@@ -116,7 +116,7 @@ public:
             if (previousCommand != 0)
                 message << "\n\n("
                         << TRANS("Currently assigned to \"CMDN\"")
-                            .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
+                            .replace ("CMDN", TRANS (owner.getCommandManager().getNameOfCommand (previousCommand)))
                         << ')';
 
             setMessage (message);
@@ -403,11 +403,11 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
 
     if (showResetToDefaultButton)
     {
-        addAndMakeVisible (&resetButton);
+        addAndMakeVisible (resetButton);
         resetButton.addListener (treeItem);
     }
 
-    addAndMakeVisible (&tree);
+    addAndMakeVisible (tree);
     tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);

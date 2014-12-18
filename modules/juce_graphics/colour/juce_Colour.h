@@ -243,6 +243,12 @@ public:
     */
     float getBrightness() const noexcept;
 
+    /** Returns a skewed brightness value, adjusted to better reflect the way the human
+        eye responds to different colour channels. This makes it better than getBrightness()
+        for comparing differences in brightness.
+    */
+    float getPerceivedBrightness() const noexcept;
+
     /** Returns the colour's hue, saturation and brightness components all at once.
         The values returned are in the range 0.0 to 1.0
     */

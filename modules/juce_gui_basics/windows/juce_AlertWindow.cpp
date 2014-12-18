@@ -404,7 +404,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
 
     for (int i = textBlocks.size(); --i >= 0;)
     {
-        const AlertTextComp* const ac = static_cast <const AlertTextComp*> (textBlocks.getUnchecked(i));
+        const AlertTextComp* const ac = static_cast<const AlertTextComp*> (textBlocks.getUnchecked(i));
         w = jmax (w, ac->getPreferredWidth());
     }
 
@@ -412,7 +412,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
 
     for (int i = textBlocks.size(); --i >= 0;)
     {
-        AlertTextComp* const ac = static_cast <AlertTextComp*> (textBlocks.getUnchecked(i));
+        AlertTextComp* const ac = static_cast<AlertTextComp*> (textBlocks.getUnchecked(i));
         ac->updateLayout ((int) (w * 0.8f));
         h += ac->getHeight() + 10;
     }
@@ -470,11 +470,11 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
         Component* const c = allComps.getUnchecked(i);
         h = 22;
 
-        const int comboIndex = comboBoxes.indexOf (dynamic_cast <ComboBox*> (c));
+        const int comboIndex = comboBoxes.indexOf (dynamic_cast<ComboBox*> (c));
         if (comboIndex >= 0 && comboBoxNames [comboIndex].isNotEmpty())
             y += labelHeight;
 
-        const int tbIndex = textBoxes.indexOf (dynamic_cast <TextEditor*> (c));
+        const int tbIndex = textBoxes.indexOf (dynamic_cast<TextEditor*> (c));
         if (tbIndex >= 0 && textboxNames[tbIndex].isNotEmpty())
             y += labelHeight;
 
@@ -536,7 +536,8 @@ bool AlertWindow::keyPressed (const KeyPress& key)
         exitModalState (0);
         return true;
     }
-    else if (key.isKeyCode (KeyPress::returnKey) && buttons.size() == 1)
+
+    if (key.isKeyCode (KeyPress::returnKey) && buttons.size() == 1)
     {
         buttons.getUnchecked(0)->triggerClick();
         return true;
@@ -592,8 +593,8 @@ private:
         LookAndFeel& lf = associatedComponent != nullptr ? associatedComponent->getLookAndFeel()
                                                          : LookAndFeel::getDefaultLookAndFeel();
 
-        ScopedPointer <Component> alertBox (lf.createAlertWindow (title, message, button1, button2, button3,
-                                                                  iconType, numButtons, associatedComponent));
+        ScopedPointer<Component> alertBox (lf.createAlertWindow (title, message, button1, button2, button3,
+                                                                 iconType, numButtons, associatedComponent));
 
         jassert (alertBox != nullptr); // you have to return one of these!
 
@@ -614,7 +615,7 @@ private:
 
     static void* showCallback (void* userData)
     {
-        static_cast <AlertWindowInfo*> (userData)->show();
+        static_cast<AlertWindowInfo*> (userData)->show();
         return nullptr;
     }
 };

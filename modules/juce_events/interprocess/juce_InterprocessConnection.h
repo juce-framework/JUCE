@@ -47,7 +47,7 @@ class MemoryBlock;
 
     @see InterprocessConnectionServer, Socket, NamedPipe
 */
-class JUCE_API  InterprocessConnection    : private Thread
+class JUCE_API  InterprocessConnection
 {
 public:
     //==============================================================================
@@ -71,7 +71,7 @@ public:
                             uint32 magicMessageHeaderNumber = 0xf2b49e2c);
 
     /** Destructor. */
-    ~InterprocessConnection();
+    virtual ~InterprocessConnection();
 
     //==============================================================================
     /** Tries to connect this object to a socket.
@@ -195,7 +195,13 @@ private:
     void connectionLostInt();
     void deliverDataInt (const MemoryBlock&);
     bool readNextMessageInt();
-    void run() override;
+
+    struct ConnectionThread;
+    friend struct ConnectionThread;
+    friend struct ContainerDeletePolicy<ConnectionThread>;
+    ScopedPointer<ConnectionThread> thread;
+    void runThread();
+    int writeData (void*, int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection)
 };

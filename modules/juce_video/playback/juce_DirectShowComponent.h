@@ -39,7 +39,7 @@ public:
     //==============================================================================
     /** DirectShow video renderer type.
 
-        See MSDN for adivce about choosing the right renderer.
+        See MSDN for advice about choosing the right renderer.
     */
     enum VideoRendererType
     {

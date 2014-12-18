@@ -88,14 +88,14 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 MemoryBlock::MemoryBlock (MemoryBlock&& other) noexcept
-    : data (static_cast <HeapBlock<char>&&> (other.data)),
+    : data (static_cast<HeapBlock<char>&&> (other.data)),
       size (other.size)
 {
 }
 
 MemoryBlock& MemoryBlock::operator= (MemoryBlock&& other) noexcept
 {
-    data = static_cast <HeapBlock<char>&&> (other.data);
+    data = static_cast<HeapBlock<char>&&> (other.data);
     size = other.size;
     return *this;
 }
@@ -127,8 +127,7 @@ void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
     {
         if (newSize <= 0)
         {
-            data.free();
-            size = 0;
+            reset();
         }
         else
         {
@@ -147,6 +146,12 @@ void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
             size = newSize;
         }
     }
+}
+
+void MemoryBlock::reset()
+{
+    data.free();
+    size = 0;
 }
 
 void MemoryBlock::ensureSize (const size_t minimumSize, const bool initialiseToZero)
@@ -341,7 +346,7 @@ void MemoryBlock::loadFromHexString (StringRef hex)
 
                 if (c == 0)
                 {
-                    setSize (static_cast <size_t> (dest - data));
+                    setSize (static_cast<size_t> (dest - data));
                     return;
                 }
             }

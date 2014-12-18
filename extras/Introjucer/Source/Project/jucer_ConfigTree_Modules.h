@@ -71,7 +71,7 @@ private:
         ModuleSettingsPanel (Project& p, const String& modID)
             : project (p), moduleID (modID)
         {
-            addAndMakeVisible (&group);
+            addAndMakeVisible (group);
             group.setName ("Module: " + moduleID);
             refresh();
         }
@@ -202,7 +202,7 @@ private:
                   missingDependencies (project.getModules().getExtraDependenciesNeeded (modID)),
                   fixButton ("Add Required Modules")
             {
-                addAndMakeVisible (&fixButton);
+                addAndMakeVisible (fixButton);
                 fixButton.setColour (TextButton::buttonColourId, Colours::red);
                 fixButton.setColour (TextButton::textColourOffId, Colours::white);
                 fixButton.addListener (this);
@@ -246,7 +246,7 @@ private:
                 if (anyFailed)
                     AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                                       "Adding Missing Dependencies",
-                                                      "Couldn't locate some of these modules - you'll beed to find their "
+                                                      "Couldn't locate some of these modules - you'll need to find their "
                                                       "folders manually and add them to the list.");
             }
 
@@ -295,10 +295,18 @@ public:
             pcc->setEditorComponent (new ModulesPanel (project), nullptr);
     }
 
+    static File getManifestFile (const File& draggedFile)
+    {
+        if (draggedFile.getFileName() == ModuleDescription::getManifestFileName())
+            return draggedFile;
+
+        return draggedFile.getChildFile (ModuleDescription::getManifestFileName());
+    }
+
     bool isInterestedInFileDrag (const StringArray& files) override
     {
         for (int i = files.size(); --i >= 0;)
-            if (ModuleDescription (File (files[i]).getChildFile (ModuleDescription::getManifestFileName())).isValid())
+            if (ModuleDescription (getManifestFile (files[i])).isValid())
                 return true;
 
         return false;
@@ -310,7 +318,8 @@ public:
 
         for (int i = files.size(); --i >= 0;)
         {
-            ModuleDescription m (File (files[i]).getChildFile (ModuleDescription::getManifestFileName()));
+            ModuleDescription m (getManifestFile (files[i]));
+
             if (m.isValid())
                 modules.add (m);
         }

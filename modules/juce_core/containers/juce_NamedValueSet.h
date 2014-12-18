@@ -43,21 +43,21 @@ public:
     NamedValueSet() noexcept;
 
     /** Creates a copy of another set. */
-    NamedValueSet (const NamedValueSet& other);
+    NamedValueSet (const NamedValueSet&);
 
     /** Replaces this set with a copy of another set. */
-    NamedValueSet& operator= (const NamedValueSet& other);
+    NamedValueSet& operator= (const NamedValueSet&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    NamedValueSet (NamedValueSet&& other) noexcept;
-    NamedValueSet& operator= (NamedValueSet&& other) noexcept;
+    NamedValueSet (NamedValueSet&&) noexcept;
+    NamedValueSet& operator= (NamedValueSet&&) noexcept;
    #endif
 
     /** Destructor. */
-    ~NamedValueSet();
+    ~NamedValueSet() noexcept;
 
-    bool operator== (const NamedValueSet& other) const;
-    bool operator!= (const NamedValueSet& other) const;
+    bool operator== (const NamedValueSet&) const;
+    bool operator!= (const NamedValueSet&) const;
 
     //==============================================================================
     /** Returns the total number of values that the set contains. */
@@ -67,57 +67,64 @@ public:
         If the name isn't found, this will return a void variant.
         @see getProperty
     */
-    const var& operator[] (const Identifier name) const;
+    const var& operator[] (const Identifier& name) const noexcept;
 
     /** Tries to return the named value, but if no such value is found, this will
         instead return the supplied default value.
     */
-    var getWithDefault (const Identifier name, const var& defaultReturnValue) const;
+    var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
 
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
-                    value was already set the the value passed-in.
+                    value was already set the value passed-in.
     */
-    bool set (const Identifier name, const var& newValue);
+    bool set (Identifier name, const var& newValue);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
-                    value was already set the the value passed-in.
+                    value was already set the value passed-in.
     */
-    bool set (const Identifier name, var&& newValue);
+    bool set (Identifier name, var&& newValue);
    #endif
 
     /** Returns true if the set contains an item with the specified name. */
-    bool contains (const Identifier name) const;
+    bool contains (const Identifier& name) const noexcept;
 
     /** Removes a value from the set.
         @returns    true if a value was removed; false if there was no value
                     with the name that was given.
     */
-    bool remove (const Identifier name);
+    bool remove (const Identifier& name);
 
     /** Returns the name of the value at a given index.
         The index must be between 0 and size() - 1.
     */
-    const Identifier getName (int index) const;
+    Identifier getName (int index) const noexcept;
 
-    /** Returns the value of the item at a given index.
-        The index must be between 0 and size() - 1.
-    */
-    const var& getValueAt (int index) const;
-
-    /** Removes all values. */
-    void clear();
-
-    //==============================================================================
     /** Returns a pointer to the var that holds a named value, or null if there is
         no value with this name.
 
         Do not use this method unless you really need access to the internal var object
         for some reason - for normal reading and writing always prefer operator[]() and set().
     */
-    var* getVarPointer (const Identifier name) const noexcept;
+    var* getVarPointer (const Identifier& name) const noexcept;
+
+    /** Returns the value of the item at a given index.
+        The index must be between 0 and size() - 1.
+    */
+    const var& getValueAt (int index) const noexcept;
+
+    /** Returns the value of the item at a given index.
+        The index must be between 0 and size() - 1, or this will return a nullptr
+    */
+    var* getVarPointerAt (int index) const noexcept;
+
+    /** Returns the index of the given name, or -1 if it's not found. */
+    int indexOf (const Identifier& name) const noexcept;
+
+    /** Removes all values. */
+    void clear();
 
     //==============================================================================
     /** Sets properties to the values of all of an XML element's attributes. */
@@ -130,32 +137,8 @@ public:
 
 private:
     //==============================================================================
-    class NamedValue
-    {
-    public:
-        NamedValue() noexcept;
-        NamedValue (const NamedValue&);
-        NamedValue (const Identifier name, const var& value);
-        NamedValue& operator= (const NamedValue&);
-       #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-        NamedValue (NamedValue&&) noexcept;
-        NamedValue (const Identifier name, var&& value);
-        NamedValue& operator= (NamedValue&&) noexcept;
-       #endif
-        bool operator== (const NamedValue& other) const noexcept;
-
-        LinkedListPointer<NamedValue> nextListItem;
-        Identifier name;
-        var value;
-
-    private:
-        JUCE_LEAK_DETECTOR (NamedValue)
-    };
-
-    friend class LinkedListPointer<NamedValue>;
-    LinkedListPointer<NamedValue> values;
-
-    friend class DynamicObject;
+    struct NamedValue;
+    Array<NamedValue> values;
 };
 
 

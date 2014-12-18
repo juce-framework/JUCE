@@ -91,6 +91,13 @@ public:
    #endif
 
     //==============================================================================
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    /** Asynchronously invokes a function or C++11 lambda on the message thread.
+        Internally this uses the CallbackMessage class to invoke the callback.
+    */
+    static void callAsync (std::function<void(void)>);
+   #endif
+
     /** Calls a function using the message-thread.
 
         This can be used by any thread to cause this function to be called-back
@@ -128,7 +135,7 @@ public:
     */
     Thread::ThreadID getCurrentMessageThread() const noexcept            { return messageThreadId; }
 
-    /** Returns true if the caller thread has currenltly got the message manager locked.
+    /** Returns true if the caller thread has currently got the message manager locked.
 
         see the MessageManagerLock class for more info about this.
 
@@ -170,7 +177,7 @@ public:
         virtual ~MessageBase() {}
 
         virtual void messageCallback() = 0;
-        void post();
+        bool post();
 
         typedef ReferenceCountedObjectPtr<MessageBase> Ptr;
 

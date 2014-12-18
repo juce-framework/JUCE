@@ -73,8 +73,7 @@ private:
             : document (doc), layout (l)
         {
             layout.getSelectedSet().addChangeListener (this);
-
-            addAndMakeVisible (&propsPanel);
+            addAndMakeVisible (propsPanel);
         }
 
         ~LayoutPropsPanel()

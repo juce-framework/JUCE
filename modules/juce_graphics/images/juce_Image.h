@@ -67,7 +67,7 @@ public:
 
     //==============================================================================
     /** Creates a null image. */
-    Image();
+    Image() noexcept;
 
     /** Creates an image with a specified size and format.
 
@@ -106,7 +106,7 @@ public:
         point to the same shared image data. To make sure that an Image object has its own unique,
         unshared internal data, call duplicateIfShared().
     */
-    Image (const Image& other);
+    Image (const Image&) noexcept;
 
     /** Makes this image refer to the same underlying image as another object.
 
@@ -117,7 +117,7 @@ public:
     Image& operator= (const Image&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    Image (Image&& other) noexcept;
+    Image (Image&&) noexcept;
     Image& operator= (Image&&) noexcept;
    #endif
 
@@ -408,7 +408,7 @@ public:
     ImagePixelData* getPixelData() const noexcept       { return image; }
 
     /** @internal */
-    explicit Image (ImagePixelData*);
+    explicit Image (ImagePixelData*) noexcept;
 
 private:
     //==============================================================================
@@ -454,6 +454,19 @@ public:
     NamedValueSet userData;
 
     typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
+
+    //==============================================================================
+    struct Listener
+    {
+        virtual ~Listener() {}
+
+        virtual void imageDataChanged (ImagePixelData*) = 0;
+        virtual void imageDataBeingDeleted (ImagePixelData*) = 0;
+    };
+
+    ListenerList<Listener> listeners;
+
+    void sendDataChangeMessage();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData)

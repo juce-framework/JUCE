@@ -68,8 +68,8 @@ public:
         callback happens, this will cancel the handleAsyncUpdate() callback.
 
         Note that this method simply cancels the next callback - if a callback is already
-        in progress on a different thread, this won't block until it finishes, so there's
-        no guarantee that the callback isn't still running when you return from
+        in progress on a different thread, this won't block until the callback finishes, so
+        there's no guarantee that the callback isn't still running when the method returns.
     */
     void cancelPendingUpdate() noexcept;
 

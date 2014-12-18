@@ -85,6 +85,8 @@ public:
     */
     String getValue (StringRef, const String& defaultReturnValue) const;
 
+    /** Returns true if the given key exists. */
+    bool containsKey (StringRef key) const noexcept;
 
     /** Returns a list of all keys in the array. */
     const StringArray& getAllKeys() const noexcept          { return keys; }

@@ -57,7 +57,7 @@ public:
     struct JUCE_API  Options
     {
         /** Creates an empty Options structure.
-            You'll need to fill-in the data memebers appropriately before using this structure.
+            You'll need to fill-in the data members appropriately before using this structure.
         */
         Options();
 
@@ -85,7 +85,8 @@ public:
             Because older apps would be broken by a silent change in this class's behaviour, you must now
             explicitly set the osxLibrarySubFolder value to indicate which path you want to use.
 
-            In newer apps, you should always set this to "Application Support".
+            In newer apps, you should always set this to "Application Support" or
+            "Application Support/YourSubFolderName".
 
             If your app needs to load settings files that were created by older versions of juce and
             you want to maintain backwards-compatibility, then you can set this to "Preferences".
@@ -144,7 +145,7 @@ public:
             C:\\Documents and Settings\\username\\Application Data\\[folderName]\\[applicationName].[filenameSuffix]
 
             On Linux it'll return
-            ~/.[folderName]/[applicationName].[filenameSuffix]
+            ~/[folderName]/[applicationName].[filenameSuffix]
 
             If the folderName variable is empty, it'll use the app name for this (or omit the
             folder name on the Mac).

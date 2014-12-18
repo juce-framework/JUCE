@@ -58,27 +58,30 @@ namespace AppearanceColours
 AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
     : settings ("COLOUR_SCHEME")
 {
-    IntrojucerLookAndFeel lf;
-
-    for (int i = 0; i < AppearanceColours::numColours; ++i)
-        getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
-
-    CodeDocument doc;
-    CPlusPlusCodeTokeniser tokeniser;
-    CodeEditorComponent editor (doc, &tokeniser);
-
-    const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
-
-    for (int i = cs.types.size(); --i >= 0;)
+    if (! IntrojucerApp::getApp().isRunningCommandLine)
     {
-        CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
-        getColourValue (t.name) = t.colour.toString();
+        IntrojucerLookAndFeel lf;
+
+        for (int i = 0; i < AppearanceColours::numColours; ++i)
+            getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
+
+        CodeDocument doc;
+        CPlusPlusCodeTokeniser tokeniser;
+        CodeEditorComponent editor (doc, &tokeniser);
+
+        const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
+
+        for (int i = cs.types.size(); --i >= 0;)
+        {
+            CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
+            getColourValue (t.name) = t.colour.toString();
+        }
+
+        getCodeFontValue() = getDefaultCodeFont().toString();
+
+        if (updateAppWhenChanged)
+            settings.addListener (this);
     }
-
-    getCodeFontValue() = getDefaultCodeFont().toString();
-
-    if (updateAppWhenChanged)
-        settings.addListener (this);
 }
 
 File AppearanceSettings::getSchemesFolder()
@@ -354,15 +357,15 @@ struct AppearanceEditor
               saveButton ("Save Scheme...")
         {
             rebuildProperties();
-            addAndMakeVisible (&panel);
+            addAndMakeVisible (panel);
 
             loadButton.setColour (TextButton::buttonColourId, Colours::lightgrey.withAlpha (0.5f));
             saveButton.setColour (TextButton::buttonColourId, Colours::lightgrey.withAlpha (0.5f));
             loadButton.setColour (TextButton::textColourOffId, Colours::white);
             saveButton.setColour (TextButton::textColourOffId, Colours::white);
 
-            addAndMakeVisible (&loadButton);
-            addAndMakeVisible (&saveButton);
+            addAndMakeVisible (loadButton);
+            addAndMakeVisible (saveButton);
 
             loadButton.addListener (this);
             saveButton.addListener (this);
@@ -445,12 +448,12 @@ struct AppearanceEditor
     public:
         FontNameValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
-        var getValue() const
+        var getValue() const override
         {
             return Font::fromString (sourceValue.toString()).getTypefaceName();
         }
 
-        void setValue (const var& newValue)
+        void setValue (const var& newValue) override
         {
             Font font (Font::fromString (sourceValue.toString()));
             font.setTypefaceName (newValue.toString().isEmpty() ? Font::getDefaultMonospacedFontName()

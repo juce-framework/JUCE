@@ -104,9 +104,15 @@ LookAndFeel_V2::LookAndFeel_V2()
         ComboBox::backgroundColourId,               0xffffffff,
         ComboBox::arrowColourId,                    0x99000000,
 
+        PropertyComponent::backgroundColourId,      0x66ffffff,
+        PropertyComponent::labelTextColourId,       0xff000000,
+
         TextPropertyComponent::backgroundColourId,  0xffffffff,
         TextPropertyComponent::textColourId,        0xff000000,
         TextPropertyComponent::outlineColourId,     standardOutlineColour,
+
+        BooleanPropertyComponent::backgroundColourId, 0xffffffff,
+        BooleanPropertyComponent::outlineColourId,  standardOutlineColour,
 
         ListBox::backgroundColourId,                0xffffffff,
         ListBox::outlineColourId,                   standardOutlineColour,
@@ -175,6 +181,7 @@ LookAndFeel_V2::LookAndFeel_V2()
         0x1005005, /*MidiKeyboardComponent::textLabelColourId*/               0xff000000,
         0x1005006, /*MidiKeyboardComponent::upDownButtonBackgroundColourId*/  0xffd3d3d3,
         0x1005007, /*MidiKeyboardComponent::upDownButtonArrowColourId*/       0xff000000,
+        0x1005008, /*MidiKeyboardComponent::shadowColourId*/                  0x4c000000,
 
         0x1004500, /*CodeEditorComponent::backgroundColourId*/                0xffffffff,
         0x1004502, /*CodeEditorComponent::highlightColourId*/                 textHighlightColour,
@@ -234,14 +241,19 @@ void LookAndFeel_V2::drawButtonBackground (Graphics& g,
                       button.isConnectedOnBottom());
 }
 
-Font LookAndFeel_V2::getTextButtonFont (TextButton& button)
+Font LookAndFeel_V2::getTextButtonFont (TextButton&, int buttonHeight)
 {
-    return button.getFont();
+    return Font (jmin (15.0f, buttonHeight * 0.6f));
+}
+
+int LookAndFeel_V2::getTextButtonWidthToFitText (TextButton& b, int buttonHeight)
+{
+    return getTextButtonFont (b, buttonHeight).getStringWidth (b.getButtonText()) + buttonHeight;
 }
 
 void LookAndFeel_V2::drawButtonText (Graphics& g, TextButton& button, bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
-    Font font (getTextButtonFont (button));
+    Font font (getTextButtonFont (button, button.getHeight()));
     g.setFont (font);
     g.setColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
                                                             : TextButton::textColourOffId)
@@ -438,8 +450,7 @@ void LookAndFeel_V2::drawAlertBox (Graphics& g, AlertWindow& alert,
             colour    = alert.getAlertType() == AlertWindow::InfoIcon ? (uint32) 0x605555ff : (uint32) 0x40b69900;
             character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
 
-            icon.addEllipse ((float) iconRect.getX(), (float) iconRect.getY(),
-                             (float) iconRect.getWidth(), (float) iconRect.getHeight());
+            icon.addEllipse (iconRect.toFloat());
         }
 
         GlyphArrangement ga;
@@ -819,17 +830,17 @@ int LookAndFeel_V2::getTreeViewIndentSize (TreeView&)
 
 //==============================================================================
 void LookAndFeel_V2::drawBubble (Graphics& g, BubbleComponent& comp,
-                              const Point<float>& tip, const Rectangle<float>& body)
+                                 const Point<float>& tip, const Rectangle<float>& body)
 {
     Path p;
-    p.addBubble (body, body.getUnion (Rectangle<float> (tip.x, tip.y, 1.0f, 1.0f)),
+    p.addBubble (body.reduced (0.5f), body.getUnion (Rectangle<float> (tip.x, tip.y, 1.0f, 1.0f)),
                  tip, 5.0f, jmin (15.0f, body.getWidth() * 0.2f, body.getHeight() * 0.2f));
 
     g.setColour (comp.findColour (BubbleComponent::backgroundColourId));
     g.fillPath (p);
 
     g.setColour (comp.findColour (BubbleComponent::outlineColourId));
-    g.strokePath (p, PathStrokeType (1.33f));
+    g.strokePath (p, PathStrokeType (1.0f));
 }
 
 
@@ -900,24 +911,23 @@ void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g, int width, int heigh
     g.fillPath (p);
 }
 
-void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, int width, int height,
+void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
                                         const bool isSeparator, const bool isActive,
                                         const bool isHighlighted, const bool isTicked,
                                         const bool hasSubMenu, const String& text,
                                         const String& shortcutKeyText,
-                                        Image* image, const Colour* const textColourToUse)
+                                        const Drawable* icon, const Colour* const textColourToUse)
 {
-    const float halfH = height * 0.5f;
-
     if (isSeparator)
     {
-        const float separatorIndent = 5.5f;
+        Rectangle<int> r (area.reduced (5, 0));
+        r.removeFromTop (r.getHeight() / 2 - 1);
 
         g.setColour (Colour (0x33000000));
-        g.drawLine (separatorIndent, halfH, width - separatorIndent, halfH);
+        g.fillRect (r.removeFromTop (1));
 
         g.setColour (Colour (0x66ffffff));
-        g.drawLine (separatorIndent, halfH + 1.0f, width - separatorIndent, halfH + 1.0f);
+        g.fillRect (r.removeFromTop (1));
     }
     else
     {
@@ -926,10 +936,12 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, int width, int height,
         if (textColourToUse != nullptr)
             textColour = *textColourToUse;
 
+        Rectangle<int> r (area.reduced (1));
+
         if (isHighlighted)
         {
             g.setColour (findColour (PopupMenu::highlightedBackgroundColourId));
-            g.fillRect (1, 1, width - 2, height - 2);
+            g.fillRect (r);
 
             g.setColour (findColour (PopupMenu::highlightedTextColourId));
         }
@@ -943,51 +955,31 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, int width, int height,
 
         Font font (getPopupMenuFont());
 
-        if (font.getHeight() > height / 1.3f)
-            font.setHeight (height / 1.3f);
+        const float maxFontHeight = area.getHeight() / 1.3f;
+
+        if (font.getHeight() > maxFontHeight)
+            font.setHeight (maxFontHeight);
 
         g.setFont (font);
 
-        const int leftBorder = (height * 5) / 4;
-        const int rightBorder = 4;
+        Rectangle<float> iconArea (r.removeFromLeft ((r.getHeight() * 5) / 4).reduced (3).toFloat());
 
-        if (image != nullptr)
+        if (icon != nullptr)
         {
-            g.drawImageWithin (*image,
-                               2, 1, leftBorder - 4, height - 2,
-                               RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
+            icon->drawWithin (g, iconArea, RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
         }
         else if (isTicked)
         {
             const Path tick (getTickShape (1.0f));
-            const float th = font.getAscent();
-            const float ty = halfH - th * 0.5f;
-
-            g.fillPath (tick, tick.getTransformToScaleToFit (2.0f, ty, (float) (leftBorder - 4),
-                                                             th, true));
-        }
-
-        g.drawFittedText (text,
-                          leftBorder, 0, width - (leftBorder + rightBorder), height,
-                          Justification::centredLeft, 1);
-
-        if (shortcutKeyText.isNotEmpty())
-        {
-            Font f2 (font);
-            f2.setHeight (f2.getHeight() * 0.75f);
-            f2.setHorizontalScale (0.95f);
-            g.setFont (f2);
-
-            g.drawText (shortcutKeyText,
-                        leftBorder, 0, width - (leftBorder + rightBorder + 4), height,
-                        Justification::centredRight,
-                        true);
+            g.fillPath (tick, tick.getTransformToScaleToFit (iconArea, true));
         }
 
         if (hasSubMenu)
         {
             const float arrowH = 0.6f * getPopupMenuFont().getAscent();
-            const float x = width - height * 0.6f;
+
+            const float x = (float) r.removeFromRight ((int) arrowH).getX();
+            const float halfH = (float) r.getCentreY();
 
             Path p;
             p.addTriangle (x, halfH - arrowH * 0.5f,
@@ -996,7 +988,30 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, int width, int height,
 
             g.fillPath (p);
         }
+
+        r.removeFromRight (3);
+        g.drawFittedText (text, r, Justification::centredLeft, 1);
+
+        if (shortcutKeyText.isNotEmpty())
+        {
+            Font f2 (font);
+            f2.setHeight (f2.getHeight() * 0.75f);
+            f2.setHorizontalScale (0.95f);
+            g.setFont (f2);
+
+            g.drawText (shortcutKeyText, r, Justification::centredRight, true);
+        }
     }
+}
+
+void LookAndFeel_V2::drawPopupMenuSectionHeader (Graphics& g, const Rectangle<int>& area, const String& sectionName)
+{
+    g.setFont (getPopupMenuFont().boldened());
+    g.setColour (findColour (PopupMenu::headerTextColourId));
+
+    g.drawFittedText (sectionName,
+                      area.getX() + 12, area.getY(), area.getWidth() - 16, (int) (area.getHeight() * 0.8f),
+                      Justification::bottomLeft, 1);
 }
 
 //==============================================================================
@@ -1175,13 +1190,11 @@ void LookAndFeel_V2::drawLabel (Graphics& g, Label& label)
 
         g.setColour (label.findColour (Label::textColourId).withMultipliedAlpha (alpha));
         g.setFont (font);
-        g.drawFittedText (label.getText(),
-                          label.getHorizontalBorderSize(),
-                          label.getVerticalBorderSize(),
-                          label.getWidth() - 2 * label.getHorizontalBorderSize(),
-                          label.getHeight() - 2 * label.getVerticalBorderSize(),
-                          label.getJustificationType(),
-                          jmax (1, (int) (label.getHeight() / font.getHeight())),
+
+        Rectangle<int> textArea (label.getBorderSize().subtractedFrom (label.getLocalBounds()));
+
+        g.drawFittedText (label.getText(), textArea, label.getJustificationType(),
+                          jmax (1, (int) (textArea.getHeight() / font.getHeight())),
                           label.getMinimumHorizontalScale());
 
         g.setColour (label.findColour (Label::outlineColourId).withMultipliedAlpha (alpha));
@@ -1384,7 +1397,6 @@ void LookAndFeel_V2::drawRotarySlider (Graphics& g, int x, int y, int width, int
             g.fillPath (filledArc);
         }
 
-        if (thickness > 0)
         {
             const float innerRadius = radius * 0.2f;
             Path p;
@@ -1460,6 +1472,8 @@ Label* LookAndFeel_V2::createSliderTextBox (Slider& slider)
                                         ? 0.7f : 1.0f));
 
     l->setColour (TextEditor::outlineColourId, slider.findColour (Slider::textBoxOutlineColourId));
+
+    l->setColour (TextEditor::highlightColourId, slider.findColour (Slider::textBoxHighlightColourId));
 
     return l;
 }
@@ -2307,20 +2321,16 @@ void LookAndFeel_V2::drawPropertyPanelSectionHeader (Graphics& g, const String& 
     g.drawText (name, textX, 0, width - textX - 4, height, Justification::centredLeft, true);
 }
 
-void LookAndFeel_V2::drawPropertyComponentBackground (Graphics& g, int width, int height,
-                                                   PropertyComponent&)
+void LookAndFeel_V2::drawPropertyComponentBackground (Graphics& g, int width, int height, PropertyComponent& component)
 {
-    g.setColour (Colour (0x66ffffff));
+    g.setColour (component.findColour (PropertyComponent::backgroundColourId));
     g.fillRect (0, 0, width, height - 1);
 }
 
-void LookAndFeel_V2::drawPropertyComponentLabel (Graphics& g, int, int height,
-                                              PropertyComponent& component)
+void LookAndFeel_V2::drawPropertyComponentLabel (Graphics& g, int, int height, PropertyComponent& component)
 {
-    g.setColour (Colours::black);
-
-    if (! component.isEnabled())
-        g.setOpacity (0.6f);
+    g.setColour (component.findColour (PropertyComponent::labelTextColourId)
+                    .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.6f));
 
     g.setFont (jmin (height, 24) * 0.65f);
 
@@ -2359,6 +2369,10 @@ void LookAndFeel_V2::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
     g.strokePath (path, PathStrokeType (2.0f));
 }
 
+int LookAndFeel_V2::getCallOutBoxBorderSize (const CallOutBox&)
+{
+    return 20;
+}
 
 //==============================================================================
 AttributedString LookAndFeel_V2::createFileChooserHeaderText (const String& title,

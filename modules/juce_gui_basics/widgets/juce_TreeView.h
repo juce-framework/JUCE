@@ -557,7 +557,7 @@ private:
     TreeViewItem* getDeepestOpenParentItem() noexcept;
     int getNumRows() const noexcept;
     TreeViewItem* getItemOnRow (int index) noexcept;
-    void deselectAllRecursively();
+    void deselectAllRecursively (TreeViewItem* itemToIgnore);
     int countSelectedItemsRecursively (int depth) const noexcept;
     TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
     TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
@@ -744,7 +744,7 @@ public:
     void setIndentSize (int newIndentSize);
 
     /** Searches the tree for an item with the specified identifier.
-        The identifer string must have been created by calling TreeViewItem::getItemIdentifierString().
+        The identifier string must have been created by calling TreeViewItem::getItemIdentifierString().
         If no such item exists, this will return false. If the item is found, all of its items
         will be automatically opened.
     */

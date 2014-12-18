@@ -73,7 +73,7 @@ public:
     ColourSpaceView (ColourSelector& cs, float& hue, float& sat, float& val, const int edgeSize)
         : owner (cs), h (hue), s (sat), v (val), lastHue (0.0f), edge (edgeSize)
     {
-        addAndMakeVisible (&marker);
+        addAndMakeVisible (marker);
         setMouseCursor (MouseCursor::CrosshairCursor);
     }
 
@@ -199,7 +199,7 @@ public:
     HueSelectorComp (ColourSelector& cs, float& hue, const int edgeSize)
         : owner (cs), h (hue), edge (edgeSize)
     {
-        addAndMakeVisible (&marker);
+        addAndMakeVisible (marker);
     }
 
     void paint (Graphics& g) override

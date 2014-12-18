@@ -44,14 +44,14 @@ public:
     MD5() noexcept;
 
     /** Creates a copy of another MD5. */
-    MD5 (const MD5& other) noexcept;
+    MD5 (const MD5&) noexcept;
 
     /** Copies another MD5. */
-    MD5& operator= (const MD5& other) noexcept;
+    MD5& operator= (const MD5&) noexcept;
 
     //==============================================================================
     /** Creates a checksum for a block of binary data. */
-    explicit MD5 (const MemoryBlock& data) noexcept;
+    explicit MD5 (const MemoryBlock&) noexcept;
 
     /** Creates a checksum for a block of binary data. */
     MD5 (const void* data, size_t numBytes) noexcept;
@@ -64,10 +64,10 @@ public:
     */
     MD5 (InputStream& input, int64 numBytesToRead = -1);
 
-    /** Creates a checksum for a file. */
-    explicit MD5 (const File& file);
+    /** Creates a checksum for the contents of a file. */
+    explicit MD5 (const File&);
 
-    /** Creates a checksum from a UTF-8 buffer.
+    /** Creates a checksum of the characters in a UTF-8 buffer.
         E.g.
         @code MD5 checksum (myString.toUTF8());
         @endcode
@@ -107,6 +107,10 @@ private:
 
     void processData (const void*, size_t) noexcept;
     void processStream (InputStream&, int64);
+
+    // This private constructor is declared here to prevent you accidentally passing a
+    // String and having it unexpectedly call the constructor that takes a File.
+    explicit MD5 (const String&) JUCE_DELETED_FUNCTION;
 
     JUCE_LEAK_DETECTOR (MD5)
 };

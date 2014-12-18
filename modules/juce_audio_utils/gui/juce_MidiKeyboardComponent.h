@@ -52,7 +52,6 @@ class JUCE_API  MidiKeyboardComponent  : public Component,
 public:
     //==============================================================================
     /** The direction of the keyboard.
-
         @see setOrientation
     */
     enum Orientation
@@ -97,7 +96,6 @@ public:
     void setMidiChannel (int midiChannelNumber);
 
     /** Returns the midi channel that the keyboard is using for midi messages.
-
         @see setMidiChannel
     */
     int getMidiChannel() const noexcept                             { return midiChannel; }
@@ -117,7 +115,6 @@ public:
     void setMidiChannelsToDisplay (int midiChannelMask);
 
     /** Returns the current set of midi channels represented by the component.
-
         This is the value that was set with setMidiChannelsToDisplay().
     */
     int getMidiChannelsToDisplay() const noexcept                   { return midiInChannelMask; }
@@ -169,7 +166,6 @@ public:
     int getLowestVisibleKey() const noexcept                        { return (int) firstKey; }
 
     /** Returns the length of the black notes.
-
         This will be their vertical or horizontal length, depending on the keyboard's orientation.
     */
     int getBlackNoteLength() const noexcept                         { return blackNoteLength; }
@@ -196,7 +192,8 @@ public:
         keyDownOverlayColourId          = 0x1005004,  /**< This colour will be overlaid on the normal note colour. */
         textLabelColourId               = 0x1005005,
         upDownButtonBackgroundColourId  = 0x1005006,
-        upDownButtonArrowColourId       = 0x1005007
+        upDownButtonArrowColourId       = 0x1005007,
+        shadowColourId                  = 0x1005008
     };
 
     /** Returns the position within the component of the left-hand edge of a key.
@@ -205,6 +202,9 @@ public:
         distance, in either direction.
     */
     int getKeyStartPosition (int midiNoteNumber) const;
+
+    /** Returns the key at a given coordinate. */
+    int getNoteAtPosition (Point<int> position);
 
     //==============================================================================
     /** Deletes all key-mappings.
@@ -319,9 +319,7 @@ protected:
                                 const Colour& noteFillColour);
 
     /** Allows text to be drawn on the white notes.
-
         By default this is used to label the C in each octave, but could be used for other things.
-
         @see setOctaveForMiddleC
     */
     virtual String getWhiteNoteText (const int midiNoteNumber);

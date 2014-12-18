@@ -91,8 +91,8 @@ class FileListComponent::ItemComponent  : public Component,
                                           private AsyncUpdater
 {
 public:
-    ItemComponent (FileListComponent& owner_, TimeSliceThread& thread_)
-        : owner (owner_), thread (thread_), index (0), highlighted (false)
+    ItemComponent (FileListComponent& fc, TimeSliceThread& t)
+        : owner (fc), thread (t), index (0), highlighted (false)
     {
     }
 
@@ -113,7 +113,7 @@ public:
 
     void mouseDown (const MouseEvent& e) override
     {
-        owner.selectRowsBasedOnModifierKeys (index, e.mods, false);
+        owner.selectRowsBasedOnModifierKeys (index, e.mods, true);
         owner.sendMouseClickMessage (file, e);
     }
 
@@ -227,9 +227,9 @@ void FileListComponent::paintListBoxItem (int, Graphics&, int, int, bool)
 
 Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, Component* existingComponentToUpdate)
 {
-    jassert (existingComponentToUpdate == nullptr || dynamic_cast <ItemComponent*> (existingComponentToUpdate) != nullptr);
+    jassert (existingComponentToUpdate == nullptr || dynamic_cast<ItemComponent*> (existingComponentToUpdate) != nullptr);
 
-    ItemComponent* comp = static_cast <ItemComponent*> (existingComponentToUpdate);
+    ItemComponent* comp = static_cast<ItemComponent*> (existingComponentToUpdate);
 
     if (comp == nullptr)
         comp = new ItemComponent (*this, fileList.getTimeSliceThread());

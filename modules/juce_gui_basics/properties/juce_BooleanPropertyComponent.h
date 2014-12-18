@@ -56,6 +56,10 @@ protected:
 public:
     /** Creates a button component.
 
+        Note that if you call this constructor then you must use the Value to interact with the
+        button state, and you can't override the class with your own setState or getState methods.
+        If you want to use getState and setState, call the other constructor instead.
+
         @param valueToControl       a Value object that this property should refer to.
         @param propertyName         the property name to be passed to the PropertyComponent
         @param buttonText           the text shown in the ToggleButton component
@@ -73,6 +77,20 @@ public:
 
     /** Must return the current value of the property. */
     virtual bool getState() const;
+
+    //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId          = 0x100e801,    /**< The colour to fill the background of the button area. */
+        outlineColourId             = 0x100e803,    /**< The colour to use to draw an outline around the text area. */
+    };
 
     //==============================================================================
     /** @internal */

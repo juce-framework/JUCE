@@ -44,8 +44,14 @@ public:
     PositionedGlyph (const Font& font, juce_wchar character, int glyphNumber,
                      float anchorX, float baselineY, float width, bool isWhitespace);
 
-    PositionedGlyph (const PositionedGlyph& other);
-    PositionedGlyph& operator= (const PositionedGlyph& other);
+    PositionedGlyph (const PositionedGlyph&);
+    PositionedGlyph& operator= (const PositionedGlyph&);
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    PositionedGlyph (PositionedGlyph&&) noexcept;
+    PositionedGlyph& operator= (PositionedGlyph&&) noexcept;
+   #endif
+
     ~PositionedGlyph();
 
     /** Returns the character the glyph represents. */
@@ -209,10 +215,10 @@ public:
                         float minimumHorizontalScale = 0.7f);
 
     /** Appends another glyph arrangement to this one. */
-    void addGlyphArrangement (const GlyphArrangement& other);
+    void addGlyphArrangement (const GlyphArrangement&);
 
     /** Appends a custom glyph to the arrangement. */
-    void addGlyph (const PositionedGlyph& glyph);
+    void addGlyph (const PositionedGlyph&);
 
     //==============================================================================
     /** Draws this glyph arrangement to a graphics context.
@@ -295,12 +301,15 @@ public:
 
 private:
     //==============================================================================
-    Array <PositionedGlyph> glyphs;
+    Array<PositionedGlyph> glyphs;
 
     int insertEllipsis (const Font&, float maxXPos, int startIndex, int endIndex);
     int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font&,
                           Justification, float minimumHorizontalScale);
     void spreadOutLine (int start, int numGlyphs, float targetWidth);
+    void splitLines (const String&, Font, int start, float x, float y, float w, float h, int maxLines,
+                     float lineWidth, Justification, float minimumHorizontalScale);
+    void addLinesWithLineBreaks (const String&, const Font&, float x, float y, float width, float height, Justification);
     void drawGlyphUnderline (const Graphics&, const PositionedGlyph&, int, const AffineTransform&) const;
 
     JUCE_LEAK_DETECTOR (GlyphArrangement)

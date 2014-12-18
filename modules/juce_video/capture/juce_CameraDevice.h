@@ -135,16 +135,19 @@ public:
     /** Removes a listener that was previously added with addListener(). */
     void removeListener (Listener* listenerToRemove);
 
-
-protected:
-   #ifndef DOXYGEN
-    CameraDevice (const String& name, int index);
-   #endif
-
 private:
-    void* internal;
-    bool isRecording;
     String name;
+
+    struct Pimpl;
+    friend struct Pimpl;
+    friend struct ContainerDeletePolicy<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
+
+    struct ViewerComponent;
+    friend struct ViewerComponent;
+
+    CameraDevice (const String& name, int index,
+                  int minWidth, int minHeight, int maxWidth, int maxHeight);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice)
 };

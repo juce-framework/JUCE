@@ -102,7 +102,7 @@ public:
     /** Returns the raw handle to whatever kind of window is being used.
 
         On windows, this is probably a HWND, on the mac, it's likely to be a WindowRef,
-        but rememeber there's no guarantees what you'll get back.
+        but remember there's no guarantees what you'll get back.
     */
     virtual void* getNativeHandle() const = 0;
 
@@ -148,13 +148,19 @@ public:
     virtual Rectangle<int> getBounds() const = 0;
 
     /** Converts a position relative to the top-left of this component to screen coordinates. */
-    virtual Point<int> localToGlobal (Point<int> relativePosition) = 0;
+    virtual Point<float> localToGlobal (Point<float> relativePosition) = 0;
+
+    /** Converts a screen coordinate to a position relative to the top-left of this component. */
+    virtual Point<float> globalToLocal (Point<float> screenPosition) = 0;
+
+    /** Converts a position relative to the top-left of this component to screen coordinates. */
+    Point<int> localToGlobal (Point<int> relativePosition);
+
+    /** Converts a screen coordinate to a position relative to the top-left of this component. */
+    Point<int> globalToLocal (Point<int> screenPosition);
 
     /** Converts a rectangle relative to the top-left of this component to screen coordinates. */
     virtual Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
-
-    /** Converts a screen coordinate to a position relative to the top-left of this component. */
-    virtual Point<int> globalToLocal (Point<int> screenPosition) = 0;
 
     /** Converts a screen area to a position relative to the top-left of this component. */
     virtual Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
@@ -175,6 +181,9 @@ public:
 
     /** True if the window is currently full-screen. */
     virtual bool isFullScreen() const = 0;
+
+    /** True if the window is in kiosk-mode. */
+    virtual bool isKioskMode() const;
 
     /** Sets the size to restore to if fullscreen mode is turned off. */
     void setNonFullScreenBounds (const Rectangle<int>& newBounds) noexcept;
@@ -273,7 +282,7 @@ public:
         This may cause things like a virtual on-screen keyboard to appear, depending
         on the OS.
     */
-    virtual void textInputRequired (const Point<int>& position) = 0;
+    virtual void textInputRequired (Point<int> position, TextInputTarget&) = 0;
 
     /** If there's some kind of OS input-method in progress, this should dismiss it. */
     virtual void dismissPendingTextInput();
@@ -297,9 +306,9 @@ public:
     virtual void setAlpha (float newAlpha) = 0;
 
     //==============================================================================
-    void handleMouseEvent (int touchIndex, const Point<int> positionWithinPeer, const ModifierKeys newMods, int64 time);
-    void handleMouseWheel (int touchIndex, const Point<int> positionWithinPeer, int64 time, const MouseWheelDetails&);
-    void handleMagnifyGesture (int touchIndex, const Point<int> positionWithinPeer, int64 time, float scaleFactor);
+    void handleMouseEvent (int touchIndex, Point<float> positionWithinPeer, ModifierKeys newMods, int64 time);
+    void handleMouseWheel (int touchIndex, Point<float> positionWithinPeer, int64 time, const MouseWheelDetails&);
+    void handleMagnifyGesture (int touchIndex, Point<float> positionWithinPeer, int64 time, float scaleFactor);
 
     void handleUserClosingWindow();
 
@@ -310,7 +319,7 @@ public:
         Point<int> position;
 
         bool isEmpty() const noexcept       { return files.size() == 0 && text.isEmpty(); }
-        void clear() noexcept               { files.clear(); text = String::empty; }
+        void clear() noexcept               { files.clear(); text.clear(); }
     };
 
     bool handleDragMove (const DragInfo&);

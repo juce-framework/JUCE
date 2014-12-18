@@ -1,5 +1,5 @@
 
-# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on 
+# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on 
 # which plugin types you've built
 
 original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME
@@ -7,6 +7,7 @@ original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME
 # this looks inside the binary to detect which platforms are needed.. 
 copyAU=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'AudioUnit' | wc -l`
 copyVST=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'VSTPlugin' | wc -l`
+copyVST3=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'GetPluginFactory' | wc -l`
 copyRTAS=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'CProcess' | wc -l`
 copyAAX=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'ACFStartup' | wc -l`
 
@@ -42,6 +43,18 @@ if [ $copyVST -gt 0 ]; then
   sed -i "" -e 's/TDMw/BNDL/g' "$VST/Contents/$INFOPLIST_FILE"
 fi
 
+if [ $copyVST3 -gt 0 ]; then
+  echo "Copying to VST3 folder..."
+  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3
+  if [ -d "$VST3" ]; then 
+    rm -r "$VST3"
+  fi
+
+  cp -r "$original" "$VST3"
+  sed -i "" -e 's/TDMwPTul/BNDLPTul/g' "$VST3/Contents/PkgInfo"
+  sed -i "" -e 's/TDMw/BNDL/g' "$VST3/Contents/$INFOPLIST_FILE"
+fi
+
 if [ $copyRTAS -gt 0 ]; then
   echo "Copying to RTAS folder..."
   RTAS=/Library/Application\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm
@@ -62,7 +75,7 @@ if [ $copyAAX -gt 0 ]; then
       rm -r "$AAX1"
     fi
 
-    cp -r "$original" "$AAX1"
+    cp -R -H "$original" "$AAX1"
   fi
 
   if [ -d "/Library/Application Support/Avid/Audio/Plug-Ins" ]; then
@@ -72,6 +85,6 @@ if [ $copyAAX -gt 0 ]; then
       rm -r "$AAX2"
     fi
 
-    cp -r "$original" "$AAX2"
+    cp -R -H "$original" "$AAX2"
   fi
 fi

@@ -102,12 +102,20 @@ public:
     /** True if the plug-in is part of a multi-type container, e.g. a VST Shell. */
     bool hasSharedContainer;
 
-    /** Returns true if the two descriptions refer the the same plug-in.
+    /** Returns true if the two descriptions refer to the same plug-in.
 
         This isn't quite as simple as them just having the same file (because of
         shell plug-ins).
     */
-    bool isDuplicateOf (const PluginDescription& other) const;
+    bool isDuplicateOf (const PluginDescription& other) const noexcept;
+
+    /** Return true if this description is equivalent to another one which created the
+        given identifier string.
+
+        Note that this isn't quite as simple as them just calling createIdentifierString()
+        and comparing the strings, because the identifers can differ (thanks to shell plug-ins).
+    */
+    bool matchesIdentifierString (const String& identifierString) const;
 
     //==============================================================================
     /** Returns a string that can be saved and used to uniquely identify the

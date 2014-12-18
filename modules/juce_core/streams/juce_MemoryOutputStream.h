@@ -114,9 +114,9 @@ public:
     void flush();
 
     bool write (const void*, size_t) override;
-    int64 getPosition() override                                 { return position; }
+    int64 getPosition() override                                 { return (int64) position; }
     bool setPosition (int64) override;
-    int writeFromInputStream (InputStream&, int64 maxNumBytesToWrite) override;
+    int64 writeFromInputStream (InputStream&, int64 maxNumBytesToWrite) override;
     bool writeRepeatedByte (uint8 byte, size_t numTimesToRepeat) override;
 
 private:

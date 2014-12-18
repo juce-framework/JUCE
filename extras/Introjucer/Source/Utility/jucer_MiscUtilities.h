@@ -50,6 +50,7 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX = true, bool scrollY = true);
 
 void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer);
+void showSVGPathDataToolWindow (ScopedPointer<Component>& ownerPointer);
 
 bool cancelAnyModalComponents();
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo&);
@@ -188,14 +189,14 @@ public:
           colourValue (colour),
           defaultColour (defaultCol)
     {
-        addAndMakeVisible (&selector);
+        addAndMakeVisible (selector);
         selector.setName ("Colour");
         selector.setCurrentColour (getColour());
         selector.addChangeListener (this);
 
         if (canResetToDefault)
         {
-            addAndMakeVisible (&defaultButton);
+            addAndMakeVisible (defaultButton);
             defaultButton.addListener (this);
         }
 
@@ -230,7 +231,7 @@ public:
         if (getColour() != newColour)
         {
             if (newColour == defaultColour && defaultButton.isVisible())
-                colourValue = var::null;
+                colourValue = var();
             else
                 colourValue = newColour.toDisplayString (true);
         }
@@ -363,7 +364,7 @@ public:
         : PropertyComponent (name),
           colourEditor (undoManager, colour, defaultColour, canResetToDefault)
     {
-        addAndMakeVisible (&colourEditor);
+        addAndMakeVisible (colourEditor);
     }
 
     void resized() override

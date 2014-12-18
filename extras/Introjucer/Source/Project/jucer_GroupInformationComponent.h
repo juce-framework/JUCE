@@ -40,7 +40,7 @@ public:
     {
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
-        addAndMakeVisible (&list);
+        addAndMakeVisible (list);
         list.updateContent();
         list.setRowHeight (20);
         item.state.addListener (this);
@@ -121,10 +121,10 @@ private:
         {
             if (item.isFile())
             {
-                addAndMakeVisible (&compileButton);
+                addAndMakeVisible (compileButton);
                 compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
 
-                addAndMakeVisible (&resourceButton);
+                addAndMakeVisible (resourceButton);
                 resourceButton.getToggleStateValue().referTo (item.getShouldAddToResourceValue());
             }
         }

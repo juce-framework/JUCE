@@ -1,5 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
+ * Copyright (C) 2000-2009  Josh Coalson
+ * Copyright (C) 2011-2014  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,25 +30,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
 #include <math.h>
 #include <string.h>
+#include "../compat.h"
 #include "include/private/bitmath.h"
 #include "include/private/fixed.h"
 #include "../assert.h"
-
-#ifndef M_LN2
-/* math.h in VC++ doesn't seem to have this (how Microsoft is that?) */
-#define M_LN2 0.69314718055994530942
-#endif
-
-#ifdef min
-#undef min
-#endif
-#define min(x,y) ((x) < (y)? (x) : (y))
 
 #ifdef local_abs
 #undef local_abs
@@ -242,11 +234,11 @@ unsigned FLAC__fixed_compute_best_predictor(const FLAC__int32 data[], unsigned d
 		error -= last_error_3; total_error_4 += local_abs(error); last_error_3 = save;
 	}
 
-	if(total_error_0 < min(min(min(total_error_1, total_error_2), total_error_3), total_error_4))
+	if(total_error_0 < flac_min(flac_min(flac_min(total_error_1, total_error_2), total_error_3), total_error_4))
 		order = 0;
-	else if(total_error_1 < min(min(total_error_2, total_error_3), total_error_4))
+	else if(total_error_1 < flac_min(flac_min(total_error_2, total_error_3), total_error_4))
 		order = 1;
-	else if(total_error_2 < min(total_error_3, total_error_4))
+	else if(total_error_2 < flac_min(total_error_3, total_error_4))
 		order = 2;
 	else if(total_error_3 < total_error_4)
 		order = 3;
@@ -304,11 +296,11 @@ unsigned FLAC__fixed_compute_best_predictor_wide(const FLAC__int32 data[], unsig
 		error -= last_error_3; total_error_4 += local_abs(error); last_error_3 = save;
 	}
 
-	if(total_error_0 < min(min(min(total_error_1, total_error_2), total_error_3), total_error_4))
+	if(total_error_0 < flac_min(flac_min(flac_min(total_error_1, total_error_2), total_error_3), total_error_4))
 		order = 0;
-	else if(total_error_1 < min(min(total_error_2, total_error_3), total_error_4))
+	else if(total_error_1 < flac_min(flac_min(total_error_2, total_error_3), total_error_4))
 		order = 1;
-	else if(total_error_2 < min(total_error_3, total_error_4))
+	else if(total_error_2 < flac_min(total_error_3, total_error_4))
 		order = 2;
 	else if(total_error_3 < total_error_4)
 		order = 3;
@@ -324,20 +316,11 @@ unsigned FLAC__fixed_compute_best_predictor_wide(const FLAC__int32 data[], unsig
 	FLAC__ASSERT(data_len > 0 || total_error_3 == 0);
 	FLAC__ASSERT(data_len > 0 || total_error_4 == 0);
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
-#if defined _MSC_VER || defined __MINGW32__
-	/* with MSVC you have to spoon feed it the casting */
-	residual_bits_per_sample[0] = (FLAC__float)((total_error_0 > 0) ? log(M_LN2 * (FLAC__double)(FLAC__int64)total_error_0 / (FLAC__double)data_len) / M_LN2 : 0.0);
-	residual_bits_per_sample[1] = (FLAC__float)((total_error_1 > 0) ? log(M_LN2 * (FLAC__double)(FLAC__int64)total_error_1 / (FLAC__double)data_len) / M_LN2 : 0.0);
-	residual_bits_per_sample[2] = (FLAC__float)((total_error_2 > 0) ? log(M_LN2 * (FLAC__double)(FLAC__int64)total_error_2 / (FLAC__double)data_len) / M_LN2 : 0.0);
-	residual_bits_per_sample[3] = (FLAC__float)((total_error_3 > 0) ? log(M_LN2 * (FLAC__double)(FLAC__int64)total_error_3 / (FLAC__double)data_len) / M_LN2 : 0.0);
-	residual_bits_per_sample[4] = (FLAC__float)((total_error_4 > 0) ? log(M_LN2 * (FLAC__double)(FLAC__int64)total_error_4 / (FLAC__double)data_len) / M_LN2 : 0.0);
-#else
 	residual_bits_per_sample[0] = (FLAC__float)((total_error_0 > 0) ? log(M_LN2 * (FLAC__double)total_error_0 / (FLAC__double)data_len) / M_LN2 : 0.0);
 	residual_bits_per_sample[1] = (FLAC__float)((total_error_1 > 0) ? log(M_LN2 * (FLAC__double)total_error_1 / (FLAC__double)data_len) / M_LN2 : 0.0);
 	residual_bits_per_sample[2] = (FLAC__float)((total_error_2 > 0) ? log(M_LN2 * (FLAC__double)total_error_2 / (FLAC__double)data_len) / M_LN2 : 0.0);
 	residual_bits_per_sample[3] = (FLAC__float)((total_error_3 > 0) ? log(M_LN2 * (FLAC__double)total_error_3 / (FLAC__double)data_len) / M_LN2 : 0.0);
 	residual_bits_per_sample[4] = (FLAC__float)((total_error_4 > 0) ? log(M_LN2 * (FLAC__double)total_error_4 / (FLAC__double)data_len) / M_LN2 : 0.0);
-#endif
 #else
 	residual_bits_per_sample[0] = (total_error_0 > 0) ? local__compute_rbps_wide_integerized(total_error_0, data_len) : 0;
 	residual_bits_per_sample[1] = (total_error_1 > 0) ? local__compute_rbps_wide_integerized(total_error_1, data_len) : 0;

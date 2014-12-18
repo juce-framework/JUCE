@@ -452,3 +452,21 @@ void DrawableShape::FillAndStrokeState::setStrokeType (const PathStrokeType& new
     state.setProperty (capStyle, newStrokeType.getEndStyle() == PathStrokeType::butt
                                      ? "butt" : (newStrokeType.getEndStyle() == PathStrokeType::square ? "square" : "round"), undoManager);
 }
+
+static bool replaceColourInFill (DrawableShape::RelativeFillType& fill, Colour original, Colour replacement)
+{
+    if (fill.fill.colour == original && fill.fill.isColour())
+    {
+        fill = FillType (replacement);
+        return true;
+    }
+
+    return false;
+}
+
+bool DrawableShape::replaceColour (Colour original, Colour replacement)
+{
+    bool changed1 = replaceColourInFill (mainFill,   original, replacement);
+    bool changed2 = replaceColourInFill (strokeFill, original, replacement);
+    return changed1 || changed2;
+}

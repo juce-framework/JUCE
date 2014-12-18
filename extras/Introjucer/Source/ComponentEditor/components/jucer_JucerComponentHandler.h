@@ -98,12 +98,11 @@ public:
         props.add (new JucerCompOpenDocProperty (tc));
     }
 
-    String getCreationParameters (Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component)
     {
-        TestComponent* const tc = dynamic_cast <TestComponent*> (component);
-
-        return tc->getConstructorParams().trim();
+        return dynamic_cast<TestComponent*> (component)->getConstructorParams().trim();
     }
+
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);

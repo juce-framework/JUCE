@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if _MSC_VER
+#if _MSC_VER || defined (__MINGW32__) || defined (__MINGW64__)
  #include <windows.h>
 #endif
 
@@ -33,7 +33,7 @@
 #include "../utility/juce_CheckSettingMacros.h"
 #include "juce_IncludeModuleHeaders.h"
 
-#if _MSC_VER
+#if _MSC_VER || JUCE_MINGW
 
 #if JucePlugin_Build_RTAS
  extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);

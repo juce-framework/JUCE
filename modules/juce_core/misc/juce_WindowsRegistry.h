@@ -35,7 +35,7 @@
     Contains some static helper functions for manipulating the MS Windows registry
     (Only available on Windows, of course!)
 */
-class WindowsRegistry
+class JUCE_API  WindowsRegistry
 {
 public:
     /** These values can be used to specify whether the 32- or 64-bit registry should be used.
@@ -59,48 +59,48 @@ public:
         The path is a string for the entire path of a value in the registry,
         e.g. "HKEY_CURRENT_USER\Software\foo\bar"
     */
-    static String getValue (const String& regValuePath,
-                            const String& defaultValue = String::empty,
-                            WoW64Mode mode = WoW64_Default);
+    static String JUCE_CALLTYPE getValue (const String& regValuePath,
+                                          const String& defaultValue = String::empty,
+                                          WoW64Mode mode = WoW64_Default);
 
     /** Reads a binary block from the registry.
         The path is a string for the entire path of a value in the registry,
         e.g. "HKEY_CURRENT_USER\Software\foo\bar"
         @returns a DWORD indicating the type of the key.
     */
-    static uint32 getBinaryValue (const String& regValuePath, MemoryBlock& resultData, WoW64Mode mode = WoW64_Default);
+    static uint32 JUCE_CALLTYPE getBinaryValue (const String& regValuePath, MemoryBlock& resultData, WoW64Mode mode = WoW64_Default);
 
     /** Sets a registry value as a string.
         This will take care of creating any groups needed to get to the given registry value.
     */
-    static bool setValue (const String& regValuePath, const String& value, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE setValue (const String& regValuePath, const String& value, WoW64Mode mode = WoW64_Default);
 
     /** Sets a registry value as a DWORD.
         This will take care of creating any groups needed to get to the given registry value.
     */
-    static bool setValue (const String& regValuePath, uint32 value, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE setValue (const String& regValuePath, uint32 value, WoW64Mode mode = WoW64_Default);
 
     /** Sets a registry value as a QWORD.
         This will take care of creating any groups needed to get to the given registry value.
     */
-    static bool setValue (const String& regValuePath, uint64 value, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE setValue (const String& regValuePath, uint64 value, WoW64Mode mode = WoW64_Default);
 
     /** Sets a registry value as a binary block.
         This will take care of creating any groups needed to get to the given registry value.
     */
-    static bool setValue (const String& regValuePath, const MemoryBlock& value, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE setValue (const String& regValuePath, const MemoryBlock& value, WoW64Mode mode = WoW64_Default);
 
     /** Returns true if the given value exists in the registry. */
-    static bool valueExists (const String& regValuePath, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE valueExists (const String& regValuePath, WoW64Mode mode = WoW64_Default);
 
     /** Returns true if the given key exists in the registry. */
-    static bool keyExists (const String& regValuePath, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE keyExists (const String& regValuePath, WoW64Mode mode = WoW64_Default);
 
     /** Deletes a registry value. */
-    static void deleteValue (const String& regValuePath, WoW64Mode mode = WoW64_Default);
+    static void JUCE_CALLTYPE deleteValue (const String& regValuePath, WoW64Mode mode = WoW64_Default);
 
     /** Deletes a registry key (which is registry-talk for 'folder'). */
-    static void deleteKey (const String& regKeyPath, WoW64Mode mode = WoW64_Default);
+    static void JUCE_CALLTYPE deleteKey (const String& regKeyPath, WoW64Mode mode = WoW64_Default);
 
     /** Creates a file association in the registry.
 
@@ -119,13 +119,13 @@ public:
                                     association in HKEY_CURRENT_USER.
         @param mode                 the WoW64 mode to use for choosing the database
     */
-    static bool registerFileAssociation (const String& fileExtension,
-                                         const String& symbolicDescription,
-                                         const String& fullDescription,
-                                         const File& targetExecutable,
-                                         int iconResourceNumber,
-                                         bool registerForCurrentUserOnly,
-                                         WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE registerFileAssociation (const String& fileExtension,
+                                                       const String& symbolicDescription,
+                                                       const String& fullDescription,
+                                                       const File& targetExecutable,
+                                                       int iconResourceNumber,
+                                                       bool registerForCurrentUserOnly,
+                                                       WoW64Mode mode = WoW64_Default);
 
     // DEPRECATED: use the other methods with a WoW64Mode parameter of WoW64_64bit instead.
     JUCE_DEPRECATED (static String getValueWow64 (const String&, const String& defaultValue = String::empty));

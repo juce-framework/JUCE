@@ -127,9 +127,7 @@ class WMAudioReader   : public AudioFormatReader
 public:
     WMAudioReader (InputStream* const input_)
         : AudioFormatReader (input_, TRANS (wmFormatName)),
-          wmvCoreLib ("Wmvcore.dll"),
-          currentPosition (0),
-          bufferStart (0), bufferEnd (0)
+          wmvCoreLib ("Wmvcore.dll")
     {
         JUCE_LOAD_WINAPI_FUNCTION (wmvCoreLib, WMCreateSyncReader, wmCreateSyncReader,
                                    HRESULT, (IUnknown*, DWORD, IWMSyncReader**))
@@ -168,30 +166,24 @@ public:
 
         checkCoInitialiseCalled();
 
-        if (startSampleInFile != currentPosition)
-        {
-            currentPosition = startSampleInFile;
-            wmSyncReader->SetRange (((QWORD) startSampleInFile * 10000000) / (int) sampleRate, 0);
-            bufferStart = bufferEnd = 0;
-        }
-
         const int stride = numChannels * sizeof (int16);
-        bool firstLoop = true;
 
         while (numSamples > 0)
         {
-            if (bufferEnd <= bufferStart)
+            if (! bufferedRange.contains (startSampleInFile))
             {
+                const bool hasJumped = (startSampleInFile != bufferedRange.getEnd());
+
+                if (hasJumped)
+                    wmSyncReader->SetRange ((QWORD) (startSampleInFile * 10000000 / (int64) sampleRate), 0);
+
                 ComSmartPtr<INSSBuffer> sampleBuffer;
                 QWORD sampleTime, duration;
                 DWORD flags, outputNum;
                 WORD streamNum;
-                int64 readBufferStart;
 
-                HRESULT hr = wmSyncReader->GetNextSample (1, sampleBuffer.resetAndGetPointerAddress(), &sampleTime,
-                                                          &duration, &flags, &outputNum, &streamNum);
-
-                readBufferStart = (int64)floor((sampleTime * sampleRate) * 0.0000001);
+                HRESULT hr = wmSyncReader->GetNextSample (1, sampleBuffer.resetAndGetPointerAddress(),
+                                                          &sampleTime, &duration, &flags, &outputNum, &streamNum);
 
                 if (sampleBuffer != nullptr)
                 {
@@ -199,41 +191,35 @@ public:
                     DWORD dataLength = 0;
                     hr = sampleBuffer->GetBufferAndLength (&rawData, &dataLength);
 
-                    bufferStart = 0;
-                    bufferEnd = (int) dataLength;
-
-                    if (bufferEnd <= 0)
-                    {
-                        sampleBuffer->Release();
+                    if (dataLength == 0)
                         return false;
-                    }
 
-                    buffer.ensureSize (bufferEnd);
-                    memcpy (buffer.getData(), rawData, bufferEnd);
+                    if (hasJumped)
+                        bufferedRange.setStart ((int64) ((sampleTime * (int64) sampleRate) / 10000000));
+                    else
+                        bufferedRange.setStart (bufferedRange.getEnd()); // (because the positions returned often aren't continguous)
 
-                    if (firstLoop && readBufferStart < startSampleInFile)
-                    {
-                        bufferStart += stride * (int) (startSampleInFile - readBufferStart);
+                    bufferedRange.setLength ((int64) (dataLength / stride));
 
-                        if (bufferStart > bufferEnd)
-                            bufferStart = bufferEnd;
-                    }
-
+                    buffer.ensureSize ((int) dataLength);
+                    memcpy (buffer.getData(), rawData, (size_t) dataLength);
+                }
+                else if (hr == NS_E_NO_MORE_SAMPLES)
+                {
+                    bufferedRange.setStart (startSampleInFile);
+                    bufferedRange.setLength (256);
+                    buffer.ensureSize (256 * stride);
+                    buffer.fillWith (0);
                 }
                 else
                 {
-                    bufferStart = 0;
-                    bufferEnd = 512;
-                    buffer.ensureSize (bufferEnd);
-                    buffer.fillWith (0);
+                    return false;
                 }
-
-                firstLoop = false;
             }
 
-
-            const int16* const rawData = static_cast <const int16*> (addBytesToPointer (buffer.getData(), bufferStart));
-            const int numToDo = jmin (numSamples, (bufferEnd - bufferStart) / stride);
+            const int offsetInBuffer = (int) (startSampleInFile - bufferedRange.getStart());
+            const int16* const rawData = static_cast<const int16*> (addBytesToPointer (buffer.getData(), offsetInBuffer * stride));
+            const int numToDo = jmin (numSamples, (int) (bufferedRange.getLength() - offsetInBuffer));
 
             for (int i = 0; i < numDestChannels; ++i)
             {
@@ -250,13 +236,9 @@ public:
                 }
             }
 
-            bufferStart += numToDo * stride;
-            if (bufferEnd - bufferStart < stride)
-                bufferStart = bufferEnd;
-
+            startSampleInFile += numToDo;
             startOffsetInDestBuffer += numToDo;
             numSamples -= numToDo;
-            currentPosition += numToDo;
         }
 
         return true;
@@ -265,9 +247,8 @@ public:
 private:
     DynamicLibrary wmvCoreLib;
     ComSmartPtr<IWMSyncReader> wmSyncReader;
-    int64 currentPosition;
     MemoryBlock buffer;
-    int bufferStart, bufferEnd;
+    Range<int64> bufferedRange;
 
     void checkCoInitialiseCalled()
     {
@@ -344,6 +325,7 @@ Array<int> WindowsMediaAudioFormat::getPossibleBitDepths()      { return Array<i
 
 bool WindowsMediaAudioFormat::canDoStereo()     { return true; }
 bool WindowsMediaAudioFormat::canDoMono()       { return true; }
+bool WindowsMediaAudioFormat::isCompressed()    { return true; }
 
 //==============================================================================
 AudioFormatReader* WindowsMediaAudioFormat::createReaderFor (InputStream* sourceStream, bool deleteStreamIfOpeningFails)

@@ -1,5 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
+ * Copyright (C) 2000-2009  Josh Coalson
+ * Copyright (C) 2011-2014  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,8 +37,9 @@
 #include <config.h>
 #endif
 
+#include "cpu.h"
 #include "float.h"
-#include "format.h"
+#include "../../../format.h"
 
 /*
  *	FLAC__fixed_compute_best_predictor()
@@ -53,14 +55,22 @@
  */
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
 unsigned FLAC__fixed_compute_best_predictor(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
+unsigned FLAC__fixed_compute_best_predictor_wide(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
 # ifndef FLAC__NO_ASM
-#  ifdef FLAC__CPU_IA32
-#   ifdef FLAC__HAS_NASM
-unsigned FLAC__fixed_compute_best_predictor_asm_ia32_mmx_cmov(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
+#  if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && defined FLAC__HAS_X86INTRIN
+#   ifdef FLAC__SSE2_SUPPORTED
+unsigned FLAC__fixed_compute_best_predictor_intrin_sse2(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER + 1]);
+unsigned FLAC__fixed_compute_best_predictor_wide_intrin_sse2(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER + 1]);
+#   endif
+#   ifdef FLAC__SSSE3_SUPPORTED
+unsigned FLAC__fixed_compute_best_predictor_intrin_ssse3(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
+unsigned FLAC__fixed_compute_best_predictor_wide_intrin_ssse3(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER + 1]);
 #   endif
 #  endif
+#  if defined FLAC__CPU_IA32 && defined FLAC__HAS_NASM
+unsigned FLAC__fixed_compute_best_predictor_asm_ia32_mmx_cmov(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
+#  endif
 # endif
-unsigned FLAC__fixed_compute_best_predictor_wide(const FLAC__int32 data[], unsigned data_len, FLAC__float residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
 #else
 unsigned FLAC__fixed_compute_best_predictor(const FLAC__int32 data[], unsigned data_len, FLAC__fixedpoint residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);
 unsigned FLAC__fixed_compute_best_predictor_wide(const FLAC__int32 data[], unsigned data_len, FLAC__fixedpoint residual_bits_per_sample[FLAC__MAX_FIXED_ORDER+1]);

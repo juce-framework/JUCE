@@ -30,9 +30,6 @@ bool isOpenSLAvailable()
     return library.open ("libOpenSLES.so");
 }
 
-const unsigned short openSLRates[]       = { 8000, 16000, 32000, 44100, 48000 };
-const unsigned short openSLBufferSizes[] = { 256, 512, 768, 1024, 1280, 1600 }; // must all be multiples of the block size
-
 //==============================================================================
 class OpenSLAudioIODevice  : public AudioIODevice,
                              public Thread
@@ -66,7 +63,7 @@ public:
 
     bool openedOk() const       { return engine.outputMixObject != nullptr; }
 
-    StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames() override
     {
         StringArray s;
         s.add ("Left");
@@ -74,38 +71,33 @@ public:
         return s;
     }
 
-    StringArray getInputChannelNames()
+    StringArray getInputChannelNames() override
     {
         StringArray s;
         s.add ("Audio Input");
         return s;
     }
 
-    int getNumSampleRates()                 { return numElementsInArray (openSLRates); }
-
-    double getSampleRate (int index)
+    Array<double> getAvailableSampleRates() override
     {
-        jassert (index >= 0 && index < getNumSampleRates());
-        return (int) openSLRates [index];
+        static const double rates[] = { 8000.0, 16000.0, 32000.0, 44100.0, 48000.0 };
+        return Array<double> (rates, numElementsInArray (rates));
     }
 
-    int getDefaultBufferSize()              { return 1024; }
-    int getNumBufferSizesAvailable()        { return numElementsInArray (openSLBufferSizes); }
-
-    int getBufferSizeSamples (int index)
+    Array<int> getAvailableBufferSizes() override
     {
-        jassert (index >= 0 && index < getNumBufferSizesAvailable());
-        return (int) openSLBufferSizes [index];
+        static const int sizes[] = { 256, 512, 768, 1024, 1280, 1600 }; // must all be multiples of the block size
+        return Array<int> (sizes, numElementsInArray (sizes));
     }
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
                  double requestedSampleRate,
-                 int bufferSize)
+                 int bufferSize) override
     {
         close();
 
-        lastError = String::empty;
+        lastError.clear();
         sampleRate = (int) requestedSampleRate;
 
         int preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
@@ -133,7 +125,7 @@ public:
         return lastError;
     }
 
-    void close()
+    void close() override
     {
         stop();
         stopThread (6000);
@@ -142,18 +134,19 @@ public:
         player = nullptr;
     }
 
-    int getOutputLatencyInSamples()                     { return outputLatency; }
-    int getInputLatencyInSamples()                      { return inputLatency; }
-    bool isOpen()                                       { return deviceOpen; }
-    int getCurrentBufferSizeSamples()                   { return actualBufferSize; }
-    int getCurrentBitDepth()                            { return 16; }
-    double getCurrentSampleRate()                       { return sampleRate; }
-    BigInteger getActiveOutputChannels() const          { return activeOutputChans; }
-    BigInteger getActiveInputChannels() const           { return activeInputChans; }
-    String getLastError()                               { return lastError; }
-    bool isPlaying()                                    { return callback != nullptr; }
+    int getDefaultBufferSize() override                 { return 1024; }
+    int getOutputLatencyInSamples() override            { return outputLatency; }
+    int getInputLatencyInSamples() override             { return inputLatency; }
+    bool isOpen() override                              { return deviceOpen; }
+    int getCurrentBufferSizeSamples() override          { return actualBufferSize; }
+    int getCurrentBitDepth() override                   { return 16; }
+    double getCurrentSampleRate() override              { return sampleRate; }
+    BigInteger getActiveOutputChannels() const override { return activeOutputChans; }
+    BigInteger getActiveInputChannels() const override  { return activeInputChans; }
+    String getLastError() override                      { return lastError; }
+    bool isPlaying() override                           { return callback != nullptr; }
 
-    void start (AudioIODeviceCallback* newCallback)
+    void start (AudioIODeviceCallback* newCallback) override
     {
         stop();
 
@@ -166,37 +159,15 @@ public:
         }
     }
 
-    void stop()
+    void stop() override
     {
         if (AudioIODeviceCallback* const oldCallback = setCallback (nullptr))
             oldCallback->audioDeviceStopped();
     }
 
-    void run() override
+    bool setAudioPreprocessingEnabled (bool enable) override
     {
-        if (recorder != nullptr)    recorder->start();
-        if (player != nullptr)      player->start();
-
-        while (! threadShouldExit())
-        {
-            if (player != nullptr)      player->writeBuffer (outputBuffer, *this);
-            if (recorder != nullptr)    recorder->readNextBlock (inputBuffer, *this);
-
-            const ScopedLock sl (callbackLock);
-
-            if (callback != nullptr)
-            {
-                callback->audioDeviceIOCallback (numInputChannels > 0 ? (const float**) inputBuffer.getArrayOfChannels() : nullptr,
-                                                 numInputChannels,
-                                                 numOutputChannels > 0 ? outputBuffer.getArrayOfChannels() : nullptr,
-                                                 numOutputChannels,
-                                                 actualBufferSize);
-            }
-            else
-            {
-                outputBuffer.clear();
-            }
-        }
+        return recorder != nullptr && recorder->setAudioPreprocessingEnabled (enable);
     }
 
 private:
@@ -221,6 +192,31 @@ private:
         return oldCallback;
     }
 
+    void run() override
+    {
+        if (recorder != nullptr)    recorder->start();
+        if (player != nullptr)      player->start();
+
+        while (! threadShouldExit())
+        {
+            if (player != nullptr)      player->writeBuffer (outputBuffer, *this);
+            if (recorder != nullptr)    recorder->readNextBlock (inputBuffer, *this);
+
+            const ScopedLock sl (callbackLock);
+
+            if (callback != nullptr)
+            {
+                callback->audioDeviceIOCallback (numInputChannels  > 0 ? inputBuffer.getArrayOfReadPointers()   : nullptr, numInputChannels,
+                                                 numOutputChannels > 0 ? outputBuffer.getArrayOfWritePointers() : nullptr, numOutputChannels,
+                                                 actualBufferSize);
+            }
+            else
+            {
+                outputBuffer.clear();
+            }
+        }
+    }
+
     //==================================================================================================
     struct Engine
     {
@@ -239,6 +235,7 @@ private:
                     SL_IID_ANDROIDSIMPLEBUFFERQUEUE = (SLInterfaceID*) library.getFunction ("SL_IID_ANDROIDSIMPLEBUFFERQUEUE");
                     SL_IID_PLAY                     = (SLInterfaceID*) library.getFunction ("SL_IID_PLAY");
                     SL_IID_RECORD                   = (SLInterfaceID*) library.getFunction ("SL_IID_RECORD");
+                    SL_IID_ANDROIDCONFIGURATION     = (SLInterfaceID*) library.getFunction ("SL_IID_ANDROIDCONFIGURATION");
 
                     check ((*engineObject)->Realize (engineObject, SL_BOOLEAN_FALSE));
                     check ((*engineObject)->GetInterface (engineObject, *SL_IID_ENGINE, &engineInterface));
@@ -280,6 +277,7 @@ private:
         SLInterfaceID* SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
         SLInterfaceID* SL_IID_PLAY;
         SLInterfaceID* SL_IID_RECORD;
+        SLInterfaceID* SL_IID_ANDROIDCONFIGURATION;
 
     private:
         DynamicLibrary library;
@@ -343,8 +341,8 @@ private:
             SLDataFormat_PCM pcmFormat =
             {
                 SL_DATAFORMAT_PCM,
-                numChannels,
-                sampleRate * 1000, // (sample rate units are millihertz)
+                (SLuint32) numChannels,
+                (SLuint32) (sampleRate * 1000), // (sample rate units are millihertz)
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT,
@@ -411,7 +409,7 @@ private:
                     typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SrcSampleType;
 
                     DstSampleType dstData (destBuffer + i, bufferList.numChannels);
-                    SrcSampleType srcData (buffer.getSampleData (i, offset));
+                    SrcSampleType srcData (buffer.getReadPointer (i, offset));
                     dstData.convertSamples (srcData, bufferList.numSamples);
                 }
 
@@ -443,7 +441,8 @@ private:
     struct Recorder
     {
         Recorder (int numChannels, int sampleRate, Engine& engine)
-            : recorderObject (nullptr), recorderRecord (nullptr), recorderBufferQueue (nullptr),
+            : recorderObject (nullptr), recorderRecord (nullptr),
+              recorderBufferQueue (nullptr), configObject (nullptr),
               bufferList (numChannels)
         {
             jassert (numChannels == 1); // STEREO doesn't always work!!
@@ -451,8 +450,8 @@ private:
             SLDataFormat_PCM pcmFormat =
             {
                 SL_DATAFORMAT_PCM,
-                numChannels,
-                sampleRate * 1000, // (sample rate units are millihertz)
+                (SLuint32) numChannels,
+                (SLuint32) (sampleRate * 1000), // (sample rate units are millihertz)
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 (numChannels == 1) ? SL_SPEAKER_FRONT_CENTER : (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT),
@@ -475,6 +474,7 @@ private:
                 {
                     check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_RECORD, &recorderRecord));
                     check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recorderBufferQueue));
+                    check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_ANDROIDCONFIGURATION, &configObject));
                     check ((*recorderBufferQueue)->RegisterCallback (recorderBufferQueue, staticCallback, this));
                     check ((*recorderRecord)->SetRecordState (recorderRecord, SL_RECORDSTATE_STOPPED));
 
@@ -529,7 +529,7 @@ private:
                     typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DstSampleType;
                     typedef AudioData::Pointer <AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const> SrcSampleType;
 
-                    DstSampleType dstData (buffer.getSampleData (i, offset));
+                    DstSampleType dstData (buffer.getWritePointer (i, offset));
                     SrcSampleType srcData (srcBuffer + i, bufferList.numChannels);
                     dstData.convertSamples (srcData, bufferList.numSamples);
                 }
@@ -541,10 +541,20 @@ private:
             }
         }
 
+        bool setAudioPreprocessingEnabled (bool enable)
+        {
+            SLuint32 mode = enable ? SL_ANDROID_RECORDING_PRESET_GENERIC
+                                   : SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION;
+
+            return configObject != nullptr
+                     && check ((*configObject)->SetConfiguration (configObject, SL_ANDROID_KEY_RECORDING_PRESET, &mode, sizeof (mode)));
+        }
+
     private:
         SLObjectItf recorderObject;
         SLRecordItf recorderRecord;
         SLAndroidSimpleBufferQueueItf recorderBufferQueue;
+        SLAndroidConfigurationItf configObject;
 
         BufferList bufferList;
 

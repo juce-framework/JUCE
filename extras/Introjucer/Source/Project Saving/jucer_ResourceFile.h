@@ -38,9 +38,6 @@ public:
     ~ResourceFile();
 
     //==============================================================================
-    static bool isResourceFile (const File& file);
-
-    //==============================================================================
     void setClassName (const String& className);
     String getClassName() const       { return className; }
 

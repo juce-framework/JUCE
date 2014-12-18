@@ -212,12 +212,12 @@ public:
     void setTabName (int tabIndex, const String& newName);
 
     /** Gets rid of one of the tabs. */
-    void removeTab (int tabIndex);
+    void removeTab (int tabIndex, bool animate = false);
 
     /** Moves a tab to a new index in the list.
         Pass -1 as the index to move it to the end of the list.
     */
-    void moveTab (int currentIndex, int newIndex);
+    void moveTab (int currentIndex, int newIndex, bool animate = false);
 
     /** Returns the number of tabs in the bar. */
     int getNumTabs() const;
@@ -253,6 +253,9 @@ public:
 
     /** Returns the index of a TabBarButton if it belongs to this bar. */
     int indexOfTabButton (const TabBarButton* button) const;
+
+    /** Returns the final bounds of this button if it is currently being animated. */
+    Rectangle<int> getTargetBounds (TabBarButton* button) const;
 
     //==============================================================================
     /** Callback method to indicate the selected tab has been changed.
@@ -357,6 +360,7 @@ private:
 
     void showExtraItemsMenu();
     static void extraItemsMenuCallback (int, TabbedButtonBar*);
+    void updateTabPositions (bool animate);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedButtonBar)
 };

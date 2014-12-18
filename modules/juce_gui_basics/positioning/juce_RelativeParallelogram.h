@@ -50,8 +50,8 @@ public:
     AffineTransform resetToPerpendicular (Expression::Scope* scope);
     bool isDynamic() const;
 
-    bool operator== (const RelativeParallelogram& other) const noexcept;
-    bool operator!= (const RelativeParallelogram& other) const noexcept;
+    bool operator== (const RelativeParallelogram&) const noexcept;
+    bool operator!= (const RelativeParallelogram&) const noexcept;
 
     static Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) noexcept;
     static Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, Point<float> internalPoint) noexcept;

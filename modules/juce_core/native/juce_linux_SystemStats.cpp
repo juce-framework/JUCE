@@ -42,11 +42,6 @@ String SystemStats::getOperatingSystemName()
     return "Linux";
 }
 
-String SystemStats::getDeviceDescription()
-{
-    return String::empty;
-}
-
 bool SystemStats::isOperatingSystem64Bit()
 {
    #if JUCE_64BIT
@@ -66,16 +61,26 @@ namespace LinuxStatsHelpers
         File ("/proc/cpuinfo").readLines (lines);
 
         for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
-            if (lines[i].startsWithIgnoreCase (key))
+            if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
                 return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
-        return String::empty;
+        return String();
     }
+}
+
+String SystemStats::getDeviceDescription()
+{
+    return LinuxStatsHelpers::getCpuInfo ("Hardware");
 }
 
 String SystemStats::getCpuVendor()
 {
-    return LinuxStatsHelpers::getCpuInfo ("vendor_id");
+    String v (LinuxStatsHelpers::getCpuInfo ("vendor_id"));
+
+    if (v.isEmpty())
+        v = LinuxStatsHelpers::getCpuInfo ("model name");
+
+    return v;
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
@@ -107,7 +112,7 @@ String SystemStats::getLogonName()
     if (struct passwd* const pw = getpwuid (getuid()))
         return CharPointer_UTF8 (pw->pw_name);
 
-    return String::empty;
+    return String();
 }
 
 String SystemStats::getFullUserName()
@@ -121,7 +126,7 @@ String SystemStats::getComputerName()
     if (gethostname (name, sizeof (name) - 1) == 0)
         return name;
 
-    return String::empty;
+    return String();
 }
 
 static String getLocaleValue (nl_item key)
@@ -134,7 +139,7 @@ static String getLocaleValue (nl_item key)
 
 String SystemStats::getUserLanguage()    { return getLocaleValue (_NL_IDENTIFICATION_LANGUAGE); }
 String SystemStats::getUserRegion()      { return getLocaleValue (_NL_IDENTIFICATION_TERRITORY); }
-String SystemStats::getDisplayLanguage() { return getUserLanguage(); }
+String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getUserRegion(); }
 
 //==============================================================================
 void CPUInformation::initialise() noexcept

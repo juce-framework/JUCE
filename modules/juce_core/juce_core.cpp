@@ -53,6 +53,8 @@
 
 #if JUCE_WINDOWS
  #include <ctime>
+
+ #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
  #include <winsock2.h>
  #include <ws2tcpip.h>
 
@@ -79,6 +81,7 @@
 
  #if JUCE_LINUX
   #include <langinfo.h>
+  #include <ifaddrs.h>
  #endif
 
  #include <pwd.h>
@@ -133,7 +136,6 @@ namespace juce
 #include "network/juce_MACAddress.cpp"
 #include "network/juce_NamedPipe.cpp"
 #include "network/juce_Socket.cpp"
-#include "network/juce_URL.cpp"
 #include "network/juce_IPAddress.cpp"
 #include "streams/juce_BufferedInputStream.cpp"
 #include "streams/juce_FileInputSource.cpp"
@@ -151,7 +153,6 @@ namespace juce
 #include "text/juce_StringPairArray.cpp"
 #include "text/juce_StringPool.cpp"
 #include "text/juce_TextDiff.cpp"
-#include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_ReadWriteLock.cpp"
 #include "threads/juce_Thread.cpp"
 #include "threads/juce_ThreadPool.cpp"
@@ -165,6 +166,8 @@ namespace juce
 #include "zip/juce_GZIPDecompressorInputStream.cpp"
 #include "zip/juce_GZIPCompressorOutputStream.cpp"
 #include "zip/juce_ZipFile.cpp"
+#include "files/juce_FileFilter.cpp"
+#include "files/juce_WildcardFileFilter.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -216,6 +219,8 @@ namespace juce
 
 #endif
 
+#include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
+#include "network/juce_URL.cpp"
 
 }

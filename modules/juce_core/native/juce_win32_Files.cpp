@@ -93,7 +93,7 @@ namespace WindowsFileHelpers
         if (SHGetSpecialFolderPath (0, path, type, FALSE))
             return File (String (path));
 
-        return File::nonexistent;
+        return File();
     }
 
     File getModuleFileName (HINSTANCE moduleHandle)
@@ -161,6 +161,12 @@ bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
                                            : (oldAtts & ~FILE_ATTRIBUTE_READONLY);
     return newAtts == oldAtts
             || SetFileAttributes (fullPath.toWideCharPointer(), newAtts) != FALSE;
+}
+
+bool File::setFileExecutableInternal (bool /*shouldBeExecutable*/) const
+{
+    // XXX is this possible?
+    return false;
 }
 
 bool File::isHidden() const
@@ -234,7 +240,7 @@ void FileInputStream::openHandle()
         status = WindowsFileHelpers::getResultForLastError();
 }
 
-void FileInputStream::closeHandle()
+FileInputStream::~FileInputStream()
 {
     CloseHandle ((HANDLE) fileHandle);
 }
@@ -474,6 +480,28 @@ int64 File::getVolumeTotalSize() const
     return WindowsFileHelpers::getDiskSpaceInfo (getFullPathName(), true);
 }
 
+uint64 File::getFileIdentifier() const
+{
+    uint64 result = 0;
+
+    HANDLE h = CreateFile (getFullPathName().toWideCharPointer(),
+                           GENERIC_READ, FILE_SHARE_READ, nullptr,
+                           OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+
+    if (h != INVALID_HANDLE_VALUE)
+    {
+        BY_HANDLE_FILE_INFORMATION info;
+        zerostruct (info);
+
+        if (GetFileInformationByHandle (h, &info))
+            result = (((uint64) info.nFileIndexHigh) << 32) | info.nFileIndexLow;
+
+        CloseHandle (h);
+    }
+
+    return result;
+}
+
 //==============================================================================
 bool File::isOnCDRomDrive() const
 {
@@ -532,6 +560,14 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
             return File (String (dest));
         }
 
+        case windowsSystemDirectory:
+        {
+            WCHAR dest [2048];
+            dest[0] = 0;
+            GetSystemDirectoryW (dest, (UINT) numElementsInArray (dest));
+            return File (String (dest));
+        }
+
         case invokedExecutableFile:
         case currentExecutableFile:
         case currentApplicationFile:
@@ -542,7 +578,7 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
 
         default:
             jassertfalse; // unknown type?
-            return File::nonexistent;
+            return File();
     }
 
     return WindowsFileHelpers::getSpecialFolderPath (csidlType);

@@ -100,7 +100,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
     using namespace WindowsMessageHelpers;
     MSG m;
 
-    if (returnIfNoPendingMessages && ! PeekMessage (&m, (HWND) 0, 0, 0, 0))
+    if (returnIfNoPendingMessages && ! PeekMessage (&m, (HWND) 0, 0, 0, PM_NOREMOVE))
         return false;
 
     if (GetMessage (&m, (HWND) 0, 0, 0) >= 0)
@@ -188,3 +188,30 @@ void MessageManager::doPlatformSpecificShutdown()
 
     OleUninitialize();
 }
+
+//==============================================================================
+struct MountedVolumeListChangeDetector::Pimpl   : private DeviceChangeDetector
+{
+    Pimpl (MountedVolumeListChangeDetector& d) : DeviceChangeDetector (L"MountedVolumeList"), owner (d)
+    {
+        File::findFileSystemRoots (lastVolumeList);
+    }
+
+    void systemDeviceChanged() override
+    {
+        Array<File> newList;
+        File::findFileSystemRoots (newList);
+
+        if (lastVolumeList != newList)
+        {
+            lastVolumeList = newList;
+            owner.mountedVolumeListChanged();
+        }
+    }
+
+    MountedVolumeListChangeDetector& owner;
+    Array<File> lastVolumeList;
+};
+
+MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
+MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}

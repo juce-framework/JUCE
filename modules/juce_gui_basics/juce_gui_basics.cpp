@@ -49,7 +49,7 @@
  #import <WebKit/WebKit.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
 
- #if JUCE_SUPPORT_CARBON
+ #if JUCE_SUPPORT_CARBON && ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
   #define Point CarbonDummyPointName
   #define Component CarbonDummyCompName
   #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
@@ -135,6 +135,12 @@
 namespace juce
 {
 
+#define ASSERT_MESSAGE_MANAGER_IS_LOCKED \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+#define ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || getPeer() == nullptr);
+
 extern bool juce_areThereAnyAlwaysOnTopWindows();
 
 #include "components/juce_Component.cpp"
@@ -175,13 +181,11 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "filebrowser/juce_FileBrowserComponent.cpp"
 #include "filebrowser/juce_FileChooser.cpp"
 #include "filebrowser/juce_FileChooserDialogBox.cpp"
-#include "filebrowser/juce_FileFilter.cpp"
 #include "filebrowser/juce_FileListComponent.cpp"
 #include "filebrowser/juce_FilenameComponent.cpp"
 #include "filebrowser/juce_FileSearchPathListComponent.cpp"
 #include "filebrowser/juce_FileTreeComponent.cpp"
 #include "filebrowser/juce_ImagePreviewComponent.cpp"
-#include "filebrowser/juce_WildcardFileFilter.cpp"
 #include "layout/juce_ComponentAnimator.cpp"
 #include "layout/juce_ComponentBoundsConstrainer.cpp"
 #include "layout/juce_ComponentBuilder.cpp"

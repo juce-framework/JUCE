@@ -101,7 +101,7 @@ public:
     /** Merges another search path into this one.
         This will remove any duplicate directories.
     */
-    void addPath (const FileSearchPath& other);
+    void addPath (const FileSearchPath&);
 
     /** Removes any directories that are actually subdirectories of one of the other directories in the search path.
 

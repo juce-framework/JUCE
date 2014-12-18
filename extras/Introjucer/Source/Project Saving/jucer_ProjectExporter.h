@@ -37,7 +37,15 @@ public:
     ProjectExporter (Project&, const ValueTree& settings);
     virtual ~ProjectExporter();
 
+    struct ExporterTypeInfo
+    {
+        String name;
+        const void* iconData;
+        int iconDataSize;
+    };
+
     static StringArray getExporterNames();
+    static Array<ExporterTypeInfo> getExporterTypes();
 
     static ProjectExporter* createNewExporter (Project&, const int index);
     static ProjectExporter* createNewExporter (Project&, const String& name);
@@ -102,6 +110,8 @@ public:
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 
+    // NB: this is the path to the parent "modules" folder that contains the named module, not the
+    // module folder itself.
     Value getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
@@ -118,8 +128,8 @@ public:
 
     Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
     Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
-    Image getBigIcon() const;
-    Image getSmallIcon() const;
+    Drawable* getBigIcon() const;
+    Drawable* getSmallIcon() const;
     Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
 
     String getExporterIdentifierMacro() const
@@ -318,19 +328,25 @@ protected:
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
 
+    void addDefaultPreprocessorDefs (StringPairArray&) const;
+
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
     static String getLibbedFilename (String name)
     {
-        if (! name.startsWith ("lib"))
-            name = "lib" + name;
-        if (! name.endsWithIgnoreCase (".a"))
-            name = name + ".a";
+        if (! name.startsWith ("lib"))         name = "lib" + name;
+        if (! name.endsWithIgnoreCase (".a"))  name += ".a";
         return name;
     }
 
     //==============================================================================
     static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)
+    {
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
+            throw SaveError (file);
+    }
+
+    static void overwriteFileIfDifferentOrThrow (const File& file, const String& newData)
     {
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
             throw SaveError (file);
@@ -359,7 +375,7 @@ protected:
         }
     }
 
-    static Image rescaleImageForIcon (Image image, int iconSize);
+    static Image rescaleImageForIcon (Drawable&, int iconSize);
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)

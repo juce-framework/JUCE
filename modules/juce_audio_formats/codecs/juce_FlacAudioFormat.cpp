@@ -49,9 +49,23 @@ namespace FlacNamespace
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wconversion"
   #pragma clang diagnostic ignored "-Wshadow"
+  #pragma clang diagnostic ignored "-Wdeprecated-register"
  #endif
 
+ #if JUCE_INTEL
+  #if JUCE_32BIT
+   #define FLAC__CPU_IA32 1
+  #endif
+  #if JUCE_64BIT
+   #define FLAC__CPU_X86_64 1
+  #endif
+  #define FLAC__HAS_X86INTRIN 1
+ #endif
+
+ #undef __STDC_LIMIT_MACROS
  #define __STDC_LIMIT_MACROS 1
+ #define flac_max jmax
+ #define flac_min jmin
  #include "flac/all.h"
  #include "flac/libFLAC/bitmath.c"
  #include "flac/libFLAC/bitreader.c"
@@ -91,7 +105,6 @@ class FlacReader  : public AudioFormatReader
 public:
     FlacReader (InputStream* const in)
         : AudioFormatReader (in, flacFormatName),
-          reservoir (2, 0),
           reservoirStart (0),
           samplesInReservoir (0),
           scanningForLength (false)
@@ -163,7 +176,7 @@ public:
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
                     if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
-                                reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
+                                reservoir.getReadPointer (i, (int) (startSampleInFile - reservoirStart)),
                                 sizeof (int) * (size_t) num);
 
                 startOffsetInDestBuffer += num;
@@ -230,7 +243,7 @@ public:
 
                 if (src != nullptr)
                 {
-                    int* const dest = reinterpret_cast<int*> (reservoir.getSampleData(i));
+                    int* const dest = reinterpret_cast<int*> (reservoir.getWritePointer(i));
 
                     for (int j = 0; j < numSamples; ++j)
                         dest[j] = src[j] << bitsToShift;

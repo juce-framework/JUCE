@@ -212,7 +212,7 @@ public:
         if (s.isNotEmpty())
         {
             StringArray toks;
-            toks.addTokens (s, ",:", String::empty);
+            toks.addTokens (s, ",:", StringRef());
             toks.trim();
 
             if (toks[0] == "solid")
@@ -329,7 +329,7 @@ private:
         gradPos2 = RelativePositionedRectangle();
         gradPos2.rect = PositionedRectangle ("100 100");
 
-        imageResourceName = String::empty;
+        imageResourceName.clear();
         imageOpacity = 1.0;
         imageAnchor = RelativePositionedRectangle();
         imageAnchor.rect = PositionedRectangle ("0 0");

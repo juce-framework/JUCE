@@ -155,13 +155,13 @@
     #define JUCE_BIG_ENDIAN 1
   #endif
 
-  #if defined (__LP64__) || defined (_LP64)
+  #if defined (__LP64__) || defined (_LP64) || defined (__arm64__)
     #define JUCE_64BIT 1
   #else
     #define JUCE_32BIT 1
   #endif
 
-  #ifdef __arm__
+  #if defined (__arm__) || defined (__arm64__)
     #define JUCE_ARM 1
   #elif __MMX__ || __SSE__ || __amd64__
     #define JUCE_INTEL 1
@@ -192,7 +192,7 @@
   #endif
 
   #if JUCE_64BIT || ! JUCE_VC7_OR_EARLIER
-    #define JUCE_USE_INTRINSICS 1
+    #define JUCE_USE_MSVC_INTRINSICS 1
   #endif
 #else
   #error unknown compiler

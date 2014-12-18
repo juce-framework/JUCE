@@ -45,7 +45,6 @@ class JUCE_API  AudioTransportSource  : public PositionableAudioSource,
 public:
     //==============================================================================
     /** Creates an AudioTransportSource.
-
         After creating one of these, use the setSource() method to select an input source.
     */
     AudioTransportSource();
@@ -94,7 +93,6 @@ public:
     void setPosition (double newPosition);
 
     /** Returns the position that the next data block will be read from
-
         This is a time in seconds.
     */
     double getCurrentPosition() const;
@@ -102,8 +100,7 @@ public:
     /** Returns the stream's length in seconds. */
     double getLengthInSeconds() const;
 
-    /** Returns true if the player has stopped because its input stream ran out of data.
-    */
+    /** Returns true if the player has stopped because its input stream ran out of data. */
     bool hasStreamFinished() const noexcept             { return inputStreamEOF; }
 
     //==============================================================================
@@ -126,18 +123,15 @@ public:
 
     //==============================================================================
     /** Changes the gain to apply to the output.
-
         @param newGain  a factor by which to multiply the outgoing samples,
                         so 1.0 = 0dB, 0.5 = -6dB, 2.0 = 6dB, etc.
     */
     void setGain (float newGain) noexcept;
 
     /** Returns the current gain setting.
-
         @see setGain
     */
     float getGain() const noexcept      { return gain; }
-
 
     //==============================================================================
     /** Implementation of the AudioSource method. */
@@ -175,7 +169,7 @@ private:
     bool volatile playing, stopped;
     double sampleRate, sourceSampleRate;
     int blockSize, readAheadBufferSize;
-    bool isPrepared, inputStreamEOF;
+    bool volatile isPrepared, inputStreamEOF;
 
     void releaseMasterResources();
 

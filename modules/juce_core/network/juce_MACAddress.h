@@ -32,12 +32,7 @@
 
 //==============================================================================
 /**
-    A wrapper for a streaming (TCP) socket.
-
-    This allows low-level use of sockets; for an easier-to-use messaging layer on top of
-    sockets, you could also try the InterprocessConnection class.
-
-    @see DatagramSocket, InterprocessConnection, InterprocessConnectionServer
+    Represents a MAC network card adapter address ID.
 */
 class JUCE_API  MACAddress
 {
@@ -51,10 +46,10 @@ public:
     MACAddress();
 
     /** Creates a copy of another address. */
-    MACAddress (const MACAddress& other);
+    MACAddress (const MACAddress&);
 
     /** Creates a copy of another address. */
-    MACAddress& operator= (const MACAddress& other);
+    MACAddress& operator= (const MACAddress&);
 
     /** Creates an address from 6 bytes. */
     explicit MACAddress (const uint8 bytes[6]);
@@ -75,8 +70,8 @@ public:
     /** Returns true if this address is null (00-00-00-00-00-00). */
     bool isNull() const noexcept;
 
-    bool operator== (const MACAddress& other) const noexcept;
-    bool operator!= (const MACAddress& other) const noexcept;
+    bool operator== (const MACAddress&) const noexcept;
+    bool operator!= (const MACAddress&) const noexcept;
 
     //==============================================================================
 private:

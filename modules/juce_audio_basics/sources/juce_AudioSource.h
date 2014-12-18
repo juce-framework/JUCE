@@ -65,7 +65,7 @@ struct JUCE_API  AudioSourceChannelInfo
         Only the samples specified by the startSample and numSamples members of this structure
         should be affected by the call.
 
-        The contents of the buffer when it is passed to the the AudioSource::getNextAudioBlock()
+        The contents of the buffer when it is passed to the AudioSource::getNextAudioBlock()
         method can be treated as the input if the source is performing some kind of filter operation,
         but should be cleared if this is not the case - the clearActiveBufferRegion() is
         a handy way of doing this.

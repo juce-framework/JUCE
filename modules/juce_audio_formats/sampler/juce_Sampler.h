@@ -82,8 +82,8 @@ public:
 
 
     //==============================================================================
-    bool appliesToNote (const int midiNoteNumber) override;
-    bool appliesToChannel (const int midiChannel) override;
+    bool appliesToNote (int midiNoteNumber) override;
+    bool appliesToChannel (int midiChannel) override;
 
 
 private:
@@ -124,7 +124,7 @@ public:
     bool canPlaySound (SynthesiserSound*) override;
 
     void startNote (int midiNoteNumber, float velocity, SynthesiserSound*, int pitchWheel) override;
-    void stopNote (bool allowTailOff) override;
+    void stopNote (float velocity, bool allowTailOff) override;
 
     void pitchWheelMoved (int newValue);
     void controllerMoved (int controllerNumber, int newValue) override;

@@ -72,7 +72,7 @@ bool File::isOnRemovableDrive() const
 
 String File::getVersion() const
 {
-    return String::empty; // xxx not yet implemented
+    return String(); // xxx not yet implemented
 }
 
 //==============================================================================
@@ -115,7 +115,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             if (struct passwd* const pw = getpwuid (getuid()))
                 return File (CharPointer_UTF8 (pw->pw_dir));
 
-            return File::nonexistent;
+            return File();
         }
 
         case userDocumentsDirectory:          return resolveXDGFolder ("XDG_DOCUMENTS_DIR", "~");
@@ -163,7 +163,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             break;
     }
 
-    return File::nonexistent;
+    return File();
 }
 
 //==============================================================================

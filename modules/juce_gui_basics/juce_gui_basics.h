@@ -216,8 +216,6 @@ class DrawableButton;
 #include "windows/juce_ThreadWithProgressWindow.h"
 #include "windows/juce_TooltipWindow.h"
 #include "layout/juce_MultiDocumentPanel.h"
-#include "filebrowser/juce_FileFilter.h"
-#include "filebrowser/juce_WildcardFileFilter.h"
 #include "filebrowser/juce_FileBrowserListener.h"
 #include "filebrowser/juce_DirectoryContentsList.h"
 #include "filebrowser/juce_DirectoryContentsDisplayComponent.h"

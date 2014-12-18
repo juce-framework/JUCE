@@ -26,12 +26,31 @@
   ==============================================================================
 */
 
+class ThreadPool::ThreadPoolThread  : public Thread
+{
+public:
+    ThreadPoolThread (ThreadPool& p)
+       : Thread ("Pool"), currentJob (nullptr), pool (p)
+    {
+    }
+
+    void run() override
+    {
+        while (! threadShouldExit())
+            if (! pool.runNextJob (*this))
+                wait (500);
+    }
+
+    ThreadPoolJob* volatile currentJob;
+    ThreadPool& pool;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread)
+};
+
+//==============================================================================
 ThreadPoolJob::ThreadPoolJob (const String& name)
-    : jobName (name),
-      pool (nullptr),
-      shouldStop (false),
-      isActive (false),
-      shouldBeDeleted (false)
+    : jobName (name), pool (nullptr),
+      shouldStop (false), isActive (false), shouldBeDeleted (false)
 {
 }
 
@@ -57,30 +76,13 @@ void ThreadPoolJob::signalJobShouldExit()
     shouldStop = true;
 }
 
-//==============================================================================
-class ThreadPool::ThreadPoolThread  : public Thread
+ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 {
-public:
-    ThreadPoolThread (ThreadPool& pool_)
-        : Thread ("Pool"),
-          pool (pool_)
-    {
-    }
+    if (ThreadPool::ThreadPoolThread* t = dynamic_cast<ThreadPool::ThreadPoolThread*> (Thread::getCurrentThread()))
+        return t->currentJob;
 
-    void run() override
-    {
-        while (! threadShouldExit())
-        {
-            if (! pool.runNextJob())
-                wait (500);
-        }
-    }
-
-private:
-    ThreadPool& pool;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread)
-};
+    return nullptr;
+}
 
 //==============================================================================
 ThreadPool::ThreadPool (const int numThreads)
@@ -164,8 +166,7 @@ bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const
     return jobs.contains (const_cast <ThreadPoolJob*> (job)) && job->isActive;
 }
 
-bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job,
-                                     const int timeOutMs) const
+bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job, const int timeOutMs) const
 {
     if (job != nullptr)
     {
@@ -215,7 +216,7 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
 }
 
 bool ThreadPool::removeAllJobs (const bool interruptRunningJobs, const int timeOutMs,
-                                ThreadPool::JobSelector* selectedJobsToRemove)
+                                ThreadPool::JobSelector* const selectedJobsToRemove)
 {
     Array <ThreadPoolJob*> jobsToWaitFor;
 
@@ -328,46 +329,49 @@ ThreadPoolJob* ThreadPool::pickNextJobToRun()
     return nullptr;
 }
 
-bool ThreadPool::runNextJob()
+bool ThreadPool::runNextJob (ThreadPoolThread& thread)
 {
-    ThreadPoolJob* const job = pickNextJobToRun();
-
-    if (job == nullptr)
-        return false;
-
-    ThreadPoolJob::JobStatus result = ThreadPoolJob::jobHasFinished;
-
-    JUCE_TRY
+    if (ThreadPoolJob* const job = pickNextJobToRun())
     {
-        result = job->runJob();
-    }
-    JUCE_CATCH_ALL_ASSERT
+        ThreadPoolJob::JobStatus result = ThreadPoolJob::jobHasFinished;
+        thread.currentJob = job;
 
-    OwnedArray<ThreadPoolJob> deletionList;
-
-    {
-        const ScopedLock sl (lock);
-
-        if (jobs.contains (job))
+        JUCE_TRY
         {
-            job->isActive = false;
+            result = job->runJob();
+        }
+        JUCE_CATCH_ALL_ASSERT
 
-            if (result != ThreadPoolJob::jobNeedsRunningAgain || job->shouldStop)
-            {
-                jobs.removeFirstMatchingValue (job);
-                addToDeleteList (deletionList, job);
+        thread.currentJob = nullptr;
 
-                jobFinishedSignal.signal();
-            }
-            else
+        OwnedArray<ThreadPoolJob> deletionList;
+
+        {
+            const ScopedLock sl (lock);
+
+            if (jobs.contains (job))
             {
-                // move the job to the end of the queue if it wants another go
-                jobs.move (jobs.indexOf (job), -1);
+                job->isActive = false;
+
+                if (result != ThreadPoolJob::jobNeedsRunningAgain || job->shouldStop)
+                {
+                    jobs.removeFirstMatchingValue (job);
+                    addToDeleteList (deletionList, job);
+
+                    jobFinishedSignal.signal();
+                }
+                else
+                {
+                    // move the job to the end of the queue if it wants another go
+                    jobs.move (jobs.indexOf (job), -1);
+                }
             }
         }
+
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void ThreadPool::addToDeleteList (OwnedArray<ThreadPoolJob>& deletionList, ThreadPoolJob* const job) const

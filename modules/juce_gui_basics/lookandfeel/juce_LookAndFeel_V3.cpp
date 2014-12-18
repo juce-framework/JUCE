@@ -30,11 +30,11 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (ComboBox::buttonColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0xff999999));
-    setColour (TabbedComponent::outlineColourId, Colour (0xff999999));
+    setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x66000000));
+    setColour (TabbedComponent::outlineColourId, Colour (0x66000000));
     setColour (Slider::trackColourId, Colour (0xbbffffff));
     setColour (Slider::thumbColourId, Colour (0xffddddff));
-
+    setColour (BubbleComponent::backgroundColourId, Colour (0xeeeeeedd));
     setColour (ScrollBar::thumbColourId, Colour::greyLevel (0.8f).contrasting().withAlpha (0.13f));
 }
 
@@ -190,7 +190,6 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
     if (button.getToggleState())
     {
         g.setColour (bkg);
-        g.fillRect (activeArea);
     }
     else
     {
@@ -207,8 +206,9 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
 
         g.setGradientFill (ColourGradient (bkg.brighter (0.2f), (float) p1.x, (float) p1.y,
                                            bkg.darker (0.1f),   (float) p2.x, (float) p2.y, false));
-        g.fillRect (activeArea);
     }
+
+    g.fillRect (activeArea);
 
     g.setColour (button.findColour (TabbedButtonBar::tabOutlineColourId));
 
@@ -225,10 +225,13 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
 
     if (TabbedButtonBar* bar = button.findParentComponentOfClass<TabbedButtonBar>())
     {
-        if (button.isFrontTab() && bar->isColourSpecified (TabbedButtonBar::frontTextColourId))
-            col = bar->findColour (TabbedButtonBar::frontTextColourId);
-        else if (bar->isColourSpecified (TabbedButtonBar::tabTextColourId))
-            col = bar->findColour (TabbedButtonBar::tabTextColourId);
+        TabbedButtonBar::ColourIds colID = button.isFrontTab() ? TabbedButtonBar::frontTextColourId
+                                                               : TabbedButtonBar::tabTextColourId;
+
+        if (bar->isColourSpecified (colID))
+            col = bar->findColour (colID);
+        else if (isColourSpecified (colID))
+            col = findColour (colID);
     }
 
     const Rectangle<float> area (button.getTextArea().toFloat());
@@ -603,4 +606,28 @@ Button* LookAndFeel_V3::createDocumentWindowButton (int buttonType)
 
     jassertfalse;
     return nullptr;
+}
+
+Path LookAndFeel_V3::getTickShape (const float height)
+{
+    static const unsigned char pathData[]
+        = { 110,109,32,210,202,64,126,183,148,64,108,39,244,247,64,245,76,124,64,108,178,131,27,65,246,76,252,64,108,175,242,4,65,246,76,252,
+            64,108,236,5,68,65,0,0,160,180,108,240,150,90,65,21,136,52,63,108,48,59,16,65,0,0,32,65,108,32,210,202,64,126,183,148,64, 99,101,0,0 };
+
+    Path p;
+    p.loadPathFromData (pathData, sizeof (pathData));
+    p.scaleToFit (0, 0, height * 2.0f, height, true);
+    return p;
+}
+
+Path LookAndFeel_V3::getCrossShape (const float height)
+{
+    static const unsigned char pathData[]
+        = { 110,109,88,57,198,65,29,90,171,65,108,63,53,154,65,8,172,126,65,108,76,55,198,65,215,163,38,65,108,141,151,175,65,82,184,242,64,108,117,147,131,65,90,100,81,65,108,184,30,47,65,82,184,242,64,108,59,223,1,65,215,163,38,65,108,84,227,89,65,8,172,126,65,
+            108,35,219,1,65,29,90,171,65,108,209,34,47,65,231,251,193,65,108,117,147,131,65,207,247,149,65,108,129,149,175,65,231,251,193,65,99,101,0,0 };
+
+    Path p;
+    p.loadPathFromData (pathData, sizeof (pathData));
+    p.scaleToFit (0, 0, height * 2.0f, height, true);
+    return p;
 }

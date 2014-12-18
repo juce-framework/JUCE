@@ -80,8 +80,8 @@ protected:
         return prefix + FileHelpers::windowsStylePath (file);
     }
 
-    static String getIntDirFile (const String& file)  { return prependIfNotAbsolute (file, "$(IntDir)\\"); }
-    static String getOutDirFile (const String& file)  { return prependIfNotAbsolute (file, "$(OutDir)\\"); }
+    String getIntDirFile (const BuildConfiguration& config, const String& file) const  { return prependIfNotAbsolute (replacePreprocessorTokens (config, file), "$(IntDir)\\"); }
+    String getOutDirFile (const BuildConfiguration& config, const String& file) const  { return prependIfNotAbsolute (replacePreprocessorTokens (config, file), "$(OutDir)\\"); }
 
     void updateOldSettings()
     {
@@ -151,16 +151,7 @@ protected:
         String getIntermediatesPath() const         { return config [Ids::intermediatesPath].toString(); }
         Value getIntermediatesPathValue()           { return getValue (Ids::intermediatesPath); }
 
-        String getCharacterSet() const
-        {
-            String charSet (config [Ids::characterSet].toString());
-
-            if (charSet.isEmpty())
-                charSet = "MultiByte";
-
-            return charSet;
-        }
-
+        String getCharacterSet() const              { return config [Ids::characterSet].toString(); }
         Value getCharacterSetValue()                { return getValue (Ids::characterSet); }
 
         String getOutputFilename (const String& suffix, bool forceSuffix) const
@@ -223,11 +214,6 @@ protected:
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
         return new MSVCBuildConfiguration (project, v);
-    }
-
-    static int getWarningLevel (const BuildConfiguration& config)
-    {
-        return dynamic_cast <const MSVCBuildConfiguration&> (config).getWarningLevel();
     }
 
     //==============================================================================
@@ -527,7 +513,7 @@ protected:
     {
         if (value.isNotEmpty())
             mo << "      VALUE \"" << name << "\",  \""
-               << CodeHelpers::addEscapeChars (value) << "\\0\"" << newLine;
+               << CppTokeniserFunctions::addEscapeChars (value) << "\\0\"" << newLine;
     }
 
     static String getCommaSeparatedVersionNumber (const String& version)
@@ -754,7 +740,7 @@ protected:
             midl->setAttribute ("MkTypLibCompatible", "true");
             midl->setAttribute ("SuppressStartupBanner", "true");
             midl->setAttribute ("TargetEnvironment", "1");
-            midl->setAttribute ("TypeLibraryName", getIntDirFile (config.getOutputFilename (".tlb", true)));
+            midl->setAttribute ("TypeLibraryName", getIntDirFile (config, config.getOutputFilename (".tlb", true)));
             midl->setAttribute ("HeaderFileName", "");
         }
 
@@ -780,11 +766,11 @@ protected:
                                                                                     : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
             compiler->setAttribute ("UsePrecompiledHeader", "0");
-            compiler->setAttribute ("PrecompiledHeaderFile", getIntDirFile (config.getOutputFilename (".pch", true)));
+            compiler->setAttribute ("PrecompiledHeaderFile", getIntDirFile (config, config.getOutputFilename (".pch", true)));
             compiler->setAttribute ("AssemblerListingLocation", "$(IntDir)\\");
             compiler->setAttribute ("ObjectFile", "$(IntDir)\\");
             compiler->setAttribute ("ProgramDataBaseFileName", "$(IntDir)\\");
-            compiler->setAttribute ("WarningLevel", String (getWarningLevel (config)));
+            compiler->setAttribute ("WarningLevel", String (config.getWarningLevel()));
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
             const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
@@ -805,12 +791,12 @@ protected:
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
-            linker->setAttribute ("OutputFile", getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
+            linker->setAttribute ("OutputFile", getOutDirFile (config, config.getOutputFilename (msvcTargetSuffix, false)));
             linker->setAttribute ("SuppressStartupBanner", "true");
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", (isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
-            linker->setAttribute ("ProgramDatabaseFile", getIntDirFile (config.getOutputFilename (".pdb", true)));
+            linker->setAttribute ("ProgramDatabaseFile", getIntDirFile (config, config.getOutputFilename (".pdb", true)));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
             const StringArray librarySearchPaths (config.getLibrarySearchPaths());
@@ -848,21 +834,21 @@ protected:
                 XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
                 String extraLinkerOptions (getExtraLinkerFlagsString());
-                extraLinkerOptions << " /IMPLIB:" << getOutDirFile (config.getOutputFilename (".lib", true));
+                extraLinkerOptions << " /IMPLIB:" << getOutDirFile (config, config.getOutputFilename (".lib", true));
                 linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
 
                 String externalLibraries (getExternalLibrariesString());
                 if (externalLibraries.isNotEmpty())
                     linker->setAttribute ("AdditionalDependencies", replacePreprocessorTokens (config, externalLibraries).trim());
 
-                linker->setAttribute ("OutputFile", getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
+                linker->setAttribute ("OutputFile", getOutDirFile (config, config.getOutputFilename (msvcTargetSuffix, false)));
                 linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
             else
             {
                 XmlElement* librarian = createToolElement (xml, "VCLibrarianTool");
 
-                librarian->setAttribute ("OutputFile", getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
+                librarian->setAttribute ("OutputFile", getOutDirFile (config, config.getOutputFilename (msvcTargetSuffix, false)));
                 librarian->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
         }
@@ -874,7 +860,7 @@ protected:
         {
             XmlElement* bscMake = createToolElement (xml, "VCBscMakeTool");
             bscMake->setAttribute ("SuppressStartupBanner", "true");
-            bscMake->setAttribute ("OutputFile", getIntDirFile (config.getOutputFilename (".bsc", true)));
+            bscMake->setAttribute ("OutputFile", getIntDirFile (config, config.getOutputFilename (".bsc", true)));
         }
 
         createToolElement (xml, "VCFxCopTool");
@@ -955,9 +941,16 @@ public:
     static const char* getName()                { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()   { return "VS2010"; }
     int getVisualStudioVersion() const override { return 10; }
-    virtual String getPlatformToolset() const   { return "Windows7.1SDK"; }
     virtual String getSolutionComment() const   { return "# Visual Studio 2010"; }
     virtual String getToolsVersion() const      { return "4.0"; }
+    virtual String getDefaultToolset() const    { return "Windows7.1SDK"; }
+    Value getPlatformToolsetValue()             { return getSetting (Ids::toolset); }
+
+    String getPlatformToolset() const
+    {
+        const String s (settings [Ids::toolset].toString());
+        return s.isNotEmpty() ? s : getDefaultToolset();
+    }
 
     static MSVCProjectExporterVC2010* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -965,6 +958,18 @@ public:
             return new MSVCProjectExporterVC2010 (project, settings);
 
         return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        MSVCProjectExporterBase::createExporterProperties (props);
+
+        static const char* toolsetNames[] = { "(default)", "v100", "v100_xp", "Windows7.1SDK", "CTP_Nov2013", nullptr };
+        const var toolsets[]              = { var(),       "v100", "v100_xp", "Windows7.1SDK", "CTP_Nov2013" };
+
+        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
+                                                StringArray (toolsetNames),
+                                                Array<var> (toolsets, numElementsInArray (toolsets))));
     }
 
     //==============================================================================
@@ -1013,6 +1018,9 @@ protected:
         Value getArchitectureType()             { return getValue (Ids::winArchitecture); }
         bool is64Bit() const                    { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
 
+        Value getFastMathValue()                { return getValue (Ids::fastMath); }
+        bool isFastMathEnabled() const          { return config [Ids::fastMath]; }
+
         //==============================================================================
         void createConfigProperties (PropertyListBuilder& props) override
         {
@@ -1023,6 +1031,9 @@ protected:
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archTypes, numElementsInArray (archTypes)),
                                                     Array<var> (archTypes, numElementsInArray (archTypes))));
+
+            props.add (new BooleanPropertyComponent (getFastMathValue(), "Relax IEEE compliance", "Enabled"),
+                       "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
         }
     };
 
@@ -1035,7 +1046,7 @@ protected:
 
     static bool is64Bit (const BuildConfiguration& config)
     {
-        return dynamic_cast <const VC2010BuildConfiguration&> (config).is64Bit();
+        return dynamic_cast<const VC2010BuildConfiguration&> (config).is64Bit();
     }
 
     //==============================================================================
@@ -1086,19 +1097,23 @@ protected:
 
         for (ConstConfigIterator i (*this); i.next();)
         {
-            const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+            const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
             setConditionAttribute (*e, config);
             e->setAttribute ("Label", "Configuration");
             e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
             e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
-            e->createNewChildElement ("CharacterSet")->addTextElement (config.getCharacterSet());
+
+            const String charSet (config.getCharacterSet());
+
+            if (charSet.isNotEmpty())
+                e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
 
             if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
-            if (is64Bit (config))
+            if (config.is64Bit())
                 e->createNewChildElement ("PlatformToolset")->addTextElement (getPlatformToolset());
         }
 
@@ -1132,7 +1147,7 @@ protected:
 
             for (ConstConfigIterator i (*this); i.next();)
             {
-                const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+                const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
                 {
                     XmlElement* outdir = props->createNewChildElement ("OutDir");
@@ -1172,7 +1187,7 @@ protected:
 
         for (ConstConfigIterator i (*this); i.next();)
         {
-            const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+            const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
             const bool isDebug = config.isDebug();
 
@@ -1198,7 +1213,7 @@ protected:
 
                 if (isDebug && config.getOptimisationLevelInt() <= optimisationOff)
                 {
-                    isUsingEditAndContinue = ! is64Bit (config);
+                    isUsingEditAndContinue = ! config.is64Bit();
 
                     cl->createNewChildElement ("DebugInformationFormat")
                             ->addTextElement (isUsingEditAndContinue ? "EditAndContinue"
@@ -1216,9 +1231,12 @@ protected:
                 cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
                 cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
                 cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement ("$(IntDir)\\");
-                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (getWarningLevel (config)));
+                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (config.getWarningLevel()));
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
+
+                if (config.isFastMathEnabled())
+                    cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
 
                 const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
                 if (extraFlags.isNotEmpty())
@@ -1233,15 +1251,15 @@ protected:
 
             {
                 XmlElement* link = group->createNewChildElement ("Link");
-                link->createNewChildElement ("OutputFile")->addTextElement (getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
+                link->createNewChildElement ("OutputFile")->addTextElement (getOutDirFile (config, config.getOutputFilename (msvcTargetSuffix, false)));
                 link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
-                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getIntDirFile (config.getOutputFilename (".pdb", true)));
+                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getIntDirFile (config, config.getOutputFilename (".pdb", true)));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
 
-                if (! is64Bit (config))
+                if (! config.is64Bit())
                     link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                 if (isUsingEditAndContinue)
@@ -1281,7 +1299,7 @@ protected:
             {
                 XmlElement* bsc = group->createNewChildElement ("Bscmake");
                 bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                bsc->createNewChildElement ("OutputFile")->addTextElement (getIntDirFile (config.getOutputFilename (".bsc", true)));
+                bsc->createNewChildElement ("OutputFile")->addTextElement (getIntDirFile (config, config.getOutputFilename (".bsc", true)));
             }
 
             if (config.getPrebuildCommandString().isNotEmpty())
@@ -1371,7 +1389,7 @@ protected:
 
             jassert (path.getRoot() == RelativePath::buildTargetFolder);
 
-            if (path.hasFileExtension ("cpp;cc;cxx;c"))
+            if (path.hasFileExtension (cOrCppFileExtensions))
             {
                 XmlElement* e = cpps.createNewChildElement ("ClCompile");
                 e->setAttribute ("Include", path.toWindowsStyle());
@@ -1386,7 +1404,7 @@ protected:
             {
                 headers.createNewChildElement ("ClInclude")->setAttribute ("Include", path.toWindowsStyle());
             }
-            else if (! path.hasFileExtension ("mm;m"))
+            else if (! path.hasFileExtension (objCFileExtensions))
             {
                 otherFiles.createNewChildElement ("None")->setAttribute ("Include", path.toWindowsStyle());
             }
@@ -1506,14 +1524,6 @@ public:
     String getSolutionComment() const override  { return "# Visual Studio 2012"; }
     virtual String getDefaultToolset() const    { return "v110"; }
 
-    String getPlatformToolset() const
-    {
-        const String s (settings [Ids::toolset].toString());
-        return s.isNotEmpty() ? s : getDefaultToolset();
-    }
-
-    Value getPlatformToolsetValue()             { return getSetting (Ids::toolset); }
-
     static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
@@ -1524,7 +1534,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterVC2010::createExporterProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
 
         static const char* toolsetNames[] = { "(default)", "v110", "v110_xp", "Windows7.1SDK", nullptr };
         const var toolsets[]              = { var(),       "v110", "v110_xp", "Windows7.1SDK" };
@@ -1576,7 +1586,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterVC2010::createExporterProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
 
         static const char* toolsetNames[] = { "(default)", "v120", "v120_xp", nullptr };
         const var toolsets[]              = { var(),       "v120", "v120_xp" };
@@ -1588,4 +1598,45 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2013)
+};
+
+//==============================================================================
+class MSVCProjectExporterVC2015 : public MSVCProjectExporterVC2012
+{
+public:
+    MSVCProjectExporterVC2015 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterVC2012 (p, t, "VisualStudio2015")
+    {
+        name = getName();
+    }
+
+    static const char* getName()                { return "Visual Studio 2015"; }
+    static const char* getValueTreeTypeName()   { return "VS2015"; }
+    int getVisualStudioVersion() const override { return 14; }
+    String getSolutionComment() const override  { return "# Visual Studio 2015"; }
+    String getToolsVersion() const override     { return "14.0"; }
+    String getDefaultToolset() const override   { return "v140"; }
+
+    static MSVCProjectExporterVC2015* createForSettings (Project& project, const ValueTree& settings)
+    {
+        if (settings.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2015 (project, settings);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        MSVCProjectExporterBase::createExporterProperties (props);
+
+        static const char* toolsetNames[] = { "(default)", "v140", "v140_xp", nullptr };
+        const var toolsets[]              = { var(),       "v140", "v140_xp" };
+
+        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
+                                                StringArray (toolsetNames),
+                                                Array<var> (toolsets, numElementsInArray (toolsets))));
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2015)
 };

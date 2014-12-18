@@ -34,6 +34,9 @@
 /** A general-purpose range object, that simply represents any linear range with
     a start and end point.
 
+    Note that when checking whether values fall within the range, the start value is
+    considered to be inclusive, and the end of the range exclusive.
+
     The templated parameter is expected to be a primitive integer or floating point
     type, though class types could also be used if they behave in a number-like way.
 */
@@ -72,6 +75,13 @@ public:
     {
         return position1 < position2 ? Range (position1, position2)
                                      : Range (position2, position1);
+    }
+
+    /** Returns a range with a given start and length. */
+    static Range withStartAndLength (const ValueType startValue, const ValueType length) noexcept
+    {
+        jassert (length >= ValueType());
+        return Range (startValue, startValue + length);
     }
 
     /** Returns a range with the specified start position and a length of zero. */
@@ -210,7 +220,10 @@ public:
         return jlimit (start, end, value);
     }
 
-    /** Returns true if the given range lies entirely inside this range. */
+    /** Returns true if the given range lies entirely inside this range.
+        When making this comparison, the start value is considered to be inclusive,
+        and the end of the range exclusive.
+     */
     bool contains (Range other) const noexcept
     {
         return start <= other.start && end >= other.end;
@@ -237,6 +250,13 @@ public:
                       jmax (end, other.end));
     }
 
+    /** Returns the smallest range that contains both this one and the given value. */
+    Range getUnionWith (const ValueType valueToInclude) const noexcept
+    {
+        return Range (jmin (valueToInclude, start),
+                      jmax (valueToInclude, end));
+    }
+
     /** Returns a given range, after moving it forwards or backwards to fit it
         within this range.
 
@@ -253,6 +273,26 @@ public:
         return getLength() <= otherLen
                 ? *this
                 : rangeToConstrain.movedToStartAt (jlimit (start, end - otherLen, rangeToConstrain.getStart()));
+    }
+
+    /** Scans an array of values for its min and max, and returns these as a Range. */
+    static Range findMinAndMax (const ValueType* values, int numValues) noexcept
+    {
+        if (numValues <= 0)
+            return Range();
+
+        const ValueType first (*values++);
+        Range r (first, first);
+
+        while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
+        {
+            const ValueType v (*values++);
+
+            if (r.end < v)    r.end = v;
+            if (v < r.start)  r.start = v;
+        }
+
+        return r;
     }
 
 private:

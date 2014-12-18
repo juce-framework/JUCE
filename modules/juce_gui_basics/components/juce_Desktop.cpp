@@ -26,6 +26,7 @@ Desktop::Desktop()
     : mouseSources (new MouseInputSource::SourceList()),
       mouseClickCounter (0), mouseWheelCounter (0),
       kioskModeComponent (nullptr),
+      kioskModeReentrant (false),
       allowedOrientations (allOrientations),
       masterScaleFactor ((float) getDefaultMasterScale())
 {
@@ -67,6 +68,8 @@ Component* Desktop::getComponent (const int index) const noexcept
 
 Component* Desktop::findComponentAt (Point<int> screenPosition) const
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
     for (int i = desktopComponents.size(); --i >= 0;)
     {
         Component* const c = desktopComponents.getUnchecked(i);
@@ -99,6 +102,7 @@ LookAndFeel& Desktop::getDefaultLookAndFeel() noexcept
 
 void Desktop::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel)
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
     currentLookAndFeel = newDefaultLookAndFeel;
 
     for (int i = getNumComponents(); --i >= 0;)
@@ -145,17 +149,22 @@ void Desktop::componentBroughtToFront (Component* const c)
 //==============================================================================
 Point<int> Desktop::getMousePosition()
 {
+    return getMousePositionFloat().roundToInt();
+}
+
+Point<float> Desktop::getMousePositionFloat()
+{
     return getInstance().getMainMouseSource().getScreenPosition();
 }
 
 void Desktop::setMousePosition (Point<int> newPosition)
 {
-    getInstance().getMainMouseSource().setScreenPosition (newPosition);
+    getInstance().getMainMouseSource().setScreenPosition (newPosition.toFloat());
 }
 
 Point<int> Desktop::getLastMouseDownPosition()
 {
-    return getInstance().getMainMouseSource().getLastMouseDownPosition();
+    return getInstance().getMainMouseSource().getLastMouseDownPosition().roundToInt();
 }
 
 int Desktop::getMouseButtonClickCounter() const noexcept    { return mouseClickCounter; }
@@ -193,10 +202,10 @@ void Desktop::resetTimer()
     else
         startTimer (100);
 
-    lastFakeMouseMove = getMousePosition();
+    lastFakeMouseMove = getMousePositionFloat();
 }
 
-ListenerList <MouseListener>& Desktop::getMouseListeners()
+ListenerList<MouseListener>& Desktop::getMouseListeners()
 {
     resetTimer();
     return mouseListeners;
@@ -204,19 +213,21 @@ ListenerList <MouseListener>& Desktop::getMouseListeners()
 
 void Desktop::addGlobalMouseListener (MouseListener* const listener)
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
     mouseListeners.add (listener);
     resetTimer();
 }
 
 void Desktop::removeGlobalMouseListener (MouseListener* const listener)
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
     mouseListeners.remove (listener);
     resetTimer();
 }
 
 void Desktop::timerCallback()
 {
-    if (lastFakeMouseMove != getMousePosition())
+    if (lastFakeMouseMove != getMousePositionFloat())
         sendMouseMove();
 }
 
@@ -226,12 +237,12 @@ void Desktop::sendMouseMove()
     {
         startTimer (20);
 
-        lastFakeMouseMove = getMousePosition();
+        lastFakeMouseMove = getMousePositionFloat();
 
-        if (Component* const target = findComponentAt (lastFakeMouseMove))
+        if (Component* const target = findComponentAt (lastFakeMouseMove.roundToInt()))
         {
             Component::BailOutChecker checker (target);
-            const Point<int> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
+            const Point<float> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
             const Time now (Time::getCurrentTime());
 
             const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(),
@@ -252,12 +263,14 @@ Desktop::Displays::~Displays()  {}
 
 const Desktop::Displays::Display& Desktop::Displays::getMainDisplay() const noexcept
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
     jassert (displays.getReference(0).isMain);
     return displays.getReference(0);
 }
 
 const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (Point<int> position) const noexcept
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
     const Display* best = &displays.getReference(0);
     double bestDistance = 1.0e10;
 
@@ -285,6 +298,7 @@ const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (Point
 
 RectangleList<int> Desktop::Displays::getRectangleList (bool userAreasOnly) const
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
     RectangleList<int> rl;
 
     for (int i = 0; i < displays.size(); ++i)
@@ -328,6 +342,7 @@ void Desktop::Displays::refresh()
     oldDisplays.swapWith (displays);
 
     init (Desktop::getInstance());
+    jassert (displays.size() > 0);
 
     if (oldDisplays != displays)
     {
@@ -340,15 +355,21 @@ void Desktop::Displays::refresh()
 //==============================================================================
 void Desktop::setKioskModeComponent (Component* componentToUse, const bool allowMenusAndBars)
 {
+    if (kioskModeReentrant)
+        return;
+
+    const ScopedValueSetter<bool> setter (kioskModeReentrant, true, false);
+
     if (kioskModeComponent != componentToUse)
     {
         // agh! Don't delete or remove a component from the desktop while it's still the kiosk component!
         jassert (kioskModeComponent == nullptr || ComponentPeer::getPeerFor (kioskModeComponent) != nullptr);
 
-        if (kioskModeComponent != nullptr)
+        if (Component* const oldKioskComp = kioskModeComponent)
         {
-            setKioskComponent (kioskModeComponent, false, allowMenusAndBars);
-            kioskModeComponent->setBounds (kioskComponentOriginalBounds);
+            kioskModeComponent = nullptr; // (to make sure that isKioskMode() returns false when resizing the old one)
+            setKioskComponent (oldKioskComp, false, allowMenusAndBars);
+            oldKioskComp->setBounds (kioskComponentOriginalBounds);
         }
 
         kioskModeComponent = componentToUse;
@@ -384,6 +405,8 @@ bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const 
 
 void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
 {
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
     if (masterScaleFactor != newScaleFactor)
     {
         masterScaleFactor = newScaleFactor;

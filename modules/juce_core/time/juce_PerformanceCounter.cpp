@@ -28,7 +28,7 @@
 
 static void appendToFile (const File& f, const String& s)
 {
-    if (f != File::nonexistent)
+    if (f.getFullPathName().isNotEmpty())
     {
         FileOutputStream out (f);
 

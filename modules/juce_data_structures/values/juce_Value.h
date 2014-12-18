@@ -75,8 +75,7 @@ public:
     operator var() const;
 
     /** Returns the value as a string.
-
-        This is alternative to writing things like "myValue.getValue().toString()".
+        This is a shortcut for "myValue.getValue().toString()".
     */
     String toString() const;
 
@@ -148,9 +147,9 @@ public:
         The listener is added to this specific Value object, and not to the shared
         object that it refers to. When this object is deleted, all the listeners will
         be lost, even if other references to the same Value still exist. So when you're
-        adding a listener, make sure that you add it to a ValueTree instance that will last
+        adding a listener, make sure that you add it to a Value instance that will last
         for as long as you need the listener. In general, you'd never want to add a listener
-        to a local stack-based ValueTree, but more likely to one that's a member variable.
+        to a local stack-based Value, but more likely to one that's a member variable.
 
         @see removeListener
     */
@@ -168,7 +167,8 @@ public:
         of a ValueSource object. If you're feeling adventurous, you can create your own custom
         ValueSource classes to allow Value objects to represent your own custom data items.
     */
-    class JUCE_API  ValueSource   : public SingleThreadedReferenceCountedObject
+    class JUCE_API  ValueSource   : public ReferenceCountedObject,
+                                    private AsyncUpdater
     {
     public:
         ValueSource();
@@ -193,8 +193,10 @@ public:
     protected:
         //==============================================================================
         friend class Value;
-        SortedSet <Value*> valuesWithListeners;
-        ReferenceCountedObjectPtr<ReferenceCountedObject> asyncUpdater;
+        SortedSet<Value*> valuesWithListeners;
+
+    private:
+        void handleAsyncUpdate() override;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSource)
     };
@@ -211,14 +213,19 @@ public:
 private:
     //==============================================================================
     friend class ValueSource;
-    ReferenceCountedObjectPtr <ValueSource> value;
-    ListenerList <Listener> listeners;
+    ReferenceCountedObjectPtr<ValueSource> value;
+    ListenerList<Listener> listeners;
 
     void callListeners();
+    void removeFromListenerList();
 
     // This is disallowed to avoid confusion about whether it should
     // do a by-value or by-reference copy.
-    Value& operator= (const Value&);
+    Value& operator= (const Value&) JUCE_DELETED_FUNCTION;
+
+    // This declaration prevents accidental construction from an integer of 0,
+    // which is possible in some compilers via an implicit cast to a pointer.
+    explicit Value (void*) JUCE_DELETED_FUNCTION;
 };
 
 /** Writes a Value to an OutputStream as a UTF8 string. */

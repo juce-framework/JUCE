@@ -164,37 +164,29 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     JUCE_AUTORELEASEPOOL
     {
-        NSView* view = (NSView*) sourceComp->getWindowHandle();
+        if (NSView* view = (NSView*) sourceComp->getWindowHandle())
+        {
+            if (NSEvent* event = [[view window] currentEvent])
+            {
+                NSPoint eventPos = [event locationInWindow];
+                NSRect dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
+                                           fromView: nil];
 
-        if (view == nil)
-            return false;
+                for (int i = 0; i < files.size(); ++i)
+                {
+                    if (! [view dragFile: juceStringToNS (files[i])
+                                fromRect: dragRect
+                               slideBack: YES
+                                   event: event])
+                        return false;
+                }
 
-        NSPasteboard* pboard = [NSPasteboard pasteboardWithName: NSDragPboard];
-        [pboard declareTypes: [NSArray arrayWithObject: NSFilenamesPboardType]
-                       owner: nil];
-
-        NSMutableArray* filesArray = [NSMutableArray arrayWithCapacity: 4];
-        for (int i = 0; i < files.size(); ++i)
-            [filesArray addObject: juceStringToNS (files[i])];
-
-        [pboard setPropertyList: filesArray
-                        forType: NSFilenamesPboardType];
-
-        NSPoint dragPosition = [view convertPoint: [[[view window] currentEvent] locationInWindow]
-                                         fromView: nil];
-        dragPosition.x -= 16;
-        dragPosition.y -= 16;
-
-        [view dragImage: [[NSWorkspace sharedWorkspace] iconForFile: juceStringToNS (files[0])]
-                     at: dragPosition
-                 offset: NSMakeSize (0, 0)
-                  event: [[view window] currentEvent]
-             pasteboard: pboard
-                 source: view
-              slideBack: YES];
+                return true;
+            }
+        }
     }
 
-    return true;
+    return false;
 }
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
@@ -209,16 +201,16 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-Point<int> MouseInputSource::getCurrentRawMousePosition()
+Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     JUCE_AUTORELEASEPOOL
     {
         const NSPoint p ([NSEvent mouseLocation]);
-        return Point<int> (roundToInt (p.x), roundToInt (getMainScreenHeight() - p.y));
+        return Point<float> ((float) p.x, (float) (getMainScreenHeight() - p.y));
     }
 }
 
-void MouseInputSource::setRawMousePosition (Point<int> newPosition)
+void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
@@ -340,18 +332,42 @@ public:
         const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback);
+    juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback)
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback)
 };
 
-juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback);
+juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback)
 
 static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
 {
     r.origin.y = mainScreenBottom - (r.origin.y + r.size.height);
     return convertToRectInt (r);
+}
+
+static Desktop::Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenBottom, const float masterScale)
+{
+    Desktop::Displays::Display d;
+
+    d.isMain = (mainScreenBottom == 0);
+
+    if (d.isMain)
+        mainScreenBottom = [s frame].size.height;
+
+    d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
+    d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
+    d.scale = masterScale;
+
+   #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+    if ([s respondsToSelector: @selector (backingScaleFactor)])
+        d.scale *= s.backingScaleFactor;
+   #endif
+
+    NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
+    d.dpi = (dpi.width + dpi.height) / 2.0;
+
+    return d;
 }
 
 void Desktop::Displays::findDisplays (const float masterScale)
@@ -363,30 +379,7 @@ void Desktop::Displays::findDisplays (const float masterScale)
         CGFloat mainScreenBottom = 0;
 
         for (NSScreen* s in [NSScreen screens])
-        {
-            Display d;
-            d.isMain = false;
-
-            if (mainScreenBottom == 0)
-            {
-                mainScreenBottom = [s frame].size.height;
-                d.isMain = true;
-            }
-
-            d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
-            d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
-            d.scale = masterScale;
-
-           #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-            if ([s respondsToSelector: @selector (backingScaleFactor)])
-                d.scale *= s.backingScaleFactor;
-           #endif
-
-            NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
-            d.dpi = (dpi.width + dpi.height) / 2.0;
-
-            displays.add (d);
-        }
+            displays.add (getDisplayFromScreen (s, mainScreenBottom, masterScale));
     }
 }
 
@@ -439,7 +432,7 @@ String SystemClipboard::getTextFromClipboard()
 {
     NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
 
-    return text == nil ? String::empty
+    return text == nil ? String()
                        : nsStringToJuce (text);
 }
 

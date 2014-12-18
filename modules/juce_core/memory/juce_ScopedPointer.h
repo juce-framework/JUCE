@@ -182,11 +182,11 @@ public:
     /** Swaps this object with that of another ScopedPointer.
         The two objects simply exchange their pointers.
     */
-    void swapWith (ScopedPointer <ObjectType>& other) noexcept
+    void swapWith (ScopedPointer<ObjectType>& other) noexcept
     {
         // Two ScopedPointers should never be able to refer to the same object - if
         // this happens, you must have done something dodgy!
-        jassert (object != other.object || this == other.getAddress());
+        jassert (object != other.object || this == other.getAddress() || object == nullptr);
 
         std::swap (object, other.object);
     }
@@ -231,7 +231,7 @@ private:
 template <class ObjectType>
 bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) noexcept
 {
-    return static_cast <ObjectType*> (pointer1) == pointer2;
+    return static_cast<ObjectType*> (pointer1) == pointer2;
 }
 
 /** Compares a ScopedPointer with another pointer.
@@ -240,7 +240,7 @@ bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* const po
 template <class ObjectType>
 bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const pointer2) noexcept
 {
-    return static_cast <ObjectType*> (pointer1) != pointer2;
+    return static_cast<ObjectType*> (pointer1) != pointer2;
 }
 
 //==============================================================================

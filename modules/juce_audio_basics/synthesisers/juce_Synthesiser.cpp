@@ -50,10 +50,22 @@ void SynthesiserVoice::setCurrentPlaybackSampleRate (const double newRate)
     currentSampleRate = newRate;
 }
 
+bool SynthesiserVoice::isVoiceActive() const
+{
+    return getCurrentlyPlayingNote() >= 0;
+}
+
 void SynthesiserVoice::clearCurrentNote()
 {
     currentlyPlayingNote = -1;
     currentlyPlayingSound = nullptr;
+}
+
+void SynthesiserVoice::aftertouchChanged (int) {}
+
+bool SynthesiserVoice::wasStartedBefore (const SynthesiserVoice& other) const noexcept
+{
+    return noteOnTime < other.noteOnTime;
 }
 
 //==============================================================================
@@ -83,10 +95,10 @@ void Synthesiser::clearVoices()
     voices.clear();
 }
 
-void Synthesiser::addVoice (SynthesiserVoice* const newVoice)
+SynthesiserVoice* Synthesiser::addVoice (SynthesiserVoice* const newVoice)
 {
     const ScopedLock sl (lock);
-    voices.add (newVoice);
+    return voices.add (newVoice);
 }
 
 void Synthesiser::removeVoice (const int index)
@@ -101,10 +113,10 @@ void Synthesiser::clearSounds()
     sounds.clear();
 }
 
-void Synthesiser::addSound (const SynthesiserSound::Ptr& newSound)
+SynthesiserSound* Synthesiser::addSound (const SynthesiserSound::Ptr& newSound)
 {
     const ScopedLock sl (lock);
-    sounds.add (newSound);
+    return sounds.add (newSound);
 }
 
 void Synthesiser::removeSound (const int index)
@@ -156,10 +168,7 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
                                          : numSamples;
 
         if (numThisTime > 0)
-        {
-            for (int i = voices.size(); --i >= 0;)
-                voices.getUnchecked (i)->renderNextBlock (outputBuffer, startSample, numThisTime);
-        }
+            renderVoices (outputBuffer, startSample, numThisTime);
 
         if (useEvent)
             handleMidiEvent (m);
@@ -167,6 +176,12 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
         startSample += numThisTime;
         numSamples -= numThisTime;
     }
+}
+
+void Synthesiser::renderVoices (AudioSampleBuffer& buffer, int startSample, int numSamples)
+{
+    for (int i = voices.size(); --i >= 0;)
+        voices.getUnchecked (i)->renderNextBlock (buffer, startSample, numSamples);
 }
 
 void Synthesiser::handleMidiEvent (const MidiMessage& m)
@@ -177,7 +192,7 @@ void Synthesiser::handleMidiEvent (const MidiMessage& m)
     }
     else if (m.isNoteOff())
     {
-        noteOff (m.getChannel(), m.getNoteNumber(), true);
+        noteOff (m.getChannel(), m.getNoteNumber(), m.getFloatVelocity(), true);
     }
     else if (m.isAllNotesOff() || m.isAllSoundOff())
     {
@@ -190,6 +205,10 @@ void Synthesiser::handleMidiEvent (const MidiMessage& m)
         lastPitchWheelValues [channel - 1] = wheelPos;
 
         handlePitchWheel (channel, wheelPos);
+    }
+    else if (m.isAftertouch())
+    {
+        handleAftertouch (m.getChannel(), m.getNoteNumber(), m.getAfterTouchValue());
     }
     else if (m.isController())
     {
@@ -219,10 +238,10 @@ void Synthesiser::noteOn (const int midiChannel,
 
                 if (voice->getCurrentlyPlayingNote() == midiNoteNumber
                      && voice->isPlayingChannel (midiChannel))
-                    stopVoice (voice, true);
+                    stopVoice (voice, 1.0f, true);
             }
 
-            startVoice (findFreeVoice (sound, shouldStealNotes),
+            startVoice (findFreeVoice (sound, midiChannel, midiNoteNumber, shouldStealNotes),
                         sound, midiChannel, midiNoteNumber, velocity);
         }
     }
@@ -237,7 +256,7 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
     if (voice != nullptr && sound != nullptr)
     {
         if (voice->currentlyPlayingSound != nullptr)
-            voice->stopNote (false);
+            voice->stopNote (0.0f, false);
 
         voice->startNote (midiNoteNumber, velocity, sound,
                           lastPitchWheelValues [midiChannel - 1]);
@@ -250,11 +269,11 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
     }
 }
 
-void Synthesiser::stopVoice (SynthesiserVoice* voice, const bool allowTailOff)
+void Synthesiser::stopVoice (SynthesiserVoice* voice, float velocity, const bool allowTailOff)
 {
     jassert (voice != nullptr);
 
-    voice->stopNote (allowTailOff);
+    voice->stopNote (velocity, allowTailOff);
 
     // the subclass MUST call clearCurrentNote() if it's not tailing off! RTFM for stopNote()!
     jassert (allowTailOff || (voice->getCurrentlyPlayingNote() < 0 && voice->getCurrentlyPlayingSound() == 0));
@@ -262,6 +281,7 @@ void Synthesiser::stopVoice (SynthesiserVoice* voice, const bool allowTailOff)
 
 void Synthesiser::noteOff (const int midiChannel,
                            const int midiNoteNumber,
+                           const float velocity,
                            const bool allowTailOff)
 {
     const ScopedLock sl (lock);
@@ -280,7 +300,7 @@ void Synthesiser::noteOff (const int midiChannel,
                     voice->keyIsDown = false;
 
                     if (! (sustainPedalsDown [midiChannel] || voice->sostenutoPedalDown))
-                        stopVoice (voice, allowTailOff);
+                        stopVoice (voice, velocity, allowTailOff);
                 }
             }
         }
@@ -296,7 +316,7 @@ void Synthesiser::allNotesOff (const int midiChannel, const bool allowTailOff)
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
         if (midiChannel <= 0 || voice->isPlayingChannel (midiChannel))
-            voice->stopNote (allowTailOff);
+            voice->stopNote (1.0f, allowTailOff);
     }
 
     sustainPedalsDown.clear();
@@ -338,6 +358,20 @@ void Synthesiser::handleController (const int midiChannel,
     }
 }
 
+void Synthesiser::handleAftertouch (int midiChannel, int midiNoteNumber, int aftertouchValue)
+{
+    const ScopedLock sl (lock);
+
+    for (int i = voices.size(); --i >= 0;)
+    {
+        SynthesiserVoice* const voice = voices.getUnchecked (i);
+
+        if (voice->getCurrentlyPlayingNote() == midiNoteNumber
+              && (midiChannel <= 0 || voice->isPlayingChannel (midiChannel)))
+            voice->aftertouchChanged (aftertouchValue);
+    }
+}
+
 void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
 {
     jassert (midiChannel > 0 && midiChannel <= 16);
@@ -354,7 +388,7 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
             SynthesiserVoice* const voice = voices.getUnchecked (i);
 
             if (voice->isPlayingChannel (midiChannel) && ! voice->keyIsDown)
-                stopVoice (voice, true);
+                stopVoice (voice, 1.0f, true);
         }
 
         sustainPedalsDown.clearBit (midiChannel);
@@ -375,7 +409,7 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
             if (isDown)
                 voice->sostenutoPedalDown = true;
             else if (voice->sostenutoPedalDown)
-                stopVoice (voice, true);
+                stopVoice (voice, 1.0f, true);
         }
     }
 }
@@ -388,35 +422,82 @@ void Synthesiser::handleSoftPedal (int midiChannel, bool /*isDown*/)
 
 //==============================================================================
 SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay,
+                                              int midiChannel, int midiNoteNumber,
                                               const bool stealIfNoneAvailable) const
 {
     const ScopedLock sl (lock);
 
-    for (int i = voices.size(); --i >= 0;)
+    for (int i = 0; i < voices.size(); ++i)
     {
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
-        if (voice->getCurrentlyPlayingNote() < 0  && voice->canPlaySound (soundToPlay))
+        if ((! voice->isVoiceActive()) && voice->canPlaySound (soundToPlay))
             return voice;
     }
 
     if (stealIfNoneAvailable)
-    {
-        // currently this just steals the one that's been playing the longest, but could be made a bit smarter..
-        SynthesiserVoice* oldest = nullptr;
-
-        for (int i = voices.size(); --i >= 0;)
-        {
-            SynthesiserVoice* const voice = voices.getUnchecked (i);
-
-            if (voice->canPlaySound (soundToPlay)
-                 && (oldest == nullptr || oldest->noteOnTime > voice->noteOnTime))
-                oldest = voice;
-        }
-
-        jassert (oldest != nullptr);
-        return oldest;
-    }
+        return findVoiceToSteal (soundToPlay, midiChannel, midiNoteNumber);
 
     return nullptr;
+}
+
+struct VoiceAgeSorter
+{
+    static int compareElements (SynthesiserVoice* v1, SynthesiserVoice* v2) noexcept
+    {
+        return v1->wasStartedBefore (*v2) ? 1 : (v2->wasStartedBefore (*v1) ? -1 : 0);
+    }
+};
+
+SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
+                                                 int /*midiChannel*/, int midiNoteNumber) const
+{
+    SynthesiserVoice* bottom = nullptr;
+    SynthesiserVoice* top    = nullptr;
+
+    // this is a list of voices we can steal, sorted by how long they've been running
+    Array<SynthesiserVoice*> usableVoices;
+    usableVoices.ensureStorageAllocated (voices.size());
+
+    for (int i = 0; i < voices.size(); ++i)
+    {
+        SynthesiserVoice* const voice = voices.getUnchecked (i);
+
+        if (voice->canPlaySound (soundToPlay))
+        {
+            VoiceAgeSorter sorter;
+            usableVoices.addSorted (sorter, voice);
+
+            const int note = voice->getCurrentlyPlayingNote();
+
+            if (bottom == nullptr || note < bottom->getCurrentlyPlayingNote())
+                bottom = voice;
+
+            if (top == nullptr || note > top->getCurrentlyPlayingNote())
+                top = voice;
+        }
+    }
+
+    jassert (bottom != nullptr && top != nullptr);
+
+    // The oldest note that's playing with the target pitch playing is ideal..
+    for (int i = 0; i < usableVoices.size(); ++i)
+    {
+        SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
+
+        if (voice->getCurrentlyPlayingNote() == midiNoteNumber)
+            return voice;
+    }
+
+    // ..otherwise, look for the oldest note that isn't the top or bottom note..
+    for (int i = 0; i < usableVoices.size(); ++i)
+    {
+        SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
+
+        if (voice != bottom && voice != top)
+            return voice;
+    }
+
+    // ..otherwise, there's only one or two voices to choose from - we'll return the top one..
+    return top;
 }

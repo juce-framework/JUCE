@@ -1,5 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2004,2005,2006,2007  Josh Coalson
+ * Copyright (C) 2004-2009  Josh Coalson
+ * Copyright (C) 2011-2014  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,22 +30,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
 #include "../assert.h"
-
+#include "../compat.h"
 #include "include/private/float.h"
 
 #ifdef FLAC__INTEGER_ONLY_LIBRARY
-
-/* adjust for compilers that can't understand using LLU suffix for uint64_t literals */
-#ifdef _MSC_VER
-#define FLAC__U64L(x) x
-#else
-#define FLAC__U64L(x) x##LLU
-#endif
 
 const FLAC__fixedpoint FLAC__FP_ZERO = 0;
 const FLAC__fixedpoint FLAC__FP_ONE_HALF = 0x00008000;

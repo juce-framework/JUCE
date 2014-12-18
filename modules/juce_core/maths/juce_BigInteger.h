@@ -65,11 +65,11 @@ public:
     BigInteger (int64 value);
 
     /** Creates a copy of another BigInteger. */
-    BigInteger (const BigInteger& other);
+    BigInteger (const BigInteger&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    BigInteger (BigInteger&& other) noexcept;
-    BigInteger& operator= (BigInteger&& other) noexcept;
+    BigInteger (BigInteger&&) noexcept;
+    BigInteger& operator= (BigInteger&&) noexcept;
    #endif
 
     /** Destructor. */
@@ -77,10 +77,10 @@ public:
 
     //==============================================================================
     /** Copies another BigInteger onto this one. */
-    BigInteger& operator= (const BigInteger& other);
+    BigInteger& operator= (const BigInteger&);
 
     /** Swaps the internal contents of this with another object. */
-    void swapWith (BigInteger& other) noexcept;
+    void swapWith (BigInteger&) noexcept;
 
     //==============================================================================
     /** Returns the value of a specified bit in the number.
@@ -183,14 +183,14 @@ public:
     //==============================================================================
     // All the standard arithmetic ops...
 
-    BigInteger& operator+= (const BigInteger& other);
-    BigInteger& operator-= (const BigInteger& other);
-    BigInteger& operator*= (const BigInteger& other);
-    BigInteger& operator/= (const BigInteger& other);
-    BigInteger& operator|= (const BigInteger& other);
-    BigInteger& operator&= (const BigInteger& other);
-    BigInteger& operator^= (const BigInteger& other);
-    BigInteger& operator%= (const BigInteger& other);
+    BigInteger& operator+= (const BigInteger&);
+    BigInteger& operator-= (const BigInteger&);
+    BigInteger& operator*= (const BigInteger&);
+    BigInteger& operator/= (const BigInteger&);
+    BigInteger& operator|= (const BigInteger&);
+    BigInteger& operator&= (const BigInteger&);
+    BigInteger& operator^= (const BigInteger&);
+    BigInteger& operator%= (const BigInteger&);
     BigInteger& operator<<= (int numBitsToShift);
     BigInteger& operator>>= (int numBitsToShift);
     BigInteger& operator++();
@@ -199,23 +199,23 @@ public:
     BigInteger operator-- (int);
 
     BigInteger operator-() const;
-    BigInteger operator+ (const BigInteger& other) const;
-    BigInteger operator- (const BigInteger& other) const;
-    BigInteger operator* (const BigInteger& other) const;
-    BigInteger operator/ (const BigInteger& other) const;
-    BigInteger operator| (const BigInteger& other) const;
-    BigInteger operator& (const BigInteger& other) const;
-    BigInteger operator^ (const BigInteger& other) const;
-    BigInteger operator% (const BigInteger& other) const;
+    BigInteger operator+ (const BigInteger&) const;
+    BigInteger operator- (const BigInteger&) const;
+    BigInteger operator* (const BigInteger&) const;
+    BigInteger operator/ (const BigInteger&) const;
+    BigInteger operator| (const BigInteger&) const;
+    BigInteger operator& (const BigInteger&) const;
+    BigInteger operator^ (const BigInteger&) const;
+    BigInteger operator% (const BigInteger&) const;
     BigInteger operator<< (int numBitsToShift) const;
     BigInteger operator>> (int numBitsToShift) const;
 
-    bool operator== (const BigInteger& other) const noexcept;
-    bool operator!= (const BigInteger& other) const noexcept;
-    bool operator<  (const BigInteger& other) const noexcept;
-    bool operator<= (const BigInteger& other) const noexcept;
-    bool operator>  (const BigInteger& other) const noexcept;
-    bool operator>= (const BigInteger& other) const noexcept;
+    bool operator== (const BigInteger&) const noexcept;
+    bool operator!= (const BigInteger&) const noexcept;
+    bool operator<  (const BigInteger&) const noexcept;
+    bool operator<= (const BigInteger&) const noexcept;
+    bool operator>  (const BigInteger&) const noexcept;
+    bool operator>= (const BigInteger&) const noexcept;
 
     //==============================================================================
     /** Does a signed comparison of two BigIntegers.
@@ -243,8 +243,7 @@ public:
     */
     void divideBy (const BigInteger& divisor, BigInteger& remainder);
 
-    /** Returns the largest value that will divide both this value and the one passed-in.
-    */
+    /** Returns the largest value that will divide both this value and the one passed-in. */
     BigInteger findGreatestCommonDivisor (BigInteger other) const;
 
     /** Performs a combined exponent and modulo operation.
@@ -310,12 +309,12 @@ public:
 
 private:
     //==============================================================================
-    HeapBlock <uint32> values;
+    HeapBlock<uint32> values;
     size_t numValues;
     int highestBit;
     bool negative;
 
-    void ensureSize (size_t numVals);
+    void ensureSize (size_t);
     void shiftLeft (int bits, int startBit);
     void shiftRight (int bits, int startBit);
 

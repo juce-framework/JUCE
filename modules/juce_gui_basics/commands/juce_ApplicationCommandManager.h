@@ -290,7 +290,7 @@ public:
     static ApplicationCommandTarget* findDefaultComponentTarget();
 
     /** Examines this component and all its parents in turn, looking for the first one
-        which is a ApplicationCommandTarget.
+        which is an ApplicationCommandTarget.
 
         Returns the first ApplicationCommandTarget that it finds, or nullptr if none of them
         implement that class.
@@ -308,6 +308,7 @@ private:
     void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo&);
     void handleAsyncUpdate() override;
     void globalFocusChanged (Component*) override;
+    ApplicationCommandInfo* getMutableCommandForID (CommandID) const noexcept;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This is just here to cause a compile error in old code that hasn't been changed to use the new

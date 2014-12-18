@@ -127,7 +127,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    virtual void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
+    void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
 
 protected:
     //==============================================================================
@@ -155,7 +155,7 @@ private:
     bool useDropShadow, useNativeTitleBar, isCurrentlyActive;
     ScopedPointer<DropShadower> shadower;
 
-    void setWindowActive (bool isNowActive);
+    void setWindowActive (bool);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow)
 };

@@ -18,19 +18,19 @@ public:
     //==============================================================================
     APPCLASSNAME() {}
 
-    const String getApplicationName()       { return ProjectInfo::projectName; }
-    const String getApplicationVersion()    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed()       { return ALLOWMORETHANONEINSTANCE; }
+    const String getApplicationName() override       { return ProjectInfo::projectName; }
+    const String getApplicationVersion() override    { return ProjectInfo::versionString; }
+    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }
 
     //==============================================================================
-    void initialise (const String& commandLine)
+    void initialise (const String& commandLine) override
     {
         // This method is where you should put your application's initialisation code..
 
-        mainWindow = new MainWindow();
+        mainWindow = new MainWindow (getApplicationName());
     }
 
-    void shutdown()
+    void shutdown() override
     {
         // Add your application's shutdown code here..
 
@@ -38,14 +38,14 @@ public:
     }
 
     //==============================================================================
-    void systemRequestedQuit()
+    void systemRequestedQuit() override
     {
         // This is called when the app is being asked to quit: you can ignore this
         // request and let the app carry on running, or call quit() to allow the app to close.
         quit();
     }
 
-    void anotherInstanceStarted (const String& commandLine)
+    void anotherInstanceStarted (const String& commandLine) override
     {
         // When another instance of the app is launched while this one is running,
         // this method is invoked, and the commandLine parameter tells you what
@@ -60,17 +60,18 @@ public:
     class MainWindow    : public DocumentWindow
     {
     public:
-        MainWindow()  : DocumentWindow ("MainWindow",
-                                        Colours::lightgrey,
-                                        DocumentWindow::allButtons)
+        MainWindow (String name)  : DocumentWindow (name,
+                                                    Colours::lightgrey,
+                                                    DocumentWindow::allButtons)
         {
+            setUsingNativeTitleBar (true);
             setContentOwned (new CONTENTCOMPCLASS(), true);
 
             centreWithSize (getWidth(), getHeight());
             setVisible (true);
         }
 
-        void closeButtonPressed()
+        void closeButtonPressed() override
         {
             // This is called when the user tries to close this window. Here, we'll just
             // ask the app to quit when this happens, but you can change this to do

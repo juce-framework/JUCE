@@ -391,9 +391,9 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
                                     AudioData::NonInterleaved, AudioData::Const> SourceSampleFormat;
 
         CDSampleFormat left (buffer, 2);
-        left.convertSamples (SourceSampleFormat (sourceBuffer.getSampleData (0)), samplesPerBlock);
+        left.convertSamples (SourceSampleFormat (sourceBuffer.getReadPointer (0)), samplesPerBlock);
         CDSampleFormat right (buffer + 2, 2);
-        right.convertSamples (SourceSampleFormat (sourceBuffer.getSampleData (1)), samplesPerBlock);
+        right.convertSamples (SourceSampleFormat (sourceBuffer.getReadPointer (1)), samplesPerBlock);
 
         hr = pimpl->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);
 

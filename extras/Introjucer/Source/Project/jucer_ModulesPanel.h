@@ -45,14 +45,14 @@ public:
 
         table.setModel (this);
         table.setColour (TableListBox::backgroundColourId, Colours::transparentBlack);
-        addAndMakeVisible (&table);
+        addAndMakeVisible (table);
         table.updateContent();
         table.setRowHeight (20);
 
-        addAndMakeVisible (&addWebModuleButton);
-        addAndMakeVisible (&updateModuleButton);
-        addAndMakeVisible (&setCopyModeButton);
-        addAndMakeVisible (&copyPathButton);
+        addAndMakeVisible (addWebModuleButton);
+        addAndMakeVisible (updateModuleButton);
+        addAndMakeVisible (setCopyModeButton);
+        addAndMakeVisible (copyPathButton);
         addWebModuleButton.addListener (this);
         updateModuleButton.addListener (this);
         updateModuleButton.setEnabled (false);

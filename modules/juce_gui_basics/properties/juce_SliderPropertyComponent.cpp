@@ -29,7 +29,7 @@ SliderPropertyComponent::SliderPropertyComponent (const String& name,
                                                   const double skewFactor)
     : PropertyComponent (name)
 {
-    addAndMakeVisible (&slider);
+    addAndMakeVisible (slider);
 
     slider.setRange (rangeMin, rangeMax, interval);
     slider.setSkewFactor (skewFactor);
@@ -46,7 +46,7 @@ SliderPropertyComponent::SliderPropertyComponent (const Value& valueToControl,
                                                   const double skewFactor)
     : PropertyComponent (name)
 {
-    addAndMakeVisible (&slider);
+    addAndMakeVisible (slider);
 
     slider.setRange (rangeMin, rangeMax, interval);
     slider.setSkewFactor (skewFactor);

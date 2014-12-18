@@ -118,7 +118,7 @@ public:
     TreePanelBase (const Project* p, const String& treeviewID)
         : project (p), opennessStateKey (treeviewID)
     {
-        addAndMakeVisible (&tree);
+        addAndMakeVisible (tree);
         tree.setRootItemVisible (true);
         tree.setDefaultOpenness (true);
         tree.setColour (TreeView::backgroundColourId, Colours::transparentBlack);

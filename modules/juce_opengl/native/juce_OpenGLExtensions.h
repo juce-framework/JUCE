@@ -34,7 +34,7 @@
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
     @see OpenGLExtensionFunctions
 */
-#define JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION) \
+#define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION) \
     USE_FUNCTION (glActiveTexture,          void, (GLenum p1), (p1))\
     USE_FUNCTION (glBindBuffer,             void, (GLenum p1, GLuint p2), (p1, p2))\
     USE_FUNCTION (glDeleteBuffers,          void, (GLsizei p1, const GLuint* p2), (p1, p2))\
@@ -54,11 +54,7 @@
     EXT_FUNCTION (glCheckFramebufferStatus, GLenum, (GLenum p1), (p1))\
     EXT_FUNCTION (glFramebufferTexture2D,   void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4, GLint p5), (p1, p2, p3, p4, p5))\
     EXT_FUNCTION (glFramebufferRenderbuffer,  void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4), (p1, p2, p3, p4))\
-    EXT_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))
-
-#if JUCE_USE_OPENGL_SHADERS
- #define JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION, EXT_FUNCTION) \
-    JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION) \
+    EXT_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glCreateProgram,          GLuint, (), ())\
     USE_FUNCTION (glDeleteProgram,          void, (GLuint p1), (p1))\
     USE_FUNCTION (glCreateShader,           GLuint, (GLenum p1), (p1))\
@@ -88,16 +84,6 @@
     USE_FUNCTION (glUniformMatrix3fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glUniformMatrix4fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))
 
-#else
- #define JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION) JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION)
-#endif
-
-#if JUCE_USE_OPENGL_FIXED_FUNCTION
- #define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION) JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION, EXT_FUNCTION) \
-    USE_FUNCTION (glClientActiveTexture,    void, (GLenum p1), (p1))
-#else
- #define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION) JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION, EXT_FUNCTION)
-#endif
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded
     for a specific GL context, or simply call-through to the appropriate OS function where available.
@@ -112,23 +98,28 @@ struct OpenGLExtensionFunctions
     typedef pointer_sized_int GLintptr;
    #endif
 
-   #if JUCE_WINDOWS || JUCE_LINUX
-    #if JUCE_WINDOWS
-     #define JUCE_GL_STDCALL __stdcall
-    #else
-     #define JUCE_GL_STDCALL
-    #endif
-
-    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (JUCE_GL_STDCALL *type_ ## name) params; type_ ## name name;
+    //==============================================================================
+   #if JUCE_WINDOWS
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    //==============================================================================
+   #elif JUCE_LINUX
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (*type_ ## name) params; type_ ## name name;
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    //==============================================================================
    #elif JUCE_OPENGL_ES
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      static returnType name params;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    //==============================================================================
    #else
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params { return ::name callparams; }
-    #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name ## EXT callparams; }
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION_EXT)
-    #undef JUCE_DECLARE_GL_FUNCTION_EXT
+    #if JUCE_OPENGL3
+     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    #else
+     #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name ## EXT callparams; }
+     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION_EXT)
+     #undef JUCE_DECLARE_GL_FUNCTION_EXT
+    #endif
    #endif
 
     #undef JUCE_DECLARE_GL_FUNCTION

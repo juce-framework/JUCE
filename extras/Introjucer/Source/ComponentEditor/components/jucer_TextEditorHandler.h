@@ -96,9 +96,9 @@ public:
         addColourProperties (t, document, props);
     }
 
-    String getCreationParameters (Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component)
     {
-        return quotedString (component->getName());
+        return quotedString (component->getName(), false);
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -116,7 +116,7 @@ public:
           << memberVariableName << "->setCaretVisible (" << CodeHelpers::boolLiteral (te->isCaretVisible()) << ");\n"
           << memberVariableName << "->setPopupMenuEnabled (" << CodeHelpers::boolLiteral (te->isPopupMenuEnabled()) << ");\n"
           << getColourIntialisationCode (component, memberVariableName)
-          << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString()) << ");\n\n";
+          << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString(), code.shouldUseTransMacro()) << ");\n\n";
 
         code.constructorCode += s;
     }

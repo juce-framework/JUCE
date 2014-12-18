@@ -41,6 +41,7 @@ MidiOutput* MidiOutput::openDevice (int index)
 
 MidiOutput::~MidiOutput()
 {
+    stopBackgroundThread();
 }
 
 void MidiOutput::sendMessageNow (const MidiMessage&)

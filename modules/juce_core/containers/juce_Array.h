@@ -40,9 +40,9 @@
     do so, the class must fulfil these requirements:
     - it must have a copy constructor and assignment operator
     - it must be able to be relocated in memory by a memcpy without this causing any problems - so
-      objects whose functionality relies on external pointers or references to themselves can be used.
+      objects whose functionality relies on external pointers or references to themselves can not be used.
 
-    You can of course have an array of pointers to any kind of object, e.g. Array <MyClass*>, but if
+    You can of course have an array of pointers to any kind of object, e.g. Array<MyClass*>, but if
     you do this, the array doesn't take any ownership of the objects - see the OwnedArray class or the
     ReferenceCountedArray class for more powerful ways of holding lists of objects.
 
@@ -65,8 +65,7 @@ private:
 public:
     //==============================================================================
     /** Creates an empty array. */
-    Array() noexcept
-       : numUsed (0)
+    Array() noexcept   : numUsed (0)
     {
     }
 
@@ -143,6 +142,7 @@ public:
     Array& operator= (Array&& other) noexcept
     {
         const ScopedLockType lock (getLock());
+        deleteAllElements();
         data = static_cast<ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data);
         numUsed = other.numUsed;
         other.numUsed = 0;
@@ -474,7 +474,11 @@ public:
             numUsed += numberOfTimesToInsertIt;
 
             while (--numberOfTimesToInsertIt >= 0)
-                new (insertPos++) ElementType (newElement);
+            {
+                new (insertPos) ElementType (newElement);
+                ++insertPos; // NB: this increment is done separately from the
+                             // new statement to avoid a compiler bug in VS2014
+            }
         }
     }
 

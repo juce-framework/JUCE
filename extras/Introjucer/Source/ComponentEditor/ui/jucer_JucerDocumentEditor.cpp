@@ -133,8 +133,8 @@ public:
     ClassPropertiesPanel (JucerDocument& doc)
         : document (doc)
     {
-        addAndMakeVisible (&panel1);
-        addAndMakeVisible (&panel2);
+        addAndMakeVisible (panel1);
+        addAndMakeVisible (panel2);
 
         Array <PropertyComponent*> props;
         props.add (new ComponentClassNameProperty (doc));
@@ -318,7 +318,7 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
         setSize (document->getInitialWidth(),
                  document->getInitialHeight());
 
-        addAndMakeVisible (&tabbedComponent);
+        addAndMakeVisible (tabbedComponent);
         tabbedComponent.setOutline (0);
 
         tabbedComponent.addTab ("Class", tabColour, new ClassPropertiesPanel (*document), true);

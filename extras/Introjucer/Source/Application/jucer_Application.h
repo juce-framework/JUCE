@@ -28,6 +28,8 @@
 #include "../jucer_Headers.h"
 #include "jucer_MainWindow.h"
 #include "jucer_CommandLine.h"
+#include "../Project/jucer_Module.h"
+#include "jucer_AutoUpdater.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
 void createGUIEditorMenu (PopupMenu&);
@@ -91,20 +93,25 @@ public:
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
+
+        versionChecker = new LatestVersionChecker();
     }
 
     void shutdown() override
     {
+        versionChecker = nullptr;
         appearanceEditorWindow = nullptr;
         utf8Window = nullptr;
+        svgPathWindow = nullptr;
+
+        mainWindowList.forceCloseAllWindows();
+        openDocumentManager.clear();
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
        #endif
-        menuModel = nullptr;
 
-        mainWindowList.forceCloseAllWindows();
-        openDocumentManager.clear();
+        menuModel = nullptr;
         commandManager = nullptr;
         settings = nullptr;
 
@@ -119,12 +126,7 @@ public:
     //==============================================================================
     void systemRequestedQuit() override
     {
-        closeModalCompsAndQuit();
-    }
-
-    void closeModalCompsAndQuit()
-    {
-        if (cancelAnyModalComponents())
+        if (ModalComponentManager::getInstance()->cancelAllModalComponents())
         {
             new AsyncQuitRetrier();
         }
@@ -172,19 +174,19 @@ public:
             setApplicationCommandManagerToWatch (&getCommandManager());
         }
 
-        StringArray getMenuBarNames()
+        StringArray getMenuBarNames() override
         {
             return getApp().getMenuNames();
         }
 
-        PopupMenu getMenuForIndex (int /*topLevelMenuIndex*/, const String& menuName)
+        PopupMenu getMenuForIndex (int /*topLevelMenuIndex*/, const String& menuName) override
         {
             PopupMenu menu;
             getApp().createMenu (menu, menuName);
             return menu;
         }
 
-        void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
+        void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/) override
         {
             getApp().handleMainMenuCommand (menuItemID);
         }
@@ -228,6 +230,7 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::closeDocument);
         menu.addCommandItem (commandManager, CommandIDs::saveDocument);
         menu.addCommandItem (commandManager, CommandIDs::saveDocumentAs);
+        menu.addCommandItem (commandManager, CommandIDs::saveAll);
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::closeProject);
         menu.addCommandItem (commandManager, CommandIDs::saveProject);
@@ -311,6 +314,7 @@ public:
     virtual void createToolsMenu (PopupMenu& menu)
     {
         menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
+        menu.addCommandItem (commandManager, CommandIDs::showSVGPathTool);
         menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
     }
 
@@ -348,7 +352,8 @@ public:
                                   CommandIDs::closeAllDocuments,
                                   CommandIDs::saveAll,
                                   CommandIDs::showAppearanceSettings,
-                                  CommandIDs::showUTF8Tool };
+                                  CommandIDs::showUTF8Tool,
+                                  CommandIDs::showSVGPathTool };
 
         commands.addArray (ids, numElementsInArray (ids));
     }
@@ -378,11 +383,15 @@ public:
 
         case CommandIDs::saveAll:
             result.setInfo ("Save All", "Saves all open documents", CommandCategories::general, 0);
-            result.setActive (openDocumentManager.anyFilesNeedSaving());
+            result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::altModifier, 0));
             break;
 
         case CommandIDs::showUTF8Tool:
             result.setInfo ("UTF-8 String-Literal Helper", "Shows the UTF-8 string literal utility", CommandCategories::general, 0);
+            break;
+
+        case CommandIDs::showSVGPathTool:
+            result.setInfo ("SVG Path Helper", "Shows the SVG->Path data conversion utility", CommandCategories::general, 0);
             break;
 
         default:
@@ -400,6 +409,8 @@ public:
             case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
             case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
             case CommandIDs::showUTF8Tool:              showUTF8ToolWindow (utf8Window); break;
+            case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow (svgPathWindow); break;
+
             case CommandIDs::showAppearanceSettings:    AppearanceSettings::showEditorWindow (appearanceEditorWindow); break;
             default:                                    return JUCEApplication::perform (info);
         }
@@ -531,13 +542,15 @@ public:
     OpenDocumentManager openDocumentManager;
     ScopedPointer<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> appearanceEditorWindow, utf8Window;
+    ScopedPointer<Component> appearanceEditorWindow, utf8Window, svgPathWindow;
 
     ScopedPointer<FileLogger> logger;
 
     bool isRunningCommandLine;
 
 private:
+    ScopedPointer<LatestVersionChecker> versionChecker;
+
     class AsyncQuitRetrier  : private Timer
     {
     public:
@@ -548,8 +561,8 @@ private:
             stopTimer();
             delete this;
 
-            if (JUCEApplicationBase::getInstance() != nullptr)
-                getApp().closeModalCompsAndQuit();
+            if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
+                app->systemRequestedQuit();
         }
 
         JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier)

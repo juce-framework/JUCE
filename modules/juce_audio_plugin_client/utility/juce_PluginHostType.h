@@ -39,14 +39,19 @@ public:
         AbletonLive7,
         AbletonLive8,
         AbletonLiveGeneric,
+        AdobeAudition,
         AdobePremierePro,
         AppleLogic,
+        Ardour,
         CakewalkSonar8,
         CakewalkSonarGeneric,
         DigidesignProTools,
+        DigitalPerformer,
+        FruityLoops,
+        MagixSamplitude,
+        MergingPyramix,
+        MuseReceptorGeneric,
         Reaper,
-        Tracktion3,
-        TracktionGeneric,
         SteinbergCubase4,
         SteinbergCubase5,
         SteinbergCubase5Bridged,
@@ -62,13 +67,11 @@ public:
         SteinbergWavelab7,
         SteinbergWavelab8,
         SteinbergWavelabGeneric,
-        MuseReceptorGeneric,
-        MagixSamplitude,
-        FruityLoops,
-        WaveBurner,
-        DigitalPerformer,
+        SteinbergTestHost,
         StudioOne,
-        MergingPyramix,
+        Tracktion3,
+        TracktionGeneric,
+        WaveBurner,
         VBVSTScanner
     };
 
@@ -76,25 +79,28 @@ public:
 
     //==============================================================================
     bool isAbletonLive() const noexcept      { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
-    bool isNuendo() const noexcept           { return type == SteinbergNuendo3 || type == SteinbergNuendo4  || type == SteinbergNuendo5 ||  type == SteinbergNuendoGeneric; }
+    bool isAdobeAudition() const noexcept    { return type == AdobeAudition; }
+    bool isArdour() const noexcept           { return type == Ardour; }
+    bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
     bool isCubase() const noexcept           { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubaseGeneric; }
     bool isCubaseBridged() const noexcept    { return type == SteinbergCubase5Bridged; }
-    bool isSteinberg() const noexcept        { return isCubase() || isNuendo() || isWavelab(); }
-    bool isTracktion() const noexcept        { return type == Tracktion3 || type == TracktionGeneric; }
+    bool isLogic() const noexcept            { return type == AppleLogic; }
+    bool isFruityLoops() const noexcept      { return type == FruityLoops; }
+    bool isNuendo() const noexcept           { return type == SteinbergNuendo3 || type == SteinbergNuendo4  || type == SteinbergNuendo5 ||  type == SteinbergNuendoGeneric; }
+    bool isPremiere() const noexcept         { return type == AdobePremierePro; }
+    bool isPyramix() const noexcept          { return type == MergingPyramix; }
+    bool isReceptor() const noexcept         { return type == MuseReceptorGeneric; }
+    bool isReaper() const noexcept           { return type == Reaper; }
+    bool isSamplitude() const noexcept       { return type == MagixSamplitude; }
     bool isSonar() const noexcept            { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
+    bool isSteinbergTestHost() const noexcept{ return type == SteinbergTestHost; }
+    bool isSteinberg() const noexcept        { return isCubase() || isNuendo() || isWavelab() || isSteinbergTestHost(); }
+    bool isStudioOne() const noexcept        { return type == StudioOne; }
+    bool isTracktion() const noexcept        { return type == Tracktion3 || type == TracktionGeneric; }
+    bool isVBVSTScanner() const noexcept     { return type == VBVSTScanner; }
+    bool isWaveBurner() const noexcept       { return type == WaveBurner; }
     bool isWavelab() const noexcept          { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelab8 || type == SteinbergWavelabGeneric; }
     bool isWavelabLegacy() const noexcept    { return type == SteinbergWavelab5 || type == SteinbergWavelab6; }
-    bool isPremiere() const noexcept         { return type == AdobePremierePro; }
-    bool isLogic() const noexcept            { return type == AppleLogic; }
-    bool isReceptor() const noexcept         { return type == MuseReceptorGeneric; }
-    bool isSamplitude() const noexcept       { return type == MagixSamplitude; }
-    bool isFruityLoops() const noexcept      { return type == FruityLoops; }
-    bool isWaveBurner() const noexcept       { return type == WaveBurner; }
-    bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
-    bool isReaper() const noexcept           { return type == Reaper; }
-    bool isStudioOne() const noexcept        { return type == StudioOne; }
-    bool isPyramix() const noexcept          { return type == MergingPyramix; }
-    bool isVBVSTScanner() const noexcept     { return type == VBVSTScanner; }
 
     //==============================================================================
     const char* getHostDescription() const noexcept
@@ -105,14 +111,18 @@ public:
             case AbletonLive7:             return "Ableton Live 7";
             case AbletonLive8:             return "Ableton Live 8";
             case AbletonLiveGeneric:       return "Ableton Live";
+            case AdobeAudition:            return "Adobe Audition";
             case AdobePremierePro:         return "Adobe Premiere";
             case AppleLogic:               return "Apple Logic";
             case CakewalkSonar8:           return "Cakewalk Sonar 8";
             case CakewalkSonarGeneric:     return "Cakewalk Sonar";
             case DigidesignProTools:       return "ProTools";
+            case DigitalPerformer:         return "DigitalPerformer";
+            case FruityLoops:              return "FruityLoops";
+            case MagixSamplitude:          return "Magix Samplitude";
+            case MergingPyramix:           return "Pyramix";
+            case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
-            case Tracktion3:               return "Tracktion 3";
-            case TracktionGeneric:         return "Tracktion";
             case SteinbergCubase4:         return "Steinberg Cubase 4";
             case SteinbergCubase5:         return "Steinberg Cubase 5";
             case SteinbergCubase5Bridged:  return "Steinberg Cubase 5 Bridged";
@@ -128,14 +138,12 @@ public:
             case SteinbergWavelab7:        return "Steinberg Wavelab 7";
             case SteinbergWavelab8:        return "Steinberg Wavelab 8";
             case SteinbergWavelabGeneric:  return "Steinberg Wavelab";
-            case MuseReceptorGeneric:      return "Muse Receptor";
-            case MagixSamplitude:          return "Magix Samplitude";
-            case FruityLoops:              return "FruityLoops";
-            case WaveBurner:               return "WaveBurner";
-            case DigitalPerformer:         return "DigitalPerformer";
+            case SteinbergTestHost:        return "Steinberg TestHost";
             case StudioOne:                return "Studio One";
-            case MergingPyramix:           return "Pyramix";
+            case Tracktion3:               return "Tracktion 3";
+            case TracktionGeneric:         return "Tracktion";
             case VBVSTScanner:             return "VBVSTScanner";
+            case WaveBurner:               return "WaveBurner";
             default:                       break;
         }
 
@@ -155,7 +163,7 @@ private:
         const String hostPath (getHostPath());
         const String hostFilename (File (hostPath).getFileName());
 
-      #if JUCE_MAC
+       #if JUCE_MAC
         if (hostPath.containsIgnoreCase     ("Live 6."))           return AbletonLive6;
         if (hostPath.containsIgnoreCase     ("Live 7."))           return AbletonLive7;
         if (hostPath.containsIgnoreCase     ("Live 8."))           return AbletonLive8;
@@ -182,11 +190,12 @@ private:
         if (hostPath.containsIgnoreCase     ("Tracktion 3"))       return Tracktion3;
         if (hostFilename.containsIgnoreCase ("Tracktion"))         return TracktionGeneric;
 
-      #elif JUCE_WINDOWS
+       #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase ("Live 6."))           return AbletonLive6;
         if (hostFilename.containsIgnoreCase ("Live 7."))           return AbletonLive7;
         if (hostFilename.containsIgnoreCase ("Live 8."))           return AbletonLive8;
         if (hostFilename.containsIgnoreCase ("Live "))             return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("Audition"))          return AdobeAudition;
         if (hostFilename.containsIgnoreCase ("Adobe Premiere"))    return AdobePremierePro;
         if (hostFilename.containsIgnoreCase ("ProTools"))          return DigidesignProTools;
         if (hostPath.containsIgnoreCase     ("SONAR 8"))           return CakewalkSonar8;
@@ -207,8 +216,10 @@ private:
         if (hostPath.containsIgnoreCase     ("Wavelab 8"))         return SteinbergWavelab8;
         if (hostPath.containsIgnoreCase     ("Nuendo"))            return SteinbergNuendoGeneric;
         if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
+        if (hostFilename.containsIgnoreCase ("TestHost"))          return SteinbergTestHost;
         if (hostFilename.containsIgnoreCase ("rm-host"))           return MuseReceptorGeneric;
         if (hostFilename.startsWith         ("FL"))                return FruityLoops;
+        if (hostFilename.contains           ("ilbridge."))         return FruityLoops;
         if (hostPath.containsIgnoreCase     ("Studio One"))        return StudioOne;
         if (hostPath.containsIgnoreCase     ("Digital Performer")) return DigitalPerformer;
         if (hostFilename.containsIgnoreCase ("VST_Scanner"))       return VBVSTScanner;
@@ -216,7 +227,8 @@ private:
         if (hostFilename.startsWithIgnoreCase ("Sam"))             return MagixSamplitude;
 
        #elif JUCE_LINUX
-        jassertfalse   // not yet done!
+        if (hostFilename.containsIgnoreCase ("Ardour"))            return Ardour;
+
        #else
         #error
        #endif

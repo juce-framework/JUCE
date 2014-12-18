@@ -40,10 +40,11 @@ class JUCE_API  FileInputStream  : public InputStream
 {
 public:
     //==============================================================================
-    /** Creates a FileInputStream.
+    /** Creates a FileInputStream to read from the given file.
 
-        @param fileToRead   the file to read from - if the file can't be accessed for some
-                            reason, then the stream will just contain no data
+        After creating a FileInputStream, you should use openedOk() or failedToOpen()
+        to make sure that it's OK before trying to read from it! If it failed, you
+        can call getStatus() to get more error information.
     */
     explicit FileInputStream (const File& fileToRead);
 
@@ -73,24 +74,23 @@ public:
 
     //==============================================================================
     int64 getTotalLength() override;
-    int read (void* destBuffer, int maxBytesToRead) override;
+    int read (void*, int) override;
     bool isExhausted() override;
     int64 getPosition() override;
-    bool setPosition (int64 pos) override;
+    bool setPosition (int64) override;
 
 private:
     //==============================================================================
-    File file;
+    const File file;
     void* fileHandle;
     int64 currentPosition;
     Result status;
-    bool needToSeek;
 
     void openHandle();
-    void closeHandle();
-    size_t readInternal (void* buffer, size_t numBytes);
+    size_t readInternal (void*, size_t);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileInputStream)
 };
+
 
 #endif   // JUCE_FILEINPUTSTREAM_H_INCLUDED

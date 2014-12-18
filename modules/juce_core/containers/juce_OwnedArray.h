@@ -505,10 +505,7 @@ public:
         jassert (numElementsToAdd <= 0 || data.elements != nullptr);
 
         while (--numElementsToAdd >= 0)
-        {
-            data.elements [numUsed] = new ObjectClass (*arrayToAddFrom.getUnchecked (startIndex++));
-            ++numUsed;
-        }
+            data.elements [numUsed++] = createCopyIfNotNull (arrayToAddFrom.getUnchecked (startIndex++));
     }
 
     /** Inserts a new object into the array assuming that the array is sorted.
@@ -833,7 +830,7 @@ public:
         This will use a comparator object to sort the elements into order. The object
         passed must have a method of the form:
         @code
-        int compareElements (ElementType first, ElementType second);
+        int compareElements (ElementType* first, ElementType* second);
         @endcode
 
         ..and this method must return:

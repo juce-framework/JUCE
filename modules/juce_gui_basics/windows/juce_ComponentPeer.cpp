@@ -79,26 +79,28 @@ void ComponentPeer::updateBounds()
     setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
 }
 
+bool ComponentPeer::isKioskMode() const
+{
+    return Desktop::getInstance().getKioskModeComponent() == &component;
+}
+
 //==============================================================================
-void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int> positionWithinPeer,
-                                      const ModifierKeys newMods, const int64 time)
+void ComponentPeer::handleMouseEvent (int touchIndex, Point<float> pos, ModifierKeys newMods, int64 time)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
-        MouseInputSource (*mouse).handleEvent (*this, positionWithinPeer, time, newMods);
+        MouseInputSource (*mouse).handleEvent (*this, pos, time, newMods);
 }
 
-void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int> positionWithinPeer,
-                                      const int64 time, const MouseWheelDetails& wheel)
+void ComponentPeer::handleMouseWheel (int touchIndex, Point<float> pos, int64 time, const MouseWheelDetails& wheel)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
-        MouseInputSource (*mouse).handleWheel (*this, positionWithinPeer, time, wheel);
+        MouseInputSource (*mouse).handleWheel (*this, pos, time, wheel);
 }
 
-void ComponentPeer::handleMagnifyGesture (const int touchIndex, const Point<int> positionWithinPeer,
-                                          const int64 time, const float scaleFactor)
+void ComponentPeer::handleMagnifyGesture (int touchIndex, Point<float> pos, int64 time, float scaleFactor)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
-        MouseInputSource (*mouse).handleMagnifyGesture (*this, positionWithinPeer, time, scaleFactor);
+        MouseInputSource (*mouse).handleMagnifyGesture (*this, pos, time, scaleFactor);
 }
 
 //==============================================================================
@@ -396,6 +398,9 @@ const Rectangle<int>& ComponentPeer::getNonFullScreenBounds() const noexcept
 {
     return lastNonFullscreenBounds;
 }
+
+Point<int> ComponentPeer::localToGlobal (Point<int> p)   { return localToGlobal (p.toFloat()).roundToInt(); }
+Point<int> ComponentPeer::globalToLocal (Point<int> p)   { return globalToLocal (p.toFloat()).roundToInt(); }
 
 Rectangle<int> ComponentPeer::localToGlobal (const Rectangle<int>& relativePosition)
 {

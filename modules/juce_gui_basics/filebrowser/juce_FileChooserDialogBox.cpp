@@ -33,15 +33,15 @@ public:
           newFolderButton (TRANS ("New Folder")),
           instructions (desc)
     {
-        addAndMakeVisible (&chooserComponent);
+        addAndMakeVisible (chooserComponent);
 
-        addAndMakeVisible (&okButton);
+        addAndMakeVisible (okButton);
         okButton.addShortcut (KeyPress (KeyPress::returnKey));
 
-        addAndMakeVisible (&cancelButton);
+        addAndMakeVisible (cancelButton);
         cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
 
-        addChildComponent (&newFolderButton);
+        addChildComponent (newFolderButton);
 
         setInterceptsMouseClicks (false, true);
     }
@@ -203,7 +203,7 @@ void FileChooserDialogBox::okButtonPressed()
     {
         AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                       TRANS("File already exists"),
-                                      TRANS("There's already a file called: FLMN")
+                                      TRANS("There's already a file called: FLNM")
                                          .replace ("FLNM", content->chooserComponent.getSelectedFile(0).getFullPathName())
                                         + "\n\n"
                                         + TRANS("Are you sure you want to overwrite it?"),

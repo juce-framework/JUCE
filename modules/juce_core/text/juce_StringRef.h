@@ -101,6 +101,9 @@ public:
     /** Returns the number of characters in the string. */
     int length() const noexcept                                         { return (int) text.length(); }
 
+    /** Retrieves a character by index. */
+    juce_wchar operator[] (int index) const noexcept                    { return text[index]; }
+
     /** Compares this StringRef with a String. */
     bool operator== (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) == 0; }
     /** Compares this StringRef with a String. */

@@ -36,6 +36,21 @@ LocalisedStrings::LocalisedStrings (const File& fileToLoad, bool ignoreCase)
     loadFromText (fileToLoad.loadFileAsString(), ignoreCase);
 }
 
+LocalisedStrings::LocalisedStrings (const LocalisedStrings& other)
+    : languageName (other.languageName), countryCodes (other.countryCodes),
+      translations (other.translations), fallback (createCopyIfNotNull (other.fallback.get()))
+{
+}
+
+LocalisedStrings& LocalisedStrings::operator= (const LocalisedStrings& other)
+{
+    languageName = other.languageName;
+    countryCodes = other.countryCodes;
+    translations = other.translations;
+    fallback = createCopyIfNotNull (other.fallback.get());
+    return *this;
+}
+
 LocalisedStrings::~LocalisedStrings()
 {
 }
@@ -43,11 +58,17 @@ LocalisedStrings::~LocalisedStrings()
 //==============================================================================
 String LocalisedStrings::translate (const String& text) const
 {
+    if (fallback != nullptr && ! translations.containsKey (text))
+        return fallback->translate (text);
+
     return translations.getValue (text, text);
 }
 
 String LocalisedStrings::translate (const String& text, const String& resultIfNotFound) const
 {
+    if (fallback != nullptr && ! translations.containsKey (text))
+        return fallback->translate (text, resultIfNotFound);
+
     return translations.getValue (text, resultIfNotFound);
 }
 
@@ -73,7 +94,7 @@ namespace
     SpinLock currentMappingsLock;
     ScopedPointer<LocalisedStrings> currentMappings;
 
-    int findCloseQuote (const String& text, int startPos)
+    static int findCloseQuote (const String& text, int startPos)
     {
         juce_wchar lastChar = 0;
         String::CharPointerType t (text.getCharPointer() + startPos);
@@ -92,7 +113,7 @@ namespace
         return startPos;
     }
 
-    String unescapeString (const String& s)
+    static String unescapeString (const String& s)
     {
         return s.replace ("\\\"", "\"")
                 .replace ("\\\'", "\'")
@@ -141,6 +162,8 @@ void LocalisedStrings::loadFromText (const String& fileContents, bool ignoreCase
             countryCodes.removeEmptyStrings();
         }
     }
+
+    translations.minimiseStorageOverheads();
 }
 
 void LocalisedStrings::addStrings (const LocalisedStrings& other)
@@ -149,6 +172,11 @@ void LocalisedStrings::addStrings (const LocalisedStrings& other)
     jassert (countryCodes == other.countryCodes);
 
     translations.addArray (other.translations);
+}
+
+void LocalisedStrings::setFallback (LocalisedStrings* f)
+{
+    fallback = f;
 }
 
 //==============================================================================
@@ -166,11 +194,11 @@ LocalisedStrings* LocalisedStrings::getCurrentMappings()
 String LocalisedStrings::translateWithCurrentMappings (const String& text)  { return juce::translate (text); }
 String LocalisedStrings::translateWithCurrentMappings (const char* text)    { return juce::translate (text); }
 
-String translate (const String& text)       { return juce::translate (text, text); }
-String translate (const char* text)         { return juce::translate (String (text)); }
-String translate (CharPointer_UTF8 text)    { return juce::translate (String (text)); }
+JUCE_API String translate (const String& text)       { return juce::translate (text, text); }
+JUCE_API String translate (const char* text)         { return juce::translate (String (text)); }
+JUCE_API String translate (CharPointer_UTF8 text)    { return juce::translate (String (text)); }
 
-String translate (const String& text, const String& resultIfNotFound)
+JUCE_API String translate (const String& text, const String& resultIfNotFound)
 {
     const SpinLock::ScopedLockType sl (currentMappingsLock);
 

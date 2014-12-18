@@ -184,10 +184,10 @@ void Project::updateOldModulePaths()
 }
 
 //==============================================================================
-static int getVersionElement (const String& v, int index)
+static int getVersionElement (StringRef v, int index)
 {
     StringArray parts;
-    parts.addTokens (v, "., ", String::empty);
+    parts.addTokens (v, "., ", StringRef());
 
     return parts [parts.size() - index - 1].getIntValue();
 }
@@ -226,12 +226,17 @@ void Project::warnAboutOldIntrojucerVersion()
     available.scanAllKnownFolders (*this);
 
     if (isAnyModuleNewerThanIntrojucer (available.modules))
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          "Introjucer",
-                                          "This version of the introjucer is out-of-date!"
-                                          "\n\n"
-                                          "Always make sure that you're running the very latest version, "
-                                          "preferably compiled directly from the JUCE repository that you're working with!");
+    {
+        if (IntrojucerApp::getApp().isRunningCommandLine)
+            std::cout <<  "WARNING! This version of the introjucer is out-of-date!" << std::endl;
+        else
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Introjucer",
+                                              "This version of the introjucer is out-of-date!"
+                                              "\n\n"
+                                              "Always make sure that you're running the very latest version, "
+                                              "preferably compiled directly from the JUCE repository that you're working with!");
+    }
 }
 
 //==============================================================================
@@ -371,6 +376,12 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (getCompanyName(), "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
 
+    props.add (new TextPropertyComponent (getCompanyWebsite(), "Company Website", 256, false),
+               "Your company website, which will be added to the properties of the binary where possible");
+
+    props.add (new TextPropertyComponent (getCompanyEmail(), "Company E-mail", 256, false),
+               "Your company e-mail, which will be added to the properties of the binary where possible");
+
     {
         StringArray projectTypeNames;
         Array<var> projectTypeCodes;
@@ -427,25 +438,25 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 }
 
 //==============================================================================
-static StringArray getConfigs (const Project& p)
+static StringArray getVersionSegments (const Project& p)
 {
-    StringArray configs;
-    configs.addTokens (p.getVersionString(), ",.", String::empty);
-    configs.trim();
-    configs.removeEmptyStrings();
-    return configs;
+    StringArray segments;
+    segments.addTokens (p.getVersionString(), ",.", "");
+    segments.trim();
+    segments.removeEmptyStrings();
+    return segments;
 }
 
 int Project::getVersionAsHexInteger() const
 {
-    const StringArray configs (getConfigs (*this));
+    const StringArray segments (getVersionSegments (*this));
 
-    int value = (configs[0].getIntValue() << 16)
-                 + (configs[1].getIntValue() << 8)
-                  + configs[2].getIntValue();
+    int value = (segments[0].getIntValue() << 16)
+                 + (segments[1].getIntValue() << 8)
+                  + segments[2].getIntValue();
 
-    if (configs.size() >= 4)
-        value = (value << 8) + configs[3].getIntValue();
+    if (segments.size() >= 4)
+        value = (value << 8) + segments[3].getIntValue();
 
     return value;
 }
@@ -515,10 +526,10 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-Image Project::Item::loadAsImageFile() const
+Drawable* Project::Item::loadAsImageFile() const
 {
-    return isValid() ? ImageCache::getFromFile (getFile())
-                     : Image::null;
+    return isValid() ? Drawable::createFromImageFile (getFile())
+                     : nullptr;
 }
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid)
@@ -533,7 +544,12 @@ Project::Item Project::Item::createGroup (Project& project, const String& name, 
 bool Project::Item::isFile() const          { return state.hasType (Ids::FILE); }
 bool Project::Item::isGroup() const         { return state.hasType (Ids::GROUP) || isMainGroup(); }
 bool Project::Item::isMainGroup() const     { return state.hasType (Ids::MAINGROUP); }
-bool Project::Item::isImageFile() const     { return isFile() && ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr; }
+
+bool Project::Item::isImageFile() const
+{
+    return isFile() && (ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr
+                          || getFile().hasFileExtension ("svg"));
+}
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
@@ -727,7 +743,7 @@ struct ItemSorter
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-        return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
+        return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
     }
 };
 
@@ -739,7 +755,7 @@ struct ItemSorterWithGroupsAtStart
         const bool secondIsGroup = second.hasType (Ids::GROUP);
 
         if (firstIsGroup == secondIsGroup)
-            return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
+            return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
 
         return firstIsGroup ? -1 : 1;
     }
@@ -819,7 +835,7 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
     Item item (project, ValueTree (Ids::FILE));
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
-    item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
+    item.getShouldCompileValue() = shouldCompile && file.hasFileExtension (fileTypesToCompileByDefault);
     item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
     if (canContain (item))

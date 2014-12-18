@@ -39,7 +39,7 @@ class JUCE_API  DrawableRectangle  : public DrawableShape
 public:
     //==============================================================================
     DrawableRectangle();
-    DrawableRectangle (const DrawableRectangle& other);
+    DrawableRectangle (const DrawableRectangle&);
 
     /** Destructor. */
     ~DrawableRectangle();

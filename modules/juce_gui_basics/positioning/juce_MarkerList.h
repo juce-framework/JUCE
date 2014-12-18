@@ -40,9 +40,9 @@ public:
     /** Creates an empty marker list. */
     MarkerList();
     /** Creates a copy of another marker list. */
-    MarkerList (const MarkerList& other);
+    MarkerList (const MarkerList&);
     /** Copies another marker list to this one. */
-    MarkerList& operator= (const MarkerList& other);
+    MarkerList& operator= (const MarkerList&);
     /** Destructor. */
     ~MarkerList();
 
@@ -52,7 +52,7 @@ public:
     {
     public:
         /** Creates a copy of another Marker. */
-        Marker (const Marker& other);
+        Marker (const Marker&);
         /** Creates a Marker with a given name and position. */
         Marker (const String& name, const RelativeCoordinate& position);
 
@@ -110,9 +110,9 @@ public:
     void removeMarker (const String& name);
 
     /** Returns true if all the markers in these two lists match exactly. */
-    bool operator== (const MarkerList& other) const noexcept;
+    bool operator== (const MarkerList&) const noexcept;
     /** Returns true if not all the markers in these two lists match exactly. */
-    bool operator!= (const MarkerList& other) const noexcept;
+    bool operator!= (const MarkerList&) const noexcept;
 
     //==============================================================================
     /**

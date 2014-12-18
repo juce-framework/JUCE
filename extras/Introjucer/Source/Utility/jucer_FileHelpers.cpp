@@ -76,7 +76,7 @@ namespace FileHelpers
         if (file.exists())
             return file.replaceWithData (data, numBytes);
 
-        return file.appendData (data, numBytes);
+        return file.getParentDirectory().createDirectory() && file.appendData (data, numBytes);
     }
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData)
@@ -178,9 +178,9 @@ namespace FileHelpers
             StringArray toks;
 
            #if JUCE_WINDOWS
-            toks.addTokens (p, "\\/", String::empty);
+            toks.addTokens (p, "\\/", StringRef());
            #else
-            toks.addTokens (p, "/", String::empty);
+            toks.addTokens (p, "/", StringRef());
            #endif
 
             while (toks[0] == ".")

@@ -30,7 +30,7 @@
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Utility/jucer_TranslationTool.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
-#include "jucer_NewFileWizard.h"
+#include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"
 
 //==============================================================================
@@ -71,12 +71,12 @@ public:
        #if JUCE_MAC || JUCE_WINDOWS
         ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
 
-        addAndMakeVisible (&openProjectButton);
+        addAndMakeVisible (openProjectButton);
         openProjectButton.setCommandToTrigger (&commandManager, CommandIDs::openInIDE, true);
         openProjectButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::openInIDE));
         openProjectButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
 
-        addAndMakeVisible (&saveAndOpenButton);
+        addAndMakeVisible (saveAndOpenButton);
         saveAndOpenButton.setCommandToTrigger (&commandManager, CommandIDs::saveAndOpenInIDE, true);
         saveAndOpenButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::saveAndOpenInIDE));
         saveAndOpenButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
@@ -144,20 +144,34 @@ private:
 };
 
 //==============================================================================
-class LogoComponent  : public Component
+struct LogoComponent  : public Component
 {
-public:
-    LogoComponent() {}
-
     void paint (Graphics& g)
     {
-        const Path& logo = getIcons().mainJuceLogo;
-        const AffineTransform trans (RectanglePlacement (RectanglePlacement::centred)
-                                        .getTransformToFit (logo.getBounds(),
-                                                            getLocalBounds().toFloat()));
-
         g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
-        g.fillPath (logo, trans);
+
+        Rectangle<int> r (getLocalBounds());
+
+        g.setFont (15.0f);
+        g.drawFittedText (getVersionInfo(), r.removeFromBottom (30), Justification::centred, 2);
+
+        const Path& logo = getIcons().mainJuceLogo;
+        g.fillPath (logo, RectanglePlacement (RectanglePlacement::centred)
+                             .getTransformToFit (logo.getBounds(), r.toFloat()));
+    }
+
+    static String getVersionInfo()
+    {
+        const Time buildDate (Time::getCompilationDate());
+
+        String s;
+
+        s << SystemStats::getJUCEVersion() << newLine
+          << "Introjucer built: " << buildDate.getDayOfMonth()
+          << " " << Time::getMonthName (buildDate.getMonth(), true)
+          << " " << buildDate.getYear();
+
+        return s;
     }
 };
 
@@ -227,7 +241,8 @@ void ProjectContentComponent::resized()
     if (contentView != nullptr)
         contentView->setBounds (r);
 
-    logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
+    if (logo != nullptr)
+        logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
 }
 
 void ProjectContentComponent::lookAndFeelChanged()
@@ -263,7 +278,7 @@ void ProjectContentComponent::rebuildProjectTabs()
 
     if (project != nullptr)
     {
-        addAndMakeVisible (&treeViewTabs);
+        addAndMakeVisible (treeViewTabs);
 
         createProjectTabs();
 
@@ -571,25 +586,29 @@ StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
 {
     StringArray s;
 
-    for (Project::ExporterIterator exporter (*project); exporter.next();)
-        if (exporter->canLaunchProject())
-            s.add (exporter->getName());
+    if (project != nullptr)
+        for (Project::ExporterIterator exporter (*project); exporter.next();)
+            if (exporter->canLaunchProject())
+                s.add (exporter->getName());
 
     return s;
 }
 
-void ProjectContentComponent::openInIDE (const String& exporterName)
+void ProjectContentComponent::openInIDE (int exporterIndex)
 {
+    int i = 0;
+
     if (project != nullptr)
         for (Project::ExporterIterator exporter (*project); exporter.next();)
-            if (exporter->getName() == exporterName && exporter->launchProject())
-                break;
+            if (exporter->canLaunchProject())
+                if (i++ == exporterIndex && exporter->launchProject())
+                    break;
 }
 
 static void openIDEMenuCallback (int result, ProjectContentComponent* comp)
 {
     if (comp != nullptr && result > 0)
-        comp->openInIDE (comp->getExportersWhichCanLaunch() [result - 1]);
+        comp->openInIDE (result - 1);
 }
 
 void ProjectContentComponent::openInIDE()
@@ -610,7 +629,7 @@ void ProjectContentComponent::openInIDE()
         }
         else
         {
-            openInIDE (possibleExporters[0]);
+            openInIDE (0);
         }
     }
 }
@@ -651,7 +670,7 @@ void ProjectContentComponent::updateMainWindowTitle()
 
 void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, const String& text)
 {
-    addChildComponent (&bubbleMessage);
+    addChildComponent (bubbleMessage);
     bubbleMessage.setColour (BubbleComponent::backgroundColourId, Colours::white.withAlpha (0.7f));
     bubbleMessage.setColour (BubbleComponent::outlineColourId, Colours::black.withAlpha (0.8f));
     bubbleMessage.setAlwaysOnTop (true);

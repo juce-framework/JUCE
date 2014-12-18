@@ -63,7 +63,7 @@ public:
         These properties are added without them being inside a named section. If you
         want them to be kept together in a collapsible section, use addSection() instead.
     */
-    void addProperties (const Array <PropertyComponent*>& newPropertyComponents);
+    void addProperties (const Array<PropertyComponent*>& newPropertyComponents);
 
     /** Adds a set of properties to the panel.
 
@@ -76,7 +76,7 @@ public:
         To add properies without them being in a section, use addProperties().
     */
     void addSection (const String& sectionTitle,
-                     const Array <PropertyComponent*>& newPropertyComponents,
+                     const Array<PropertyComponent*>& newPropertyComponents,
                      bool shouldSectionInitiallyBeOpen = true);
 
     /** Calls the refresh() method of all PropertyComponents in the panel */

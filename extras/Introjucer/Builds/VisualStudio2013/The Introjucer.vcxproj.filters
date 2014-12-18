@@ -8,15 +8,6 @@
     <Filter Include="The Introjucer\Application">
       <UniqueIdentifier>{BCABA310-8FA8-9483-44C8-901CB254B038}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Introjucer\Project">
-      <UniqueIdentifier>{9CFC1C13-C955-D9BB-A0F7-363446AC2CBB}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Introjucer\Project Saving">
-      <UniqueIdentifier>{330A7495-9D53-820D-AD63-2DC83D2ED767}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Introjucer\Utility">
-      <UniqueIdentifier>{BF742880-2B1E-3276-CFB8-089DC7DD5EE5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="The Introjucer\Code Editor">
       <UniqueIdentifier>{D05B051C-4835-D6A6-3AF4-B61963EFC368}</UniqueIdentifier>
     </Filter>
@@ -37,6 +28,21 @@
     </Filter>
     <Filter Include="The Introjucer\ComponentEditor\ui">
       <UniqueIdentifier>{3CBBC95A-4009-C9C5-036C-B226EF4E113E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\Project Saving">
+      <UniqueIdentifier>{330A7495-9D53-820D-AD63-2DC83D2ED767}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\Project">
+      <UniqueIdentifier>{9CFC1C13-C955-D9BB-A0F7-363446AC2CBB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\Utility">
+      <UniqueIdentifier>{BF742880-2B1E-3276-CFB8-089DC7DD5EE5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\Wizards">
+      <UniqueIdentifier>{CB03A00B-C740-D8D3-A019-4C165270265F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\Wizards\templates">
+      <UniqueIdentifier>{EF91E5A7-0051-0493-4B4A-D458322DB03D}</UniqueIdentifier>
     </Filter>
     <Filter Include="The Introjucer\BinaryData">
       <UniqueIdentifier>{768EDA37-3A9B-E5C5-8D35-27FEF74CCBA0}</UniqueIdentifier>
@@ -262,48 +268,6 @@
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_NewFileWizard.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_NewProjectWizard.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_Project.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_Icons.cpp">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_MiscUtilities.cpp">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
       <Filter>The Introjucer\Code Editor</Filter>
     </ClCompile>
@@ -367,32 +331,89 @@
     <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp">
       <Filter>The Introjucer\ComponentEditor</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
+      <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_Project.cpp">
+      <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
+      <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp">
+      <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_Icons.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_MiscUtilities.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_SlidingPanelComponent.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Wizards\jucer_NewFileWizard.cpp">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
+      <Filter>The Introjucer\Wizards\templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_AudioComponentTemplate.cpp">
+      <Filter>The Introjucer\Wizards\templates</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_ComponentTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_SimpleWindow.cpp">
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_OpenGLComponentTemplate.cpp">
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <Filter>Juce Modules\juce_core\text</Filter>
@@ -478,6 +499,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_File.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_FileFilter.cpp">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_FileInputStream.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
@@ -488,6 +512,9 @@
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.cpp">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.cpp">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.cpp">
@@ -684,6 +711,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\broadcasters\juce_ChangeBroadcaster.cpp">
       <Filter>Juce Modules\juce_events\broadcasters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.cpp">
+      <Filter>Juce Modules\juce_events\interprocess</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnection.cpp">
       <Filter>Juce Modules\juce_events\interprocess</Filter>
@@ -1114,9 +1144,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.cpp">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileListComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
@@ -1130,9 +1157,6 @@
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.cpp">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.cpp">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandInfo.cpp">
@@ -1210,8 +1234,17 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniser.cpp">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.cpp">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.cpp">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_BubbleMessageComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
@@ -1220,6 +1253,9 @@
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
@@ -1299,6 +1335,9 @@
     <ClInclude Include="..\..\Source\Application\jucer_Application.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Application\jucer_AutoUpdater.h">
+      <Filter>The Introjucer\Application</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_CommandIDs.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
@@ -1322,108 +1361,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_OpenDocumentManager.h">
       <Filter>The Introjucer\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_AudioPluginModule.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Base.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Exporter.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_Module.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ModulesPanel.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_NewFileWizard.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_NewProjectWizard.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_Project.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Base.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExporter.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectSaver.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ResourceFile.h">
-      <Filter>The Introjucer\Project Saving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_Colours.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_MiscUtilities.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_PresetIDs.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_TranslationTool.h">
-      <Filter>The Introjucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">
-      <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h">
       <Filter>The Introjucer\Code Editor</Filter>
@@ -1620,29 +1557,173 @@
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h">
       <Filter>The Introjucer\ComponentEditor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExporter.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectSaver.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ResourceFile.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_AudioPluginModule.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Base.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Exporter.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_Module.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ModulesPanel.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_Project.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Base.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_Colours.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_MiscUtilities.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_PresetIDs.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_SlidingPanelComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_TranslationTool.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_NewFileWizard.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizard.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizardComponent.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Animated.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_AudioApp.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_AudioPlugin.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Blank.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Console.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_DLL.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_GUIApp.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_openGL.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_StaticLibrary.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_StartPageComponent.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h">
+      <Filter>The Introjucer\Wizards</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_ComponentTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_InlineComponentTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
+      <Filter>The Introjucer\Wizards\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h">
       <Filter>Juce Modules\juce_core\text</Filter>
@@ -1650,13 +1731,13 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h">
+      <Filter>Juce Modules\juce_core\text</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h">
-      <Filter>Juce Modules\juce_core\text</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_Identifier.h">
@@ -1695,6 +1776,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h">
       <Filter>Juce Modules\juce_core\maths</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_NormalisableRange.h">
+      <Filter>Juce Modules\juce_core\maths</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Random.h">
       <Filter>Juce Modules\juce_core\maths</Filter>
     </ClInclude>
@@ -1729,6 +1813,9 @@
       <Filter>Juce Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ScopedPointer.h">
+      <Filter>Juce Modules\juce_core\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_SharedResourcePointer.h">
       <Filter>Juce Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Singleton.h">
@@ -1845,6 +1932,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_File.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileFilter.h">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileInputStream.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
@@ -1858,6 +1948,9 @@
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h">
+      <Filter>Juce Modules\juce_core\files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h">
       <Filter>Juce Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.h">
@@ -1904,6 +1997,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_Logger.h">
       <Filter>Juce Modules\juce_core\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerSupport.h">
+      <Filter>Juce Modules\juce_core\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_PlatformDefs.h">
       <Filter>Juce Modules\juce_core\system</Filter>
@@ -2028,6 +2124,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MessageManager.h">
       <Filter>Juce Modules\juce_events\messages</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_MountedVolumeListChangeDetector.h">
+      <Filter>Juce Modules\juce_events\messages</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h">
       <Filter>Juce Modules\juce_events\messages</Filter>
     </ClInclude>
@@ -2054,6 +2153,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ListenerList.h">
       <Filter>Juce Modules\juce_events\broadcasters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.h">
+      <Filter>Juce Modules\juce_events\interprocess</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\interprocess\juce_InterprocessConnection.h">
       <Filter>Juce Modules\juce_events\interprocess</Filter>
@@ -2523,9 +2625,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileChooserDialogBox.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileFilter.h">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_FileListComponent.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
@@ -2542,9 +2641,6 @@
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_ImagePreviewComponent.h">
-      <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\filebrowser\juce_WildcardFileFilter.h">
       <Filter>Juce Modules\juce_gui_basics\filebrowser</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\commands\juce_ApplicationCommandID.h">
@@ -2592,6 +2688,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CPlusPlusCodeTokeniserFunctions.h">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_LuaCodeTokeniser.h">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.h">
+      <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.h">
       <Filter>Juce Modules\juce_gui_extra\documents</Filter>
     </ClInclude>
@@ -2604,6 +2706,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h">
       <Filter>Juce Modules\juce_gui_extra\embedding</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AnimatedAppComponent.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_AppleRemote.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
@@ -2614,6 +2719,9 @@
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h">
@@ -2663,7 +2771,55 @@
     <None Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
+    <None Include="..\..\Source\BinaryData\projectIconAndroid.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\projectIconCodeblocks.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\projectIconLinuxMakefile.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\projectIconVisualStudio.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\projectIconXcode.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\projectIconXcodeIOS.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
     <None Include="..\..\Source\BinaryData\RecentFilesMenuTemplate.nib">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_AnimatedApp.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_AudioApp.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_AudioPlugin.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_ConsoleApp.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_DLL.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_GUI.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_Highlight.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_Openfile.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_OpenGL.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\wizard_StaticLibrary.svg">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_core\juce_module_info">

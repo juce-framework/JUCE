@@ -64,7 +64,7 @@
 //=============================================================================
 /** Config: JUCE_LOG_ASSERTIONS
 
-    If this flag is enabled, the the jassert and jassertfalse macros will always use Logger::writeToLog()
+    If this flag is enabled, the jassert and jassertfalse macros will always use Logger::writeToLog()
     to write a message when an assertion happens.
 
     Enabling it will also leave this turned on in release builds. When it's disabled,
@@ -194,6 +194,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "threads/juce_ScopedLock.h"
 #include "threads/juce_CriticalSection.h"
 #include "maths/juce_Range.h"
+#include "maths/juce_NormalisableRange.h"
 #include "containers/juce_ElementComparator.h"
 #include "containers/juce_ArrayAllocationBase.h"
 #include "containers/juce_Array.h"
@@ -232,6 +233,8 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "files/juce_FileSearchPath.h"
 #include "files/juce_MemoryMappedFile.h"
 #include "files/juce_TemporaryFile.h"
+#include "files/juce_FileFilter.h"
+#include "files/juce_WildcardFileFilter.h"
 #include "streams/juce_FileInputSource.h"
 #include "logging/juce_FileLogger.h"
 #include "javascript/juce_JSON.h"
@@ -242,6 +245,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
 #include "system/juce_PlatformDefs.h"
+#include "system/juce_CompilerSupport.h"
 #include "system/juce_SystemStats.h"
 #include "threads/juce_ChildProcess.h"
 #include "threads/juce_DynamicLibrary.h"
@@ -270,6 +274,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "zip/juce_GZIPDecompressorInputStream.h"
 #include "zip/juce_ZipFile.h"
 #include "containers/juce_PropertySet.h"
+#include "memory/juce_SharedResourcePointer.h"
 
 }
 

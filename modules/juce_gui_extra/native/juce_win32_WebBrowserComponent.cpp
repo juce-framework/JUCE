@@ -53,7 +53,7 @@ public:
 
             if (connectionPoint != nullptr)
             {
-                WebBrowserComponent* const owner = dynamic_cast <WebBrowserComponent*> (getParentComponent());
+                WebBrowserComponent* const owner = dynamic_cast<WebBrowserComponent*> (getParentComponent());
                 jassert (owner != nullptr);
 
                 EventHandler* handler = new EventHandler (*owner);
@@ -129,13 +129,11 @@ private:
     DWORD adviseCookie;
 
     //==============================================================================
-    class EventHandler  : public ComBaseClassHelper <IDispatch>,
+    class EventHandler  : public ComBaseClassHelper<IDispatch>,
                           public ComponentMovementWatcher
     {
     public:
-        EventHandler (WebBrowserComponent& owner_)
-            : ComponentMovementWatcher (&owner_),
-              owner (owner_)
+        EventHandler (WebBrowserComponent& w)  : ComponentMovementWatcher (&w), owner (w)
         {
         }
 
@@ -153,9 +151,26 @@ private:
                                                                                                     : VARIANT_TRUE;
                 return S_OK;
             }
+            else if (dispIdMember == DISPID_NEWWINDOW3)
+            {
+                owner.newWindowAttemptingToLoad (pDispParams->rgvarg[0].bstrVal);
+                *pDispParams->rgvarg[3].pboolVal = VARIANT_TRUE;
+
+                return S_OK;
+            }
             else if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
+                return S_OK;
+            }
+            else if (dispIdMember == 263 /*DISPID_WINDOWCLOSING*/)
+            {
+                owner.windowCloseRequest();
+
+                // setting this bool tells the browser to ignore the event - we'll handle it.
+                if (pDispParams->cArgs > 0 && pDispParams->rgvarg[0].vt == (VT_BYREF | VT_BOOL))
+                    *pDispParams->rgvarg[0].pboolVal = VARIANT_TRUE;
+
                 return S_OK;
             }
 
@@ -204,15 +219,20 @@ void WebBrowserComponent::goToURL (const String& url,
 {
     lastURL = url;
 
-    lastHeaders.clear();
     if (headers != nullptr)
         lastHeaders = *headers;
+    else
+        lastHeaders.clear();
 
-    lastPostData.setSize (0);
     if (postData != nullptr)
         lastPostData = *postData;
+    else
+        lastPostData.reset();
 
     blankPageShown = false;
+
+    if (browser->browser == nullptr)
+        checkWindowAssociation();
 
     browser->goToURL (url, headers, postData);
 }
@@ -225,7 +245,7 @@ void WebBrowserComponent::stop()
 
 void WebBrowserComponent::goBack()
 {
-    lastURL = String::empty;
+    lastURL.clear();
     blankPageShown = false;
 
     if (browser->browser != nullptr)
@@ -234,7 +254,7 @@ void WebBrowserComponent::goBack()
 
 void WebBrowserComponent::goForward()
 {
-    lastURL = String::empty;
+    lastURL.clear();
 
     if (browser->browser != nullptr)
         browser->browser->GoForward();
@@ -250,7 +270,10 @@ void WebBrowserComponent::refresh()
 void WebBrowserComponent::paint (Graphics& g)
 {
     if (browser->browser == nullptr)
+    {
         g.fillAll (Colours::white);
+        checkWindowAssociation();
+    }
 }
 
 void WebBrowserComponent::checkWindowAssociation()
@@ -287,7 +310,7 @@ void WebBrowserComponent::reloadLastURL()
     if (lastURL.isNotEmpty())
     {
         goToURL (lastURL, &lastHeaders, &lastPostData);
-        lastURL = String::empty;
+        lastURL.clear();
     }
 }
 
@@ -306,5 +329,25 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
-void WebBrowserComponent::pageFinishedLoading (const String&) {}
+void WebBrowserComponent::focusGained (FocusChangeType)
+{
+    if (IOleObject* oleObject = (IOleObject*) browser->queryInterface (&IID_IOleObject))
+    {
+        if (IOleWindow* oleWindow = (IOleWindow*) browser->queryInterface (&IID_IOleWindow))
+        {
+            IOleClientSite* oleClientSite = nullptr;
+
+            if (SUCCEEDED (oleObject->GetClientSite (&oleClientSite)))
+            {
+                HWND hwnd;
+                oleWindow->GetWindow (&hwnd);
+                oleObject->DoVerb (OLEIVERB_UIACTIVATE, nullptr, oleClientSite, 0, hwnd, nullptr);
+                oleClientSite->Release();
+            }
+
+            oleWindow->Release();
+        }
+
+        oleObject->Release();
+    }
+}

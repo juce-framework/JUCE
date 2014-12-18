@@ -70,6 +70,6 @@ void ToneGeneratorAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& 
         currentPhase += phasePerSample;
 
         for (int j = info.buffer->getNumChannels(); --j >= 0;)
-            *info.buffer->getSampleData (j, info.startSample + i) = sample;
+            info.buffer->setSample (j, info.startSample + i, sample);
     }
 }

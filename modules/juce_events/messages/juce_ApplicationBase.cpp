@@ -134,11 +134,11 @@ struct JUCEApplicationBase::MultipleInstanceHandler {};
 #if JUCE_ANDROID
 
 StringArray JUCEApplicationBase::getCommandLineParameterArray() { return StringArray(); }
-String JUCEApplicationBase::getCommandLineParameters()          { return String::empty; }
+String JUCEApplicationBase::getCommandLineParameters()          { return String(); }
 
 #else
 
-#if JUCE_WINDOWS
+#if JUCE_WINDOWS && ! defined (_CONSOLE)
 
 String JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameters()
 {
@@ -171,8 +171,13 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
-extern const char* const* juce_argv;  // declared in juce_core
-extern int juce_argc;
+#if JUCE_WINDOWS
+ const char* const* juce_argv = nullptr;
+ int juce_argc = 0;
+#else
+ extern const char* const* juce_argv;  // declared in juce_core
+ extern int juce_argc;
+#endif
 
 String JUCEApplicationBase::getCommandLineParameters()
 {
@@ -227,7 +232,7 @@ int JUCEApplicationBase::main()
     jassert (app != nullptr);
 
     if (! app->initialiseApp())
-        return 0;
+        return app->getApplicationReturnValue();
 
     JUCE_TRY
     {

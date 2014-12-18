@@ -59,14 +59,14 @@ public:
     explicit Expression (double constant);
 
     /** Creates a copy of an expression. */
-    Expression (const Expression& other);
+    Expression (const Expression&);
 
     /** Copies another expression. */
-    Expression& operator= (const Expression& other);
+    Expression& operator= (const Expression&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    Expression (Expression&& other) noexcept;
-    Expression& operator= (Expression&& other) noexcept;
+    Expression (Expression&&) noexcept;
+    Expression& operator= (Expression&&) noexcept;
    #endif
 
     /** Creates an expression by parsing a string.
@@ -78,14 +78,14 @@ public:
     /** Returns a string version of the expression. */
     String toString() const;
 
-    /** Returns an expression which is an addtion operation of two existing expressions. */
-    Expression operator+ (const Expression& other) const;
+    /** Returns an expression which is an addition operation of two existing expressions. */
+    Expression operator+ (const Expression&) const;
     /** Returns an expression which is a subtraction operation of two existing expressions. */
-    Expression operator- (const Expression& other) const;
+    Expression operator- (const Expression&) const;
     /** Returns an expression which is a multiplication operation of two existing expressions. */
-    Expression operator* (const Expression& other) const;
+    Expression operator* (const Expression&) const;
     /** Returns an expression which is a division operation of two existing expressions. */
-    Expression operator/ (const Expression& other) const;
+    Expression operator/ (const Expression&) const;
     /** Returns an expression which performs a negation operation on an existing expression. */
     Expression operator-() const;
 

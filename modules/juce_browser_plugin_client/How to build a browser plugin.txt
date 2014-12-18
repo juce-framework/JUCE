@@ -60,8 +60,7 @@ Building a Windows ActiveX control for Internet Explorer
 
 - This is actually quite easy, because the same DLL that functions as an NPAPI plugin can
   also be used as an ActiveX control.
-- Just create a windows NPAPI plugin as described above, but add the juce_ActiveX_GlueCode.cpp
-  file to the project.
+- By default the build will produce an ActiveX plugin. To disable this, you can set JUCE_BUILD_ACTIVEX = 0
 - In your BrowserPluginCharacteristics.h file, the JuceBrowserPlugin_ActiveXCLSID setting needs
   to be given a unique GUID for your plugin.
 - Because the plugin is a COM object, it doesn't matter where the DLL lives, but it needs to

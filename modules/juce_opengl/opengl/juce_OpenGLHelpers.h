@@ -50,75 +50,23 @@ public:
     /** Returns the address of a named GL extension function */
     static void* getExtensionFunction (const char* functionName);
 
-   #if JUCE_USE_OPENGL_FIXED_FUNCTION
-    /** Sets the current colour using a JUCE colour. */
-    static void setColour (Colour colour);
+    /** Makes some simple textual changes to a shader program to try to convert old GLSL
+        keywords to their v3 equivalents.
 
-    /** Gives the current context an orthoganal rendering mode for 2D drawing into the given size. */
-    static void prepareFor2D (int width, int height);
+        Before doing this, the function will check whether the current context is actually
+        using a later version of the language, and if not it will not make any changes.
+        Obviously this is not a real parser, so will only work on simple code!
+    */
+    static String translateVertexShaderToV3 (const String&);
 
-    /** This does the same job as gluPerspective(). */
-    static void setPerspective (double fovy, double aspect, double zNear, double zFar);
+    /** Makes some simple textual changes to a shader program to try to convert old GLSL
+        keywords to their v3 equivalents.
 
-    static void applyTransform (const AffineTransform& t);
-
-    static void applyMatrix (const float matrixValues[16]);
-   #if ! JUCE_OPENGL_ES
-    static void applyMatrix (const double matrixValues[16]);
-   #endif
-
-    /** Draws a 2D quad with the specified corner points. */
-    static void drawQuad2D (float x1, float y1,
-                            float x2, float y2,
-                            float x3, float y3,
-                            float x4, float y4,
-                            Colour colour);
-
-    /** Draws a 3D quad with the specified corner points. */
-    static void drawQuad3D (float x1, float y1, float z1,
-                            float x2, float y2, float z2,
-                            float x3, float y3, float z3,
-                            float x4, float y4, float z4,
-                            Colour colour);
-    static void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords, const int numVertices) noexcept;
-
-    static void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords,
-                                   const int numVertices, const GLuint textureID) noexcept;
-
-    static void drawTextureQuad (GLuint textureID, const Rectangle<int>& rect);
-
-    static void fillRectWithTexture (const Rectangle<int>& rect, GLuint textureID, const float alpha);
-
-    /** Fills a rectangle with the specified colour. */
-    static void fillRectWithColour (const Rectangle<int>& rect,
-                                    Colour colour);
-
-    static void fillRect (const Rectangle<int>& rect);
-   #endif
-};
-
-//==============================================================================
-/**
-    Used as a local object while rendering, this will create a temporary texture ID
-    from an image in the quickest way possible.
-
-    If the image is backed by an OpenGL framebuffer, it will use that directly; otherwise,
-    this object will create a temporary texture or framebuffer and copy the image.
-*/
-class JUCE_API  OpenGLTextureFromImage
-{
-public:
-    OpenGLTextureFromImage (const Image& image);
-    ~OpenGLTextureFromImage();
-
-    GLuint textureID;
-    const int imageWidth, imageHeight;
-    float fullWidthProportion, fullHeightProportion;
-
-private:
-    ScopedPointer<OpenGLTexture> texture;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTextureFromImage)
+        Before doing this, the function will check whether the current context is actually
+        using a later version of the language, and if not it will not make any changes.
+        Obviously this is not a real parser, so will only work on simple code!
+    */
+    static String translateFragmentShaderToV3 (const String&);
 };
 
 

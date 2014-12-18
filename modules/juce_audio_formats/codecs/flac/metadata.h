@@ -1,5 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2001,2002,2003,2004,2005,2006,2007  Josh Coalson
+ * Copyright (C) 2001-2009  Josh Coalson
+ * Copyright (C) 2011-2014  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -499,7 +500,7 @@ FLAC_API FLAC__MetadataType FLAC__metadata_simple_iterator_get_block_type(const 
  * \retval unsigned
  *    The length of the metadata block at the current iterator position.
  *    The is same length as that in the
- *    <a href="http://flac.sourceforge.net/format.html#metadata_block_header">metadata block header</a>,
+ *    <a href="http://xiph.org/flac/format.html#metadata_block_header">metadata block header</a>,
  *    i.e. the length of the metadata body that follows the header.
  */
 FLAC_API unsigned FLAC__metadata_simple_iterator_get_block_length(const FLAC__Metadata_SimpleIterator *iterator);
@@ -1986,7 +1987,7 @@ FLAC_API FLAC__bool FLAC__metadata_object_cuesheet_resize_tracks(FLAC__StreamMet
  *    \code object->type == FLAC__METADATA_TYPE_CUESHEET \endcode
  *    \code track_num < object->data.cue_sheet.num_tracks \endcode
  *    \code (track->indices != NULL && track->num_indices > 0) ||
- * (track->indices == NULL && track->num_indices == 0)
+ * (track->indices == NULL && track->num_indices == 0) \endcode
  * \retval FLAC__bool
  *    \c false if \a copy is \c true and malloc() fails, else \c true.
  */

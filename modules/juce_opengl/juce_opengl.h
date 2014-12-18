@@ -32,7 +32,6 @@
 
 #if JUCE_IOS || JUCE_ANDROID
  #define JUCE_OPENGL_ES 1
- #define JUCE_USE_OPENGL_FIXED_FUNCTION 0
 #endif
 
 #if JUCE_WINDOWS
@@ -57,20 +56,65 @@
  #include <GL/gl.h>
  #undef KeyPress
 #elif JUCE_IOS
- #include <OpenGLES/ES2/gl.h>
+ #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
+  #include <OpenGLES/ES3/gl.h>
+ #else
+  #include <OpenGLES/ES2/gl.h>
+ #endif
 #elif JUCE_MAC
- #include <OpenGL/gl.h>
- #include "OpenGL/glext.h"
+ #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
+  #define JUCE_OPENGL3 1
+  #include <OpenGL/gl3.h>
+  #include <OpenGL/gl3ext.h>
+ #else
+  #include <OpenGL/gl.h>
+  #include <OpenGL/glext.h>
+ #endif
 #elif JUCE_ANDROID
  #include <GLES2/gl2.h>
 #endif
 
-#if ! defined (JUCE_USE_OPENGL_SHADERS)
- #define JUCE_USE_OPENGL_SHADERS 1
+#if GL_ES_VERSION_3_0
+ #define JUCE_OPENGL3 1
 #endif
 
-#ifndef JUCE_USE_OPENGL_FIXED_FUNCTION
- #define JUCE_USE_OPENGL_FIXED_FUNCTION 1
+//=============================================================================
+/** This macro is a helper for use in GLSL shader code which needs to compile on both OpenGL 2.1 and OpenGL 3.0.
+    It's mandatory in OpenGL 3.0 to specify the GLSL version.
+*/
+#if JUCE_OPENGL3
+ #if JUCE_OPENGL_ES
+  #define JUCE_GLSL_VERSION "#version 300 es"
+ #else
+  #define JUCE_GLSL_VERSION "#version 150"
+ #endif
+#else
+ #define JUCE_GLSL_VERSION ""
+#endif
+
+//=============================================================================
+#if JUCE_OPENGL_ES || defined (DOXYGEN)
+ /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
+     Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
+     these macros define the various precision keywords only on GLES.
+ */
+ #define JUCE_MEDIUMP  "mediump"
+
+ /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
+     Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
+     these macros define the various precision keywords only on GLES.
+ */
+ #define JUCE_HIGHP    "highp"
+
+ /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
+     Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
+     these macros define the various precision keywords only on GLES.
+ */
+ #define JUCE_LOWP     "lowp"
+#else
+ #define JUCE_MEDIUMP
+ #define JUCE_HIGHP
+ #define JUCE_LOWP
 #endif
 
 //=============================================================================
@@ -79,12 +123,14 @@ namespace juce
 
 class OpenGLTexture;
 class OpenGLFrameBuffer;
+class OpenGLShaderProgram;
 
+#include "geometry/juce_Quaternion.h"
+#include "geometry/juce_Matrix3D.h"
+#include "geometry/juce_Vector3D.h"
+#include "geometry/juce_Draggable3DOrientation.h"
 #include "native/juce_MissingGLDefinitions.h"
 #include "opengl/juce_OpenGLHelpers.h"
-#include "opengl/juce_Quaternion.h"
-#include "opengl/juce_Matrix3D.h"
-#include "opengl/juce_Draggable3DOrientation.h"
 #include "opengl/juce_OpenGLPixelFormat.h"
 #include "native/juce_OpenGLExtensions.h"
 #include "opengl/juce_OpenGLRenderer.h"
@@ -96,7 +142,7 @@ class OpenGLFrameBuffer;
 #include "opengl/juce_OpenGLRenderer.h"
 #include "opengl/juce_OpenGLShaderProgram.h"
 #include "opengl/juce_OpenGLTexture.h"
-#include "opengl/juce_Vector3D.h"
+#include "utils/juce_OpenGLAppComponent.h"
 
 }
 

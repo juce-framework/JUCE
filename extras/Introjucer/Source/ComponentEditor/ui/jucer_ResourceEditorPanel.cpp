@@ -35,7 +35,7 @@ public:
         : document (doc), reloadButton ("Reload"), row (0)
     {
         setInterceptsMouseClicks (false, true);
-        addAndMakeVisible (&reloadButton);
+        addAndMakeVisible (reloadButton);
         reloadButton.addListener (this);
     }
 
@@ -74,13 +74,13 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
       reloadAllButton ("Reload all resources"),
       delButton ("Delete selected resources")
 {
-    addAndMakeVisible (&addButton);
+    addAndMakeVisible (addButton);
     addButton.addListener (this);
 
-    addAndMakeVisible (&reloadAllButton);
+    addAndMakeVisible (reloadAllButton);
     reloadAllButton.addListener (this);
 
-    addAndMakeVisible (&delButton);
+    addAndMakeVisible (delButton);
     delButton.addListener (this);
     delButton.setEnabled (false);
 

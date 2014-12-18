@@ -82,10 +82,14 @@ public:
                                 has in fact been dropped.
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
+        @param sysexHasEmbeddedLength   when reading sysexes, this flag indicates whether
+                                to expect the data to begin with a variable-length field
+                                indicating its size
     */
     MidiMessage (const void* data, int maxBytesToUse,
                  int& numBytesUsed, uint8 lastStatusByte,
-                 double timeStamp = 0);
+                 double timeStamp = 0,
+                 bool sysexHasEmbeddedLength = true);
 
     /** Creates an active-sense message.
         Since the MidiMessage has to contain a valid message, this default constructor
@@ -94,10 +98,10 @@ public:
     MidiMessage() noexcept;
 
     /** Creates a copy of another midi message. */
-    MidiMessage (const MidiMessage& other);
+    MidiMessage (const MidiMessage&);
 
     /** Creates a copy of another midi message, with a different timestamp. */
-    MidiMessage (const MidiMessage& other, double newTimeStamp);
+    MidiMessage (const MidiMessage&, double newTimeStamp);
 
     /** Destructor. */
     ~MidiMessage();
@@ -106,8 +110,8 @@ public:
     MidiMessage& operator= (const MidiMessage& other);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    MidiMessage (MidiMessage&& other) noexcept;
-    MidiMessage& operator= (MidiMessage&& other) noexcept;
+    MidiMessage (MidiMessage&&) noexcept;
+    MidiMessage& operator= (MidiMessage&&) noexcept;
    #endif
 
     //==============================================================================
@@ -168,9 +172,7 @@ public:
     bool isForChannel (int channelNumber) const noexcept;
 
     /** Changes the message's midi channel.
-
         This won't do anything for non-channel messages like sysexes.
-
         @param newChannelNumber    the channel number to change it to, in the range 1 to 16
     */
     void setChannel (int newChannelNumber) noexcept;
@@ -181,17 +183,13 @@ public:
     bool isSysEx() const noexcept;
 
     /** Returns a pointer to the sysex data inside the message.
-
         If this event isn't a sysex event, it'll return 0.
-
         @see getSysExDataSize
     */
     const uint8* getSysExData() const noexcept;
 
     /** Returns the size of the sysex data.
-
         This value excludes the 0xf0 header byte and the 0xf7 at the end.
-
         @see getSysExData
     */
     int getSysExDataSize() const noexcept;
@@ -252,15 +250,12 @@ public:
     bool isNoteOnOrOff() const noexcept;
 
     /** Returns the midi note number for note-on and note-off messages.
-
         If the message isn't a note-on or off, the value returned is undefined.
-
         @see isNoteOff, getMidiNoteName, getMidiNoteInHertz, setNoteNumber
     */
     int getNoteNumber() const noexcept;
 
     /** Changes the midi note number of a note-on or note-off message.
-
         If the message isn't a note on or off, this will do nothing.
     */
     void setNoteNumber (int newNoteNumber) noexcept;
@@ -320,16 +315,12 @@ public:
 
     //==============================================================================
     /** Returns true if the message is a program (patch) change message.
-
         @see getProgramChangeNumber, getGMInstrumentName
     */
     bool isProgramChange() const noexcept;
 
     /** Returns the new program number of a program change message.
-
-        If the message isn't a program change, the value returned will be
-        nonsense.
-
+        If the message isn't a program change, the value returned is undefined.
         @see isProgramChange, getGMInstrumentName
     */
     int getProgramChangeNumber() const noexcept;
@@ -344,7 +335,6 @@ public:
 
     //==============================================================================
     /** Returns true if the message is a pitch-wheel move.
-
         @see getPitchWheelValue, pitchWheel
     */
     bool isPitchWheel() const noexcept;
@@ -433,7 +423,6 @@ public:
     /** Returns the controller number of a controller message.
 
         The name of the controller can be looked up using the getControllerName() method.
-
         Note that the value returned is invalid for messages that aren't controller changes.
 
         @see isController, getControllerName, getControllerValue
@@ -443,7 +432,6 @@ public:
     /** Returns the controller value from a controller message.
 
         A value 0 to 127 is returned to indicate the new controller position.
-
         Note that the value returned is invalid for messages that aren't controller changes.
 
         @see isController, getControllerNumber
@@ -467,13 +455,11 @@ public:
                                         int value) noexcept;
 
     /** Checks whether this message is an all-notes-off message.
-
         @see allNotesOff
     */
     bool isAllNotesOff() const noexcept;
 
     /** Checks whether this message is an all-sound-off message.
-
         @see allSoundOff
     */
     bool isAllSoundOff() const noexcept;
@@ -520,13 +506,11 @@ public:
     int getMetaEventType() const noexcept;
 
     /** Returns a pointer to the data in a meta-event.
-
         @see isMetaEvent, getMetaEventLength
     */
     const uint8* getMetaEventData() const noexcept;
 
     /** Returns the length of the data for a meta-event.
-
         @see isMetaEvent, getMetaEventData
     */
     int getMetaEventLength() const noexcept;
@@ -539,28 +523,27 @@ public:
     bool isEndOfTrackMetaEvent() const noexcept;
 
     /** Creates an end-of-track meta-event.
-
         @see isEndOfTrackMetaEvent
     */
     static MidiMessage endOfTrack() noexcept;
 
     /** Returns true if this is an 'track name' meta-event.
-
         You can use the getTextFromTextMetaEvent() method to get the track's name.
     */
     bool isTrackNameEvent() const noexcept;
 
     /** Returns true if this is a 'text' meta-event.
-
         @see getTextFromTextMetaEvent
     */
     bool isTextMetaEvent() const noexcept;
 
     /** Returns the text from a text meta-event.
-
         @see isTextMetaEvent
     */
     String getTextFromTextMetaEvent() const;
+
+    /** Creates a text meta-event. */
+    static MidiMessage textMetaEvent (int type, StringRef text);
 
     //==============================================================================
     /** Returns true if this is a 'tempo' meta-event.
@@ -660,7 +643,6 @@ public:
 
     //==============================================================================
     /** Returns true if this is a midi start event.
-
         @see midiStart
     */
     bool isMidiStart() const noexcept;
@@ -669,7 +651,6 @@ public:
     static MidiMessage midiStart() noexcept;
 
     /** Returns true if this is a midi continue event.
-
         @see midiContinue
     */
     bool isMidiContinue() const noexcept;
@@ -678,7 +659,6 @@ public:
     static MidiMessage midiContinue() noexcept;
 
     /** Returns true if this is a midi stop event.
-
         @see midiStop
     */
     bool isMidiStop() const noexcept;
@@ -687,7 +667,6 @@ public:
     static MidiMessage midiStop() noexcept;
 
     /** Returns true if this is a midi clock event.
-
         @see midiClock, songPositionPointer
     */
     bool isMidiClock() const noexcept;
@@ -696,13 +675,11 @@ public:
     static MidiMessage midiClock() noexcept;
 
     /** Returns true if this is a song-position-pointer message.
-
         @see getSongPositionPointerMidiBeat, songPositionPointer
     */
     bool isSongPositionPointer() const noexcept;
 
     /** Returns the midi beat-number of a song-position-pointer message.
-
         @see isSongPositionPointer, songPositionPointer
     */
     int getSongPositionPointerMidiBeat() const noexcept;
@@ -719,23 +696,18 @@ public:
 
     //==============================================================================
     /** Returns true if this is a quarter-frame midi timecode message.
-
         @see quarterFrame, getQuarterFrameSequenceNumber, getQuarterFrameValue
     */
     bool isQuarterFrame() const noexcept;
 
     /** Returns the sequence number of a quarter-frame midi timecode message.
-
         This will be a value between 0 and 7.
-
         @see isQuarterFrame, getQuarterFrameValue, quarterFrame
     */
     int getQuarterFrameSequenceNumber() const noexcept;
 
     /** Returns the value from a quarter-frame message.
-
-        This will be the lower nybble of the message's data-byte, a value
-        between 0 and 15
+        This will be the lower nybble of the message's data-byte, a value between 0 and 15
     */
     int getQuarterFrameValue() const noexcept;
 
@@ -747,7 +719,6 @@ public:
     static MidiMessage quarterFrame (int sequenceNumber, int value) noexcept;
 
     /** SMPTE timecode types.
-
         Used by the getFullFrameParameters() and fullFrame() methods.
     */
     enum SmpteTimecodeType
@@ -758,8 +729,7 @@ public:
         fps30       = 3
     };
 
-    /** Returns true if this is a full-frame midi timecode message.
-    */
+    /** Returns true if this is a full-frame midi timecode message. */
     bool isFullFrame() const noexcept;
 
     /** Extracts the timecode information from a full-frame midi timecode message.
@@ -773,8 +743,7 @@ public:
                                  int& frames,
                                  SmpteTimecodeType& timecodeType) const noexcept;
 
-    /** Creates a full-frame MTC message.
-    */
+    /** Creates a full-frame MTC message. */
     static MidiMessage fullFrame (int hours,
                                   int minutes,
                                   int seconds,
@@ -799,7 +768,6 @@ public:
     };
 
     /** Checks whether this is an MMC message.
-
         If it is, you can use the getMidiMachineControlCommand() to find out its type.
     */
     bool isMidiMachineControlMessage() const noexcept;
@@ -888,6 +856,9 @@ public:
         @see getMidiNoteName
     */
     static double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
+
+    /** Returns true if the given midi note number is a black key. */
+    static bool isMidiNoteBlack (int noteNumber) noexcept;
 
     /** Returns the standard name of a GM instrument, or nullptr if unknown for this index.
 

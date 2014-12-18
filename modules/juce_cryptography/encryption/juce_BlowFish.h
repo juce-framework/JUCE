@@ -42,10 +42,10 @@ public:
     BlowFish (const void* keyData, int keyBytes);
 
     /** Creates a copy of another blowfish object. */
-    BlowFish (const BlowFish& other);
+    BlowFish (const BlowFish&);
 
     /** Copies another blowfish object. */
-    BlowFish& operator= (const BlowFish& other) noexcept;
+    BlowFish& operator= (const BlowFish&) noexcept;
 
     /** Destructor. */
     ~BlowFish() noexcept;

@@ -139,8 +139,8 @@ private:
     public:
         PropertyPanelViewport (Component* content)
         {
-            addAndMakeVisible (&viewport);
-            addAndMakeVisible (&rolloverHelp);
+            addAndMakeVisible (viewport);
+            addAndMakeVisible (rolloverHelp);
             viewport.setViewedComponent (content, true);
         }
 
@@ -251,7 +251,7 @@ private:
     public:
         SettingsComp (Project& p)  : project (p)
         {
-            addAndMakeVisible (&group);
+            addAndMakeVisible (group);
 
             updatePropertyList();
             project.addChangeListener (this);

@@ -120,6 +120,12 @@ public:
     void signalJobShouldExit();
 
     //==============================================================================
+    /** If the calling thread is being invoked inside a runJob() method, this will
+        return the ThreadPoolJob that it belongs to.
+    */
+    static ThreadPoolJob* getCurrentThreadPoolJob();
+
+    //==============================================================================
 private:
     friend class ThreadPool;
     friend class ThreadPoolThread;
@@ -247,7 +253,7 @@ public:
     /** Returns one of the jobs in the queue.
 
         Note that this can be a very volatile list as jobs might be continuously getting shifted
-        around in the list, and this method may return 0 if the index is currently out-of-range.
+        around in the list, and this method may return nullptr if the index is currently out-of-range.
     */
     ThreadPoolJob* getJob (int index) const;
 
@@ -290,6 +296,7 @@ private:
     Array <ThreadPoolJob*> jobs;
 
     class ThreadPoolThread;
+    friend class ThreadPoolJob;
     friend class ThreadPoolThread;
     friend struct ContainerDeletePolicy<ThreadPoolThread>;
     OwnedArray<ThreadPoolThread> threads;
@@ -297,7 +304,7 @@ private:
     CriticalSection lock;
     WaitableEvent jobFinishedSignal;
 
-    bool runNextJob();
+    bool runNextJob (ThreadPoolThread&);
     ThreadPoolJob* pickNextJobToRun();
     void addToDeleteList (OwnedArray<ThreadPoolJob>&, ThreadPoolJob*) const;
     void createThreads (int numThreads);

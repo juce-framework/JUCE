@@ -106,7 +106,7 @@ static void readChannels (AudioFormatReader& reader,
                           const int64 readerStartSample, const int numTargetChannels)
 {
     for (int j = 0; j < numTargetChannels; ++j)
-        chans[j] = reinterpret_cast<int*> (buffer->getSampleData (j, startSample));
+        chans[j] = reinterpret_cast<int*> (buffer->getWritePointer (j, startSample));
 
     chans[numTargetChannels] = nullptr;
     reader.read (chans, numTargetChannels, readerStartSample, numSamples, true);
@@ -128,8 +128,8 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
 
         if (numTargetChannels <= 2)
         {
-            int* const dest0 = reinterpret_cast<int*> (buffer->getSampleData (0, startSample));
-            int* const dest1 = reinterpret_cast<int*> (numTargetChannels > 1 ? buffer->getSampleData (1, startSample) : nullptr);
+            int* const dest0 = reinterpret_cast<int*> (buffer->getWritePointer (0, startSample));
+            int* const dest1 = reinterpret_cast<int*> (numTargetChannels > 1 ? buffer->getWritePointer (1, startSample) : nullptr);
             int* chans[3];
 
             if (useReaderLeftChan == useReaderRightChan)
@@ -162,47 +162,65 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
         }
         else
         {
-            HeapBlock<int*> chans (numTargetChannels);
+            HeapBlock<int*> chans ((size_t) numTargetChannels);
             readChannels (*this, chans, buffer, startSample, numSamples, readerStartSample, numTargetChannels);
         }
 
         if (! usesFloatingPointData)
             for (int j = 0; j < numTargetChannels; ++j)
-                if (float* const d = buffer->getSampleData (j, startSample))
+                if (float* const d = buffer->getWritePointer (j, startSample))
                     FloatVectorOperations::convertFixedToFloat (d, reinterpret_cast<const int*> (d), 1.0f / 0x7fffffff, numSamples);
     }
 }
 
-template <typename SampleType>
-static inline void getChannelMinAndMax (SampleType* channel, const int numSamples, SampleType& mn, SampleType& mx)
+void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples,
+                                       Range<float>* const results, const int channelsToRead)
 {
-    findMinAndMax (channel, numSamples, mn, mx);
-}
+    jassert (channelsToRead > 0 && channelsToRead <= (int) numChannels);
 
-static inline void getChannelMinAndMax (float* channel, const int numSamples, float& mn, float& mx)
-{
-    FloatVectorOperations::findMinAndMax (channel, numSamples, mn, mx);
-}
-
-template <typename SampleType>
-static void getStereoMinAndMax (SampleType* const* channels, const int numChannels, const int numSamples,
-                                SampleType& lmin, SampleType& lmax, SampleType& rmin, SampleType& rmax)
-{
-    SampleType bufMin, bufMax;
-    getChannelMinAndMax (channels[0], numSamples, bufMin, bufMax);
-    lmax = jmax (lmax, bufMax);
-    lmin = jmin (lmin, bufMin);
-
-    if (numChannels > 1)
+    if (numSamples <= 0)
     {
-        getChannelMinAndMax (channels[1], numSamples, bufMin, bufMax);
-        rmax = jmax (rmax, bufMax);
-        rmin = jmin (rmin, bufMin);
+        for (int i = 0; i < channelsToRead; ++i)
+            results[i] = Range<float>();
+
+        return;
     }
-    else
+
+    const int bufferSize = (int) jmin (numSamples, (int64) 4096);
+    AudioSampleBuffer tempSampleBuffer ((int) channelsToRead, bufferSize);
+
+    float* const* const floatBuffer = tempSampleBuffer.getArrayOfWritePointers();
+    int* const* intBuffer = reinterpret_cast<int* const*> (floatBuffer);
+    bool isFirstBlock = true;
+
+    while (numSamples > 0)
     {
-        rmax = lmax;
-        rmin = lmin;
+        const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
+        if (! read (intBuffer, channelsToRead, startSampleInFile, numToDo, false))
+            break;
+
+        for (int i = 0; i < channelsToRead; ++i)
+        {
+            Range<float> r;
+
+            if (usesFloatingPointData)
+            {
+                r = FloatVectorOperations::findMinAndMax (floatBuffer[i], numToDo);
+            }
+            else
+            {
+                Range<int> intRange (Range<int>::findMinAndMax (intBuffer[i], numToDo));
+
+                r = Range<float> (intRange.getStart() / (float) std::numeric_limits<int>::max(),
+                                  intRange.getEnd()   / (float) std::numeric_limits<int>::max());
+            }
+
+            results[i] = isFirstBlock ? r : results[i].getUnionWith (r);
+        }
+
+        isFirstBlock = false;
+        numSamples -= numToDo;
+        startSampleInFile += numToDo;
     }
 }
 
@@ -210,66 +228,20 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples
                                        float& lowestLeft, float& highestLeft,
                                        float& lowestRight, float& highestRight)
 {
-    if (numSamples <= 0)
+    Range<float> levels[2];
+    readMaxLevels (startSampleInFile, numSamples, levels, jmin (2, (int) numChannels));
+    lowestLeft  = levels[0].getStart();
+    highestLeft = levels[0].getEnd();
+
+    if (numChannels > 1)
     {
-        lowestLeft = 0;
-        lowestRight = 0;
-        highestLeft = 0;
-        highestRight = 0;
-        return;
-    }
-
-    const int bufferSize = (int) jmin (numSamples, (int64) 4096);
-    AudioSampleBuffer tempSampleBuffer ((int) numChannels, bufferSize);
-
-    float** const floatBuffer = tempSampleBuffer.getArrayOfChannels();
-    int* const* intBuffer = reinterpret_cast<int* const*> (floatBuffer);
-
-    if (usesFloatingPointData)
-    {
-        float lmin = 1.0e6f;
-        float lmax = -lmin;
-        float rmin = lmin;
-        float rmax = lmax;
-
-        while (numSamples > 0)
-        {
-            const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            if (! read (intBuffer, 2, startSampleInFile, numToDo, false))
-                break;
-
-            numSamples -= numToDo;
-            startSampleInFile += numToDo;
-            getStereoMinAndMax (floatBuffer, (int) numChannels, numToDo, lmin, lmax, rmin, rmax);
-        }
-
-        lowestLeft   = lmin;
-        highestLeft  = lmax;
-        lowestRight  = rmin;
-        highestRight = rmax;
+        lowestRight  = levels[1].getStart();
+        highestRight = levels[1].getEnd();
     }
     else
     {
-        int lmax = std::numeric_limits<int>::min();
-        int lmin = std::numeric_limits<int>::max();
-        int rmax = std::numeric_limits<int>::min();
-        int rmin = std::numeric_limits<int>::max();
-
-        while (numSamples > 0)
-        {
-            const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            if (! read (intBuffer, 2, startSampleInFile, numToDo, false))
-                break;
-
-            numSamples -= numToDo;
-            startSampleInFile += numToDo;
-            getStereoMinAndMax (intBuffer, (int) numChannels, numToDo, lmin, lmax, rmin, rmax);
-        }
-
-        lowestLeft   = lmin / (float) std::numeric_limits<int>::max();
-        highestLeft  = lmax / (float) std::numeric_limits<int>::max();
-        lowestRight  = rmin / (float) std::numeric_limits<int>::max();
-        highestRight = rmax / (float) std::numeric_limits<int>::max();
+        lowestRight  = lowestLeft;
+        highestRight = highestLeft;
     }
 }
 

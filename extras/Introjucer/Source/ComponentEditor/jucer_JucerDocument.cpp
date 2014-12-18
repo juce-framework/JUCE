@@ -24,7 +24,7 @@
 
 #include "../jucer_Headers.h"
 #include "../Application/jucer_Application.h"
-#include "../Project/jucer_NewFileWizard.h"
+#include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_JucerDocument.h"
 #include "jucer_ObjectTypes.h"
 #include "ui/jucer_JucerDocumentEditor.h"
@@ -159,7 +159,7 @@ void JucerDocument::setParentClasses (const String& classes)
     if (classes != parentClasses)
     {
         StringArray parentClassLines;
-        parentClassLines.addTokens (classes, ",", String::empty);
+        parentClassLines.addTokens (classes, ",", StringRef());
         parentClassLines.trim();
         parentClassLines.removeEmptyStrings();
         parentClassLines.removeDuplicates (false);
@@ -426,13 +426,14 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     code.initialisers.addLines (variableInitialisers);
 
     if (! componentName.isEmpty())
-        code.constructorCode << "setName (" + quotedString (componentName) + ");\n";
+        code.constructorCode << "setName (" + quotedString (componentName, false) + ");\n";
 
     // call these now, just to make sure they're the first two methods in the list.
     code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
         << "//[UserPrePaint] Add your own custom painting code here..\n//[/UserPrePaint]\n\n";
 
-    code.getCallbackCode (String::empty, "void", "resized()", false);
+    code.getCallbackCode (String::empty, "void", "resized()", false)
+        << "//[UserPreResize] Add your own custom resize code here..\n//[/UserPreResize]\n\n";
 
     if (ComponentLayout* l = getComponentLayout())
         l->fillInGeneratedCode (code);
@@ -441,7 +442,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
 
     ScopedPointer<XmlElement> e (createXml());
     jassert (e != nullptr);
-    code.jucerMetadata = e->createDocument (String::empty, false, false);
+    code.jucerMetadata = e->createDocument ("", false, false);
 
     resources.fillInGeneratedCode (code);
 
@@ -469,7 +470,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
             String baseClassToAdd (baseClasses[i]);
 
             if (baseClassToAdd == "Component" || baseClassToAdd == "Button")
-                baseClassToAdd = String::empty;
+                baseClassToAdd.clear();
 
             String& s = code.getCallbackCode (baseClassToAdd, returnValues[i], methods[i], false);
 
@@ -721,9 +722,9 @@ class JucerFileWizard  : public NewFileWizard::Type
 public:
     JucerFileWizard() {}
 
-    String getName()  { return "GUI Component"; }
+    String getName() override  { return "GUI Component"; }
 
-    void createNewFile (Project::Item parent)
+    void createNewFile (Project::Item parent) override
     {
         const File newFile (askUserToChooseNewFile (String (defaultClassName) + ".h", "*.h;*.cpp", parent));
 
@@ -745,6 +746,8 @@ public:
 
                     if (jucerDoc != nullptr)
                     {
+                        jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
+
                         jucerDoc->flushChangesToDocuments();
                         jucerDoc = nullptr;
 

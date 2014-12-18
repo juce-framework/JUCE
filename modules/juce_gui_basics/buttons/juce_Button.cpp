@@ -125,11 +125,12 @@ void Button::setTooltip (const String& newTooltip)
     generateTooltip = false;
 }
 
-String Button::getTooltip()
+void Button::updateAutomaticTooltip (const ApplicationCommandInfo& info)
 {
-    if (generateTooltip && commandManagerToUse != nullptr && commandID != 0)
+    if (generateTooltip && commandManagerToUse != nullptr)
     {
-        String tt (commandManagerToUse->getDescriptionOfCommand (commandID));
+        String tt (info.description.isNotEmpty() ? info.description
+                                                 : info.shortName);
 
         Array<KeyPress> keyPresses (commandManagerToUse->getKeyMappings()->getKeyPressesAssignedToCommand (commandID));
 
@@ -145,10 +146,8 @@ String Button::getTooltip()
                 tt << key << ']';
         }
 
-        return tt;
+        SettableTooltipClient::setTooltip (tt);
     }
-
-    return SettableTooltipClient::getTooltip();
 }
 
 void Button::setConnectedEdges (const int newFlags)
@@ -169,7 +168,7 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
 
         if (shouldBeOn)
         {
-            turnOffOtherButtonsInGroup (dontSendNotification);
+            turnOffOtherButtonsInGroup (notification);
 
             if (deletionWatcher == nullptr)
                 return;
@@ -186,7 +185,7 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
             // async callbacks aren't possible here
             jassert (notification != sendNotificationAsync);
 
-            sendClickMessage (ModifierKeys());
+            sendClickMessage (ModifierKeys::getCurrentModifiers());
 
             if (deletionWatcher == nullptr)
                 return;
@@ -194,6 +193,8 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
 
         if (notification != dontSendNotification)
             sendStateMessage();
+        else
+            buttonStateChanged();
     }
 }
 
@@ -540,6 +541,7 @@ void Button::applicationCommandListChangeCallback()
 
         if (commandManagerToUse->getTargetForCommand (commandID, info) != nullptr)
         {
+            updateAutomaticTooltip (info);
             setEnabled ((info.flags & ApplicationCommandInfo::isDisabled) == 0);
             setToggleState ((info.flags & ApplicationCommandInfo::isTicked) != 0, dontSendNotification);
         }
@@ -570,7 +572,7 @@ void Button::clearShortcuts()
 
 bool Button::isShortcutPressed() const
 {
-    if (! isCurrentlyBlockedByAnotherModalComponent())
+    if (isShowing() && ! isCurrentlyBlockedByAnotherModalComponent())
         for (int i = shortcuts.size(); --i >= 0;)
             if (shortcuts.getReference(i).isCurrentlyDown())
                 return true;

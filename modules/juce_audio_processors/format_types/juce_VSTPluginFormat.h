@@ -96,6 +96,13 @@ public:
     FileSearchPath getDefaultLocationsToSearch() override;
     bool canScanForPlugins() const override        { return true; }
 
+    /** Can be overridden to receive a callback when each member of a shell plugin is about to be
+        tested during a call to findAllTypesForFile().
+        Only the name and uid members of the PluginDescription are guaranteed to be valid when
+        this is called.
+    */
+    virtual void aboutToScanVSTShellPlugin (const PluginDescription&);
+
 private:
     void recursiveFileSearch (StringArray&, const File&, bool recursive);
 

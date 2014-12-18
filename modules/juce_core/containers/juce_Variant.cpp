@@ -120,6 +120,9 @@ public:
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
+        if (otherType.isDouble() || otherType.isInt64() || otherType.isString())
+            return otherType.equals (otherData, data, *this);
+
         return otherType.toInt (otherData) == data.intValue;
     }
 
@@ -147,6 +150,9 @@ public:
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
+        if (otherType.isDouble() || otherType.isString())
+            return otherType.equals (otherData, data, *this);
+
         return otherType.toInt64 (otherData) == data.int64Value;
     }
 

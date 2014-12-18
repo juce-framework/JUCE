@@ -26,20 +26,7 @@ namespace ColourHelpers
 {
     static uint8 floatToUInt8 (const float n) noexcept
     {
-        return n <= 0.0f ? 0 : (n >= 1.0f ? 255 : (uint8) (n * 255.0f));
-    }
-
-    // This is an adjusted brightness value, based on the way the human
-    // eye responds to different colour channels..
-    static float getPerceivedBrightness (Colour c) noexcept
-    {
-        const float r = c.getFloatRed();
-        const float g = c.getFloatGreen();
-        const float b = c.getFloatBlue();
-
-        return std::sqrt (r * r * 0.241f
-                           + g * g * 0.691f
-                           + b * b * 0.068f);
+        return n <= 0.0f ? 0 : (n >= 1.0f ? 255 : static_cast<uint8> (n * 255.996f));
     }
 
     //==============================================================================
@@ -333,6 +320,13 @@ Colour Colour::withHue (float h) const noexcept          { ColourHelpers::HSB hs
 Colour Colour::withSaturation (float s) const noexcept   { ColourHelpers::HSB hsb (*this); hsb.saturation = s; return hsb.toColour (*this); }
 Colour Colour::withBrightness (float v) const noexcept   { ColourHelpers::HSB hsb (*this); hsb.brightness = v; return hsb.toColour (*this); }
 
+float Colour::getPerceivedBrightness() const noexcept
+{
+    return std::sqrt (0.241f * square (getFloatRed())
+                    + 0.691f * square (getFloatGreen())
+                    + 0.068f * square (getFloatBlue()));
+}
+
 //==============================================================================
 Colour Colour::withRotatedHue (const float amountToRotate) const noexcept
 {
@@ -386,9 +380,9 @@ Colour Colour::greyLevel (const float brightness) noexcept
 //==============================================================================
 Colour Colour::contrasting (const float amount) const noexcept
 {
-   return overlaidWith ((ColourHelpers::getPerceivedBrightness (*this) >= 0.5f
-                            ? Colours::black
-                            : Colours::white).withAlpha (amount));
+   return overlaidWith ((getPerceivedBrightness() >= 0.5f
+                           ? Colours::black
+                           : Colours::white).withAlpha (amount));
 }
 
 Colour Colour::contrasting (Colour target, float minContrast) const noexcept
@@ -409,8 +403,8 @@ Colour Colour::contrasting (Colour target, float minContrast) const noexcept
 Colour Colour::contrasting (Colour colour1,
                             Colour colour2) noexcept
 {
-    const float b1 = ColourHelpers::getPerceivedBrightness (colour1);
-    const float b2 = ColourHelpers::getPerceivedBrightness (colour2);
+    const float b1 = colour1.getPerceivedBrightness();
+    const float b2 = colour2.getPerceivedBrightness();
     float best = 0.0f;
     float bestDist = 0.0f;
 

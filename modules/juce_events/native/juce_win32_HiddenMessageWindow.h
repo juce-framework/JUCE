@@ -100,7 +100,6 @@ public:
 
     virtual ~DeviceChangeDetector() {}
 
-protected:
     virtual void systemDeviceChanged() = 0;
 
     void triggerAsyncDeviceChangeCallback()

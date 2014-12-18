@@ -39,6 +39,7 @@ namespace juce
 #include "messages/juce_NotificationType.h"
 #include "messages/juce_ApplicationBase.h"
 #include "messages/juce_Initialisation.h"
+#include "messages/juce_MountedVolumeListChangeDetector.h"
 #include "broadcasters/juce_ListenerList.h"
 #include "broadcasters/juce_ActionBroadcaster.h"
 #include "broadcasters/juce_ActionListener.h"
@@ -49,6 +50,7 @@ namespace juce
 #include "timers/juce_MultiTimer.h"
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
+#include "interprocess/juce_ConnectedChildProcess.h"
 #include "native/juce_ScopedXLock.h"
 
 }

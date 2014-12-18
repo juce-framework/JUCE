@@ -31,23 +31,26 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
     const int s = socket (AF_INET, SOCK_DGRAM, 0);
     if (s != -1)
     {
-        char buf [1024];
-        struct ifconf ifc;
-        ifc.ifc_len = sizeof (buf);
-        ifc.ifc_buf = buf;
-        ioctl (s, SIOCGIFCONF, &ifc);
+        struct ifaddrs* addrs = nullptr;
 
-        for (unsigned int i = 0; i < ifc.ifc_len / sizeof (struct ifreq); ++i)
+        if (getifaddrs (&addrs) != -1)
         {
-            struct ifreq ifr;
-            strcpy (ifr.ifr_name, ifc.ifc_req[i].ifr_name);
-
-            if (ioctl (s, SIOCGIFFLAGS, &ifr) == 0
-                 && (ifr.ifr_flags & IFF_LOOPBACK) == 0
-                 && ioctl (s, SIOCGIFHWADDR, &ifr) == 0)
+            for (struct ifaddrs* i = addrs; i != nullptr; i = i->ifa_next)
             {
-                result.addIfNotAlreadyThere (MACAddress ((const uint8*) ifr.ifr_hwaddr.sa_data));
+                struct ifreq ifr;
+                strcpy (ifr.ifr_name, i->ifa_name);
+                ifr.ifr_addr.sa_family = AF_INET;
+
+                if (ioctl (s, SIOCGIFHWADDR, &ifr) == 0)
+                {
+                    MACAddress ma ((const uint8*) ifr.ifr_hwaddr.sa_data);
+
+                    if (! ma.isNull())
+                        result.addIfNotAlreadyThere (ma);
+                }
             }
+
+            freeifaddrs (addrs);
         }
 
         close (s);
@@ -72,11 +75,11 @@ public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
-      : socketHandle (-1), levelsOfRedirection (0),
+      : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
         address (address_), headers (headers_), postData (postData_), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
-        createConnection (progressCallback, progressCallbackContext);
+        statusCode = createConnection (progressCallback, progressCallbackContext);
 
         if (responseHeaders != nullptr && ! isError())
         {
@@ -144,7 +147,7 @@ public:
             {
                 closeSocket();
                 position = 0;
-                createConnection (0, 0);
+                statusCode = createConnection (0, 0);
             }
 
             skipNextBytes (wantedPos - position);
@@ -154,6 +157,8 @@ public:
     }
 
     //==============================================================================
+    int statusCode;
+
 private:
     int socketHandle, levelsOfRedirection;
     StringArray headerLines;
@@ -173,7 +178,7 @@ private:
         levelsOfRedirection = 0;
     }
 
-    void createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
+    int createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
     {
         closeSocket();
 
@@ -189,7 +194,7 @@ private:
         String hostName, hostPath;
         int hostPort;
         if (! decomposeURL (address, hostName, hostPath, hostPort))
-            return;
+            return 0;
 
         String serverName, proxyName, proxyPath;
         int proxyPort = 0;
@@ -199,7 +204,7 @@ private:
         if (proxyURL.startsWithIgnoreCase ("http://"))
         {
             if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
-                return;
+                return 0;
 
             serverName = proxyName;
             port = proxyPort;
@@ -219,14 +224,14 @@ private:
 
         struct addrinfo* result = nullptr;
         if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == 0)
-            return;
+            return 0;
 
         socketHandle = socket (result->ai_family, result->ai_socktype, 0);
 
         if (socketHandle == -1)
         {
             freeaddrinfo (result);
-            return;
+            return 0;
         }
 
         int receiveBufferSize = 16384;
@@ -241,7 +246,7 @@ private:
         {
             closeSocket();
             freeaddrinfo (result);
-            return;
+            return 0;
         }
 
         freeaddrinfo (result);
@@ -254,26 +259,26 @@ private:
                               progressCallback, progressCallbackContext))
             {
                 closeSocket();
-                return;
+                return 0;
             }
         }
 
-        String responseHeader (readResponse (socketHandle, timeOutTime));
+        String responseHeader (readResponse (timeOutTime));
         position = 0;
 
         if (responseHeader.isNotEmpty())
         {
             headerLines = StringArray::fromLines (responseHeader);
 
-            const int statusCode = responseHeader.fromFirstOccurrenceOf (" ", false, false)
-                                                 .substring (0, 3).getIntValue();
+            const int status = responseHeader.fromFirstOccurrenceOf (" ", false, false)
+                                             .substring (0, 3).getIntValue();
 
             //int contentLength = findHeaderItem (lines, "Content-Length:").getIntValue();
             //bool isChunked = findHeaderItem (lines, "Transfer-Encoding:").equalsIgnoreCase ("chunked");
 
             String location (findHeaderItem (headerLines, "Location:"));
 
-            if (statusCode >= 300 && statusCode < 400
+            if (status >= 300 && status < 400
                  && location.isNotEmpty() && location != address)
             {
                 if (! location.startsWithIgnoreCase ("http://"))
@@ -282,22 +287,22 @@ private:
                 if (++levelsOfRedirection <= 3)
                 {
                     address = location;
-                    createConnection (progressCallback, progressCallbackContext);
-                    return;
+                    return createConnection (progressCallback, progressCallbackContext);
                 }
             }
             else
             {
                 levelsOfRedirection = 0;
-                return;
+                return status;
             }
         }
 
         closeSocket();
+        return 0;
     }
 
     //==============================================================================
-    String readResponse (const int socketHandle, const uint32 timeOutTime)
+    String readResponse (const uint32 timeOutTime)
     {
         int numConsecutiveLFs  = 0;
         MemoryOutputStream buffer;
@@ -309,7 +314,7 @@ private:
         {
             char c = 0;
             if (read (&c, 1) != 1)
-                return String::empty;
+                return String();
 
             buffer.writeByte (c);
 
@@ -324,7 +329,7 @@ private:
         if (header.startsWithIgnoreCase ("HTTP/"))
             return header;
 
-        return String::empty;
+        return String();
     }
 
     static void writeValueIfNotPresent (MemoryOutputStream& dest, const String& headers, const String& key, const String& value)
@@ -333,7 +338,8 @@ private:
             dest << "\r\n" << key << ' ' << value;
     }
 
-    static void writeHost (MemoryOutputStream& dest, const bool isPost, const String& path, const String& host, const int port)
+    static void writeHost (MemoryOutputStream& dest, const bool isPost,
+                           const String& path, const String& host, int /*port*/)
     {
         dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
     }
@@ -432,19 +438,8 @@ private:
             if (lines[i].startsWithIgnoreCase (itemName))
                 return lines[i].substring (itemName.length()).trim();
 
-        return String::empty;
+        return String();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
-
-InputStream* URL::createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
-                                      OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                                      const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
-{
-    ScopedPointer<WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                          progressCallback, progressCallbackContext,
-                                                          headers, timeOutMs, responseHeaders));
-
-    return wi->isError() ? nullptr : wi.release();
-}

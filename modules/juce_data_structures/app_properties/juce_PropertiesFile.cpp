@@ -53,7 +53,7 @@ File PropertiesFile::Options::getDefaultFile() const
     File dir (commonToAllUsers ?  "/Library/"
                                : "~/Library/");
 
-    if (osxLibrarySubFolder != "Preferences" && osxLibrarySubFolder != "Application Support")
+    if (osxLibrarySubFolder != "Preferences" && ! osxLibrarySubFolder.startsWith ("Application Support"))
     {
         /* The PropertiesFile class always used to put its settings files in "Library/Preferences", but Apple
            have changed their advice, and now stipulate that settings should go in "Library/Application Support".
@@ -61,7 +61,8 @@ File PropertiesFile::Options::getDefaultFile() const
            Because older apps would be broken by a silent change in this class's behaviour, you must now
            explicitly set the osxLibrarySubFolder value to indicate which path you want to use.
 
-           In newer apps, you should always set this to "Application Support".
+           In newer apps, you should always set this to "Application Support"
+           or "Application Support/YourSubFolderName".
 
            If your app needs to load settings files that were created by older versions of juce and
            you want to maintain backwards-compatibility, then you can set this to "Preferences".
@@ -90,8 +91,8 @@ File PropertiesFile::Options::getDefaultFile() const
     File dir (File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
                                                          : File::userApplicationDataDirectory));
 
-    if (dir == File::nonexistent)
-        return File::nonexistent;
+    if (dir == File())
+        return File();
 
     dir = dir.getChildFile (folderName.isNotEmpty() ? folderName
                                                     : applicationName);
@@ -165,7 +166,7 @@ bool PropertiesFile::save()
     stopTimer();
 
     if (options.doNotSave
-         || file == File::nonexistent
+         || file == File()
          || file.isDirectory()
          || ! file.getParentDirectory().createDirectory())
         return false;
@@ -195,7 +196,7 @@ bool PropertiesFile::loadAsXml()
                 {
                     getAllProperties().set (name,
                                             e->getFirstChildElement() != nullptr
-                                                ? e->getFirstChildElement()->createDocument (String::empty, true)
+                                                ? e->getFirstChildElement()->createDocument ("", true)
                                                 : e->getStringAttribute (PropertyFileConstants::valueAttribute));
                 }
             }
@@ -215,18 +216,18 @@ bool PropertiesFile::loadAsXml()
 bool PropertiesFile::saveAsXml()
 {
     XmlElement doc (PropertyFileConstants::fileTag);
+    const StringPairArray& props = getAllProperties();
 
-    for (int i = 0; i < getAllProperties().size(); ++i)
+    for (int i = 0; i < props.size(); ++i)
     {
         XmlElement* const e = doc.createNewChildElement (PropertyFileConstants::valueTag);
-        e->setAttribute (PropertyFileConstants::nameAttribute, getAllProperties().getAllKeys() [i]);
+        e->setAttribute (PropertyFileConstants::nameAttribute, props.getAllKeys() [i]);
 
         // if the value seems to contain xml, store it as such..
-        if (XmlElement* const childElement = XmlDocument::parse (getAllProperties().getAllValues() [i]))
+        if (XmlElement* const childElement = XmlDocument::parse (props.getAllValues() [i]))
             e->addChildElement (childElement);
         else
-            e->setAttribute (PropertyFileConstants::valueAttribute,
-                             getAllProperties().getAllValues() [i]);
+            e->setAttribute (PropertyFileConstants::valueAttribute, props.getAllValues() [i]);
     }
 
     ProcessScopedLock pl (createProcessLock());
@@ -234,7 +235,7 @@ bool PropertiesFile::saveAsXml()
     if (pl != nullptr && ! pl->isLocked())
         return false; // locking failure..
 
-    if (doc.writeToFile (file, String::empty))
+    if (doc.writeToFile (file, String()))
     {
         needsWriting = false;
         return true;
@@ -311,14 +312,17 @@ bool PropertiesFile::saveAsBinary()
             out->writeInt (PropertyFileConstants::magicNumber);
         }
 
-        const int numProperties = getAllProperties().size();
+        const StringPairArray& props = getAllProperties();
+        const int numProperties   = props.size();
+        const StringArray& keys   = props.getAllKeys();
+        const StringArray& values = props.getAllValues();
 
         out->writeInt (numProperties);
 
         for (int i = 0; i < numProperties; ++i)
         {
-            out->writeString (getAllProperties().getAllKeys() [i]);
-            out->writeString (getAllProperties().getAllValues() [i]);
+            out->writeString (keys[i]);
+            out->writeString (values[i]);
         }
 
         out = nullptr;

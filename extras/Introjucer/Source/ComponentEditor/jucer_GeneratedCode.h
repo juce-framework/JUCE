@@ -88,6 +88,8 @@ public:
     String getCallbackDefinitions() const;
     StringArray getExtraParentClasses() const;
 
+    bool shouldUseTransMacro() const noexcept;
+
 private:
     String getClassDeclaration() const;
     String getInitialiserList() const;

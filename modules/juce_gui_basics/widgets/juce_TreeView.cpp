@@ -67,7 +67,7 @@ public:
                         selectBasedOnModifiers (item, e.mods);
 
                     if (e.x >= pos.getX())
-                        item->itemClicked (e.withNewPosition (e.getPosition() - pos.getPosition()));
+                        item->itemClicked (e.withNewPosition (e.position - pos.getPosition().toFloat()));
                 }
             }
         }
@@ -92,7 +92,7 @@ public:
             Rectangle<int> pos;
             if (TreeViewItem* const item = findItemAt (e.y, pos))
                 if (e.x >= pos.getX() || ! owner.openCloseButtonsVisible)
-                    item->itemDoubleClicked (e.withNewPosition (e.getPosition() - pos.getPosition()));
+                    item->itemDoubleClicked (e.withNewPosition (e.position - pos.getPosition().toFloat()));
         }
     }
 
@@ -560,7 +560,7 @@ Viewport* TreeView::getViewport() const noexcept
 void TreeView::clearSelectedItems()
 {
     if (rootItem != nullptr)
-        rootItem->deselectAllRecursively();
+        rootItem->deselectAllRecursively (nullptr);
 }
 
 int TreeView::getNumSelectedItems (int maximumDepthToSearchTo) const noexcept
@@ -1299,12 +1299,13 @@ bool TreeViewItem::isSelected() const noexcept
     return selected;
 }
 
-void TreeViewItem::deselectAllRecursively()
+void TreeViewItem::deselectAllRecursively (TreeViewItem* itemToIgnore)
 {
-    setSelected (false, false);
+    if (this != itemToIgnore)
+        setSelected (false, false);
 
     for (int i = 0; i < subItems.size(); ++i)
-        subItems.getUnchecked(i)->deselectAllRecursively();
+        subItems.getUnchecked(i)->deselectAllRecursively (itemToIgnore);
 }
 
 void TreeViewItem::setSelected (const bool shouldBeSelected,
@@ -1315,7 +1316,7 @@ void TreeViewItem::setSelected (const bool shouldBeSelected,
         return;
 
     if (deselectOtherItemsFirst)
-        getTopLevelItem()->deselectAllRecursively();
+        getTopLevelItem()->deselectAllRecursively (this);
 
     if (shouldBeSelected != selected)
     {
@@ -1371,7 +1372,7 @@ String TreeViewItem::getTooltip()
 
 var TreeViewItem::getDragSourceDescription()
 {
-    return var::null;
+    return var();
 }
 
 bool TreeViewItem::isInterestedInFileDrag (const StringArray&)
@@ -1772,6 +1773,11 @@ TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const noexce
     return nullptr;
 }
 
+static String escapeSlashesInTreeViewItemName (const String& s)
+{
+    return s.replaceCharacter ('/', '\\');
+}
+
 String TreeViewItem::getItemIdentifierString() const
 {
     String s;
@@ -1779,12 +1785,12 @@ String TreeViewItem::getItemIdentifierString() const
     if (parentItem != nullptr)
         s = parentItem->getItemIdentifierString();
 
-    return s + "/" + getUniqueName().replaceCharacter ('/', '\\');
+    return s + "/" + escapeSlashesInTreeViewItemName (getUniqueName());
 }
 
 TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifierString)
 {
-    const String thisId ("/" + getUniqueName());
+    const String thisId ("/" + escapeSlashesInTreeViewItemName (getUniqueName()));
 
     if (thisId == identifierString)
         return this;

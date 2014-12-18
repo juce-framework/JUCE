@@ -73,7 +73,7 @@ private:
     class ActionMessage;
     friend class ActionMessage;
 
-    SortedSet <ActionListener*> actionListeners;
+    SortedSet<ActionListener*> actionListeners;
     CriticalSection actionListenerLock;
 
     JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster)

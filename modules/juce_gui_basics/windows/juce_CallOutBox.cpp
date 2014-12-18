@@ -23,9 +23,9 @@
 */
 
 CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* const parent)
-    : borderSpace (20), arrowSize (16.0f), content (c)
+    : arrowSize (16.0f), content (c), dismissalMouseClicksAreAlwaysConsumed (false)
 {
-    addAndMakeVisible (&content);
+    addAndMakeVisible (content);
 
     if (parent != nullptr)
     {
@@ -48,8 +48,6 @@ CallOutBox::~CallOutBox()
 {
 }
 
-enum { callOutBoxDismissCommandId = 0x4f83a04b };
-
 //==============================================================================
 class CallOutBoxCallback  : public ModalComponentManager::Callback,
                             private Timer
@@ -68,7 +66,7 @@ public:
     void timerCallback() override
     {
         if (! Process::isForegroundProcess())
-            callout.postCommandMessage (callOutBoxDismissCommandId);
+            callout.dismiss();
     }
 
     ScopedPointer<Component> content;
@@ -88,8 +86,12 @@ CallOutBox& CallOutBox::launchAsynchronously (Component* content, const Rectangl
 void CallOutBox::setArrowSize (const float newSize)
 {
     arrowSize = newSize;
-    borderSpace = jmax (20, (int) arrowSize);
     refreshPath();
+}
+
+int CallOutBox::getBorderSize() const noexcept
+{
+    return jmax (getLookAndFeel().getCallOutBoxBorderSize (*this), (int) arrowSize);
 }
 
 void CallOutBox::paint (Graphics& g)
@@ -99,6 +101,7 @@ void CallOutBox::paint (Graphics& g)
 
 void CallOutBox::resized()
 {
+    const int borderSpace = getBorderSize();
     content.setTopLeftPosition (borderSpace, borderSpace);
     refreshPath();
 }
@@ -120,14 +123,13 @@ bool CallOutBox::hitTest (int x, int y)
 
 void CallOutBox::inputAttemptWhenModal()
 {
-    const Point<int> mousePos (getMouseXYRelative() + getBounds().getPosition());
-
-    if (targetArea.contains (mousePos))
+    if (dismissalMouseClicksAreAlwaysConsumed
+         || targetArea.contains (getMouseXYRelative() + getBounds().getPosition()))
     {
         // if you click on the area that originally popped-up the callout, you expect it
         // to get rid of the box, but deleting the box here allows the click to pass through and
         // probably re-trigger it, so we need to dismiss the box asynchronously to consume the click..
-        postCommandMessage (callOutBoxDismissCommandId);
+        dismiss();
     }
     else
     {
@@ -135,6 +137,13 @@ void CallOutBox::inputAttemptWhenModal()
         setVisible (false);
     }
 }
+
+void CallOutBox::setDismissalMouseClicksAreAlwaysConsumed (bool b) noexcept
+{
+    dismissalMouseClicksAreAlwaysConsumed = b;
+}
+
+enum { callOutBoxDismissCommandId = 0x4f83a04b };
 
 void CallOutBox::handleCommandMessage (int commandId)
 {
@@ -145,6 +154,11 @@ void CallOutBox::handleCommandMessage (int commandId)
         exitModalState (0);
         setVisible (false);
     }
+}
+
+void CallOutBox::dismiss()
+{
+    postCommandMessage (callOutBoxDismissCommandId);
 }
 
 bool CallOutBox::keyPressed (const KeyPress& key)
@@ -162,6 +176,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
 {
     targetArea = newAreaToPointTo;
     availableArea = newAreaToFitIn;
+
+    const int borderSpace = getBorderSize();
 
     Rectangle<int> newBounds (content.getWidth()  + borderSpace * 2,
                               content.getHeight() + borderSpace * 2);

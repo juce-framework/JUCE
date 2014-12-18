@@ -30,6 +30,7 @@
 namespace
 {
     Value shouldBuildVST (Project& project)                       { return project.getProjectValue ("buildVST"); }
+    Value shouldBuildVST3 (Project& project)                      { return project.getProjectValue ("buildVST3"); }
     Value shouldBuildAU (Project& project)                        { return project.getProjectValue ("buildAU"); }
     Value shouldBuildRTAS (Project& project)                      { return project.getProjectValue ("buildRTAS"); }
     Value shouldBuildAAX (Project& project)                       { return project.getProjectValue ("buildAAX"); }
@@ -45,6 +46,7 @@ namespace
     Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
     Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
     Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
+    Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
     Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
     Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
@@ -52,6 +54,7 @@ namespace
     Value getPluginRTASMultiMonoDisabled (Project& project)       { return project.getProjectValue ("pluginRTASDisableMultiMono"); }
     Value getPluginAAXCategory (Project& project)                 { return project.getProjectValue ("pluginAAXCategory"); }
     Value getPluginAAXBypassDisabled (Project& project)           { return project.getProjectValue ("pluginAAXDisableBypass"); }
+    Value getPluginAAXMultiMonoDisabled (Project& project)        { return project.getProjectValue ("pluginAAXDisableMultiMono"); }
 
     String getPluginRTASCategoryCode (Project& project)
     {
@@ -93,10 +96,20 @@ namespace
         return s;
     }
 
+    String getPluginVSTCategoryString (Project& project)
+    {
+        String s (getPluginVSTCategory (project).toString().trim());
+
+        if (s.isEmpty())
+            s = static_cast<bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth"
+                                                                          : "kPlugCategEffect";
+        return s;
+    }
+
     int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
-        configs.addTokens (configString, ", {}", String::empty);
+        configs.addTokens (configString, ", {}", StringRef());
         configs.trim();
         configs.removeEmptyStrings();
         jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
@@ -113,6 +126,16 @@ namespace
         return static_cast<bool> (v.getValue()) ? "1" : "0";
     }
 
+    String valueToStringLiteral (const var& v)
+    {
+        return CppTokeniserFunctions::addEscapeChars (v.toString()).quoted();
+    }
+
+    String valueToCharLiteral (const var& v)
+    {
+        return CppTokeniserFunctions::addEscapeChars (v.toString().trim().substring (0, 4)).quoted ('\'');
+    }
+
     void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
     {
         Project& project = projectSaver.project;
@@ -120,14 +143,17 @@ namespace
         StringPairArray flags;
         //flags.set ("JUCE_MODAL_LOOPS_PERMITTED",             "0");
         flags.set ("JucePlugin_Build_VST",                   valueToBool (shouldBuildVST  (project)));
+        flags.set ("JucePlugin_Build_VST3",                  valueToBool (shouldBuildVST3 (project)));
         flags.set ("JucePlugin_Build_AU",                    valueToBool (shouldBuildAU   (project)));
         flags.set ("JucePlugin_Build_RTAS",                  valueToBool (shouldBuildRTAS (project)));
         flags.set ("JucePlugin_Build_AAX",                   valueToBool (shouldBuildAAX  (project)));
-        flags.set ("JucePlugin_Name",                        getPluginName (project).toString().quoted());
-        flags.set ("JucePlugin_Desc",                        getPluginDesc (project).toString().quoted());
-        flags.set ("JucePlugin_Manufacturer",                getPluginManufacturer (project).toString().quoted());
-        flags.set ("JucePlugin_ManufacturerCode",            getPluginManufacturerCode (project).toString().trim().substring (0, 4).quoted ('\''));
-        flags.set ("JucePlugin_PluginCode",                  getPluginCode (project).toString().trim().substring (0, 4).quoted ('\''));
+        flags.set ("JucePlugin_Name",                        valueToStringLiteral (getPluginName (project)));
+        flags.set ("JucePlugin_Desc",                        valueToStringLiteral (getPluginDesc (project)));
+        flags.set ("JucePlugin_Manufacturer",                valueToStringLiteral (getPluginManufacturer (project)));
+        flags.set ("JucePlugin_ManufacturerWebsite",         valueToStringLiteral (project.getCompanyWebsite()));
+        flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (project.getCompanyEmail()));
+        flags.set ("JucePlugin_ManufacturerCode",            valueToCharLiteral (getPluginManufacturerCode (project)));
+        flags.set ("JucePlugin_PluginCode",                  valueToCharLiteral (getPluginCode (project)));
         flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
         flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false)));
         flags.set ("JucePlugin_PreferredChannelConfigurations", getPluginChannelConfigs (project).toString());
@@ -138,13 +164,13 @@ namespace
         flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
         flags.set ("JucePlugin_Version",                     project.getVersionString());
         flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
-        flags.set ("JucePlugin_VersionString",               project.getVersionString().quoted());
+        flags.set ("JucePlugin_VersionString",               valueToStringLiteral (project.getVersionString()));
         flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
-        flags.set ("JucePlugin_VSTCategory",                 static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth" : "kPlugCategEffect");
+        flags.set ("JucePlugin_VSTCategory",                 getPluginVSTCategoryString (project));
         flags.set ("JucePlugin_AUMainType",                  getAUMainTypeString (project));
         flags.set ("JucePlugin_AUSubType",                   "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AUExportPrefix",              getPluginAUExportPrefix (project).toString());
-        flags.set ("JucePlugin_AUExportPrefixQuoted",        getPluginAUExportPrefix (project).toString().quoted());
+        flags.set ("JucePlugin_AUExportPrefixQuoted",        valueToStringLiteral (getPluginAUExportPrefix (project)));
         flags.set ("JucePlugin_AUManufacturerCode",          "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_CFBundleIdentifier",          project.getBundleIdentifier().toString());
         flags.set ("JucePlugin_RTASCategory",                getPluginRTASCategoryCode (project));
@@ -155,9 +181,9 @@ namespace
         flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifier().toString());
         flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
-        flags.set ("JucePlugin_AAXPluginId",                 "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXCategory",                 getPluginAAXCategory (project).toString());
         flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (getPluginAAXBypassDisabled (project)));
+        flags.set ("JucePlugin_AAXDisableMultiMono",         valueToBool (getPluginAAXMultiMonoDisabled (project)));
 
         MemoryOutputStream mem;
 
@@ -186,8 +212,8 @@ namespace
     String createEscapedStringForVersion (ProjectExporter& exporter, const String& text)
     {
         // (VS10 automatically adds escape characters to the quotes for this definition)
-        return exporter.getVisualStudioVersion() < 10 ? CodeHelpers::addEscapeChars (text.quoted())
-                                                      : CodeHelpers::addEscapeChars (text).quoted();
+        return exporter.getVisualStudioVersion() < 10 ? CppTokeniserFunctions::addEscapeChars (text.quoted())
+                                                      : CppTokeniserFunctions::addEscapeChars (text).quoted();
     }
 
     String createRebasedPath (ProjectExporter& exporter, const RelativePath& path)
@@ -201,41 +227,47 @@ namespace
 //==============================================================================
 namespace VSTHelpers
 {
-    static Value getVSTFolder (ProjectExporter& exporter)         { return exporter.getSetting (Ids::vstFolder); }
-
-    static void addVSTFolderToPath (ProjectExporter& exporter, StringArray& searchPaths)
+    static Value getVSTFolder (ProjectExporter& exporter, bool isVST3)
     {
-        const String vstFolder (getVSTFolder (exporter).toString());
+        return exporter.getSetting (isVST3 ? Ids::vst3Folder
+                                           : Ids::vstFolder);
+    }
+
+    static void addVSTFolderToPath (ProjectExporter& exporter, bool isVST3)
+    {
+        const String vstFolder (getVSTFolder (exporter, isVST3).toString());
 
         if (vstFolder.isNotEmpty())
         {
             RelativePath path (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (vstFolder, RelativePath::projectFolder)));
 
             if (exporter.isVisualStudio())
-                searchPaths.add (path.toWindowsStyle());
+                exporter.extraSearchPaths.add (path.toWindowsStyle());
             else if (exporter.isLinux() || exporter.isXcode())
-                searchPaths.insert (0, path.toUnixStyle());
+                exporter.extraSearchPaths.insert (0, path.toUnixStyle());
         }
     }
 
-    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props)
+    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        props.add (new TextPropertyComponent (getVSTFolder (exporter), "VST Folder", 1024, false),
-                  "If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
+        const String vstFormat (isVST3 ? "VST3" : "VST");
+
+        props.add (new TextPropertyComponent (getVSTFolder (exporter, isVST3), vstFormat + " Folder", 1024, false),
+                   "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
     }
 
-    static void fixMissingVSTValues (ProjectExporter& exporter)
+    static void fixMissingVSTValues (ProjectExporter& exporter, bool isVST3)
     {
-        if (getVSTFolder(exporter).toString().isEmpty())
-            getVSTFolder(exporter) = (exporter.isWindows() ? "c:\\SDKs\\vstsdk2.4"
-                                                           : "~/SDKs/vstsdk2.4");
+        if (getVSTFolder (exporter, isVST3).toString().isEmpty())
+            getVSTFolder (exporter, isVST3) = exporter.isWindows() ? (isVST3 ? "c:\\SDKs\\VST3 SDK" : "c:\\SDKs\\vstsdk2.4")
+                                                                   : (isVST3 ? "~/SDKs/VST3 SDK"    : "~/SDKs/vstsdk2.4");
 
         fixMissingXcodePostBuildScript (exporter);
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, bool isVST3)
     {
-        fixMissingVSTValues (exporter);
+        fixMissingVSTValues (exporter, isVST3);
         writePluginCharacteristicsFile (projectSaver);
 
         exporter.makefileTargetSuffix = ".so";
@@ -246,18 +278,39 @@ namespace VSTHelpers
         RelativePath juceWrapperFolder (exporter.getProject().getGeneratedCodeFolder(),
                                         exporter.getTargetFolder(), RelativePath::buildTargetFolder);
 
-        addVSTFolderToPath (exporter, exporter.extraSearchPaths);
+        addVSTFolderToPath (exporter, isVST3);
 
         if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
         else if (exporter.isLinux())
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
+
+        if (exporter.isVisualStudio())
+        {
+            if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
+                exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
+
+            RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
+                                                                                                  RelativePath::projectFolder)
+                                                                                      .getChildFile ("juce_audio_plugin_client")
+                                                                                      .getChildFile ("VST3")));
+
+            for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+            {
+                if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
+                    config->getValue (Ids::useRuntimeLibDLL) = true;
+
+                if (isVST3)
+                    if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
+                        config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+            }
+        }
     }
 
-    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
+    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        fixMissingVSTValues (exporter);
-        createVSTPathEditor (exporter, props);
+        fixMissingVSTValues (exporter, isVST3);
+        createVSTPathEditor (exporter, props, isVST3);
     }
 }
 
@@ -388,6 +441,7 @@ namespace RTASHelpers
 
                 RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
                                                                                                       RelativePath::projectFolder)
+                                                                                           .getChildFile ("juce_audio_plugin_client")
                                                                                            .getChildFile ("RTAS")));
 
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)

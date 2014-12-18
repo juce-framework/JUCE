@@ -142,7 +142,7 @@ public:
         into a Drawable tree.
 
         The object returned must be deleted by the caller. If something goes wrong
-        while parsing, it may return 0.
+        while parsing, it may return nullptr.
 
         SVG is a pretty large and complex spec, and this doesn't aim to be a full
         implementation, but it can return the basic vector objects.
@@ -174,6 +174,11 @@ public:
         into account any transforms that may be applied to the component.
     */
     virtual Rectangle<float> getDrawableBounds() const = 0;
+
+    /** Recursively replaces a colour that might be used for filling or stroking.
+        return true if any instances of this colour were found.
+    */
+    virtual bool replaceColour (Colour originalColour, Colour replacementColour);
 
     //==============================================================================
     /** Internal class used to manage ValueTrees that represent Drawables. */

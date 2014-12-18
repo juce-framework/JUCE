@@ -58,9 +58,11 @@ namespace juce
 
 namespace AudioUnitFormatHelpers
 {
-    static int insideCallback = 0;
+   #if JUCE_DEBUG
+    static ThreadLocalValue<int> insideCallback;
+   #endif
 
-    String osTypeToString (OSType type)
+    String osTypeToString (OSType type) noexcept
     {
         const juce_wchar s[4] = { (juce_wchar) ((type >> 24) & 0xff),
                                   (juce_wchar) ((type >> 16) & 0xff),
@@ -86,9 +88,6 @@ namespace AudioUnitFormatHelpers
 
     String createPluginIdentifier (const AudioComponentDescription& desc)
     {
-        jassert (osTypeToString ('abcd') == "abcd"); // agh, must have got the endianness wrong..
-        jassert (stringToOSType ("abcd") == (OSType) 'abcd'); // ditto
-
         String s (auIdentifierPrefix);
 
         if (desc.componentType == kAudioUnitType_MusicDevice)
@@ -136,7 +135,7 @@ namespace AudioUnitFormatHelpers
                                                         fileOrIdentifier.lastIndexOfChar ('/')) + 1));
 
             StringArray tokens;
-            tokens.addTokens (s, ",", String::empty);
+            tokens.addTokens (s, ",", StringRef());
             tokens.removeEmptyStrings();
 
             if (tokens.size() == 3)
@@ -213,9 +212,11 @@ namespace AudioUnitFormatHelpers
                 const short resFileId = CFBundleOpenBundleResourceMap (bundleRef);
                 UseResFile (resFileId);
 
-                for (ResourceIndex i = 1; i <= Count1Resources ('thng'); ++i)
+                const OSType thngType = stringToOSType ("thng");
+
+                for (ResourceIndex i = 1; i <= Count1Resources (thngType); ++i)
                 {
-                    if (Handle h = Get1IndResource ('thng', i))
+                    if (Handle h = Get1IndResource (thngType, i))
                     {
                         HLock (h);
                         const uint32* const types = (const uint32*) *h;
@@ -290,7 +291,9 @@ public:
     {
         using namespace AudioUnitFormatHelpers;
 
-        ++insideCallback;
+       #if JUCE_DEBUG
+        ++*insideCallback;
+       #endif
 
         JUCE_AU_LOG ("Opening AU: " + fileOrIdentifier);
 
@@ -306,14 +309,20 @@ public:
             }
         }
 
-        --insideCallback;
+       #if JUCE_DEBUG
+        --*insideCallback;
+       #endif
     }
 
     ~AudioUnitPluginInstance()
     {
         const ScopedLock sl (lock);
 
-        jassert (AudioUnitFormatHelpers::insideCallback == 0);
+       #if JUCE_DEBUG
+        // this indicates that some kind of recursive call is getting triggered that's
+        // deleting this plugin while it's still under construction.
+        jassert (AudioUnitFormatHelpers::insideCallback.get() == 0);
+       #endif
 
         if (eventListenerRef != 0)
         {
@@ -336,11 +345,21 @@ public:
         refreshParameterList();
         updateNumChannels();
         producesMidiMessages = canProduceMidiOutput();
-        setPluginCallbacks();
         setPlayConfigDetails (numInputBusChannels * numInputBusses,
                               numOutputBusChannels * numOutputBusses,
                               rate, blockSize);
         setLatencySamples (0);
+
+        if (parameters.size() == 0)
+        {
+            // some plugins crash if initialiseAudioUnit() is called too soon (sigh..), so we'll
+            // only call it here if it seems like they it's one of the awkward plugins that can
+            // only create their parameters after it has been initialised.
+            initialiseAudioUnit();
+            refreshParameterList();
+        }
+
+        setPluginCallbacks();
     }
 
     //==============================================================================
@@ -468,8 +487,8 @@ public:
 
             resetBusses();
 
-            prepared = (AudioUnitInitialize (audioUnit) == noErr);
-            jassert (prepared);
+            jassert (! prepared);
+            initialiseAudioUnit();
         }
     }
 
@@ -489,6 +508,14 @@ public:
         incomingMidi.clear();
     }
 
+    bool initialiseAudioUnit()
+    {
+        if (! prepared)
+            prepared = (AudioUnitInitialize (audioUnit) == noErr);
+
+        return prepared;
+    }
+
     void resetBusses()
     {
         for (int i = 0; i < numInputBusses; ++i)   AudioUnitReset (audioUnit, kAudioUnitScope_Input, i);
@@ -505,14 +532,16 @@ public:
 
             for (int i = 0; i < numOutputBusses; ++i)
             {
-                AudioBufferList* const abl = getAudioBufferListForBus(i);
-                abl->mNumberBuffers = numOutputBusChannels;
-
-                for (int j = 0; j < numOutputBusChannels; ++j)
+                if (AudioBufferList* const abl = getAudioBufferListForBus(i))
                 {
-                    abl->mBuffers[j].mNumberChannels = 1;
-                    abl->mBuffers[j].mDataByteSize = sizeof (float) * numSamples;
-                    abl->mBuffers[j].mData = buffer.getSampleData (i * numOutputBusChannels + j, 0);
+                    abl->mNumberBuffers = numOutputBusChannels;
+
+                    for (int j = 0; j < numOutputBusChannels; ++j)
+                    {
+                        abl->mBuffers[j].mNumberChannels = 1;
+                        abl->mBuffers[j].mDataByteSize = sizeof (float) * numSamples;
+                        abl->mBuffers[j].mData = buffer.getWritePointer (i * numOutputBusChannels + j);
+                    }
                 }
             }
 
@@ -570,7 +599,7 @@ public:
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return "Input " + String (index + 1);
 
-        return String::empty;
+        return String();
     }
 
     const String getOutputChannelName (int index) const override
@@ -578,7 +607,7 @@ public:
         if (isPositiveAndBelow (index, getNumOutputChannels()))
             return "Output " + String (index + 1);
 
-        return String::empty;
+        return String();
     }
 
     bool isInputChannelStereoPair (int index) const override    { return isPositiveAndBelow (index, getNumInputChannels()); }
@@ -643,8 +672,13 @@ public:
 
     void sendAllParametersChangedEvents()
     {
-        for (int i = 0; i < parameters.size(); ++i)
-            sendParameterChangeEvent (i);
+        jassert (audioUnit != nullptr);
+
+        AudioUnitParameter param;
+        param.mAudioUnit = audioUnit;
+        param.mParameterID = kAUParameterListener_AnyParameter;
+
+        AUParameterListenerNotify (nullptr, nullptr, &param);
     }
 
     const String getParameterName (int index) override
@@ -652,7 +686,7 @@ public:
         if (const ParamInfo* p = parameters[index])
             return p->name;
 
-        return String::empty;
+        return String();
     }
 
     const String getParameterText (int index) override   { return String (getParameter (index)); }
@@ -789,10 +823,14 @@ public:
 
         if (propertyList != 0)
         {
+            initialiseAudioUnit();
+
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global,
                                   0, &propertyList, sizeof (propertyList));
 
             sendAllParametersChangedEvents();
+
+            CFRelease (propertyList);
         }
     }
 
@@ -886,7 +924,7 @@ private:
         bool automatable;
     };
 
-    OwnedArray <ParamInfo> parameters;
+    OwnedArray<ParamInfo> parameters;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
@@ -943,16 +981,11 @@ private:
 
             for (int i = 0; i < parameters.size(); ++i)
             {
-                const ParamInfo& p = *parameters.getUnchecked(i);
-
-                AudioUnitParameter paramToAdd;
-                paramToAdd.mAudioUnit = audioUnit;
-                paramToAdd.mParameterID = p.paramID;
-                paramToAdd.mScope = kAudioUnitScope_Global;
-                paramToAdd.mElement = 0;
-
                 AudioUnitEvent event;
-                event.mArgument.mParameter = paramToAdd;
+                event.mArgument.mParameter.mAudioUnit = audioUnit;
+                event.mArgument.mParameter.mParameterID = parameters.getUnchecked(i)->paramID;
+                event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
+                event.mArgument.mParameter.mElement = 0;
 
                 event.mEventType = kAudioUnitEvent_ParameterValueChange;
                 AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
@@ -963,6 +996,16 @@ private:
                 event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
                 AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
             }
+
+            // Add a listener for program changes
+            AudioUnitEvent event;
+            event.mArgument.mProperty.mAudioUnit = audioUnit;
+            event.mArgument.mProperty.mPropertyID = kAudioUnitProperty_PresentPreset;
+            event.mArgument.mProperty.mScope = kAudioUnitScope_Global;
+            event.mArgument.mProperty.mElement = 0;
+
+            event.mEventType = kAudioUnitEvent_PropertyChange;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
         }
     }
 
@@ -993,6 +1036,7 @@ private:
                 break;
 
             default:
+                sendAllParametersChangedEvents();
                 break;
         }
     }
@@ -1023,7 +1067,7 @@ private:
                 if (bufferChannel < currentBuffer->getNumChannels())
                 {
                     memcpy (ioData->mBuffers[i].mData,
-                            currentBuffer->getSampleData (bufferChannel, 0),
+                            currentBuffer->getReadPointer (bufferChannel),
                             sizeof (float) * inNumberFrames);
                 }
                 else
@@ -1285,15 +1329,14 @@ private:
 };
 
 //==============================================================================
-class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor,
-                                      public Timer
+class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
 {
 public:
     AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& p, bool createGenericViewIfNeeded)
         : AudioProcessorEditor (&p),
           plugin (p)
     {
-        addAndMakeVisible (&wrapper);
+        addAndMakeVisible (wrapper);
 
         setOpaque (true);
         setVisible (true);
@@ -1325,29 +1368,24 @@ public:
         wrapper.setSize (getWidth(), getHeight());
     }
 
-    void timerCallback() override
-    {
-        wrapper.resizeToFitView();
-        startTimer (jmin (713, getTimerInterval() + 51));
-    }
-
     void childBoundsChanged (Component*) override
     {
         setSize (wrapper.getWidth(), wrapper.getHeight());
-        startTimer (70);
     }
 
 private:
     AudioUnitPluginInstance& plugin;
-    NSViewComponent wrapper;
+
+    AutoResizingNSViewComponent wrapper;
 
     bool createView (const bool createGenericViewIfNeeded)
     {
+        if (! plugin.initialiseAudioUnit())
+            return false;
+
         NSView* pluginView = nil;
         UInt32 dataSize = 0;
         Boolean isWritable = false;
-
-        AudioUnitInitialize (plugin.audioUnit);
 
         if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                       0, &dataSize, &isWritable) == noErr
@@ -1400,10 +1438,7 @@ private:
         wrapper.setView (pluginView);
 
         if (pluginView != nil)
-        {
-            timerCallback();
-            startTimer (70);
-        }
+            wrapper.resizeToFitView();
 
         return pluginView != nil;
     }
@@ -1518,16 +1553,10 @@ private:
 
             Float32Point pos = { 0, 0 };
             Float32Point size = { 250, 200 };
-
             HIViewRef pluginView = 0;
 
-            AudioUnitCarbonViewCreate (carbonView,
-                                       owner.getAudioUnit(),
-                                       windowRef,
-                                       rootView,
-                                       &pos,
-                                       &size,
-                                       (ControlRef*) &pluginView);
+            AudioUnitCarbonViewCreate (carbonView, owner.getAudioUnit(), windowRef, rootView,
+                                       &pos, &size, (ControlRef*) &pluginView);
 
             return pluginView;
         }
@@ -1586,7 +1615,7 @@ AudioUnitPluginFormat::~AudioUnitPluginFormat()
 {
 }
 
-void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
+void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
                                                  const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))

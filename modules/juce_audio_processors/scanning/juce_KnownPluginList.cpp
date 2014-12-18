@@ -46,7 +46,7 @@ PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifi
 PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const
 {
     for (int i = 0; i < types.size(); ++i)
-        if (types.getUnchecked(i)->createIdentifierString() == identifierString)
+        if (types.getUnchecked(i)->matchesIdentifierString (identifierString))
             return types.getUnchecked(i);
 
     return nullptr;
@@ -202,6 +202,14 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
             }
         }
     }
+
+    scanFinished();
+}
+
+void KnownPluginList::scanFinished()
+{
+    if (scanner != nullptr)
+        scanner->scanFinished();
 }
 
 const StringArray& KnownPluginList::getBlacklistedFiles() const
@@ -241,7 +249,8 @@ void KnownPluginList::clearBlacklistedFiles()
 //==============================================================================
 struct PluginSorter
 {
-    PluginSorter (KnownPluginList::SortMethod sortMethod) noexcept  : method (sortMethod) {}
+    PluginSorter (KnownPluginList::SortMethod sortMethod, bool forwards) noexcept
+        : method (sortMethod), direction (forwards ? 1 : -1) {}
 
     int compareElements (const PluginDescription* const first,
                          const PluginDescription* const second) const
@@ -250,16 +259,17 @@ struct PluginSorter
 
         switch (method)
         {
-            case KnownPluginList::sortByCategory:           diff = first->category.compareLexicographically (second->category); break;
-            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareLexicographically (second->manufacturerName); break;
+            case KnownPluginList::sortByCategory:           diff = first->category.compareNatural (second->category); break;
+            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName); break;
+            case KnownPluginList::sortByFormat:             diff = first->pluginFormatName.compare (second->pluginFormatName); break;
             case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first->fileOrIdentifier).compare (lastPathPart (second->fileOrIdentifier)); break;
             default: break;
         }
 
         if (diff == 0)
-            diff = first->name.compareLexicographically (second->name);
+            diff = first->name.compareNatural (second->name);
 
-        return diff;
+        return diff * direction;
     }
 
 private:
@@ -268,17 +278,26 @@ private:
         return path.replaceCharacter ('\\', '/').upToLastOccurrenceOf ("/", false, false);
     }
 
-    KnownPluginList::SortMethod method;
+    const KnownPluginList::SortMethod method;
+    const int direction;
+
+    JUCE_DECLARE_NON_COPYABLE (PluginSorter)
 };
 
-void KnownPluginList::sort (const SortMethod method)
+void KnownPluginList::sort (const SortMethod method, bool forwards)
 {
     if (method != defaultOrder)
     {
-        PluginSorter sorter (method);
+        Array<PluginDescription*> oldOrder, newOrder;
+        oldOrder.addArray (types);
+
+        PluginSorter sorter (method, forwards);
         types.sort (sorter, true);
 
-        sendChangeMessage();
+        newOrder.addArray (types);
+
+        if (oldOrder != newOrder)
+            sendChangeMessage();
     }
 }
 
@@ -435,6 +454,18 @@ struct PluginTreeUtils
         }
     }
 
+    static bool containsDuplicateNames (const Array<const PluginDescription*>& plugins, const String& name)
+    {
+        int matches = 0;
+
+        for (int i = 0; i < plugins.size(); ++i)
+            if (plugins.getUnchecked(i)->name == name)
+                if (++matches > 1)
+                    return true;
+
+        return false;
+    }
+
     static void addToMenu (const KnownPluginList::PluginTree& tree, PopupMenu& m, const OwnedArray <PluginDescription>& allPlugins)
     {
         for (int i = 0; i < tree.subFolders.size(); ++i)
@@ -450,7 +481,12 @@ struct PluginTreeUtils
         {
             const PluginDescription* const plugin = tree.plugins.getUnchecked(i);
 
-            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, plugin->name, true, false);
+            String name (plugin->name);
+
+            if (containsDuplicateNames (tree.plugins, name))
+                name << " (" << plugin->pluginFormatName << ')';
+
+            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, name, true, false);
         }
     }
 };
@@ -460,7 +496,7 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
     Array <PluginDescription*> sorted;
 
     {
-        PluginSorter sorter (sortMethod);
+        PluginSorter sorter (sortMethod, true);
 
         for (int i = 0; i < types.size(); ++i)
             sorted.addSorted (sorter, types.getUnchecked(i));
@@ -468,7 +504,7 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
 
     PluginTree* tree = new PluginTree();
 
-    if (sortMethod == sortByCategory || sortMethod == sortByManufacturer)
+    if (sortMethod == sortByCategory || sortMethod == sortByManufacturer || sortMethod == sortByFormat)
     {
         PluginTreeUtils::buildTreeByCategory (*tree, sorted, sortMethod);
     }
@@ -501,3 +537,13 @@ int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
 //==============================================================================
 KnownPluginList::CustomScanner::CustomScanner() {}
 KnownPluginList::CustomScanner::~CustomScanner() {}
+
+void KnownPluginList::CustomScanner::scanFinished() {}
+
+bool KnownPluginList::CustomScanner::shouldExit() const noexcept
+{
+    if (ThreadPoolJob* job = ThreadPoolJob::getCurrentThreadPoolJob())
+        return job->shouldExit();
+
+    return false;
+}

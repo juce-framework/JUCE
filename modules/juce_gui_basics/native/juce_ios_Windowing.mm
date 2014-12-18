@@ -22,6 +22,8 @@
   ==============================================================================
 */
 
+extern bool isIOSAppActive;
+
 } // (juce namespace)
 
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
@@ -32,6 +34,8 @@
 - (void) applicationWillTerminate: (UIApplication*) application;
 - (void) applicationDidEnterBackground: (UIApplication*) application;
 - (void) applicationWillEnterForeground: (UIApplication*) application;
+- (void) applicationDidBecomeActive: (UIApplication*) application;
+- (void) applicationWillResignActive: (UIApplication*) application;
 
 @end
 
@@ -68,6 +72,18 @@
         app->resumed();
 }
 
+- (void) applicationDidBecomeActive: (UIApplication*) application
+{
+    (void) application;
+    isIOSAppActive = true;
+}
+
+- (void) applicationWillResignActive: (UIApplication*) application
+{
+    (void) application;
+    isIOSAppActive = false;
+}
+
 @end
 
 namespace juce
@@ -91,7 +107,7 @@ class iOSMessageBox;
 
 } // (juce namespace)
 
-@interface JuceAlertBoxDelegate  : NSObject
+@interface JuceAlertBoxDelegate  : NSObject <UIAlertViewDelegate>
 {
 @public
     iOSMessageBox* owner;
@@ -110,7 +126,7 @@ public:
     iOSMessageBox (const String& title, const String& message,
                    NSString* button1, NSString* button2, NSString* button3,
                    ModalComponentManager::Callback* cb, const bool async)
-        : result (0), delegate (nil), alert (nil),
+        : result (0), resultReceived (false), delegate (nil), alert (nil),
           callback (cb), isYesNo (button3 != nil), isAsync (async)
     {
         delegate = [[JuceAlertBoxDelegate alloc] init];
@@ -137,7 +153,7 @@ public:
 
         JUCE_AUTORELEASEPOOL
         {
-            while (! alert.hidden && alert.superview != nil)
+            while (! (alert.hidden || resultReceived))
                 [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
 
@@ -147,6 +163,7 @@ public:
     void buttonClicked (const int buttonIndex) noexcept
     {
         result = buttonIndex;
+        resultReceived = true;
 
         if (callback != nullptr)
             callback->modalStateFinished (result);
@@ -157,6 +174,7 @@ public:
 
 private:
     int result;
+    bool resultReceived;
     JuceAlertBoxDelegate* delegate;
     UIAlertView* alert;
     ScopedPointer<ModalComponentManager::Callback> callback;
@@ -171,7 +189,7 @@ private:
 
 - (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex
 {
-    owner->buttonClicked (buttonIndex);
+    owner->buttonClicked ((int) buttonIndex);
     alertView.hidden = true;
 }
 
@@ -294,12 +312,12 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-Point<int> MouseInputSource::getCurrentRawMousePosition()
+Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     return juce_lastMousePos;
 }
 
-void MouseInputSource::setRawMousePosition (Point<int>)
+void MouseInputSource::setRawMousePosition (Point<float>)
 {
 }
 

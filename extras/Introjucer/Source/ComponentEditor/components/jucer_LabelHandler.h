@@ -97,13 +97,13 @@ public:
         label->setFont (f);
     }
 
-    String getCreationParameters (Component* component)
+    String getCreationParameters (GeneratedCode& code, Component* component)
     {
         Label* const l = dynamic_cast <Label*> (component);
 
-        return quotedString (component->getName())
+        return quotedString (component->getName(), false)
                  + ",\n"
-                 + quotedString (l->getText());
+                 + quotedString (l->getText(), code.shouldUseTransMacro());
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)

@@ -92,6 +92,8 @@ public:
     String getDefaultAAXIdentifier()                    { return getDefaultBundleIdentifier(); }
 
     Value getCompanyName()                              { return getProjectValue (Ids::companyName); }
+    Value getCompanyWebsite()                           { return getProjectValue (Ids::companyWebsite); }
+    Value getCompanyEmail()                             { return getProjectValue (Ids::companyEmail); }
 
     //==============================================================================
     Value getProjectValue (const Identifier& name)      { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
@@ -147,7 +149,7 @@ public:
         Item findItemWithID (const String& targetId) const; // (recursive search)
 
         String getImageFileID() const;
-        Image loadAsImageFile() const;
+        Drawable* loadAsImageFile() const;
 
         //==============================================================================
         Value getNameValue();

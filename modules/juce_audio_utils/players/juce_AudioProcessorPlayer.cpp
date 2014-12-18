@@ -28,8 +28,7 @@ AudioProcessorPlayer::AudioProcessorPlayer()
       blockSize (0),
       isPrepared (false),
       numInputChans (0),
-      numOutputChans (0),
-      tempBuffer (1, 1)
+      numOutputChans (0)
 {
 }
 
@@ -45,9 +44,7 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
     {
         if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
         {
-            processorToPlay->setPlayConfigDetails (numInputChans, numOutputChans,
-                                                   sampleRate, blockSize);
-
+            processorToPlay->setPlayConfigDetails (numInputChans, numOutputChans, sampleRate, blockSize);
             processorToPlay->prepareToPlay (sampleRate, blockSize);
         }
 
@@ -96,7 +93,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
         for (int i = numOutputChannels; i < numInputChannels; ++i)
         {
-            channels[totalNumChans] = tempBuffer.getSampleData (i - numOutputChannels, 0);
+            channels[totalNumChans] = tempBuffer.getWritePointer (i - numOutputChannels);
             memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }
@@ -120,22 +117,23 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
     AudioSampleBuffer buffer (channels, totalNumChans, numSamples);
 
-    const ScopedLock sl (lock);
-
-    if (processor != nullptr)
     {
-        const ScopedLock sl2 (processor->getCallbackLock());
+        const ScopedLock sl (lock);
 
-        if (processor->isSuspended())
+        if (processor != nullptr)
         {
-            for (int i = 0; i < numOutputChannels; ++i)
-                zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
-        }
-        else
-        {
-            processor->processBlock (buffer, incomingMidi);
+            const ScopedLock sl2 (processor->getCallbackLock());
+
+            if (! processor->isSuspended())
+            {
+                processor->processBlock (buffer, incomingMidi);
+                return;
+            }
         }
     }
+
+    for (int i = 0; i < numOutputChannels; ++i)
+        FloatVectorOperations::clear (outputChannelData[i], numSamples);
 }
 
 void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)

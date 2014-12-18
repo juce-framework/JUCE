@@ -62,10 +62,10 @@ public:
     explicit EdgeTable (const Rectangle<float>& rectangleToAdd);
 
     /** Creates a copy of another edge table. */
-    EdgeTable (const EdgeTable& other);
+    EdgeTable (const EdgeTable&);
 
     /** Copies from another edge table. */
-    EdgeTable& operator= (const EdgeTable& other);
+    EdgeTable& operator= (const EdgeTable&);
 
     /** Destructor. */
     ~EdgeTable();
@@ -73,7 +73,7 @@ public:
     //==============================================================================
     void clipToRectangle (const Rectangle<int>& r);
     void excludeRectangle (const Rectangle<int>& r);
-    void clipToEdgeTable (const EdgeTable& other);
+    void clipToEdgeTable (const EdgeTable&);
     void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels);
     bool isEmpty() noexcept;
     const Rectangle<int>& getMaximumBounds() const noexcept      { return bounds; }

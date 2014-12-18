@@ -35,12 +35,12 @@ class NumericValueSource   : public ValueSourceFilter
 public:
     NumericValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
-    var getValue() const
+    var getValue() const override
     {
         return (Type) sourceValue.getValue();
     }
 
-    void setValue (const var& newValue)
+    void setValue (const var& newValue) override
     {
         const Type newVal = static_cast <Type> (newValue);
 

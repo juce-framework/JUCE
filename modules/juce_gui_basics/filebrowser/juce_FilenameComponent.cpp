@@ -38,7 +38,7 @@ FilenameComponent::FilenameComponent (const String& name,
       wildcard (fileBrowserWildcard),
       enforcedSuffix (suffix)
 {
-    addAndMakeVisible (&filenameBox);
+    addAndMakeVisible (filenameBox);
     filenameBox.setEditableText (canEditFilename);
     filenameBox.addListener (this);
     filenameBox.setTextWhenNothingSelected (textWhenNothingSelected);
@@ -66,6 +66,13 @@ void FilenameComponent::paintOverChildren (Graphics& g)
 void FilenameComponent::resized()
 {
     getLookAndFeel().layoutFilenameComponent (*this, &filenameBox, browseButton);
+}
+
+KeyboardFocusTraverser* FilenameComponent::createFocusTraverser()
+{
+    // This prevents the sub-components from grabbing focus if the
+    // FilenameComponent has been set to refuse focus.
+    return getWantsKeyboardFocus() ? Component::createFocusTraverser() : nullptr;
 }
 
 void FilenameComponent::setBrowseButtonText (const String& newBrowseButtonText)
@@ -155,9 +162,14 @@ void FilenameComponent::fileDragExit (const StringArray&)
 }
 
 //==============================================================================
+String FilenameComponent::getCurrentFileText() const
+{
+    return filenameBox.getText();
+}
+
 File FilenameComponent::getCurrentFile() const
 {
-    File f (File::getCurrentWorkingDirectory().getChildFile (filenameBox.getText()));
+    File f (File::getCurrentWorkingDirectory().getChildFile (getCurrentFileText()));
 
     if (enforcedSuffix.isNotEmpty())
         f = f.withFileExtension (enforcedSuffix);

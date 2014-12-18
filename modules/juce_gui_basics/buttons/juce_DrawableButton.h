@@ -132,6 +132,9 @@ public:
     /** Returns the image that the button will use when the mouse is held down on it. */
     Drawable* getDownImage() const noexcept;
 
+    /** Can be overridden to specify a custom position for the image within the button. */
+    virtual Rectangle<float> getImageBounds() const;
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the link.
 
@@ -173,8 +176,8 @@ public:
 private:
     //==============================================================================
     ButtonStyle style;
-    ScopedPointer <Drawable> normalImage, overImage, downImage, disabledImage,
-                             normalImageOn, overImageOn, downImageOn, disabledImageOn;
+    ScopedPointer<Drawable> normalImage, overImage, downImage, disabledImage,
+                            normalImageOn, overImageOn, downImageOn, disabledImageOn;
     Drawable* currentImage;
     int edgeIndent;
 

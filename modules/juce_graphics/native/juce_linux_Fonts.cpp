@@ -43,7 +43,7 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
                 {
                     if (e->getStringAttribute ("prefix") == "xdg")
                     {
-                        String xdgDataHome (SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", String::empty));
+                        String xdgDataHome (SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", String()));
 
                         if (xdgDataHome.trimStart().isEmpty())
                             xdgDataHome = "~/.local/share";
@@ -67,6 +67,11 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new FreeTypeTypeface (font);
+}
+
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
+{
+    return new FreeTypeTypeface (data, dataSize);
 }
 
 void Typeface::scanFolderForFonts (const File& folder)

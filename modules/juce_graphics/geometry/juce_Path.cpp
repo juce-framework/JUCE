@@ -254,6 +254,11 @@ Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) c
 }
 
 //==============================================================================
+void Path::preallocateSpace (int numExtraCoordsToMakeSpaceFor)
+{
+    data.ensureAllocatedSize ((int) numElements + numExtraCoordsToMakeSpaceFor);
+}
+
 void Path::startNewSubPath (const float x, const float y)
 {
     JUCE_CHECK_COORDS_ARE_VALID (x, y);
@@ -263,7 +268,7 @@ void Path::startNewSubPath (const float x, const float y)
     else
         bounds.extend (x, y);
 
-    data.ensureAllocatedSize ((int) numElements + 3);
+    preallocateSpace (3);
 
     data.elements [numElements++] = moveMarker;
     data.elements [numElements++] = x;
@@ -282,7 +287,7 @@ void Path::lineTo (const float x, const float y)
     if (numElements == 0)
         startNewSubPath (0, 0);
 
-    data.ensureAllocatedSize ((int) numElements + 3);
+    preallocateSpace (3);
 
     data.elements [numElements++] = lineMarker;
     data.elements [numElements++] = x;
@@ -305,7 +310,7 @@ void Path::quadraticTo (const float x1, const float y1,
     if (numElements == 0)
         startNewSubPath (0, 0);
 
-    data.ensureAllocatedSize ((int) numElements + 5);
+    preallocateSpace (5);
 
     data.elements [numElements++] = quadMarker;
     data.elements [numElements++] = x1;
@@ -334,7 +339,7 @@ void Path::cubicTo (const float x1, const float y1,
     if (numElements == 0)
         startNewSubPath (0, 0);
 
-    data.ensureAllocatedSize ((int) numElements + 7);
+    preallocateSpace (7);
 
     data.elements [numElements++] = cubicMarker;
     data.elements [numElements++] = x1;
@@ -362,7 +367,7 @@ void Path::closeSubPath()
     if (numElements > 0
          && data.elements [numElements - 1] != closeSubPathMarker)
     {
-        data.ensureAllocatedSize ((int) numElements + 1);
+        preallocateSpace (1);
         data.elements [numElements++] = closeSubPathMarker;
     }
 }
@@ -399,7 +404,7 @@ void Path::addRectangle (const float x, const float y,
     if (w < 0) std::swap (x1, x2);
     if (h < 0) std::swap (y1, y2);
 
-    data.ensureAllocatedSize ((int) numElements + 13);
+    preallocateSpace (13);
 
     if (numElements == 0)
     {
@@ -431,9 +436,7 @@ void Path::addRectangle (const float x, const float y,
     data.elements [numElements++] = closeSubPathMarker;
 }
 
-void Path::addRoundedRectangle (const float x, const float y,
-                                const float w, const float h,
-                                float csx, float csy)
+void Path::addRoundedRectangle (float x, float y, float w, float h, float csx, float csy)
 {
     addRoundedRectangle (x, y, w, h, csx, csy, true, true, true, true);
 }
@@ -493,20 +496,25 @@ void Path::addRoundedRectangle (const float x, const float y, const float w, con
     closeSubPath();
 }
 
-void Path::addRoundedRectangle (const float x, const float y,
-                                const float w, const float h,
-                                float cs)
+void Path::addRoundedRectangle (float x, float y, float w, float h, float cs)
 {
     addRoundedRectangle (x, y, w, h, cs, cs);
 }
 
-void Path::addTriangle (const float x1, const float y1,
-                        const float x2, const float y2,
-                        const float x3, const float y3)
+void Path::addTriangle (float x1, float y1,
+                        float x2, float y2,
+                        float x3, float y3)
 {
-    startNewSubPath (x1, y1);
-    lineTo (x2, y2);
-    lineTo (x3, y3);
+    addTriangle (Point<float> (x1, y1),
+                 Point<float> (x2, y2),
+                 Point<float> (x3, y3));
+}
+
+void Path::addTriangle (Point<float> p1, Point<float> p2, Point<float> p3)
+{
+    startNewSubPath (p1);
+    lineTo (p2);
+    lineTo (p3);
     closeSubPath();
 }
 
@@ -522,15 +530,19 @@ void Path::addQuadrilateral (const float x1, const float y1,
     closeSubPath();
 }
 
-void Path::addEllipse (const float x, const float y,
-                       const float w, const float h)
+void Path::addEllipse (float x, float y, float w, float h)
 {
-    const float hw = w * 0.5f;
+    addEllipse (Rectangle<float> (x, y, w, h));
+}
+
+void Path::addEllipse (Rectangle<float> area)
+{
+    const float hw = area.getWidth() * 0.5f;
     const float hw55 = hw * 0.55f;
-    const float hh = h * 0.5f;
+    const float hh = area.getHeight() * 0.5f;
     const float hh55 = hh * 0.55f;
-    const float cx = x + hw;
-    const float cy = y + hh;
+    const float cx = area.getX() + hw;
+    const float cy = area.getY() + hh;
 
     startNewSubPath (cx, cy - hh);
     cubicTo (cx + hw55, cy - hh, cx + hw, cy - hh55, cx + hw, cy);

@@ -190,6 +190,11 @@ public:
     */
     void setMinimised (bool shouldMinimise);
 
+    /** Returns true if the window has been placed in kiosk-mode.
+        @see Desktop::setKioskComponent
+    */
+    bool isKioskMode() const;
+
     //==============================================================================
     /** Returns a string which encodes the window's current size and position.
 
@@ -379,7 +384,8 @@ private:
     #endif
 
     void initialise (bool addToDesktop);
-    void updateLastPos();
+    void updateLastPosIfNotFullScreen();
+    void updateLastPosIfShowing();
     void setContent (Component*, bool takeOwnership, bool resizeToFit);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

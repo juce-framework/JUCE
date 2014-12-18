@@ -75,7 +75,7 @@ const File File::nonexistent;
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
-        return String::empty;
+        return String();
 
 #if JUCE_WINDOWS
     // Windows..
@@ -219,6 +219,11 @@ bool File::setReadOnly (const bool shouldBeReadOnly,
     return setFileReadOnlyInternal (shouldBeReadOnly) && worked;
 }
 
+bool File::setExecutePermission (bool shouldBeExecutable) const
+{
+    return setFileExecutableInternal (shouldBeExecutable);
+}
+
 bool File::deleteRecursively() const
 {
     bool worked = true;
@@ -322,7 +327,7 @@ String File::getFileNameWithoutExtension() const
 
 bool File::isAChildOf (const File& potentialParent) const
 {
-    if (potentialParent == File::nonexistent)
+    if (potentialParent.fullPath.isEmpty())
         return false;
 
     const String ourPath (getPathUpToLastSlash());
@@ -355,7 +360,7 @@ File File::getChildFile (StringRef relativePath) const
     if (isAbsolutePath (relativePath))
         return File (String (relativePath.text));
 
-    if (relativePath.text[0] != '.')
+    if (relativePath[0] != '.')
         return File (addTrailingSeparator (fullPath) + relativePath);
 
     String path (fullPath);
@@ -368,11 +373,11 @@ File File::getChildFile (StringRef relativePath) const
 
     while (relativePath[0] == '.')
     {
-        const juce_wchar secondChar = relativePath.text[1];
+        const juce_wchar secondChar = relativePath[1];
 
         if (secondChar == '.')
         {
-            const juce_wchar thirdChar = relativePath.text[2];
+            const juce_wchar thirdChar = relativePath[2];
 
             if (thirdChar == 0 || thirdChar == separator)
             {
@@ -476,17 +481,17 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const
         return false;
 
     FileInputStream in (*this);
-    return in.openedOk() && getSize() == in.readIntoMemoryBlock (destBlock);
+    return in.openedOk() && getSize() == (int64) in.readIntoMemoryBlock (destBlock);
 }
 
 String File::loadFileAsString() const
 {
     if (! existsAsFile())
-        return String::empty;
+        return String();
 
     FileInputStream in (*this);
     return in.openedOk() ? in.readEntireStreamAsString()
-                         : String::empty;
+                         : String();
 }
 
 void File::readLines (StringArray& destLines) const
@@ -598,7 +603,7 @@ String File::getFileExtension() const
     if (indexOfDot > fullPath.lastIndexOfChar (separator))
         return fullPath.substring (indexOfDot);
 
-    return String::empty;
+    return String();
 }
 
 bool File::hasFileExtension (StringRef possibleSuffix) const
@@ -629,7 +634,7 @@ bool File::hasFileExtension (StringRef possibleSuffix) const
 File File::withFileExtension (StringRef newExtension) const
 {
     if (fullPath.isEmpty())
-        return File::nonexistent;
+        return File();
 
     String filePart (getFileName());
 
@@ -754,7 +759,7 @@ String File::createLegalPathName (const String& original)
     String s (original);
     String start;
 
-    if (s[1] == ':')
+    if (s.isNotEmpty() && s[1] == ':')
     {
         start = s.substring (0, 2);
         s = s.substring (2);

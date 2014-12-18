@@ -75,10 +75,8 @@ public:
 
     /** Call this from your mouseDrag() callback to move the component.
 
-        This will move the component, but will first check the validity of the
-        component's new position using the checkPosition() method, which you
-        can override if you need to enforce special positioning limits on the
-        component.
+        This will move the component, using the given constrainer object to check
+        the new position.
 
         @param componentToDrag      the component that you want to drag
         @param e                    the current mouse-drag event

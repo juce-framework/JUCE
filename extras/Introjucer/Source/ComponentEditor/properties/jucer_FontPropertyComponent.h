@@ -34,7 +34,7 @@ public:
     {
         choices.add (getDefaultFont());
         choices.add (getDefaultSans());
-        choices.add (getDefaultSans());
+        choices.add (getDefaultSerif());
         choices.add (getDefaultMono());
         choices.add (String::empty);
 
@@ -82,7 +82,7 @@ public:
     {
         if (typefaceName == getDefaultFont())  return Font (font.getHeight(), font.getStyleFlags());
         if (typefaceName == getDefaultSans())  return Font (Font::getDefaultSansSerifFontName(), font.getHeight(), font.getStyleFlags());
-        if (typefaceName == getDefaultSans())  return Font (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags());
+        if (typefaceName == getDefaultSerif()) return Font (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags());
         if (typefaceName == getDefaultMono())  return Font (Font::getDefaultMonospacedFontName(), font.getHeight(), font.getStyleFlags());
 
         return Font (typefaceName, font.getHeight(), font.getStyleFlags());
@@ -92,7 +92,7 @@ public:
     {
         if (typefaceName == getDefaultFont())   return String::empty;
         if (typefaceName == getDefaultSans())   return "Font::getDefaultSansSerifFontName(), ";
-        if (typefaceName == getDefaultSans())   return "Font::getDefaultSerifFontName(), ";
+        if (typefaceName == getDefaultSerif())  return "Font::getDefaultSerifFontName(), ";
         if (typefaceName == getDefaultMono())   return "Font::getDefaultMonospacedFontName(), ";
 
         return "\"" + typefaceName + "\", ";

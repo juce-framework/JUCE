@@ -216,7 +216,7 @@ void PaintRoutineEditor::mouseDown (const MouseEvent& e)
     }
     else
     {
-        addChildComponent (&lassoComp);
+        addChildComponent (lassoComp);
         lassoComp.beginLasso (e, this);
     }
 }

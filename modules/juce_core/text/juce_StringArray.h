@@ -134,18 +134,12 @@ public:
     /** Returns a pointer to the first String in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline String* begin() const noexcept
-    {
-        return strings.begin();
-    }
+    inline String* begin() const noexcept       { return strings.begin(); }
 
     /** Returns a pointer to the String which follows the last element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline String* end() const noexcept
-    {
-        return strings.end();
-    }
+    inline String* end() const noexcept         { return strings.end(); }
 
     /** Searches for a string in the array.
 
@@ -387,10 +381,15 @@ public:
 
     //==============================================================================
     /** Sorts the array into alphabetical order.
-
         @param ignoreCase       if true, the comparisons used will be case-sensitive.
     */
     void sort (bool ignoreCase);
+
+    /** Sorts the array using extra language-aware rules to do a better job of comparing
+        words containing spaces and numbers.
+        @see String::compareNatural()
+    */
+    void sortNatural();
 
     //==============================================================================
     /** Increases the array's internal storage to hold a minimum number of elements.

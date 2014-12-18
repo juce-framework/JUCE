@@ -111,18 +111,52 @@ public:
         @param itemText         the text to show.
         @param isEnabled        if false, the item will be shown 'greyed-out' and can't be picked
         @param isTicked         if true, the item will be shown with a tick next to it
-        @param iconToUse        if this is non-zero, it should be an image that will be
-                                displayed to the left of the item. This method will take its
-                                own copy of the image passed-in, so there's no need to keep
-                                it hanging around.
 
         @see addSeparator, addColouredItem, addCustomItem, addSubMenu
     */
     void addItem (int itemResultID,
                   const String& itemText,
                   bool isEnabled = true,
-                  bool isTicked = false,
-                  const Image& iconToUse = Image::null);
+                  bool isTicked = false);
+
+    /** Appends a new item with an icon.
+
+        @param itemResultID     the number that will be returned from the show() method
+                                if the user picks this item. The value should never be
+                                zero, because that's used to indicate that the user didn't
+                                select anything.
+        @param itemText         the text to show.
+        @param isEnabled        if false, the item will be shown 'greyed-out' and can't be picked
+        @param isTicked         if true, the item will be shown with a tick next to it
+        @param iconToUse        if this is a valid image, it will be displayed to the left of the item.
+
+        @see addSeparator, addColouredItem, addCustomItem, addSubMenu
+    */
+    void addItem (int itemResultID,
+                  const String& itemText,
+                  bool isEnabled,
+                  bool isTicked,
+                  const Image& iconToUse);
+
+    /** Appends a new item with an icon.
+
+        @param itemResultID     the number that will be returned from the show() method
+                                if the user picks this item. The value should never be
+                                zero, because that's used to indicate that the user didn't
+                                select anything.
+        @param itemText         the text to show.
+        @param isEnabled        if false, the item will be shown 'greyed-out' and can't be picked
+        @param isTicked         if true, the item will be shown with a tick next to it
+        @param iconToUse        a Drawable object to use as the icon to the left of the item.
+                                The menu will take ownership of this drawable object and will
+                                delete it later when no longer needed
+        @see addSeparator, addColouredItem, addCustomItem, addSubMenu
+    */
+    void addItem (int itemResultID,
+                  const String& itemText,
+                  bool isEnabled,
+                  bool isTicked,
+                  Drawable* iconToUse);
 
     /** Adds an item that represents one of the commands in a command manager object.
 
@@ -177,8 +211,35 @@ public:
     */
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
-                     bool isEnabled = true,
-                     const Image& iconToUse = Image::null,
+                     bool isEnabled = true);
+
+    /** Appends a sub-menu with an icon.
+
+        If the menu that's passed in is empty, it will appear as an inactive item.
+        If the itemResultID argument is non-zero, then the sub-menu item itself can be
+        clicked to trigger it as a command.
+    */
+    void addSubMenu (const String& subMenuName,
+                     const PopupMenu& subMenu,
+                     bool isEnabled,
+                     const Image& iconToUse,
+                     bool isTicked = false,
+                     int itemResultID = 0);
+
+    /** Appends a sub-menu with an icon.
+
+        If the menu that's passed in is empty, it will appear as an inactive item.
+        If the itemResultID argument is non-zero, then the sub-menu item itself can be
+        clicked to trigger it as a command.
+
+        The iconToUse parameter is a Drawable object to use as the icon to the left of
+        the item. The menu will take ownership of this drawable object and will delete it
+        later when no longer needed
+    */
+    void addSubMenu (const String& subMenuName,
+                     const PopupMenu& subMenu,
+                     bool isEnabled,
+                     Drawable* iconToUse,
                      bool isTicked = false,
                      int itemResultID = 0);
 
@@ -408,7 +469,7 @@ public:
         bool isCustomComponent;
         bool isSectionHeader;
         const Colour* customColour;
-        Image customImage;
+        const Drawable* icon;
         ApplicationCommandManager* commandManager;
 
     private:
@@ -493,13 +554,16 @@ public:
         virtual void drawPopupMenuBackground (Graphics&, int width, int height) = 0;
 
         /** Draws one of the items in a popup menu. */
-        virtual void drawPopupMenuItem (Graphics&, int width, int height,
+        virtual void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
                                         bool isSeparator, bool isActive, bool isHighlighted,
                                         bool isTicked, bool hasSubMenu,
                                         const String& text,
                                         const String& shortcutKeyText,
-                                        Image* icon,
+                                        const Drawable* icon,
                                         const Colour* textColour) = 0;
+
+        virtual void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
+                                                 const String& sectionName) = 0;
 
         /** Returns the size and style of font to use in popup menus. */
         virtual Font getPopupMenuFont() = 0;
@@ -548,6 +612,11 @@ private:
 
     Component* createWindow (const Options&, ApplicationCommandManager**) const;
     int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // These methods have new implementations now - see its new definition
+    int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
+   #endif
 
     JUCE_LEAK_DETECTOR (PopupMenu)
 };

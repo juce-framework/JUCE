@@ -63,7 +63,9 @@ public:
         if (isActive)
         {
             isActive = false;
-            ModalComponentManager::getInstance()->triggerAsyncUpdate();
+
+            if (ModalComponentManager* mcm = ModalComponentManager::getInstanceWithoutCreating())
+                mcm->triggerAsyncUpdate();
         }
     }
 
@@ -83,10 +85,11 @@ ModalComponentManager::ModalComponentManager()
 
 ModalComponentManager::~ModalComponentManager()
 {
+    stack.clear();
     clearSingletonInstance();
 }
 
-juce_ImplementSingleton_SingleThreaded (ModalComponentManager);
+juce_ImplementSingleton_SingleThreaded (ModalComponentManager)
 
 
 //==============================================================================
@@ -231,6 +234,17 @@ void ModalComponentManager::bringModalComponentsToFront (bool topOneShouldGrabFo
     }
 }
 
+bool ModalComponentManager::cancelAllModalComponents()
+{
+    const int numModal = getNumModalComponents();
+
+    for (int i = numModal; --i >= 0;)
+        if (Component* const c = getModalComponent(i))
+            c->exitModalState (0);
+
+    return numModal > 0;
+}
+
 #if JUCE_MODAL_LOOPS_PERMITTED
 class ModalComponentManager::ReturnValueRetriever     : public ModalComponentManager::Callback
 {
@@ -259,7 +273,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     if (Component* currentlyModal = getModalComponent (0))
     {
-        WeakReference<Component> prevFocused (Component::getCurrentlyFocusedComponent());
+        FocusRestorer focusRestorer;
 
         bool finished = false;
         attachCallback (currentlyModal, new ReturnValueRetriever (returnValue, finished));
@@ -273,9 +287,6 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
             }
         }
         JUCE_CATCH_EXCEPTION
-
-        if (prevFocused != nullptr && ! prevFocused->isCurrentlyBlockedByAnotherModalComponent())
-            prevFocused->grabKeyboardFocus();
     }
 
     return returnValue;

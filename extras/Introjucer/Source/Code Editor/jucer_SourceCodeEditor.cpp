@@ -117,10 +117,33 @@ void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
 SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocument& codeDocument)
     : DocumentEditorComponent (doc)
 {
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
+    GenericCodeEditorComponent* ed = nullptr;
+    const File file (document->getFile());
+
+    if (file.hasFileExtension (sourceOrHeaderFileExtensions))
+    {
+        ed = new CppCodeEditorComponent (file, codeDocument);
+    }
     else
-        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
+    {
+        CodeTokeniser* tokeniser = nullptr;
+
+        if (file.hasFileExtension ("xml;svg"))
+        {
+            static XmlTokeniser xmlTokeniser;
+            tokeniser = &xmlTokeniser;
+        }
+
+        if (file.hasFileExtension ("lua"))
+        {
+            static LuaTokeniser luaTokeniser;
+            tokeniser = &luaTokeniser;
+        }
+
+        ed = new GenericCodeEditorComponent (file, codeDocument, tokeniser);
+    }
+
+    setEditor (ed);
 }
 
 SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeEditorComponent* ed)
@@ -312,20 +335,20 @@ public:
     {
         editor.setColour (CaretComponent::caretColourId, Colours::black);
 
-        addAndMakeVisible (&editor);
+        addAndMakeVisible (editor);
         label.setText ("Find:", dontSendNotification);
         label.setColour (Label::textColourId, Colours::white);
         label.attachToComponent (&editor, false);
 
-        addAndMakeVisible (&caseButton);
+        addAndMakeVisible (caseButton);
         caseButton.setColour (ToggleButton::textColourId, Colours::white);
         caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
         caseButton.addListener (this);
 
         findPrev.setConnectedEdges (Button::ConnectedOnRight);
         findNext.setConnectedEdges (Button::ConnectedOnLeft);
-        addAndMakeVisible (&findPrev);
-        addAndMakeVisible (&findNext);
+        addAndMakeVisible (findPrev);
+        addAndMakeVisible (findNext);
 
         setWantsKeyboardFocus (false);
         setFocusContainer (true);

@@ -139,4 +139,8 @@ namespace juce
  #endif
 #endif
 
+#if JUCE_USE_CAMERA
+ #include "capture/juce_CameraDevice.cpp"
+#endif
+
 }

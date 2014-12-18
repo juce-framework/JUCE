@@ -151,8 +151,8 @@ public:
     */
     bool isRadial;
 
-    bool operator== (const ColourGradient& other) const noexcept;
-    bool operator!= (const ColourGradient& other) const noexcept;
+    bool operator== (const ColourGradient&) const noexcept;
+    bool operator!= (const ColourGradient&) const noexcept;
 
 
 private:
@@ -165,14 +165,14 @@ private:
             : position (pos), colour (col)
         {}
 
-        bool operator== (const ColourPoint& other) const noexcept;
-        bool operator!= (const ColourPoint& other) const noexcept;
+        bool operator== (const ColourPoint&) const noexcept;
+        bool operator!= (const ColourPoint&) const noexcept;
 
         double position;
         Colour colour;
     };
 
-    Array <ColourPoint> colours;
+    Array<ColourPoint> colours;
 
     JUCE_LEAK_DETECTOR (ColourGradient)
 };

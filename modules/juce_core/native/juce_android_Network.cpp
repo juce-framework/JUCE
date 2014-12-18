@@ -71,6 +71,7 @@ public:
     WebInputStream (String address, bool isPost, const MemoryBlock& postData,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers, int timeOutMs, StringPairArray* responseHeaders)
+        : statusCode (0)
     {
         if (! address.contains ("://"))
             address = "http://" + address;
@@ -87,6 +88,13 @@ public:
 
         LocalRef<jobject> responseHeaderBuffer (env->NewObject (StringBuffer, StringBuffer.constructor));
 
+        // Annoyingly, the android HTTP functions will choke on this call if you try to do it on the message
+        // thread. You'll need to move your networking code to a background thread to keep it happy..
+        jassert (Thread::getCurrentThread() != nullptr);
+
+        jintArray statusCodeArray = env->NewIntArray (1);
+        jassert (statusCodeArray != 0);
+
         stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
                                                          JuceAppActivity.createHTTPStream,
                                                          javaString (address).get(),
@@ -94,7 +102,13 @@ public:
                                                          postDataArray,
                                                          javaString (headers).get(),
                                                          (jint) timeOutMs,
+                                                         statusCodeArray,
                                                          responseHeaderBuffer.get()));
+
+        jint* const statusCodeElements = env->GetIntArrayElements (statusCodeArray, 0);
+        statusCode = statusCodeElements[0];
+        env->ReleaseIntArrayElements (statusCodeArray, statusCodeElements, 0);
+        env->DeleteLocalRef (statusCodeArray);
 
         if (postDataArray != 0)
             env->DeleteLocalRef (postDataArray);
@@ -131,6 +145,8 @@ public:
     }
 
     //==============================================================================
+    bool isError() const                         { return stream == nullptr; }
+
     bool isExhausted() override                  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.isExhausted); }
     int64 getTotalLength() override              { return stream != nullptr ? stream.callLongMethod (HTTPStream.getTotalLength) : 0; }
     int64 getPosition() override                 { return stream != nullptr ? stream.callLongMethod (HTTPStream.getPosition) : 0; }
@@ -150,7 +166,7 @@ public:
         int numBytes = stream.callIntMethod (HTTPStream.read, javaArray, (jint) bytesToRead);
 
         if (numBytes > 0)
-            env->GetByteArrayRegion (javaArray, 0, numBytes, static_cast <jbyte*> (buffer));
+            env->GetByteArrayRegion (javaArray, 0, numBytes, static_cast<jbyte*> (buffer));
 
         env->DeleteLocalRef (javaArray);
         return numBytes;
@@ -158,18 +174,8 @@ public:
 
     //==============================================================================
     GlobalRef stream;
+    int statusCode;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
-
-InputStream* URL::createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
-                                      OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                                      const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
-{
-    ScopedPointer <WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                           progressCallback, progressCallbackContext,
-                                                           headers, timeOutMs, responseHeaders));
-
-    return wi->stream != 0 ? wi.release() : nullptr;
-}

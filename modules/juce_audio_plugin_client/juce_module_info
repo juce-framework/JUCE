@@ -1,8 +1,8 @@
 {
   "id":             "juce_audio_plugin_client",
   "name":           "JUCE audio plugin wrapper classes",
-  "version":        "2.1.8",
-  "description":    "Classes for building VST, RTAS and AU plugins.",
+  "version":        "3.1.1",
+  "description":    "Classes for building VST, VST3, RTAS, AAX and AU plugins.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",
 
@@ -14,15 +14,17 @@
 
   "compile":        [ { "file": "VST/juce_VST_Wrapper.cpp" },
                       { "file": "VST/juce_VST_Wrapper.mm", "target": "xcode" },
+                      { "file": "VST3/juce_VST3_Wrapper.cpp" },
+                      { "file": "VST3/juce_VST3_Wrapper.mm", "target": "xcode" },
                       { "file": "RTAS/juce_RTAS_DigiCode1.cpp", "warnings": "disabled", "stdcall": "1", "target": "xcode, msvc" },
                       { "file": "RTAS/juce_RTAS_DigiCode2.cpp", "warnings": "disabled", "stdcall": "1", "target": "xcode, msvc" },
                       { "file": "RTAS/juce_RTAS_DigiCode3.cpp", "warnings": "disabled", "stdcall": "1", "target": "xcode, msvc" },
-                      { "file": "RTAS/juce_RTAS_MacResources.r", "target": "xcode" },
+                      { "file": "RTAS/juce_RTAS_MacResources.r", "target": "xcode", "RTASOnly": "1" },
                       { "file": "RTAS/juce_RTAS_MacUtilities.mm", "target": "xcode" },
                       { "file": "RTAS/juce_RTAS_WinResources.rsr", "target": "msvc" },
                       { "file": "RTAS/juce_RTAS_WinUtilities.cpp", "target": "msvc", "warnings": "disabled", "stdcall": "1" },
                       { "file": "RTAS/juce_RTAS_Wrapper.cpp", "warnings": "disabled", "stdcall": "1", "target": "xcode, msvc" },
-                      { "file": "AU/juce_AU_Resources.r", "target": "xcode" },
+                      { "file": "AU/juce_AU_Resources.r", "target": "xcode", "AudioUnitOnly": "1" },
                       { "file": "AU/juce_AU_Wrapper.mm", "target": "xcode" },
                       { "file": "AAX/juce_AAX_Wrapper.cpp", "target": "xcode, msvc" },
                       { "file": "AAX/juce_AAX_Wrapper.mm", "target": "xcode" },
@@ -36,6 +38,7 @@
                       "RTAS/*.mm",
                       "RTAS/*.h",
                       "VST/*",
+                      "VST3/*",
                       "AAX/*",
                       "utility/*"
                     ]

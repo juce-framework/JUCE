@@ -287,7 +287,7 @@ void TabbedButtonBar::setTabName (const int tabIndex, const String& newName)
     }
 }
 
-void TabbedButtonBar::removeTab (const int tabIndex)
+void TabbedButtonBar::removeTab (const int tabIndex, const bool animate)
 {
     const int oldIndex = currentTabIndex;
     if (tabIndex == currentTabIndex)
@@ -296,15 +296,15 @@ void TabbedButtonBar::removeTab (const int tabIndex)
     tabs.remove (tabIndex);
 
     setCurrentTabIndex (oldIndex);
-    resized();
+    updateTabPositions (animate);
 }
 
-void TabbedButtonBar::moveTab (const int currentIndex, const int newIndex)
+void TabbedButtonBar::moveTab (const int currentIndex, const int newIndex, const bool animate)
 {
     TabInfo* const currentTab = tabs [currentTabIndex];
     tabs.move (currentIndex, newIndex);
     currentTabIndex = tabs.indexOf (currentTab);
-    resized();
+    updateTabPositions (animate);
 }
 
 int TabbedButtonBar::getNumTabs() const
@@ -369,6 +369,16 @@ int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
     return -1;
 }
 
+Rectangle<int> TabbedButtonBar::getTargetBounds (TabBarButton* button) const
+{
+    if (button == nullptr || indexOfTabButton (button) == -1)
+        return Rectangle<int>();
+
+    ComponentAnimator& animator = Desktop::getInstance().getAnimator();
+
+    return animator.isAnimating (button) ? animator.getComponentDestination (button) : button->getBounds();
+}
+
 void TabbedButtonBar::lookAndFeelChanged()
 {
     extraTabsButton = nullptr;
@@ -381,6 +391,12 @@ void TabbedButtonBar::paint (Graphics& g)
 }
 
 void TabbedButtonBar::resized()
+{
+    updateTabPositions (false);
+}
+
+//==============================================================================
+void TabbedButtonBar::updateTabPositions (bool animate)
 {
     LookAndFeel& lf = getLookAndFeel();
 
@@ -462,6 +478,7 @@ void TabbedButtonBar::resized()
     int pos = 0;
 
     TabBarButton* frontTab = nullptr;
+    ComponentAnimator& animator = Desktop::getInstance().getAnimator();
 
     for (int i = 0; i < tabs.size(); ++i)
     {
@@ -471,10 +488,18 @@ void TabbedButtonBar::resized()
 
             if (i < numVisibleButtons)
             {
-                if (isVertical())
-                    tb->setBounds (0, pos, getWidth(), bestLength);
+                const Rectangle<int> newBounds (isVertical() ? Rectangle<int> (0, pos, getWidth(), bestLength)
+                                                             : Rectangle<int> (pos, 0, bestLength, getHeight()));
+
+                if (animate)
+                {
+                    animator.animateComponent (tb, newBounds, 1.0f, 200, false, 3.0, 0.0);
+                }
                 else
-                    tb->setBounds (pos, 0, bestLength, getHeight());
+                {
+                    animator.cancelAnimation (tb, false);
+                    tb->setBounds (newBounds);
+                }
 
                 tb->toBack();
 

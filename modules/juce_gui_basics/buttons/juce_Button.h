@@ -277,12 +277,6 @@ public:
     */
     void setTooltip (const String& newTooltip) override;
 
-    /** Returns the tooltip set by setTooltip(), or the description corresponding to
-        the currently mapped command if one is enabled (see setCommandToTrigger).
-    */
-    String getTooltip() override;
-
-
     //==============================================================================
     /** A combination of these flags are used by setConnectedEdges(). */
     enum ConnectedEdgeFlags
@@ -349,6 +343,9 @@ public:
     */
     void setState (ButtonState newState);
 
+    /** Returns the button's current over/down/up state. */
+    ButtonState getState() const noexcept               { return buttonState; }
+
     // This method's parameters have changed - see the new version.
     JUCE_DEPRECATED (void setToggleState (bool, bool));
 
@@ -360,10 +357,11 @@ public:
     {
         virtual ~LookAndFeelMethods() {}
 
-        virtual void drawButtonBackground (Graphics&, Button& button, const Colour& backgroundColour,
+        virtual void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                            bool isMouseOverButton, bool isButtonDown) = 0;
 
-        virtual Font getTextButtonFont (TextButton& button) = 0;
+        virtual Font getTextButtonFont (TextButton&, int buttonHeight) = 0;
+        virtual int getTextButtonWidthToFitText (TextButton&, int buttonHeight) = 0;
 
         /** Draws the text for a TextButton. */
         virtual void drawButtonText (Graphics&, TextButton&, bool isMouseOverButton, bool isButtonDown) = 0;
@@ -377,6 +375,13 @@ public:
                                   bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) = 0;
 
         virtual void drawDrawableButton (Graphics&, DrawableButton&, bool isMouseOverButton, bool isButtonDown) = 0;
+
+    private:
+       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+        // These method have been deprecated: see their replacements above.
+        virtual int getTextButtonFont (TextButton&) { return 0; }
+        virtual int changeTextButtonWidthToFitText (TextButton&, int) { return 0; }
+       #endif
     };
 
 protected:
@@ -487,6 +492,7 @@ private:
     void repeatTimerCallback();
     bool keyStateChangedCallback();
     void applicationCommandListChangeCallback();
+    void updateAutomaticTooltip (const ApplicationCommandInfo&);
 
     ButtonState updateState();
     ButtonState updateState (bool isOver, bool isDown);

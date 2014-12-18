@@ -45,7 +45,7 @@ public:
           const String& name,
           const bool active,
           const bool ticked,
-          const Image& im,
+          Drawable* drawable,
           const Colour colour,
           const bool useColour,
           CustomComponent* const custom,
@@ -54,8 +54,8 @@ public:
 
       : itemID (itemId), text (name), textColour (colour),
         isActive (active), isSeparator (false), isTicked (ticked),
-        usesColour (useColour), image (im), customComp (custom),
-        subMenu (createCopyIfNotNull (sub)), commandManager (manager)
+        usesColour (useColour), iconDrawable (drawable),
+        customComp (custom), subMenu (createCopyIfNotNull (sub)), commandManager (manager)
     {
         if (commandManager != nullptr && itemID != 0)
         {
@@ -92,7 +92,7 @@ public:
           isSeparator (other.isSeparator),
           isTicked (other.isTicked),
           usesColour (other.usesColour),
-          image (other.image),
+          iconDrawable (other.iconDrawable != nullptr ? other.iconDrawable->createCopy() : nullptr),
           customComp (other.customComp),
           subMenu (createCopyIfNotNull (other.subMenu.get())),
           commandManager (other.commandManager)
@@ -106,7 +106,7 @@ public:
     String text;
     const Colour textColour;
     const bool isActive, isSeparator, isTicked, usesColour;
-    Image image;
+    ScopedPointer<Drawable> iconDrawable;
     ReferenceCountedObjectPtr <CustomComponent> customComp;
     ScopedPointer <PopupMenu> subMenu;
     ApplicationCommandManager* const commandManager;
@@ -175,14 +175,14 @@ public:
             }
 
             getLookAndFeel()
-                .drawPopupMenuItem (g, getWidth(), getHeight(),
+                .drawPopupMenuItem (g, getLocalBounds(),
                                     itemInfo.isSeparator,
                                     itemInfo.isActive,
                                     isHighlighted,
                                     itemInfo.isTicked,
                                     itemInfo.subMenu != nullptr && (itemInfo.itemID == 0 || itemInfo.subMenu->getNumItems() > 0),
                                     mainText, endText,
-                                    itemInfo.image.isValid() ? &itemInfo.image : nullptr,
+                                    itemInfo.iconDrawable,
                                     itemInfo.usesColour ? &(itemInfo.textColour) : nullptr);
         }
     }
@@ -740,7 +740,7 @@ public:
 
     void ensureItemIsVisible (const int itemID, int wantedY)
     {
-        jassert (itemID != 0)
+        jassert (itemID != 0);
 
         for (int i = items.size(); --i >= 0;)
         {
@@ -980,12 +980,12 @@ public:
     void timerCallback() override
     {
         if (window.windowIsStillValid())
-            handleMousePosition (source.getScreenPosition());
+            handleMousePosition (source.getScreenPosition().roundToInt());
     }
 
     bool isOver() const
     {
-        return window.reallyContains (window.getLocalPoint (nullptr, source.getScreenPosition()), true);
+        return window.reallyContains (window.getLocalPoint (nullptr, source.getScreenPosition()).roundToInt(), true);
     }
 
     MenuWindow& window;
@@ -1216,12 +1216,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setFont (getLookAndFeel().getPopupMenuFont().boldened());
-        g.setColour (findColour (PopupMenu::headerTextColourId));
-
-        g.drawFittedText (getName(),
-                          12, 0, getWidth() - 16, proportionOfHeight (0.8f),
-                          Justification::bottomLeft, 1);
+        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight)
@@ -1288,8 +1283,40 @@ void PopupMenu::clear()
     items.clear();
 }
 
-void PopupMenu::addItem (const int itemResultID, const String& itemText,
-                         const bool isActive, const bool isTicked, const Image& iconToUse)
+void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked)
+{
+    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
+                                    // didn't pick anything, so you shouldn't use it as the id
+                                    // for an item..
+
+    items.add (new Item (itemResultID, itemText, isActive, isTicked, nullptr,
+                         Colours::black, false, nullptr, nullptr, nullptr));
+}
+
+static Drawable* createDrawableFromImage (const Image& im)
+{
+    if (im.isValid())
+    {
+        DrawableImage* d = new DrawableImage();
+        d->setImage (im);
+        return d;
+    }
+
+    return nullptr;
+}
+
+void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked, const Image& iconToUse)
+{
+    jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
+                                    // didn't pick anything, so you shouldn't use it as the id
+                                    // for an item..
+
+
+    items.add (new Item (itemResultID, itemText, isActive, isTicked, createDrawableFromImage (iconToUse),
+                         Colours::black, false, nullptr, nullptr, nullptr));
+}
+
+void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked, Drawable* iconToUse)
 {
     jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1315,7 +1342,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                                                       : info.shortName,
                              target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0,
                              (info.flags & ApplicationCommandInfo::isTicked) != 0,
-                             Image::null,
+                             nullptr,
                              Colours::black,
                              false,
                              nullptr, nullptr,
@@ -1323,50 +1350,49 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
     }
 }
 
-void PopupMenu::addColouredItem (const int itemResultID,
-                                 const String& itemText,
-                                 Colour itemTextColour,
-                                 const bool isActive,
-                                 const bool isTicked,
-                                 const Image& iconToUse)
+void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
+                                 bool isActive, bool isTicked, const Image& iconToUse)
 {
     jassert (itemResultID != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
                                     // for an item..
 
-    items.add (new Item (itemResultID, itemText, isActive, isTicked, iconToUse,
+    items.add (new Item (itemResultID, itemText, isActive, isTicked, createDrawableFromImage (iconToUse),
                          itemTextColour, true, nullptr, nullptr, nullptr));
 }
 
-void PopupMenu::addCustomItem (const int itemID, CustomComponent* const cc, const PopupMenu* subMenu)
+void PopupMenu::addCustomItem (int itemID, CustomComponent* cc, const PopupMenu* subMenu)
 {
     jassert (itemID != 0);    // 0 is used as a return value to indicate that the user
                               // didn't pick anything, so you shouldn't use it as the id
                               // for an item..
 
-    items.add (new Item (itemID, String::empty, true, false, Image::null,
+    items.add (new Item (itemID, String::empty, true, false, nullptr,
                          Colours::black, false, cc, subMenu, nullptr));
 }
 
-void PopupMenu::addCustomItem (const int itemResultID,
-                               Component* customComponent,
-                               int idealWidth, int idealHeight,
-                               const bool triggerMenuItemAutomaticallyWhenClicked,
-                               const PopupMenu* subMenu)
+void PopupMenu::addCustomItem (int itemResultID, Component* customComponent, int idealWidth, int idealHeight,
+                               bool triggerMenuItemAutomaticallyWhenClicked, const PopupMenu* subMenu)
 {
-    items.add (new Item (itemResultID, String::empty, true, false, Image::null,
-                         Colours::black, false,
+    items.add (new Item (itemResultID, String::empty, true, false, nullptr, Colours::black, false,
                          new HelperClasses::NormalComponentWrapper (customComponent, idealWidth, idealHeight,
                                                                     triggerMenuItemAutomaticallyWhenClicked),
                          subMenu, nullptr));
 }
 
-void PopupMenu::addSubMenu (const String& subMenuName,
-                            const PopupMenu& subMenu,
-                            const bool isActive,
-                            const Image& iconToUse,
-                            const bool isTicked,
-                            const int itemResultID)
+void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive)
+{
+    addSubMenu (subMenuName, subMenu, isActive, nullptr, false, 0);
+}
+
+void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive,
+                            const Image& iconToUse, bool isTicked, int itemResultID)
+{
+    addSubMenu (subMenuName, subMenu, isActive, createDrawableFromImage (iconToUse), isTicked, itemResultID);
+}
+
+void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive,
+                            Drawable* iconToUse, bool isTicked, int itemResultID)
 {
     items.add (new Item (itemResultID, subMenuName, isActive && (itemResultID != 0 || subMenu.getNumItems() > 0), isTicked,
                          iconToUse, Colours::black, false, nullptr, &subMenu, nullptr));
@@ -1673,7 +1699,7 @@ void PopupMenu::CustomComponent::triggerMenuItem()
 {
     if (HelperClasses::ItemComponent* const mic = dynamic_cast<HelperClasses::ItemComponent*> (getParentComponent()))
     {
-        if (HelperClasses::MenuWindow* const pmw = dynamic_cast <HelperClasses::MenuWindow*> (mic->getParentComponent()))
+        if (HelperClasses::MenuWindow* const pmw = dynamic_cast<HelperClasses::MenuWindow*> (mic->getParentComponent()))
         {
             pmw->dismissMenu (&mic->itemInfo);
         }
@@ -1727,10 +1753,10 @@ bool PopupMenu::MenuItemIterator::next()
     isSeparator     = item->isSeparator;
     isTicked        = item->isTicked;
     isEnabled       = item->isActive;
-    isSectionHeader = dynamic_cast <HelperClasses::HeaderItemComponent*> (static_cast <CustomComponent*> (item->customComp)) != nullptr;
+    isSectionHeader = dynamic_cast<HelperClasses::HeaderItemComponent*> (static_cast<CustomComponent*> (item->customComp)) != nullptr;
     isCustomComponent = (! isSectionHeader) && item->customComp != nullptr;
     customColour    = item->usesColour ? &(item->textColour) : nullptr;
-    customImage     = item->image;
+    icon            = item->iconDrawable;
     commandManager  = item->commandManager;
 
     return true;
@@ -1738,8 +1764,7 @@ bool PopupMenu::MenuItemIterator::next()
 
 void PopupMenu::MenuItemIterator::addItemTo (PopupMenu& targetMenu)
 {
-    targetMenu.items.add (new Item (itemId, itemName, isEnabled, isTicked, customImage,
-                                    customColour != nullptr ? *customColour : Colours::black, customColour != nullptr,
-                                    nullptr,
-                                    subMenu, commandManager));
+    targetMenu.items.add (new Item (itemId, itemName, isEnabled, isTicked, icon != nullptr ? icon->createCopy() : nullptr,
+                                    customColour != nullptr ? *customColour : Colours::black,
+                                    customColour != nullptr, nullptr, subMenu, commandManager));
 }

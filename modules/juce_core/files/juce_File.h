@@ -348,6 +348,13 @@ public:
     bool setReadOnly (bool shouldBeReadOnly,
                       bool applyRecursively = false) const;
 
+    /** Changes the execute-permissions of a file.
+
+        @param shouldBeExecutable   whether to add or remove execute-permission
+        @returns    true if it manages to change the file's permissions.
+    */
+    bool setExecutePermission (bool shouldBeExecutable) const;
+
     /** Returns true if this file is a hidden or system file.
         The criteria for deciding whether a file is hidden are platform-dependent.
     */
@@ -360,6 +367,14 @@ public:
         If the file isn't actually link, it'll just return itself.
     */
     File getLinkedTarget() const;
+
+    /** Returns a unique identifier for the file, if one is available.
+
+        Depending on the OS and file-system, this may be a unix inode number or
+        a win32 file identifier, or 0 if it fails to find one. The number will
+        be unique on the filesystem, but not globally.
+    */
+    uint64 getFileIdentifier() const;
 
     //==============================================================================
     /** Returns the last modification time of this file.
@@ -741,7 +756,7 @@ public:
 
         @see revealToUser
     */
-    bool startAsProcess (const String& parameters = String::empty) const;
+    bool startAsProcess (const String& parameters = String()) const;
 
     /** Opens Finder, Explorer, or whatever the OS uses, to show the user this file's location.
         @see startAsProcess
@@ -835,6 +850,11 @@ public:
 
         /** In a plugin, this will return the path of the host executable. */
         hostApplicationPath,
+
+       #if JUCE_WINDOWS
+        /** On a Windows machine, returns the location of the Windows/System32 folder. */
+        windowsSystemDirectory,
+       #endif
 
         /** The directory in which applications normally get installed.
             So on windows, this would be something like "c:\program files", on the
@@ -955,6 +975,7 @@ private:
     bool setFileTimesInternal (int64 m, int64 a, int64 c) const;
     void getFileTimesInternal (int64& m, int64& a, int64& c) const;
     bool setFileReadOnlyInternal (bool) const;
+    bool setFileExecutableInternal (bool) const;
 };
 
 #endif   // JUCE_FILE_H_INCLUDED

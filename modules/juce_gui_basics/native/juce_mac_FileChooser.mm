@@ -172,10 +172,10 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         [panel setDirectoryURL: [NSURL fileURLWithPath: juceStringToNS (directory)]];
         [panel setNameFieldStringValue: juceStringToNS (filename)];
 
-        if ([panel runModal] == NSOKButton)
+        if ([panel runModal] == 1 /*NSModalResponseOK*/)
        #else
         if ([panel runModalForDirectory: juceStringToNS (directory)
-                                   file: juceStringToNS (filename)] == NSOKButton)
+                                   file: juceStringToNS (filename)] == 1 /*NSModalResponseOK*/)
        #endif
         {
             if (isSaveDialogue)
@@ -198,7 +198,11 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
 bool FileChooser::isPlatformDialogAvailable()
 {
+   #if JUCE_DISABLE_NATIVE_FILECHOOSERS
+    return false;
+   #else
     return true;
+   #endif
 }
 
 #else

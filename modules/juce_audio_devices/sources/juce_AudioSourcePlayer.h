@@ -65,8 +65,7 @@ public:
     void setSource (AudioSource* newSource);
 
     /** Returns the source that's playing.
-
-        May return 0 if there's no source.
+        May return nullptr if there's no source.
     */
     AudioSource* getCurrentSource() const noexcept      { return source; }
 

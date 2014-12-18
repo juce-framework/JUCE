@@ -105,18 +105,8 @@ void ReadWriteLock::enterWrite() const noexcept
     const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const SpinLock::ScopedLockType sl (accessLock);
 
-    for (;;)
+    while (! tryEnterWriteInternal (threadId))
     {
-        if (readerThreads.size() + numWriters == 0
-             || threadId == writerThreadId
-             || (readerThreads.size() == 1
-                  && readerThreads.getReference(0).threadID == threadId))
-        {
-            writerThreadId = threadId;
-            ++numWriters;
-            break;
-        }
-
         ++numWaitingWriters;
         accessLock.exit();
         waitEvent.wait (100);
@@ -127,13 +117,15 @@ void ReadWriteLock::enterWrite() const noexcept
 
 bool ReadWriteLock::tryEnterWrite() const noexcept
 {
-    const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const SpinLock::ScopedLockType sl (accessLock);
+    return tryEnterWriteInternal (Thread::getCurrentThreadId());
+}
 
+bool ReadWriteLock::tryEnterWriteInternal (Thread::ThreadID threadId) const noexcept
+{
     if (readerThreads.size() + numWriters == 0
          || threadId == writerThreadId
-         || (readerThreads.size() == 1
-              && readerThreads.getReference(0).threadID == threadId))
+         || (readerThreads.size() == 1 && readerThreads.getReference(0).threadID == threadId))
     {
         writerThreadId = threadId;
         ++numWriters;

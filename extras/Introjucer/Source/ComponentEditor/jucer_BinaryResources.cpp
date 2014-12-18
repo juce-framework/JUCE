@@ -152,7 +152,7 @@ String BinaryResources::browseForResource (const String& title,
                                          TRANS("Adding Resource"),
                                          TRANS("Failed to load the file!"));
 
-            name = String::empty;
+            name.clear();
         }
 
         return name;

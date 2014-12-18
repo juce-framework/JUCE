@@ -31,13 +31,17 @@
     live in juce_posix_SharedCode.h!
 */
 
+#if JUCE_IOS
+bool isIOSAppActive = true;
+#endif
+
 //==============================================================================
 JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
    #if JUCE_MAC
     return [NSApp isActive];
    #else
-    return true; // xxx change this if more than one app is ever possible on iOS!
+    return isIOSAppActive;
    #endif
 }
 

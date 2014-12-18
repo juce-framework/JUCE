@@ -118,6 +118,17 @@ private:
         StringPairArray defines;
         defines.set ("__MINGW__", "1");
         defines.set ("__MINGW_EXTENSION", String::empty);
+
+        if (config.isDebug())
+        {
+            defines.set ("DEBUG", "1");
+            defines.set ("_DEBUG", "1");
+        }
+        else
+        {
+            defines.set ("NDEBUG", "1");
+        }
+
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
 
         StringArray defs;
@@ -131,8 +142,7 @@ private:
     {
         StringArray flags;
         flags.add ("-O" + config.getGCCOptimisationFlag());
-        flags.add ("-std=gnu++0x");
-        flags.add ("-march=pentium4");
+        flags.add ("-std=c++11");
         flags.add ("-mstackrealign");
 
         if (config.isDebug())
@@ -211,7 +221,7 @@ private:
                 outputPath ="bin/" + File::createLegalFileName (config.getName().trim());
             }
 
-            output->setAttribute ("output", outputPath + "/" + config.getTargetBinaryNameString());
+            output->setAttribute ("output", outputPath + "/" + replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
             output->setAttribute ("prefix_auto", 1);
             output->setAttribute ("extension_auto", 1);

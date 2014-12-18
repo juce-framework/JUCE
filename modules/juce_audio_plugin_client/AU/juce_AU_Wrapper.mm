@@ -42,6 +42,7 @@
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wconversion"
+ #pragma clang diagnostic ignored "-Woverloaded-virtual"
 #endif
 
 #include "../utility/juce_IncludeSystemHeaders.h"
@@ -56,6 +57,13 @@
  #define Component CarbonDummyCompName
 #endif
 
+/*
+    Got an include error here?
+
+    You probably need to install Apple's AU classes - see the
+    juce website for more info on how to get them:
+    http://www.juce.com/forum/topic/aus-xcode
+*/
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
 #undef Point
@@ -474,6 +482,8 @@ public:
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
             outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index);
+            jassert (outParameterInfo.defaultValue >= outParameterInfo.minValue
+                      && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
             outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
 
             return noErr;
@@ -511,6 +521,10 @@ public:
         return AUBase::SetParameter (inID, inScope, inElement, inValue, inBufferOffsetInFrames);
     }
 
+    // No idea what this method actually does or what it should return. Current Apple docs say nothing about it.
+    // (Note that this isn't marked 'override' in case older versions of the SDK don't include it)
+    bool CanScheduleParameters() const                   { return false; }
+
     //==============================================================================
     ComponentResult Version() override                   { return JucePlugin_VersionCode; }
     bool SupportsTail() override                         { return true; }
@@ -528,7 +542,7 @@ public:
    #if BUILD_AU_CARBON_UI
     int GetNumCustomUIComponents() override
     {
-        return PluginHostType().isDigitalPerformer() ? 0 : 1;
+        return getHostType().isDigitalPerformer() ? 0 : 1;
     }
 
     void GetUIComponentDescs (ComponentDescription* inDescArray) override
@@ -546,13 +560,9 @@ public:
     {
         info.timeSigNumerator = 0;
         info.timeSigDenominator = 0;
-        info.timeInSamples = 0;
-        info.timeInSeconds = 0;
         info.editOriginTime = 0;
         info.ppqPositionOfLastBarStart = 0;
-        info.isPlaying = false;
         info.isRecording = false;
-        info.isLooping = false;
         info.ppqLoopStart = 0;
         info.ppqLoopEnd = 0;
 
@@ -589,19 +599,23 @@ public:
         }
 
         double outCurrentSampleInTimeLine, outCycleStartBeat, outCycleEndBeat;
-        Boolean playing, playchanged, looping;
+        Boolean playing = false, looping = false, playchanged;
 
         if (CallHostTransportState (&playing,
                                     &playchanged,
                                     &outCurrentSampleInTimeLine,
                                     &looping,
                                     &outCycleStartBeat,
-                                    &outCycleEndBeat) == noErr)
+                                    &outCycleEndBeat) != noErr)
         {
-            info.isPlaying = playing;
-            info.timeInSamples = (int64) outCurrentSampleInTimeLine;
-            info.timeInSeconds = outCurrentSampleInTimeLine / getSampleRate();
+            // If the host doesn't support this callback, use the sample time from lastTimeStamp:
+            outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
+
+        info.isPlaying = playing;
+        info.timeInSamples = (int64) (outCurrentSampleInTimeLine + 0.5);
+        info.timeInSeconds = info.timeInSamples / getSampleRate();
+        info.isLooping = looping;
 
         return true;
     }
@@ -633,7 +647,9 @@ public:
 
     void audioProcessorChanged (AudioProcessor*)
     {
-        PropertyChanged (kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_Latency,       kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
     }
 
     bool StreamFormatWritable (AudioUnitScope, AudioUnitElement) override
@@ -650,9 +666,9 @@ public:
     ComponentResult Initialize() override
     {
        #if ! JucePlugin_IsSynth
-        const int numIns  = GetInput(0)  != 0 ? (int) GetInput(0)->GetStreamFormat().mChannelsPerFrame : 0;
+        const int numIns  = findNumInputChannels();
        #endif
-        const int numOuts = GetOutput(0) != 0 ? (int) GetOutput(0)->GetStreamFormat().mChannelsPerFrame : 0;
+        const int numOuts = findNumOutputChannels();
 
         bool isValidChannelConfig = false;
 
@@ -696,19 +712,32 @@ public:
         return JuceAUBaseClass::Reset (inScope, inElement);
     }
 
+    int findNumInputChannels()
+    {
+       #if ! JucePlugin_IsSynth
+        if (AUInputElement* e = GetInput(0))
+            return (int) e->GetStreamFormat().mChannelsPerFrame;
+       #endif
+
+        return 0;
+    }
+
+    int findNumOutputChannels()
+    {
+        if (AUOutputElement* e = GetOutput(0))
+            return (int) e->GetStreamFormat().mChannelsPerFrame;
+
+        return 0;
+    }
+
     void prepareToPlay()
     {
         if (juceFilter != nullptr)
         {
-            juceFilter->setPlayConfigDetails (
-                 #if ! JucePlugin_IsSynth
-                  (int) GetInput(0)->GetStreamFormat().mChannelsPerFrame,
-                 #else
-                  0,
-                 #endif
-                  (int) GetOutput(0)->GetStreamFormat().mChannelsPerFrame,
-                  getSampleRate(),
-                  (int) GetMaxFramesPerSlice());
+            juceFilter->setPlayConfigDetails (findNumInputChannels(),
+                                              findNumOutputChannels(),
+                                              getSampleRate(),
+                                              (int) GetMaxFramesPerSlice());
 
             bufferSpace.setSize (juceFilter->getNumInputChannels() + juceFilter->getNumOutputChannels(),
                                  (int) GetMaxFramesPerSlice() + 32);
@@ -772,7 +801,7 @@ public:
                     needToReinterleave = true;
 
                     for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
-                        channels [numOutChans++] = bufferSpace.getSampleData (nextSpareBufferChan++);
+                        channels [numOutChans++] = bufferSpace.getWritePointer (nextSpareBufferChan++);
                 }
 
                 if (numOutChans >= numOut)
@@ -807,7 +836,7 @@ public:
                         }
                         else
                         {
-                            dest = bufferSpace.getSampleData (nextSpareBufferChan++);
+                            dest = bufferSpace.getWritePointer (nextSpareBufferChan++);
                             channels [numInChans++] = dest;
                         }
 
@@ -908,7 +937,7 @@ public:
                     {
                         for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
                         {
-                            const float* src = bufferSpace.getSampleData (nextSpareBufferChan++);
+                            const float* src = bufferSpace.getReadPointer (nextSpareBufferChan++);
                             float* dest = ((float*) buf.mData) + subChan;
 
                             for (int j = (int) numSamples; --j >= 0;)
@@ -938,9 +967,11 @@ public:
                                      (juce::uint8) inData2 };
 
         incomingEvents.addEvent (data, 3, (int) inStartFrame);
-       #endif
-
         return noErr;
+       #else
+        (void) nStatus; (void) inChannel; (void) inData1; (void) inData2; (void) inStartFrame;
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
@@ -948,8 +979,11 @@ public:
        #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
         incomingEvents.addEvent (inData, (int) inLength, 0);
-       #endif
         return noErr;
+       #else
+        (void) inData; (void) inLength;
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     //==============================================================================
@@ -1083,7 +1117,7 @@ public:
 
         bool keyPressed (const KeyPress&) override
         {
-            if (PluginHostType().isAbletonLive())
+            if (getHostType().isAbletonLive())
             {
                 static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
                 NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
@@ -1167,17 +1201,20 @@ public:
 
         static void shutdown (id self)
         {
-            // there's some kind of component currently modal, but the host
-            // is trying to delete our plugin..
-            jassert (Component::getCurrentlyModalComponent() == nullptr);
-
             [[NSNotificationCenter defaultCenter] removeObserver: self];
             deleteEditor (self);
 
             jassert (activeUIs.contains (self));
             activeUIs.removeFirstMatchingValue (self);
+
             if (activePlugins.size() + activeUIs.size() == 0)
+            {
+                // there's some kind of component currently modal, but the host
+                // is trying to delete our plugin..
+                jassert (Component::getCurrentlyModalComponent() == nullptr);
+
                 shutdownJuce_GUI();
+            }
         }
 
         static void viewDidMoveToWindow (id self, SEL)
@@ -1310,7 +1347,7 @@ public:
             }
             else
             {
-                jassertfalse // can't get a pointer to our effect
+                jassertfalse; // can't get a pointer to our effect
             }
         }
 
@@ -1362,7 +1399,7 @@ private:
             JUCE_AUTORELEASEPOOL
             {
                 jassert (ed != nullptr);
-                addAndMakeVisible (&editor);
+                addAndMakeVisible (editor);
                 setOpaque (true);
                 setVisible (true);
                 setBroughtToFrontOnMouseClick (true);

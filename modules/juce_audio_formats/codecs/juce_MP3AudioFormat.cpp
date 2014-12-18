@@ -516,12 +516,21 @@ struct MP3Frame
               { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160 } }
         };
 
-        switch (layer)
+        if (bitrateIndex == 0)
         {
-            case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
-            case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
-            case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
-            default: break;
+            jassertfalse; // This means the file is using "free format". Apparently very few decoders
+                          // support this mode, and this one certainly doesn't handle it correctly!
+            frameSize = 0;
+        }
+        else
+        {
+            switch (layer)
+            {
+                case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
+                case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
+                case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
+                default: break;
+            }
         }
     }
 
@@ -598,7 +607,7 @@ private:
             float* costab = cosTables[i];
 
             for (int k = 0; k < kr; ++k)
-                costab[k] = (float) (1.0 / (2.0 * cos (double_Pi * (k * 2 + 1) / divv)));
+                costab[k] = (float) (1.0 / (2.0 * std::cos (double_Pi * (k * 2 + 1) / divv)));
         }
 
         for (i = 0, j = 0; i < 256; ++i, ++j, table += 32)
@@ -683,23 +692,23 @@ private:
 
         for (i = 0; i < 18; ++i)
         {
-            win[0][i] = win[1][i] = (float) (0.5 * sin (double_Pi / 72.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 19) / 72.0));
-            win[0][i + 18] = win[3][i + 18] = (float) (0.5 * sin (double_Pi / 72.0 * (2 * (i + 18) + 1)) / cos (double_Pi * (2 * (i + 18) + 19) / 72.0));
+            win[0][i]      = win[1][i]      = (float) (0.5 * std::sin (double_Pi / 72.0 * (2 * i + 1))        / std::cos (double_Pi * (2 * i + 19)        / 72.0));
+            win[0][i + 18] = win[3][i + 18] = (float) (0.5 * std::sin (double_Pi / 72.0 * (2 * (i + 18) + 1)) / std::cos (double_Pi * (2 * (i + 18) + 19) / 72.0));
         }
 
         const double piOver72 = double_Pi;
 
         for (i = 0; i < 6; ++i)
         {
-            win[1][i + 18] = (float) (0.5 / cos (piOver72 * (2 * (i + 18) + 19)));
-            win[3][i + 12] = (float) (0.5 / cos (piOver72 * (2 * (i + 12) + 19)));
-            win[1][i + 24] = (float) (0.5 * sin (double_Pi / 24.0 * (2 * i + 13)) / cos (piOver72 * (2 * (i + 24) + 19)));
+            win[1][i + 18] = (float) (0.5 / std::cos (piOver72 * (2 * (i + 18) + 19)));
+            win[3][i + 12] = (float) (0.5 / std::cos (piOver72 * (2 * (i + 12) + 19)));
+            win[1][i + 24] = (float) (0.5 * std::sin (double_Pi / 24.0 * (2 * i + 13)) / std::cos (piOver72 * (2 * (i + 24) + 19)));
             win[1][i + 30] = win[3][i] = 0;
-            win[3][i + 6]  = (float) (0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (piOver72 * (2 * (i + 6) + 19)));
+            win[3][i + 6]  = (float) (0.5 * std::sin (double_Pi / 24.0 * (2 * i + 1)) / std::cos (piOver72 * (2 * (i + 6) + 19)));
         }
 
         for (i = 0; i < 12; ++i)
-            win[2][i] = (float) (0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 7) / 24.0));
+            win[2][i] = (float) (0.5 * std::sin (double_Pi / 24.0 * (2 * i + 1)) / std::cos (double_Pi * (2 * i + 7) / 24.0));
 
         for (j = 0; j < 4; ++j)
         {
@@ -712,7 +721,7 @@ private:
 
         for (i = 0; i < 16; ++i)
         {
-            const double t = tan (i * double_Pi / 12.0);
+            const double t = std::tan (i * double_Pi / 12.0);
             tan1_1[i] = (float) (t / (1.0 + t));
             tan2_1[i] = (float) (1.0 / (1.0 + t));
             tan1_2[i] = (float) (sqrt2 * t / (1.0 + t));
@@ -1451,7 +1460,7 @@ struct MP3Stream
             bufferPointer = bufferSpace[bufferSpaceIndex] + 512;
             bitIndex = 0;
 
-            if (lastFrameSize == -1)
+            if (lastFrameSize < 0)
                 return 1;
         }
 
@@ -1513,8 +1522,14 @@ struct MP3Stream
             else
             {
                 const int nextFrameOffset = scanForNextFrameHeader (true);
+
+                wasFreeFormat = isFreeFormat;
+
                 if (nextFrameOffset < 0)
+                {
+                    lastFrameSize = frameSize;
                     return result;
+                }
 
                 frameSize = nextFrameOffset + sideInfoSize + dataSize;
                 lastFrameSizeNoPadding = frameSize - frame.padding;
@@ -3095,7 +3110,14 @@ private:
             const int64 streamSize = stream.stream.getTotalLength();
 
             if (streamSize > 0)
-                numFrames = (streamSize - streamStartPos) / (stream.frame.frameSize);
+            {
+                const int bytesPerFrame = stream.frame.frameSize + 4;
+
+                if (bytesPerFrame == 417 || bytesPerFrame == 418)
+                    numFrames = roundToInt ((streamSize - streamStartPos) / 417.95918); // more accurate for 128k
+                else
+                    numFrames = (streamSize - streamStartPos) / bytesPerFrame;
+            }
         }
 
         return numFrames * 1152;

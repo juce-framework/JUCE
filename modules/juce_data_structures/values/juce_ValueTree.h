@@ -317,8 +317,11 @@ public:
     //==============================================================================
     /** Creates an XmlElement that holds a complete image of this node and all its children.
 
-        If this node is invalid, this may return 0. Otherwise, the XML that is produced can
-        be used to recreate a similar node by calling fromXml()
+        If this node is invalid, this may return nullptr. Otherwise, the XML that is produced can
+        be used to recreate a similar node by calling fromXml().
+
+        The caller must delete the object that is returned.
+
         @see fromXml
     */
     XmlElement* createXml() const;
@@ -489,6 +492,11 @@ public:
         This invalid object is equivalent to ValueTree created with its default constructor.
     */
     static const ValueTree invalid;
+
+    /** Returns the total number of references to the shared underlying data structure that this
+        ValueTree is using.
+    */
+    int getReferenceCount() const noexcept;
 
 private:
     //==============================================================================

@@ -44,10 +44,12 @@ ComboBox::ComboBox (const String& name)
       isButtonDown (false),
       separatorPending (false),
       menuActive (false),
+      scrollWheelEnabled (false),
+      mouseWheelAccumulator (0),
       noChoicesMessage (TRANS("(no choices)"))
 {
     setRepaintsOnMouseActivity (true);
-    ComboBox::lookAndFeelChanged();
+    lookAndFeelChanged();
     currentId.addListener (this);
 }
 
@@ -408,12 +410,22 @@ void ComboBox::enablementChanged()
     repaint();
 }
 
+void ComboBox::colourChanged()
+{
+    lookAndFeelChanged();
+}
+
+void ComboBox::parentHierarchyChanged()
+{
+    lookAndFeelChanged();
+}
+
 void ComboBox::lookAndFeelChanged()
 {
     repaint();
 
     {
-        ScopedPointer <Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
+        ScopedPointer<Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
         jassert (newLabel != nullptr);
 
         if (label != nullptr)
@@ -444,11 +456,6 @@ void ComboBox::lookAndFeelChanged()
     resized();
 }
 
-void ComboBox::colourChanged()
-{
-    lookAndFeelChanged();
-}
-
 //==============================================================================
 bool ComboBox::keyPressed (const KeyPress& key)
 {
@@ -466,7 +473,7 @@ bool ComboBox::keyPressed (const KeyPress& key)
 
     if (key == KeyPress::returnKey)
     {
-        showPopup();
+        showPopupIfNotActive();
         return true;
     }
 
@@ -505,40 +512,49 @@ void ComboBox::popupMenuFinishedCallback (int result, ComboBox* box)
     }
 }
 
-void ComboBox::showPopup()
+void ComboBox::showPopupIfNotActive()
 {
     if (! menuActive)
     {
-        const int selectedId = getSelectedId();
-
-        PopupMenu menu;
-        menu.setLookAndFeel (&getLookAndFeel());
-
-        for (int i = 0; i < items.size(); ++i)
-        {
-            const ItemInfo* const item = items.getUnchecked(i);
-
-            if (item->isSeparator())
-                menu.addSeparator();
-            else if (item->isHeading)
-                menu.addSectionHeader (item->name);
-            else
-                menu.addItem (item->itemId, item->name,
-                              item->isEnabled, item->itemId == selectedId);
-        }
-
-        if (items.size() == 0)
-            menu.addItem (1, noChoicesMessage, false);
-
         menuActive = true;
-
-        menu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                                .withItemThatMustBeVisible (selectedId)
-                                                .withMinimumWidth (getWidth())
-                                                .withMaximumNumColumns (1)
-                                                .withStandardItemHeight (jlimit (12, 24, getHeight())),
-                            ModalCallbackFunction::forComponent (popupMenuFinishedCallback, this));
+        showPopup();
     }
+}
+
+void ComboBox::showPopup()
+{
+    PopupMenu menu;
+    menu.setLookAndFeel (&getLookAndFeel());
+    addItemsToMenu (menu);
+
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                            .withItemThatMustBeVisible (getSelectedId())
+                                            .withMinimumWidth (getWidth())
+                                            .withMaximumNumColumns (1)
+                                            .withStandardItemHeight (label->getHeight()),
+                        ModalCallbackFunction::forComponent (popupMenuFinishedCallback, this));
+}
+
+void ComboBox::addItemsToMenu (PopupMenu& menu) const
+{
+    const int selectedId = getSelectedId();
+
+    for (int i = 0; i < items.size(); ++i)
+    {
+        const ItemInfo* const item = items.getUnchecked(i);
+        jassert (item != nullptr);
+
+        if (item->isSeparator())
+            menu.addSeparator();
+        else if (item->isHeading)
+            menu.addSectionHeader (item->name);
+        else
+            menu.addItem (item->itemId, item->name,
+                          item->isEnabled, item->itemId == selectedId);
+    }
+
+    if (items.size() == 0)
+        menu.addItem (1, noChoicesMessage, false);
 }
 
 //==============================================================================
@@ -549,7 +565,7 @@ void ComboBox::mouseDown (const MouseEvent& e)
     isButtonDown = isEnabled() && ! e.mods.isPopupMenu();
 
     if (isButtonDown && (e.eventComponent == this || ! label->isEditable()))
-        showPopup();
+        showPopupIfNotActive();
 }
 
 void ComboBox::mouseDrag (const MouseEvent& e)
@@ -557,7 +573,7 @@ void ComboBox::mouseDrag (const MouseEvent& e)
     beginDragAutoRepeat (50);
 
     if (isButtonDown && ! e.mouseWasClicked())
-        showPopup();
+        showPopupIfNotActive();
 }
 
 void ComboBox::mouseUp (const MouseEvent& e2)
@@ -572,21 +588,31 @@ void ComboBox::mouseUp (const MouseEvent& e2)
         if (reallyContains (e.getPosition(), true)
              && (e2.eventComponent == this || ! label->isEditable()))
         {
-            showPopup();
+            showPopupIfNotActive();
         }
     }
 }
 
 void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-   #if 0
-    // NB: this is far too irritating if enabled, because on scrollable pages containing
-    // comboboxes (e.g. introjucer settings pages), you can easily nudge them when trying to scroll
-    if (! menuActive && wheel.deltaY != 0)
-        nudgeSelectedItem (wheel.deltaY > 0 ? -1 : 1);
+    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0)
+    {
+        const int oldPos = (int) mouseWheelAccumulator;
+        mouseWheelAccumulator += wheel.deltaY * 5.0f;
+        const int delta = oldPos - (int) mouseWheelAccumulator;
+
+        if (delta != 0)
+            nudgeSelectedItem (delta);
+    }
     else
-   #endif
+    {
         Component::mouseWheelMove (e, wheel);
+    }
+}
+
+void ComboBox::setScrollWheelEnabled (bool enabled) noexcept
+{
+    scrollWheelEnabled = enabled;
 }
 
 //==============================================================================

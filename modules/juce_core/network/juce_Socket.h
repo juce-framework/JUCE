@@ -146,7 +146,7 @@ public:
 
         @see waitForNextConnection
     */
-    bool createListener (int portNumber, const String& localHostName = String::empty);
+    bool createListener (int portNumber, const String& localHostName = String());
 
     /** When in "listener" mode, this waits for a connection and spawns it as a new
         socket.

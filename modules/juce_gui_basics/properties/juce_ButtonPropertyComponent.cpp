@@ -26,7 +26,7 @@ ButtonPropertyComponent::ButtonPropertyComponent (const String& name,
                                                   const bool triggerOnMouseDown)
     : PropertyComponent (name)
 {
-    addAndMakeVisible (&button);
+    addAndMakeVisible (button);
     button.setTriggeredOnMouseDown (triggerOnMouseDown);
     button.addListener (this);
 }

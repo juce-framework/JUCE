@@ -65,13 +65,13 @@ public:
         return true;
     }
 
-    String getCreationParameters (Component* component)
+    String getCreationParameters (GeneratedCode& code, Component* component)
     {
-        GroupComponent* g = dynamic_cast <GroupComponent*> (component);
+        GroupComponent* g = dynamic_cast<GroupComponent*> (component);
 
-        return quotedString (component->getName())
+        return quotedString (component->getName(), false)
                 + ",\n"
-                + quotedString (g->getText());
+                + quotedString (g->getText(), code.shouldUseTransMacro());
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)

@@ -110,7 +110,7 @@ namespace TimeHelpers
             const size_t numChars = wcsftime (buffer, bufferSize - 1, format.toUTF32(), tm);
            #endif
 
-            if (numChars > 0)
+            if (numChars > 0 || format.isEmpty())
                 return String (StringType (buffer),
                                StringType (buffer) + (int) numChars);
         }
@@ -407,11 +407,11 @@ String Time::getWeekdayName (const bool threeLetterVersion) const
     return getWeekdayName (getDayOfWeek(), threeLetterVersion);
 }
 
+static const char* const shortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+static const char* const longMonthNames[]  = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+
 String Time::getMonthName (int monthNumber, const bool threeLetterVersion)
 {
-    static const char* const shortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-    static const char* const longMonthNames[]  = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
-
     monthNumber %= 12;
 
     return TRANS (threeLetterVersion ? shortMonthNames [monthNumber]
@@ -430,17 +430,40 @@ String Time::getWeekdayName (int day, const bool threeLetterVersion)
 }
 
 //==============================================================================
-Time& Time::operator+= (RelativeTime delta)           { millisSinceEpoch += delta.inMilliseconds(); return *this; }
-Time& Time::operator-= (RelativeTime delta)           { millisSinceEpoch -= delta.inMilliseconds(); return *this; }
+Time& Time::operator+= (RelativeTime delta) noexcept           { millisSinceEpoch += delta.inMilliseconds(); return *this; }
+Time& Time::operator-= (RelativeTime delta) noexcept           { millisSinceEpoch -= delta.inMilliseconds(); return *this; }
 
-Time operator+ (Time time, RelativeTime delta)        { Time t (time); return t += delta; }
-Time operator- (Time time, RelativeTime delta)        { Time t (time); return t -= delta; }
-Time operator+ (RelativeTime delta, Time time)        { Time t (time); return t += delta; }
-const RelativeTime operator- (Time time1, Time time2) { return RelativeTime::milliseconds (time1.toMilliseconds() - time2.toMilliseconds()); }
+Time operator+ (Time time, RelativeTime delta) noexcept        { Time t (time); return t += delta; }
+Time operator- (Time time, RelativeTime delta) noexcept        { Time t (time); return t -= delta; }
+Time operator+ (RelativeTime delta, Time time) noexcept        { Time t (time); return t += delta; }
+const RelativeTime operator- (Time time1, Time time2) noexcept { return RelativeTime::milliseconds (time1.toMilliseconds() - time2.toMilliseconds()); }
 
-bool operator== (Time time1, Time time2)      { return time1.toMilliseconds() == time2.toMilliseconds(); }
-bool operator!= (Time time1, Time time2)      { return time1.toMilliseconds() != time2.toMilliseconds(); }
-bool operator<  (Time time1, Time time2)      { return time1.toMilliseconds() <  time2.toMilliseconds(); }
-bool operator>  (Time time1, Time time2)      { return time1.toMilliseconds() >  time2.toMilliseconds(); }
-bool operator<= (Time time1, Time time2)      { return time1.toMilliseconds() <= time2.toMilliseconds(); }
-bool operator>= (Time time1, Time time2)      { return time1.toMilliseconds() >= time2.toMilliseconds(); }
+bool operator== (Time time1, Time time2) noexcept      { return time1.toMilliseconds() == time2.toMilliseconds(); }
+bool operator!= (Time time1, Time time2) noexcept      { return time1.toMilliseconds() != time2.toMilliseconds(); }
+bool operator<  (Time time1, Time time2) noexcept      { return time1.toMilliseconds() <  time2.toMilliseconds(); }
+bool operator>  (Time time1, Time time2) noexcept      { return time1.toMilliseconds() >  time2.toMilliseconds(); }
+bool operator<= (Time time1, Time time2) noexcept      { return time1.toMilliseconds() <= time2.toMilliseconds(); }
+bool operator>= (Time time1, Time time2) noexcept      { return time1.toMilliseconds() >= time2.toMilliseconds(); }
+
+static int getMonthNumberForCompileDate (const String& m) noexcept
+{
+    for (int i = 0; i < 12; ++i)
+        if (m.equalsIgnoreCase (shortMonthNames[i]))
+            return i;
+
+    // If you hit this because your compiler has a non-standard __DATE__ format,
+    // let me know so we can add support for it!
+    jassertfalse;
+    return 0;
+}
+
+Time Time::getCompilationDate()
+{
+    StringArray dateTokens;
+    dateTokens.addTokens (__DATE__, true);
+    dateTokens.removeEmptyStrings (true);
+
+    return Time (dateTokens[2].getIntValue(),
+                 getMonthNumberForCompileDate (dateTokens[0]),
+                 dateTokens[1].getIntValue(), 12, 0);
+}

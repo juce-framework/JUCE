@@ -22,11 +22,10 @@
   ==============================================================================
 */
 
-#ifdef __aeffect__
+#ifdef __aeffect__ // NB: this must come first, *before* the header-guard.
 
 #ifndef JUCE_VSTMIDIEVENTLIST_H_INCLUDED
 #define JUCE_VSTMIDIEVENTLIST_H_INCLUDED
-
 
 //==============================================================================
 /** Holds a set of VSTMidiEvent objects and makes it easy to add
@@ -183,7 +182,6 @@ private:
         std::free (e);
     }
 };
-
 
 #endif   // JUCE_VSTMIDIEVENTLIST_H_INCLUDED
 #endif

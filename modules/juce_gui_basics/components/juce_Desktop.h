@@ -414,7 +414,7 @@ private:
 
     ScopedPointer<Displays> displays;
 
-    Point<int> lastFakeMouseMove;
+    Point<float> lastFakeMouseMove;
     void sendMouseMove();
 
     int mouseClickCounter, mouseWheelCounter;
@@ -426,6 +426,7 @@ private:
 
     Component* kioskModeComponent;
     Rectangle<int> kioskComponentOriginalBounds;
+    bool kioskModeReentrant;
 
     int allowedOrientations;
     float masterScaleFactor;
@@ -440,10 +441,12 @@ private:
     void removeDesktopComponent (Component*);
     void componentBroughtToFront (Component*);
 
-    void setKioskComponent (Component*, bool enableOrDisable, bool allowMenusAndBars);
+    void setKioskComponent (Component*, bool shouldBeEnabled, bool allowMenusAndBars);
 
     void triggerFocusCallback();
     void handleAsyncUpdate() override;
+
+    static Point<float> getMousePositionFloat();
 
     static double getDefaultMasterScale();
 

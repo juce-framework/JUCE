@@ -568,6 +568,9 @@ public:
     */
     void setInputFilter (InputFilter* newFilter, bool takeOwnership);
 
+    /** Returns the current InputFilter, as set by setInputFilter(). */
+    InputFilter* getInputFilter() const noexcept            { return inputFilter; }
+
     /** Sets limits on the characters that can be entered.
         This is just a shortcut that passes an instance of the LengthAndCharacterRestriction
         class to setInputFilter().
@@ -657,7 +660,7 @@ private:
     friend class InsertAction;
     friend class RemoveAction;
 
-    ScopedPointer <Viewport> viewport;
+    ScopedPointer<Viewport> viewport;
     TextHolderComponent* textHolder;
     BorderSize<int> borderSize;
 
@@ -683,7 +686,7 @@ private:
     Font currentFont;
     mutable int totalNumChars;
     int caretPosition;
-    Array <UniformTextSection*> sections;
+    OwnedArray<UniformTextSection> sections;
     String textToShowWhenEmpty;
     Colour colourForTextWhenEmpty;
     juce_wchar passwordCharacter;
@@ -707,7 +710,7 @@ private:
     void splitSection (int sectionIndex, int charToSplitAt);
     void clearInternal (UndoManager*);
     void insert (const String&, int insertIndex, const Font&, const Colour, UndoManager*, int newCaretPos);
-    void reinsert (int insertIndex, const Array <UniformTextSection*>&);
+    void reinsert (int insertIndex, const OwnedArray<UniformTextSection>&);
     void remove (Range<int> range, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
     void updateCaretPosition();

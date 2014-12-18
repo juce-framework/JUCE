@@ -118,8 +118,8 @@ class LADSPAPluginInstance     : public AudioPluginInstance
 {
 public:
     LADSPAPluginInstance (const LADSPAModuleHandle::Ptr& m)
-        : plugin (nullptr), handle (nullptr), initialised (false),
-          tempBuffer (1, 1), module (m)
+        : module (m), plugin (nullptr), handle (nullptr),
+          initialised (false), tempBuffer (1, 1)
     {
         ++insideLADSPACallback;
 
@@ -222,7 +222,7 @@ public:
         desc.lastFileModTime = module->file.getLastModificationTime();
         desc.pluginFormatName = "LADSPA";
         desc.category = getCategory();
-        desc.manufacturerName = plugin != nullptr ? String (plugin->Maker) : String::empty;
+        desc.manufacturerName = plugin != nullptr ? String (plugin->Maker) : String();
         desc.version = getVersion();
         desc.numInputChannels  = getNumInputChannels();
         desc.numOutputChannels = getNumOutputChannels();
@@ -294,13 +294,13 @@ public:
         {
             for (int i = 0; i < inputs.size(); ++i)
                 plugin->connect_port (handle, inputs[i],
-                                      i < buffer.getNumChannels() ? buffer.getSampleData (i) : nullptr);
+                                      i < buffer.getNumChannels() ? buffer.getWritePointer (i) : nullptr);
 
             if (plugin->run != nullptr)
             {
                 for (int i = 0; i < outputs.size(); ++i)
                     plugin->connect_port (handle, outputs.getUnchecked(i),
-                                          i < buffer.getNumChannels() ? buffer.getSampleData (i) : nullptr);
+                                          i < buffer.getNumChannels() ? buffer.getWritePointer (i) : nullptr);
 
                 plugin->run (handle, numSamples);
                 return;
@@ -312,7 +312,7 @@ public:
                 tempBuffer.clear();
 
                 for (int i = 0; i < outputs.size(); ++i)
-                    plugin->connect_port (handle, outputs.getUnchecked(i), tempBuffer.getSampleData (i));
+                    plugin->connect_port (handle, outputs.getUnchecked(i), tempBuffer.getWritePointer (i));
 
                 plugin->run_adding (handle, numSamples);
 
@@ -338,7 +338,7 @@ public:
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return String (plugin->PortNames [inputs [index]]).trim();
 
-        return String::empty;
+        return String();
     }
 
     const String getOutputChannelName (const int index) const
@@ -346,7 +346,7 @@ public:
         if (isPositiveAndBelow (index, getNumInputChannels()))
             return String (plugin->PortNames [outputs [index]]).trim();
 
-        return String::empty;
+        return String();
     }
 
     //==============================================================================
@@ -390,7 +390,7 @@ public:
             return String (plugin->PortNames [parameters [index]]).trim();
         }
 
-        return String::empty;
+        return String();
     }
 
     const String getParameterText (int index)
@@ -407,7 +407,7 @@ public:
             return String (parameterValues[index].scaled, 4);
         }
 
-        return String::empty;
+        return String();
     }
 
     //==============================================================================
@@ -424,7 +424,7 @@ public:
     const String getProgramName (int index)
     {
         // XXX
-        return String::empty;
+        return String();
     }
 
     void changeProgramName (int index, const String& newName)

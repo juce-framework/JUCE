@@ -144,7 +144,7 @@ public:
         ed.setText (item.getRenamingName());
         ed.setBounds (bounds);
 
-        parent.addAndMakeVisible (&ed);
+        parent.addAndMakeVisible (ed);
         ed.enterModalState (true, this);
     }
 
@@ -188,6 +188,10 @@ void JucerTreeViewBase::itemClicked (const MouseEvent& e)
             showMultiSelectionPopupMenu();
         else
             showPopupMenu();
+    }
+    else if (isSelected())
+    {
+        itemSelectionChanged (true);
     }
 }
 

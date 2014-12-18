@@ -174,12 +174,16 @@ bool OutputStream::writeDoubleBigEndian (double value)
 
 bool OutputStream::writeString (const String& text)
 {
+   #if (JUCE_STRING_UTF_TYPE == 8)
+    return write (text.toRawUTF8(), text.getNumBytesAsUTF8() + 1);
+   #else
     // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
     // if lots of large, persistent strings were to be written to streams).
     const size_t numBytes = text.getNumBytesAsUTF8() + 1;
     HeapBlock<char> temp (numBytes);
     text.copyToUTF8 (temp, numBytes);
     return write (temp, numBytes);
+   #endif
 }
 
 bool OutputStream::writeText (const String& text, const bool asUTF16,
@@ -248,12 +252,12 @@ bool OutputStream::writeText (const String& text, const bool asUTF16,
     return true;
 }
 
-int OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWrite)
+int64 OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWrite)
 {
     if (numBytesToWrite < 0)
         numBytesToWrite = std::numeric_limits<int64>::max();
 
-    int numWritten = 0;
+    int64 numWritten = 0;
 
     while (numBytesToWrite > 0)
     {

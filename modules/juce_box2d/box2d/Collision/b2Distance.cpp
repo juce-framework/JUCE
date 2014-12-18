@@ -467,7 +467,7 @@ void b2Distance(b2DistanceOutput* output,
 
 	b2Vec2 closestPoint = simplex.GetClosestPoint();
 	float32 distanceSqr1 = closestPoint.LengthSquared();
-	float32 distanceSqr2 = distanceSqr1;
+	float32 distanceSqr2;// = distanceSqr1;
 
 	// Main iteration loop.
 	int32 iter = 0;

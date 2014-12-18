@@ -107,6 +107,8 @@ public:
     void reopenLastProjects();
     void saveCurrentlyOpenProjectList();
 
+    void updateAllWindowTitles();
+
     void avoidSuperimposedWindows (MainWindow*);
 
     void sendLookAndFeelChange();

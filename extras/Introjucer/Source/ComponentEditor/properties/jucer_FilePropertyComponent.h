@@ -39,7 +39,7 @@ public:
                         isDirectory, false, fileBrowserWildcard,
                         String::empty, String::empty)
     {
-        addAndMakeVisible (&filenameComp);
+        addAndMakeVisible (filenameComp);
         filenameComp.addListener (this);
     }
 

@@ -129,7 +129,7 @@ private:
     public:
         SettingsComp (ProjectExporter* exp)
         {
-            addAndMakeVisible (&group);
+            addAndMakeVisible (group);
 
             PropertyListBuilder props;
             exp->createPropertyEditors (props);
@@ -230,7 +230,7 @@ private:
     public:
         SettingsComp (ProjectExporter::BuildConfiguration* conf, const String& expName)
         {
-            addAndMakeVisible (&group);
+            addAndMakeVisible (group);
 
             PropertyListBuilder props;
             conf->createPropertyEditors (props);

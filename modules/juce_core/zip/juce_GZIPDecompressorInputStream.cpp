@@ -38,6 +38,7 @@ namespace zlibNamespace
    #pragma clang diagnostic push
    #pragma clang diagnostic ignored "-Wconversion"
    #pragma clang diagnostic ignored "-Wshadow"
+   #pragma clang diagnostic ignored "-Wdeprecated-register"
   #endif
 
   #undef OS_CODE
@@ -284,11 +285,4 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
 
     skipNextBytes (newPos - currentPos);
     return true;
-}
-
-// (This is used as a way for the zip file code to use the crc32 function without including zlib)
-unsigned long juce_crc32 (unsigned long, const unsigned char*, unsigned);
-unsigned long juce_crc32 (unsigned long crc, const unsigned char* buf, unsigned len)
-{
-    return zlibNamespace::crc32 (crc, buf, len);
 }

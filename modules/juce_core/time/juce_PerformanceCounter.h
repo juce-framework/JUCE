@@ -65,7 +65,7 @@ public:
     */
     PerformanceCounter (const String& counterName,
                         int runsPerPrintout = 100,
-                        const File& loggingFile = File::nonexistent);
+                        const File& loggingFile = File());
 
     /** Destructor. */
     ~PerformanceCounter();

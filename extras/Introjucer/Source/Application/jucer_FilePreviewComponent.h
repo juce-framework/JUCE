@@ -32,8 +32,7 @@
 class ItemPreviewComponent  : public Component
 {
 public:
-    ItemPreviewComponent (const File& f)
-        : file (f)
+    ItemPreviewComponent (const File& f)  : file (f)
     {
         setOpaque (true);
         tryToLoadImage();
@@ -45,17 +44,28 @@ public:
 
         if (drawable != nullptr)
         {
-            Rectangle<int> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
-                                    .appliedTo (drawable->getBounds(), Rectangle<int> (4, 22, getWidth() - 8, getHeight() - 26));
+            Rectangle<float> contentBounds (drawable->getDrawableBounds());
+
+            if (DrawableComposite* dc = dynamic_cast<DrawableComposite*> (drawable.get()))
+            {
+                Rectangle<float> r (dc->getContentArea().resolve (nullptr));
+
+                if (! r.isEmpty())
+                    contentBounds = r;
+            }
+
+            Rectangle<float> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
+                                        .appliedTo (contentBounds, Rectangle<float> (4.0f, 22.0f, getWidth() - 8.0f, getHeight() - 26.0f));
 
             Path p;
             p.addRectangle (area);
             DropShadow (Colours::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
 
-            g.fillCheckerBoard (area, 24, 24, Colour (0xffffffff), Colour (0xffeeeeee));
+            g.fillCheckerBoard (area.getSmallestIntegerContainer(), 24, 24,
+                                Colour (0xffffffff), Colour (0xffeeeeee));
 
-            g.setOpacity (1.0f);
-            drawable->drawWithin (g, area.toFloat(), RectanglePlacement::stretchToFit, 1.0f);
+            drawable->draw (g, 1.0f, RectanglePlacement (RectanglePlacement::stretchToFit)
+                                        .getTransformToFit (contentBounds, area.toFloat()));
         }
 
         g.setFont (Font (14.0f, Font::bold));
@@ -75,7 +85,7 @@ private:
         drawable = nullptr;
 
         {
-            ScopedPointer <InputStream> input (file.createInputStream());
+            ScopedPointer<InputStream> input (file.createInputStream());
 
             if (input != nullptr)
             {

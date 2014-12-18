@@ -22,21 +22,6 @@
   ==============================================================================
 */
 
-class MessageManager::QuitMessage   : public MessageManager::MessageBase
-{
-public:
-    QuitMessage() {}
-
-    void messageCallback() override
-    {
-        if (MessageManager* const mm = MessageManager::instance)
-            mm->quitMessageReceived = true;
-    }
-
-    JUCE_DECLARE_NON_COPYABLE (QuitMessage)
-};
-
-//==============================================================================
 MessageManager::MessageManager() noexcept
   : quitMessagePosted (false),
     quitMessageReceived (false),
@@ -81,12 +66,17 @@ void MessageManager::deleteInstance()
 }
 
 //==============================================================================
-void MessageManager::MessageBase::post()
+bool MessageManager::MessageBase::post()
 {
     MessageManager* const mm = MessageManager::instance;
 
     if (mm == nullptr || mm->quitMessagePosted || ! postMessageToSystemQueue (this))
+    {
         Ptr deleter (this); // (this will delete messages that were just created with a 0 ref count)
+        return false;
+    }
+
+    return true;
 }
 
 //==============================================================================
@@ -94,12 +84,6 @@ void MessageManager::MessageBase::post()
 void MessageManager::runDispatchLoop()
 {
     runDispatchLoopUntil (-1);
-}
-
-void MessageManager::stopDispatchLoop()
-{
-    (new QuitMessage())->post();
-    quitMessagePosted = true;
 }
 
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
@@ -124,6 +108,45 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     return ! quitMessageReceived;
 }
 
+class MessageManager::QuitMessage   : public MessageManager::MessageBase
+{
+public:
+    QuitMessage() {}
+
+    void messageCallback() override
+    {
+        if (MessageManager* const mm = MessageManager::instance)
+            mm->quitMessageReceived = true;
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (QuitMessage)
+};
+
+void MessageManager::stopDispatchLoop()
+{
+    (new QuitMessage())->post();
+    quitMessagePosted = true;
+}
+
+#endif
+
+//==============================================================================
+#if JUCE_COMPILER_SUPPORTS_LAMBDAS
+struct AsyncFunction  : private MessageManager::MessageBase
+{
+    AsyncFunction (std::function<void(void)> f)  : fn (f)  { post(); }
+
+private:
+    std::function<void(void)> fn;
+    void messageCallback() override    { fn(); }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncFunction)
+};
+
+void MessageManager::callAsync (std::function<void(void)> f)
+{
+    new AsyncFunction (f);
+}
 #endif
 
 //==============================================================================
@@ -159,9 +182,15 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* cons
     jassert (! currentThreadHasLockedMessageManager());
 
     const ReferenceCountedObjectPtr<AsyncFunctionCallback> message (new AsyncFunctionCallback (func, parameter));
-    message->post();
-    message->finished.wait();
-    return message->result;
+
+    if (message->post())
+    {
+        message->finished.wait();
+        return message->result;
+    }
+
+    jassertfalse; // the OS message queue failed to send the message!
+    return nullptr;
 }
 
 //==============================================================================
@@ -276,7 +305,12 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
     }
 
     blockingMessage = new BlockingMessage();
-    blockingMessage->post();
+
+    if (! blockingMessage->post())
+    {
+        blockingMessage = nullptr;
+        return false;
+    }
 
     while (! blockingMessage->lockedEvent.wait (20))
     {
@@ -335,5 +369,7 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
     }
 }
 
-ScopedJuceInitialiser_GUI::ScopedJuceInitialiser_GUI()  { initialiseJuce_GUI(); }
-ScopedJuceInitialiser_GUI::~ScopedJuceInitialiser_GUI() { shutdownJuce_GUI(); }
+static int numScopedInitInstances = 0;
+
+ScopedJuceInitialiser_GUI::ScopedJuceInitialiser_GUI()  { if (numScopedInitInstances++ == 0) initialiseJuce_GUI(); }
+ScopedJuceInitialiser_GUI::~ScopedJuceInitialiser_GUI() { if (--numScopedInitInstances == 0) shutdownJuce_GUI(); }

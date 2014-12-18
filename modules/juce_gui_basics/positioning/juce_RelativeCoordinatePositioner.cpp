@@ -27,7 +27,7 @@ class MarkerListScope  : public Expression::Scope
 public:
     MarkerListScope (Component& comp) : component (comp) {}
 
-    Expression getSymbolValue (const String& symbol) const
+    Expression getSymbolValue (const String& symbol) const override
     {
         switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
         {
@@ -44,7 +44,7 @@ public:
         return Expression::Scope::getSymbolValue (symbol);
     }
 
-    void visitRelativeScope (const String& scopeName, Visitor& visitor) const
+    void visitRelativeScope (const String& scopeName, Visitor& visitor) const override
     {
         if (scopeName == RelativeCoordinate::Strings::parent)
         {
@@ -58,7 +58,7 @@ public:
         Expression::Scope::visitRelativeScope (scopeName, visitor);
     }
 
-    String getScopeUID() const
+    String getScopeUID() const override
     {
         return String::toHexString ((pointer_sized_int) (void*) &component) + "m";
     }
@@ -150,12 +150,12 @@ Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponen
 class RelativeCoordinatePositionerBase::DependencyFinderScope  : public ComponentScope
 {
 public:
-    DependencyFinderScope (Component& comp, RelativeCoordinatePositionerBase& positioner_, bool& ok_)
-        : ComponentScope (comp), positioner (positioner_), ok (ok_)
+    DependencyFinderScope (Component& comp, RelativeCoordinatePositionerBase& p, bool& result)
+        : ComponentScope (comp), positioner (p), ok (result)
     {
     }
 
-    Expression getSymbolValue (const String& symbol) const
+    Expression getSymbolValue (const String& symbol) const override
     {
         switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
         {
@@ -193,7 +193,7 @@ public:
         return ComponentScope::getSymbolValue (symbol);
     }
 
-    void visitRelativeScope (const String& scopeName, Visitor& visitor) const
+    void visitRelativeScope (const String& scopeName, Visitor& visitor) const override
     {
         if (Component* const targetComp = (scopeName == RelativeCoordinate::Strings::parent)
                                                 ? component.getParentComponent()

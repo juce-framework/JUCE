@@ -110,7 +110,7 @@ public:
 
     unsigned int cacheTimeout;
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl);
+    juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl)
 
 private:
     OwnedArray<Item> images;
@@ -119,7 +119,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
 
-juce_ImplementSingleton_SingleThreaded (ImageCache::Pimpl);
+juce_ImplementSingleton_SingleThreaded (ImageCache::Pimpl)
 
 
 //==============================================================================

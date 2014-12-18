@@ -175,7 +175,7 @@ public:
 
     void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
     {
-        float* data = sharedBufferChans.getSampleData (channel, 0);
+        float* data = sharedBufferChans.getWritePointer (channel, 0);
 
         for (int i = numSamples; --i >= 0;)
         {
@@ -219,7 +219,7 @@ public:
     void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples)
     {
         for (int i = totalChans; --i >= 0;)
-            channels[i] = sharedBufferChans.getSampleData (audioChannelsToUse.getUnchecked (i), 0);
+            channels[i] = sharedBufferChans.getWritePointer (audioChannelsToUse.getUnchecked (i), 0);
 
         AudioSampleBuffer buffer (channels, totalChans, numSamples);
 
@@ -230,8 +230,8 @@ public:
     AudioProcessor* const processor;
 
 private:
-    Array <int> audioChannelsToUse;
-    HeapBlock <float*> channels;
+    Array<int> audioChannelsToUse;
+    HeapBlock<float*> channels;
     int totalChans;
     int midiBufferToUse;
 
@@ -923,9 +923,7 @@ void AudioProcessorGraph::Node::setParentGraph (AudioProcessorGraph* const graph
 //==============================================================================
 AudioProcessorGraph::AudioProcessorGraph()
     : lastNodeId (0),
-      renderingBuffers (1, 1),
       currentAudioInputBuffer (nullptr),
-      currentAudioOutputBuffer (1, 1),
       currentMidiInputBuffer (nullptr)
 {
 }
@@ -1367,7 +1365,7 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getName() const
         default:                break;
     }
 
-    return String::empty;
+    return String();
 }
 
 void AudioProcessorGraph::AudioGraphIOProcessor::fillInPluginDescription (PluginDescription& d) const
@@ -1469,7 +1467,7 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getInputChannelName (in
         default:                break;
     }
 
-    return String::empty;
+    return String();
 }
 
 const String AudioProcessorGraph::AudioGraphIOProcessor::getOutputChannelName (int channelIndex) const
@@ -1481,7 +1479,7 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getOutputChannelName (i
         default:                break;
     }
 
-    return String::empty;
+    return String();
 }
 
 bool AudioProcessorGraph::AudioGraphIOProcessor::isInputChannelStereoPair (int /*index*/) const
@@ -1501,17 +1499,17 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::hasEditor() const              
 AudioProcessorEditor* AudioProcessorGraph::AudioGraphIOProcessor::createEditor()    { return nullptr; }
 
 int AudioProcessorGraph::AudioGraphIOProcessor::getNumParameters()                  { return 0; }
-const String AudioProcessorGraph::AudioGraphIOProcessor::getParameterName (int)     { return String::empty; }
+const String AudioProcessorGraph::AudioGraphIOProcessor::getParameterName (int)     { return String(); }
 
 float AudioProcessorGraph::AudioGraphIOProcessor::getParameter (int)                { return 0.0f; }
-const String AudioProcessorGraph::AudioGraphIOProcessor::getParameterText (int)     { return String::empty; }
+const String AudioProcessorGraph::AudioGraphIOProcessor::getParameterText (int)     { return String(); }
 void AudioProcessorGraph::AudioGraphIOProcessor::setParameter (int, float)          { }
 
 int AudioProcessorGraph::AudioGraphIOProcessor::getNumPrograms()                    { return 0; }
 int AudioProcessorGraph::AudioGraphIOProcessor::getCurrentProgram()                 { return 0; }
 void AudioProcessorGraph::AudioGraphIOProcessor::setCurrentProgram (int)            { }
 
-const String AudioProcessorGraph::AudioGraphIOProcessor::getProgramName (int)       { return String::empty; }
+const String AudioProcessorGraph::AudioGraphIOProcessor::getProgramName (int)       { return String(); }
 void AudioProcessorGraph::AudioGraphIOProcessor::changeProgramName (int, const String&) {}
 
 void AudioProcessorGraph::AudioGraphIOProcessor::getStateInformation (juce::MemoryBlock&) {}

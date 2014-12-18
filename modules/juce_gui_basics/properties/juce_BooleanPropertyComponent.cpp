@@ -29,7 +29,7 @@ BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
       onText (buttonTextWhenTrue),
       offText (buttonTextWhenFalse)
 {
-    addAndMakeVisible (&button);
+    addAndMakeVisible (button);
     button.setClickingTogglesState (false);
     button.addListener (this);
 }
@@ -41,7 +41,7 @@ BooleanPropertyComponent::BooleanPropertyComponent (const Value& valueToControl,
       onText (buttonText),
       offText (buttonText)
 {
-    addAndMakeVisible (&button);
+    addAndMakeVisible (button);
     button.setClickingTogglesState (false);
     button.setButtonText (buttonText);
     button.getToggleStateValue().referTo (valueToControl);
@@ -66,7 +66,7 @@ void BooleanPropertyComponent::paint (Graphics& g)
 {
     PropertyComponent::paint (g);
 
-    g.setColour (Colours::white);
+    g.setColour (findColour (backgroundColourId));
     g.fillRect (button.getBounds());
 
     g.setColour (findColour (ComboBox::outlineColourId));

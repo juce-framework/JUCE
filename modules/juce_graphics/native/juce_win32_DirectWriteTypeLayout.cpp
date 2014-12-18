@@ -29,8 +29,9 @@ namespace DirectWriteTypeLayout
     class CustomDirectWriteTextRenderer   : public ComBaseClassHelper<IDWriteTextRenderer>
     {
     public:
-        CustomDirectWriteTextRenderer (IDWriteFontCollection* const fonts)
+        CustomDirectWriteTextRenderer (IDWriteFontCollection* const fonts, const AttributedString& as)
             : ComBaseClassHelper<IDWriteTextRenderer> (0),
+              attributedString (as),
               fontCollection (fonts),
               currentLine (-1),
               lastOriginY (-10000.0f)
@@ -63,6 +64,9 @@ namespace DirectWriteTypeLayout
         {
             TextLayout* const layout = static_cast<TextLayout*> (clientDrawingContext);
 
+            if (! (baselineOriginY >= -1.0e10f && baselineOriginY <= 1.0e10f))
+                baselineOriginY = 0; // DirectWrite sometimes sends NaNs in this parameter
+
             if (baselineOriginY != lastOriginY)
             {
                 lastOriginY = baselineOriginY;
@@ -73,6 +77,7 @@ namespace DirectWriteTypeLayout
                     jassert (currentLine == layout->getNumLines());
                     TextLayout::Line* const newLine = new TextLayout::Line();
                     layout->addLine (newLine);
+
                     newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
                 }
             }
@@ -85,20 +90,16 @@ namespace DirectWriteTypeLayout
             glyphLine.ascent  = jmax (glyphLine.ascent,  scaledFontSize (dwFontMetrics.ascent,  dwFontMetrics, glyphRun));
             glyphLine.descent = jmax (glyphLine.descent, scaledFontSize (dwFontMetrics.descent, dwFontMetrics, glyphRun));
 
-            String fontFamily, fontStyle;
-            getFontFamilyAndStyle (glyphRun, fontFamily, fontStyle);
-
             TextLayout::Run* const glyphRunLayout = new TextLayout::Run (Range<int> (runDescription->textPosition,
                                                                                      runDescription->textPosition + runDescription->stringLength),
                                                                          glyphRun->glyphCount);
             glyphLine.runs.add (glyphRunLayout);
 
             glyphRun->fontFace->GetMetrics (&dwFontMetrics);
-
             const float totalHeight = std::abs ((float) dwFontMetrics.ascent) + std::abs ((float) dwFontMetrics.descent);
             const float fontHeightToEmSizeFactor = (float) dwFontMetrics.designUnitsPerEm / totalHeight;
 
-            glyphRunLayout->font = Font (fontFamily, fontStyle, glyphRun->fontEmSize / fontHeightToEmSizeFactor);
+            glyphRunLayout->font = getFontForRun (glyphRun, glyphRun->fontEmSize / fontHeightToEmSizeFactor);
             glyphRunLayout->colour = getColourOf (static_cast<ID2D1SolidColorBrush*> (clientDrawingEffect));
 
             const Point<float> lineOrigin (layout->getLine (currentLine).lineOrigin);
@@ -123,6 +124,7 @@ namespace DirectWriteTypeLayout
         }
 
     private:
+        const AttributedString& attributedString;
         IDWriteFontCollection* const fontCollection;
         int currentLine;
         float lastOriginY;
@@ -141,19 +143,22 @@ namespace DirectWriteTypeLayout
             return Colour::fromFloatRGBA (colour.r, colour.g, colour.b, colour.a);
         }
 
-        void getFontFamilyAndStyle (DWRITE_GLYPH_RUN const* glyphRun, String& family, String& style) const
+        Font getFontForRun (DWRITE_GLYPH_RUN const* glyphRun, float fontHeight)
         {
+            for (int i = 0; i < attributedString.getNumAttributes(); ++i)
+                if (const Font* font = attributedString.getAttribute(i)->getFont())
+                    if (WindowsDirectWriteTypeface* wt = dynamic_cast<WindowsDirectWriteTypeface*> (font->getTypeface()))
+                        if (wt->getIDWriteFontFace() == glyphRun->fontFace)
+                            return font->withHeight (fontHeight);
+
             ComSmartPtr<IDWriteFont> dwFont;
             HRESULT hr = fontCollection->GetFontFromFontFace (glyphRun->fontFace, dwFont.resetAndGetPointerAddress());
             jassert (dwFont != nullptr);
 
-            {
-                ComSmartPtr<IDWriteFontFamily> dwFontFamily;
-                hr = dwFont->GetFontFamily (dwFontFamily.resetAndGetPointerAddress());
-                family = getFontFamilyName (dwFontFamily);
-            }
+            ComSmartPtr<IDWriteFontFamily> dwFontFamily;
+            hr = dwFont->GetFontFamily (dwFontFamily.resetAndGetPointerAddress());
 
-            style = getFontFaceName (dwFont);
+            return Font (getFontFamilyName (dwFontFamily), getFontFaceName (dwFont), fontHeight);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomDirectWriteTextRenderer)
@@ -164,6 +169,9 @@ namespace DirectWriteTypeLayout
     {
         ComSmartPtr<IDWriteFontFace> dwFontFace;
         dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());
+
+        if (dwFontFace == nullptr)
+            return 1.0f;
 
         DWRITE_FONT_METRICS dwFontMetrics;
         dwFontFace->GetMetrics (&dwFontMetrics);
@@ -345,11 +353,11 @@ namespace DirectWriteTypeLayout
         layout.ensureStorageAllocated (actualLineCount);
 
         {
-            ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection));
+            ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection, text));
             hr = dwTextLayout->Draw (&layout, textRenderer, 0, 0);
         }
 
-        HeapBlock <DWRITE_LINE_METRICS> dwLineMetrics (actualLineCount);
+        HeapBlock<DWRITE_LINE_METRICS> dwLineMetrics (actualLineCount);
         hr = dwTextLayout->GetLineMetrics (dwLineMetrics, actualLineCount, &actualLineCount);
         int lastLocation = 0;
         const int numLines = jmin ((int) actualLineCount, layout.getNumLines());
@@ -377,14 +385,30 @@ namespace DirectWriteTypeLayout
         }
     }
 }
+
+static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
+{
+    const int numCharacterAttributes = text.getNumAttributes();
+
+    for (int i = 0; i < numCharacterAttributes; ++i)
+        if (const Font* const font = text.getAttribute (i)->getFont())
+            if (dynamic_cast<WindowsDirectWriteTypeface*> (font->getTypeface()) == nullptr)
+                return false;
+
+    return true;
+}
+
 #endif
 
 bool TextLayout::createNativeLayout (const AttributedString& text)
 {
    #if JUCE_USE_DIRECTWRITE
-    const Direct2DFactories& factories = Direct2DFactories::getInstance();
+    if (! canAllTypefacesBeUsedInLayout (text))
+        return false;
 
-    if (factories.d2dFactory != nullptr && factories.systemFonts != nullptr)
+    SharedResourcePointer<Direct2DFactories> factories;
+
+    if (factories->d2dFactory != nullptr && factories->systemFonts != nullptr)
     {
        #if JUCE_64BIT
         // There's a mysterious bug in 64-bit Windows that causes garbage floating-point
@@ -395,13 +419,13 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
         {
             hasBeenCalled = true;
             TextLayout dummy;
-            DirectWriteTypeLayout::createLayout (dummy, text, factories.directWriteFactory,
-                                                 factories.d2dFactory, factories.systemFonts);
+            DirectWriteTypeLayout::createLayout (dummy, text, factories->directWriteFactory,
+                                                 factories->d2dFactory, factories->systemFonts);
         }
        #endif
 
-        DirectWriteTypeLayout::createLayout (*this, text, factories.directWriteFactory,
-                                             factories.d2dFactory, factories.systemFonts);
+        DirectWriteTypeLayout::createLayout (*this, text, factories->directWriteFactory,
+                                             factories->d2dFactory, factories->systemFonts);
         return true;
     }
    #else

@@ -41,8 +41,9 @@
 
 //==============================================================================
 #if JUCE_MAC
- #if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU) \
-       || ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+ #if JUCE_SUPPORT_CARBON \
+      && ((JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU) \
+           || ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6))
   #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
   #define Component CarbonDummyCompName
   #include <Carbon/Carbon.h>
@@ -55,6 +56,11 @@
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
  #undef KeyPress
+#endif
+
+#if ! JUCE_WINDOWS && ! JUCE_MAC
+ #undef JUCE_PLUGINHOST_VST3
+ #define JUCE_PLUGINHOST_VST3 0
 #endif
 
 //==============================================================================
@@ -71,6 +77,69 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
     return false;
 }
 
+#if JUCE_MAC
+//==============================================================================
+struct AutoResizingNSViewComponent  : public NSViewComponent,
+                                      private AsyncUpdater
+{
+    AutoResizingNSViewComponent() : recursive (false) {}
+
+    void childBoundsChanged (Component*) override
+    {
+        if (recursive)
+        {
+            triggerAsyncUpdate();
+        }
+        else
+        {
+            recursive = true;
+            resizeToFitView();
+            recursive = true;
+        }
+    }
+
+    void handleAsyncUpdate() override               { resizeToFitView(); }
+
+    bool recursive;
+};
+
+//==============================================================================
+struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewComponent,
+                                                private Timer
+{
+    AutoResizingNSViewComponentWithParent()
+    {
+        NSView* v = [[NSView alloc] init];
+        setView (v);
+        [v release];
+
+        startTimer (30);
+    }
+
+    NSView* getChildView() const
+    {
+        if (NSView* parent = (NSView*) getView())
+            if ([[parent subviews] count] > 0)
+                return [[parent subviews] objectAtIndex: 0];
+
+        return nil;
+    }
+
+    void timerCallback() override
+    {
+        if (NSView* child = getChildView())
+        {
+            stopTimer();
+            setView (child);
+        }
+    }
+};
+#endif
+
+#if JUCE_CLANG
+ #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
 #include "processors/juce_AudioProcessor.cpp"
@@ -80,6 +149,7 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 #include "processors/juce_PluginDescription.cpp"
 #include "format_types/juce_LADSPAPluginFormat.cpp"
 #include "format_types/juce_VSTPluginFormat.cpp"
+#include "format_types/juce_VST3PluginFormat.cpp"
 #include "format_types/juce_AudioUnitPluginFormat.mm"
 #include "scanning/juce_KnownPluginList.cpp"
 #include "scanning/juce_PluginDirectoryScanner.cpp"

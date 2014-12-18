@@ -59,12 +59,12 @@ SamplerSound::~SamplerSound()
 {
 }
 
-bool SamplerSound::appliesToNote (const int midiNoteNumber)
+bool SamplerSound::appliesToNote (int midiNoteNumber)
 {
     return midiNotes [midiNoteNumber];
 }
 
-bool SamplerSound::appliesToChannel (const int /*midiChannel*/)
+bool SamplerSound::appliesToChannel (int /*midiChannel*/)
 {
     return true;
 }
@@ -119,7 +119,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
         if (sound->releaseSamples > 0)
             releaseDelta = (float) (-pitchRatio / sound->releaseSamples);
         else
-            releaseDelta = 0.0f;
+            releaseDelta = -1.0f;
     }
     else
     {
@@ -127,7 +127,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
     }
 }
 
-void SamplerVoice::stopNote (const bool allowTailOff)
+void SamplerVoice::stopNote (float /*velocity*/, bool allowTailOff)
 {
     if (allowTailOff)
     {
@@ -154,12 +154,12 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 {
     if (const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().get()))
     {
-        const float* const inL = playingSound->data->getSampleData (0, 0);
+        const float* const inL = playingSound->data->getReadPointer (0);
         const float* const inR = playingSound->data->getNumChannels() > 1
-                                    ? playingSound->data->getSampleData (1, 0) : nullptr;
+                                    ? playingSound->data->getReadPointer (1) : nullptr;
 
-        float* outL = outputBuffer.getSampleData (0, startSample);
-        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getSampleData (1, startSample) : nullptr;
+        float* outL = outputBuffer.getWritePointer (0, startSample);
+        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer (1, startSample) : nullptr;
 
         while (--numSamples >= 0)
         {
@@ -197,7 +197,7 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 
                 if (attackReleaseLevel <= 0.0f)
                 {
-                    stopNote (false);
+                    stopNote (0.0f, false);
                     break;
                 }
             }
@@ -216,7 +216,7 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
 
             if (sourceSamplePosition > playingSound->length)
             {
-                stopNote (false);
+                stopNote (0.0f, false);
                 break;
             }
         }

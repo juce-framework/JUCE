@@ -71,7 +71,7 @@ public:
     bool saveProject();
     void closeProject();
     void openInIDE();
-    void openInIDE (const String& exporterName);
+    void openInIDE (int exporterIndex);
 
     void showFilesTab();
     void showConfigTab();

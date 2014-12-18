@@ -41,41 +41,70 @@ public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
-      : connection (0), request (0),
+      : statusCode (0), connection (0), request (0),
         address (address_), headers (headers_), postData (postData_), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
-        createConnection (progressCallback, progressCallbackContext);
-
-        if (responseHeaders != nullptr && ! isError())
+        for (int maxRedirects = 10; --maxRedirects >= 0;)
         {
-            DWORD bufferSizeBytes = 4096;
+            createConnection (progressCallback, progressCallbackContext);
 
-            for (;;)
+            if (! isError())
             {
-                HeapBlock<char> buffer ((size_t) bufferSizeBytes);
+                DWORD bufferSizeBytes = 4096;
+                StringPairArray headers (false);
 
-                if (HttpQueryInfo (request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
+                for (;;)
                 {
-                    StringArray headersArray;
-                    headersArray.addLines (String (reinterpret_cast<const WCHAR*> (buffer.getData())));
+                    HeapBlock<char> buffer ((size_t) bufferSizeBytes);
 
-                    for (int i = 0; i < headersArray.size(); ++i)
+                    if (HttpQueryInfo (request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
                     {
-                        const String& header = headersArray[i];
-                        const String key (header.upToFirstOccurrenceOf (": ", false, false));
-                        const String value (header.fromFirstOccurrenceOf (": ", false, false));
-                        const String previousValue ((*responseHeaders) [key]);
+                        StringArray headersArray;
+                        headersArray.addLines (String (reinterpret_cast<const WCHAR*> (buffer.getData())));
 
-                        responseHeaders->set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+                        for (int i = 0; i < headersArray.size(); ++i)
+                        {
+                            const String& header = headersArray[i];
+                            const String key   (header.upToFirstOccurrenceOf (": ", false, false));
+                            const String value (header.fromFirstOccurrenceOf (": ", false, false));
+                            const String previousValue (headers[key]);
+                            headers.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+                        }
+
+                        break;
                     }
 
-                    break;
+                    if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+                        break;
+
+                    bufferSizeBytes += 4096;
                 }
 
-                if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-                    break;
+                DWORD status = 0;
+                DWORD statusSize = sizeof (status);
+
+                if (HttpQueryInfo (request, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &status, &statusSize, 0))
+                {
+                    statusCode = (int) status;
+
+                    if (status == 301 || status == 302 || status == 303 || status == 307)
+                    {
+                        const String newLocation (headers["Location"]);
+
+                        if (newLocation.isNotEmpty() && newLocation != address)
+                        {
+                            address = newLocation;
+                            continue;
+                        }
+                    }
+                }
+
+                if (responseHeaders != nullptr)
+                    responseHeaders->addArray (headers);
             }
+
+            break;
         }
     }
 
@@ -144,6 +173,8 @@ public:
 
         return true;
     }
+
+    int statusCode;
 
 private:
     //==============================================================================
@@ -248,7 +279,8 @@ private:
     {
         const TCHAR* mimeTypes[] = { _T("*/*"), nullptr };
 
-        DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES;
+        DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES
+                        | INTERNET_FLAG_NO_AUTO_REDIRECT | SECURITY_SET_MASK;
 
         if (address.startsWithIgnoreCase ("https:"))
             flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
@@ -259,6 +291,8 @@ private:
 
         if (request != 0)
         {
+            setSecurityFlags();
+
             INTERNET_BUFFERS buffers = { 0 };
             buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
             buffers.lpcszHeader = headers.toWideCharPointer();
@@ -276,7 +310,7 @@ private:
 
                     if (bytesToDo > 0
                          && ! InternetWriteFile (request,
-                                                 static_cast <const char*> (postData.getData()) + bytesSent,
+                                                 static_cast<const char*> (postData.getData()) + bytesSent,
                                                  (DWORD) bytesToDo, &bytesDone))
                     {
                         break;
@@ -302,19 +336,16 @@ private:
         close();
     }
 
+    void setSecurityFlags()
+    {
+        DWORD dwFlags = 0, dwBuffLen = sizeof (DWORD);
+        InternetQueryOption (request, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, &dwBuffLen);
+        dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_SET_MASK;
+        InternetSetOption (request, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, sizeof (dwFlags));
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
-
-InputStream* URL::createNativeStream (const String& address, bool isPost, const MemoryBlock& postData,
-                                      OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                                      const String& headers, const int timeOutMs, StringPairArray* responseHeaders)
-{
-    ScopedPointer <WebInputStream> wi (new WebInputStream (address, isPost, postData,
-                                                           progressCallback, progressCallbackContext,
-                                                           headers, timeOutMs, responseHeaders));
-
-    return wi->isError() ? nullptr : wi.release();
-}
 
 
 //==============================================================================
@@ -342,7 +373,13 @@ struct GetAdaptersInfoHelper
 
 namespace MACAddressHelpers
 {
-    void getViaGetAdaptersInfo (Array<MACAddress>& result)
+    static void addAddress (Array<MACAddress>& result, const MACAddress& ma)
+    {
+        if (! ma.isNull())
+            result.addIfNotAlreadyThere (ma);
+    }
+
+    static void getViaGetAdaptersInfo (Array<MACAddress>& result)
     {
         GetAdaptersInfoHelper gah;
 
@@ -350,11 +387,11 @@ namespace MACAddressHelpers
         {
             for (PIP_ADAPTER_INFO adapter = gah.adapterInfo; adapter != nullptr; adapter = adapter->Next)
                 if (adapter->AddressLength >= 6)
-                    result.addIfNotAlreadyThere (MACAddress (adapter->Address));
+                    addAddress (result, MACAddress (adapter->Address));
         }
     }
 
-    void getViaNetBios (Array<MACAddress>& result)
+    static void getViaNetBios (Array<MACAddress>& result)
     {
         DynamicLibrary dll ("netapi32.dll");
         JUCE_LOAD_WINAPI_FUNCTION (dll, Netbios, NetbiosCall, UCHAR, (PNCB))
@@ -396,7 +433,7 @@ namespace MACAddressHelpers
                     ncb.ncb_length = sizeof (ASTAT);
 
                     if (NetbiosCall (&ncb) == 0 && astat.adapt.adapter_type == 0xfe)
-                        result.addIfNotAlreadyThere (MACAddress (astat.adapt.adapter_address));
+                        addAddress (result, MACAddress (astat.adapt.adapter_address));
                 }
             }
         }

@@ -112,9 +112,9 @@ public:
 
 
 private:
-    OwnedArray <DocumentType> types;
-    OwnedArray <Document> documents;
-    Array <DocumentCloseListener*> listeners;
+    OwnedArray<DocumentType> types;
+    OwnedArray<Document> documents;
+    Array<DocumentCloseListener*> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenDocumentManager)
 };
@@ -146,7 +146,7 @@ public:
 private:
     bool documentAboutToClose (OpenDocumentManager::Document*);
 
-    Array <OpenDocumentManager::Document*> previousDocs, nextDocs;
+    Array<OpenDocumentManager::Document*> previousDocs, nextDocs;
 };
 
 

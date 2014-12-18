@@ -40,6 +40,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext() override
     {
+        sendDataChangeMessage();
         return createOpenGLGraphicsContext (context, frameBuffer);
     }
 
@@ -73,6 +74,9 @@ public:
             case Image::BitmapData::readWrite:  DataReleaser<Reader, Writer>::initialise (frameBuffer, bitmapData, x, y); break;
             default:                            jassertfalse; break;
         }
+
+        if (mode != Image::BitmapData::readOnly)
+            sendDataChangeMessage();
     }
 
     OpenGLContext& context;

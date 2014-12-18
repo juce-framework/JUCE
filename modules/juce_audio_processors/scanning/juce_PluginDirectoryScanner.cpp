@@ -63,6 +63,7 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
 
 PluginDirectoryScanner::~PluginDirectoryScanner()
 {
+    list.scanFinished();
 }
 
 //==============================================================================
@@ -120,7 +121,7 @@ bool PluginDirectoryScanner::skipNextFile()
 
 void PluginDirectoryScanner::setDeadMansPedalFile (const StringArray& newContents)
 {
-    if (deadMansPedalFile != File::nonexistent)
+    if (deadMansPedalFile.getFullPathName().isNotEmpty())
         deadMansPedalFile.replaceWithText (newContents.joinIntoString ("\n"), true, true);
 }
 

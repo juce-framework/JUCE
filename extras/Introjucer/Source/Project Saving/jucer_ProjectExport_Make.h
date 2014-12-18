@@ -151,7 +151,7 @@ private:
 
     void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  CPPFLAGS := $(DEPFLAGS)";
+        out << "  CPPFLAGS := $(DEPFLAGS) -std=c++11";
         writeDefineFlags (out, config);
         writeHeaderPathFlags (out, config);
         out << newLine;
@@ -230,7 +230,7 @@ private:
         writeHeaderPathFlags (out, config);
         out << newLine;
 
-        String targetName (config.getTargetBinaryNameString());
+        String targetName (replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
         if (projectType.isStaticLibrary() || projectType.isDynamicLibrary())
             targetName = getLibbedFilename (targetName);
@@ -244,7 +244,9 @@ private:
         else
             out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
 
-        out << "endif" << newLine << newLine;
+        out << "  CLEANCMD = rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)" << newLine
+            << "endif" << newLine
+            << newLine;
     }
 
     void writeObjects (OutputStream& out, const Array<RelativePath>& files) const
@@ -291,9 +293,7 @@ private:
 
         out << "clean:" << newLine
             << "\t@echo Cleaning " << projectName << newLine
-            << "\t-@rm -f $(OUTDIR)/$(TARGET)" << newLine
-            << "\t-@rm -rf $(OBJDIR)/*" << newLine
-            << "\t-@rm -rf $(OBJDIR)" << newLine
+            << "\t@$(CLEANCMD)" << newLine
             << newLine;
 
         out << "strip:" << newLine
@@ -311,8 +311,8 @@ private:
                     << ": " << escapeSpaces (files.getReference(i).toUnixStyle()) << newLine
                     << "\t-@mkdir -p $(OBJDIR)" << newLine
                     << "\t@echo \"Compiling " << files.getReference(i).getFileName() << "\"" << newLine
-                    << (files.getReference(i).hasFileExtension (".c") ? "\t@$(CC) $(CFLAGS) -o \"$@\" -c \"$<\""
-                                                                      : "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"")
+                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t@$(CC) $(CFLAGS) -o \"$@\" -c \"$<\""
+                                                                         : "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"")
                     << newLine << newLine;
             }
         }

@@ -39,10 +39,10 @@ struct AudioThumbnail::MinMaxValue
     inline char getMinValue() const noexcept        { return values[0]; }
     inline char getMaxValue() const noexcept        { return values[1]; }
 
-    inline void setFloat (const float newMin, const float newMax) noexcept
+    inline void setFloat (Range<float> newRange) noexcept
     {
-        values[0] = (char) jlimit (-128, 127, roundFloatToInt (newMin * 127.0f));
-        values[1] = (char) jlimit (-128, 127, roundFloatToInt (newMax * 127.0f));
+        values[0] = (char) jlimit (-128, 127, roundFloatToInt (newRange.getStart() * 127.0f));
+        values[1] = (char) jlimit (-128, 127, roundFloatToInt (newRange.getEnd()   * 127.0f));
 
         if (values[0] == values[1])
         {
@@ -115,7 +115,7 @@ public:
         }
     }
 
-    void getLevels (int64 startSample, int numSamples, Array<float>& levels)
+    void getLevels (int64 startSample, int numSamples, Array<Range<float> >& levels)
     {
         const ScopedLock sl (readerLock);
 
@@ -132,11 +132,10 @@ public:
 
         if (reader != nullptr)
         {
-            float l[4] = { 0 };
-            reader->readMaxLevels (startSample, numSamples, l[0], l[1], l[2], l[3]);
+            if (levels.size() < (int) reader->numChannels)
+                levels.insertMultiple (0, Range<float>(), (int) reader->numChannels - levels.size());
 
-            levels.clearQuick();
-            levels.addArray ((const float*) l, 4);
+            reader->readMaxLevels (startSample, numSamples, levels.getRawDataPointer(), (int) reader->numChannels);
 
             lastReaderUseTime = Time::getMillisecondCounter();
         }
@@ -202,8 +201,8 @@ public:
 
 private:
     AudioThumbnail& owner;
-    ScopedPointer <InputSource> source;
-    ScopedPointer <AudioFormatReader> reader;
+    ScopedPointer<InputSource> source;
+    ScopedPointer<AudioFormatReader> reader;
     CriticalSection readerLock;
     uint32 lastReaderUseTime;
 
@@ -230,23 +229,26 @@ private:
                 const int lastThumbIndex  = sampleToThumbSample (startSample + numToDo);
                 const int numThumbSamps = lastThumbIndex - firstThumbIndex;
 
-                HeapBlock<MinMaxValue> levelData ((size_t) numThumbSamps * 2);
-                MinMaxValue* levels[2] = { levelData, levelData + numThumbSamps };
+                HeapBlock<MinMaxValue> levelData ((size_t) numThumbSamps * numChannels);
+                HeapBlock<MinMaxValue*> levels (numChannels);
+
+                for (int i = 0; i < (int) numChannels; ++i)
+                    levels[i] = levelData + i * numThumbSamps;
+
+                HeapBlock<Range<float> > levelsRead (numChannels);
 
                 for (int i = 0; i < numThumbSamps; ++i)
                 {
-                    float lowestLeft, highestLeft, lowestRight, highestRight;
+                    reader->readMaxLevels ((firstThumbIndex + i) * owner.samplesPerThumbSample,
+                                           owner.samplesPerThumbSample, levelsRead, (int) numChannels);
 
-                    reader->readMaxLevels ((firstThumbIndex + i) * owner.samplesPerThumbSample, owner.samplesPerThumbSample,
-                                           lowestLeft, highestLeft, lowestRight, highestRight);
-
-                    levels[0][i].setFloat (lowestLeft, highestLeft);
-                    levels[1][i].setFloat (lowestRight, highestRight);
+                    for (int j = 0; j < (int) numChannels; ++j)
+                        levels[j][i].setFloat (levelsRead[j]);
                 }
 
                 {
                     const ScopedUnlock su (readerLock);
-                    owner.setLevels (levels, firstThumbIndex, 2, numThumbSamps);
+                    owner.setLevels (levels, firstThumbIndex, (int) numChannels, numThumbSamps);
                 }
 
                 numSamplesFinished += numToDo;
@@ -342,7 +344,7 @@ public:
     }
 
 private:
-    Array <MinMaxValue> data;
+    Array<MinMaxValue> data;
     int peakLevel;
 
     void ensureSize (const int thumbSamples)
@@ -391,6 +393,7 @@ public:
                 const MinMaxValue* cacheData = getData (channelNum, clip.getX() - area.getX());
 
                 RectangleList<float> waveform;
+                waveform.ensureStorageAllocated (clip.getWidth());
 
                 float x = (float) clip.getX();
 
@@ -414,7 +417,7 @@ public:
     }
 
 private:
-    Array <MinMaxValue> data;
+    Array<MinMaxValue> data;
     double cachedStart, cachedTimePerPixel;
     int numChannelsCached, numSamplesCached;
     bool cacheNeedsRefilling;
@@ -451,7 +454,7 @@ private:
         if (timePerPixel * rate <= sampsPerThumbSample && levelData != nullptr)
         {
             int sample = roundToInt (startTime * rate);
-            Array<float> levels;
+            Array<Range<float> > levels;
 
             int i;
             for (i = 0; i < numSamples; ++i)
@@ -461,15 +464,19 @@ private:
                 if (sample >= 0)
                 {
                     if (sample >= levelData->lengthInSamples)
-                        break;
+                    {
+                        for (int chan = 0; chan < numChannelsCached; ++chan)
+                            *getData (chan, i) = MinMaxValue();
+                    }
+                    else
+                    {
+                        levelData->getLevels (sample, jmax (1, nextSample - sample), levels);
 
-                    levelData->getLevels (sample, jmax (1, nextSample - sample), levels);
+                        const int totalChans = jmin (levels.size(), numChannelsCached);
 
-                    const int totalChans = jmin (levels.size() / 2, numChannelsCached);
-
-                    for (int chan = 0; chan < totalChans; ++chan)
-                        getData (chan, i)->setFloat (levels.getUnchecked (chan * 2),
-                                                     levels.getUnchecked (chan * 2 + 1));
+                        for (int chan = 0; chan < totalChans; ++chan)
+                            getData (chan, i)->setFloat (levels.getReference (chan));
+                    }
                 }
 
                 startTime += timePerPixel;
@@ -701,16 +708,14 @@ void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer&
 
         for (int chan = 0; chan < numChans; ++chan)
         {
-            const float* const sourceData = incoming.getSampleData (chan, startOffsetInBuffer);
+            const float* const sourceData = incoming.getReadPointer (chan, startOffsetInBuffer);
             MinMaxValue* const dest = thumbData + numToDo * chan;
             thumbChannels [chan] = dest;
 
             for (int i = 0; i < numToDo; ++i)
             {
-                float low, high;
                 const int start = i * samplesPerThumbSample;
-                FloatVectorOperations::findMinAndMax (sourceData + start, jmin (samplesPerThumbSample, numSamples - start), low, high);
-                dest[i].setFloat (low, high);
+                dest[i].setFloat (FloatVectorOperations::findMinAndMax (sourceData + start, jmin (samplesPerThumbSample, numSamples - start)));
             }
         }
 

@@ -359,6 +359,9 @@ public:
             return true;
         }
 
+        // Note that if you're trying to open a file and this method fails, you may
+        // just need to install a suitable codec. It seems that by default DirectShow
+        // doesn't support a very good range of formats.
         release();
         return false;
     }
@@ -527,7 +530,7 @@ private:
         bool isRegistered() const noexcept              { return atom != 0; }
         LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
 
-        juce_DeclareSingleton_SingleThreaded_Minimal (NativeWindowClass);
+        juce_DeclareSingleton_SingleThreaded_Minimal (NativeWindowClass)
 
     private:
         NativeWindowClass()
@@ -721,7 +724,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowContext)
 };
 
-juce_ImplementSingleton_SingleThreaded (DirectShowComponent::DirectShowContext::NativeWindowClass);
+juce_ImplementSingleton_SingleThreaded (DirectShowComponent::DirectShowContext::NativeWindowClass)
 
 
 //======================================================================
@@ -840,7 +843,7 @@ void DirectShowComponent::closeMovie()
         context->release();
 
     videoLoaded = false;
-    videoPath = String::empty;
+    videoPath.clear();
 }
 
 //======================================================================

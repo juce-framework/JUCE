@@ -93,6 +93,17 @@ public:
     /** This callback happens when the browser has finished loading a page. */
     virtual void pageFinishedLoading (const String& url);
 
+    /** This callback occurs when a script or other activity in the browser asks for
+        the window to be closed.
+    */
+    virtual void windowCloseRequest();
+
+    /** This callback occurs when the browser attempts to load a URL in a new window.
+        This won't actually load the window but gives you a chance to either launch a
+        new window yourself or just load the URL into the current window with goToURL().
+     */
+    virtual void newWindowAttemptingToLoad (const String& newURL);
+
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
@@ -102,6 +113,8 @@ public:
     void parentHierarchyChanged() override;
     /** @internal */
     void visibilityChanged() override;
+    /** @internal */
+    void focusGained (FocusChangeType) override;
 
 private:
     //==============================================================================

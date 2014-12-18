@@ -193,7 +193,7 @@ void PropertyPanel::init()
 {
     messageWhenEmpty = TRANS("(nothing selected)");
 
-    addAndMakeVisible (&viewport);
+    addAndMakeVisible (viewport);
     viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());
     viewport.setFocusContainer (true);
 }

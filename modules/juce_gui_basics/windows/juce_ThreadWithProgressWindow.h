@@ -96,7 +96,7 @@ public:
                                         the thread to stop before killing it forcibly (see
                                         Thread::stopThread() )
         @param cancelButtonText         the text that should be shown in the cancel button
-                                        (if it has one)
+                                        (if it has one). Leave this empty for the default "Cancel"
         @param componentToCentreAround  if this is non-null, the window will be positioned
                                         so that it's centred around this component.
     */
@@ -104,13 +104,14 @@ public:
                               bool hasProgressBar,
                               bool hasCancelButton,
                               int timeOutMsWhenCancelling = 10000,
-                              const String& cancelButtonText = "Cancel",
+                              const String& cancelButtonText = String(),
                               Component* componentToCentreAround = nullptr);
 
     /** Destructor. */
     ~ThreadWithProgressWindow();
 
     //==============================================================================
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Starts the thread and waits for it to finish.
 
         This will start the thread, make the dialog box appear, and wait until either
@@ -123,6 +124,18 @@ public:
         @returns true if the thread finished normally; false if the user pressed cancel
     */
     bool runThread (int threadPriority = 5);
+   #endif
+
+    /** Starts the thread and returns.
+
+        This will start the thread and make the dialog box appear in a modal state. When
+        the thread finishes normally, or the cancel button is pressed, the window will be
+        hidden and the threadComplete() method will be called.
+
+        @param threadPriority   the priority to use when starting the thread - see
+                                Thread::startThread() for values
+    */
+    void launchThread (int threadPriority = 5);
 
     /** The thread should call this periodically to update the position of the progress bar.
 
@@ -137,15 +150,22 @@ public:
     /** Returns the AlertWindow that is being used. */
     AlertWindow* getAlertWindow() const noexcept        { return alertWindow; }
 
+    //==============================================================================
+    /** This method is called (on the message thread) when the operation has finished.
+        You may choose to use this callback to delete the ThreadWithProgressWindow object.
+    */
+    virtual void threadComplete (bool userPressedCancel);
+
 private:
     //==============================================================================
     void timerCallback() override;
 
     double progress;
-    ScopedPointer <AlertWindow> alertWindow;
+    ScopedPointer<AlertWindow> alertWindow;
     String message;
     CriticalSection messageLock;
     const int timeOutMsWhenCancelling;
+    bool wasCancelledByUser;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow)
 };

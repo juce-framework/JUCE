@@ -74,7 +74,7 @@ ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
 ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
                                                   const String& name,
                                                   const StringArray& choiceList,
-                                                  const Array <var>& correspondingValues)
+                                                  const Array<var>& correspondingValues)
     : PropertyComponent (name),
       choices (choiceList),
       isCustomClass (false)
@@ -96,7 +96,7 @@ ChoicePropertyComponent::~ChoicePropertyComponent()
 //==============================================================================
 void ChoicePropertyComponent::createComboBox()
 {
-    addAndMakeVisible (&comboBox);
+    addAndMakeVisible (comboBox);
 
     for (int i = 0; i < choices.size(); ++i)
     {

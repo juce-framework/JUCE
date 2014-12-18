@@ -69,17 +69,26 @@ public:
 
     String getStringFromDISPID (const DISPID hash) const
     {
-        for (int i = identifierPool.size(); --i >= 0;)
-            if (getHashFromString (identifierPool[i]) == hash)
-                return identifierPool[i];
+        return identifierNames [identifierIDs.indexOf (hash)];
+    }
 
-        return String::empty;
+    DISPID getDISPIDForName (const String& name)
+    {
+        const int i = identifierNames.indexOf (String (name));
+
+        if (i >= 0)
+            return identifierIDs[i];
+
+        const DISPID newID = (DISPID) name.hashCode64();
+        identifierNames.add (name);
+        identifierIDs.add (newID);
+        return newID;
     }
 
     HRESULT doGetIDsOfNames (LPOLESTR* rgszNames, UINT cNames, DISPID* rgDispId)
     {
         for (unsigned int i = 0; i < cNames; ++i)
-            rgDispId[i] = getHashFromString (identifierPool.getPooledString (String (rgszNames[i])));
+            rgDispId[i] = getDISPIDForName (rgszNames[i]);
 
         return S_OK;
     }
@@ -97,36 +106,33 @@ public:
 
         if ((wFlags & DISPATCH_METHOD) != 0)
         {
-            if (! object->hasMethod (memberId))
-                return DISP_E_MEMBERNOTFOUND;
-
-            const int numArgs = pDispParams == nullptr ? 0 : pDispParams->cArgs;
-            var result;
-
-            if (numArgs == 0)
+            if (object->hasMethod (memberId))
             {
-                result = v.call (memberId);
+                const int numArgs = pDispParams == nullptr ? 0 : pDispParams->cArgs;
+                var result;
+
+                if (numArgs == 0)
+                {
+                    result = v.call (memberId);
+                }
+                else
+                {
+                    Array<var> args;
+                    for (int j = numArgs; --j >= 0;)
+                        args.add (variantTojuceVar (pDispParams->rgvarg[j]));
+
+                    result = v.invoke (memberId, numArgs == 0 ? nullptr : args.getRawDataPointer(), numArgs);
+                }
+
+                if (pVarResult != nullptr)
+                    juceVarToVariant (result, *pVarResult);
+
+                return S_OK;
             }
-            else
-            {
-                Array<var> args;
-                for (int j = numArgs; --j >= 0;)
-                    args.add (variantTojuceVar (pDispParams->rgvarg[j]));
-
-                result = v.invoke (memberId, numArgs == 0 ? 0 : args.getRawDataPointer(), numArgs);
-            }
-
-            if (pVarResult != nullptr)
-                juceVarToVariant (result, *pVarResult);
-
-            return S_OK;
         }
         else if ((wFlags & DISPATCH_PROPERTYGET) != 0)
         {
-            if (! object->hasProperty (memberId))
-                return DISP_E_MEMBERNOTFOUND;
-
-            if (pVarResult != nullptr)
+            if (object->hasProperty (memberId) && pVarResult != nullptr)
             {
                 juceVarToVariant (object->getProperty (memberId), *pVarResult);
                 return S_OK;
@@ -145,12 +151,8 @@ public:
     }
 
 private:
-    StringPool identifierPool;
-
-    static DISPID getHashFromString (const String::CharPointerType s) noexcept
-    {
-        return (DISPID) (pointer_sized_int) s.getAddress();
-    }
+    Array<DISPID> identifierIDs;
+    StringArray identifierNames;
 
     JUCE_DECLARE_NON_COPYABLE (IDispatchHelper)
 };
@@ -252,7 +254,7 @@ public:
             }
         }
 
-        return var::null;
+        return var();
     }
 
     bool hasProperty (const Identifier& propertyName) const override
@@ -297,7 +299,7 @@ public:
 
     void removeProperty (const Identifier& propertyName) override
     {
-        setProperty (propertyName, var::null);
+        setProperty (propertyName, var());
     }
 
     bool hasMethod (const Identifier& methodName) const override
@@ -401,7 +403,7 @@ var variantTojuceVar (const VARIANT& v)
         switch (v.vt & ~VT_BYREF)
         {
             case VT_VOID:
-            case VT_EMPTY:      return var::null;
+            case VT_EMPTY:      return var();
             case VT_I1:         return var ((int) v.cVal);
             case VT_I2:         return var ((int) v.iVal);
             case VT_I4:         return var ((int) v.lVal);
@@ -421,7 +423,7 @@ var variantTojuceVar (const VARIANT& v)
         }
     }
 
-    return var::null;
+    return var();
 }
 
 //==============================================================================
@@ -785,8 +787,10 @@ private:
 //==============================================================================
 String getActiveXBrowserURL (const BrowserPluginComponent* comp)
 {
-    AXBrowserPluginHolderComponent* const ax = dynamic_cast <AXBrowserPluginHolderComponent*> (comp->getParentComponent());
-    return ax != nullptr ? ax->getBrowserURL() : String::empty;
+    if (AXBrowserPluginHolderComponent* ax = dynamic_cast<AXBrowserPluginHolderComponent*> (comp->getParentComponent()))
+        return ax->getBrowserURL();
+
+    return String();
 }
 
 //==============================================================================
@@ -803,7 +807,7 @@ extern "C" BOOL WINAPI DllMain (HANDLE instance, DWORD reason, LPVOID)
 
     case DLL_PROCESS_DETACH:
         log ("DLL_PROCESS_DETACH");
-        browserVersionDesc = String::empty;
+        browserVersionDesc.clear();
 
         // IE has a tendency to leak our objects, so although none of this should be
         // necessary, it's best to make sure..

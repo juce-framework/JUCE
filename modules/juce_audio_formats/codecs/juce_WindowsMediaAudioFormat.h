@@ -40,6 +40,7 @@ public:
     Array<int> getPossibleBitDepths() override;
     bool canDoStereo() override;
     bool canDoMono() override;
+    bool isCompressed() override;
 
     //==============================================================================
     AudioFormatReader* createReaderFor (InputStream*, bool deleteStreamIfOpeningFails) override;

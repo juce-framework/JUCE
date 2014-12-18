@@ -46,17 +46,17 @@ void WebBrowserComponent::goToURL (const String& url,
 {
     lastURL = url;
 
-    lastHeaders.clear();
     if (headers != nullptr)
         lastHeaders = *headers;
+    else
+        lastHeaders.clear();
 
-    lastPostData.setSize (0);
     if (postData != nullptr)
         lastPostData = *postData;
+    else
+        lastPostData.reset();
 
     blankPageShown = false;
-
-
 }
 
 void WebBrowserComponent::stop()
@@ -65,14 +65,14 @@ void WebBrowserComponent::stop()
 
 void WebBrowserComponent::goBack()
 {
-    lastURL = String::empty;
+    lastURL.clear();
     blankPageShown = false;
 
 }
 
 void WebBrowserComponent::goForward()
 {
-    lastURL = String::empty;
+    lastURL.clear();
 
 }
 
@@ -95,7 +95,7 @@ void WebBrowserComponent::reloadLastURL()
     if (lastURL.isNotEmpty())
     {
         goToURL (lastURL, &lastHeaders, &lastPostData);
-        lastURL = String::empty;
+        lastURL.clear();
     }
 }
 
@@ -113,5 +113,6 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
-void WebBrowserComponent::pageFinishedLoading (const String&) {}
+void WebBrowserComponent::focusGained (FocusChangeType)
+{
+}

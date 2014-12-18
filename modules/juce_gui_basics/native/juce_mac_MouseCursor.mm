@@ -52,15 +52,20 @@ namespace MouseCursorHelpers
 
     static void* fromWebKitFile (const char* filename, float hx, float hy)
     {
-        FileInputStream fileStream (File ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources").getChildFile (filename));
-        BufferedInputStream buf (fileStream, 4096);
+        FileInputStream fileStream (File ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources")
+                                        .getChildFile (filename));
 
-        PNGImageFormat pngFormat;
-        Image im (pngFormat.decodeImage (buf));
+        if (fileStream.openedOk())
+        {
+            BufferedInputStream buf (fileStream, 4096);
 
-        if (im.isValid())
-            return CustomMouseCursorInfo (im, (int) (hx * im.getWidth()),
-                                              (int) (hy * im.getHeight())).create();
+            PNGImageFormat pngFormat;
+            Image im (pngFormat.decodeImage (buf));
+
+            if (im.isValid())
+                return CustomMouseCursorInfo (im, (int) (hx * im.getWidth()),
+                                                  (int) (hy * im.getHeight())).create();
+        }
 
         return nullptr;
     }
@@ -90,7 +95,6 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
             case IBeamCursor:           c = [NSCursor IBeamCursor]; break;
             case PointingHandCursor:    c = [NSCursor pointingHandCursor]; break;
-            case LeftRightResizeCursor: c = [NSCursor resizeLeftRightCursor]; break;
             case LeftEdgeResizeCursor:  c = [NSCursor resizeLeftCursor]; break;
             case RightEdgeResizeCursor: c = [NSCursor resizeRightCursor]; break;
             case CrosshairCursor:       c = [NSCursor crosshairCursor]; break;
@@ -109,6 +113,13 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case TopEdgeResizeCursor:
             case BottomEdgeResizeCursor:
                 return MouseCursorHelpers::fromWebKitFile ("northSouthResizeCursor.png", 0.5f, 0.5f);
+
+            case LeftRightResizeCursor:
+                if (void* m = MouseCursorHelpers::fromWebKitFile ("eastWestResizeCursor.png", 0.5f, 0.5f))
+                    return m;
+
+                c = [NSCursor resizeLeftRightCursor];
+                break;
 
             case TopLeftCornerResizeCursor:
             case BottomRightCornerResizeCursor:

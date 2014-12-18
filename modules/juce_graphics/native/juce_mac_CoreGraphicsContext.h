@@ -84,7 +84,7 @@ private:
     struct SavedState
     {
         SavedState();
-        SavedState (const SavedState& other);
+        SavedState (const SavedState&);
         ~SavedState();
 
         void setFill (const FillType& newFill);

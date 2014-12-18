@@ -230,6 +230,7 @@ LibraryModule::LibraryModule (const ModuleDescription& d)
 
 bool LibraryModule::isAUPluginHost (const Project& project) const   { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_AU"); }
 bool LibraryModule::isVSTPluginHost (const Project& project) const  { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"); }
+bool LibraryModule::isVST3PluginHost (const Project& project) const { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3"); }
 
 File LibraryModule::getModuleHeaderFile (const File& folder) const
 {
@@ -345,11 +346,11 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
         findAndAddCompiledCode (exporter, projectSaver, localModuleFolder, compiled);
 
         if (project.getModules().shouldShowAllModuleFilesInProject (getID()).getValue())
-            addBrowsableCode (exporter, projectSaver, compiled, moduleInfo.getFolder());
+            addBrowsableCode (exporter, projectSaver, compiled, localModuleFolder);
     }
 
-    if (isVSTPluginHost (project))
-        VSTHelpers::addVSTFolderToPath (exporter, exporter.extraSearchPaths);
+    if (isVSTPluginHost (project))  VSTHelpers::addVSTFolderToPath (exporter, false);
+    if (isVST3PluginHost (project)) VSTHelpers::addVSTFolderToPath (exporter, true);
 
     if (exporter.isXcode())
     {
@@ -357,12 +358,12 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
             exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
 
         const String frameworks (moduleInfo.moduleInfo [exporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
-        exporter.xcodeFrameworks.addTokens (frameworks, ", ", String::empty);
+        exporter.xcodeFrameworks.addTokens (frameworks, ", ", StringRef());
     }
     else if (exporter.isLinux())
     {
         const String libs (moduleInfo.moduleInfo ["LinuxLibs"].toString());
-        exporter.linuxLibs.addTokens (libs, ", ", String::empty);
+        exporter.linuxLibs.addTokens (libs, ", ", StringRef());
         exporter.linuxLibs.trim();
         exporter.linuxLibs.sort (false);
         exporter.linuxLibs.removeDuplicates (false);
@@ -370,7 +371,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
     else if (exporter.isCodeBlocks())
     {
         const String libs (moduleInfo.moduleInfo ["mingwLibs"].toString());
-        exporter.mingwLibs.addTokens (libs, ", ", String::empty);
+        exporter.mingwLibs.addTokens (libs, ", ", StringRef());
         exporter.mingwLibs.trim();
         exporter.mingwLibs.sort (false);
         exporter.mingwLibs.removeDuplicates (false);
@@ -378,7 +379,8 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
     if (moduleInfo.isPluginClient())
     {
-        if (shouldBuildVST  (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver);
+        if (shouldBuildVST  (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver, false);
+        if (shouldBuildVST3 (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver, true);
         if (shouldBuildAU   (project).getValue())  AUHelpers::prepareExporter (exporter, projectSaver);
         if (shouldBuildAAX  (project).getValue())  AAXHelpers::prepareExporter (exporter, projectSaver);
         if (shouldBuildRTAS (project).getValue())  RTASHelpers::prepareExporter (exporter, projectSaver);
@@ -389,11 +391,16 @@ void LibraryModule::createPropertyEditors (ProjectExporter& exporter, PropertyLi
 {
     if (isVSTPluginHost (exporter.getProject())
          && ! (moduleInfo.isPluginClient() && shouldBuildVST  (exporter.getProject()).getValue()))
-        VSTHelpers::createVSTPathEditor (exporter, props);
+        VSTHelpers::createVSTPathEditor (exporter, props, false);
+
+    if (isVST3PluginHost (exporter.getProject())
+         && ! (moduleInfo.isPluginClient() && shouldBuildVST3  (exporter.getProject()).getValue()))
+        VSTHelpers::createVSTPathEditor (exporter, props, true);
 
     if (moduleInfo.isPluginClient())
     {
-        if (shouldBuildVST  (exporter.getProject()).getValue())  VSTHelpers::createPropertyEditors (exporter, props);
+        if (shouldBuildVST  (exporter.getProject()).getValue())  VSTHelpers::createPropertyEditors (exporter, props, false);
+        if (shouldBuildVST3 (exporter.getProject()).getValue())  VSTHelpers::createPropertyEditors (exporter, props, true);
         if (shouldBuildRTAS (exporter.getProject()).getValue())  RTASHelpers::createPropertyEditors (exporter, props);
         if (shouldBuildAAX  (exporter.getProject()).getValue())  AAXHelpers::createPropertyEditors (exporter, props);
     }
@@ -460,21 +467,11 @@ static bool exporterTargetMatches (const String& test, String target)
     return false;
 }
 
-bool LibraryModule::fileTargetMatches (ProjectExporter& exporter, const String& target)
-{
-    if (exporter.isXcode())         return exporterTargetMatches ("xcode", target);
-    if (exporter.isWindows())       return exporterTargetMatches ("msvc", target);
-    if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
-    if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
-    if (exporter.isCodeBlocks())    return exporterTargetMatches ("mingw", target);
-    return target.isEmpty();
-}
-
 struct FileSorter
 {
     static int compareElements (const File& f1, const File& f2)
     {
-        return f1.getFileName().compareIgnoreCase (f2.getFileName());
+        return f1.getFileName().compareNatural (f2.getFileName());
     }
 };
 
@@ -496,6 +493,30 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
     result.addArray (tempList);
 }
 
+static bool fileTargetMatches (ProjectExporter& exporter, const String& target)
+{
+    if (exporter.isXcode())         return exporterTargetMatches ("xcode", target);
+    if (exporter.isWindows())       return exporterTargetMatches ("msvc", target);
+    if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
+    if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
+    if (exporter.isCodeBlocks())    return exporterTargetMatches ("mingw", target);
+    return target.isEmpty();
+}
+
+static bool fileShouldBeAdded (ProjectExporter& exporter, const var& properties)
+{
+    if (! fileTargetMatches (exporter, properties["target"].toString()))
+        return false;
+
+    if (properties["RTASOnly"] && ! shouldBuildRTAS (exporter.getProject()).getValue())
+        return false;
+
+    if (properties["AudioUnitOnly"] && ! shouldBuildAU (exporter.getProject()).getValue())
+        return false;
+
+    return true;
+}
+
 void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver,
                                             const File& localModuleFolder, Array<File>& result) const
 {
@@ -508,8 +529,7 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
             const var& file = files->getReference(i);
             const String filename (file ["file"].toString());
 
-            if (filename.isNotEmpty()
-                 && fileTargetMatches (exporter, file ["target"].toString()))
+            if (filename.isNotEmpty() && fileShouldBeAdded (exporter, file))
             {
                 const File compiledFile (localModuleFolder.getChildFile (filename));
                 result.add (compiledFile);
@@ -874,4 +894,14 @@ void EnabledModuleList::addModuleOfferingToCopy (const File& f)
     }
 
     addModule (m.manifestFile, areMostModulesCopiedLocally());
+}
+
+bool isJuceFolder (const File& f)
+{
+    return isJuceModulesFolder (f.getChildFile ("modules"));
+}
+
+bool isJuceModulesFolder (const File& f)
+{
+    return f.isDirectory() && f.getChildFile ("juce_core").isDirectory();
 }

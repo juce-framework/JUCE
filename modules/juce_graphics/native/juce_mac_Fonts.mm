@@ -488,6 +488,7 @@ public:
           ctFontRef (nullptr),
           fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
+          isMemoryFont (false),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
@@ -496,26 +497,72 @@ public:
 
         if (ctFontRef != nullptr)
         {
-            const float ctAscent  = std::abs ((float) CTFontGetAscent (ctFontRef));
-            const float ctDescent = std::abs ((float) CTFontGetDescent (ctFontRef));
-            const float ctTotalHeight = ctAscent + ctDescent;
-
-            ascent = ctAscent / ctTotalHeight;
-            unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
-            pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
-
             fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
-            fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
-
-            const short zero = 0;
-            CFNumberRef numberRef = CFNumberCreate (0, kCFNumberShortType, &zero);
-
-            CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
-            CFTypeRef values[] = { ctFontRef, numberRef };
-            attributedStringAtts = CFDictionaryCreate (nullptr, (const void**) &keys, (const void**) &values, numElementsInArray (keys),
-                                                       &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-            CFRelease (numberRef);
+            initialiseMetrics();
         }
+    }
+
+    OSXTypeface (const void* data, size_t dataSize)
+        : Typeface (String(), String()),
+          fontRef (nullptr),
+          ctFontRef (nullptr),
+          fontHeightToPointsFactor (1.0f),
+          renderingTransform (CGAffineTransformIdentity),
+          isMemoryFont (true),
+          attributedStringAtts (nullptr),
+          ascent (0.0f),
+          unitsToHeightScaleFactor (0.0f)
+    {
+        CFDataRef cfData = CFDataCreate (kCFAllocatorDefault, (const UInt8*) data, (CFIndex) dataSize);
+        CGDataProviderRef provider = CGDataProviderCreateWithCFData (cfData);
+        CFRelease (cfData);
+
+        fontRef = CGFontCreateWithDataProvider (provider);
+        CGDataProviderRelease (provider);
+
+        if (fontRef != nullptr)
+        {
+            ctFontRef = CTFontCreateWithGraphicsFont (fontRef, referenceFontSize, nullptr, nullptr);
+
+            if (ctFontRef != nullptr)
+            {
+                if (CFStringRef fontName = CTFontCopyName (ctFontRef, kCTFontFamilyNameKey))
+                {
+                    name = String::fromCFString (fontName);
+                    CFRelease (fontName);
+                }
+
+                if (CFStringRef fontStyle = CTFontCopyName (ctFontRef, kCTFontStyleNameKey))
+                {
+                    style = String::fromCFString (fontStyle);
+                    CFRelease (fontStyle);
+                }
+
+                initialiseMetrics();
+            }
+        }
+    }
+
+    void initialiseMetrics()
+    {
+        const float ctAscent  = std::abs ((float) CTFontGetAscent (ctFontRef));
+        const float ctDescent = std::abs ((float) CTFontGetDescent (ctFontRef));
+        const float ctTotalHeight = ctAscent + ctDescent;
+
+        ascent = ctAscent / ctTotalHeight;
+        unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
+        pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+
+        fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
+
+        const short zero = 0;
+        CFNumberRef numberRef = CFNumberCreate (0, kCFNumberShortType, &zero);
+
+        CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
+        CFTypeRef values[] = { ctFontRef, numberRef };
+        attributedStringAtts = CFDictionaryCreate (nullptr, (const void**) &keys, (const void**) &values, numElementsInArray (keys),
+                                                   &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        CFRelease (numberRef);
     }
 
     ~OSXTypeface()
@@ -530,11 +577,11 @@ public:
             CFRelease (ctFontRef);
     }
 
-    float getAscent() const                 { return ascent; }
-    float getDescent() const                { return 1.0f - ascent; }
-    float getHeightToPointsFactor() const   { return fontHeightToPointsFactor; }
+    float getAscent() const override                 { return ascent; }
+    float getDescent() const override                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const override   { return fontHeightToPointsFactor; }
 
-    float getStringWidth (const String& text)
+    float getStringWidth (const String& text) override
     {
         float x = 0;
 
@@ -567,7 +614,7 @@ public:
         return x;
     }
 
-    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets)
+    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets) override
     {
         xOffsets.add (0);
 
@@ -603,18 +650,7 @@ public:
         }
     }
 
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
-    {
-        Path path;
-
-        if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
-            return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                                  path, transform);
-
-        return nullptr;
-    }
-
-    bool getOutlineForGlyph (int glyphNumber, Path& path)
+    bool getOutlineForGlyph (int glyphNumber, Path& path) override
     {
         jassert (path.isEmpty());  // we might need to apply a transform to the path, so this must be empty
 
@@ -637,6 +673,8 @@ public:
 
     float fontHeightToPointsFactor;
     CGAffineTransform renderingTransform;
+
+    bool isMemoryFont;
 
 private:
     CFDictionaryRef attributedStringAtts;
@@ -667,12 +705,11 @@ private:
 
 CTFontRef getCTFontFromTypeface (const Font& f)
 {
-    if (OSXTypeface* tf = dynamic_cast <OSXTypeface*> (f.getTypeface()))
+    if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (f.getTypeface()))
         return tf->ctFontRef;
 
     return 0;
 }
-
 
 StringArray Font::findAllTypefaceNames()
 {
@@ -730,7 +767,7 @@ StringArray Font::findAllTypefaceStyles (const String& family)
     CTFontDescriptorRef ctFontDescRef = CTFontDescriptorCreateWithAttributes (fontDescAttributes);
     CFRelease (fontDescAttributes);
 
-    CFArrayRef fontFamilyArray = CFArrayCreate(kCFAllocatorDefault, (const void**) &ctFontDescRef, 1, &kCFTypeArrayCallBacks);
+    CFArrayRef fontFamilyArray = CFArrayCreate (kCFAllocatorDefault, (const void**) &ctFontDescRef, 1, &kCFTypeArrayCallBacks);
     CFRelease (ctFontDescRef);
 
     CTFontCollectionRef fontCollectionRef = CTFontCollectionCreateWithFontDescriptors (fontFamilyArray, nullptr);
@@ -861,11 +898,11 @@ public:
    #endif
 
 
-    float getAscent() const                 { return ascent; }
-    float getDescent() const                { return 1.0f - ascent; }
-    float getHeightToPointsFactor() const   { return fontHeightToPointsFactor; }
+    float getAscent() const override                 { return ascent; }
+    float getDescent() const override                { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const override   { return fontHeightToPointsFactor; }
 
-    float getStringWidth (const String& text)
+    float getStringWidth (const String& text) override
     {
         if (fontRef == 0 || text.isEmpty())
             return 0;
@@ -878,7 +915,7 @@ public:
 
 #if SUPPORT_ONLY_10_4_FONTS
         HeapBlock <NSSize> advances (length);
-        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast <NSGlyph*> (glyphs.getData()) count: length];
+        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast<NSGlyph*> (glyphs.getData()) count: length];
 
         for (int i = 0; i < length; ++i)
             x += advances[i].width;
@@ -906,7 +943,7 @@ public:
         return x * unitsToHeightScaleFactor;
     }
 
-    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets)
+    void getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets) override
     {
         xOffsets.add (0);
 
@@ -964,18 +1001,7 @@ public:
 #endif
     }
 
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
-    {
-        Path path;
-
-        if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
-            return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                                  path, transform);
-
-        return nullptr;
-    }
-
-    bool getOutlineForGlyph (int glyphNumber, Path& path)
+    bool getOutlineForGlyph (int glyphNumber, Path& path) override
     {
        #if JUCE_IOS
         return false;
@@ -1129,8 +1155,8 @@ private:
 
                     if (rangeOffset == 0)
                         return delta + c;
-                    else
-                        return getValue16 (glyphIndexes, 2 * ((rangeOffset / 2) + (c - start) - (segCount - i)));
+
+                    return getValue16 (glyphIndexes, 2 * ((rangeOffset / 2) + (c - start) - (segCount - i)));
                 }
             }
 
@@ -1202,6 +1228,16 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new OSXTypeface (font);
 }
 
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
+{
+   #if JUCE_CORETEXT_AVAILABLE
+    return new OSXTypeface (data, dataSize);
+   #else
+    jassertfalse; // You need CoreText enabled to use this feature!
+    return nullptr;
+   #endif
+}
+
 void Typeface::scanFolderForFonts (const File&)
 {
     jassertfalse; // not implemented on this platform
@@ -1243,13 +1279,43 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     return Typeface::createSystemTypefaceFor (newFont);
 }
 
+#if JUCE_CORETEXT_AVAILABLE
+static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
+{
+    const int numCharacterAttributes = text.getNumAttributes();
+
+    for (int i = 0; i < numCharacterAttributes; ++i)
+    {
+        if (const Font* const f = text.getAttribute (i)->getFont())
+        {
+            if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (f->getTypeface()))
+            {
+                if (tf->isMemoryFont)
+                    return false;
+            }
+            else if (dynamic_cast<CustomTypeface*> (f->getTypeface()) != nullptr)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+#endif
+
 bool TextLayout::createNativeLayout (const AttributedString& text)
 {
    #if JUCE_CORETEXT_AVAILABLE
-    CoreTextTypeLayout::createLayout (*this, text);
-    return true;
-   #else
+    // Seems to be an unfathomable bug in CoreText which prevents the layout working with
+    // typefaces that were loaded from memory, so have to fallback if we hit any of those..
+    if (canAllTypefacesBeUsedInLayout (text))
+    {
+        CoreTextTypeLayout::createLayout (*this, text);
+        return true;
+    }
+   #endif
+
     (void) text;
     return false;
-   #endif
 }

@@ -28,13 +28,13 @@ ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& tbf, Toolbar& bar)
     Component* const itemHolder = new Component();
     viewport.setViewedComponent (itemHolder);
 
-    Array <int> allIds;
+    Array<int> allIds;
     factory.getAllToolbarItemIds (allIds);
 
     for (int i = 0; i < allIds.size(); ++i)
         addComponent (allIds.getUnchecked (i), -1);
 
-    addAndMakeVisible (&viewport);
+    addAndMakeVisible (viewport);
 }
 
 ToolbarItemPalette::~ToolbarItemPalette()
