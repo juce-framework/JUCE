@@ -411,7 +411,7 @@ public:
         The component returned will have been created using createRowComponent().
 
         If the component for this row is off-screen or if the row is out-of-range,
-        this will return 0.
+        this will return nullptr.
 
         @see getRowContainingPosition
     */
@@ -471,7 +471,6 @@ public:
     void setOutlineThickness (int outlineThickness);
 
     /** Returns the thickness of outline that will be drawn around the listbox.
-
         @see setOutlineColour
     */
     int getOutlineThickness() const noexcept            { return outlineThickness; }
@@ -486,6 +485,9 @@ public:
         different component, or when the listbox is deleted.
     */
     void setHeaderComponent (Component* newHeaderComponent);
+
+    /** Returns whatever header component was set with setHeaderComponent(). */
+    Component* getHeaderComponent() const noexcept      { return headerComponent; }
 
     /** Changes the width of the rows in the list.
 
