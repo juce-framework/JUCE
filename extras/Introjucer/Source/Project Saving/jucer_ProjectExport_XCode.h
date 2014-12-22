@@ -287,6 +287,11 @@ private:
         return path;
     }
 
+    static String addQuotesIfContainsSpace (const String& s)
+    {
+        return s.containsChar (' ') ? s.quoted() : s;
+    }
+
     File getProjectBundle() const                 { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (".xcodeproj"); }
 
     //==============================================================================
@@ -754,8 +759,8 @@ private:
             RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
             binaryPath = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder);
 
-            s.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
-            s.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
+            s.add ("DSTROOT = " + addQuotesIfContainsSpace (sanitisePath (binaryPath.toUnixStyle())));
+            s.add ("SYMROOT = " + addQuotesIfContainsSpace (sanitisePath (binaryPath.toUnixStyle())));
         }
         else
         {
