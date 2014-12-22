@@ -1583,8 +1583,8 @@ public:
       : module (handle),
         numInputAudioBusses (0),
         numOutputAudioBusses (0),
-        inputParameterChanges (new ParameterChangeList()),
-        outputParameterChanges (new ParameterChangeList()),
+        inputParameterChanges (new ParamValueQueueList()),
+        outputParameterChanges (new ParamValueQueueList()),
         midiInputs (new MidiEventList()),
         midiOutputs (new MidiEventList()),
         isComponentInitialised (false),
@@ -1798,6 +1798,8 @@ public:
             processor->process (data);
 
             MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
+
+            inputParameterChanges->clearAllQueues();
         }
     }
 
@@ -1928,8 +1930,11 @@ public:
     {
         if (editController != nullptr)
         {
-            const uint32 id = getParameterInfoForIndex (parameterIndex).id;
-            editController->setParamNormalized (id, (double) newValue);
+            const uint32 paramID = getParameterInfoForIndex (parameterIndex).id;
+            editController->setParamNormalized (paramID, (double) newValue);
+
+            Steinberg::int32 index;
+            inputParameterChanges->addParameterData (paramID, index)->addPoint (0, newValue, index);
         }
     }
 
@@ -2007,11 +2012,11 @@ public:
     //==============================================================================
     // NB: this class and its subclasses must be public to avoid problems in
     // DLL builds under MSVC.
-    class ParameterChangeList  : public Vst::IParameterChanges
+    class ParamValueQueueList  : public Vst::IParameterChanges
     {
     public:
-        ParameterChangeList() {}
-        virtual ~ParameterChangeList() {}
+        ParamValueQueueList() {}
+        virtual ~ParamValueQueueList() {}
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -2030,9 +2035,14 @@ public:
                 }
             }
 
-            ParamValueQueue* q = queues.add (new ParamValueQueue (id));
-            index = getParameterCount() - 1;
-            return q;
+            index = getParameterCount();
+            return queues.add (new ParamValueQueue (id));
+        }
+
+        void clearAllQueues() noexcept
+        {
+            for (int i = queues.size(); --i >= 0;)
+                queues.getUnchecked (i)->clear();
         }
 
         struct ParamValueQueue  : public Vst::IParamValueQueue
@@ -2054,6 +2064,8 @@ public:
                                                     Steinberg::int32& sampleOffset,
                                                     Steinberg::Vst::ParamValue& value) override
             {
+                const ScopedLock sl (pointLock);
+
                 if (isPositiveAndBelow ((int) index, points.size()))
                 {
                     ParamPoint e (points.getUnchecked ((int) index));
@@ -2071,11 +2083,18 @@ public:
                                                     Steinberg::Vst::ParamValue value,
                                                     Steinberg::int32& index) override
             {
-                // XXX this may need to be made thread-safe..
                 ParamPoint p = { sampleOffset, value };
-                points.add (p);
+
+                const ScopedLock sl (pointLock);
                 index = (Steinberg::int32) points.size();
+                points.add (p);
                 return kResultTrue;
+            }
+
+            void clear() noexcept
+            {
+                const ScopedLock sl (pointLock);
+                points.clearQuick();
             }
 
         private:
@@ -2088,6 +2107,7 @@ public:
             Atomic<int> refCount;
             const Vst::ParamID paramID;
             Array<ParamPoint> points;
+            CriticalSection pointLock;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueue)
         };
@@ -2095,7 +2115,7 @@ public:
         Atomic<int> refCount;
         OwnedArray<ParamValueQueue> queues;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterChangeList)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueueList)
     };
 
 private:
@@ -2168,7 +2188,7 @@ private:
         return stream;
     }
 
-    ComSmartPtr<ParameterChangeList> inputParameterChanges, outputParameterChanges;
+    ComSmartPtr<ParamValueQueueList> inputParameterChanges, outputParameterChanges;
     ComSmartPtr<MidiEventList> midiInputs, midiOutputs;
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
     bool isComponentInitialised, isControllerInitialised, isActive;
