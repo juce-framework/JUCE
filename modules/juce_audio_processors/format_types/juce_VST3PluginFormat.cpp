@@ -810,47 +810,26 @@ private:
         //==============================================================================
         tresult PLUGIN_API setInt (AttrID id, Steinberg::int64 value) override
         {
-            jassert (id != nullptr);
-
-            if (! setValueForId (id, value))
-                owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, value)));
-
+            addMessageToQueue (id, value);
             return kResultTrue;
         }
 
         tresult PLUGIN_API setFloat (AttrID id, double value) override
         {
-            jassert (id != nullptr);
-
-            if (! setValueForId (id, value))
-                owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, value)));
-
+            addMessageToQueue (id, value);
             return kResultTrue;
         }
 
         tresult PLUGIN_API setString (AttrID id, const Vst::TChar* string) override
         {
-            jassert (id != nullptr);
-            jassert (string != nullptr);
-
-            const String text (toString (string));
-
-            if (! setValueForId (id, text))
-                owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, text)));
-
+            addMessageToQueue (id, toString (string));
             return kResultTrue;
         }
 
         tresult PLUGIN_API setBinary (AttrID id, const void* data, Steinberg::uint32 size) override
         {
-            jassert (id != nullptr);
-            jassert (data != nullptr && size > 0);
-
-            MemoryBlock block (data, (size_t) size);
-
-            if (! setValueForId (id, block))
-                owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, block)));
-
+            jassert (size >= 0 && (data != nullptr || size == 0));
+            addMessageToQueue (id, MemoryBlock (data, (size_t) size));
             return kResultTrue;
         }
 
@@ -859,7 +838,7 @@ private:
         {
             jassert (id != nullptr);
 
-            if (fetchValueForId (id, result))
+            if (findMessageOnQueueWithID (id, result))
                 return kResultTrue;
 
             jassertfalse;
@@ -870,7 +849,7 @@ private:
         {
             jassert (id != nullptr);
 
-            if (fetchValueForId (id, result))
+            if (findMessageOnQueueWithID (id, result))
                 return kResultTrue;
 
             jassertfalse;
@@ -882,7 +861,7 @@ private:
             jassert (id != nullptr);
 
             String stringToFetch;
-            if (fetchValueForId (id, stringToFetch))
+            if (findMessageOnQueueWithID (id, stringToFetch))
             {
                 Steinberg::String str (stringToFetch.toRawUTF8());
                 str.copyTo (result, 0, (Steinberg::int32) jmin (length, (Steinberg::uint32) std::numeric_limits<Steinberg::int32>::max()));
@@ -922,7 +901,7 @@ private:
 
         //==============================================================================
         template<typename Type>
-        bool setValueForId (AttrID id, const Type& value)
+        void addMessageToQueue (AttrID id, const Type& value)
         {
             jassert (id != nullptr);
 
@@ -933,15 +912,15 @@ private:
                 if (std::strcmp (message->getMessageID(), id) == 0)
                 {
                     message->value = value;
-                    return true;
+                    return;
                 }
             }
 
-            return false; // No message found with that Id
+            owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, value)));
         }
 
         template<typename Type>
-        bool fetchValueForId (AttrID id, Type& value)
+        bool findMessageOnQueueWithID (AttrID id, Type& value)
         {
             jassert (id != nullptr);
 
