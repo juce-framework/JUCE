@@ -349,7 +349,7 @@ public:
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
-   #if JUCE_WINDOWS && ! DOXYGEN
+   #if JUCE_MSVC && ! DOXYGEN
     int compareIgnoreCase (const CharPointer_UTF16 other) const noexcept
     {
         return _wcsicmp (data, other.data);
@@ -408,7 +408,7 @@ public:
     /** Parses this string as a 32-bit integer. */
     int getIntValue32() const noexcept
     {
-       #if JUCE_WINDOWS
+       #if JUCE_MSVC
         return _wtoi (data);
        #else
         return CharacterFunctions::getIntValue <int, CharPointer_UTF16> (*this);
@@ -418,7 +418,7 @@ public:
     /** Parses this string as a 64-bit integer. */
     int64 getIntValue64() const noexcept
     {
-       #if JUCE_WINDOWS
+       #if JUCE_MSVC
         return _wtoi64 (data);
        #else
         return CharacterFunctions::getIntValue <int64, CharPointer_UTF16> (*this);

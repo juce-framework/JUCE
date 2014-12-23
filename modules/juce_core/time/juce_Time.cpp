@@ -361,7 +361,7 @@ String Time::getTimeZone() const noexcept
 {
     String zone[2];
 
-  #if JUCE_WINDOWS
+  #if JUCE_MSVC
     _tzset();
 
    #ifdef _INC_TIME_INL
@@ -378,7 +378,11 @@ String Time::getTimeZone() const noexcept
     zone[1] = zonePtr[1];
    #endif
   #else
+   #if JUCE_MINGW
+    #warning "Can't find a replacement for tzset on mingw - ideas welcome!"
+   #else
     tzset();
+   #endif
     const char** const zonePtr = (const char**) tzname;
     zone[0] = zonePtr[0];
     zone[1] = zonePtr[1];
