@@ -104,7 +104,7 @@
 #endif
 
 #if JUCE_ANDROID
- #include <sys/atomics.h>
+ #include <atomic>
  #include <byteswap.h>
 #endif
 
