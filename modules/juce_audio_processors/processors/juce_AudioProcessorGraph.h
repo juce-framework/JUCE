@@ -80,7 +80,7 @@ public:
 
         //==============================================================================
         /** A convenient typedef for referring to a pointer to a node object. */
-        typedef ReferenceCountedObjectPtr <Node> Ptr;
+        typedef ReferenceCountedObjectPtr<Node> Ptr;
 
     private:
         //==============================================================================
@@ -151,13 +151,13 @@ public:
     void clear();
 
     /** Returns the number of nodes in the graph. */
-    int getNumNodes() const                                         { return nodes.size(); }
+    int getNumNodes() const noexcept                                { return nodes.size(); }
 
     /** Returns a pointer to one of the nodes in the graph.
         This will return nullptr if the index is out of range.
         @see getNodeForId
     */
-    Node* getNode (const int index) const                           { return nodes [index]; }
+    Node* getNode (const int index) const noexcept                  { return nodes [index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
         If no such node was found, this returns nullptr.
@@ -289,54 +289,47 @@ public:
 
         //==============================================================================
         /** Returns the mode of this processor. */
-        IODeviceType getType() const                                { return type; }
+        IODeviceType getType() const noexcept                       { return type; }
 
         /** Returns the parent graph to which this processor belongs, or nullptr if it
             hasn't yet been added to one. */
-        AudioProcessorGraph* getParentGraph() const                 { return graph; }
+        AudioProcessorGraph* getParentGraph() const noexcept        { return graph; }
 
         /** True if this is an audio or midi input. */
-        bool isInput() const;
+        bool isInput() const noexcept;
         /** True if this is an audio or midi output. */
-        bool isOutput() const;
+        bool isOutput() const noexcept;
 
         //==============================================================================
         AudioGraphIOProcessor (const IODeviceType type);
         ~AudioGraphIOProcessor();
 
-        const String getName() const;
-        void fillInPluginDescription (PluginDescription&) const;
-
-        void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
-        void releaseResources();
+        const String getName() const override;
+        void fillInPluginDescription (PluginDescription&) const override;
+        void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock) override;
+        void releaseResources() override;
         void processBlock (AudioSampleBuffer&, MidiBuffer&);
 
-        const String getInputChannelName (int channelIndex) const;
-        const String getOutputChannelName (int channelIndex) const;
-        bool isInputChannelStereoPair (int index) const;
-        bool isOutputChannelStereoPair (int index) const;
-        bool silenceInProducesSilenceOut() const;
-        double getTailLengthSeconds() const;
-        bool acceptsMidi() const;
-        bool producesMidi() const;
+        const String getInputChannelName (int channelIndex) const override;
+        const String getOutputChannelName (int channelIndex) const override;
+        bool isInputChannelStereoPair (int index) const override;
+        bool isOutputChannelStereoPair (int index) const override;
+        bool silenceInProducesSilenceOut() const override;
+        double getTailLengthSeconds() const override;
+        bool acceptsMidi() const override;
+        bool producesMidi() const override;
 
-        bool hasEditor() const;
-        AudioProcessorEditor* createEditor();
+        bool hasEditor() const override;
+        AudioProcessorEditor* createEditor() override;
 
-        int getNumParameters();
-        const String getParameterName (int);
-        float getParameter (int);
-        const String getParameterText (int);
-        void setParameter (int, float);
+        int getNumPrograms() override;
+        int getCurrentProgram() override;
+        void setCurrentProgram (int) override;
+        const String getProgramName (int) override;
+        void changeProgramName (int, const String&) override;
 
-        int getNumPrograms();
-        int getCurrentProgram();
-        void setCurrentProgram (int);
-        const String getProgramName (int);
-        void changeProgramName (int, const String&);
-
-        void getStateInformation (juce::MemoryBlock& destData);
-        void setStateInformation (const void* data, int sizeInBytes);
+        void getStateInformation (juce::MemoryBlock& destData) override;
+        void setStateInformation (const void* data, int sizeInBytes) override;
 
         /** @internal */
         void setParentGraph (AudioProcessorGraph*);
@@ -349,42 +342,34 @@ public:
     };
 
     //==============================================================================
-    // AudioProcessor methods:
+    const String getName() const override;
+    void prepareToPlay (double, int) override;
+    void releaseResources() override;
+    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
 
-    const String getName() const;
+    void reset() override;
+    void setNonRealtime (bool) noexcept override;
+    void setPlayHead (AudioPlayHead*) override;
 
-    void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
-    void releaseResources();
-    void processBlock (AudioSampleBuffer&, MidiBuffer&);
-    void reset();
+    const String getInputChannelName (int) const override;
+    const String getOutputChannelName (int) const override;
+    bool isInputChannelStereoPair (int) const override;
+    bool isOutputChannelStereoPair (int) const override;
 
-    const String getInputChannelName (int channelIndex) const;
-    const String getOutputChannelName (int channelIndex) const;
-    bool isInputChannelStereoPair (int index) const;
-    bool isOutputChannelStereoPair (int index) const;
-    bool silenceInProducesSilenceOut() const;
-    double getTailLengthSeconds() const;
+    bool silenceInProducesSilenceOut() const override;
+    double getTailLengthSeconds() const override;
+    bool acceptsMidi() const override;
+    bool producesMidi() const override;
 
-    bool acceptsMidi() const;
-    bool producesMidi() const;
-
-    bool hasEditor() const                          { return false; }
-    AudioProcessorEditor* createEditor()            { return nullptr; }
-
-    int getNumParameters()                          { return 0; }
-    const String getParameterName (int)             { return String(); }
-    float getParameter (int)                        { return 0; }
-    const String getParameterText (int)             { return String(); }
-    void setParameter (int, float)                  { }
-
-    int getNumPrograms()                            { return 0; }
-    int getCurrentProgram()                         { return 0; }
-    void setCurrentProgram (int)                    { }
-    const String getProgramName (int)               { return String(); }
-    void changeProgramName (int, const String&)     { }
-
-    void getStateInformation (juce::MemoryBlock&);
-    void setStateInformation (const void* data, int sizeInBytes);
+    bool hasEditor() const override                         { return false; }
+    AudioProcessorEditor* createEditor() override           { return nullptr; }
+    int getNumPrograms() override                           { return 0; }
+    int getCurrentProgram() override                        { return 0; }
+    void setCurrentProgram (int) override                   { }
+    const String getProgramName (int) override              { return String(); }
+    void changeProgramName (int, const String&) override    { }
+    void getStateInformation (juce::MemoryBlock&) override;
+    void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
     //==============================================================================
