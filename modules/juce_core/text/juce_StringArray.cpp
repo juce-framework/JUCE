@@ -86,6 +86,13 @@ StringArray& StringArray::operator= (StringArray&& other) noexcept
 }
 #endif
 
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+StringArray::StringArray (const std::initializer_list<const char*>& stringList)
+{
+    strings.addArray (stringList);
+}
+#endif
+
 StringArray::~StringArray()
 {
 }

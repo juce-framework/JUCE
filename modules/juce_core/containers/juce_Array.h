@@ -96,8 +96,7 @@ public:
         @param values   the array to copy from
     */
     template <typename TypeToCreateFrom>
-    explicit Array (const TypeToCreateFrom* values)
-       : numUsed (0)
+    explicit Array (const TypeToCreateFrom* values)  : numUsed (0)
     {
         while (*values != TypeToCreateFrom())
             add (*values++);
@@ -109,14 +108,21 @@ public:
         @param numValues    the number of values in the array
     */
     template <typename TypeToCreateFrom>
-    Array (const TypeToCreateFrom* values, int numValues)
-       : numUsed (numValues)
+    Array (const TypeToCreateFrom* values, int numValues)  : numUsed (numValues)
     {
         data.setAllocatedSize (numValues);
 
         for (int i = 0; i < numValues; ++i)
             new (data.elements + i) ElementType (values[i]);
     }
+
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    template <typename TypeToCreateFrom>
+    Array (const std::initializer_list<TypeToCreateFrom>& items)  : numUsed (0)
+    {
+        addArray (items);
+    }
+   #endif
 
     /** Destructor. */
     ~Array()
@@ -603,6 +609,21 @@ public:
             }
         }
     }
+
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    template <typename TypeToCreateFrom>
+    void addArray (const std::initializer_list<TypeToCreateFrom>& items)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (numUsed + (int) items.size());
+
+        for (auto& item : items)
+        {
+            new (data.elements + numUsed) ElementType (item);
+            ++numUsed;
+        }
+    }
+   #endif
 
     /** Adds elements from a null-terminated array of pointers to the end of this array.
 
