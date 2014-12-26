@@ -300,7 +300,7 @@ private:
 
 //==============================================================================
 class ASIOAudioIODevice;
-static ASIOAudioIODevice* volatile currentASIODev[3] = { 0 };
+static ASIOAudioIODevice* volatile currentASIODev[4] = { 0 };
 
 extern HWND juce_messageWindowHandle;
 
@@ -1503,15 +1503,16 @@ public:
         jassert (inputDeviceName == outputDeviceName || outputDeviceName.isEmpty() || inputDeviceName.isEmpty());
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int index = deviceNames.indexOf (outputDeviceName.isNotEmpty() ? outputDeviceName
-                                                                             : inputDeviceName);
+        const String deviceName (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                               : inputDeviceName);
+        const int index = deviceNames.indexOf (deviceName);
 
         if (index >= 0)
         {
             const int freeSlot = findFreeSlot();
 
             if (freeSlot >= 0)
-                return new ASIOAudioIODevice (this, outputDeviceName,
+                return new ASIOAudioIODevice (this, deviceName,
                                               classIds.getReference (index), freeSlot);
         }
 
