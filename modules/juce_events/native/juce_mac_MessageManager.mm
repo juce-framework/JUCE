@@ -53,7 +53,7 @@ public:
 
             [[NSDistributedNotificationCenter defaultCenter] addObserver: delegate
                                                                 selector: @selector (broadcastMessageCallback:)
-                                                                    name: getBroacastEventName()
+                                                                    name: getBroadcastEventName()
                                                                   object: nil];
         }
         else
@@ -79,14 +79,14 @@ public:
             [NSApp setDelegate: nil];
 
             [[NSDistributedNotificationCenter defaultCenter] removeObserver: delegate
-                                                                       name: getBroacastEventName()
+                                                                       name: getBroadcastEventName()
                                                                      object: nil];
         }
 
         [delegate release];
     }
 
-    static NSString* getBroacastEventName()
+    static NSString* getBroadcastEventName()
     {
         return juceStringToNS ("juce_" + String::toHexString (File::getSpecialLocation (File::currentExecutableFile).hashCode64()));
     }
@@ -356,7 +356,7 @@ void MessageManager::broadcastMessage (const String& message)
     NSDictionary* info = [NSDictionary dictionaryWithObject: juceStringToNS (message)
                                                      forKey: nsStringLiteral ("message")];
 
-    [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegate::getBroacastEventName()
+    [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegate::getBroadcastEventName()
                                                                    object: nil
                                                                  userInfo: info];
 }
