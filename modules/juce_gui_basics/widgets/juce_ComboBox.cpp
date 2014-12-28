@@ -56,10 +56,7 @@ ComboBox::ComboBox (const String& name)
 ComboBox::~ComboBox()
 {
     currentId.removeListener (this);
-
-    if (menuActive)
-        PopupMenu::dismissAllActiveMenus();
-
+    hidePopup();
     label = nullptr;
 }
 
@@ -501,23 +498,32 @@ void ComboBox::labelTextChanged (Label*)
 
 
 //==============================================================================
-void ComboBox::popupMenuFinishedCallback (int result, ComboBox* box)
-{
-    if (box != nullptr)
-    {
-        box->menuActive = false;
-
-        if (result != 0)
-            box->setSelectedId (result);
-    }
-}
-
 void ComboBox::showPopupIfNotActive()
 {
     if (! menuActive)
     {
         menuActive = true;
         showPopup();
+    }
+}
+
+void ComboBox::hidePopup()
+{
+    if (menuActive)
+    {
+        menuActive = false;
+        PopupMenu::dismissAllActiveMenus();
+    }
+}
+
+static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
+{
+    if (combo != nullptr)
+    {
+        combo->hidePopup();
+
+        if (result != 0)
+            combo->setSelectedId (result);
     }
 }
 
@@ -532,7 +538,7 @@ void ComboBox::showPopup()
                                             .withMinimumWidth (getWidth())
                                             .withMaximumNumColumns (1)
                                             .withStandardItemHeight (label->getHeight()),
-                        ModalCallbackFunction::forComponent (popupMenuFinishedCallback, this));
+                        ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
 }
 
 void ComboBox::addItemsToMenu (PopupMenu& menu) const
