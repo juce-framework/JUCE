@@ -775,7 +775,13 @@ public:
     */
     void removeAllChildren();
 
-    /** Removes all this component's children, and deletes them.
+    /** Removes and deletes all of this component's children.
+        My advice is to avoid this method! It's an old function that is only kept here for
+        backwards-compatibility with legacy code, and should be viewed with extreme
+        suspicion by anyone attempting to write modern C++. In almost all cases, it's much
+        smarter to manage the lifetimes of your child components via modern RAII techniques
+        such as simply making them member variables, or using ScopedPointer, OwnedArray, etc
+        to manage their lifetimes appropriately.
         @see removeAllChildren
     */
     void deleteAllChildren();
