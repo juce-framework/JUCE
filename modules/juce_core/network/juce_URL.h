@@ -266,6 +266,8 @@ public:
                                 in the response will be stored in this array
         @param statusCode       if this is non-null, it will get set to the http status code, if one
                                 is known, or 0 if a code isn't available
+        @param numRedirectsToFollow specifies the number of redirects that will be followed before
+                                returning a response (ignored for Android which follows up to 5 redirects)
         @returns    an input stream that the caller must delete, or a null pointer if there was an
                     error trying to open it.
      */
@@ -275,7 +277,8 @@ public:
                                     String extraHeaders = String(),
                                     int connectionTimeOutMs = 0,
                                     StringPairArray* responseHeaders = nullptr,
-                                    int* statusCode = nullptr) const;
+                                    int* statusCode = nullptr,
+                                    int numRedirectsToFollow = 5) const;
 
 
     //==============================================================================
