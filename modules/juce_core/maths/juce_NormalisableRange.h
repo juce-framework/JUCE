@@ -104,7 +104,7 @@ public:
         ValueType proportion = (v - start) / (end - start);
 
         if (skew != static_cast<ValueType> (1))
-            proportion = pow (proportion, skew);
+            proportion = std::pow (proportion, skew);
 
         return proportion;
     }
@@ -115,7 +115,7 @@ public:
     ValueType convertFrom0to1 (ValueType proportion) const noexcept
     {
         if (skew != static_cast<ValueType> (1) && proportion > ValueType())
-            proportion = exp (log (proportion) / skew);
+            proportion = std::exp (std::log (proportion) / skew);
 
         return start + (end - start) * proportion;
     }

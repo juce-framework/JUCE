@@ -530,7 +530,7 @@ private:
         bool isRegistered() const noexcept              { return atom != 0; }
         LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
 
-        juce_DeclareSingleton_SingleThreaded_Minimal (NativeWindowClass);
+        juce_DeclareSingleton_SingleThreaded_Minimal (NativeWindowClass)
 
     private:
         NativeWindowClass()
@@ -724,7 +724,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowContext)
 };
 
-juce_ImplementSingleton_SingleThreaded (DirectShowComponent::DirectShowContext::NativeWindowClass);
+juce_ImplementSingleton_SingleThreaded (DirectShowComponent::DirectShowContext::NativeWindowClass)
 
 
 //======================================================================

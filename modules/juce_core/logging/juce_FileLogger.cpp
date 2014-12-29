@@ -32,7 +32,7 @@ FileLogger::FileLogger (const File& file,
     : logFile (file)
 {
     if (maxInitialFileSizeBytes >= 0)
-        trimFileSize (maxInitialFileSizeBytes);
+        trimFileSize (logFile, maxInitialFileSizeBytes);
 
     if (! file.exists())
         file.create();  // (to create the parent directories)
@@ -57,23 +57,23 @@ void FileLogger::logMessage (const String& message)
     out << message << newLine;
 }
 
-void FileLogger::trimFileSize (int64 maxFileSizeBytes) const
+void FileLogger::trimFileSize (const File& file, int64 maxFileSizeBytes)
 {
     if (maxFileSizeBytes <= 0)
     {
-        logFile.deleteFile();
+        file.deleteFile();
     }
     else
     {
-        const int64 fileSize = logFile.getSize();
+        const int64 fileSize = file.getSize();
 
         if (fileSize > maxFileSizeBytes)
         {
-            TemporaryFile tempFile (logFile);
+            TemporaryFile tempFile (file);
 
             {
                 FileOutputStream out (tempFile.getFile());
-                FileInputStream in (logFile);
+                FileInputStream in (file);
 
                 if (! (out.openedOk() && in.openedOk()))
                     return;

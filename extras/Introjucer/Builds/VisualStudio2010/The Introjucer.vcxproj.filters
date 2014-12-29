@@ -2780,19 +2780,7 @@
     <None Include="..\..\Source\BinaryData\projectIconLinuxMakefile.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio05.png">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio08.png">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio10.png">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio12.png">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\projectIconVisualStudio13.png">
+    <None Include="..\..\Source\BinaryData\projectIconVisualStudio.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\projectIconXcode.png">

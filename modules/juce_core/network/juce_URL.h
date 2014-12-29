@@ -140,6 +140,12 @@ public:
     URL withParameter (const String& parameterName,
                        const String& parameterValue) const;
 
+    /** Returns a copy of this URL, with a set of GET or POST parameters added.
+        This is a convenience method, equivalent to calling withParameter for each value.
+        @see withParameter
+    */
+    URL withParameters (const StringPairArray& parametersToAdd) const;
+
     /** Returns a copy of this URL, with a file-upload type parameter added to it.
 
         When performing a POST where one of your parameters is a binary file, this

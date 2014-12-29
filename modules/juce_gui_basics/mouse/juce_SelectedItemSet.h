@@ -38,8 +38,6 @@
 
     To be informed when items are selected/deselected, register a ChangeListener with
     this object.
-
-    @see SelectableObject
 */
 template <class SelectableItemType>
 class SelectedItemSet   : public ChangeBroadcaster

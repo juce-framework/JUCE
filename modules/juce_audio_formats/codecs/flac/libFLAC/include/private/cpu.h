@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2013  Xiph.Org Foundation
+ * Copyright (C) 2011-2014  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,49 +41,59 @@
 
 typedef enum {
 	FLAC__CPUINFO_TYPE_IA32,
-	FLAC__CPUINFO_TYPE_PPC,
+	FLAC__CPUINFO_TYPE_X86_64,
 	FLAC__CPUINFO_TYPE_UNKNOWN
 } FLAC__CPUInfo_Type;
 
+#if defined FLAC__CPU_IA32
 typedef struct {
-	FLAC__bool cpuid;
-	FLAC__bool bswap;
 	FLAC__bool cmov;
 	FLAC__bool mmx;
-	FLAC__bool fxsr;
 	FLAC__bool sse;
 	FLAC__bool sse2;
+
 	FLAC__bool sse3;
 	FLAC__bool ssse3;
-	FLAC__bool _3dnow;
-	FLAC__bool ext3dnow;
-	FLAC__bool extmmx;
+	FLAC__bool sse41;
+	FLAC__bool sse42;
+	FLAC__bool avx;
+	FLAC__bool avx2;
+	FLAC__bool fma;
 } FLAC__CPUInfo_IA32;
-
+#elif defined FLAC__CPU_X86_64
 typedef struct {
-	FLAC__bool altivec;
-	FLAC__bool ppc64;
-} FLAC__CPUInfo_PPC;
+	FLAC__bool sse3;
+	FLAC__bool ssse3;
+	FLAC__bool sse41;
+	FLAC__bool sse42;
+	FLAC__bool avx;
+	FLAC__bool avx2;
+	FLAC__bool fma;
+} FLAC__CPUInfo_x86;
+#endif
 
 typedef struct {
 	FLAC__bool use_asm;
 	FLAC__CPUInfo_Type type;
-	union {
-		FLAC__CPUInfo_IA32 ia32;
-		FLAC__CPUInfo_PPC ppc;
-	} data;
+#if defined FLAC__CPU_IA32
+	FLAC__CPUInfo_IA32 ia32;
+#elif defined FLAC__CPU_X86_64
+	FLAC__CPUInfo_x86 x86;
+#endif
 } FLAC__CPUInfo;
 
 void FLAC__cpu_info(FLAC__CPUInfo *info);
 
 #ifndef FLAC__NO_ASM
-#ifdef FLAC__CPU_IA32
-#ifdef FLAC__HAS_NASM
+# if defined FLAC__CPU_IA32 && defined FLAC__HAS_NASM
 FLAC__uint32 FLAC__cpu_have_cpuid_asm_ia32(void);
 void         FLAC__cpu_info_asm_ia32(FLAC__uint32 *flags_edx, FLAC__uint32 *flags_ecx);
-FLAC__uint32 FLAC__cpu_info_extended_amd_asm_ia32(void);
-#endif
-#endif
+# endif
+# if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && defined FLAC__HAS_X86INTRIN
+FLAC__uint32 FLAC__cpu_have_cpuid_x86(void);
+void         FLAC__cpu_info_x86(FLAC__uint32 level, FLAC__uint32 *eax, FLAC__uint32 *ebx, FLAC__uint32 *ecx, FLAC__uint32 *edx);
+FLAC__uint32 FLAC__cpu_xgetbv_x86(void);
+# endif
 #endif
 
 #endif

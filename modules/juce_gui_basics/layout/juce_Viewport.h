@@ -267,6 +267,9 @@ private:
     bool allowScrollingWithoutScrollbarV, allowScrollingWithoutScrollbarH;
     Component contentHolder;
     ScrollBar verticalScrollBar, horizontalScrollBar;
+    struct MouseWheelTimer;
+    ScopedPointer<Timer> mouseWheelTimer;
+
     Point<int> viewportPosToCompPos (Point<int>) const;
 
     void updateVisibleArea();

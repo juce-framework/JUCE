@@ -81,10 +81,10 @@ static Array<PropertyComponent*> createTextEditors()
 {
     Array<PropertyComponent*> comps;
 
-    comps.add (new TextPropertyComponent (Value ("This is a single-line Text Property"), "Text 1", 200, false));
-    comps.add (new TextPropertyComponent (Value ("Another one"), "Text 2", 200, false));
+    comps.add (new TextPropertyComponent (Value (var ("This is a single-line Text Property")), "Text 1", 200, false));
+    comps.add (new TextPropertyComponent (Value (var ("Another one")), "Text 2", 200, false));
 
-    comps.add (new TextPropertyComponent (Value (
+    comps.add (new TextPropertyComponent (Value (var (
         "Lorem ipsum dolor sit amet, cu mei labore admodum facilisi. Iriure iuvaret invenire ea vim, cum quod"
         "si intellegat delicatissimi an. Cetero recteque ei eos, his an scripta fastidii placerat. Nec et anc"
         "illae nominati corrumpit. Vis dictas audire accumsan ad, elit fabulas saperet mel eu.\n"
@@ -93,7 +93,7 @@ static Array<PropertyComponent*> createTextEditors()
         " cum. Est aeque eripuit deleniti in, amet ferri recusabo ea nec. Cu persius maiorum corrumpit mei, i"
         "n ridens perpetua mea, pri nobis tation inermis an. Vis alii autem cotidieque ut, ius harum salutatu"
         "s ut. Mel eu purto veniam dissentias, malis doctus bonorum ne vel, mundi aperiam adversarium cu eum."
-        " Mei quando graeci te, dolore accusata mei te."),
+        " Mei quando graeci te, dolore accusata mei te.")),
                                           "Multi-line text",
                                           1000, true));
 

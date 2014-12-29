@@ -389,7 +389,10 @@ void StreamingSocket::close()
     }
 
     if (handle != -1)
+    {
+        ::shutdown (handle, SHUT_RDWR);
         ::close (handle);
+    }
    #endif
 
     hostName.clear();

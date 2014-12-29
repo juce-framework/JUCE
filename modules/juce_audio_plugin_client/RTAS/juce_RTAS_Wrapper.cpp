@@ -413,7 +413,7 @@ public:
             JuceCustomUIView* const owner;
             int titleW, titleH;
 
-            Component* getEditor() const        { return getChildComponent (0); }
+            juce::Component* getEditor() const        { return getChildComponent (0); }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
         };
@@ -446,7 +446,6 @@ public:
     }
 
     //==============================================================================
-protected:
     ComponentResult GetDelaySamplesLong (long* aNumSamples) override
     {
         if (aNumSamples != nullptr)
@@ -663,6 +662,29 @@ protected:
 
         return CProcess::UpdateControlValue (controlIndex, value);
     }
+
+   #if JUCE_WINDOWS
+    Boolean HandleKeystroke (EventRecord* e) override
+    {
+        if (juce::Component* modalComp = juce::Component::getCurrentlyModalComponent())
+        {
+            if (juce::Component* focused = modalComp->getCurrentlyFocusedComponent())
+            {
+                switch (e->message & charCodeMask)
+                {
+                    case kReturnCharCode:
+                    case kEnterCharCode:    focused->keyPressed (KeyPress (KeyPress::returnKey)); break;
+                    case kEscapeCharCode:   focused->keyPressed (KeyPress (KeyPress::escapeKey)); break;
+                    default: break;
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+   #endif
 
     //==============================================================================
     bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info) override

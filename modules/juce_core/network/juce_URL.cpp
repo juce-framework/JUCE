@@ -397,6 +397,17 @@ URL URL::withParameter (const String& parameterName,
     return u;
 }
 
+URL URL::withParameters (const StringPairArray& parametersToAdd) const
+{
+    URL u (*this);
+
+    for (int i = 0; i < parametersToAdd.size(); ++i)
+        u.addParameter (parametersToAdd.getAllKeys()[i],
+                        parametersToAdd.getAllValues()[i]);
+
+    return u;
+}
+
 URL URL::withPOSTData (const String& newPostData) const
 {
     URL u (*this);
@@ -482,8 +493,8 @@ String URL::addEscapeChars (const String& s, const bool isParameter)
                  || legalChars.indexOf ((juce_wchar) c) >= 0))
         {
             utf8.set (i, '%');
-            utf8.insert (++i, "0123456789abcdef" [((uint8) c) >> 4]);
-            utf8.insert (++i, "0123456789abcdef" [c & 15]);
+            utf8.insert (++i, "0123456789ABCDEF" [((uint8) c) >> 4]);
+            utf8.insert (++i, "0123456789ABCDEF" [c & 15]);
         }
     }
 

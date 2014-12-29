@@ -53,7 +53,7 @@ public:
 
             if (connectionPoint != nullptr)
             {
-                WebBrowserComponent* const owner = dynamic_cast <WebBrowserComponent*> (getParentComponent());
+                WebBrowserComponent* const owner = dynamic_cast<WebBrowserComponent*> (getParentComponent());
                 jassert (owner != nullptr);
 
                 EventHandler* handler = new EventHandler (*owner);
@@ -129,13 +129,11 @@ private:
     DWORD adviseCookie;
 
     //==============================================================================
-    class EventHandler  : public ComBaseClassHelper <IDispatch>,
+    class EventHandler  : public ComBaseClassHelper<IDispatch>,
                           public ComponentMovementWatcher
     {
     public:
-        EventHandler (WebBrowserComponent& owner_)
-            : ComponentMovementWatcher (&owner_),
-              owner (owner_)
+        EventHandler (WebBrowserComponent& w)  : ComponentMovementWatcher (&w), owner (w)
         {
         }
 
@@ -329,4 +327,27 @@ void WebBrowserComponent::resized()
 void WebBrowserComponent::visibilityChanged()
 {
     checkWindowAssociation();
+}
+
+void WebBrowserComponent::focusGained (FocusChangeType)
+{
+    if (IOleObject* oleObject = (IOleObject*) browser->queryInterface (&IID_IOleObject))
+    {
+        if (IOleWindow* oleWindow = (IOleWindow*) browser->queryInterface (&IID_IOleWindow))
+        {
+            IOleClientSite* oleClientSite = nullptr;
+
+            if (SUCCEEDED (oleObject->GetClientSite (&oleClientSite)))
+            {
+                HWND hwnd;
+                oleWindow->GetWindow (&hwnd);
+                oleObject->DoVerb (OLEIVERB_UIACTIVATE, nullptr, oleClientSite, 0, hwnd, nullptr);
+                oleClientSite->Release();
+            }
+
+            oleWindow->Release();
+        }
+
+        oleObject->Release();
+    }
 }

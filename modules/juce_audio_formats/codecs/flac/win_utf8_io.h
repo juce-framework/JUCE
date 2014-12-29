@@ -1,6 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2013-2014  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,57 +29,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FLAC__ORDINALS_H
-#define FLAC__ORDINALS_H
+#ifdef _WIN32
 
-#if defined(_MSC_VER) && _MSC_VER < 1600
+#ifndef flac__win_utf8_io_h
+#define flac__win_utf8_io_h
 
-/* Microsoft Visual Studio earlier than the 2010 version did not provide
- * the 1999 ISO C Standard header file <stdint.h>.
- */
-
-typedef __int8 FLAC__int8;
-typedef unsigned __int8 FLAC__uint8;
-
-typedef __int16 FLAC__int16;
-typedef __int32 FLAC__int32;
-typedef __int64 FLAC__int64;
-typedef unsigned __int16 FLAC__uint16;
-typedef unsigned __int32 FLAC__uint32;
-typedef unsigned __int64 FLAC__uint64;
-
-#else
-
-/* For MSVC 2010 and everything else which provides <stdint.h>. */
-
-#include <stdint.h>
-
-typedef int8_t FLAC__int8;
-typedef uint8_t FLAC__uint8;
-
-typedef int16_t FLAC__int16;
-typedef int32_t FLAC__int32;
-typedef int64_t FLAC__int64;
-typedef uint16_t FLAC__uint16;
-typedef uint32_t FLAC__uint32;
-typedef uint64_t FLAC__uint64;
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-typedef int FLAC__bool;
+#include <stdio.h>
+#include <sys/stat.h>
+#include <stdarg.h>
+#include <windows.h>
 
-typedef FLAC__uint8 FLAC__byte;
+int get_utf8_argv(int *argc, char ***argv);
 
+int printf_utf8(const char *format, ...);
+int fprintf_utf8(FILE *stream, const char *format, ...);
+int vfprintf_utf8(FILE *stream, const char *format, va_list argptr);
 
-#ifdef true
-#undef true
+FILE *fopen_utf8(const char *filename, const char *mode);
+int stat_utf8(const char *path, struct stat *buffer);
+int _stat64_utf8(const char *path, struct __stat64 *buffer);
+int chmod_utf8(const char *filename, int pmode);
+int utime_utf8(const char *filename, struct utimbuf *times);
+int unlink_utf8(const char *filename);
+int rename_utf8(const char *oldname, const char *newname);
+size_t strlen_utf8(const char *str);
+int win_get_console_width(void);
+int print_console(FILE *stream, const wchar_t *text, size_t len);
+HANDLE WINAPI CreateFile_utf8(const char *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
+
+#ifdef __cplusplus
+} /* extern "C" */
 #endif
-#ifdef false
-#undef false
-#endif
-#ifndef __cplusplus
-#define true 1
-#define false 0
-#endif
 
+#endif
 #endif

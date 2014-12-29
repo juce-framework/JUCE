@@ -30,19 +30,26 @@
 //==============================================================================
 namespace
 {
-    void hideDockIcon()
+    static void hideDockIcon()
     {
        #if JUCE_MAC
         Process::setDockIconVisible (false);
        #endif
     }
 
-    File getFile (const String& filename)
+    static File getFile (const String& filename)
     {
         return File::getCurrentWorkingDirectory().getChildFile (filename.unquoted());
     }
 
-    bool checkArgumentCount (const StringArray& args, int minNumArgs)
+    static bool matchArgument (const String& arg, const String& possible)
+    {
+        return arg == possible
+            || arg == "-" + possible
+            || arg == "--" + possible;
+    }
+
+    static bool checkArgumentCount (const StringArray& args, int minNumArgs)
     {
         if (args.size() < minNumArgs)
         {
@@ -54,61 +61,173 @@ namespace
     }
 
     //==============================================================================
+    struct LoadedProject
+    {
+        LoadedProject()
+        {
+            hideDockIcon();
+        }
+
+        int load (const File& projectFile)
+        {
+            hideDockIcon();
+
+            if (! projectFile.exists())
+            {
+                std::cout << "The file " << projectFile.getFullPathName() << " doesn't exist!" << std::endl;
+                return 1;
+            }
+
+            if (! projectFile.hasFileExtension (Project::projectFileExtension))
+            {
+                std::cout << projectFile.getFullPathName() << " isn't a valid jucer project file!" << std::endl;
+                return 1;
+            }
+
+            project = new Project (projectFile);
+
+            if (! project->loadFrom (projectFile, true))
+            {
+                project = nullptr;
+                std::cout << "Failed to load the project file: " << projectFile.getFullPathName() << std::endl;
+                return 1;
+            }
+
+            return 0;
+        }
+
+        int save (bool justSaveResources)
+        {
+            if (project != nullptr)
+            {
+                Result error (justSaveResources ? project->saveResourcesOnly (project->getFile())
+                                                : project->saveProject (project->getFile(), true));
+
+                if (error.failed())
+                {
+                    std::cout << "Error when saving: " << error.getErrorMessage() << std::endl;
+                    return 1;
+                }
+
+                project = nullptr;
+            }
+
+            return 0;
+        }
+
+        ScopedPointer<Project> project;
+    };
+
+    //==============================================================================
     /* Running a command-line of the form "introjucer --resave foobar.jucer" will try to load
        that project and re-export all of its targets.
     */
-    int resaveProject (const StringArray& args, bool justSaveResources)
+    static int resaveProject (const StringArray& args, bool justSaveResources)
+    {
+        if (! checkArgumentCount (args, 2))
+            return 1;
+
+        LoadedProject proj;
+
+        int res = proj.load (getFile (args[1]));
+
+        if (res != 0)
+            return res;
+
+        std::cout << (justSaveResources ? "Re-saving project resources: "
+                                        : "Re-saving file: ")
+                  << proj.project->getFile().getFullPathName() << std::endl;
+
+        return proj.save (justSaveResources);
+    }
+
+    //==============================================================================
+    static int setVersion (const StringArray& args)
+    {
+        if (! checkArgumentCount (args, 3))
+            return 1;
+
+        LoadedProject proj;
+
+        int res = proj.load (getFile (args[2]));
+
+        if (res != 0)
+            return res;
+
+        String version (args[1].trim());
+
+        std::cout << "Setting project version: " << version << std::endl;
+
+        proj.project->getVersionValue() = version;
+
+        return proj.save (false);
+    }
+
+    //==============================================================================
+    static int bumpVersion (const StringArray& args)
+    {
+        if (! checkArgumentCount (args, 2))
+            return 1;
+
+        LoadedProject proj;
+
+        int res = proj.load (getFile (args[1]));
+
+        if (res != 0)
+            return res;
+
+        String version = proj.project->getVersionString();
+
+        version = version.upToLastOccurrenceOf (".", true, false)
+                    + String (version.getTrailingIntValue() + 1);
+
+        std::cout << "Bumping project version to: " << version << std::endl;
+
+        proj.project->getVersionValue() = version;
+
+        return proj.save (false);
+    }
+
+    //==============================================================================
+    int showStatus (const StringArray& args)
     {
         hideDockIcon();
 
         if (! checkArgumentCount (args, 2))
             return 1;
 
-        const File projectFile (getFile (args[1]));
+        LoadedProject proj;
 
-        if (! projectFile.exists())
+        int res = proj.load (getFile (args[1]));
+
+        if (res != 0)
+            return res;
+
+        std::cout << "Project file: " << proj.project->getFile().getFullPathName() << std::endl
+                  << "Name: " << proj.project->getTitle() << std::endl
+                  << "UID: " << proj.project->getProjectUID() << std::endl;
+
+        EnabledModuleList& modules = proj.project->getModules();
+
+        const int numModules = modules.getNumModules();
+        if (numModules > 0)
         {
-            std::cout << "The file " << projectFile.getFullPathName() << " doesn't exist!" << std::endl;
-            return 1;
-        }
+            std::cout << "Modules:" << std::endl;
 
-        if (! projectFile.hasFileExtension (Project::projectFileExtension))
-        {
-            std::cout << projectFile.getFullPathName() << " isn't a valid jucer project file!" << std::endl;
-            return 1;
-        }
-
-        Project proj (projectFile);
-
-        if (! proj.loadFrom (projectFile, true))
-        {
-            std::cout << "Failed to load the project file: " << projectFile.getFullPathName() << std::endl;
-            return 1;
-        }
-
-        std::cout << (justSaveResources ? "The Introjucer - Re-saving project resources: "
-                                        : "The Introjucer - Re-saving file: ")
-                  << projectFile.getFullPathName() << std::endl;
-
-        Result error (justSaveResources ? proj.saveResourcesOnly (projectFile)
-                                        : proj.saveProject (projectFile, true));
-
-        if (error.failed())
-        {
-            std::cout << "Error when saving: " << error.getErrorMessage() << std::endl;
-            return 1;
+            for (int i = 0; i < numModules; ++i)
+                std::cout << "  " << modules.getModuleID (i) << std::endl;
         }
 
         return 0;
     }
 
     //==============================================================================
-    String getModulePackageName (const LibraryModule& module)
+    static String getModulePackageName (const LibraryModule& module)
     {
         return module.getID() + ".jucemodule";
     }
 
-    int zipModule (const File& targetFolder, const File& moduleFolder)
+    static int zipModule (const File& targetFolder, const File& moduleFolder)
     {
         jassert (targetFolder.isDirectory());
 
@@ -151,7 +270,7 @@ namespace
         return 0;
     }
 
-    int buildModules (const StringArray& args, const bool buildAllWithIndex)
+    static int buildModules (const StringArray& args, const bool buildAllWithIndex)
     {
         hideDockIcon();
 
@@ -208,51 +327,8 @@ namespace
         return 0;
     }
 
-    int showStatus (const StringArray& args)
-    {
-        hideDockIcon();
-
-        if (! checkArgumentCount (args, 2))
-            return 1;
-
-        const File projectFile (getFile (args[1]));
-
-        Project proj (projectFile);
-        const Result result (proj.loadDocument (projectFile));
-
-        if (result.failed())
-        {
-            std::cout << "Failed to load project: " << projectFile.getFullPathName() << std::endl;
-            return 1;
-        }
-
-        std::cout << "Project file: " << projectFile.getFullPathName() << std::endl
-                  << "Name: " << proj.getTitle() << std::endl
-                  << "UID: " << proj.getProjectUID() << std::endl;
-
-        EnabledModuleList& modules = proj.getModules();
-
-        const int numModules = modules.getNumModules();
-        if (numModules > 0)
-        {
-            std::cout << "Modules:" << std::endl;
-
-            for (int i = 0; i < numModules; ++i)
-                std::cout << "  " << modules.getModuleID (i) << std::endl;
-        }
-
-        return 0;
-    }
-
-    bool matchArgument (const String& arg, const String& possible)
-    {
-        return arg == possible
-            || arg == "-" + possible
-            || arg == "--" + possible;
-    }
-
     //==============================================================================
-    int showHelp()
+    static int showHelp()
     {
         hideDockIcon();
 
@@ -265,6 +341,12 @@ namespace
                   << std::endl
                   << " introjucer --resave-resources project_file" << std::endl
                   << "    Resaves just the binary resources for a project." << std::endl
+                  << std::endl
+                  << " introjucer --set-version version_number project_file" << std::endl
+                  << "    Updates the version number in a project." << std::endl
+                  << std::endl
+                  << " introjucer --bump-version project_file" << std::endl
+                  << "    Updates the minor version number in a project by 1." << std::endl
                   << std::endl
                   << " introjucer --status project_file" << std::endl
                   << "    Displays information about a project." << std::endl
@@ -290,6 +372,8 @@ int performCommandLine (const String& commandLine)
     if (matchArgument (args[0], "help"))                return showHelp();
     if (matchArgument (args[0], "resave"))              return resaveProject (args, false);
     if (matchArgument (args[0], "resave-resources"))    return resaveProject (args, true);
+    if (matchArgument (args[0], "set-version"))         return setVersion (args);
+    if (matchArgument (args[0], "bump-version"))        return bumpVersion (args);
     if (matchArgument (args[0], "buildmodule"))         return buildModules (args, false);
     if (matchArgument (args[0], "buildallmodules"))     return buildModules (args, true);
     if (matchArgument (args[0], "status"))              return showStatus (args);

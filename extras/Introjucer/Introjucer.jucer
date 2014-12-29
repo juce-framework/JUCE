@@ -584,16 +584,8 @@
             file="Source/BinaryData/projectIconCodeblocks.png"/>
       <FILE id="xwPVtR" name="projectIconLinuxMakefile.png" compile="0" resource="1"
             file="Source/BinaryData/projectIconLinuxMakefile.png"/>
-      <FILE id="WE1dv3" name="projectIconVisualStudio05.png" compile="0"
-            resource="1" file="Source/BinaryData/projectIconVisualStudio05.png"/>
-      <FILE id="kib8GE" name="projectIconVisualStudio08.png" compile="0"
-            resource="1" file="Source/BinaryData/projectIconVisualStudio08.png"/>
-      <FILE id="w1tMpa" name="projectIconVisualStudio10.png" compile="0"
-            resource="1" file="Source/BinaryData/projectIconVisualStudio10.png"/>
-      <FILE id="VKIiCG" name="projectIconVisualStudio12.png" compile="0"
-            resource="1" file="Source/BinaryData/projectIconVisualStudio12.png"/>
-      <FILE id="mOyDWX" name="projectIconVisualStudio13.png" compile="0"
-            resource="1" file="Source/BinaryData/projectIconVisualStudio13.png"/>
+      <FILE id="TXWwpL" name="projectIconVisualStudio.png" compile="0" resource="1"
+            file="Source/BinaryData/projectIconVisualStudio.png"/>
       <FILE id="WFftCh" name="projectIconXcode.png" compile="0" resource="1"
             file="Source/BinaryData/projectIconXcode.png"/>
       <FILE id="FZNKix" name="projectIconXcodeIOS.png" compile="0" resource="1"
