@@ -50,7 +50,7 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_iOSAudio()        
 #endif
 
 #if ! (JUCE_WINDOWS && JUCE_WASAPI)
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI()          { return nullptr; }
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI (bool)     { return nullptr; }
 #endif
 
 #if ! (JUCE_WINDOWS && JUCE_DIRECTSOUND)

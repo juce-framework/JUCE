@@ -151,7 +151,7 @@ public:
     /** Creates an iOS device type if it's available on this platform, or returns null. */
     static AudioIODeviceType* createAudioIODeviceType_iOSAudio();
     /** Creates a WASAPI device type if it's available on this platform, or returns null. */
-    static AudioIODeviceType* createAudioIODeviceType_WASAPI();
+    static AudioIODeviceType* createAudioIODeviceType_WASAPI (bool exclusiveMode);
     /** Creates a DirectSound device type if it's available on this platform, or returns null. */
     static AudioIODeviceType* createAudioIODeviceType_DirectSound();
     /** Creates an ASIO device type if it's available on this platform, or returns null. */
