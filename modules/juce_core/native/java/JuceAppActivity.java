@@ -666,38 +666,103 @@ public final class JuceAppActivity   extends Activity
     public static final HTTPStream createHTTPStream (String address,
                                                      boolean isPost, byte[] postData, String headers,
                                                      int timeOutMs, int[] statusCode,
-                                                     StringBuffer responseHeaders)
+                                                     StringBuffer responseHeaders,
+                                                     int numRedirectsToFollow)
     {
-        try
-        {
-            HttpURLConnection connection = (HttpURLConnection) (new URL(address)
-                    .openConnection());
-            if (connection != null)
-            {
-                try
-                {
-                    if (isPost)
-                    {
-                        connection.setRequestMethod("POST");
-                        connection.setConnectTimeout(timeOutMs);
-                        connection.setDoOutput(true);
-                        connection.setChunkedStreamingMode(0);
-                        OutputStream out = connection.getOutputStream();
-                        out.write(postData);
-                        out.flush();
-                    }
+        // timeout parameter of zero for HttpUrlConnection is a blocking connect (negative value for juce::URL)
+        if (timeOutMs < 0)
+            timeOutMs = 0;
+        else if (timeOutMs == 0)
+            timeOutMs = 30000;
 
-                    return new HTTPStream (connection, statusCode, responseHeaders);
-                }
-                catch (Throwable e)
+        // headers - if not empty, this string is appended onto the headers that are used for the request. It must therefore be a valid set of HTML header directives, separated by newlines.
+        // So convert headers string to an array, with an element for each line
+        String headerLines[] = headers.split("\\n");
+
+        for (;;)
+        {
+            try
+            {
+                HttpURLConnection connection = (HttpURLConnection) (new URL(address).openConnection());
+
+                if (connection != null)
                 {
-                    connection.disconnect();
+                    try
+                    {
+                        connection.setInstanceFollowRedirects (false);
+                        connection.setConnectTimeout (timeOutMs);
+                        connection.setReadTimeout (timeOutMs);
+
+                        // Set request headers
+                        for (int i = 0; i < headerLines.length; ++i)
+                        {
+                            int pos = headerLines[i].indexOf (":");
+
+                            if (pos > 0 && pos < headerLines[i].length())
+                            {
+                                String field = headerLines[i].substring (0, pos);
+                                String value = headerLines[i].substring (pos + 1);
+
+                                if (value.length() > 0)
+                                    connection.setRequestProperty (field, value);
+                            }
+                        }
+
+                        if (isPost)
+                        {
+                            connection.setRequestMethod ("POST");
+                            connection.setDoOutput (true);
+
+                            if (postData != null)
+                            {
+                                OutputStream out = connection.getOutputStream();
+                                out.write(postData);
+                                out.flush();
+                            }
+                        }
+
+                        HTTPStream httpStream = new HTTPStream (connection, statusCode, responseHeaders);
+
+                        // Process redirect & continue as necessary
+                        int status = statusCode[0];
+
+                        if (--numRedirectsToFollow >= 0
+                             && (status == 301 || status == 302 || status == 303 || status == 307))
+                        {
+                            // Assumes only one occurrence of "Location"
+                            int pos1 = responseHeaders.indexOf ("Location:") + 10;
+                            int pos2 = responseHeaders.indexOf ("\n", pos1);
+
+                            if (pos2 > pos1)
+                            {
+                                String newLocation = responseHeaders.substring(pos1, pos2);
+                                // Handle newLocation whether it's absolute or relative
+                                URL baseUrl = new URL (address);
+                                URL newUrl = new URL (baseUrl, newLocation);
+                                String transformedNewLocation = newUrl.toString();
+
+                                if (transformedNewLocation != address)
+                                {
+                                    address = transformedNewLocation;
+                                    // Clear responseHeaders before next iteration
+                                    responseHeaders.delete (0, responseHeaders.length());
+                                    continue;
+                                }
+                            }
+                        }
+
+                        return httpStream;
+                    }
+                    catch (Throwable e)
+                    {
+                        connection.disconnect();
+                    }
                 }
             }
-        }
-        catch (Throwable e) {}
+            catch (Throwable e) {}
 
-        return null;
+            return null;
+        }
     }
 
     public final void launchURL (String url)

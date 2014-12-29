@@ -1087,7 +1087,7 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
 
             deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
 
-            updateAllControls(); // needed in case the type hasn't actally changed
+            updateAllControls(); // needed in case the type hasn't actually changed
         }
     }
     else if (comboBoxThatHasChanged == midiOutputSelector)

@@ -70,7 +70,7 @@ class WebInputStream  : public InputStream
 public:
     WebInputStream (String address, bool isPost, const MemoryBlock& postData,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers, int timeOutMs, StringPairArray* responseHeaders)
+                    const String& headers, int timeOutMs, StringPairArray* responseHeaders, const int numRedirectsToFollow)
         : statusCode (0)
     {
         if (! address.contains ("://"))
@@ -103,7 +103,8 @@ public:
                                                          javaString (headers).get(),
                                                          (jint) timeOutMs,
                                                          statusCodeArray,
-                                                         responseHeaderBuffer.get()));
+                                                         responseHeaderBuffer.get(),
+                                                         (jint) numRedirectsToFollow));
 
         jint* const statusCodeElements = env->GetIntArrayElements (statusCodeArray, 0);
         statusCode = statusCodeElements[0];

@@ -276,8 +276,10 @@ public:
 
     int compareIgnoreCase (const CharPointer_ASCII other) const
     {
-       #if JUCE_WINDOWS
+       #if JUCE_MSVC
         return stricmp (data, other.data);
+       #elif JUCE_MINGW
+        return CharacterFunctions::compareIgnoreCase (*this, other);
        #else
         return strcasecmp (data, other.data);
        #endif
@@ -344,7 +346,7 @@ public:
     /** Parses this string as a 64-bit integer. */
     int64 getIntValue64() const noexcept
     {
-       #if JUCE_LINUX || JUCE_ANDROID
+       #if JUCE_LINUX || JUCE_ANDROID || JUCE_MINGW
         return atoll (data);
        #elif JUCE_WINDOWS
         return _atoi64 (data);

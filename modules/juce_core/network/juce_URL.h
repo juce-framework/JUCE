@@ -140,6 +140,12 @@ public:
     URL withParameter (const String& parameterName,
                        const String& parameterValue) const;
 
+    /** Returns a copy of this URL, with a set of GET or POST parameters added.
+        This is a convenience method, equivalent to calling withParameter for each value.
+        @see withParameter
+    */
+    URL withParameters (const StringPairArray& parametersToAdd) const;
+
     /** Returns a copy of this URL, with a file-upload type parameter added to it.
 
         When performing a POST where one of your parameters is a binary file, this
@@ -260,6 +266,8 @@ public:
                                 in the response will be stored in this array
         @param statusCode       if this is non-null, it will get set to the http status code, if one
                                 is known, or 0 if a code isn't available
+        @param numRedirectsToFollow specifies the number of redirects that will be followed before
+                                returning a response (ignored for Android which follows up to 5 redirects)
         @returns    an input stream that the caller must delete, or a null pointer if there was an
                     error trying to open it.
      */
@@ -269,7 +277,8 @@ public:
                                     String extraHeaders = String(),
                                     int connectionTimeOutMs = 0,
                                     StringPairArray* responseHeaders = nullptr,
-                                    int* statusCode = nullptr) const;
+                                    int* statusCode = nullptr,
+                                    int numRedirectsToFollow = 5) const;
 
 
     //==============================================================================

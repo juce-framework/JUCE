@@ -3429,7 +3429,6 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
         case IBeamCursor:                   cursorName = IDC_IBEAM; break;
         case PointingHandCursor:            cursorName = MAKEINTRESOURCE(32649); break;
         case CrosshairCursor:               cursorName = IDC_CROSS; break;
-        case CopyingCursor:                 break; // can't seem to find one of these in the system list..
 
         case LeftRightResizeCursor:
         case LeftEdgeResizeCursor:
@@ -3462,6 +3461,24 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
             }
 
             return dragHandCursor;
+        }
+
+        case CopyingCursor:
+        {
+            static void* copyCursor = nullptr;
+
+            if (copyCursor == nullptr)
+            {
+                static unsigned char copyCursorData[] = { 71,73,70,56,57,97,21,0,21,0,145,0,0,0,0,0,255,255,255,0,
+                  128,128,255,255,255,33,249,4,1,0,0,3,0,44,0,0,0,0,21,0, 21,0,0,2,72,4,134,169,171,16,199,98,11,79,90,71,161,93,56,111,
+                  78,133,218,215,137,31,82,154,100,200,86,91,202,142,12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,
+                  252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
+                const int copyCursorSize = 119;
+
+                copyCursor = CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3).create();
+            }
+
+            return copyCursor;
         }
 
         default:

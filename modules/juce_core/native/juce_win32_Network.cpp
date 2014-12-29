@@ -40,12 +40,12 @@ class WebInputStream  : public InputStream
 public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
+                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders, int numRedirectsToFollow)
       : statusCode (0), connection (0), request (0),
         address (address_), headers (headers_), postData (postData_), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
-        for (int maxRedirects = 10; --maxRedirects >= 0;)
+        while (numRedirectsToFollow-- >= 0)
         {
             createConnection (progressCallback, progressCallbackContext);
 
@@ -88,9 +88,22 @@ public:
                 {
                     statusCode = (int) status;
 
-                    if (status == 301 || status == 302 || status == 303 || status == 307)
+                    if (numRedirectsToFollow >= 0
+                         && (statusCode == 301 || statusCode == 302 || statusCode == 303 || statusCode == 307))
                     {
-                        const String newLocation (headers["Location"]);
+                        String newLocation (headers["Location"]);
+
+                        // Check whether location is a relative URI - this is an incomplete test for relative path,
+                        // but we'll use it for now (valid protocols for this implementation are http, https & ftp)
+                        if (! (newLocation.startsWithIgnoreCase ("http://")
+                                || newLocation.startsWithIgnoreCase ("https://")
+                                || newLocation.startsWithIgnoreCase ("ftp://")))
+                        {
+                            if (newLocation.startsWithChar ('/'))
+                                newLocation = URL (address).withNewSubPath (newLocation).toString (true);
+                            else
+                                newLocation = address + "/" + newLocation;
+                        }
 
                         if (newLocation.isNotEmpty() && newLocation != address)
                         {

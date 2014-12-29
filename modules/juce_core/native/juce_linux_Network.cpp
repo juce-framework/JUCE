@@ -74,12 +74,13 @@ class WebInputStream  : public InputStream
 public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
+                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
+                    const int maxRedirects)
       : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
         address (address_), headers (headers_), postData (postData_), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
+        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects)
     {
-        statusCode = createConnection (progressCallback, progressCallbackContext);
+        statusCode = createConnection (progressCallback, progressCallbackContext, numRedirectsToFollow);
 
         if (responseHeaders != nullptr && ! isError())
         {
@@ -147,7 +148,7 @@ public:
             {
                 closeSocket();
                 position = 0;
-                statusCode = createConnection (0, 0);
+                statusCode = createConnection (0, 0, numRedirectsToFollow);
             }
 
             skipNextBytes (wantedPos - position);
@@ -168,24 +169,27 @@ private:
     bool finished;
     const bool isPost;
     const int timeOutMs;
+    const int numRedirectsToFollow;
 
-    void closeSocket()
+    void closeSocket (bool resetLevelsOfRedirection = true)
     {
         if (socketHandle >= 0)
             close (socketHandle);
 
         socketHandle = -1;
-        levelsOfRedirection = 0;
+        if (resetLevelsOfRedirection)
+            levelsOfRedirection = 0;
     }
 
-    int createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
+    int createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
+                          const int numRedirectsToFollow)
     {
-        closeSocket();
+        closeSocket (false);
 
         uint32 timeOutTime = Time::getMillisecondCounter();
 
         if (timeOutMs == 0)
-            timeOutTime += 60000;
+            timeOutTime += 30000;
         else if (timeOutMs < 0)
             timeOutTime = 0xffffffff;
         else
@@ -273,28 +277,28 @@ private:
             const int status = responseHeader.fromFirstOccurrenceOf (" ", false, false)
                                              .substring (0, 3).getIntValue();
 
-            //int contentLength = findHeaderItem (lines, "Content-Length:").getIntValue();
-            //bool isChunked = findHeaderItem (lines, "Transfer-Encoding:").equalsIgnoreCase ("chunked");
-
             String location (findHeaderItem (headerLines, "Location:"));
 
-            if (status >= 300 && status < 400
+            if (++levelsOfRedirection <= numRedirectsToFollow
+                 && status >= 300 && status < 400
                  && location.isNotEmpty() && location != address)
             {
-                if (! location.startsWithIgnoreCase ("http://"))
-                    location = "http://" + location;
-
-                if (++levelsOfRedirection <= 3)
+                if (! (location.startsWithIgnoreCase ("http://")
+                        || location.startsWithIgnoreCase ("https://")
+                        || location.startsWithIgnoreCase ("ftp://")))
                 {
-                    address = location;
-                    return createConnection (progressCallback, progressCallbackContext);
+                    // The following is a bit dodgy. Ideally, we should do a proper transform of the relative URI to a target URI
+                    if (location.startsWithChar ('/'))
+                        location = URL (address).withNewSubPath (location).toString (true);
+                    else
+                        location = address + "/" + location;
                 }
+
+                address = location;
+                return createConnection (progressCallback, progressCallbackContext, numRedirectsToFollow);
             }
-            else
-            {
-                levelsOfRedirection = 0;
-                return status;
-            }
+
+            return status;
         }
 
         closeSocket();
@@ -363,10 +367,14 @@ private:
         writeValueIfNotPresent (header, userHeaders, "Connection:", "close");
 
         if (isPost)
+        {
             writeValueIfNotPresent (header, userHeaders, "Content-Length:", String ((int) postData.getSize()));
-
-        header << "\r\n" << userHeaders
-               << "\r\n" << postData;
+            header << userHeaders << "\r\n" << postData;
+        }
+        else
+        {
+            header << "\r\n" << userHeaders << "\r\n";
+        }
 
         return header.getMemoryBlock();
     }

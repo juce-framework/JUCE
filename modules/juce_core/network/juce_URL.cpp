@@ -334,7 +334,8 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      String headers,
                                      const int timeOutMs,
                                      StringPairArray* const responseHeaders,
-                                     int* statusCode) const
+                                     int* statusCode,
+                                     const int numRedirectsToFollow) const
 {
     MemoryBlock headersAndPostData;
 
@@ -350,7 +351,8 @@ InputStream* URL::createInputStream (const bool usePostCommand,
     ScopedPointer<WebInputStream> wi (new WebInputStream (toString (! usePostCommand),
                                                           usePostCommand, headersAndPostData,
                                                           progressCallback, progressCallbackContext,
-                                                          headers, timeOutMs, responseHeaders));
+                                                          headers, timeOutMs, responseHeaders,
+                                                          numRedirectsToFollow));
 
     if (statusCode != nullptr)
         *statusCode = wi->statusCode;
@@ -394,6 +396,17 @@ URL URL::withParameter (const String& parameterName,
 {
     URL u (*this);
     u.addParameter (parameterName, parameterValue);
+    return u;
+}
+
+URL URL::withParameters (const StringPairArray& parametersToAdd) const
+{
+    URL u (*this);
+
+    for (int i = 0; i < parametersToAdd.size(); ++i)
+        u.addParameter (parametersToAdd.getAllKeys()[i],
+                        parametersToAdd.getAllValues()[i]);
+
     return u;
 }
 

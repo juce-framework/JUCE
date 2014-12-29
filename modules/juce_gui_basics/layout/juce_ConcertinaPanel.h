@@ -85,7 +85,7 @@ public:
         expanded to that size. Otherwise, it'll fill as much of the total
         space as possible.
     */
-    bool expandPanelFully (Component* panelComponent, const bool animate);
+    bool expandPanelFully (Component* panelComponent, bool animate);
 
     /** Sets a maximum size for one of the panels. */
     void setMaximumPanelSize (Component* panelComponent, int maximumSize);
@@ -100,7 +100,8 @@ public:
         virtual ~LookAndFeelMethods() {}
 
         virtual void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>& area,
-                                                bool isMouseOver, bool isMouseDown, ConcertinaPanel&, Component&) = 0;
+                                                bool isMouseOver, bool isMouseDown,
+                                                ConcertinaPanel&, Component&) = 0;
     };
 
 private:

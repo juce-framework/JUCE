@@ -82,13 +82,13 @@ protected:
             setValueIfVoid (getLibrarySearchPathValue(), "/usr/X11R6/lib/");
         }
 
-        Value getArchitectureType()                 { return getValue (Ids::linuxArchitecture); }
-        String getArchitectureTypeString() const    { return config [Ids::linuxArchitecture]; }
+        Value getArchitectureType()             { return getValue (Ids::linuxArchitecture); }
+        var getArchitectureTypeVar() const      { return config [Ids::linuxArchitecture]; }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            static const char* const archNames[] = { "(Default)", "32-bit (-m32)", "64-bit (-m64)", "ARM v6", "ARM v7" };
-            const var archFlags[] = { var(), "-m32", "-m64", "-march=armv6", "-march=armv7" };
+            static const char* const archNames[] = { "(Default)", "<None>",       "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" };
+            const var archFlags[]                = { var(),       var (String()), "-m32",         "-m64",           "-march=armv6", "-march=armv7" };
 
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archNames, numElementsInArray (archNames)),
@@ -323,8 +323,8 @@ private:
     String getArchFlags (const BuildConfiguration& config) const
     {
         if (const MakeBuildConfiguration* makeConfig = dynamic_cast<const MakeBuildConfiguration*> (&config))
-            if (makeConfig->getArchitectureTypeString().isNotEmpty())
-                return makeConfig->getArchitectureTypeString();
+            if (! makeConfig->getArchitectureTypeVar().isVoid())
+                return makeConfig->getArchitectureTypeVar();
 
         return "-march=native";
     }

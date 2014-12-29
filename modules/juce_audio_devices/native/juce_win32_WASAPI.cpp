@@ -1208,9 +1208,10 @@ class WASAPIAudioIODeviceType  : public AudioIODeviceType,
                                  private DeviceChangeDetector
 {
 public:
-    WASAPIAudioIODeviceType()
-        : AudioIODeviceType ("Windows Audio"),
+    WASAPIAudioIODeviceType (bool exclusive)
+        : AudioIODeviceType (exclusive ? "Windows Audio (Exclusive Mode)" : "Windows Audio"),
           DeviceChangeDetector (L"Windows Audio"),
+          exclusiveMode (exclusive),
           hasScanned (false)
     {
     }
@@ -1267,7 +1268,6 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const bool useExclusiveMode = false;
         ScopedPointer<WASAPIAudioIODevice> device;
 
         const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
@@ -1279,7 +1279,7 @@ public:
                                                                             : inputDeviceName,
                                               outputDeviceIds [outputIndex],
                                               inputDeviceIds [inputIndex],
-                                              useExclusiveMode);
+                                              exclusiveMode);
 
             if (! device->initialise())
                 device = nullptr;
@@ -1293,7 +1293,7 @@ public:
     StringArray inputDeviceNames, inputDeviceIds;
 
 private:
-    bool hasScanned;
+    bool exclusiveMode, hasScanned;
     ComSmartPtr<IMMDeviceEnumerator> enumerator;
 
     //==============================================================================
@@ -1493,12 +1493,16 @@ struct MMDeviceMasterVolume
 }
 
 //==============================================================================
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI()
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI (bool exclusiveMode)
 {
-    if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
-        return new WasapiClasses::WASAPIAudioIODeviceType();
+   #if ! JUCE_WASAPI_EXCLUSIVE
+    if (exclusiveMode)
+        return nullptr;
+   #endif
 
-    return nullptr;
+    return SystemStats::getOperatingSystemType() >= SystemStats::WinVista
+                ? new WasapiClasses::WASAPIAudioIODeviceType (exclusiveMode)
+                : nullptr;
 }
 
 //==============================================================================
