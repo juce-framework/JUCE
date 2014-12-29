@@ -223,47 +223,57 @@ public:
         {
             switch (inID)
             {
-            case juceFilterObjectPropertyID:
-                outWritable = false;
-                outDataSize = sizeof (void*) * 2;
-                return noErr;
+                case juceFilterObjectPropertyID:
+                    outWritable = false;
+                    outDataSize = sizeof (void*) * 2;
+                    return noErr;
 
-            case kAudioUnitProperty_OfflineRender:
-                outWritable = true;
-                outDataSize = sizeof (UInt32);
-                return noErr;
+                case kAudioUnitProperty_OfflineRender:
+                    outWritable = true;
+                    outDataSize = sizeof (UInt32);
+                    return noErr;
 
-            case kMusicDeviceProperty_InstrumentCount:
-                outDataSize = sizeof (UInt32);
-                outWritable = false;
-                return noErr;
+                case kMusicDeviceProperty_InstrumentCount:
+                    outDataSize = sizeof (UInt32);
+                    outWritable = false;
+                    return noErr;
 
-            case kAudioUnitProperty_CocoaUI:
-               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-                // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
-               #endif
-                {
-                    outDataSize = sizeof (AudioUnitCocoaViewInfo);
+                case kAudioUnitProperty_CocoaUI:
+                   #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+                    // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
+                    if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
+                   #endif
+                    {
+                        outDataSize = sizeof (AudioUnitCocoaViewInfo);
+                        outWritable = true;
+                        return noErr;
+                    }
+
+                    break;
+
+               #if JucePlugin_ProducesMidiOutput
+                case kAudioUnitProperty_MIDIOutputCallbackInfo:
+                    outDataSize = sizeof (CFArrayRef);
+                    outWritable = false;
+                    return noErr;
+
+                case kAudioUnitProperty_MIDIOutputCallback:
+                    outDataSize = sizeof (AUMIDIOutputCallbackStruct);
                     outWritable = true;
                     return noErr;
-                }
+               #endif
 
-                break;
+                case kAudioUnitProperty_ParameterStringFromValue:
+                     outDataSize = sizeof (AudioUnitParameterStringFromValue);
+                     outWritable = false;
+                     return noErr;
 
-           #if JucePlugin_ProducesMidiOutput
-            case kAudioUnitProperty_MIDIOutputCallbackInfo:
-                outDataSize = sizeof (CFArrayRef);
-                outWritable = false;
-                return noErr;
+                case kAudioUnitProperty_ParameterValueFromString:
+                     outDataSize = sizeof (AudioUnitParameterValueFromString);
+                     outWritable = false;
+                     return noErr;
 
-            case kAudioUnitProperty_MIDIOutputCallback:
-                outDataSize = sizeof (AUMIDIOutputCallbackStruct);
-                outWritable = true;
-                return noErr;
-           #endif
-
-            default: break;
+                default: break;
             }
         }
 
@@ -280,7 +290,7 @@ public:
             switch (inID)
             {
                 case juceFilterObjectPropertyID:
-                    ((void**) outData)[0] = (void*) static_cast <AudioProcessor*> (juceFilter);
+                    ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter);
                     ((void**) outData)[1] = (void*) this;
                     return noErr;
 
@@ -305,7 +315,7 @@ public:
                             // (NB: this may be the host's bundle, not necessarily the component's)
                             NSBundle* bundle = [NSBundle bundleForClass: cls.cls];
 
-                            AudioUnitCocoaViewInfo* info = static_cast <AudioUnitCocoaViewInfo*> (outData);
+                            AudioUnitCocoaViewInfo* info = static_cast<AudioUnitCocoaViewInfo*> (outData);
                             info->mCocoaAUViewClass[0] = (CFStringRef) [juceStringToNS (class_getName (cls.cls)) retain];
                             info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [bundle bundlePath]] retain];
                         }
@@ -327,7 +337,40 @@ public:
                 }
                #endif
 
-                default: break;
+                case kAudioUnitProperty_ParameterValueFromString:
+                {
+                    if (AudioUnitParameterValueFromString* pv = (AudioUnitParameterValueFromString*) outData)
+                    {
+                        if (juceFilter != nullptr)
+                        {
+                            if (AudioProcessorParameter* param = juceFilter->getParameters() [(int) pv->inParamID])
+                            {
+                                pv->outValue = param->getValueForText (String::fromCFString (pv->inString));
+                                return noErr;
+                            }
+                        }
+                    }
+                }
+                break;
+
+                case kAudioUnitProperty_ParameterStringFromValue:
+                {
+                    if (AudioUnitParameterStringFromValue* pv = (AudioUnitParameterStringFromValue*) outData)
+                    {
+                        if (juceFilter != nullptr)
+                        {
+                            if (AudioProcessorParameter* param = juceFilter->getParameters() [(int) pv->inParamID])
+                            {
+                                pv->outString = param->getText ((float) *(pv->inValue), 0).toCFString();
+                                return noErr;
+                            }
+                        }
+                    }
+                }
+                break;
+
+                default:
+                    break;
             }
         }
 
@@ -466,7 +509,8 @@ public:
         {
             outParameterInfo.flags = (UInt32) (kAudioUnitParameterFlag_IsWritable
                                                 | kAudioUnitParameterFlag_IsReadable
-                                                | kAudioUnitParameterFlag_HasCFNameString);
+                                                | kAudioUnitParameterFlag_HasCFNameString
+                                                | kAudioUnitParameterFlag_ValuesHaveStrings);
 
             const String name (juceFilter->getParameterName (index));
 
@@ -1144,9 +1188,9 @@ public:
     };
 
     //==============================================================================
-    struct JuceUIViewClass  : public ObjCClass <NSView>
+    struct JuceUIViewClass  : public ObjCClass<NSView>
     {
-        JuceUIViewClass()  : ObjCClass <NSView> ("JUCEAUView_")
+        JuceUIViewClass()  : ObjCClass<NSView> ("JUCEAUView_")
         {
             addIvar<AudioProcessor*> ("filter");
             addIvar<JuceAU*> ("au");
@@ -1235,9 +1279,9 @@ public:
     };
 
     //==============================================================================
-    struct JuceUICreationClass  : public ObjCClass <NSObject>
+    struct JuceUICreationClass  : public ObjCClass<NSObject>
     {
-        JuceUICreationClass()  : ObjCClass <NSObject> ("JUCE_AUCocoaViewClass_")
+        JuceUICreationClass()  : ObjCClass<NSObject> ("JUCE_AUCocoaViewClass_")
         {
             addMethod (@selector (interfaceVersion),             interfaceVersion,    @encode (unsigned int), "@:");
             addMethod (@selector (description),                  description,         @encode (NSString*),    "@:");
@@ -1264,9 +1308,9 @@ public:
             if (AudioUnitGetProperty (inAudioUnit, juceFilterObjectPropertyID,
                                       kAudioUnitScope_Global, 0, pointers, &propertySize) == noErr)
             {
-                if (AudioProcessor* filter = static_cast <AudioProcessor*> (pointers[0]))
+                if (AudioProcessor* filter = static_cast<AudioProcessor*> (pointers[0]))
                     if (AudioProcessorEditor* editorComp = filter->createEditorIfNeeded())
-                        return EditorCompHolder::createViewFor (filter, static_cast <JuceAU*> (pointers[1]), editorComp);
+                        return EditorCompHolder::createViewFor (filter, static_cast<JuceAU*> (pointers[1]), editorComp);
             }
 
             return nil;
@@ -1277,7 +1321,7 @@ private:
     //==============================================================================
     ScopedPointer<AudioProcessor> juceFilter;
     AudioSampleBuffer bufferSpace;
-    HeapBlock <float*> channels;
+    HeapBlock<float*> channels;
     MidiBuffer midiEvents, incomingEvents;
     bool prepared;
     AUChannelInfo channelInfo [numChannelConfigs];
@@ -1378,8 +1422,8 @@ private:
                aren't so careful) */
             jassert (Component::getCurrentlyModalComponent() == nullptr);
 
-            if (JuceAU::EditorCompHolder* editorCompHolder = dynamic_cast <JuceAU::EditorCompHolder*> (windowComp->getChildComponent(0)))
-                if (AudioProcessorEditor* audioProcessEditor = dynamic_cast <AudioProcessorEditor*> (editorCompHolder->getChildComponent(0)))
+            if (JuceAU::EditorCompHolder* editorCompHolder = dynamic_cast<JuceAU::EditorCompHolder*> (windowComp->getChildComponent(0)))
+                if (AudioProcessorEditor* audioProcessEditor = dynamic_cast<AudioProcessorEditor*> (editorCompHolder->getChildComponent(0)))
                     juceFilter->editorBeingDeleted (audioProcessEditor);
 
             windowComp = nullptr;
