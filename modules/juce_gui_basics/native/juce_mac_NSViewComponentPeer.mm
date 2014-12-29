@@ -573,6 +573,7 @@ public:
     void redirectMouseMove (NSEvent* ev)
     {
         currentModifiers = currentModifiers.withoutMouseButtons();
+
         NSPoint windowPos = [ev locationInWindow];
 
        #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
