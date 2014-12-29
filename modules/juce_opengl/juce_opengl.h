@@ -34,6 +34,10 @@
  #define JUCE_OPENGL_ES 1
 #endif
 
+#if ! JUCE_ANDROID
+ #define JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD 1
+#endif
+
 #if JUCE_WINDOWS
  #ifndef APIENTRY
   #define APIENTRY __stdcall
