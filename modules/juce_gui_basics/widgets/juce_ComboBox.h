@@ -266,6 +266,9 @@ public:
     /** Hides the combo box's popup list, if it's currently visible. */
     void hidePopup();
 
+    /** Returns true if the popup menu is currently being shown. */
+    bool isPopupActive() const noexcept                 { return menuActive; }
+
     /** Adds the items in this ComboBox to the given menu. */
     virtual void addItemsToMenu (PopupMenu&) const;
 
