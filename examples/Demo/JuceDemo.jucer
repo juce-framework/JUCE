@@ -290,7 +290,7 @@
       </GROUP>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_ENABLE_LIVE_CONSTANT_EDITOR="enabled"/>
+  <JUCEOPTIONS JUCE_ENABLE_LIVE_CONSTANT_EDITOR="enabled" JUCE_WASAPI_EXCLUSIVE="enabled"/>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
