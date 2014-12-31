@@ -513,6 +513,7 @@ void ComboBox::hidePopup()
     {
         menuActive = false;
         PopupMenu::dismissAllActiveMenus();
+        repaint();
     }
 }
 
