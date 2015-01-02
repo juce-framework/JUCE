@@ -193,47 +193,72 @@ namespace AiffFileHelpers
    #endif
 
     //==============================================================================
-    static String readCATEChunk (InputStream& input, const uint32 length)
+    namespace CATEChunk
     {
-        MemoryBlock mb;
-        input.skipNextBytes (4);
-        input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
-
-        static const char* appleGenres[] =
+        static bool isValidTag (const char* d) noexcept
         {
-            "Rock/Blues",
-            "Electronic/Dance",
-            "Jazz",
-            "Urban",
-            "World/Ethnic",
-            "Cinematic/New Age",
-            "Orchestral",
-            "Country/Folk",
-            "Experimental",
-            "Other Genre",
-            nullptr
-        };
-
-        const StringArray genres (appleGenres);
-        StringArray tagsArray;
-
-        int bytesLeft = (int) mb.getSize();
-        const char* data = static_cast<const char*> (mb.getData());
-
-        while (bytesLeft > 0)
-        {
-            const String tag (CharPointer_UTF8 (data),
-                              CharPointer_UTF8 (data + bytesLeft));
-
-            if (tag.isNotEmpty())
-                tagsArray.add (data);
-
-            const int numBytesInTag = genres.contains (tag) ? 118 : 50;
-            data += numBytesInTag;
-            bytesLeft -= numBytesInTag;
+            return CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (d[0])
+                && CharacterFunctions::isLetterOrDigit (d[1]) && CharacterFunctions::isLowerCase (d[1])
+                && CharacterFunctions::isLetterOrDigit (d[2]) && CharacterFunctions::isLowerCase (d[2]);
         }
 
-        return tagsArray.joinIntoString (";");
+        static bool isAppleGenre (const String& tag) noexcept
+        {
+            static const char* appleGenres[] =
+            {
+                "Rock/Blues",
+                "Electronic/Dance",
+                "Jazz",
+                "Urban",
+                "World/Ethnic",
+                "Cinematic/New Age",
+                "Orchestral",
+                "Country/Folk",
+                "Experimental",
+                "Other Genre"
+            };
+
+            for (int i = 0; i < numElementsInArray (appleGenres); ++i)
+                if (tag == appleGenres[i])
+                    return true;
+
+            return false;
+        }
+
+        static String read (InputStream& input, const uint32 length)
+        {
+            MemoryBlock mb;
+            input.skipNextBytes (4);
+            input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
+
+            StringArray tagsArray;
+
+            const char* data = static_cast<const char*> (mb.getData());
+            const char* dataEnd = data + mb.getSize();
+
+            while (data < dataEnd)
+            {
+                bool isGenre = false;
+
+                if (isValidTag (data))
+                {
+                    const String tag = String (CharPointer_UTF8 (data), CharPointer_UTF8 (dataEnd));
+                    isGenre = isAppleGenre (tag);
+                    tagsArray.add (tag);
+                }
+
+                data += isGenre ? 118 : 50;
+
+                if (data[0] == 0)
+                {
+                    if      (data + 52  < dataEnd && isValidTag (data + 50))   data += 50;
+                    else if (data + 120 < dataEnd && isValidTag (data + 118))  data += 118;
+                    else if (data + 170 < dataEnd && isValidTag (data + 168))  data += 168;
+                }
+            }
+
+            return tagsArray.joinIntoString (";");
+        }
     }
 
     //==============================================================================
@@ -518,7 +543,7 @@ public:
                     else if (type == chunkName ("cate"))
                     {
                         metadataValues.set (AiffAudioFormat::appleTag,
-                                            AiffFileHelpers::readCATEChunk (*input, length));;
+                                            AiffFileHelpers::CATEChunk::read (*input, length));
                     }
                     else if ((hasGotVer && hasGotData && hasGotType)
                               || chunkEnd < input->getPosition()
