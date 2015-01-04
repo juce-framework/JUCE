@@ -202,29 +202,24 @@ int AudioProcessor::getNumParameters()
 
 float AudioProcessor::getParameter (int index)
 {
-    // Vanilla juce code:
-//    if (AudioProcessorParameter* p = getParamChecked (index))
-//        return p->getValue();
-    // Sound Radix branch code:
-    return parameterValueToScaled(index, getParameterValue(index));
+    if (AudioProcessorParameter* p = getParamChecked (index))
+        return p->getValue();
+
+    return 0;
 }
 
 void AudioProcessor::setParameter (int index, float newValue)
 {
-    // Vanilla juce code:
-//    if (AudioProcessorParameter* p = getParamChecked (index))
-//        p->setValue (newValue);
-    // Sound Radix branch code:
-    setParameterValue(index, parameterValueFromScaled(index, newValue));
+    if (AudioProcessorParameter* p = getParamChecked (index))
+        p->setValue (newValue);
 }
 
 float AudioProcessor::getParameterDefaultValue (int index)
 {
-    // Vanilla juce code:
-//    if (AudioProcessorParameter* p = managedParameters[index])
-//        return p->getDefaultValue();
-    // Sound Radix branch code:
-    return parameterValueToScaled (index, parameterInfo (index).defaultVal);
+    if (AudioProcessorParameter* p = managedParameters[index])
+        return p->getDefaultValue();
+
+    return 0;
 }
 
 const String AudioProcessor::getParameterName (int index)
@@ -245,8 +240,7 @@ String AudioProcessor::getParameterName (int index, int maximumStringLength)
 
 const String AudioProcessor::getParameterText (int index)
 {
-    // SR branch code:
-    return parameterValueToText (index, getParameter (index));
+    return getParameterText (index, 1024);
 }
 
 String AudioProcessor::getParameterText (int index, int maximumStringLength)
@@ -479,72 +473,4 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
     timeSigNumerator = 4;
     timeSigDenominator = 4;
     bpm = 120;
-}
-
-String AudioProcessor::parameterValueToText(int param, float value) const {
-    return String(parameterValueFromScaled(param, value), 2);
-}
-
-float AudioProcessor::parameterTextToValue(int param, const String& text) const {
-    return parameterValueToScaled(param, text.getFloatValue());
-}
-
-#if _MSC_VER
-static inline float roundf(float val) { return floorf(val + 0.5f); }
-#endif // _MSC_VER
-
-double AudioProcessor::parameterValueFromScaled(int param, float scaled) const {
-    ParamInfo info = parameterInfo(param);
-    double minVal = info.minVal, maxVal = info.maxVal;
-    if (info.paramType == eParamTypeHz) {
-        minVal = log(minVal);
-        maxVal = log(maxVal);
-    }
-    double val = minVal + (double)scaled * (maxVal - minVal);
-    if (info.paramType == eParamTypeHz)
-        val = exp(val);
-    return val;
-}
-
-float AudioProcessor::parameterValueToScaled(int param, double value) const {
-    ParamInfo info = parameterInfo(param);
-    double minVal = info.minVal, maxVal = info.maxVal;
-    if (info.paramType == eParamTypeHz) {
-        value = log(value);
-        minVal = log(minVal);
-        maxVal = log(maxVal);
-    }
-    return (value - minVal) / (maxVal - minVal);
-}
-
-// Default implementations to Sound Radix extensions to JUCE's AudioProcessor.
-// Note that these use JUCE's methods and the default implementation for those use these extensions,
-// causing an infinite loop + crash when not implementing either.
-
-ParamInfo AudioProcessor::parameterInfo(int i) const
-{
-    ParamInfo result;
-
-    // Override constness..
-    result.name = ((AudioProcessor*)this)->getParameterName(i).toStdString();
-
-    result.key = juce::String(i).toStdString();
-    result.defaultVal = 0.0f;
-    result.minVal = 0.0f;
-    result.maxVal = 1.0f;
-    result.paramType = eParamTypeGeneric;
-    return result;
-};
-
-double AudioProcessor::getParameterValue(int index) const
-{
-    // Override constness..
-    float val = ((AudioProcessor*)this)->getParameter(index);
-
-    return parameterValueFromScaled(index, val);
-}
-
-void AudioProcessor::setParameterValue(int index, double value)
-{
-    setParameter(index, parameterValueToScaled(index, value));
 }

@@ -530,26 +530,9 @@ public:
 
             AUBase::FillInParameterName (outParameterInfo, name.toCFString(), true);
 
-            ParamInfo paramInfo = juceFilter->parameterInfo(inParameterID);
-            outParameterInfo.defaultValue =
-                juceFilter->parameterValueToScaled(
-                    inParameterID,
-                    paramInfo.defaultVal);
             AudioUnitParameterUnit unit = kAudioUnitParameterUnit_Generic;
-            switch(paramInfo.paramType)
-            {
-                case juce::eParamTypeGeneric:
-                    unit = kAudioUnitParameterUnit_Generic;
-                    break;
-                case juce::eParamTypeBool:
-                    unit = kAudioUnitParameterUnit_Boolean;
-                    break;
-                case juce::eParamTypeHz:
-                    unit = kAudioUnitParameterUnit_Hertz;
-                    break;
-                default:
-                    assert(0);
-            }
+            if (juceFilter->getParameterNumSteps (inParameterID) == 1)
+                unit = kAudioUnitParameterUnit_Boolean;
             outParameterInfo.unit = unit;
             if (unit != kAudioUnitParameterUnit_Boolean) {
                 outParameterInfo.flags |= kAudioUnitParameterFlag_ValuesHaveStrings;
