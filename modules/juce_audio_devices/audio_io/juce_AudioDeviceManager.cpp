@@ -92,7 +92,6 @@ AudioDeviceManager::AudioDeviceManager()
     : numInputChansNeeded (0),
       numOutputChansNeeded (2),
       listNeedsScanning (true),
-      useInputNames (false),
       inputLevel (0),
       testSoundPosition (0),
       cpuUsageMs (0),
