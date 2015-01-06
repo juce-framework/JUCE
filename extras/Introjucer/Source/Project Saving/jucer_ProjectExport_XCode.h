@@ -40,8 +40,8 @@ class XCodeProjectExporter  : public ProjectExporter
 {
 public:
     //==============================================================================
-    static const char* getNameMac()                         { return "XCode (MacOSX)"; }
-    static const char* getNameiOS()                         { return "XCode (iOS)"; }
+    static const char* getNameMac()                         { return "Xcode (MacOSX)"; }
+    static const char* getNameiOS()                         { return "Xcode (iOS)"; }
     static const char* getValueTreeTypeName (bool iOS)      { return iOS ? "XCODE_IPHONE" : "XCODE_MAC"; }
 
     //==============================================================================
@@ -1309,7 +1309,7 @@ private:
         };
 
         const ImageType types[] = { { "portrait",  "iphone", "full-screen", "2x" },
-                                    { "portrait",  "iphone", "full-screen", "2x" },
+                                    { "landscape", "iphone", "full-screen", "2x" },
                                     { "portrait",  "ipad",   "full-screen", "1x" },
                                     { "landscape", "ipad",   "full-screen", "1x" },
                                     { "portrait",  "ipad",   "full-screen", "2x" },
@@ -1322,7 +1322,7 @@ private:
             d->setProperty ("orientation", types[i].orientation);
             d->setProperty ("idiom", types[i].idiom);
             d->setProperty ("extent",  types[i].extent);
-            d->setProperty ("minimum-system-version",  "7.0");
+            d->setProperty ("minimum-system-version", "7.0");
             d->setProperty ("scale", types[i].scale);
             images.append (var (d));
         }
