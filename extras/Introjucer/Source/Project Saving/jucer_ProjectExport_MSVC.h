@@ -1536,8 +1536,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v110", "v110_xp", "Windows7.1SDK", nullptr };
-        const var toolsets[]              = { var(),       "v110", "v110_xp", "Windows7.1SDK" };
+        static const char* toolsetNames[] = { "(default)", "v110", "v110_xp", "Windows7.1SDK", "CTP_Nov2013", nullptr };
+        const var toolsets[]              = { var(),       "v110", "v110_xp", "Windows7.1SDK", "CTP_Nov2013" };
 
         props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
                                                 StringArray (toolsetNames),
@@ -1588,8 +1588,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v120", "v120_xp", nullptr };
-        const var toolsets[]              = { var(),       "v120", "v120_xp" };
+        static const char* toolsetNames[] = { "(default)", "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013", nullptr };
+        const var toolsets[]              = { var(),       "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013" };
 
         props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
                                                 StringArray (toolsetNames),
