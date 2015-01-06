@@ -355,7 +355,7 @@ public:
           useExclusiveMode (exclusiveMode),
           sampleRateHasChanged (false)
     {
-        clientEvent = CreateEvent (nullptr, false, false, nullptr));
+        clientEvent = CreateEvent (nullptr, false, false, nullptr);
 
         ComSmartPtr<IAudioClient> tempClient (createClient());
         if (tempClient == nullptr)
