@@ -328,6 +328,11 @@ int refTimeToSamples (const REFERENCE_TIME& t, const double sampleRate) noexcept
     return roundToInt (sampleRate * ((double) t) * 0.0000001);
 }
 
+REFERENCE_TIME samplesToRefTime (const int numSamples, const double sampleRate) noexcept
+{
+    return (REFERENCE_TIME) ((numSamples * 10000.0 * 1000.0 / sampleRate) + 0.5);
+}
+
 void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* const src) noexcept
 {
     memcpy (&dest, src, src->wFormatTag == WAVE_FORMAT_EXTENSIBLE ? sizeof (WAVEFORMATEXTENSIBLE)
@@ -350,7 +355,7 @@ public:
           useExclusiveMode (exclusiveMode),
           sampleRateHasChanged (false)
     {
-        clientEvent = CreateEvent (0, false, false, _T("JuceWASAPI"));
+        clientEvent = CreateEvent (nullptr, false, false, nullptr));
 
         ComSmartPtr<IAudioClient> tempClient (createClient());
         if (tempClient == nullptr)
@@ -376,25 +381,14 @@ public:
 
         rates.addUsingDefaultSort (defaultSampleRate);
 
-        while (useExclusiveMode)
+        if (useExclusiveMode
+             && (findSupportedFormat (tempClient, defaultSampleRate, true, 4, 4, format.dwChannelMask, format)
+                  || findSupportedFormat (tempClient, defaultSampleRate, false, 4, 4, format.dwChannelMask, format)
+                  || findSupportedFormat (tempClient, defaultSampleRate, false, 3, 4, format.dwChannelMask, format)
+                  || findSupportedFormat (tempClient, defaultSampleRate, false, 3, 3, format.dwChannelMask, format)
+                  || findSupportedFormat (tempClient, defaultSampleRate, false, 2, 2, format.dwChannelMask, format)))
         {
-            bool isOK = false;
-
-            for (int bitsToTest = format.Format.wBitsPerSample; bitsToTest >= 16; bitsToTest = ((bitsToTest - 1) & ~7))
-            {
-                format.Samples.wValidBitsPerSample = (bitsToTest + 7) & ~7;
-
-                if (SUCCEEDED (tempClient->IsFormatSupported (AUDCLNT_SHAREMODE_EXCLUSIVE, (WAVEFORMATEX*) &format, 0)))
-                {
-                    isOK = true;
-                    break;
-                }
-            }
-
-            if (isOK || format.SubFormat != KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
-                break;
-
-            format.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;   // Try PCM as a fallback from float..
+            // Got a format that is supported by the device so we can ask what sample rates are supported (in whatever format)
         }
 
         static const int ratesToTest[] = { 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000 };
@@ -562,11 +556,10 @@ private:
         return client;
     }
 
-    bool tryInitialisingWithFormat (const bool useFloat, const int bytesPerSampleToTry, const int bytesPerSampleContainer, const int bufferSizeSamples)
+    bool findSupportedFormat (IAudioClient* clientToUse, double sampleRate, bool useFloat,
+                              int bytesPerSampleToTry, int bytesPerSampleContainer,
+                              DWORD mixFormatChannelMask, WAVEFORMATEXTENSIBLE& format) const
     {
-        WAVEFORMATEXTENSIBLE format;
-        zerostruct (format);
-
         if (numChannels <= 2 && bytesPerSampleToTry <= 2)
         {
             format.Format.wFormatTag = WAVE_FORMAT_PCM;
@@ -588,21 +581,30 @@ private:
 
         WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
 
-        HRESULT hr = client->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
-                                                                 : AUDCLNT_SHAREMODE_SHARED,
-                                                (WAVEFORMATEX*) &format,
-                                                useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
+        HRESULT hr = clientToUse->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
+                                                                      : AUDCLNT_SHAREMODE_SHARED,
+                                                     (WAVEFORMATEX*) &format,
+                                                     useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
         logFailure (hr);
 
         if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
         {
-            copyWavFormat (format, (WAVEFORMATEX*) nearestFormat);
+            copyWavFormat (format, (const WAVEFORMATEX*) nearestFormat);
             hr = S_OK;
         }
 
         CoTaskMemFree (nearestFormat);
+        return check (hr);
+    }
 
-        if (hr == S_OK)
+    bool tryInitialisingWithFormat (const bool useFloat, const int bytesPerSampleToTry,
+                                    const int bytesPerSampleContainer, const int bufferSizeSamples)
+    {
+        WAVEFORMATEXTENSIBLE format;
+        zerostruct (format);
+
+        if (findSupportedFormat (client, sampleRate, useFloat, bytesPerSampleToTry,
+                                 bytesPerSampleContainer, mixFormatChannelMask, format))
         {
             REFERENCE_TIME defaultPeriod = 0, minPeriod = 0;
 
@@ -611,15 +613,14 @@ private:
                 check (client->GetDevicePeriod (&defaultPeriod, &minPeriod));
 
                 if (bufferSizeSamples > 0)
-                    defaultPeriod = jmax (minPeriod, (REFERENCE_TIME) ((10000.0 * 1000.0 / format.Format.nSamplesPerSec * bufferSizeSamples) + 0.5));
+                    defaultPeriod = jmax (minPeriod, samplesToRefTime (bufferSizeSamples, format.Format.nSamplesPerSec));
             }
 
             for (;;)
             {
-                GUID session;
-                hr = client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                         0x40000 /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/,
-                                         defaultPeriod, defaultPeriod, (WAVEFORMATEX*) &format, &session);
+                HRESULT hr = client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
+                                                 0x40000 /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/,
+                                                 defaultPeriod, defaultPeriod, (WAVEFORMATEX*) &format, nullptr);
 
                 if (check (hr))
                 {
@@ -643,7 +644,7 @@ private:
                 client = nullptr;
                 client = createClient();
 
-                defaultPeriod = (REFERENCE_TIME) ((10000.0 * 1000.0 / format.Format.nSamplesPerSec * numFrames) + 0.5);
+                defaultPeriod = samplesToRefTime (numFrames, format.Format.nSamplesPerSec);
             }
         }
 
@@ -1006,6 +1007,20 @@ public:
             return lastError;
         }
 
+        if (useExclusiveMode)
+        {
+            // This is to make sure that the callback uses actualBufferSize in case of exclusive mode
+            if (inputDevice != nullptr && outputDevice != nullptr && inputDevice->actualBufferSize != outputDevice->actualBufferSize)
+            {
+                close();
+                lastError = TRANS("Couldn't open the output device (buffer size mismatch)");
+                return lastError;
+            }
+
+            currentBufferSizeSamples = outputDevice != nullptr ? outputDevice->actualBufferSize
+                                                               : inputDevice->actualBufferSize;
+        }
+
         if (inputDevice != nullptr)   ResetEvent (inputDevice->clientEvent);
         if (outputDevice != nullptr)  ResetEvent (outputDevice->clientEvent);
 
@@ -1124,6 +1139,9 @@ public:
         float** const inputBuffers  = ins.getArrayOfWritePointers();
         float** const outputBuffers = outs.getArrayOfWritePointers();
         ins.clear();
+
+        if (outputDevice != nullptr)
+            SetEvent (outputDevice->clientEvent); // (Equivalent to preloading the output buffer)
 
         while (! threadShouldExit())
         {
