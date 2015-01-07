@@ -921,6 +921,7 @@ TextEditor::TextEditor (const String& name,
       totalNumChars (0),
       caretPosition (0),
       passwordCharacter (passwordChar),
+      keyboardType (TextInputTarget::textKeyboard),
       dragType (notDragging)
 {
     setOpaque (true);
@@ -1292,8 +1293,8 @@ void TextEditor::moveCaret (int newCaretPos)
 {
     if (newCaretPos < 0)
         newCaretPos = 0;
-    else if (newCaretPos > getTotalNumChars())
-        newCaretPos = getTotalNumChars();
+    else
+        newCaretPos = jmin (newCaretPos, getTotalNumChars());
 
     if (newCaretPos != getCaretPosition())
     {
@@ -2128,7 +2129,7 @@ void TextEditor::enablementChanged()
     repaint();
 }
 
-void TextEditor::setTemporaryUnderlining (const Array <Range<int> >& newUnderlinedSections)
+void TextEditor::setTemporaryUnderlining (const Array<Range<int> >& newUnderlinedSections)
 {
     underlinedSections = newUnderlinedSections;
     repaint();

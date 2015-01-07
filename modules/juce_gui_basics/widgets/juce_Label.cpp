@@ -30,6 +30,7 @@ Label::Label (const String& name, const String& labelText)
       justification (Justification::centredLeft),
       border (1, 5, 1, 5),
       minimumHorizontalScale (0.7f),
+      keyboardType (TextEditor::textKeyboard),
       editSingleClick (false),
       editDoubleClick (false),
       lossOfFocusDiscardsChanges (false)
@@ -208,6 +209,7 @@ void Label::showEditor()
     {
         addAndMakeVisible (editor = createEditorComponent());
         editor->setText (getText(), false);
+        editor->setKeyboardType (keyboardType);
         editor->addListener (this);
         editor->grabKeyboardFocus();
 
