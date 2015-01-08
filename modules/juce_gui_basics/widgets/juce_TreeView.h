@@ -102,7 +102,7 @@ public:
         @param index        the item to remove
         @param deleteItem   if true, the item that is removed will also be deleted.
     */
-    void removeSubItem (int index, bool deleteItem = true);
+    void removeSubItem (int index, bool deleteItem = true, bool sendTreeHasChanged = true);
 
     /** Sorts the list of sub-items using a standard array comparator.
 
