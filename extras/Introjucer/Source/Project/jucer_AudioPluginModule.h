@@ -568,28 +568,27 @@ namespace AUHelpers
                 }
             }
 
-            if (exporter.isXcode())
-            {
-                XmlElement plistKey ("key");
-                plistKey.addTextElement ("AudioComponents");
+            XmlElement plistKey ("key");
+            plistKey.addTextElement ("AudioComponents");
 
-                XmlElement plistEntry ("array");
-                XmlElement* dict = plistEntry.createNewChildElement ("dict");
+            XmlElement plistEntry ("array");
+            XmlElement* dict = plistEntry.createNewChildElement ("dict");
 
-                Project& project = exporter.getProject();
+            Project& project = exporter.getProject();
 
-                addPlistDictionaryKey (dict, "name", getPluginManufacturer (project).toString()
-                                                       + ": " + getPluginName (project).toString());
-                addPlistDictionaryKey (dict, "description", getPluginDesc (project).toString());
-                addPlistDictionaryKey (dict, "factoryFunction", getPluginAUExportPrefix (project).toString() + "Factory");
-                addPlistDictionaryKey (dict, "manufacturer", getPluginManufacturerCode (project).toString().trim().substring (0, 4));
-                addPlistDictionaryKey (dict, "type", getAUMainTypeCode (project));
-                addPlistDictionaryKey (dict, "subtype", getPluginCode (project).toString().trim().substring (0, 4));
-                addPlistDictionaryKeyInt (dict, "version", project.getVersionAsHexInteger());
+            addPlistDictionaryKey (dict, "name", getPluginManufacturer (project).toString()
+                                                   + ": " + getPluginName (project).toString());
+            addPlistDictionaryKey (dict, "description", getPluginDesc (project).toString());
+            addPlistDictionaryKey (dict, "factoryFunction", getPluginAUExportPrefix (project).toString() + "Factory");
+            addPlistDictionaryKey (dict, "manufacturer", getPluginManufacturerCode (project).toString().trim().substring (0, 4));
+            addPlistDictionaryKey (dict, "type", getAUMainTypeCode (project));
+            addPlistDictionaryKey (dict, "subtype", getPluginCode (project).toString().trim().substring (0, 4));
+            addPlistDictionaryKeyInt (dict, "version", project.getVersionAsHexInteger());
 
-                exporter.xcodeExtraPListEntries.add (plistKey);
-                exporter.xcodeExtraPListEntries.add (plistEntry);
-            }
+            exporter.xcodeExtraPListEntries.add (plistKey);
+            exporter.xcodeExtraPListEntries.add (plistEntry);
+
+            fixMissingXcodePostBuildScript (exporter);
         }
     }
 }
