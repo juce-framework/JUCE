@@ -465,7 +465,7 @@ public:
         SFicPlugInStemFormats stems;
         GetProcessType()->GetStemFormats (&stems);
 
-        juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs, sampleRate, maxBlockSize);
+        juceFilter->setPlayConfigDetails (1, fNumInputs, 1, fNumOutputs, sampleRate, maxBlockSize);
 
         AddControl (new CPluginControl_OnOff ('bypa', "Master Bypass\nMastrByp\nMByp\nByp", false, true));
         DefineMasterBypassControlIndex (bypassControlIndex);

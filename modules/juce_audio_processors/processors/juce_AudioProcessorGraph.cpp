@@ -868,8 +868,8 @@ void AudioProcessorGraph::Node::prepare (const double sampleRate, const int bloc
         isPrepared = true;
         setParentGraph (graph);
 
-        processor->setPlayConfigDetails (processor->getNumInputChannels(),
-                                         processor->getNumOutputChannels(),
+        processor->setPlayConfigDetails (processor->getNumChannelsPerInputElement(),
+                                         processor->getNumChannelsPerOutputElement(),
                                          sampleRate, blockSize);
 
         processor->prepareToPlay (sampleRate, blockSize);
@@ -1311,18 +1311,19 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
     midiMessages.addEvents (currentMidiOutputBuffer, 0, buffer.getNumSamples(), 0);
 }
 
-const String AudioProcessorGraph::getInputChannelName (int channelIndex) const
+// TODO?
+const String AudioProcessorGraph::getInputChannelName (int channelIndex, int elementIndex) const
 {
     return "Input " + String (channelIndex + 1);
 }
 
-const String AudioProcessorGraph::getOutputChannelName (int channelIndex) const
+const String AudioProcessorGraph::getOutputChannelName (int channelIndex, int elementIndex) const
 {
     return "Output " + String (channelIndex + 1);
 }
 
-bool AudioProcessorGraph::isInputChannelStereoPair (int) const      { return true; }
-bool AudioProcessorGraph::isOutputChannelStereoPair (int) const     { return true; }
+bool AudioProcessorGraph::isInputChannelStereoPair (int, int) const      { return true; }
+bool AudioProcessorGraph::isOutputChannelStereoPair (int, int) const     { return true; }
 bool AudioProcessorGraph::silenceInProducesSilenceOut() const       { return false; }
 double AudioProcessorGraph::getTailLengthSeconds() const            { return 0; }
 bool AudioProcessorGraph::acceptsMidi() const                       { return true; }
@@ -1445,7 +1446,8 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::producesMidi() const
     return type == midiInputNode;
 }
 
-const String AudioProcessorGraph::AudioGraphIOProcessor::getInputChannelName (int channelIndex) const
+// TODO?
+const String AudioProcessorGraph::AudioGraphIOProcessor::getInputChannelName (int channelIndex, int elementIndex) const
 {
     switch (type)
     {
@@ -1457,7 +1459,7 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getInputChannelName (in
     return String();
 }
 
-const String AudioProcessorGraph::AudioGraphIOProcessor::getOutputChannelName (int channelIndex) const
+const String AudioProcessorGraph::AudioGraphIOProcessor::getOutputChannelName (int channelIndex, int elementIndex) const
 {
     switch (type)
     {
@@ -1469,14 +1471,14 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getOutputChannelName (i
     return String();
 }
 
-bool AudioProcessorGraph::AudioGraphIOProcessor::isInputChannelStereoPair (int /*index*/) const
+bool AudioProcessorGraph::AudioGraphIOProcessor::isInputChannelStereoPair (int /*channelIndex*/, int /*elementIndex*/) const
 {
     return type == audioInputNode || type == audioOutputNode;
 }
 
-bool AudioProcessorGraph::AudioGraphIOProcessor::isOutputChannelStereoPair (int index) const
+bool AudioProcessorGraph::AudioGraphIOProcessor::isOutputChannelStereoPair (int channelIndex, int elementIndex) const
 {
-    return isInputChannelStereoPair (index);
+    return isInputChannelStereoPair (channelIndex, elementIndex);
 }
 
 bool AudioProcessorGraph::AudioGraphIOProcessor::isInput() const noexcept           { return type == audioInputNode  || type == midiInputNode; }
@@ -1501,8 +1503,8 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
 
     if (graph != nullptr)
     {
-        setPlayConfigDetails (type == audioOutputNode ? graph->getNumOutputChannels() : 0,
-                              type == audioInputNode  ? graph->getNumInputChannels()  : 0,
+        setPlayConfigDetails (type == audioOutputNode ? graph->getNumChannelsPerOutputElement() : Array<int>(),
+                              type == audioInputNode  ? graph->getNumChannelsPerInputElement() : Array<int>(),
                               getSampleRate(),
                               getBlockSize());
 

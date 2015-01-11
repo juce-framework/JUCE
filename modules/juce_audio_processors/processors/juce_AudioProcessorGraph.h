@@ -310,10 +310,10 @@ public:
         void releaseResources() override;
         void processBlock (AudioSampleBuffer&, MidiBuffer&);
 
-        const String getInputChannelName (int channelIndex) const override;
-        const String getOutputChannelName (int channelIndex) const override;
-        bool isInputChannelStereoPair (int index) const override;
-        bool isOutputChannelStereoPair (int index) const override;
+        const String getInputChannelName (int channelIndex, int elementIndex) const override;
+        const String getOutputChannelName (int channelIndex, int elementIndex) const override;
+        bool isInputChannelStereoPair (int channelIndex, int elementIndex) const override;
+        bool isOutputChannelStereoPair (int channelIndex, int elementIndex) const override;
         bool silenceInProducesSilenceOut() const override;
         double getTailLengthSeconds() const override;
         bool acceptsMidi() const override;
@@ -351,10 +351,10 @@ public:
     void setNonRealtime (bool) noexcept override;
     void setPlayHead (AudioPlayHead*) override;
 
-    const String getInputChannelName (int) const override;
-    const String getOutputChannelName (int) const override;
-    bool isInputChannelStereoPair (int) const override;
-    bool isOutputChannelStereoPair (int) const override;
+    const String getInputChannelName (int, int) const override;
+    const String getOutputChannelName (int, int) const override;
+    bool isInputChannelStereoPair (int channelIndex, int elementIndex) const override;
+    bool isOutputChannelStereoPair (int channelIndex, int elementIndex) const override;
 
     bool silenceInProducesSilenceOut() const override;
     double getTailLengthSeconds() const override;

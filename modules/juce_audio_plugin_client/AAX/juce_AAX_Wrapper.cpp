@@ -796,8 +796,8 @@ struct AAXClasses
                 if (lastBufferSize != bufferSize)
                 {
                     lastBufferSize = bufferSize;
-                    pluginInstance->setPlayConfigDetails (pluginInstance->getNumInputChannels(),
-                                                          pluginInstance->getNumOutputChannels(),
+                    pluginInstance->setPlayConfigDetails (pluginInstance->getNumChannelsPerInputElement(),
+                                                          pluginInstance->getNumChannelsPerOutputElement(),
                                                           sampleRate, bufferSize);
                     pluginInstance->prepareToPlay (sampleRate, bufferSize);
                 }
@@ -886,6 +886,7 @@ struct AAXClasses
 
         void preparePlugin()
         {
+            // TODO - Handle multiple inputs/outputs?
             AAX_EStemFormat inputStemFormat = AAX_eStemFormat_None;
             check (Controller()->GetInputStemFormat (&inputStemFormat));
             const int numberOfInputChannels = getNumChannelsForStemFormat (inputStemFormat);
@@ -896,10 +897,12 @@ struct AAXClasses
 
             AudioProcessor& audioProcessor = getPluginInstance();
 
-            audioProcessor.setSpeakerArrangement (getSpeakerArrangementString (inputStemFormat),
-                                                  getSpeakerArrangementString (outputStemFormat));
+            // TODO - Handle multiple inputs/outputs?
+            audioProcessor.setInputSpeakerArrangement (getSpeakerArrangementString (inputStemFormat));
+            audioProcessor.setOutputSpeakerArrangement (getSpeakerArrangementString (outputStemFormat));
 
-            audioProcessor.setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, lastBufferSize);
+            // TODO - Handle multiple inputs/outputs?
+            audioProcessor.setPlayConfigDetails (1, numberOfInputChannels, 1, numberOfOutputChannels, sampleRate, lastBufferSize);
             audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));

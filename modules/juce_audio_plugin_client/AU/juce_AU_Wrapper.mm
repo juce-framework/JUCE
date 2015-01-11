@@ -113,12 +113,6 @@ class JuceAUBaseClass   : public MusicDeviceBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : MusicDeviceBase (comp, 0, 1) {}
 };
-#elif SrJucePlugin_WantSideChain
-class JuceAUBaseClass   : public AUBase
-{
-public:
-    JuceAUBaseClass (AudioComponentInstance comp)  : AUBase (comp, 2, 1) {}
-};
 #else
 class JuceAUBaseClass   : public AUMIDIEffectBase
 {
@@ -724,9 +718,9 @@ public:
     ComponentResult Initialize() override
     {
        #if ! JucePlugin_IsSynth
-        const int numIns  = findNumInputChannels();
+        const int numIns  = findScopeTotalNumChannels(Inputs());
        #endif
-        const int numOuts = findNumOutputChannels();
+        const int numOuts = findScopeTotalNumChannels(Outputs());
 
         bool isValidChannelConfig = false;
 
@@ -770,30 +764,45 @@ public:
         return JuceAUBaseClass::Reset (inScope, inElement);
     }
 
-    int findNumInputChannels()
+    int findNumChannels(const AUScope& scope, int elementIndex)
     {
        #if ! JucePlugin_IsSynth
-        if (AUInputElement* e = GetInput(0))
+        if (const AUIOElement* e = static_cast<const AUIOElement *>((const_cast<AUScope&>(scope)).SafeGetElement(elementIndex)))
+        {
             return (int) e->GetStreamFormat().mChannelsPerFrame;
+        }
        #endif
 
         return 0;
     }
 
-    int findNumOutputChannels()
+    Array<int> findScopeLayout (const AUScope &scope)
     {
-        if (AUOutputElement* e = GetOutput(0))
-            return (int) e->GetStreamFormat().mChannelsPerFrame;
+        Array<int> result;
+        int numElements = scope.GetNumberOfElements();
+        for (int i = 0; i < numElements; ++i)
+        {
+            result.add(findNumChannels(scope, i));
+        }
+        return result;
+    }
 
-        return 0;
+    int findScopeTotalNumChannels (const AUScope & scope)
+    {
+        Array<int> layout = findScopeLayout(scope);
+        int totalNumChannels = 0;
+        for (int i = 0; i < layout.size(); ++i) {
+            totalNumChannels += layout[i];
+        }
+        return totalNumChannels;
     }
 
     void prepareToPlay()
     {
         if (juceFilter != nullptr)
         {
-            juceFilter->setPlayConfigDetails (findNumInputChannels(),
-                                              findNumOutputChannels(),
+            juceFilter->setPlayConfigDetails (findScopeLayout(Inputs()),
+                                              findScopeLayout(Outputs()),
                                               getSampleRate(),
                                               (int) GetMaxFramesPerSlice());
 
@@ -824,105 +833,100 @@ public:
             if (!HasInput(0))
                 return kAudioUnitErr_NoConnection;
 
-#if SrJucePlugin_WantSideChain
-            const bool hasSideChain = HasInput(1);
-#else // SrJucePlugin_WantSideChain
-            const bool hasSideChain = false;
-#endif // SrJucePlugin_WantSideChain
-            juceFilter->m_hasSideChain = hasSideChain;
-
-            ComponentResult result;
-            AUOutputElement *theOutput = GetOutput(0);	// throws if error
-            AUInputElement *theInput = GetInput(0);
-            result = theInput->PullInput(ioActionFlags, inTimeStamp, 0 /* element */, numSamples);
-            if (noErr != result)
-                return result;
-            if (hasSideChain) {
-                result = GetInput(1)->PullInput(ioActionFlags, inTimeStamp, 1 /* element */, numSamples);
+            // TODO: Check for bigger number of inputs
+            int numInputElements = HasInput(1) ? 2 : 1;
+            // TODO: Check number of outputs
+            int numOutputElements = 1;
+            
+            for (int inputElementIndex = 0; inputElementIndex < numInputElements; ++inputElementIndex)
+            {
+                ComponentResult result = GetInput(inputElementIndex)->PullInput(ioActionFlags, inTimeStamp, inputElementIndex /* element */, numSamples);
                 if (noErr != result)
+                {
                     return result;
+                }
             }
+            
             lastTimeStamp = inTimeStamp;
-
-            const AudioBufferList& inBuffer = theInput->GetBufferList();
-            AudioBufferList& outBuffer = theOutput->GetBufferList();
-
+            
             jassert (prepared);
 
             int numOutChans = 0;
             int nextSpareBufferChan = 0;
             bool needToReinterleave = false;
-            const int numIn = juceFilter->getNumInputChannels() * (HasInput(1) ? 2 : 1);
+
+            const int numIn = juceFilter->getNumInputChannels();
             const int numOut = juceFilter->getNumOutputChannels();
 
-            for (unsigned int i = 0; i < outBuffer.mNumberBuffers; ++i)
+            for (int outputElementIndex = 0; outputElementIndex < numOutputElements && numOutChans < numOut; ++outputElementIndex)
             {
-                AudioBuffer& buf = outBuffer.mBuffers[i];
-
-                if (buf.mNumberChannels == 1)
+                AUOutputElement* outputElement = GetOutput(outputElementIndex);
+                AudioBufferList& outBuffer = outputElement->GetBufferList();
+                for (unsigned int i = 0; i < outBuffer.mNumberBuffers && numOutChans < numOut; ++i)
                 {
-                    channels [numOutChans++] = (float*) buf.mData;
+                    AudioBuffer& buf = outBuffer.mBuffers[i];
+                    
+                    if (buf.mNumberChannels == 1)
+                    {
+                        channels [numOutChans++] = (float*) buf.mData;
+                    }
+                    else
+                    {
+                        // TODO: Multiple outputs interleave?
+                        needToReinterleave = true;
+                        
+                        for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
+                            channels [numOutChans++] = bufferSpace.getWritePointer (nextSpareBufferChan++);
+                    }
                 }
-                else
-                {
-                    needToReinterleave = true;
-
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
-                        channels [numOutChans++] = bufferSpace.getWritePointer (nextSpareBufferChan++);
-                }
-
-                if (numOutChans >= numOut)
-                    break;
             }
 
             int numInChans = 0;
-#if SrJucePlugin_WantSideChain
-            const int numSideChainBufs = HasInput(1) ? GetInput(1)->GetBufferList().mNumberBuffers : 0;
-#else // SrJucePlugin_WantSideChain
-            const int numSideChainBufs = 0;
-#endif // SrJucePlugin_WantSideChain
-            for (unsigned int i = 0; i < inBuffer.mNumberBuffers + numSideChainBufs; ++i)
+            for (int inputElementIndex = 0; inputElementIndex < numInputElements && numInChans < numIn; ++inputElementIndex)
             {
-                const AudioBuffer& buf = i < inBuffer.mNumberBuffers ? inBuffer.mBuffers[i] : GetInput(1)->GetBufferList().mBuffers[i-inBuffer.mNumberBuffers];
-
-                if (buf.mNumberChannels == 1)
+                AUInputElement* inputElement = GetInput(inputElementIndex);
+                const AudioBufferList& inBuffer = inputElement->GetBufferList();
+                for (unsigned int i = 0; i < inBuffer.mNumberBuffers && numInChans < numIn; ++i)
                 {
-                    if (numInChans < numOutChans)
-                        memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
-                    else
-                        channels [numInChans] = (float*) buf.mData;
-
-                    ++numInChans;
-                }
-                else
-                {
-                    // need to de-interleave..
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numInChans < numIn; ++subChan)
+                    const AudioBuffer& buf = inBuffer.mBuffers[i];
+                    
+                    if (buf.mNumberChannels == 1)
                     {
-                        float* dest;
-
-                        if (numInChans < numOutChans)
-                        {
-                            dest = channels [numInChans++];
+                        if (numInChans < numOutChans) {
+                            memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
                         }
-                        else
-                        {
-                            dest = bufferSpace.getWritePointer (nextSpareBufferChan++);
-                            channels [numInChans++] = dest;
+                        else {
+                            channels [numInChans] = (float*) buf.mData;
                         }
-
-                        const float* src = ((const float*) buf.mData) + subChan;
-
-                        for (int j = (int) numSamples; --j >= 0;)
+                        ++numInChans;
+                    }
+                    else
+                    {
+                        // need to de-interleave..
+                        for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numInChans < numIn; ++subChan)
                         {
-                            *dest++ = *src;
-                            src += buf.mNumberChannels;
+                            float* dest;
+                            
+                            if (numInChans < numOutChans)
+                            {
+                                dest = channels [numInChans++];
+                            }
+                            else
+                            {
+                                dest = bufferSpace.getWritePointer (nextSpareBufferChan++);
+                                channels [numInChans++] = dest;
+                            }
+                            
+                            const float* src = ((const float*) buf.mData) + subChan;
+                            
+                            for (int j = (int) numSamples; --j >= 0;)
+                            {
+                                *dest++ = *src;
+                                src += buf.mNumberChannels;
+                            }
                         }
                     }
                 }
-
-                if (numInChans >= numIn)
-                    break;
             }
 
             {
@@ -941,7 +945,8 @@ public:
                     for (int j = 0; j < numOut; ++j)
                         zeromem (channels [j], sizeof (float) * numSamples);
                 }
-               #if !JucePlugin_IsSynth && !SrJucePlugin_WantSideChain
+                // TODO: Valid to just remove the sidechain ifdef?
+               #if !JucePlugin_IsSynth
                 else if (ShouldBypassEffect())
                 {
                     juceFilter->processBlockBypassed (buffer, midiEvents);
@@ -999,21 +1004,27 @@ public:
             {
                 nextSpareBufferChan = 0;
 
-                for (unsigned int i = 0; i < outBuffer.mNumberBuffers; ++i)
+                for (int outputElementIndex = 0; outputElementIndex < numOutputElements; ++outputElementIndex)
                 {
-                    AudioBuffer& buf = outBuffer.mBuffers[i];
-
-                    if (buf.mNumberChannels > 1)
+                    AUOutputElement* outputElement = GetOutput(outputElementIndex);
+                    AudioBufferList& outBuffer = outputElement->GetBufferList();
+                    
+                    for (unsigned int i = 0; i < outBuffer.mNumberBuffers; ++i)
                     {
-                        for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
+                        AudioBuffer& buf = outBuffer.mBuffers[i];
+                        
+                        if (buf.mNumberChannels > 1)
                         {
-                            const float* src = bufferSpace.getReadPointer (nextSpareBufferChan++);
-                            float* dest = ((float*) buf.mData) + subChan;
-
-                            for (int j = (int) numSamples; --j >= 0;)
+                            for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
                             {
-                                *dest = *src++;
-                                dest += buf.mNumberChannels;
+                                const float* src = bufferSpace.getReadPointer (nextSpareBufferChan++);
+                                float* dest = ((float*) buf.mData) + subChan;
+                                
+                                for (int j = (int) numSamples; --j >= 0;)
+                                {
+                                    *dest = *src++;
+                                    dest += buf.mNumberChannels;
+                                }
                             }
                         }
                     }
@@ -1028,7 +1039,6 @@ public:
         return noErr;
     }
 
-#if !SrJucePlugin_WantSideChain
     OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
     {
        #if JucePlugin_WantsMidiInput
@@ -1056,8 +1066,6 @@ public:
         return kAudioUnitErr_PropertyNotInUse;
        #endif
     }
-#endif // !SrJucePlugin_WantSideChain
-
 
     //==============================================================================
     ComponentResult GetPresets (CFArrayRef* outData) const override

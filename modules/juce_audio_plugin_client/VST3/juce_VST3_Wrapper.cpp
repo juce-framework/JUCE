@@ -1376,9 +1376,8 @@ private:
 
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        getPluginInstance().setPlayConfigDetails (getNumChannels (audioInputs),
-                                                  getNumChannels (audioOutputs),
-                                                  sampleRate, bufferSize);
+        // TODO
+        getPluginInstance().setPlayConfigDetails (1, getNumChannels (audioInputs), 1, getNumChannels (audioOutputs), sampleRate, bufferSize);
 
         getPluginInstance().prepareToPlay (sampleRate, bufferSize);
     }

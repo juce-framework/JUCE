@@ -1734,9 +1734,8 @@ public:
         }
 
         // Needed for having the same sample rate in processBlock(); some plugins need this!
-        setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
-                              getNumSingleDirectionChannelsFor (component, false, true),
-                              sampleRate, estimatedSamplesPerBlock);
+        // TODO: Busses or channels?
+        setPlayConfigDetails (1, getNumSingleDirectionChannelsFor (component, true, true), 1, getNumSingleDirectionChannelsFor (component, false, true), sampleRate, estimatedSamplesPerBlock);
 
         setStateForAllBusses (true);
 
@@ -2359,12 +2358,12 @@ private:
 
         warnOnFailure (processor->setupProcessing (setup));
 
+        // TODO: Busses or channels?
         numInputAudioBusses = getNumSingleDirectionBussesFor (component, true, true);
         numOutputAudioBusses = getNumSingleDirectionBussesFor (component, false, true);
 
-        setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
-                              getNumSingleDirectionChannelsFor (component, false, true),
-                              setup.sampleRate, (int) setup.maxSamplesPerBlock);
+        // TODO: Busses or channels?
+        setPlayConfigDetails (1, numInputAudioBusses, 1, numOutputAudioBusses, setup.sampleRate, (int) setup.maxSamplesPerBlock);
     }
 
     //==============================================================================

@@ -169,7 +169,7 @@ public:
 
     void initialise (double initialSampleRate, int initialBlockSize)
     {
-        setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
+        setPlayConfigDetails (1, inputs.size(), 1, outputs.size(), initialSampleRate, initialBlockSize);
 
         if (initialised || plugin == nullptr || handle == nullptr)
             return;
@@ -201,7 +201,7 @@ public:
         for (int i = 0; i < parameters.size(); ++i)
             plugin->connect_port (handle, parameters[i], &(parameterValues[i].scaled));
 
-        setPlayConfigDetails (inputs.size(), outputs.size(), initialSampleRate, initialBlockSize);
+        setPlayConfigDetails (1, inputs.size(), 1, outputs.size(), initialSampleRate, initialBlockSize);
 
         setCurrentProgram (0);
         setLatencySamples (0);

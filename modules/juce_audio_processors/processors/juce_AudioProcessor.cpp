@@ -32,12 +32,9 @@ void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::Wrapp
 AudioProcessor::AudioProcessor()
     : wrapperType (wrapperTypeBeingCreated.get()),
       m_isInitialized (false),
-      m_hasSideChain (false),
       playHead (nullptr),
       sampleRate (0),
       blockSize (0),
-      numInputChannels (0),
-      numOutputChannels (0),
       latencySamples (0),
       suspended (false),
       nonRealtime (false)
@@ -57,6 +54,30 @@ AudioProcessor::~AudioProcessor()
    #endif
 }
 
+int AudioProcessor::getNumInputChannels(int elementIndex) const noexcept {
+    if (elementIndex != -1) {
+        return numChannelsPerInputElement[elementIndex];
+    }
+    
+    int totalNumChannels = 0;
+    for (int i = 0; i < numChannelsPerInputElement.size(); ++i) {
+        totalNumChannels += numChannelsPerInputElement[i];
+    }
+    return totalNumChannels;
+}
+
+int AudioProcessor::getNumOutputChannels(int elementIndex) const noexcept {
+    if (elementIndex != -1) {
+        return numChannelsPerOutputElement[elementIndex];
+    }
+    
+    int totalNumChannels = 0;
+    for (int i = 0; i < numChannelsPerOutputElement.size(); ++i) {
+        totalNumChannels += numChannelsPerOutputElement[i];
+    }
+    return totalNumChannels;
+}
+
 void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead)
 {
     playHead = newPlayHead;
@@ -74,29 +95,62 @@ void AudioProcessor::removeListener (AudioProcessorListener* const listenerToRem
     listeners.removeFirstMatchingValue (listenerToRemove);
 }
 
-void AudioProcessor::setPlayConfigDetails (const int newNumIns,
-                                           const int newNumOuts,
+void AudioProcessor::setPlayConfigDetails (const Array<int>& newNumChannelsPerInputElement,
+                                           const Array<int>& newNumChannelsPerOutputElement,
                                            const double newSampleRate,
                                            const int newBlockSize) noexcept
 {
     sampleRate = newSampleRate;
     blockSize  = newBlockSize;
 
-    if (numInputChannels != newNumIns || numOutputChannels != newNumOuts)
-    {
-        numInputChannels  = newNumIns;
-        numOutputChannels = newNumOuts;
-
+    bool layoutChanged = false;
+    
+    if (newNumChannelsPerInputElement != numChannelsPerInputElement) {
+        numChannelsPerInputElement = newNumChannelsPerInputElement;
+        inputSpeakerArrangements.resize(numChannelsPerInputElement.size());
+        layoutChanged = true;
+    }
+    
+    if (newNumChannelsPerOutputElement != numChannelsPerOutputElement) {
+        numChannelsPerOutputElement = newNumChannelsPerOutputElement;
+        outputSpeakerArrangements.resize(numChannelsPerOutputElement.size());
+        layoutChanged = true;
+    }
+    
+    if (layoutChanged) {
+        inputOutputLayoutChanged();
         numChannelsChanged();
     }
 }
 
+void AudioProcessor::setPlayConfigDetails (const int newNumInputElements,
+                                           const int newNumInputChannelsEachElement,
+                                           const int newNumOutputElements,
+                                           const int newNumOutputChannelsEachElement,
+                                           const double newSampleRate,
+                                           const int newBlockSize) noexcept
+{
+    Array<int> newNumChannelsPerInputElement;
+    newNumChannelsPerInputElement.insertMultiple(0, newNumInputChannelsEachElement, newNumInputElements);
+    
+    Array<int> newNumChannelsPerOutputElement;
+    newNumChannelsPerOutputElement.insertMultiple(0, newNumOutputChannelsEachElement, newNumOutputElements);
+    
+    return setPlayConfigDetails(newNumChannelsPerInputElement, newNumChannelsPerOutputElement, newSampleRate, newBlockSize);
+}
+
+void AudioProcessor::inputOutputLayoutChanged() {}
+
 void AudioProcessor::numChannelsChanged() {}
 
-void AudioProcessor::setSpeakerArrangement (const String& inputs, const String& outputs)
+void AudioProcessor::setInputSpeakerArrangement (const String& inputs, int elementIndex)
 {
-    inputSpeakerArrangement  = inputs;
-    outputSpeakerArrangement = outputs;
+    inputSpeakerArrangements[elementIndex] = inputs;
+}
+
+void AudioProcessor::setOutputSpeakerArrangement (const String& outputs, int elementIndex)
+{
+    outputSpeakerArrangements[elementIndex] = outputs;
 }
 
 void AudioProcessor::setNonRealtime (const bool newNonRealtime) noexcept
