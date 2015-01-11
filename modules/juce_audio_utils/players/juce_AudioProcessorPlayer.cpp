@@ -44,7 +44,8 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
     {
         if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
         {
-            processorToPlay->setPlayConfigDetails (numInputChans, numOutputChans, sampleRate, blockSize);
+            // TODO?
+            processorToPlay->setPlayConfigDetails (1, numInputChans, 1, numOutputChans, sampleRate, blockSize);
             processorToPlay->prepareToPlay (sampleRate, blockSize);
         }
 
