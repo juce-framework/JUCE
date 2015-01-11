@@ -25,6 +25,7 @@
 #ifndef __JUCER_IMAGERESOURCEPROPERTY_JUCEHEADER__
 #define __JUCER_IMAGERESOURCEPROPERTY_JUCEHEADER__
 
+#include "../../Project Saving/jucer_ResourceFile.h"
 
 //==============================================================================
 /**
@@ -44,12 +45,7 @@ public:
           element (e), document (doc),
           allowChoiceOfNoResource (allowChoiceOfNoResource_)
     {
-        choices.add ("-- create a new image resource -- ");
-        choices.add (String::empty);
-        if (allowChoiceOfNoResource_)
-            choices.add ("<< none >>");
-        choices.addArray (doc.getResources().getResourceNames());
-
+        refreshChoices();
         doc.addChangeListener (this);
     }
 
@@ -59,13 +55,7 @@ public:
           element (e), document (*e->getDocument()),
           allowChoiceOfNoResource (allowChoiceOfNoResource_)
     {
-        choices.add ("-- create a new image resource -- ");
-        choices.add (String::empty);
-        if (allowChoiceOfNoResource_)
-            choices.add ("<< none >>");
-
-        choices.addArray (document.getResources().getResourceNames());
-
+        refreshChoices();
         document.addChangeListener (this);
     }
 
@@ -95,7 +85,7 @@ public:
         }
         else
         {
-            if (choices[newIndex] == "<< none >>" && allowChoiceOfNoResource)
+            if (choices[newIndex] == getNoneText() && allowChoiceOfNoResource)
                 setResource (String::empty);
             else
                 setResource (choices [newIndex]);
@@ -114,6 +104,36 @@ public:
     {
         refresh();
     }
+
+    void refreshChoices()
+    {
+        choices.clear();
+
+        choices.add ("-- create a new image resource -- ");
+        choices.add (String::empty);
+
+        if (allowChoiceOfNoResource)
+            choices.add (getNoneText());
+
+        choices.addArray (document.getResources().getResourceNames());
+
+        const SourceCodeDocument& cpp = document.getCppDocument();
+
+        if (Project* project = cpp.getProject())
+        {
+            ResourceFile resourceFile (*project);
+
+            for (int i = 0; i < resourceFile.getNumFiles(); ++i)
+            {
+                const File& file = resourceFile.getFile(i);
+
+                if (ImageFileFormat::findImageFormatForFileExtension(file))
+                    choices.add (resourceFile.getClassName() + "::" + resourceFile.getDataVariableFor (file));
+            }
+        }
+    }
+
+    const char* getNoneText() noexcept      { return "<< none >>"; }
 
 protected:
     mutable Component::SafePointer<ElementType> element;

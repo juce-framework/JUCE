@@ -89,14 +89,14 @@ char* MemoryOutputStream::prepareToWrite (size_t numBytes)
         if (storageNeeded >= blockToUse->getSize())
             blockToUse->ensureSize ((storageNeeded + jmin (storageNeeded / 2, (size_t) (1024 * 1024)) + 32) & ~31u);
 
-        data = static_cast <char*> (blockToUse->getData());
+        data = static_cast<char*> (blockToUse->getData());
     }
     else
     {
         if (storageNeeded > availableSize)
             return nullptr;
 
-        data = static_cast <char*> (externalData);
+        data = static_cast<char*> (externalData);
     }
 
     char* const writePointer = data + position;
@@ -157,7 +157,7 @@ const void* MemoryOutputStream::getData() const noexcept
         return externalData;
 
     if (blockToUse->getSize() > size)
-        static_cast <char*> (blockToUse->getData()) [size] = 0;
+        static_cast<char*> (blockToUse->getData()) [size] = 0;
 
     return blockToUse->getData();
 }
@@ -194,7 +194,7 @@ int64 MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNu
 
 String MemoryOutputStream::toUTF8() const
 {
-    const char* const d = static_cast <const char*> (getData());
+    const char* const d = static_cast<const char*> (getData());
     return String (CharPointer_UTF8 (d), CharPointer_UTF8 (d + getDataSize()));
 }
 

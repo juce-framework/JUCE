@@ -186,7 +186,7 @@ public:
 
 private:
     Timer* volatile firstTimer;
-    Atomic <int> callbackNeeded;
+    Atomic<int> callbackNeeded;
 
     struct CallTimersMessage  : public MessageManager::MessageBase
     {

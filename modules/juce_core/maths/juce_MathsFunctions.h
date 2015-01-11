@@ -119,6 +119,22 @@ inline Type jmin (const Type a, const Type b, const Type c)                     
 template <typename Type>
 inline Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
 
+/** Remaps a normalised value (between 0 and 1) to a target range.
+    This effectively returns (targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin))
+*/
+template <class Type>
+static Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
+{
+    return targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin);
+}
+
+/** Remaps a value from a source range to a target range. */
+template <class Type>
+static Type jmap (Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targetRangeMin, Type targetRangeMax)
+{
+    return targetRangeMin + ((targetRangeMax - targetRangeMin) * (sourceValue - sourceRangeMin)) / (sourceRangeMax - sourceRangeMin);
+}
+
 /** Scans an array of values, returning the minimum value that it contains. */
 template <typename Type>
 const Type findMinimum (const Type* data, int numValues)

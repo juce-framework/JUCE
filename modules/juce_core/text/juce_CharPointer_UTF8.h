@@ -458,9 +458,9 @@ public:
     }
 
     /** Returns true if the first character of this string is whitespace. */
-    bool isWhitespace() const noexcept      { return *data == ' ' || (*data <= 13 && *data >= 9); }
+    bool isWhitespace() const noexcept      { const CharType c = *data; return c == ' ' || (c <= 13 && c >= 9); }
     /** Returns true if the first character of this string is a digit. */
-    bool isDigit() const noexcept           { return *data >= '0' && *data <= '9'; }
+    bool isDigit() const noexcept           { const CharType c = *data; return c >= '0' && c <= '9'; }
     /** Returns true if the first character of this string is a letter. */
     bool isLetter() const noexcept          { return CharacterFunctions::isLetter (operator*()) != 0; }
     /** Returns true if the first character of this string is a letter or digit. */

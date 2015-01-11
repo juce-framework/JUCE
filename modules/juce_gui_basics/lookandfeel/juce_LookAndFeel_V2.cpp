@@ -1475,6 +1475,8 @@ Label* LookAndFeel_V2::createSliderTextBox (Slider& slider)
 
     l->setColour (TextEditor::highlightColourId, slider.findColour (Slider::textBoxHighlightColourId));
 
+    l->setKeyboardType (TextInputTarget::numericKeyboard);
+
     return l;
 }
 

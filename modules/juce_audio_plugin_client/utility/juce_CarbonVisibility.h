@@ -46,7 +46,7 @@ static pascal OSStatus windowVisibilityBodge (EventHandlerCallRef, EventRef e, v
     return eventNotHandledErr;
 }
 
-static void attachWindowHidingHooks (Component* comp, void* hostWindowRef, NSWindow* nsWindow)
+inline void attachWindowHidingHooks (Component* comp, void* hostWindowRef, NSWindow* nsWindow)
 {
     const EventTypeSpec eventsToCatch[] =
     {
@@ -64,7 +64,7 @@ static void attachWindowHidingHooks (Component* comp, void* hostWindowRef, NSWin
     comp->getProperties().set ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 }
 
-static void removeWindowHidingHooks (Component* comp)
+inline void removeWindowHidingHooks (Component* comp)
 {
     if (comp != nullptr)
         RemoveEventHandler ((EventHandlerRef) (void*) (pointer_sized_int)
@@ -72,8 +72,8 @@ static void removeWindowHidingHooks (Component* comp)
 }
 
 #elif JUCE_MAC
- static void attachWindowHidingHooks (void*, void*, void*) {}
- static void removeWindowHidingHooks (void*) {}
+ inline void attachWindowHidingHooks (void*, void*, void*) {}
+ inline void removeWindowHidingHooks (void*) {}
 #endif
 
 #endif   // JUCE_CARBONVISIBILITY_H_INCLUDED

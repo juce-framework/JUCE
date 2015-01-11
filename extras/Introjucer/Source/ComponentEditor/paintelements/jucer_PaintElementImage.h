@@ -100,7 +100,7 @@ public:
         {
             if (dynamic_cast <const DrawableImage*> (getDrawable()) != 0)
             {
-                const String imageVariable ("cachedImage_" + resourceName);
+                const String imageVariable ("cachedImage_" + resourceName.replace ("::", "_"));
 
                 code.addImageResourceLoader (imageVariable, resourceName);
 

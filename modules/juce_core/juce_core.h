@@ -48,6 +48,15 @@
  #endif
 #endif
 
+#ifdef _MSC_VER
+ #pragma warning (push)
+ // Disable warnings for long class names, padding, and undefined preprocessor definitions.
+ #pragma warning (disable: 4251 4786 4668 4820)
+ #ifdef __INTEL_COMPILER
+  #pragma warning (disable: 1125)
+ #endif
+#endif
+
 //==============================================================================
 #include "system/juce_TargetPlatform.h"
 
@@ -131,14 +140,6 @@
 
 //=============================================================================
 //=============================================================================
-#if JUCE_MSVC
- #pragma warning (disable: 4251) // (DLL build warning, must be disabled before pushing the warning state)
- #pragma warning (push)
- #pragma warning (disable: 4786) // (long class name warning)
- #ifdef __INTEL_COMPILER
-  #pragma warning (disable: 1125)
- #endif
-#endif
 
 #include "system/juce_StandardHeader.h"
 
