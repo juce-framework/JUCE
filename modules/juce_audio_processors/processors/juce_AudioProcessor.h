@@ -182,8 +182,8 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumInputChannels(int elementIndex = -1) const noexcept;
-
+    int getNumInputChannels(int elementIndex) const noexcept { return numChannelsPerInputElement[elementIndex]; }
+    
     /** Returns the number of output channels that the host will be sending the filter.
 
         If writing a plugin, your configuration macros should specify the number of
@@ -193,8 +193,12 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumOutputChannels(int elementIndex = -1) const noexcept;
+    int getNumOutputChannels(int elementIndex) const noexcept { return numChannelsPerOutputElement[elementIndex]; }
 
+    // TODO: Comment
+    int getNumInputChannelsTotal() const noexcept;
+    int getNumOutputChannelsTotal() const noexcept;
+    
     /** Returns a string containing a whitespace-separated list of speaker types
         corresponding to each input channel.
         For example in a 5.1 arrangement, the string may be "L R C Lfe Ls Rs"

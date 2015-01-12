@@ -733,8 +733,8 @@ struct AAXClasses
         void process (const float* const* inputs, float* const* outputs, const int bufferSize,
                       const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
         {
-            const int numIns  = pluginInstance->getNumInputChannels();
-            const int numOuts = pluginInstance->getNumOutputChannels();
+            const int numIns  = pluginInstance->getNumInputChannelsTotal();
+            const int numOuts = pluginInstance->getNumOutputChannelsTotal();
 
             if (numOuts >= numIns)
             {

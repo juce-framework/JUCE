@@ -498,8 +498,8 @@ public:
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
         midiEvents.ensureSize (2048);
 
-        channels.calloc (jmax (juceFilter->getNumInputChannels(),
-                               juceFilter->getNumOutputChannels()));
+        channels.calloc (jmax (juceFilter->getNumInputChannelsTotal(),
+                               juceFilter->getNumOutputChannelsTotal()));
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
@@ -545,8 +545,8 @@ public:
         {
             const ScopedLock sl (juceFilter->getCallbackLock());
 
-            const int numIn = juceFilter->getNumInputChannels();
-            const int numOut = juceFilter->getNumOutputChannels();
+            const int numIn = juceFilter->getNumInputChannelsTotal();
+            const int numOut = juceFilter->getNumOutputChannelsTotal();
             const int totalChans = jmax (numIn, numOut);
 
             if (juceFilter->isSuspended())

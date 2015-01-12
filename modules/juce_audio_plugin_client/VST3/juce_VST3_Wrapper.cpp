@@ -1261,7 +1261,7 @@ public:
         if (totalChans != 0)
             buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
         else if (getHostType().isWavelab()
-                  && pluginInstance->getNumInputChannels() + pluginInstance->getNumOutputChannels() > 0)
+                  && pluginInstance->getNumInputChannelsTotal() + pluginInstance->getNumOutputChannelsTotal() > 0)
             return kResultFalse;
 
         {

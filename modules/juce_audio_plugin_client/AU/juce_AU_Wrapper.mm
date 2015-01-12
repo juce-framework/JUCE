@@ -113,6 +113,14 @@ class JuceAUBaseClass   : public MusicDeviceBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : MusicDeviceBase (comp, 0, 1) {}
 };
+#elif 1
+// TODO: Support arbitrary number of input and output elements
+// TODO? Derive from AUMIDIEffectBase (need to change it to support more than one input element)
+class JuceAUBaseClass   : public AUBase
+{
+public:
+    JuceAUBaseClass (AudioComponentInstance comp)  : AUBase (comp, 2, 1) {}
+};
 #else
 class JuceAUBaseClass   : public AUMIDIEffectBase
 {
@@ -179,12 +187,19 @@ public:
 
         CAStreamBasicDescription streamDescription;
         streamDescription.mSampleRate = getSampleRate();
+        
         streamDescription.SetCanonical ((UInt32) channelConfigs[0][1], false);
-        Outputs().GetIOElement(0)->SetStreamFormat (streamDescription);
+        for (int i = 0; i < Outputs().GetNumberOfElements(); ++i)
+        {
+            Outputs().GetIOElement(i)->SetStreamFormat (streamDescription);
+        }
 
        #if ! JucePlugin_IsSynth
         streamDescription.SetCanonical ((UInt32) channelConfigs[0][0], false);
-        Inputs().GetIOElement(0)->SetStreamFormat (streamDescription);
+        for (int i = 0; i < Inputs().GetNumberOfElements(); ++i)
+        {
+            Inputs().GetIOElement(i)->SetStreamFormat (streamDescription);
+        }
        #endif
     }
 
@@ -718,9 +733,12 @@ public:
     ComponentResult Initialize() override
     {
        #if ! JucePlugin_IsSynth
-        const int numIns  = findScopeTotalNumChannels(Inputs());
+        const int numIns = findNumChannels(Inputs(), 0);
+        if (numIns == 0) {
+            return kAudioUnitErr_FormatNotSupported;
+        }
        #endif
-        const int numOuts = findScopeTotalNumChannels(Outputs());
+        const int numOuts = findNumChannels(Outputs(), 0);
 
         bool isValidChannelConfig = false;
 
@@ -767,12 +785,13 @@ public:
     int findNumChannels(const AUScope& scope, int elementIndex)
     {
        #if ! JucePlugin_IsSynth
-        if (const AUIOElement* e = static_cast<const AUIOElement *>((const_cast<AUScope&>(scope)).SafeGetElement(elementIndex)))
+        const AUElement* e = scope.GetElement(elementIndex);
+        if (e != nullptr)
         {
-            return (int) e->GetStreamFormat().mChannelsPerFrame;
+            return (int) static_cast<const AUIOElement *>(e)->GetStreamFormat().mChannelsPerFrame;
         }
        #endif
-
+        // TODO: Synths can have side chains?
         return 0;
     }
 
@@ -787,16 +806,6 @@ public:
         return result;
     }
 
-    int findScopeTotalNumChannels (const AUScope & scope)
-    {
-        Array<int> layout = findScopeLayout(scope);
-        int totalNumChannels = 0;
-        for (int i = 0; i < layout.size(); ++i) {
-            totalNumChannels += layout[i];
-        }
-        return totalNumChannels;
-    }
-
     void prepareToPlay()
     {
         if (juceFilter != nullptr)
@@ -806,7 +815,7 @@ public:
                                               getSampleRate(),
                                               (int) GetMaxFramesPerSlice());
 
-            bufferSpace.setSize (juceFilter->getNumInputChannels()*2 + juceFilter->getNumOutputChannels(),
+            bufferSpace.setSize (juceFilter->getNumInputChannelsTotal() + juceFilter->getNumOutputChannelsTotal(),
                                  (int) GetMaxFramesPerSlice() + 32);
 
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
@@ -816,8 +825,8 @@ public:
             incomingEvents.ensureSize (2048);
             incomingEvents.clear();
 
-            channels.calloc ((size_t) jmax (juceFilter->getNumInputChannels()*2,
-                                            juceFilter->getNumOutputChannels()) + 4);
+            channels.calloc ((size_t) jmax (juceFilter->getNumInputChannelsTotal(),
+                                            juceFilter->getNumOutputChannelsTotal()) + 4);
 
             prepared = true;
         }
@@ -832,14 +841,17 @@ public:
         {
             if (!HasInput(0))
                 return kAudioUnitErr_NoConnection;
+            
+            Array<int> newInputScopeLayout = findScopeLayout(Inputs());
 
-            // TODO: Check for bigger number of inputs
-            int numInputElements = HasInput(1) ? 2 : 1;
-            // TODO: Check number of outputs
-            int numOutputElements = 1;
+            int numInputElements = Inputs().GetNumberOfElements();
+            int numOutputElements = Outputs().GetNumberOfElements();
             
             for (int inputElementIndex = 0; inputElementIndex < numInputElements; ++inputElementIndex)
             {
+                if (!HasInput(inputElementIndex)) {
+                    continue;
+                }
                 ComponentResult result = GetInput(inputElementIndex)->PullInput(ioActionFlags, inTimeStamp, inputElementIndex /* element */, numSamples);
                 if (noErr != result)
                 {
@@ -855,8 +867,8 @@ public:
             int nextSpareBufferChan = 0;
             bool needToReinterleave = false;
 
-            const int numIn = juceFilter->getNumInputChannels();
-            const int numOut = juceFilter->getNumOutputChannels();
+            const int numIn = juceFilter->getNumInputChannelsTotal();
+            const int numOut = juceFilter->getNumOutputChannelsTotal();
 
             for (int outputElementIndex = 0; outputElementIndex < numOutputElements && numOutChans < numOut; ++outputElementIndex)
             {
@@ -881,9 +893,25 @@ public:
                 }
             }
 
+            // TODO: Assert all output channels have valid pointers? Add isActive to outputs?
+            
             int numInChans = 0;
             for (int inputElementIndex = 0; inputElementIndex < numInputElements && numInChans < numIn; ++inputElementIndex)
             {
+                if (!HasInput(inputElementIndex)) {
+                    int numMissingChannels = juceFilter->getNumInputChannels(inputElementIndex);
+                    for (int i = 0; i < numMissingChannels && numInChans < numIn; ++i)
+                    {
+                        if (numInChans >= numOutChans)
+                        {
+                            channels[numInChans] = bufferSpace.getWritePointer (nextSpareBufferChan++);
+                        }
+                        zeromem(channels[numInChans], numSamples * sizeof(float));
+                        ++numInChans;
+                    }
+                    continue;
+                }
+                
                 AUInputElement* inputElement = GetInput(inputElementIndex);
                 const AudioBufferList& inBuffer = inputElement->GetBufferList();
                 for (unsigned int i = 0; i < inBuffer.mNumberBuffers && numInChans < numIn; ++i)
@@ -928,6 +956,8 @@ public:
                     }
                 }
             }
+            
+            jassert(numInChans == numIn);
 
             {
                 const ScopedLock sl (incomingMidiLock);
@@ -945,13 +975,13 @@ public:
                     for (int j = 0; j < numOut; ++j)
                         zeromem (channels [j], sizeof (float) * numSamples);
                 }
-                // TODO: Valid to just remove the sidechain ifdef?
-               #if !JucePlugin_IsSynth
-                else if (ShouldBypassEffect())
-                {
-                    juceFilter->processBlockBypassed (buffer, midiEvents);
-                }
-               #endif
+                // TODO? Restore once we are based on AUMIDIEffectBase and not AUBase
+//               #if !JucePlugin_IsSynth
+//                else if (ShouldBypassEffect())
+//                {
+//                    juceFilter->processBlockBypassed (buffer, midiEvents);
+//                }
+//               #endif
                 else
                 {
                     juceFilter->processBlock (buffer, midiEvents);
@@ -1039,33 +1069,35 @@ public:
         return noErr;
     }
 
-    OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
-    {
-       #if JucePlugin_WantsMidiInput
-        const ScopedLock sl (incomingMidiLock);
-        const juce::uint8 data[] = { (juce::uint8) (nStatus | inChannel),
-                                     (juce::uint8) inData1,
-                                     (juce::uint8) inData2 };
+// TODO? Restore once we are based on AUMIDIEffectBase and not AUBase
 
-        incomingEvents.addEvent (data, 3, (int) inStartFrame);
-        return noErr;
-       #else
-        (void) nStatus; (void) inChannel; (void) inData1; (void) inData2; (void) inStartFrame;
-        return kAudioUnitErr_PropertyNotInUse;
-       #endif
-    }
-
-    OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
-    {
-       #if JucePlugin_WantsMidiInput
-        const ScopedLock sl (incomingMidiLock);
-        incomingEvents.addEvent (inData, (int) inLength, 0);
-        return noErr;
-       #else
-        (void) inData; (void) inLength;
-        return kAudioUnitErr_PropertyNotInUse;
-       #endif
-    }
+//    OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
+//    {
+//       #if JucePlugin_WantsMidiInput
+//        const ScopedLock sl (incomingMidiLock);
+//        const juce::uint8 data[] = { (juce::uint8) (nStatus | inChannel),
+//                                     (juce::uint8) inData1,
+//                                     (juce::uint8) inData2 };
+//
+//        incomingEvents.addEvent (data, 3, (int) inStartFrame);
+//        return noErr;
+//       #else
+//        (void) nStatus; (void) inChannel; (void) inData1; (void) inData2; (void) inStartFrame;
+//        return kAudioUnitErr_PropertyNotInUse;
+//       #endif
+//    }
+//
+//    OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
+//    {
+//       #if JucePlugin_WantsMidiInput
+//        const ScopedLock sl (incomingMidiLock);
+//        incomingEvents.addEvent (inData, (int) inLength, 0);
+//        return noErr;
+//       #else
+//        (void) inData; (void) inLength;
+//        return kAudioUnitErr_PropertyNotInUse;
+//       #endif
+//    }
 
     //==============================================================================
     ComponentResult GetPresets (CFArrayRef* outData) const override
