@@ -79,6 +79,7 @@ public:
     {
         textKeyboard = 0,
         numericKeyboard,
+        decimalKeyboard,
         urlKeyboard,
         emailAddressKeyboard,
         phoneNumberKeyboard
