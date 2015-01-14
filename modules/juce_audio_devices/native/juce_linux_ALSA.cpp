@@ -149,7 +149,7 @@ class ALSADevice
 {
 public:
     ALSADevice (const String& devID, bool forInput)
-        : handle (0),
+        : handle (nullptr),
           bitDepth (16),
           numChannelsRunning (0),
           latency (0),
@@ -183,16 +183,16 @@ public:
 
     void closeNow()
     {
-        if (handle != 0)
+        if (handle != nullptr)
         {
             snd_pcm_close (handle);
-            handle = 0;
+            handle = nullptr;
         }
     }
 
     bool setParameters (unsigned int sampleRate, int numChannels, int bufferSize)
     {
-        if (handle == 0)
+        if (handle == nullptr)
             return false;
 
         JUCE_ALSA_LOG ("ALSADevice::setParameters(" << deviceID << ", "
@@ -644,8 +644,21 @@ public:
     {
         while (! threadShouldExit())
         {
-            if (inputDevice != nullptr && inputDevice->handle)
+            if (inputDevice != nullptr && inputDevice->handle != nullptr)
             {
+                if (outputDevice == nullptr || outputDevice->handle == nullptr)
+                {
+                    JUCE_ALSA_FAILED (snd_pcm_wait (inputDevice->handle, 2000));
+
+                    if (threadShouldExit())
+                        break;
+
+                    snd_pcm_sframes_t avail = snd_pcm_avail_update (inputDevice->handle);
+
+                    if (avail < 0)
+                        JUCE_ALSA_FAILED (snd_pcm_recover (inputDevice->handle, avail, 0));
+                }
+
                 audioIoInProgress = true;
 
                 if (! inputDevice->readFromInputDevice (inputChannelBuffer, bufferSize))
@@ -679,7 +692,7 @@ public:
                 }
             }
 
-            if (outputDevice != nullptr && outputDevice->handle)
+            if (outputDevice != nullptr && outputDevice->handle != nullptr)
             {
                 JUCE_ALSA_FAILED (snd_pcm_wait (outputDevice->handle, 2000));
 
@@ -702,6 +715,7 @@ public:
                 audioIoInProgress = false;
             }
         }
+
         audioIoInProgress = false;
     }
 
