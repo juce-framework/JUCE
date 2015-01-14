@@ -753,7 +753,7 @@ public:
     bool isHorizontal() const noexcept;
     /** True if the slider moves vertically. */
     bool isVertical() const noexcept;
-    /** True if the slider moves vertically. */
+    /** True if the slider is in a rotary mode. */
     bool isRotary() const noexcept;
 
     //==============================================================================
