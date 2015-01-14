@@ -1495,8 +1495,9 @@ private:
 
         tempChannels.clear();
 
+        // TODO: Review
         if (filter != nullptr)
-            tempChannels.insertMultiple (0, nullptr, filter->getNumInputChannelsTotal() + filter->getNumOutputChannelsTotal());
+            tempChannels.insertMultiple (0, nullptr, filter->getNumInputChannelsTotal(false) + filter->getNumOutputChannelsTotal());
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)

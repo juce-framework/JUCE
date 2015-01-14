@@ -298,7 +298,7 @@ private:
                                     const int ourRenderingIndex)
     {
         AudioProcessor& processor = *node.getProcessor();
-        const int numIns  = processor.getNumInputChannelsTotal();
+        const int numIns  = processor.getNumInputChannelsTotal(false);
         const int numOuts = processor.getNumOutputChannelsTotal();
         const int totalChans = jmax (numIns, numOuts);
 
@@ -679,7 +679,8 @@ private:
             }
             else
             {
-                for (int i = 0; i < node->getProcessor()->getNumInputChannelsTotal(); ++i)
+                // TODO: Verify
+                for (int i = 0; i < node->getProcessor()->getNumInputChannelsTotal(false); ++i)
                     if (i != inputChannelOfIndexToIgnore
                          && graph.getConnectionBetween (nodeId, outputChanIndex,
                                                         node->nodeId, i) != nullptr)
@@ -1037,7 +1038,7 @@ bool AudioProcessorGraph::canConnect (const uint32 sourceNodeId,
     const Node* const dest = getNodeForId (destNodeId);
 
     if (dest == nullptr
-         || (destChannelIndex != midiChannelIndex && destChannelIndex >= dest->processor->getNumInputChannelsTotal())
+         || (destChannelIndex != midiChannelIndex && destChannelIndex >= dest->processor->getNumInputChannelsTotal(false))
          || (destChannelIndex == midiChannelIndex && ! dest->processor->acceptsMidi()))
         return false;
 
@@ -1117,7 +1118,7 @@ bool AudioProcessorGraph::isConnectionLegal (const Connection* const c) const
         && dest != nullptr
         && (c->sourceChannelIndex != midiChannelIndex ? isPositiveAndBelow (c->sourceChannelIndex, source->processor->getNumOutputChannelsTotal())
                                                       : source->processor->producesMidi())
-        && (c->destChannelIndex   != midiChannelIndex ? isPositiveAndBelow (c->destChannelIndex, dest->processor->getNumInputChannelsTotal())
+        && (c->destChannelIndex   != midiChannelIndex ? isPositiveAndBelow (c->destChannelIndex, dest->processor->getNumInputChannelsTotal(false))
                                                       : dest->processor->acceptsMidi());
 }
 
@@ -1366,9 +1367,9 @@ void AudioProcessorGraph::AudioGraphIOProcessor::fillInPluginDescription (Plugin
     d.version = "1.0";
     d.isInstrument = false;
 
-    d.numInputChannels = getNumInputChannelsTotal();
+    d.numInputChannels = getNumInputChannelsTotal(false);
     if (type == audioOutputNode && graph != nullptr)
-        d.numInputChannels = graph->getNumInputChannelsTotal();
+        d.numInputChannels = graph->getNumInputChannelsTotal(false);
 
     d.numOutputChannels = getNumOutputChannelsTotal();
     if (type == audioInputNode && graph != nullptr)

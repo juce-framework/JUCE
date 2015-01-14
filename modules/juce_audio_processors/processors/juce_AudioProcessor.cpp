@@ -54,10 +54,12 @@ AudioProcessor::~AudioProcessor()
    #endif
 }
 
-int AudioProcessor::getNumInputChannelsTotal() const noexcept {
+int AudioProcessor::getNumInputChannelsTotal(bool onlyActive) const noexcept {
     int totalNumChannels = 0;
     for (int i = 0; i < numChannelsPerInputElement.size(); ++i) {
-        totalNumChannels += numChannelsPerInputElement[i];
+        if (!onlyActive || getInputElementActive(i)) {
+            totalNumChannels += numChannelsPerInputElement[i];
+        }
     }
     return totalNumChannels;
 }
@@ -99,7 +101,9 @@ void AudioProcessor::setPlayConfigDetails (const Array<int>& newNumChannelsPerIn
     
     if (newNumChannelsPerInputElement != numChannelsPerInputElement) {
         numChannelsPerInputElement = newNumChannelsPerInputElement;
-        inputSpeakerArrangements.resize(numChannelsPerInputElement.size());
+        const int newNumInputElements = numChannelsPerInputElement.size();
+        inputSpeakerArrangements.resize(newNumInputElements);
+        inputElementsActive.resize(newNumInputElements);
         layoutChanged = true;
     }
     

@@ -196,7 +196,7 @@ public:
     int getNumOutputChannels(int elementIndex) const noexcept { return numChannelsPerOutputElement[elementIndex]; }
 
     // TODO: Comment
-    int getNumInputChannelsTotal() const noexcept;
+    int getNumInputChannelsTotal(bool onlyActive) const noexcept;
     int getNumOutputChannelsTotal() const noexcept;
     
     /** Returns a string containing a whitespace-separated list of speaker types
@@ -629,6 +629,10 @@ public:
     /** This is called by the processor to specify its details before being played. */
     void setPlayConfigDetails (int numInputElements, int numInputChannelsEachElement, int numOutputElements, int numOutputChannelsEachElement, double sampleRate, int blockSize) noexcept;
 
+    // TODO: Comments
+    void setInputElementActive (int elementIndex, bool active) noexcept { inputElementsActive.set(elementIndex, active); }
+    bool getInputElementActive (int elementIndex) const noexcept { return inputElementsActive[elementIndex]; }
+    
     //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
     void editorBeingDeleted (AudioProcessorEditor*) noexcept;
@@ -693,6 +697,7 @@ private:
     Component::SafePointer<AudioProcessorEditor> activeEditor;
     double sampleRate;
     Array<int> numChannelsPerInputElement, numChannelsPerOutputElement;
+    Array<bool> inputElementsActive;
     int blockSize, latencySamples;
     bool suspended, nonRealtime;
     CriticalSection callbackLock, listenerLock;

@@ -760,6 +760,8 @@ public:
 
     void Cleanup() override
     {
+        removePropertyListeners();
+
         JuceAUBaseClass::Cleanup();
 
         if (juceFilter != nullptr)
@@ -806,6 +808,40 @@ public:
         return result;
     }
 
+    static void InputSourceChangedCallback(void *inRefCon,
+                                           AudioUnit			inUnit,
+                                           AudioUnitPropertyID	inID,
+                                           AudioUnitScope		inScope,
+                                           AudioUnitElement	inElement)
+    {
+        jassert(inID == kAudioUnitProperty_SetRenderCallback || inID == kAudioUnitProperty_MakeConnection);
+        
+        if (inScope != kAudioUnitScope_Input) {
+            return;
+        }
+        
+        JuceAU* _this = reinterpret_cast<JuceAU*>(inRefCon);
+        AudioProcessor* filter = _this->juceFilter;
+        if (filter == nullptr) {
+            return;
+        }
+        
+        filter->setInputElementActive(inElement, _this->HasInput(inElement));
+    }
+
+    void removePropertyListeners()
+    {
+        RemovePropertyListener(kAudioUnitProperty_SetRenderCallback, &InputSourceChangedCallback, this, true);
+        RemovePropertyListener(kAudioUnitProperty_MakeConnection, &InputSourceChangedCallback, this, true);
+    }
+
+    void addPropertyListeners()
+    {
+        removePropertyListeners();
+        AddPropertyListener(kAudioUnitProperty_SetRenderCallback, &InputSourceChangedCallback, this);
+        AddPropertyListener(kAudioUnitProperty_MakeConnection, &InputSourceChangedCallback, this);
+    }
+
     void prepareToPlay()
     {
         if (juceFilter != nullptr)
@@ -815,7 +851,14 @@ public:
                                               getSampleRate(),
                                               (int) GetMaxFramesPerSlice());
 
-            bufferSpace.setSize (juceFilter->getNumInputChannelsTotal() + juceFilter->getNumOutputChannelsTotal(),
+            for (int inputElementIndex = 0; inputElementIndex < Inputs().GetNumberOfElements(); ++inputElementIndex)
+            {
+                juceFilter->setInputElementActive(inputElementIndex, HasInput(inputElementIndex));
+            }
+            
+            addPropertyListeners();
+            
+            bufferSpace.setSize (juceFilter->getNumInputChannelsTotal(false) + juceFilter->getNumOutputChannelsTotal(),
                                  (int) GetMaxFramesPerSlice() + 32);
 
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
@@ -825,7 +868,7 @@ public:
             incomingEvents.ensureSize (2048);
             incomingEvents.clear();
 
-            channels.calloc ((size_t) jmax (juceFilter->getNumInputChannelsTotal(),
+            channels.calloc ((size_t) jmax (juceFilter->getNumInputChannelsTotal(false),
                                             juceFilter->getNumOutputChannelsTotal()) + 4);
 
             prepared = true;
@@ -842,19 +885,18 @@ public:
             if (!HasInput(0))
                 return kAudioUnitErr_NoConnection;
             
-            Array<int> newInputScopeLayout = findScopeLayout(Inputs());
-
-            int numInputElements = Inputs().GetNumberOfElements();
             int numOutputElements = Outputs().GetNumberOfElements();
             
-            for (int inputElementIndex = 0; inputElementIndex < numInputElements; ++inputElementIndex)
+            int numInputElements = 0;
+            for (int inputElementIndex = 0; inputElementIndex < Inputs().GetNumberOfElements(); ++inputElementIndex)
             {
                 if (!HasInput(inputElementIndex)) {
                     continue;
                 }
+                ++numInputElements;
+                
                 ComponentResult result = GetInput(inputElementIndex)->PullInput(ioActionFlags, inTimeStamp, inputElementIndex /* element */, numSamples);
-                if (noErr != result)
-                {
+                if (noErr != result) {
                     return result;
                 }
             }
@@ -867,7 +909,7 @@ public:
             int nextSpareBufferChan = 0;
             bool needToReinterleave = false;
 
-            const int numIn = juceFilter->getNumInputChannelsTotal();
+            const int numIn = juceFilter->getNumInputChannelsTotal(true);
             const int numOut = juceFilter->getNumOutputChannelsTotal();
 
             for (int outputElementIndex = 0; outputElementIndex < numOutputElements && numOutChans < numOut; ++outputElementIndex)
@@ -899,16 +941,6 @@ public:
             for (int inputElementIndex = 0; inputElementIndex < numInputElements && numInChans < numIn; ++inputElementIndex)
             {
                 if (!HasInput(inputElementIndex)) {
-                    int numMissingChannels = juceFilter->getNumInputChannels(inputElementIndex);
-                    for (int i = 0; i < numMissingChannels && numInChans < numIn; ++i)
-                    {
-                        if (numInChans >= numOutChans)
-                        {
-                            channels[numInChans] = bufferSpace.getWritePointer (nextSpareBufferChan++);
-                        }
-                        zeromem(channels[numInChans], numSamples * sizeof(float));
-                        ++numInChans;
-                    }
                     continue;
                 }
                 
