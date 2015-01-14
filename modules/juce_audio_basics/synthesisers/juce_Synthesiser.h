@@ -236,7 +236,7 @@ private:
     friend class Synthesiser;
 
     double currentSampleRate;
-    int currentlyPlayingNote;
+    int currentlyPlayingNote, currentPlayingMidiChannel;
     uint32 noteOnTime;
     SynthesiserSound::Ptr currentlyPlayingSound;
     bool keyIsDown, sostenutoPedalDown;

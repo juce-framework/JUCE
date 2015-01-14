@@ -29,6 +29,7 @@ SynthesiserSound::~SynthesiserSound() {}
 SynthesiserVoice::SynthesiserVoice()
     : currentSampleRate (44100.0),
       currentlyPlayingNote (-1),
+      currentPlayingMidiChannel (0),
       noteOnTime (0),
       keyIsDown (false),
       sostenutoPedalDown (false)
@@ -41,8 +42,7 @@ SynthesiserVoice::~SynthesiserVoice()
 
 bool SynthesiserVoice::isPlayingChannel (const int midiChannel) const
 {
-    return currentlyPlayingSound != nullptr
-            && currentlyPlayingSound->appliesToChannel (midiChannel);
+    return currentPlayingMidiChannel == midiChannel;
 }
 
 void SynthesiserVoice::setCurrentPlaybackSampleRate (const double newRate)
@@ -59,6 +59,7 @@ void SynthesiserVoice::clearCurrentNote()
 {
     currentlyPlayingNote = -1;
     currentlyPlayingSound = nullptr;
+    currentPlayingMidiChannel = 0;
 }
 
 void SynthesiserVoice::aftertouchChanged (int) {}
@@ -258,14 +259,15 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
         if (voice->currentlyPlayingSound != nullptr)
             voice->stopNote (0.0f, false);
 
-        voice->startNote (midiNoteNumber, velocity, sound,
-                          lastPitchWheelValues [midiChannel - 1]);
-
         voice->currentlyPlayingNote = midiNoteNumber;
+        voice->currentPlayingMidiChannel = midiChannel;
         voice->noteOnTime = ++lastNoteOnCounter;
         voice->currentlyPlayingSound = sound;
         voice->keyIsDown = true;
         voice->sostenutoPedalDown = false;
+
+        voice->startNote (midiNoteNumber, velocity, sound,
+                          lastPitchWheelValues [midiChannel - 1]);
     }
 }
 
