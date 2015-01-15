@@ -210,7 +210,8 @@ struct AAXClasses
         float** outputChannels;
         int32_t* bufferSize;
         int32_t* bypass;
-
+        int32_t* sideChain;
+        
        #if JucePlugin_WantsMidiInput
         AAX_IMIDINode* midiNodeIn;
        #endif
@@ -231,6 +232,7 @@ struct AAXClasses
             outputChannels  = AAX_FIELD_INDEX (JUCEAlgorithmContext, outputChannels),
             bufferSize      = AAX_FIELD_INDEX (JUCEAlgorithmContext, bufferSize),
             bypass          = AAX_FIELD_INDEX (JUCEAlgorithmContext, bypass),
+            sideChain       = AAX_FIELD_INDEX (JUCEAlgorithmContext, sideChain),
 
            #if JucePlugin_WantsMidiInput
             midiNodeIn      = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeIn),
@@ -726,6 +728,11 @@ struct AAXClasses
         {
             if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
             if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
+            if (type == AAX_eNotificationEvent_SideChainBeingConnected || type == AAX_eNotificationEvent_SideChainBeingDisconnected)
+            {
+                AudioProcessor& processor = getPluginInstance();
+                processor.setInputElementActive(1, type == AAX_eNotificationEvent_SideChainBeingConnected);
+            }
 
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
         }
@@ -903,9 +910,18 @@ struct AAXClasses
             audioProcessor.setOutputSpeakerArrangement (getSpeakerArrangementString (outputStemFormat));
 
             // TODO - Handle multiple inputs/outputs?
-            audioProcessor.setPlayConfigDetails (1, numberOfInputChannels, 1, numberOfOutputChannels, sampleRate, lastBufferSize);
-            audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
+            Array<int> numChannelsPerInputElement;
+            numChannelsPerInputElement.add(numberOfInputChannels);
+            numChannelsPerInputElement.add(1); // side-chain
 
+            Array<int> numChannelsPerOutputElement;
+            numChannelsPerOutputElement.add(numberOfOutputChannels);
+            
+            audioProcessor.setPlayConfigDetails (numChannelsPerInputElement, numChannelsPerOutputElement, sampleRate, lastBufferSize);
+            audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
+            audioProcessor.setInputElementActive(0, true);
+            audioProcessor.setInputElementActive(1, false);
+            
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
         }
 
@@ -977,7 +993,9 @@ struct AAXClasses
         check (desc.AddAudioOut (JUCEAlgorithmIDs::outputChannels));
         check (desc.AddAudioBufferLength (JUCEAlgorithmIDs::bufferSize));
         check (desc.AddDataInPort (JUCEAlgorithmIDs::bypass, sizeof (int32_t)));
-
+        
+        check (desc.AddSideChainIn(JUCEAlgorithmIDs::sideChain));
+        
        #if JucePlugin_WantsMidiInput
         check (desc.AddMIDINode (JUCEAlgorithmIDs::midiNodeIn, AAX_eMIDINodeType_LocalInput,
                                  JucePlugin_Name, 0xffff));
@@ -994,6 +1012,8 @@ struct AAXClasses
         AAX_IPropertyMap* const properties = desc.NewPropertyMap();
         jassert (properties != nullptr);
 
+        properties->AddProperty (AAX_eProperty_SupportsSideChainInput, true);
+        
         properties->AddProperty (AAX_eProperty_ManufacturerID,      JucePlugin_AAXManufacturerCode);
         properties->AddProperty (AAX_eProperty_ProductID,           JucePlugin_AAXProductId);
 
