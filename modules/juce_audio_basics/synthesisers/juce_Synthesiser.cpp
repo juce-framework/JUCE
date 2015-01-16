@@ -447,7 +447,7 @@ struct VoiceAgeSorter
 {
     static int compareElements (SynthesiserVoice* v1, SynthesiserVoice* v2) noexcept
     {
-        return v1->wasStartedBefore (*v2) ? 1 : (v2->wasStartedBefore (*v1) ? -1 : 0);
+        return v1->wasStartedBefore (*v2) ? -1 : (v2->wasStartedBefore (*v1) ? 1 : 0);
     }
 };
 
@@ -480,10 +480,10 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
         }
     }
 
-    jassert (bottom != nullptr && top != nullptr);
+    const int stealableVoiceRange = usableVoices.size() - 6;
 
     // The oldest note that's playing with the target pitch playing is ideal..
-    for (int i = 0; i < usableVoices.size(); ++i)
+    for (int i = 0; i < stealableVoiceRange; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
@@ -492,7 +492,7 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
     }
 
     // ..otherwise, look for the oldest note that isn't the top or bottom note..
-    for (int i = 0; i < usableVoices.size(); ++i)
+    for (int i = 0; i < stealableVoiceRange; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
@@ -500,6 +500,6 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
             return voice;
     }
 
-    // ..otherwise, there's only one or two voices to choose from - we'll return the top one..
-    return top;
+    // ..otherwise, there's only one or two voices to choose from - we'll return the oldest one..
+    return usableVoices.getFirst();
 }
