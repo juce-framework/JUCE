@@ -60,7 +60,7 @@ public:
             contextList.removeFirstMatchingValue (this);
         }
 
-        android.activity.callVoidMethod (JuceAppActivity.deleteView, glView.get());
+        android.activity.callVoidMethod (JuceAppActivity.deleteOpenGLView, glView.get());
         glView.clear();
     }
 

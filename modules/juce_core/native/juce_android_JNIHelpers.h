@@ -372,6 +372,7 @@ struct AndroidThreadScope
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (createNewView,          "createNewView",        "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
  METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
+ METHOD (deleteOpenGLView,       "deleteOpenGLView",     "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$OpenGLView;)V") \
  METHOD (postMessage,            "postMessage",          "(J)V") \
  METHOD (finish,                 "finish",               "()V") \
  METHOD (getClipboardContent,    "getClipboardContent",  "()Ljava/lang/String;") \
