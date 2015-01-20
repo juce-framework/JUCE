@@ -616,12 +616,14 @@ public:
             host.loadFrom (hostContext);
 
        #if JucePlugin_MaxNumInputChannels > 0
-        addAudioBusTo (audioInputs, TRANS("Audio Input"),
+        addAudioBusTo (audioInputs, TRANS("Audio Input"), Vst::kMain,
+                       getArrangementForNumChannels (JucePlugin_MaxNumInputChannels));
+        addAudioBusTo (audioInputs, TRANS("Side Chain Input"), Vst::kAux,
                        getArrangementForNumChannels (JucePlugin_MaxNumInputChannels));
        #endif
 
        #if JucePlugin_MaxNumOutputChannels > 0
-        addAudioBusTo (audioOutputs, TRANS("Audio Output"),
+        addAudioBusTo (audioOutputs, TRANS("Audio Output"), Vst::kMain,
                        getArrangementForNumChannels (JucePlugin_MaxNumOutputChannels));
        #endif
 
@@ -723,6 +725,9 @@ public:
             if (Vst::Bus* const bus = (Vst::Bus*) busList->at (index))
             {
                 bus->setActive (state);
+                if (dir == Vst::kInput) {
+                    getPluginInstance().setInputElementActive(index, state);
+                }
                 return kResultTrue;
             }
         }
@@ -750,8 +755,9 @@ public:
                             ? (int) processSetup.maxSamplesPerBlock
                             : bufferSize;
 
+            // TODO: Allocate dynamically acccording to nunmber of inputs and outputs
             channelList.clear();
-            channelList.insertMultiple (0, nullptr, jmax (JucePlugin_MaxNumInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
+            channelList.insertMultiple (0, nullptr, jmax (JucePlugin_MaxNumInputChannels * 2, JucePlugin_MaxNumOutputChannels) + 1);
 
             preparePlugin (sampleRate, bufferSize);
         }
@@ -1091,7 +1097,7 @@ public:
                                          Vst::SpeakerArrangement* arrangement,
                                          Steinberg::int32 numBusses)
     {
-        if (arrangement != nullptr && numBusses == 1) //Should only be 1 bus per BusList
+        if (arrangement != nullptr)
         {
             Steinberg::int32 counter = 0;
 
@@ -1239,16 +1245,32 @@ public:
         const int numMidiEventsComingIn = midiBuffer.getNumEvents();
        #endif
 
-        const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
-        const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
-
         int totalChans = 0;
-
-        while (totalChans < numInputChans)
+        int numInputChans = 0;
+        if (data.inputs != nullptr)
         {
-            channelList.set (totalChans, data.inputs[0].channelBuffers32[totalChans]);
-            ++totalChans;
+            for (int elementIndex = 0; elementIndex < pluginInstance->getNumChannelsPerInputElement().size(); ++elementIndex)
+            {
+                if (! pluginInstance->getInputElementActive(elementIndex)) {
+                    continue;
+                }
+                Vst::AudioBusBuffers& buffers = data.inputs[elementIndex];
+                jassert(buffers.channelBuffers32 != nullptr);
+                
+                int numChannels = (int) buffers.numChannels;
+                numInputChans += numChannels;
+
+                for (int channelIndex = 0; channelIndex < numChannels; ++channelIndex) {
+                    channelList.set (totalChans, buffers.channelBuffers32[channelIndex]);
+                    ++totalChans;
+                }
+            }
         }
+
+        jassert(numInputChans == pluginInstance->getNumInputChannelsTotal(true));
+        
+        // TODO: Multi out
+        const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
         while (totalChans < numOutputChans)
         {
@@ -1339,9 +1361,9 @@ private:
         busList.append (IPtr<Vst::Bus> (newBus, false));
     }
 
-    void addAudioBusTo (Vst::BusList& busList, const juce::String& name, Vst::SpeakerArrangement arr)
+    void addAudioBusTo (Vst::BusList& busList, const juce::String& name, Vst::BusType busType, Vst::SpeakerArrangement arr)
     {
-        addBusTo (busList, new Vst::AudioBus (toString (name), Vst::kMain, Vst::BusInfo::kDefaultActive, arr));
+        addBusTo (busList, new Vst::AudioBus (toString (name), busType, Vst::BusInfo::kDefaultActive, arr));
     }
 
     void addEventBusTo (Vst::BusList& busList, const juce::String& name)
@@ -1376,9 +1398,14 @@ private:
 
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        // TODO
-        getPluginInstance().setPlayConfigDetails (1, getNumChannels (audioInputs), 1, getNumChannels (audioOutputs), sampleRate, bufferSize);
-
+        getPluginInstance().setPlayConfigDetails (audioInputs.size(),
+                                                  getNumChannels (audioInputs),
+                                                  audioOutputs.size(),
+                                                  getNumChannels (audioOutputs),
+                                                  sampleRate, bufferSize);
+        for (int elementIndex = 0; elementIndex < audioInputs.size(); ++elementIndex) {
+            getPluginInstance().setInputElementActive(elementIndex, audioInputs.at(elementIndex)->isActive());
+        }
         getPluginInstance().prepareToPlay (sampleRate, bufferSize);
     }
 
