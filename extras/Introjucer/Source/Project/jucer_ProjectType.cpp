@@ -206,6 +206,7 @@ public:
         setValueIfVoid (getPluginCode (project),                   "Plug");
         setValueIfVoid (getPluginChannelConfigs (project),         "{1, 1}, {2, 2}");
         setValueIfVoid (getPluginIsSynth (project),                false);
+        setValueIfVoid (getPluginAcceptsSideChain (project),       false);
         setValueIfVoid (getPluginWantsMidiInput (project),         false);
         setValueIfVoid (getPluginProducesMidiOut (project),        false);
         setValueIfVoid (getPluginSilenceInProducesSilenceOut (project), false);
@@ -249,6 +250,9 @@ public:
 
         props.add (new BooleanPropertyComponent (getPluginIsSynth (project), "Plugin is a Synth", "Is a Synth"),
                    "Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
+
+        props.add (new BooleanPropertyComponent (getPluginAcceptsSideChain (project), "Plugin Accepts Side-Chain", "Accepts Side-Chain"),
+                   "Enable this if you want your plugin to be accept a side-chain or key input.");
 
         props.add (new BooleanPropertyComponent (getPluginWantsMidiInput (project), "Plugin Midi Input", "Plugin wants midi input"),
                    "Enable this if you want your plugin to accept midi messages.");

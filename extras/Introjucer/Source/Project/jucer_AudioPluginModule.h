@@ -42,6 +42,7 @@ namespace
     Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
     Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
     Value getPluginIsSynth (Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
+    Value getPluginAcceptsSideChain (Project& project)            { return project.getProjectValue ("pluginAcceptsSideChain"); }
     Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
     Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
     Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
@@ -158,6 +159,7 @@ namespace
         flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false)));
         flags.set ("JucePlugin_PreferredChannelConfigurations", getPluginChannelConfigs (project).toString());
         flags.set ("JucePlugin_IsSynth",                     valueToBool (getPluginIsSynth (project)));
+        flags.set ("JucePlugin_AcceptsSideChain",            valueToBool (getPluginAcceptsSideChain (project)));
         flags.set ("JucePlugin_WantsMidiInput",              valueToBool (getPluginWantsMidiInput (project)));
         flags.set ("JucePlugin_ProducesMidiOutput",          valueToBool (getPluginProducesMidiOut (project)));
         flags.set ("JucePlugin_SilenceInProducesSilenceOut", valueToBool (getPluginSilenceInProducesSilenceOut (project)));
