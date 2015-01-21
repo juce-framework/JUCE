@@ -465,6 +465,7 @@ public:
         SFicPlugInStemFormats stems;
         GetProcessType()->GetStemFormats (&stems);
 
+        Array<int> numChannelsPerInputElement;
         numChannelsPerInputElement.add(fNumInputs);
        #if JucePlugin_AcceptsSideChain
         numChannelsPerInputElement.add(1);
@@ -474,9 +475,9 @@ public:
         numChannelsPerOutputElement.add(fNumOutputs);
 
         juceFilter->setPlayConfigDetails (numChannelsPerInputElement, numChannelsPerOutputElement, sampleRate, maxBlockSize);
-        audioProcessor.setInputElementActive(0, true);
+        juceFilter->setInputElementActive(0, true);
        #if JucePlugin_AcceptsSideChain
-        audioProcessor.setInputElementActive(1, false);
+        juceFilter->setInputElementActive(1, false);
        #endif
 
         AddControl (new CPluginControl_OnOff ('bypa', "Master Bypass\nMastrByp\nMByp\nByp", false, true));
@@ -620,17 +621,17 @@ public:
 
         // Check if side chain was just connected
         if (portNum == fNumInputs && ret == noErr) {
-            juceFilter->SetInputElementActive (portNum, true);
+            juceFilter->setInputElementActive (portNum, true);
         }
         return ret;
     }
     
     virtual ComponentResult DisconnectInput(long portNum) override {
-        ComponentResult ret = CEffectProcessRTAS::DisconnectInput(portNum, connection);
+        ComponentResult ret = CEffectProcessRTAS::DisconnectInput(portNum);
 
         // Check if side chain was just disconnected
         if (portNum == fNumInputs && ret == noErr) {
-            juceFilter->SetInputElementActive (portNum, false);
+            juceFilter->setInputElementActive (portNum, false);
         }
         return ret;
     }
