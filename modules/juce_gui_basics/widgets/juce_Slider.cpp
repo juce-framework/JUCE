@@ -1576,10 +1576,11 @@ void Slider::valueChanged() {}
 void Slider::setPopupMenuEnabled (const bool menuEnabled)   { pimpl->menuEnabled = menuEnabled; }
 void Slider::setScrollWheelEnabled (const bool enabled)     { pimpl->scrollWheelEnabled = enabled; }
 
-bool Slider::isHorizontal() const noexcept   { return pimpl->isHorizontal(); }
-bool Slider::isVertical() const noexcept     { return pimpl->isVertical(); }
+bool Slider::isHorizontal() const noexcept                  { return pimpl->isHorizontal(); }
+bool Slider::isVertical() const noexcept                    { return pimpl->isVertical(); }
+bool Slider::isRotary() const noexcept                      { return pimpl->isRotary(); }
 
-float Slider::getPositionOfValue (const double value)   { return pimpl->getPositionOfValue (value); }
+float Slider::getPositionOfValue (const double value)       { return pimpl->getPositionOfValue (value); }
 
 //==============================================================================
 void Slider::paint (Graphics& g)        { pimpl->paint (g, getLookAndFeel()); }

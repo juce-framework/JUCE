@@ -791,7 +791,7 @@ public:
 
     void copyBuffersFromReservoir (float** destBuffers, int numDestBuffers, int bufferSize)
     {
-        if (numChannels <= 0 && bufferSize == 0)
+        if ((numChannels <= 0 && bufferSize == 0) || reservoir.getSize() == 0)
             return;
 
         int offset = jmax (0, bufferSize - getNumSamplesInReservoir());
@@ -802,6 +802,7 @@ public:
                 zeromem (destBuffers[i], offset * sizeof (float));
 
             bufferSize -= offset;
+            reservoirReadPos -= offset / 2;
         }
 
         while (bufferSize > 0)

@@ -157,6 +157,14 @@ public final class JuceAppActivity   extends Activity
             group.removeView (view);
     }
 
+    public final void deleteOpenGLView (OpenGLView view)
+    {
+        ViewGroup group = (ViewGroup) (view.getParent());
+
+        if (group != null)
+            group.removeView (view);
+    }
+
     final class ViewHolder  extends ViewGroup
     {
         public ViewHolder (Context context)

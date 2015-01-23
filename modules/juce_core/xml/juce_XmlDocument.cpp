@@ -639,7 +639,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
             }
 
             if (contentShouldBeUsed)
-                childAppender.append (XmlElement::createTextElement (textElementContent.toString()));
+                childAppender.append (XmlElement::createTextElement (textElementContent.toUTF8()));
         }
     }
 }

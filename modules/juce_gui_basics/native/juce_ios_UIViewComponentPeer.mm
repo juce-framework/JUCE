@@ -862,12 +862,18 @@ void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
 {
 }
 
+static bool isIOS4_1() noexcept
+{
+    return [[[UIDevice currentDevice] systemVersion] doubleValue] >= 4.1;
+}
+
 static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept
 {
     switch (type)
     {
         case TextInputTarget::textKeyboard:          return UIKeyboardTypeAlphabet;
-        case TextInputTarget::numericKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
+        case TextInputTarget::numericKeyboard:       return isIOS4_1() ? UIKeyboardTypeNumberPad  : UIKeyboardTypeNumbersAndPunctuation;
+        case TextInputTarget::decimalKeyboard:       return isIOS4_1() ? UIKeyboardTypeDecimalPad : UIKeyboardTypeNumbersAndPunctuation;
         case TextInputTarget::urlKeyboard:           return UIKeyboardTypeURL;
         case TextInputTarget::emailAddressKeyboard:  return UIKeyboardTypeEmailAddress;
         case TextInputTarget::phoneNumberKeyboard:   return UIKeyboardTypePhonePad;

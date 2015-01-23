@@ -385,6 +385,7 @@ public:
         {
             case TextInputTarget::textKeyboard:          return "text";
             case TextInputTarget::numericKeyboard:       return "number";
+            case TextInputTarget::decimalKeyboard:       return "numberDecimal";
             case TextInputTarget::urlKeyboard:           return "textUri";
             case TextInputTarget::emailAddressKeyboard:  return "textEmailAddress";
             case TextInputTarget::phoneNumberKeyboard:   return "phone";

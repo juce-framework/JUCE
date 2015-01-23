@@ -493,6 +493,9 @@ public:
         Note that the destination file isn't the directory to put it in, it's the actual
         filename that you want the new file to have.
 
+        Also note that on some OSes (e.g. Windows), moving files between different
+        volumes may not be possible.
+
         @returns    true if the operation succeeds
     */
     bool moveFileTo (const File& targetLocation) const;
