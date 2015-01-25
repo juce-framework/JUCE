@@ -618,8 +618,12 @@ public:
        #if JucePlugin_MaxNumInputChannels > 0
         addAudioBusTo (audioInputs, TRANS("Audio Input"), Vst::kMain,
                        getArrangementForNumChannels (JucePlugin_MaxNumInputChannels));
+
+       #if JucePlugin_AcceptsSideChain
         addAudioBusTo (audioInputs, TRANS("Side Chain Input"), Vst::kAux,
                        getArrangementForNumChannels (JucePlugin_MaxNumInputChannels));
+       #endif
+
        #endif
 
        #if JucePlugin_MaxNumOutputChannels > 0
@@ -755,9 +759,16 @@ public:
                             ? (int) processSetup.maxSamplesPerBlock
                             : bufferSize;
 
-            // TODO: Allocate dynamically acccording to nunmber of inputs and outputs
             channelList.clear();
-            channelList.insertMultiple (0, nullptr, jmax (JucePlugin_MaxNumInputChannels * 2, JucePlugin_MaxNumOutputChannels) + 1);
+            const int numInputChannels =
+           #if JucePlugin_AcceptsSideChain
+                JucePlugin_MaxNumInputChannels * 2;
+           #else
+                JucePlugin_MaxNumInputChannels;
+           #endif
+
+            // TODO: Support multi-out
+            channelList.insertMultiple (0, nullptr, jmax (numInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
 
             preparePlugin (sampleRate, bufferSize);
         }
@@ -1283,7 +1294,7 @@ public:
         if (totalChans != 0)
             buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
         else if (getHostType().isWavelab()
-                  && pluginInstance->getNumInputChannelsTotal(true) + pluginInstance->getNumOutputChannelsTotal() > 0) // TODO: Review
+                  && pluginInstance->getNumInputChannelsTotal(true) + pluginInstance->getNumOutputChannelsTotal() > 0)
             return kResultFalse;
 
         {
