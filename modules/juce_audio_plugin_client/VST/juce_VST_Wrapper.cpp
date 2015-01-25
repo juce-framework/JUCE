@@ -267,6 +267,7 @@ public:
          hostWindow (0)
     {
         filter->setPlayConfigDetails (1, numInChans, 1, numOutChans, 0, 0);
+        filter->setInputElementActive(0, true);
         filter->setPlayHead (this);
         filter->addListener (this);
 
@@ -674,6 +675,7 @@ public:
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
             filter->setPlayConfigDetails (1, numInChans, 1, numOutChans, rate, currentBlockSize);
+            filter->setInputElementActive(0, true);
 
             deleteTempChannels();
 
@@ -932,6 +934,7 @@ public:
                 filter->setPlayConfigDetails (1, numInChans, 1, numOutChans,
                                               filter->getSampleRate(),
                                               filter->getBlockSize());
+                filter->setInputElementActive(0, true);
 
                 filter->setInputSpeakerArrangement (getSpeakerArrangementString (speakerIn));
                 filter->setOutputSpeakerArrangement (getSpeakerArrangementString (speakerOut));
@@ -1495,7 +1498,6 @@ private:
 
         tempChannels.clear();
 
-        // TODO: Review
         if (filter != nullptr)
             tempChannels.insertMultiple (0, nullptr, filter->getNumInputChannelsTotal(false) + filter->getNumOutputChannelsTotal());
     }
