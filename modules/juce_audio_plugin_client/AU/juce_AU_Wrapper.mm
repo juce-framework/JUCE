@@ -113,9 +113,8 @@ class JuceAUBaseClass   : public MusicDeviceBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : MusicDeviceBase (comp, 0, 1) {}
 };
-#elif 1
-// TODO: Support arbitrary number of input and output elements
-// TODO? Derive from AUMIDIEffectBase (need to change it to support more than one input element)
+#elif JucePlugin_AcceptsSideChain
+// TODO: Derive from AUMIDIEffectBase (need to change it to support more than one input element)
 class JuceAUBaseClass   : public AUBase
 {
 public:
@@ -187,13 +186,13 @@ public:
 
         CAStreamBasicDescription streamDescription;
         streamDescription.mSampleRate = getSampleRate();
-        
         streamDescription.SetCanonical ((UInt32) channelConfigs[0][1], false);
         for (int i = 0; i < Outputs().GetNumberOfElements(); ++i)
         {
             Outputs().GetIOElement(i)->SetStreamFormat (streamDescription);
         }
 
+        // TODO: Allow synths with side chain?
        #if ! JucePlugin_IsSynth
         streamDescription.SetCanonical ((UInt32) channelConfigs[0][0], false);
         for (int i = 0; i < Inputs().GetNumberOfElements(); ++i)
@@ -796,9 +795,7 @@ public:
     Array<int> findScopeLayout (const AUScope &scope)
     {
         Array<int> result;
-        int numElements = scope.GetNumberOfElements();
-        for (int i = 0; i < numElements; ++i)
-        {
+        for (int i = 0; i < scope.GetNumberOfElements(); ++i) {
             result.add(findNumChannels(scope, i));
         }
         return result;
@@ -896,7 +893,6 @@ public:
                     return result;
                 }
             }
-            
             lastTimeStamp = inTimeStamp;
             
             jassert (prepared);
@@ -910,7 +906,7 @@ public:
 
             for (int outputElementIndex = 0; outputElementIndex < numOutputElements && numOutChans < numOut; ++outputElementIndex)
             {
-                AUOutputElement* outputElement = GetOutput(outputElementIndex);
+                AUOutputElement* outputElement = GetOutput(outputElementIndex); // throws if error
                 AudioBufferList& outBuffer = outputElement->GetBufferList();
                 for (unsigned int i = 0; i < outBuffer.mNumberBuffers && numOutChans < numOut; ++i)
                 {
@@ -922,7 +918,6 @@ public:
                     }
                     else
                     {
-                        // TODO: Multiple outputs interleave?
                         needToReinterleave = true;
                         
                         for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
@@ -931,8 +926,6 @@ public:
                 }
             }
 
-            // TODO: Assert all output channels have valid pointers? Add isActive to outputs?
-            
             int numInChans = 0;
             for (int inputElementIndex = 0; inputElementIndex < numInputElements && numInChans < numIn; ++inputElementIndex)
             {
