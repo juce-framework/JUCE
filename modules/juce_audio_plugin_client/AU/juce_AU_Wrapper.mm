@@ -786,14 +786,10 @@ public:
 
     int findNumChannels(const AUScope& scope, int elementIndex)
     {
-       #if ! JucePlugin_IsSynth
         const AUElement* e = scope.GetElement(elementIndex);
-        if (e != nullptr)
-        {
+        if (e != nullptr) {
             return (int) static_cast<const AUIOElement *>(e)->GetStreamFormat().mChannelsPerFrame;
         }
-       #endif
-        // TODO: Synths can have side chains?
         return 0;
     }
 
