@@ -902,22 +902,14 @@ struct AAXClasses
 
         void preparePlugin()
         {
-            // TODO - Handle multiple inputs/outputs?
             AAX_EStemFormat inputStemFormat = AAX_eStemFormat_None;
             check (Controller()->GetInputStemFormat (&inputStemFormat));
             const int numberOfInputChannels = getNumChannelsForStemFormat (inputStemFormat);
-
+            
             AAX_EStemFormat outputStemFormat = AAX_eStemFormat_None;
             check (Controller()->GetOutputStemFormat (&outputStemFormat));
             const int numberOfOutputChannels = getNumChannelsForStemFormat (outputStemFormat);
 
-            AudioProcessor& audioProcessor = getPluginInstance();
-
-            // TODO - Handle multiple inputs/outputs?
-            audioProcessor.setInputSpeakerArrangement (getSpeakerArrangementString (inputStemFormat));
-            audioProcessor.setOutputSpeakerArrangement (getSpeakerArrangementString (outputStemFormat));
-
-            // TODO - Handle multiple inputs/outputs, not just side-chain?
             Array<int> numChannelsPerInputElement;
             numChannelsPerInputElement.add(numberOfInputChannels);
            #if JucePlugin_AcceptsSideChain
@@ -927,12 +919,20 @@ struct AAXClasses
             Array<int> numChannelsPerOutputElement;
             numChannelsPerOutputElement.add(numberOfOutputChannels);
             
+            AudioProcessor& audioProcessor = getPluginInstance();
             audioProcessor.setPlayConfigDetails (numChannelsPerInputElement, numChannelsPerOutputElement, sampleRate, lastBufferSize);
-            audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
             audioProcessor.setInputElementActive(0, true);
            #if JucePlugin_AcceptsSideChain
             audioProcessor.setInputElementActive(1, false);
            #endif
+
+            audioProcessor.setInputSpeakerArrangement (getSpeakerArrangementString (inputStemFormat));
+           #if JucePluginAcceptsSideChain
+            audioProcessor.setInputSpeakerArrangement (getSpeakerArrangementString (AAX_eStemFormat_Mono), 1);
+           #endif
+            audioProcessor.setOutputSpeakerArrangement (getSpeakerArrangementString (outputStemFormat));
+            
+            audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
         }
