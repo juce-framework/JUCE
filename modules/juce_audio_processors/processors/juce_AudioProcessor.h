@@ -167,13 +167,10 @@ public:
     */
     int getBlockSize() const noexcept                           { return blockSize; }
 
-    // TODO: Comments
-    const Array<int>& getNumChannelsPerInputElement() const noexcept { return numChannelsPerInputElement; }
-
-    const Array<int>& getNumChannelsPerOutputElement() const noexcept { return numChannelsPerOutputElement; }
-
     //==============================================================================
     /** Returns the number of input channels that the host will be sending the filter.
+        By default, the number of channels sent through the main input element is returned.
+        Specify another input element index to get its number of channels.
 
         If writing a plugin, your configuration macros should specify the number of
         channels that your filter would prefer to have, and this method lets
@@ -182,9 +179,11 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumInputChannels(int elementIndex) const noexcept { return numChannelsPerInputElement[elementIndex]; }
+    int getNumInputChannels(int elementIndex = 0) const noexcept { return numChannelsPerInputElement[elementIndex]; }
     
-    /** Returns the number of output channels that the host will be sending the filter.
+    /** Returns the number of output channels that the filter will be sending the host.
+        By default, the number of channels sent through the main output element is returned.
+        Specify another output element index to get its number of channels.
 
         If writing a plugin, your configuration macros should specify the number of
         channels that your filter would prefer to have, and this method lets
@@ -193,10 +192,38 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumOutputChannels(int elementIndex) const noexcept { return numChannelsPerOutputElement[elementIndex]; }
+    int getNumOutputChannels(int elementIndex = 0) const noexcept { return numChannelsPerOutputElement[elementIndex]; }
 
-    // TODO: Comment
+    /** Returns the number of input channels that the host will be sending the filter
+        through each input element.
+
+        Note that this method is only valid during or after the prepareToPlay()
+        method call. Until that point, the number of channels will be unknown.
+     */
+    const Array<int>& getNumChannelsPerInputElement() const noexcept { return numChannelsPerInputElement; }
+    
+    /** Returns the number of output channels that the filter will be sending the host
+        through each output element.
+
+        Note that this method is only valid during or after the prepareToPlay()
+        method call. Until that point, the number of channels will be unknown.
+     */
+    const Array<int>& getNumChannelsPerOutputElement() const noexcept { return numChannelsPerOutputElement; }
+
+    /** Returns the total number of input channels the host will be sending the filter
+        through all input elements.
+
+        Note that this method is only valid during or after the prepareToPlay()
+        method call. Until that point, the number of channels will be unknown.
+     */
     int getNumInputChannelsTotal(bool onlyActive) const noexcept;
+    
+    /** Returns the total number of output channels that the filter will be sending the host
+        through all output elements.
+     
+        Note that this method is only valid during or after the prepareToPlay()
+        method call. Until that point, the number of channels will be unknown.
+     */
     int getNumOutputChannelsTotal() const noexcept;
     
     /** Returns a string containing a whitespace-separated list of speaker types
@@ -620,16 +647,12 @@ public:
 
     //==============================================================================
     /** This is called by the processor to specify its details before being played. */
-//    void setPlayConfigDetails (int numIns, int numOuts, double sampleRate, int blockSize) noexcept;
-
-    //==============================================================================
-    /** This is called by the processor to specify its details before being played. */
     void setPlayConfigDetails (const Array<int>& numChannelsPerInputElement, const Array<int>& numChannelsPerOutputElement, double sampleRate, int blockSize) noexcept;
 
     /** This is called by the processor to specify its details before being played. */
     void setPlayConfigDetails (int numInputElements, int numInputChannelsEachElement, int numOutputElements, int numOutputChannelsEachElement, double sampleRate, int blockSize) noexcept;
 
-    // TODO: Comments
+    /** This is called by the processor as input elements are indicated as active or inactive by the host. */
     void setInputElementActive (int elementIndex, bool active) noexcept { inputElementsActive.set(elementIndex, active); }
     bool getInputElementActive (int elementIndex) const noexcept { return inputElementsActive[elementIndex]; }
     
