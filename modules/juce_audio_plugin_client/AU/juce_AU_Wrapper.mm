@@ -113,28 +113,48 @@ class JuceAUBaseClass   : public MusicDeviceBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : MusicDeviceBase (comp, 0, 1) {}
 };
-#elif JucePlugin_AcceptsSideChain
-// TODO: Derive from AUMIDIEffectBase (need to change it to support more than one input element)
-class JuceAUBaseClass   : public AUBase
-{
-public:
-    JuceAUBaseClass (AudioComponentInstance comp)  : AUBase (comp, 2, 1) {}
-};
 #else
-class JuceAUBaseClass   : public AUMIDIEffectBase
+class JuceAUBaseClass   : public AUBase, public AUMIDIBase
 {
 public:
-    JuceAUBaseClass (AudioComponentInstance comp)  : AUMIDIEffectBase (comp, false) {}
+#if JucePlugin_AcceptsSideChain
+    static const int numInputElements = 2;
+#else
+    static const int numInputElements = 1;
+#endif
+    JuceAUBaseClass (AudioComponentInstance comp)  : AUBase (comp, numInputElements, 1), AUMIDIBase(this), mBypassEffect(false) {}
 
-    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame)
+#if !TARGET_OS_IPHONE
+    static OSStatus	ComponentEntryDispatch(	ComponentParameters *			params,
+                                            JuceAUBaseClass *				This)
     {
-        return AUMIDIBase::MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame);
+        if (This == NULL) return paramErr;
+        
+        OSStatus result;
+        
+        switch (params->what) {
+            case kMusicDeviceMIDIEventSelect:
+            case kMusicDeviceSysExSelect:
+                result = AUMIDIBase::ComponentEntryDispatch (params, This);
+                break;
+            default:
+                result = AUBase::ComponentEntryDispatch(params, This);
+                break;
+        }
+        
+        return result;
     }
+#endif
 
-    OSStatus SysEx (const UInt8* inData, UInt32 inLength)
-    {
-        return AUMIDIBase::SysEx (inData, inLength);
-    }
+    // Same bypass logic as AUEffectBase
+    bool IsBypassEffect () { return mBypassEffect; }
+    virtual void SetBypassEffect (bool inFlag) { mBypassEffect = inFlag; }
+
+protected:
+    virtual	bool ShouldBypassEffect () { return IsBypassEffect(); }
+
+private:
+    bool mBypassEffect;
 };
 #endif
 
@@ -277,6 +297,13 @@ public:
                     return noErr;
                #endif
 
+               #if ! JucePlugin_IsSynth
+                case kAudioUnitProperty_BypassEffect:
+                    outWritable = true;
+                    outDataSize = sizeof (UInt32);
+                    return noErr;
+               #endif
+
                 case kAudioUnitProperty_ParameterStringFromValue:
                      outDataSize = sizeof (AudioUnitParameterStringFromValue);
                      outWritable = false;
@@ -351,6 +378,12 @@ public:
                 }
                #endif
 
+               #if ! JucePlugin_IsSynth
+                case kAudioUnitProperty_BypassEffect:
+                    *((UInt32*)outData) = (IsBypassEffect() ? 1 : 0);
+                    return noErr;
+               #endif
+
                 case kAudioUnitProperty_ParameterValueFromString:
                 {
                     if (AudioUnitParameterValueFromString* pv = (AudioUnitParameterValueFromString*) outData)
@@ -410,6 +443,26 @@ public:
                         midiCallback = *callbackStruct;
 
                     return noErr;
+               #endif
+
+               #if ! JucePlugin_IsSynth
+                case kAudioUnitProperty_BypassEffect:
+                {
+                    if (inDataSize < sizeof(UInt32))
+                        return kAudioUnitErr_InvalidPropertyValue;
+
+                    bool tempNewSetting = *((UInt32*)inData) != 0;
+                    // we're changing the state of bypass
+                    if (tempNewSetting != IsBypassEffect())
+                    {
+                        if (!tempNewSetting && IsBypassEffect() && IsInitialized()) // turning bypass off and we're initialized
+                        {
+                            Reset(0, 0);
+                        }
+                        SetBypassEffect (tempNewSetting);
+                    }
+                    return noErr;
+                }
                #endif
 
                 case kAudioUnitProperty_OfflineRender:
@@ -868,15 +921,18 @@ public:
         }
     }
 
-    // Based on Render from AUEffectBase
+    // Based on Render from AUEffectBase (which only supports single input and output elements)
     ComponentResult Render (AudioUnitRenderActionFlags &ioActionFlags,
                             const AudioTimeStamp& inTimeStamp,
                             UInt32 numSamples) override
     {
+        lastTimeStamp = inTimeStamp;
         if (juceFilter != nullptr)
         {
+           #if ! JucePlugin_IsSynth
             if (!HasInput(0))
                 return kAudioUnitErr_NoConnection;
+           #endif
             
             int numOutputElements = Outputs().GetNumberOfElements();
             
@@ -893,7 +949,6 @@ public:
                     return result;
                 }
             }
-            lastTimeStamp = inTimeStamp;
             
             jassert (prepared);
 
@@ -996,13 +1051,12 @@ public:
                     for (int j = 0; j < numOut; ++j)
                         zeromem (channels [j], sizeof (float) * numSamples);
                 }
-                // TODO? Restore once we are based on AUMIDIEffectBase and not AUBase
-//               #if !JucePlugin_IsSynth
-//                else if (ShouldBypassEffect())
-//                {
-//                    juceFilter->processBlockBypassed (buffer, midiEvents);
-//                }
-//               #endif
+               #if !JucePlugin_IsSynth
+                else if (ShouldBypassEffect())
+                {
+                    juceFilter->processBlockBypassed (buffer, midiEvents);
+                }
+               #endif
                 else
                 {
                     juceFilter->processBlock (buffer, midiEvents);
@@ -1090,35 +1144,33 @@ public:
         return noErr;
     }
 
-// TODO? Restore once we are based on AUMIDIEffectBase and not AUBase
+    OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
+    {
+       #if JucePlugin_WantsMidiInput
+        const ScopedLock sl (incomingMidiLock);
+        const juce::uint8 data[] = { (juce::uint8) (nStatus | inChannel),
+                                     (juce::uint8) inData1,
+                                     (juce::uint8) inData2 };
 
-//    OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
-//    {
-//       #if JucePlugin_WantsMidiInput
-//        const ScopedLock sl (incomingMidiLock);
-//        const juce::uint8 data[] = { (juce::uint8) (nStatus | inChannel),
-//                                     (juce::uint8) inData1,
-//                                     (juce::uint8) inData2 };
-//
-//        incomingEvents.addEvent (data, 3, (int) inStartFrame);
-//        return noErr;
-//       #else
-//        (void) nStatus; (void) inChannel; (void) inData1; (void) inData2; (void) inStartFrame;
-//        return kAudioUnitErr_PropertyNotInUse;
-//       #endif
-//    }
-//
-//    OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
-//    {
-//       #if JucePlugin_WantsMidiInput
-//        const ScopedLock sl (incomingMidiLock);
-//        incomingEvents.addEvent (inData, (int) inLength, 0);
-//        return noErr;
-//       #else
-//        (void) inData; (void) inLength;
-//        return kAudioUnitErr_PropertyNotInUse;
-//       #endif
-//    }
+        incomingEvents.addEvent (data, 3, (int) inStartFrame);
+        return noErr;
+       #else
+        (void) nStatus; (void) inChannel; (void) inData1; (void) inData2; (void) inStartFrame;
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
+    }
+
+    OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
+    {
+       #if JucePlugin_WantsMidiInput
+        const ScopedLock sl (incomingMidiLock);
+        incomingEvents.addEvent (inData, (int) inLength, 0);
+        return noErr;
+       #else
+        (void) inData; (void) inLength;
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
+    }
 
     //==============================================================================
     ComponentResult GetPresets (CFArrayRef* outData) const override
