@@ -767,7 +767,6 @@ public:
                 JucePlugin_MaxNumInputChannels;
            #endif
 
-            // TODO: Support multi-out
             channelList.insertMultiple (0, nullptr, jmax (numInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
 
             preparePlugin (sampleRate, bufferSize);
@@ -1280,7 +1279,6 @@ public:
 
         jassert(numInputChans == pluginInstance->getNumInputChannelsTotal(true));
         
-        // TODO: Multi out
         const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
         while (totalChans < numOutputChans)

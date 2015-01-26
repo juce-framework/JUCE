@@ -679,7 +679,6 @@ private:
             }
             else
             {
-                // TODO: Verify
                 for (int i = 0; i < node->getProcessor()->getNumInputChannelsTotal(false); ++i)
                     if (i != inputChannelOfIndexToIgnore
                          && graph.getConnectionBetween (nodeId, outputChanIndex,
@@ -1312,15 +1311,18 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
     midiMessages.addEvents (currentMidiOutputBuffer, 0, buffer.getNumSamples(), 0);
 }
 
-// TODO?
 const String AudioProcessorGraph::getInputChannelName (int channelIndex, int elementIndex) const
 {
-    return "Input " + String (channelIndex + 1);
+    return "Input " + String (channelIndex + 1) + (elementIndex > 0 ?
+                                                   String(" (element %d)", elementIndex) :
+                                                   String::empty);
 }
 
 const String AudioProcessorGraph::getOutputChannelName (int channelIndex, int elementIndex) const
 {
-    return "Output " + String (channelIndex + 1);
+    return "Output " + String (channelIndex + 1) + (elementIndex > 0 ?
+                                                    String(" (element %d)", elementIndex) :
+                                                    String::empty);
 }
 
 bool AudioProcessorGraph::isInputChannelStereoPair (int, int) const      { return true; }
@@ -1447,12 +1449,13 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::producesMidi() const
     return type == midiInputNode;
 }
 
-// TODO?
 const String AudioProcessorGraph::AudioGraphIOProcessor::getInputChannelName (int channelIndex, int elementIndex) const
 {
     switch (type)
     {
-        case audioOutputNode:   return "Output " + String (channelIndex + 1);
+        case audioOutputNode:   return "Output " + String (channelIndex + 1) + (elementIndex > 0 ?
+                                                                                String(" (element %d)", elementIndex) :
+                                                                                String::empty);
         case midiOutputNode:    return "Midi Output";
         default:                break;
     }
@@ -1464,7 +1467,9 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getOutputChannelName (i
 {
     switch (type)
     {
-        case audioInputNode:    return "Input " + String (channelIndex + 1);
+        case audioInputNode:    return "Input " + String (channelIndex + 1) + (elementIndex > 0 ?
+                                                                               String(" (element %d)", elementIndex) :
+                                                                               String::empty);
         case midiInputNode:     return "Midi Input";
         default:                break;
     }
