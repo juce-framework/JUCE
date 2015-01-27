@@ -203,7 +203,7 @@ public:
         setValueIfVoid (getPluginDesc (project),                   project.getTitle());
         setValueIfVoid (getPluginManufacturer (project),           "yourcompany");
         setValueIfVoid (getPluginManufacturerCode (project),       "Manu");
-        setValueIfVoid (getPluginCode (project),                   "Plug");
+        setValueIfVoid (getPluginCode (project),                   makeValid4CC (project.getProjectUID() + project.getProjectUID()));
         setValueIfVoid (getPluginChannelConfigs (project),         "{1, 1}, {2, 2}");
         setValueIfVoid (getPluginIsSynth (project),                false);
         setValueIfVoid (getPluginAcceptsSideChain (project),       false);
@@ -307,6 +307,14 @@ public:
         exporter.msvcIsDLL = true;
 
         exporter.makefileIsDLL = true;
+    }
+
+    static String makeValid4CC (const String& seed)
+    {
+        String s (CodeHelpers::makeValidIdentifier (seed, false, true, false) + "xxxx");
+
+        return s.substring (0, 1).toUpperCase()
+             + s.substring (1, 4).toLowerCase();
     }
 };
 

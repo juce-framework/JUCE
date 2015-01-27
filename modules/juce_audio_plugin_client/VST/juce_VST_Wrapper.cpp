@@ -1192,6 +1192,8 @@ public:
               #elif JUCE_LINUX
                 editorComp->addToDesktop (0, ptr);
                 hostWindow = (Window) ptr;
+                Window editorWnd = (Window) editorComp->getWindowHandle();
+                XReparentWindow (display, editorWnd, hostWindow, 0, 0);
               #else
                 hostWindow = attachComponentToWindowRef (editorComp, ptr, useNSView);
               #endif

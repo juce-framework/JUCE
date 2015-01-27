@@ -72,7 +72,7 @@
      This means that anyone who wants to use JUCE's ASIO abilities will have to:
 
      1) Agree to Steinberg's licensing terms and download the ASIO SDK
-         (see www.steinberg.net/Steinberg/Developers.asp).
+         (see http://www.steinberg.net/en/company/developers.html).
 
      2) Enable this code with a global definition #define JUCE_ASIO 1.
 

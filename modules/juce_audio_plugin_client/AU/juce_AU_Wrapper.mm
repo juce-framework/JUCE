@@ -390,11 +390,14 @@ public:
                     {
                         if (juceFilter != nullptr)
                         {
+                            const String text (String::fromCFString (pv->inString));
+
                             if (AudioProcessorParameter* param = juceFilter->getParameters() [(int) pv->inParamID])
-                            {
-                                pv->outValue = param->getValueForText (String::fromCFString (pv->inString));
-                                return noErr;
-                            }
+                                pv->outValue = param->getValueForText (text);
+                            else
+                                pv->outValue = text.getFloatValue();
+
+                            return noErr;
                         }
                     }
                 }
@@ -406,11 +409,16 @@ public:
                     {
                         if (juceFilter != nullptr)
                         {
+                            const float value = (float) *(pv->inValue);
+                            String text;
+
                             if (AudioProcessorParameter* param = juceFilter->getParameters() [(int) pv->inParamID])
-                            {
-                                pv->outString = param->getText ((float) *(pv->inValue), 0).toCFString();
-                                return noErr;
-                            }
+                                text = param->getText ((float) *(pv->inValue), 0);
+                            else
+                                text = String (value);
+
+                            pv->outString = text.toCFString();
+                            return noErr;
                         }
                     }
                 }
@@ -728,6 +736,12 @@ public:
                                     &outCycleEndBeat) != noErr)
         {
             // If the host doesn't support this callback, use the sample time from lastTimeStamp:
+            outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
+        }
+
+        if (getHostType().isLogic())
+        {
+            // Use the sample time from lastTimeStamp to work around bug in Logic Pro 10.1
             outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
 

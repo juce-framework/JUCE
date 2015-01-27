@@ -171,6 +171,16 @@ StringArray getSearchPathsFromString (const String& searchPath)
     return s;
 }
 
+StringArray getCommaOrWhitespaceSeparatedItems (const String& sourceString)
+{
+    StringArray s;
+    s.addTokens (sourceString, ", \t\r\n", StringRef());
+    s.trim();
+    s.removeEmptyStrings();
+    s.removeDuplicates (false);
+    return s;
+}
+
 void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
 {
     forEachXmlChildElementWithTagName (*xml, e, "key")

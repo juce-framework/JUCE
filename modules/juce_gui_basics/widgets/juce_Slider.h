@@ -753,6 +753,8 @@ public:
     bool isHorizontal() const noexcept;
     /** True if the slider moves vertically. */
     bool isVertical() const noexcept;
+    /** True if the slider is in a rotary mode. */
+    bool isRotary() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
