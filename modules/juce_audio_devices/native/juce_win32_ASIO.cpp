@@ -438,8 +438,6 @@ public:
         currentBlockSizeSamples = bufferSizeSamples;
         currentChansOut.clear();
         currentChansIn.clear();
-        inBuffers.clear (totalNumInputChans + 1);
-        outBuffers.clear (totalNumOutputChans + 1);
 
         updateSampleRates();
 
@@ -457,6 +455,13 @@ public:
         buffersCreated = false;
 
         setSampleRate (sampleRate);
+
+        // (need to get this again in case a sample rate change affected the channel count)
+        err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans);
+        jassert (err == ASE_OK);
+
+        inBuffers.calloc (totalNumInputChans + 8);
+        outBuffers.calloc (totalNumOutputChans + 8);
 
         if (needToReset)
         {
