@@ -139,7 +139,7 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    virtual ~MidiInput();
+    ~MidiInput();
 
     /** Returns the name of this device. */
     const String& getName() const noexcept                      { return name; }
@@ -158,23 +158,21 @@ public:
 
         @see stop
     */
-    virtual void start();
+    void start();
 
     /** Stops the device running.
-
         @see start
     */
-    virtual void stop();
+    void stop();
 
-protected:
+private:
     //==============================================================================
     String name;
     void* internal;
 
-    explicit MidiInput (const String& name);
+    // The input objects are created with the openDevice() method.
+    explicit MidiInput (const String&);
 
-private:
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInput)
 };
 
