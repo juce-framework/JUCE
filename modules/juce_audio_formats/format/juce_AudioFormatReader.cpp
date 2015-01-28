@@ -229,20 +229,21 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples
                                        float& lowestRight, float& highestRight)
 {
     Range<float> levels[2];
-    readMaxLevels (startSampleInFile, numSamples, levels, jmin (2, (int) numChannels));
-    lowestLeft  = levels[0].getStart();
-    highestLeft = levels[0].getEnd();
 
-    if (numChannels > 1)
+    if (numChannels < 2)
     {
-        lowestRight  = levels[1].getStart();
-        highestRight = levels[1].getEnd();
+        readMaxLevels (startSampleInFile, numSamples, levels, numChannels);
+        levels[1] = levels[0];
     }
     else
     {
-        lowestRight  = lowestLeft;
-        highestRight = highestLeft;
+        readMaxLevels (startSampleInFile, numSamples, levels, 2);
     }
+
+    lowestLeft   = levels[0].getStart();
+    highestLeft  = levels[0].getEnd();
+    lowestRight  = levels[1].getStart();
+    highestRight = levels[1].getEnd();
 }
 
 int64 AudioFormatReader::searchForLevel (int64 startSample,

@@ -846,12 +846,54 @@ public:
         return true;
     }
 
-    void readMaxLevels (int64 startSampleInFile, int64 numSamples,
-                        float& min0, float& max0, float& min1, float& max1)
+    void getSample (int64 sample, float* result) const noexcept override
+    {
+        const int num = (int) numChannels;
+
+        if (map == nullptr || ! mappedSection.contains (sample))
+        {
+            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+
+            zeromem (result, sizeof (float) * num);
+            return;
+        }
+
+        float** dest = &result;
+        const void* source = sampleToPointer (sample);
+
+        if (littleEndian)
+        {
+            switch (bitsPerSample)
+            {
+                case 8:     ReadHelper<AudioData::Float32, AudioData::UInt8, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 16:    ReadHelper<AudioData::Float32, AudioData::Int16, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 24:    ReadHelper<AudioData::Float32, AudioData::Int24, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num);
+                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                default:    jassertfalse; break;
+            }
+        }
+        else
+        {
+            switch (bitsPerSample)
+            {
+                case 8:     ReadHelper<AudioData::Float32, AudioData::UInt8, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 16:    ReadHelper<AudioData::Float32, AudioData::Int16, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 24:    ReadHelper<AudioData::Float32, AudioData::Int24, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num);
+                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                default:    jassertfalse; break;
+            }
+        }
+    }
+
+    void readMaxLevels (int64 startSampleInFile, int64 numSamples, Range<float>* results, int numChannelsToRead) override
     {
         if (numSamples <= 0)
         {
-            min0 = max0 = min1 = max1 = 0;
+            for (int i = 0; i < numChannelsToRead; ++i)
+                results[i] = Range<float>();
+
             return;
         }
 
@@ -859,17 +901,19 @@ public:
         {
             jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 
-            min0 = max0 = min1 = max1 = 0;
+            for (int i = 0; i < numChannelsToRead; ++i)
+                results[i] = Range<float>();
+
             return;
         }
 
         switch (bitsPerSample)
         {
-            case 8:     scanMinAndMax<AudioData::UInt8> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
-            case 16:    scanMinAndMax<AudioData::Int16> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
-            case 24:    scanMinAndMax<AudioData::Int24> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
-            case 32:    if (usesFloatingPointData) scanMinAndMax<AudioData::Float32> (startSampleInFile, numSamples, min0, max0, min1, max1);
-                        else                       scanMinAndMax<AudioData::Int32>   (startSampleInFile, numSamples, min0, max0, min1, max1); break;
+            case 8:     scanMinAndMax<AudioData::UInt8> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 16:    scanMinAndMax<AudioData::Int16> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 24:    scanMinAndMax<AudioData::Int24> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 32:    if (usesFloatingPointData) scanMinAndMax<AudioData::Float32> (startSampleInFile, numSamples, results, numChannelsToRead);
+                        else                       scanMinAndMax<AudioData::Int32>   (startSampleInFile, numSamples, results, numChannelsToRead); break;
             default:    jassertfalse; break;
         }
     }
@@ -878,24 +922,17 @@ private:
     const bool littleEndian;
 
     template <typename SampleType>
-    void scanMinAndMax (int64 startSampleInFile, int64 numSamples,
-                        float& min0, float& max0, float& min1, float& max1) const noexcept
+    void scanMinAndMax (int64 startSampleInFile, int64 numSamples, Range<float>* results, int numChannelsToRead) const noexcept
     {
-        scanMinAndMax2<SampleType> (0, startSampleInFile, numSamples, min0, max0);
-
-        if (numChannels > 1)
-            scanMinAndMax2<SampleType> (1, startSampleInFile, numSamples, min1, max1);
-        else
-            min1 = max1 = 0;
+        for (int i = 0; i < numChannelsToRead; ++i)
+            results[i] = scanMinAndMaxForChannel<SampleType> (i, startSampleInFile, numSamples);
     }
 
     template <typename SampleType>
-    void scanMinAndMax2 (int channel, int64 startSampleInFile, int64 numSamples, float& mn, float& mx) const noexcept
+    Range<float> scanMinAndMaxForChannel (int channel, int64 startSampleInFile, int64 numSamples) const noexcept
     {
-        if (littleEndian)
-            scanMinAndMaxInterleaved<SampleType, AudioData::LittleEndian> (channel, startSampleInFile, numSamples, mn, mx);
-        else
-            scanMinAndMaxInterleaved<SampleType, AudioData::BigEndian>    (channel, startSampleInFile, numSamples, mn, mx);
+        return littleEndian ? scanMinAndMaxInterleaved<SampleType, AudioData::LittleEndian> (channel, startSampleInFile, numSamples)
+                            : scanMinAndMaxInterleaved<SampleType, AudioData::BigEndian>    (channel, startSampleInFile, numSamples);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedAiffReader)
