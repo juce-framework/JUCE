@@ -50,22 +50,22 @@ const String FILTERCLASSNAME::getParameterText (int index)
     return String();
 }
 
-const String FILTERCLASSNAME::getInputChannelName (int channelIndex) const
+const String FILTERCLASSNAME::getInputChannelName (int channelIndex, int elementIndex) const
 {
     return String (channelIndex + 1);
 }
 
-const String FILTERCLASSNAME::getOutputChannelName (int channelIndex) const
+const String FILTERCLASSNAME::getOutputChannelName (int channelIndex, int elementIndex) const
 {
     return String (channelIndex + 1);
 }
 
-bool FILTERCLASSNAME::isInputChannelStereoPair (int index) const
+bool FILTERCLASSNAME::isInputChannelStereoPair (int channelIndex, int elementIndex) const
 {
     return true;
 }
 
-bool FILTERCLASSNAME::isOutputChannelStereoPair (int index) const
+bool FILTERCLASSNAME::isOutputChannelStereoPair (int channelIndex, int elementIndex) const
 {
     return true;
 }
