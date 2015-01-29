@@ -99,7 +99,7 @@ bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previ
    #if JUCE_WINDOWS
     if (useNativeDialogBox && ! (selectsFiles && selectsDirectories))
    #elif JUCE_MAC || JUCE_LINUX
-    if (useNativeDialogBox && (previewComp == nullptr))
+    if (useNativeDialogBox)
    #else
     if (false)
    #endif
