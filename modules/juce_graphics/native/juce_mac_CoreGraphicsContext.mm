@@ -507,7 +507,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
        #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
         // There's a bug in CGContextDrawTiledImage that makes it incredibly slow
         // if it's doing a transformation - it's quicker to just draw lots of images manually
-        if (CGContextDrawTiledImage != 0 && transform.isOnlyTranslation())
+        if (&CGContextDrawTiledImage != 0 && transform.isOnlyTranslation())
             CGContextDrawTiledImage (context, imageRect, image);
         else
        #endif
