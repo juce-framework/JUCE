@@ -232,7 +232,7 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples
 
     if (numChannels < 2)
     {
-        readMaxLevels (startSampleInFile, numSamples, levels, numChannels);
+        readMaxLevels (startSampleInFile, numSamples, levels, (int) numChannels);
         levels[1] = levels[0];
     }
     else

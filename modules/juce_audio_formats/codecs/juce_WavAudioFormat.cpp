@@ -1297,7 +1297,7 @@ public:
         {
             jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 
-            zeromem (result, sizeof (float) * num);
+            zeromem (result, sizeof (float) * (size_t) num);
             return;
         }
 
