@@ -696,7 +696,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
         mouseOverNotes.set (fingerNum, newNote);
     }
 
-    int oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
+    const int oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
 
     if (isDown)
     {
@@ -710,7 +710,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
                     state.noteOff (midiChannel, oldNoteDown);
             }
 
-            if (newNote >= 0)
+            if (newNote >= 0 && ! mouseDownNotes.contains (newNote))
             {
                 if (! useMousePositionForVelocity)
                     mousePositionVelocity = 1.0f;
