@@ -746,7 +746,7 @@ void JUCE_CALLTYPE FloatVectorOperations::min (double* dest, const double* src, 
 void JUCE_CALLTYPE FloatVectorOperations::min (float* dest, const float* src1, const float* src2, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vmin (src1, 1, src2, 1, dest, 1, (vDSP_Length) num);
+    vDSP_vmin ((float*) src1, 1, (float*) src2, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmin (src1[i], src2[i]), Mode::min (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
    #endif
@@ -755,7 +755,7 @@ void JUCE_CALLTYPE FloatVectorOperations::min (float* dest, const float* src1, c
 void JUCE_CALLTYPE FloatVectorOperations::min (double* dest, const double* src1, const double* src2, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vminD (src1, 1, src2, 1, dest, 1, (vDSP_Length) num);
+    vDSP_vminD ((double*) src1, 1, (double*) src2, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmin (src1[i], src2[i]), Mode::min (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
    #endif
@@ -778,7 +778,7 @@ void JUCE_CALLTYPE FloatVectorOperations::max (double* dest, const double* src, 
 void JUCE_CALLTYPE FloatVectorOperations::max (float* dest, const float* src1, const float* src2, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vmax (src1, 1, src2, 1, dest, 1, (vDSP_Length) num);
+    vDSP_vmax ((float*) src1, 1, (float*) src2, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmax (src1[i], src2[i]), Mode::max (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
    #endif
@@ -787,7 +787,7 @@ void JUCE_CALLTYPE FloatVectorOperations::max (float* dest, const float* src1, c
 void JUCE_CALLTYPE FloatVectorOperations::max (double* dest, const double* src1, const double* src2, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vmaxD (src1, 1, src2, 1, dest, 1, (vDSP_Length) num);
+    vDSP_vmaxD ((double*) src1, 1, (double*) src2, 1, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmax (src1[i], src2[i]), Mode::max (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
    #endif
@@ -798,7 +798,7 @@ void JUCE_CALLTYPE FloatVectorOperations::clip (float* dest, const float* src, f
     jassert(high >= low);
 
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vclip (src, 1, &low, &high, dest, 1, (vDSP_Length) num);
+    vDSP_vclip ((float*) src, 1, &low, &high, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmax (jmin (src[i], high), low), Mode::max (Mode::min (s, hi), lo),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
@@ -811,7 +811,7 @@ void JUCE_CALLTYPE FloatVectorOperations::clip (double* dest, const double* src,
     jassert(high >= low);
 
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vclipD (src, 1, &low, &high, dest, 1, (vDSP_Length) num);
+    vDSP_vclipD ((double*) src, 1, &low, &high, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmax (jmin (src[i], high), low), Mode::max (Mode::min (s, hi), lo),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
