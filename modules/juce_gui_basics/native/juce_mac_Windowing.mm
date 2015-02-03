@@ -82,7 +82,7 @@ private:
         delete this;
     }
 
-    NSModalResponse getRawResult() const
+    NSInteger getRawResult() const
     {
         NSAlert* alert = [[[NSAlert alloc] init] autorelease];
 
