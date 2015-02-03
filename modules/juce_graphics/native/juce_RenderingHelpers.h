@@ -162,15 +162,6 @@ public:
     }
 
     //==============================================================================
-    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
-    {
-        if (ReferenceCountedObjectPtr<CachedGlyphType> glyph = findOrCreateGlyph (font, glyphNumber))
-        {
-            glyph->lastAccessCount = ++accessCounter;
-            glyph->draw (target, pos);
-        }
-    }
-
     void reset()
     {
         const ScopedLock sl (lock);
@@ -180,11 +171,14 @@ public:
         misses.set (0);
     }
 
-private:
-    friend struct ContainerDeletePolicy<CachedGlyphType>;
-    ReferenceCountedArray<CachedGlyphType> glyphs;
-    Atomic<int> accessCounter, hits, misses;
-    CriticalSection lock;
+    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
+    {
+        if (ReferenceCountedObjectPtr<CachedGlyphType> glyph = findOrCreateGlyph (font, glyphNumber))
+        {
+            glyph->lastAccessCount = ++accessCounter;
+            glyph->draw (target, pos);
+        }
+    }
 
     ReferenceCountedObjectPtr<CachedGlyphType> findOrCreateGlyph (const Font& font, int glyphNumber)
     {
@@ -202,6 +196,12 @@ private:
         g->generate (font, glyphNumber);
         return g;
     }
+
+private:
+    friend struct ContainerDeletePolicy<CachedGlyphType>;
+    ReferenceCountedArray<CachedGlyphType> glyphs;
+    Atomic<int> accessCounter, hits, misses;
+    CriticalSection lock;
 
     CachedGlyphType* findExistingGlyph (const Font& font, int glyphNumber) const
     {
@@ -302,11 +302,9 @@ public:
     }
 
     Font font;
+    ScopedPointer<EdgeTable> edgeTable;
     int glyph, lastAccessCount;
     bool snapToIntegerCoordinate;
-
-private:
-    ScopedPointer<EdgeTable> edgeTable;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
 };
