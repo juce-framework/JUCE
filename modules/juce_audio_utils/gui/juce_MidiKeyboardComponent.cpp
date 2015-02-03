@@ -813,7 +813,8 @@ void MidiKeyboardComponent::timerCallback()
         const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
         for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-            updateNoteUnderMouse (getLocalPoint (nullptr, mi->getScreenPosition()).roundToInt(), mi->isDragging(), mi->getIndex());
+            if (mi->getComponentUnderMouse() == this || isParentOf (mi->getComponentUnderMouse()))
+                updateNoteUnderMouse (getLocalPoint (nullptr, mi->getScreenPosition()).roundToInt(), mi->isDragging(), mi->getIndex());
     }
 }
 
