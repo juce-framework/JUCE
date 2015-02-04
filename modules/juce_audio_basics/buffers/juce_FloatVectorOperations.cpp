@@ -615,16 +615,24 @@ void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const d
 
 void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const float* src1, const float* src2, int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vma ((float*) src1, 1, (float*) src2, 1, dest, 1, dest, 1, (vDSP_Length) num);
+   #else
     JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST (dest[i] += src1[i] * src2[i], Mode::add (d, Mode::mul (s1, s2)),
                                              JUCE_LOAD_SRC1_SRC2_DEST,
                                              JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const double* src1, const double* src2, int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vmaD ((double*) src1, 1, (double*) src2, 1, dest, 1, dest, 1, (vDSP_Length) num);
+   #else
     JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST (dest[i] += src1[i] * src2[i], Mode::add (d, Mode::mul (s1, s2)),
                                              JUCE_LOAD_SRC1_SRC2_DEST,
                                              JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
