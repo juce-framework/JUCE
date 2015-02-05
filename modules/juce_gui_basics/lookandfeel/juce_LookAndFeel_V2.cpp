@@ -2504,7 +2504,7 @@ void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserCo
     filenameBox->setBounds (x + 50, y, w - 50, controlsHeight);
 }
 
-// Pulls a drawable out of compressed valuetree data..
+// Pulls a drawable out of compressed ValueTree data..
 static Drawable* loadDrawableFromData (const void* data, size_t numBytes)
 {
     MemoryInputStream m (data, numBytes, false);
