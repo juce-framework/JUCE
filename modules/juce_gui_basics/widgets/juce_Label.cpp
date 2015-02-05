@@ -324,6 +324,7 @@ void Label::paint (Graphics& g)
 void Label::mouseUp (const MouseEvent& e)
 {
     if (editSingleClick
+         && isEnabled()
          && e.mouseWasClicked()
          && contains (e.getPosition())
          && ! e.mods.isPopupMenu())
@@ -334,7 +335,9 @@ void Label::mouseUp (const MouseEvent& e)
 
 void Label::mouseDoubleClick (const MouseEvent& e)
 {
-    if (editDoubleClick && ! e.mods.isPopupMenu())
+    if (editDoubleClick
+         && isEnabled()
+         && ! e.mods.isPopupMenu())
         showEditor();
 }
 
@@ -346,7 +349,9 @@ void Label::resized()
 
 void Label::focusGained (FocusChangeType cause)
 {
-    if (editSingleClick && cause == focusChangedByTabKey)
+    if (editSingleClick
+         && isEnabled()
+         && cause == focusChangedByTabKey)
         showEditor();
 }
 
