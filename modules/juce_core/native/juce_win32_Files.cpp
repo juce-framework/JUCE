@@ -137,17 +137,22 @@ bool File::existsAsFile() const
 bool File::isDirectory() const
 {
     const DWORD attr = WindowsFileHelpers::getAtts (fullPath);
-    return ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) && (attr != INVALID_FILE_ATTRIBUTES);
+    return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0 && attr != INVALID_FILE_ATTRIBUTES;
 }
 
 bool File::hasWriteAccess() const
 {
-    if (exists())
-        return (WindowsFileHelpers::getAtts (fullPath) & FILE_ATTRIBUTE_READONLY) == 0;
+    if (fullPath.isEmpty())
+        return true;
 
-    // on windows, it seems that even read-only directories can still be written into,
-    // so checking the parent directory's permissions would return the wrong result..
-    return true;
+    const DWORD attr = WindowsFileHelpers::getAtts (fullPath);
+
+    // NB: According to MS, the FILE_ATTRIBUTE_READONLY attribute doesn't work for
+    // folders, and can be incorrectly set for some special folders, so we'll just say
+    // that folders are always writable.
+    return attr == INVALID_FILE_ATTRIBUTES
+            || (attr & FILE_ATTRIBUTE_DIRECTORY) != 0
+            || (attr & FILE_ATTRIBUTE_READONLY) == 0;
 }
 
 bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
