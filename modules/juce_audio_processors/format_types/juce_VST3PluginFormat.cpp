@@ -2163,7 +2163,7 @@ private:
 
             if (object->getState (&stream) == kResultTrue)
             {
-                MemoryBlock info (stream.getData(), (std::size_t) stream.getSize());
+                MemoryBlock info (stream.getData(), (size_t) stream.getSize());
                 head.createNewChildElement (identifier)->addTextElement (info.toBase64Encoding());
             }
         }

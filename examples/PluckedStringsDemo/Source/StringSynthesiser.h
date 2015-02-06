@@ -81,7 +81,7 @@ private:
     //=======================================================================
     void prepareSynthesiserState (double sampleRate, double frequencyInHz)
     {
-        std::size_t delayLineLength =  std::lround (sampleRate / frequencyInHz);
+        size_t delayLineLength = (size_t) roundToInt (sampleRate / frequencyInHz);
 
         // we need a minimum delay line length to get a reasonable synthesis.
         // if you hit this assert, increase sample rate or decrease frequency!
