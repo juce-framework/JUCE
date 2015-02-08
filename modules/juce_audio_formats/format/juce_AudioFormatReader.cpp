@@ -46,6 +46,7 @@ bool AudioFormatReader::read (int* const* destSamples,
 {
     jassert (numDestChannels > 0); // you have to actually give this some channels to work with!
 
+    const size_t originalNumSamplesToRead = (size_t) numSamplesToRead;
     int startOffsetInDestBuffer = 0;
 
     if (startSampleInSource < 0)
@@ -64,7 +65,7 @@ bool AudioFormatReader::read (int* const* destSamples,
     if (numSamplesToRead <= 0)
         return true;
 
-    if (! readSamples (const_cast <int**> (destSamples),
+    if (! readSamples (const_cast<int**> (destSamples),
                        jmin ((int) numChannels, numDestChannels), startOffsetInDestBuffer,
                        startSampleInSource, numSamplesToRead))
         return false;
@@ -87,13 +88,13 @@ bool AudioFormatReader::read (int* const* destSamples,
             if (lastFullChannel != nullptr)
                 for (int i = (int) numChannels; i < numDestChannels; ++i)
                     if (destSamples[i] != nullptr)
-                        memcpy (destSamples[i], lastFullChannel, sizeof (int) * (size_t) numSamplesToRead);
+                        memcpy (destSamples[i], lastFullChannel, sizeof (int) * originalNumSamplesToRead);
         }
         else
         {
             for (int i = (int) numChannels; i < numDestChannels; ++i)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i], sizeof (int) * (size_t) numSamplesToRead);
+                    zeromem (destSamples[i], sizeof (int) * originalNumSamplesToRead);
         }
     }
 
