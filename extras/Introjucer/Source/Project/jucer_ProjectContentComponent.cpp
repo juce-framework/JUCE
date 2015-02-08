@@ -764,7 +764,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save As...",
                         "Saves the current document to a new location",
                         CommandCategories::general, 0);
-        result.setActive (currentDocument != nullptr || project != nullptr);
+        result.setActive (currentDocument != nullptr);
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 

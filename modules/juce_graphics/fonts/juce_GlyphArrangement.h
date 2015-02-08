@@ -77,14 +77,17 @@ public:
     void moveBy (float deltaX, float deltaY);
 
     //==============================================================================
-    /** Draws the glyph into a graphics context. */
-    void draw (const Graphics& g) const;
+    /** Draws the glyph into a graphics context.
+        (Note that this may change the context's currently selected font).
+    */
+    void draw (Graphics& g) const;
 
-    /** Draws the glyph into a graphics context, with an extra transform applied to it. */
-    void draw (const Graphics& g, const AffineTransform& transform) const;
+    /** Draws the glyph into a graphics context, with an extra transform applied to it.
+        (Note that this may change the context's currently selected font).
+    */
+    void draw (Graphics& g, const AffineTransform& transform) const;
 
     /** Returns the path for this glyph.
-
         @param path     the glyph's outline will be appended to this path
     */
     void createPath (Path& path) const;

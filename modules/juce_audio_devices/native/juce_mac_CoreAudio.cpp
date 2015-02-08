@@ -543,7 +543,7 @@ public:
         // set sample rate
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioDevicePropertyNominalSampleRate;
-        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mScope = kAudioObjectPropertyScopeGlobal;
         pa.mElement = kAudioObjectPropertyElementMaster;
         Float64 sr = newSampleRate;
 

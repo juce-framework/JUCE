@@ -181,7 +181,7 @@ public:
     int64 hashCode64() const noexcept;
 
     /** Generates a probably-unique hashcode from this string. */
-    std::size_t hash() const noexcept;
+    size_t hash() const noexcept;
 
     /** Returns the number of characters in the string. */
     int length() const noexcept;

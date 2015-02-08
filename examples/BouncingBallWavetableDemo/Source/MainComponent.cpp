@@ -129,7 +129,7 @@ public:
         wavePath.startNewSubPath (0.0f, y);
 
         for (int i = 1; i < pathWidth; ++i)
-            wavePath.lineTo (i, (1 + waveValues[channel][i * numElementsInArray (waveValues[0]) / pathWidth]) * 10.0f);
+            wavePath.lineTo ((float) i, (1.0f + waveValues[channel][i * numElementsInArray (waveValues[0]) / pathWidth]) * 10.0f);
 
         g.strokePath (wavePath, PathStrokeType (1.0f),
                       wavePath.getTransformToScaleToFit (Rectangle<float> (0.0f, y, (float) getWidth(), 20.0f), false));
@@ -198,7 +198,7 @@ public:
         return (float) indexValue;
     }
 
-    int amplitudeToY (float amp) const noexcept
+    float amplitudeToY (float amp) const noexcept
     {
         return getHeight() - (amp + 1.0f) * getHeight() / 2.0f;
     }

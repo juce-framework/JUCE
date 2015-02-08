@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2013
+Project("{E2F0E2D2-88FF-EF53-E779-C571B75BEB02}") = "SimpleFFTExample", "SimpleFFTExample.vcxproj", "{D3EA4D64-39DA-D13A-AC10-C306C86BA9F5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D3EA4D64-39DA-D13A-AC10-C306C86BA9F5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D3EA4D64-39DA-D13A-AC10-C306C86BA9F5}.Debug|Win32.Build.0 = Debug|Win32
+		{D3EA4D64-39DA-D13A-AC10-C306C86BA9F5}.Release|Win32.ActiveCfg = Release|Win32
+		{D3EA4D64-39DA-D13A-AC10-C306C86BA9F5}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

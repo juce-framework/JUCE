@@ -696,7 +696,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
         mouseOverNotes.set (fingerNum, newNote);
     }
 
-    int oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
+    const int oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
 
     if (isDown)
     {
@@ -710,7 +710,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
                     state.noteOff (midiChannel, oldNoteDown);
             }
 
-            if (newNote >= 0)
+            if (newNote >= 0 && ! mouseDownNotes.contains (newNote))
             {
                 if (! useMousePositionForVelocity)
                     mousePositionVelocity = 1.0f;
@@ -813,7 +813,8 @@ void MidiKeyboardComponent::timerCallback()
         const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
         for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-            updateNoteUnderMouse (getLocalPoint (nullptr, mi->getScreenPosition()).roundToInt(), mi->isDragging(), mi->getIndex());
+            if (mi->getComponentUnderMouse() == this || isParentOf (mi->getComponentUnderMouse()))
+                updateNoteUnderMouse (getLocalPoint (nullptr, mi->getScreenPosition()).roundToInt(), mi->isDragging(), mi->getIndex());
     }
 }
 

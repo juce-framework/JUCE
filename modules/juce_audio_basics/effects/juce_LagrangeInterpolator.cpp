@@ -87,7 +87,10 @@ int LagrangeInterpolator::process (const double actualRatio, const float* in,
 
         if (numOut >= 4)
         {
-            memcpy (lastInputSamples, in + (numOut - 4), 4 * sizeof (float));
+            const float* end = in + numOut;
+
+            for (int i = 0; i < 4; ++i)
+                lastInputSamples[i] = *--end;
         }
         else
         {
@@ -152,7 +155,10 @@ int LagrangeInterpolator::processAdding (const double actualRatio, const float* 
 
         if (numOut >= 4)
         {
-            memcpy (lastInputSamples, in + (numOut - 4), 4 * sizeof (float));
+            const float* end = in + numOut;
+
+            for (int i = 0; i < 4; ++i)
+                lastInputSamples[i] = *--end;
         }
         else
         {

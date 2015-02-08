@@ -292,7 +292,8 @@ void Synthesiser::noteOff (const int midiChannel,
     {
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
-        if (voice->getCurrentlyPlayingNote() == midiNoteNumber)
+        if (voice->getCurrentlyPlayingNote() == midiNoteNumber
+              && voice->isPlayingChannel (midiChannel))
         {
             if (SynthesiserSound* const sound = voice->getCurrentlyPlayingSound())
             {
