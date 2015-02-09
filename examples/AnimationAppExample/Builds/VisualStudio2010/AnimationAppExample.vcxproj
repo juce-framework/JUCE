@@ -151,6 +151,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessageSequence.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_FFT.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -581,6 +584,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\hashing\juce_SHA256.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_cryptography\hashing\juce_Whirlpool.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_Value.cpp">
@@ -1237,6 +1243,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessage.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessageSequence.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Decibels.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_FFT.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_LagrangeInterpolator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Reverb.h"/>
@@ -1423,6 +1430,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_cryptography\encryption\juce_RSAKey.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_cryptography\hashing\juce_MD5.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_cryptography\hashing\juce_SHA256.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_cryptography\hashing\juce_Whirlpool.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_cryptography\juce_cryptography.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_Value.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTree.h"/>
