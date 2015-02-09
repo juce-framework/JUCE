@@ -654,8 +654,13 @@ public:
 
     /** This is called by the processor as input elements are indicated as active or inactive by the host. */
     void setInputElementActive (int elementIndex, bool active) noexcept { inputElementsActive.set(elementIndex, active); }
+
+    /** This can be called to find out the activation status of an input element. */
     bool getInputElementActive (int elementIndex) const noexcept { return inputElementsActive[elementIndex]; }
     
+    /** Convenience method which returns true iff there are at least two input elements and the second input element is active. */
+    bool isSideChainActive() const noexcept { return inputElementsActive.size() >= 2 && getInputElementActive(1); }
+
     //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
     void editorBeingDeleted (AudioProcessorEditor*) noexcept;
