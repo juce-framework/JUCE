@@ -825,6 +825,7 @@ private:
         const String anchorStr = getStyleAttribute(xml, "text-anchor");
 
         DrawableComposite* dc = new DrawableComposite();
+        setDrawableID (*dc, xml);
 
         forEachXmlChildElement (*xml, e)
         {
