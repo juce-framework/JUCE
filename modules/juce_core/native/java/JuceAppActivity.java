@@ -55,7 +55,7 @@ import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 
 //==============================================================================
-public final class JuceAppActivity   extends Activity
+public class JuceAppActivity   extends Activity
 {
     //==============================================================================
     static
