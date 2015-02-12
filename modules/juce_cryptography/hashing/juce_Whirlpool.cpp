@@ -170,7 +170,7 @@ private:
     void processNextBuffer() noexcept
     {
         #undef X
-        #define X(a) literal64bit(a)
+        #define X(value) value##ULL
 
         static const uint64 rc[] =
         {   X(0x1823c6e887b8014f), X(0x36a6d2f5796f9152), X(0x60bc9b8ea30c7b35), X(0x1de0d7c22e4bfe57), X(0x157737e59ff04ada),
