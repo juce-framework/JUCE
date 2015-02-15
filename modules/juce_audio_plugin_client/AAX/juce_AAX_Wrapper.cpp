@@ -495,6 +495,19 @@ struct AAXClasses
                 return AAX_CEffectParameters::SetChunk (chunkID, chunk);
 
             pluginInstance->setStateInformation ((void*) chunk->fData, chunk->fSize);
+
+            // Notify Pro Tools that the parameters were updated.
+            // Without it a bug happens in these circumstances:
+            // * A preset is saved with the RTAS version of the plugin (".tfx" preset format).
+            // * The preset is loaded in PT 10 using the AAX version.
+            // * The session is then saved, and closed.
+            // * The saved session is loaded, but acting as if the preset was never loaded.
+            const int numParameters = pluginInstance->getNumParameters();
+            for (int i = 0; i < numParameters; ++i)
+            {
+                SetParameterNormalizedValue (IndexAsParamID (i), (double) pluginInstance->getParameter(i));
+            }
+
             return AAX_SUCCESS;
         }
 
