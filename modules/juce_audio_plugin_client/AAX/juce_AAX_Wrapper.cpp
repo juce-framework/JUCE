@@ -794,10 +794,8 @@ struct AAXClasses
 
                 for (uint32_t i = 0; i < numMidiEvents; ++i)
                 {
-                    // (This 8-byte alignment is a workaround to a bug in the AAX SDK. Hopefully can be
-                    // removed in future when the packet structure size is fixed)
-                    const AAX_CMidiPacket& m = *addBytesToPointer (midiStream->mBuffer,
-                                                                   i * ((sizeof (AAX_CMidiPacket) + 7) & ~(size_t) 7));
+                    const AAX_CMidiPacket& m = midiStream->mBuffer[i];
+
                     jassert ((int) m.mTimestamp < bufferSize);
                     midiBuffer.addEvent (m.mData, (int) m.mLength,
                                          jlimit (0, (int) bufferSize - 1, (int) m.mTimestamp));
