@@ -221,7 +221,7 @@ protected:
     {
         const String binaryPath (config.getTargetBinaryRelativePathString().trim());
         if (binaryPath.isEmpty())
-            return prependDot (File::createLegalFileName (config.getName().trim()));
+            return binaryPath;
 
         RelativePath binaryRelPath (binaryPath, RelativePath::projectFolder);
 
@@ -708,7 +708,9 @@ protected:
         const bool isDebug = config.isDebug();
 
         xml.setAttribute ("Name", createConfigName (config));
-        xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (getConfigTargetPath (config)));
+
+        if (getConfigTargetPath (config).isNotEmpty())
+            xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (getConfigTargetPath (config)));
 
         if (config.getIntermediatesPath().isNotEmpty())
             xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (config.getIntermediatesPath()));
@@ -1149,6 +1151,7 @@ protected:
             {
                 const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
+                if (getConfigTargetPath (config).isNotEmpty())
                 {
                     XmlElement* outdir = props->createNewChildElement ("OutDir");
                     setConditionAttribute (*outdir, config);
