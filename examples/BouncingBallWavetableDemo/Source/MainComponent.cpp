@@ -33,7 +33,7 @@ public:
 
         // specify the number of input and output channels that we want to open
         setAudioChannels (2, 2);
-        startTimer (50);
+        startTimerHz (60);
     }
 
     ~MainContentComponent()
