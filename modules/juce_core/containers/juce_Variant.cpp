@@ -576,15 +576,15 @@ var var::clone() const noexcept
 }
 
 //==============================================================================
-var var::operator[] (const Identifier propertyName) const
+const var& var::operator[] (Identifier propertyName) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperty (propertyName);
 
-    return var();
+    return var::null;
 }
 
-var var::operator[] (const char* const propertyName) const
+const var& var::operator[] (const char* const propertyName) const
 {
     return operator[] (Identifier (propertyName));
 }

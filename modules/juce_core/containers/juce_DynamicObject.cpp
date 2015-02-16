@@ -45,7 +45,7 @@ bool DynamicObject::hasProperty (const Identifier& propertyName) const
     return v != nullptr && ! v->isMethod();
 }
 
-var DynamicObject::getProperty (const Identifier& propertyName) const
+const var& DynamicObject::getProperty (const Identifier& propertyName) const
 {
     return properties [propertyName];
 }
