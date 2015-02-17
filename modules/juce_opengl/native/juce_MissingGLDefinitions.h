@@ -47,6 +47,10 @@ enum MissingOpenGLDefinitions
     GL_RGBA8                        = GL_RGBA,
    #endif
 
+   #ifndef GL_RGBA32F
+    GL_RGBA32F                      = 0x8814,
+   #endif
+
    #ifndef GL_COLOR_ATTACHMENT0
     GL_COLOR_ATTACHMENT0            = 0x8CE0,
    #endif
