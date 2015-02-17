@@ -146,7 +146,7 @@ private:
         searchPaths.removeDuplicates (false);
 
         for (int i = 0; i < searchPaths.size(); ++i)
-            out << " -I " << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])));
+            out << " -I " << escapeSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])));
     }
 
     void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const

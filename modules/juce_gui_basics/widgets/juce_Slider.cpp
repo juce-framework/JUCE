@@ -1497,11 +1497,8 @@ void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double value
     pimpl->doubleClickReturnValue = valueToSetOnDoubleClick;
 }
 
-double Slider::getDoubleClickReturnValue (bool& isEnabledResult) const
-{
-    isEnabledResult = pimpl->doubleClickToValue;
-    return pimpl->doubleClickReturnValue;
-}
+double Slider::getDoubleClickReturnValue() const noexcept       { return pimpl->doubleClickReturnValue; }
+bool Slider::isDoubleClickReturnEnabled() const noexcept        { return pimpl->doubleClickToValue; }
 
 void Slider::updateText()
 {

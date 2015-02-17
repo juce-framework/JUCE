@@ -1726,6 +1726,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_cryptography\hashing\juce_SHA256.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_cryptography\hashing\juce_Whirlpool.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_cryptography\hashing\juce_Whirlpool.h"/>
         </Filter>
         <File RelativePath="..\..\..\..\modules\juce_cryptography\juce_module_info">
           <FileConfiguration Name="Debug|Win32"

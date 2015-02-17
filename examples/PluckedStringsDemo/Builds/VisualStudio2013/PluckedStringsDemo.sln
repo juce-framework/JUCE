@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2013
+Project("{798408B1-275B-0B42-1439-1A3AA75C50F3}") = "PluckedStringsDemo", "PluckedStringsDemo.vcxproj", "{A8C8CD6F-F9CA-737E-DC8B-DA724521F17B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A8C8CD6F-F9CA-737E-DC8B-DA724521F17B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A8C8CD6F-F9CA-737E-DC8B-DA724521F17B}.Debug|Win32.Build.0 = Debug|Win32
+		{A8C8CD6F-F9CA-737E-DC8B-DA724521F17B}.Release|Win32.ActiveCfg = Release|Win32
+		{A8C8CD6F-F9CA-737E-DC8B-DA724521F17B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

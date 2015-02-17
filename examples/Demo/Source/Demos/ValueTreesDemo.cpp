@@ -95,6 +95,9 @@ public:
 
                 if (v.getParent().isValid() && newParent != v && ! newParent.isAChildOf (v))
                 {
+                    if (v.getParent() == newParent && newParent.indexOf(v) < insertIndex)
+                        --insertIndex;
+
                     v.getParent().removeChild (v, &undoManager);
                     newParent.addChild (v, insertIndex, &undoManager);
                 }

@@ -1504,8 +1504,8 @@ void TextEditor::moveCaretTo (const int newPosition, const bool isSelecting)
 
 int TextEditor::getTextIndexAt (const int x, const int y)
 {
-    return indexAtPosition ((float) (x + viewport->getViewPositionX() - leftIndent),
-                            (float) (y + viewport->getViewPositionY() - topIndent));
+    return indexAtPosition ((float) (x + viewport->getViewPositionX() - leftIndent - borderSize.getLeft()),
+                            (float) (y + viewport->getViewPositionY() - topIndent  - borderSize.getTop()));
 }
 
 void TextEditor::insertTextAtCaret (const String& t)

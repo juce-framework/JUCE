@@ -177,6 +177,17 @@ void AudioDeviceManager::addAudioDeviceType (AudioIODeviceType* newDeviceType)
     }
 }
 
+static bool deviceListContains (AudioIODeviceType* type, bool isInput, const String& name)
+{
+    StringArray devices (type->getDeviceNames (isInput));
+
+    for (int i = devices.size(); --i >= 0;)
+        if (devices[i].trim().equalsIgnoreCase (name.trim()))
+            return true;
+
+    return false;
+}
+
 //==============================================================================
 String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                        const int numOutputChannelsNeeded,
@@ -363,8 +374,8 @@ AudioIODeviceType* AudioDeviceManager::findType (const String& inputName, const 
     {
         AudioIODeviceType* const type = availableDeviceTypes.getUnchecked(i);
 
-        if ((inputName.isNotEmpty() && type->getDeviceNames (true).contains (inputName, true))
-            || (outputName.isNotEmpty() && type->getDeviceNames (false).contains (outputName, true)))
+        if ((inputName.isNotEmpty() && deviceListContains (type, true, inputName))
+             || (outputName.isNotEmpty() && deviceListContains (type, false, outputName)))
         {
             return type;
         }
@@ -458,17 +469,11 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         deleteCurrentDevice();
         scanDevicesIfNeeded();
 
-        if (newOutputDeviceName.isNotEmpty()
-             && ! type->getDeviceNames (false).contains (newOutputDeviceName))
-        {
+        if (newOutputDeviceName.isNotEmpty() && ! deviceListContains (type, false, newOutputDeviceName))
             return "No such device: " + newOutputDeviceName;
-        }
 
-        if (newInputDeviceName.isNotEmpty()
-             && ! type->getDeviceNames (true).contains (newInputDeviceName))
-        {
+        if (newInputDeviceName.isNotEmpty() && ! deviceListContains (type, true, newInputDeviceName))
             return "No such device: " + newInputDeviceName;
-        }
 
         currentAudioDevice = type->createDevice (newOutputDeviceName, newInputDeviceName);
 

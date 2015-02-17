@@ -134,6 +134,19 @@ namespace FloatVectorHelpers
         } \
         JUCE_FINISH_VEC_OP (normalOp)
 
+    #define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        JUCE_BEGIN_VEC_OP \
+        setupOp \
+        { \
+            Mode::ParallelType (&loadSrc1) (const Mode::Type* v) = FloatVectorHelpers::isAligned (src1) ? Mode::loadA  : Mode::loadU;          \
+            Mode::ParallelType (&loadSrc2) (const Mode::Type* v) = FloatVectorHelpers::isAligned (src2) ? Mode::loadA  : Mode::loadU;          \
+            Mode::ParallelType (&loadDst)  (const Mode::Type* v) = FloatVectorHelpers::isAligned (dest) ? Mode::loadA  : Mode::loadU;          \
+            void (&storeDst) (Mode::Type* dest, Mode::ParallelType a) = FloatVectorHelpers::isAligned (dest) ? Mode::storeA  : Mode::storeU;   \
+            JUCE_VEC_LOOP_TWO_SOURCES_WITH_DEST_LOAD (vecOp, loadSrc1, loadSrc2, loadDst, storeDst, locals, increment);                        \
+        } \
+        JUCE_FINISH_VEC_OP (normalOp)
+
+
     //==============================================================================
    #elif JUCE_USE_ARM_NEON
 
@@ -211,6 +224,13 @@ namespace FloatVectorHelpers
         JUCE_VEC_LOOP_TWO_SOURCES (vecOp, Mode::loadU, Mode::loadU, Mode::storeU, locals, increment) \
         JUCE_FINISH_VEC_OP (normalOp)
 
+    #define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        JUCE_BEGIN_VEC_OP \
+        setupOp \
+        JUCE_VEC_LOOP_TWO_SOURCES_WITH_DEST_LOAD (vecOp, Mode::loadU, Mode::loadU, Mode::loadU, Mode::storeU, locals, increment) \
+        JUCE_FINISH_VEC_OP (normalOp)
+
+
     //==============================================================================
    #else
     #define JUCE_PERFORM_VEC_OP_DEST(normalOp, vecOp, locals, setupOp) \
@@ -221,6 +241,10 @@ namespace FloatVectorHelpers
 
     #define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST(normalOp, vecOp, locals, increment, setupOp) \
         for (int i = 0; i < num; ++i) normalOp;
+
+    #define JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST(normalOp, vecOp, locals, increment, setupOp) \
+        for (int i = 0; i < num; ++i) normalOp;
+
    #endif
 
     //==============================================================================
@@ -240,11 +264,20 @@ namespace FloatVectorHelpers
             increment; \
         }
 
+    #define JUCE_VEC_LOOP_TWO_SOURCES_WITH_DEST_LOAD(vecOp, src1Load, src2Load, dstLoad, dstStore, locals, increment) \
+        for (int i = 0; i < numLongOps; ++i) \
+        { \
+            locals (src1Load, src2Load, dstLoad); \
+            dstStore (dest, vecOp); \
+            increment; \
+        }
+
     #define JUCE_LOAD_NONE(srcLoad, dstLoad)
-    #define JUCE_LOAD_DEST(srcLoad, dstLoad)        const Mode::ParallelType d = dstLoad (dest);
-    #define JUCE_LOAD_SRC(srcLoad, dstLoad)         const Mode::ParallelType s = srcLoad (src);
-    #define JUCE_LOAD_SRC1_SRC2(src1Load, src2Load) const Mode::ParallelType s1 = src1Load (src1), s2 = src2Load (src2);
-    #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad)    const Mode::ParallelType d = dstLoad (dest), s = srcLoad (src);
+    #define JUCE_LOAD_DEST(srcLoad, dstLoad)                        const Mode::ParallelType d = dstLoad (dest);
+    #define JUCE_LOAD_SRC(srcLoad, dstLoad)                         const Mode::ParallelType s = srcLoad (src);
+    #define JUCE_LOAD_SRC1_SRC2(src1Load, src2Load)                 const Mode::ParallelType s1 = src1Load (src1), s2 = src2Load (src2);
+    #define JUCE_LOAD_SRC1_SRC2_DEST(src1Load, src2Load, dstLoad)   const Mode::ParallelType d = dstLoad (dest), s1 = src1Load (src1), s2 = src2Load (src2);
+    #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad)                    const Mode::ParallelType d = dstLoad (dest), s = srcLoad (src);
 
    #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
     template<int typeSize> struct ModeType    { typedef BasicOps32 Mode; };
@@ -580,6 +613,28 @@ void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const d
                                   const Mode::ParallelType mult = Mode::load1 (multiplier);)
 }
 
+void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const float* src1, const float* src2, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vma ((float*) src1, 1, (float*) src2, 1, dest, 1, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST (dest[i] += src1[i] * src2[i], Mode::add (d, Mode::mul (s1, s2)),
+                                             JUCE_LOAD_SRC1_SRC2_DEST,
+                                             JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const double* src1, const double* src2, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vmaD ((double*) src1, 1, (double*) src2, 1, dest, 1, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST (dest[i] += src1[i] * src2[i], Mode::add (d, Mode::mul (s1, s2)),
+                                             JUCE_LOAD_SRC1_SRC2_DEST,
+                                             JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
@@ -679,6 +734,96 @@ void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, cons
                                   Mode::mul (mult, _mm_cvtepi32_ps (_mm_loadu_si128 ((const __m128i*) src))),
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mult = Mode::load1 (multiplier);)
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::min (float* dest, const float* src, float comp, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmin (src[i], comp), Mode::min (s, cmp),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType cmp = Mode::load1 (comp);)
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::min (double* dest, const double* src, double comp, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmin (src[i], comp), Mode::min (s, cmp),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType cmp = Mode::load1 (comp);)
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::min (float* dest, const float* src1, const float* src2, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vmin ((float*) src1, 1, (float*) src2, 1, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmin (src1[i], src2[i]), Mode::min (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::min (double* dest, const double* src1, const double* src2, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vminD ((double*) src1, 1, (double*) src2, 1, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmin (src1[i], src2[i]), Mode::min (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::max (float* dest, const float* src, float comp, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmax (src[i], comp), Mode::max (s, cmp),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType cmp = Mode::load1 (comp);)
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::max (double* dest, const double* src, double comp, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmax (src[i], comp), Mode::max (s, cmp),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType cmp = Mode::load1 (comp);)
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::max (float* dest, const float* src1, const float* src2, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vmax ((float*) src1, 1, (float*) src2, 1, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmax (src1[i], src2[i]), Mode::max (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::max (double* dest, const double* src1, const double* src2, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vmaxD ((double*) src1, 1, (double*) src2, 1, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST (dest[i] = jmax (src1[i], src2[i]), Mode::max (s1, s2), JUCE_LOAD_SRC1_SRC2, JUCE_INCREMENT_SRC1_SRC2_DEST, )
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::clip (float* dest, const float* src, float low, float high, int num) noexcept
+{
+    jassert(high >= low);
+
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vclip ((float*) src, 1, &low, &high, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmax (jmin (src[i], high), low), Mode::max (Mode::min (s, hi), lo),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType lo = Mode::load1 (low); const Mode::ParallelType hi = Mode::load1 (high);)
+   #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::clip (double* dest, const double* src, double low, double high, int num) noexcept
+{
+    jassert(high >= low);
+
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vclipD ((double*) src, 1, &low, &high, dest, 1, (vDSP_Length) num);
+   #else
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmax (jmin (src[i], high), low), Mode::max (Mode::min (s, hi), lo),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType lo = Mode::load1 (low); const Mode::ParallelType hi = Mode::load1 (high);)
    #endif
 }
 
@@ -823,6 +968,11 @@ public:
 
             fillRandomly (random, int1, num);
             doConversionTest (u, data1, data2, int1, num);
+
+            FloatVectorOperations::fill (data1, (ValueType) 2, num);
+            FloatVectorOperations::fill (data2, (ValueType) 3, num);
+            FloatVectorOperations::addWithMultiply (data1, data1, data2, num);
+            u.expect (areAllValuesEqual (data1, num, (ValueType) 8));
         }
 
         static void doConversionTest (UnitTest& u, float* data1, float* data2, int* const int1, int num)

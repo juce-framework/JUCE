@@ -55,7 +55,7 @@ import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 
 //==============================================================================
-public final class JuceAppActivity   extends Activity
+public class JuceAppActivity   extends Activity
 {
     //==============================================================================
     static
@@ -64,7 +64,7 @@ public final class JuceAppActivity   extends Activity
     }
 
     @Override
-    public final void onCreate (Bundle savedInstanceState)
+    public void onCreate (Bundle savedInstanceState)
     {
         super.onCreate (savedInstanceState);
 
@@ -75,14 +75,14 @@ public final class JuceAppActivity   extends Activity
     }
 
     @Override
-    protected final void onDestroy()
+    protected void onDestroy()
     {
         quitApp();
         super.onDestroy();
     }
 
     @Override
-    protected final void onPause()
+    protected void onPause()
     {
         if (viewHolder != null)
             viewHolder.onPause();
@@ -92,7 +92,7 @@ public final class JuceAppActivity   extends Activity
     }
 
     @Override
-    protected final void onResume()
+    protected void onResume()
     {
         super.onResume();
 

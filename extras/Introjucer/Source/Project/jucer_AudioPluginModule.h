@@ -636,8 +636,6 @@ namespace AAXHelpers
 
             if (exporter.isVisualStudio())
             {
-                exporter.msvcTargetSuffix = ".aaxplugin";
-
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)
                     if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                         config->getValue (Ids::useRuntimeLibDLL) = true;

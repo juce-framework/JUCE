@@ -503,6 +503,19 @@ struct AAXClasses
                 return AAX_CEffectParameters::SetChunk (chunkID, chunk);
 
             pluginInstance->setStateInformation ((void*) chunk->fData, chunk->fSize);
+
+            // Notify Pro Tools that the parameters were updated.
+            // Without it a bug happens in these circumstances:
+            // * A preset is saved with the RTAS version of the plugin (".tfx" preset format).
+            // * The preset is loaded in PT 10 using the AAX version.
+            // * The session is then saved, and closed.
+            // * The saved session is loaded, but acting as if the preset was never loaded.
+            const int numParameters = pluginInstance->getNumParameters();
+            for (int i = 0; i < numParameters; ++i)
+            {
+                SetParameterNormalizedValue (IndexAsParamID (i), (double) pluginInstance->getParameter(i));
+            }
+
             return AAX_SUCCESS;
         }
 
@@ -797,10 +810,8 @@ struct AAXClasses
 
                 for (uint32_t i = 0; i < numMidiEvents; ++i)
                 {
-                    // (This 8-byte alignment is a workaround to a bug in the AAX SDK. Hopefully can be
-                    // removed in future when the packet structure size is fixed)
-                    const AAX_CMidiPacket& m = *addBytesToPointer (midiStream->mBuffer,
-                                                                   i * ((sizeof (AAX_CMidiPacket) + 7) & ~(size_t) 7));
+                    const AAX_CMidiPacket& m = midiStream->mBuffer[i];
+
                     jassert ((int) m.mTimestamp < bufferSize);
                     midiBuffer.addEvent (m.mData, (int) m.mLength,
                                          jlimit (0, (int) bufferSize - 1, (int) m.mTimestamp));
