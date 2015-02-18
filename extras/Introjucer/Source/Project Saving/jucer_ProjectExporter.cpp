@@ -55,6 +55,7 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
     addType (types, MakefileProjectExporter::getNameLinux(),        BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
     addType (types, AndroidProjectExporter::getNameAndroid(),       BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
     addType (types, CodeBlocksProjectExporter::getNameCodeBlocks(), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
+    addType (types, QtCreatorProjectExporter::getNameQtCreator(),   BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
 
     return types;
 }
@@ -76,6 +77,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 8:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter  ::getValueTreeTypeName())); break;
         case 9:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter   ::getValueTreeTypeName())); break;
         case 10:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName())); break;
+        case 11:    exp = new QtCreatorProjectExporter  (project, ValueTree (QtCreatorProjectExporter ::getValueTreeTypeName())); break;
 
         default:    jassertfalse; return 0;
     }

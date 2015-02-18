@@ -26,7 +26,7 @@ class QtCreatorProjectExporter  : public ProjectExporter
 {
 public:
     //==============================================================================
-    static const char* getName()                { return "QtCreator";  }
+    static const char* getNameQtCreator()       { return "QtCreator";  }
     static const char* getValueTreeTypeName()   { return "QT_CREATOR"; }
 
     static QtCreatorProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -41,7 +41,7 @@ public:
     //==============================================================================
     QtCreatorProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
     {
-        name = getName();
+        name = getNameQtCreator();
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + "QtCreator";
