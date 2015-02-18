@@ -931,7 +931,7 @@ struct TreeView::InsertPoint
             item = root;
             insertIndex = root->getNumSubItems();
             pos = root->getItemPosition (true).getBottomLeft();
-            pos.x += root->getIndentX();
+            pos.x += view.getIndentSize();
         }
     }
 
