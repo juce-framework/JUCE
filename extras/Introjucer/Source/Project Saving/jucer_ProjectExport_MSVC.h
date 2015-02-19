@@ -131,6 +131,9 @@ protected:
         Value getWarningLevelValue()                { return getValue (Ids::winWarningLevel); }
         int getWarningLevel() const                 { return config [Ids::winWarningLevel]; }
 
+        Value getWarningsTreatedAsErrors()          { return getValue (Ids::warningsAreErrors); }
+        bool areWarningsTreatedAsErrors() const     { return config [Ids::warningsAreErrors]; }
+
         Value getPrebuildCommand()                  { return getValue (Ids::prebuildCommand); }
         String getPrebuildCommandString() const     { return config [Ids::prebuildCommand]; }
         Value getPostbuildCommand()                 { return getValue (Ids::postbuildCommand); }
@@ -176,6 +179,8 @@ protected:
 
             props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
                                                     StringArray (warningLevelNames), Array<var> (warningLevels, numElementsInArray (warningLevels))));
+
+            props.add (new BooleanPropertyComponent (getWarningsTreatedAsErrors(), "Warnings", "Treat warnings as errors"));
 
             {
                 static const char* runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
@@ -778,6 +783,9 @@ protected:
             const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
             if (extraFlags.isNotEmpty())
                 compiler->setAttribute ("AdditionalOptions", extraFlags);
+
+            if (config.areWarningsTreatedAsErrors())
+                compiler->setAttribute ("TreatWarningAsError", "true");
         }
 
         createToolElement (xml, "VCManagedResourceCompilerTool");
