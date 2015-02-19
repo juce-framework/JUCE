@@ -141,6 +141,8 @@ namespace Ids
     DECLARE_ID (androidKeyStorePass);
     DECLARE_ID (androidKeyAlias);
     DECLARE_ID (androidKeyAliasPass);
+    DECLARE_ID (androidTheme);
+    DECLARE_ID (androidImportModules);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);
