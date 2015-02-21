@@ -783,9 +783,6 @@ protected:
             const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
             if (extraFlags.isNotEmpty())
                 compiler->setAttribute ("AdditionalOptions", extraFlags);
-
-            if (config.areWarningsTreatedAsErrors())
-                compiler->setAttribute ("TreatWarningAsError", "true");
         }
 
         createToolElement (xml, "VCManagedResourceCompilerTool");
@@ -1252,6 +1249,9 @@ protected:
                 const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
                 if (extraFlags.isNotEmpty())
                     cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
+
+                if (config.areWarningsTreatedAsErrors())
+                    cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
             }
 
             {
