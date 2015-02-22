@@ -492,7 +492,7 @@ public:
         {
             if (! (isAddingNewProperty || isDeletingProperty))
             {
-                if (SetPropertyAction* const next = dynamic_cast <SetPropertyAction*> (nextAction))
+                if (SetPropertyAction* const next = dynamic_cast<SetPropertyAction*> (nextAction))
                     if (next->target == target && next->name == name
                           && ! (next->isAddingNewProperty || next->isDeletingProperty))
                         return new SetPropertyAction (target, name, next->newValue, oldValue, false, false);
@@ -592,7 +592,7 @@ public:
 
         UndoableAction* createCoalescedAction (UndoableAction* nextAction)
         {
-            if (MoveChildAction* next = dynamic_cast <MoveChildAction*> (nextAction))
+            if (MoveChildAction* next = dynamic_cast<MoveChildAction*> (nextAction))
                 if (next->parent == parent && next->startIndex == endIndex)
                     return new MoveChildAction (parent, startIndex, next->endIndex);
 
@@ -711,7 +711,7 @@ Identifier ValueTree::getType() const
 ValueTree ValueTree::getParent() const
 {
     return ValueTree (object != nullptr ? object->parent
-                                        : static_cast <SharedObject*> (nullptr));
+                                        : static_cast<SharedObject*> (nullptr));
 }
 
 ValueTree ValueTree::getSibling (const int delta) const
@@ -846,7 +846,7 @@ int ValueTree::getNumChildren() const
 ValueTree ValueTree::getChild (int index) const
 {
     return ValueTree (object != nullptr ? object->children.getObjectPointer (index)
-                                        : static_cast <SharedObject*> (nullptr));
+                                        : static_cast<SharedObject*> (nullptr));
 }
 
 ValueTree ValueTree::getChildWithName (const Identifier type) const

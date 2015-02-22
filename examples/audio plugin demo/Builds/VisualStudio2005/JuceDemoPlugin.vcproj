@@ -11,7 +11,6 @@
   <ToolFiles/>
   <Configurations>
     <Configuration Name="Debug|Win32"
-                   OutputDirectory=".\Debug"
                    ConfigurationType="2"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"
@@ -69,7 +68,6 @@
             CommandLine="copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;"/>
     </Configuration>
     <Configuration Name="Release|Win32"
-                   OutputDirectory=".\Release"
                    ConfigurationType="2"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"

@@ -60,7 +60,7 @@ public:
     /** Returns a named property.
         This returns var::null if no such property exists.
     */
-    virtual var getProperty (const Identifier& propertyName) const;
+    virtual const var& getProperty (const Identifier& propertyName) const;
 
     /** Sets a named property. */
     virtual void setProperty (const Identifier& propertyName, const var& newValue);
