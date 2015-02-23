@@ -1,0 +1,19 @@
+
+== Major JUCE features and updates ==
+
+(This file just lists the more notable headline features. For more detailed
+ info about minor changes and bugfixes, please see the git log)
+
+
+Version 3.1.2 (not yet released)
+  - Introduced this ChangeList.txt file!
+  - Several new example and tutorial projects
+  - New FFT class
+  - WASAPI exclusive mode support
+  - New methods for FloatVectorOperations
+  - Better control over redirection when opening URLs
+  - More C++11 feature support macros
+  - Performance improvements to XML parsing
+  - Basic SVG text support
+  - New Whirlpool hashing class
+  - Various minor additions to the Introjucer
