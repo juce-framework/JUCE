@@ -707,7 +707,7 @@ void CoreGraphicsContext::SavedState::setFill (const FillType& newFill)
 static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef colourSpace)
 {
     const int numColours = g.getNumColours();
-    CGFloat* const data = (CGFloat*) alloca (numColours * 5 * sizeof (CGFloat));
+    CGFloat* const data = (CGFloat*) alloca ((size_t) numColours * 5 * sizeof (CGFloat));
     CGFloat* const locations = data;
     CGFloat* const components = data + numColours;
     CGFloat* comps = components;
@@ -715,14 +715,14 @@ static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef co
     for (int i = 0; i < numColours; ++i)
     {
         const Colour colour (g.getColour (i));
-        *comps++ = colour.getFloatRed();
-        *comps++ = colour.getFloatGreen();
-        *comps++ = colour.getFloatBlue();
-        *comps++ = colour.getFloatAlpha();
-        locations[i] = g.getColourPosition (i);
+        *comps++ = (CGFloat) colour.getFloatRed();
+        *comps++ = (CGFloat) colour.getFloatGreen();
+        *comps++ = (CGFloat) colour.getFloatBlue();
+        *comps++ = (CGFloat) colour.getFloatAlpha();
+        locations[i] = (CGFloat) g.getColourPosition (i);
     }
 
-    return CGGradientCreateWithColorComponents (colourSpace, components, locations, numColours);
+    return CGGradientCreateWithColorComponents (colourSpace, components, locations, (size_t) numColours);
 }
 
 void CoreGraphicsContext::drawGradient()

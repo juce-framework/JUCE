@@ -64,7 +64,7 @@ private:
         int sourceGap = (8 - (numBits & 7)) & 7;  // space on source[sourcePos]
         int bufferRem = bufferBits & 7;           // occupied bits on buffer[bufferPos]
 
-        uint64 value = numBits, carry = 0;
+        uint64 value = (uint64) numBits, carry = 0;
 
         for (int i = 32; --i >= 0 && (carry != 0 || value != 0);)
         {
@@ -137,14 +137,14 @@ private:
         if (bufferPos > 32)
         {
             if (bufferPos < 64)
-                zeromem (buffer + bufferPos, 64 - bufferPos);
+                zeromem (buffer + bufferPos, (size_t) (64 - bufferPos));
 
             processNextBuffer();
             bufferPos = 0;
         }
 
         if (bufferPos < 32)
-            zeromem (buffer + bufferPos, 32 - bufferPos);
+            zeromem (buffer + bufferPos, (size_t) (32 - bufferPos));
 
         bufferPos = 32;
         memcpy (buffer + 32, bitLength, 32);  // append bit length of hashed data
