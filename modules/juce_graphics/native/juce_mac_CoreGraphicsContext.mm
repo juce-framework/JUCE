@@ -25,7 +25,7 @@
 #include "juce_mac_CoreGraphicsContext.h"
 
 //==============================================================================
-class CoreGraphicsImage : public ImagePixelData
+class CoreGraphicsImage   : public ImagePixelData
 {
 public:
     CoreGraphicsImage (const Image::PixelFormat format, const int w, const int h, const bool clearImage)
@@ -174,6 +174,7 @@ CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, const float h, const f
     CGContextRetain (context);
     CGContextSaveGState(context);
     CGContextSetShouldSmoothFonts (context, true);
+    CGContextSetAllowsFontSmoothing (context, true);
     CGContextSetShouldAntialias (context, true);
     CGContextSetBlendMode (context, kCGBlendModeNormal);
     rgbColourSpace = CGColorSpaceCreateDeviceRGB();
@@ -215,8 +216,6 @@ float CoreGraphicsContext::getPhysicalPixelScaleFactor()
     const CGAffineTransform t = CGContextGetCTM (context);
 
     return targetScale * (float) (juce_hypot (t.a, t.c) + juce_hypot (t.b, t.d)) / 2.0f;
-
-//    return targetScale * (float) (t.a + t.d) / 2.0f;
 }
 
 bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)
@@ -245,19 +244,17 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
         lastClipRect = Rectangle<int>();
         return false;
     }
-    else
-    {
-        const size_t numRects = (size_t) clipRegion.getNumRectangles();
-        HeapBlock<CGRect> rects (numRects);
 
-        int i = 0;
-        for (const Rectangle<int>* r = clipRegion.begin(), * const e = clipRegion.end(); r != e; ++r)
-            rects[i++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
+    const size_t numRects = (size_t) clipRegion.getNumRectangles();
+    HeapBlock<CGRect> rects (numRects);
 
-        CGContextClipToRects (context, rects, numRects);
-        lastClipRectIsValid = false;
-        return true;
-    }
+    int i = 0;
+    for (const Rectangle<int>* r = clipRegion.begin(), * const e = clipRegion.end(); r != e; ++r)
+        rects[i++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
+
+    CGContextClipToRects (context, rects, numRects);
+    lastClipRectIsValid = false;
+    return true;
 }
 
 bool CoreGraphicsContext::clipToRectangleList (const RectangleList<int>& clipRegion)
@@ -752,9 +749,8 @@ void CoreGraphicsContext::drawGradient()
 void CoreGraphicsContext::createPath (const Path& path) const
 {
     CGContextBeginPath (context);
-    Path::Iterator i (path);
 
-    while (i.next())
+    for (Path::Iterator i (path); i.next();)
     {
         switch (i.elementType)
         {
@@ -771,9 +767,8 @@ void CoreGraphicsContext::createPath (const Path& path) const
 void CoreGraphicsContext::createPath (const Path& path, const AffineTransform& transform) const
 {
     CGContextBeginPath (context);
-    Path::Iterator i (path);
 
-    while (i.next())
+    for (Path::Iterator i (path); i.next();)
     {
         switch (i.elementType)
         {
