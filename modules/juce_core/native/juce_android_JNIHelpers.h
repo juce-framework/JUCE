@@ -290,13 +290,23 @@ public:
         if (android.activity != nullptr)
         {
             jvm->DetachCurrentThread();
+            removeCurrentThreadFromCache();
+        }
+    }
 
-            const pthread_t thisThread = pthread_self();
+    void removeCurrentThreadFromCache()
+    {
+        const pthread_t thisThread = pthread_self();
 
-            SpinLock::ScopedLockType sl (addRemoveLock);
-            for (int i = 0; i < maxThreads; ++i)
-                if (threads[i] == thisThread)
-                    threads[i] = 0;
+        SpinLock::ScopedLockType sl (addRemoveLock);
+
+        for (int i = 0; i < maxThreads; ++i)
+        {
+            if (threads[i] == thisThread)
+            {
+                threads[i] = 0;
+                envs[i] = nullptr;
+            }
         }
     }
 
