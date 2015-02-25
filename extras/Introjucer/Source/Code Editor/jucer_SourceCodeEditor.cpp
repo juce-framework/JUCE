@@ -217,8 +217,8 @@ void SourceCodeEditor::checkSaveState()
 
 void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
 void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&, int)        { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&, int, int)          { updateColourScheme(); }
 void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
 void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
 

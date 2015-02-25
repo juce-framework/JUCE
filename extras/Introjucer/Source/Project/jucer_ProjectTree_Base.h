@@ -222,9 +222,9 @@ public:
             repaintItem();
     }
 
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override    { treeChildrenChanged (parentTree); }
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&) override  { treeChildrenChanged (parentTree); }
-    void valueTreeChildOrderChanged (ValueTree& parentTree) override         { treeChildrenChanged (parentTree); }
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { treeChildrenChanged (parentTree); }
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { treeChildrenChanged (parentTree); }
+    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { treeChildrenChanged (parentTree); }
     void valueTreeParentChanged (ValueTree&) override {}
 
     //==============================================================================

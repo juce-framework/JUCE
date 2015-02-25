@@ -119,7 +119,7 @@ public:
         if (! generatedCodeFolder.createDirectory())
         {
             addError ("Couldn't create folder: " + generatedCodeFolder.getFullPathName());
-            return Project::Item (project, ValueTree::invalid);
+            return Project::Item (project, ValueTree());
         }
 
         const File file (generatedCodeFolder.getChildFile (filePath));
@@ -127,7 +127,7 @@ public:
         if (replaceFileIfDifferent (file, newData))
             return addFileToGeneratedGroup (file);
 
-        return Project::Item (project, ValueTree::invalid);
+        return Project::Item (project, ValueTree());
     }
 
     Project::Item addFileToGeneratedGroup (const File& file)

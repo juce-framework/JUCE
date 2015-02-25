@@ -200,12 +200,12 @@ void ComponentBuilder::valueTreeChildAdded (ValueTree& tree, ValueTree&)
     ComponentBuilderHelpers::updateComponent (*this, tree);
 }
 
-void ComponentBuilder::valueTreeChildRemoved (ValueTree& tree, ValueTree&)
+void ComponentBuilder::valueTreeChildRemoved (ValueTree& tree, ValueTree&, int)
 {
     ComponentBuilderHelpers::updateComponent (*this, tree);
 }
 
-void ComponentBuilder::valueTreeChildOrderChanged (ValueTree& tree)
+void ComponentBuilder::valueTreeChildOrderChanged (ValueTree& tree, int, int)
 {
     ComponentBuilderHelpers::updateComponent (*this, tree);
 }
