@@ -1650,6 +1650,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_data_structures/undomanager/juce_UndoableAction.h">
       <Option compile="0"/>
       <Option link="0"/>
