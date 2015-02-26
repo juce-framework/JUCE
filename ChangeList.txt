@@ -19,3 +19,4 @@ Version 3.1.2 (not yet released)
   - Various minor additions to the Introjucer
   - Added parameters to the ValueTree::Listener::valueTreeChildRemoved() and valueTreeChildOrderChanged()
     methods to include more info about exactly what changed - this is essential for some applications
+  - New class ValueTreeSynchroniser, for remote-syncing multiple ValueTrees
