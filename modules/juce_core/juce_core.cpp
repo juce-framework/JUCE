@@ -45,9 +45,9 @@
 
 #include <locale>
 #include <cctype>
-#include <sys/timeb.h>
 
 #if ! JUCE_ANDROID
+ #include <sys/timeb.h>
  #include <cwctype>
 #endif
 
