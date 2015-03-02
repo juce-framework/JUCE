@@ -631,11 +631,17 @@ private:
         return "(" + paths.joinIntoString (", ") + ")";
     }
 
+    static String getLinkerFlagForLib (String library)
+    {
+        if (library.substring (0, 3) == "lib")
+            library = library.substring (3);
+
+        return "-l" + library.upToLastOccurrenceOf (".", false, false);
+    }
+
     void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths) const
     {
-        jassert (library.getFileNameWithoutExtension().substring (0, 3) == "lib");
-
-        flags.add ("-l" + library.getFileNameWithoutExtension().substring (3));
+        flags.add (getLinkerFlagForLib (library.getFileNameWithoutExtension()));
 
         String searchPath (library.toUnixStyle().upToLastOccurrenceOf ("/", false, false));
 
@@ -666,7 +672,11 @@ private:
         flags.add (replacePreprocessorTokens (config, getExtraLinkerFlagsString()));
         flags.add (getExternalLibraryFlags (config));
 
+        for (int i = 0; i < xcodeLibs.size(); ++i)
+            flags.add (getLinkerFlagForLib (xcodeLibs[i]));
+
         flags.removeEmptyStrings (true);
+        flags.removeDuplicates (false);
     }
 
     StringArray getProjectSettings (const XcodeBuildConfiguration& config) const

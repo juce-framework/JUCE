@@ -325,6 +325,14 @@ void LibraryModule::createLocalHeaderWrapper (ProjectSaver& projectSaver, const 
 }
 
 //==============================================================================
+static void parseAndAddLibs (StringArray& libList, const String& libs)
+{
+    libList.addTokens (libs, ", ", StringRef());
+    libList.trim();
+    libList.sort (false);
+    libList.removeDuplicates (false);
+}
+
 void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
 {
     Project& project = exporter.getProject();
@@ -359,22 +367,16 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
         const String frameworks (moduleInfo.moduleInfo [exporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
         exporter.xcodeFrameworks.addTokens (frameworks, ", ", StringRef());
+
+        parseAndAddLibs (exporter.xcodeLibs, moduleInfo.moduleInfo [exporter.isOSX() ? "OSXLibs" : "iOSLibs"].toString());
     }
     else if (exporter.isLinux())
     {
-        const String libs (moduleInfo.moduleInfo ["LinuxLibs"].toString());
-        exporter.linuxLibs.addTokens (libs, ", ", StringRef());
-        exporter.linuxLibs.trim();
-        exporter.linuxLibs.sort (false);
-        exporter.linuxLibs.removeDuplicates (false);
+        parseAndAddLibs (exporter.linuxLibs, moduleInfo.moduleInfo ["LinuxLibs"].toString());
     }
     else if (exporter.isCodeBlocks())
     {
-        const String libs (moduleInfo.moduleInfo ["mingwLibs"].toString());
-        exporter.mingwLibs.addTokens (libs, ", ", StringRef());
-        exporter.mingwLibs.trim();
-        exporter.mingwLibs.sort (false);
-        exporter.mingwLibs.removeDuplicates (false);
+        parseAndAddLibs (exporter.mingwLibs, moduleInfo.moduleInfo ["mingwLibs"].toString());
     }
 
     if (moduleInfo.isPluginClient())
