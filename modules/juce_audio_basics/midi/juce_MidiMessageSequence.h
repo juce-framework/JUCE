@@ -247,7 +247,7 @@ public:
                                 state at the required time.
     */
     void createControllerUpdatesForTime (int channelNumber, double time,
-                                         OwnedArray<MidiMessage>& resultMessages);
+                                         Array<MidiMessage>& resultMessages);
 
     //==============================================================================
     /** Swaps this sequence with another one. */
