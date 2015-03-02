@@ -62,7 +62,7 @@ public:
 
         The size of the array passed in must be 2 * getSize(), and the first half
         should contain your raw input sample data. On return, the array will contain
-        complex frequency + phase data, and can be passed to performRealOnlyForwardTransform()
+        complex frequency + phase data, and can be passed to performRealOnlyInverseTransform()
         in order to convert it back to reals.
     */
     void performRealOnlyForwardTransform (float* inputOutputData) const noexcept;
