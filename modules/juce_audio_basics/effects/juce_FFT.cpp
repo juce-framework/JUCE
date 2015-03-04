@@ -266,12 +266,9 @@ void FFT::performFrequencyOnlyForwardTransform (float* d) const noexcept
 
     for (int i = 0; i < twiceSize; i += 2)
     {
-        const float d1 = d[i];
-        const float d2 = d[i + 1];
+        d[i / 2] = juce_hypot (d[i], d[i + 1]);
 
-        d[i / 2] = std::sqrt (d1 * d1 + d2 * d2);
-
-        if (i > size / 2)
+        if (i >= size)
         {
             d[i] = 0;
             d[i + 1] = 0;
