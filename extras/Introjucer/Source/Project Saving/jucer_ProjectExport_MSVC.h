@@ -131,6 +131,9 @@ protected:
         Value getWarningLevelValue()                { return getValue (Ids::winWarningLevel); }
         int getWarningLevel() const                 { return config [Ids::winWarningLevel]; }
 
+        Value getWarningsTreatedAsErrors()          { return getValue (Ids::warningsAreErrors); }
+        bool areWarningsTreatedAsErrors() const     { return config [Ids::warningsAreErrors]; }
+
         Value getPrebuildCommand()                  { return getValue (Ids::prebuildCommand); }
         String getPrebuildCommandString() const     { return config [Ids::prebuildCommand]; }
         Value getPostbuildCommand()                 { return getValue (Ids::postbuildCommand); }
@@ -177,6 +180,8 @@ protected:
             props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
                                                     StringArray (warningLevelNames), Array<var> (warningLevels, numElementsInArray (warningLevels))));
 
+            props.add (new BooleanPropertyComponent (getWarningsTreatedAsErrors(), "Warnings", "Treat warnings as errors"));
+
             {
                 static const char* runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
                 const var runtimeValues[] = { var(), var (false), var (true) };
@@ -221,7 +226,7 @@ protected:
     {
         const String binaryPath (config.getTargetBinaryRelativePathString().trim());
         if (binaryPath.isEmpty())
-            return prependDot (File::createLegalFileName (config.getName().trim()));
+            return binaryPath;
 
         RelativePath binaryRelPath (binaryPath, RelativePath::projectFolder);
 
@@ -708,7 +713,9 @@ protected:
         const bool isDebug = config.isDebug();
 
         xml.setAttribute ("Name", createConfigName (config));
-        xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (getConfigTargetPath (config)));
+
+        if (getConfigTargetPath (config).isNotEmpty())
+            xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (getConfigTargetPath (config)));
 
         if (config.getIntermediatesPath().isNotEmpty())
             xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (config.getIntermediatesPath()));
@@ -1149,6 +1156,7 @@ protected:
             {
                 const VC2010BuildConfiguration& config = dynamic_cast<const VC2010BuildConfiguration&> (*i);
 
+                if (getConfigTargetPath (config).isNotEmpty())
                 {
                     XmlElement* outdir = props->createNewChildElement ("OutDir");
                     setConditionAttribute (*outdir, config);
@@ -1241,6 +1249,9 @@ protected:
                 const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim());
                 if (extraFlags.isNotEmpty())
                     cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
+
+                if (config.areWarningsTreatedAsErrors())
+                    cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
             }
 
             {

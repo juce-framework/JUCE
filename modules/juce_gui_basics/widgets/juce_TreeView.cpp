@@ -925,6 +925,14 @@ struct TreeView::InsertPoint
             pos.x = itemPos.getX();
             item = item->getParentItem();
         }
+        else if (TreeViewItem* root = view.getRootItem())
+        {
+            // If they're dragging beyond the bottom of the list, then insert at the end of the root item..
+            item = root;
+            insertIndex = root->getNumSubItems();
+            pos = root->getItemPosition (true).getBottomLeft();
+            pos.x += view.getIndentSize();
+        }
     }
 
     Point<int> pos;

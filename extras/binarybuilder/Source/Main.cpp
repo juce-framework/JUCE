@@ -21,10 +21,10 @@ static int addFile (const File& file,
     MemoryBlock mb;
     file.loadFileAsData (mb);
 
-    const String name (file.getFileName().toLowerCase()
+    const String name (file.getFileName()
                            .replaceCharacter (' ', '_')
                            .replaceCharacter ('.', '_')
-                           .retainCharacters ("abcdefghijklmnopqrstuvwxyz_0123456789"));
+                           .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"));
 
     std::cout << "Adding " << name << ": "
               << (int) mb.getSize() << " bytes" << std::endl;
@@ -71,7 +71,7 @@ static bool isHiddenFile (const File& f, const File& root)
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    std::cout << "\n BinaryBuilder! Copyright 2007 by Julian Storer - www.juce.com\n\n";
+    std::cout << std::endl << " BinaryBuilder!  Visit www.juce.com for more info." << std::endl;
 
     if (argc < 4 || argc > 5)
     {
@@ -120,7 +120,7 @@ int main (int argc, char* argv[])
               << " from files in " << sourceDirectory.getFullPathName()
               << "..." << std::endl << std::endl;
 
-    Array <File> files;
+    Array<File> files;
     sourceDirectory.findChildFiles (files, File::findFiles, true,
                                     (argc > 4) ? argv[4] : "*");
 
@@ -134,18 +134,18 @@ int main (int argc, char* argv[])
     headerFile.deleteFile();
     cppFile.deleteFile();
 
-    ScopedPointer <OutputStream> header (headerFile.createOutputStream());
+    ScopedPointer<OutputStream> header (headerFile.createOutputStream());
 
-    if (header == 0)
+    if (header == nullptr)
     {
         std::cout << "Couldn't open "
                   << headerFile.getFullPathName() << " for writing" << std::endl << std::endl;
         return 0;
     }
 
-    ScopedPointer <OutputStream> cpp (cppFile.createOutputStream());
+    ScopedPointer<OutputStream> cpp (cppFile.createOutputStream());
 
-    if (cpp == 0)
+    if (cpp == nullptr)
     {
         std::cout << "Couldn't open "
                   << cppFile.getFullPathName() << " for writing" << std::endl << std::endl;
@@ -190,8 +190,8 @@ int main (int argc, char* argv[])
     *header << "}\r\n\r\n"
                "#endif\r\n";
 
-    header = 0;
-    cpp = 0;
+    header = nullptr;
+    cpp = nullptr;
 
     std::cout << std::endl << " Total size of binary data: " << totalBytes << " bytes" << std::endl;
 

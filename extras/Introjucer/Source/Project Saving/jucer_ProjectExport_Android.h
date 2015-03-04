@@ -100,6 +100,12 @@ public:
         props.add (new TextPropertyComponent (getOtherPermissionsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
+         props.add (new TextPropertyComponent (getImportModulesValue(), "Import modules", 8192, true),
+                   "Comma or whitespace delimited list of import-module calls.");
+
+        props.add (new TextPropertyComponent (getThemeValue(), "Android Theme", 256, false),
+                   "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
+
         props.add (new TextPropertyComponent (getKeyStoreValue(), "Key Signing: key.store", 2048, false),
                    "The key.store value, used when signing the package.");
         props.add (new TextPropertyComponent (getKeyStorePassValue(), "Key Signing: key.store.password", 2048, false),
@@ -110,35 +116,41 @@ public:
                    "The key.alias password, used when signing the package.");
     }
 
-    Value getActivityClassPathValue()           { return getSetting (Ids::androidActivityClass); }
-    String getActivityClassPath() const         { return settings [Ids::androidActivityClass]; }
-    Value getSDKPathValue()                     { return getSetting (Ids::androidSDKPath); }
-    String getSDKPathString() const             { return settings [Ids::androidSDKPath]; }
-    Value getNDKPathValue()                     { return getSetting (Ids::androidNDKPath); }
-    String getNDKPathString() const             { return settings [Ids::androidNDKPath]; }
-    Value getNDKToolchainVersionValue()         { return getSetting (Ids::toolset); }
-    String getNDKToolchainVersionString() const { return settings [Ids::toolset]; }
+    Value  getActivityClassPathValue()              { return getSetting (Ids::androidActivityClass); }
+    String getActivityClassPath() const             { return settings [Ids::androidActivityClass]; }
+    Value  getSDKPathValue()                        { return getSetting (Ids::androidSDKPath); }
+    String getSDKPathString() const                 { return settings [Ids::androidSDKPath]; }
+    Value  getNDKPathValue()                        { return getSetting (Ids::androidNDKPath); }
+    String getNDKPathString() const                 { return settings [Ids::androidNDKPath]; }
+    Value  getNDKToolchainVersionValue()            { return getSetting (Ids::toolset); }
+    String getNDKToolchainVersionString() const     { return settings [Ids::toolset]; }
 
-    Value getKeyStoreValue()                    { return getSetting (Ids::androidKeyStore); }
-    String getKeyStoreString() const            { return settings [Ids::androidKeyStore]; }
-    Value getKeyStorePassValue()                { return getSetting (Ids::androidKeyStorePass); }
-    String getKeyStorePassString() const        { return settings [Ids::androidKeyStorePass]; }
-    Value getKeyAliasValue()                    { return getSetting (Ids::androidKeyAlias); }
-    String getKeyAliasString() const            { return settings [Ids::androidKeyAlias]; }
-    Value getKeyAliasPassValue()                { return getSetting (Ids::androidKeyAliasPass); }
-    String getKeyAliasPassString() const        { return settings [Ids::androidKeyAliasPass]; }
+    Value  getKeyStoreValue()                       { return getSetting (Ids::androidKeyStore); }
+    String getKeyStoreString() const                { return settings [Ids::androidKeyStore]; }
+    Value  getKeyStorePassValue()                   { return getSetting (Ids::androidKeyStorePass); }
+    String getKeyStorePassString() const            { return settings [Ids::androidKeyStorePass]; }
+    Value  getKeyAliasValue()                       { return getSetting (Ids::androidKeyAlias); }
+    String getKeyAliasString() const                { return settings [Ids::androidKeyAlias]; }
+    Value  getKeyAliasPassValue()                   { return getSetting (Ids::androidKeyAliasPass); }
+    String getKeyAliasPassString() const            { return settings [Ids::androidKeyAliasPass]; }
 
-    Value getInternetNeededValue()              { return getSetting (Ids::androidInternetNeeded); }
-    bool getInternetNeeded() const              { return settings [Ids::androidInternetNeeded]; }
-    Value getAudioRecordNeededValue()           { return getSetting (Ids::androidMicNeeded); }
-    bool getAudioRecordNeeded() const           { return settings [Ids::androidMicNeeded]; }
-    Value getMinimumSDKVersionValue()           { return getSetting (Ids::androidMinimumSDK); }
-    String getMinimumSDKVersionString() const   { return settings [Ids::androidMinimumSDK]; }
-    Value getOtherPermissionsValue()            { return getSetting (Ids::androidOtherPermissions); }
-    String getOtherPermissions() const          { return settings [Ids::androidOtherPermissions]; }
+    Value  getInternetNeededValue()                 { return getSetting (Ids::androidInternetNeeded); }
+    bool   getInternetNeeded() const                { return settings [Ids::androidInternetNeeded]; }
+    Value  getAudioRecordNeededValue()              { return getSetting (Ids::androidMicNeeded); }
+    bool   getAudioRecordNeeded() const             { return settings [Ids::androidMicNeeded]; }
+    Value  getMinimumSDKVersionValue()              { return getSetting (Ids::androidMinimumSDK); }
+    String getMinimumSDKVersionString() const       { return settings [Ids::androidMinimumSDK]; }
+    Value  getOtherPermissionsValue()               { return getSetting (Ids::androidOtherPermissions); }
+    String getOtherPermissions() const              { return settings [Ids::androidOtherPermissions]; }
 
-    Value getCPP11EnabledValue()                { return getSetting (Ids::androidCpp11); }
-    bool isCPP11Enabled() const                 { return settings [Ids::androidCpp11]; }
+    Value  getThemeValue()                          { return getSetting (Ids::androidTheme); }
+    String getThemeString() const                   { return settings [Ids::androidTheme]; }
+
+    Value  getImportModulesValue()                  { return getSetting (Ids::androidImportModules); }
+    String getImportModulesString() const           { return settings [Ids::androidImportModules]; }
+
+    Value getCPP11EnabledValue()                    { return getSetting (Ids::androidCpp11); }
+    bool isCPP11Enabled() const                     { return settings [Ids::androidCpp11]; }
 
     String createDefaultClassName() const
     {
@@ -271,6 +283,10 @@ private:
 
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
+
+        String androidThemeString (getThemeString());
+        if (androidThemeString.isNotEmpty())
+            app->setAttribute ("android:theme", androidThemeString);
 
         {
             ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
@@ -462,8 +478,6 @@ private:
             out << "  " << (files.getReference(i).isAbsolute() ? "" : "../")
                 << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
 
-        String debugSettings, releaseSettings;
-
         out << newLine
             << "ifeq ($(NDK_DEBUG),1)" << newLine;
         writeConfigSettings (out, true);
@@ -472,6 +486,11 @@ private:
         out << "endif" << newLine
             << newLine
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;
+
+        const StringArray importModules (getCommaOrWhitespaceSeparatedItems (getImportModulesString()));
+
+        for (int i = 0; i < importModules.size(); ++i)
+            out << "$(call import-module," << importModules[i] << ")" << newLine;
     }
 
     void writeConfigSettings (OutputStream& out, bool forDebug) const

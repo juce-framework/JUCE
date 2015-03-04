@@ -642,8 +642,8 @@ public:
            #endif
             if ([ev respondsToSelector: @selector (deviceDeltaX)])
             {
-                wheel.deltaX = checkDeviceDeltaReturnValue ((float) objc_msgSend_fpret (ev, @selector (deviceDeltaX)));
-                wheel.deltaY = checkDeviceDeltaReturnValue ((float) objc_msgSend_fpret (ev, @selector (deviceDeltaY)));
+                wheel.deltaX = checkDeviceDeltaReturnValue ((float) getMsgSendFPRetFn() (ev, @selector (deviceDeltaX)));
+                wheel.deltaY = checkDeviceDeltaReturnValue ((float) getMsgSendFPRetFn() (ev, @selector (deviceDeltaY)));
             }
         }
         @catch (...)
@@ -1491,7 +1491,7 @@ private:
             if ((! owner->textWasInserted) && (owner == nullptr || ! owner->redirectKeyDown (ev)))
             {
                 objc_super s = { self, [NSView class] };
-                objc_msgSendSuper (&s, @selector (keyDown:), ev);
+                getMsgSendSuperFn() (&s, @selector (keyDown:), ev);
             }
         }
     }
@@ -1503,7 +1503,7 @@ private:
         if (owner == nullptr || ! owner->redirectKeyUp (ev))
         {
             objc_super s = { self, [NSView class] };
-            objc_msgSendSuper (&s, @selector (keyUp:), ev);
+            getMsgSendSuperFn() (&s, @selector (keyUp:), ev);
         }
     }
 
@@ -1644,7 +1644,7 @@ private:
                 return true;
 
         objc_super s = { self, [NSView class] };
-        return objc_msgSendSuper (&s, @selector (performKeyEquivalent:), ev) != nil;
+        return getMsgSendSuperFn() (&s, @selector (performKeyEquivalent:), ev) != nil;
     }
     #endif
 
@@ -1805,7 +1805,7 @@ private:
         {
             owner->isZooming = true;
             objc_super s = { self, [NSWindow class] };
-            objc_msgSendSuper (&s, @selector (zoom:), sender);
+            getMsgSendSuperFn() (&s, @selector (zoom:), sender);
             owner->isZooming = false;
 
             owner->redirectMovedOrResized();

@@ -242,9 +242,9 @@ public:
 
     //==============================================================================
     /** If this variant is an object, this returns one of its properties. */
-    var operator[] (Identifier propertyName) const;
+    const var& operator[] (Identifier propertyName) const;
     /** If this variant is an object, this returns one of its properties. */
-    var operator[] (const char* propertyName) const;
+    const var& operator[] (const char* propertyName) const;
     /** If this variant is an object, this returns one of its properties, or a default
         fallback value if the property is not set. */
     var getProperty (Identifier propertyName, const var& defaultReturnValue) const;

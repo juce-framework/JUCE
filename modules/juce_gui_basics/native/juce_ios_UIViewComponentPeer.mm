@@ -887,7 +887,7 @@ void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget* target)
 {
     view->hiddenTextView.keyboardType = getUIKeyboardType (target->getKeyboardType());
     view->hiddenTextView.text = juceStringToNS (target->getTextInRange (Range<int> (0, target->getHighlightedRegion().getStart())));
-    view->hiddenTextView.selectedRange = NSMakeRange (target->getHighlightedRegion().getStart(), 0);
+    view->hiddenTextView.selectedRange = NSMakeRange ((NSUInteger) target->getHighlightedRegion().getStart(), 0);
 }
 
 BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const String& text)

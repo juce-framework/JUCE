@@ -71,7 +71,7 @@ ComponentPeer* ComponentPeer::getPeerFor (const Component* const component) noex
 
 bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
 {
-    return Desktop::getInstance().peers.contains (const_cast <ComponentPeer*> (peer));
+    return Desktop::getInstance().peers.contains (const_cast<ComponentPeer*> (peer));
 }
 
 void ComponentPeer::updateBounds()
@@ -276,7 +276,7 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
     Component* const c = Component::getCurrentlyFocusedComponent();
 
     if (component.isParentOf (c))
-        if (TextInputTarget* const ti = dynamic_cast <TextInputTarget*> (c))
+        if (TextInputTarget* const ti = dynamic_cast<TextInputTarget*> (c))
             if (ti->isTextInputActive())
                 return ti;
 
@@ -377,7 +377,7 @@ void ComponentPeer::handleFocusLoss()
 Component* ComponentPeer::getLastFocusedSubcomponent() const noexcept
 {
     return (component.isParentOf (lastFocusedComponent) && lastFocusedComponent->isShowing())
-                ? static_cast <Component*> (lastFocusedComponent)
+                ? static_cast<Component*> (lastFocusedComponent)
                 : &component;
 }
 
@@ -428,14 +428,14 @@ namespace DragHelpers
 
     static bool isSuitableTarget (const ComponentPeer::DragInfo& info, Component* target)
     {
-        return isFileDrag (info) ? dynamic_cast <FileDragAndDropTarget*> (target) != nullptr
-                                 : dynamic_cast <TextDragAndDropTarget*> (target) != nullptr;
+        return isFileDrag (info) ? dynamic_cast<FileDragAndDropTarget*> (target) != nullptr
+                                 : dynamic_cast<TextDragAndDropTarget*> (target) != nullptr;
     }
 
     static bool isInterested (const ComponentPeer::DragInfo& info, Component* target)
     {
-        return isFileDrag (info) ? dynamic_cast <FileDragAndDropTarget*> (target)->isInterestedInFileDrag (info.files)
-                                 : dynamic_cast <TextDragAndDropTarget*> (target)->isInterestedInTextDrag (info.text);
+        return isFileDrag (info) ? dynamic_cast<FileDragAndDropTarget*> (target)->isInterestedInFileDrag (info.files)
+                                 : dynamic_cast<TextDragAndDropTarget*> (target)->isInterestedInTextDrag (info.text);
     }
 
     static Component* findDragAndDropTarget (Component* c, const ComponentPeer::DragInfo& info, Component* const lastOne)
@@ -459,9 +459,9 @@ namespace DragHelpers
             if (Component* const c = target.get())
             {
                 if (isFileDrag (info))
-                    dynamic_cast <FileDragAndDropTarget*> (c)->filesDropped (info.files, info.position.x, info.position.y);
+                    dynamic_cast<FileDragAndDropTarget*> (c)->filesDropped (info.files, info.position.x, info.position.y);
                 else
-                    dynamic_cast <TextDragAndDropTarget*> (c)->textDropped (info.text, info.position.x, info.position.y);
+                    dynamic_cast<TextDragAndDropTarget*> (c)->textDropped (info.text, info.position.x, info.position.y);
             }
         }
 
@@ -492,9 +492,9 @@ bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
             if (lastTarget != nullptr)
             {
                 if (DragHelpers::isFileDrag (info))
-                    dynamic_cast <FileDragAndDropTarget*> (lastTarget)->fileDragExit (info.files);
+                    dynamic_cast<FileDragAndDropTarget*> (lastTarget)->fileDragExit (info.files);
                 else
-                    dynamic_cast <TextDragAndDropTarget*> (lastTarget)->textDragExit (info.text);
+                    dynamic_cast<TextDragAndDropTarget*> (lastTarget)->textDragExit (info.text);
             }
 
             dragAndDropTargetComponent = nullptr;
@@ -505,9 +505,9 @@ bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
                 const Point<int> pos (newTarget->getLocalPoint (&component, info.position));
 
                 if (DragHelpers::isFileDrag (info))
-                    dynamic_cast <FileDragAndDropTarget*> (newTarget)->fileDragEnter (info.files, pos.x, pos.y);
+                    dynamic_cast<FileDragAndDropTarget*> (newTarget)->fileDragEnter (info.files, pos.x, pos.y);
                 else
-                    dynamic_cast <TextDragAndDropTarget*> (newTarget)->textDragEnter (info.text, pos.x, pos.y);
+                    dynamic_cast<TextDragAndDropTarget*> (newTarget)->textDragEnter (info.text, pos.x, pos.y);
             }
         }
     }
@@ -522,9 +522,9 @@ bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
     const Point<int> pos (newTarget->getLocalPoint (&component, info.position));
 
     if (DragHelpers::isFileDrag (info))
-        dynamic_cast <FileDragAndDropTarget*> (newTarget)->fileDragMove (info.files, pos.x, pos.y);
+        dynamic_cast<FileDragAndDropTarget*> (newTarget)->fileDragMove (info.files, pos.x, pos.y);
     else
-        dynamic_cast <TextDragAndDropTarget*> (newTarget)->textDragMove (info.text, pos.x, pos.y);
+        dynamic_cast<TextDragAndDropTarget*> (newTarget)->textDragMove (info.text, pos.x, pos.y);
 
     return true;
 }

@@ -87,6 +87,7 @@ namespace Ids
     DECLARE_ID (extraDLLs);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
+    DECLARE_ID (warningsAreErrors);
     DECLARE_ID (linuxArchitecture);
     DECLARE_ID (toolset);
     DECLARE_ID (msvcModuleDefinitionFile);
@@ -140,6 +141,8 @@ namespace Ids
     DECLARE_ID (androidKeyStorePass);
     DECLARE_ID (androidKeyAlias);
     DECLARE_ID (androidKeyAliasPass);
+    DECLARE_ID (androidTheme);
+    DECLARE_ID (androidImportModules);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

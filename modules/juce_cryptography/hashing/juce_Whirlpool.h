@@ -110,4 +110,4 @@ private:
 };
 
 
-#endif   // JUCE_MD5_H_INCLUDED
+#endif   // JUCE_WHIRLPOOL_H_INCLUDED

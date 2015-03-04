@@ -69,8 +69,8 @@ private:
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override   { updateColourScheme(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override               { updateColourScheme(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) override             { updateColourScheme(); }
-    void valueTreeChildOrderChanged (ValueTree&) override                    { updateColourScheme(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override        { updateColourScheme(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override          { updateColourScheme(); }
     void valueTreeParentChanged (ValueTree&) override                        { updateColourScheme(); }
     void valueTreeRedirected (ValueTree&) override                           { updateColourScheme(); }
 

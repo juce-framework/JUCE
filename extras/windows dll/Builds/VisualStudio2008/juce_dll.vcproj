@@ -11,7 +11,6 @@
   <ToolFiles/>
   <Configurations>
     <Configuration Name="Debug|Win32"
-                   OutputDirectory=".\Debug"
                    ConfigurationType="4"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"
@@ -52,7 +51,6 @@
       <Tool Name="VCPostBuildEventTool"/>
     </Configuration>
     <Configuration Name="Release|Win32"
-                   OutputDirectory=".\Release"
                    ConfigurationType="4"
                    UseOfMFC="0"
                    ATLMinimizesCRunTimeLibraryUsage="false"
@@ -2098,6 +2096,17 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_data_structures\values\juce_ValueTree.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.h"/>
         </Filter>
         <Filter Name="undomanager">
           <File RelativePath="..\..\..\..\modules\juce_data_structures\undomanager\juce_UndoableAction.h"/>

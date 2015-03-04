@@ -42,6 +42,7 @@ namespace juce
 
 #include "values/juce_Value.cpp"
 #include "values/juce_ValueTree.cpp"
+#include "values/juce_ValueTreeSynchroniser.cpp"
 #include "undomanager/juce_UndoManager.cpp"
 #include "app_properties/juce_ApplicationProperties.cpp"
 #include "app_properties/juce_PropertiesFile.cpp"

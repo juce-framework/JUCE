@@ -174,7 +174,7 @@ public:
     int toInt (const ValueUnion& data) const noexcept override       { return (int) data.doubleValue; };
     int64 toInt64 (const ValueUnion& data) const noexcept override   { return (int64) data.doubleValue; };
     double toDouble (const ValueUnion& data) const noexcept override { return data.doubleValue; }
-    String toString (const ValueUnion& data) const override          { return String (data.doubleValue); }
+    String toString (const ValueUnion& data) const override          { return String (data.doubleValue, 20); }
     bool toBool (const ValueUnion& data) const noexcept override     { return data.doubleValue != 0; }
     bool isDouble() const noexcept override                          { return true; }
 
@@ -253,8 +253,8 @@ public:
     }
 
 private:
-    static inline const String* getString (const ValueUnion& data) noexcept { return reinterpret_cast <const String*> (data.stringValue); }
-    static inline String* getString (ValueUnion& data) noexcept             { return reinterpret_cast <String*> (data.stringValue); }
+    static inline const String* getString (const ValueUnion& data) noexcept { return reinterpret_cast<const String*> (data.stringValue); }
+    static inline String* getString (ValueUnion& data) noexcept             { return reinterpret_cast<String*> (data.stringValue); }
 };
 
 //==============================================================================
@@ -487,7 +487,7 @@ var::operator String() const                            { return type->toString 
 ReferenceCountedObject* var::getObject() const noexcept { return type->toObject (value); }
 Array<var>* var::getArray() const noexcept              { return type->toArray (value); }
 MemoryBlock* var::getBinaryData() const noexcept        { return type->toBinary (value); }
-DynamicObject* var::getDynamicObject() const noexcept   { return dynamic_cast <DynamicObject*> (getObject()); }
+DynamicObject* var::getDynamicObject() const noexcept   { return dynamic_cast<DynamicObject*> (getObject()); }
 
 //==============================================================================
 void var::swapWith (var& other) noexcept
@@ -576,15 +576,15 @@ var var::clone() const noexcept
 }
 
 //==============================================================================
-var var::operator[] (const Identifier propertyName) const
+const var& var::operator[] (Identifier propertyName) const
 {
     if (DynamicObject* const o = getDynamicObject())
         return o->getProperty (propertyName);
 
-    return var();
+    return var::null;
 }
 
-var var::operator[] (const char* const propertyName) const
+const var& var::operator[] (const char* const propertyName) const
 {
     return operator[] (Identifier (propertyName));
 }

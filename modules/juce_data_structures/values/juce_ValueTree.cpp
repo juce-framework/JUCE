@@ -62,23 +62,20 @@ public:
     {
         const int numListeners = valueTreesWithListeners.size();
 
-        if (numListeners > 0)
+        if (numListeners == 1)
         {
-            if (numListeners == 1)
-            {
-                valueTreesWithListeners.getUnchecked(0)->listeners.call (method, tree);
-            }
-            else
-            {
-                const SortedSet<ValueTree*> listenersCopy (valueTreesWithListeners);
+            valueTreesWithListeners.getUnchecked(0)->listeners.call (method, tree);
+        }
+        else if (numListeners > 0)
+        {
+            const SortedSet<ValueTree*> listenersCopy (valueTreesWithListeners);
 
-                for (int i = 0; i < numListeners; ++i)
-                {
-                    ValueTree* const v = listenersCopy.getUnchecked(i);
+            for (int i = 0; i < numListeners; ++i)
+            {
+                ValueTree* const v = listenersCopy.getUnchecked(i);
 
-                    if (i == 0 || valueTreesWithListeners.contains (v))
-                        v->listeners.call (method, tree);
-                }
+                if (i == 0 || valueTreesWithListeners.contains (v))
+                    v->listeners.call (method, tree);
             }
         }
     }
@@ -88,23 +85,43 @@ public:
     {
         const int numListeners = valueTreesWithListeners.size();
 
-        if (numListeners > 0)
+        if (numListeners == 1)
         {
-            if (numListeners == 1)
+            valueTreesWithListeners.getUnchecked(0)->listeners.call (method, tree, param2);
+        }
+        else if (numListeners > 0)
+        {
+            const SortedSet<ValueTree*> listenersCopy (valueTreesWithListeners);
+
+            for (int i = 0; i < numListeners; ++i)
             {
-                valueTreesWithListeners.getUnchecked(0)->listeners.call (method, tree, param2);
+                ValueTree* const v = listenersCopy.getUnchecked(i);
+
+                if (i == 0 || valueTreesWithListeners.contains (v))
+                    v->listeners.call (method, tree, param2);
             }
-            else
+        }
+    }
+
+    template <typename Method, typename ParamType1, typename ParamType2>
+    void callListeners (Method method, ValueTree& tree, ParamType1& param2, ParamType2& param3) const
+    {
+        const int numListeners = valueTreesWithListeners.size();
+
+        if (numListeners == 1)
+        {
+            valueTreesWithListeners.getUnchecked(0)->listeners.call (method, tree, param2, param3);
+        }
+        else if (numListeners > 0)
+        {
+            const SortedSet<ValueTree*> listenersCopy (valueTreesWithListeners);
+
+            for (int i = 0; i < numListeners; ++i)
             {
-                const SortedSet<ValueTree*> listenersCopy (valueTreesWithListeners);
+                ValueTree* const v = listenersCopy.getUnchecked(i);
 
-                for (int i = 0; i < numListeners; ++i)
-                {
-                    ValueTree* const v = listenersCopy.getUnchecked(i);
-
-                    if (i == 0 || valueTreesWithListeners.contains (v))
-                        v->listeners.call (method, tree, param2);
-                }
+                if (i == 0 || valueTreesWithListeners.contains (v))
+                    v->listeners.call (method, tree, param2, param3);
             }
         }
     }
@@ -125,20 +142,20 @@ public:
             t->callListeners (&ValueTree::Listener::valueTreeChildAdded, tree, child);
     }
 
-    void sendChildRemovedMessage (ValueTree child)
+    void sendChildRemovedMessage (ValueTree child, int index)
     {
         ValueTree tree (this);
 
         for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
-            t->callListeners (&ValueTree::Listener::valueTreeChildRemoved, tree, child);
+            t->callListeners (&ValueTree::Listener::valueTreeChildRemoved, tree, child, index);
     }
 
-    void sendChildOrderChangedMessage()
+    void sendChildOrderChangedMessage (int oldIndex, int newIndex)
     {
         ValueTree tree (this);
 
         for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
-            t->callListeners (&ValueTree::Listener::valueTreeChildOrderChanged, tree);
+            t->callListeners (&ValueTree::Listener::valueTreeChildOrderChanged, tree, oldIndex, newIndex);
     }
 
     void sendParentChangeMessage()
@@ -323,7 +340,7 @@ public:
             {
                 children.remove (childIndex);
                 child->parent = nullptr;
-                sendChildRemovedMessage (ValueTree (child));
+                sendChildRemovedMessage (ValueTree (child), childIndex);
                 child->sendParentChangeMessage();
             }
             else
@@ -350,7 +367,7 @@ public:
             if (undoManager == nullptr)
             {
                 children.move (currentIndex, newIndex);
-                sendChildOrderChangedMessage();
+                sendChildOrderChangedMessage (currentIndex, newIndex);
             }
             else
             {
@@ -366,28 +383,15 @@ public:
     {
         jassert (newOrder.size() == children.size());
 
-        if (undoManager == nullptr)
+        for (int i = 0; i < children.size(); ++i)
         {
-            children.clear();
-            children.ensureStorageAllocated (newOrder.size());
+            SharedObject* const child = newOrder.getUnchecked(i)->object;
 
-            for (int i = 0; i < newOrder.size(); ++i)
-                children.add (newOrder.getUnchecked(i)->object);
-
-            sendChildOrderChangedMessage();
-        }
-        else
-        {
-            for (int i = 0; i < children.size(); ++i)
+            if (children.getObjectPointerUnchecked (i) != child)
             {
-                SharedObject* const child = newOrder.getUnchecked(i)->object;
-
-                if (children.getObjectPointerUnchecked (i) != child)
-                {
-                    const int oldIndex = children.indexOf (child);
-                    jassert (oldIndex >= 0);
-                    moveChild (oldIndex, i, undoManager);
-                }
+                const int oldIndex = children.indexOf (child);
+                jassert (oldIndex >= 0);
+                moveChild (oldIndex, i, undoManager);
             }
         }
     }
@@ -492,7 +496,7 @@ public:
         {
             if (! (isAddingNewProperty || isDeletingProperty))
             {
-                if (SetPropertyAction* const next = dynamic_cast <SetPropertyAction*> (nextAction))
+                if (SetPropertyAction* const next = dynamic_cast<SetPropertyAction*> (nextAction))
                     if (next->target == target && next->name == name
                           && ! (next->isAddingNewProperty || next->isDeletingProperty))
                         return new SetPropertyAction (target, name, next->newValue, oldValue, false, false);
@@ -592,7 +596,7 @@ public:
 
         UndoableAction* createCoalescedAction (UndoableAction* nextAction)
         {
-            if (MoveChildAction* next = dynamic_cast <MoveChildAction*> (nextAction))
+            if (MoveChildAction* next = dynamic_cast<MoveChildAction*> (nextAction))
                 if (next->parent == parent && next->startIndex == endIndex)
                     return new MoveChildAction (parent, startIndex, next->endIndex);
 
@@ -711,7 +715,7 @@ Identifier ValueTree::getType() const
 ValueTree ValueTree::getParent() const
 {
     return ValueTree (object != nullptr ? object->parent
-                                        : static_cast <SharedObject*> (nullptr));
+                                        : static_cast<SharedObject*> (nullptr));
 }
 
 ValueTree ValueTree::getSibling (const int delta) const
@@ -825,8 +829,8 @@ private:
     }
 
     void valueTreeChildAdded (ValueTree&, ValueTree&) override {}
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) override {}
-    void valueTreeChildOrderChanged (ValueTree&) override {}
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override {}
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override {}
     void valueTreeParentChanged (ValueTree&) override {}
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreePropertyValueSource)
@@ -846,7 +850,7 @@ int ValueTree::getNumChildren() const
 ValueTree ValueTree::getChild (int index) const
 {
     return ValueTree (object != nullptr ? object->children.getObjectPointer (index)
-                                        : static_cast <SharedObject*> (nullptr));
+                                        : static_cast<SharedObject*> (nullptr));
 }
 
 ValueTree ValueTree::getChildWithName (const Identifier type) const
@@ -1108,8 +1112,8 @@ public:
             ValueTree v2 = ValueTree::readFromStream (mi);
             expect (v1.isEquivalentTo (v2));
 
-            ScopedPointer <XmlElement> xml1 (v1.createXml());
-            ScopedPointer <XmlElement> xml2 (v2.createCopy().createXml());
+            ScopedPointer<XmlElement> xml1 (v1.createXml());
+            ScopedPointer<XmlElement> xml2 (v2.createCopy().createXml());
             expect (xml1->isEquivalentTo (xml2, false));
 
             ValueTree v4 = v2.createCopy();

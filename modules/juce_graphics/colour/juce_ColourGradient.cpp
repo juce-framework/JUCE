@@ -32,12 +32,12 @@ ColourGradient::ColourGradient() noexcept
    #endif
 }
 
-ColourGradient::ColourGradient (Colour colour1, const float x1_, const float y1_,
-                                Colour colour2, const float x2_, const float y2_,
-                                const bool isRadial_)
-    : point1 (x1_, y1_),
-      point2 (x2_, y2_),
-      isRadial (isRadial_)
+ColourGradient::ColourGradient (Colour colour1, const float x1, const float y1,
+                                Colour colour2, const float x2, const float y2,
+                                const bool radial)
+    : point1 (x1, y1),
+      point2 (x2, y2),
+      isRadial (radial)
 {
     colours.add (ColourPoint (0.0, colour1));
     colours.add (ColourPoint (1.0, colour2));

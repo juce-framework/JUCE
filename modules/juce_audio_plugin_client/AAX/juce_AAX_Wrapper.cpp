@@ -511,10 +511,9 @@ struct AAXClasses
             // * The session is then saved, and closed.
             // * The saved session is loaded, but acting as if the preset was never loaded.
             const int numParameters = pluginInstance->getNumParameters();
+
             for (int i = 0; i < numParameters; ++i)
-            {
                 SetParameterNormalizedValue (IndexAsParamID (i), (double) pluginInstance->getParameter(i));
-            }
 
             return AAX_SUCCESS;
         }
