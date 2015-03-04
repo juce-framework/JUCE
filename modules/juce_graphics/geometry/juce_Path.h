@@ -516,7 +516,7 @@ public:
                             respect to the outer one.
         @see addArc
     */
-    void addPieSegment (Rectangle<int> segmentBounds,
+    void addPieSegment (Rectangle<float> segmentBounds,
                         float fromRadians,
                         float toRadians,
                         float innerCircleProportionalSize);

@@ -656,7 +656,7 @@ void Path::addPieSegment (const float x, const float y,
     closeSubPath();
 }
 
-void Path::addPieSegment (Rectangle<int> segmentBounds,
+void Path::addPieSegment (Rectangle<float> segmentBounds,
                           const float fromRadians,
                           const float toRadians,
                           const float innerCircleProportionalSize)
