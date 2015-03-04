@@ -165,7 +165,7 @@ public:
     String xcodeProductType, xcodeProductInstallPath, xcodeFileType;
     String xcodeOtherRezFlags, xcodeExcludedFiles64Bit;
     bool xcodeIsBundle, xcodeCreatePList, xcodeCanUseDwarf;
-    StringArray xcodeFrameworks;
+    StringArray xcodeFrameworks, xcodeLibs;
     Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;
     Array<XmlElement> xcodeExtraPListEntries;
 

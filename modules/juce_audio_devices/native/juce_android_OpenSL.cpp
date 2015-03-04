@@ -47,13 +47,13 @@ public:
 
         // this is a total guess about how to calculate the latency, but seems to vaguely agree
         // with the devices I've tested.. YMMV
-        inputLatency  = ((javaDevice.minBufferSizeIn  * 2) / 3);
-        outputLatency = ((javaDevice.minBufferSizeOut * 2) / 3);
+        inputLatency  = (javaDevice.minBufferSizeIn  * 2) / 3;
+        outputLatency = (javaDevice.minBufferSizeOut * 2) / 3;
 
-        const int longestLatency = jmax (inputLatency, outputLatency);
-        const int totalLatency = inputLatency + outputLatency;
-        inputLatency  = ((longestLatency * inputLatency)  / totalLatency) & ~15;
-        outputLatency = ((longestLatency * outputLatency) / totalLatency) & ~15;
+        const int64 longestLatency = jmax (inputLatency, outputLatency);
+        const int64 totalLatency = inputLatency + outputLatency;
+        inputLatency  = (int) ((longestLatency * inputLatency)  / totalLatency) & ~15;
+        outputLatency = (int) ((longestLatency * outputLatency) / totalLatency) & ~15;
     }
 
     ~OpenSLAudioIODevice()

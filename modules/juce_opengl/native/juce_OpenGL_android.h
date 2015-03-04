@@ -161,6 +161,7 @@ bool OpenGLHelpers::isContextActive()
 
 JUCE_JNI_CALLBACK (GL_VIEW_CLASS_NAME, contextCreated, void, (JNIEnv* env, jobject view))
 {
+    threadLocalJNIEnvHolder.removeCurrentThreadFromCache();
     threadLocalJNIEnvHolder.getOrAttach();
 
     if (OpenGLContext::NativeContext* const context = OpenGLContext::NativeContext::findContextFor (env, view))

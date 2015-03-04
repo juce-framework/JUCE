@@ -208,8 +208,8 @@ private:
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override                { itemChanged(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) override              { itemChanged(); }
-    void valueTreeChildOrderChanged (ValueTree&) override                     { itemChanged(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override         { itemChanged(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override           { itemChanged(); }
     void valueTreeParentChanged (ValueTree&) override                         { itemChanged(); }
 
     void itemChanged()

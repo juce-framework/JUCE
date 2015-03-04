@@ -290,13 +290,23 @@ public:
         if (android.activity != nullptr)
         {
             jvm->DetachCurrentThread();
+            removeCurrentThreadFromCache();
+        }
+    }
 
-            const pthread_t thisThread = pthread_self();
+    void removeCurrentThreadFromCache()
+    {
+        const pthread_t thisThread = pthread_self();
 
-            SpinLock::ScopedLockType sl (addRemoveLock);
-            for (int i = 0; i < maxThreads; ++i)
-                if (threads[i] == thisThread)
-                    threads[i] = 0;
+        SpinLock::ScopedLockType sl (addRemoveLock);
+
+        for (int i = 0; i < maxThreads; ++i)
+        {
+            if (threads[i] == thisThread)
+            {
+                threads[i] = 0;
+                envs[i] = nullptr;
+            }
         }
     }
 
@@ -385,7 +395,9 @@ struct AndroidThreadScope
  METHOD (showOkCancelBox,        "showOkCancelBox",      "(Ljava/lang/String;Ljava/lang/String;J)V") \
  METHOD (showYesNoCancelBox,     "showYesNoCancelBox",   "(Ljava/lang/String;Ljava/lang/String;J)V") \
  STATICMETHOD (getLocaleValue,   "getLocaleValue",       "(Z)Ljava/lang/String;") \
- METHOD (scanFile,               "scanFile",             "(Ljava/lang/String;)V")
+ METHOD (scanFile,               "scanFile",             "(Ljava/lang/String;)V") \
+ METHOD (getTypeFaceFromAsset,   "getTypeFaceFromAsset", "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
+ METHOD (getTypeFaceFromByteArray,"getTypeFaceFromByteArray","([B)Landroid/graphics/Typeface;")
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS

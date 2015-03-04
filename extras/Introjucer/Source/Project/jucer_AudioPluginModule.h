@@ -141,7 +141,6 @@ namespace
         Project& project = projectSaver.project;
 
         StringPairArray flags;
-        //flags.set ("JUCE_MODAL_LOOPS_PERMITTED",             "0");
         flags.set ("JucePlugin_Build_VST",                   valueToBool (shouldBuildVST  (project)));
         flags.set ("JucePlugin_Build_VST3",                  valueToBool (shouldBuildVST3 (project)));
         flags.set ("JucePlugin_Build_AU",                    valueToBool (shouldBuildAU   (project)));

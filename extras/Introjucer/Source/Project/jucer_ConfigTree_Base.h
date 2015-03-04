@@ -115,8 +115,8 @@ public:
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override {}
     void valueTreeChildAdded (ValueTree&, ValueTree&) override {}
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) override {}
-    void valueTreeChildOrderChanged (ValueTree&) override {}
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override {}
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override {}
     void valueTreeParentChanged (ValueTree&) override {}
 
     virtual bool isProjectSettings() const          { return false; }
@@ -230,9 +230,9 @@ public:
     }
 
     //==============================================================================
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override   { refreshIfNeeded (parentTree); }
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&) override { refreshIfNeeded (parentTree); }
-    void valueTreeChildOrderChanged (ValueTree& parentTree) override        { refreshIfNeeded (parentTree); }
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { refreshIfNeeded (parentTree); }
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { refreshIfNeeded (parentTree); }
+    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { refreshIfNeeded (parentTree); }
 
     void refreshIfNeeded (ValueTree& changedTree)
     {

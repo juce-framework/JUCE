@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 // (For the moment, we'll implement a few local operators for this complex class - one
 // day we'll probably either have a juce complex class, or use the C++11 one)
 static FFT::Complex operator+ (FFT::Complex a, FFT::Complex b) noexcept     { FFT::Complex c = { a.r + b.r, a.i + b.i }; return c; }
@@ -267,12 +266,9 @@ void FFT::performFrequencyOnlyForwardTransform (float* d) const noexcept
 
     for (int i = 0; i < twiceSize; i += 2)
     {
-        const float d1 = d[i];
-        const float d2 = d[i + 1];
+        d[i / 2] = juce_hypot (d[i], d[i + 1]);
 
-        d[i / 2] = std::sqrt (d1 * d1 + d2 * d2);
-
-        if (i > size / 2)
+        if (i >= size)
         {
             d[i] = 0;
             d[i + 1] = 0;
