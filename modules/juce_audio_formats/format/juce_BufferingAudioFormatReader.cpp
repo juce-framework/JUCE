@@ -28,7 +28,8 @@ BufferingAudioReader::BufferingAudioReader (AudioFormatReader* sourceReader,
     : AudioFormatReader (nullptr, sourceReader->getFormatName()),
       source (sourceReader), thread (timeSliceThread),
       nextReadPosition (0),
-      numBlocks (1 + (samplesToBuffer / samplesPerBlock))
+      numBlocks (1 + (samplesToBuffer / samplesPerBlock)),
+      timeoutMs (0)
 {
     sampleRate            = source->sampleRate;
     lengthInSamples       = source->lengthInSamples;
