@@ -52,7 +52,7 @@ public:
         if (getNDKPathString().isEmpty())       getNDKPathValue() = "${user.home}/SDKs/android-ndk";
 
         if (getMinimumSDKVersionString().isEmpty())
-            getMinimumSDKVersionValue() = 8;
+            getMinimumSDKVersionValue() = 10;
 
         if (getInternetNeededValue().toString().isEmpty())
             getInternetNeededValue() = true;
