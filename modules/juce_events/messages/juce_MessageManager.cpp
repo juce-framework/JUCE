@@ -121,7 +121,17 @@ public:
 
 void MessageManager::runDispatchLoop()
 {
-    runDispatchLoopUntil (-1);
+    jassert (isThisTheMessageThread()); // must only be called by the message thread
+
+    while (! quitMessageReceived)
+    {
+        JUCE_TRY
+        {
+            if (! dispatchNextMessageOnSystemQueue (false))
+                Thread::sleep (1);
+        }
+        JUCE_CATCH_EXCEPTION
+    }
 }
 
 void MessageManager::stopDispatchLoop()
