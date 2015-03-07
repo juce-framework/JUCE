@@ -136,7 +136,7 @@ public:
     /** Returns the ID of the item with the given index.
 
         If the index is less than zero or greater than the number of items,
-        this will return 0.
+        this will return nullptr.
 
         @see getNumItems
     */
@@ -145,7 +145,7 @@ public:
     /** Returns the component being used for the item with the given index.
 
         If the index is less than zero or greater than the number of items,
-        this will return 0.
+        this will return nullptr.
 
         @see getNumItems
     */
@@ -314,7 +314,7 @@ private:
     ToolbarItemStyle toolbarStyle;
     class MissingItemsComponent;
     friend class MissingItemsComponent;
-    OwnedArray <ToolbarItemComponent> items;
+    OwnedArray<ToolbarItemComponent> items;
     class Spacer;
     class CustomisationDialog;
 
