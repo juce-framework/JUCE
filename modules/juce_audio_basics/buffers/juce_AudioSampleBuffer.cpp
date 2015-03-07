@@ -116,8 +116,11 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
     jassert (dataToReferTo != nullptr);
     jassert (newNumChannels >= 0 && newNumSamples >= 0);
 
-    allocatedBytes = 0;
-    allocatedData.free();
+    if (allocatedBytes != 0)
+    {
+        allocatedBytes = 0;
+        allocatedData.free();
+    }
 
     numChannels = newNumChannels;
     size = newNumSamples;
