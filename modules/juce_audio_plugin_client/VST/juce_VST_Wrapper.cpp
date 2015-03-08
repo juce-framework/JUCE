@@ -251,6 +251,11 @@ public:
          chunkMemoryTime (0),
          speakerIn (kSpeakerArrEmpty),
          speakerOut (kSpeakerArrEmpty),
+        #if JucePlugin_AcceptsSideChain
+         numInElems (2),
+        #else
+         numInElems (1),
+        #endif
          numInChans (JucePlugin_MaxNumInputChannels),
          numOutChans (JucePlugin_MaxNumOutputChannels),
          isProcessing (false),
@@ -266,8 +271,9 @@ public:
          processTempBuffer (1, 1),
          hostWindow (0)
     {
-        filter->setPlayConfigDetails (1, numInChans, 1, numOutChans, 0, 0);
-        filter->setInputElementActive(0, true);
+        filter->setPlayConfigDetails (numInElems, numInChans, 1, numOutChans, 0, 0);
+        for (int i = 0; i < numInElems; ++i)
+            filter->setInputElementActive (i, true);
         filter->setPlayHead (this);
         filter->addListener (this);
 
@@ -276,7 +282,7 @@ public:
 
         setUniqueID ((int) (JucePlugin_VSTUniqueID));
 
-        setNumInputs (numInChans);
+        setNumInputs (numInChans * numInElems);
         setNumOutputs (numOutChans);
 
         canProcessReplacing (true);
@@ -433,11 +439,13 @@ public:
 
     bool getInputProperties (VstInt32 index, VstPinProperties* properties) override
     {
-        if (filter == nullptr || index >= JucePlugin_MaxNumInputChannels)
+        if (filter == nullptr || index >= numInChans * numInElems)
             return false;
 
-        setPinProperties (*properties, filter->getInputChannelName ((int) index),
-                          speakerIn, filter->isInputChannelStereoPair ((int) index));
+        const int elem = (int) index / numInChans;
+        const int chan = (int) index % numInChans;
+        setPinProperties (*properties, filter->getInputChannelName (chan, elem),
+                          speakerIn, filter->isInputChannelStereoPair (chan, elem));
         return true;
     }
 
@@ -500,7 +508,7 @@ public:
 
     void process (float** inputs, float** outputs, VstInt32 numSamples)
     {
-        const int numIn = numInChans;
+        const int numIn = numInChans * numInElems;
         const int numOut = numOutChans;
 
         processTempBuffer.setSize (numIn, numSamples, false, false, true);
@@ -552,7 +560,7 @@ public:
         {
             const ScopedLock sl (filter->getCallbackLock());
 
-            const int numIn = numInChans;
+            const int numIn = numInChans * numInElems;
             const int numOut = numOutChans;
 
             if (filter->isSuspended())
@@ -661,7 +669,7 @@ public:
         if (filter != nullptr)
         {
             isProcessing = true;
-            channels.calloc ((size_t) (numInChans + numOutChans));
+            channels.calloc ((size_t) (numInChans * numInElems + numOutChans));
 
             double rate = getSampleRate();
             jassert (rate > 0);
@@ -674,7 +682,7 @@ public:
             firstProcessCallback = true;
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
-            filter->setPlayConfigDetails (1, numInChans, 1, numOutChans, rate, currentBlockSize);
+            filter->setPlayConfigDetails (numInElems, numInChans, 1, numOutChans, rate, currentBlockSize);
             filter->setInputElementActive(0, true);
 
             deleteTempChannels();
@@ -931,7 +939,7 @@ public:
                 numInChans  = pluginInput->numChannels;
                 numOutChans = pluginOutput->numChannels;
 
-                filter->setPlayConfigDetails (1, numInChans, 1, numOutChans,
+                filter->setPlayConfigDetails (numInElems, numInChans, 1, numOutChans,
                                               filter->getSampleRate(),
                                               filter->getBlockSize());
                 filter->setInputElementActive(0, true);
@@ -1430,7 +1438,7 @@ private:
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
     VstSpeakerArrangementType speakerIn, speakerOut;
-    int numInChans, numOutChans;
+    int numInElems, numInChans, numOutChans;
     bool isProcessing, isBypassed, hasShutdown, firstProcessCallback;
     bool shouldDeleteEditor, useNSView;
     HeapBlock<float*> channels;
