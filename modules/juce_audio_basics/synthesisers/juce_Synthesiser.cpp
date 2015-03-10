@@ -215,6 +215,10 @@ void Synthesiser::handleMidiEvent (const MidiMessage& m)
     {
         handleController (m.getChannel(), m.getControllerNumber(), m.getControllerValue());
     }
+    else if (m.isProgramChange())
+    {
+        handleProgramChange (m.getChannel(), m.getProgramChangeNumber());
+    }
 }
 
 //==============================================================================
@@ -420,6 +424,12 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
 void Synthesiser::handleSoftPedal (int midiChannel, bool /*isDown*/)
 {
     (void) midiChannel;
+    jassert (midiChannel > 0 && midiChannel <= 16);
+}
+
+void Synthesiser::handleProgramChange (int midiChannel, int programNumber)
+{
+    (void) midiChannel; (void) programNumber;
     jassert (midiChannel > 0 && midiChannel <= 16);
 }
 
