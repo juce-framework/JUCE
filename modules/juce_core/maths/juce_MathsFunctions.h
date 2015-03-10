@@ -495,12 +495,12 @@ NumericType square (NumericType n) noexcept
 }
 
 //==============================================================================
-#if (JUCE_INTEL && JUCE_32BIT) || defined (DOXYGEN)
+#if JUCE_INTEL || defined (DOXYGEN)
  /** This macro can be applied to a float variable to check whether it contains a denormalised
      value, and to normalise it if necessary.
      On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
  */
- #define JUCE_UNDENORMALISE(x)   x += 1.0f; x -= 1.0f;
+ #define JUCE_UNDENORMALISE(x)   { (x) += 1.0f; (x) -= 1.0f; }
 #else
  #define JUCE_UNDENORMALISE(x)
 #endif
