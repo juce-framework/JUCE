@@ -832,8 +832,8 @@ public:
 
     /** Removes an item from the array.
 
-        This will remove the first occurrence of the given element from the array.
-        If the item isn't found, no action is taken.
+        This will remove all occurrences of the given element from the array.
+        If no such items are found, no action is taken.
 
         @param valueToRemove   the object to try to remove
         @see remove, removeRange
