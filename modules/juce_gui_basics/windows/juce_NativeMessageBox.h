@@ -107,11 +107,13 @@ public:
                                                const String& message,
                                             #if JUCE_MODAL_LOOPS_PERMITTED
                                                Component* associatedComponent = nullptr,
-                                               ModalComponentManager::Callback* callback = nullptr);
+                                               ModalComponentManager::Callback* callback = nullptr,
                                             #else
                                                Component* associatedComponent,
-                                               ModalComponentManager::Callback* callback);
+                                               ModalComponentManager::Callback* callback,
                                             #endif
+                                               const String& button1Text = "OK",
+                                               const String& button2Text = "Cancel");
 
     /** Shows a dialog box with three buttons.
 

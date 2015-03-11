@@ -3492,10 +3492,13 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
                                                       const String& title, const String& message,
                                                       Component* associatedComponent,
-                                                      ModalComponentManager::Callback* callback)
+                                                      ModalComponentManager::Callback* callback,
+                                                      const String& button1Text,
+                                                      const String& button2Text)
 {
+    // TODO: This causes infinite recursion in case LookAndFeel is set to use native windows
     return AlertWindow::showOkCancelBox (iconType, title, message, String::empty, String::empty,
-                                         associatedComponent, callback);
+                                         associatedComponent, callback, button1Text, button2Text);
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
