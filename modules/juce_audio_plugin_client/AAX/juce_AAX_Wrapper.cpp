@@ -562,13 +562,36 @@ struct AAXClasses
             return result;
         }
 
+        AAX_Result GetParameterValueFromString (AAX_CParamID paramID, double* oValue, const AAX_IString& text) const override
+        {
+            if (isBypassParam (paramID))
+                *oValue = (text.Get()[0] == 'B') ? 1 : 0;
+            else
+            {
+                const int paramIdx = getParamIndexFromID (paramID);
+                if (AudioProcessorParameter* param = pluginInstance->getParameters() [paramIdx])
+                    *oValue = param->getValueForText (text.Get());
+                else
+                    return AAX_CEffectParameters::GetParameterValueFromString (paramID, oValue, text);
+            }
+            return AAX_SUCCESS;
+        }
+
         AAX_Result GetParameterStringFromValue (AAX_CParamID paramID, double value, AAX_IString* result, int32_t maxLen) const override
         {
             if (isBypassParam (paramID))
                 result->Set (value == 0 ? "Off"
                                         : (maxLen >= 8 ? "Bypassed" : "Byp"));
             else
-                result->Set (pluginInstance->getParameterText (getParamIndexFromID (paramID), maxLen).toRawUTF8());
+            {
+                const int paramIdx = getParamIndexFromID (paramID);
+                juce::String text;
+                if (AudioProcessorParameter* param = pluginInstance->getParameters() [paramIdx])
+                    text = param->getText ((float) value, 0);
+                else
+                    text = pluginInstance->getParameterText (paramIdx, maxLen);
+                result->Set (text.toRawUTF8());
+            }
 
             return AAX_SUCCESS;
         }
