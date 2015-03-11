@@ -50,7 +50,7 @@ public:
 
     int64 getTotalDataSize() const;
 
-    bool write (Array<File>& filesCreated, int maxFileSize);
+    Result write (Array<File>& filesCreated, int maxFileSize);
 
     //==============================================================================
 private:
@@ -59,8 +59,8 @@ private:
     Project& project;
     String className;
 
-    bool writeHeader (MemoryOutputStream&);
-    bool writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
+    Result writeHeader (MemoryOutputStream&);
+    Result writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
     void addResourcesFromProjectItem (const Project::Item& node);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)

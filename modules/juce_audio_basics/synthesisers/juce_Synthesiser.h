@@ -449,6 +449,13 @@ public:
     /** Can be overridden to handle soft pedal events. */
     virtual void handleSoftPedal (int midiChannel, bool isDown);
 
+    /** Can be overridden to handle an incoming program change message.
+        The base class implementation of this has no effect, but you may want to make your
+        own synth react to program changes.
+    */
+    virtual void handleProgramChange (int midiChannel,
+                                      int programNumber);
+
     //==============================================================================
     /** Tells the synthesiser what the sample rate is for the audio it's being used to render.
 

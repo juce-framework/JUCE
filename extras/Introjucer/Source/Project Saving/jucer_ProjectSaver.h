@@ -468,7 +468,9 @@ private:
             if (maxSize <= 0)
                 maxSize = 10 * 1024 * 1024;
 
-            if (resourceFile.write (binaryDataFiles, maxSize))
+            Result r (resourceFile.write (binaryDataFiles, maxSize));
+
+            if (r.wasOk())
             {
                 hasBinaryData = true;
 
@@ -482,8 +484,7 @@ private:
             }
             else
             {
-                addError ("Can't create binary resources file: "
-                            + project.getBinaryDataCppFile(0).getFullPathName());
+                addError (r.getErrorMessage());
             }
         }
         else

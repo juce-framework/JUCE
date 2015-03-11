@@ -25,7 +25,15 @@
 void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
-    runDispatchLoopUntil (-1);
+
+    while (! quitMessagePosted)
+    {
+        JUCE_AUTORELEASEPOOL
+        {
+            [[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode
+                                     beforeDate: [NSDate dateWithTimeIntervalSinceNow: 0.001]];
+        }
+    }
 }
 
 void MessageManager::stopDispatchLoop()
@@ -34,6 +42,7 @@ void MessageManager::stopDispatchLoop()
     exit (0); // iOS apps get no mercy..
 }
 
+#if JUCE_MODAL_LOOPS_PERMITTED
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
     JUCE_AUTORELEASEPOOL
@@ -59,6 +68,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
         return ! quitMessagePosted;
     }
 }
+#endif
 
 //==============================================================================
 static ScopedPointer<MessageQueue> messageQueue;

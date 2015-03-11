@@ -82,7 +82,7 @@ public:
         them, you can use this to show it in front of the relevent parent window, which
         is a bit neater than just having it appear in the middle of the screen.
 
-        If componentToCentreAround is 0, then the currently active TopLevelWindow will
+        If componentToCentreAround is nullptr, then the currently active TopLevelWindow will
         be used instead. If no window is focused, it'll just default to the middle of the
         screen.
     */

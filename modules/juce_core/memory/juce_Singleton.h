@@ -44,7 +44,7 @@
     destructor, in case it is deleted by other means than deleteInstance()
 
     Clients can then call the static method MyClass::getInstance() to get a pointer
-    to the singleton, or MyClass::getInstanceWithoutCreating() which will return 0 if
+    to the singleton, or MyClass::getInstanceWithoutCreating() which will return nullptr if
     no instance currently exists.
 
     e.g. @code

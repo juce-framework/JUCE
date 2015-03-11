@@ -152,6 +152,8 @@ void FileSearchPathListComponent::returnKeyPressed (int row)
         path.add (chooser.getResult(), row);
         changed();
     }
+   #else
+    (void) row;
    #endif
 }
 

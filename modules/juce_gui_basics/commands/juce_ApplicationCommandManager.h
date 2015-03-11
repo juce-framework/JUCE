@@ -154,7 +154,7 @@ public:
 
         This will search the list of registered commands for one with the given command
         ID number, and return its associated info. If no matching command is found, this
-        will return 0.
+        will return nullptr.
     */
     const ApplicationCommandInfo* getCommandForID (CommandID commandID) const noexcept;
 

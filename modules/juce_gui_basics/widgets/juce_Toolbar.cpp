@@ -158,7 +158,7 @@ public:
         {
             ToolbarItemComponent* const tc = bar.items.getUnchecked(i);
 
-            if (dynamic_cast <Spacer*> (tc) == nullptr && ! tc->isVisible())
+            if (dynamic_cast<Spacer*> (tc) == nullptr && ! tc->isVisible())
             {
                 oldIndexes.insert (0, i);
                 addAndMakeVisible (tc, 0);
@@ -174,7 +174,7 @@ public:
         {
             for (int i = 0; i < getNumChildComponents(); ++i)
             {
-                if (ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getChildComponent (i)))
+                if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (getChildComponent (i)))
                 {
                     tc->setVisible (false);
                     const int index = oldIndexes.remove (i);
@@ -196,7 +196,7 @@ public:
 
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            if (ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getChildComponent (i)))
+            if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (getChildComponent (i)))
             {
                 int preferredSize = 1, minSize = 1, maxSize = 1;
 
@@ -455,7 +455,7 @@ void Toolbar::updateAllItemPositions (const bool animate)
 
             tc->setStyle (toolbarStyle);
 
-            Spacer* const spacer = dynamic_cast <Spacer*> (tc);
+            Spacer* const spacer = dynamic_cast<Spacer*> (tc);
 
             int preferredSize = 1, minSize = 1, maxSize = 1;
 
@@ -555,7 +555,7 @@ bool Toolbar::isInterestedInDragSource (const SourceDetails& dragSourceDetails)
 
 void Toolbar::itemDragMove (const SourceDetails& dragSourceDetails)
 {
-    if (ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get()))
+    if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get()))
     {
         if (! items.contains (tc))
         {
@@ -623,7 +623,7 @@ void Toolbar::itemDragMove (const SourceDetails& dragSourceDetails)
 
 void Toolbar::itemDragExit (const SourceDetails& dragSourceDetails)
 {
-    if (ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get()))
+    if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get()))
     {
         if (isParentOf (tc))
         {
@@ -636,7 +636,7 @@ void Toolbar::itemDragExit (const SourceDetails& dragSourceDetails)
 
 void Toolbar::itemDropped (const SourceDetails& dragSourceDetails)
 {
-    if (ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get()))
+    if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get()))
         tc->setState (Button::buttonNormal);
 }
 
@@ -669,7 +669,7 @@ public:
     bool canModalEventBeSentToComponent (const Component* comp) override
     {
         return toolbar.isParentOf (comp)
-                 || dynamic_cast <const ToolbarItemComponent::ItemDragAndDropOverlayComponent*> (comp) != nullptr;
+                 || dynamic_cast<const ToolbarItemComponent::ItemDragAndDropOverlayComponent*> (comp) != nullptr;
     }
 
     void positionNearBar()

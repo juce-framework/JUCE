@@ -656,6 +656,20 @@ void Path::addPieSegment (const float x, const float y,
     closeSubPath();
 }
 
+void Path::addPieSegment (Rectangle<float> segmentBounds,
+                          const float fromRadians,
+                          const float toRadians,
+                          const float innerCircleProportionalSize)
+{
+    addPieSegment (segmentBounds.getX(),
+                   segmentBounds.getY(),
+                   segmentBounds.getWidth(),
+                   segmentBounds.getHeight(),
+                   fromRadians,
+                   toRadians,
+                   innerCircleProportionalSize);
+}
+
 //==============================================================================
 void Path::addLineSegment (const Line<float>& line, float lineThickness)
 {
