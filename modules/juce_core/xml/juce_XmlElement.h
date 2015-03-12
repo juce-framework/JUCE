@@ -352,7 +352,7 @@ public:
 
     /** Returns the value of a named attribute as floating-point.
 
-        This will try to find the attribute and convert it to an integer (using
+        This will try to find the attribute and convert it to a double (using
         the String::getDoubleValue() method).
 
         @param attributeName        the name of the attribute to look up
