@@ -329,12 +329,16 @@ struct AAXClasses
         {
             if (component != nullptr && component->pluginEditor != nullptr)
             {
-                AudioProcessorEditor::ParameterControlHighlightInfo info;
-                info.parameterIndex  = getParamIndexFromID (paramID);
-                info.isHighlighted   = isHighlighted;
-                info.suggestedColour = getColourFromHighlightEnum (colour);
+                if (! isBypassParam (paramID))
+                {
+                    AudioProcessorEditor::ParameterControlHighlightInfo info;
+                    info.parameterIndex  = getParamIndexFromID (paramID);
+                    info.isHighlighted   = isHighlighted;
+                    info.suggestedColour = getColourFromHighlightEnum (colour);
 
-                component->pluginEditor->setControlHighlight (info);
+                    component->pluginEditor->setControlHighlight (info);
+                }
+
                 return AAX_SUCCESS;
             }
 
@@ -554,13 +558,41 @@ struct AAXClasses
             return result;
         }
 
+        AAX_Result GetParameterValueFromString (AAX_CParamID paramID, double* result, const AAX_IString& text) const override
+        {
+            if (isBypassParam (paramID))
+            {
+                *result = (text.Get()[0] == 'B') ? 1 : 0;
+                return AAX_SUCCESS;
+            }
+
+            if (AudioProcessorParameter* param = pluginInstance->getParameters() [getParamIndexFromID (paramID)])
+            {
+                *result = param->getValueForText (text.Get());
+                return AAX_SUCCESS;
+            }
+
+            return AAX_CEffectParameters::GetParameterValueFromString (paramID, result, text);
+        }
+
         AAX_Result GetParameterStringFromValue (AAX_CParamID paramID, double value, AAX_IString* result, int32_t maxLen) const override
         {
             if (isBypassParam (paramID))
-                result->Set (value == 0 ? "Off"
-                                        : (maxLen >= 8 ? "Bypassed" : "Byp"));
+            {
+                result->Set (value == 0 ? "Off" : (maxLen >= 8 ? "Bypassed" : "Byp"));
+            }
             else
-                result->Set (pluginInstance->getParameterText (getParamIndexFromID (paramID), maxLen).toRawUTF8());
+            {
+                const int paramIndex = getParamIndexFromID (paramID);
+                juce::String text;
+
+                if (AudioProcessorParameter* param = pluginInstance->getParameters() [paramIndex])
+                    text = param->getText ((float) value, maxLen);
+                else
+                    text = pluginInstance->getParameterText (paramIndex, maxLen);
+
+                result->Set (text.toRawUTF8());
+            }
 
             return AAX_SUCCESS;
         }
