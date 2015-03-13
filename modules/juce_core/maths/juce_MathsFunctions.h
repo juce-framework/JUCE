@@ -512,7 +512,7 @@ NumericType square (NumericType n) noexcept
      value, and to normalise it if necessary.
      On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
  */
- #define JUCE_UNDENORMALISE(x)   { (x) += 1.0f; (x) -= 1.0f; }
+ #define JUCE_UNDENORMALISE(x)   { (x) += 0.1f; (x) -= 0.1f; }
 #else
  #define JUCE_UNDENORMALISE(x)
 #endif
