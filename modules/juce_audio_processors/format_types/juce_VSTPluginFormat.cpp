@@ -488,7 +488,7 @@ public:
             const char* const utf8 = file.getFullPathName().toRawUTF8();
 
             if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
-                                                                        strlen (utf8), file.isDirectory()))
+                                                                        (CFIndex) strlen (utf8), file.isDirectory()))
             {
                 bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
                 CFRelease (url);
@@ -864,7 +864,7 @@ public:
         wantsMidiMessages = dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) > 0;
 
        #if JUCE_MAC && JUCE_SUPPORT_CARBON
-        usesCocoaNSView = (dispatch (effCanDo, 0, 0, (void*) "hasCockosViewAsConfig", 0) & 0xffff0000) == 0xbeef0000;
+        usesCocoaNSView = (dispatch (effCanDo, 0, 0, (void*) "hasCockosViewAsConfig", 0) & (int) 0xffff0000) == 0xbeef0000;
        #endif
 
         setLatencySamples (effect->initialDelay);
@@ -1228,8 +1228,8 @@ public:
     void getStateInformation (MemoryBlock& mb) override                  { saveToFXBFile (mb, true); }
     void getCurrentProgramStateInformation (MemoryBlock& mb) override    { saveToFXBFile (mb, false); }
 
-    void setStateInformation (const void* data, int size) override               { loadFromFXBFile (data, size); }
-    void setCurrentProgramStateInformation (const void* data, int size) override { loadFromFXBFile (data, size); }
+    void setStateInformation (const void* data, int size) override               { loadFromFXBFile (data, (size_t) size); }
+    void setCurrentProgramStateInformation (const void* data, int size) override { loadFromFXBFile (data, (size_t) size); }
 
     //==============================================================================
     void timerCallback() override
@@ -1449,7 +1449,7 @@ public:
             {
                 const int oldProg = getCurrentProgram();
                 const int numParams = fxbSwap (((const fxProgram*) (set->programs))->numParams);
-                const int progLen = sizeof (fxProgram) + (numParams - 1) * sizeof (float);
+                const int progLen = (int) sizeof (fxProgram) + (numParams - 1) * (int) sizeof (float);
 
                 for (int i = 0; i < fxbSwap (set->numPrograms); ++i)
                 {
@@ -1496,7 +1496,7 @@ public:
             // non-preset chunk
             const fxChunkSet* const cset = (const fxChunkSet*) data;
 
-            if (fxbSwap (cset->chunkSize) + sizeof (fxChunkSet) - 8 > (unsigned int) dataSize)
+            if ((size_t) fxbSwap (cset->chunkSize) + sizeof (fxChunkSet) - 8 > (size_t) dataSize)
                 return false;
 
             setChunkData (cset->chunk, fxbSwap (cset->chunkSize), false);
@@ -1506,7 +1506,7 @@ public:
             // preset chunk
             const fxProgramSet* const cset = (const fxProgramSet*) data;
 
-            if (fxbSwap (cset->chunkSize) + sizeof (fxProgramSet) - 8 > (unsigned int) dataSize)
+            if ((size_t) fxbSwap (cset->chunkSize) + sizeof (fxProgramSet) - 8 > (size_t) dataSize)
                 return false;
 
             setChunkData (cset->chunk, fxbSwap (cset->chunkSize), true);
@@ -1571,8 +1571,8 @@ public:
         {
             if (isFXB)
             {
-                const int progLen = sizeof (fxProgram) + (numParams - 1) * sizeof (float);
-                const int len = (sizeof (fxSet) - sizeof (fxProgram)) + progLen * jmax (1, numPrograms);
+                const int progLen = (int) sizeof (fxProgram) + (numParams - 1) * (int) sizeof (float);
+                const size_t len = (sizeof (fxSet) - sizeof (fxProgram)) + (size_t) (progLen * jmax (1, numPrograms));
                 dest.setSize (len, true);
 
                 fxSet* const set = (fxSet*) dest.getData();
@@ -1584,11 +1584,13 @@ public:
                 set->fxVersion = fxbSwap (getVersionNumber());
                 set->numPrograms = fxbSwap (numPrograms);
 
-                const int oldProgram = getCurrentProgram();
                 MemoryBlock oldSettings;
                 createTempParameterStore (oldSettings);
 
-                setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + oldProgram * progLen));
+                const int oldProgram = getCurrentProgram();
+
+                if (oldProgram >= 0)
+                    setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + oldProgram * progLen));
 
                 for (int i = 0; i < numPrograms; ++i)
                 {
@@ -1599,14 +1601,14 @@ public:
                     }
                 }
 
-                setCurrentProgram (oldProgram);
+                if (oldProgram >= 0)
+                    setCurrentProgram (oldProgram);
+
                 restoreFromTempParameterStore (oldSettings);
             }
             else
             {
-                const int totalLen = sizeof (fxProgram) + (numParams - 1) * sizeof (float);
-                dest.setSize (totalLen, true);
-
+                dest.setSize (sizeof (fxProgram) + (size_t) ((numParams - 1) * (int) sizeof (float)), true);
                 setParamsInProgramBlock ((fxProgram*) dest.getData());
             }
         }
@@ -1621,7 +1623,7 @@ public:
         if (usesChunks())
         {
             void* data = nullptr;
-            const VstIntPtr bytes = dispatch (effGetChunk, isPreset ? 1 : 0, 0, &data, 0.0f);
+            const size_t bytes = (size_t) dispatch (effGetChunk, isPreset ? 1 : 0, 0, &data, 0.0f);
 
             if (data != nullptr && bytes <= maxSizeMB * 1024 * 1024)
             {
@@ -1783,7 +1785,7 @@ private:
     //==============================================================================
     void createTempParameterStore (MemoryBlock& dest)
     {
-        dest.setSize (64 + 4 * getNumParameters());
+        dest.setSize (64 + 4 * (size_t) getNumParameters());
         dest.fillWith (0);
 
         getCurrentProgramName().copyToUTF8 ((char*) dest.getData(), 63);
@@ -1821,21 +1823,21 @@ private:
         String s;
 
         if (v == 0 || (int) v == -1)
-            v = getVersionNumber();
+            v = (unsigned int) getVersionNumber();
 
         if (v != 0)
         {
             int versionBits[32];
             int n = 0;
 
-            for (int vv = v; vv != 0; vv /= 10)
+            for (unsigned int vv = v; vv != 0; vv /= 10)
                 versionBits [n++] = vv % 10;
 
             if (n > 4) // if the number ends up silly, it's probably encoded as hex instead of decimal..
             {
                 n = 0;
 
-                for (int vv = v; vv != 0; vv >>= 8)
+                for (unsigned int vv = v; vv != 0; vv >>= 8)
                     versionBits [n++] = vv & 255;
             }
 

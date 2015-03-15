@@ -174,12 +174,12 @@ struct OpenGLDemoClasses
                 Array<Vertex> vertices;
                 createVertexListFromMesh (shape.mesh, vertices, Colours::green);
 
-                openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER, vertices.size() * sizeof (Vertex),
+                openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER, vertices.size() * (int) sizeof (Vertex),
                                                        vertices.getRawDataPointer(), GL_STATIC_DRAW);
 
                 openGLContext.extensions.glGenBuffers (1, &indexBuffer);
                 openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-                openGLContext.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof (juce::uint32),
+                openGLContext.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, numIndices * (int) sizeof (juce::uint32),
                                                        shape.mesh.indices.getRawDataPointer(), GL_STATIC_DRAW);
             }
 
@@ -280,7 +280,7 @@ struct OpenGLDemoClasses
 
     struct BuiltInTexture   : public DemoTexture
     {
-        BuiltInTexture (const char* nm, const void* imageData, int imageSize)
+        BuiltInTexture (const char* nm, const void* imageData, size_t imageSize)
             : image (resizeImageToPowerOfTwo (ImageFileFormat::loadFrom (imageData, imageSize)))
         {
             name = nm;
