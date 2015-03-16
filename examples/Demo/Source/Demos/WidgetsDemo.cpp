@@ -876,10 +876,10 @@ private:
             comboBox.addItem ("fab", 1);
             comboBox.addItem ("groovy", 2);
             comboBox.addItem ("hep", 3);
-            comboBox.addItem ("neat", 4);
-            comboBox.addItem ("wild", 5);
+            comboBox.addItem ("mad for it", 4);
+            comboBox.addItem ("neat", 5);
             comboBox.addItem ("swingin", 6);
-            comboBox.addItem ("mad for it", 7);
+            comboBox.addItem ("wild", 7);
 
             // when the combo is changed, we'll get a callback.
             comboBox.addListener (this);
