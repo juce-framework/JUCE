@@ -2215,6 +2215,8 @@ private:
         const int screen = DefaultScreen (display);
         Window root = RootWindow (display, screen);
 
+        parentWindow = parentToAddTo;
+
         // Try to obtain a 32-bit visual or fallback to 24 or 16
         visual = Visuals::findVisualFormat ((styleFlags & windowIsSemiTransparent) ? 32 : 24, depth);
 
@@ -2314,11 +2316,12 @@ private:
         {}
     }
 
-    static int getAllEventsMask() noexcept
+    int getAllEventsMask() const noexcept
     {
         return NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
                  | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
-                 | ExposureMask | StructureNotifyMask | FocusChangeMask;
+                 | ExposureMask | FocusChangeMask
+                 | (parentWindow != 0 ? SubstructureNotifyMask : StructureNotifyMask);
     }
 
     template <typename EventType>
