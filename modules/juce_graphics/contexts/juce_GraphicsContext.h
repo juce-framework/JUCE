@@ -203,7 +203,7 @@ public:
 
         The minimumHorizontalScale parameter specifies how much the text can be squashed horizontally
         to try to squeeze it into the space. If you don't want any horizontal scaling to occur, you
-        can set this value to 1.0f.
+        can set this value to 1.0f. Pass 0 if you want it to use a default value.
 
         @see GlyphArrangement::addFittedText
     */
@@ -211,7 +211,7 @@ public:
                          int x, int y, int width, int height,
                          Justification justificationFlags,
                          int maximumNumberOfLines,
-                         float minimumHorizontalScale = 0.7f) const;
+                         float minimumHorizontalScale = 0.0f) const;
 
     /** Tries to draw a text string inside a given space.
 
@@ -228,7 +228,7 @@ public:
 
         The minimumHorizontalScale parameter specifies how much the text can be squashed horizontally
         to try to squeeze it into the space. If you don't want any horizontal scaling to occur, you
-        can set this value to 1.0f.
+        can set this value to 1.0f. Pass 0 if you want it to use a default value.
 
         @see GlyphArrangement::addFittedText
     */
@@ -236,7 +236,7 @@ public:
                          const Rectangle<int>& area,
                          Justification justificationFlags,
                          int maximumNumberOfLines,
-                         float minimumHorizontalScale = 0.7f) const;
+                         float minimumHorizontalScale = 0.0f) const;
 
     //==============================================================================
     /** Fills the context's entire clip region with the current colour or brush.

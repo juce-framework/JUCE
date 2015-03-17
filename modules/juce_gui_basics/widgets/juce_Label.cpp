@@ -29,7 +29,7 @@ Label::Label (const String& name, const String& labelText)
       font (15.0f),
       justification (Justification::centredLeft),
       border (1, 5, 1, 5),
-      minimumHorizontalScale (0.7f),
+      minimumHorizontalScale (0.0f),
       keyboardType (TextEditor::textKeyboard),
       editSingleClick (false),
       editDoubleClick (false),

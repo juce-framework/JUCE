@@ -319,6 +319,18 @@ public:
     */
     void setHorizontalScale (float scaleFactor);
 
+    /** Returns the minimum horizontal scale to which fonts may be squashed when trying to
+        create a layout.
+        @see setDefaultMinimumHorizontalScaleFactor
+    */
+    static float getDefaultMinimumHorizontalScaleFactor() noexcept;
+
+    /** Sets the minimum horizontal scale to which fonts may be squashed when trying to
+        create a text layout.
+        @see getDefaultMinimumHorizontalScaleFactor
+    */
+    static void setDefaultMinimumHorizontalScaleFactor (float newMinimumScaleFactor) noexcept;
+
     /** Returns the font's kerning.
 
         This is the extra space added between adjacent characters, as a proportion
