@@ -467,7 +467,7 @@ struct AAXClasses
             return AAX_SUCCESS;
         }
 
-        MemoryBlock& getTemporaryChunkMemory() const
+        juce::MemoryBlock& getTemporaryChunkMemory() const
         {
             ScopedLock sl (perThreadDataLock);
             const Thread::ThreadID currentThread = Thread::getCurrentThreadId();
@@ -485,7 +485,7 @@ struct AAXClasses
             if (chunkID != juceChunkType)
                 return AAX_CEffectParameters::GetChunkSize (chunkID, oSize);
 
-            MemoryBlock& tempFilterData = getTemporaryChunkMemory();
+            juce::MemoryBlock& tempFilterData = getTemporaryChunkMemory();
             tempFilterData.reset();
             pluginInstance->getStateInformation (tempFilterData);
 
@@ -501,7 +501,7 @@ struct AAXClasses
             MemoryBlock& tempFilterData = getTemporaryChunkMemory();
 
             if (tempFilterData.getSize() == 0)
-                pluginInstance->getStateInformation (tempFilterData);
+                return 20700 /*AAX_ERROR_PLUGIN_API_INVALID_THREAD*/;
 
             oChunk->fSize = (int32_t) tempFilterData.getSize();
             tempFilterData.copyTo (oChunk->fData, 0, tempFilterData.getSize());
@@ -975,7 +975,7 @@ struct AAXClasses
 
         struct ChunkMemoryBlock  : public ReferenceCountedObject
         {
-            MemoryBlock data;
+            juce::MemoryBlock data;
 
             typedef ReferenceCountedObjectPtr<ChunkMemoryBlock> Ptr;
         };
