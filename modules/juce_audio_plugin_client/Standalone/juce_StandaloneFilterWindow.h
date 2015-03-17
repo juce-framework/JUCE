@@ -60,7 +60,7 @@ public:
     }
 
     //==============================================================================
-    void createPlugin()
+    virtual void createPlugin()
     {
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
         processor = createPluginFilter();
@@ -72,7 +72,7 @@ public:
                                          44100, 512);
     }
 
-    void deletePlugin()
+    virtual void deletePlugin()
     {
         stopPlaying();
         processor = nullptr;
