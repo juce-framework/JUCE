@@ -53,7 +53,7 @@ public:
         startPlaying();
     }
 
-    ~StandalonePluginHolder()
+    virtual ~StandalonePluginHolder()
     {
         deletePlugin();
         shutDownAudioDevices();
