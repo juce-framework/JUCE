@@ -498,7 +498,7 @@ struct AAXClasses
             if (chunkID != juceChunkType)
                 return AAX_CEffectParameters::GetChunk (chunkID, oChunk);
 
-            MemoryBlock& tempFilterData = getTemporaryChunkMemory();
+            juce::MemoryBlock& tempFilterData = getTemporaryChunkMemory();
 
             if (tempFilterData.getSize() == 0)
                 return 20700 /*AAX_ERROR_PLUGIN_API_INVALID_THREAD*/;
