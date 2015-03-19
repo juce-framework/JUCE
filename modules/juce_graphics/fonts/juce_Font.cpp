@@ -30,7 +30,7 @@ namespace FontValues
     }
 
     const float defaultFontHeight = 14.0f;
-    float minimumHorizontalScale = 1.0f;
+    float minimumHorizontalScale = 0.7f;
     String fallbackFont;
     String fallbackFontStyle;
 }
