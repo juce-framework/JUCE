@@ -55,16 +55,21 @@ bool SystemStats::isOperatingSystem64Bit()
 //==============================================================================
 namespace LinuxStatsHelpers
 {
-    String getCpuInfo (const char* const key)
+    String getConfigFileValue (const char* file, const char* const key)
     {
         StringArray lines;
-        File ("/proc/cpuinfo").readLines (lines);
+        File (file).readLines (lines);
 
         for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
             if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
                 return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
         return String();
+    }
+
+    String getCpuInfo (const char* key)
+    {
+        return getConfigFileValue ("/proc/cpuinfo", key);
     }
 }
 
@@ -188,4 +193,14 @@ bool Time::setSystemTimeToThisTime() const
     t.tv_usec = (millisSinceEpoch - t.tv_sec * 1000) * 1000;
 
     return settimeofday (&t, 0) == 0;
+}
+
+JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
+{
+   #if JUCE_BSD
+    return false;
+   #else
+    return LinuxStatsHelpers::getConfigFileValue ("/proc/self/status", "TracerPid")
+             .getIntValue() > 0;
+   #endif
 }
