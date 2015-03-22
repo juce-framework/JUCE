@@ -45,10 +45,10 @@ public:
     const String getParameterName (int index) override;
     const String getParameterText (int index) override;
 
-    const String getInputChannelName (int channelIndex) const override;
-    const String getOutputChannelName (int channelIndex) const override;
-    bool isInputChannelStereoPair (int index) const override;
-    bool isOutputChannelStereoPair (int index) const override;
+    const String getInputChannelName (int channelIndex, int elementIndex) const override;
+    const String getOutputChannelName (int channelIndex, int elementIndex) const override;
+    bool isInputChannelStereoPair (int index, int elementIndex) const override;
+    bool isOutputChannelStereoPair (int index, int elementIndex) const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;

@@ -349,22 +349,22 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
     }
 }
 
-const String JuceDemoPluginAudioProcessor::getInputChannelName (const int channelIndex) const
+const String JuceDemoPluginAudioProcessor::getInputChannelName (int channelIndex, int elementIndex) const
 {
     return String (channelIndex + 1);
 }
 
-const String JuceDemoPluginAudioProcessor::getOutputChannelName (const int channelIndex) const
+const String JuceDemoPluginAudioProcessor::getOutputChannelName (int channelIndex, int elementIndex) const
 {
     return String (channelIndex + 1);
 }
 
-bool JuceDemoPluginAudioProcessor::isInputChannelStereoPair (int /*index*/) const
+bool JuceDemoPluginAudioProcessor::isInputChannelStereoPair (int /*channelIndex*/, int /*elementIndex*/) const
 {
     return true;
 }
 
-bool JuceDemoPluginAudioProcessor::isOutputChannelStereoPair (int /*index*/) const
+bool JuceDemoPluginAudioProcessor::isOutputChannelStereoPair (int /*channelIndex*/, int /*elementIndex*/) const
 {
     return true;
 }
