@@ -2321,12 +2321,11 @@ private:
         {}
     }
 
-    int getAllEventsMask() const noexcept
+    static int getAllEventsMask() noexcept
     {
         return NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
                  | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
-                 | ExposureMask | FocusChangeMask
-                 | (parentWindow != 0 ? SubstructureNotifyMask : StructureNotifyMask);
+                 | ExposureMask | StructureNotifyMask | FocusChangeMask;
     }
 
     template <typename EventType>
