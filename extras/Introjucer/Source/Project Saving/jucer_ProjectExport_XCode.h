@@ -154,6 +154,15 @@ public:
         }
 
         writeInfoPlistFile();
+
+        {
+            // Clean .rsrc files because Xcode does not know to rebuild them when necessary.
+
+            Array<File> resourceFiles;
+            getTargetFolder().getChildFile ("build").findChildFiles (resourceFiles, File::findFiles, true, "*.rsrc");
+            for (int i = 0; i < resourceFiles.size(); ++i)
+                resourceFiles[i].deleteFile();
+        }
     }
 
 protected:
