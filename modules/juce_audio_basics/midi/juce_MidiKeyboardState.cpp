@@ -145,7 +145,7 @@ void MidiKeyboardState::processNextMidiBuffer (MidiBuffer& buffer,
                                                const bool injectIndirectEvents)
 {
     MidiBuffer::Iterator i (buffer);
-    MidiMessage message (0xf4, 0.0);
+    MidiMessage message;
     int time;
 
     const ScopedLock sl (lock);
