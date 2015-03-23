@@ -154,6 +154,9 @@ public:
         }
 
         writeInfoPlistFile();
+
+        // Deleting the .rsrc files can be needed to force Xcode to update the version number.
+        deleteRsrcFiles();
     }
 
 protected:
@@ -606,6 +609,12 @@ private:
         plist->writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
 
         overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
+    }
+
+    void deleteRsrcFiles() const
+    {
+        for (DirectoryIterator di (getTargetFolder().getChildFile ("build"), true, "*.rsrc", File::findFiles); di.next();)
+            di.getFile().deleteFile();
     }
 
     String getHeaderSearchPaths (const BuildConfiguration& config) const
