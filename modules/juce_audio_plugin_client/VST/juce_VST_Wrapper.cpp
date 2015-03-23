@@ -906,7 +906,7 @@ public:
     {
         short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
 
-        Array <short*> channelConfigsSorted;
+        Array<short*> channelConfigsSorted;
         ChannelConfigComparator comp;
 
         for (int i = 0; i < numElementsInArray (channelConfigs); ++i)
@@ -1229,7 +1229,7 @@ public:
     {
         if (editorComp != nullptr)
         {
-            if (! (canHostDo (const_cast <char*> ("sizeWindow")) && sizeWindow (newWidth, newHeight)))
+            if (! (canHostDo (const_cast<char*> ("sizeWindow")) && sizeWindow (newWidth, newHeight)))
             {
                 // some hosts don't support the sizeWindow call, so do it manually..
                #if JUCE_MAC
@@ -1285,7 +1285,10 @@ public:
             }
 
             if (ComponentPeer* peer = editorComp->getPeer())
+            {
                 peer->handleMovedOrResized();
+                peer->getComponent().repaint();
+            }
         }
     }
 
