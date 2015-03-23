@@ -162,7 +162,8 @@ void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bo
 
     if (leftOfOwnerComp)
     {
-        setSize (jmin (f.getStringWidth (textValue.toString()) + 8, component.getX()),
+        setSize (jmin (roundToInt (f.getStringWidthFloat (textValue.toString()) + 0.5f) + getBorderSize().getLeftAndRight(),
+                       component.getX()),
                  component.getHeight());
 
         setTopRightPosition (component.getX(), component.getY());
@@ -170,7 +171,7 @@ void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bo
     else
     {
         setSize (component.getWidth(),
-                 8 + roundToInt (f.getHeight()));
+                 getBorderSize().getTopAndBottom() + 6 + roundToInt (f.getHeight() + 0.5f));
 
         setTopLeftPosition (component.getX(), component.getY() - getHeight());
     }
