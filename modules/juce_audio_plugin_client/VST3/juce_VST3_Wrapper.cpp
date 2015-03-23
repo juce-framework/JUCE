@@ -264,9 +264,32 @@ public:
     }
 
     //==============================================================================
-    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override        { beginEdit ((Vst::ParamID) index); }
-    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override   { performEdit ((Vst::ParamID) index, (double) newValue); }
-    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit ((Vst::ParamID) index); }
+    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override
+    {
+        if (PluginHostType().isSteinberg())
+        {
+            // Reporting change gestures is Cubase causes plugins to malfunction.
+            // See http://www.juce.com/forum/topic/vst3-parameterchangegesture-problem-cubase-75
+            return;
+        }
+        beginEdit ((Vst::ParamID) index);
+    }
+
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
+    {
+        performEdit ((Vst::ParamID) index, (double) newValue);
+    }
+
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override
+    {
+        if (PluginHostType().isSteinberg())
+        {
+            // Reporting change gestures is Cubase causes plugins to malfunction.
+            // See http://www.juce.com/forum/topic/vst3-parameterchangegesture-problem-cubase-75
+            return;
+        }
+        endEdit ((Vst::ParamID) index);
+    }
 
     void audioProcessorChanged (AudioProcessor*) override
     {
