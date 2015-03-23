@@ -165,7 +165,7 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
     {
        #if JUCE_DEBUG
         // This means you've called endParameterChangeGesture without having previously called
-        // endParameterChangeGesture. That might be fine in most hosts, but better to keep the
+        // beginParameterChangeGesture. That might be fine in most hosts, but better to keep the
         // calls matched correctly.
         jassert (changingParams [parameterIndex]);
         changingParams.clearBit (parameterIndex);
