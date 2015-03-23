@@ -579,7 +579,7 @@ public:
             case 1:     return r.nextInt();
             case 2:     return r.nextInt64();
             case 3:     return r.nextBool();
-            case 4:     return r.nextDouble();
+            case 4:     return String (r.nextDouble(), 20).getDoubleValue();
             case 5:     return createRandomWideCharString (r);
 
             case 6:
