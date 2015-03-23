@@ -73,6 +73,9 @@ public:
     };
 
     //==============================================================================
+    juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager)
+
+    //==============================================================================
     /** Returns the number of components currently being shown modally.
         @see getModalComponent
     */
@@ -118,9 +121,6 @@ public:
     */
     int runEventLoopForCurrentComponent();
    #endif
-
-    //==============================================================================
-    juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager)
 
 protected:
     /** Creates a ModalComponentManager.

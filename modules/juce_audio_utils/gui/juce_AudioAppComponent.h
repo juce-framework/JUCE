@@ -31,8 +31,8 @@
     A base class for writing audio apps that stream from the audio i/o devices.
 
     A subclass can inherit from this and implement just a few methods such as
-    renderAudio(). The base class provides a basic AudioDeviceManager object
-    and runs audio through the
+    getNextAudioBlock(). The base class provides a basic AudioDeviceManager object
+    and runs audio through the default output device.
 */
 class AudioAppComponent   : public Component,
                             public AudioSource
