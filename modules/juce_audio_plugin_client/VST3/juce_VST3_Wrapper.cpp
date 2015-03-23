@@ -265,7 +265,14 @@ public:
 
     //==============================================================================
     void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override        { beginEdit ((Vst::ParamID) index); }
-    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override   { performEdit ((Vst::ParamID) index, (double) newValue); }
+
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
+    {
+        // NB: Cubase has problems if performEdit is called without setParamNormalized
+        EditController::setParamNormalized ((Vst::ParamID) index, (double) newValue);
+        performEdit ((Vst::ParamID) index, (double) newValue);
+    }
+
     void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit ((Vst::ParamID) index); }
 
     void audioProcessorChanged (AudioProcessor*) override
