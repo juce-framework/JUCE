@@ -224,10 +224,6 @@ private:
 
         writeLinkerFlags (out, config);
 
-        out << "  LDDEPS :=" << newLine
-            << "  RESFLAGS := ";
-        writeDefineFlags (out, config);
-        writeHeaderPathFlags (out, config);
         out << newLine;
 
         String targetName (replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
@@ -283,7 +279,7 @@ private:
         out << ".PHONY: clean" << newLine
             << newLine;
 
-        out << "$(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)" << newLine
+        out << "$(OUTDIR)/$(TARGET): $(OBJECTS) $(RESOURCES)" << newLine
             << "\t@echo Linking " << projectName << newLine
             << "\t-@mkdir -p $(BINDIR)" << newLine
             << "\t-@mkdir -p $(LIBDIR)" << newLine
