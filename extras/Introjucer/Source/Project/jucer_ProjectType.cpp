@@ -262,6 +262,9 @@ public:
         props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus (project), "Key Focus", "Plugin editor requires keyboard focus"),
                    "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
 
+        props.add (new TextPropertyComponent (getPluginAUSDKLocation (project), "Plugin AU SDK Path", 512, false),
+                   "An optional path to the Apple AudioUnit SDK's 'CoreAudio' folder. Leave this blank to use the default location.");
+
         props.add (new TextPropertyComponent (getPluginAUExportPrefix (project), "Plugin AU Export Prefix", 64, false),
                    "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
 

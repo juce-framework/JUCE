@@ -47,6 +47,7 @@ namespace
     Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
     Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
     Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
+    Value getPluginAUSDKLocation (Project& project)               { return project.getProjectValue ("pluginAUSDKLocation"); }
     Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
     Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
@@ -492,9 +493,17 @@ namespace AUHelpers
 
         if (exporter.isXcode())
         {
-            exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility");
-            exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility");
-            exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase");
+            String sdkLocation (getPluginAUSDKLocation (projectSaver.project).toString());
+
+            if (sdkLocation.trim().isEmpty())
+                sdkLocation = "$(DEVELOPER_DIR)/Extras/CoreAudio/";
+
+            if (! sdkLocation.endsWithChar ('/'))
+                sdkLocation << '/';
+
+            exporter.extraSearchPaths.add (sdkLocation + "PublicUtility");
+            exporter.extraSearchPaths.add (sdkLocation + "AudioUnits/AUPublic/Utility");
+            exporter.extraSearchPaths.add (sdkLocation + "AudioUnits/AUPublic/AUBase");
 
             exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
             exporter.xcodeExcludedFiles64Bit = "\"*Carbon*.cpp\"";
@@ -503,65 +512,65 @@ namespace AUHelpers
             subGroup.setID ("__juceappleaufiles");
 
             {
-                #define JUCE_AU_PUBLICUTILITY   "${DEVELOPER_DIR}/Extras/CoreAudio/PublicUtility/"
-                #define JUCE_AU_PUBLIC          "${DEVELOPER_DIR}/Extras/CoreAudio/AudioUnits/AUPublic/"
-
                 static const char* appleAUFiles[] =
                 {
-                    JUCE_AU_PUBLICUTILITY "CADebugMacros.h",
-                    JUCE_AU_PUBLICUTILITY "CAAUParameter.cpp",
-                    JUCE_AU_PUBLICUTILITY "CAAUParameter.h",
-                    JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.cpp",
-                    JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.h",
-                    JUCE_AU_PUBLICUTILITY "CAMutex.cpp",
-                    JUCE_AU_PUBLICUTILITY "CAMutex.h",
-                    JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.cpp",
-                    JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.h",
-                    JUCE_AU_PUBLICUTILITY "CAVectorUnitTypes.h",
-                    JUCE_AU_PUBLICUTILITY "CAVectorUnit.cpp",
-                    JUCE_AU_PUBLICUTILITY "CAVectorUnit.h",
-                    JUCE_AU_PUBLIC "AUViewBase/AUViewLocalizedStringKeys.h",
-                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewDispatch.cpp",
-                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.cpp",
-                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.h",
-                    JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.cpp",
-                    JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.h",
-                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.cpp",
-                    JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.h",
-                    JUCE_AU_PUBLIC "AUBase/AUBase.cpp",
-                    JUCE_AU_PUBLIC "AUBase/AUBase.h",
-                    JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
-                    JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
-                    JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
-                    JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
-                    JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",
-                    JUCE_AU_PUBLIC "AUBase/AUOutputElement.h",
-                    JUCE_AU_PUBLIC "AUBase/AUResources.r",
-                    JUCE_AU_PUBLIC "AUBase/AUScopeElement.cpp",
-                    JUCE_AU_PUBLIC "AUBase/AUScopeElement.h",
-                    JUCE_AU_PUBLIC "AUBase/ComponentBase.cpp",
-                    JUCE_AU_PUBLIC "AUBase/ComponentBase.h",
-                    JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.cpp",
-                    JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.h",
-                    JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.cpp",
-                    JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.h",
-                    JUCE_AU_PUBLIC "OtherBases/AUOutputBase.cpp",
-                    JUCE_AU_PUBLIC "OtherBases/AUOutputBase.h",
-                    JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.cpp",
-                    JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.h",
-                    JUCE_AU_PUBLIC "OtherBases/AUEffectBase.cpp",
-                    JUCE_AU_PUBLIC "OtherBases/AUEffectBase.h",
-                    JUCE_AU_PUBLIC "Utility/AUBuffer.cpp",
-                    JUCE_AU_PUBLIC "Utility/AUBuffer.h",
-                    JUCE_AU_PUBLIC "Utility/AUInputFormatConverter.h",
-                    JUCE_AU_PUBLIC "Utility/AUSilentTimeout.h",
-                    JUCE_AU_PUBLIC "Utility/AUTimestampGenerator.h",
+                    "PublicUtility/CADebugMacros.h",
+                    "PublicUtility/CAAUParameter.cpp",
+                    "PublicUtility/CAAUParameter.h",
+                    "PublicUtility/CAAudioChannelLayout.cpp",
+                    "PublicUtility/CAAudioChannelLayout.h",
+                    "PublicUtility/CAMutex.cpp",
+                    "PublicUtility/CAMutex.h",
+                    "PublicUtility/CAStreamBasicDescription.cpp",
+                    "PublicUtility/CAStreamBasicDescription.h",
+                    "PublicUtility/CAVectorUnitTypes.h",
+                    "PublicUtility/CAVectorUnit.cpp",
+                    "PublicUtility/CAVectorUnit.h",
+                    "AudioUnits/AUPublic/AUViewBase/AUViewLocalizedStringKeys.h",
+                    "AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewDispatch.cpp",
+                    "AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.cpp",
+                    "AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.h",
+                    "AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.cpp",
+                    "AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.h",
+                    "AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.cpp",
+                    "AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.h",
+                    "AudioUnits/AUPublic/AUBase/AUBase.cpp",
+                    "AudioUnits/AUPublic/AUBase/AUBase.h",
+                    "AudioUnits/AUPublic/AUBase/AUDispatch.cpp",
+                    "AudioUnits/AUPublic/AUBase/AUDispatch.h",
+                    "AudioUnits/AUPublic/AUBase/AUInputElement.cpp",
+                    "AudioUnits/AUPublic/AUBase/AUInputElement.h",
+                    "AudioUnits/AUPublic/AUBase/AUOutputElement.cpp",
+                    "AudioUnits/AUPublic/AUBase/AUOutputElement.h",
+                    "AudioUnits/AUPublic/AUBase/AUResources.r",
+                    "AudioUnits/AUPublic/AUBase/AUScopeElement.cpp",
+                    "AudioUnits/AUPublic/AUBase/AUScopeElement.h",
+                    "AudioUnits/AUPublic/AUBase/ComponentBase.cpp",
+                    "AudioUnits/AUPublic/AUBase/ComponentBase.h",
+                    "AudioUnits/AUPublic/OtherBases/AUMIDIBase.cpp",
+                    "AudioUnits/AUPublic/OtherBases/AUMIDIBase.h",
+                    "AudioUnits/AUPublic/OtherBases/AUMIDIEffectBase.cpp",
+                    "AudioUnits/AUPublic/OtherBases/AUMIDIEffectBase.h",
+                    "AudioUnits/AUPublic/OtherBases/AUOutputBase.cpp",
+                    "AudioUnits/AUPublic/OtherBases/AUOutputBase.h",
+                    "AudioUnits/AUPublic/OtherBases/MusicDeviceBase.cpp",
+                    "AudioUnits/AUPublic/OtherBases/MusicDeviceBase.h",
+                    "AudioUnits/AUPublic/OtherBases/AUEffectBase.cpp",
+                    "AudioUnits/AUPublic/OtherBases/AUEffectBase.h",
+                    "AudioUnits/AUPublic/Utility/AUBuffer.cpp",
+                    "AudioUnits/AUPublic/Utility/AUBuffer.h",
+                    "AudioUnits/AUPublic/Utility/AUInputFormatConverter.h",
+                    "AudioUnits/AUPublic/Utility/AUSilentTimeout.h",
+                    "AudioUnits/AUPublic/Utility/AUTimestampGenerator.h",
                     nullptr
                 };
 
+                // This converts things like $(DEVELOPER_DIR) to ${DEVELOPER_DIR}
+                sdkLocation = sdkLocation.replaceCharacters ("()", "{}");
+
                 for (const char** f = appleAUFiles; *f != nullptr; ++f)
                 {
-                    const RelativePath file (*f, RelativePath::projectFolder);
+                    const RelativePath file (sdkLocation + *f, RelativePath::projectFolder);
                     subGroup.addRelativeFile (file, -1, file.hasFileExtension ("cpp;mm"));
                     subGroup.getChild (subGroup.getNumChildren() - 1).getShouldInhibitWarningsValue() = true;
                 }
