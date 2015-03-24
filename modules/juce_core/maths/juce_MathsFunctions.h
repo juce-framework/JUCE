@@ -299,11 +299,23 @@ template <typename Type>
 inline Type juce_hypot (Type a, Type b) noexcept
 {
    #if JUCE_MSVC
-    return static_cast <Type> (_hypot (a, b));
+    return static_cast<Type> (_hypot (a, b));
    #else
-    return static_cast <Type> (hypot (a, b));
+    return static_cast<Type> (hypot (a, b));
    #endif
 }
+
+#ifndef DOXYGEN
+template <>
+inline float juce_hypot (float a, float b) noexcept
+{
+   #if JUCE_MSVC
+    return (_hypotf (a, b));
+   #else
+    return (hypotf (a, b));
+   #endif
+}
+#endif
 
 /** 64-bit abs function. */
 inline int64 abs64 (const int64 n) noexcept
@@ -500,7 +512,7 @@ NumericType square (NumericType n) noexcept
      value, and to normalise it if necessary.
      On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
  */
- #define JUCE_UNDENORMALISE(x)   { (x) += 1.0f; (x) -= 1.0f; }
+ #define JUCE_UNDENORMALISE(x)   { (x) += 0.1f; (x) -= 0.1f; }
 #else
  #define JUCE_UNDENORMALISE(x)
 #endif

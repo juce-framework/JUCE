@@ -221,7 +221,7 @@ void QuickTimeMovieComponent::setPosition (const double seconds)
     if (movie != 0)
     {
         QTTime t;
-        t.timeValue = (uint64) (100000.0 * seconds);
+        t.timeValue = (long long) (100000.0 * seconds);
         t.timeScale = 100000;
         t.flags = 0;
 

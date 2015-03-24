@@ -70,7 +70,7 @@ public:
             view.userInteractionEnabled = NO;
 
             glLayer = (CAEAGLLayer*) [view layer];
-            glLayer.contentsScale = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            glLayer.contentsScale = (CGFloat) Desktop::getInstance().getDisplays().getMainDisplay().scale;
             glLayer.opaque = true;
 
             [((UIView*) peer->getNativeHandle()) addSubview: view];

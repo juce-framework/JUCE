@@ -561,7 +561,7 @@ public:
             }
         }
 
-        if (! usingXShm)
+        if (! isUsingXShm())
        #endif
         {
             imageDataAllocated.allocate (lineStride * h, format == Image::ARGB && clearImage);
@@ -614,7 +614,7 @@ public:
             XFreeGC (display, gc);
 
        #if JUCE_USE_XSHM
-        if (usingXShm)
+        if (isUsingXShm())
         {
             XShmDetach (display, &segmentInfo);
 
@@ -709,12 +709,16 @@ public:
 
         // blit results to screen.
        #if JUCE_USE_XSHM
-        if (usingXShm)
+        if (isUsingXShm())
             XShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
         else
        #endif
             XPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
     }
+
+    #if JUCE_USE_XSHM
+    bool isUsingXShm() const noexcept       { return usingXShm; }
+    #endif
 
 private:
     //==============================================================================
@@ -1926,15 +1930,16 @@ private:
 
                 for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {
+                    XBitmapImage* xbitmap = static_cast<XBitmapImage*> (image.getPixelData());
                    #if JUCE_USE_XSHM
-                    if (XSHMHelpers::isShmAvailable())
+                    if (xbitmap->isUsingXShm())
                         ++shmPaintsPending;
                    #endif
 
-                    static_cast<XBitmapImage*> (image.getPixelData())
-                        ->blitToWindow (peer.windowH,
-                                        i->getX(), i->getY(), i->getWidth(), i->getHeight(),
-                                        i->getX() - totalArea.getX(), i->getY() - totalArea.getY());
+
+                   xbitmap->blitToWindow (peer.windowH,
+                                          i->getX(), i->getY(), i->getWidth(), i->getHeight(),
+                                          i->getX() - totalArea.getX(), i->getY() - totalArea.getY());
                 }
             }
 
@@ -2214,6 +2219,8 @@ private:
         // Get defaults for various properties
         const int screen = DefaultScreen (display);
         Window root = RootWindow (display, screen);
+
+        parentWindow = parentToAddTo;
 
         // Try to obtain a 32-bit visual or fallback to 24 or 16
         visual = Visuals::findVisualFormat ((styleFlags & windowIsSemiTransparent) ? 32 : 24, depth);

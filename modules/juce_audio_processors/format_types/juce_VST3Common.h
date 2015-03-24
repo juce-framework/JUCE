@@ -250,7 +250,7 @@ public:
                         break;
 
                     case Steinberg::Vst::Event::kDataEvent:
-                        result.addEvent (MidiMessage::createSysExMessage (e.data.bytes, e.data.size),
+                        result.addEvent (MidiMessage::createSysExMessage (e.data.bytes, (int) e.data.size),
                                          e.sampleOffset);
                         break;
 
@@ -300,7 +300,7 @@ public:
             {
                 e.type          = Steinberg::Vst::Event::kDataEvent;
                 e.data.bytes    = msg.getSysExData();
-                e.data.size     = msg.getSysExDataSize();
+                e.data.size     = (uint32) msg.getSysExDataSize();
                 e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
             }
             else if (msg.isAftertouch())

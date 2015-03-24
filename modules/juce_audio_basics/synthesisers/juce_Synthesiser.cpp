@@ -73,6 +73,7 @@ bool SynthesiserVoice::wasStartedBefore (const SynthesiserVoice& other) const no
 Synthesiser::Synthesiser()
     : sampleRate (0),
       lastNoteOnCounter (0),
+      minimumSubBlockSize (32),
       shouldStealNotes (true)
 {
     for (int i = 0; i < numElementsInArray (lastPitchWheelValues); ++i)
@@ -131,6 +132,12 @@ void Synthesiser::setNoteStealingEnabled (const bool shouldSteal)
     shouldStealNotes = shouldSteal;
 }
 
+void Synthesiser::setMinimumRenderingSubdivisionSize (int numSamples) noexcept
+{
+    jassert (numSamples > 0); // it wouldn't make much sense for this to be less than 1
+    minimumSubBlockSize = numSamples;
+}
+
 //==============================================================================
 void Synthesiser::setCurrentPlaybackSampleRate (const double newRate)
 {
@@ -153,30 +160,45 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
     // must set the sample rate before using this!
     jassert (sampleRate != 0);
 
-    const ScopedLock sl (lock);
-
     MidiBuffer::Iterator midiIterator (midiData);
     midiIterator.setNextSamplePosition (startSample);
-    MidiMessage m (0xf4, 0.0);
+
+    int midiEventPos;
+    MidiMessage m;
+
+    const ScopedLock sl (lock);
 
     while (numSamples > 0)
     {
-        int midiEventPos;
-        const bool useEvent = midiIterator.getNextEvent (m, midiEventPos)
-                                && midiEventPos < startSample + numSamples;
+        if (! midiIterator.getNextEvent (m, midiEventPos))
+        {
+            renderVoices (outputBuffer, startSample, numSamples);
+            return;
+        }
 
-        const int numThisTime = useEvent ? midiEventPos - startSample
-                                         : numSamples;
+        const int samplesToNextMidiMessage = midiEventPos - startSample;
 
-        if (numThisTime > 0)
-            renderVoices (outputBuffer, startSample, numThisTime);
-
-        if (useEvent)
+        if (samplesToNextMidiMessage >= numSamples)
+        {
+            renderVoices (outputBuffer, startSample, numSamples);
             handleMidiEvent (m);
+            break;
+        }
 
-        startSample += numThisTime;
-        numSamples -= numThisTime;
+        if (samplesToNextMidiMessage < minimumSubBlockSize)
+        {
+            handleMidiEvent (m);
+            continue;
+        }
+
+        renderVoices (outputBuffer, startSample, samplesToNextMidiMessage);
+        handleMidiEvent (m);
+        startSample += samplesToNextMidiMessage;
+        numSamples  -= samplesToNextMidiMessage;
     }
+
+    while (midiIterator.getNextEvent (m, midiEventPos))
+        handleMidiEvent (m);
 }
 
 void Synthesiser::renderVoices (AudioSampleBuffer& buffer, int startSample, int numSamples)

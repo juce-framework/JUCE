@@ -72,6 +72,17 @@ public:
     /** Returns true if there's currently a scan in progress. */
     bool isScanning() const noexcept;
 
+    /** Removes the plugins currently selected in the table. */
+    void removeSelectedPlugins();
+
+    /** Sets a custom table model to be used.
+        This will take ownership of the model and delete it when no longer needed.
+     */
+    void setTableModel (TableListBoxModel* model);
+
+    /** Returns the table used to display the plugin list. */
+    TableListBox& getTableListBox() noexcept            { return table; }
+
 private:
     //==============================================================================
     AudioPluginFormatManager& formatManager;
@@ -83,9 +94,7 @@ private:
     int numThreads;
 
     class TableModel;
-    friend class TableModel;
-    friend struct ContainerDeletePolicy<TableModel>;
-    ScopedPointer<TableModel> tableModel;
+    ScopedPointer<TableListBoxModel> tableModel;
 
     class Scanner;
     friend class Scanner;
@@ -98,8 +107,8 @@ private:
     void updateList();
     void showSelectedFolder();
     bool canShowSelectedFolder() const;
-    void removeSelected();
     void removeMissingPlugins();
+    void removePluginItem (int index);
 
     void resized() override;
     bool isInterestedInFileDrag (const StringArray&) override;

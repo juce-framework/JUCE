@@ -366,8 +366,11 @@ void GlyphArrangement::addFittedText (const Font& f,
                                       const float width, const float height,
                                       Justification layout,
                                       int maximumLines,
-                                      const float minimumHorizontalScale)
+                                      float minimumHorizontalScale)
 {
+    if (minimumHorizontalScale == 0.0f)
+        minimumHorizontalScale = Font::getDefaultMinimumHorizontalScaleFactor();
+
     // doesn't make much sense if this is outside a sensible range of 0.5 to 1.0
     jassert (minimumHorizontalScale > 0 && minimumHorizontalScale <= 1.0f);
 

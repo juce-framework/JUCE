@@ -30,9 +30,9 @@ public:
     Writer (OutputStream* destStream, const String& formatName,
             const File& appFile, int vbr, int cbr,
             double sampleRate, unsigned int numberOfChannels,
-            unsigned int bitsPerSample, const StringPairArray& metadata)
+            int bitsPerSample, const StringPairArray& metadata)
         : AudioFormatWriter (destStream, formatName, sampleRate,
-                             numberOfChannels, bitsPerSample),
+                             numberOfChannels, (unsigned int) bitsPerSample),
           vbrLevel (vbr), cbrBitrate (cbr),
           tempWav (".wav")
     {

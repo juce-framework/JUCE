@@ -154,7 +154,7 @@ public:
     bool isAttachedOnLeft() const noexcept                                      { return leftOfOwnerComp; }
 
     /** Specifies the minimum amount that the font can be squashed horizontally before it starts
-        using ellipsis.
+        using ellipsis. Use a value of 0 for a default value.
 
         @see Graphics::drawFittedText
     */

@@ -150,7 +150,7 @@ public:
         /** The attribute's ID number.
             If the uniform couldn't be found, this value will be < 0.
         */
-        GLint attributeID;
+        GLuint attributeID;
     };
 
     /** The ID number of the compiled program. */
