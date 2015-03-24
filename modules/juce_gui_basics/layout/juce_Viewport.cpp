@@ -179,10 +179,8 @@ void Viewport::componentMovedOrResized (Component&, bool, bool)
 
 void Viewport::lookAndFeelChanged()
 {
-    if (customScrollBarThickness == false)
-    {
+    if (! customScrollBarThickness)
         scrollBarThickness = getLookAndFeel().getDefaultScrollbarWidth();
-    }
 }
 
 void Viewport::resized()
