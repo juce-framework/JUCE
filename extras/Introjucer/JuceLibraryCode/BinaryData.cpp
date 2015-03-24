@@ -578,6 +578,9 @@ static const unsigned char temp_binary_data_6[] =
 "//==============================================================================\r\n"
 "%%className%%::%%className%% (%%constructorParams%%)\r\n"
 "%%initialisers%%{\r\n"
+"    //[Constructor_pre] You can add your own custom stuff here..\r\n"
+"    //[/Constructor_pre]\r\n"
+"\r\n"
 "    %%constructor%%\r\n"
 "\r\n"
 "    //[Constructor] You can add your own custom stuff here..\r\n"
@@ -4074,7 +4077,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5039; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2727; return jucer_AudioPluginFilterTemplate_h;
-        case 0xabad7041:  numBytes = 2083; return jucer_ComponentTemplate_cpp;
+        case 0xabad7041:  numBytes = 2177; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
