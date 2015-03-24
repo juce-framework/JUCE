@@ -682,7 +682,7 @@ private:
     OwnedArray<AudioProcessorParameter> managedParameters;
     AudioProcessorParameter* getParamChecked (int) const noexcept;
 
-   #if JUCE_DEBUG
+   #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     BigInteger changingParams;
    #endif
 
