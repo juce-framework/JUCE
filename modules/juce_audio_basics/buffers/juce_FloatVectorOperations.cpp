@@ -495,8 +495,12 @@ void JUCE_CALLTYPE FloatVectorOperations::copyWithMultiply (double* dest, const 
 
 void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float amount, int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsadd (dest, 1, &amount, dest, 1, (vDSP_Length) num);
+   #else
     JUCE_PERFORM_VEC_OP_DEST (dest[i] += amount, Mode::add (d, amountToAdd), JUCE_LOAD_DEST,
                               const Mode::ParallelType amountToAdd = Mode::load1 (amount);)
+   #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double amount, int num) noexcept
@@ -601,9 +605,13 @@ void JUCE_CALLTYPE FloatVectorOperations::subtract (double* dest, const double* 
 
 void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsma (src, 1, &multiplier, dest, 1, dest, 1, (vDSP_Length) num);
+   #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i] * multiplier, Mode::add (d, Mode::mul (mult, s)),
                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mult = Mode::load1 (multiplier);)
+   #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const double* src, double multiplier, int num) noexcept
