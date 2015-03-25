@@ -195,7 +195,7 @@ public:
     int getSliderPopupPlacement (Slider&) override;
 
     //==============================================================================
-    void getTooltipSize (const String& tipText, int& width, int& height) override;
+    Rectangle<int> getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea) override;
     void drawTooltip (Graphics&, const String& text, int width, int height) override;
 
     //==============================================================================
