@@ -339,6 +339,8 @@ protected:
     /** @internal */
     void mouseDrag (const MouseEvent&) override;
     /** @internal */
+    void mouseUp (const MouseEvent&) override;
+    /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
     void childBoundsChanged (Component*) override;
@@ -374,7 +376,7 @@ protected:
 private:
     //==============================================================================
     Component::SafePointer<Component> contentComponent;
-    bool ownsContentComponent, resizeToFitContent, fullscreen;
+    bool ownsContentComponent, resizeToFitContent, fullscreen, dragStarted;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;
