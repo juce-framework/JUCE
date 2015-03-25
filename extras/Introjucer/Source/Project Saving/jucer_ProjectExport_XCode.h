@@ -602,6 +602,25 @@ private:
         if (settings ["UIStatusBarHidden"])
             addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
+        if (iOS)
+        {
+            static const char* kDefaultiOSOrientationStrings[] =
+            {
+                "UIInterfaceOrientationPortrait",
+                "UIInterfaceOrientationLandscapeLeft",
+                "UIInterfaceOrientationLandscapeRight",
+                nullptr
+            };
+
+            StringArray iOSOrientations (kDefaultiOSOrientationStrings);
+
+            dict->createNewChildElement ("key")->addTextElement ("UISupportedInterfaceOrientations");
+            XmlElement* plistStringArray = dict->createNewChildElement ("array");
+
+            for (int i = 0; i < iOSOrientations.size(); ++i)
+                plistStringArray->createNewChildElement ("string")->addTextElement (iOSOrientations[i]);
+        }
+
         for (int i = 0; i < xcodeExtraPListEntries.size(); ++i)
             dict->addChildElement (new XmlElement (xcodeExtraPListEntries.getReference(i)));
 
