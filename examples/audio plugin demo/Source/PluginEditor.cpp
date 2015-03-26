@@ -95,8 +95,8 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
     if (lastDisplayedPosition != newPos)
         displayPositionInfo (newPos);
 
-    gainSlider.setValue (ourProcessor.gain, dontSendNotification);
-    delaySlider.setValue (ourProcessor.delay, dontSendNotification);
+    gainSlider.setValue (ourProcessor.gain->getValue(), dontSendNotification);
+    delaySlider.setValue (ourProcessor.delay->getValue(), dontSendNotification);
 }
 
 // This is our Slider::Listener callback, when the user drags a slider.
@@ -104,16 +104,14 @@ void JuceDemoPluginAudioProcessorEditor::sliderValueChanged (Slider* slider)
 {
     if (slider == &gainSlider)
     {
-        // It's vital to use setParameterNotifyingHost to change any parameters that are automatable
+        // It's vital to use setValueNotifyingHost to change any parameters that are automatable
         // by the host, rather than just modifying them directly, otherwise the host won't know
         // that they've changed.
-        getProcessor().setParameterNotifyingHost (JuceDemoPluginAudioProcessor::gainParam,
-                                                  (float) gainSlider.getValue());
+        getProcessor().gain->setValueNotifyingHost ((float) gainSlider.getValue());
     }
     else if (slider == &delaySlider)
     {
-        getProcessor().setParameterNotifyingHost (JuceDemoPluginAudioProcessor::delayParam,
-                                                  (float) delaySlider.getValue());
+        getProcessor().delay->setValueNotifyingHost ((float) delaySlider.getValue());
     }
 }
 

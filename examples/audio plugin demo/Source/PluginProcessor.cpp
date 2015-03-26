@@ -132,6 +132,52 @@ private:
     double currentAngle, angleDelta, level, tailOff;
 };
 
+class FloatParameter : public AudioProcessorParameter
+{
+public:
+
+    FloatParameter (float defaultParameterValue, const String& paramName)
+       : defaultValue (defaultParameterValue),
+         value (defaultParameterValue),
+         name (paramName)
+    {
+    }
+
+    float getValue() const override
+    {
+        return value;
+    }
+
+    void setValue (float newValue) override
+    {
+        value = newValue;
+    }
+
+    float getDefaultValue() const override
+    {
+        return defaultValue;
+    }
+
+    String getName (int maximumStringLength) const override
+    {
+        return name;
+    }
+
+    String getLabel() const override
+    {
+        return String();
+    }
+
+    float getValueForText (const String& text) const override
+    {
+        return text.getFloatValue();
+    }
+
+private:
+    float defaultValue, value;
+    String name;
+};
+
 const float defaultGain = 1.0f;
 const float defaultDelay = 0.5f;
 
@@ -139,9 +185,9 @@ const float defaultDelay = 0.5f;
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
     : delayBuffer (2, 12000)
 {
-    // Set up some default values..
-    gain = defaultGain;
-    delay = defaultDelay;
+    // Set up our parameters. The base class will delete them for us.
+    addParameter (gain  = new FloatParameter (defaultGain,  "Gain"));
+    addParameter (delay = new FloatParameter (defaultDelay, "Delay"));
 
     lastUIWidth = 400;
     lastUIHeight = 200;
@@ -158,67 +204,6 @@ JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
 
 JuceDemoPluginAudioProcessor::~JuceDemoPluginAudioProcessor()
 {
-}
-
-//==============================================================================
-int JuceDemoPluginAudioProcessor::getNumParameters()
-{
-    return totalNumParams;
-}
-
-float JuceDemoPluginAudioProcessor::getParameter (int index)
-{
-    // This method will be called by the host, probably on the audio thread, so
-    // it's absolutely time-critical. Don't use critical sections or anything
-    // UI-related, or anything at all that may block in any way!
-    switch (index)
-    {
-        case gainParam:     return gain;
-        case delayParam:    return delay;
-        default:            return 0.0f;
-    }
-}
-
-void JuceDemoPluginAudioProcessor::setParameter (int index, float newValue)
-{
-    // This method will be called by the host, probably on the audio thread, so
-    // it's absolutely time-critical. Don't use critical sections or anything
-    // UI-related, or anything at all that may block in any way!
-    switch (index)
-    {
-        case gainParam:     gain = newValue;  break;
-        case delayParam:    delay = newValue;  break;
-        default:            break;
-    }
-}
-
-float JuceDemoPluginAudioProcessor::getParameterDefaultValue (int index)
-{
-    switch (index)
-    {
-        case gainParam:     return defaultGain;
-        case delayParam:    return defaultDelay;
-        default:            break;
-    }
-
-    return 0.0f;
-}
-
-const String JuceDemoPluginAudioProcessor::getParameterName (int index)
-{
-    switch (index)
-    {
-        case gainParam:     return "gain";
-        case delayParam:    return "delay";
-        default:            break;
-    }
-
-    return String::empty;
-}
-
-const String JuceDemoPluginAudioProcessor::getParameterText (int index)
-{
-    return String (getParameter (index), 2);
 }
 
 //==============================================================================
@@ -252,7 +237,7 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
 
     // Go through the incoming data, and apply our gain to it...
     for (channel = 0; channel < getNumInputChannels(); ++channel)
-        buffer.applyGain (channel, 0, buffer.getNumSamples(), gain);
+        buffer.applyGain (channel, 0, buffer.getNumSamples(), gain->getValue());
 
     // Now pass any incoming midi messages to our keyboard state object, and let it
     // add messages to the buffer if the user is clicking on the on-screen keys
@@ -272,7 +257,7 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
         {
             const float in = channelData[i];
             channelData[i] += delayData[dp];
-            delayData[dp] = (delayData[dp] + in) * delay;
+            delayData[dp] = (delayData[dp] + in) * delay->getValue();
             if (++dp >= delayBuffer.getNumSamples())
                 dp = 0;
         }
@@ -319,8 +304,8 @@ void JuceDemoPluginAudioProcessor::getStateInformation (MemoryBlock& destData)
     // add some attributes to it..
     xml.setAttribute ("uiWidth", lastUIWidth);
     xml.setAttribute ("uiHeight", lastUIHeight);
-    xml.setAttribute ("gain", gain);
-    xml.setAttribute ("delay", delay);
+    xml.setAttribute ("gain", gain->getValue());
+    xml.setAttribute ("delay", delay->getValue());
 
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
@@ -343,8 +328,8 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
             lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
             lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
 
-            gain  = (float) xmlState->getDoubleAttribute ("gain", gain);
-            delay = (float) xmlState->getDoubleAttribute ("delay", delay);
+            gain->setValue (xmlState->getDoubleAttribute ("gain", gain->getValue()));
+            delay->setValue (xmlState->getDoubleAttribute ("delay", delay->getValue()));
         }
     }
 }

@@ -845,6 +845,23 @@ public:
         }
     }
 
+    bool string2parameter (VstInt32 index, char* text) override
+    {
+        if (filter != nullptr)
+        {
+            jassert (isPositiveAndBelow (index, filter->getNumParameters()));
+
+            float value;
+            if (filter->valueFromString (index, text, value))
+            {
+                filter->setParameter (index, value);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void getParameterName (VstInt32 index, char* text) override
     {
         if (filter != nullptr)

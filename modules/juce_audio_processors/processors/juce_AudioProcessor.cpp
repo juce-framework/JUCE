@@ -397,6 +397,28 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data, const int sizeIn
     return nullptr;
 }
 
+bool AudioProcessor::valueFromString (int index, const String& text, float& value) const
+{
+    if (AudioProcessorParameter* p = managedParameters[index])
+    {
+        value = p->getValueForText (text);
+        return true;
+    }
+
+    return false;
+}
+
+bool AudioProcessor::stringFromValue (int index, float value, int maxLen, String& result) const
+{
+    if (AudioProcessorParameter* p = managedParameters[index])
+    {
+        result = p->getText (value, maxLen);
+        return true;
+    }
+
+    return false;
+}
+
 //==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}
 void AudioProcessorListener::audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int) {}
