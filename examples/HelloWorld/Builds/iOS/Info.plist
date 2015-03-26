@@ -27,5 +27,11 @@
     <string>Raw Material Software Ltd.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+      <string>UIInterfaceOrientationPortrait</string>
+      <string>UIInterfaceOrientationLandscapeLeft</string>
+      <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
   </dict>
 </plist>
