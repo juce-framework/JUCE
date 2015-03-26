@@ -204,8 +204,12 @@ protected:
         Value  getLinkTimeOptimisationValue()          { return getValue (Ids::linkTimeOptimisation); }
         bool   isLinkTimeOptimisationEnabled() const   { return config   [Ids::linkTimeOptimisation]; }
 
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
+
         void createConfigProperties (PropertyListBuilder& props)
         {
+            addGCCOptimisationProperty (props);
+
             if (iOS)
             {
                 const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", "6.0", "6.1", "7.0", "7.1", 0 };

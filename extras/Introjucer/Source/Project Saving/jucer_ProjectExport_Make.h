@@ -85,8 +85,12 @@ protected:
         Value getArchitectureType()             { return getValue (Ids::linuxArchitecture); }
         var getArchitectureTypeVar() const      { return config [Ids::linuxArchitecture]; }
 
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
+
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addGCCOptimisationProperty (props);
+
             static const char* const archNames[] = { "(Default)", "<None>",       "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" };
             const var archFlags[]                = { var(),       var (String()), "-m32",         "-m64",           "-march=armv6", "-march=armv7" };
 

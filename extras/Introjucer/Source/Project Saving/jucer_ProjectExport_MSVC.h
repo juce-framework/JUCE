@@ -63,6 +63,13 @@ public:
     {
     }
 
+    enum OptimisationLevel
+    {
+        optimisationOff = 1,
+        optimiseMinSize = 2,
+        optimiseMaxSpeed = 3
+    };
+
 protected:
     String projectGUID;
     mutable File rcFile, iconFile;
@@ -91,7 +98,7 @@ protected:
 
             if (oldStylePrebuildCommand.isNotEmpty())
                 for (ConfigIterator config (*this); config.next();)
-                    dynamic_cast <MSVCBuildConfiguration&> (*config).getPrebuildCommand() = oldStylePrebuildCommand;
+                    dynamic_cast<MSVCBuildConfiguration&> (*config).getPrebuildCommand() = oldStylePrebuildCommand;
         }
 
         {
@@ -167,8 +174,18 @@ protected:
             return target;
         }
 
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? optimisationOff : optimiseMaxSpeed)); }
+
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            static const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
+            const int optimisationLevelValues[]     = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
+
+            props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
+                                                    StringArray (optimisationLevels),
+                                                    Array<var> (optimisationLevelValues)),
+                       "The optimisation level for this configuration");
+
             props.add (new TextPropertyComponent (getIntermediatesPathValue(), "Intermediates path", 2048, false),
                        "An optional path to a folder to use for the intermediate build files. Note that Visual Studio allows "
                        "you to use macros in this path, e.g. \"$(TEMP)\\MyAppBuildFiles\\$(Configuration)\", which is a handy way to "
@@ -888,7 +905,7 @@ protected:
     {
         for (ConstConfigIterator config (*this); config.next();)
             createConfig (*xml.createNewChildElement ("Configuration"),
-                          dynamic_cast <const MSVCBuildConfiguration&> (*config));
+                          dynamic_cast<const MSVCBuildConfiguration&> (*config));
     }
 
     static const char* getOptimisationLevelString (int level)
