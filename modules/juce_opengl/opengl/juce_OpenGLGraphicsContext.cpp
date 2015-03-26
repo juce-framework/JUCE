@@ -38,8 +38,8 @@ struct TextureInfo
 struct CachedImageList  : public ReferenceCountedObject,
                           private ImagePixelData::Listener
 {
-    CachedImageList (OpenGLContext& c, size_t totalCacheSizeInPixels = 8 * 1024 * 1024) noexcept
-        : context (c), totalSize (0), maxCacheSize (totalCacheSizeInPixels) {}
+    CachedImageList (OpenGLContext& c) noexcept
+        : context (c), totalSize (0), maxCacheSize (c.getImageCacheSize()) {}
 
     static CachedImageList* get (OpenGLContext& c)
     {

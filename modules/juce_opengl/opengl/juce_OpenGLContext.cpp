@@ -596,6 +596,7 @@ private:
 OpenGLContext::OpenGLContext()
     : nativeContext (nullptr), renderer (nullptr), currentRenderScale (1.0),
       contextToShareWith (nullptr), versionRequired (OpenGLContext::defaultGLVersion),
+      imageCacheMaxSize (8 * 1024 * 1024),
       renderComponents (true), useMultisampling (false), continuousRepaint (false)
 {
 }
@@ -811,6 +812,9 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
         }
     }
 }
+
+void OpenGLContext::setImageCacheSize (size_t newSize) noexcept     { imageCacheMaxSize = newSize; }
+size_t OpenGLContext::getImageCacheSize() const noexcept            { return imageCacheMaxSize; }
 
 void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                                  const Rectangle<int>& anchorPosAndTextureSize,
