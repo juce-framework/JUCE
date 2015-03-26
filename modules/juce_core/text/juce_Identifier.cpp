@@ -40,25 +40,22 @@ Identifier& Identifier::operator= (const Identifier other) noexcept
 Identifier::Identifier (const String& nm)
     : name (StringPool::getGlobalPool().getPooledString (nm))
 {
-    /* An Identifier string must be suitable for use as a script variable or XML
-       attribute, so it can only contain this limited set of characters.. */
-    jassert (isValidIdentifier (toString()));
+    // An Identifier cannot be created from an empty string!
+    jassert (nm.isNotEmpty());
 }
 
 Identifier::Identifier (const char* nm)
     : name (StringPool::getGlobalPool().getPooledString (nm))
 {
-    /* An Identifier string must be suitable for use as a script variable or XML
-       attribute, so it can only contain this limited set of characters.. */
-    jassert (isValidIdentifier (toString()));
+    // An Identifier cannot be created from an empty string!
+    jassert (nm != nullptr && nm[0] != 0);
 }
 
 Identifier::Identifier (String::CharPointerType start, String::CharPointerType end)
     : name (StringPool::getGlobalPool().getPooledString (start, end))
 {
-    /* An Identifier string must be suitable for use as a script variable or XML
-       attribute, so it can only contain this limited set of characters.. */
-    jassert (isValidIdentifier (toString()));
+    // An Identifier cannot be created from an empty string!
+    jassert (start < end);
 }
 
 Identifier Identifier::null;
