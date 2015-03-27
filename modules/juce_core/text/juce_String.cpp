@@ -1617,10 +1617,10 @@ String String::upToLastOccurrenceOf (StringRef sub,
 
 bool String::isQuotedString() const
 {
-    const String trimmed (trimStart());
+    const juce_wchar trimmedStart = trimStart()[0];
 
-    return trimmed[0] == '"'
-        || trimmed[0] == '\'';
+    return trimmedStart == '"'
+        || trimmedStart == '\'';
 }
 
 String String::unquoted() const
