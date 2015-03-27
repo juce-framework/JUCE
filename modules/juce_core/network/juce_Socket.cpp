@@ -90,26 +90,32 @@ namespace SocketHelpers
     }
 
     static int readSocket (const SocketHandle handle,
-                           void* const destBuffer, const int maxBytesToRead,
+                           void* const destBuffer, const ssize_t maxBytesToRead,
                            bool volatile& connected,
-                           const bool blockUntilSpecifiedAmountHasArrived) noexcept
+                           const bool blockUntilSpecifiedAmountHasArrived,
+                           String* senderIP) noexcept
     {
-        int bytesRead = 0;
+        ssize_t bytesRead = 0;
 
         while (bytesRead < maxBytesToRead)
         {
-            int bytesThisTime;
+            ssize_t bytesThisTime;
+            char* const buffer = static_cast<char*> (destBuffer) + bytesRead;
+            const size_t numToRead = (size_t) (maxBytesToRead - bytesRead);
 
-           #if JUCE_WINDOWS
-            bytesThisTime = recv (handle, static_cast<char*> (destBuffer) + bytesRead, maxBytesToRead - bytesRead, 0);
-           #else
-            while ((bytesThisTime = (int) ::read (handle, addBytesToPointer (destBuffer, bytesRead),
-                                                  (size_t) (maxBytesToRead - bytesRead))) < 0
-                     && errno == EINTR
-                     && connected)
+            if (senderIP == nullptr)
             {
+                bytesThisTime = ::recv (handle, buffer, numToRead, 0);
             }
-           #endif
+            else
+            {
+                sockaddr_in client;
+                socklen_t clientLen = sizeof (sockaddr);
+
+                bytesThisTime = (int) ::recvfrom (handle, buffer, numToRead, 0, (sockaddr*) &client, &clientLen);
+
+                *senderIP = String::fromUTF8 (inet_ntoa (client.sin_addr), 16);
+            }
 
             if (bytesThisTime <= 0 || ! connected)
             {
@@ -125,7 +131,7 @@ namespace SocketHelpers
                 break;
         }
 
-        return bytesRead;
+        return (int) bytesRead;
     }
 
     static int waitForReadiness (const SocketHandle handle, const bool forReading, const int timeoutMsecs) noexcept
@@ -298,11 +304,9 @@ StreamingSocket::~StreamingSocket()
 }
 
 //==============================================================================
-int StreamingSocket::read (void* destBuffer, const int maxBytesToRead,
-                           const bool blockUntilSpecifiedAmountHasArrived)
+int StreamingSocket::read (void* destBuffer, const int maxBytesToRead, bool shouldBlock)
 {
-    return (connected && ! isListener) ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
-                                                                    connected, blockUntilSpecifiedAmountHasArrived)
+    return (connected && ! isListener) ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected, shouldBlock, nullptr)
                                        : -1;
 }
 
@@ -311,18 +315,7 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     if (isListener || ! connected)
         return -1;
 
-   #if JUCE_WINDOWS
-    return send (handle, (const char*) sourceBuffer, numBytesToWrite, 0);
-   #else
-    int result;
-
-    while ((result = (int) ::write (handle, sourceBuffer, (size_t) numBytesToWrite)) < 0
-            && errno == EINTR)
-    {
-    }
-
-    return result;
-   #endif
+    return (int) ::send (handle, (const char*) sourceBuffer, (size_t) numBytesToWrite, 0);
 }
 
 //==============================================================================
@@ -575,10 +568,17 @@ int DatagramSocket::waitUntilReady (const bool readyForReading,
                      : -1;
 }
 
-int DatagramSocket::read (void* destBuffer, const int maxBytesToRead, const bool blockUntilSpecifiedAmountHasArrived)
+int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock)
 {
     return connected ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
-                                                  connected, blockUntilSpecifiedAmountHasArrived)
+                                                  connected, shouldBlock, nullptr)
+                     : -1;
+}
+
+int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock, String& senderIPAddress)
+{
+    return connected ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
+                                                  connected, shouldBlock, &senderIPAddress)
                      : -1;
 }
 
@@ -587,10 +587,10 @@ int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     // You need to call connect() first to set the server address..
     jassert (serverAddress != nullptr && connected);
 
-    return connected ? (int) sendto (handle, (const char*) sourceBuffer,
-                                     (size_t) numBytesToWrite, 0,
-                                     static_cast <const struct addrinfo*> (serverAddress)->ai_addr,
-                                     (juce_socklen_t) static_cast <const struct addrinfo*> (serverAddress)->ai_addrlen)
+    return connected ? (int) ::sendto (handle, (const char*) sourceBuffer,
+                                       (size_t) numBytesToWrite, 0,
+                                       static_cast <const struct addrinfo*> (serverAddress)->ai_addr,
+                                       (juce_socklen_t) static_cast <const struct addrinfo*> (serverAddress)->ai_addrlen)
                      : -1;
 }
 
