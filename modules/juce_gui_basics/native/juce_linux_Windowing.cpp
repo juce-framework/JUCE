@@ -3199,6 +3199,34 @@ void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 
 double Desktop::getDefaultMasterScale()
 {
+    // Ubuntu and derived distributions now save a per-display scale factor as a configuration
+    // variable. This can be changed in the Monitor system settings panel.
+    ChildProcess dconf;
+
+    if (dconf.start ("dconf read /com/ubuntu/user-interface/scale-factor", ChildProcess::wantStdOut))
+    {
+        if (dconf.waitForProcessToFinish (200))
+        {
+            String jsonOutput = dconf.readAllProcessOutput().replaceCharacter ('\'', '"');
+
+            if (dconf.getExitCode() == 0 && jsonOutput.isNotEmpty())
+            {
+                var jsonVar = JSON::parse (jsonOutput);
+
+                if (DynamicObject* object = jsonVar.getDynamicObject())
+                {
+                    NamedValueSet& scaleFactors = object->getProperties();
+
+                    double maxScaleFactor = 1.0;
+                    for (int i = 0; i < scaleFactors.size(); ++i)
+                        maxScaleFactor = jmax (maxScaleFactor, (double) (scaleFactors.getValueAt (i)) / 8.0);
+
+                    return maxScaleFactor;
+                }
+            }
+        }
+    }
+
     return 1.0;
 }
 
