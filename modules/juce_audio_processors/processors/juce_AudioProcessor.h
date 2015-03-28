@@ -663,12 +663,6 @@ public:
     /** @internal */
     static void JUCE_CALLTYPE setTypeOfNextNewPlugin (WrapperType);
 
-    /** @internal */
-    bool valueFromString (int parameterIndex, const String& text, float& value) const;
-
-    /** @internal */
-    bool stringFromValue (int index, float value, int maxLen, String& result) const;
-
 protected:
     /** @internal */
     AudioPlayHead* playHead;

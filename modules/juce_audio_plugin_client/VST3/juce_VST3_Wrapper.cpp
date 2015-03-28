@@ -197,10 +197,8 @@ public:
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
-            String text;
-
-            if (owner.stringFromValue (paramIndex, value, 128, text))
-                toString128 (result, text);
+            if (AudioProcessorParameter* p = owner.getParameters()[paramIndex])
+                toString128 (result, p->getText (value, 128));
             else
                 // remain backward-compatible with old JUCE code
                 toString128 (result, owner.getParameterText (paramIndex, 128));
@@ -208,10 +206,9 @@ public:
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& valueNormalized) const override
         {
-            float value;
-            if (owner.valueFromString (paramIndex, getStringFromVstTChars (text), value))
+            if (AudioProcessorParameter* p = owner.getParameters()[paramIndex])
             {
-                valueNormalized = value;
+                valueNormalized = p->getValueForText (getStringFromVstTChars (text));
                 return true;
             }
 

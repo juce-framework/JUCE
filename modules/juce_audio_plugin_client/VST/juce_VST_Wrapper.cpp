@@ -851,10 +851,9 @@ public:
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
 
-            float value;
-            if (filter->valueFromString (index, text, value))
+            if (AudioProcessorParameter* p = filter->getParameters()[index])
             {
-                filter->setParameter (index, value);
+                filter->setParameter (index, p->getValueForText (String::fromUTF8 (text)));
                 return true;
             }
         }
