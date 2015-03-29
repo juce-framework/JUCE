@@ -72,9 +72,9 @@
                 extraCompilerFlags="-std=gnu++0x">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
-                       libraryPath="/usr/X11R6/lib/"/>
+                       libraryPath="/usr/X11R6/lib/" linuxArchitecture=""/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
-                       libraryPath="/usr/X11R6/lib/"/>
+                       libraryPath="/usr/X11R6/lib/" linuxArchitecture=""/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>

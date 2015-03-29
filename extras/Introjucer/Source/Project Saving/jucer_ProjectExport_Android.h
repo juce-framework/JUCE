@@ -233,8 +233,12 @@ protected:
         Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
         String getArchitectures() const         { return config [Ids::androidArchitectures]; }
 
-        void createConfigProperties (PropertyListBuilder& props)
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
+
+        void createConfigProperties (PropertyListBuilder& props) override
         {
+            addGCCOptimisationProperty (props);
+
             props.add (new TextPropertyComponent (getArchitecturesValue(), "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary).");
         }

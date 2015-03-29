@@ -240,6 +240,9 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
     currentRoot = newRootDirectory;
     fileList->setDirectory (currentRoot, true, true);
 
+    if (FileTreeComponent* tree = dynamic_cast<FileTreeComponent*> (fileListComponent.get()))
+        tree->refresh();
+
     String currentRootName (currentRoot.getFullPathName());
     if (currentRootName.isEmpty())
         currentRootName = File::separatorString;
@@ -555,7 +558,7 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add (String::empty);
     rootNames.add (String::empty);
 
-    Array <File> volumes;
+    Array<File> volumes;
     File vol ("/Volumes");
     vol.findChildFiles (volumes, File::findDirectories, false);
 

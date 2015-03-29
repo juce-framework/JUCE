@@ -198,10 +198,13 @@ void Label::editorShown (TextEditor* textEditor)
     listeners.callChecked (checker, &LabelListener::editorShown, this, *textEditor);
 }
 
-void Label::editorAboutToBeHidden (TextEditor*)
+void Label::editorAboutToBeHidden (TextEditor* textEditor)
 {
     if (ComponentPeer* const peer = getPeer())
         peer->dismissPendingTextInput();
+
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &LabelListener::editorHidden, this, *textEditor);
 }
 
 void Label::showEditor()

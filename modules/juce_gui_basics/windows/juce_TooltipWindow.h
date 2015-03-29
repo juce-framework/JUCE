@@ -61,7 +61,7 @@ public:
         @param millisecondsBeforeTipAppears     the time for which the mouse has to stay still
                                                 before a tooltip will be shown
 
-        @see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipSize
+        @see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipBounds
     */
     explicit TooltipWindow (Component* parentComponent = nullptr,
                             int millisecondsBeforeTipAppears = 700);
@@ -104,8 +104,14 @@ public:
     {
         virtual ~LookAndFeelMethods() {}
 
-        virtual void getTooltipSize (const String& tipText, int& width, int& height) = 0;
+        /** returns the bounds for a tooltip at the given screen coordinate, constrained within the given desktop area. */
+        virtual Rectangle<int> getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea) = 0;
         virtual void drawTooltip (Graphics&, const String& text, int width, int height) = 0;
+
+       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+        // This method has been replaced by getTooltipBounds()
+        virtual int getTooltipSize (const String&, int&, int&) { return 0; }
+       #endif
     };
 
 private:
@@ -121,7 +127,7 @@ private:
     void paint (Graphics&) override;
     void mouseEnter (const MouseEvent&) override;
     void timerCallback() override;
-    void updatePosition (const String&, Point<int>, const Rectangle<int>&);
+    void updatePosition (const String&, Point<int>, Rectangle<int>);
 
     static String getTipFor (Component*);
 

@@ -22,24 +22,22 @@
   ==============================================================================
 */
 
-ResizableWindow::ResizableWindow (const String& name,
-                                  const bool addToDesktop_)
-    : TopLevelWindow (name, addToDesktop_),
+ResizableWindow::ResizableWindow (const String& name, bool shouldAddToDesktop)
+    : TopLevelWindow (name, shouldAddToDesktop),
       ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
+      dragStarted (false),
       constrainer (nullptr)
      #if JUCE_DEBUG
       , hasBeenResized (false)
      #endif
 {
-    initialise (addToDesktop_);
+    initialise (shouldAddToDesktop);
 }
 
-ResizableWindow::ResizableWindow (const String& name,
-                                  Colour backgroundColour_,
-                                  const bool addToDesktop_)
-    : TopLevelWindow (name, addToDesktop_),
+ResizableWindow::ResizableWindow (const String& name, Colour bkgnd, bool shouldAddToDesktop)
+    : TopLevelWindow (name, shouldAddToDesktop),
       ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
@@ -48,9 +46,9 @@ ResizableWindow::ResizableWindow (const String& name,
       , hasBeenResized (false)
      #endif
 {
-    setBackgroundColour (backgroundColour_);
+    setBackgroundColour (bkgnd);
 
-    initialise (addToDesktop_);
+    initialise (shouldAddToDesktop);
 }
 
 ResizableWindow::~ResizableWindow()
@@ -574,13 +572,21 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 void ResizableWindow::mouseDown (const MouseEvent& e)
 {
     if (! isFullScreen())
+    {
+        dragStarted = true;
         dragger.startDraggingComponent (this, e);
+    }
 }
 
 void ResizableWindow::mouseDrag (const MouseEvent& e)
 {
-    if (! isFullScreen())
+    if (dragStarted)
         dragger.dragComponent (this, e, constrainer);
+}
+
+void ResizableWindow::mouseUp (const MouseEvent&)
+{
+    dragStarted = false;
 }
 
 //==============================================================================

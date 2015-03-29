@@ -171,6 +171,12 @@ void PluginListComponent::setOptionsButtonText (const String& newText)
     resized();
 }
 
+void PluginListComponent::setScanDialogText (const String& title, const String& content)
+{
+    dialogTitle = title;
+    dialogText = content;
+}
+
 void PluginListComponent::setNumberOfThreadsForScanning (int num)
 {
     numThreads = num;
@@ -324,11 +330,11 @@ void PluginListComponent::setLastSearchPath (PropertiesFile& properties, AudioPl
 class PluginListComponent::Scanner    : private Timer
 {
 public:
-    Scanner (PluginListComponent& plc, AudioPluginFormat& format, PropertiesFile* properties, int threads)
+    Scanner (PluginListComponent& plc, AudioPluginFormat& format, PropertiesFile* properties,
+             int threads, const String& title, const String& text)
         : owner (plc), formatToScan (format), propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String::empty, AlertWindow::NoIcon),
-          progressWindow (TRANS("Scanning for plug-ins..."),
-                          TRANS("Searching for all possible plug-in files..."), AlertWindow::NoIcon),
+          progressWindow (title, text, AlertWindow::NoIcon),
           progress (0.0), numThreads (threads), finished (false)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
@@ -539,7 +545,9 @@ private:
 
 void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    currentScanner = new Scanner (*this, format, propertiesToUse, numThreads);
+    currentScanner = new Scanner (*this, format, propertiesToUse, numThreads,
+                                  dialogTitle.isNotEmpty() ? dialogTitle : TRANS("Scanning for plug-ins..."),
+                                  dialogText.isNotEmpty()  ? dialogText  : TRANS("Searching for all possible plug-in files..."));
 }
 
 bool PluginListComponent::isScanning() const noexcept

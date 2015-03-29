@@ -195,6 +195,7 @@ public:
 
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
+        virtual var getDefaultOptimisationLevel() const = 0;
 
         //==============================================================================
         Value getNameValue()                                { return getValue (Ids::name); }
@@ -233,6 +234,7 @@ public:
         UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
 
         void createPropertyEditors (PropertyListBuilder&);
+        void addGCCOptimisationProperty (PropertyListBuilder&);
         void removeFromExporter();
 
         //==============================================================================
@@ -306,12 +308,14 @@ public:
 
     ValueTree settings;
 
-    //==============================================================================
-    enum OptimisationLevel
+    enum GCCOptimisationLevel
     {
-        optimisationOff = 1,
-        optimiseMinSize = 2,
-        optimiseMaxSpeed = 3
+        gccO0     = 1,
+        gccO1     = 4,
+        gccO2     = 5,
+        gccO3     = 3,
+        gccOs     = 2,
+        gccOfast  = 6
     };
 
 protected:

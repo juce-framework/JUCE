@@ -108,8 +108,6 @@ public:
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
         methods.
 
-        To change the colours of the menu that pops up
-
         @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
     */
     enum ColourIds

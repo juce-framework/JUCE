@@ -60,6 +60,7 @@ ScrollBar::ScrollBar (const bool vertical_)
       thumbAreaSize (0),
       thumbStart (0),
       thumbSize (0),
+      minimumScrollBarThumbSize (0),
       initialDelayInMillisecs (100),
       repeatDelayInMillisecs (50),
       minimumDelayInMillisecs (10),
@@ -67,6 +68,8 @@ ScrollBar::ScrollBar (const bool vertical_)
       isDraggingThumb (false),
       autohides (true)
 {
+    minimumScrollBarThumbSize = getLookAndFeel().getMinimumScrollbarThumbSize (*this);
+
     setRepaintsOnMouseActivity (true);
     setFocusContainer (true);
 }
@@ -190,10 +193,8 @@ void ScrollBar::updateThumbPosition()
     int newThumbSize = roundToInt (totalRange.getLength() > 0 ? (visibleRange.getLength() * thumbAreaSize) / totalRange.getLength()
                                                               : thumbAreaSize);
 
-    LookAndFeel& lf = getLookAndFeel();
-
-    if (newThumbSize < lf.getMinimumScrollbarThumbSize (*this))
-        newThumbSize = jmin (lf.getMinimumScrollbarThumbSize (*this), thumbAreaSize - 1);
+    if (newThumbSize < minimumScrollBarThumbSize)
+        newThumbSize = jmin (minimumScrollBarThumbSize, thumbAreaSize - 1);
 
     if (newThumbSize > thumbAreaSize)
         newThumbSize = thumbAreaSize;
@@ -280,6 +281,7 @@ void ScrollBar::resized()
     const int length = vertical ? getHeight() : getWidth();
 
     LookAndFeel& lf = getLookAndFeel();
+    minimumScrollBarThumbSize = lf.getMinimumScrollbarThumbSize (*this);
     const bool buttonsVisible = lf.areScrollbarButtonsVisible();
     int buttonSize = 0;
 

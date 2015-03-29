@@ -57,6 +57,7 @@ public:
         SteinbergCubase5Bridged,
         SteinbergCubase6,
         SteinbergCubase7,
+        SteinbergCubase8,
         SteinbergCubaseGeneric,
         SteinbergNuendo3,
         SteinbergNuendo4,
@@ -82,7 +83,8 @@ public:
     bool isAdobeAudition() const noexcept    { return type == AdobeAudition; }
     bool isArdour() const noexcept           { return type == Ardour; }
     bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
-    bool isCubase() const noexcept           { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubaseGeneric; }
+    bool isCubase() const noexcept           { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubaseGeneric; }
+    bool isCubase7orLater() const noexcept   { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     bool isCubaseBridged() const noexcept    { return type == SteinbergCubase5Bridged; }
     bool isLogic() const noexcept            { return type == AppleLogic; }
     bool isFruityLoops() const noexcept      { return type == FruityLoops; }
@@ -128,6 +130,7 @@ public:
             case SteinbergCubase5Bridged:  return "Steinberg Cubase 5 Bridged";
             case SteinbergCubase6:         return "Steinberg Cubase 6";
             case SteinbergCubase7:         return "Steinberg Cubase 7";
+            case SteinbergCubase8:         return "Steinberg Cubase 8";
             case SteinbergCubaseGeneric:   return "Steinberg Cubase";
             case SteinbergNuendo3:         return "Steinberg Nuendo 3";
             case SteinbergNuendo4:         return "Steinberg Nuendo 4";
@@ -179,6 +182,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Cubase 5"))          return SteinbergCubase5;
         if (hostFilename.containsIgnoreCase ("Cubase 6"))          return SteinbergCubase6;
         if (hostFilename.containsIgnoreCase ("Cubase 7"))          return SteinbergCubase7;
+        if (hostFilename.containsIgnoreCase ("Cubase 8"))          return SteinbergCubase8;
         if (hostFilename.containsIgnoreCase ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostPath.containsIgnoreCase     ("Wavelab 7"))         return SteinbergWavelab7;
         if (hostPath.containsIgnoreCase     ("Wavelab 8"))         return SteinbergWavelab8;
@@ -208,6 +212,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Cubase5"))           return SteinbergCubase5;
         if (hostFilename.containsIgnoreCase ("Cubase6"))           return SteinbergCubase6;
         if (hostFilename.containsIgnoreCase ("Cubase7"))           return SteinbergCubase7;
+        if (hostFilename.containsIgnoreCase ("Cubase8"))           return SteinbergCubase8;
         if (hostFilename.containsIgnoreCase ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase ("VSTBridgeApp"))      return SteinbergCubase5Bridged;
         if (hostPath.containsIgnoreCase     ("Wavelab 5"))         return SteinbergWavelab5;

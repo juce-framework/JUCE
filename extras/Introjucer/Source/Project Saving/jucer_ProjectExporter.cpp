@@ -525,7 +525,7 @@ void ProjectExporter::createDefaultConfigs()
 
         config->getNameValue() = debugConfig ? "Debug" : "Release";
         config->isDebugValue() = debugConfig;
-        config->getOptimisationLevel() = debugConfig ? optimisationOff : optimiseMinSize;
+        config->getOptimisationLevel() = config->getDefaultOptimisationLevel();
         config->getTargetBinaryName() = project.getProjectFilenameRoot();
     }
 }
@@ -641,10 +641,40 @@ String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
 {
     switch (getOptimisationLevelInt())
     {
-        case optimiseMaxSpeed:  return "3";
-        case optimiseMinSize:   return "s";
-        default:                return "0";
+        case gccO0:     return "0";
+        case gccO1:     return "1";
+        case gccO2:     return "2";
+        case gccO3:     return "3";
+        case gccOs:     return "s";
+        case gccOfast:  return "fast";
+        default:        break;
     }
+
+    return "0";
+}
+
+void ProjectExporter::BuildConfiguration::addGCCOptimisationProperty (PropertyListBuilder& props)
+{
+    static const char* optimisationLevels[] = { "-O0 (no optimisation)",
+                                                "-Os (minimise code size)",
+                                                "-O1 (fast)",
+                                                "-O2 (faster)",
+                                                "-O3 (fastest with safe optimisations)",
+                                                "-Ofast (uses aggressive optimisations)",
+                                                nullptr };
+
+    static const int optimisationLevelValues[] = { gccO0,
+                                                   gccOs,
+                                                   gccO1,
+                                                   gccO2,
+                                                   gccO3,
+                                                   gccOfast,
+                                                   0 };
+
+    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
+                                            StringArray (optimisationLevels),
+                                            Array<var> (optimisationLevelValues)),
+               "The optimisation level for this configuration");
 }
 
 void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
@@ -655,11 +685,7 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
     props.add (new BooleanPropertyComponent (isDebugValue(), "Debug mode", "Debugging enabled"),
                "If enabled, this means that the configuration should be built with debug synbols.");
 
-    static const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
-    const int optimisationLevelValues[]     = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
-    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
-                                            StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
-               "The optimisation level for this configuration");
+//    addGCCOptimisationProperty (props);
 
     props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false),
                "The filename to use for the destination binary executable file. If you don't add a suffix to this name, "

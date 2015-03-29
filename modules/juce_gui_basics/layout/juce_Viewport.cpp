@@ -24,6 +24,7 @@
 
 Viewport::Viewport (const String& name)
   : Component (name),
+    customScrollBarThickness(false),
     scrollBarThickness (0),
     singleStepX (16),
     singleStepY (16),
@@ -38,6 +39,8 @@ Viewport::Viewport (const String& name)
     // content holder is used to clip the contents so they don't overlap the scrollbars
     addAndMakeVisible (contentHolder);
     contentHolder.setInterceptsMouseClicks (false, true);
+
+    scrollBarThickness = getLookAndFeel().getDefaultScrollbarWidth();
 
     addChildComponent (verticalScrollBar);
     addChildComponent (horizontalScrollBar);
@@ -172,6 +175,12 @@ bool Viewport::autoScroll (const int mouseX, const int mouseY, const int activeB
 void Viewport::componentMovedOrResized (Component&, bool, bool)
 {
     updateVisibleArea();
+}
+
+void Viewport::lookAndFeelChanged()
+{
+    if (! customScrollBarThickness)
+        scrollBarThickness = getLookAndFeel().getDefaultScrollbarWidth();
 }
 
 void Viewport::resized()
@@ -314,17 +323,32 @@ void Viewport::setScrollBarsShown (const bool showVerticalScrollbarIfNeeded,
 
 void Viewport::setScrollBarThickness (const int thickness)
 {
-    if (scrollBarThickness != thickness)
+    int newThickness;
+
+    // To stay compatible with the previous code: use the
+    // default thickness if thickness parameter is zero
+    // or negative
+    if (thickness <= 0)
     {
-        scrollBarThickness = thickness;
+        customScrollBarThickness = false;
+        newThickness = getLookAndFeel().getDefaultScrollbarWidth();
+    }
+    else
+    {
+        customScrollBarThickness = true;
+        newThickness = thickness;
+    }
+
+    if (scrollBarThickness != newThickness)
+    {
+        scrollBarThickness = newThickness;
         updateVisibleArea();
     }
 }
 
 int Viewport::getScrollBarThickness() const
 {
-    return scrollBarThickness > 0 ? scrollBarThickness
-                                  : getLookAndFeel().getDefaultScrollbarWidth();
+    return scrollBarThickness;
 }
 
 void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)

@@ -66,6 +66,9 @@
 
 #if __ARM_NEON__ && ! (JUCE_USE_VDSP_FRAMEWORK || defined (JUCE_USE_ARM_NEON))
  #define JUCE_USE_ARM_NEON 1
+#endif
+
+#if JUCE_USE_ARM_NEON
  #include <arm_neon.h>
 #endif
 

@@ -261,11 +261,13 @@ static void shutdownNSApp()
 
 void MessageManager::stopDispatchLoop()
 {
+   #if JUCE_PROJUCER_LIVE_BUILD
     quitMessagePosted = true;
+   #else
 
-   #if ! JUCE_PROJUCER_LIVE_BUILD
     if (isThisTheMessageThread())
     {
+        quitMessagePosted = true;
         shutdownNSApp();
     }
     else
@@ -273,7 +275,7 @@ void MessageManager::stopDispatchLoop()
         struct QuitCallback  : public CallbackMessage
         {
             QuitCallback() {}
-            void messageCallback() override   { shutdownNSApp(); }
+            void messageCallback() override    { MessageManager::getInstance()->stopDispatchLoop(); }
         };
 
         (new QuitCallback())->post();

@@ -262,6 +262,12 @@ public:
                       bool textureOriginIsBottomLeft);
 
 
+    /** Changes the amount of GPU memory that the internal cache for Images is allowed to use. */
+    void setImageCacheSize (size_t cacheSizeBytes) noexcept;
+
+    /** Returns the amount of GPU memory that the internal cache for Images is allowed to use. */
+    size_t getImageCacheSize() const noexcept;
+
     //==============================================================================
    #ifndef DOXYGEN
     class NativeContext;
@@ -277,6 +283,7 @@ private:
     OpenGLPixelFormat pixelFormat;
     void* contextToShareWith;
     OpenGLVersion versionRequired;
+    size_t imageCacheMaxSize;
     bool renderComponents, useMultisampling, continuousRepaint;
 
     CachedImage* getCachedImage() const noexcept;

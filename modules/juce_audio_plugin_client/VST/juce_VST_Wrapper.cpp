@@ -859,6 +859,22 @@ public:
         }
     }
 
+    bool string2parameter (VstInt32 index, char* text) override
+    {
+        if (filter != nullptr)
+        {
+            jassert (isPositiveAndBelow (index, filter->getNumParameters()));
+
+            if (AudioProcessorParameter* p = filter->getParameters()[index])
+            {
+                filter->setParameter (index, p->getValueForText (String::fromUTF8 (text)));
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void getParameterName (VstInt32 index, char* text) override
     {
         if (filter != nullptr)

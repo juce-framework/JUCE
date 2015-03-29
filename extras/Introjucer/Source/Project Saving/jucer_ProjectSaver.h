@@ -176,6 +176,11 @@ public:
         return true;
     }
 
+    static bool shouldFolderBeIgnoredWhenCopying (const File& f)
+    {
+        return f.getFileName() == ".git" || f.getFileName() == ".svn" || f.getFileName() == ".cvs";
+    }
+
     bool copyFolder (const File& source, const File& dest)
     {
         if (source.isDirectory() && dest.createDirectory())
@@ -185,18 +190,25 @@ public:
 
             for (int i = 0; i < subFiles.size(); ++i)
             {
-                const File target (dest.getChildFile (subFiles.getReference(i).getFileName()));
+                const File f (subFiles.getReference(i));
+                const File target (dest.getChildFile (f.getFileName()));
                 filesCreated.add (target);
-                if (! subFiles.getReference(i).copyFileTo (target))
+
+                if (! f.copyFileTo (target))
                     return false;
             }
 
-            subFiles.clear();
-            source.findChildFiles (subFiles, File::findDirectories, false);
+            Array<File> subFolders;
+            source.findChildFiles (subFolders, File::findDirectories, false);
 
-            for (int i = 0; i < subFiles.size(); ++i)
-                if (! copyFolder (subFiles.getReference(i), dest.getChildFile (subFiles.getReference(i).getFileName())))
-                    return false;
+            for (int i = 0; i < subFolders.size(); ++i)
+            {
+                const File f (subFolders.getReference(i));
+
+                if (! shouldFolderBeIgnoredWhenCopying (f))
+                    if (! copyFolder (f, dest.getChildFile (f.getFileName())))
+                        return false;
+            }
 
             return true;
         }
