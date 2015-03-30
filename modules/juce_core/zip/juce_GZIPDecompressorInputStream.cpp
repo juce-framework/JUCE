@@ -90,7 +90,7 @@ namespace zlibNamespace
 class GZIPDecompressorInputStream::GZIPDecompressHelper
 {
 public:
-    GZIPDecompressHelper (Format format)
+    GZIPDecompressHelper (Format f)
         : finished (true),
           needsDictionary (false),
           error (true),
@@ -100,7 +100,7 @@ public:
     {
         using namespace zlibNamespace;
         zerostruct (stream);
-        streamIsValid = (inflateInit2 (&stream, getBitsForFormat (format)) == Z_OK);
+        streamIsValid = (inflateInit2 (&stream, getBitsForFormat (f)) == Z_OK);
         finished = error = ! streamIsValid;
     }
 
