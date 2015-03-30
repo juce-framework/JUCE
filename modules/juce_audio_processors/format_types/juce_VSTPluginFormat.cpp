@@ -1356,6 +1356,7 @@ public:
                                                 "receiveVstEvents",
                                                 "receiveVstMidiEvent",
                                                 "supportShell",
+                                                "sizeWindow",
                                                 "shellCategory" };
 
                 for (int i = 0; i < numElementsInArray (canDos); ++i)
