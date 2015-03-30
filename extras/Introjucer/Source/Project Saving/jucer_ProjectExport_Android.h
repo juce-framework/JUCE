@@ -100,8 +100,11 @@ public:
         props.add (new TextPropertyComponent (getOtherPermissionsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
-         props.add (new TextPropertyComponent (getImportModulesValue(), "Import modules", 8192, true),
-                   "Comma or whitespace delimited list of import-module calls.");
+        props.add (new TextPropertyComponent (getStaticLibrariesValue(), "Import static library modules", 8192, true),
+                   "Comma or whitespace delimited list of static libraries (.a) defined in NDK_MODULE_PATH.");
+
+        props.add (new TextPropertyComponent (getSharedLibrariesValue(), "Import shared library modules", 8192, true),
+                   "Comma or whitespace delimited list of shared libraries (.so) defined in NDK_MODULE_PATH.");
 
         props.add (new TextPropertyComponent (getThemeValue(), "Android Theme", 256, false),
                    "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
@@ -146,8 +149,11 @@ public:
     Value  getThemeValue()                          { return getSetting (Ids::androidTheme); }
     String getThemeString() const                   { return settings [Ids::androidTheme]; }
 
-    Value  getImportModulesValue()                  { return getSetting (Ids::androidImportModules); }
-    String getImportModulesString() const           { return settings [Ids::androidImportModules]; }
+    Value  getStaticLibrariesValue()                { return getSetting (Ids::androidStaticLibraries); }
+    String getStaticLibrariesString() const         { return settings [Ids::androidStaticLibraries]; }
+
+    Value  getSharedLibrariesValue()                { return getSetting (Ids::androidSharedLibraries); }
+    String getSharedLibrariesString() const         { return settings [Ids::androidSharedLibraries]; }
 
     Value getCPP11EnabledValue()                    { return getSetting (Ids::androidCpp11); }
     bool isCPP11Enabled() const                     { return settings [Ids::androidCpp11]; }
@@ -462,6 +468,14 @@ private:
         overwriteFileIfDifferentOrThrow (file, mo);
     }
 
+    void writeAndroidMkVariableList (OutputStream& out, const String& variableName, const String& settingsValue) const
+    {
+        const StringArray separatedItems (getCommaOrWhitespaceSeparatedItems (settingsValue));
+
+        if (separatedItems.size() > 0)
+            out << newLine << variableName << " := " << separatedItems.joinIntoString (" ") << newLine;
+    }
+
     void writeAndroidMk (OutputStream& out, const Array<RelativePath>& files) const
     {
         out << "# Automatically generated makefile, created by the Introjucer" << newLine
@@ -482,6 +496,9 @@ private:
             out << "  " << (files.getReference(i).isAbsolute() ? "" : "../")
                 << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
 
+        writeAndroidMkVariableList (out, "LOCAL_STATIC_LIBRARIES", getStaticLibrariesString());
+        writeAndroidMkVariableList (out, "LOCAL_SHARED_LIBRARIES", getSharedLibrariesString());
+
         out << newLine
             << "ifeq ($(NDK_DEBUG),1)" << newLine;
         writeConfigSettings (out, true);
@@ -491,7 +508,8 @@ private:
             << newLine
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;
 
-        const StringArray importModules (getCommaOrWhitespaceSeparatedItems (getImportModulesString()));
+        StringArray importModules (getCommaOrWhitespaceSeparatedItems (getStaticLibrariesString()));
+        importModules.addArray (getCommaOrWhitespaceSeparatedItems (getSharedLibrariesString()));
 
         for (int i = 0; i < importModules.size(); ++i)
             out << "$(call import-module," << importModules[i] << ")" << newLine;
