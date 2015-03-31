@@ -513,10 +513,10 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
         }
     }
 
-    const int stealableVoiceRange = usableVoices.size() - 6;
+    const int numUsableVoices = usableVoices.size();
 
     // The oldest note that's playing with the target pitch playing is ideal..
-    for (int i = 0; i < stealableVoiceRange; ++i)
+    for (int i = 0; i < numUsableVoices; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
@@ -524,8 +524,29 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
             return voice;
     }
 
-    // ..otherwise, look for the oldest note that isn't the top or bottom note..
-    for (int i = 0; i < stealableVoiceRange; ++i)
+    // Oldest voice that's isn't being held:
+    // (this could be the top or bottom note if it had just been released.)
+    for (int i = 0; i < numUsableVoices; ++i)
+    {
+        SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
+
+        if (! (voice->isKeyDown() || voice->isSostenutoPedalDown()))
+            return voice;
+    }
+
+    // Oldest voice that doesn't have a finger on it:
+    // (this could be the top or bottom note if it had just been released.)
+    for (int i = 0; i < numUsableVoices; ++i)
+    {
+        SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
+
+        if (! voice->isKeyDown())
+            return voice;
+    }
+
+    // At this point, all notes have fingers on them, so look for the oldest note
+    // that isn't the top or bottom note..
+    for (int i = 0; i < numUsableVoices; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
@@ -533,6 +554,7 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
             return voice;
     }
 
-    // ..otherwise, there's only one or two voices to choose from - we'll return the oldest one..
-    return usableVoices.getFirst();
+    // ..otherwise, there's only one or two voices to choose from - prefer to steal the highest one:
+    jassert (top != nullptr || bottom != nullptr);
+    return top != nullptr ? top : bottom;
 }
