@@ -107,7 +107,7 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        const uint32 alpha = 0x100 - src.getAlpha();
+        const uint32 alpha = (uint32) (0x100 - src.getAlpha());
         uint32 rb = src.getRB() + maskPixelComponents (getRB() * alpha);
         uint32 ag = src.getAG() + maskPixelComponents (getAG() * alpha);
         argb = clampPixelComponents (rb) + (clampPixelComponents (ag) << 8);
@@ -234,9 +234,9 @@ public:
             }
             else
             {
-                components.b = (uint8) jmin ((uint32) 0xff, (components.b * 0xff) / alpha);
-                components.g = (uint8) jmin ((uint32) 0xff, (components.g * 0xff) / alpha);
-                components.r = (uint8) jmin ((uint32) 0xff, (components.r * 0xff) / alpha);
+                components.b = (uint8) jmin ((uint32) 0xffu, (components.b * 0xffu) / alpha);
+                components.g = (uint8) jmin ((uint32) 0xffu, (components.g * 0xffu) / alpha);
+                components.r = (uint8) jmin ((uint32) 0xffu, (components.r * 0xffu) / alpha);
             }
         }
     }
@@ -350,7 +350,7 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        const uint32 alpha = 0x100 - src.getAlpha();
+        const uint32 alpha = (uint32) (0x100 - src.getAlpha());
 
         uint32 rb = clampPixelComponents (src.getRB() + maskPixelComponents (getRB() * alpha));
         uint32 ag = src.getAG() + (g * alpha >> 8);

@@ -55,14 +55,14 @@ public:
 
     void resized() override
     {
-        Rectangle<int> bounds = getLocalBounds();
+        Rectangle<int> r = getLocalBounds();
 
-        modulesLabel.setBounds (bounds.removeFromLeft (110));
+        modulesLabel.setBounds (r.removeFromLeft (110));
 
-        openFolderButton.setBounds (bounds.removeFromRight (40));
-        bounds.removeFromRight (5);
+        openFolderButton.setBounds (r.removeFromRight (40));
+        r.removeFromRight (5);
 
-        currentPathBox.setBounds (bounds);
+        currentPathBox.setBounds (r);
     }
 
     static bool selectJuceFolder (File& result)

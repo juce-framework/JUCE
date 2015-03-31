@@ -57,7 +57,7 @@ int FileInputStream::read (void* buffer, int bytesToRead)
     jassert (buffer != nullptr && bytesToRead >= 0);
 
     const size_t num = readInternal (buffer, (size_t) bytesToRead);
-    currentPosition += num;
+    currentPosition += (int64) num;
 
     return (int) num;
 }

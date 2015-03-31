@@ -587,15 +587,15 @@ public:
 
             if (imageDepth == 16)
             {
-                const int pixelStride = 2;
-                const int lineStride = ((w * pixelStride + 3) & ~3);
+                const int pixStride = 2;
+                const int stride = ((w * pixStride + 3) & ~3);
 
-                imageData16Bit.malloc (lineStride * h);
+                imageData16Bit.malloc (stride * h);
                 xImage->data = imageData16Bit;
                 xImage->bitmap_pad = 16;
-                xImage->depth = pixelStride * 8;
-                xImage->bytes_per_line = lineStride;
-                xImage->bits_per_pixel = pixelStride * 8;
+                xImage->depth = pixStride * 8;
+                xImage->bytes_per_line = stride;
+                xImage->bits_per_pixel = pixStride * 8;
                 xImage->red_mask   = visual->red_mask;
                 xImage->green_mask = visual->green_mask;
                 xImage->blue_mask  = visual->blue_mask;
@@ -1143,11 +1143,11 @@ public:
 
         ::Window root, child;
         int wx, wy;
-        unsigned int ww, wh, bw, depth;
+        unsigned int ww, wh, bw, bitDepth;
 
         ScopedXLock xlock;
 
-        return XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &depth)
+        return XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth)
                 && XTranslateCoordinates (display, windowH, windowH, localPos.getX(), localPos.getY(), &wx, &wy, &child)
                 && child == None;
     }
@@ -2384,11 +2384,11 @@ private:
         {
             Window root, child;
             int wx = 0, wy = 0;
-            unsigned int ww = 0, wh = 0, bw, depth;
+            unsigned int ww = 0, wh = 0, bw, bitDepth;
 
             ScopedXLock xlock;
 
-            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &depth))
+            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth))
                 if (! XTranslateCoordinates (display, windowH, root, 0, 0, &wx, &wy, &child))
                     wx = wy = 0;
 
@@ -3009,10 +3009,10 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /* allowMenusAndBars */)
+void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* allowMenusAndBars */)
 {
     if (enableOrDisable)
-        kioskModeComponent->setBounds (getDisplays().getMainDisplay().totalArea);
+        comp->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
 //==============================================================================

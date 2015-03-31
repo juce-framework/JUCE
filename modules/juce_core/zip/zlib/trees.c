@@ -571,7 +571,7 @@ local void gen_codes (ct_data *tree,             /* the tree to decorate */
                       ushf *bl_count)            /* number of codes at each bit length */
 {
     ush next_code[MAX_BITS+1]; /* next code value for each bit length */
-    ush code = 0;              /* running code value */
+    ush code_ = 0;              /* running code value */
     int bits;                  /* bit index */
     int n;                     /* code index */
 
@@ -579,12 +579,12 @@ local void gen_codes (ct_data *tree,             /* the tree to decorate */
      * without bit reversal.
      */
     for (bits = 1; bits <= MAX_BITS; bits++) {
-        next_code[bits] = code = (code + bl_count[bits-1]) << 1;
+        next_code[bits] = code_ = (code_ + bl_count[bits-1]) << 1;
     }
     /* Check that the bit counts in bl_count are consistent. The last code
      * must be all ones.
      */
-    Assert (code + bl_count[MAX_BITS]-1 == (1<<MAX_BITS)-1,
+    Assert (code_ + bl_count[MAX_BITS]-1 == (1<<MAX_BITS)-1,
             "inconsistent bit counts");
     Tracev((stderr,"\ngen_codes: max_code %d ", max_code));
 
@@ -1055,7 +1055,7 @@ local void compress_block (deflate_state *s,
     unsigned dist;      /* distance of matched string */
     int lc;             /* match length or unmatched char (if dist == 0) */
     unsigned lx = 0;    /* running index in l_buf */
-    unsigned code;      /* the code to send */
+    unsigned code_;     /* the code to send */
     int extra;          /* number of extra bits to send */
 
     if (s->last_lit != 0) do {
@@ -1066,21 +1066,21 @@ local void compress_block (deflate_state *s,
             Tracecv(isgraph(lc), (stderr," '%c' ", lc));
         } else {
             /* Here, lc is the match length - MIN_MATCH */
-            code = _length_code[lc];
-            send_code(s, code+LITERALS+1, ltree); /* send the length code */
-            extra = extra_lbits[code];
+            code_ = _length_code[lc];
+            send_code(s, code_+LITERALS+1, ltree); /* send the length code */
+            extra = extra_lbits[code_];
             if (extra != 0) {
-                lc -= base_length[code];
+                lc -= base_length[code_];
                 send_bits(s, lc, extra);       /* send the extra length bits */
             }
             dist--; /* dist is now the match distance - 1 */
-            code = d_code(dist);
-            Assert (code < D_CODES, "bad d_code");
+            code_ = d_code(dist);
+            Assert (code_ < D_CODES, "bad d_code");
 
-            send_code(s, code, dtree);       /* send the distance code */
-            extra = extra_dbits[code];
+            send_code(s, code_, dtree);       /* send the distance code */
+            extra = extra_dbits[code_];
             if (extra != 0) {
-                dist -= base_dist[code];
+                dist -= base_dist[code_];
                 send_bits(s, dist, extra);   /* send the extra distance bits */
             }
         } /* literal or match pair ? */
@@ -1120,12 +1120,12 @@ local void set_data_type (deflate_state *s)
  * method would use a table)
  * IN assertion: 1 <= len <= 15
  */
-local unsigned bi_reverse (unsigned code, int len)
+local unsigned bi_reverse (unsigned code_, int len)
 {
     register unsigned res = 0;
     do {
-        res |= code & 1;
-        code >>= 1, res <<= 1;
+        res |= code_ & 1;
+        code_ >>= 1, res <<= 1;
     } while (--len > 0);
     return res >> 1;
 }

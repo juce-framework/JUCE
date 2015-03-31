@@ -126,7 +126,7 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
         cfg.ifc_buf += IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
     }
    #else
-    for (size_t i = 0; i < cfg.ifc_len / sizeof (struct ifreq); ++i)
+    for (size_t i = 0; i < (size_t) cfg.ifc_len / (size_t) sizeof (struct ifreq); ++i)
     {
         const ifreq& item = cfg.ifc_req[i];
 
