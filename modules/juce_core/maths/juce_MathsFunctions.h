@@ -355,7 +355,7 @@ template <>
 inline bool juce_isfinite (float value) noexcept
 {
    #if JUCE_WINDOWS
-    return _finite (value);
+    return _finite (value) != 0;
    #elif JUCE_ANDROID
     return isfinite (value);
    #else
@@ -367,7 +367,7 @@ template <>
 inline bool juce_isfinite (double value) noexcept
 {
    #if JUCE_WINDOWS
-    return _finite (value);
+    return _finite (value) != 0;
    #elif JUCE_ANDROID
     return isfinite (value);
    #else
