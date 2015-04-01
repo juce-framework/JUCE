@@ -45,6 +45,9 @@ public:
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + "Android";
 
+        if (getVersionCodeString().isEmpty())
+            getVersionCodeValue() = 1;
+
         if (getActivityClassPath().isEmpty())
             getActivityClassPathValue() = createDefaultClassName();
 
@@ -75,6 +78,9 @@ public:
     {
         props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
+
+        props.add (new TextPropertyComponent (getVersionCodeValue(), "Android Version Code", 32, false),
+                   "An integer value that represents the version of the application code, relative to other versions.");
 
         props.add (new TextPropertyComponent (getSDKPathValue(), "Android SDK Path", 1024, false),
                    "The path to the Android SDK folder on the target build machine");
@@ -121,6 +127,8 @@ public:
 
     Value  getActivityClassPathValue()              { return getSetting (Ids::androidActivityClass); }
     String getActivityClassPath() const             { return settings [Ids::androidActivityClass]; }
+    Value  getVersionCodeValue()                    { return getSetting (Ids::androidVersionCode); }
+    String getVersionCodeString() const             { return settings [Ids::androidVersionCode]; }
     Value  getSDKPathValue()                        { return getSetting (Ids::androidSDKPath); }
     String getSDKPathString() const                 { return settings [Ids::androidSDKPath]; }
     Value  getNDKPathValue()                        { return getSetting (Ids::androidNDKPath); }
@@ -262,8 +270,8 @@ private:
         XmlElement* manifest = new XmlElement ("manifest");
 
         manifest->setAttribute ("xmlns:android", "http://schemas.android.com/apk/res/android");
-        manifest->setAttribute ("android:versionCode", "1");
-        manifest->setAttribute ("android:versionName", "1.0");
+        manifest->setAttribute ("android:versionCode", getVersionCodeString());
+        manifest->setAttribute ("android:versionName",  project.getVersionString());
         manifest->setAttribute ("package", getActivityClassPackage());
 
         XmlElement* screens = manifest->createNewChildElement ("supports-screens");
