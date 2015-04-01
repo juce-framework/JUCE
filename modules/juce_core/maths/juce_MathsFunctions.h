@@ -346,7 +346,7 @@ const float   float_Pi   = 3.14159265358979323846f;
     platform-independent function for it.
 */
 template <typename NumericType>
-inline bool juce_isfinite (NumericType value) noexcept
+inline bool juce_isfinite (NumericType) noexcept
 {
     return true; // Integer types are always finite
 }
