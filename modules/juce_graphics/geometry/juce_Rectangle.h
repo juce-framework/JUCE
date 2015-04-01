@@ -100,6 +100,9 @@ public:
     /** Returns true if the rectangle's width or height are zero or less */
     bool isEmpty() const noexcept                                   { return w <= ValueType() || h <= ValueType(); }
 
+    /** Returns true if the rectangle's values are all finite numbers, i.e. not NaN or infinity. */
+    inline bool isFinite() const noexcept                           { return pos.isFinite() && juce_isfinite(w) && juce_isfinite(h); }
+
     /** Returns the x coordinate of the rectangle's left-hand-side. */
     inline ValueType getX() const noexcept                          { return pos.x; }
 

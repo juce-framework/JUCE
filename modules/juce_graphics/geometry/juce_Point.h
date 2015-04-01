@@ -58,6 +58,9 @@ public:
     /** Returns true if the point is (0, 0). */
     bool isOrigin() const noexcept                                  { return x == ValueType() && y == ValueType(); }
 
+    /** Returns true if the coordinates are finite values. */
+    inline bool isFinite() const noexcept                           { return juce_isfinite(x) && juce_isfinite(y); }
+
     /** Returns the point's x coordinate. */
     inline ValueType getX() const noexcept                          { return x; }
 
