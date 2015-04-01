@@ -345,8 +345,26 @@ const float   float_Pi   = 3.14159265358979323846f;
 /** The isfinite() method seems to vary between platforms, so this is a
     platform-independent function for it.
 */
-template <typename FloatingPointType>
-inline bool juce_isfinite (FloatingPointType value)
+template <typename NumericType>
+inline bool juce_isfinite (NumericType value) noexcept
+{
+    return true; // Integer types are always finite
+}
+
+template <>
+inline bool juce_isfinite (float value) noexcept
+{
+   #if JUCE_WINDOWS
+    return _finite (value);
+   #elif JUCE_ANDROID
+    return isfinite (value);
+   #else
+    return std::isfinite (value);
+   #endif
+}
+
+template <>
+inline bool juce_isfinite (double value) noexcept
 {
    #if JUCE_WINDOWS
     return _finite (value);
