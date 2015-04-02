@@ -356,8 +356,6 @@ inline bool juce_isfinite (float value) noexcept
 {
    #if JUCE_WINDOWS
     return _finite (value) != 0;
-   #elif JUCE_ANDROID
-    return isfinite (value);
    #else
     return std::isfinite (value);
    #endif
@@ -368,8 +366,6 @@ inline bool juce_isfinite (double value) noexcept
 {
    #if JUCE_WINDOWS
     return _finite (value) != 0;
-   #elif JUCE_ANDROID
-    return isfinite (value);
    #else
     return std::isfinite (value);
    #endif
