@@ -749,9 +749,8 @@ void FloatVectorOperations::abs (float* dest, const float* src, int num) noexcep
     vDSP_vabs ((float*) src, 1, dest, 1, (vDSP_Length) num);
    #else
     union {float f; uint32 i;} signMask;
-    signMask.i = 0x80000000UL;
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf(src[i]),
-                                  Mode::bit_xor (s, Mode::bit_and (s, mask)),
+    signMask.i = 0x7fffffffUL;
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST, 
                                   const Mode::ParallelType mask = Mode::load1 (signMask.f);)
    #endif
@@ -763,10 +762,9 @@ void FloatVectorOperations::abs (double* dest, const double* src, int num) noexc
     vDSP_vabsD ((double*) src, 1, dest, 1, (vDSP_Length) num);
    #else
     union {double d; uint64 i;} signMask;
-    signMask.i = 0x8000000000000000ULL;
+    signMask.i = 0x7fffffffffffffffULL;
 
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]),
-                                  Mode::bit_xor (s, Mode::bit_and (s, mask)),
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST, 
                                   const Mode::ParallelType mask = Mode::load1 (signMask.d);)
    #endif
