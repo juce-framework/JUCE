@@ -850,7 +850,7 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
 
       /* generate the partition's first stage cascade value */
       if(csubbits){
-        int maxval[8];
+        int maxval[8] = { 0 };
         for(k=0;k<csub;k++){
 	  int booknum=info->class_subbook[classx][k];
           if(booknum<0){
