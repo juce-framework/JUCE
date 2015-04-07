@@ -137,6 +137,12 @@ public:
     /** Copies a source vector to a destination, negating each value. */
     static void JUCE_CALLTYPE negate (double* dest, const double* src, int numValues) noexcept;
 
+    /** Copies a source vector to a destination, taking the absolute of each value. */
+    static void JUCE_CALLTYPE abs (float* dest, const float* src, int numValues) noexcept;
+
+    /** Copies a source vector to a destination, taking the absolute of each value. */
+    static void JUCE_CALLTYPE abs (double* dest, const double* src, int numValues) noexcept;
+
     /** Converts a stream of integers to floats, multiplying each one by the given multiplier. */
     static void JUCE_CALLTYPE convertFixedToFloat (float* dest, const int* src, float multiplier, int numValues) noexcept;
 
