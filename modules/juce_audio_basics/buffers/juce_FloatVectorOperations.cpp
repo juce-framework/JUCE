@@ -53,8 +53,8 @@ namespace FloatVectorHelpers
         enum { numParallel = 4 };
 
         // Integer and parallel types are the same for SSE. On neon they have different types
-        static forcedinline IntegerType toint (ParallelType v) { return v; }
-        static forcedinline ParallelType toflt (IntegerType v) { return v; }
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { return v; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { return v; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_ps (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_ps (v); }
@@ -85,8 +85,8 @@ namespace FloatVectorHelpers
         enum { numParallel = 2 };
 
         // Integer and parallel types are the same for SSE. On neon they have different types
-        static forcedinline IntegerType toint (ParallelType v) { return v; }
-        static forcedinline ParallelType toflt (IntegerType v) { return v; }
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { return v; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { return v; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_pd (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_pd (v); }
@@ -179,8 +179,8 @@ namespace FloatVectorHelpers
         typedef uint32x4 IntegerType;
         enum { numParallel = 4 };
 
-        static forcedinline IntegerType toint (ParallelType v) { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
-        static forcedinline ParallelType toflt (IntegerType v) { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return vld1q_dup_f32 (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return vld1q_f32 (v); }
@@ -210,8 +210,8 @@ namespace FloatVectorHelpers
         typedef uint64 IntegerType;
         enum { numParallel = 1 };
 
-        static forcedinline IntegerType toint (ParallelType v) { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
-        static forcedinline ParallelType toflt (IntegerType v) { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return v; }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return *v; }
