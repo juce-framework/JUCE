@@ -987,27 +987,28 @@ public:
             if (AudioPlayHead* const playHead = getPlayHead())
             {
                 AudioPlayHead::CurrentPositionInfo position;
-                playHead->getCurrentPosition (position);
-
-                vstHostTime.samplePos          = (double) position.timeInSamples;
-                vstHostTime.tempo              = position.bpm;
-                vstHostTime.timeSigNumerator   = position.timeSigNumerator;
-                vstHostTime.timeSigDenominator = position.timeSigDenominator;
-                vstHostTime.ppqPos             = position.ppqPosition;
-                vstHostTime.barStartPos        = position.ppqPositionOfLastBarStart;
-                vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid | kVstPpqPosValid | kVstBarsValid;
-
-                VstInt32 newTransportFlags = 0;
-                if (position.isPlaying)     newTransportFlags |= kVstTransportPlaying;
-                if (position.isRecording)   newTransportFlags |= kVstTransportRecording;
-
-                if (newTransportFlags != (vstHostTime.flags & (kVstTransportPlaying | kVstTransportRecording)))
-                    vstHostTime.flags = (vstHostTime.flags & ~(kVstTransportPlaying | kVstTransportRecording)) | newTransportFlags | kVstTransportChanged;
-                else
-                    vstHostTime.flags &= ~kVstTransportChanged;
-
-                switch (position.frameRate)
+                if (playHead->getCurrentPosition (position))
                 {
+
+                    vstHostTime.samplePos          = (double) position.timeInSamples;
+                    vstHostTime.tempo              = position.bpm;
+                    vstHostTime.timeSigNumerator   = position.timeSigNumerator;
+                    vstHostTime.timeSigDenominator = position.timeSigDenominator;
+                    vstHostTime.ppqPos             = position.ppqPosition;
+                    vstHostTime.barStartPos        = position.ppqPositionOfLastBarStart;
+                    vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid | kVstPpqPosValid | kVstBarsValid;
+
+                    VstInt32 newTransportFlags = 0;
+                    if (position.isPlaying)     newTransportFlags |= kVstTransportPlaying;
+                    if (position.isRecording)   newTransportFlags |= kVstTransportRecording;
+
+                    if (newTransportFlags != (vstHostTime.flags & (kVstTransportPlaying | kVstTransportRecording)))
+                        vstHostTime.flags = (vstHostTime.flags & ~(kVstTransportPlaying | kVstTransportRecording)) | newTransportFlags | kVstTransportChanged;
+                    else
+                        vstHostTime.flags &= ~kVstTransportChanged;
+
+                    switch (position.frameRate)
+                    {
                     case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
                     case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
                     case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 29.97, position.timeInSeconds); break;
@@ -1015,17 +1016,18 @@ public:
                     case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 29.97, position.timeInSeconds); break;
                     case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 29.97, position.timeInSeconds); break;
                     default: break;
-                }
+                    }
 
-                if (position.isLooping)
-                {
-                    vstHostTime.cycleStartPos = position.ppqLoopStart;
-                    vstHostTime.cycleEndPos   = position.ppqLoopEnd;
-                    vstHostTime.flags |= (kVstCyclePosValid | kVstTransportCycleActive);
-                }
-                else
-                {
-                    vstHostTime.flags &= ~(kVstCyclePosValid | kVstTransportCycleActive);
+                    if (position.isLooping)
+                    {
+                        vstHostTime.cycleStartPos = position.ppqLoopStart;
+                        vstHostTime.cycleEndPos   = position.ppqLoopEnd;
+                        vstHostTime.flags |= (kVstCyclePosValid | kVstTransportCycleActive);
+                    }
+                    else
+                    {
+                        vstHostTime.flags &= ~(kVstCyclePosValid | kVstTransportCycleActive);
+                    }
                 }
             }
 
