@@ -128,7 +128,9 @@ public:
 
     //==============================================================================
     /** Fills-in the given structure with details about the transport's
-        position at the start of the current processing block.
+        position at the start of the current processing block. If this method returns
+        false then the current play head position is not available and the given
+        structure will be undefined.
 
         You can ONLY call this from your processBlock() method! Calling it at other
         times will produce undefined behaviour, as the host may not have any context
