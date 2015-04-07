@@ -49,7 +49,12 @@ namespace FloatVectorHelpers
     {
         typedef float Type;
         typedef __m128 ParallelType;
+        typedef __m128 IntegerType;
         enum { numParallel = 4 };
+
+        // Integer and parallel types are the same for SSE. On neon they have different types
+        static forcedinline IntegerType toint (ParallelType v) { return v; }
+        static forcedinline ParallelType toflt (IntegerType v) { return v; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_ps (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_ps (v); }
@@ -76,7 +81,12 @@ namespace FloatVectorHelpers
     {
         typedef double Type;
         typedef __m128d ParallelType;
+        typedef __m128d IntegerType;
         enum { numParallel = 2 };
+
+        // Integer and parallel types are the same for SSE. On neon they have different types
+        static forcedinline IntegerType toint (ParallelType v) { return v; }
+        static forcedinline ParallelType toflt (IntegerType v) { return v; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_pd (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_pd (v); }
@@ -166,7 +176,11 @@ namespace FloatVectorHelpers
     {
         typedef float Type;
         typedef float32x4_t ParallelType;
+        typedef uint32x4 IntegerType;
         enum { numParallel = 4 };
+
+        static forcedinline IntegerType toint (ParallelType v) { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return vld1q_dup_f32 (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return vld1q_f32 (v); }
@@ -180,6 +194,11 @@ namespace FloatVectorHelpers
         static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return vmaxq_f32 (a, b); }
         static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return vminq_f32 (a, b); }
 
+        static forcedinline ParallelType bit_and (ParallelType a, ParallelType b) noexcept  {  return toflt (vandq_u32 (toint (a), toint (b))); }
+        static forcedinline ParallelType bit_not (ParallelType a, ParallelType b) noexcept  {  return toflt (vbicq_u32 (toint (a), toint (b))); }
+        static forcedinline ParallelType bit_or  (ParallelType a, ParallelType b) noexcept  {  return toflt (vorrq_u32 (toint (a), toint (b))); }
+        static forcedinline ParallelType bit_xor (ParallelType a, ParallelType b) noexcept  {  return toflt (veorq_u32 (toint (a), toint (b))); }
+
         static forcedinline Type max (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmax (v[0], v[1], v[2], v[3]); }
         static forcedinline Type min (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1], v[2], v[3]); }
     };
@@ -188,7 +207,11 @@ namespace FloatVectorHelpers
     {
         typedef double Type;
         typedef double ParallelType;
+        typedef uint64 IntegerType;
         enum { numParallel = 1 };
+
+        static forcedinline IntegerType toint (ParallelType v) { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return v; }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return *v; }
@@ -201,6 +224,11 @@ namespace FloatVectorHelpers
         static forcedinline ParallelType mul (ParallelType a, ParallelType b) noexcept  { return a * b; }
         static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return jmax (a, b); }
         static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return jmin (a, b); }
+
+        static forcedinline ParallelType bit_and (ParallelType a, ParallelType b) noexcept  {  return toflt (toint (a) & toint (b)); }
+        static forcedinline ParallelType bit_not (ParallelType a, ParallelType b) noexcept  {  return toflt ((~toint (a)) & toint (b)); }
+        static forcedinline ParallelType bit_or  (ParallelType a, ParallelType b) noexcept  {  return toflt (toint (a) | toint (b)); }
+        static forcedinline ParallelType bit_xor (ParallelType a, ParallelType b) noexcept  {  return toflt (toint (a) ^ toint (b)); }
 
         static forcedinline Type max (ParallelType a) noexcept  { return a; }
         static forcedinline Type min (ParallelType a) noexcept  { return a; }
