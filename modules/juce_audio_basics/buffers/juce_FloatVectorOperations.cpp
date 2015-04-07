@@ -176,7 +176,7 @@ namespace FloatVectorHelpers
     {
         typedef float Type;
         typedef float32x4_t ParallelType;
-        typedef uint32x4 IntegerType;
+        typedef uint32x4_t IntegerType;
         enum { numParallel = 4 };
 
         static forcedinline IntegerType toint (ParallelType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
