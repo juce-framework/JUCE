@@ -635,4 +635,9 @@ void TextLayout::recalculateSize (const AttributedString& text)
         width  = bounds.getWidth();
         height = bounds.getHeight();
     }
+    else
+    {
+        width = 0;
+        height = 0;
+    }
 }
