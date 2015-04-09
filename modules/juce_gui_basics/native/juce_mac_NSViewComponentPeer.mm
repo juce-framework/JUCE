@@ -877,11 +877,11 @@ public:
     {
         return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
-    
+
     bool canBecomeMainWindow()
     {
         Component* owner = &juce::ComponentPeer::getComponent();
-        
+
         return dynamic_cast<ResizableWindow*> (owner) != nullptr;
     }
 
@@ -1758,11 +1758,11 @@ private:
                 && owner->canBecomeKeyWindow()
                 && ! owner->sendModalInputAttemptIfBlocked();
     }
-    
+
     static BOOL canBecomeMainWindow (id self, SEL)
     {
         NSViewComponentPeer* const owner = getOwner (self);
-        
+
         return owner != nullptr
                 && owner->canBecomeMainWindow()
                 && ! owner->sendModalInputAttemptIfBlocked();

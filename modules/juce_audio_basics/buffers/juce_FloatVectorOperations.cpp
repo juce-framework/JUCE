@@ -109,7 +109,7 @@ namespace FloatVectorHelpers
         static forcedinline Type min (ParallelType a) noexcept  { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1]); }
     };
 
-    
+
 
     #define JUCE_BEGIN_VEC_OP \
         typedef FloatVectorHelpers::ModeType<sizeof(*dest)>::Mode Mode; \
@@ -779,7 +779,7 @@ void FloatVectorOperations::abs (float* dest, const float* src, int num) noexcep
     union {float f; uint32 i;} signMask;
     signMask.i = 0x7fffffffUL;
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf (src[i]), Mode::bit_and (s, mask),
-                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST, 
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.f);)
    #endif
 }
@@ -793,7 +793,7 @@ void FloatVectorOperations::abs (double* dest, const double* src, int num) noexc
     signMask.i = 0x7fffffffffffffffULL;
 
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]), Mode::bit_and (s, mask),
-                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST, 
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.d);)
    #endif
 }
