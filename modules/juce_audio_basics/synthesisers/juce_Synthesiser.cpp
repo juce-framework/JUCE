@@ -63,6 +63,7 @@ void SynthesiserVoice::clearCurrentNote()
 }
 
 void SynthesiserVoice::aftertouchChanged (int) {}
+void SynthesiserVoice::channelPressureChanged (int) {}
 
 bool SynthesiserVoice::wasStartedBefore (const SynthesiserVoice& other) const noexcept
 {
@@ -209,37 +210,41 @@ void Synthesiser::renderVoices (AudioSampleBuffer& buffer, int startSample, int 
 
 void Synthesiser::handleMidiEvent (const MidiMessage& m)
 {
+    const int channel = m.getChannel();
+
     if (m.isNoteOn())
     {
-        noteOn (m.getChannel(), m.getNoteNumber(), m.getFloatVelocity());
+        noteOn (channel, m.getNoteNumber(), m.getFloatVelocity());
     }
     else if (m.isNoteOff())
     {
-        noteOff (m.getChannel(), m.getNoteNumber(), m.getFloatVelocity(), true);
+        noteOff (channel, m.getNoteNumber(), m.getFloatVelocity(), true);
     }
     else if (m.isAllNotesOff() || m.isAllSoundOff())
     {
-        allNotesOff (m.getChannel(), true);
+        allNotesOff (channel, true);
     }
     else if (m.isPitchWheel())
     {
-        const int channel = m.getChannel();
         const int wheelPos = m.getPitchWheelValue();
         lastPitchWheelValues [channel - 1] = wheelPos;
-
         handlePitchWheel (channel, wheelPos);
     }
     else if (m.isAftertouch())
     {
-        handleAftertouch (m.getChannel(), m.getNoteNumber(), m.getAfterTouchValue());
+        handleAftertouch (channel, m.getNoteNumber(), m.getAfterTouchValue());
+    }
+    else if (m.isChannelPressure())
+    {
+        handleChannelPressure (channel, m.getChannelPressureValue());
     }
     else if (m.isController())
     {
-        handleController (m.getChannel(), m.getControllerNumber(), m.getControllerValue());
+        handleController (channel, m.getControllerNumber(), m.getControllerValue());
     }
     else if (m.isProgramChange())
     {
-        handleProgramChange (m.getChannel(), m.getProgramChangeNumber());
+        handleProgramChange (channel, m.getProgramChangeNumber());
     }
 }
 
@@ -398,6 +403,19 @@ void Synthesiser::handleAftertouch (int midiChannel, int midiNoteNumber, int aft
         if (voice->getCurrentlyPlayingNote() == midiNoteNumber
               && (midiChannel <= 0 || voice->isPlayingChannel (midiChannel)))
             voice->aftertouchChanged (aftertouchValue);
+    }
+}
+
+void Synthesiser::handleChannelPressure (int midiChannel, int channelPressureValue)
+{
+    const ScopedLock sl (lock);
+
+    for (int i = voices.size(); --i >= 0;)
+    {
+        SynthesiserVoice* const voice = voices.getUnchecked (i);
+
+        if (midiChannel <= 0 || voice->isPlayingChannel (midiChannel))
+            voice->channelPressureChanged (channelPressureValue);
     }
 }
 
