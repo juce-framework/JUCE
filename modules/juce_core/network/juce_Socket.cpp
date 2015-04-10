@@ -260,8 +260,8 @@ namespace SocketHelpers
        #endif
 
 		// we are closing
-		if (handle < 0)
-			return -1;
+        if (handle < 0)
+            return -1;
 
         {
             int opt;
@@ -335,11 +335,11 @@ namespace SocketHelpers
 
             if (result < 0)
             {
-#if JUCE_WINDOWS
+              #if JUCE_WINDOWS
                 if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
-#else
+              #else
                     if (errno == EINPROGRESS)
-#endif
+              #endif
                     {
                         if (waitForReadiness (handle, readLock, false, timeOutMillisecs) != 1)
                         {
@@ -553,7 +553,7 @@ DatagramSocket::~DatagramSocket()
         freeaddrinfo (static_cast <struct addrinfo*> (lastServerAddress));
 
     bool connected = false;
-	SocketHelpers::closeSocket (handle, readLock, false, 0, connected);
+    SocketHelpers::closeSocket (handle, readLock, false, 0, connected);
 }
 
 
@@ -584,14 +584,14 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
 {
     bool connected = true;
     return isBound ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
-                                                connected, shouldBlock, readLock) : -1;
+                    connected, shouldBlock, readLock) : -1;
 }
 
 int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock, String& senderIPAddress, int& senderPort)
 {
     bool connected = true;
     return isBound ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected,
-                                                shouldBlock, readLock, &senderIPAddress, &senderPort) : -1;
+                    shouldBlock, readLock, &senderIPAddress, &senderPort) : -1;
 }
 
 int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,
