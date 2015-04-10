@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2012
+Project("{3245752B-017B-F5B4-8C60-9951141F2B35}") = "ChatterBot", "ChatterBot.vcxproj", "{BB605C60-C18F-D0F6-60B7-3CF3431275CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB605C60-C18F-D0F6-60B7-3CF3431275CA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BB605C60-C18F-D0F6-60B7-3CF3431275CA}.Debug|Win32.Build.0 = Debug|Win32
+		{BB605C60-C18F-D0F6-60B7-3CF3431275CA}.Release|Win32.ActiveCfg = Release|Win32
+		{BB605C60-C18F-D0F6-60B7-3CF3431275CA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
