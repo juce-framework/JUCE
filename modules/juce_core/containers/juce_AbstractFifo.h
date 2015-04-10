@@ -69,7 +69,7 @@
         void readFromFifo (int* someData, int numItems)
         {
             int start1, size1, start2, size2;
-            abstractFifo.prepareToRead (numSamples, start1, size1, start2, size2);
+            abstractFifo.prepareToRead (numItems, start1, size1, start2, size2);
 
             if (size1 > 0)
                 copySomeData (someData, myBuffer + start1, size1);
