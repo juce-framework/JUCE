@@ -274,6 +274,19 @@ inline void swapVariables (Type& variable1, Type& variable2)
     std::swap (variable1, variable2);
 }
 
+/** Handy function for avoiding unused variables warning. */
+template <typename Type1>
+void ignoreUnused (const Type1&) noexcept {}
+
+template <typename Type1, typename Type2>
+void ignoreUnused (const Type1&, const Type2&) noexcept {}
+
+template <typename Type1, typename Type2, typename Type3>
+void ignoreUnused (const Type1&, const Type2&, const Type3&) noexcept {}
+
+template <typename Type1, typename Type2, typename Type3, typename Type4>
+void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexcept {}
+
 /** Handy function for getting the number of elements in a simple const C array.
     E.g.
     @code
