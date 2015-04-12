@@ -511,7 +511,7 @@ public:
 
             if (byte < 0)
             {
-                uint8 bit = 0x40;
+                int bit = 0x40;
                 int numExtraValues = 0;
 
                 while ((byte & bit) != 0)

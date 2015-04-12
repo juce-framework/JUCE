@@ -216,6 +216,7 @@ void detachComponentFromWindowRef (Component* comp, void* window, bool isNSView)
             else
                 [hostWindow release];
 
+           #if JUCE_MODAL_LOOPS_PERMITTED
             static bool needToRunMessageLoop = ! getHostType().isReaper();
 
             // The event loop needs to be run between closing the window and deleting the plugin,
@@ -226,6 +227,7 @@ void detachComponentFromWindowRef (Component* comp, void* window, bool isNSView)
             if (needToRunMessageLoop)
                 for (int i = 20; --i >= 0;)
                     MessageManager::getInstance()->runDispatchLoopUntil (1);
+           #endif
 
             return;
         }

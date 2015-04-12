@@ -49,7 +49,12 @@ namespace FloatVectorHelpers
     {
         typedef float Type;
         typedef __m128 ParallelType;
+        typedef __m128 IntegerType;
         enum { numParallel = 4 };
+
+        // Integer and parallel types are the same for SSE. On neon they have different types
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { return v; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { return v; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_ps (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_ps (v); }
@@ -63,6 +68,11 @@ namespace FloatVectorHelpers
         static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return _mm_max_ps (a, b); }
         static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return _mm_min_ps (a, b); }
 
+        static forcedinline ParallelType bit_and (ParallelType a, ParallelType b) noexcept  { return _mm_and_ps (a, b); }
+        static forcedinline ParallelType bit_not (ParallelType a, ParallelType b) noexcept  { return _mm_andnot_ps (a, b); }
+        static forcedinline ParallelType bit_or  (ParallelType a, ParallelType b) noexcept  { return _mm_or_ps (a, b); }
+        static forcedinline ParallelType bit_xor (ParallelType a, ParallelType b) noexcept  { return _mm_xor_ps (a, b); }
+
         static forcedinline Type max (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmax (v[0], v[1], v[2], v[3]); }
         static forcedinline Type min (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1], v[2], v[3]); }
     };
@@ -71,7 +81,12 @@ namespace FloatVectorHelpers
     {
         typedef double Type;
         typedef __m128d ParallelType;
+        typedef __m128d IntegerType;
         enum { numParallel = 2 };
+
+        // Integer and parallel types are the same for SSE. On neon they have different types
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { return v; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { return v; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return _mm_load1_pd (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return _mm_load_pd (v); }
@@ -85,9 +100,16 @@ namespace FloatVectorHelpers
         static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return _mm_max_pd (a, b); }
         static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return _mm_min_pd (a, b); }
 
+        static forcedinline ParallelType bit_and (ParallelType a, ParallelType b) noexcept  { return _mm_and_pd (a, b); }
+        static forcedinline ParallelType bit_not (ParallelType a, ParallelType b) noexcept  { return _mm_andnot_pd (a, b); }
+        static forcedinline ParallelType bit_or  (ParallelType a, ParallelType b) noexcept  { return _mm_or_pd (a, b); }
+        static forcedinline ParallelType bit_xor (ParallelType a, ParallelType b) noexcept  { return _mm_xor_pd (a, b); }
+
         static forcedinline Type max (ParallelType a) noexcept  { Type v[numParallel]; storeU (v, a); return jmax (v[0], v[1]); }
         static forcedinline Type min (ParallelType a) noexcept  { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1]); }
     };
+
+
 
     #define JUCE_BEGIN_VEC_OP \
         typedef FloatVectorHelpers::ModeType<sizeof(*dest)>::Mode Mode; \
@@ -154,7 +176,11 @@ namespace FloatVectorHelpers
     {
         typedef float Type;
         typedef float32x4_t ParallelType;
+        typedef uint32x4_t IntegerType;
         enum { numParallel = 4 };
+
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return vld1q_dup_f32 (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return vld1q_f32 (v); }
@@ -168,6 +194,11 @@ namespace FloatVectorHelpers
         static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return vmaxq_f32 (a, b); }
         static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return vminq_f32 (a, b); }
 
+        static forcedinline ParallelType bit_and (ParallelType a, ParallelType b) noexcept  {  return toflt (vandq_u32 (toint (a), toint (b))); }
+        static forcedinline ParallelType bit_not (ParallelType a, ParallelType b) noexcept  {  return toflt (vbicq_u32 (toint (a), toint (b))); }
+        static forcedinline ParallelType bit_or  (ParallelType a, ParallelType b) noexcept  {  return toflt (vorrq_u32 (toint (a), toint (b))); }
+        static forcedinline ParallelType bit_xor (ParallelType a, ParallelType b) noexcept  {  return toflt (veorq_u32 (toint (a), toint (b))); }
+
         static forcedinline Type max (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmax (v[0], v[1], v[2], v[3]); }
         static forcedinline Type min (ParallelType a) noexcept { Type v[numParallel]; storeU (v, a); return jmin (v[0], v[1], v[2], v[3]); }
     };
@@ -176,7 +207,11 @@ namespace FloatVectorHelpers
     {
         typedef double Type;
         typedef double ParallelType;
+        typedef uint64 IntegerType;
         enum { numParallel = 1 };
+
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return v; }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return *v; }
@@ -189,6 +224,11 @@ namespace FloatVectorHelpers
         static forcedinline ParallelType mul (ParallelType a, ParallelType b) noexcept  { return a * b; }
         static forcedinline ParallelType max (ParallelType a, ParallelType b) noexcept  { return jmax (a, b); }
         static forcedinline ParallelType min (ParallelType a, ParallelType b) noexcept  { return jmin (a, b); }
+
+        static forcedinline ParallelType bit_and (ParallelType a, ParallelType b) noexcept  {  return toflt (toint (a) & toint (b)); }
+        static forcedinline ParallelType bit_not (ParallelType a, ParallelType b) noexcept  {  return toflt ((~toint (a)) & toint (b)); }
+        static forcedinline ParallelType bit_or  (ParallelType a, ParallelType b) noexcept  {  return toflt (toint (a) | toint (b)); }
+        static forcedinline ParallelType bit_xor (ParallelType a, ParallelType b) noexcept  {  return toflt (toint (a) ^ toint (b)); }
 
         static forcedinline Type max (ParallelType a) noexcept  { return a; }
         static forcedinline Type min (ParallelType a) noexcept  { return a; }
@@ -731,6 +771,33 @@ void FloatVectorOperations::negate (double* dest, const double* src, int num) no
    #endif
 }
 
+void FloatVectorOperations::abs (float* dest, const float* src, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vabs ((float*) src, 1, dest, 1, (vDSP_Length) num);
+   #else
+    union {float f; uint32 i;} signMask;
+    signMask.i = 0x7fffffffUL;
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf (src[i]), Mode::bit_and (s, mask),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mask = Mode::load1 (signMask.f);)
+   #endif
+}
+
+void FloatVectorOperations::abs (double* dest, const double* src, int num) noexcept
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vabsD ((double*) src, 1, dest, 1, (vDSP_Length) num);
+   #else
+    union {double d; uint64 i;} signMask;
+    signMask.i = 0x7fffffffffffffffULL;
+
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]), Mode::bit_and (s, mask),
+                                  JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mask = Mode::load1 (signMask.d);)
+   #endif
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_ARM_NEON
@@ -973,6 +1040,12 @@ public:
 
             FloatVectorOperations::subtract (data1, data2, num);
             u.expect (areAllValuesEqual (data1, num, (ValueType) 512));
+
+            FloatVectorOperations::abs (data1, data2, num);
+            u.expect (areAllValuesEqual (data1, num, (ValueType) 256));
+
+            FloatVectorOperations::abs (data2, data1, num);
+            u.expect (areAllValuesEqual (data2, num, (ValueType) 256));
 
             fillRandomly (random, int1, num);
             doConversionTest (u, data1, data2, int1, num);

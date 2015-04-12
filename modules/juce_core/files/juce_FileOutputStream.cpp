@@ -90,7 +90,7 @@ bool FileOutputStream::write (const void* const src, const size_t numBytes)
     {
         memcpy (buffer + bytesInBuffer, src, numBytes);
         bytesInBuffer += numBytes;
-        currentPosition += numBytes;
+        currentPosition += (int64) numBytes;
     }
     else
     {
@@ -101,7 +101,7 @@ bool FileOutputStream::write (const void* const src, const size_t numBytes)
         {
             memcpy (buffer + bytesInBuffer, src, numBytes);
             bytesInBuffer += numBytes;
-            currentPosition += numBytes;
+            currentPosition += (int64) numBytes;
         }
         else
         {
@@ -110,7 +110,7 @@ bool FileOutputStream::write (const void* const src, const size_t numBytes)
             if (bytesWritten < 0)
                 return false;
 
-            currentPosition += bytesWritten;
+            currentPosition += (int64) bytesWritten;
             return bytesWritten == (ssize_t) numBytes;
         }
     }
@@ -126,7 +126,7 @@ bool FileOutputStream::writeRepeatedByte (uint8 byte, size_t numBytes)
     {
         memset (buffer + bytesInBuffer, byte, numBytes);
         bytesInBuffer += numBytes;
-        currentPosition += numBytes;
+        currentPosition += (int64) numBytes;
         return true;
     }
 

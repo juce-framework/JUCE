@@ -153,7 +153,7 @@ inline uint64 ByteOrder::swap (uint64 value) noexcept
    #elif JUCE_USE_MSVC_INTRINSICS
     return _byteswap_uint64 (value);
    #else
-    return (((int64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));
+    return (((uint64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));
    #endif
 }
 

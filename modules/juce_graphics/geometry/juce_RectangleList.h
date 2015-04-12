@@ -101,9 +101,14 @@ public:
         The rectangle being added will first be clipped to remove any parts of it
         that overlap existing rectangles in the list, and adjacent rectangles will be
         merged into it.
+
+        The rectangle can have any size and may be empty, but if it's floating point
+        then it's expected to not contain any INF values.
     */
     void add (const RectangleType& rect)
     {
+        jassert (rect.isFinite()); // You must provide a valid rectangle to this method!
+
         if (! rect.isEmpty())
         {
             if (rects.size() == 0)
@@ -168,9 +173,14 @@ public:
 
         This simply adds the rectangle to the end, it doesn't merge it or remove
         any overlapping bits.
+
+        The rectangle can have any size and may be empty, but if it's floating point
+        then it's expected to not contain any INF values.
     */
     void addWithoutMerging (const RectangleType& rect)
     {
+        jassert (rect.isFinite()); // You must provide a valid rectangle to this method!
+
         if (! rect.isEmpty())
             rects.add (rect);
     }
@@ -300,6 +310,8 @@ public:
     */
     bool clipTo (const RectangleType& rect)
     {
+        jassert (rect.isFinite()); // You must provide a valid rectangle to this method!
+
         bool notEmpty = false;
 
         if (rect.isEmpty())
@@ -367,6 +379,8 @@ public:
     */
     bool getIntersectionWith (const RectangleType& rect, RectangleList& destRegion) const
     {
+        jassert (rect.isFinite()); // You must provide a valid rectangle to this method!
+
         destRegion.clear();
 
         if (! rect.isEmpty())

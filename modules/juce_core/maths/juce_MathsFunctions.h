@@ -274,6 +274,19 @@ inline void swapVariables (Type& variable1, Type& variable2)
     std::swap (variable1, variable2);
 }
 
+/** Handy function for avoiding unused variables warning. */
+template <typename Type1>
+void ignoreUnused (const Type1&) noexcept {}
+
+template <typename Type1, typename Type2>
+void ignoreUnused (const Type1&, const Type2&) noexcept {}
+
+template <typename Type1, typename Type2, typename Type3>
+void ignoreUnused (const Type1&, const Type2&, const Type3&) noexcept {}
+
+template <typename Type1, typename Type2, typename Type3, typename Type4>
+void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexcept {}
+
 /** Handy function for getting the number of elements in a simple const C array.
     E.g.
     @code
@@ -345,13 +358,27 @@ const float   float_Pi   = 3.14159265358979323846f;
 /** The isfinite() method seems to vary between platforms, so this is a
     platform-independent function for it.
 */
-template <typename FloatingPointType>
-inline bool juce_isfinite (FloatingPointType value)
+template <typename NumericType>
+inline bool juce_isfinite (NumericType) noexcept
+{
+    return true; // Integer types are always finite
+}
+
+template <>
+inline bool juce_isfinite (float value) noexcept
 {
    #if JUCE_WINDOWS
-    return _finite (value);
-   #elif JUCE_ANDROID
-    return isfinite (value);
+    return _finite (value) != 0;
+   #else
+    return std::isfinite (value);
+   #endif
+}
+
+template <>
+inline bool juce_isfinite (double value) noexcept
+{
+   #if JUCE_WINDOWS
+    return _finite (value) != 0;
    #else
     return std::isfinite (value);
    #endif

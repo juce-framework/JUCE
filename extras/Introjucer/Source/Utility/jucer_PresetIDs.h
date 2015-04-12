@@ -129,6 +129,7 @@ namespace Ids
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (androidActivityClass);
+    DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
@@ -142,7 +143,8 @@ namespace Ids
     DECLARE_ID (androidKeyAlias);
     DECLARE_ID (androidKeyAliasPass);
     DECLARE_ID (androidTheme);
-    DECLARE_ID (androidImportModules);
+    DECLARE_ID (androidStaticLibraries);
+    DECLARE_ID (androidSharedLibraries);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

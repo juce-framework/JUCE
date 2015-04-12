@@ -1067,6 +1067,12 @@ public:
         jassert (! isOpen());
         jassert (! device->isOpen());
         devices.add (new DeviceWrapper (*this, device, useInputs, useOutputs));
+
+        if (currentSampleRate == 0)
+            currentSampleRate = device->getCurrentSampleRate();
+
+        if (currentBufferSize == 0)
+            currentBufferSize = device->getCurrentBufferSizeSamples();
     }
 
     Array<AudioIODevice*> getDevices() const

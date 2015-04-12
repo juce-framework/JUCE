@@ -259,7 +259,7 @@ void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const noexcep
 
     if ((size_t) offset + num > size)
     {
-        const size_t newNum = size - (size_t) offset;
+        const size_t newNum = (size_t) size - (size_t) offset;
         zeromem (d + newNum, num - newNum);
         num = newNum;
     }

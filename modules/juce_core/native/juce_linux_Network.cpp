@@ -182,7 +182,7 @@ private:
     }
 
     int createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                          const int numRedirectsToFollow)
+                          const int numRedirects)
     {
         closeSocket (false);
 
@@ -279,7 +279,7 @@ private:
 
             String location (findHeaderItem (headerLines, "Location:"));
 
-            if (++levelsOfRedirection <= numRedirectsToFollow
+            if (++levelsOfRedirection <= numRedirects
                  && status >= 300 && status < 400
                  && location.isNotEmpty() && location != address)
             {
@@ -295,7 +295,7 @@ private:
                 }
 
                 address = location;
-                return createConnection (progressCallback, progressCallbackContext, numRedirectsToFollow);
+                return createConnection (progressCallback, progressCallbackContext, numRedirects);
             }
 
             return status;

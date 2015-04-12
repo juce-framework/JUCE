@@ -161,6 +161,11 @@ public:
     */
     virtual void aftertouchChanged (int newAftertouchValue);
 
+    /** Called to let the voice know that the channel pressure has changed.
+        This will be called during the rendering callback, so must be fast and thread-safe.
+    */
+    virtual void channelPressureChanged (int newChannelPressureValue);
+
     //==============================================================================
     /** Renders the next block of data for this voice.
 
@@ -439,6 +444,20 @@ public:
                                     as returned by MidiMessage::getAftertouchValue()
     */
     virtual void handleAftertouch (int midiChannel, int midiNoteNumber, int aftertouchValue);
+
+    /** Sends a channel pressure message.
+
+        This will send a channel pressure message to any voices that are playing sounds on
+        the given midi channel.
+
+        This method will be called automatically according to the midi data passed into
+        renderNextBlock(), but may be called explicitly too.
+
+        @param midiChannel              the midi channel, from 1 to 16 inclusive
+        @param channelPressureValue     the pressure value, between 0 and 127, as returned
+                                        by MidiMessage::getChannelPressureValue()
+    */
+    virtual void handleChannelPressure (int midiChannel, int channelPressureValue);
 
     /** Handles a sustain pedal event. */
     virtual void handleSustainPedal (int midiChannel, bool isDown);

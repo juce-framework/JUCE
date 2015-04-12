@@ -433,12 +433,12 @@ namespace GradientPixelIterators
             if (vertical)
             {
                 scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.y - p1.y));
-                start = roundToInt (p1.y * scale);
+                start = roundToInt (p1.y * (float) scale);
             }
             else if (horizontal)
             {
                 scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.x - p1.x));
-                start = roundToInt (p1.x * scale);
+                start = roundToInt (p1.x * (float) scale);
             }
             else
             {
@@ -534,8 +534,9 @@ namespace GradientPixelIterators
 
         forcedinline void setY (const int y) noexcept
         {
-            lineYM01 = inverseTransform.mat01 * y + inverseTransform.mat02 - gx1;
-            lineYM11 = inverseTransform.mat11 * y + inverseTransform.mat12 - gy1;
+            const float floatY = (float) y;
+            lineYM01 = inverseTransform.mat01 * floatY + inverseTransform.mat02 - gx1;
+            lineYM11 = inverseTransform.mat11 * floatY + inverseTransform.mat12 - gy1;
         }
 
         inline PixelARGB getPixel (const int px) const noexcept
@@ -1301,7 +1302,7 @@ namespace EdgeTableFillers
                 sx += pixelOffset;
                 sy += pixelOffset;
                 float x1 = sx, y1 = sy;
-                sx += numPixels;
+                sx += (float) numPixels;
                 inverseTransform.transformPoints (x1, y1, sx, sy);
 
                 xBresenham.set ((int) (x1 * 256.0f), (int) (sx * 256.0f), numPixels, pixelOffsetInt);

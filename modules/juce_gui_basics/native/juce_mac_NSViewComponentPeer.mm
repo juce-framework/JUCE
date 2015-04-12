@@ -878,6 +878,13 @@ public:
         return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
 
+    bool canBecomeMainWindow()
+    {
+        Component* owner = &juce::ComponentPeer::getComponent();
+
+        return dynamic_cast<ResizableWindow*> (owner) != nullptr;
+    }
+
     void becomeKeyWindow()
     {
         handleBroughtToFront();
@@ -1718,6 +1725,7 @@ struct JuceNSWindowClass   : public ObjCClass<NSWindow>
         addIvar<NSViewComponentPeer*> ("owner");
 
         addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,        "c@:");
+        addMethod (@selector (canBecomeMainWindow),           canBecomeMainWindow,        "c@:");
         addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,           "v@:");
         addMethod (@selector (windowShouldClose:),            windowShouldClose,         "c@:@");
         addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
@@ -1748,6 +1756,15 @@ private:
 
         return owner != nullptr
                 && owner->canBecomeKeyWindow()
+                && ! owner->sendModalInputAttemptIfBlocked();
+    }
+
+    static BOOL canBecomeMainWindow (id self, SEL)
+    {
+        NSViewComponentPeer* const owner = getOwner (self);
+
+        return owner != nullptr
+                && owner->canBecomeMainWindow()
                 && ! owner->sendModalInputAttemptIfBlocked();
     }
 
