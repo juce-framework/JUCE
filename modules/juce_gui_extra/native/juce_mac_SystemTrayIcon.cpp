@@ -45,6 +45,8 @@ public:
         statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength: NSSquareStatusItemLength] retain];
         [statusItem setView: view];
 
+        SystemTrayViewClass::frameChanged (view, SEL(), nullptr);
+
         [[NSNotificationCenter defaultCenter]  addObserver: view
                                                   selector: @selector (frameChanged:)
                                                       name: NSWindowDidMoveNotification
@@ -134,9 +136,9 @@ private:
         [statusIcon setSize: NSMakeSize (20.0f, 20.0f)];
     }
 
-    struct SystemTrayViewClass : public ObjCClass <NSControl>
+    struct SystemTrayViewClass : public ObjCClass<NSControl>
     {
-        SystemTrayViewClass()  : ObjCClass <NSControl> ("JUCESystemTrayView_")
+        SystemTrayViewClass()  : ObjCClass<NSControl> ("JUCESystemTrayView_")
         {
             addIvar<Pimpl*> ("owner");
             addIvar<NSImage*> ("image");
@@ -153,6 +155,17 @@ private:
         static NSImage* getImage (id self)              { return getIvar<NSImage*> (self, "image"); }
         static void setOwner (id self, Pimpl* owner)    { object_setInstanceVariable (self, "owner", owner); }
         static void setImage (id self, NSImage* image)  { object_setInstanceVariable (self, "image", image); }
+
+        static void frameChanged (id self, SEL, NSNotification*)
+        {
+            if (Pimpl* const owner = getOwner (self))
+            {
+                NSRect r = [[[owner->statusItem view] window] frame];
+                NSRect sr = [[[NSScreen screens] objectAtIndex: 0] frame];
+                r.origin.y = sr.size.height - r.origin.y - r.size.height;
+                owner->owner.setBounds (convertToRectInt (r));
+            }
+        }
 
     private:
         static void handleEventDown (id self, SEL, NSEvent* e)
@@ -182,17 +195,6 @@ private:
                       fromRect: NSZeroRect
                      operation: NSCompositeSourceOver
                       fraction: 1.0f];
-            }
-        }
-
-        static void frameChanged (id self, SEL, NSNotification*)
-        {
-            if (Pimpl* const owner = getOwner (self))
-            {
-                NSRect r = [[[owner->statusItem view] window] frame];
-                NSRect sr = [[[NSScreen screens] objectAtIndex: 0] frame];
-                r.origin.y = sr.size.height - r.origin.y - r.size.height;
-                owner->owner.setBounds (convertToRectInt (r));
             }
         }
     };
