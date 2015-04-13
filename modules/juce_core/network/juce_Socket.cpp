@@ -78,10 +78,10 @@ namespace SocketHelpers
     static void closeSocket (volatile int& handle, CriticalSection& readLock,
                              const bool isListener, int portNumber, bool& connected) noexcept
     {
-		const SocketHandle h = handle;
-		handle = -1;
+        const SocketHandle h = handle;
+        handle = -1;
 
-      #if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         ignoreUnused (portNumber, isListener, readLock);
 
         if (h != SOCKET_ERROR || connected)
@@ -90,7 +90,7 @@ namespace SocketHelpers
         // make sure any read process finishes before we delete the socket
         CriticalSection::ScopedLockType lock(readLock);
         connected = false;
-      #else
+       #else
         if (connected)
         {
             connected = false;
@@ -122,7 +122,7 @@ namespace SocketHelpers
               #endif
             }
         }
-      #endif
+       #endif
     }
 
     static bool bindSocketToPort (const SocketHandle handle, const int port) noexcept
@@ -147,7 +147,7 @@ namespace SocketHelpers
         struct sockaddr_in sin;
         socklen_t len = sizeof(sin);
 
-        if (getsockname (handle, (struct sockaddr *)&sin, &len) == 0)
+        if (getsockname (handle, (struct sockaddr*) &sin, &len) == 0)
             return ntohs (sin.sin_port);
 
         return -1;
@@ -335,11 +335,11 @@ namespace SocketHelpers
 
             if (result < 0)
             {
-              #if JUCE_WINDOWS
+               #if JUCE_WINDOWS
                 if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
-              #else
-                    if (errno == EINPROGRESS)
-              #endif
+               #else
+                if (errno == EINPROGRESS)
+               #endif
                     {
                         if (waitForReadiness (handle, readLock, false, timeOutMillisecs) != 1)
                         {
