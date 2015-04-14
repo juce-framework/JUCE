@@ -1105,7 +1105,12 @@ struct AAXClasses
         check (descriptor.AddProcPtr ((void*) JuceAAX_GUI::Create,        kAAX_ProcPtrID_Create_EffectGUI));
         check (descriptor.AddProcPtr ((void*) JuceAAX_Processor::Create,  kAAX_ProcPtrID_Create_EffectParameters));
 
+       #ifdef JucePlugin_PreferredChannelConfigurations_AAX
+        const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations_AAX };
+       #else
         const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
+       #endif
+
         const int numConfigs = numElementsInArray (channelConfigs);
 
         // You need to actually add some configurations to the JucePlugin_PreferredChannelConfigurations
