@@ -259,6 +259,7 @@ public:
     static CreateInstanceFunction createInstance;
 
     virtual bool initialiseApp();
+    int shutdownApp();
     static void JUCE_CALLTYPE sendUnhandledException (const std::exception*, const char* sourceFile, int lineNumber);
     bool sendCommandLineToPreexistingInstance();
    #endif
@@ -273,8 +274,6 @@ private:
     friend struct MultipleInstanceHandler;
     friend struct ContainerDeletePolicy<MultipleInstanceHandler>;
     ScopedPointer<MultipleInstanceHandler> multipleInstanceHandler;
-
-    int shutdownApp();
 
     JUCE_DECLARE_NON_COPYABLE (JUCEApplicationBase)
 };
