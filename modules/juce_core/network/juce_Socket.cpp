@@ -78,19 +78,19 @@ namespace SocketHelpers
     static void closeSocket (volatile int& handle, CriticalSection& readLock,
                              const bool isListener, int portNumber, bool& connected) noexcept
     {
-		const SocketHandle h = handle;
-		handle = -1;
+        const SocketHandle h = handle;
+        handle = -1;
 
-      #if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         ignoreUnused (portNumber, isListener, readLock);
 
         if (h != SOCKET_ERROR || connected)
             closesocket (h);
 
-		// make sure any read process finishes before we delete the socket
-		CriticalSection::ScopedLockType lock(readLock);
+        // make sure any read process finishes before we delete the socket
+        CriticalSection::ScopedLockType lock(readLock);
         connected = false;
-      #else
+       #else
         if (connected)
         {
             connected = false;
@@ -115,14 +115,14 @@ namespace SocketHelpers
                 // both threads.
                #if JUCE_LINUX
                 CriticalSection::ScopedLockType lock (readLock);
-				::close (h);
+                ::close (h);
                #else
-				::close (h);
-				CriticalSection::ScopedLockType lock(readLock);
+                ::close (h);
+                CriticalSection::ScopedLockType lock(readLock);
               #endif
             }
         }
-      #endif
+       #endif
     }
 
     static bool bindSocketToPort (const SocketHandle handle, const int port) noexcept
@@ -147,7 +147,7 @@ namespace SocketHelpers
         struct sockaddr_in sin;
         socklen_t len = sizeof(sin);
 
-        if (getsockname (handle, (struct sockaddr *)&sin, &len) == 0)
+        if (getsockname (handle, (struct sockaddr*) &sin, &len) == 0)
             return ntohs (sin.sin_port);
 
         return -1;
@@ -218,7 +218,7 @@ namespace SocketHelpers
         if (! lock.isLocked())
             return -1;
 
-		int h = handle;
+        int h = handle;
 
         struct timeval timeout;
         struct timeval* timeoutp;
@@ -259,7 +259,7 @@ namespace SocketHelpers
         }
        #endif
 
-		// we are closing
+        // we are closing
         if (handle < 0)
             return -1;
 
@@ -335,11 +335,11 @@ namespace SocketHelpers
 
             if (result < 0)
             {
-              #if JUCE_WINDOWS
+               #if JUCE_WINDOWS
                 if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
-              #else
-                    if (errno == EINPROGRESS)
-              #endif
+               #else
+                if (errno == EINPROGRESS)
+               #endif
                     {
                         if (waitForReadiness (handle, readLock, false, timeOutMillisecs) != 1)
                         {
@@ -457,7 +457,7 @@ bool StreamingSocket::connect (const String& remoteHostName,
 
 void StreamingSocket::close()
 {
-	SocketHelpers::closeSocket (handle, readLock, isListener, portNumber, connected);
+    SocketHelpers::closeSocket (handle, readLock, isListener, portNumber, connected);
 
     hostName.clear();
     portNumber = 0;
