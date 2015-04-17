@@ -248,7 +248,7 @@ public:
 
     void didSendBodyData (NSInteger totalBytesWritten, NSInteger /*totalBytesExpected*/)
     {
-        latestTotalBytes = totalBytesWritten;
+        latestTotalBytes = static_cast<int> (totalBytesWritten);
     }
 
     void finishedLoading()
