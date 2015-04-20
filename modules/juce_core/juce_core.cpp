@@ -107,6 +107,11 @@
  #include <android/log.h>
 #endif
 
+//==============================================================================
+#ifndef    JUCE_STANDALONE_APPLICATION
+ JUCE_COMPILER_WARNING ("Please re-save your Introjucer project with the latest Introjucer version to avoid this warning")
+ #define   JUCE_STANDALONE_APPLICATION 0
+#endif
 
 //==============================================================================
 namespace juce

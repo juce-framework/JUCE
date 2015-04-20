@@ -150,7 +150,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
         case currentExecutableFile:
         case currentApplicationFile:
-           #ifdef JucePlugin_Name
+           #if ! JUCE_STANDALONE_APPLICATION
             return juce_getExecutableFile();
            #endif
             // deliberate fall-through if this is not a shared-library
