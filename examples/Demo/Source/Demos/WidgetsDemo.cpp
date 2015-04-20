@@ -800,10 +800,20 @@ public:
         }
         else
         {
-            // for any other column, just return 0, as we'll be painting these columns directly.
-
-            jassert (existingComponentToUpdate == 0);
-            return 0;
+            EditableTextCustomComponent* textLabel = (EditableTextCustomComponent*) existingComponentToUpdate;
+            
+            // If an existing component is being passed-in for updating, we'll re-use it, but
+            // if not, we'll have to create one.
+            if (textLabel == 0)
+                textLabel = new EditableTextCustomComponent (*this);
+            
+            textLabel->setRowAndColumn(rowNumber, "Title");
+            
+            // The ID column will be a non-editable text column:
+            if (columnId == 1)
+                textLabel->setEditable(false, false, false);
+            
+            return textLabel;
         }
     }
 
@@ -832,8 +842,7 @@ public:
         return widest + 8;
     }
 
-    // A couple of quick methods to set and get the "rating" value when the user
-    // changes the combo box
+    // A couple of quick methods to set and get cell values when the user changes them
     int getRating (const int rowNumber) const
     {
         return dataList->getChildElement (rowNumber)->getIntAttribute ("Rating");
@@ -842,6 +851,16 @@ public:
     void setRating (const int rowNumber, const int newRating)
     {
         dataList->getChildElement (rowNumber)->setAttribute ("Rating", newRating);
+    }
+    
+    String getCellText (const String& columnName, const int rowNumber)
+    {
+        return dataList->getChildElement (rowNumber)->getStringAttribute (columnName);
+    }
+    
+    void setCellText (const String& columnName, const int rowNumber, const String& newCellText)
+    {
+        dataList->getChildElement (rowNumber)->setAttribute (columnName, newCellText);
     }
 
     //==============================================================================
@@ -860,6 +879,37 @@ private:
     XmlElement* columnList; // A pointer to the sub-node of demoData that contains the list of columns
     XmlElement* dataList;   // A pointer to the sub-node of demoData that contains the list of data rows
     int numRows;            // The number of rows of data we've got
+    
+    //==============================================================================
+    // This is a custom component containing an editable textfield, which we're use
+    // for the table's text columns.
+    class EditableTextCustomComponent : public Label
+    {
+    public:
+        EditableTextCustomComponent (TableDemoComponent& owner_)
+            : owner (owner_)
+        {
+            setEditable (false, true, false);
+        }
+        
+        void textWasEdited() override
+        {
+            owner.setCellText (columnName, rowNumber, getText());
+        }
+        
+        void setRowAndColumn (const int newRowNumber, const String& newColumnName)
+        {
+            rowNumber = newRowNumber;
+            columnName = newColumnName;
+            setText(owner.getCellText(columnName, rowNumber), dontSendNotification);
+        }
+        
+    private:
+        TableDemoComponent& owner;
+        int rowNumber;
+        String columnName;
+    };
+    
 
     //==============================================================================
     // This is a custom component containing a combo box, which we're going to put inside
