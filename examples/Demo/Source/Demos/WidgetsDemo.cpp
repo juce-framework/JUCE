@@ -745,7 +745,6 @@ public:
     {
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
-        
         else if (rowNumber % 2)
             g.fillAll (Colour (0xffeeeeee));
     }
@@ -809,13 +808,13 @@ public:
         else // The other columns are editable text columns, for which we use the custom Label component
         {
             EditableTextCustomComponent* textLabel = (EditableTextCustomComponent*) existingComponentToUpdate;
-            
+
             // same as above...
             if (textLabel == 0)
                 textLabel = new EditableTextCustomComponent (*this);
-            
+
             textLabel->setRowAndColumn (rowNumber, columnId);
-            
+
             return textLabel;
         }
     }
@@ -855,12 +854,12 @@ public:
     {
         dataList->getChildElement (rowNumber)->setAttribute ("Rating", newRating);
     }
-    
+
     String getText (const int columnNumber, const int rowNumber) const
     {
         return dataList->getChildElement (rowNumber)->getStringAttribute ( getAttributeNameForColumnId(columnNumber));
     }
-    
+
     void setText (const int columnNumber, const int rowNumber, const String& newText)
     {
         const String& columnName = table.getHeader().getColumnName (columnNumber);
@@ -895,12 +894,12 @@ private:
             setEditable (false, true, false);
             setColour (textColourId, Colours::black);
         }
-        
+
         void textWasEdited() override
         {
             owner.setText (columnId, row, getText());
         }
-        
+
         // Our demo code will call this when we may need to update our contents
         void setRowAndColumn (const int newRow, const int newColumn)
         {
@@ -908,12 +907,12 @@ private:
             columnId = newColumn;
             setText (owner.getText(columnId, row), dontSendNotification);
         }
-        
+
     private:
         TableDemoComponent& owner;
         int row, columnId;
     };
-    
+
 
     //==============================================================================
     // This is a custom component containing a combo box, which we're going to put inside
