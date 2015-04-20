@@ -785,7 +785,12 @@ public:
     Component* refreshComponentForCell (int rowNumber, int columnId, bool /*isRowSelected*/,
                                         Component* existingComponentToUpdate) override
     {
-        if (columnId == 5) // If it's the ratings column, we'll return our custom component..
+        if (columnId == 1 || columnId == 7) // The ID and Length columns do not have a custom component
+        {
+            jassert (existingComponentToUpdate == 0);
+            return 0;
+        }
+        else if (columnId == 5) // For the ratings column, we return the custom combobox component
         {
             RatingColumnCustomComponent* ratingsBox = (RatingColumnCustomComponent*) existingComponentToUpdate;
 
@@ -798,20 +803,15 @@ public:
 
             return ratingsBox;
         }
-        else
+        else // The other columns are editable text columns, for which we use the custom Label component
         {
             EditableTextCustomComponent* textLabel = (EditableTextCustomComponent*) existingComponentToUpdate;
             
-            // If an existing component is being passed-in for updating, we'll re-use it, but
-            // if not, we'll have to create one.
+            // same as above...
             if (textLabel == 0)
                 textLabel = new EditableTextCustomComponent (*this);
             
-            textLabel->setRowAndColumn(rowNumber, "Title");
-            
-            // The ID column will be a non-editable text column:
-            if (columnId == 1)
-                textLabel->setEditable(false, false, false);
+            textLabel->setRowAndColumn (rowNumber, columnId);
             
             return textLabel;
         }
@@ -822,7 +822,7 @@ public:
     int getColumnAutoSizeWidth (int columnId) override
     {
         if (columnId == 5)
-            return 100; // (this is the ratings column, containing a custom component)
+            return 100; // (this is the ratings column, containing a custom combobox component)
 
         int widest = 32;
 
@@ -853,14 +853,15 @@ public:
         dataList->getChildElement (rowNumber)->setAttribute ("Rating", newRating);
     }
     
-    String getCellText (const String& columnName, const int rowNumber)
+    String getText (const int columnNumber, const int rowNumber) const
     {
-        return dataList->getChildElement (rowNumber)->getStringAttribute (columnName);
+        return dataList->getChildElement (rowNumber)->getStringAttribute ( getAttributeNameForColumnId(columnNumber));
     }
     
-    void setCellText (const String& columnName, const int rowNumber, const String& newCellText)
+    void setText (const int columnNumber, const int rowNumber, const String& newText)
     {
-        dataList->getChildElement (rowNumber)->setAttribute (columnName, newCellText);
+        const String& columnName = table.getHeader().getColumnName (columnNumber);
+        dataList->getChildElement (rowNumber)->setAttribute (columnName, newText);
     }
 
     //==============================================================================
@@ -879,10 +880,9 @@ private:
     XmlElement* columnList; // A pointer to the sub-node of demoData that contains the list of columns
     XmlElement* dataList;   // A pointer to the sub-node of demoData that contains the list of data rows
     int numRows;            // The number of rows of data we've got
-    
+
     //==============================================================================
-    // This is a custom component containing an editable textfield, which we're use
-    // for the table's text columns.
+    // This is a custom Label component, which we use for the table's editable text columns.
     class EditableTextCustomComponent : public Label
     {
     public:
@@ -890,24 +890,25 @@ private:
             : owner (owner_)
         {
             setEditable (false, true, false);
+            setColour (textColourId, Colours::black);
         }
         
         void textWasEdited() override
         {
-            owner.setCellText (columnName, rowNumber, getText());
+            owner.setText (columnId, row, getText());
         }
         
-        void setRowAndColumn (const int newRowNumber, const String& newColumnName)
+        // Our demo code will call this when we may need to update our contents
+        void setRowAndColumn (const int newRow, const int newColumn)
         {
-            rowNumber = newRowNumber;
-            columnName = newColumnName;
-            setText(owner.getCellText(columnName, rowNumber), dontSendNotification);
+            row = newRow;
+            columnId = newColumn;
+            setText (owner.getText(columnId, row), dontSendNotification);
         }
         
     private:
         TableDemoComponent& owner;
-        int rowNumber;
-        String columnName;
+        int row, columnId;
     };
     
 
