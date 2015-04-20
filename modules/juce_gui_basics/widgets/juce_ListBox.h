@@ -230,6 +230,11 @@ public:
     */
     void setClickingTogglesRowSelection (bool flipRowSelection) noexcept;
 
+    /** Sets whether a row should be selected when the mouse is pressed or released.
+        By default this is true, but you may want to turn it off.
+    */
+    void setRowSelectedOnMouseDown (bool isSelectedOnMouseDown) noexcept;
+
     /** Makes the list react to mouse moves by selecting the row that the mouse if over.
 
         This function is here primarily for the ComboBox class to use, but might be
@@ -571,7 +576,7 @@ private:
     int totalItems, rowHeight, minimumRowWidth;
     int outlineThickness;
     int lastRowSelected;
-    bool multipleSelection, alwaysFlipSelection, hasDoneInitialUpdate;
+    bool multipleSelection, alwaysFlipSelection, hasDoneInitialUpdate, selectOnMouseDown;
     SparseSet<int> selected;
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,

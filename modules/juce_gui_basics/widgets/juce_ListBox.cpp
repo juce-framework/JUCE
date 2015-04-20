@@ -68,7 +68,7 @@ public:
 
         if (isEnabled())
         {
-            if (! selected)
+            if (owner.selectOnMouseDown && ! selected)
             {
                 owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
 
@@ -370,7 +370,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
       lastRowSelected (-1),
       multipleSelection (false),
       alwaysFlipSelection (false),
-      hasDoneInitialUpdate (false)
+      hasDoneInitialUpdate (false),
+      selectOnMouseDown (true)
 {
     addAndMakeVisible (viewport = new ListViewport (*this));
 
@@ -394,15 +395,9 @@ void ListBox::setModel (ListBoxModel* const newModel)
     }
 }
 
-void ListBox::setMultipleSelectionEnabled (bool b) noexcept
-{
-    multipleSelection = b;
-}
-
-void ListBox::setClickingTogglesRowSelection (bool b) noexcept
-{
-    alwaysFlipSelection = b;
-}
+void ListBox::setMultipleSelectionEnabled (bool b) noexcept         { multipleSelection = b; }
+void ListBox::setClickingTogglesRowSelection (bool b) noexcept      { alwaysFlipSelection = b; }
+void ListBox::setRowSelectedOnMouseDown (bool b) noexcept           { selectOnMouseDown = b; }
 
 void ListBox::setMouseMoveSelectsRows (bool b)
 {
