@@ -741,10 +741,13 @@ public:
     }
 
     // This is overloaded from TableListBoxModel, and should fill in the background of the whole row
-    void paintRowBackground (Graphics& g, int /*rowNumber*/, int /*width*/, int /*height*/, bool rowIsSelected) override
+    void paintRowBackground (Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override
     {
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
+        
+        else if (rowNumber % 2)
+            g.fillAll (Colour (0xffeeeeee));
     }
 
     // This is overloaded from TableListBoxModel, and must paint any cells that aren't using custom
