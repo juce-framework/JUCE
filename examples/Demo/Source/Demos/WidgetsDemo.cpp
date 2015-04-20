@@ -891,8 +891,17 @@ private:
         EditableTextCustomComponent (TableDemoComponent& owner_)
             : owner (owner_)
         {
+            // double click to edit the label text; single click handled below
             setEditable (false, true, false);
             setColour (textColourId, Colours::black);
+        }
+
+        void mouseDown (const MouseEvent& event) override
+        {
+            // single click on the label should simply select the row
+            owner.table.selectRowsBasedOnModifierKeys (row, event.mods, false);
+
+            Label::mouseDown (event);
         }
 
         void textWasEdited() override
