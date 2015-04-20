@@ -137,6 +137,10 @@ static const unsigned char temp_binary_data_1[] =
 "        // Your audio-processing code goes here!\r\n"
 "\r\n"
 "        // For more details, see the help for AudioProcessor::getNextAudioBlock()\r\n"
+"\r\n"
+"        // Right now we are not producing any data, in which case we need to clear the buffer\r\n"
+"        // (to prevent the output of random noise)\r\n"
+"        bufferToFill.clearActiveBufferRegion();\r\n"
 "    }\r\n"
 "\r\n"
 "    void releaseResources() override\r\n"
@@ -4072,7 +4076,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     switch (hash)
     {
         case 0x6cf2645e:  numBytes = 1949; return jucer_AnimatedComponentTemplate_cpp;
-        case 0xafccbd3f:  numBytes = 2991; return jucer_AudioComponentTemplate_cpp;
+        case 0xafccbd3f:  numBytes = 3189; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1180; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5039; return jucer_AudioPluginFilterTemplate_cpp;

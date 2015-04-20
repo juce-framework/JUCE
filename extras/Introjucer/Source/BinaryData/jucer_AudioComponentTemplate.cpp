@@ -50,6 +50,10 @@ public:
         // Your audio-processing code goes here!
 
         // For more details, see the help for AudioProcessor::getNextAudioBlock()
+
+        // Right now we are not producing any data, in which case we need to clear the buffer
+        // (to prevent the output of random noise)
+        bufferToFill.clearActiveBufferRegion();
     }
 
     void releaseResources() override
