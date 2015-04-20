@@ -369,7 +369,7 @@ private:
 
             if (type.isAudioPlugin() || type.isDynamicLibrary() || type.isBrowserPlugin())
                 isStandaloneApplication = 0;
-        
+
             out << "//==============================================================================" << newLine;
             out << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine;
             out << " #define   JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine;
