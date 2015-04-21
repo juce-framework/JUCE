@@ -586,6 +586,9 @@ private:
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This method's bool parameter has changed: see the new method signature.
     JUCE_DEPRECATED (void setSelectedRows (const SparseSet<int>&, bool));
+    // This method has been replaced by the more flexible method createSnapshotOfRows.
+    // Please call createSnapshotOfRows (getSelectedRows(), x, y) to get the same behaviour.
+    JUCE_DEPRECATED (virtual void createSnapshotOfSelectedRows (int&, int&)) {}
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox)
