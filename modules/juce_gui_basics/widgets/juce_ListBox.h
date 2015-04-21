@@ -146,7 +146,7 @@ public:
 
         @see DragAndDropContainer::startDragging
     */
-    virtual var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+    virtual var getDragSourceDescription (const SparseSet<int>& rowsToDescribe);
 
     /** You can override this to provide tool tips for specific rows.
         @see TooltipClient
@@ -518,8 +518,8 @@ public:
     */
     void repaintRow (int rowNumber) noexcept;
 
-    /** This fairly obscure method creates an image that just shows the currently
-        selected row components.
+    /** This fairly obscure method creates an image that shows the row components specified
+        in rows (for example, these could be the currently selected row components).
 
         It's a handy method for doing drag-and-drop, as it can be passed to the
         DragAndDropContainer for use as the drag image.
@@ -530,7 +530,7 @@ public:
 
         @see Component::createComponentSnapshot
     */
-    virtual Image createSnapshotOfSelectedRows (int& x, int& y);
+    virtual Image createSnapshotOfRows (SparseSet<int> rows, int& x, int& y);
 
     /** Returns the viewport that this ListBox uses.
 
@@ -561,7 +561,8 @@ public:
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
-    void startDragAndDrop (const MouseEvent&, const var& dragDescription, bool allowDraggingToOtherWindows);
+    void startDragAndDrop (const MouseEvent&, SparseSet<int> rowsToDrag,
+                           const var& dragDescription, bool allowDraggingToOtherWindows);
 
 private:
     //==============================================================================
