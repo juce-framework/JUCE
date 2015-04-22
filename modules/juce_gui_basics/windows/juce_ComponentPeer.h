@@ -285,7 +285,7 @@ public:
     virtual void textInputRequired (Point<int> position, TextInputTarget&) = 0;
 
     /** If there's some kind of OS input-method in progress, this should dismiss it. */
-    virtual void dismissPendingTextInput();
+    virtual void dismissPendingTextInput() = 0;
 
     /** Returns the currently focused TextInputTarget, or null if none is found. */
     TextInputTarget* findCurrentTextInputTarget();

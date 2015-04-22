@@ -95,8 +95,8 @@ public:
         jintArray statusCodeArray = env->NewIntArray (1);
         jassert (statusCodeArray != 0);
 
-        stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
-                                                         JuceAppActivity.createHTTPStream,
+        stream = GlobalRef (env->CallStaticObjectMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME,
+                                                         JUCE_ANDROID_ACTIVITY_CLASSNAME.createHTTPStream,
                                                          javaString (address).get(),
                                                          (jboolean) isPost,
                                                          postDataArray,

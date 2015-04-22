@@ -348,6 +348,8 @@ InputStream* URL::createInputStream (const bool usePostCommand,
     if (! headers.endsWithChar ('\n'))
         headers << "\r\n";
 
+    DBG ("CREATING WebInputStream");
+
     ScopedPointer<WebInputStream> wi (new WebInputStream (toString (! usePostCommand),
                                                           usePostCommand, headersAndPostData,
                                                           progressCallback, progressCallbackContext,
@@ -356,6 +358,8 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 
     if (statusCode != nullptr)
         *statusCode = wi->statusCode;
+
+    DBG (String::formatted ("WebInputStream status: %s, code: %d", wi->isError() ? "ERROR!" : "ok", wi->statusCode));
 
     return wi->isError() ? nullptr : wi.release();
 }

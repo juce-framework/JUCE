@@ -181,6 +181,7 @@ public:
     bool isFocused() const override;
     void grabFocus() override;
     void textInputRequired (Point<int>, TextInputTarget&) override;
+    void dismissPendingTextInput() override;
 
     BOOL textViewReplaceCharacters (Range<int>, const String&);
     void updateHiddenTextContent (TextInputTarget*);
@@ -860,6 +861,11 @@ void UIViewComponentPeer::grabFocus()
 
 void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
 {
+}
+
+void UIViewComponentPeer::dismissPendingTextInput()
+{
+    [view->hiddenTextView resignFirstResponder];
 }
 
 static bool isIOS4_1() noexcept

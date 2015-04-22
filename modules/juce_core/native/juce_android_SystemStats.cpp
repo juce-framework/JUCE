@@ -175,8 +175,8 @@ namespace AndroidStatsHelpers
 
     String getLocaleValue (bool isRegion)
     {
-        return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (JuceAppActivity,
-                                                                                          JuceAppActivity.getLocaleValue,
+        return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME,
+                                                                                          JUCE_ANDROID_ACTIVITY_CLASSNAME.getLocaleValue,
                                                                                           isRegion)));
     }
 

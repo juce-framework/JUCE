@@ -399,7 +399,7 @@ struct AndroidThreadScope
  METHOD (getTypeFaceFromAsset,   "getTypeFaceFromAsset", "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
  METHOD (getTypeFaceFromByteArray,"getTypeFaceFromByteArray","([B)Landroid/graphics/Typeface;")
 
-DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
+DECLARE_JNI_CLASS (JUCE_ANDROID_ACTIVITY_CLASSNAME, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

@@ -116,7 +116,7 @@ public:
     {
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
-        view = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.createNewView,
+        view = GlobalRef (android.activity.callObjectMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.createNewView,
                                                              (jboolean) component.isOpaque(),
                                                              (jlong) this));
 
@@ -128,7 +128,7 @@ public:
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            android.activity.callVoidMethod (JuceAppActivity.deleteView, view.get());
+            android.activity.callVoidMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.deleteView, view.get());
         }
         else
         {
@@ -138,7 +138,7 @@ public:
 
                 void messageCallback() override
                 {
-                    android.activity.callVoidMethod (JuceAppActivity.deleteView, view.get());
+                    android.activity.callVoidMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.deleteView, view.get());
                 }
 
             private:
@@ -658,7 +658,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
                                                           Component* associatedComponent,
                                                           ModalComponentManager::Callback* callback)
 {
-    android.activity.callVoidMethod (JuceAppActivity.showMessageBox, javaString (title).get(),
+    android.activity.callVoidMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.showMessageBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
 }
 
@@ -669,7 +669,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
 {
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(),
+    android.activity.callVoidMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.showOkCancelBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
     return false;
 }
@@ -681,7 +681,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 {
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (JuceAppActivity.showYesNoCancelBox, javaString (title).get(),
+    android.activity.callVoidMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.showYesNoCancelBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
     return 0;
 }
@@ -778,12 +778,12 @@ void LookAndFeel::playAlertSound()
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
     const LocalRef<jstring> t (javaString (text));
-    android.activity.callVoidMethod (JuceAppActivity.setClipboardContent, t.get());
+    android.activity.callVoidMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.setClipboardContent, t.get());
 }
 
 String SystemClipboard::getTextFromClipboard()
 {
-    const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (JuceAppActivity.getClipboardContent));
+    const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (JUCE_ANDROID_ACTIVITY_CLASSNAME.getClipboardContent));
     return juceString (text);
 }
 
