@@ -530,7 +530,7 @@ public:
 
         @see Component::createComponentSnapshot
     */
-    virtual Image createSnapshotOfRows (SparseSet<int> rows, int& x, int& y);
+    virtual Image createSnapshotOfRows (const SparseSet<int>& rows, int& x, int& y);
 
     /** Returns the viewport that this ListBox uses.
 
@@ -561,7 +561,7 @@ public:
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
-    void startDragAndDrop (const MouseEvent&, SparseSet<int> rowsToDrag,
+    void startDragAndDrop (const MouseEvent&, const SparseSet<int>& rowsToDrag,
                            const var& dragDescription, bool allowDraggingToOtherWindows);
 
 private:

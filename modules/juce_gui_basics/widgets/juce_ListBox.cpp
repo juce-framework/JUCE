@@ -886,7 +886,7 @@ void ListBox::repaintRow (const int rowNumber) noexcept
     repaint (getRowPosition (rowNumber, true));
 }
 
-Image ListBox::createSnapshotOfRows (SparseSet<int> rows, int& imageX, int& imageY)
+Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, int& imageY)
 {
     Rectangle<int> imageArea;
     const int firstRow = getRowContainingPosition (0, viewport->getY());
@@ -929,7 +929,7 @@ Image ListBox::createSnapshotOfRows (SparseSet<int> rows, int& imageX, int& imag
     return snapshot;
 }
 
-void ListBox::startDragAndDrop (const MouseEvent& e, SparseSet<int> rowsToDrag, const var& dragDescription, bool allowDraggingToOtherWindows)
+void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsToDrag, const var& dragDescription, bool allowDraggingToOtherWindows)
 {
     if (DragAndDropContainer* const dragContainer = DragAndDropContainer::findParentDragContainerFor (this))
     {
