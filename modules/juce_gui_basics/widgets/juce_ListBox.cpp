@@ -106,16 +106,21 @@ public:
         {
             if (isEnabled() && ! (e.mouseWasClicked() || isDragging))
             {
-                const SparseSet<int> selectedRows (owner.getSelectedRows());
+                SparseSet<int> rowsToDrag;
+                
+                if (owner.selectOnMouseDown || owner.isRowSelected (row))
+                    rowsToDrag = owner.getSelectedRows();
+                else
+                    rowsToDrag.addRange (Range<int>::withStartAndLength (row, 1));
 
-                if (selectedRows.size() > 0)
+                if (rowsToDrag.size() > 0)
                 {
-                    const var dragDescription (m->getDragSourceDescription (selectedRows));
+                    const var dragDescription (m->getDragSourceDescription (rowsToDrag));
 
                     if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                     {
                         isDragging = true;
-                        owner.startDragAndDrop (e, dragDescription, true);
+                        owner.startDragAndDrop (e, rowsToDrag, dragDescription, true);
                     }
                 }
             }
@@ -881,7 +886,7 @@ void ListBox::repaintRow (const int rowNumber) noexcept
     repaint (getRowPosition (rowNumber, true));
 }
 
-Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
+Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, int& imageY)
 {
     Rectangle<int> imageArea;
     const int firstRow = getRowContainingPosition (0, viewport->getY());
@@ -890,7 +895,7 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     {
         Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
 
-        if (rowComp != nullptr && isRowSelected (firstRow + i))
+        if (rowComp != nullptr && rows.contains (firstRow + i))
         {
             const Point<int> pos (getLocalPoint (rowComp, Point<int>()));
             const Rectangle<int> rowRect (pos.getX(), pos.getY(), rowComp->getWidth(), rowComp->getHeight());
@@ -907,7 +912,7 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     {
         Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
 
-        if (rowComp != nullptr && isRowSelected (firstRow + i))
+        if (rowComp != nullptr && rows.contains (firstRow + i))
         {
             Graphics g (snapshot);
             g.setOrigin (getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition());
@@ -924,13 +929,13 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     return snapshot;
 }
 
-void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription, bool allowDraggingToOtherWindows)
+void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsToDrag, const var& dragDescription, bool allowDraggingToOtherWindows)
 {
     if (DragAndDropContainer* const dragContainer = DragAndDropContainer::findParentDragContainerFor (this))
     {
         int x, y;
-        Image dragImage (createSnapshotOfSelectedRows (x, y));
-
+        Image dragImage = createSnapshotOfRows (rowsToDrag, x, y);
+        
         MouseEvent e2 (e.getEventRelativeTo (this));
         const Point<int> p (x - e2.x, y - e2.y);
         dragContainer->startDragging (dragDescription, this, dragImage, allowDraggingToOtherWindows, &p);
