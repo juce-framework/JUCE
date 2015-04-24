@@ -105,6 +105,11 @@ public:
     /** Can be overridden if necessary, but by default returns "tracktion.com". */
     virtual String getWebsiteName();
 
+    /** The default implementation of this method will construct a URL with the default
+        parameters and read the reply, but for custom webserver set-ups, you may need to
+        override it to use more exotic methods. */
+    virtual String readReplyFromWebserver (const String& email, const String& password);
+
     //==============================================================================
     // The following methods can be called by your app:
 

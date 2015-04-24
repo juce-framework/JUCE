@@ -68,7 +68,7 @@ public:
 
         if (args.size() != 5)
         {
-            std::cout << "Requires 5 arguments: app-name username user-email machine-numbers private-key" << std::endl
+            std::cout << "Requires 5 arguments: app-name user-email username machine-numbers private-key" << std::endl
                       << "  app-name:         name of the product being unlocked" << std::endl
                       << "  user-email:       user's email address" << std::endl
                       << "  username:         name of the user. Careful not to allow any spaces!" << std::endl
