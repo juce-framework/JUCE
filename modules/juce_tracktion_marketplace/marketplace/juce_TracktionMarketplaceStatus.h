@@ -54,6 +54,13 @@ public:
     /** This must return your product's ID, as allocated by the store. */
     virtual String getMarketplaceProductID() = 0;
 
+    /** This checks whether a product ID string that the server returned is OK for
+        unlocking the current app.
+        By default this just compares the string with getMarketplaceProductID() but you
+        may want to add more custom behaviour.
+    */
+    virtual bool doesMarketplaceProductIDMatch (const String& returnedIDFromServer);
+
     /** This must return the RSA public key for authenticating responses from
         the server for this app. You can get this key from your marketplace
         account page.

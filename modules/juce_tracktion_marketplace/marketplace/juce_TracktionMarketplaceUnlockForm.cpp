@@ -144,6 +144,11 @@ TracktionMarketplaceUnlockForm::TracktionMarketplaceUnlockForm (TracktionMarketp
     if (hasCancelButton)
         addAndMakeVisible (cancelButton);
 
+    emailBox.setEscapeAndReturnKeysConsumed (false);
+    passwordBox.setEscapeAndReturnKeysConsumed (false);
+
+    registerButton.addShortcut (KeyPress (KeyPress::returnKey));
+
     registerButton.addListener (this);
     cancelButton.addListener (this);
 

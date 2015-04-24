@@ -251,12 +251,17 @@ String TracktionMarketplaceStatus::getUserEmail() const
     return status[userNameProp].toString();
 }
 
+bool TracktionMarketplaceStatus::doesMarketplaceProductIDMatch (const String& returnedIDFromServer)
+{
+    return getMarketplaceProductID() == returnedIDFromServer;
+}
+
 bool TracktionMarketplaceStatus::applyKeyFile (String keyFileContent)
 {
     KeyFileUtils::KeyFileData data;
     data = KeyFileUtils::getDataFromKeyFile (KeyFileUtils::getXmlFromKeyFile (keyFileContent, getPublicKey()));
 
-    if (data.licensee.isNotEmpty() && data.email.isNotEmpty() && data.appID == getMarketplaceProductID())
+    if (data.licensee.isNotEmpty() && data.email.isNotEmpty() && doesMarketplaceProductIDMatch (data.appID))
     {
         setUserEmail (data.email);
 
