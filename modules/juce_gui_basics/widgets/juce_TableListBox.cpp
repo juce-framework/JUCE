@@ -147,7 +147,7 @@ public:
         if (isEnabled() && owner.getModel() != nullptr && ! (e.mouseWasClicked() || isDragging))
         {
             SparseSet<int> rowsToDrag;
-            
+
             if (owner.selectOnMouseDown || owner.isRowSelected (row))
                 rowsToDrag = owner.getSelectedRows();
             else

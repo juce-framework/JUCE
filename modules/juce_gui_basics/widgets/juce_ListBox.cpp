@@ -107,7 +107,7 @@ public:
             if (isEnabled() && ! (e.mouseWasClicked() || isDragging))
             {
                 SparseSet<int> rowsToDrag;
-                
+
                 if (owner.selectOnMouseDown || owner.isRowSelected (row))
                     rowsToDrag = owner.getSelectedRows();
                 else
@@ -935,7 +935,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsT
     {
         int x, y;
         Image dragImage = createSnapshotOfRows (rowsToDrag, x, y);
-        
+
         MouseEvent e2 (e.getEventRelativeTo (this));
         const Point<int> p (x - e2.x, y - e2.y);
         dragContainer->startDragging (dragDescription, this, dragImage, allowDraggingToOtherWindows, &p);

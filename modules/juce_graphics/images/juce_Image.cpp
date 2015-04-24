@@ -39,8 +39,8 @@ void ImagePixelData::sendDataChangeMessage()
     listeners.call (&Listener::imageDataChanged, this);
 }
 
-int ImagePixelData::getSharedCount() const noexcept 
-{ 
+int ImagePixelData::getSharedCount() const noexcept
+{
     return getReferenceCount();
 }
 
