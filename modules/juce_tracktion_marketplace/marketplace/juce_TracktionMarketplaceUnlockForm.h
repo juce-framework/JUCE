@@ -68,12 +68,12 @@ public:
     /** @internal */
     void lookAndFeelChanged() override;
 
-private:
-    TracktionMarketplaceStatus& status;
-
     Label message;
     TextEditor emailBox, passwordBox;
     TextButton registerButton, cancelButton;
+
+private:
+    TracktionMarketplaceStatus& status;
     ScopedPointer<BubbleMessageComponent> bubble;
 
     struct OverlayComp;

@@ -122,11 +122,11 @@ static juce_wchar getDefaultPasswordChar() noexcept
 TracktionMarketplaceUnlockForm::TracktionMarketplaceUnlockForm (TracktionMarketplaceStatus& s,
                                                                 const String& userInstructions,
                                                                 bool hasCancelButton)
-    : status (s),
-      message (String(), userInstructions),
+    : message (String(), userInstructions),
       passwordBox (String(), getDefaultPasswordChar()),
       registerButton (TRANS("Register")),
-      cancelButton (TRANS ("Cancel"))
+      cancelButton (TRANS ("Cancel")),
+      status (s)
 {
     // Please supply a message to tell your users what to do!
     jassert (userInstructions.isNotEmpty());
