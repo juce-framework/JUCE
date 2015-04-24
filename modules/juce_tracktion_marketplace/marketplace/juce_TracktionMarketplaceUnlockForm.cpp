@@ -98,10 +98,14 @@ struct TracktionMarketplaceUnlockForm::OverlayComp  : public Component,
             url.launchInDefaultBrowser();
         }
 
-        if (result.succeeded)
-            form.dismiss();
-        else
-            delete this;
+        // (local copies because we're about to delete this)
+        const bool worked = result.succeeded;
+        TracktionMarketplaceUnlockForm& f = form;
+
+        delete this;
+
+        if (worked)
+            f.dismiss();
     }
 
     TracktionMarketplaceUnlockForm& form;
