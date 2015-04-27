@@ -405,7 +405,9 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, const bool replaceEx
 {
     if (replaceExistingContents)
     {
-      #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+      #if JUCE_IOS
+        CGContextSetBlendMode (context, kCGBlendModeCopy);
+      #elif MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
         CGContextClearRect (context, cgRect);
       #else
        #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
