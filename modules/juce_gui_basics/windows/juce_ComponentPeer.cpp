@@ -275,8 +275,8 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
 {
     Component* const c = Component::getCurrentlyFocusedComponent();
 
-    if (component.isParentOf (c))
-        if (TextInputTarget* const ti = dynamic_cast<TextInputTarget*> (c))
+    if (c == &component || component.isParentOf (c))
+        if (TextInputTarget* const ti = dynamic_cast <TextInputTarget*> (c))
             if (ti->isTextInputActive())
                 return ti;
 
