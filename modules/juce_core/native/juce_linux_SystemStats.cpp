@@ -155,6 +155,8 @@ void CPUInformation::initialise() noexcept
     hasSSE2  = flags.contains ("sse2");
     hasSSE3  = flags.contains ("sse3");
     has3DNow = flags.contains ("3dnow");
+    hasSSSE3 = flags.contains ("ssse3");
+    hasAVX   = flags.contains ("avx");
 
     numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
 }

@@ -105,6 +105,8 @@ void CPUInformation::initialise() noexcept
     hasSSE   = (info[3] & (1 << 25)) != 0;
     hasSSE2  = (info[3] & (1 << 26)) != 0;
     hasSSE3  = (info[2] & (1 <<  0)) != 0;
+    hasAVX   = (info[2] & (1 << 28)) != 0;
+    hasSSSE3 = (info[2] & (1 <<  9)) != 0;
     has3DNow = (info[1] & (1 << 31)) != 0;
 
     SYSTEM_INFO systemInfo;

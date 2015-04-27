@@ -152,10 +152,12 @@ public:
     static String getCpuVendor();
 
     static bool hasMMX() noexcept;   /**< Returns true if Intel MMX instructions are available. */
+    static bool has3DNow() noexcept; /**< Returns true if AMD 3DNOW instructions are available. */
     static bool hasSSE() noexcept;   /**< Returns true if Intel SSE instructions are available. */
     static bool hasSSE2() noexcept;  /**< Returns true if Intel SSE2 instructions are available. */
     static bool hasSSE3() noexcept;  /**< Returns true if Intel SSE2 instructions are available. */
-    static bool has3DNow() noexcept; /**< Returns true if AMD 3DNOW instructions are available. */
+    static bool hasSSSE3() noexcept; /**< Returns true if Intel SSSE3 instructions are available. */
+    static bool hasAVX() noexcept;   /**< Returns true if Intel AVX instructions are available. */
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
