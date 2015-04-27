@@ -131,7 +131,12 @@ static bool isWindowsVersionOrLater (SystemStats::OperatingSystemType target)
     zerostruct (info);
     info.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEX);
 
-    if (target >= SystemStats::WinVista)
+    if (target >= SystemStats::Windows10)
+    {
+        info.dwMajorVersion = 10;
+        info.dwMinorVersion = 0;
+    }
+    else if (target >= SystemStats::WinVista)
     {
         info.dwMajorVersion = 6;
 
@@ -166,7 +171,7 @@ static bool isWindowsVersionOrLater (SystemStats::OperatingSystemType target)
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
     const SystemStats::OperatingSystemType types[]
-            = { Windows8_1, Windows8_0, Windows7, WinVista, WinXP, Win2000 };
+            = { Windows10, Windows8_1, Windows8_0, Windows7, WinVista, WinXP, Win2000 };
 
     for (int i = 0; i < numElementsInArray (types); ++i)
         if (isWindowsVersionOrLater (types[i]))
@@ -182,6 +187,7 @@ String SystemStats::getOperatingSystemName()
 
     switch (getOperatingSystemType())
     {
+        case Windows10:         name = "Windows 10";        break;
         case Windows8_1:        name = "Windows 8.1";       break;
         case Windows8_0:        name = "Windows 8.0";       break;
         case Windows7:          name = "Windows 7";         break;
