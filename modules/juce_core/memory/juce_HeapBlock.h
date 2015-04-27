@@ -36,7 +36,7 @@ namespace HeapBlockHelper
     struct ThrowOnFail          { static void check (void*) {} };
 
     template<>
-    struct ThrowOnFail <true>   { static void check (void* data) { if (data == nullptr) throw std::bad_alloc(); } };
+    struct ThrowOnFail<true>    { static void check (void* data) { if (data == nullptr) throw std::bad_alloc(); } };
 }
 #endif
 
@@ -67,7 +67,7 @@ namespace HeapBlockHelper
 
     ..you could just write this:
     @code
-        HeapBlock <int> temp (1024);
+        HeapBlock<int> temp (1024);
         memcpy (temp, xyz, 1024 * sizeof (int));
         temp.calloc (2048);
         temp[0] = 1234;
@@ -109,7 +109,7 @@ public:
         other constructor that takes an InitialisationState parameter.
     */
     explicit HeapBlock (const size_t numElements)
-        : data (static_cast <ElementType*> (std::malloc (numElements * sizeof (ElementType))))
+        : data (static_cast<ElementType*> (std::malloc (numElements * sizeof (ElementType))))
     {
         throwOnAllocationFailure();
     }
@@ -120,7 +120,7 @@ public:
         or left uninitialised.
     */
     HeapBlock (const size_t numElements, const bool initialiseToZero)
-        : data (static_cast <ElementType*> (initialiseToZero
+        : data (static_cast<ElementType*> (initialiseToZero
                                                ? std::calloc (numElements, sizeof (ElementType))
                                                : std::malloc (numElements * sizeof (ElementType))))
     {
@@ -166,13 +166,13 @@ public:
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator void*() const noexcept                                  { return static_cast <void*> (data); }
+    inline operator void*() const noexcept                                  { return static_cast<void*> (data); }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator const void*() const noexcept                            { return static_cast <const void*> (data); }
+    inline operator const void*() const noexcept                            { return static_cast<const void*> (data); }
 
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
@@ -220,7 +220,7 @@ public:
     void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
-        data = static_cast <ElementType*> (std::malloc (newNumElements * elementSize));
+        data = static_cast<ElementType*> (std::malloc (newNumElements * elementSize));
         throwOnAllocationFailure();
     }
 
@@ -230,7 +230,7 @@ public:
     void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
-        data = static_cast <ElementType*> (std::calloc (newNumElements, elementSize));
+        data = static_cast<ElementType*> (std::calloc (newNumElements, elementSize));
         throwOnAllocationFailure();
     }
 
@@ -241,7 +241,7 @@ public:
     void allocate (const size_t newNumElements, bool initialiseToZero)
     {
         std::free (data);
-        data = static_cast <ElementType*> (initialiseToZero
+        data = static_cast<ElementType*> (initialiseToZero
                                              ? std::calloc (newNumElements, sizeof (ElementType))
                                              : std::malloc (newNumElements * sizeof (ElementType)));
         throwOnAllocationFailure();
@@ -254,15 +254,15 @@ public:
     */
     void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
-        data = static_cast <ElementType*> (data == nullptr ? std::malloc (newNumElements * elementSize)
-                                                           : std::realloc (data, newNumElements * elementSize));
+        data = static_cast<ElementType*> (data == nullptr ? std::malloc (newNumElements * elementSize)
+                                                          : std::realloc (data, newNumElements * elementSize));
         throwOnAllocationFailure();
     }
 
     /** Frees any currently-allocated data.
         This will free the data and reset this object to be a null pointer.
     */
-    void free()
+    void free() noexcept
     {
         std::free (data);
         data = nullptr;
@@ -272,7 +272,7 @@ public:
         The two objects simply exchange their data pointers.
     */
     template <bool otherBlockThrows>
-    void swapWith (HeapBlock <ElementType, otherBlockThrows>& other) noexcept
+    void swapWith (HeapBlock<ElementType, otherBlockThrows>& other) noexcept
     {
         std::swap (data, other.data);
     }
