@@ -609,16 +609,18 @@ namespace WavFileHelpers
     {
         static MemoryBlock createFrom (const StringPairArray& values)
         {
-            const String s = values[WavAudioFormat::tracktionLoopInfo];
-            MemoryBlock data;
+            MemoryOutputStream out;
+            const String s (values[WavAudioFormat::tracktionLoopInfo]);
 
             if (s.isNotEmpty())
             {
-                MemoryOutputStream os (data, false);
-                os.writeString (s);
+                out.writeString (s);
+
+                if ((out.getDataSize() & 1) != 0)
+                    out.writeByte (0);
             }
 
-            return data;
+            return out.getMemoryBlock();
         }
     };
 
