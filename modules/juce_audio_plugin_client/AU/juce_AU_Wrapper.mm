@@ -757,12 +757,9 @@ public:
 
     void sendAUEvent (const AudioUnitEventType type, const int index)
     {
-        if (AUEventListenerNotify != 0)
-        {
-            auEvent.mEventType = type;
-            auEvent.mArgument.mParameter.mParameterID = (AudioUnitParameterID) index;
-            AUEventListenerNotify (0, 0, &auEvent);
-        }
+        auEvent.mEventType = type;
+        auEvent.mArgument.mParameter.mParameterID = (AudioUnitParameterID) index;
+        AUEventListenerNotify (0, 0, &auEvent);
     }
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float /*newValue*/)

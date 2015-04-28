@@ -448,6 +448,22 @@ public class JuceDemo   extends Activity
             return true;
         }
 
+        @Override
+        public boolean onKeyMultiple (int keyCode, int count, KeyEvent event)
+        {
+            if (keyCode != KeyEvent.KEYCODE_UNKNOWN || event.getAction() != KeyEvent.ACTION_MULTIPLE)
+                return super.onKeyMultiple (keyCode, count, event);
+
+            if (event.getCharacters() != null)
+            {
+                int utf8Char = event.getCharacters().codePointAt (0);
+                handleKeyDown (host, utf8Char, utf8Char);
+                return true;
+            }
+
+            return false;
+        }
+
         // this is here to make keyboard entry work on a Galaxy Tab2 10.1
         @Override
         public InputConnection onCreateInputConnection (EditorInfo outAttrs)

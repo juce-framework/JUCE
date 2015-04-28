@@ -80,6 +80,8 @@ void CPUInformation::initialise() noexcept
     hasSSE2  = (d & (1u << 26)) != 0;
     has3DNow = (b & (1u << 31)) != 0;
     hasSSE3  = (c & (1u <<  0)) != 0;
+    hasSSSE3 = (c & (1u <<  9)) != 0;
+    hasAVX   = (c & (1u << 28)) != 0;
    #endif
 
    #if JUCE_IOS || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)

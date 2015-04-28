@@ -146,7 +146,7 @@ public:
 
         @see DragAndDropContainer::startDragging
     */
-    virtual var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+    virtual var getDragSourceDescription (const SparseSet<int>& rowsToDescribe);
 
     /** You can override this to provide tool tips for specific rows.
         @see TooltipClient
@@ -229,6 +229,11 @@ public:
         down CMD or CTRL when clicking.
     */
     void setClickingTogglesRowSelection (bool flipRowSelection) noexcept;
+
+    /** Sets whether a row should be selected when the mouse is pressed or released.
+        By default this is true, but you may want to turn it off.
+    */
+    void setRowSelectedOnMouseDown (bool isSelectedOnMouseDown) noexcept;
 
     /** Makes the list react to mouse moves by selecting the row that the mouse if over.
 
@@ -513,8 +518,8 @@ public:
     */
     void repaintRow (int rowNumber) noexcept;
 
-    /** This fairly obscure method creates an image that just shows the currently
-        selected row components.
+    /** This fairly obscure method creates an image that shows the row components specified
+        in rows (for example, these could be the currently selected row components).
 
         It's a handy method for doing drag-and-drop, as it can be passed to the
         DragAndDropContainer for use as the drag image.
@@ -525,7 +530,7 @@ public:
 
         @see Component::createComponentSnapshot
     */
-    virtual Image createSnapshotOfSelectedRows (int& x, int& y);
+    virtual Image createSnapshotOfRows (const SparseSet<int>& rows, int& x, int& y);
 
     /** Returns the viewport that this ListBox uses.
 
@@ -556,7 +561,8 @@ public:
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
-    void startDragAndDrop (const MouseEvent&, const var& dragDescription, bool allowDraggingToOtherWindows);
+    void startDragAndDrop (const MouseEvent&, const SparseSet<int>& rowsToDrag,
+                           const var& dragDescription, bool allowDraggingToOtherWindows);
 
 private:
     //==============================================================================
@@ -571,7 +577,7 @@ private:
     int totalItems, rowHeight, minimumRowWidth;
     int outlineThickness;
     int lastRowSelected;
-    bool multipleSelection, alwaysFlipSelection, hasDoneInitialUpdate;
+    bool multipleSelection, alwaysFlipSelection, hasDoneInitialUpdate, selectOnMouseDown;
     SparseSet<int> selected;
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
@@ -580,6 +586,9 @@ private:
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This method's bool parameter has changed: see the new method signature.
     JUCE_DEPRECATED (void setSelectedRows (const SparseSet<int>&, bool));
+    // This method has been replaced by the more flexible method createSnapshotOfRows.
+    // Please call createSnapshotOfRows (getSelectedRows(), x, y) to get the same behaviour.
+    JUCE_DEPRECATED (virtual void createSnapshotOfSelectedRows (int&, int&)) {}
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox)

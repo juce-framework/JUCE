@@ -680,7 +680,7 @@ void MidiKeyboardComponent::resetAnyKeysInUse()
 
 void MidiKeyboardComponent::updateNoteUnderMouse (const MouseEvent& e, bool isDown)
 {
-    updateNoteUnderMouse (e.getPosition(), isDown, e.source.getIndex());
+    updateNoteUnderMouse (e.getEventRelativeTo (this).getPosition(), isDown, e.source.getIndex());
 }
 
 void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, int fingerNum)

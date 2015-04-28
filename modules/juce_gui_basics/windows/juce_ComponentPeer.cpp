@@ -187,7 +187,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textChar
     {
         const WeakReference<Component> deletionChecker (target);
 
-        if (const Array <KeyListener*>* const keyListeners = target->keyListeners)
+        if (const Array<KeyListener*>* const keyListeners = target->keyListeners)
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
@@ -238,7 +238,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
         if (keyWasUsed || deletionChecker == nullptr)
             break;
 
-        if (const Array <KeyListener*>* const keyListeners = target->keyListeners)
+        if (const Array<KeyListener*>* const keyListeners = target->keyListeners)
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
@@ -275,7 +275,7 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
 {
     Component* const c = Component::getCurrentlyFocusedComponent();
 
-    if (component.isParentOf (c))
+    if (c == &component || component.isParentOf (c))
         if (TextInputTarget* const ti = dynamic_cast<TextInputTarget*> (c))
             if (ti->isTextInputActive())
                 return ti;

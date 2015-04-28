@@ -232,7 +232,7 @@ int JUCEApplicationBase::main()
     jassert (app != nullptr);
 
     if (! app->initialiseApp())
-        return app->getApplicationReturnValue();
+        return app->shutdownApp();
 
     JUCE_TRY
     {

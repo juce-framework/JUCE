@@ -251,12 +251,17 @@ String TracktionMarketplaceStatus::getUserEmail() const
     return status[userNameProp].toString();
 }
 
+bool TracktionMarketplaceStatus::doesMarketplaceProductIDMatch (const String& returnedIDFromServer)
+{
+    return getMarketplaceProductID() == returnedIDFromServer;
+}
+
 bool TracktionMarketplaceStatus::applyKeyFile (String keyFileContent)
 {
     KeyFileUtils::KeyFileData data;
     data = KeyFileUtils::getDataFromKeyFile (KeyFileUtils::getXmlFromKeyFile (keyFileContent, getPublicKey()));
 
-    if (data.licensee.isNotEmpty() && data.email.isNotEmpty() && data.appID == getMarketplaceProductID())
+    if (data.licensee.isNotEmpty() && data.email.isNotEmpty() && doesMarketplaceProductIDMatch (data.appID))
     {
         setUserEmail (data.email);
 
@@ -341,12 +346,8 @@ TracktionMarketplaceStatus::UnlockResult TracktionMarketplaceStatus::handleFaile
     return r;
 }
 
-TracktionMarketplaceStatus::UnlockResult TracktionMarketplaceStatus::attemptWebserverUnlock (const String& email,
-                                                                                             const String& password)
+String TracktionMarketplaceStatus::readReplyFromWebserver (const String& email, const String& password)
 {
-    // This method will block while it contacts the server, so you must run it on a background thread!
-    jassert (! MessageManager::getInstance()->isThisTheMessageThread());
-
     URL url (getServerAuthenticationURL()
                 .withParameter ("product", getMarketplaceProductID())
                 .withParameter ("email", email)
@@ -356,7 +357,16 @@ TracktionMarketplaceStatus::UnlockResult TracktionMarketplaceStatus::attemptWebs
 
     DBG ("Trying to unlock via URL: " << url.toString (true));
 
-    const String reply (url.readEntireTextStream());
+    return url.readEntireTextStream();
+}
+
+TracktionMarketplaceStatus::UnlockResult TracktionMarketplaceStatus::attemptWebserverUnlock (const String& email,
+                                                                                             const String& password)
+{
+    // This method will block while it contacts the server, so you must run it on a background thread!
+    jassert (! MessageManager::getInstance()->isThisTheMessageThread());
+
+    String reply (readReplyFromWebserver (email, password));
 
     DBG ("Reply from server: " << reply);
 

@@ -54,6 +54,13 @@ public:
     /** This must return your product's ID, as allocated by the store. */
     virtual String getMarketplaceProductID() = 0;
 
+    /** This checks whether a product ID string that the server returned is OK for
+        unlocking the current app.
+        By default this just compares the string with getMarketplaceProductID() but you
+        may want to add more custom behaviour.
+    */
+    virtual bool doesMarketplaceProductIDMatch (const String& returnedIDFromServer);
+
     /** This must return the RSA public key for authenticating responses from
         the server for this app. You can get this key from your marketplace
         account page.
@@ -104,6 +111,11 @@ public:
 
     /** Can be overridden if necessary, but by default returns "tracktion.com". */
     virtual String getWebsiteName();
+
+    /** The default implementation of this method will construct a URL with the default
+        parameters and read the reply, but for custom webserver set-ups, you may need to
+        override it to use more exotic methods. */
+    virtual String readReplyFromWebserver (const String& email, const String& password);
 
     //==============================================================================
     // The following methods can be called by your app:

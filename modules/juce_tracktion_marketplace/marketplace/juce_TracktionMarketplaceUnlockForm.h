@@ -49,10 +49,17 @@ public:
         The userInstructions will be displayed above the email and password boxes.
     */
     TracktionMarketplaceUnlockForm (TracktionMarketplaceStatus&,
-                                    const String& userInstructions);
+                                    const String& userInstructions,
+                                    bool hasCancelButton = true);
 
     /** Destructor. */
     ~TracktionMarketplaceUnlockForm();
+
+    /** This is called when the form is dismissed (either cancelled or when registration
+        succeeds).
+        By default it will delete this, but you can override it to do other things.
+    */
+    virtual void dismiss();
 
     /** @internal */
     void paint (Graphics&) override;
@@ -61,12 +68,12 @@ public:
     /** @internal */
     void lookAndFeelChanged() override;
 
-private:
-    TracktionMarketplaceStatus& status;
-
     Label message;
     TextEditor emailBox, passwordBox;
     TextButton registerButton, cancelButton;
+
+private:
+    TracktionMarketplaceStatus& status;
     ScopedPointer<BubbleMessageComponent> bubble;
 
     struct OverlayComp;
@@ -75,7 +82,6 @@ private:
 
     void buttonClicked (Button*) override;
     void attemptRegistration();
-    void cancel();
     void showBubbleMessage (const String&, Component&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TracktionMarketplaceUnlockForm)

@@ -73,15 +73,15 @@
  #ifndef JUCE_USE_FREETYPE
   #define JUCE_USE_FREETYPE 1
  #endif
+#endif
 
- #if ! JUCE_USE_FREETYPE_AMALGAMATED
+#if JUCE_USE_FREETYPE
+ #if JUCE_USE_FREETYPE_AMALGAMATED
+  #include "native/freetype/FreeTypeAmalgam.h"
+ #else
   #include <ft2build.h>
   #include FT_FREETYPE_H
  #endif
-#endif
-
-#if JUCE_USE_FREETYPE && JUCE_USE_FREETYPE_AMALGAMATED
- #include "native/freetype/FreeTypeAmalgam.h"
 #endif
 
 #undef SIZEOF
