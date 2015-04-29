@@ -157,18 +157,18 @@ namespace SocketHelpers
     }
 
     static int readSocket (const SocketHandle handle,
-                           void* const destBuffer, const juce_socklen_t maxBytesToRead,
+                           void* const destBuffer, const int maxBytesToRead,
                            bool volatile& connected,
                            const bool blockUntilSpecifiedAmountHasArrived,
                            CriticalSection& readLock,
                            String* senderIP = nullptr,
                            int* senderPort = nullptr) noexcept
     {
-        juce_socklen_t bytesRead = 0;
+        int bytesRead = 0;
 
         while (bytesRead < maxBytesToRead)
         {
-            juce_socklen_t bytesThisTime = -1;
+            long bytesThisTime = -1;
             char* const buffer = static_cast<char*> (destBuffer) + bytesRead;
             const juce_socklen_t numToRead = (juce_socklen_t) (maxBytesToRead - bytesRead);
 
@@ -187,7 +187,7 @@ namespace SocketHelpers
                         sockaddr_in client;
                         socklen_t clientLen = sizeof (sockaddr);
 
-                        bytesThisTime = (juce_socklen_t) ::recvfrom (handle, buffer, numToRead, 0, (sockaddr*) &client, &clientLen);
+                        bytesThisTime = ::recvfrom (handle, buffer, numToRead, 0, (sockaddr*) &client, &clientLen);
 
                         *senderIP = String::fromUTF8 (inet_ntoa (client.sin_addr), 16);
                         *senderPort = ntohs (client.sin_port);
