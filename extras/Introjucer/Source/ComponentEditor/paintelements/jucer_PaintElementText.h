@@ -331,9 +331,13 @@ public:
 
     void convertToPath()
     {
+        jassert (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != nullptr);
+
         font = FontPropertyComponent::applyNameToFont (typefaceName, font);
 
-        const Rectangle<int> r (getCurrentAbsoluteBounds());
+        const Rectangle<int> r =
+            getCurrentBounds (Rectangle<int> (((PaintRoutineEditor*) getParentComponent())
+                                              ->getComponentArea()).withPosition (0,0));
 
         GlyphArrangement arr;
         arr.addCurtailedLineOfText (font, text,
