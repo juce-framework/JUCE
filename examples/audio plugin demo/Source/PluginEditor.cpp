@@ -99,6 +99,30 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
     delaySlider.setValue (ourProcessor.delay->getValue(), dontSendNotification);
 }
 
+void JuceDemoPluginAudioProcessorEditor::sliderDragStarted(Slider* slider)
+{
+    if (slider == &gainSlider)
+    {
+        getProcessor().gain->beginChangeGesture();
+    }
+    else if (slider == &delaySlider)
+    {
+        getProcessor().delay->beginChangeGesture();
+    }
+}
+
+void JuceDemoPluginAudioProcessorEditor::sliderDragEnded(Slider* slider)
+{
+    if (slider == &gainSlider)
+    {
+        getProcessor().gain->endChangeGesture();
+    }
+    else if (slider == &delaySlider)
+    {
+        getProcessor().delay->endChangeGesture();
+    }
+}
+
 // This is our Slider::Listener callback, when the user drags a slider.
 void JuceDemoPluginAudioProcessorEditor::sliderValueChanged (Slider* slider)
 {

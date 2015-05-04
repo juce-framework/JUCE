@@ -31,6 +31,8 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void sliderValueChanged (Slider*) override;
+    void sliderDragStarted (Slider*) override;
+    void sliderDragEnded (Slider*) override;
 
 private:
     MidiKeyboardComponent midiKeyboard;
