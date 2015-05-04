@@ -198,7 +198,7 @@ public:
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
             if (AudioProcessorParameter* p = owner.getParameters()[paramIndex])
-                toString128 (result, p->getText (value, 128));
+                toString128 (result, p->getText ((float) value, 128));
             else
                 // remain backward-compatible with old JUCE code
                 toString128 (result, owner.getParameterText (paramIndex, 128));

@@ -65,6 +65,18 @@ public:
     */
     bool bindToPort (int localPortNumber);
 
+    /** Binds the socket to the specified local port and local address.
+
+        If localAddress is not an empty string then the socket will be bound to localAddress
+        as well. This is useful if you would like to bind your socket to a specific network
+        adapter. Note that localAddress must be an IP address assigned to one of your
+        network address otherwise this function will fail.
+        @returns    true on success; false may indicate that another socket is already bound
+                    on the same port
+        @see bindToPort(int localPortNumber), IPAddress::findAllAddresses
+    */
+    bool bindToPort (int localPortNumber, const String& localAddress);
+
     /** Returns the local port number to which this socket is currently bound.
 
         This is useful if you need to know to which port the OS has actually bound your
@@ -218,6 +230,18 @@ public:
     */
     bool bindToPort (int localPortNumber);
 
+    /** Binds the socket to the specified local port and local address.
+
+        If localAddress is not an empty string then the socket will be bound to localAddress
+        as well. This is useful if you would like to bind your socket to a specific network
+        adapter. Note that localAddress must be an IP address assigned to one of your
+        network address otherwise this function will fail.
+        @returns    true on success; false may indicate that another socket is already bound
+                    on the same port
+        @see bindToPort(int localPortNumber), IPAddress::findAllAddresses
+    */
+    bool bindToPort (int localPortNumber, const String& localAddress);
+
     /** Returns the local port number to which this socket is currently bound.
 
         This is useful if you need to know to which port the OS has actually bound your
@@ -282,11 +306,24 @@ public:
     int write (const String& remoteHostname, int remotePortNumber,
                const void* sourceBuffer, int numBytesToWrite);
 
+    //==============================================================================
+    /** Join a multicast group
+
+        @returns true if it succeeds.
+    */
+    bool joinMulticast (const String& multicastIPAddress);
+
+    /** Leave a multicast group
+
+        @returns true if it succeeds.
+    */
+    bool leaveMulticast (const String& multicastIPAddress);
+
 private:
     //==============================================================================
     int handle;
     bool isBound;
-    String lastServerHost;
+    String lastBindAddress, lastServerHost;
     int lastServerPort;
     void* lastServerAddress;
     mutable CriticalSection readLock;

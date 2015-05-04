@@ -118,14 +118,14 @@ namespace SocketHelpers
                 ::close (h);
                #else
                 ::close (h);
-                CriticalSection::ScopedLockType lock(readLock);
+                CriticalSection::ScopedLockType lock (readLock);
               #endif
             }
         }
        #endif
     }
 
-    static bool bindSocketToPort (const SocketHandle handle, const int port) noexcept
+    static bool bindSocket (const SocketHandle handle, const int port, const String& address) noexcept
     {
         if (handle <= 0 || port < 0)
             return false;
@@ -136,6 +136,9 @@ namespace SocketHelpers
         servTmpAddr.sin_addr.s_addr = htonl (INADDR_ANY);
         servTmpAddr.sin_port = htons ((uint16) port);
 
+        if (address.isNotEmpty())
+            servTmpAddr.sin_addr.s_addr = ::inet_addr (address.toUTF8());
+
         return bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) >= 0;
     }
 
@@ -144,30 +147,30 @@ namespace SocketHelpers
         if (handle <= 0)
             return -1;
 
-        struct sockaddr_in sin;
-        socklen_t len = sizeof(sin);
+        struct sockaddr_in sin_addr;
+        socklen_t len = sizeof (sin_addr);
 
-        if (getsockname (handle, (struct sockaddr*) &sin, &len) == 0)
-            return ntohs (sin.sin_port);
+        if (getsockname (handle, (struct sockaddr*) &sin_addr, &len) == 0)
+            return ntohs (sin_addr.sin_port);
 
         return -1;
     }
 
     static int readSocket (const SocketHandle handle,
-                           void* const destBuffer, const ssize_t maxBytesToRead,
+                           void* const destBuffer, const int maxBytesToRead,
                            bool volatile& connected,
                            const bool blockUntilSpecifiedAmountHasArrived,
                            CriticalSection& readLock,
                            String* senderIP = nullptr,
                            int* senderPort = nullptr) noexcept
     {
-        ssize_t bytesRead = 0;
+        int bytesRead = 0;
 
         while (bytesRead < maxBytesToRead)
         {
-            ssize_t bytesThisTime = -1;
+            long bytesThisTime = -1;
             char* const buffer = static_cast<char*> (destBuffer) + bytesRead;
-            const size_t numToRead = (size_t) (maxBytesToRead - bytesRead);
+            const juce_socklen_t numToRead = (juce_socklen_t) (maxBytesToRead - bytesRead);
 
             {
                 // avoid race-condition
@@ -184,7 +187,7 @@ namespace SocketHelpers
                         sockaddr_in client;
                         socklen_t clientLen = sizeof (sockaddr);
 
-                        bytesThisTime = (int) ::recvfrom (handle, buffer, numToRead, 0, (sockaddr*) &client, &clientLen);
+                        bytesThisTime = ::recvfrom (handle, buffer, numToRead, 0, (sockaddr*) &client, &clientLen);
 
                         *senderIP = String::fromUTF8 (inet_ntoa (client.sin_addr), 16);
                         *senderPort = ntohs (client.sin_port);
@@ -363,6 +366,23 @@ namespace SocketHelpers
         const int reuse = 1;
         setsockopt (handle, SOL_SOCKET, SO_REUSEADDR, (const char*) &reuse, sizeof (reuse));
     }
+
+    static bool multicast (int handle, const String& multicastIPAddress,
+                           const String& interfaceIPAddress, bool join) noexcept
+    {
+        struct ip_mreq mreq;
+
+        zerostruct (mreq);
+        mreq.imr_multiaddr.s_addr = inet_addr (multicastIPAddress.toUTF8());
+        mreq.imr_interface.s_addr = INADDR_ANY;
+
+        if (interfaceIPAddress.isNotEmpty())
+            mreq.imr_interface.s_addr = inet_addr (interfaceIPAddress.toUTF8());
+
+        int joinCmd = join ? IP_ADD_MEMBERSHIP : IP_DROP_MEMBERSHIP;
+
+        return setsockopt (handle, IPPROTO_IP, joinCmd, (const char*) &mreq, sizeof (mreq)) == 0;
+    }
 }
 
 //==============================================================================
@@ -404,7 +424,7 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     if (isListener || ! connected)
         return -1;
 
-    return (int) ::send (handle, (const char*) sourceBuffer, (size_t) numBytesToWrite, 0);
+    return (int) ::send (handle, (const char*) sourceBuffer, (juce_socklen_t) numBytesToWrite, 0);
 }
 
 //==============================================================================
@@ -418,7 +438,12 @@ int StreamingSocket::waitUntilReady (const bool readyForReading,
 //==============================================================================
 bool StreamingSocket::bindToPort (const int port)
 {
-    return SocketHelpers::bindSocketToPort (handle, port);
+    return bindToPort (port, String());
+}
+
+bool StreamingSocket::bindToPort (const int port, const String& addr)
+{
+    return SocketHelpers::bindSocket (handle, port, addr);
 }
 
 int StreamingSocket::getBoundPort() const noexcept
@@ -556,12 +581,18 @@ DatagramSocket::~DatagramSocket()
     SocketHelpers::closeSocket (handle, readLock, false, 0, connected);
 }
 
-
 bool DatagramSocket::bindToPort (const int port)
 {
-    if (SocketHelpers::bindSocketToPort (handle, port))
+    return bindToPort (port, String());
+}
+
+bool DatagramSocket::bindToPort (const int port, const String& addr)
+{
+    if (SocketHelpers::bindSocket (handle, port, addr))
     {
         isBound = true;
+        lastBindAddress = addr;
+
         return true;
     }
 
@@ -584,14 +615,14 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
 {
     bool connected = true;
     return isBound ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
-                    connected, shouldBlock, readLock) : -1;
+                                                connected, shouldBlock, readLock) : -1;
 }
 
 int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock, String& senderIPAddress, int& senderPort)
 {
     bool connected = true;
     return isBound ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected,
-                    shouldBlock, readLock, &senderIPAddress, &senderPort) : -1;
+                                                shouldBlock, readLock, &senderIPAddress, &senderPort) : -1;
 }
 
 int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,
@@ -613,7 +644,24 @@ int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,
     }
 
     return (int) ::sendto (handle, (const char*) sourceBuffer,
-                           (size_t) numBytesToWrite, 0, info->ai_addr, info->ai_addrlen);
+                           (juce_socklen_t) numBytesToWrite, 0,
+                           info->ai_addr, (socklen_t) info->ai_addrlen);
+}
+
+bool DatagramSocket::joinMulticast (const String& multicastIPAddress)
+{
+    if (! isBound)
+        return false;
+
+    return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, true);
+}
+
+bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
+{
+    if (! isBound)
+        return false;
+
+    return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, false);
 }
 
 #if JUCE_MSVC

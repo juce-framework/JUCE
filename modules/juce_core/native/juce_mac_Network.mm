@@ -204,7 +204,6 @@ public:
             [data setLength: 0];
         }
 
-        initialised = true;
         contentLength = [response expectedContentLength];
 
         [headers release];
@@ -216,6 +215,8 @@ public:
             headers = [[httpResponse allHeaderFields] retain];
             statusCode = (int) [httpResponse statusCode];
         }
+
+        initialised = true;
     }
 
     NSURLRequest* willSendRequest (NSURLRequest* newRequest, NSURLResponse* redirectResponse)
