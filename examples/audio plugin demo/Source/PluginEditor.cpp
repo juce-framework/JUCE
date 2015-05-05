@@ -168,13 +168,10 @@ static String ppqToBarsBeatsString (double ppq, double /*lastBarPPQ*/, int numer
 AudioProcessorParameter* JuceDemoPluginAudioProcessorEditor::getParameterFromSlider (const Slider* slider) const
 {
     if (slider == &gainSlider)
-    {
         return getProcessor().gain;
-    }
-    else if (slider == &delaySlider)
-    {
+
+    if (slider == &delaySlider)
         return getProcessor().delay;
-    }
 
     return nullptr;
 }
