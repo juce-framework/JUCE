@@ -1162,7 +1162,14 @@ struct StateHelpers
             v[1].x = v[3].x = (GLshort) (x + w);
             v[2].y = v[3].y = (GLshort) (y + h);
 
-            const GLuint rgba = colour.getInRGBAMemoryOrder();
+           #if JUCE_BIG_ENDIAN
+            const GLuint rgba = (GLuint) ((colour.getRed() << 24) | (colour.getGreen() << 16)
+                                        | (colour.getBlue() << 8) |  colour.getAlpha());
+           #else
+            const GLuint rgba = (GLuint) ((colour.getAlpha() << 24) | (colour.getBlue() << 16)
+                                        | (colour.getGreen() << 8) |  colour.getRed());
+           #endif
+
             v[0].colour = rgba;
             v[1].colour = rgba;
             v[2].colour = rgba;

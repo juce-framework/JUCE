@@ -110,15 +110,7 @@ struct Flipper
             PixelARGB* const dst = (PixelARGB*) (dataCopy + w * (h - 1 - y));
 
             for (int x = 0; x < w; ++x)
-            {
-               #if JUCE_ANDROID
-                PixelType s (src[x]);
-                dst[x].setARGB (s.getAlpha(), s.getBlue(), s.getGreen(), s.getRed());
-               #else
                 dst[x].set (src[x]);
-               #endif
-            }
-
 
             srcData += lineStride;
         }
