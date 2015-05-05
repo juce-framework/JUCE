@@ -102,16 +102,28 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
 // This is our Slider::Listener callback, when the user drags a slider.
 void JuceDemoPluginAudioProcessorEditor::sliderValueChanged (Slider* slider)
 {
-    if (slider == &gainSlider)
+    if (AudioProcessorParameter* param = getParameterFromSlider (slider))
     {
         // It's vital to use setValueNotifyingHost to change any parameters that are automatable
         // by the host, rather than just modifying them directly, otherwise the host won't know
         // that they've changed.
-        getProcessor().gain->setValueNotifyingHost ((float) gainSlider.getValue());
+        param->setValueNotifyingHost ((float) slider->getValue());
     }
-    else if (slider == &delaySlider)
+}
+
+void JuceDemoPluginAudioProcessorEditor::sliderDragStarted (Slider* slider)
+{
+    if (AudioProcessorParameter* param = getParameterFromSlider (slider))
     {
-        getProcessor().delay->setValueNotifyingHost ((float) delaySlider.getValue());
+        param->beginChangeGesture();
+    }
+}
+
+void JuceDemoPluginAudioProcessorEditor::sliderDragEnded (Slider* slider)
+{
+    if (AudioProcessorParameter* param = getParameterFromSlider (slider))
+    {
+        param->endChangeGesture();
     }
 }
 
@@ -151,6 +163,20 @@ static String ppqToBarsBeatsString (double ppq, double /*lastBarPPQ*/, int numer
     String s;
     s << bar << '|' << beat << '|' << ticks;
     return s;
+}
+
+AudioProcessorParameter* JuceDemoPluginAudioProcessorEditor::getParameterFromSlider (const Slider* slider) const
+{
+    if (slider == &gainSlider)
+    {
+        return getProcessor().gain;
+    }
+    else if (slider == &delaySlider)
+    {
+        return getProcessor().delay;
+    }
+
+    return nullptr;
 }
 
 // Updates the text in our position label.

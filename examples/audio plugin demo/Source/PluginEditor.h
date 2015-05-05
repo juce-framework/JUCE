@@ -31,6 +31,8 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void sliderValueChanged (Slider*) override;
+    void sliderDragStarted  (Slider*) override;
+    void sliderDragEnded    (Slider*) override;
 
 private:
     MidiKeyboardComponent midiKeyboard;
@@ -41,10 +43,13 @@ private:
 
     AudioPlayHead::CurrentPositionInfo lastDisplayedPosition;
 
+    //==============================================================================
     JuceDemoPluginAudioProcessor& getProcessor() const
     {
         return static_cast<JuceDemoPluginAudioProcessor&> (processor);
     }
+
+    AudioProcessorParameter* getParameterFromSlider (const Slider*) const;
 
     void displayPositionInfo (const AudioPlayHead::CurrentPositionInfo& pos);
 };
