@@ -245,7 +245,7 @@ namespace VSTHelpers
 
             if (exporter.isVisualStudio())
                 exporter.extraSearchPaths.add (path.toWindowsStyle());
-            else if (exporter.isLinux() || exporter.isXcode())
+            else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux() || exporter.isXcode())
                 exporter.extraSearchPaths.insert (0, path.toUnixStyle());
         }
     }
@@ -284,7 +284,7 @@ namespace VSTHelpers
 
         if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
-        else if (exporter.isLinux())
+        else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux() )
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
 
         if (exporter.isVisualStudio())
@@ -504,10 +504,15 @@ namespace AUHelpers
                 sdkLocation << '/';
 
             {
-                String sdkLocationRel (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (sdkLocation, RelativePath::projectFolder)).toUnixStyle());
-                exporter.extraSearchPaths.add (sdkLocationRel + "/PublicUtility");
-                exporter.extraSearchPaths.add (sdkLocationRel + "/AudioUnits/AUPublic/Utility");
-                exporter.extraSearchPaths.add (sdkLocationRel + "/AudioUnits/AUPublic/AUBase");
+                String relativeSDK (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (sdkLocation, RelativePath::projectFolder))
+                                            .toUnixStyle());
+
+                if (! relativeSDK.endsWithChar ('/'))
+                    relativeSDK << '/';
+
+                exporter.extraSearchPaths.add (relativeSDK + "PublicUtility");
+                exporter.extraSearchPaths.add (relativeSDK + "AudioUnits/AUPublic/Utility");
+                exporter.extraSearchPaths.add (relativeSDK + "AudioUnits/AUPublic/AUBase");
             }
 
             exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);

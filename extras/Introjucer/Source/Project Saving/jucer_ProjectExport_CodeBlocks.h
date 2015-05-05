@@ -22,35 +22,86 @@
   ==============================================================================
 */
 
+enum CodeBlocksOS
+{
+    windows,
+    linux
+};
+
 class CodeBlocksProjectExporter  : public ProjectExporter
 {
 public:
-    //==============================================================================
-    static const char* getNameCodeBlocks()      { return "Code::Blocks project"; }
-    static const char* getValueTreeTypeName()   { return "CODEBLOCKS"; }
 
+    //==============================================================================
+    static const char* getName (CodeBlocksOS os)
+    {
+        if (os == windows)
+            return "Code::Blocks (Windows)";
+        else if (os == linux)
+            return "Code::Blocks (Linux)";
+
+        // currently no other OSes supported by Codeblocks exporter!
+        jassertfalse;
+        return "Code::Blocks (Unknown OS)";
+    }
+
+    //==============================================================================
+    static const char* getValueTreeTypeName (CodeBlocksOS os)
+    {
+        if (os == windows)
+            return "CODEBLOCKS_WINDOWS";
+        else if (os == linux)
+            return "CODEBLOCKS_LINUX";
+
+        // currently no other OSes supported by Codeblocks exporter!
+        jassertfalse;
+        return "CODEBLOCKS_UNKOWN_OS";
+    }
+
+    //==============================================================================
+    static String getTargetFolderName (CodeBlocksOS os)
+    {
+        if (os == windows)
+            return "CodeBlocksWindows";
+        else if (os == linux)
+            return "CodeBlocksLinux";
+
+        // currently no other OSes supported by Codeblocks exporter!
+        jassertfalse;
+        return "CodeBlocksUnknownOS";
+    }
+
+    //==============================================================================
     static CodeBlocksProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
-        if (settings.hasType (getValueTreeTypeName()))
-            return new CodeBlocksProjectExporter (project, settings);
+        if (settings.hasType (getValueTreeTypeName(CodeBlocksOS::windows)) || settings.hasType ("CODEBLOCKS"))
+            return new CodeBlocksProjectExporter (project, settings, CodeBlocksOS::windows);
+            // this will also import legacy jucer files where CodeBlocks only worked for Windows,
+            // had valueTreetTypeName "CODEBLOCKS", and there was no OS distinction
+
+        else if (settings.hasType (getValueTreeTypeName(CodeBlocksOS::linux)))
+            return new CodeBlocksProjectExporter (project, settings, CodeBlocksOS::linux);
 
         return nullptr;
     }
 
     //==============================================================================
-    CodeBlocksProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
+    CodeBlocksProjectExporter (Project& p, const ValueTree& t, CodeBlocksOS codeBlocksOs)
+        : ProjectExporter (p, t), os (codeBlocksOs)
     {
-        name = getNameCodeBlocks();
+        name = getName (os);
 
         if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + "CodeBlocks";
+        {
+            getTargetLocationValue() = getDefaultBuildsRootFolder() + getTargetFolderName (os);
+        }
     }
 
     //==============================================================================
     bool canLaunchProject() override                 { return false; }
     bool launchProject() override                    { return false; }
-    bool isCodeBlocks() const override               { return true; }
-    bool isWindows() const override                  { return true; }
+    bool isCodeBlocksWindows() const override        { return os == CodeBlocksOS::windows; }
+    bool isCodeBlocksLinux() const override          { return os == CodeBlocksOS::linux; }
     bool usesMMFiles() const override                { return false; }
     bool canCopeWithDuplicateFiles() override        { return false; }
 
@@ -119,8 +170,15 @@ private:
     StringArray getDefines (const BuildConfiguration& config) const
     {
         StringPairArray defines;
-        defines.set ("__MINGW__", "1");
-        defines.set ("__MINGW_EXTENSION", String::empty);
+        if (os == CodeBlocksOS::windows)
+        {
+            defines.set ("__MINGW__", "1");
+            defines.set ("__MINGW_EXTENSION", String::empty);
+        }
+        else
+        {
+            defines.set ("LINUX", "1");
+        }
 
         if (config.isDebug())
         {
@@ -187,11 +245,16 @@ private:
     StringArray getIncludePaths (const BuildConfiguration& config) const
     {
         StringArray paths;
+
         paths.add (".");
         paths.add (RelativePath (project.getGeneratedCodeFolder(),
                                  getTargetFolder(), RelativePath::buildTargetFolder).toWindowsStyle());
 
         paths.addArray (config.getHeaderSearchPaths());
+
+        if (os != CodeBlocksOS::windows)
+            paths.add ("/usr/include/freetype2");
+
         return cleanArray (paths);
     }
 
@@ -261,8 +324,10 @@ private:
             for (int i = 0; i < linkerFlags.size(); ++i)
                 setAddOption (*linker, "option", linkerFlags[i]);
 
-            for (int i = 0; i < mingwLibs.size(); ++i)
-                setAddOption (*linker, "library", mingwLibs[i]);
+            const StringArray& libs = (os == CodeBlocksOS::windows) ? mingwLibs : linuxLibs;
+
+            for (int i = 0; i < libs.size(); ++i)
+                setAddOption (*linker, "library", libs[i]);
 
             const StringArray librarySearchPaths (config.getLibrarySearchPaths());
             for (int i = 0; i < librarySearchPaths.size(); ++i)
@@ -290,9 +355,14 @@ private:
     {
         XmlElement* const linker = xml.createNewChildElement ("Linker");
 
-        static const char* defaultLibs[] = { "gdi32", "user32", "kernel32", "comctl32" };
+        StringArray libs;
 
-        StringArray libs (defaultLibs, numElementsInArray (defaultLibs));
+        if (os == CodeBlocksOS::windows)
+        {
+            static const char* defaultLibs[] = { "gdi32", "user32", "kernel32", "comctl32" };
+            libs = StringArray (defaultLibs, numElementsInArray (defaultLibs));
+        }
+
         libs.addTokens (getExternalLibrariesString(), ";\n", "\"'");
 
         libs = cleanArray (libs);
@@ -342,6 +412,8 @@ private:
     {
         xml.createNewChildElement ("Add")->setAttribute (nm, value);
     }
+
+    CodeBlocksOS os;
 
     JUCE_DECLARE_NON_COPYABLE (CodeBlocksProjectExporter)
 };

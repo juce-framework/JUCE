@@ -57,7 +57,7 @@ public:
             ev.xclient.format = 32;
             ev.xclient.data.l[0] = CurrentTime;
             ev.xclient.data.l[1] = 0 /*SYSTEM_TRAY_REQUEST_DOCK*/;
-            ev.xclient.data.l[2] = windowH;
+            ev.xclient.data.l[2] = (long) windowH;
             ev.xclient.data.l[3] = 0;
             ev.xclient.data.l[4] = 0;
 

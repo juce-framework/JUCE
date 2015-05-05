@@ -370,11 +370,11 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
         parseAndAddLibs (exporter.xcodeLibs, moduleInfo.moduleInfo [exporter.isOSX() ? "OSXLibs" : "iOSLibs"].toString());
     }
-    else if (exporter.isLinux())
+    else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux())
     {
         parseAndAddLibs (exporter.linuxLibs, moduleInfo.moduleInfo ["LinuxLibs"].toString());
     }
-    else if (exporter.isCodeBlocks())
+    else if (exporter.isCodeBlocksWindows())
     {
         parseAndAddLibs (exporter.mingwLibs, moduleInfo.moduleInfo ["mingwLibs"].toString());
     }
@@ -497,11 +497,17 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
 
 static bool fileTargetMatches (ProjectExporter& exporter, const String& target)
 {
-    if (exporter.isXcode())         return exporterTargetMatches ("xcode", target);
-    if (exporter.isWindows())       return exporterTargetMatches ("msvc", target);
-    if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
-    if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
-    if (exporter.isCodeBlocks())    return exporterTargetMatches ("mingw", target);
+    if (exporter.isXcode())
+        return exporterTargetMatches ("xcode", target);
+    if (exporter.isWindows())
+        return exporterTargetMatches ("msvc", target);
+    if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux())
+        return exporterTargetMatches ("linux", target);
+    if (exporter.isAndroid())
+        return exporterTargetMatches ("android", target);
+    if (exporter.isCodeBlocksWindows())
+        return exporterTargetMatches ("mingw", target);
+
     return target.isEmpty();
 }
 

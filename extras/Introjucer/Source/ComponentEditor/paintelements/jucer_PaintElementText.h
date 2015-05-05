@@ -331,24 +331,33 @@ public:
 
     void convertToPath()
     {
-        font = FontPropertyComponent::applyNameToFont (typefaceName, font);
+        if (PaintRoutineEditor* parent = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
+        {
 
-        const Rectangle<int> r (getCurrentAbsoluteBounds());
+            font = FontPropertyComponent::applyNameToFont (typefaceName, font);
 
-        GlyphArrangement arr;
-        arr.addCurtailedLineOfText (font, text,
-                                    0.0f, 0.0f, (float) r.getWidth(),
-                                    true);
+            const Rectangle<int> r =
+                getCurrentBounds (parent->getComponentArea().withZeroOrigin());
 
-        arr.justifyGlyphs (0, arr.getNumGlyphs(),
-                           (float) r.getX(), (float) r.getY(),
-                           (float) r.getWidth(), (float) r.getHeight(),
-                           justification);
+            GlyphArrangement arr;
+            arr.addCurtailedLineOfText (font, text,
+                                        0.0f, 0.0f, (float) r.getWidth(),
+                                        true);
 
-        Path path;
-        arr.createPath (path);
+            arr.justifyGlyphs (0, arr.getNumGlyphs(),
+                               (float) r.getX(), (float) r.getY(),
+                               (float) r.getWidth(), (float) r.getHeight(),
+                               justification);
 
-        convertToNewPathElement (path);
+            Path path;
+            arr.createPath (path);
+
+            convertToNewPathElement (path);
+        }
+        else
+        {
+            jassertfalse;
+        }
     }
 
 private:

@@ -66,11 +66,12 @@ public:
     virtual bool isXcode() const                { return false; }
     virtual bool isVisualStudio() const         { return false; }
     virtual int getVisualStudioVersion() const  { return 0; }
-    virtual bool isCodeBlocks() const           { return false; }
+    virtual bool isCodeBlocksWindows() const    { return false; }
+    virtual bool isCodeBlocksLinux() const      { return false; }
 
     virtual bool isAndroid() const              { return false; }
     virtual bool isWindows() const              { return false; }
-    virtual bool isLinux() const                { return false; }
+    virtual bool isLinuxMakefile() const        { return false; }
     virtual bool isOSX() const                  { return false; }
 
     bool mayCompileOnCurrentOS() const
