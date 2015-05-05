@@ -1274,7 +1274,7 @@ private:
         {
             struct timespec t;
             clock_gettime (CLOCK_MONOTONIC, &t);
-            time = 1000000000 * (int64) t.tv_sec + t.tv_nsec;
+            time = (uint64) (1000000000 * (int64) t.tv_sec + (int64) t.tv_nsec);
         }
 
         void wait() noexcept

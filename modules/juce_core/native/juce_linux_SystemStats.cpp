@@ -98,14 +98,14 @@ int SystemStats::getMemorySizeInMegabytes()
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
-        return sysi.totalram * sysi.mem_unit / (1024 * 1024);
+        return (int) (sysi.totalram * sysi.mem_unit / (1024 * 1024));
 
     return 0;
 }
 
 int SystemStats::getPageSize()
 {
-    return sysconf (_SC_PAGESIZE);
+    return (int) sysconf (_SC_PAGESIZE);
 }
 
 //==============================================================================
@@ -167,7 +167,7 @@ uint32 juce_millisecondsSinceStartup() noexcept
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
 
-    return t.tv_sec * 1000 + t.tv_nsec / 1000000;
+    return (uint32) (t.tv_sec * 1000 + t.tv_nsec / 1000000);
 }
 
 int64 Time::getHighResolutionTicks() noexcept

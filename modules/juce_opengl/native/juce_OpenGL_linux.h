@@ -1,4 +1,5 @@
 /*
+
   ==============================================================================
 
    This file is part of the JUCE library.
@@ -30,7 +31,7 @@ class OpenGLContext::NativeContext
 {
 public:
     NativeContext (Component& component,
-                   const OpenGLPixelFormat& pixelFormat,
+                   const OpenGLPixelFormat& cPixelFormat,
                    void* shareContext,
                    bool /*useMultisampling*/,
                    OpenGLVersion)
@@ -44,16 +45,16 @@ public:
         {
             GLX_RGBA,
             GLX_DOUBLEBUFFER,
-            GLX_RED_SIZE,         pixelFormat.redBits,
-            GLX_GREEN_SIZE,       pixelFormat.greenBits,
-            GLX_BLUE_SIZE,        pixelFormat.blueBits,
-            GLX_ALPHA_SIZE,       pixelFormat.alphaBits,
-            GLX_DEPTH_SIZE,       pixelFormat.depthBufferBits,
-            GLX_STENCIL_SIZE,     pixelFormat.stencilBufferBits,
-            GLX_ACCUM_RED_SIZE,   pixelFormat.accumulationBufferRedBits,
-            GLX_ACCUM_GREEN_SIZE, pixelFormat.accumulationBufferGreenBits,
-            GLX_ACCUM_BLUE_SIZE,  pixelFormat.accumulationBufferBlueBits,
-            GLX_ACCUM_ALPHA_SIZE, pixelFormat.accumulationBufferAlphaBits,
+            GLX_RED_SIZE,         cPixelFormat.redBits,
+            GLX_GREEN_SIZE,       cPixelFormat.greenBits,
+            GLX_BLUE_SIZE,        cPixelFormat.blueBits,
+            GLX_ALPHA_SIZE,       cPixelFormat.alphaBits,
+            GLX_DEPTH_SIZE,       cPixelFormat.depthBufferBits,
+            GLX_STENCIL_SIZE,     cPixelFormat.stencilBufferBits,
+            GLX_ACCUM_RED_SIZE,   cPixelFormat.accumulationBufferRedBits,
+            GLX_ACCUM_GREEN_SIZE, cPixelFormat.accumulationBufferGreenBits,
+            GLX_ACCUM_BLUE_SIZE,  cPixelFormat.accumulationBufferBlueBits,
+            GLX_ACCUM_ALPHA_SIZE, cPixelFormat.accumulationBufferAlphaBits,
             None
         };
 
@@ -70,13 +71,13 @@ public:
         swa.border_pixel = 0;
         swa.event_mask = ExposureMask | StructureNotifyMask;
 
-        const Rectangle<int> bounds (component.getTopLevelComponent()
-                                        ->getLocalArea (&component, component.getLocalBounds()));
+        Rectangle<int> glBounds (component.getTopLevelComponent()
+                                   ->getLocalArea (&component, component.getLocalBounds()));
 
         embeddedWindow = XCreateWindow (display, windowH,
-                                        bounds.getX(), bounds.getY(),
-                                        jmax (1, bounds.getWidth()),
-                                        jmax (1, bounds.getHeight()),
+                                        glBounds.getX(), glBounds.getY(),
+                                        (unsigned int) jmax (1, glBounds.getWidth()),
+                                        (unsigned int) jmax (1, glBounds.getHeight()),
                                         0, bestVisual->depth,
                                         InputOutput,
                                         bestVisual->visual,
@@ -146,8 +147,8 @@ public:
         ScopedXLock xlock;
         XMoveResizeWindow (display, embeddedWindow,
                            bounds.getX(), bounds.getY(),
-                           jmax (1, bounds.getWidth()),
-                           jmax (1, bounds.getHeight()));
+                           (unsigned int) jmax (1, bounds.getWidth()),
+                           (unsigned int) jmax (1, bounds.getHeight()));
     }
 
     bool setSwapInterval (int numFramesPerSwap)

@@ -138,8 +138,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
 
-DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCard)
-    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildCard))
+DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCardStr)
+    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildCardStr))
 {
 }
 

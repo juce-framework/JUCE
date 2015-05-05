@@ -507,7 +507,7 @@ void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vclr (dest, 1, (size_t) num);
    #else
-    zeromem (dest, num * sizeof (float));
+    zeromem (dest, (size_t) num * sizeof (float));
    #endif
 }
 
@@ -516,7 +516,7 @@ void JUCE_CALLTYPE FloatVectorOperations::clear (double* dest, int num) noexcept
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vclrD (dest, 1, (size_t) num);
    #else
-    zeromem (dest, num * sizeof (double));
+    zeromem (dest, (size_t) num * sizeof (double));
    #endif
 }
 

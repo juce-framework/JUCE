@@ -68,7 +68,7 @@ namespace ClipboardHelpers
                                     (unsigned char**) &clipData) == Success)
             {
                 if (actualType == atom_UTF8_STRING && actualFormat == 8)
-                    returnData = String::fromUTF8 (clipData, numItems);
+                    returnData = String::fromUTF8 (clipData, (int) numItems);
                 else if (actualType == XA_STRING && actualFormat == 8)
                     returnData = String (clipData, numItems);
 
@@ -184,7 +184,7 @@ namespace ClipboardHelpers
                     XChangeProperty (evt.display, evt.requestor,
                                      evt.property, evt.target,
                                      propertyFormat /* 8 or 32 */, PropModeReplace,
-                                     reinterpret_cast<const unsigned char*> (data.getData()), numDataItems);
+                                     reinterpret_cast<const unsigned char*> (data.getData()), (int) numDataItems);
                     reply.property = evt.property; // " == success"
                 }
             }
