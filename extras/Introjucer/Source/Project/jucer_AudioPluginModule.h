@@ -501,9 +501,17 @@ namespace AUHelpers
             if (! sdkLocation.endsWithChar ('/'))
                 sdkLocation << '/';
 
-            exporter.extraSearchPaths.add (sdkLocation + "PublicUtility");
-            exporter.extraSearchPaths.add (sdkLocation + "AudioUnits/AUPublic/Utility");
-            exporter.extraSearchPaths.add (sdkLocation + "AudioUnits/AUPublic/AUBase");
+            {
+                String relativeSDK (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (sdkLocation, RelativePath::projectFolder))
+                                            .toUnixStyle());
+
+                if (! relativeSDK.endsWithChar ('/'))
+                    relativeSDK << '/';
+
+                exporter.extraSearchPaths.add (relativeSDK + "PublicUtility");
+                exporter.extraSearchPaths.add (relativeSDK + "AudioUnits/AUPublic/Utility");
+                exporter.extraSearchPaths.add (relativeSDK + "AudioUnits/AUPublic/AUBase");
+            }
 
             exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
             exporter.xcodeExcludedFiles64Bit = "\"*Carbon*.cpp\"";
