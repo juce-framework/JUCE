@@ -1939,7 +1939,7 @@ private:
 
 
                    xbitmap->blitToWindow (peer.windowH,
-                                          i->getX(), i->getY(), 
+                                          i->getX(), i->getY(),
                                           (unsigned int) i->getWidth(),
                                           (unsigned int) i->getHeight(),
                                           i->getX() - totalArea.getX(), i->getY() - totalArea.getY());

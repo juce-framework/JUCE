@@ -507,7 +507,7 @@ static bool fileTargetMatches (ProjectExporter& exporter, const String& target)
         return exporterTargetMatches ("android", target);
     if (exporter.isCodeBlocksWindows())
         return exporterTargetMatches ("mingw", target);
-    
+
     return target.isEmpty();
 }
 

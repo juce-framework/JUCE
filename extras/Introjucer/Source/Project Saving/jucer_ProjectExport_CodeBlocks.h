@@ -31,7 +31,7 @@ enum CodeBlocksOS
 class CodeBlocksProjectExporter  : public ProjectExporter
 {
 public:
-    
+
     //==============================================================================
     static const char* getName (CodeBlocksOS os)
     {
@@ -39,12 +39,12 @@ public:
             return "Code::Blocks (Windows)";
         else if (os == linux)
             return "Code::Blocks (Linux)";
-        
+
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
         return "Code::Blocks (Unknown OS)";
     }
-    
+
     //==============================================================================
     static const char* getValueTreeTypeName (CodeBlocksOS os)
     {
@@ -52,12 +52,12 @@ public:
             return "CODEBLOCKS_WINDOWS";
         else if (os == linux)
             return "CODEBLOCKS_LINUX";
-        
+
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
         return "CODEBLOCKS_UNKOWN_OS";
     }
-    
+
     //==============================================================================
     static String getTargetFolderName (CodeBlocksOS os)
     {
@@ -65,7 +65,7 @@ public:
             return "CodeBlocksWindows";
         else if (os == linux)
             return "CodeBlocksLinux";
-        
+
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
         return "CodeBlocksUnknownOS";
@@ -78,7 +78,7 @@ public:
             return new CodeBlocksProjectExporter (project, settings, CodeBlocksOS::windows);
             // this will also import legacy jucer files where CodeBlocks only worked for Windows,
             // had valueTreetTypeName "CODEBLOCKS", and there was no OS distinction
-        
+
         else if (settings.hasType (getValueTreeTypeName(CodeBlocksOS::linux)))
             return new CodeBlocksProjectExporter (project, settings, CodeBlocksOS::linux);
 
@@ -245,16 +245,16 @@ private:
     StringArray getIncludePaths (const BuildConfiguration& config) const
     {
         StringArray paths;
-        
+
         paths.add (".");
         paths.add (RelativePath (project.getGeneratedCodeFolder(),
                                  getTargetFolder(), RelativePath::buildTargetFolder).toWindowsStyle());
 
         paths.addArray (config.getHeaderSearchPaths());
-        
+
         if (os != CodeBlocksOS::windows)
             paths.add ("/usr/include/freetype2");
-            
+
         return cleanArray (paths);
     }
 
@@ -323,7 +323,7 @@ private:
             const StringArray linkerFlags (getLinkerFlags (config));
             for (int i = 0; i < linkerFlags.size(); ++i)
                 setAddOption (*linker, "option", linkerFlags[i]);
-            
+
             const StringArray& libs = (os == CodeBlocksOS::windows) ? mingwLibs : linuxLibs;
 
             for (int i = 0; i < libs.size(); ++i)
@@ -354,15 +354,15 @@ private:
     void addProjectLinkerOptions (XmlElement& xml) const
     {
         XmlElement* const linker = xml.createNewChildElement ("Linker");
-        
+
         StringArray libs;
-        
+
         if (os == CodeBlocksOS::windows)
         {
             static const char* defaultLibs[] = { "gdi32", "user32", "kernel32", "comctl32" };
             libs = StringArray (defaultLibs, numElementsInArray (defaultLibs));
         }
-        
+
         libs.addTokens (getExternalLibrariesString(), ";\n", "\"'");
 
         libs = cleanArray (libs);
@@ -412,7 +412,7 @@ private:
     {
         xml.createNewChildElement ("Add")->setAttribute (nm, value);
     }
-    
+
     CodeBlocksOS os;
 
     JUCE_DECLARE_NON_COPYABLE (CodeBlocksProjectExporter)
