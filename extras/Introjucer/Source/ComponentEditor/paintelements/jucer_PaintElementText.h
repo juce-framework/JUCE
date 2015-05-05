@@ -331,28 +331,33 @@ public:
 
     void convertToPath()
     {
-        jassert (dynamic_cast<PaintRoutineEditor*> (getParentComponent()) != nullptr);
+        if (PaintRoutineEditor* parent = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
+        {
 
-        font = FontPropertyComponent::applyNameToFont (typefaceName, font);
+            font = FontPropertyComponent::applyNameToFont (typefaceName, font);
 
-        const Rectangle<int> r =
-            getCurrentBounds (Rectangle<int> (((PaintRoutineEditor*) getParentComponent())
-                                              ->getComponentArea()).withZeroOrigin());
+            const Rectangle<int> r =
+                getCurrentBounds (parent->getComponentArea().withZeroOrigin());
 
-        GlyphArrangement arr;
-        arr.addCurtailedLineOfText (font, text,
-                                    0.0f, 0.0f, (float) r.getWidth(),
-                                    true);
+            GlyphArrangement arr;
+            arr.addCurtailedLineOfText (font, text,
+                                        0.0f, 0.0f, (float) r.getWidth(),
+                                        true);
 
-        arr.justifyGlyphs (0, arr.getNumGlyphs(),
-                           (float) r.getX(), (float) r.getY(),
-                           (float) r.getWidth(), (float) r.getHeight(),
-                           justification);
+            arr.justifyGlyphs (0, arr.getNumGlyphs(),
+                               (float) r.getX(), (float) r.getY(),
+                               (float) r.getWidth(), (float) r.getHeight(),
+                               justification);
 
-        Path path;
-        arr.createPath (path);
+            Path path;
+            arr.createPath (path);
 
-        convertToNewPathElement (path);
+            convertToNewPathElement (path);
+        }
+        else
+        {
+            jassertfalse;
+        }
     }
 
 private:
