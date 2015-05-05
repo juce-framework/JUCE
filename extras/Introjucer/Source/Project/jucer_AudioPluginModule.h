@@ -243,7 +243,7 @@ namespace VSTHelpers
 
             if (exporter.isVisualStudio())
                 exporter.extraSearchPaths.add (path.toWindowsStyle());
-            else if (exporter.isLinux() || exporter.isXcode())
+            else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux() || exporter.isXcode())
                 exporter.extraSearchPaths.insert (0, path.toUnixStyle());
         }
     }
@@ -282,7 +282,7 @@ namespace VSTHelpers
 
         if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
-        else if (exporter.isLinux())
+        else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux() )
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
 
         if (exporter.isVisualStudio())

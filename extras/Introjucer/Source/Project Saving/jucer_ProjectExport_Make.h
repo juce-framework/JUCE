@@ -44,14 +44,14 @@ public:
         name = getNameLinux();
 
         if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + "Linux";
+            getTargetLocationValue() = getDefaultBuildsRootFolder() + "LinuxMakefile";
     }
 
     //==============================================================================
     bool canLaunchProject() override                    { return false; }
     bool launchProject() override                       { return false; }
     bool usesMMFiles() const override                   { return false; }
-    bool isLinux() const override                       { return true; }
+    bool isLinuxMakefile() const override               { return true; }
     bool canCopeWithDuplicateFiles() override           { return false; }
 
     void createExporterProperties (PropertyListBuilder&) override
