@@ -1512,14 +1512,13 @@ Slider::SliderLayout LookAndFeel_V2::getSliderLayout (Slider& slider)
     const int textBoxWidth = jmax (0, jmin (slider.getTextBoxWidth(),  localBounds.getWidth() - minXSpace));
     const int textBoxHeight = jmax (0, jmin (slider.getTextBoxHeight(), localBounds.getHeight() - minYSpace));
 
-    Slider::SliderStyle style = slider.getSliderStyle();
     Slider::SliderLayout layout;
 
     // 2. set the textBox bounds
 
     if (textBoxPos != Slider::NoTextBox)
     {
-        if (style == Slider::LinearBar || style == Slider::LinearBarVertical)
+        if (slider.isBar())
         {
             layout.textBoxBounds = localBounds;
         }
@@ -1542,17 +1541,22 @@ Slider::SliderLayout LookAndFeel_V2::getSliderLayout (Slider& slider)
 
     layout.sliderBounds = localBounds;
 
-    if (! slider.isBar())
+    if (slider.isBar())
+    {
+        layout.sliderBounds.reduce (1, 1);   // bar border
+    }
+    else
     {
         if (textBoxPos == Slider::TextBoxLeft)       layout.sliderBounds.removeFromLeft (textBoxWidth);
         else if (textBoxPos == Slider::TextBoxRight) layout.sliderBounds.removeFromRight (textBoxWidth);
         else if (textBoxPos == Slider::TextBoxAbove) layout.sliderBounds.removeFromTop (textBoxHeight);
         else if (textBoxPos == Slider::TextBoxBelow) layout.sliderBounds.removeFromBottom (textBoxHeight);
-    }
 
-    if (slider.isBar())              layout.sliderBounds.reduce (1, 1);   // bar indent
-    else if (slider.isHorizontal())  layout.sliderBounds.reduce (getSliderThumbRadius (slider), 0);
-    else if (slider.isVertical())    layout.sliderBounds.reduce (0, getSliderThumbRadius (slider));
+        const int thumbIndent = getSliderThumbRadius (slider);
+
+        if (slider.isHorizontal())    layout.sliderBounds.reduce (thumbIndent, 0);
+        else if (slider.isVertical()) layout.sliderBounds.reduce (0, thumbIndent);
+    }
 
     return layout;
 }
