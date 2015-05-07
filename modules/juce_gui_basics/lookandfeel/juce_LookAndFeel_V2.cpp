@@ -1493,6 +1493,71 @@ int LookAndFeel_V2::getSliderPopupPlacement (Slider&)
 }
 
 //==============================================================================
+Slider::SliderLayout LookAndFeel_V2::getSliderLayout (Slider& slider)
+{
+    // 1. compute the actually visible textBox size from the slider textBox size and some additional constraints
+
+    int minXSpace = 0;
+    int minYSpace = 0;
+
+    Slider::TextEntryBoxPosition textBoxPos = slider.getTextBoxPosition();
+
+    if (textBoxPos == Slider::TextBoxLeft || textBoxPos == Slider::TextBoxRight)
+        minXSpace = 30;
+    else
+        minYSpace = 15;
+
+    Rectangle<int> localBounds = slider.getLocalBounds();
+
+    const int textBoxWidth = jmax (0, jmin (slider.getTextBoxWidth(),  localBounds.getWidth() - minXSpace));
+    const int textBoxHeight = jmax (0, jmin (slider.getTextBoxHeight(), localBounds.getHeight() - minYSpace));
+
+    Slider::SliderStyle style = slider.getSliderStyle();
+    Slider::SliderLayout layout;
+
+    // 2. set the textBox bounds
+
+    if (textBoxPos != Slider::NoTextBox)
+    {
+        if (style == Slider::LinearBar || style == Slider::LinearBarVertical)
+        {
+            layout.textBoxBounds = localBounds;
+        }
+        else
+        {
+            layout.textBoxBounds.setWidth (textBoxWidth);
+            layout.textBoxBounds.setHeight (textBoxHeight);
+
+            if (textBoxPos == Slider::TextBoxLeft)           layout.textBoxBounds.setX (0);
+            else if (textBoxPos == Slider::TextBoxRight)     layout.textBoxBounds.setX (localBounds.getWidth() - textBoxWidth);
+            else /* above or below -> centre horizontally */ layout.textBoxBounds.setX ((localBounds.getWidth() - textBoxWidth) / 2);
+
+            if (textBoxPos == Slider::TextBoxAbove)          layout.textBoxBounds.setY (0);
+            else if (textBoxPos == Slider::TextBoxBelow)     layout.textBoxBounds.setY (localBounds.getHeight() - textBoxHeight);
+            else /* left or right -> centre vertically */    layout.textBoxBounds.setY ((localBounds.getHeight() - textBoxHeight) / 2);
+        }
+    }
+
+    // 3. set the slider bounds
+
+    layout.sliderBounds = localBounds;
+
+    if (! slider.isBar())
+    {
+        if (textBoxPos == Slider::TextBoxLeft)       layout.sliderBounds.removeFromLeft (textBoxWidth);
+        else if (textBoxPos == Slider::TextBoxRight) layout.sliderBounds.removeFromRight (textBoxWidth);
+        else if (textBoxPos == Slider::TextBoxAbove) layout.sliderBounds.removeFromTop (textBoxHeight);
+        else if (textBoxPos == Slider::TextBoxBelow) layout.sliderBounds.removeFromBottom (textBoxHeight);
+    }
+
+    if (slider.isBar())              layout.sliderBounds.reduce (1, 1);   // bar indent
+    else if (slider.isHorizontal())  layout.sliderBounds.reduce (getSliderThumbRadius (slider), 0);
+    else if (slider.isVertical())    layout.sliderBounds.reduce (0, getSliderThumbRadius (slider));
+
+    return layout;
+}
+
+//==============================================================================
 Rectangle<int> LookAndFeel_V2::getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea)
 {
     const TextLayout tl (LookAndFeelHelpers::layoutTooltipText (tipText, Colours::black));
