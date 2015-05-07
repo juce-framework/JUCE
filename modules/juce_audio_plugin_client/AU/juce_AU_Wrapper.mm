@@ -658,11 +658,9 @@ public:
                                     &outCurrentSampleInTimeLine,
                                     &looping,
                                     &outCycleStartBeat,
-                                    &outCycleEndBeat) != noErr
-             || getHostType().isLogic())
+                                    &outCycleEndBeat) != noErr)
         {
-            // If the host doesn't support this callback (or if it's Logic, which has a bug),
-            // then fallback to using the sample time from lastTimeStamp:
+            // If the host doesn't support this callback, then use the sample time from lastTimeStamp:
             outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
 
