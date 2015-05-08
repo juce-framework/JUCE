@@ -115,16 +115,16 @@ public:
             float brightness,
             float alpha) noexcept;
 
-    /** Creates a colour using a PixedARGB object. This function assumes that the argb pixel is
+    /** Creates a colour using a PixelARGB object. This function assumes that the argb pixel is
         not premultiplied.
      */
     Colour (PixelARGB argb) noexcept;
 
-    /** Creates a colour using a PixedRGB object.
+    /** Creates a colour using a PixelRGB object.
      */
     Colour (PixelRGB rgb) noexcept;
 
-    /** Creates a colour using a PixedAlpha object.
+    /** Creates a colour using a PixelAlpha object.
      */
     Colour (PixelAlpha alpha) noexcept;
 
