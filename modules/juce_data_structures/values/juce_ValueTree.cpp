@@ -1022,6 +1022,9 @@ ValueTree ValueTree::readFromStream (InputStream& input)
     {
         ValueTree child (readFromStream (input));
 
+        if (! child.isValid())
+            return v;
+
         v.object->children.add (child.object);
         child.object->parent = v.object;
     }
