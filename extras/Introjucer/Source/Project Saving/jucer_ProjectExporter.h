@@ -81,7 +81,7 @@ public:
        #elif JUCE_WINDOWS
         return isWindows() || isAndroid();
        #elif JUCE_LINUX
-        return isLinux() || isAndroid();
+        return isLinuxMakefile() || isCodeBlocksLinux() || isAndroid();
        #else
         #error
        #endif

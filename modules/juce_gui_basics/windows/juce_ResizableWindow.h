@@ -140,6 +140,12 @@ public:
                           int newMaximumWidth,
                           int newMaximumHeight) noexcept;
 
+    /** Can be used to enable or disable user-dragging of the window. */
+    void setDraggable (bool shouldBeDraggable) noexcept;
+
+    /** Returns true if the window can be dragged around by the user. */
+    bool isDraggable() const noexcept                               { return canDrag; }
+
     /** Returns the bounds constrainer object that this window is using.
         You can access this to change its properties.
     */
@@ -370,20 +376,20 @@ protected:
     void addAndMakeVisible (Component*, int zOrder = -1);
    #endif
 
-    ScopedPointer <ResizableCornerComponent> resizableCorner;
-    ScopedPointer <ResizableBorderComponent> resizableBorder;
+    ScopedPointer<ResizableCornerComponent> resizableCorner;
+    ScopedPointer<ResizableBorderComponent> resizableBorder;
 
 private:
     //==============================================================================
     Component::SafePointer<Component> contentComponent;
-    bool ownsContentComponent, resizeToFitContent, fullscreen, dragStarted;
+    bool ownsContentComponent, resizeToFitContent, fullscreen, canDrag, dragStarted;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;
     ComponentBoundsConstrainer* constrainer;
-    #if JUCE_DEBUG
+   #if JUCE_DEBUG
     bool hasBeenResized;
-    #endif
+   #endif
 
     void initialise (bool addToDesktop);
     void updateLastPosIfNotFullScreen();

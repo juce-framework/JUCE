@@ -413,7 +413,7 @@ public:
      }
 
     //==============================================================================
-    void handlePaintCallback (JNIEnv* env, jobject canvas)
+    void handlePaintCallback (JNIEnv* env, jobject canvas, jobject paint)
     {
         jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
         const int left   = env->GetIntField (rect, RectClass.left);
@@ -449,7 +449,7 @@ public:
 
             env->CallVoidMethod (canvas, CanvasMinimal.drawBitmap, (jintArray) buffer.get(), 0, clip.getWidth(),
                                  (jfloat) clip.getX(), (jfloat) clip.getY(),
-                                 clip.getWidth(), clip.getHeight(), true, (jobject) 0);
+                                 clip.getWidth(), clip.getHeight(), true, paint);
         }
     }
 
@@ -575,7 +575,7 @@ int64 AndroidComponentPeer::touchesDown = 0;
           peer->juceMethodInvocation; \
   }
 
-JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jlong host, jobject canvas),                          handlePaintCallback (env, canvas))
+JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
 JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
 JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
 JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))

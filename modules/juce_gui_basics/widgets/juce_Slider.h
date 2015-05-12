@@ -756,6 +756,8 @@ public:
     bool isVertical() const noexcept;
     /** True if the slider is in a rotary mode. */
     bool isRotary() const noexcept;
+    /** True if the slider is in a linear bar mode. */
+    bool isBar() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
@@ -778,6 +780,16 @@ public:
         textBoxBackgroundColourId   = 0x1001500,  /**< The background colour for the text-editor box. */
         textBoxHighlightColourId    = 0x1001600,  /**< The text highlight colour for the text-editor box. */
         textBoxOutlineColourId      = 0x1001700   /**< The colour to use for a border around the text-editor box. */
+    };
+
+    //==============================================================================
+    /** A struct defining the placement of the slider area and the text box area
+        relative to the bounds of the whole Slider component.
+     */
+    struct SliderLayout
+    {
+        Rectangle<int> sliderBounds;
+        Rectangle<int> textBoxBounds;
     };
 
     //==============================================================================
@@ -829,6 +841,8 @@ public:
 
         virtual Font getSliderPopupFont (Slider&) = 0;
         virtual int getSliderPopupPlacement (Slider&) = 0;
+
+        virtual SliderLayout getSliderLayout (Slider&) = 0;
 
        #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
         // These methods' parameters have changed: see the new method signatures.

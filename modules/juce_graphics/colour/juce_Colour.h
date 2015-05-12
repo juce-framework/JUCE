@@ -115,6 +115,19 @@ public:
             float brightness,
             float alpha) noexcept;
 
+    /** Creates a colour using a PixelARGB object. This function assumes that the argb pixel is
+        not premultiplied.
+     */
+    Colour (PixelARGB argb) noexcept;
+
+    /** Creates a colour using a PixelRGB object.
+     */
+    Colour (PixelRGB rgb) noexcept;
+
+    /** Creates a colour using a PixelAlpha object.
+     */
+    Colour (PixelAlpha alpha) noexcept;
+
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
         The floating point values must be between 0.0 and 1.0.

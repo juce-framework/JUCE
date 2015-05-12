@@ -22,23 +22,23 @@
   ==============================================================================
 */
 
-enum CodeBlocksOS
-{
-    windows,
-    linux
-};
-
 class CodeBlocksProjectExporter  : public ProjectExporter
 {
 public:
+    enum CodeBlocksOS
+    {
+        windowsTarget,
+        linuxTarget
+    };
 
     //==============================================================================
-    static const char* getName (CodeBlocksOS os)
+    static const char* getNameWindows() noexcept    { return "Code::Blocks (Windows)"; }
+    static const char* getNameLinux() noexcept      { return "Code::Blocks (Linux)"; }
+
+    static const char* getName (CodeBlocksOS os) noexcept
     {
-        if (os == windows)
-            return "Code::Blocks (Windows)";
-        else if (os == linux)
-            return "Code::Blocks (Linux)";
+        if (os == windowsTarget) return getNameWindows();
+        if (os == linuxTarget)   return getNameLinux();
 
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
@@ -48,10 +48,8 @@ public:
     //==============================================================================
     static const char* getValueTreeTypeName (CodeBlocksOS os)
     {
-        if (os == windows)
-            return "CODEBLOCKS_WINDOWS";
-        else if (os == linux)
-            return "CODEBLOCKS_LINUX";
+        if (os == windowsTarget)  return "CODEBLOCKS_WINDOWS";
+        if (os == linuxTarget)    return "CODEBLOCKS_LINUX";
 
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
@@ -61,10 +59,8 @@ public:
     //==============================================================================
     static String getTargetFolderName (CodeBlocksOS os)
     {
-        if (os == windows)
-            return "CodeBlocksWindows";
-        else if (os == linux)
-            return "CodeBlocksLinux";
+        if (os == windowsTarget)  return "CodeBlocksWindows";
+        if (os == linuxTarget)    return "CodeBlocksLinux";
 
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
@@ -74,13 +70,13 @@ public:
     //==============================================================================
     static CodeBlocksProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
-        if (settings.hasType (getValueTreeTypeName(CodeBlocksOS::windows)) || settings.hasType ("CODEBLOCKS"))
-            return new CodeBlocksProjectExporter (project, settings, CodeBlocksOS::windows);
-            // this will also import legacy jucer files where CodeBlocks only worked for Windows,
-            // had valueTreetTypeName "CODEBLOCKS", and there was no OS distinction
+        // this will also import legacy jucer files where CodeBlocks only worked for Windows,
+        // had valueTreetTypeName "CODEBLOCKS", and there was no OS distinction
+        if (settings.hasType (getValueTreeTypeName (windowsTarget)) || settings.hasType ("CODEBLOCKS"))
+            return new CodeBlocksProjectExporter (project, settings, windowsTarget);
 
-        else if (settings.hasType (getValueTreeTypeName(CodeBlocksOS::linux)))
-            return new CodeBlocksProjectExporter (project, settings, CodeBlocksOS::linux);
+        if (settings.hasType (getValueTreeTypeName (linuxTarget)))
+            return new CodeBlocksProjectExporter (project, settings, linuxTarget);
 
         return nullptr;
     }
@@ -92,16 +88,14 @@ public:
         name = getName (os);
 
         if (getTargetLocationString().isEmpty())
-        {
             getTargetLocationValue() = getDefaultBuildsRootFolder() + getTargetFolderName (os);
-        }
     }
 
     //==============================================================================
     bool canLaunchProject() override                 { return false; }
     bool launchProject() override                    { return false; }
-    bool isCodeBlocksWindows() const override        { return os == CodeBlocksOS::windows; }
-    bool isCodeBlocksLinux() const override          { return os == CodeBlocksOS::linux; }
+    bool isCodeBlocksWindows() const override        { return os == windowsTarget; }
+    bool isCodeBlocksLinux() const override          { return os == linuxTarget; }
     bool usesMMFiles() const override                { return false; }
     bool canCopeWithDuplicateFiles() override        { return false; }
 
@@ -170,7 +164,8 @@ private:
     StringArray getDefines (const BuildConfiguration& config) const
     {
         StringPairArray defines;
-        if (os == CodeBlocksOS::windows)
+
+        if (isCodeBlocksWindows())
         {
             defines.set ("__MINGW__", "1");
             defines.set ("__MINGW_EXTENSION", String::empty);
@@ -252,7 +247,7 @@ private:
 
         paths.addArray (config.getHeaderSearchPaths());
 
-        if (os != CodeBlocksOS::windows)
+        if (! isCodeBlocksWindows())
             paths.add ("/usr/include/freetype2");
 
         return cleanArray (paths);
@@ -324,7 +319,7 @@ private:
             for (int i = 0; i < linkerFlags.size(); ++i)
                 setAddOption (*linker, "option", linkerFlags[i]);
 
-            const StringArray& libs = (os == CodeBlocksOS::windows) ? mingwLibs : linuxLibs;
+            const StringArray& libs = isCodeBlocksWindows() ? mingwLibs : linuxLibs;
 
             for (int i = 0; i < libs.size(); ++i)
                 setAddOption (*linker, "library", libs[i]);
@@ -357,7 +352,7 @@ private:
 
         StringArray libs;
 
-        if (os == CodeBlocksOS::windows)
+        if (isCodeBlocksWindows())
         {
             static const char* defaultLibs[] = { "gdi32", "user32", "kernel32", "comctl32" };
             libs = StringArray (defaultLibs, numElementsInArray (defaultLibs));

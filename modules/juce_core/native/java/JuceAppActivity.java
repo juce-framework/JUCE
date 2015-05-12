@@ -331,15 +331,26 @@ public class JuceAppActivity   extends Activity
             setFocusableInTouchMode (true);
             setOnFocusChangeListener (this);
             requestFocus();
+
+            // swap red and blue colours to match internal opengl texture format
+            ColorMatrix colorMatrix = new ColorMatrix();
+            float[] colorTransform =
+                {0, 0, 1.0f, 0, 0,
+                 0, 1.0f, 0, 0, 0,
+                 1.0f, 0, 0, 0, 0,
+                 0, 0, 0, 1.0f, 0};
+            colorMatrix.set (colorTransform);
+            ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter (colorMatrix);
+            paint.setColorFilter (colorFilter);
         }
 
         //==============================================================================
-        private native void handlePaint (long host, Canvas canvas);
+        private native void handlePaint (long host, Canvas canvas, Paint paint);
 
         @Override
         public void onDraw (Canvas canvas)
         {
-            handlePaint (host, canvas);
+            handlePaint (host, canvas, paint);
         }
 
         @Override
@@ -350,6 +361,7 @@ public class JuceAppActivity   extends Activity
 
         private boolean opaque;
         private long host;
+        private Paint paint = new Paint();
 
         //==============================================================================
         private native void handleMouseDown (long host, int index, float x, float y, long time);

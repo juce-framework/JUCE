@@ -433,11 +433,11 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
                 {
                     PixelARGB p (*(const PixelARGB*) pixelData);
                     p.unpremultiply();
-                    pixel = Colours::white.overlaidWith (Colour (p.getARGB()));
+                    pixel = Colours::white.overlaidWith (Colour (p));
                 }
                 else if (im.isRGB())
                 {
-                    pixel = Colour (((const PixelRGB*) pixelData)->getARGB());
+                    pixel = Colour (*((const PixelRGB*) pixelData));
                 }
                 else
                 {

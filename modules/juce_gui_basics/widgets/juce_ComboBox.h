@@ -63,7 +63,7 @@ public:
     ~ComboBox();
 
     //==============================================================================
-    /** Sets whether the test in the combo-box is editable.
+    /** Sets whether the text in the combo-box is editable.
 
         The default state for a new ComboBox is non-editable, and can only be changed
         by choosing from the drop-down list.

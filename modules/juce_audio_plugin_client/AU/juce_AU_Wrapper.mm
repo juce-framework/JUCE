@@ -735,7 +735,7 @@ public:
                                     &outCycleStartBeat,
                                     &outCycleEndBeat) != noErr)
         {
-            // If the host doesn't support this callback, use the sample time from lastTimeStamp:
+            // If the host doesn't support this callback, then use the sample time from lastTimeStamp:
             outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
 

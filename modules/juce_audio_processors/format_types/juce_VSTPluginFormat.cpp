@@ -2084,6 +2084,14 @@ public:
                 plugin.dispatch (effEditIdle, 0, 0, 0, 0);
                 reentrant = false;
             }
+
+           #if JUCE_LINUX
+            if (pluginWindow == 0)
+            {
+                updatePluginWindowHandle();
+                componentMovedOrResized (true, true);
+            }
+           #endif
         }
     }
 
@@ -2269,11 +2277,7 @@ private:
         }
 
        #elif JUCE_LINUX
-        pluginWindow = getChildWindow ((Window) getWindowHandle());
-
-        if (pluginWindow != 0)
-            pluginProc = (EventProcPtr) getPropertyFromXWindow (pluginWindow,
-                                                                XInternAtom (display, "_XEventProc", False));
+        updatePluginWindowHandle();
 
         int w = 250, h = 150;
 
@@ -2500,6 +2504,15 @@ private:
             ev.xbutton.type = ButtonRelease;
             sendEventToChild (ev);
         }
+    }
+
+    void updatePluginWindowHandle()
+    {
+        pluginWindow = getChildWindow ((Window) getWindowHandle());
+
+        if (pluginWindow != 0)
+            pluginProc = (EventProcPtr) getPropertyFromXWindow (pluginWindow,
+                                                                XInternAtom (display, "_XEventProc", False));
     }
 #endif
 

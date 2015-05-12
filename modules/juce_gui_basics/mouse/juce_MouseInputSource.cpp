@@ -351,13 +351,10 @@ public:
 
     int getNumberOfMultipleClicks() const noexcept
     {
-        int numClicks = 0;
+        int numClicks = 1;
 
-        if (mouseDowns[0].time != Time())
+        if (! hasMouseMovedSignificantlySincePressed())
         {
-            if (! mouseMovedSignificantlySincePressed)
-                ++numClicks;
-
             for (int i = 1; i < numElementsInArray (mouseDowns); ++i)
             {
                 if (mouseDowns[0].canBePartOfMultipleClickWith (mouseDowns[i], MouseEvent::getDoubleClickTimeout() * jmin (i, 2)))

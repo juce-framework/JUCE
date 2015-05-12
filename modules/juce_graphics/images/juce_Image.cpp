@@ -407,9 +407,9 @@ Colour Image::BitmapData::getPixelColour (const int x, const int y) const noexce
 
     switch (pixelFormat)
     {
-        case Image::ARGB:           return Colour (((const PixelARGB*)  pixel)->getUnpremultipliedARGB());
-        case Image::RGB:            return Colour (((const PixelRGB*)   pixel)->getUnpremultipliedARGB());
-        case Image::SingleChannel:  return Colour (((const PixelAlpha*) pixel)->getUnpremultipliedARGB());
+        case Image::ARGB:           return Colour ( ((const PixelARGB*)  pixel)->getUnpremultiplied());
+        case Image::RGB:            return Colour (*((const PixelRGB*)   pixel));
+        case Image::SingleChannel:  return Colour (*((const PixelAlpha*) pixel));
         default:                    jassertfalse; break;
     }
 

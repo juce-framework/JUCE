@@ -49,6 +49,10 @@ public:
             contextList.add (this);
         }
 
+        Rectangle<int> bounds = component.getTopLevelComponent()
+            ->getLocalArea (&component, component.getLocalBounds());
+        bounds *= component.getDesktopScaleFactor();
+
         updateWindowPosition (component.getTopLevelComponent()
                                 ->getLocalArea (&component, component.getLocalBounds()));
     }

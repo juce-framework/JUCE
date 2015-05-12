@@ -43,18 +43,18 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
 {
     Array<ProjectExporter::ExporterTypeInfo> types;
 
-    addType (types, XCodeProjectExporter::getNameMac(),        BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize);
-    addType (types, XCodeProjectExporter::getNameiOS(),        BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize);
-    addType (types, MSVCProjectExporterVC2015::getName(),      BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2013::getName(),      BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2012::getName(),      BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2010::getName(),      BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2008::getName(),      BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2005::getName(),      BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MakefileProjectExporter::getNameLinux(),   BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
-    addType (types, AndroidProjectExporter::getNameAndroid(),  BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
-    addType (types, CodeBlocksProjectExporter::getName (CodeBlocksOS::windows), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
-    addType (types, CodeBlocksProjectExporter::getName (CodeBlocksOS::linux),   BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
+    addType (types, XCodeProjectExporter::getNameMac(),          BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize);
+    addType (types, XCodeProjectExporter::getNameiOS(),          BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize);
+    addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2012::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2010::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2008::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2005::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
+    addType (types, AndroidProjectExporter::getNameAndroid(),    BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
+    addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
+    addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
 
     return types;
 }
@@ -75,8 +75,8 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 7:     exp = new MSVCProjectExporterVC2005 (project, ValueTree (MSVCProjectExporterVC2005::getValueTreeTypeName())); break;
         case 8:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter  ::getValueTreeTypeName())); break;
         case 9:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter   ::getValueTreeTypeName())); break;
-        case 10:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksOS::windows)), CodeBlocksOS::windows); break;
-        case 11:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksOS::linux)), CodeBlocksOS::linux); break;
+        case 10:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
+        case 11:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
         default:    jassertfalse; return 0;
     }
 
