@@ -231,6 +231,18 @@ public:
     };
 
     //==============================================================================
+    tresult PLUGIN_API setComponentState (IBStream*) override
+    {
+        // Cubase and Nuendo need to inform the host of the current parameter values
+        if (AudioProcessor* const pluginInstance = getPluginInstance())
+        {
+            for (int i = 0; i < pluginInstance->getNumParameters(); ++i)
+                setParamNormalized ((Vst::ParamID) i, (double) pluginInstance->getParameter (i));
+        }
+
+        return kResultFalse;
+    }
+
     void setAudioProcessor (JuceAudioProcessor* audioProc)
     {
         if (audioProcessor != audioProc)
