@@ -27,15 +27,19 @@ extern Display* display;
 extern XContext windowHandleXContext;
 
 //==============================================================================
+// Defined juce_linux_Windowing.cpp
+Rectangle<int> juce_LinuxScaledToPhysicalBounds(ComponentPeer* peer, const Rectangle<int>& bounds);
+
+//==============================================================================
 class OpenGLContext::NativeContext
 {
 public:
-    NativeContext (Component& component,
+    NativeContext (Component& comp,
                    const OpenGLPixelFormat& cPixelFormat,
                    void* shareContext,
                    bool /*useMultisampling*/,
                    OpenGLVersion)
-        : renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
+        : component (comp), renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
           contextToShareWith (shareContext)
     {
         ScopedXLock xlock;
@@ -72,7 +76,9 @@ public:
         swa.event_mask = ExposureMask | StructureNotifyMask;
 
         Rectangle<int> glBounds (component.getTopLevelComponent()
-                                   ->getLocalArea (&component, component.getLocalBounds()));
+                               ->getLocalArea (&component, component.getLocalBounds()));
+
+        glBounds = juce_LinuxScaledToPhysicalBounds (peer, glBounds);
 
         embeddedWindow = XCreateWindow (display, windowH,
                                         glBounds.getX(), glBounds.getY(),
@@ -144,11 +150,14 @@ public:
     {
         bounds = newBounds;
 
+        const Rectangle<int> physicalBounds =
+            juce_LinuxScaledToPhysicalBounds (component.getPeer(), bounds);
+
         ScopedXLock xlock;
         XMoveResizeWindow (display, embeddedWindow,
-                           bounds.getX(), bounds.getY(),
-                           (unsigned int) jmax (1, bounds.getWidth()),
-                           (unsigned int) jmax (1, bounds.getHeight()));
+                           physicalBounds.getX(), physicalBounds.getY(),
+                           (unsigned int) jmax (1, physicalBounds.getWidth()),
+                           (unsigned int) jmax (1, physicalBounds.getHeight()));
     }
 
     bool setSwapInterval (int numFramesPerSwap)
@@ -177,6 +186,7 @@ public:
     struct Locker { Locker (NativeContext&) {} };
 
 private:
+    Component& component;
     GLXContext renderContext;
     Window embeddedWindow;
 
