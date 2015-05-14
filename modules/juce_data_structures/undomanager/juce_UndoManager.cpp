@@ -203,6 +203,14 @@ void UndoManager::setCurrentTransactionName (const String& newName) noexcept
         action->name = newName;
 }
 
+String UndoManager::getCurrentTransactionName() const noexcept
+{
+    if (ActionSet* action = getCurrentSet())
+        return action->name;
+
+    return newTransactionName;
+}
+
 //==============================================================================
 UndoManager::ActionSet* UndoManager::getCurrentSet() const noexcept     { return transactions [nextIndex - 1]; }
 UndoManager::ActionSet* UndoManager::getNextSet() const noexcept        { return transactions [nextIndex]; }
