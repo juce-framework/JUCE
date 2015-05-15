@@ -72,12 +72,12 @@ public:
     {
     }
 
-    var getValue() const
+    var getValue() const override
     {
         return value;
     }
 
-    void setValue (const var& newValue)
+    void setValue (const var& newValue) override
     {
         if (! newValue.equalsWithSameType (value))
         {

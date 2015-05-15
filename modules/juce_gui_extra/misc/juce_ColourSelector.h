@@ -154,7 +154,7 @@ private:
     void setSV (float newS, float newV);
     void updateHSV();
     void update();
-    void sliderValueChanged (Slider*);
+    void sliderValueChanged (Slider*) override;
     void paint (Graphics&) override;
     void resized() override;
 
