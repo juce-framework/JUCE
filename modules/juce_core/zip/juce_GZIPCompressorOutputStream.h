@@ -72,7 +72,7 @@ public:
         the stream is closed - this means that no more data can be written to it, and any
         subsequent attempts to call write() will cause an assertion.
     */
-    void flush();
+    void flush() override;
 
     int64 getPosition() override;
     bool setPosition (int64) override;

@@ -223,7 +223,7 @@ public:
 
 protected:
     /** @internal */
-    virtual void propertyChanged();
+    virtual void propertyChanged() override;
 
 private:
     //==============================================================================

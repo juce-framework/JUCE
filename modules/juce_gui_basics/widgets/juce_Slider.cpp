@@ -1240,14 +1240,14 @@ public:
             setLookAndFeel (&s.getLookAndFeel());
         }
 
-        void paintContent (Graphics& g, int w, int h)
+        void paintContent (Graphics& g, int w, int h) override
         {
             g.setFont (font);
             g.setColour (owner.findColour (TooltipWindow::textColourId, true));
             g.drawFittedText (text, Rectangle<int> (w, h), Justification::centred, 1);
         }
 
-        void getContentSize (int& w, int& h)
+        void getContentSize (int& w, int& h) override
         {
             w = font.getStringWidth (text) + 18;
             h = (int) (font.getHeight() * 1.6f);

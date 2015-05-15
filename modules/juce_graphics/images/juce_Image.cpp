@@ -185,7 +185,7 @@ public:
     ImageType* createType() const override    { return image->createType(); }
 
     /* as we always hold a reference to image, don't double count */
-    int getSharedCount() const noexcept { return getReferenceCount() + image->getSharedCount() - 1; }
+    int getSharedCount() const noexcept override { return getReferenceCount() + image->getSharedCount() - 1; }
 
 private:
     friend class Image;

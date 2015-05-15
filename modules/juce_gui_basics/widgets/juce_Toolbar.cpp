@@ -36,7 +36,8 @@ public:
     }
 
     bool getToolbarItemSizes (int toolbarThickness, bool /*isToolbarVertical*/,
-                              int& preferredSize, int& minSize, int& maxSize)
+                              int& preferredSize, int& minSize,
+							  int& maxSize) override
     {
         if (fixedSize <= 0)
         {
