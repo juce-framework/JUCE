@@ -112,10 +112,10 @@ public:
 
     //==============================================================================
     /** Returns the application's name. */
-    virtual const String getApplicationName() = 0;
+    virtual const String getApplicationName() override = 0;
 
     /** Returns the application's version number. */
-    virtual const String getApplicationVersion() = 0;
+    virtual const String getApplicationVersion() override = 0;
 
     /** Checks whether multiple instances of the app are allowed.
 
@@ -172,13 +172,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    ApplicationCommandTarget* getNextCommandTarget();
+    ApplicationCommandTarget* getNextCommandTarget() override;
     /** @internal */
-    void getCommandInfo (CommandID, ApplicationCommandInfo&);
+    void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
     /** @internal */
-    void getAllCommands (Array<CommandID>&);
+    void getAllCommands (Array<CommandID>&) override;
     /** @internal */
-    bool perform (const InvocationInfo&);
+    bool perform (const InvocationInfo&) override;
 
 private:
     bool initialiseApp() override;

@@ -1219,7 +1219,7 @@ public:
         getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
     }
 
-    void getIdealSize (int& idealWidth, int& idealHeight)
+    void getIdealSize (int& idealWidth, int& idealHeight) override
     {
         getLookAndFeel().getIdealPopupMenuItemSize (getName(), false, -1, idealWidth, idealHeight);
         idealHeight += idealHeight / 2;

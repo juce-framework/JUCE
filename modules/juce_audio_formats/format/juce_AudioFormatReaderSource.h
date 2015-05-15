@@ -58,10 +58,10 @@ public:
 
         @see isLooping
     */
-    void setLooping (bool shouldLoop);
+    void setLooping (bool shouldLoop) override;
 
     /** Returns whether loop-mode is turned on or not. */
-    bool isLooping() const                                      { return looping; }
+    bool isLooping() const override                             { return looping; }
 
     /** Returns the reader that's being used. */
     AudioFormatReader* getAudioFormatReader() const noexcept    { return reader; }
