@@ -130,7 +130,7 @@ private:
                     addSubItem (new DemoTreeViewItem ("Demo sub-node " + String (i), numItems - 1));
             }
 
-            void paintItem (Graphics& g, int width, int height)
+            void paintItem (Graphics& g, int width, int height) override
             {
                 if (isSelected())
                     g.fillAll (Colours::lightblue);
@@ -140,7 +140,7 @@ private:
                 g.drawText (name, 4, 0, width - 4, height, Justification::centredLeft, true);
             }
 
-            bool mightContainSubItems()
+            bool mightContainSubItems() override
             {
                 return true;
             }

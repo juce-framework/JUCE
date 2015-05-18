@@ -172,13 +172,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    ApplicationCommandTarget* getNextCommandTarget();
+    ApplicationCommandTarget* getNextCommandTarget() override;
     /** @internal */
-    void getCommandInfo (CommandID, ApplicationCommandInfo&);
+    void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
     /** @internal */
-    void getAllCommands (Array<CommandID>&);
+    void getAllCommands (Array<CommandID>&) override;
     /** @internal */
-    bool perform (const InvocationInfo&);
+    bool perform (const InvocationInfo&) override;
 
 private:
     bool initialiseApp() override;

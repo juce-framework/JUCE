@@ -144,6 +144,11 @@ public:
     */
     void setCurrentTransactionName (const String& newName) noexcept;
 
+    /** Returns the name of the current transaction.
+        @see setCurrentTransactionName
+    */
+    String getCurrentTransactionName() const noexcept;
+
     //==============================================================================
     /** Returns true if there's at least one action in the list to undo.
         @see getUndoDescription, undo, canRedo

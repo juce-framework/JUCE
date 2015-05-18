@@ -2089,7 +2089,9 @@ public:
             if (pluginWindow == 0)
             {
                 updatePluginWindowHandle();
-                componentMovedOrResized (true, true);
+
+                if (pluginWindow != 0)
+                    componentMovedOrResized (true, true);
             }
            #endif
         }

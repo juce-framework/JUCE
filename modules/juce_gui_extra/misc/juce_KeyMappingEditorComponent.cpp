@@ -347,8 +347,8 @@ public:
         owner.getMappings().removeChangeListener (this);
     }
 
-    bool mightContainSubItems()             { return true; }
-    String getUniqueName() const            { return "keys"; }
+    bool mightContainSubItems() override             { return true; }
+    String getUniqueName() const override            { return "keys"; }
 
     void changeListenerCallback (ChangeBroadcaster*) override
     {

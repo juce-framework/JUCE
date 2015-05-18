@@ -92,15 +92,15 @@ public:
 
     //==============================================================================
     /** @internal */
-    Drawable* createCopy() const;
+    Drawable* createCopy() const override;
     /** @internal */
-    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
     /** @internal */
-    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const override;
     /** @internal */
     static const Identifier valueTreeType;
     /** @internal */
-    Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const override;
     /** @internal */
     void childBoundsChanged (Component*) override;
     /** @internal */

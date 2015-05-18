@@ -103,11 +103,11 @@ public:
                 break;
 
             const SyntaxToken& token = tokens.getReference(i);
-            as.append (token.text.removeCharacters ("\r\n"), fontToUse, owner.getColourForTokenType (token.tokenType));
+            as.append (token.text.initialSectionNotContaining ("\r\n"), fontToUse, owner.getColourForTokenType (token.tokenType));
             column += token.length;
         }
 
-        as.draw (g, Rectangle<float> (x, (float) y, 10000.0f, (float) lineH));
+        as.draw (g, Rectangle<float> (x, (float) y, column * characterWidth + 10.0f, (float) lineH));
     }
 
 private:

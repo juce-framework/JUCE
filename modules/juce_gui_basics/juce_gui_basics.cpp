@@ -105,6 +105,11 @@
  #include <X11/cursorfont.h>
  #include <unistd.h>
 
+ #if JUCE_USE_XRANDR
+  /* If you're trying to use Xrandr, you'll need to install the "libxrandr-dev" package..  */
+  #include <X11/extensions/Xrandr.h>
+ #endif
+
  #if JUCE_USE_XINERAMA
   /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..  */
   #include <X11/extensions/Xinerama.h>

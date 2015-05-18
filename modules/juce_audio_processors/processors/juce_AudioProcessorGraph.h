@@ -308,7 +308,7 @@ public:
         void fillInPluginDescription (PluginDescription&) const override;
         void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock) override;
         void releaseResources() override;
-        void processBlock (AudioSampleBuffer&, MidiBuffer&);
+        void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
 
         const String getInputChannelName (int channelIndex, int elementIndex) const override;
         const String getOutputChannelName (int channelIndex, int elementIndex) const override;

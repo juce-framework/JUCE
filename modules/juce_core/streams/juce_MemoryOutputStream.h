@@ -111,7 +111,7 @@ public:
         capacity off the block, so that its length matches the amount of actual data that
         has been written so far.
     */
-    void flush();
+    void flush() override;
 
     bool write (const void*, size_t) override;
     int64 getPosition() override                                 { return (int64) position; }

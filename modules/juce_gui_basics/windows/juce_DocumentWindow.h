@@ -100,7 +100,7 @@ public:
         (This is overridden from Component::setName() to cause a repaint, as
         the name is what gets drawn across the window's title bar).
     */
-    void setName (const String& newName);
+    void setName (const String& newName) override;
 
     /** Sets an icon to show in the title bar, next to the title.
 

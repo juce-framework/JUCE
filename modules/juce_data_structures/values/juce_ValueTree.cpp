@@ -814,8 +814,8 @@ public:
         tree.removeListener (this);
     }
 
-    var getValue() const                 { return tree [property]; }
-    void setValue (const var& newValue)  { tree.setProperty (property, newValue, undoManager); }
+    var getValue() const override                 { return tree [property]; }
+    void setValue (const var& newValue) override  { tree.setProperty (property, newValue, undoManager); }
 
 private:
     ValueTree tree;

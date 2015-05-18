@@ -542,23 +542,21 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
             return voice;
     }
 
-    // Oldest voice that's isn't being held:
-    // (this could be the top or bottom note if it had just been released.)
+    // Oldest voice that has been released (no finger on it and not held by sustain pedal)
     for (int i = 0; i < numUsableVoices; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
-        if (! (voice->isKeyDown() || voice->isSostenutoPedalDown()))
+        if (voice != bottom && voice != top && ! voice->isKeyDown() && ! voice->isSostenutoPedalDown())
             return voice;
     }
 
     // Oldest voice that doesn't have a finger on it:
-    // (this could be the top or bottom note if it had just been released.)
     for (int i = 0; i < numUsableVoices; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
-        if (! voice->isKeyDown())
+        if (voice != bottom && voice != top && ! voice->isKeyDown())
             return voice;
     }
 
@@ -574,5 +572,5 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
 
     // ..otherwise, there's only one or two voices to choose from - prefer to steal the highest one:
     jassert (top != nullptr || bottom != nullptr);
-    return top != nullptr ? top : bottom;
+    return (top == nullptr ? bottom : top);
 }

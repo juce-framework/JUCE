@@ -36,7 +36,7 @@ public:
     }
 
     bool getToolbarItemSizes (int toolbarThickness, bool /*isToolbarVertical*/,
-                              int& preferredSize, int& minSize, int& maxSize)
+                              int& preferredSize, int& minSize, int& maxSize) override
     {
         if (fixedSize <= 0)
         {
@@ -219,7 +219,7 @@ public:
         setSize (maxX + 8, y + height + 8);
     }
 
-    void getIdealSize (int& idealWidth, int& idealHeight)
+    void getIdealSize (int& idealWidth, int& idealHeight) override
     {
         idealWidth = getWidth();
         idealHeight = getHeight();
