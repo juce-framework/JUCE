@@ -1198,6 +1198,11 @@ private:
                             if (! screens->outputs[j])
                                 continue;
 
+                            // Xrandr on the raspberry pi fails to determine the main display (mainDisplay == 0)!
+                            // Detect this edge case and make the first found display the main display
+                            if (! mainDisplay)
+                                mainDisplay = screens->outputs[j];
+
                             ScopedPointer<XRROutputInfo> output;
 
                             if ((output = xrandr.getOutputInfo (dpy, screens.get(), screens->outputs[j])).get())
