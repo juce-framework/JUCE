@@ -1215,8 +1215,12 @@ private:
                                     e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
                                     e.topLeftScaled = e.totalBounds.getTopLeft();
                                     e.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
-                                    e.dpi = ((static_cast<double> (crtc->width) * 25.4 * 0.5) / static_cast<double> (output->mm_width))
-                                        + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
+                                    e.dpi = getDisplayDPI (0);
+
+                                    // The raspberry pi returns a zero sized display, so we need to guard for divide-by-zero
+                                    if (output->mm_width > 0 && output->mm_height > 0)
+                                        e.dpi = ((static_cast<double> (crtc->width) * 25.4 * 0.5) / static_cast<double> (output->mm_width))
+                                            + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
 
                                     e.scale = masterScale * getScaleForDisplay (output->name, e);
 
