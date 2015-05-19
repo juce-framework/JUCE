@@ -961,14 +961,8 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (const uint32 affinityMa
         if ((affinityMask & (1 << i)) != 0)
             CPU_SET (i, &affinity);
 
-    /*
-       N.B. If this line causes a compile error, then you've probably not got the latest
-       version of glibc installed.
+    pthread_setaffinity_np (pthread_self(), sizeof (cpu_set_t), &affinity);
 
-       If you don't want to update your copy of glibc and don't care about cpu affinities,
-       then you can just disable all this stuff by setting the SUPPORT_AFFINITIES macro to 0.
-    */
-    sched_setaffinity (getpid(), sizeof (cpu_set_t), &affinity);
     sched_yield();
 
    #else
@@ -976,7 +970,7 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (const uint32 affinityMa
        or the SUPPORT_AFFINITIES macro was turned off
     */
     jassertfalse;
-    (void) affinityMask;
+    ignoreUnused (affinityMask);
    #endif
 }
 
