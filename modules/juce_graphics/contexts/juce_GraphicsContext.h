@@ -374,21 +374,29 @@ public:
     //==============================================================================
     /** Draws a line between two points.
         The line is 1 pixel wide and drawn with the current colour or brush.
+        TIP: If you're trying to draw horizontal or vertical lines, don't use this -
+        it's better to use fillRect() instead unless you really need an angled line.
     */
     void drawLine (float startX, float startY, float endX, float endY) const;
 
     /** Draws a line between two points with a given thickness.
+        TIP: If you're trying to draw horizontal or vertical lines, don't use this -
+        it's better to use fillRect() instead unless you really need an angled line.
         @see Path::addLineSegment
     */
     void drawLine (float startX, float startY, float endX, float endY, float lineThickness) const;
 
     /** Draws a line between two points.
         The line is 1 pixel wide and drawn with the current colour or brush.
+        TIP: If you're trying to draw horizontal or vertical lines, don't use this -
+        it's better to use fillRect() instead unless you really need an angled line.
     */
     void drawLine (const Line<float>& line) const;
 
     /** Draws a line between two points with a given thickness.
         @see Path::addLineSegment
+        TIP: If you're trying to draw horizontal or vertical lines, don't use this -
+        it's better to use fillRect() instead unless you really need an angled line.
     */
     void drawLine (const Line<float>& line, float lineThickness) const;
 
