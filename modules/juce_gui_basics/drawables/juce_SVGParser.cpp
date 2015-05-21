@@ -54,7 +54,7 @@ public:
 
         DrawableComposite* const drawable = new DrawableComposite();
 
-        setDrawableID (*drawable, xml);
+        setCommonAttributes (*drawable, xml);
 
         SVGState newState (*this);
 
@@ -345,11 +345,14 @@ private:
     AffineTransform transform;
     String cssStyleText;
 
-    static void setDrawableID (Drawable& d, const XmlPath& xml)
+    static void setCommonAttributes (Drawable& d, const XmlPath& xml)
     {
         String compID (xml->getStringAttribute ("id"));
         d.setName (compID);
         d.setComponentID (compID);
+
+        if (xml->getStringAttribute ("display") == "none")
+            d.setVisible (false);
     }
 
     //==============================================================================
@@ -391,7 +394,7 @@ private:
     {
         DrawableComposite* const drawable = new DrawableComposite();
 
-        setDrawableID (*drawable, xml);
+        setCommonAttributes (*drawable, xml);
 
         if (xml->hasAttribute ("transform"))
         {
@@ -536,7 +539,7 @@ private:
         }
 
         DrawablePath* dp = new DrawablePath();
-        setDrawableID (*dp, xml);
+        setCommonAttributes (*dp, xml);
         dp->setFill (Colours::transparentBlack);
 
         path.applyTransform (transform);
@@ -825,7 +828,7 @@ private:
         const String anchorStr = getStyleAttribute(xml, "text-anchor");
 
         DrawableComposite* dc = new DrawableComposite();
-        setDrawableID (*dc, xml);
+        setCommonAttributes (*dc, xml);
 
         forEachXmlChildElement (*xml, e)
         {
