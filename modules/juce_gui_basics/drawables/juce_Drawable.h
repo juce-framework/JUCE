@@ -227,14 +227,15 @@ protected:
               owner (c)
         {}
 
-        bool registerCoordinates()      { return owner.registerCoordinates (*this); }
-        void applyToComponentBounds()
+        bool registerCoordinates() override      { return owner.registerCoordinates (*this); }
+
+        void applyToComponentBounds() override
         {
             ComponentScope scope (getComponent());
             owner.recalculateCoordinates (&scope);
         }
 
-        void applyNewBounds (const Rectangle<int>&)
+        void applyNewBounds (const Rectangle<int>&) override
         {
             jassertfalse; // drawables can't be resized directly!
         }
