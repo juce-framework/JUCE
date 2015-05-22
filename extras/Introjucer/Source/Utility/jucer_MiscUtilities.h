@@ -56,6 +56,8 @@ void showSVGPathDataToolWindow (ScopedPointer<Component>& ownerPointer);
 bool cancelAnyModalComponents();
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo&);
 
+StringArray getCleanedStringArray (StringArray);
+
 //==============================================================================
 class RolloverHelpComp   : public Component,
                            private Timer

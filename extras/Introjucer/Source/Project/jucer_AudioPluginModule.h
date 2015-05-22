@@ -243,7 +243,7 @@ namespace VSTHelpers
 
             if (exporter.isVisualStudio())
                 exporter.extraSearchPaths.add (path.toWindowsStyle());
-            else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux() || exporter.isXcode())
+            else if (exporter.isLinux() || exporter.isXcode())
                 exporter.extraSearchPaths.insert (0, path.toUnixStyle());
         }
     }
@@ -282,7 +282,7 @@ namespace VSTHelpers
 
         if (exporter.isWindows())
             exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
-        else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux() )
+        else if (exporter.isLinux())
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
 
         if (exporter.isVisualStudio())
@@ -305,6 +305,9 @@ namespace VSTHelpers
                         config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
             }
         }
+
+        if (exporter.isLinux())
+            exporter.makefileExtraLinkerFlags.add ("--no-undefined");
     }
 
     static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)

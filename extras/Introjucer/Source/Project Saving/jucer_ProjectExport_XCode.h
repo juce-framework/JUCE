@@ -661,8 +661,8 @@ private:
         StringArray paths (extraSearchPaths);
         paths.addArray (config.getHeaderSearchPaths());
         paths.add ("$(inherited)");
-        paths.removeDuplicates (false);
-        paths.removeEmptyStrings();
+
+        paths = getCleanedStringArray (paths);
 
         for (int i = 0; i < paths.size(); ++i)
         {
@@ -723,8 +723,7 @@ private:
         for (int i = 0; i < xcodeLibs.size(); ++i)
             flags.add (getLinkerFlagForLib (xcodeLibs[i]));
 
-        flags.removeEmptyStrings (true);
-        flags.removeDuplicates (false);
+        flags = getCleanedStringArray (flags);
     }
 
     StringArray getProjectSettings (const XcodeBuildConfiguration& config) const
@@ -876,7 +875,7 @@ private:
                 s.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (" ") + "\"");
 
             librarySearchPaths.addArray (config.getLibrarySearchPaths());
-            librarySearchPaths.removeDuplicates (false);
+            librarySearchPaths = getCleanedStringArray (librarySearchPaths);
 
             if (librarySearchPaths.size() > 0)
             {
@@ -926,11 +925,8 @@ private:
         }
 
         s.addTokens (config.getCustomXcodeFlags(), ",", "\"'");
-        s.trim();
-        s.removeEmptyStrings();
-        s.removeDuplicates (false);
 
-        return s;
+        return getCleanedStringArray (s);
     }
 
     void addFrameworks() const

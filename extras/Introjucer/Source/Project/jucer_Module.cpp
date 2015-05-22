@@ -370,7 +370,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
         parseAndAddLibs (exporter.xcodeLibs, moduleInfo.moduleInfo [exporter.isOSX() ? "OSXLibs" : "iOSLibs"].toString());
     }
-    else if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux())
+    else if (exporter.isLinux())
     {
         parseAndAddLibs (exporter.linuxLibs, moduleInfo.moduleInfo ["LinuxLibs"].toString());
     }
@@ -501,7 +501,7 @@ static bool fileTargetMatches (ProjectExporter& exporter, const String& target)
         return exporterTargetMatches ("xcode", target);
     if (exporter.isWindows())
         return exporterTargetMatches ("msvc", target);
-    if (exporter.isLinuxMakefile() || exporter.isCodeBlocksLinux())
+    if (exporter.isLinux())
         return exporterTargetMatches ("linux", target);
     if (exporter.isAndroid())
         return exporterTargetMatches ("android", target);
