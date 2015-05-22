@@ -334,14 +334,14 @@ public class JuceAppActivity   extends Activity
 
             // swap red and blue colours to match internal opengl texture format
             ColorMatrix colorMatrix = new ColorMatrix();
-            float[] colorTransform =
-                {0, 0, 1.0f, 0, 0,
-                 0, 1.0f, 0, 0, 0,
-                 1.0f, 0, 0, 0, 0,
-                 0, 0, 0, 1.0f, 0};
+
+            float[] colorTransform = { 0,    0,    1.0f, 0,    0,
+                                       0,    1.0f, 0,    0,    0,
+                                       1.0f, 0,    0,    0,    0,
+                                       0,    0,    0,    1.0f, 0 };
+
             colorMatrix.set (colorTransform);
-            ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter (colorMatrix);
-            paint.setColorFilter (colorFilter);
+            paint.setColorFilter (new ColorMatrixColorFilter (colorMatrix));
         }
 
         //==============================================================================
