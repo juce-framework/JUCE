@@ -2038,6 +2038,8 @@ public:
 
     void handleKeyPressEvent (XKeyEvent& keyEvent)
     {
+        const ModifierKeys oldMods (currentModifiers);
+
         char utf8 [64] = { 0 };
         juce_wchar unicodeChar = 0;
         int keyCode = 0;
@@ -2064,7 +2066,6 @@ public:
             keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
         }
 
-        const ModifierKeys oldMods (currentModifiers);
         bool keyPressed = false;
 
         if ((sym & 0xff00) == 0xff00 || keyCode == XK_ISO_Left_Tab)
