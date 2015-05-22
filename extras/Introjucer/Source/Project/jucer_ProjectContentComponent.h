@@ -70,8 +70,8 @@ public:
 
     bool saveProject();
     void closeProject();
-    void openInIDE();
-    void openInIDE (int exporterIndex);
+    void openInIDE (bool saveFirst);
+    void openInIDE (int exporterIndex, bool saveFirst);
 
     void showFilesTab();
     void showConfigTab();
