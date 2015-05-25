@@ -307,7 +307,7 @@ namespace VSTHelpers
         }
 
         if (exporter.isLinux())
-            exporter.makefileExtraLinkerFlags.add ("--no-undefined");
+            exporter.makefileExtraLinkerFlags.add ("-Wl,--no-undefined");
     }
 
     static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
