@@ -1644,7 +1644,7 @@ public:
             hints->width  = physicalBounds.getWidth();
             hints->height = physicalBounds.getHeight();
 
-            if ((getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == windowHasTitleBar)
+            if ((getStyleFlags() & windowIsResizable) == 0)
             {
                 hints->min_width  = hints->max_width  = hints->width;
                 hints->min_height = hints->max_height = hints->height;
