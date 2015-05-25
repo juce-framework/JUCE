@@ -289,6 +289,11 @@ public:
 
         glBindTexture (GL_TEXTURE_2D, cachedImageFrameBuffer.getTextureID());
 
+       #if JUCE_OPENGL3
+        if (vertexArrayObject != 0)
+            glBindVertexArray (vertexArrayObject);
+       #endif
+
         const Rectangle<int> cacheBounds (cachedImageFrameBuffer.getWidth(), cachedImageFrameBuffer.getHeight());
         context.copyTexture (cacheBounds, cacheBounds, cacheBounds.getWidth(), cacheBounds.getHeight(), false);
         glBindTexture (GL_TEXTURE_2D, 0);
