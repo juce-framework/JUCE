@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-extern Display* display;
-extern Window juce_messageWindowHandle;
+extern ::Display* display;
+extern ::Window juce_messageWindowHandle;
 
 namespace ClipboardHelpers
 {

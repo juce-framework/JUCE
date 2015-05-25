@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-extern Display* display;
+extern ::Display* display;
 extern XContext windowHandleXContext;
 typedef void (*WindowMessageReceiveCallback) (XEvent&);
 extern WindowMessageReceiveCallback dispatchWindowMessage;
@@ -775,7 +775,7 @@ class DisplayGeometry
 {
 private:
     //==============================================================================
-    DisplayGeometry (::Display *dpy, double masterScale)
+    DisplayGeometry (::Display* dpy, double masterScale)
     {
         jassert (instance == nullptr);
         instance = this;
@@ -912,19 +912,20 @@ public:
     }
 
     //==============================================================================
-    static DisplayGeometry& getInstance ()
+    static DisplayGeometry& getInstance()
     {
         jassert (instance != nullptr);
         return *instance;
     }
 
-    static DisplayGeometry& getOrCreateInstance (::Display *dpy, double masterScale)
+    static DisplayGeometry& getOrCreateInstance (::Display* dpy, double masterScale)
     {
         if (instance == nullptr)
             new DisplayGeometry (dpy, masterScale);
 
         return getInstance();
     }
+
 private:
     //==============================================================================
     static DisplayGeometry* instance;
@@ -1027,7 +1028,7 @@ private:
         }
 
         //==============================================================================
-        XRRScreenResources* getScreenResources (::Display *dpy, ::Window window)
+        XRRScreenResources* getScreenResources (::Display* dpy, ::Window window)
         {
             if (getScreenResourcesPtr != nullptr)
                 return getScreenResourcesPtr (dpy, window);
@@ -1035,7 +1036,7 @@ private:
             return nullptr;
         }
 
-        XRROutputInfo* getOutputInfo (::Display *dpy, XRRScreenResources *resources, RROutput output)
+        XRROutputInfo* getOutputInfo (::Display* dpy, XRRScreenResources* resources, RROutput output)
         {
             if (getOutputInfoPtr != nullptr)
                 return getOutputInfoPtr (dpy, resources, output);
@@ -1043,7 +1044,7 @@ private:
             return nullptr;
         }
 
-        XRRCrtcInfo* getCrtcInfo (::Display *dpy, XRRScreenResources *resources, RRCrtc crtc)
+        XRRCrtcInfo* getCrtcInfo (::Display* dpy, XRRScreenResources* resources, RRCrtc crtc)
         {
             if (getCrtcInfoPtr != nullptr)
                 return getCrtcInfoPtr (dpy, resources, crtc);
@@ -1051,13 +1052,14 @@ private:
             return nullptr;
         }
 
-        RROutput getOutputPrimary (::Display *dpy, ::Window window)
+        RROutput getOutputPrimary (::Display* dpy, ::Window window)
         {
             if (getOutputPrimaryPtr != nullptr)
                 return getOutputPrimaryPtr (dpy, window);
 
             return 0;
         }
+
     private:
         //==============================================================================
         friend class ContainerDeletePolicy<XRRScreenResources>;
@@ -1084,13 +1086,13 @@ private:
     private:
         static XRandrWrapper* instance;
 
-        typedef XRRScreenResources* (*tXRRGetScreenResources) (::Display *dpy, ::Window window);
-        typedef void (*tXRRFreeScreenResources) (XRRScreenResources *resources);
-        typedef XRROutputInfo* (*tXRRGetOutputInfo) (::Display *dpy, XRRScreenResources *resources, RROutput output);
-        typedef void (*tXRRFreeOutputInfo) (XRROutputInfo *outputInfo);
-        typedef XRRCrtcInfo* (*tXRRGetCrtcInfo) (::Display *dpy, XRRScreenResources *resources, RRCrtc crtc);
-        typedef void (*tXRRFreeCrtcInfo) (XRRCrtcInfo *crtcInfo);
-        typedef RROutput (*tXRRGetOutputPrimary) (::Display *dpy, ::Window window);
+        typedef XRRScreenResources* (*tXRRGetScreenResources) (::Display*, ::Window);
+        typedef void (*tXRRFreeScreenResources) (XRRScreenResources*);
+        typedef XRROutputInfo* (*tXRRGetOutputInfo) (::Display*, XRRScreenResources*, RROutput);
+        typedef void (*tXRRFreeOutputInfo) (XRROutputInfo*);
+        typedef XRRCrtcInfo* (*tXRRGetCrtcInfo) (::Display*, XRRScreenResources*, RRCrtc);
+        typedef void (*tXRRFreeCrtcInfo) (XRRCrtcInfo*);
+        typedef RROutput (*tXRRGetOutputPrimary) (::Display*, ::Window);
 
         void* libXrandr;
         tXRRGetScreenResources getScreenResourcesPtr;
@@ -1172,7 +1174,7 @@ private:
     }
 
     //==============================================================================
-    void queryDisplayInfos (::Display *dpy, double masterScale) noexcept
+    void queryDisplayInfos (::Display* dpy, double masterScale) noexcept
     {
         ScopedXLock xlock;
 

@@ -154,7 +154,7 @@ private:
 
         bool shouldBailOut() const noexcept
         {
-            return checker.shouldBailOut() || safePointer == 0;
+            return checker.shouldBailOut() || safePointer == nullptr;
         }
 
     private:
