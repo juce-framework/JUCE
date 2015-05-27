@@ -1189,7 +1189,7 @@ private:
                 ScopedPointer<XRRScreenResources> screens;
 
                 const int numMonitors = ScreenCount (dpy);
-                RROutput mainDisplay = xrandr.getOutputPrimary (dpy, RootWindow (dpy, 0)) + 1;
+                RROutput mainDisplay = xrandr.getOutputPrimary (dpy, RootWindow (dpy, 0);
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
