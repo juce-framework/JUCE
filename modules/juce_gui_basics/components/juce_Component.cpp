@@ -1153,12 +1153,15 @@ void Component::setBounds (const int x, const int y, int w, int h)
 
 void Component::sendMovedResizedMessagesIfPending()
 {
-    if (flags.isMoveCallbackPending || flags.isResizeCallbackPending)
-    {
-        sendMovedResizedMessages (flags.isMoveCallbackPending, flags.isResizeCallbackPending);
+    const bool wasMoved   = flags.isMoveCallbackPending;
+    const bool wasResized = flags.isResizeCallbackPending;
 
+    if (wasMoved || wasResized)
+    {
         flags.isMoveCallbackPending = false;
         flags.isResizeCallbackPending = false;
+
+        sendMovedResizedMessages (wasMoved, wasResized);
     }
 }
 
