@@ -50,7 +50,7 @@ inline void deleteAndZero (Type& pointer)                           { delete poi
     a specific number of bytes,
 */
 template <typename Type, typename IntegerType>
-inline Type* addBytesToPointer (Type* pointer, IntegerType bytes) noexcept  { return (Type*) (((char*) pointer) + bytes); }
+inline Type* addBytesToPointer (Type* basePointer, IntegerType bytes) noexcept  { return (Type*) (((char*) basePointer) + bytes); }
 
 /** A handy function which returns the difference between any two pointers, in bytes.
     The address of the second pointer is subtracted from the first, and the difference in bytes is returned.
@@ -62,7 +62,7 @@ inline int getAddressDifference (Type1* pointer1, Type2* pointer2) noexcept  { r
     nullptr if the pointer is null.
 */
 template <class Type>
-inline Type* createCopyIfNotNull (const Type* pointer)     { return pointer != nullptr ? new Type (*pointer) : nullptr; }
+inline Type* createCopyIfNotNull (const Type* objectToCopy) { return objectToCopy != nullptr ? new Type (*objectToCopy) : nullptr; }
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS || DOXYGEN
