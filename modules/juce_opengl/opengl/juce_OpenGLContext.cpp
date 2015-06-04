@@ -188,6 +188,8 @@ public:
             context.currentRenderScale = scale;
             context.renderer->renderOpenGL();
             clearGLError();
+
+            bindVertexArray();
         }
 
         if (context.renderComponents)
@@ -229,6 +231,14 @@ public:
                     invalidateAll();
             }
         }
+    }
+
+    void bindVertexArray() noexcept
+    {
+       #if JUCE_OPENGL3
+        if (vertexArrayObject != 0)
+            glBindVertexArray (vertexArrayObject);
+       #endif
     }
 
     void checkViewportBounds()
@@ -288,11 +298,7 @@ public:
             context.extensions.glActiveTexture (GL_TEXTURE0);
 
         glBindTexture (GL_TEXTURE_2D, cachedImageFrameBuffer.getTextureID());
-
-       #if JUCE_OPENGL3
-        if (vertexArrayObject != 0)
-            glBindVertexArray (vertexArrayObject);
-       #endif
+        bindVertexArray();
 
         const Rectangle<int> cacheBounds (cachedImageFrameBuffer.getWidth(), cachedImageFrameBuffer.getHeight());
         context.copyTexture (cacheBounds, cacheBounds, cacheBounds.getWidth(), cacheBounds.getHeight(), false);
@@ -401,7 +407,7 @@ public:
         if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
         {
             glGenVertexArrays (1, &vertexArrayObject);
-            glBindVertexArray (vertexArrayObject);
+            bindVertexArray();
         }
        #endif
 
