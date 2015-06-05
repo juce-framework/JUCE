@@ -22,13 +22,16 @@
   ==============================================================================
 */
 
+#ifndef JUCE_INCLUDEMODULEHEADERS_H_INCLUDED
+#define JUCE_INCLUDEMODULEHEADERS_H_INCLUDED
+
 #include "../juce_audio_plugin_client.h"
 
 using namespace juce;
 
 namespace juce
 {
-    #if JUCE_MAC && ! DOXYGEN
+    #if JUCE_MAC
      #define Point     juce::Point
      #define Component juce::Component
 
@@ -44,3 +47,5 @@ namespace juce
 }
 
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
+
+#endif   // JUCE_INCLUDEMODULEHEADERS_H_INCLUDED
