@@ -102,6 +102,9 @@ public:
     */
     var getCurrentDragDescription() const;
 
+    /** If a drag is in progress, this allows the image being shown to be dynamically updated. */
+    void setCurrentDragImage (const Image& newImage);
+
     /** Utility to find the DragAndDropContainer for a given Component.
 
         This will search up this component's parent hierarchy looking for the first
