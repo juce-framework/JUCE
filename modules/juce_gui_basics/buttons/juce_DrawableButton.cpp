@@ -59,6 +59,7 @@ void DrawableButton::setImages (const Drawable* normal,
     overImageOn     = copyDrawableIfNotNull (overOn);
     downImageOn     = copyDrawableIfNotNull (downOn);
     disabledImageOn = copyDrawableIfNotNull (disabledOn);
+    currentImage    = nullptr;
 
     buttonStateChanged();
 }
