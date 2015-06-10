@@ -2968,24 +2968,27 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
     SHORT k = (SHORT) keyCode;
 
-    if ((keyCode & extendedKeyModifier) == 0
-         && (k >= (SHORT) 'a' && k <= (SHORT) 'z'))
-        k += (SHORT) 'A' - (SHORT) 'a';
+    if ((keyCode & extendedKeyModifier) == 0)
+    {
+        if (k >= (SHORT) 'a' && k <= (SHORT) 'z')
+            k += (SHORT) 'A' - (SHORT) 'a';
 
-    const SHORT translatedValues[] = { (SHORT) ',', VK_OEM_COMMA,
-                                       (SHORT) '+', VK_OEM_PLUS,
-                                       (SHORT) '-', VK_OEM_MINUS,
-                                       (SHORT) '.', VK_OEM_PERIOD,
-                                       (SHORT) ';', VK_OEM_1,
-                                       (SHORT) ':', VK_OEM_1,
-                                       (SHORT) '/', VK_OEM_2,
-                                       (SHORT) '?', VK_OEM_2,
-                                       (SHORT) '[', VK_OEM_4,
-                                       (SHORT) ']', VK_OEM_6 };
+        // Only translate if extendedKeyModifier flag is not set
+        const SHORT translatedValues[] = { (SHORT) ',', VK_OEM_COMMA,
+                                           (SHORT) '+', VK_OEM_PLUS,
+                                           (SHORT) '-', VK_OEM_MINUS,
+                                           (SHORT) '.', VK_OEM_PERIOD,
+                                           (SHORT) ';', VK_OEM_1,
+                                           (SHORT) ':', VK_OEM_1,
+                                           (SHORT) '/', VK_OEM_2,
+                                           (SHORT) '?', VK_OEM_2,
+                                           (SHORT) '[', VK_OEM_4,
+                                           (SHORT) ']', VK_OEM_6 };
 
-    for (int i = 0; i < numElementsInArray (translatedValues); i += 2)
-        if (k == translatedValues [i])
-            k = translatedValues [i + 1];
+        for (int i = 0; i < numElementsInArray (translatedValues); i += 2)
+            if (k == translatedValues [i])
+                k = translatedValues [i + 1];
+    }
 
     return HWNDComponentPeer::isKeyDown (k);
 }
