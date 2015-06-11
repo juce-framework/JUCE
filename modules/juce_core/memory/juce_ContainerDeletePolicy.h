@@ -54,7 +54,7 @@ struct ContainerDeletePolicy
         // of the class owning it) into cpp files where they can see to the definition
         // of ObjectType. This should fix the error.
         ignoreUnused (sizeof (ObjectType));
-        
+
         delete object;
     }
 };
