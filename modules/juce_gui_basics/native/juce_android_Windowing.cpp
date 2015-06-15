@@ -112,7 +112,8 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           usingAndroidGraphics (false),
           fullScreen (false),
-          sizeAllocated (0)
+          sizeAllocated (0),
+          scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
     {
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
@@ -189,8 +190,10 @@ public:
         view.callVoidMethod (ComponentPeerView.setViewName, javaString (title).get());
     }
 
-    void setBounds (const Rectangle<int>& r, bool isNowFullScreen) override
+    void setBounds (const Rectangle<int>& userRect, bool isNowFullScreen) override
     {
+        Rectangle<int> r = userRect * scale;
+
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             fullScreen = isNowFullScreen;
@@ -224,7 +227,7 @@ public:
         return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
                                view.callIntMethod (ComponentPeerView.getTop),
                                view.callIntMethod (ComponentPeerView.getWidth),
-                               view.callIntMethod (ComponentPeerView.getHeight));
+                               view.callIntMethod (ComponentPeerView.getHeight)) / scale;
     }
 
     void handleScreenSizeChange()
@@ -238,7 +241,7 @@ public:
     Point<int> getScreenPosition() const
     {
         return Point<int> (view.callIntMethod (ComponentPeerView.getLeft),
-                           view.callIntMethod (ComponentPeerView.getTop));
+                           view.callIntMethod (ComponentPeerView.getTop)) / scale;
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
@@ -291,7 +294,8 @@ public:
         return isPositiveAndBelow (localPos.x, component.getWidth())
             && isPositiveAndBelow (localPos.y, component.getHeight())
             && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
-                                                                    localPos.x, localPos.y));
+                                                                    localPos.x * scale,
+                                                                    localPos.y * scale));
     }
 
     BorderSize<int> getFrameSize() const override
@@ -322,19 +326,21 @@ public:
     }
 
     //==============================================================================
-    void handleMouseDownCallback (int index, Point<float> pos, int64 time)
+    void handleMouseDownCallback (int index, Point<float> sysPos, int64 time)
     {
+        Point<float> pos = sysPos / scale;
         lastMousePos = pos;
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
         handleMouseEvent (index, pos, currentModifiers.withoutMouseButtons(), time);
 
         if (isValidPeer (this))
-            handleMouseDragCallback (index, pos, time);
+            handleMouseDragCallback (index, sysPos, time);
     }
 
     void handleMouseDragCallback (int index, Point<float> pos, int64 time)
     {
+        pos /= scale;
         lastMousePos = pos;
 
         jassert (index < 64);
@@ -346,6 +352,7 @@ public:
 
     void handleMouseUpCallback (int index, Point<float> pos, int64 time)
     {
+        pos /= scale;
         lastMousePos = pos;
 
         jassert (index < 64);
@@ -441,6 +448,7 @@ public:
                 {
                     LowLevelGraphicsSoftwareRenderer g (temp);
                     g.setOrigin (-clip.getPosition());
+                    g.addTransform (AffineTransform::scale (scale));
                     handlePaint (g);
                 }
             }
@@ -453,8 +461,10 @@ public:
         }
     }
 
-    void repaint (const Rectangle<int>& area) override
+    void repaint (const Rectangle<int>& userArea) override
     {
+        Rectangle<int> area = userArea * scale;
+
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
@@ -507,6 +517,7 @@ private:
     GlobalRef buffer;
     bool usingAndroidGraphics, fullScreen;
     int sizeAllocated;
+    float scale;
 
     class PreallocatedImage  : public ImagePixelData
     {
@@ -723,11 +734,12 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 void Desktop::Displays::findDisplays (float masterScale)
 {
     Display d;
-    d.userArea = d.totalArea = Rectangle<int> (android.screenWidth,
-                                               android.screenHeight) / masterScale;
+
     d.isMain = true;
-    d.scale = masterScale;
     d.dpi = android.dpi;
+    d.scale = masterScale * (d.dpi / 150.);
+    d.userArea = d.totalArea = Rectangle<int> (android.screenWidth,
+                                               android.screenHeight) / d.scale;
 
     displays.add (d);
 }
