@@ -812,7 +812,7 @@ public:
     virtual void childrenChanged();
 
     //==============================================================================
-    /** Tests whether a given point inside the component.
+    /** Tests whether a given point is inside the component.
 
         Overriding this method allows you to create components which only intercept
         mouse-clicks within a user-defined area.
