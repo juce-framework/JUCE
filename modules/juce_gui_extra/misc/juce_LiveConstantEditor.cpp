@@ -51,22 +51,36 @@ private:
     {
         stopTimer();
 
+        Array<Component*> alreadyDone;
+
         for (int i = TopLevelWindow::getNumTopLevelWindows(); --i >= 0;)
             if (Component* c = TopLevelWindow::getTopLevelWindow(i))
-                repaintAndResizeAllComps (c);
+                repaintAndResizeAllComps (c, alreadyDone);
+
+        for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
+            if (Component* c = Desktop::getInstance().getComponent(i))
+                repaintAndResizeAllComps (c, alreadyDone);
     }
 
-    static void repaintAndResizeAllComps (Component::SafePointer<Component> c)
+    static void repaintAndResizeAllComps (Component::SafePointer<Component> c,
+                                          Array<Component*>& alreadyDone)
     {
-        if (c->isVisible())
+        if (c->isVisible() && ! alreadyDone.contains (c))
         {
             c->repaint();
             c->resized();
 
             for (int i = c->getNumChildComponents(); --i >= 0;)
-                if (c != nullptr)
-                    if (Component* child = c->getChildComponent(i))
-                        repaintAndResizeAllComps (child);
+            {
+                if (Component* child = c->getChildComponent(i))
+                {
+                    repaintAndResizeAllComps (child, alreadyDone);
+                    alreadyDone.add (child);
+                }
+
+                if (c == nullptr)
+                    break;
+            }
         }
     }
 };
