@@ -75,16 +75,21 @@ namespace MouseCursorHelpers
                 NSAffineTransform* scaleTransform = [NSAffineTransform transform];
                 [scaleTransform scaleBy: (float) scale];
 
-                CGImageRef rasterCGImage = [originalImage CGImageForProposedRect: nil
-                                                                         context: nil
-                                                                           hints: [NSDictionary dictionaryWithObjectsAndKeys:
-                                                                                     NSImageHintCTM, scaleTransform, nil]];
+                if (CGImageRef rasterCGImage = [originalImage CGImageForProposedRect: nil
+                                                                             context: nil
+                                                                               hints: [NSDictionary dictionaryWithObjectsAndKeys:
+                                                                                         NSImageHintCTM, scaleTransform, nil]])
+                {
+                    NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: rasterCGImage];
+                    [imageRep setSize: originalSize];
 
-                NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: rasterCGImage];
-                [imageRep setSize: originalSize];
-
-                [resultImage addRepresentation: imageRep];
-                [imageRep release];
+                    [resultImage addRepresentation: imageRep];
+                    [imageRep release];
+                }
+                else
+                {
+                    return nil;
+                }
             }
 
             NSDictionary* info = [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (cursorPath + "/info.plist")];
@@ -136,7 +141,11 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case UpDownResizeCursor:
             case TopEdgeResizeCursor:
             case BottomEdgeResizeCursor:
-                return MouseCursorHelpers::fromHIServices ("resizenorthsouth");
+                if (void* m = MouseCursorHelpers::fromHIServices ("resizenorthsouth"))
+                    return m;
+
+                c = [NSCursor resizeUpDownCursor];
+                break;
 
             case LeftRightResizeCursor:
                 if (void* m = MouseCursorHelpers::fromHIServices ("resizeeastwest"))
