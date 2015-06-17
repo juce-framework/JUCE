@@ -701,13 +701,12 @@ struct OpenGLDemoClasses
 
         Matrix3D<float> getViewMatrix() const
         {
-            Matrix3D<float> viewMatrix (Vector3D<float> (0.0f, 1.0f, -10.0f));
-
-            viewMatrix *= draggableOrientation.getRotationMatrix();
+            Matrix3D<float> viewMatrix = draggableOrientation.getRotationMatrix()
+                                            * Vector3D<float> (0.0f, 1.0f, -10.0f);
 
             Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (rotation, rotation, -0.3f));
 
-            return viewMatrix * rotationMatrix;
+            return rotationMatrix * viewMatrix;
         }
 
         void setTexture (DemoTexture* t)
