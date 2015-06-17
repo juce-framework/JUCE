@@ -796,10 +796,10 @@ class ALSAAudioIODevice   : public AudioIODevice
 {
 public:
     ALSAAudioIODevice (const String& deviceName,
-                       const String& typeName,
+                       const String& deviceTypeName,
                        const String& inputDeviceID,
                        const String& outputDeviceID)
-        : AudioIODevice (deviceName, typeName),
+        : AudioIODevice (deviceName, deviceTypeName),
           inputId (inputDeviceID),
           outputId (outputDeviceID),
           isOpen_ (false),
@@ -924,8 +924,8 @@ private:
 class ALSAAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-    ALSAAudioIODeviceType (bool onlySoundcards, const String &typeName)
-        : AudioIODeviceType (typeName),
+    ALSAAudioIODeviceType (bool onlySoundcards, const String &deviceTypeName)
+        : AudioIODeviceType (deviceTypeName),
           hasScanned (false),
           listOnlySoundcards (onlySoundcards)
     {
