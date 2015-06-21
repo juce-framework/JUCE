@@ -29,7 +29,7 @@
 struct NamedValueSet::NamedValue
 {
     NamedValue() noexcept {}
-    NamedValue (Identifier n, const var& v)  : name (n), value (v) {}
+    NamedValue (const Identifier& n, const var& v)  : name (n), value (v) {}
     NamedValue (const NamedValue& other) : name (other.name), value (other.value) {}
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
@@ -39,7 +39,9 @@ struct NamedValueSet::NamedValue
     {
     }
 
-    NamedValue (Identifier n, var&& v)  : name (n), value (static_cast<var&&> (v))
+    NamedValue (Identifier&& n, var&& v)
+        : name (static_cast<Identifier&&> (n)),
+          value (static_cast<var&&> (v))
     {
     }
 
