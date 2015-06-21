@@ -140,7 +140,7 @@ var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
 }
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-bool NamedValueSet::set (Identifier name, var&& newValue)
+bool NamedValueSet::set (const Identifier& name, var&& newValue)
 {
     if (var* const v = getVarPointer (name))
     {
@@ -156,7 +156,7 @@ bool NamedValueSet::set (Identifier name, var&& newValue)
 }
 #endif
 
-bool NamedValueSet::set (Identifier name, const var& newValue)
+bool NamedValueSet::set (const Identifier& name, const var& newValue)
 {
     if (var* const v = getVarPointer (name))
     {

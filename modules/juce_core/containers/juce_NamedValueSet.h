@@ -78,14 +78,14 @@ public:
         @returns    true if a value was changed or added; false if the
                     value was already set the value passed-in.
     */
-    bool set (Identifier name, const var& newValue);
+    bool set (const Identifier& name, const var& newValue);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
                     value was already set the value passed-in.
     */
-    bool set (Identifier name, var&& newValue);
+    bool set (const Identifier& name, var&& newValue);
    #endif
 
     /** Returns true if the set contains an item with the specified name. */
