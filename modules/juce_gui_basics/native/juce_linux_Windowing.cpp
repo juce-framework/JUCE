@@ -978,9 +978,9 @@ private:
 
     //==============================================================================
    #if JUCE_USE_XRANDR
-    friend class ContainerDeletePolicy<XRRScreenResources>;
-    friend class ContainerDeletePolicy<XRROutputInfo>;
-    friend class ContainerDeletePolicy<XRRCrtcInfo>;
+    friend struct ContainerDeletePolicy<XRRScreenResources>;
+    friend struct ContainerDeletePolicy<XRROutputInfo>;
+    friend struct ContainerDeletePolicy<XRRCrtcInfo>;
 
     class XRandrWrapper
     {
@@ -1062,9 +1062,9 @@ private:
 
     private:
         //==============================================================================
-        friend class ContainerDeletePolicy<XRRScreenResources>;
-        friend class ContainerDeletePolicy<XRROutputInfo>;
-        friend class ContainerDeletePolicy<XRRCrtcInfo>;
+        friend struct ContainerDeletePolicy<XRRScreenResources>;
+        friend struct ContainerDeletePolicy<XRROutputInfo>;
+        friend struct ContainerDeletePolicy<XRRCrtcInfo>;
 
         void freeScreenResources (XRRScreenResources* ptr)
         {
