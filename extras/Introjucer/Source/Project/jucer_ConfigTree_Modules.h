@@ -88,8 +88,9 @@ private:
                 props.add (new MissingDependenciesComponent (project, moduleID));
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
-                props.add (new TextPropertyComponent (exporter->getPathForModuleValue (moduleID),
-                                                      "Path for " + exporter->getName().quoted(), 1024, false),
+                props.add (new FilePathPropertyComponent (exporter->getPathForModuleValue (moduleID),
+                                                          "Path for " + exporter->getName().quoted(),
+                                                          true, "*", project.getProjectFolder()),
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
                             + exporter->getName().quoted() + " target. "
                            "This can be an absolute path, or relative to the jucer project folder, but it "
