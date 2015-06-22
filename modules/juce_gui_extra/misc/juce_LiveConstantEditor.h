@@ -194,7 +194,7 @@ namespace LiveConstantEditor
         ValueList();
         ~ValueList();
 
-        static ValueList& getInstance();
+        juce_DeclareSingleton (ValueList, false)
 
         template <typename Type>
         LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
@@ -233,7 +233,7 @@ namespace LiveConstantEditor
     template <typename Type>
     inline LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
     {
-        return ValueList::getInstance().getValue (file, line, initialValue);
+        return ValueList::getInstance()->getValue (file, line, initialValue);
     }
 
     inline LiveValue<String>& getValue (const char* file, int line, const char* initialValue)
