@@ -318,7 +318,7 @@ namespace
 
     static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) noexcept
     {
-	ignoreUnused (e);
+        ignoreUnused (e);
 
         if (increment < 0)
         {
