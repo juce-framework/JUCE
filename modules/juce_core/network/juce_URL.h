@@ -248,6 +248,9 @@ public:
 
     /** Attempts to open a stream that can read from this URL.
 
+        Note that on some platforms (Android, for example) it's not permitted to do any network
+        action from the message thread, so you must only call it from a background thread.
+
         @param usePostCommand   if true, it will try to do use a http 'POST' to pass
                                 the parameters, otherwise it'll encode them into the
                                 URL and do a 'GET'.
@@ -287,6 +290,9 @@ public:
         If it succeeds, this will return true and append the data it read onto the end
         of the memory block.
 
+        Note that on some platforms (Android, for example) it's not permitted to do any network
+        action from the message thread, so you must only call it from a background thread.
+
         @param destData         the memory block to append the new data to
         @param usePostCommand   whether to use a POST command to get the data (uses
                                 a GET command if this is false)
@@ -302,6 +308,9 @@ public:
         operation that fails and one that returns an empty string, you'll need to use
         a different method, such as readEntireBinaryStream().
 
+        Note that on some platforms (Android, for example) it's not permitted to do any network
+        action from the message thread, so you must only call it from a background thread.
+
         @param usePostCommand   whether to use a POST command to get the data (uses
                                 a GET command if this is false)
         @see readEntireBinaryStream, readEntireXmlStream
@@ -315,6 +324,9 @@ public:
 
         When it returns a valid XmlElement object, the caller is responsibile for deleting
         this object when no longer needed.
+
+        Note that on some platforms (Android, for example) it's not permitted to do any network
+        action from the message thread, so you must only call it from a background thread.
 
         @param usePostCommand   whether to use a POST command to get the data (uses
                                 a GET command if this is false)
