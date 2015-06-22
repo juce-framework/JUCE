@@ -1820,6 +1820,7 @@ private:
         wheel.deltaY = isVertical ? amount / 256.0f : 0.0f;
         wheel.isReversed = false;
         wheel.isSmooth = false;
+        wheel.isInertial = false;
 
         Point<float> localPos;
         if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
