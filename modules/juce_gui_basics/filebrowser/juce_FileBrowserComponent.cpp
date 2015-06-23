@@ -387,7 +387,7 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
     {
         setRoot (f);
 
-        if ((flags & canSelectDirectories) != 0)
+        if ((flags & canSelectDirectories) != 0 && (flags & doNotClearFileNameOnRootChange) == 0)
             filenameBox.setText (String::empty);
     }
     else
@@ -432,7 +432,9 @@ void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
         {
             setRoot (f);
             chosenFiles.clear();
-            filenameBox.setText (String::empty);
+
+            if ((flags & doNotClearFileNameOnRootChange) == 0)
+                filenameBox.setText (String());
         }
         else
         {
