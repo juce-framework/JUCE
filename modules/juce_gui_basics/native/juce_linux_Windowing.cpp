@@ -978,9 +978,9 @@ private:
 
     //==============================================================================
    #if JUCE_USE_XRANDR
-    friend class ContainerDeletePolicy<XRRScreenResources>;
-    friend class ContainerDeletePolicy<XRROutputInfo>;
-    friend class ContainerDeletePolicy<XRRCrtcInfo>;
+    friend struct ContainerDeletePolicy<XRRScreenResources>;
+    friend struct ContainerDeletePolicy<XRROutputInfo>;
+    friend struct ContainerDeletePolicy<XRRCrtcInfo>;
 
     class XRandrWrapper
     {
@@ -1062,9 +1062,9 @@ private:
 
     private:
         //==============================================================================
-        friend class ContainerDeletePolicy<XRRScreenResources>;
-        friend class ContainerDeletePolicy<XRROutputInfo>;
-        friend class ContainerDeletePolicy<XRRCrtcInfo>;
+        friend struct ContainerDeletePolicy<XRRScreenResources>;
+        friend struct ContainerDeletePolicy<XRROutputInfo>;
+        friend struct ContainerDeletePolicy<XRRCrtcInfo>;
 
         void freeScreenResources (XRRScreenResources* ptr)
         {
@@ -2209,6 +2209,7 @@ public:
         wheel.deltaY = amount;
         wheel.isReversed = false;
         wheel.isSmooth = false;
+        wheel.isInertial = false;
 
         handleMouseWheel (0, getMousePos (buttonPressEvent), getEventTime (buttonPressEvent), wheel);
     }

@@ -354,6 +354,10 @@ struct MouseWheelDetails
 
     /** If true, then the wheel has continuous, un-stepped motion. */
     bool isSmooth;
+
+    /** If true, then this event is part of the intertial momentum phase that follows
+        the wheel being released. */
+    bool isInertial;
 };
 
 

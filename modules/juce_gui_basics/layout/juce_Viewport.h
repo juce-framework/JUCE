@@ -263,15 +263,13 @@ private:
     //==============================================================================
     WeakReference<Component> contentComp;
     Rectangle<int> lastVisibleArea;
-    bool customScrollBarThickness;
     int scrollBarThickness;
     int singleStepX, singleStepY;
     bool showHScrollbar, showVScrollbar, deleteContent;
+    bool customScrollBarThickness;
     bool allowScrollingWithoutScrollbarV, allowScrollingWithoutScrollbarH;
     Component contentHolder;
     ScrollBar verticalScrollBar, horizontalScrollBar;
-    struct MouseWheelTimer;
-    ScopedPointer<Timer> mouseWheelTimer;
 
     Point<int> viewportPosToCompPos (Point<int>) const;
 

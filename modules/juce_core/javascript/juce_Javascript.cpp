@@ -102,7 +102,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     static bool isNumericOrUndefined (const var& v)  { return v.isInt() || v.isDouble() || v.isInt64() || v.isBool() || v.isUndefined(); }
     static int64 getOctalValue (const String& s)     { BigInteger b; b.parseString (s, 8); return b.toInt64(); }
     static Identifier getPrototypeIdentifier()       { static const Identifier i ("prototype"); return i; }
-    static var* getPropertyPointer (DynamicObject* o, Identifier i)   { return o->getProperties().getVarPointer (i); }
+    static var* getPropertyPointer (DynamicObject* o, const Identifier& i)   { return o->getProperties().getVarPointer (i); }
 
     //==============================================================================
     struct CodeLocation
@@ -136,7 +136,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ReferenceCountedObjectPtr<RootObject> root;
         DynamicObject::Ptr scope;
 
-        var findFunctionCall (const CodeLocation& location, const var& targetObject, Identifier functionName) const
+        var findFunctionCall (const CodeLocation& location, const var& targetObject, const Identifier& functionName) const
         {
             if (DynamicObject* o = targetObject.getDynamicObject())
             {
@@ -170,7 +170,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return var();
         }
 
-        var* findRootClassProperty (Identifier className, Identifier propName) const
+        var* findRootClassProperty (const Identifier& className, const Identifier& propName) const
         {
             if (DynamicObject* cls = root->getProperty (className).getDynamicObject())
                 return getPropertyPointer (cls, propName);
@@ -178,7 +178,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return nullptr;
         }
 
-        var findSymbolInParentScopes (Identifier name) const
+        var findSymbolInParentScopes (const Identifier& name) const
         {
             if (const var* v = getPropertyPointer (scope, name))
                 return *v;
@@ -187,7 +187,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                                      : var::undefined();
         }
 
-        bool findAndInvokeMethod (Identifier function, const var::NativeFunctionArgs& args, var& result) const
+        bool findAndInvokeMethod (const Identifier& function, const var::NativeFunctionArgs& args, var& result) const
         {
             DynamicObject* target = args.thisObject.getDynamicObject();
 
@@ -352,7 +352,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct UnqualifiedName  : public Expression
     {
-        UnqualifiedName (const CodeLocation& l, Identifier n) noexcept : Expression (l), name (n) {}
+        UnqualifiedName (const CodeLocation& l, const Identifier& n) noexcept : Expression (l), name (n) {}
 
         var getResult (const Scope& s) const override  { return s.findSymbolInParentScopes (name); }
 
@@ -369,7 +369,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct DotOperator  : public Expression
     {
-        DotOperator (const CodeLocation& l, ExpPtr& p, Identifier c) noexcept : Expression (l), parent (p), child (c) {}
+        DotOperator (const CodeLocation& l, ExpPtr& p, const Identifier& c) noexcept : Expression (l), parent (p), child (c) {}
 
         var getResult (const Scope& s) const override
         {
@@ -1670,7 +1670,7 @@ JavascriptEngine::~JavascriptEngine() {}
 
 void JavascriptEngine::prepareTimeout() const noexcept   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
 
-void JavascriptEngine::registerNativeObject (Identifier name, DynamicObject* object)
+void JavascriptEngine::registerNativeObject (const Identifier& name, DynamicObject* object)
 {
     root->setProperty (name, object);
 }
@@ -1706,7 +1706,7 @@ var JavascriptEngine::evaluate (const String& code, Result* result)
     return var::undefined();
 }
 
-var JavascriptEngine::callFunction (Identifier function, const var::NativeFunctionArgs& args, Result* result)
+var JavascriptEngine::callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* result)
 {
     var returnVal (var::undefined());
 

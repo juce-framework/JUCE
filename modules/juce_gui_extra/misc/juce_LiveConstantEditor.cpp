@@ -32,13 +32,10 @@ class AllComponentRepainter  : private Timer,
                                private DeletedAtShutdown
 {
 public:
-    AllComponentRepainter() {}
+    AllComponentRepainter()  {}
+    ~AllComponentRepainter() { clearSingletonInstance(); }
 
-    static AllComponentRepainter& getInstance()
-    {
-        static AllComponentRepainter* instance = new AllComponentRepainter();
-        return *instance;
-    }
+    juce_DeclareSingleton (AllComponentRepainter, false)
 
     void trigger()
     {
@@ -57,8 +54,10 @@ private:
             if (Component* c = TopLevelWindow::getTopLevelWindow(i))
                 repaintAndResizeAllComps (c, alreadyDone);
 
-        for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
-            if (Component* c = Desktop::getInstance().getComponent(i))
+        Desktop& desktop = Desktop::getInstance();
+
+        for (int i = desktop.getNumComponents(); --i >= 0;)
+            if (Component* c = desktop.getComponent(i))
                 repaintAndResizeAllComps (c, alreadyDone);
     }
 
@@ -84,6 +83,9 @@ private:
         }
     }
 };
+
+juce_ImplementSingleton (AllComponentRepainter)
+juce_ImplementSingleton (ValueList)
 
 //==============================================================================
 int64 parseInt (String s)
@@ -189,7 +191,7 @@ void LivePropertyEditorBase::applyNewValue (const String& s)
     selectOriginalValue();
 
     valueEditor.setText (s, dontSendNotification);
-    AllComponentRepainter::getInstance().trigger();
+    AllComponentRepainter::getInstance()->trigger();
 }
 
 void LivePropertyEditorBase::selectOriginalValue()
@@ -347,14 +349,8 @@ public:
 };
 
 //==============================================================================
-ValueList::ValueList() {}
-ValueList::~ValueList() {}
-
-ValueList& ValueList::getInstance()
-{
-    static ValueList* i = new ValueList();
-    return *i;
-}
+ValueList::ValueList()  {}
+ValueList::~ValueList() { clearSingletonInstance(); }
 
 void ValueList::addValue (LiveValueBase* v)
 {

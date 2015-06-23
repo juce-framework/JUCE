@@ -68,16 +68,24 @@ public:
     Identifier (const Identifier& other) noexcept;
 
     /** Creates a copy of another identifier. */
-    Identifier& operator= (const Identifier other) noexcept;
+    Identifier& operator= (const Identifier& other) noexcept;
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Creates a copy of another identifier. */
+    Identifier (Identifier&& other) noexcept;
+
+    /** Creates a copy of another identifier. */
+    Identifier& operator= (Identifier&& other) noexcept;
+   #endif
 
     /** Destructor */
     ~Identifier() noexcept;
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator== (Identifier other) const noexcept            { return name.getCharPointer() == other.name.getCharPointer(); }
+    inline bool operator== (const Identifier& other) const noexcept     { return name.getCharPointer() == other.name.getCharPointer(); }
 
     /** Compares two identifiers. This is a very fast operation. */
-    inline bool operator!= (Identifier other) const noexcept            { return name.getCharPointer() != other.name.getCharPointer(); }
+    inline bool operator!= (const Identifier& other) const noexcept     { return name.getCharPointer() != other.name.getCharPointer(); }
 
     /** Compares the identifier with a string. */
     inline bool operator== (StringRef other) const noexcept             { return name == other; }

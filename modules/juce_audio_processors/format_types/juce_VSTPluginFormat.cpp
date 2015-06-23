@@ -318,6 +318,8 @@ namespace
 
     static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) noexcept
     {
+        ignoreUnused (e);
+
         if (increment < 0)
         {
             ev.xbutton.button = Button5;
@@ -1633,7 +1635,7 @@ public:
             void* data = nullptr;
             const size_t bytes = (size_t) dispatch (effGetChunk, isPreset ? 1 : 0, 0, &data, 0.0f);
 
-            if (data != nullptr && bytes <= maxSizeMB * 1024 * 1024)
+            if (data != nullptr && bytes <= (size_t) maxSizeMB * 1024 * 1024)
             {
                 mb.setSize (bytes);
                 mb.copyFrom (data, 0, bytes);
