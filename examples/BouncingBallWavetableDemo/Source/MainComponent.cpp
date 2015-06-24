@@ -77,7 +77,7 @@ public:
 
     void releaseResources() override
     {
-        // This gets automatically called when audio device paramters change
+        // This gets automatically called when audio device parameters change
         // or device is restarted.
         stopTimer();
     }
