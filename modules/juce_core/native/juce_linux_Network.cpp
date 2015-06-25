@@ -343,9 +343,13 @@ private:
     }
 
     static void writeHost (MemoryOutputStream& dest, const bool isPost,
-                           const String& path, const String& host, int /*port*/)
+                           const String& path, const String& host, int port)
     {
         dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
+
+        /* HTTP spec 14.23 says that the port number must be included in the header if it is not 80 */
+        if (port != 80)
+            dest << ':' << port;
     }
 
     static MemoryBlock createRequestHeader (const String& hostName, const int hostPort,
