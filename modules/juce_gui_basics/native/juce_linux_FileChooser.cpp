@@ -131,11 +131,11 @@ static void addZenityArgs (StringArray& args, String& separator,
 
     if (filters.isNotEmpty() && filters != "*" && filters != "*.*")
     {
-        args.add ("--file-filter");
-        args.add (filters.replaceCharacter (';', ' '));
+        StringArray tokens;
+        tokens.addTokens (filters, ";,|", "\"");
 
-        args.add ("--file-filter");
-        args.add ("All files | *");
+        for (int i = 0; i < tokens.size(); ++i)
+            args.add ("--file-filter='" + tokens[i] + "'");
     }
 
     if (file.isDirectory())
