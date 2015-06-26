@@ -961,7 +961,7 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (const uint32 affinityMa
         if ((affinityMask & (1 << i)) != 0)
             CPU_SET (i, &affinity);
 
-   #if (! JUCE_LINUX) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004)
+   #if (! JUCE_ANDROID) && ((! JUCE_LINUX) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
     pthread_setaffinity_np (pthread_self(), sizeof (cpu_set_t), &affinity);
    #else
     // NB: this call isn't really correct because it sets the affinity of the process,
