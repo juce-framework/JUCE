@@ -227,8 +227,14 @@ private:
 
 
 //==============================================================================
+#if defined (__arm__)
+ #define JUCE_ARM_SOFT_FLOAT_ABI  __attribute__ ((pcs("aapcs")))
+#else
+ #define JUCE_ARM_SOFT_FLOAT_ABI
+#endif
+
 #define JUCE_JNI_CALLBACK(className, methodName, returnType, params) \
-  extern "C" __attribute__ ((visibility("default"))) returnType JUCE_JOIN_MACRO (JUCE_JOIN_MACRO (Java_, className), _ ## methodName) params
+  extern "C" __attribute__ ((visibility("default"))) JUCE_ARM_SOFT_FLOAT_ABI returnType JUCE_JOIN_MACRO (JUCE_JOIN_MACRO (Java_, className), _ ## methodName) params
 
 //==============================================================================
 class AndroidSystem
