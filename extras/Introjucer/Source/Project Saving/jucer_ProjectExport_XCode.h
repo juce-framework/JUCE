@@ -1358,29 +1358,30 @@ private:
         const int   size;
     };
 
-    Array<AppIconType> getiOSAppIconTypes() const
+    static Array<AppIconType> getiOSAppIconTypes()
     {
-        Array<AppIconType> types;
+        AppIconType types[] =
+        {
+            { "iphone", "29x29",   "Icon-Small.png",             "1x", 29  },
+            { "iphone", "29x29",   "Icon-Small@2x.png",          "2x", 58  },
+            { "iphone", "40x40",   "Icon-Spotlight-40@2x.png",   "2x", 80  },
+            { "iphone", "57x57",   "Icon.png",                   "1x", 57  },
+            { "iphone", "57x57",   "Icon@2x.png",                "2x", 114 },
+            { "iphone", "60x60",   "Icon-60@2x.png",             "2x", 120 },
+            { "iphone", "60x60",   "Icon-@3x.png",               "3x", 180 },
+            { "ipad",   "29x29",   "Icon-Small-1.png",           "1x", 29  },
+            { "ipad",   "29x29",   "Icon-Small@2x-1.png",        "2x", 58  },
+            { "ipad",   "40x40",   "Icon-Spotlight-40.png",      "1x", 40  },
+            { "ipad",   "40x40",   "Icon-Spotlight-40@2x-1.png", "2x", 80  },
+            { "ipad",   "50x50",   "Icon-Small-50.png",          "1x", 50  },
+            { "ipad",   "50x50",   "Icon-Small-50@2x.png",       "2x", 100 },
+            { "ipad",   "72x72",   "Icon-72.png",                "1x", 72  },
+            { "ipad",   "72x72",   "Icon-72@2x.png",             "2x", 144 },
+            { "ipad",   "76x76",   "Icon-76.png",                "1x", 76  },
+            { "ipad",   "76x76",   "Icon-76@2x.png",             "2x", 152 }
+        };
 
-        types.add ({ "iphone", "29x29",   "Icon-Small.png",             "1x", 29  });
-        types.add ({ "iphone", "29x29",   "Icon-Small@2x.png",          "2x", 58  });
-        types.add ({ "iphone", "40x40",   "Icon-Spotlight-40@2x.png",   "2x", 80  });
-        types.add ({ "iphone", "57x57",   "Icon.png",                   "1x", 57  });
-        types.add ({ "iphone", "57x57",   "Icon@2x.png",                "2x", 114 });
-        types.add ({ "iphone", "60x60",   "Icon-60@2x.png",             "2x", 120 });
-        types.add ({ "iphone", "60x60",   "Icon-@3x.png",               "3x", 180 });
-        types.add ({ "ipad",   "29x29",   "Icon-Small-1.png",           "1x", 29  });
-        types.add ({ "ipad",   "29x29",   "Icon-Small@2x-1.png",        "2x", 58  });
-        types.add ({ "ipad",   "40x40",   "Icon-Spotlight-40.png",      "1x", 40  });
-        types.add ({ "ipad",   "40x40",   "Icon-Spotlight-40@2x-1.png", "2x", 80  });
-        types.add ({ "ipad",   "50x50",   "Icon-Small-50.png",          "1x", 50  });
-        types.add ({ "ipad",   "50x50",   "Icon-Small-50@2x.png",       "2x", 100 });
-        types.add ({ "ipad",   "72x72",   "Icon-72.png",                "1x", 72  });
-        types.add ({ "ipad",   "72x72",   "Icon-72@2x.png",             "2x", 144 });
-        types.add ({ "ipad",   "76x76",   "Icon-76.png",                "1x", 76  });
-        types.add ({ "ipad",   "76x76",   "Icon-76@2x.png",             "2x", 152 });
-
-        return types;
+        return Array<AppIconType> (types, numElementsInArray (types));
     }
 
     String getiOSAppIconContents() const
