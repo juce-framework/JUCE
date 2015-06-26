@@ -65,6 +65,24 @@ template <class Type>
 inline Type* createCopyIfNotNull (const Type* objectToCopy) { return objectToCopy != nullptr ? new Type (*objectToCopy) : nullptr; }
 
 //==============================================================================
+/** A handy function to read un-aligned memory without a performance penalty or bus-error. */
+template <typename Type>
+inline Type readUnaligned (const void* srcPtr) noexcept
+{
+    Type value;
+    memcpy (&value, srcPtr, sizeof (Type));
+
+    return value;
+}
+
+/** A handy function to write un-aligned memory without a performance penalty or bus-error. */
+template <typename Type>
+inline void writeUnaligned (void* dstPtr, Type value) noexcept
+{
+    memcpy (dstPtr, &value, sizeof(Type));
+}
+
+//==============================================================================
 #if JUCE_MAC || JUCE_IOS || DOXYGEN
 
  /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
