@@ -328,7 +328,7 @@ void ZipFile::sortEntriesByFilename()
 //==============================================================================
 void ZipFile::init()
 {
-    ScopedPointer <InputStream> toDelete;
+    ScopedPointer<InputStream> toDelete;
     InputStream* in = inputStream;
 
     if (inputSource != nullptr)
@@ -358,7 +358,7 @@ void ZipFile::init()
                     if (pos + 46 > size)
                         break;
 
-                    const char* const buffer = static_cast <const char*> (headerData.getData()) + pos;
+                    const char* const buffer = static_cast<const char*> (headerData.getData()) + pos;
 
                     const int fileNameLen = ByteOrder::littleEndianShort (buffer + 28);
 
