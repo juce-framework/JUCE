@@ -32,6 +32,7 @@ SynthesiserVoice::SynthesiserVoice()
       currentPlayingMidiChannel (0),
       noteOnTime (0),
       keyIsDown (false),
+      sustainPedalDown (false),
       sostenutoPedalDown (false)
 {
 }
@@ -296,6 +297,7 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
         voice->currentlyPlayingSound = sound;
         voice->keyIsDown = true;
         voice->sostenutoPedalDown = false;
+        voice->sustainPedalDown = sustainPedalsDown[midiChannel];
 
         voice->startNote (midiNoteNumber, velocity, sound,
                           lastPitchWheelValues [midiChannel - 1]);
@@ -331,9 +333,11 @@ void Synthesiser::noteOff (const int midiChannel,
                 if (sound->appliesToNote (midiNoteNumber)
                      && sound->appliesToChannel (midiChannel))
                 {
+                    jassert (! voice->keyIsDown || voice->sustainPedalDown == sustainPedalsDown [midiChannel]);
+
                     voice->keyIsDown = false;
 
-                    if (! (sustainPedalsDown [midiChannel] || voice->sostenutoPedalDown))
+                    if (! (voice->sustainPedalDown || voice->sostenutoPedalDown))
                         stopVoice (voice, velocity, allowTailOff);
                 }
             }
@@ -427,6 +431,14 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
     if (isDown)
     {
         sustainPedalsDown.setBit (midiChannel);
+
+        for (int i = voices.size(); --i >= 0;)
+        {
+            SynthesiserVoice* const voice = voices.getUnchecked (i);
+
+            if (voice->isPlayingChannel (midiChannel) && voice->isKeyDown())
+                voice->sustainPedalDown = true;
+        }
     }
     else
     {
@@ -434,8 +446,13 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
         {
             SynthesiserVoice* const voice = voices.getUnchecked (i);
 
-            if (voice->isPlayingChannel (midiChannel) && ! voice->keyIsDown)
-                stopVoice (voice, 1.0f, true);
+            if (voice->isPlayingChannel (midiChannel))
+            {
+                voice->sustainPedalDown = false;
+
+                if (! voice->isKeyDown())
+                    stopVoice (voice, 1.0f, true);
+            }
         }
 
         sustainPedalsDown.clearBit (midiChannel);
@@ -505,8 +522,13 @@ struct VoiceAgeSorter
 SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
                                                  int /*midiChannel*/, int midiNoteNumber) const
 {
-    SynthesiserVoice* bottom = nullptr;
-    SynthesiserVoice* top    = nullptr;
+    // This voice-stealing algorithm applies the following heuristics:
+    // - Re-use the oldest notes first
+    // - Protect the lowest & topmost notes, even if sustained, but not if they've been released.
+
+    // These are the voices we want to protect (ie: only steal if unavoidable)
+    SynthesiserVoice* low = nullptr; // Lowest sounding note, might be sustained, but NOT in release phase
+    SynthesiserVoice* top = nullptr; // Highest sounding note, might be sustained, but NOT in release phase
 
     // this is a list of voices we can steal, sorted by how long they've been running
     Array<SynthesiserVoice*> usableVoices;
@@ -516,24 +538,33 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
     {
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
+        jassert (voice->isVoiceActive()); // We wouldn't be here otherwise
+
         if (voice->canPlaySound (soundToPlay))
         {
             VoiceAgeSorter sorter;
             usableVoices.addSorted (sorter, voice);
 
-            const int note = voice->getCurrentlyPlayingNote();
+            if (! voice->isPlayingButReleased()) // Don't protect released notes
+            {
+                const int note = voice->getCurrentlyPlayingNote();
 
-            if (bottom == nullptr || note < bottom->getCurrentlyPlayingNote())
-                bottom = voice;
+                if (low == nullptr || note < low->getCurrentlyPlayingNote())
+                    low = voice;
 
-            if (top == nullptr || note > top->getCurrentlyPlayingNote())
-                top = voice;
+                if (top == nullptr || note > top->getCurrentlyPlayingNote())
+                    top = voice;
+            }
         }
     }
 
+    // Eliminate pathological cases (ie: only 1 note playing): we always give precedence to the lowest note(s)
+    if (top == low)
+        top = nullptr;
+
     const int numUsableVoices = usableVoices.size();
 
-    // The oldest note that's playing with the target pitch playing is ideal..
+    // The oldest note that's playing with the target pitch is ideal..
     for (int i = 0; i < numUsableVoices; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
@@ -547,7 +578,7 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
-        if (voice != bottom && voice != top && ! voice->isKeyDown() && ! voice->isSostenutoPedalDown())
+        if (voice != low && voice != top && voice->isPlayingButReleased())
             return voice;
     }
 
@@ -556,21 +587,25 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
-        if (voice != bottom && voice != top && ! voice->isKeyDown())
+        if (voice != low && voice != top && ! voice->isKeyDown())
             return voice;
     }
 
-    // At this point, all notes have fingers on them, so look for the oldest note
-    // that isn't the top or bottom note..
+    // Oldest voice that isn't protected
     for (int i = 0; i < numUsableVoices; ++i)
     {
         SynthesiserVoice* const voice = usableVoices.getUnchecked (i);
 
-        if (voice != bottom && voice != top)
+        if (voice != low && voice != top)
             return voice;
     }
 
-    // ..otherwise, there's only one or two voices to choose from - prefer to steal the highest one:
-    jassert (top != nullptr || bottom != nullptr);
-    return (top == nullptr ? bottom : top);
+    // We've only got "protected" voices now: lowest note takes priority
+    jassert (low != nullptr);
+
+    // Duophonic synth: give priority to the bass note:
+    if (top != nullptr)
+        return top;
+
+    return low;
 }

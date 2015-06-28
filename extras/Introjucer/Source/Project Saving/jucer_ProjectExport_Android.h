@@ -336,9 +336,7 @@ private:
         if (getInternetNeeded())         s.add ("android.permission.INTERNET");
         if (getAudioRecordNeeded())      s.add ("android.permission.RECORD_AUDIO");
 
-        s.trim();
-        s.removeDuplicates (false);
-        return s;
+        return getCleanedStringArray (s);
     }
 
     //==============================================================================
@@ -557,7 +555,8 @@ private:
         String flags;
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
-        searchPaths.removeDuplicates (false);
+
+        searchPaths = getCleanedStringArray (searchPaths);
 
         for (int i = 0; i < searchPaths.size(); ++i)
             flags << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])).quoted();

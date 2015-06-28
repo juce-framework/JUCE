@@ -1147,6 +1147,8 @@ public:
 
            #if ! JucePlugin_SilenceInProducesSilenceOut
             ioActionFlags &= (AudioUnitRenderActionFlags) ~kAudioUnitRenderAction_OutputIsSilence;
+           #else
+            ignoreUnused (ioActionFlags);
            #endif
         }
 

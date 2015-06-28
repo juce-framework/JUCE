@@ -192,7 +192,7 @@ public:
     {
     }
 
-    bool registerCoordinates()
+    bool registerCoordinates() override
     {
         bool ok = addCoordinate (rectangle.left);
         ok = addCoordinate (rectangle.right) && ok;
@@ -206,7 +206,7 @@ public:
         return rectangle == other;
     }
 
-    void applyToComponentBounds()
+    void applyToComponentBounds() override
     {
         for (int i = 32; --i >= 0;)
         {
@@ -222,7 +222,7 @@ public:
         jassertfalse; // Seems to be a recursive reference!
     }
 
-    void applyNewBounds (const Rectangle<int>& newBounds)
+    void applyNewBounds (const Rectangle<int>& newBounds) override
     {
         if (newBounds != getComponent().getBounds())
         {

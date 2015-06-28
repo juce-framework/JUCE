@@ -24,13 +24,13 @@
 
 Viewport::Viewport (const String& name)
   : Component (name),
-    customScrollBarThickness(false),
     scrollBarThickness (0),
     singleStepX (16),
     singleStepY (16),
     showHScrollbar (true),
     showVScrollbar (true),
     deleteContent (true),
+    customScrollBarThickness (false),
     allowScrollingWithoutScrollbarV (false),
     allowScrollingWithoutScrollbarH (false),
     verticalScrollBar (true),
@@ -55,7 +55,6 @@ Viewport::Viewport (const String& name)
 Viewport::~Viewport()
 {
     deleteContentComp();
-    mouseWheelTimer = nullptr;
 }
 
 //==============================================================================
@@ -382,30 +381,6 @@ static int rescaleMouseWheelDistance (float distance, int singleStepSize) noexce
                                     : jmax (distance,  1.0f));
 }
 
-// This puts a temporary component overlay over the content component, to prevent
-// wheel events from reaching components inside it, so that while spinning a wheel
-// with momentum, it won't accidentally scroll any subcomponents of the viewport.
-struct Viewport::MouseWheelTimer  : public Timer
-{
-    MouseWheelTimer (Viewport& v) : viewport (v)
-    {
-        viewport.contentHolder.addAndMakeVisible (dummyOverlay);
-        dummyOverlay.setAlwaysOnTop (true);
-        dummyOverlay.setPaintingIsUnclipped (true);
-        dummyOverlay.setBounds (viewport.contentHolder.getLocalBounds());
-    }
-
-    void timerCallback() override
-    {
-        viewport.mouseWheelTimer = nullptr;
-    }
-
-    Component dummyOverlay;
-    Viewport& viewport;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseWheelTimer)
-};
-
 bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
     if (! (e.mods.isAltDown() || e.mods.isCtrlDown() || e.mods.isCommandDown()))
@@ -436,11 +411,6 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelD
 
             if (pos != getViewPosition())
             {
-                if (mouseWheelTimer == nullptr)
-                    mouseWheelTimer = new MouseWheelTimer (*this);
-
-                mouseWheelTimer->startTimer (300);
-
                 setViewPosition (pos);
                 return true;
             }

@@ -486,14 +486,17 @@ public:
         sampleRate = newSampleRate;
         bufferSize = newBufferSize;
 
-        inputChannelBuffer.setSize (jmax ((int) minChansIn, inputChannels.getHighestBit()) + 1, bufferSize);
+        int maxInputsRequested = inputChannels.getHighestBit() + 1;
+        maxInputsRequested = jmax ((int) minChansIn, jmin ((int) maxChansIn, maxInputsRequested));
+
+        inputChannelBuffer.setSize (maxInputsRequested, bufferSize);
         inputChannelBuffer.clear();
         inputChannelDataForCallback.clear();
         currentInputChans.clear();
 
         if (inputChannels.getHighestBit() >= 0)
         {
-            for (int i = 0; i <= jmax (inputChannels.getHighestBit(), (int) minChansIn); ++i)
+            for (int i = 0; i < maxInputsRequested; ++i)
             {
                 if (inputChannels[i])
                 {
@@ -505,14 +508,17 @@ public:
 
         ensureMinimumNumBitsSet (outputChannels, (int) minChansOut);
 
-        outputChannelBuffer.setSize (jmax ((int) minChansOut, outputChannels.getHighestBit()) + 1, bufferSize);
+        int maxOutputsRequested = outputChannels.getHighestBit() + 1;
+        maxOutputsRequested = jmax ((int) minChansOut, jmin ((int) maxChansOut, maxOutputsRequested));
+
+        outputChannelBuffer.setSize (maxOutputsRequested, bufferSize);
         outputChannelBuffer.clear();
         outputChannelDataForCallback.clear();
         currentOutputChans.clear();
 
         if (outputChannels.getHighestBit() >= 0)
         {
-            for (int i = 0; i <= jmax (outputChannels.getHighestBit(), (int) minChansOut); ++i)
+            for (int i = 0; i < maxOutputsRequested; ++i)
             {
                 if (outputChannels[i])
                 {
@@ -796,10 +802,10 @@ class ALSAAudioIODevice   : public AudioIODevice
 {
 public:
     ALSAAudioIODevice (const String& deviceName,
-                       const String& typeName,
+                       const String& deviceTypeName,
                        const String& inputDeviceID,
                        const String& outputDeviceID)
-        : AudioIODevice (deviceName, typeName),
+        : AudioIODevice (deviceName, deviceTypeName),
           inputId (inputDeviceID),
           outputId (outputDeviceID),
           isOpen_ (false),
@@ -924,8 +930,8 @@ private:
 class ALSAAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-    ALSAAudioIODeviceType (bool onlySoundcards, const String &typeName)
-        : AudioIODeviceType (typeName),
+    ALSAAudioIODeviceType (bool onlySoundcards, const String &deviceTypeName)
+        : AudioIODeviceType (deviceTypeName),
           hasScanned (false),
           listOnlySoundcards (onlySoundcards)
     {

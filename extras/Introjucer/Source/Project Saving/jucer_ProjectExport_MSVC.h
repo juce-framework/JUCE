@@ -291,8 +291,7 @@ protected:
     {
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
-        searchPaths.removeDuplicates (false);
-        return searchPaths;
+        return getCleanedStringArray (searchPaths);
     }
 
     virtual String createConfigName (const BuildConfiguration& config) const

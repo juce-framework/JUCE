@@ -331,10 +331,17 @@ public:
                       Time time, const MouseWheelDetails& wheel)
     {
         Desktop::getInstance().incrementMouseWheelCounter();
-
         Point<float> screenPos;
-        if (Component* current = getTargetForGesture (peer, positionWithinPeer, time, screenPos))
-            sendMouseWheel (*current, screenPos, time, wheel);
+
+        // This will make sure that when the wheel spins in its inertial phase, any events
+        // continue to be sent to the last component that the mouse was over when it was being
+        // actively controlled by the user. This avoids confusion when scrolling through nested
+        // scrollable components.
+        if (lastNonInertialWheelTarget == nullptr || ! wheel.isInertial)
+            lastNonInertialWheelTarget = getTargetForGesture (peer, positionWithinPeer, time, screenPos);
+
+        if (Component* target = lastNonInertialWheelTarget)
+            sendMouseWheel (*target, screenPos, time, wheel);
     }
 
     void handleMagnifyGesture (ComponentPeer& peer, Point<float> positionWithinPeer,
@@ -467,7 +474,7 @@ public:
     bool isUnboundedMouseModeOn, isCursorVisibleUntilOffscreen;
 
 private:
-    WeakReference<Component> componentUnderMouse;
+    WeakReference<Component> componentUnderMouse, lastNonInertialWheelTarget;
     ComponentPeer* lastPeer;
 
     void* currentCursorHandle;
@@ -512,6 +519,7 @@ private:
             mouseDowns[0].peerID = 0;
 
         mouseMovedSignificantlySincePressed = false;
+        lastNonInertialWheelTarget = nullptr;
     }
 
     void registerMouseDrag (Point<float> screenPos) noexcept

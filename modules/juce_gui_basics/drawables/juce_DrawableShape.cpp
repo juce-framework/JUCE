@@ -53,14 +53,14 @@ public:
     {
     }
 
-    bool registerCoordinates()
+    bool registerCoordinates() override
     {
         bool ok = addPoint (fill.gradientPoint1);
         ok = addPoint (fill.gradientPoint2) && ok;
         return addPoint (fill.gradientPoint3) && ok;
     }
 
-    void applyToComponentBounds()
+    void applyToComponentBounds() override
     {
         ComponentScope scope (owner);
         if (isMainFill ? owner.mainFill.recalculateCoords (&scope)
@@ -68,7 +68,7 @@ public:
             owner.repaint();
     }
 
-    void applyNewBounds (const Rectangle<int>&)
+    void applyNewBounds (const Rectangle<int>&) override
     {
         jassertfalse; // drawables can't be resized directly!
     }

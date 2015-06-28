@@ -83,7 +83,7 @@ public:
     {
     }
 
-    bool registerCoordinates()
+    bool registerCoordinates() override
     {
         bool ok = true;
 
@@ -104,7 +104,7 @@ public:
         return ok;
     }
 
-    void applyToComponentBounds()
+    void applyToComponentBounds() override
     {
         jassert (owner.relativePath != nullptr);
 
@@ -112,7 +112,7 @@ public:
         owner.applyRelativePath (*owner.relativePath, &scope);
     }
 
-    void applyNewBounds (const Rectangle<int>&)
+    void applyNewBounds (const Rectangle<int>&) override
     {
         jassertfalse; // drawables can't be resized directly!
     }

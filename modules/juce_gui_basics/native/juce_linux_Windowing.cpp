@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-extern Display* display;
+extern ::Display* display;
 extern XContext windowHandleXContext;
 typedef void (*WindowMessageReceiveCallback) (XEvent&);
 extern WindowMessageReceiveCallback dispatchWindowMessage;
@@ -775,7 +775,7 @@ class DisplayGeometry
 {
 private:
     //==============================================================================
-    DisplayGeometry (::Display *dpy, double masterScale)
+    DisplayGeometry (::Display* dpy, double masterScale)
     {
         jassert (instance == nullptr);
         instance = this;
@@ -912,19 +912,20 @@ public:
     }
 
     //==============================================================================
-    static DisplayGeometry& getInstance ()
+    static DisplayGeometry& getInstance()
     {
         jassert (instance != nullptr);
         return *instance;
     }
 
-    static DisplayGeometry& getOrCreateInstance (::Display *dpy, double masterScale)
+    static DisplayGeometry& getOrCreateInstance (::Display* dpy, double masterScale)
     {
         if (instance == nullptr)
             new DisplayGeometry (dpy, masterScale);
 
         return getInstance();
     }
+
 private:
     //==============================================================================
     static DisplayGeometry* instance;
@@ -977,9 +978,9 @@ private:
 
     //==============================================================================
    #if JUCE_USE_XRANDR
-    friend class ContainerDeletePolicy<XRRScreenResources>;
-    friend class ContainerDeletePolicy<XRROutputInfo>;
-    friend class ContainerDeletePolicy<XRRCrtcInfo>;
+    friend struct ContainerDeletePolicy<XRRScreenResources>;
+    friend struct ContainerDeletePolicy<XRROutputInfo>;
+    friend struct ContainerDeletePolicy<XRRCrtcInfo>;
 
     class XRandrWrapper
     {
@@ -1027,7 +1028,7 @@ private:
         }
 
         //==============================================================================
-        XRRScreenResources* getScreenResources (::Display *dpy, ::Window window)
+        XRRScreenResources* getScreenResources (::Display* dpy, ::Window window)
         {
             if (getScreenResourcesPtr != nullptr)
                 return getScreenResourcesPtr (dpy, window);
@@ -1035,7 +1036,7 @@ private:
             return nullptr;
         }
 
-        XRROutputInfo* getOutputInfo (::Display *dpy, XRRScreenResources *resources, RROutput output)
+        XRROutputInfo* getOutputInfo (::Display* dpy, XRRScreenResources* resources, RROutput output)
         {
             if (getOutputInfoPtr != nullptr)
                 return getOutputInfoPtr (dpy, resources, output);
@@ -1043,7 +1044,7 @@ private:
             return nullptr;
         }
 
-        XRRCrtcInfo* getCrtcInfo (::Display *dpy, XRRScreenResources *resources, RRCrtc crtc)
+        XRRCrtcInfo* getCrtcInfo (::Display* dpy, XRRScreenResources* resources, RRCrtc crtc)
         {
             if (getCrtcInfoPtr != nullptr)
                 return getCrtcInfoPtr (dpy, resources, crtc);
@@ -1051,18 +1052,19 @@ private:
             return nullptr;
         }
 
-        RROutput getOutputPrimary (::Display *dpy, ::Window window)
+        RROutput getOutputPrimary (::Display* dpy, ::Window window)
         {
             if (getOutputPrimaryPtr != nullptr)
                 return getOutputPrimaryPtr (dpy, window);
 
             return 0;
         }
+
     private:
         //==============================================================================
-        friend class ContainerDeletePolicy<XRRScreenResources>;
-        friend class ContainerDeletePolicy<XRROutputInfo>;
-        friend class ContainerDeletePolicy<XRRCrtcInfo>;
+        friend struct ContainerDeletePolicy<XRRScreenResources>;
+        friend struct ContainerDeletePolicy<XRROutputInfo>;
+        friend struct ContainerDeletePolicy<XRRCrtcInfo>;
 
         void freeScreenResources (XRRScreenResources* ptr)
         {
@@ -1084,13 +1086,13 @@ private:
     private:
         static XRandrWrapper* instance;
 
-        typedef XRRScreenResources* (*tXRRGetScreenResources) (::Display *dpy, ::Window window);
-        typedef void (*tXRRFreeScreenResources) (XRRScreenResources *resources);
-        typedef XRROutputInfo* (*tXRRGetOutputInfo) (::Display *dpy, XRRScreenResources *resources, RROutput output);
-        typedef void (*tXRRFreeOutputInfo) (XRROutputInfo *outputInfo);
-        typedef XRRCrtcInfo* (*tXRRGetCrtcInfo) (::Display *dpy, XRRScreenResources *resources, RRCrtc crtc);
-        typedef void (*tXRRFreeCrtcInfo) (XRRCrtcInfo *crtcInfo);
-        typedef RROutput (*tXRRGetOutputPrimary) (::Display *dpy, ::Window window);
+        typedef XRRScreenResources* (*tXRRGetScreenResources) (::Display*, ::Window);
+        typedef void (*tXRRFreeScreenResources) (XRRScreenResources*);
+        typedef XRROutputInfo* (*tXRRGetOutputInfo) (::Display*, XRRScreenResources*, RROutput);
+        typedef void (*tXRRFreeOutputInfo) (XRROutputInfo*);
+        typedef XRRCrtcInfo* (*tXRRGetCrtcInfo) (::Display*, XRRScreenResources*, RRCrtc);
+        typedef void (*tXRRFreeCrtcInfo) (XRRCrtcInfo*);
+        typedef RROutput (*tXRRGetOutputPrimary) (::Display*, ::Window);
 
         void* libXrandr;
         tXRRGetScreenResources getScreenResourcesPtr;
@@ -1172,7 +1174,7 @@ private:
     }
 
     //==============================================================================
-    void queryDisplayInfos (::Display *dpy, double masterScale) noexcept
+    void queryDisplayInfos (::Display* dpy, double masterScale) noexcept
     {
         ScopedXLock xlock;
 
@@ -1198,6 +1200,11 @@ private:
                             if (! screens->outputs[j])
                                 continue;
 
+                            // Xrandr on the raspberry pi fails to determine the main display (mainDisplay == 0)!
+                            // Detect this edge case and make the first found display the main display
+                            if (! mainDisplay)
+                                mainDisplay = screens->outputs[j];
+
                             ScopedPointer<XRROutputInfo> output;
 
                             if ((output = xrandr.getOutputInfo (dpy, screens.get(), screens->outputs[j])).get())
@@ -1215,8 +1222,12 @@ private:
                                     e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
                                     e.topLeftScaled = e.totalBounds.getTopLeft();
                                     e.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
-                                    e.dpi = ((static_cast<double> (crtc->width) * 25.4 * 0.5) / static_cast<double> (output->mm_width))
-                                        + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
+                                    e.dpi = getDisplayDPI (0);
+
+                                    // The raspberry pi returns a zero sized display, so we need to guard for divide-by-zero
+                                    if (output->mm_width > 0 && output->mm_height > 0)
+                                        e.dpi = ((static_cast<double> (crtc->width) * 25.4 * 0.5) / static_cast<double> (output->mm_width))
+                                            + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
 
                                     e.scale = masterScale * getScaleForDisplay (output->name, e);
 
@@ -1635,7 +1646,7 @@ public:
             hints->width  = physicalBounds.getWidth();
             hints->height = physicalBounds.getHeight();
 
-            if ((getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == windowHasTitleBar)
+            if ((getStyleFlags() & windowIsResizable) == 0)
             {
                 hints->min_width  = hints->max_width  = hints->width;
                 hints->min_height = hints->max_height = hints->height;
@@ -2029,6 +2040,8 @@ public:
 
     void handleKeyPressEvent (XKeyEvent& keyEvent)
     {
+        const ModifierKeys oldMods (currentModifiers);
+
         char utf8 [64] = { 0 };
         juce_wchar unicodeChar = 0;
         int keyCode = 0;
@@ -2055,7 +2068,6 @@ public:
             keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
         }
 
-        const ModifierKeys oldMods (currentModifiers);
         bool keyPressed = false;
 
         if ((sym & 0xff00) == 0xff00 || keyCode == XK_ISO_Left_Tab)
@@ -2197,6 +2209,7 @@ public:
         wheel.deltaY = amount;
         wheel.isReversed = false;
         wheel.isSmooth = false;
+        wheel.isInertial = false;
 
         handleMouseWheel (0, getMousePos (buttonPressEvent), getEventTime (buttonPressEvent), wheel);
     }
@@ -3710,12 +3723,45 @@ void Desktop::Displays::findDisplays (float masterScale)
 {
     DisplayGeometry& geometry = DisplayGeometry::getOrCreateInstance (display, masterScale);
 
+    // add the main display first
+    int mainDisplayIdx;
+    for (mainDisplayIdx = 0; mainDisplayIdx < geometry.infos.size(); ++mainDisplayIdx)
+    {
+        const DisplayGeometry::ExtendedInfo& info = geometry.infos.getReference (mainDisplayIdx);
+        if (info.isMain)
+        break;
+    }
+
+    // no main display found then use the first
+    if (mainDisplayIdx >= geometry.infos.size())
+        mainDisplayIdx = 0;
+
+    // add the main display
+    {
+        const DisplayGeometry::ExtendedInfo& info =
+      geometry.infos.getReference (mainDisplayIdx);
+        Desktop::Displays::Display d;
+
+        d.isMain = true;
+        d.scale = masterScale * info.scale;
+        d.dpi = info.dpi;
+
+        d.totalArea = DisplayGeometry::physicalToScaled (info.totalBounds);
+        d.userArea = (info.usableBounds / d.scale) + info.topLeftScaled;
+
+        displays.add (d);
+    }
+
     for (int i = 0; i < geometry.infos.size(); ++i)
     {
+        // don't add the main display a second time
+        if (i == mainDisplayIdx)
+            continue;
+
         const DisplayGeometry::ExtendedInfo& info = geometry.infos.getReference (i);
         Desktop::Displays::Display d;
 
-        d.isMain = info.isMain;
+        d.isMain = false;
         d.scale = masterScale * info.scale;
         d.dpi = info.dpi;
 

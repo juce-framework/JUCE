@@ -165,16 +165,18 @@ StringArray getSearchPathsFromString (const String& searchPath)
 {
     StringArray s;
     s.addTokens (searchPath, ";\r\n", StringRef());
-    s.trim();
-    s.removeEmptyStrings();
-    s.removeDuplicates (false);
-    return s;
+    return getCleanedStringArray (s);
 }
 
 StringArray getCommaOrWhitespaceSeparatedItems (const String& sourceString)
 {
     StringArray s;
     s.addTokens (sourceString, ", \t\r\n", StringRef());
+    return getCleanedStringArray (s);
+}
+
+StringArray getCleanedStringArray (StringArray s)
+{
     s.trim();
     s.removeEmptyStrings();
     s.removeDuplicates (false);

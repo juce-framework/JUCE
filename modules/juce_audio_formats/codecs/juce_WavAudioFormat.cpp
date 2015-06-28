@@ -1267,8 +1267,8 @@ private:
 class MemoryMappedWavReader   : public MemoryMappedAudioFormatReader
 {
 public:
-    MemoryMappedWavReader (const File& file, const WavAudioFormatReader& reader)
-        : MemoryMappedAudioFormatReader (file, reader, reader.dataChunkStart,
+    MemoryMappedWavReader (const File& wavFile, const WavAudioFormatReader& reader)
+        : MemoryMappedAudioFormatReader (wavFile, reader, reader.dataChunkStart,
                                          reader.dataLength, reader.bytesPerFrame)
     {
     }

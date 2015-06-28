@@ -916,6 +916,11 @@ public:
         const File temp (File::getSpecialLocation (File::tempDirectory));
 
         expect (! File::nonexistent.exists());
+        expect (! File::nonexistent.existsAsFile());
+        expect (! File::nonexistent.isDirectory());
+       #if ! JUCE_WINDOWS
+        expect (File("/").isDirectory());
+       #endif
         expect (home.isDirectory());
         expect (home.exists());
         expect (! home.existsAsFile());

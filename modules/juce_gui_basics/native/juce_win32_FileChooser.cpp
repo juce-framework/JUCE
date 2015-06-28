@@ -218,12 +218,18 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
             info.customComponent->enterModalState();
         }
 
+        const StringRef separatorTokens (";,|");
+
         const size_t filterSpaceNumChars = 2048;
         HeapBlock<WCHAR> filters;
         filters.calloc (filterSpaceNumChars);
         const size_t bytesWritten = filter.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
         filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)),
                             ((filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten));
+
+        for (int i = 0; i < filterSpaceNumChars; ++i)
+            if (separatorTokens.text.indexOf ((juce_wchar) filters[i]) >= 0)
+                filters[i] = 0;
 
         OPENFILENAMEW of = { 0 };
         String localPath (info.initialPath);
@@ -249,7 +255,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         if (isSaveDialogue)
         {
             StringArray tokens;
-            tokens.addTokens (filter, ";,", "\"'");
+            tokens.addTokens (filter, separatorTokens, "\"'");
             tokens.trim();
             tokens.removeEmptyStrings();
 

@@ -497,10 +497,7 @@ public:
 
     void toBehind (ComponentPeer* other) override
     {
-        NSViewComponentPeer* const otherPeer = dynamic_cast<NSViewComponentPeer*> (other);
-        jassert (otherPeer != nullptr); // wrong type of window?
-
-        if (otherPeer != nullptr)
+        if (NSViewComponentPeer* const otherPeer = dynamic_cast<NSViewComponentPeer*> (other))
         {
             if (isSharedWindow)
             {
@@ -513,6 +510,10 @@ public:
                 [window orderWindow: NSWindowBelow
                          relativeTo: [otherPeer->window windowNumber]];
             }
+        }
+        else
+        {
+            jassertfalse; // wrong type of window?
         }
     }
 
@@ -620,6 +621,7 @@ public:
         wheel.deltaY = 0;
         wheel.isReversed = false;
         wheel.isSmooth = false;
+        wheel.isInertial = false;
 
        #if ! JUCE_PPC
         @try
@@ -627,6 +629,8 @@ public:
            #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
             if ([ev respondsToSelector: @selector (isDirectionInvertedFromDevice)])
                 wheel.isReversed = [ev isDirectionInvertedFromDevice];
+
+            wheel.isInertial = ([ev momentumPhase] != NSEventPhaseNone);
 
             if ([ev respondsToSelector: @selector (hasPreciseScrollingDeltas)])
             {

@@ -341,10 +341,10 @@ namespace AiffFileHelpers
                     out.writeByte ((char) labelLength + 1);
                     out.write (label.toUTF8(), labelLength);
                     out.writeByte (0);
-                }
 
-                if ((out.getDataSize() & 1) != 0)
-                    out.writeByte (0);
+                    if ((out.getDataSize() & 1) != 0)
+                        out.writeByte (0);
+                }
             }
         }
     }

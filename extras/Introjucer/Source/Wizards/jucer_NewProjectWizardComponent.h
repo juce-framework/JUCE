@@ -256,7 +256,8 @@ private:
 class WizardComp  : public Component,
                     private ButtonListener,
                     private ComboBoxListener,
-                    private TextEditorListener
+                    private TextEditorListener,
+                    private FileBrowserListener
 {
 public:
     WizardComp()
@@ -264,7 +265,9 @@ public:
           projectName (TRANS("Project name")),
           nameLabel (String::empty, TRANS("Project Name") + ":"),
           typeLabel (String::empty, TRANS("Project Type") + ":"),
-          fileBrowser (FileBrowserComponent::saveMode | FileBrowserComponent::canSelectDirectories,
+          fileBrowser (FileBrowserComponent::saveMode
+                         | FileBrowserComponent::canSelectDirectories
+                         | FileBrowserComponent::doNotClearFileNameOnRootChange,
                        NewProjectWizardClasses::getLastWizardFolder(), nullptr, nullptr),
           fileOutline (String::empty, TRANS("Project Folder") + ":"),
           targetsOutline (String::empty, TRANS("Target Platforms") + ":"),
@@ -303,6 +306,8 @@ public:
         addChildAndSetID (&fileBrowser, "fileBrowser");
         fileBrowser.setBounds ("fileOutline.left + 10, fileOutline.top + 20, fileOutline.right - 10, fileOutline.bottom - 32");
         fileBrowser.setFilenameBoxLabel ("Folder:");
+        fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
+        fileBrowser.addListener (this);
 
         addChildAndSetID (&createButton, "createButton");
         createButton.setBounds ("right - 130, bottom - 34, parent.width - 30, parent.height - 30");
@@ -406,6 +411,16 @@ public:
     void textEditorTextChanged (TextEditor&) override
     {
         updateCreateButton();
+        fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
+    }
+
+    void selectionChanged() override {}
+
+    void fileClicked (const File&, const MouseEvent&) override {}
+    void fileDoubleClicked (const File&) override {}
+
+    void browserRootChanged (const File&) override
+    {
         fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
     }
 

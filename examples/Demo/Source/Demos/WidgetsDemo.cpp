@@ -1253,6 +1253,8 @@ public:
         popupButton.setTriggeredOnMouseDown (true);
         popupButton.addListener (this);
         addAndMakeVisible (popupButton);
+
+        setApplicationCommandManagerToWatch (&MainAppWindow::getApplicationCommandManager());
     }
 
     ~MenusDemo()

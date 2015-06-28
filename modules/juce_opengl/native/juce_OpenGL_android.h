@@ -88,9 +88,12 @@ public:
         if (lastBounds != bounds)
         {
             lastBounds = bounds;
+
+            Rectangle<int> r = bounds * Desktop::getInstance().getDisplays().getMainDisplay().scale;
+
             glView.callVoidMethod (OpenGLView.layout,
-                                   bounds.getX(), bounds.getY(),
-                                   bounds.getRight(), bounds.getBottom());
+                                   r.getX(), r.getY(),
+                                   r.getRight(), r.getBottom());
         }
     }
 

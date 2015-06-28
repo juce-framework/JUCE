@@ -27,7 +27,7 @@ class ValueTree::SharedObject  : public ReferenceCountedObject
 public:
     typedef ReferenceCountedObjectPtr<SharedObject> Ptr;
 
-    explicit SharedObject (Identifier t) noexcept
+    explicit SharedObject (const Identifier& t) noexcept
         : type (t), parent (nullptr)
     {
     }
@@ -126,7 +126,7 @@ public:
         }
     }
 
-    void sendPropertyChangeMessage (const Identifier property)
+    void sendPropertyChangeMessage (const Identifier& property)
     {
         ValueTree tree (this);
 
@@ -169,7 +169,7 @@ public:
         callListeners (&ValueTree::Listener::valueTreeParentChanged, tree);
     }
 
-    void setProperty (const Identifier name, const var& newValue, UndoManager* const undoManager)
+    void setProperty (const Identifier& name, const var& newValue, UndoManager* const undoManager)
     {
         if (undoManager == nullptr)
         {
@@ -190,12 +190,12 @@ public:
         }
     }
 
-    bool hasProperty (const Identifier name) const noexcept
+    bool hasProperty (const Identifier& name) const noexcept
     {
         return properties.contains (name);
     }
 
-    void removeProperty (const Identifier name, UndoManager* const undoManager)
+    void removeProperty (const Identifier& name, UndoManager* const undoManager)
     {
         if (undoManager == nullptr)
         {
@@ -238,7 +238,7 @@ public:
             setProperty (source.properties.getName(i), source.properties.getValueAt(i), undoManager);
     }
 
-    ValueTree getChildWithName (const Identifier typeToMatch) const
+    ValueTree getChildWithName (const Identifier& typeToMatch) const
     {
         for (int i = 0; i < children.size(); ++i)
         {
@@ -250,7 +250,7 @@ public:
         return ValueTree();
     }
 
-    ValueTree getOrCreateChildWithName (const Identifier typeToMatch, UndoManager* undoManager)
+    ValueTree getOrCreateChildWithName (const Identifier& typeToMatch, UndoManager* undoManager)
     {
         for (int i = 0; i < children.size(); ++i)
         {
@@ -265,7 +265,7 @@ public:
 
     }
 
-    ValueTree getChildWithProperty (const Identifier propertyName, const var& propertyValue) const
+    ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const
     {
         for (int i = 0; i < children.size(); ++i)
         {
@@ -458,7 +458,7 @@ public:
     class SetPropertyAction  : public UndoableAction
     {
     public:
-        SetPropertyAction (SharedObject* const so, const Identifier propertyName,
+        SetPropertyAction (SharedObject* const so, const Identifier& propertyName,
                            const var& newVal, const var& oldVal, bool isAdding, bool isDeleting)
             : target (so), name (propertyName), newValue (newVal), oldValue (oldVal),
               isAddingNewProperty (isAdding), isDeletingProperty (isDeleting)
@@ -629,7 +629,7 @@ ValueTree::ValueTree() noexcept
 
 const ValueTree ValueTree::invalid;
 
-ValueTree::ValueTree (Identifier type)  : object (new ValueTree::SharedObject (type))
+ValueTree::ValueTree (const Identifier& type)  : object (new ValueTree::SharedObject (type))
 {
     jassert (type.toString().isNotEmpty()); // All objects must be given a sensible type name!
 }
@@ -702,7 +702,7 @@ ValueTree ValueTree::createCopy() const
     return ValueTree (createCopyIfNotNull (object.get()));
 }
 
-bool ValueTree::hasType (const Identifier typeName) const
+bool ValueTree::hasType (const Identifier& typeName) const
 {
     return object != nullptr && object->type == typeName;
 }
@@ -727,24 +727,23 @@ ValueTree ValueTree::getSibling (const int delta) const
     return ValueTree (object->parent->children.getObjectPointer (index));
 }
 
-const var& ValueTree::operator[] (const Identifier name) const
+const var& ValueTree::operator[] (const Identifier& name) const
 {
     return object == nullptr ? var::null : object->properties[name];
 }
 
-const var& ValueTree::getProperty (const Identifier name) const
+const var& ValueTree::getProperty (const Identifier& name) const
 {
     return object == nullptr ? var::null : object->properties[name];
 }
 
-var ValueTree::getProperty (const Identifier name, const var& defaultReturnValue) const
+var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValue) const
 {
     return object == nullptr ? defaultReturnValue
                              : object->properties.getWithDefault (name, defaultReturnValue);
 }
 
-ValueTree& ValueTree::setProperty (const Identifier name, const var& newValue,
-                                   UndoManager* const undoManager)
+ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager)
 {
     jassert (name.toString().isNotEmpty()); // Must have a valid property name!
     jassert (object != nullptr); // Trying to add a property to a null ValueTree will fail!
@@ -755,12 +754,12 @@ ValueTree& ValueTree::setProperty (const Identifier name, const var& newValue,
     return *this;
 }
 
-bool ValueTree::hasProperty (const Identifier name) const
+bool ValueTree::hasProperty (const Identifier& name) const
 {
     return object != nullptr && object->hasProperty (name);
 }
 
-void ValueTree::removeProperty (const Identifier name, UndoManager* const undoManager)
+void ValueTree::removeProperty (const Identifier& name, UndoManager* const undoManager)
 {
     if (object != nullptr)
         object->removeProperty (name, undoManager);
@@ -803,7 +802,7 @@ class ValueTreePropertyValueSource  : public Value::ValueSource,
                                       private ValueTree::Listener
 {
 public:
-    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier prop, UndoManager* um)
+    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um)
         : tree (vt), property (prop), undoManager (um)
     {
         tree.addListener (this);
@@ -836,7 +835,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreePropertyValueSource)
 };
 
-Value ValueTree::getPropertyAsValue (const Identifier name, UndoManager* const undoManager)
+Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager)
 {
     return Value (new ValueTreePropertyValueSource (*this, name, undoManager));
 }
@@ -853,17 +852,17 @@ ValueTree ValueTree::getChild (int index) const
                                         : static_cast<SharedObject*> (nullptr));
 }
 
-ValueTree ValueTree::getChildWithName (const Identifier type) const
+ValueTree ValueTree::getChildWithName (const Identifier& type) const
 {
     return object != nullptr ? object->getChildWithName (type) : ValueTree();
 }
 
-ValueTree ValueTree::getOrCreateChildWithName (const Identifier type, UndoManager* undoManager)
+ValueTree ValueTree::getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager)
 {
     return object != nullptr ? object->getOrCreateChildWithName (type, undoManager) : ValueTree();
 }
 
-ValueTree ValueTree::getChildWithProperty (const Identifier propertyName, const var& propertyValue) const
+ValueTree ValueTree::getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const
 {
     return object != nullptr ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree();
 }
@@ -945,7 +944,7 @@ void ValueTree::removeListener (Listener* listener)
         object->valueTreesWithListeners.removeValue (this);
 }
 
-void ValueTree::sendPropertyChangeMessage (const Identifier property)
+void ValueTree::sendPropertyChangeMessage (const Identifier& property)
 {
     if (object != nullptr)
         object->sendPropertyChangeMessage (property);

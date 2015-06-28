@@ -594,8 +594,11 @@ StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
     return s;
 }
 
-void ProjectContentComponent::openInIDE (int exporterIndex)
+void ProjectContentComponent::openInIDE (int exporterIndex, bool saveFirst)
 {
+    if (saveFirst)
+        saveProject();
+
     int i = 0;
 
     if (project != nullptr)
@@ -605,13 +608,13 @@ void ProjectContentComponent::openInIDE (int exporterIndex)
                     break;
 }
 
-static void openIDEMenuCallback (int result, ProjectContentComponent* comp)
+static void openIDEMenuCallback (int result, ProjectContentComponent* comp, bool saveFirst)
 {
     if (comp != nullptr && result > 0)
-        comp->openInIDE (result - 1);
+        comp->openInIDE (result - 1, saveFirst);
 }
 
-void ProjectContentComponent::openInIDE()
+void ProjectContentComponent::openInIDE (bool saveFirst)
 {
     if (project != nullptr)
     {
@@ -625,11 +628,11 @@ void ProjectContentComponent::openInIDE()
                 menu.addItem (i + 1, possibleExporters[i]);
 
             menu.showMenuAsync (PopupMenu::Options(),
-                                ModalCallbackFunction::forComponent (openIDEMenuCallback, this));
+                                ModalCallbackFunction::forComponent (openIDEMenuCallback, this, saveFirst));
         }
         else
         {
-            openInIDE (0);
+            openInIDE (0, saveFirst);
         }
     }
 }
@@ -911,15 +914,10 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::showProjectSettings:       showProjectSettings(); break;
         case CommandIDs::showProjectModules:        showModules(); break;
 
-        case CommandIDs::openInIDE:                 openInIDE(); break;
+        case CommandIDs::openInIDE:                 openInIDE (false); break;
+        case CommandIDs::saveAndOpenInIDE:          openInIDE (true); break;
 
         case CommandIDs::deleteSelectedItem:        deleteSelectedTreeItems(); break;
-
-        case CommandIDs::saveAndOpenInIDE:
-            if (saveProject())
-                openInIDE();
-
-            break;
 
         case CommandIDs::showTranslationTool:       showTranslationTool(); break;
 

@@ -95,7 +95,8 @@ public:
     bool canLaunchProject() override                 { return false; }
     bool launchProject() override                    { return false; }
     bool isCodeBlocksWindows() const override        { return os == windowsTarget; }
-    bool isCodeBlocksLinux() const override          { return os == linuxTarget; }
+    bool isCodeBlocksLinux() const override          { return isLinux(); }
+    bool isLinux() const override                    { return os == linuxTarget; }
     bool usesMMFiles() const override                { return false; }
     bool canCopeWithDuplicateFiles() override        { return false; }
 
@@ -153,14 +154,6 @@ private:
         xml.createNewChildElement ("Option")->setAttribute ("compiler", "gcc");
     }
 
-    static StringArray cleanArray (StringArray s)
-    {
-        s.trim();
-        s.removeDuplicates (false);
-        s.removeEmptyStrings (true);
-        return s;
-    }
-
     StringArray getDefines (const BuildConfiguration& config) const
     {
         StringPairArray defines;
@@ -191,7 +184,7 @@ private:
         for (int i = 0; i < defines.size(); ++i)
             defs.add (defines.getAllKeys()[i] + "=" + defines.getAllValues()[i]);
 
-        return cleanArray (defs);
+        return getCleanedStringArray (defs);
     }
 
     StringArray getCompilerFlags (const BuildConfiguration& config) const
@@ -221,12 +214,12 @@ private:
             }
         }
 
-        return cleanArray (flags);
+        return getCleanedStringArray (flags);
     }
 
     StringArray getLinkerFlags (const BuildConfiguration& config) const
     {
-        StringArray flags;
+        StringArray flags (makefileExtraLinkerFlags);
 
         if (! config.isDebug())
             flags.add ("-s");
@@ -234,7 +227,7 @@ private:
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(),
                          " \n", "\"'");
 
-        return cleanArray (flags);
+        return getCleanedStringArray (flags);
     }
 
     StringArray getIncludePaths (const BuildConfiguration& config) const
@@ -250,7 +243,7 @@ private:
         if (! isCodeBlocksWindows())
             paths.add ("/usr/include/freetype2");
 
-        return cleanArray (paths);
+        return getCleanedStringArray (paths);
     }
 
     static int getTypeIndex (const ProjectType& type)
@@ -360,7 +353,7 @@ private:
 
         libs.addTokens (getExternalLibrariesString(), ";\n", "\"'");
 
-        libs = cleanArray (libs);
+        libs = getCleanedStringArray (libs);
 
         for (int i = 0; i < libs.size(); ++i)
             setAddOption (*linker, "library", replacePreprocessorDefs (getAllPreprocessorDefs(), libs[i]));

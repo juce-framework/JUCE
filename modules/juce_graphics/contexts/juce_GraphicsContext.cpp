@@ -32,8 +32,8 @@ namespace
 
         jassert ((int) x >= -maxVal && (int) x <= maxVal
               && (int) y >= -maxVal && (int) y <= maxVal
-              && (int) w >= -maxVal && (int) w <= maxVal
-              && (int) h >= -maxVal && (int) h <= maxVal);
+              && (int) w >= 0 && (int) w <= maxVal
+              && (int) h >= 0 && (int) h <= maxVal);
        #endif
 
         return Rectangle<Type> (x, y, w, h);
@@ -427,6 +427,8 @@ void Graphics::drawRect (const Rectangle<int>& r, int lineThickness) const
 
 void Graphics::drawRect (Rectangle<float> r, const float lineThickness) const
 {
+    jassert (r.getWidth() >= 0.0f && r.getHeight() >= 0.0f);
+
     RectangleList<float> rects;
     rects.addWithoutMerging (r.removeFromTop    (lineThickness));
     rects.addWithoutMerging (r.removeFromBottom (lineThickness));
