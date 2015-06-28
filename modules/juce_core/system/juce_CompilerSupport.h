@@ -118,7 +118,6 @@
 
  #if _MSC_VER >= 1900
   #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
-  #define JUCE_DELETED_FUNCTION = delete
  #endif
 #endif
 
