@@ -1355,7 +1355,7 @@ private:
         const char* sizeString;
         const char* filename;
         const char* scale;
-        const int   size;
+        int size;
     };
 
     static Array<AppIconType> getiOSAppIconTypes()
