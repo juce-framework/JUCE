@@ -1351,6 +1351,28 @@ private:
 
     struct AppIconType
     {
+        AppIconType (const char* in_idiom,const char* in_sizeString, const char* in_filename, const char* in_scale, const int in_size) :
+            idiom(in_idiom),
+            sizeString(in_sizeString),
+            filename(in_filename),
+            scale(in_scale),
+            size(in_size)
+        {
+
+        }
+
+        AppIconType (const AppIconType& other) :
+            idiom(other.idiom),
+            sizeString(other.sizeString),
+            filename(other.filename),
+            scale(other.scale),
+            size(other.size)
+        {
+
+        }
+
+        AppIconType& operator= (const AppIconType& other) JUCE_DELETED_FUNCTION;
+
         const char* idiom;
         const char* sizeString;
         const char* filename;
@@ -1358,7 +1380,7 @@ private:
         const int   size;
     };
 
-    static Array<AppIconType> getiOSAppIconTypes()
+    static Array<AppIconType> getiOSAppIconTypes ()
     {
         AppIconType types[] =
         {
