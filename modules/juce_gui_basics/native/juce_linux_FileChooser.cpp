@@ -135,7 +135,7 @@ static void addZenityArgs (StringArray& args, String& separator,
         tokens.addTokens (filters, ";,|", "\"");
 
         for (int i = 0; i < tokens.size(); ++i)
-            args.add ("--file-filter='" + tokens[i] + "'");
+            args.add ("--file-filter=" + tokens[i]);
     }
 
     if (file.isDirectory())
