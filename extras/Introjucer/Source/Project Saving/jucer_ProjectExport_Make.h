@@ -156,7 +156,7 @@ private:
 
     void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  CPPFLAGS := $(DEPFLAGS) -std=c++11";
+        out << "  CPPFLAGS := $(DEPFLAGS)";
         writeDefineFlags (out, config);
         writeHeaderPathFlags (out, config);
         out << newLine;
@@ -232,7 +232,7 @@ private:
             << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
             << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS)" << newLine;
+        out << "  CXXFLAGS += $(CFLAGS) -std=c++11" << newLine;
 
         writeLinkerFlags (out, config);
 
