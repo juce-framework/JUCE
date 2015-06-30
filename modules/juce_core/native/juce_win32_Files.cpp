@@ -795,18 +795,19 @@ public:
           connected (false), ownsPipe (createPipe), shouldStop (false)
     {
         if (createPipe)
+        {
             pipeH = CreateNamedPipe (filename.toWideCharPointer(),
                                      PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
                                      PIPE_UNLIMITED_INSTANCES, 4096, 4096, 0, 0);
+
+            if (GetLastError() == ERROR_ALREADY_EXISTS)
+                closePipeHandle();
+        }
     }
 
     ~Pimpl()
     {
-        disconnectPipe();
-
-        if (pipeH != INVALID_HANDLE_VALUE)
-            CloseHandle (pipeH);
-
+        closePipeHandle();
         CloseHandle (cancelEvent);
     }
 
@@ -865,6 +866,16 @@ public:
         {
             DisconnectNamedPipe (pipeH);
             connected = false;
+        }
+    }
+
+    void closePipeHandle()
+    {
+        if (pipeH != INVALID_HANDLE_VALUE)
+        {
+            disconnectPipe();
+            CloseHandle (pipeH);
+            pipeH = INVALID_HANDLE_VALUE;
         }
     }
 
