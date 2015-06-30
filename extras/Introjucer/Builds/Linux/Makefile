@@ -18,9 +18,9 @@ ifeq ($(CONFIG),Debug)
     TARGET_ARCH := 
   endif
 
-  CPPFLAGS := $(DEPFLAGS) -std=c++11 -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -D "JUCE_APP_VERSION=3.1.1" -D "JUCE_APP_VERSION_HEX=0x30101" -I /usr/include -I /usr/include/freetype2 -I ../../JuceLibraryCode -I ../../../../modules
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -D "JUCE_APP_VERSION=3.1.1" -D "JUCE_APP_VERSION_HEX=0x30101" -I /usr/include -I /usr/include/freetype2 -I ../../JuceLibraryCode -I ../../../../modules
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O0 -std=gnu++0x -Wreorder -Wuninitialized -Wunused-parameter -Wstrict-aliasing -Wshadow -Wsign-compare
-  CXXFLAGS += $(CFLAGS)
+  CXXFLAGS += $(CFLAGS) -std=c++11
   LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt 
 
   TARGET := Introjucer
@@ -38,9 +38,9 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := 
   endif
 
-  CPPFLAGS := $(DEPFLAGS) -std=c++11 -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -D "JUCE_APP_VERSION=3.1.1" -D "JUCE_APP_VERSION_HEX=0x30101" -I /usr/include -I /usr/include/freetype2 -I ../../JuceLibraryCode -I ../../../../modules
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -D "JUCE_APP_VERSION=3.1.1" -D "JUCE_APP_VERSION_HEX=0x30101" -I /usr/include -I /usr/include/freetype2 -I ../../JuceLibraryCode -I ../../../../modules
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O3 -std=gnu++0x -Wreorder -Wuninitialized -Wunused-parameter -Wstrict-aliasing -Wshadow -Wsign-compare
-  CXXFLAGS += $(CFLAGS)
+  CXXFLAGS += $(CFLAGS) -std=c++11
   LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR) -fvisibility=hidden -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt 
 
   TARGET := Introjucer

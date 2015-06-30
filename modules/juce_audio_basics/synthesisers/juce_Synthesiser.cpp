@@ -538,10 +538,10 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
     {
         SynthesiserVoice* const voice = voices.getUnchecked (i);
 
-        jassert (voice->isVoiceActive()); // We wouldn't be here otherwise
-
         if (voice->canPlaySound (soundToPlay))
         {
+            jassert (voice->isVoiceActive()); // We wouldn't be here otherwise
+
             VoiceAgeSorter sorter;
             usableVoices.addSorted (sorter, voice);
 

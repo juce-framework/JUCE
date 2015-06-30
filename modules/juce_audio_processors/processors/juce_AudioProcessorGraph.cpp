@@ -1282,6 +1282,8 @@ void AudioProcessorGraph::setPlayHead (AudioPlayHead* audioPlayHead)
 {
     const ScopedLock sl (getCallbackLock());
 
+    AudioProcessor::setPlayHead (audioPlayHead);
+
     for (int i = 0; i < nodes.size(); ++i)
         nodes.getUnchecked(i)->getProcessor()->setPlayHead (audioPlayHead);
 }

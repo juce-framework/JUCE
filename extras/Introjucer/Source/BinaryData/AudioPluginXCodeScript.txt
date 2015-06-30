@@ -13,7 +13,9 @@ copyAAX=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'ACFStartup
 
 if [ $copyAU -gt 0 ]; then
   echo "Copying to AudioUnit folder..."
-  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component
+  AUDir=~/Library/Audio/Plug-Ins/Components
+  mkdir -p "$AUDir"
+  AU=$AUDir/$PRODUCT_NAME.component
   if [ -d "$AU" ]; then 
     rm -r "$AU"
   fi
@@ -33,7 +35,9 @@ fi
 
 if [ $copyVST -gt 0 ]; then
   echo "Copying to VST folder..."
-  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst
+  VSTDir=~/Library/Audio/Plug-Ins/VST
+  mkdir -p "$VSTDir"
+  VST=$VSTDir/$PRODUCT_NAME.vst
   if [ -d "$VST" ]; then 
     rm -r "$VST"
   fi
@@ -45,7 +49,9 @@ fi
 
 if [ $copyVST3 -gt 0 ]; then
   echo "Copying to VST3 folder..."
-  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3
+  VST3Dir=~/Library/Audio/Plug-Ins/VST3
+  mkdir -p "$VST3Dir"
+  VST3=$VST3Dir/$PRODUCT_NAME.vst3
   if [ -d "$VST3" ]; then 
     rm -r "$VST3"
   fi
@@ -57,12 +63,15 @@ fi
 
 if [ $copyRTAS -gt 0 ]; then
   echo "Copying to RTAS folder..."
-  RTAS=/Library/Application\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm
-  if [ -d "$RTAS" ]; then
-    rm -r "$RTAS"
-  fi
+  RTASDir=/Library/Application\ Support/Digidesign/Plug-Ins
+  if [ -d "$RTASDir" ]; then
+    RTAS=$RTASDir/$PRODUCT_NAME.dpm
+    if [ -d "$RTAS" ]; then
+      rm -r "$RTAS"
+    fi
 
-  cp -r "$original" "$RTAS"
+    cp -r "$original" "$RTAS"
+  fi
 fi
 
 if [ $copyAAX -gt 0 ]; then
