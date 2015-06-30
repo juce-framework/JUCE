@@ -1422,7 +1422,9 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyAU -gt 0 ]; then\r\n"
 "  echo \"Copying to AudioUnit folder...\"\r\n"
-"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
+"  AUDir=~/Library/Audio/Plug-Ins/Components\r\n"
+"  mkdir -p \"$AUDir\"\r\n"
+"  AU=$AUDir/$PRODUCT_NAME.component\r\n"
 "  if [ -d \"$AU\" ]; then \r\n"
 "    rm -r \"$AU\"\r\n"
 "  fi\r\n"
@@ -1442,7 +1444,9 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyVST -gt 0 ]; then\r\n"
 "  echo \"Copying to VST folder...\"\r\n"
-"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
+"  VSTDir=~/Library/Audio/Plug-Ins/VST\r\n"
+"  mkdir -p \"$VSTDir\"\r\n"
+"  VST=$VSTDir/$PRODUCT_NAME.vst\r\n"
 "  if [ -d \"$VST\" ]; then \r\n"
 "    rm -r \"$VST\"\r\n"
 "  fi\r\n"
@@ -1454,7 +1458,9 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyVST3 -gt 0 ]; then\r\n"
 "  echo \"Copying to VST3 folder...\"\r\n"
-"  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3\r\n"
+"  VST3Dir=~/Library/Audio/Plug-Ins/VST3\r\n"
+"  mkdir -p \"$VST3Dir\"\r\n"
+"  VST3=$VST3Dir/$PRODUCT_NAME.vst3\r\n"
 "  if [ -d \"$VST3\" ]; then \r\n"
 "    rm -r \"$VST3\"\r\n"
 "  fi\r\n"
@@ -1466,12 +1472,15 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyRTAS -gt 0 ]; then\r\n"
 "  echo \"Copying to RTAS folder...\"\r\n"
-"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
-"  if [ -d \"$RTAS\" ]; then\r\n"
-"    rm -r \"$RTAS\"\r\n"
-"  fi\r\n"
+"  RTASDir=/Library/Application\\ Support/Digidesign/Plug-Ins\r\n"
+"  if [ -d \"$RTASDir\" ]; then\r\n"
+"    RTAS=$RTASDir/$PRODUCT_NAME.dpm\r\n"
+"    if [ -d \"$RTAS\" ]; then\r\n"
+"      rm -r \"$RTAS\"\r\n"
+"    fi\r\n"
 "\r\n"
-"  cp -r \"$original\" \"$RTAS\"\r\n"
+"    cp -r \"$original\" \"$RTAS\"\r\n"
+"  fi\r\n"
 "fi\r\n"
 "\r\n"
 "if [ $copyAAX -gt 0 ]; then\r\n"
@@ -4096,7 +4105,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
         case 0x7fbac252:  numBytes = 1827; return jucer_OpenGLComponentTemplate_cpp;
-        case 0x44be9398:  numBytes = 2922; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 3108; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
