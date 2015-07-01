@@ -59,7 +59,7 @@ public:
         Matrix3D<float> rotationMatrix
             = viewMatrix.rotated (Vector3D<float> (-0.3f, 5.0f * std::sin (getFrameCounter() * 0.01f), 0.0f));
 
-        return viewMatrix * rotationMatrix;
+        return rotationMatrix * viewMatrix;
     }
 
     void render() override
