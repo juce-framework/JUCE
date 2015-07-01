@@ -57,7 +57,7 @@ public:
     /** Tries to create a new pipe.
         Returns true if it succeeds.
     */
-    bool createNewPipe (const String& pipeName);
+    bool createNewPipe (const String& pipeName, bool mustNotExist = false);
 
     /** Closes the pipe, if it's open. */
     void close();
@@ -95,7 +95,7 @@ private:
     String currentPipeName;
     ReadWriteLock lock;
 
-    bool openInternal (const String& pipeName, const bool createPipe);
+    bool openInternal (const String& pipeName, const bool createPipe, bool mustNotExist = false);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NamedPipe)
 };

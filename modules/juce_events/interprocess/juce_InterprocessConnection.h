@@ -111,10 +111,11 @@ public:
         @param pipeName     the name to use for the pipe - this should be unique to your app
         @param pipeReceiveMessageTimeoutMs  a timeout length to be used when reading or writing
                                             to the pipe, or -1 for an infinite timeout.
+        @param mustNotExist     if set 'true', the method failes if the pipe already exists.
         @returns true if the pipe was created, or false if it fails (e.g. if another process is
                  already using using the pipe).
     */
-    bool createPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs);
+    bool createPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, bool mustNotExist = false);
 
     /** Disconnects and closes any currently-open sockets or pipes. */
     void disconnect();
