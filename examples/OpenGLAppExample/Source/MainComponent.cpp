@@ -59,7 +59,7 @@ public:
         Matrix3D<float> rotationMatrix
             = viewMatrix.rotated (Vector3D<float> (-0.3f, 5.0f * std::sin (getFrameCounter() * 0.01f), 0.0f));
 
-        return viewMatrix * rotationMatrix;
+        return rotationMatrix * viewMatrix;
     }
 
     void render() override
@@ -187,12 +187,12 @@ private:
     // This class just manages the attributes that the shaders use.
     struct Attributes
     {
-        Attributes (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
+        Attributes (OpenGLContext& openGLContext, OpenGLShaderProgram& shaderProgram)
         {
-            position      = createAttribute (openGLContext, shader, "position");
-            normal        = createAttribute (openGLContext, shader, "normal");
-            sourceColour  = createAttribute (openGLContext, shader, "sourceColour");
-            texureCoordIn = createAttribute (openGLContext, shader, "texureCoordIn");
+            position      = createAttribute (openGLContext, shaderProgram, "position");
+            normal        = createAttribute (openGLContext, shaderProgram, "normal");
+            sourceColour  = createAttribute (openGLContext, shaderProgram, "sourceColour");
+            texureCoordIn = createAttribute (openGLContext, shaderProgram, "texureCoordIn");
         }
 
         void enable (OpenGLContext& openGLContext)
@@ -248,23 +248,23 @@ private:
     // This class just manages the uniform values that the demo shaders use.
     struct Uniforms
     {
-        Uniforms (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
+        Uniforms (OpenGLContext& openGLContext, OpenGLShaderProgram& shaderProgram)
         {
-            projectionMatrix = createUniform (openGLContext, shader, "projectionMatrix");
-            viewMatrix       = createUniform (openGLContext, shader, "viewMatrix");
+            projectionMatrix = createUniform (openGLContext, shaderProgram, "projectionMatrix");
+            viewMatrix       = createUniform (openGLContext, shaderProgram, "viewMatrix");
         }
 
         ScopedPointer<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix;
 
     private:
         static OpenGLShaderProgram::Uniform* createUniform (OpenGLContext& openGLContext,
-                                                            OpenGLShaderProgram& shader,
+                                                            OpenGLShaderProgram& shaderProgram,
                                                             const char* uniformName)
         {
-            if (openGLContext.extensions.glGetUniformLocation (shader.getProgramID(), uniformName) < 0)
+            if (openGLContext.extensions.glGetUniformLocation (shaderProgram.getProgramID(), uniformName) < 0)
                 return nullptr;
 
-            return new OpenGLShaderProgram::Uniform (shader, uniformName);
+            return new OpenGLShaderProgram::Uniform (shaderProgram, uniformName);
         }
     };
 
@@ -282,39 +282,41 @@ private:
 
         }
 
-        void draw (OpenGLContext& openGLContext, Attributes& attributes)
+        void draw (OpenGLContext& openGLContext, Attributes& glAttributes)
         {
             for (int i = 0; i < vertexBuffers.size(); ++i)
             {
                 VertexBuffer& vertexBuffer = *vertexBuffers.getUnchecked (i);
                 vertexBuffer.bind();
 
-                attributes.enable (openGLContext);
+                glAttributes.enable (openGLContext);
                 glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
-                attributes.disable (openGLContext);
+                glAttributes.disable (openGLContext);
             }
         }
 
     private:
         struct VertexBuffer
         {
-            VertexBuffer (OpenGLContext& context, WavefrontObjFile::Shape& shape) : openGLContext (context)
+            VertexBuffer (OpenGLContext& context, WavefrontObjFile::Shape& aShape) : openGLContext (context)
             {
-                numIndices = shape.mesh.indices.size();
+                numIndices = aShape.mesh.indices.size();
 
                 openGLContext.extensions.glGenBuffers (1, &vertexBuffer);
                 openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, vertexBuffer);
 
                 Array<Vertex> vertices;
-                createVertexListFromMesh (shape.mesh, vertices, Colours::green);
+                createVertexListFromMesh (aShape.mesh, vertices, Colours::green);
 
-                openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER, vertices.size() * sizeof (Vertex),
+                openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER,
+                                                       static_cast<GLsizeiptr> (static_cast<size_t> (vertices.size()) * sizeof (Vertex)),
                                                        vertices.getRawDataPointer(), GL_STATIC_DRAW);
 
                 openGLContext.extensions.glGenBuffers (1, &indexBuffer);
                 openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-                openGLContext.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof (juce::uint32),
-                                                       shape.mesh.indices.getRawDataPointer(), GL_STATIC_DRAW);
+                openGLContext.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER,
+                                                       static_cast<GLsizeiptr> (static_cast<size_t> (numIndices) * sizeof (juce::uint32)),
+                                                       aShape.mesh.indices.getRawDataPointer(), GL_STATIC_DRAW);
             }
 
             ~VertexBuffer()

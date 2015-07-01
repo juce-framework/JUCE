@@ -1,4 +1,4 @@
-/*
+	/*
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
@@ -34,7 +34,8 @@ public:
          pipeOutName (pipePath + "_out"),
          pipeIn (-1), pipeOut (-1),
          createdPipe (createPipe),
-         stopReadOperation (false)
+         stopReadOperation (false),
+         filesCreated(false)
     {
         signal (SIGPIPE, signalHandler);
         juce_siginterrupt (SIGPIPE, 1);
@@ -45,7 +46,7 @@ public:
         if (pipeIn  != -1)  ::close (pipeIn);
         if (pipeOut != -1)  ::close (pipeOut);
 
-        if (createdPipe)
+        if (createdPipe && filesCreated)
         {
             unlink (pipeInName.toUTF8());
             unlink (pipeOutName.toUTF8());
@@ -119,10 +120,13 @@ public:
         return bytesWritten;
     }
 
-    bool createFifos() const
+    bool createFifos(bool mustNotExist = false)
     {
-        return (mkfifo (pipeInName .toUTF8(), 0666) == 0 || errno == EEXIST)
-            && (mkfifo (pipeOutName.toUTF8(), 0666) == 0 || errno == EEXIST);
+        if (mustNotExist && (File(pipeInName).exists() || File(pipeOutName).exists()))
+            return false;
+        
+        return (filesCreated =    (mkfifo (pipeInName .toUTF8(), 0666) == 0 || errno == EEXIST)
+                               && (mkfifo (pipeOutName.toUTF8(), 0666) == 0 || errno == EEXIST));
     }
 
     const String pipeInName, pipeOutName;
@@ -169,6 +173,8 @@ private:
 
         select (handle + 1, &rset, nullptr, 0, &timeout);
     }
+    
+    bool filesCreated;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -188,7 +194,7 @@ void NamedPipe::close()
     }
 }
 
-bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
+bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, bool mustNotExist)
 {
    #if JUCE_IOS
     pimpl = new Pimpl (File::getSpecialLocation (File::tempDirectory)
@@ -202,7 +208,7 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
     pimpl = new Pimpl (file, createPipe);
    #endif
 
-    if (createPipe && ! pimpl->createFifos())
+    if (createPipe && ! pimpl->createFifos(mustNotExist))
     {
         pimpl = nullptr;
         return false;
