@@ -513,6 +513,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Project/jucer_TreeItemTypes.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_CodeHelpers.cpp"/>
     <Unit filename="../../Source/Utility/jucer_CodeHelpers.h">
       <Option compile="0"/>

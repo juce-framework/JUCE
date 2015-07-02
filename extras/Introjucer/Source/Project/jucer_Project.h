@@ -104,8 +104,10 @@ public:
     Value getProjectUserNotes()                         { return getProjectValue (Ids::userNotes); }
 
     //==============================================================================
-    File getGeneratedCodeFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
-    File getAppIncludeFile() const                      { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
+    File getGeneratedCodeFolder() const                         { return getFile().getSiblingFile ("JuceLibraryCode"); }
+    File getLocalModulesFolder() const                          { return getGeneratedCodeFolder().getChildFile ("modules"); }
+    File getLocalModuleFolder (const String& moduleID) const    { return getLocalModulesFolder().getChildFile (moduleID); }
+    File getAppIncludeFile() const                              { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
 
     File getBinaryDataCppFile (int index) const;
     File getBinaryDataHeaderFile() const                { return getBinaryDataCppFile (0).withFileExtension (".h"); }

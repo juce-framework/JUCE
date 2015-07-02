@@ -1145,6 +1145,7 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h"/>
+    <ClInclude Include="..\..\Source\Project\jucer_TreeItemTypes.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_Colours.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h"/>

@@ -240,7 +240,7 @@ File LibraryModule::getModuleHeaderFile (const File& folder) const
 //==============================================================================
 void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)
 {
-    const File localModuleFolder (projectSaver.getLocalModuleFolder (getID()));
+    const File localModuleFolder (projectSaver.project.getLocalModuleFolder (getID()));
     const File localHeader (getModuleHeaderFile (localModuleFolder));
 
     localModuleFolder.createDirectory();
@@ -308,7 +308,7 @@ void LibraryModule::createLocalHeaderWrapper (ProjectSaver& projectSaver, const 
 
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        const RelativePath headerFromProject (exporter->getModuleFolderRelativeToProject (getID(), projectSaver)
+        const RelativePath headerFromProject (exporter->getModuleFolderRelativeToProject (getID())
                                                 .getChildFile (originalHeader.getFileName()));
 
         const RelativePath fileFromHere (headerFromProject.rebased (project.getProjectFolder(),
@@ -337,7 +337,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 {
     Project& project = exporter.getProject();
 
-    exporter.addToExtraSearchPaths (exporter.getModuleFolderRelativeToProject (getID(), projectSaver).getParentDirectory());
+    exporter.addToExtraSearchPaths (exporter.getModuleFolderRelativeToProject (getID()).getParentDirectory());
 
     const String extraDefs (moduleInfo.getPreprocessorDefs().trim());
 
@@ -348,13 +348,13 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
         Array<File> compiled;
 
         const File localModuleFolder = project.getModules().shouldCopyModuleFilesLocally (getID()).getValue()
-                                          ? projectSaver.getLocalModuleFolder (getID())
+                                          ? project.getLocalModuleFolder (getID())
                                           : moduleInfo.getFolder();
 
-        findAndAddCompiledCode (exporter, projectSaver, localModuleFolder, compiled);
+        findAndAddCompiledUnits (exporter, &projectSaver, localModuleFolder, compiled);
 
         if (project.getModules().shouldShowAllModuleFilesInProject (getID()).getValue())
-            addBrowsableCode (exporter, projectSaver, compiled, localModuleFolder);
+            addBrowseableCode (exporter, compiled, localModuleFolder);
     }
 
     if (isVSTPluginHost (project))  VSTHelpers::addVSTFolderToPath (exporter, false);
@@ -479,7 +479,7 @@ struct FileSorter
 
 void LibraryModule::findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const
 {
-    String path (wildcardPath.upToLastOccurrenceOf ("/", false, false));
+    String path     (wildcardPath.upToLastOccurrenceOf ("/", false, false));
     String wildCard (wildcardPath.fromLastOccurrenceOf ("/", false, false));
 
     Array<File> tempList;
@@ -497,21 +497,16 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
 
 static bool fileTargetMatches (ProjectExporter& exporter, const String& target)
 {
-    if (exporter.isXcode())
-        return exporterTargetMatches ("xcode", target);
-    if (exporter.isWindows())
-        return exporterTargetMatches ("msvc", target);
-    if (exporter.isLinux())
-        return exporterTargetMatches ("linux", target);
-    if (exporter.isAndroid())
-        return exporterTargetMatches ("android", target);
-    if (exporter.isCodeBlocksWindows())
-        return exporterTargetMatches ("mingw", target);
+    if (exporter.isXcode())                 return exporterTargetMatches ("xcode",   target);
+    if (exporter.isWindows())               return exporterTargetMatches ("msvc",    target);
+    if (exporter.isLinux())                 return exporterTargetMatches ("linux",   target);
+    if (exporter.isAndroid())               return exporterTargetMatches ("android", target);
+    if (exporter.isCodeBlocksWindows())     return exporterTargetMatches ("mingw",   target);
 
     return target.isEmpty();
 }
 
-static bool fileShouldBeAdded (ProjectExporter& exporter, const var& properties)
+static bool fileShouldBeCompiled (ProjectExporter& exporter, const var& properties)
 {
     if (! fileTargetMatches (exporter, properties["target"].toString()))
         return false;
@@ -525,8 +520,8 @@ static bool fileShouldBeAdded (ProjectExporter& exporter, const var& properties)
     return true;
 }
 
-void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver,
-                                            const File& localModuleFolder, Array<File>& result) const
+void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter, ProjectSaver* projectSaver,
+                                             const File& localModuleFolder, Array<File>& result) const
 {
     const var compileArray (moduleInfo.moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
 
@@ -537,18 +532,21 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
             const var& file = files->getReference(i);
             const String filename (file ["file"].toString());
 
-            if (filename.isNotEmpty() && fileShouldBeAdded (exporter, file))
+            if (filename.isNotEmpty() && fileShouldBeCompiled (exporter, file))
             {
                 const File compiledFile (localModuleFolder.getChildFile (filename));
                 result.add (compiledFile);
 
-                Project::Item item (projectSaver.addFileToGeneratedGroup (compiledFile));
+                if (projectSaver != nullptr)
+                {
+                    Project::Item item (projectSaver->addFileToGeneratedGroup (compiledFile));
 
-                if (file ["warnings"].toString().equalsIgnoreCase ("disabled"))
-                    item.getShouldInhibitWarningsValue() = true;
+                    if (file ["warnings"].toString().equalsIgnoreCase ("disabled"))
+                        item.getShouldInhibitWarningsValue() = true;
 
-                if (file ["stdcall"])
-                    item.getShouldUseStdCallValue() = true;
+                    if (file ["stdcall"])
+                        item.getShouldUseStdCallValue() = true;
+                }
             }
         }
     }
@@ -582,15 +580,14 @@ void LibraryModule::findBrowseableFiles (const File& localModuleFolder, Array<Fi
             findWildcardMatches (localModuleFolder, files->getReference(i), filesFound);
 }
 
-void LibraryModule::addBrowsableCode (ProjectExporter& exporter, ProjectSaver& projectSaver,
-                                      const Array<File>& compiled, const File& localModuleFolder) const
+void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const
 {
     if (sourceFiles.size() == 0)
         findBrowseableFiles (localModuleFolder, sourceFiles);
 
     Project::Item sourceGroup (Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID()));
 
-    const RelativePath moduleFromProject (exporter.getModuleFolderRelativeToProject (getID(), projectSaver));
+    const RelativePath moduleFromProject (exporter.getModuleFolderRelativeToProject (getID()));
 
     for (int i = 0; i < sourceFiles.size(); ++i)
     {

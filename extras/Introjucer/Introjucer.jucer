@@ -432,6 +432,8 @@
             file="Source/Project/jucer_ProjectType.cpp"/>
       <FILE id="davId" name="jucer_ProjectType.h" compile="0" resource="0"
             file="Source/Project/jucer_ProjectType.h"/>
+      <FILE id="n5C8LS" name="jucer_TreeItemTypes.h" compile="0" resource="0"
+            file="Source/Project/jucer_TreeItemTypes.h"/>
     </GROUP>
     <GROUP id="Ga8fLmv" name="Utility">
       <FILE id="mceJWJc" name="jucer_CodeHelpers.cpp" compile="1" resource="0"

@@ -122,7 +122,7 @@ public:
     String getLegacyModulePath() const;
 
     // Returns a path to the actual module folder itself
-    RelativePath getModuleFolderRelativeToProject (const String& moduleID, ProjectSaver& projectSaver) const;
+    RelativePath getModuleFolderRelativeToProject (const String& moduleID) const;
     void updateOldModulePaths();
 
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;

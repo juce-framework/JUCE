@@ -88,8 +88,8 @@ public:
 
     void drawTabButton (TabBarButton& button, Graphics&, bool isMouseOver, bool isMouseDown) override;
     void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) override {}
-
     int getTabButtonBestWidth (TabBarButton&, int tabDepth) override;
+    static Colour getTabBackgroundColour (TabBarButton&);
 
 private:
     Image backgroundTexture;

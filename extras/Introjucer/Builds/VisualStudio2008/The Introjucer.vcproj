@@ -274,6 +274,7 @@
         <File RelativePath="..\..\Source\Project\jucer_ProjectTree_Group.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_TreeItemTypes.h"/>
       </Filter>
       <Filter Name="Utility">
         <File RelativePath="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>

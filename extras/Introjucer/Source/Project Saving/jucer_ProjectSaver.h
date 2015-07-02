@@ -160,8 +160,6 @@ public:
     static String getJuceCodeGroupName()                            { return "Juce Library Code"; }
 
     File getGeneratedCodeFolder() const                             { return generatedCodeFolder; }
-    File getLocalModulesFolder() const                              { return generatedCodeFolder.getChildFile ("modules"); }
-    File getLocalModuleFolder (const String& moduleID) const        { return getLocalModulesFolder().getChildFile (moduleID); }
 
     bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
     {

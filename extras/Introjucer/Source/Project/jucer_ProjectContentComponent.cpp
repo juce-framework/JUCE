@@ -27,11 +27,8 @@
 #include "../Application/jucer_MainWindow.h"
 #include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Utility/jucer_TranslationTool.h"
-#include "../Utility/jucer_JucerTreeViewBase.h"
-#include "../Wizards/jucer_NewFileWizard.h"
-#include "jucer_GroupInformationComponent.h"
+#include "jucer_TreeItemTypes.h"
+
 
 //==============================================================================
 class FileTreePanel   : public TreePanelBase
@@ -41,18 +38,14 @@ public:
         : TreePanelBase (&p, "fileTreeState")
     {
         tree.setMultiSelectEnabled (true);
-        setRoot (new GroupItem (p.getMainGroup()));
+        setRoot (new FileTreeItemTypes::GroupItem (p.getMainGroup()));
     }
 
     void updateMissingFileStatuses()
     {
-        if (ProjectTreeItemBase* p = dynamic_cast<ProjectTreeItemBase*> (rootItem.get()))
+        if (FileTreeItemTypes::ProjectTreeItemBase* p = dynamic_cast<FileTreeItemTypes::ProjectTreeItemBase*> (rootItem.get()))
             p->checkFileStatus();
     }
-
-    #include "jucer_ProjectTree_Base.h"
-    #include "jucer_ProjectTree_Group.h"
-    #include "jucer_ProjectTree_File.h"
 };
 
 //==============================================================================
@@ -63,7 +56,7 @@ public:
         : TreePanelBase (&p, "settingsTreeState")
     {
         tree.setMultiSelectEnabled (false);
-        setRoot (new RootItem (p));
+        setRoot (new ConfigTreeItemTypes::RootItem (p));
 
         if (tree.getNumSelectedItems() == 0)
             tree.getRootItem()->setSelected (true, true);
@@ -99,25 +92,25 @@ public:
 
     void showProjectSettings()
     {
-        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
+        if (ConfigTreeItemTypes::ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemTypes::ConfigTreeItemBase*> (rootItem.get()))
             if (root->isProjectSettings())
                 root->setSelected (true, true);
     }
 
     void showModules()
     {
-        if (ConfigTreeItemBase* mods = getModulesItem())
+        if (ConfigTreeItemTypes::ConfigTreeItemBase* mods = getModulesItem())
             mods->setSelected (true, true);
     }
 
     void showModule (const String& moduleID)
     {
-        if (ConfigTreeItemBase* mods = getModulesItem())
+        if (ConfigTreeItemTypes::ConfigTreeItemBase* mods = getModulesItem())
         {
             mods->setOpen (true);
 
             for (int i = mods->getNumSubItems(); --i >= 0;)
-                if (ModuleItem* m = dynamic_cast<ModuleItem*> (mods->getSubItem (i)))
+                if (ConfigTreeItemTypes::ModuleItem* m = dynamic_cast<ConfigTreeItemTypes::ModuleItem*> (mods->getSubItem (i)))
                     if (m->moduleID == moduleID)
                         m->setSelected (true, true);
         }
@@ -126,16 +119,11 @@ public:
     TextButton openProjectButton, saveAndOpenButton;
 
 private:
-    #include "jucer_ConfigTree_Base.h"
-    #include "jucer_ConfigTree_Modules.h"
-    #include "jucer_ConfigTree_Exporter.h"
-    #include "jucer_ModulesPanel.h"
-
-    ConfigTreeItemBase* getModulesItem()
+    ConfigTreeItemTypes::ConfigTreeItemBase* getModulesItem()
     {
-        if (ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemBase*> (rootItem.get()))
+        if (ConfigTreeItemTypes::ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemTypes::ConfigTreeItemBase*> (rootItem.get()))
             if (root->isProjectSettings())
-                if (ConfigTreeItemBase* mods = dynamic_cast<ConfigTreeItemBase*> (root->getSubItem (0)))
+                if (ConfigTreeItemTypes::ConfigTreeItemBase* mods = dynamic_cast<ConfigTreeItemTypes::ConfigTreeItemBase*> (root->getSubItem (0)))
                     if (mods->isModulesList())
                         return mods;
 
@@ -931,5 +919,5 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 void ProjectContentComponent::getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,
                                                                    OwnedArray<Project::Item>& selectedNodes)
 {
-    FileTreePanel::ProjectTreeItemBase::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
+    FileTreeItemTypes::ProjectTreeItemBase::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
 }

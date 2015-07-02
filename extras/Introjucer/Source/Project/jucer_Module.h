@@ -101,6 +101,7 @@ public:
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
     void findBrowseableFiles (const File& localModuleFolder, Array<File>& files) const;
+    void findAndAddCompiledUnits (ProjectExporter&, ProjectSaver*, const File& localModuleFolder, Array<File>& result) const;
 
     ModuleDescription moduleInfo;
 
@@ -110,8 +111,7 @@ private:
     File getModuleHeaderFile (const File& folder) const;
 
     void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
-    void findAndAddCompiledCode (ProjectExporter&, ProjectSaver&, const File& localModuleFolder, Array<File>& result) const;
-    void addBrowsableCode (ProjectExporter&, ProjectSaver&, const Array<File>& compiled, const File& localModuleFolder) const;
+    void addBrowseableCode (ProjectExporter&, const Array<File>& compiled, const File& localModuleFolder) const;
     void createLocalHeaderWrapper (ProjectSaver&, const File& originalHeader, const File& localHeader) const;
 
     bool isAUPluginHost (const Project&) const;

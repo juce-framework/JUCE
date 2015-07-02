@@ -537,7 +537,7 @@ IntrojucerLookAndFeel::IntrojucerLookAndFeel()
 
 int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton&, int)   { return 120; }
 
-static Colour getTabBackgroundColour (TabBarButton& button)
+Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
 {
     const Colour bkg (button.findColour (mainBackgroundColourId).contrasting (0.15f));
 
