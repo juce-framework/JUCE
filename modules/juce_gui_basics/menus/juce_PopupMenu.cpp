@@ -1698,23 +1698,26 @@ void PopupMenu::CustomComponent::setHighlighted (bool shouldBeHighlighted)
 
 void PopupMenu::CustomComponent::triggerMenuItem()
 {
-    if (HelperClasses::ItemComponent* const mic = dynamic_cast<HelperClasses::ItemComponent*> (getParentComponent()))
+    if (HelperClasses::NormalComponentWrapper* const pre = dynamic_cast<HelperClasses::NormalComponentWrapper*> (getParentComponent()))
     {
-        if (HelperClasses::MenuWindow* const pmw = dynamic_cast<HelperClasses::MenuWindow*> (mic->getParentComponent()))
+        if (HelperClasses::ItemComponent* const mic = dynamic_cast<HelperClasses::ItemComponent*> (pre->getParentComponent()))
         {
-            pmw->dismissMenu (&mic->itemInfo);
+            if (HelperClasses::MenuWindow* const pmw = dynamic_cast<HelperClasses::MenuWindow*> (mic->getParentComponent()))
+            {
+                pmw->dismissMenu (&mic->itemInfo);
+            }
+            else
+            {
+                // something must have gone wrong with the component hierarchy if this happens..
+                jassertfalse;
+            }
         }
         else
         {
-            // something must have gone wrong with the component hierarchy if this happens..
+            // why isn't this component inside a menu? Not much point triggering the item if
+            // there's no menu.
             jassertfalse;
         }
-    }
-    else
-    {
-        // why isn't this component inside a menu? Not much point triggering the item if
-        // there's no menu.
-        jassertfalse;
     }
 }
 
