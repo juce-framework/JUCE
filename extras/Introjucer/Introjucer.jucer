@@ -508,6 +508,8 @@
             file="Source/Wizards/jucer_StartPageComponent.h"/>
       <FILE id="BlL6EA" name="jucer_TemplateThumbnailsComponent.h" compile="0"
             resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
+    </GROUP>
+    <GROUP id="KPIRFfz" name="BinaryData">
       <GROUP id="{2EFFC5F3-CE4A-FCEB-391B-A644E7394EE3}" name="templates">
         <FILE id="Ksvdgw" name="jucer_AnimatedComponentTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/jucer_AnimatedComponentTemplate.cpp"/>
@@ -552,8 +554,6 @@
         <FILE id="MMiar4" name="jucer_OpenGLComponentTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/jucer_OpenGLComponentTemplate.cpp"/>
       </GROUP>
-    </GROUP>
-    <GROUP id="KPIRFfz" name="BinaryData">
       <FILE id="RSJcrRl" name="AudioPluginXCodeScript.txt" compile="0" resource="1"
             file="Source/BinaryData/AudioPluginXCodeScript.txt"/>
       <FILE id="eYn4jB" name="background_tile.png" compile="0" resource="1"

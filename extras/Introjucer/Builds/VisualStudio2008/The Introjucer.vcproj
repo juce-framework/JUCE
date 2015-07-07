@@ -315,6 +315,8 @@
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_StaticLibrary.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_StartPageComponent.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h"/>
+      </Filter>
+      <Filter Name="BinaryData">
         <Filter Name="templates">
           <File RelativePath="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
             <FileConfiguration Name="Debug|Win32"
@@ -527,8 +529,6 @@
             </FileConfiguration>
           </File>
         </Filter>
-      </Filter>
-      <Filter Name="BinaryData">
         <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">

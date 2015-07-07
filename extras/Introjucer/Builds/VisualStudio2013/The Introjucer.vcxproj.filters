@@ -41,11 +41,11 @@
     <Filter Include="The Introjucer\Wizards">
       <UniqueIdentifier>{CB03A00B-C740-D8D3-A019-4C165270265F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Introjucer\Wizards\templates">
-      <UniqueIdentifier>{EF91E5A7-0051-0493-4B4A-D458322DB03D}</UniqueIdentifier>
-    </Filter>
     <Filter Include="The Introjucer\BinaryData">
       <UniqueIdentifier>{768EDA37-3A9B-E5C5-8D35-27FEF74CCBA0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\BinaryData\templates">
+      <UniqueIdentifier>{FD79BB9B-CBFF-F94F-6A8B-91DA3ECFEA27}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules">
       <UniqueIdentifier>{422C46B7-0467-2DB0-BF3C-16DFCAFD69AC}</UniqueIdentifier>
@@ -377,43 +377,43 @@
       <Filter>The Introjucer\Wizards</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioComponentTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_ComponentTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_SimpleWindow.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_OpenGLComponentTemplate.cpp">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <Filter>Juce Modules\juce_core\text</Filter>
@@ -1711,28 +1711,28 @@
       <Filter>The Introjucer\Wizards</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_ComponentTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_InlineComponentTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
-      <Filter>The Introjucer\Wizards\templates</Filter>
+      <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h">
       <Filter>Juce Modules\juce_core\text</Filter>
