@@ -354,6 +354,15 @@ const double  double_Pi  = 3.1415926535897932384626433832795;
 const float   float_Pi   = 3.14159265358979323846f;
 
 
+/** Converts an angle in degrees to radians. */
+template <typename FloatType>
+inline FloatType degreesToRadians (FloatType degrees) noexcept  { return degrees * static_cast<FloatType> (double_Pi / 180.0); }
+
+/** Converts an angle in radians to degrees. */
+template <typename FloatType>
+inline FloatType radiansToDegrees (FloatType radians) noexcept  { return radians * static_cast<FloatType> (180.0 / double_Pi); }
+
+
 //==============================================================================
 /** The isfinite() method seems to vary between platforms, so this is a
     platform-independent function for it.
@@ -477,16 +486,14 @@ inline int roundFloatToInt (const float value) noexcept
 }
 
 //==============================================================================
-/** Returns true if the specified integer is a power-of-two.
-*/
+/** Returns true if the specified integer is a power-of-two. */
 template <typename IntegerType>
 bool isPowerOfTwo (IntegerType value)
 {
    return (value & (value - 1)) == 0;
 }
 
-/** Returns the smallest power-of-two which is equal to or greater than the given integer.
-*/
+/** Returns the smallest power-of-two which is equal to or greater than the given integer. */
 inline int nextPowerOfTwo (int n) noexcept
 {
     --n;
@@ -532,6 +539,7 @@ NumericType square (NumericType n) noexcept
 {
     return n * n;
 }
+
 
 //==============================================================================
 #if JUCE_INTEL || defined (DOXYGEN)

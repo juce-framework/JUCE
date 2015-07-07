@@ -1584,8 +1584,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         static var Math_range     (Args a) { return isInt (a, 0) ? var (jlimit (getInt (a, 1), getInt (a, 2), getInt (a, 0))) : var (jlimit (getDouble (a, 1), getDouble (a, 2), getDouble (a, 0))); }
         static var Math_min       (Args a) { return (isInt (a, 0) && isInt (a, 1)) ? var (jmin (getInt (a, 0), getInt (a, 1))) : var (jmin (getDouble (a, 0), getDouble (a, 1))); }
         static var Math_max       (Args a) { return (isInt (a, 0) && isInt (a, 1)) ? var (jmax (getInt (a, 0), getInt (a, 1))) : var (jmax (getDouble (a, 0), getDouble (a, 1))); }
-        static var Math_toDegrees (Args a) { return (180.0 / double_Pi) * getDouble (a, 0); }
-        static var Math_toRadians (Args a) { return (double_Pi / 180.0) * getDouble (a, 0); }
+        static var Math_toDegrees (Args a) { return radiansToDegrees (getDouble (a, 0)); }
+        static var Math_toRadians (Args a) { return degreesToRadians (getDouble (a, 0)); }
         static var Math_sin       (Args a) { return sin   (getDouble (a, 0)); }
         static var Math_asin      (Args a) { return asin  (getDouble (a, 0)); }
         static var Math_cos       (Args a) { return cos   (getDouble (a, 0)); }
