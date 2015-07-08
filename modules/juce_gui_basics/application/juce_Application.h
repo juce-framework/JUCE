@@ -111,11 +111,13 @@ public:
     static JUCEApplication* JUCE_CALLTYPE getInstance() noexcept;
 
     //==============================================================================
+   #if DOXYGEN
     /** Returns the application's name. */
     virtual const String getApplicationName() = 0;
 
     /** Returns the application's version number. */
     virtual const String getApplicationVersion() = 0;
+   #endif
 
     /** Checks whether multiple instances of the app are allowed.
 
