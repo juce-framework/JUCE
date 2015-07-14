@@ -88,7 +88,7 @@ struct TextEditorKeyMapper
         if (numCtrlAltCommandKeys < 2)
         {
             if (key.isKeyCode (KeyPress::backspaceKey)) return target.deleteBackwards (ctrlOrAltDown);
-            if (key.isKeyCode (KeyPress::deleteKey))    return target.deleteForwards  (ctrlOrAltDown);
+            if (!isShiftDown && key.isKeyCode (KeyPress::deleteKey))    return target.deleteForwards  (ctrlOrAltDown);
         }
 
         if (key == KeyPress ('c', ModifierKeys::commandModifier, 0)
