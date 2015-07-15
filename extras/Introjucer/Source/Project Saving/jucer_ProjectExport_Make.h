@@ -184,6 +184,9 @@ private:
         for (int i = 0; i < linuxLibs.size(); ++i)
             out << " -l" << linuxLibs[i];
 
+        if (getProject().isConfigFlagEnabled ("JUCE_USE_CURL"))
+            out << " -lcurl";
+
         StringArray libraries;
         libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
         libraries.removeEmptyStrings();

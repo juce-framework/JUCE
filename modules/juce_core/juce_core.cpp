@@ -82,6 +82,10 @@
  #if JUCE_LINUX
   #include <langinfo.h>
   #include <ifaddrs.h>
+
+  #if JUCE_USE_CURL
+   #include <curl/curl.h>
+  #endif
  #endif
 
  #include <pwd.h>
@@ -210,6 +214,9 @@ namespace juce
 #include "native/juce_linux_CommonFile.cpp"
 #include "native/juce_linux_Files.cpp"
 #include "native/juce_linux_Network.cpp"
+#if JUCE_USE_CURL
+ #include "native/juce_curl_Network.cpp"
+#endif
 #include "native/juce_linux_SystemStats.cpp"
 #include "native/juce_linux_Threads.cpp"
 

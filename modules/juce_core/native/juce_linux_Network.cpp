@@ -67,8 +67,8 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /* targetEma
     return false;
 }
 
-
 //==============================================================================
+#if ! JUCE_USE_CURL
 class WebInputStream  : public InputStream
 {
 public:
@@ -455,3 +455,4 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
+#endif
