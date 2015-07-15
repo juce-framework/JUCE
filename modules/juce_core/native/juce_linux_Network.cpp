@@ -77,7 +77,7 @@ public:
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
                     const int maxRedirects)
       : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
-        address (address_), headers (headers_), postData (postData_), position (0),
+        address (address_), headers (headers_), postData (postData_), contentLength(-1), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects)
     {
         statusCode = createConnection (progressCallback, progressCallbackContext, numRedirectsToFollow);
@@ -104,12 +104,7 @@ public:
     bool isError() const                 { return socketHandle < 0; }
     bool isExhausted() override          { return finished; }
     int64 getPosition() override         { return position; }
-
-    int64 getTotalLength() override
-    {
-        //xxx to do
-        return -1;
-    }
+    int64 getTotalLength() override      { return contentLength; }
 
     int read (void* buffer, int bytesToRead) override
     {
@@ -165,6 +160,7 @@ private:
     StringArray headerLines;
     String address, headers;
     MemoryBlock postData;
+    int64 contentLength;
     int64 position;
     bool finished;
     const bool isPost;
@@ -297,6 +293,10 @@ private:
                 address = location;
                 return createConnection (progressCallback, progressCallbackContext, numRedirects);
             }
+
+            String contentLengthString (findHeaderItem (headerLines, "Content-Length:"));
+            if (contentLengthString.isNotEmpty())
+                contentLength = contentLengthString.getLargeIntValue();
 
             return status;
         }
