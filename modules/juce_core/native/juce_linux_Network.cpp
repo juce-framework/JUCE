@@ -78,7 +78,8 @@ public:
                     const int maxRedirects)
       : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
         address (address_), headers (headers_), postData (postData_), contentLength(-1), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects)
+        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects),
+        chunked(false), chunkEnd(0), readRecurse(false)
     {
         statusCode = createConnection (progressCallback, progressCallbackContext, numRedirectsToFollow);
 
@@ -111,6 +112,55 @@ public:
         if (finished || isError())
             return 0;
 
+        if (chunked && !readRecurse) {
+            if (position >= chunkEnd) {
+                MemoryOutputStream buffer;
+                int64 chunkSize;
+                char c = 0;
+
+                readRecurse = true;
+
+                if (chunkEnd > 0) {
+                    if (read (&c, 1) != 1 || c != '\r'
+                         || read (&c, 1) != 1 || c != '\n') {
+                        readRecurse = false;
+                        finished = true;
+                        return 0;
+                    }
+                }
+
+                while (buffer.getDataSize() < 512 && ! (finished || isError())) {
+                    if (read (&c, 1) != 1) {
+                        readRecurse = false;
+                        finished = true;
+                        return 0;
+                    }
+
+                    if (c == '\r')
+                        continue;
+
+                    if (c == '\n')
+                        break;
+
+                    buffer.writeByte (c);
+                }
+
+                readRecurse = false;
+
+                chunkSize = buffer.toString().upToFirstOccurrenceOf(";", false, false).getHexValue64();
+
+                if (chunkSize == 0) {
+                    finished = true;
+                    return 0;
+                }
+
+                chunkEnd += chunkSize;
+            }
+            if (bytesToRead > chunkEnd - position) {
+                bytesToRead = chunkEnd - position;
+            }
+        }
+
         fd_set readbits;
         FD_ZERO (&readbits);
         FD_SET (socketHandle, &readbits);
@@ -126,7 +176,8 @@ public:
         if (bytesRead == 0)
             finished = true;
 
-        position += bytesRead;
+        if (!readRecurse)
+            position += bytesRead;
         return bytesRead;
     }
 
@@ -166,6 +217,9 @@ private:
     const bool isPost;
     const int timeOutMs;
     const int numRedirectsToFollow;
+    bool chunked;
+    int64 chunkEnd;
+    bool readRecurse;
 
     void closeSocket (bool resetLevelsOfRedirection = true)
     {
@@ -298,6 +352,10 @@ private:
             if (contentLengthString.isNotEmpty())
                 contentLength = contentLengthString.getLargeIntValue();
 
+            String transferEncoding (findHeaderItem (headerLines, "Transfer-Encoding:"));
+            if (transferEncoding.isNotEmpty() && transferEncoding == "chunked")
+                chunked = true;
+
             return status;
         }
 
@@ -345,7 +403,7 @@ private:
     static void writeHost (MemoryOutputStream& dest, const bool isPost,
                            const String& path, const String& host, int port)
     {
-        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
+        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.1\r\nHost: " << host;
 
         /* HTTP spec 14.23 says that the port number must be included in the header if it is not 80 */
         if (port != 80)
