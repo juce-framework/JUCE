@@ -101,7 +101,20 @@ private:
     struct TripleIndex
     {
         TripleIndex() noexcept : vertexIndex (-1), textureIndex (-1), normalIndex (-1) {}
-        bool operator< (const TripleIndex& other) const noexcept  { return vertexIndex < other.vertexIndex; }
+
+        bool operator< (const TripleIndex& other) const noexcept
+        {
+            if (this == &other)
+                return false;
+
+            if (vertexIndex != other.vertexIndex)
+                return vertexIndex < other.vertexIndex;
+
+            if (textureIndex != other.textureIndex)
+                return textureIndex < other.textureIndex;
+
+            return normalIndex < other.normalIndex;
+        }
 
         int vertexIndex, textureIndex, normalIndex;
     };
