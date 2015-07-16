@@ -654,6 +654,7 @@ private:
             static const char* kDefaultiOSOrientationStrings[] =
             {
                 "UIInterfaceOrientationPortrait",
+                "UIInterfaceOrientationPortraitUpsideDown",
                 "UIInterfaceOrientationLandscapeLeft",
                 "UIInterfaceOrientationLandscapeRight",
                 nullptr
