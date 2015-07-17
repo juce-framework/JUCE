@@ -47,6 +47,7 @@ public:
         CakewalkSonarGeneric,
         DigidesignProTools,
         DigitalPerformer,
+        FinalCut,
         FruityLoops,
         MagixSamplitude,
         MergingPyramix,
@@ -72,8 +73,8 @@ public:
         StudioOne,
         Tracktion3,
         TracktionGeneric,
-        WaveBurner,
-        VBVSTScanner
+        VBVSTScanner,
+        WaveBurner
     };
 
     HostType type;
@@ -87,6 +88,7 @@ public:
     bool isCubase7orLater() const noexcept   { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     bool isCubaseBridged() const noexcept    { return type == SteinbergCubase5Bridged; }
     bool isLogic() const noexcept            { return type == AppleLogic; }
+    bool isFinalCut() const noexcept         { return type == FinalCut; }
     bool isFruityLoops() const noexcept      { return type == FruityLoops; }
     bool isNuendo() const noexcept           { return type == SteinbergNuendo3 || type == SteinbergNuendo4  || type == SteinbergNuendo5 ||  type == SteinbergNuendoGeneric; }
     bool isPremiere() const noexcept         { return type == AdobePremierePro; }
@@ -120,6 +122,7 @@ public:
             case CakewalkSonarGeneric:     return "Cakewalk Sonar";
             case DigidesignProTools:       return "ProTools";
             case DigitalPerformer:         return "DigitalPerformer";
+            case FinalCut:                 return "Final Cut";
             case FruityLoops:              return "FruityLoops";
             case MagixSamplitude:          return "Magix Samplitude";
             case MergingPyramix:           return "Pyramix";
@@ -167,6 +170,8 @@ private:
         const String hostFilename (File (hostPath).getFileName());
 
        #if JUCE_MAC
+        if (hostPath.containsIgnoreCase     ("Final Cut Pro.app")) return FinalCut;
+        if (hostPath.containsIgnoreCase     ("Final Cut Pro Trial.app")) return FinalCut;
         if (hostPath.containsIgnoreCase     ("Live 6."))           return AbletonLive6;
         if (hostPath.containsIgnoreCase     ("Live 7."))           return AbletonLive7;
         if (hostPath.containsIgnoreCase     ("Live 8."))           return AbletonLive8;
