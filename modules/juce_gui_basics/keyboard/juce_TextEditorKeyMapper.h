@@ -85,12 +85,6 @@ struct TextEditorKeyMapper
             if (key.isKeyCode (KeyPress::pageDownKey))  return target.pageDown (isShiftDown);
         }
 
-        if (numCtrlAltCommandKeys < 2)
-        {
-            if (key.isKeyCode (KeyPress::backspaceKey)) return target.deleteBackwards (ctrlOrAltDown);
-            if (key.isKeyCode (KeyPress::deleteKey))    return target.deleteForwards  (ctrlOrAltDown);
-        }
-
         if (key == KeyPress ('c', ModifierKeys::commandModifier, 0)
               || key == KeyPress (KeyPress::insertKey, ModifierKeys::ctrlModifier, 0))
             return target.copyToClipboard();
@@ -102,6 +96,13 @@ struct TextEditorKeyMapper
         if (key == KeyPress ('v', ModifierKeys::commandModifier, 0)
               || key == KeyPress (KeyPress::insertKey, ModifierKeys::shiftModifier, 0))
             return target.pasteFromClipboard();
+
+        // NB: checking for delete must happen after the earlier check for shift + delete
+        if (numCtrlAltCommandKeys < 2)
+        {
+            if (key.isKeyCode (KeyPress::backspaceKey)) return target.deleteBackwards (ctrlOrAltDown);
+            if (key.isKeyCode (KeyPress::deleteKey))    return target.deleteForwards  (ctrlOrAltDown);
+        }
 
         if (key == KeyPress ('a', ModifierKeys::commandModifier, 0))
             return target.selectAll();
