@@ -490,6 +490,12 @@ int LookAndFeel_V2::getAlertWindowButtonHeight()
     return 28;
 }
 
+Font LookAndFeel_V2::getAlertWindowTitleFont()
+{
+    Font messageFont = getAlertWindowMessageFont();
+    return messageFont.withHeight (messageFont.getHeight() * 1.1f).boldened();
+}
+
 Font LookAndFeel_V2::getAlertWindowMessageFont()
 {
     return Font (15.0f);

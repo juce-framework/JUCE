@@ -437,6 +437,7 @@ public:
 
         virtual int getAlertWindowButtonHeight() = 0;
 
+        virtual Font getAlertWindowTitleFont() = 0;
         virtual Font getAlertWindowMessageFont() = 0;
         virtual Font getAlertWindowFont() = 0;
     };

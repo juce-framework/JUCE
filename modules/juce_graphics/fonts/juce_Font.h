@@ -279,8 +279,12 @@ public:
     //==============================================================================
     /** Makes the font bold or non-bold. */
     void setBold (bool shouldBeBold);
-    /** Returns a copy of this font with the bold attribute set. */
+
+    /** Returns a copy of this font with the bold attribute set.
+        If the font does not have a bold version, this will return the default font.
+     */
     Font boldened() const;
+
     /** Returns true if the font is bold. */
     bool isBold() const noexcept;
 
