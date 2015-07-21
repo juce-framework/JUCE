@@ -331,6 +331,11 @@ void ScrollBar::resized()
     updateThumbPosition();
 }
 
+void ScrollBar::parentHierarchyChanged()
+{
+    lookAndFeelChanged();
+}
+
 void ScrollBar::mouseDown (const MouseEvent& e)
 {
     isDraggingThumb = false;

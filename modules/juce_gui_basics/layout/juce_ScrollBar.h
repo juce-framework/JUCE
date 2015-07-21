@@ -376,6 +376,8 @@ public:
     void paint (Graphics&) override;
     /** @internal */
     void resized() override;
+    /** @internal */
+    void parentHierarchyChanged() override;
 
 private:
     //==============================================================================
