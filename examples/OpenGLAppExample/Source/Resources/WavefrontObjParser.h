@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-12 by Raw Material Software Ltd.
+   Copyright 2015 by ROLI Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@
   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */

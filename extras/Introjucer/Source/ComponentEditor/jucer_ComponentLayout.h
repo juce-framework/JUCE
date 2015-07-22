@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_COMPONENTLAYOUT_JUCEHEADER__
-#define __JUCER_COMPONENTLAYOUT_JUCEHEADER__
+#ifndef JUCER_COMPONENTLAYOUT_H_INCLUDED
+#define JUCER_COMPONENTLAYOUT_H_INCLUDED
 
 
 #include "components/jucer_ComponentTypeHandler.h"
@@ -132,4 +132,4 @@ void positionToCode (const RelativePositionedRectangle& position,
                      const ComponentLayout* layout,
                      String& x, String& y, String& w, String& h);
 
-#endif   // __JUCER_COMPONENTLAYOUT_JUCEHEADER__
+#endif   // JUCER_COMPONENTLAYOUT_H_INCLUDED

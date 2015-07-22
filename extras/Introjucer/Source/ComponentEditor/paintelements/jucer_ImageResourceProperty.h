@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_IMAGERESOURCEPROPERTY_JUCEHEADER__
-#define __JUCER_IMAGERESOURCEPROPERTY_JUCEHEADER__
+#ifndef JUCER_IMAGERESOURCEPROPERTY_H_INCLUDED
+#define JUCER_IMAGERESOURCEPROPERTY_H_INCLUDED
 
 #include "../../Project Saving/jucer_ResourceFile.h"
 
@@ -142,4 +142,4 @@ protected:
 };
 
 
-#endif   // __JUCER_IMAGERESOURCEPROPERTY_JUCEHEADER__
+#endif   // JUCER_IMAGERESOURCEPROPERTY_H_INCLUDED
