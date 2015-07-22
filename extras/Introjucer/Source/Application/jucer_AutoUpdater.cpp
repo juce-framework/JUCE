@@ -592,31 +592,22 @@ void LatestVersionChecker::checkForNewVersion()
                                                                           extraHeaders, 0, &responseHeaders,
                                                                           &statusCode, numRedirects));
 
-        if (in == nullptr || threadShouldExit())
+        if (threadShouldExit())
             return;  // can't connect: fail silently.
 
-        if (statusCode != 303 && statusCode != 400)
-            return;
-
-        // if this doesn't fail then there is a new version available.
-        // By leaving the scope of this function we will abort the download
-        // to give the user a chance to cancel an update
-        if (statusCode == 303)
+        if (in != nullptr && (statusCode == 303 || statusCode == 400))
         {
-            newRelativeDownloadPath = responseHeaders ["Location"];
+            // if this doesn't fail then there is a new version available.
+            // By leaving the scope of this function we will abort the download
+            // to give the user a chance to cancel an update
+            if (statusCode == 303)
+                newRelativeDownloadPath = responseHeaders ["Location"];
 
-            // A 303 without a redirect target? Let's quickly get out of here
-            if (newRelativeDownloadPath.isEmpty())
-                return;
+            jsonReply = JSON::parse (in->readEntireStreamAsString());
         }
-
-        jsonReply = JSON::parse (in->readEntireStreamAsString());
     }
 
-    if (threadShouldExit())
-        return;
-
-    if (jsonReply.isObject())
+    if (! threadShouldExit())
         startTimer (100);
 }
 
@@ -778,9 +769,17 @@ void LatestVersionChecker::timerCallback()
     stopTimer();
 
     if (hasAttemptedToReadWebsite)
-        processResult (jsonReply, newRelativeDownloadPath);
+    {
+        if (jsonReply.isObject())
+            processResult (jsonReply, newRelativeDownloadPath);
+
+        hasAttemptedToReadWebsite = false;
+        startTimer (7200000);
+    }
     else
+    {
         startThread (3);
+    }
 }
 
 void LatestVersionChecker::run()
