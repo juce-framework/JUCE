@@ -1,7 +1,7 @@
 {
   "id":             "juce_gui_extra",
   "name":           "JUCE extended GUI classes",
-  "version":        "3.1.1",
+  "version":        "3.2.0",
   "description":    "Miscellaneous GUI classes for specialised tasks.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

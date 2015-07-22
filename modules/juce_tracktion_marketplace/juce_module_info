@@ -1,7 +1,7 @@
 {
   "id":             "juce_tracktion_marketplace",
   "name":           "JUCE Tracktion marketplace support",
-  "version":        "3.1.1",
+  "version":        "3.2.0",
   "description":    "JUCE classes for online product authentication via the Tracktion marketplace.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",
