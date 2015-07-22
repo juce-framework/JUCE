@@ -566,7 +566,7 @@ static const unsigned char temp_binary_data_6[] =
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
 "  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright 2015 by ROLI Ltd.\r\n"
+"  Copyright (c) 2015 - ROLI Ltd.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -613,7 +613,7 @@ static const unsigned char temp_binary_data_6[] =
 "#if 0\r\n"
 "/*  -- Introjucer information section --\r\n"
 "\r\n"
-"    This is where the Introjucer stores the metadata that describe this GUI layout, so \r\n"
+"    This is where the Introjucer stores the metadata that describe this GUI layout, so\r\n"
 "    make changes in here at your peril!\r\n"
 "\r\n"
 "BEGIN_JUCER_METADATA\r\n"
@@ -625,7 +625,7 @@ static const unsigned char temp_binary_data_6[] =
 "\r\n"
 "%%staticMemberDefinitions%%\r\n"
 "//[EndFile] You can add extra defines here...\r\n"
-"//[/EndFile]";
+"//[/EndFile]\r\n";
 
 const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_6;
 
@@ -645,7 +645,7 @@ static const unsigned char temp_binary_data_7[] =
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
 "  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright 2015 by ROLI Ltd.\r\n"
+"  Copyright (c) 2015 - ROLI Ltd.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -694,7 +694,7 @@ static const unsigned char temp_binary_data_7[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n"
 "\r\n"
-"#endif   // %%headerGuard%%";
+"#endif   // %%headerGuard%%\r\n";
 
 const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_7;
 
@@ -4090,8 +4090,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5039; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2727; return jucer_AudioPluginFilterTemplate_h;
-        case 0xabad7041:  numBytes = 2177; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
+        case 0xabad7041:  numBytes = 2161; return jucer_ComponentTemplate_cpp;
+        case 0xfc72fe86:  numBytes = 2141; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;

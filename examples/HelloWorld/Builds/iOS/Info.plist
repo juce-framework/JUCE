@@ -12,7 +12,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.rawmaterialsoftware.jucehelloworld</string>
+    <string>com.roli.jucehelloworld</string>
     <key>CFBundleName</key>
     <string>HelloWorld</string>
     <key>CFBundlePackageType</key>
@@ -24,12 +24,13 @@
     <key>CFBundleVersion</key>
     <string>1.0.0</string>
     <key>NSHumanReadableCopyright</key>
-    <string>Raw Material Software Ltd.</string>
+    <string>ROLI Ltd.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>UISupportedInterfaceOrientations</key>
     <array>
       <string>UIInterfaceOrientationPortrait</string>
+      <string>UIInterfaceOrientationPortraitUpsideDown</string>
       <string>UIInterfaceOrientationLandscapeLeft</string>
       <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
