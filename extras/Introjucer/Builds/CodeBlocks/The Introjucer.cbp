@@ -97,6 +97,7 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Application/jucer_AutoUpdater.cpp"/>
     <Unit filename="../../Source/Application/jucer_Application.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1495,6 +1496,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/native/juce_BasicNativeHeaders.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/native/juce_curl_Network.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

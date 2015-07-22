@@ -114,6 +114,8 @@
 #undef TYPE_BOOL
 #undef max
 #undef min
+#undef major
+#undef minor
 
 //==============================================================================
 // DLL building settings on Windows

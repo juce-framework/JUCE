@@ -59,7 +59,7 @@
 #endif
 
 #ifndef    JUCE_USE_CURL
- //#define JUCE_USE_CURL
+ #define   JUCE_USE_CURL 1
 #endif
 
 //==============================================================================
