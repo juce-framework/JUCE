@@ -63,7 +63,7 @@ private:
     ATOM atom;
     HWND hwnd;
 
-    LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) MAKELONG (atom, 0); }
+    LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) atom; }
 };
 
 //==============================================================================

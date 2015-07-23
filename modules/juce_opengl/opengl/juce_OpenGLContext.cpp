@@ -570,7 +570,7 @@ private:
     {
         Component& comp = *getComponent();
         CachedImage* const newCachedImage = new CachedImage (context, comp,
-                                                             context.pixelFormat,
+                                                             context.openGLPixelFormat,
                                                              context.contextToShareWith);
         comp.setCachedComponentImage (newCachedImage);
         newCachedImage->start(); // (must wait until this is attached before starting its thread)
@@ -647,7 +647,7 @@ void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelForma
     // Call it before attaching your context, or use detach() first, before calling this!
     jassert (nativeContext == nullptr);
 
-    pixelFormat = preferredPixelFormat;
+    openGLPixelFormat = preferredPixelFormat;
 }
 
 void OpenGLContext::setNativeSharedContext (void* nativeContextToShareWith) noexcept

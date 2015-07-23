@@ -292,12 +292,12 @@ void FileOutputStream::closeHandle()
     CloseHandle ((HANDLE) fileHandle);
 }
 
-ssize_t FileOutputStream::writeInternal (const void* buffer, size_t numBytes)
+ssize_t FileOutputStream::writeInternal (const void* bufferToWrite, size_t numBytes)
 {
     if (fileHandle != nullptr)
     {
         DWORD actualNum = 0;
-        if (! WriteFile ((HANDLE) fileHandle, buffer, (DWORD) numBytes, &actualNum, 0))
+        if (! WriteFile ((HANDLE) fileHandle, bufferToWrite, (DWORD) numBytes, &actualNum, 0))
             status = WindowsFileHelpers::getResultForLastError();
 
         return (ssize_t) actualNum;

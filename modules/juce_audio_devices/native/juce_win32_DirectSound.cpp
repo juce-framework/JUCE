@@ -640,7 +640,7 @@ public:
             DWORD dwsize1 = 0;
             DWORD dwsize2 = 0;
 
-            HRESULT hr = pInputBuffer->Lock ((DWORD) readOffset, (DWORD) bytesPerBuffer,
+            hr = pInputBuffer->Lock ((DWORD) readOffset, (DWORD) bytesPerBuffer,
                                              (void**) &buf1, &dwsize1,
                                              (void**) &buf2, &dwsize2, 0);
 
@@ -753,9 +753,9 @@ public:
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
-                 double sampleRate, int bufferSizeSamples) override
+                 double newSampleRate, int newBufferSize) override
     {
-        lastError = openDevice (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
+        lastError = openDevice (inputChannels, outputChannels, newSampleRate, newBufferSize);
         isOpen_ = lastError.isEmpty();
 
         return lastError;

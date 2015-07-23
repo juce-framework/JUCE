@@ -75,10 +75,10 @@ namespace DirectWriteTypeLayout
                 if (currentLine >= layout->getNumLines())
                 {
                     jassert (currentLine == layout->getNumLines());
-                    TextLayout::Line* const newLine = new TextLayout::Line();
-                    layout->addLine (newLine);
+                    TextLayout::Line* const line = new TextLayout::Line();
+                    layout->addLine (line);
 
-                    newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
+                    line->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
                 }
             }
 

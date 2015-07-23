@@ -280,7 +280,7 @@ private:
     OpenGLRenderer* renderer;
     double currentRenderScale;
     ScopedPointer<Attachment> attachment;
-    OpenGLPixelFormat pixelFormat;
+    OpenGLPixelFormat openGLPixelFormat;
     void* contextToShareWith;
     OpenGLVersion versionRequired;
     size_t imageCacheMaxSize;

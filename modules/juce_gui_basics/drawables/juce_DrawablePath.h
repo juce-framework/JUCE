@@ -123,8 +123,8 @@ public:
 
         ValueTree getPathState();
 
-        void readFrom (const RelativePointPath& path, UndoManager* undoManager);
-        void writeTo (RelativePointPath& path) const;
+        void readFrom (const RelativePointPath& relativePath, UndoManager* undoManager);
+        void writeTo (RelativePointPath& relativePath) const;
 
         static const Identifier nonZeroWinding, point1, point2, point3;
     };

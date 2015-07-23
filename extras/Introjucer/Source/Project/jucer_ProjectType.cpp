@@ -87,6 +87,7 @@ public:
 
         exporter.msvcIsWindowsSubsystem = true;
         exporter.msvcTargetSuffix = ".exe";
+        exporter.msvcExtraPreprocessorDefs.set ("_CRT_SECURE_NO_WARNINGS", "");
     }
 };
 
@@ -118,6 +119,7 @@ public:
         exporter.msvcIsWindowsSubsystem = false;
         exporter.msvcTargetSuffix = ".exe";
         exporter.msvcExtraPreprocessorDefs.set ("_CONSOLE", "");
+        exporter.msvcExtraPreprocessorDefs.set ("_CRT_SECURE_NO_WARNINGS", "");
     }
 };
 
@@ -147,6 +149,7 @@ public:
         exporter.makefileTargetSuffix = ".a";
         exporter.msvcTargetSuffix = ".lib";
         exporter.msvcExtraPreprocessorDefs.set ("_LIB", "");
+        exporter.msvcExtraPreprocessorDefs.set ("_CRT_SECURE_NO_WARNINGS", "");
     }
 };
 
@@ -177,6 +180,7 @@ public:
         exporter.makefileTargetSuffix = ".so";
         exporter.msvcTargetSuffix = ".dll";
         exporter.msvcExtraPreprocessorDefs.set ("_LIB", "");
+        exporter.msvcExtraPreprocessorDefs.set ("_CRT_SECURE_NO_WARNINGS", "");
     }
 };
 
@@ -304,7 +308,7 @@ public:
 
         exporter.msvcTargetSuffix = ".dll";
         exporter.msvcIsDLL = true;
-
+        exporter.msvcExtraPreprocessorDefs.set ("_CRT_SECURE_NO_WARNINGS", "");
         exporter.makefileIsDLL = true;
     }
 
@@ -355,6 +359,7 @@ public:
 
         exporter.msvcTargetSuffix = ".dll";
         exporter.msvcIsDLL = true;
+        exporter.msvcExtraPreprocessorDefs.set ("_CRT_SECURE_NO_WARNINGS", "");
 
         exporter.makefileIsDLL = true;
     }

@@ -80,8 +80,7 @@
    #error "You're compiling without exceptions enabled! This is needed for a lot of JUCE classes, please update your compiler settings!"
   #endif
 
-  #pragma warning (push)
-  #pragma warning (disable : 4100 4201 4514 4312 4995)
+  #pragma warning (push, 0) // disable all warnings whilst including system headers
  #endif
 
  #define STRICT 1

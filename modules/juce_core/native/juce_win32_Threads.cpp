@@ -110,7 +110,7 @@ void Thread::launchThread()
 {
     unsigned int newThreadId;
     threadHandle = (void*) _beginthreadex (0, 0, &threadEntryProc, this, 0, &newThreadId);
-    threadId = (ThreadID) newThreadId;
+    threadId = (ThreadID) (pointer_sized_int) newThreadId;
 }
 
 void Thread::closeThreadHandle()

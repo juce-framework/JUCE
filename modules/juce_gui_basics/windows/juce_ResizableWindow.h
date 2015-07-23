@@ -164,7 +164,7 @@ public:
         with the current constrainer.
         @see setConstrainer
     */
-    void setBoundsConstrained (const Rectangle<int>& bounds);
+    void setBoundsConstrained (const Rectangle<int>& newBounds);
 
 
     //==============================================================================

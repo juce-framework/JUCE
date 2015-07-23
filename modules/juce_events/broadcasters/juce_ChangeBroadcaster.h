@@ -93,7 +93,7 @@ private:
     };
 
     friend class ChangeBroadcasterCallback;
-    ChangeBroadcasterCallback callback;
+    ChangeBroadcasterCallback broadcastCallback;
     ListenerList <ChangeListener> changeListeners;
 
     void callListeners();

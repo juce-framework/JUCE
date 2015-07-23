@@ -309,7 +309,7 @@ public:
     /** @internal */
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate) override;
     /** @internal */
-    void selectedRowsChanged (int lastRowSelected) override;
+    void selectedRowsChanged (int row) override;
     /** @internal */
     void deleteKeyPressed (int currentSelectedRow) override;
     /** @internal */

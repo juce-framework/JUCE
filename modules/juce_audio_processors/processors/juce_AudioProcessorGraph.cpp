@@ -860,7 +860,7 @@ AudioProcessorGraph::Node::Node (const uint32 nodeID, AudioProcessor* const p) n
     jassert (processor != nullptr);
 }
 
-void AudioProcessorGraph::Node::prepare (const double sampleRate, const int blockSize,
+void AudioProcessorGraph::Node::prepare (const double newSampleRate, const int newBlockSize,
                                          AudioProcessorGraph* const graph)
 {
     if (! isPrepared)
@@ -870,9 +870,9 @@ void AudioProcessorGraph::Node::prepare (const double sampleRate, const int bloc
 
         processor->setPlayConfigDetails (processor->getNumInputChannels(),
                                          processor->getNumOutputChannels(),
-                                         sampleRate, blockSize);
+                                         newSampleRate, newBlockSize);
 
-        processor->prepareToPlay (sampleRate, blockSize);
+        processor->prepareToPlay (newSampleRate, newBlockSize);
     }
 }
 

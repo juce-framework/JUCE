@@ -15,6 +15,10 @@
 
  ********************************************************************/
 
+#ifdef JUCE_MSVC
+ #pragma warning (disable: 4456 4457 4459)
+#endif
+
 /* We're 'LSb' endian; if we write a word but read individual bits,
    then we'll read the lsb first */
 

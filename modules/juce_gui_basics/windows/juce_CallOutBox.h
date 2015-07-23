@@ -139,7 +139,7 @@ public:
     {
         virtual ~LookAndFeelMethods() {}
 
-        virtual void drawCallOutBoxBackground (CallOutBox&, Graphics&, const Path&, Image& cachedImage) = 0;
+        virtual void drawCallOutBoxBackground (CallOutBox&, Graphics&, const Path&, Image&) = 0;
         virtual int getCallOutBoxBorderSize (const CallOutBox&) = 0;
     };
 

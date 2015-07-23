@@ -40,8 +40,8 @@ public:
 
     void componentMovedOrResized (Component&, bool, bool);
     void componentParentHierarchyChanged (Component&);
-    void componentChildrenChanged (Component& component);
-    void componentBeingDeleted (Component& component);
+    void componentChildrenChanged (Component&);
+    void componentBeingDeleted (Component&);
     void markersChanged (MarkerList*);
     void markerListBeingDeleted (MarkerList* markerList);
 

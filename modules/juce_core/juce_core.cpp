@@ -59,7 +59,10 @@
  #include <ws2tcpip.h>
 
  #if ! JUCE_MINGW
+  #pragma warning (push)
+  #pragma warning (disable: 4091)
   #include <Dbghelp.h>
+  #pragma warning (pop)
 
   #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
    #pragma comment (lib, "DbgHelp.lib")

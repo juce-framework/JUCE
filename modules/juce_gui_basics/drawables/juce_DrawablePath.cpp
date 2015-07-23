@@ -88,11 +88,11 @@ public:
         bool ok = true;
 
         jassert (owner.relativePath != nullptr);
-        const RelativePointPath& path = *owner.relativePath;
+        const RelativePointPath& relPath = *owner.relativePath;
 
-        for (int i = 0; i < path.elements.size(); ++i)
+        for (int i = 0; i < relPath.elements.size(); ++i)
         {
-            RelativePointPath::ElementBase* const e = path.elements.getUnchecked(i);
+            RelativePointPath::ElementBase* const e = relPath.elements.getUnchecked(i);
 
             int numPoints;
             RelativePoint* const points = e->getControlPoints (numPoints);

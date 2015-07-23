@@ -85,7 +85,7 @@ private:
     int getNumRows() override;
     void paintListBoxItem (int, Graphics&, int, int, bool) override;
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component*) override;
-    void selectedRowsChanged (int lastRowSelected) override;
+    void selectedRowsChanged (int row) override;
     void deleteKeyPressed (int currentSelectedRow) override;
     void returnKeyPressed (int currentSelectedRow) override;
 

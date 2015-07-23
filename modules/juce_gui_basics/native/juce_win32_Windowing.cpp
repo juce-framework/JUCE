@@ -1224,7 +1224,7 @@ private:
             clearSingletonInstance();
         }
 
-        LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
+        LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) atom; }
 
         juce_DeclareSingleton_SingleThreaded_Minimal (WindowClassHolder)
 
@@ -3280,13 +3280,13 @@ String SystemClipboard::getTextFromClipboard()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
+void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
-    if (TopLevelWindow* tlw = dynamic_cast<TopLevelWindow*> (kioskModeComponent))
+    if (TopLevelWindow* tlw = dynamic_cast<TopLevelWindow*> (kioskModeComp))
         tlw->setUsingNativeTitleBar (! enableOrDisable);
 
     if (enableOrDisable)
-        kioskModeComponent->setBounds (getDisplays().getMainDisplay().totalArea);
+        kioskModeComp->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
 //==============================================================================
