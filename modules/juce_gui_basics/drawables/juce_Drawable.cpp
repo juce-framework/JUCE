@@ -32,6 +32,7 @@ Drawable::Drawable (const Drawable& other)
     : Component (other.getName())
 {
     setComponentID (other.getComponentID());
+    setTransform (other.getTransform());
 }
 
 Drawable::~Drawable()
