@@ -88,6 +88,36 @@ public:
     /** Deletes the program. */
     void release() noexcept;
 
+    //==============================================================================
+    //  Methods for setting shader uniforms without using a Uniform object (see below).
+    //  You must make sure this shader is the currently bound one before setting uniforms
+    //  with these functions.
+
+    /** Get the uniform ID from the variable name */
+    GLint getUniformIDFromName (const char* uniformName) const noexcept;
+
+    /** Sets a float uniform. */
+    void setUniform (const char* uniformName, GLfloat value) noexcept;
+    /** Sets an int uniform. */
+    void setUniform (const char* uniformName, GLint value) noexcept;
+    /** Sets a vec2 uniform. */
+    void setUniform (const char* uniformName, GLfloat x, GLfloat y) noexcept;
+    /** Sets a vec3 uniform. */
+    void setUniform (const char* uniformName, GLfloat x, GLfloat y, GLfloat z) noexcept;
+    /** Sets a vec4 uniform. */
+    void setUniform (const char* uniformName, GLfloat x, GLfloat y, GLfloat z, GLfloat w) noexcept;
+    /** Sets a vec4 uniform. */
+    void setUniform (const char* uniformName, GLint x, GLint y, GLint z, GLint w) noexcept;
+    /** Sets a vector float uniform. */
+    void setUniform (const char* uniformName, const GLfloat* values, GLsizei numValues) noexcept;
+    /** Sets a 2x2 matrix float uniform. */
+    void setUniformMat2 (const char* uniformName, const GLfloat* values, GLint count, GLboolean transpose) noexcept;
+    /** Sets a 3x3 matrix float uniform. */
+    void setUniformMat3 (const char* uniformName, const GLfloat* values, GLint count, GLboolean transpose) noexcept;
+    /** Sets a 4x4 matrix float uniform. */
+    void setUniformMat4 (const char* uniformName, const GLfloat* values, GLint count, GLboolean transpose) noexcept;
+
+    //==============================================================================
     /** Represents an openGL uniform value.
         After a program has been linked, you can create Uniform objects to let you
         set the uniforms that your shaders use.
@@ -135,6 +165,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Uniform)
     };
 
+    //==============================================================================
     /** Represents an openGL vertex attribute value.
         After a program has been linked, you can create Attribute objects to let you
         set the attributes that your vertex shaders use.
