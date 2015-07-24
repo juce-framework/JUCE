@@ -31,7 +31,7 @@
             BufferSecurityCheck=""
             DebugInformationFormat="4"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
-            PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=3.1.1;JUCE_APP_VERSION_HEX=0x30101"
+            PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -86,7 +86,7 @@
             InlineFunctionExpansion="1"
             StringPooling="true"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
-            PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=3.1.1;JUCE_APP_VERSION_HEX=0x30101"
+            PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -128,6 +128,7 @@
       <Filter Name="Application">
         <File RelativePath="..\..\Source\Application\jucer_AppearanceSettings.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_AppearanceSettings.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_AutoUpdater.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_Application.h"/>
         <File RelativePath="..\..\Source\Application\jucer_AutoUpdater.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommandIDs.h"/>
@@ -274,6 +275,7 @@
         <File RelativePath="..\..\Source\Project\jucer_ProjectTree_Group.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_TreeItemTypes.h"/>
       </Filter>
       <Filter Name="Utility">
         <File RelativePath="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>
@@ -314,6 +316,8 @@
         <File RelativePath="..\..\Source\Wizards\jucer_ProjectWizard_StaticLibrary.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_StartPageComponent.h"/>
         <File RelativePath="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h"/>
+      </Filter>
+      <Filter Name="BinaryData">
         <Filter Name="templates">
           <File RelativePath="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
             <FileConfiguration Name="Debug|Win32"
@@ -526,8 +530,6 @@
             </FileConfiguration>
           </File>
         </Filter>
-      </Filter>
-      <Filter Name="BinaryData">
         <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
@@ -1534,6 +1536,16 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_curl_Network.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_linux_CommonFile.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

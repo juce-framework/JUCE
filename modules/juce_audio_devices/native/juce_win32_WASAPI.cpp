@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -547,13 +547,13 @@ private:
     //==============================================================================
     ComSmartPtr<IAudioClient> createClient()
     {
-        ComSmartPtr<IAudioClient> client;
+        ComSmartPtr<IAudioClient> newClient;
 
         if (device != nullptr)
             logFailure (device->Activate (__uuidof (IAudioClient), CLSCTX_INPROC_SERVER,
-                                          nullptr, (void**) client.resetAndGetPointerAddress()));
+                                          nullptr, (void**) newClient.resetAndGetPointerAddress()));
 
-        return client;
+        return newClient;
     }
 
     struct AudioSampleFormat
@@ -563,8 +563,8 @@ private:
         int  bytesPerSampleContainer;
     };
 
-    bool tryFormat (const AudioSampleFormat sampleFormat, IAudioClient* clientToUse, double sampleRate,
-                    DWORD mixFormatChannelMask, WAVEFORMATEXTENSIBLE& format) const
+    bool tryFormat (const AudioSampleFormat sampleFormat, IAudioClient* clientToUse, double newSampleRate,
+                    DWORD newMixFormatChannelMask, WAVEFORMATEXTENSIBLE& format) const
     {
         zerostruct (format);
 
@@ -578,14 +578,14 @@ private:
             format.Format.cbSize = sizeof (WAVEFORMATEXTENSIBLE) - sizeof (WAVEFORMATEX);
         }
 
-        format.Format.nSamplesPerSec       = (DWORD) sampleRate;
+        format.Format.nSamplesPerSec       = (DWORD) newSampleRate;
         format.Format.nChannels            = (WORD) numChannels;
         format.Format.wBitsPerSample       = (WORD) (8 * sampleFormat.bytesPerSampleContainer);
         format.Samples.wValidBitsPerSample = (WORD) (sampleFormat.bitsPerSampleToTry);
         format.Format.nBlockAlign          = (WORD) (format.Format.nChannels * format.Format.wBitsPerSample / 8);
         format.Format.nAvgBytesPerSec      = (DWORD) (format.Format.nSamplesPerSec * format.Format.nBlockAlign);
         format.SubFormat                   = sampleFormat.useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
-        format.dwChannelMask               = mixFormatChannelMask;
+        format.dwChannelMask               = newMixFormatChannelMask;
 
         WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
 
@@ -605,8 +605,8 @@ private:
         return check (hr);
     }
 
-    bool findSupportedFormat (IAudioClient* clientToUse, double sampleRate,
-                              DWORD mixFormatChannelMask, WAVEFORMATEXTENSIBLE& format) const
+    bool findSupportedFormat (IAudioClient* clientToUse, double newSampleRate,
+                              DWORD newMixFormatChannelMask, WAVEFORMATEXTENSIBLE& format) const
     {
         static const AudioSampleFormat formats[] =
         {
@@ -620,7 +620,7 @@ private:
         };
 
         for (int i = 0; i < numElementsInArray (formats); ++i)
-            if (tryFormat (formats[i], clientToUse, sampleRate, mixFormatChannelMask, format))
+            if (tryFormat (formats[i], clientToUse, newSampleRate, newMixFormatChannelMask, format))
                 return true;
 
         return false;
@@ -1523,10 +1523,10 @@ private:
     }
 
     //==============================================================================
-    void scan (StringArray& outputDeviceNames,
-               StringArray& inputDeviceNames,
-               StringArray& outputDeviceIds,
-               StringArray& inputDeviceIds)
+    void scan (StringArray& outDeviceNames,
+               StringArray& inDeviceNames,
+               StringArray& outDeviceIds,
+               StringArray& inDeviceIds)
     {
         if (enumerator == nullptr)
         {
@@ -1582,19 +1582,19 @@ private:
             if (flow == eRender)
             {
                 const int index = (deviceId == defaultRenderer) ? 0 : -1;
-                outputDeviceIds.insert (index, deviceId);
-                outputDeviceNames.insert (index, name);
+                outDeviceIds.insert (index, deviceId);
+                outDeviceNames.insert (index, name);
             }
             else if (flow == eCapture)
             {
                 const int index = (deviceId == defaultCapture) ? 0 : -1;
-                inputDeviceIds.insert (index, deviceId);
-                inputDeviceNames.insert (index, name);
+                inDeviceIds.insert (index, deviceId);
+                inDeviceNames.insert (index, name);
             }
         }
 
-        inputDeviceNames.appendNumbersToDuplicates (false, false);
-        outputDeviceNames.appendNumbersToDuplicates (false, false);
+        inDeviceNames.appendNumbersToDuplicates (false, false);
+        outDeviceNames.appendNumbersToDuplicates (false, false);
     }
 
     //==============================================================================

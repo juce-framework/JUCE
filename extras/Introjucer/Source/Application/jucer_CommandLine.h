@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_COMMANDLINE_JUCEHEADER__
-#define __JUCER_COMMANDLINE_JUCEHEADER__
+#ifndef JUCER_COMMANDLINE_H_INCLUDED
+#define JUCER_COMMANDLINE_H_INCLUDED
 
 
 int performCommandLine (const String& commandLine);
@@ -31,4 +31,4 @@ int performCommandLine (const String& commandLine);
 enum { commandLineNotPerformed = 0x72346231 };
 
 
-#endif   // __JUCER_COMMANDLINE_JUCEHEADER__
+#endif   // JUCER_COMMANDLINE_H_INCLUDED

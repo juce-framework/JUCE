@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -85,7 +85,7 @@ private:
     int getNumRows() override;
     void paintListBoxItem (int, Graphics&, int, int, bool) override;
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component*) override;
-    void selectedRowsChanged (int lastRowSelected) override;
+    void selectedRowsChanged (int row) override;
     void deleteKeyPressed (int currentSelectedRow) override;
     void returnKeyPressed (int currentSelectedRow) override;
 

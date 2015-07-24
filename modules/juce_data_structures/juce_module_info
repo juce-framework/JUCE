@@ -1,7 +1,7 @@
 {
   "id":             "juce_data_structures",
   "name":           "JUCE data model helper classes",
-  "version":        "3.1.1",
+  "version":        "3.2.0",
   "description":    "Classes for undo/redo management, and smart data structures.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

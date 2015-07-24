@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -344,10 +344,10 @@ void ProjectExporter::removePathForModule (const String& moduleID)
     paths.removeChild (m, project.getUndoManagerFor (settings));
 }
 
-RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID, ProjectSaver& projectSaver) const
+RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID) const
 {
     if (project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue())
-        return RelativePath (project.getRelativePathForFile (projectSaver.getLocalModuleFolder (moduleID)),
+        return RelativePath (project.getRelativePathForFile (project.getLocalModuleFolder (moduleID)),
                              RelativePath::projectFolder);
 
     String path (getPathForModuleString (moduleID));

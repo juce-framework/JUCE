@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_JUCERCOMPONENTHANDLER_JUCEHEADER__
-#define __JUCER_JUCERCOMPONENTHANDLER_JUCEHEADER__
+#ifndef JUCER_JUCERCOMPONENTHANDLER_H_INCLUDED
+#define JUCER_JUCERCOMPONENTHANDLER_H_INCLUDED
 
 #include "../ui/jucer_TestComponent.h"
 #include "../properties/jucer_FilePropertyComponent.h"
@@ -272,4 +272,4 @@ private:
 };
 
 
-#endif   // __JUCER_JUCERCOMPONENTHANDLER_JUCEHEADER__
+#endif   // JUCER_JUCERCOMPONENTHANDLER_H_INCLUDED

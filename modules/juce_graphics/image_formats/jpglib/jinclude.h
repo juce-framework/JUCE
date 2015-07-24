@@ -180,11 +180,16 @@ static const int extend_test[16] =   /* entry n is 2**(n-1) */
   { 0, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,
     0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000 };
 
+#define SHIFTED_BITS_PLUS_ONE(n) (int) (((unsigned int) -1) << n) + 1
+
 static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
-  { 0, ((-1)<<1) + 1, ((-1)<<2) + 1, ((-1)<<3) + 1, ((-1)<<4) + 1,
-    ((-1)<<5) + 1, ((-1)<<6) + 1, ((-1)<<7) + 1, ((-1)<<8) + 1,
-    ((-1)<<9) + 1, ((-1)<<10) + 1, ((-1)<<11) + 1, ((-1)<<12) + 1,
-    ((-1)<<13) + 1, ((-1)<<14) + 1, ((-1)<<15) + 1 };
+  { 0,
+    SHIFTED_BITS_PLUS_ONE (1), SHIFTED_BITS_PLUS_ONE (2), SHIFTED_BITS_PLUS_ONE (3), SHIFTED_BITS_PLUS_ONE (4),
+    SHIFTED_BITS_PLUS_ONE (5), SHIFTED_BITS_PLUS_ONE (6), SHIFTED_BITS_PLUS_ONE (7), SHIFTED_BITS_PLUS_ONE (8),
+    SHIFTED_BITS_PLUS_ONE (9), SHIFTED_BITS_PLUS_ONE (10), SHIFTED_BITS_PLUS_ONE (11), SHIFTED_BITS_PLUS_ONE (12),
+    SHIFTED_BITS_PLUS_ONE (13), SHIFTED_BITS_PLUS_ONE (14), SHIFTED_BITS_PLUS_ONE (15) };
+
+#undef SHIFTED_BITS_PLUS_ONE
 
 #endif /* AVOID_TABLES */
 

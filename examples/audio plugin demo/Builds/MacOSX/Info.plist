@@ -20,20 +20,20 @@
     <key>CFBundleVersion</key>
     <string>1.0.0</string>
     <key>NSHumanReadableCopyright</key>
-    <string>Raw Material Software Ltd.</string>
+    <string>ROLI Ltd.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>AudioComponents</key>
     <array>
       <dict>
         <key>name</key>
-        <string>Raw Material Software: Juce Demo Plugin</string>
+        <string>ROLI Ltd.: Juce Demo Plugin</string>
         <key>description</key>
         <string>Juce Demo Plugin</string>
         <key>factoryFunction</key>
         <string>JuceDemoProjectAUFactory</string>
         <key>manufacturer</key>
-        <string>RawM</string>
+        <string>Roli</string>
         <key>type</key>
         <string>aumf</string>
         <key>subtype</key>

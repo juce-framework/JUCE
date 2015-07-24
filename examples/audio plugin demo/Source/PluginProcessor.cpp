@@ -158,7 +158,7 @@ public:
         return defaultValue;
     }
 
-    String getName (int maximumStringLength) const override
+    String getName (int /* maximumStringLength */) const override
     {
         return name;
     }
@@ -207,11 +207,11 @@ JuceDemoPluginAudioProcessor::~JuceDemoPluginAudioProcessor()
 }
 
 //==============================================================================
-void JuceDemoPluginAudioProcessor::prepareToPlay (double sampleRate, int /*samplesPerBlock*/)
+void JuceDemoPluginAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    synth.setCurrentPlaybackSampleRate (sampleRate);
+    synth.setCurrentPlaybackSampleRate (newSampleRate);
     keyboardState.reset();
     delayBuffer.clear();
 }
@@ -328,8 +328,8 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
             lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
             lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
 
-            gain->setValue (xmlState->getDoubleAttribute ("gain", gain->getValue()));
-            delay->setValue (xmlState->getDoubleAttribute ("delay", delay->getValue()));
+            gain->setValue ((float) xmlState->getDoubleAttribute ("gain", gain->getValue()));
+            delay->setValue ((float) xmlState->getDoubleAttribute ("delay", delay->getValue()));
         }
     }
 }

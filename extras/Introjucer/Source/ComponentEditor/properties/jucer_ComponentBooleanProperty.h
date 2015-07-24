@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_COMPONENTBOOLEANPROPERTY_JUCEHEADER__
-#define __JUCER_COMPONENTBOOLEANPROPERTY_JUCEHEADER__
+#ifndef JUCER_COMPONENTBOOLEANPROPERTY_H_INCLUDED
+#define JUCER_COMPONENTBOOLEANPROPERTY_H_INCLUDED
 
 
 template <class ComponentType>
@@ -59,4 +59,4 @@ protected:
 };
 
 
-#endif   // __JUCER_COMPONENTBOOLEANPROPERTY_JUCEHEADER__
+#endif   // JUCER_COMPONENTBOOLEANPROPERTY_H_INCLUDED

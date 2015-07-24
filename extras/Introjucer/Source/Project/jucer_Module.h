@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_MODULE_JUCEHEADER__
-#define __JUCER_MODULE_JUCEHEADER__
+#ifndef JUCER_MODULE_H_INCLUDED
+#define JUCER_MODULE_H_INCLUDED
 
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
@@ -101,6 +101,7 @@ public:
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
     void findBrowseableFiles (const File& localModuleFolder, Array<File>& files) const;
+    void findAndAddCompiledUnits (ProjectExporter&, ProjectSaver*, const File& localModuleFolder, Array<File>& result) const;
 
     ModuleDescription moduleInfo;
 
@@ -110,8 +111,7 @@ private:
     File getModuleHeaderFile (const File& folder) const;
 
     void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
-    void findAndAddCompiledCode (ProjectExporter&, ProjectSaver&, const File& localModuleFolder, Array<File>& result) const;
-    void addBrowsableCode (ProjectExporter&, ProjectSaver&, const Array<File>& compiled, const File& localModuleFolder) const;
+    void addBrowseableCode (ProjectExporter&, const Array<File>& compiled, const File& localModuleFolder) const;
     void createLocalHeaderWrapper (ProjectSaver&, const File& originalHeader, const File& localHeader) const;
 
     bool isAUPluginHost (const Project&) const;
@@ -166,4 +166,4 @@ private:
 };
 
 
-#endif   // __JUCER_MODULE_JUCEHEADER__
+#endif   // JUCER_MODULE_H_INCLUDED

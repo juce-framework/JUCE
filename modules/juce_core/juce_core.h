@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -125,6 +125,17 @@
 #ifndef JUCE_ZLIB_INCLUDE_PATH
  #define JUCE_ZLIB_INCLUDE_PATH <zlib.h>
 #endif
+
+/** Config: JUCE_USE_CURL
+    Enables http/https support via libcurl (Linux only). Enabling this will add an additional
+    run-time dynmic dependency to libcurl.
+
+    If you disable this then https/ssl support will not be available on linux.
+*/
+#ifndef JUCE_USE_CURL
+ #define JUCE_USE_CURL 0
+#endif
+
 
 /*  Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
     If enabled, this will add some exception-catching code to forward unhandled exceptions

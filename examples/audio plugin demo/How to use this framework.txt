@@ -2,7 +2,7 @@
                             The Juce Polymorphic Plugin Project!
                             ====================================
 
-(c) 2012 by Raw Material Software, visit www.rawmaterialsoftware.com for more info.
+(c) 2015 by ROLI, visit www.juce.com for more info.
 
 -----------------------------------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ Juce is released under the GPL (Gnu Public License) - this means that you're fre
 and redistribute it as long as your products are also released under the GPL. Basically
 this means that if you use it, you also have to give away your source code. 
 If you want to release a closed-source application, you can buy a commercial license 
-that lets you avoid this restriction - see http://www.rawmaterialsoftware.com/juce for more info, 
+that lets you avoid this restriction - see http://www.juce.com for more info, 
 or see the comments at the top of all the Juce source files.
 
 If you're building the VST projects or releasing a VST, you'll need have a look at Steinberg's 

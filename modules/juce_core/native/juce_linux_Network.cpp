@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -67,8 +67,8 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /* targetEma
     return false;
 }
 
-
 //==============================================================================
+#if ! JUCE_USE_CURL
 class WebInputStream  : public InputStream
 {
 public:
@@ -77,8 +77,9 @@ public:
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
                     const int maxRedirects)
       : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
-        address (address_), headers (headers_), postData (postData_), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects)
+        address (address_), headers (headers_), postData (postData_), contentLength (-1), position (0),
+        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects),
+        chunkEnd (0), isChunked (false), readingChunk (false)
     {
         statusCode = createConnection (progressCallback, progressCallbackContext, numRedirectsToFollow);
 
@@ -104,17 +105,62 @@ public:
     bool isError() const                 { return socketHandle < 0; }
     bool isExhausted() override          { return finished; }
     int64 getPosition() override         { return position; }
-
-    int64 getTotalLength() override
-    {
-        //xxx to do
-        return -1;
-    }
+    int64 getTotalLength() override      { return contentLength; }
 
     int read (void* buffer, int bytesToRead) override
     {
         if (finished || isError())
             return 0;
+
+        if (isChunked && ! readingChunk)
+        {
+            if (position >= chunkEnd)
+            {
+                const ScopedValueSetter<bool> setter (readingChunk, true, false);
+                MemoryOutputStream chunkLengthBuffer;
+                char c = 0;
+
+                if (chunkEnd > 0)
+                {
+                    if (read (&c, 1) != 1 || c != '\r'
+                         || read (&c, 1) != 1 || c != '\n')
+                    {
+                        finished = true;
+                        return 0;
+                    }
+                }
+
+                while (chunkLengthBuffer.getDataSize() < 512 && ! (finished || isError()))
+                {
+                    if (read (&c, 1) != 1)
+                    {
+                        finished = true;
+                        return 0;
+                    }
+
+                    if (c == '\r')
+                        continue;
+
+                    if (c == '\n')
+                        break;
+
+                    chunkLengthBuffer.writeByte (c);
+                }
+
+                const int64 chunkSize = chunkLengthBuffer.toString().trimStart().getHexValue64();
+
+                if (chunkSize == 0)
+                {
+                    finished = true;
+                    return 0;
+                }
+
+                chunkEnd += chunkSize;
+            }
+
+            if (bytesToRead > chunkEnd - position)
+                bytesToRead = chunkEnd - position;
+        }
 
         fd_set readbits;
         FD_ZERO (&readbits);
@@ -131,7 +177,9 @@ public:
         if (bytesRead == 0)
             finished = true;
 
-        position += bytesRead;
+        if (! readingChunk)
+            position += bytesRead;
+
         return bytesRead;
     }
 
@@ -165,11 +213,13 @@ private:
     StringArray headerLines;
     String address, headers;
     MemoryBlock postData;
-    int64 position;
+    int64 contentLength, position;
     bool finished;
     const bool isPost;
     const int timeOutMs;
     const int numRedirectsToFollow;
+    int64 chunkEnd;
+    bool isChunked, readingChunk;
 
     void closeSocket (bool resetLevelsOfRedirection = true)
     {
@@ -298,6 +348,13 @@ private:
                 return createConnection (progressCallback, progressCallbackContext, numRedirects);
             }
 
+            String contentLengthString (findHeaderItem (headerLines, "Content-Length:"));
+
+            if (contentLengthString.isNotEmpty())
+                contentLength = contentLengthString.getLargeIntValue();
+
+            isChunked = (findHeaderItem (headerLines, "Transfer-Encoding:") == "chunked");
+
             return status;
         }
 
@@ -345,7 +402,7 @@ private:
     static void writeHost (MemoryOutputStream& dest, const bool isPost,
                            const String& path, const String& host, int port)
     {
-        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
+        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.1\r\nHost: " << host;
 
         /* HTTP spec 14.23 says that the port number must be included in the header if it is not 80 */
         if (port != 80)
@@ -455,3 +512,4 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
+#endif

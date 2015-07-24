@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -56,6 +56,9 @@ public:
 
         The graphics context has its origin at the row's top-left, and your method
         should fill the area specified by the width and height parameters.
+
+        Note that the rowNumber value may be greater than the number of rows in your
+        list, so be careful that you don't assume it's less than getNumRows().
     */
     virtual void paintRowBackground (Graphics&,
                                      int rowNumber,
@@ -306,7 +309,7 @@ public:
     /** @internal */
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate) override;
     /** @internal */
-    void selectedRowsChanged (int lastRowSelected) override;
+    void selectedRowsChanged (int row) override;
     /** @internal */
     void deleteKeyPressed (int currentSelectedRow) override;
     /** @internal */

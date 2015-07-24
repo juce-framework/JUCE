@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -225,10 +225,10 @@ public:
         storage->Release();
     }
 
-    void setControlBounds (const Rectangle<int>& bounds) const
+    void setControlBounds (const Rectangle<int>& newBounds) const
     {
         if (controlHWND != 0)
-            MoveWindow (controlHWND, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), TRUE);
+            MoveWindow (controlHWND, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
     }
 
     void setControlVisible (bool shouldBeVisible) const
@@ -332,7 +332,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
     if (ComponentPeer* const peer = getPeer())
     {
-        const Rectangle<int> bounds (peer->getAreaCoveredBy (*this));
+        const Rectangle<int> controlBounds (peer->getAreaCoveredBy (*this));
 
         HWND hwnd = (HWND) peer->getNativeHandle();
 
@@ -348,10 +348,10 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
             if (OleSetContainedObject (newControl->control, TRUE) == S_OK)
             {
                 RECT rect;
-                rect.left   = bounds.getX();
-                rect.top    = bounds.getY();
-                rect.right  = bounds.getRight();
-                rect.bottom = bounds.getBottom();
+                rect.left   = controlBounds.getX();
+                rect.top    = controlBounds.getY();
+                rect.right  = controlBounds.getRight();
+                rect.bottom = controlBounds.getBottom();
 
                 if (newControl->control->DoVerb (OLEIVERB_SHOW, 0, newControl->clientSite, 0, hwnd, &rect) == S_OK)
                 {
@@ -360,7 +360,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
                     if (control->controlHWND != 0)
                     {
-                        control->setControlBounds (bounds);
+                        control->setControlBounds (controlBounds);
 
                         control->originalWndProc = (WNDPROC) GetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC);
                         SetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC, (LONG_PTR) Pimpl::activeXHookWndProc);
