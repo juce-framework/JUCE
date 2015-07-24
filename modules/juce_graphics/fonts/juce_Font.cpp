@@ -631,7 +631,7 @@ float Font::getDescentInPoints() const      { return getDescent() * getHeightToP
 
 int Font::getStringWidth (const String& text) const
 {
-    return roundToInt (getStringWidthFloat (text));
+    return (int) std::ceil (getStringWidthFloat (text));
 }
 
 float Font::getStringWidthFloat (const String& text) const
