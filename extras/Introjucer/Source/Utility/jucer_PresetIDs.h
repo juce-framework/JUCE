@@ -130,6 +130,7 @@ namespace Ids
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (androidActivityClass);
+    DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
