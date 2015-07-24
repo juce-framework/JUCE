@@ -159,7 +159,7 @@ public:
             }
 
             if (bytesToRead > chunkEnd - position)
-                bytesToRead = chunkEnd - position;
+                bytesToRead = static_cast<int> (chunkEnd - position);
         }
 
         fd_set readbits;
