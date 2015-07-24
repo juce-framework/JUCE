@@ -275,11 +275,6 @@ public:
     */
     float mat00, mat01, mat02;
     float mat10, mat11, mat12;
-
-
-private:
-    //==============================================================================
-    JUCE_LEAK_DETECTOR (AffineTransform)
 };
 
 #endif   // JUCE_AFFINETRANSFORM_H_INCLUDED
