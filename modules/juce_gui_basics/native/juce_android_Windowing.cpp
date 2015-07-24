@@ -710,12 +710,12 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEn
 //==============================================================================
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
-    // TODO
+    android.activity.callVoidMethod (JuceAppActivity.setScreenSaver, isEnabled);
 }
 
 bool Desktop::isScreenSaverEnabled()
 {
-    return true;
+    return android.activity.callBooleanMethod (JuceAppActivity.getScreenSaver);
 }
 
 //==============================================================================

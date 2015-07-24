@@ -66,6 +66,7 @@ public class JuceAppActivity   extends Activity
     {
         super.onCreate (savedInstanceState);
 
+        isScreenSaverEnabled = true;
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
 
@@ -141,6 +142,7 @@ public class JuceAppActivity   extends Activity
 
     //==============================================================================
     private ViewHolder viewHolder;
+    private boolean isScreenSaverEnabled;
 
     public final ComponentPeerView createNewView (boolean opaque, long host)
     {
@@ -220,6 +222,24 @@ public class JuceAppActivity   extends Activity
     public final void excludeClipRegion (android.graphics.Canvas canvas, float left, float top, float right, float bottom)
     {
         canvas.clipRect (left, top, right, bottom, android.graphics.Region.Op.DIFFERENCE);
+    }
+
+    //==============================================================================
+    public final void setScreenSaver (boolean enabled)
+    {
+        if (isScreenSaverEnabled != enabled)
+        {
+            isScreenSaverEnabled = enabled;
+            if (enabled)
+                getWindow().clearFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else
+                getWindow().addFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    public final boolean getScreenSaver ()
+    {
+        return isScreenSaverEnabled;
     }
 
     //==============================================================================
