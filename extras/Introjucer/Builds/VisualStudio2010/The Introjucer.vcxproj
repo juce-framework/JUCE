@@ -50,7 +50,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2010_78A501D=1;JUCE_APP_VERSION=3.1.1;JUCE_APP_VERSION_HEX=0x30101;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2010_78A501D=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -91,7 +91,7 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2010_78A501D=1;JUCE_APP_VERSION=3.1.1;JUCE_APP_VERSION_HEX=0x30101;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2010_78A501D=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -124,6 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Application\jucer_AppearanceSettings.cpp"/>
+    <ClCompile Include="..\..\Source\Application\jucer_AutoUpdater.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
@@ -394,6 +395,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Threads.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_curl_Network.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_CommonFile.cpp">
@@ -1145,6 +1149,7 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h"/>
+    <ClInclude Include="..\..\Source\Project\jucer_TreeItemTypes.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_Colours.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h"/>

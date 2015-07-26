@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.rawmaterialsoftware.pluginhost</string>
+    <string>com.roli.pluginhost</string>
     <key>CFBundleName</key>
     <string>Plugin Host</string>
     <key>CFBundlePackageType</key>
@@ -20,7 +20,7 @@
     <key>CFBundleVersion</key>
     <string>1.0.0</string>
     <key>NSHumanReadableCopyright</key>
-    <string>Raw Material Software Ltd.</string>
+    <string>ROLI Ltd.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
   </dict>

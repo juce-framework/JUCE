@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -59,7 +59,10 @@
  #include <ws2tcpip.h>
 
  #if ! JUCE_MINGW
+  #pragma warning (push)
+  #pragma warning (disable: 4091)
   #include <Dbghelp.h>
+  #pragma warning (pop)
 
   #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
    #pragma comment (lib, "DbgHelp.lib")
@@ -82,6 +85,10 @@
  #if JUCE_LINUX
   #include <langinfo.h>
   #include <ifaddrs.h>
+
+  #if JUCE_USE_CURL
+   #include <curl/curl.h>
+  #endif
  #endif
 
  #include <pwd.h>
@@ -210,6 +217,9 @@ namespace juce
 #include "native/juce_linux_CommonFile.cpp"
 #include "native/juce_linux_Files.cpp"
 #include "native/juce_linux_Network.cpp"
+#if JUCE_USE_CURL
+ #include "native/juce_curl_Network.cpp"
+#endif
 #include "native/juce_linux_SystemStats.cpp"
 #include "native/juce_linux_Threads.cpp"
 

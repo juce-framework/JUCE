@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -403,7 +403,9 @@ struct AndroidThreadScope
  STATICMETHOD (getLocaleValue,   "getLocaleValue",       "(Z)Ljava/lang/String;") \
  METHOD (scanFile,               "scanFile",             "(Ljava/lang/String;)V") \
  METHOD (getTypeFaceFromAsset,   "getTypeFaceFromAsset", "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
- METHOD (getTypeFaceFromByteArray,"getTypeFaceFromByteArray","([B)Landroid/graphics/Typeface;")
+ METHOD (getTypeFaceFromByteArray,"getTypeFaceFromByteArray","([B)Landroid/graphics/Typeface;") \
+ METHOD (setScreenSaver,          "setScreenSaver",       "(Z)V") \
+ METHOD (getScreenSaver,          "getScreenSaver",       "()Z")
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS

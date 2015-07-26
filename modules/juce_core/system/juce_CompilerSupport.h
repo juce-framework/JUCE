@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -113,11 +113,11 @@
  #if _MSC_VER >= 1800
   #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
   #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
+  #define JUCE_DELETED_FUNCTION = delete
  #endif
 
  #if _MSC_VER >= 1900
   #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
-  #define JUCE_DELETED_FUNCTION = delete
  #endif
 #endif
 

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -63,8 +63,8 @@
 //==============================================================================
 #if JUCE_IOS || JUCE_LINUX || JUCE_ANDROID || JUCE_PPC
   /** This will try to break into the debugger if the app is currently being debugged.
-      If called by an app that's not being debugged, the behaiour isn't defined - it may crash or not, depending
-      on the platform.
+      If called by an app that's not being debugged, the behaviour isn't defined - it may
+      crash or not, depending on the platform.
       @see jassert()
   */
   #define juce_breakDebugger        { ::kill (0, SIGTRAP); }

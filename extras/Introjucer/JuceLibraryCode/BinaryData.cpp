@@ -566,7 +566,7 @@ static const unsigned char temp_binary_data_6[] =
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
 "  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
+"  Copyright (c) 2015 - ROLI Ltd.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -613,7 +613,7 @@ static const unsigned char temp_binary_data_6[] =
 "#if 0\r\n"
 "/*  -- Introjucer information section --\r\n"
 "\r\n"
-"    This is where the Introjucer stores the metadata that describe this GUI layout, so \r\n"
+"    This is where the Introjucer stores the metadata that describe this GUI layout, so\r\n"
 "    make changes in here at your peril!\r\n"
 "\r\n"
 "BEGIN_JUCER_METADATA\r\n"
@@ -625,7 +625,7 @@ static const unsigned char temp_binary_data_6[] =
 "\r\n"
 "%%staticMemberDefinitions%%\r\n"
 "//[EndFile] You can add extra defines here...\r\n"
-"//[/EndFile]";
+"//[/EndFile]\r\n";
 
 const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_6;
 
@@ -645,7 +645,7 @@ static const unsigned char temp_binary_data_7[] =
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
 "  The Introjucer is part of the JUCE library - \"Jules' Utility Class Extensions\"\r\n"
-"  Copyright 2004-13 by Raw Material Software Ltd.\r\n"
+"  Copyright (c) 2015 - ROLI Ltd.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -694,7 +694,7 @@ static const unsigned char temp_binary_data_7[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n"
 "\r\n"
-"#endif   // %%headerGuard%%";
+"#endif   // %%headerGuard%%\r\n";
 
 const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_7;
 
@@ -1422,7 +1422,9 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyAU -gt 0 ]; then\r\n"
 "  echo \"Copying to AudioUnit folder...\"\r\n"
-"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
+"  AUDir=~/Library/Audio/Plug-Ins/Components\r\n"
+"  mkdir -p \"$AUDir\"\r\n"
+"  AU=$AUDir/$PRODUCT_NAME.component\r\n"
 "  if [ -d \"$AU\" ]; then \r\n"
 "    rm -r \"$AU\"\r\n"
 "  fi\r\n"
@@ -1442,7 +1444,9 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyVST -gt 0 ]; then\r\n"
 "  echo \"Copying to VST folder...\"\r\n"
-"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
+"  VSTDir=~/Library/Audio/Plug-Ins/VST\r\n"
+"  mkdir -p \"$VSTDir\"\r\n"
+"  VST=$VSTDir/$PRODUCT_NAME.vst\r\n"
 "  if [ -d \"$VST\" ]; then \r\n"
 "    rm -r \"$VST\"\r\n"
 "  fi\r\n"
@@ -1454,7 +1458,9 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyVST3 -gt 0 ]; then\r\n"
 "  echo \"Copying to VST3 folder...\"\r\n"
-"  VST3=~/Library/Audio/Plug-Ins/VST3/$PRODUCT_NAME.vst3\r\n"
+"  VST3Dir=~/Library/Audio/Plug-Ins/VST3\r\n"
+"  mkdir -p \"$VST3Dir\"\r\n"
+"  VST3=$VST3Dir/$PRODUCT_NAME.vst3\r\n"
 "  if [ -d \"$VST3\" ]; then \r\n"
 "    rm -r \"$VST3\"\r\n"
 "  fi\r\n"
@@ -1466,12 +1472,15 @@ static const unsigned char temp_binary_data_21[] =
 "\r\n"
 "if [ $copyRTAS -gt 0 ]; then\r\n"
 "  echo \"Copying to RTAS folder...\"\r\n"
-"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
-"  if [ -d \"$RTAS\" ]; then\r\n"
-"    rm -r \"$RTAS\"\r\n"
-"  fi\r\n"
+"  RTASDir=/Library/Application\\ Support/Digidesign/Plug-Ins\r\n"
+"  if [ -d \"$RTASDir\" ]; then\r\n"
+"    RTAS=$RTASDir/$PRODUCT_NAME.dpm\r\n"
+"    if [ -d \"$RTAS\" ]; then\r\n"
+"      rm -r \"$RTAS\"\r\n"
+"    fi\r\n"
 "\r\n"
-"  cp -r \"$original\" \"$RTAS\"\r\n"
+"    cp -r \"$original\" \"$RTAS\"\r\n"
+"  fi\r\n"
 "fi\r\n"
 "\r\n"
 "if [ $copyAAX -gt 0 ]; then\r\n"
@@ -4081,8 +4090,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5039; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2727; return jucer_AudioPluginFilterTemplate_h;
-        case 0xabad7041:  numBytes = 2177; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2156; return jucer_ComponentTemplate_h;
+        case 0xabad7041:  numBytes = 2161; return jucer_ComponentTemplate_cpp;
+        case 0xfc72fe86:  numBytes = 2141; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;
@@ -4096,7 +4105,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
         case 0x7fbac252:  numBytes = 1827; return jucer_OpenGLComponentTemplate_cpp;
-        case 0x44be9398:  numBytes = 2922; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 3108; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;

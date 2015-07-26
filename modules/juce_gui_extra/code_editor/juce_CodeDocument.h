@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -125,7 +125,7 @@ public:
             Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
             they will be adjusted to keep them within its limits.
         */
-        void setLineAndIndex (int newLine, int newIndexInLine);
+        void setLineAndIndex (int newLineNumber, int newIndexInLine);
 
         /** Returns the line number of this position.
             The first line in the document is numbered zero, not one!
@@ -257,7 +257,7 @@ public:
         The string must be either "\n", "\r\n", or (rarely) "\r".
         @see getNewLineCharacters
     */
-    void setNewLineCharacters (const String& newLine) noexcept;
+    void setNewLineCharacters (const String& newLineCharacters) noexcept;
 
     //==============================================================================
     /** Begins a new undo transaction.

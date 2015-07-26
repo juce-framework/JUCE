@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -79,6 +79,10 @@ public:
         props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
 
+        props.add (new TextPropertyComponent (getActivitySubClassPathValue(), "Android Activity sub-class name", 256, false),
+                   "If not empty, specifies the Android Activity class name stored in the app's manifest. "
+                   "Use this if you would like to use your own Android Activity sub-class.");
+
         props.add (new TextPropertyComponent (getVersionCodeValue(), "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
@@ -127,6 +131,8 @@ public:
 
     Value  getActivityClassPathValue()              { return getSetting (Ids::androidActivityClass); }
     String getActivityClassPath() const             { return settings [Ids::androidActivityClass]; }
+    Value  getActivitySubClassPathValue()           { return getSetting (Ids::androidActivitySubClassName); }
+    String getActivitySubClassPath() const          { return settings [Ids::androidActivitySubClassName]; }
     Value  getVersionCodeValue()                    { return getSetting (Ids::androidVersionCode); }
     String getVersionCodeString() const             { return settings [Ids::androidVersionCode]; }
     Value  getSDKPathValue()                        { return getSetting (Ids::androidSDKPath); }
@@ -317,7 +323,7 @@ private:
             app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
 
         XmlElement* act = app->createNewChildElement ("activity");
-        act->setAttribute ("android:name", getActivityName());
+        act->setAttribute ("android:name", getActivitySubClassName());
         act->setAttribute ("android:label", "@string/app_name");
         act->setAttribute ("android:configChanges", "keyboardHidden|orientation");
 
@@ -358,6 +364,13 @@ private:
     String getActivityName() const
     {
         return getActivityClassPath().fromLastOccurrenceOf (".", false, false);
+    }
+
+    String getActivitySubClassName() const
+    {
+        String activityPath = getActivitySubClassPath();
+
+        return (activityPath.isEmpty()) ? getActivityName() : activityPath.fromLastOccurrenceOf (".", false, false);
     }
 
     String getActivityClassPackage() const

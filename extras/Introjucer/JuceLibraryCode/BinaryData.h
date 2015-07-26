@@ -28,10 +28,10 @@ namespace BinaryData
     const int            jucer_AudioPluginFilterTemplate_hSize = 2813;
 
     extern const char*   jucer_ComponentTemplate_cpp;
-    const int            jucer_ComponentTemplate_cppSize = 2177;
+    const int            jucer_ComponentTemplate_cppSize = 2161;
 
     extern const char*   jucer_ComponentTemplate_h;
-    const int            jucer_ComponentTemplate_hSize = 2156;
+    const int            jucer_ComponentTemplate_hSize = 2141;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
     const int            jucer_ContentCompTemplate_cppSize = 886;
@@ -73,7 +73,7 @@ namespace BinaryData
     const int            jucer_OpenGLComponentTemplate_cppSize = 1827;
 
     extern const char*   AudioPluginXCodeScript_txt;
-    const int            AudioPluginXCodeScript_txtSize = 2922;
+    const int            AudioPluginXCodeScript_txtSize = 3108;
 
     extern const char*   background_tile_png;
     const int            background_tile_pngSize = 151;

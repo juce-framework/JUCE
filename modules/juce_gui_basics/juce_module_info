@@ -1,7 +1,7 @@
 {
   "id":             "juce_gui_basics",
   "name":           "JUCE GUI core classes",
-  "version":        "3.1.1",
+  "version":        "3.2.0",
   "description":    "Basic user-interface components and related classes.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

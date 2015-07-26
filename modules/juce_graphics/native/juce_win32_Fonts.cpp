@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -542,22 +542,22 @@ private:
         }
     }
 
-    void createKerningPairs (HDC dc, const float height)
+    void createKerningPairs (HDC hdc, const float height)
     {
         HeapBlock<KERNINGPAIR> rawKerning;
-        const DWORD numKPs = GetKerningPairs (dc, 0, 0);
+        const DWORD numKPs = GetKerningPairs (hdc, 0, 0);
         rawKerning.calloc (numKPs);
-        GetKerningPairs (dc, numKPs, rawKerning);
+        GetKerningPairs (hdc, numKPs, rawKerning);
 
         kerningPairs.ensureStorageAllocated ((int) numKPs);
 
         for (DWORD i = 0; i < numKPs; ++i)
         {
             KerningPair kp;
-            kp.glyph1 = getGlyphForChar (dc, rawKerning[i].wFirst);
-            kp.glyph2 = getGlyphForChar (dc, rawKerning[i].wSecond);
+            kp.glyph1 = getGlyphForChar (hdc, rawKerning[i].wFirst);
+            kp.glyph2 = getGlyphForChar (hdc, rawKerning[i].wSecond);
 
-            const int standardWidth = getGlyphWidth (dc, kp.glyph1);
+            const int standardWidth = getGlyphWidth (hdc, kp.glyph1);
             kp.kerning = (standardWidth + rawKerning[i].iKernAmount) / height;
             kerningPairs.add (kp);
 
@@ -587,7 +587,7 @@ private:
         return gm.gmCellIncX;
     }
 
-    float getKerning (HDC dc, const int glyph1, const int glyph2)
+    float getKerning (HDC hdc, const int glyph1, const int glyph2)
     {
         KerningPair kp;
         kp.glyph1 = glyph1;
@@ -602,7 +602,7 @@ private:
             if (index < 0)
             {
                 kp.glyph2 = -1;
-                kp.kerning = getGlyphWidth (dc, kp.glyph1) / (float) tm.tmHeight;
+                kp.kerning = getGlyphWidth (hdc, kp.glyph1) / (float) tm.tmHeight;
                 kerningPairs.add (kp);
                 return kp.kerning;
             }

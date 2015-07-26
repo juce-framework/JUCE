@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTSAVER_JUCEHEADER__
-#define __JUCER_PROJECTSAVER_JUCEHEADER__
+#ifndef JUCER_PROJECTSAVER_H_INCLUDED
+#define JUCER_PROJECTSAVER_H_INCLUDED
 
 #include "jucer_ResourceFile.h"
 #include "../Project/jucer_Module.h"
@@ -160,8 +160,6 @@ public:
     static String getJuceCodeGroupName()                            { return "Juce Library Code"; }
 
     File getGeneratedCodeFolder() const                             { return generatedCodeFolder; }
-    File getLocalModulesFolder() const                              { return generatedCodeFolder.getChildFile ("modules"); }
-    File getLocalModuleFolder (const String& moduleID) const        { return getLocalModulesFolder().getChildFile (moduleID); }
 
     bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
     {
@@ -631,4 +629,4 @@ private:
 };
 
 
-#endif   // __JUCER_PROJECTSAVER_JUCEHEADER__
+#endif   // JUCER_PROJECTSAVER_H_INCLUDED

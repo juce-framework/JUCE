@@ -8,7 +8,7 @@
 
 
 //==============================================================================
-#define JuceBrowserPlugin_Company           "Raw Material Software Ltd"
+#define JuceBrowserPlugin_Company           "ROLI Ltd"
 #define JuceBrowserPlugin_Name              "Juce Plugin Demo!"
 #define JuceBrowserPlugin_Desc              "Juce Browser Plugin Demo!"
 

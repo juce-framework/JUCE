@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -292,12 +292,12 @@ void FileOutputStream::closeHandle()
     CloseHandle ((HANDLE) fileHandle);
 }
 
-ssize_t FileOutputStream::writeInternal (const void* buffer, size_t numBytes)
+ssize_t FileOutputStream::writeInternal (const void* bufferToWrite, size_t numBytes)
 {
     if (fileHandle != nullptr)
     {
         DWORD actualNum = 0;
-        if (! WriteFile ((HANDLE) fileHandle, buffer, (DWORD) numBytes, &actualNum, 0))
+        if (! WriteFile ((HANDLE) fileHandle, bufferToWrite, (DWORD) numBytes, &actualNum, 0))
             status = WindowsFileHelpers::getResultForLastError();
 
         return (ssize_t) actualNum;
@@ -795,18 +795,19 @@ public:
           connected (false), ownsPipe (createPipe), shouldStop (false)
     {
         if (createPipe)
+        {
             pipeH = CreateNamedPipe (filename.toWideCharPointer(),
                                      PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
                                      PIPE_UNLIMITED_INSTANCES, 4096, 4096, 0, 0);
+
+            if (GetLastError() == ERROR_ALREADY_EXISTS)
+                closePipeHandle();
+        }
     }
 
     ~Pimpl()
     {
-        disconnectPipe();
-
-        if (pipeH != INVALID_HANDLE_VALUE)
-            CloseHandle (pipeH);
-
+        closePipeHandle();
         CloseHandle (cancelEvent);
     }
 
@@ -865,6 +866,16 @@ public:
         {
             DisconnectNamedPipe (pipeH);
             connected = false;
+        }
+    }
+
+    void closePipeHandle()
+    {
+        if (pipeH != INVALID_HANDLE_VALUE)
+        {
+            disconnectPipe();
+            CloseHandle (pipeH);
+            pipeH = INVALID_HANDLE_VALUE;
         }
     }
 

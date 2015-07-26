@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -52,7 +52,7 @@ public:
             if (! isError())
             {
                 DWORD bufferSizeBytes = 4096;
-                StringPairArray headers (false);
+                StringPairArray dataHeaders (false);
 
                 for (;;)
                 {
@@ -68,8 +68,8 @@ public:
                             const String& header = headersArray[i];
                             const String key   (header.upToFirstOccurrenceOf (": ", false, false));
                             const String value (header.fromFirstOccurrenceOf (": ", false, false));
-                            const String previousValue (headers[key]);
-                            headers.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+                            const String previousValue (dataHeaders[key]);
+                            dataHeaders.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
                         }
 
                         break;
@@ -91,7 +91,7 @@ public:
                     if (numRedirectsToFollow >= 0
                          && (statusCode == 301 || statusCode == 302 || statusCode == 303 || statusCode == 307))
                     {
-                        String newLocation (headers["Location"]);
+                        String newLocation (dataHeaders["Location"]);
 
                         // Check whether location is a relative URI - this is an incomplete test for relative path,
                         // but we'll use it for now (valid protocols for this implementation are http, https & ftp)
@@ -114,7 +114,7 @@ public:
                 }
 
                 if (responseHeaders != nullptr)
-                    responseHeaders->addArray (headers);
+                    responseHeaders->addArray (dataHeaders);
             }
 
             break;

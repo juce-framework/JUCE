@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -712,12 +712,12 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEn
 //==============================================================================
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
-    // TODO
+    android.activity.callVoidMethod (JuceAppActivity.setScreenSaver, isEnabled);
 }
 
 bool Desktop::isScreenSaverEnabled()
 {
-    return true;
+    return android.activity.callBooleanMethod (JuceAppActivity.getScreenSaver);
 }
 
 //==============================================================================

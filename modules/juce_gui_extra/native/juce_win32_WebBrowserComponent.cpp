@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -71,8 +71,8 @@ public:
         {
             LPSAFEARRAY sa = nullptr;
 
-            VARIANT flags, frame, postDataVar, headersVar;  // (_variant_t isn't available in all compilers)
-            VariantInit (&flags);
+            VARIANT headerFlags, frame, postDataVar, headersVar;  // (_variant_t isn't available in all compilers)
+            VariantInit (&headerFlags);
             VariantInit (&frame);
             VariantInit (&postDataVar);
             VariantInit (&headersVar);
@@ -109,12 +109,12 @@ public:
             }
 
             browser->Navigate ((BSTR) (const OLECHAR*) url.toWideCharPointer(),
-                               &flags, &frame, &postDataVar, &headersVar);
+                               &headerFlags, &frame, &postDataVar, &headersVar);
 
             if (sa != nullptr)
                 SafeArrayDestroy (sa);
 
-            VariantClear (&flags);
+            VariantClear (&headerFlags);
             VariantClear (&frame);
             VariantClear (&postDataVar);
             VariantClear (&headersVar);

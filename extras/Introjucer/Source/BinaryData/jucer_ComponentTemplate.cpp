@@ -12,7 +12,7 @@
   ------------------------------------------------------------------------------
 
   The Introjucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-13 by Raw Material Software Ltd.
+  Copyright (c) 2015 - ROLI Ltd.
 
   ==============================================================================
 */
@@ -59,7 +59,7 @@
 #if 0
 /*  -- Introjucer information section --
 
-    This is where the Introjucer stores the metadata that describe this GUI layout, so 
+    This is where the Introjucer stores the metadata that describe this GUI layout, so
     make changes in here at your peril!
 
 BEGIN_JUCER_METADATA

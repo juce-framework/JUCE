@@ -1,7 +1,7 @@
 {
   "id":             "juce_audio_devices",
   "name":           "JUCE audio and midi I/O device classes",
-  "version":        "3.1.1",
+  "version":        "3.2.0",
   "description":    "Classes to play and record from audio and midi i/o devices.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

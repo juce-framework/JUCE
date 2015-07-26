@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PAINTELEMENTUNDOABLEACTION_JUCEHEADER__
-#define __JUCER_PAINTELEMENTUNDOABLEACTION_JUCEHEADER__
+#ifndef JUCER_PAINTELEMENTUNDOABLEACTION_H_INCLUDED
+#define JUCER_PAINTELEMENTUNDOABLEACTION_H_INCLUDED
 
 #include "../ui/jucer_JucerDocumentEditor.h"
 #include "jucer_PaintElementGroup.h"
@@ -139,4 +139,4 @@ private:
 
 
 
-#endif   // __JUCER_PAINTELEMENTUNDOABLEACTION_JUCEHEADER__
+#endif   // JUCER_PAINTELEMENTUNDOABLEACTION_H_INCLUDED

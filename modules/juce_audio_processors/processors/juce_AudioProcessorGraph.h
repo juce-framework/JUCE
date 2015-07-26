@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -92,7 +92,7 @@ public:
         Node (uint32 nodeId, AudioProcessor*) noexcept;
 
         void setParentGraph (AudioProcessorGraph*) const;
-        void prepare (double sampleRate, int blockSize, AudioProcessorGraph*);
+        void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*);
         void unprepare();
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node)
@@ -306,7 +306,7 @@ public:
 
         const String getName() const override;
         void fillInPluginDescription (PluginDescription&) const override;
-        void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock) override;
+        void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock) override;
         void releaseResources() override;
         void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
 

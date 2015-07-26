@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -123,7 +123,7 @@ public:
                                 Thread::startThread() for values
         @returns true if the thread finished normally; false if the user pressed cancel
     */
-    bool runThread (int threadPriority = 5);
+    bool runThread (int priority = 5);
    #endif
 
     /** Starts the thread and returns.
@@ -135,7 +135,7 @@ public:
         @param threadPriority   the priority to use when starting the thread - see
                                 Thread::startThread() for values
     */
-    void launchThread (int threadPriority = 5);
+    void launchThread (int priority = 5);
 
     /** The thread should call this periodically to update the position of the progress bar.
 

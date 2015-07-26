@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PRESETIDS_JUCEHEADER__
-#define __JUCER_PRESETIDS_JUCEHEADER__
+#ifndef JUCER_PRESETIDS_H_INCLUDED
+#define JUCER_PRESETIDS_H_INCLUDED
 
 
 // Handy list of static Identifiers..
@@ -130,6 +130,7 @@ namespace Ids
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (androidActivityClass);
+    DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
@@ -171,4 +172,4 @@ namespace Ids
     #undef DECLARE_ID
 }
 
-#endif   // __JUCER_PRESETIDS_JUCEHEADER__
+#endif   // JUCER_PRESETIDS_H_INCLUDED

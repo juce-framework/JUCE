@@ -1,7 +1,7 @@
 {
   "id":             "juce_cryptography",
   "name":           "JUCE cryptography classes",
-  "version":        "3.1.1",
+  "version":        "3.2.0",
   "description":    "Classes for various basic cryptography functions, including RSA, Blowfish, MD5, SHA, etc.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

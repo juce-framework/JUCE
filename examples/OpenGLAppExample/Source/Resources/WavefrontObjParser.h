@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-12 by Raw Material Software Ltd.
+   Copyright 2015 by ROLI Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@
   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -101,7 +101,20 @@ private:
     struct TripleIndex
     {
         TripleIndex() noexcept : vertexIndex (-1), textureIndex (-1), normalIndex (-1) {}
-        bool operator< (const TripleIndex& other) const noexcept  { return vertexIndex < other.vertexIndex; }
+
+        bool operator< (const TripleIndex& other) const noexcept
+        {
+            if (this == &other)
+                return false;
+
+            if (vertexIndex != other.vertexIndex)
+                return vertexIndex < other.vertexIndex;
+
+            if (textureIndex != other.textureIndex)
+                return textureIndex < other.textureIndex;
+
+            return normalIndex < other.normalIndex;
+        }
 
         int vertexIndex, textureIndex, normalIndex;
     };

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -110,7 +110,7 @@ void Thread::launchThread()
 {
     unsigned int newThreadId;
     threadHandle = (void*) _beginthreadex (0, 0, &threadEntryProc, this, 0, &newThreadId);
-    threadId = (ThreadID) newThreadId;
+    threadId = (ThreadID) (pointer_sized_int) newThreadId;
 }
 
 void Thread::closeThreadHandle()
