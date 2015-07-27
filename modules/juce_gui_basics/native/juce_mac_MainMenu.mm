@@ -29,7 +29,8 @@ public:
     JuceMainMenuHandler()
         : currentModel (nullptr),
           lastUpdateTime (0),
-          isOpen (false)
+          isOpen (false),
+          defferedUpdateRequested (false)
     {
         static JuceMenuCallbackClass cls;
         callback = [cls.createInstance() init];
@@ -126,7 +127,10 @@ public:
     void menuBarItemsChanged (MenuBarModel*)
     {
         if (isOpen)
+        {
+            defferedUpdateRequested = true;
             return;
+        }
 
         lastUpdateTime = Time::getMillisecondCounter();
 
@@ -290,7 +294,7 @@ public:
     uint32 lastUpdateTime;
     NSObject* callback;
     String recentItemsMenuName;
-    bool isOpen;
+    bool isOpen, defferedUpdateRequested;
 
 private:
     struct RecentFilesMenuItem
@@ -737,8 +741,16 @@ static void mainMenuTrackingChanged (bool isTracking)
 {
     PopupMenu::dismissAllActiveMenus();
 
-    if (JuceMainMenuHandler::instance != nullptr)
-        JuceMainMenuHandler::instance->isOpen = isTracking;
+    if (JuceMainMenuHandler* menuHandler = JuceMainMenuHandler::instance)
+    {
+        menuHandler->isOpen = isTracking;
+
+        if (menuHandler->defferedUpdateRequested && ! isTracking)
+        {
+            menuHandler->defferedUpdateRequested = false;
+            menuHandler->menuBarItemsChanged (menuHandler->currentModel);
+        }
+    }
 }
 
 void juce_initialiseMacMainMenu()
