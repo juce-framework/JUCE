@@ -109,12 +109,12 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         fillTiledBackground (g);
     }
 
-    void resized()
+    void resized() override
     {
         Rectangle<int> r (getLocalBounds().reduced (5));
 
@@ -149,27 +149,27 @@ public:
         demoTextBox.setBounds (r);
     }
 
-    void sliderValueChanged (Slider* sliderThatWasMoved)
+    void sliderValueChanged (Slider* sliderThatWasMoved) override
     {
         if (sliderThatWasMoved == &heightSlider)            refreshPreviewBoxFont();
         else if (sliderThatWasMoved == &kerningSlider)      refreshPreviewBoxFont();
         else if (sliderThatWasMoved == &scaleSlider)        refreshPreviewBoxFont();
     }
 
-    void buttonClicked (Button* buttonThatWasClicked)
+    void buttonClicked (Button* buttonThatWasClicked) override
     {
         if (buttonThatWasClicked == &boldToggle)            refreshPreviewBoxFont();
         else if (buttonThatWasClicked == &italicToggle)     refreshPreviewBoxFont();
     }
 
     // The following methods implement the ListBoxModel virtual methods:
-    int getNumRows()
+    int getNumRows() override
     {
         return fonts.size();
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g,
-                           int width, int height, bool rowIsSelected)
+                           int width, int height, bool rowIsSelected) override
     {
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
@@ -185,7 +185,7 @@ public:
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
     }
 
-    void selectedRowsChanged (int /*lastRowselected*/)
+    void selectedRowsChanged (int /*lastRowselected*/) override
     {
         refreshPreviewBoxFont();
     }

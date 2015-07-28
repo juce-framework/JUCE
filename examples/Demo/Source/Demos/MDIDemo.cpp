@@ -94,7 +94,7 @@ public:
         // not interested in this for now
     }
 
-    File getSuggestedSaveAsFile (const File&)
+    File getSuggestedSaveAsFile (const File&) override
     {
         return File::getSpecialLocation (File::userDesktopDirectory).getChildFile (getName()).withFileExtension ("jnote");
     }

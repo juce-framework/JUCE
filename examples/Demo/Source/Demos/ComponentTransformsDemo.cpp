@@ -46,7 +46,7 @@ public:
         draggers.getUnchecked(2)->relativePos = Point<float> (0.05f, 0.85f);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         fillTiledBackground (g);
 
@@ -96,7 +96,7 @@ private:
             setRepaintsOnMouseActivity (true);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.setColour (Colours::white.withAlpha (isMouseOverOrDragging() ? 0.9f : 0.5f));
             g.fillEllipse (getLocalBounds().reduced (3).toFloat());

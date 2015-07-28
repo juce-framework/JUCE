@@ -43,7 +43,7 @@ public:
         initialiseToggle (quality, "Higher quality image interpolation", false);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         fillTiledBackground (g);
     }
@@ -686,7 +686,7 @@ public:
         addAndMakeVisible (testList);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::grey);
     }
