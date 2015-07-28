@@ -84,6 +84,11 @@ public:
     void paint (Graphics&) override;
    #endif
 
+   #if JUCE_MAC
+    /** Shows a menu attached to the OSX menu bar icon. */
+    void showDropdownMenu (const PopupMenu& menu);
+   #endif
+
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
