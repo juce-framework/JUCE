@@ -251,37 +251,43 @@ public:
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.
 
-        @param usePostCommand   if true, it will try to do use a http 'POST' to pass
-                                the parameters, otherwise it'll encode them into the
-                                URL and do a 'GET'.
-        @param progressCallback if this is non-zero, it lets you supply a callback function
-                                to keep track of the operation's progress. This can be useful
-                                for lengthy POST operations, so that you can provide user feedback.
+        @param doPostLikeRequest if true, the parameters added to this class will be transferred
+                                 via the HTTP headers which is typical for POST requests. Otherwise
+                                 the parameters will be added to the URL address. Additionally,
+                                 if the parameter httpRequestCmd is not specified (or empty) then this
+                                 parameter will determine which HTTP request command will be used
+                                 (POST or GET).
+        @param progressCallback  if this is non-zero, it lets you supply a callback function
+                                 to keep track of the operation's progress. This can be useful
+                                 for lengthy POST operations, so that you can provide user feedback.
         @param progressCallbackContext  if a callback is specified, this value will be passed to
-                                the function
-        @param extraHeaders     if not empty, this string is appended onto the headers that
-                                are used for the request. It must therefore be a valid set of HTML
-                                header directives, separated by newlines.
+                                 the function
+        @param extraHeaders      if not empty, this string is appended onto the headers that
+                                 are used for the request. It must therefore be a valid set of HTML
+                                 header directives, separated by newlines.
         @param connectionTimeOutMs  if 0, this will use whatever default setting the OS chooses. If
-                                a negative number, it will be infinite. Otherwise it specifies a
-                                time in milliseconds.
-        @param responseHeaders  if this is non-null, all the (key, value) pairs received as headers
-                                in the response will be stored in this array
-        @param statusCode       if this is non-null, it will get set to the http status code, if one
-                                is known, or 0 if a code isn't available
+                                 a negative number, it will be infinite. Otherwise it specifies a
+                                 time in milliseconds.
+        @param responseHeaders   if this is non-null, all the (key, value) pairs received as headers
+                                 in the response will be stored in this array
+        @param statusCode        if this is non-null, it will get set to the http status code, if one
+                                 is known, or 0 if a code isn't available
         @param numRedirectsToFollow specifies the number of redirects that will be followed before
-                                returning a response (ignored for Android which follows up to 5 redirects)
+                                 returning a response (ignored for Android which follows up to 5 redirects)
+        @param httpRequestCmd    Specify which HTTP Request to use. If this is empty, then doPostRequest
+                                 will determine the HTTP request.
         @returns    an input stream that the caller must delete, or a null pointer if there was an
                     error trying to open it.
      */
-    InputStream* createInputStream (bool usePostCommand,
+    InputStream* createInputStream (bool doPostLikeRequest,
                                     OpenStreamProgressCallback* progressCallback = nullptr,
                                     void* progressCallbackContext = nullptr,
                                     String extraHeaders = String(),
                                     int connectionTimeOutMs = 0,
                                     StringPairArray* responseHeaders = nullptr,
                                     int* statusCode = nullptr,
-                                    int numRedirectsToFollow = 5) const;
+                                    int numRedirectsToFollow = 5,
+                                    String httpRequestCmd = String()) const;
 
 
     //==============================================================================

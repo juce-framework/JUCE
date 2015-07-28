@@ -335,7 +335,8 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      const int timeOutMs,
                                      StringPairArray* const responseHeaders,
                                      int* statusCode,
-                                     const int numRedirectsToFollow) const
+                                     const int numRedirectsToFollow,
+                                     String httpRequestCmd) const
 {
     MemoryBlock headersAndPostData;
 
@@ -348,11 +349,14 @@ InputStream* URL::createInputStream (const bool usePostCommand,
     if (! headers.endsWithChar ('\n'))
         headers << "\r\n";
 
+    if (httpRequestCmd.isEmpty())
+        httpRequestCmd = usePostCommand ? "POST" : "GET";
+
     ScopedPointer<WebInputStream> wi (new WebInputStream (toString (! usePostCommand),
                                                           usePostCommand, headersAndPostData,
                                                           progressCallback, progressCallbackContext,
                                                           headers, timeOutMs, responseHeaders,
-                                                          numRedirectsToFollow));
+                                                          numRedirectsToFollow, httpRequestCmd));
 
     if (statusCode != nullptr)
         *statusCode = wi->statusCode;

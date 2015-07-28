@@ -719,11 +719,10 @@ public class JuceAppActivity   extends Activity
         private long position;
     }
 
-    public static final HTTPStream createHTTPStream (String address,
-                                                     boolean isPost, byte[] postData, String headers,
-                                                     int timeOutMs, int[] statusCode,
-                                                     StringBuffer responseHeaders,
-                                                     int numRedirectsToFollow)
+    public static final HTTPStream createHTTPStream (String address, boolean isPost, byte[] postData,
+                                                     String headers, int timeOutMs, int[] statusCode,
+                                                     StringBuffer responseHeaders, int numRedirectsToFollow,
+                                                     String httpRequestCmd)
     {
         // timeout parameter of zero for HttpUrlConnection is a blocking connect (negative value for juce::URL)
         if (timeOutMs < 0)
@@ -764,9 +763,9 @@ public class JuceAppActivity   extends Activity
                             }
                         }
 
+                        connection.setRequestMethod (httpRequestCmd);
                         if (isPost)
                         {
-                            connection.setRequestMethod ("POST");
                             connection.setDoOutput (true);
 
                             if (postData != null)

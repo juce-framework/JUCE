@@ -40,10 +40,11 @@ class WebInputStream  : public InputStream
 public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders, int numRedirectsToFollow)
+                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
+                    int numRedirectsToFollow, const String& httpRequestCmd_)
       : statusCode (0), connection (0), request (0),
         address (address_), headers (headers_), postData (postData_), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
+        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), httpRequestCmd (httpRequestCmd_)
     {
         while (numRedirectsToFollow-- >= 0)
         {
@@ -198,6 +199,7 @@ private:
     bool finished;
     const bool isPost;
     int timeOutMs;
+    String httpRequestCmd;
 
     void close()
     {
@@ -299,7 +301,7 @@ private:
             flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
                                             //  IE7 seems to automatically work out when it's https)
 
-        request = HttpOpenRequest (connection, isPost ? _T("POST") : _T("GET"),
+        request = HttpOpenRequest (connection, httpRequestCmd.toWideCharPointer(),
                                    uc.lpszUrlPath, 0, 0, mimeTypes, flags, 0);
 
         if (request != 0)

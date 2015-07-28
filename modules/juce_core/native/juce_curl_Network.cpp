@@ -32,7 +32,7 @@ public:
     WebInputStream (const String& address, bool isPost, const MemoryBlock& postData,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers, int timeOutMs, StringPairArray* responseHeaders,
-                    const int maxRedirects)
+                    const int maxRedirects, const String& httpRequest)
         : multi (nullptr), curl (nullptr), headerList (nullptr), lastError (CURLE_OK),
           contentLength (-1), streamPos (0),
           finished (false), skipBytes (0),
@@ -41,7 +41,7 @@ public:
         statusCode = -1;
 
         if (init() && setOptions (address, timeOutMs, (responseHeaders != nullptr),
-                                  maxRedirects, headers, isPost, postData.getSize()))
+                                  maxRedirects, headers, isPost, httpRequest, postData.getSize()))
         {
             connect (responseHeaders, isPost, postData, progressCallback, progressCallbackContext);
         }
@@ -131,7 +131,7 @@ private:
     //==============================================================================
     bool setOptions (const String& address, int timeOutMs, bool wantsHeaders,
                      const int maxRedirects, const String& headers,
-                     bool isPost, size_t postSize)
+                     bool isPost, const String& httpRequest, size_t postSize)
     {
         if (curl_easy_setopt (curl, CURLOPT_URL, address.toRawUTF8()) == CURLE_OK
              && curl_easy_setopt (curl, CURLOPT_WRITEDATA, this) == CURLE_OK
@@ -146,6 +146,14 @@ private:
 
                 if (curl_easy_setopt (curl, CURLOPT_POST, 1) != CURLE_OK
                      || curl_easy_setopt (curl, CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t> (postSize)) != CURLE_OK)
+                    return false;
+            }
+
+            // handle special http request commands
+            bool hasSpecialRequestCmd = isPost ? (httpRequest != "POST") : (httpRequest != "GET");
+            if (hasSpecialRequestCmd)
+            {
+                if (curl_easy_setopt (curl, CURLOPT_CUSTOMREQUEST, httpRequest.toRawUTF8()) != CURLE_OK)
                     return false;
             }
 
