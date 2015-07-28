@@ -700,6 +700,14 @@ Component* OpenGLContext::getTargetComponent() const noexcept
     return attachment != nullptr ? attachment->getComponent() : nullptr;
 }
 
+OpenGLContext* OpenGLContext::getContextAttachedTo (Component& c) noexcept
+{
+    if (CachedImage* const ci = CachedImage::get (c))
+        return &(ci->context);
+
+    return nullptr;
+}
+
 static ThreadLocalValue<OpenGLContext*> currentThreadActiveContext;
 
 OpenGLContext* OpenGLContext::getCurrentContext()
