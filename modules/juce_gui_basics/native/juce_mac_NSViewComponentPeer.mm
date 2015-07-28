@@ -1068,7 +1068,9 @@ public:
                                               '8', KeyPress::numberPad8, '9', KeyPress::numberPad9,
                                               '+', KeyPress::numberPadAdd, '-', KeyPress::numberPadSubtract,
                                               '*', KeyPress::numberPadMultiply, '/', KeyPress::numberPadDivide,
-                                              '.', KeyPress::numberPadDecimalPoint, '=', KeyPress::numberPadEquals };
+                                              '.', KeyPress::numberPadDecimalPoint,
+                                              ',', KeyPress::numberPadDecimalPoint, // (to deal with non-english kbds)
+                                              '=', KeyPress::numberPadEquals };
 
             for (int i = 0; i < numElementsInArray (numPadConversions); i += 2)
                 if (keyCode == numPadConversions [i])
