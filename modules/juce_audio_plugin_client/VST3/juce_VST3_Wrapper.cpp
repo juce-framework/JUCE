@@ -204,11 +204,11 @@ public:
                 toString128 (result, owner.getParameterText (paramIndex, 128));
         }
 
-        bool fromString (const Vst::TChar* text, Vst::ParamValue& valueNormalized) const override
+        bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
         {
             if (AudioProcessorParameter* p = owner.getParameters()[paramIndex])
             {
-                valueNormalized = p->getValueForText (getStringFromVstTChars (text));
+                outValueNormalized = p->getValueForText (getStringFromVstTChars (text));
                 return true;
             }
 
@@ -460,12 +460,12 @@ private:
 
         tresult PLUGIN_API canResize() override         { return kResultTrue; }
 
-        tresult PLUGIN_API checkSizeConstraint (ViewRect* rect) override
+        tresult PLUGIN_API checkSizeConstraint (ViewRect* rectToCheck) override
         {
-            if (rect != nullptr && component != nullptr)
+            if (rectToCheck != nullptr && component != nullptr)
             {
-                rect->right  = rect->left + component->getWidth();
-                rect->bottom = rect->top  + component->getHeight();
+                rectToCheck->right  = rectToCheck->left + component->getWidth();
+                rectToCheck->bottom = rectToCheck->top  + component->getHeight();
                 return kResultTrue;
             }
 

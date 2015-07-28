@@ -256,6 +256,77 @@ private:
     template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) noexcept            { jassertfalse; return --*a; }
     #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
+
+  template <typename Type, std::size_t sizeOfType>
+  struct WindowsInterlockedHelpersBase
+  {};
+
+  template <typename Type>
+  struct WindowsInterlockedHelpersBase<Type, 4>
+  {
+      static inline Type exchange(volatile Type* value, Type other) noexcept
+      {
+          return castFrom (juce_InterlockedExchange (reinterpret_cast<volatile long*> (value), castTo (other)));
+      }
+
+      static inline Type add(volatile Type* value, Type other) noexcept
+      {
+          return castFrom (juce_InterlockedExchangeAdd (reinterpret_cast<volatile long*> (value), castTo (other)) + castTo (other));
+      }
+
+      static inline Type inc(volatile Type* value) noexcept
+      {
+          return castFrom (juce_InterlockedIncrement (reinterpret_cast<volatile long*> (value)));
+      }
+
+      static inline Type dec(volatile Type* value) noexcept
+      {
+          return castFrom (juce_InterlockedDecrement (reinterpret_cast<volatile long*> (value)));
+      }
+
+      static inline Type cmp(volatile Type* value, Type other, Type comparand) noexcept
+      {
+          return castFrom (juce_InterlockedCompareExchange (reinterpret_cast<volatile long*> (value), castTo (other), castTo (comparand)));
+      }
+
+      static inline Type castFrom (long value) { union { long in; Type out; } u; u.in = value; return u.out; }
+      static inline long castTo   (Type value) { union { Type in; long out; } u; u.in = value; return u.out; }
+  };
+
+  template <typename Type>
+  struct WindowsInterlockedHelpersBase<Type, 8>
+  {
+      static inline Type exchange(volatile Type* value, Type other) noexcept
+      {
+          return castFrom (juce_InterlockedExchange64 (reinterpret_cast<volatile __int64*> (value), castTo (other)));
+      }
+
+      static inline Type add(volatile Type* value, Type other) noexcept
+      {
+          return castFrom (juce_InterlockedExchangeAdd64 (reinterpret_cast<volatile __int64*> (value), castTo (other)) + castTo (other));
+      }
+
+      static inline Type inc(volatile Type* value) noexcept
+      {
+          return castFrom (juce_InterlockedIncrement64 (reinterpret_cast<volatile __int64*> (value)));
+      }
+
+      static inline Type dec(volatile Type* value) noexcept
+      {
+          return castFrom (juce_InterlockedDecrement64 (reinterpret_cast<volatile __int64*> (value)));
+      }
+
+      static inline Type cmp(volatile Type* value, Type other, Type comparand) noexcept
+      {
+          return castFrom (juce_InterlockedCompareExchange64 (reinterpret_cast<volatile __int64*> (value), castTo (other), castTo (comparand)));
+      }
+
+      static inline Type castFrom (__int64 value) { union { __int64 in; Type out; } u; u.in = value; return u.out; }
+      static inline __int64 castTo   (Type value) { union { Type in; __int64 out; } u; u.in = value; return u.out; }
+  };
+
+  template <typename Type>
+  struct WindowsInterlockedHelpers : WindowsInterlockedHelpersBase<Type, sizeof (Type)> {};
 #endif
 
 
@@ -272,8 +343,7 @@ inline Type Atomic<Type>::get() const noexcept
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value))
                               : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value));
   #elif JUCE_ATOMICS_WINDOWS
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchangeAdd ((volatile long*) &value, (long) 0))
-                              : castFrom64Bit ((int64) juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) 0));
+    return WindowsInterlockedHelpers<Type>::add (const_cast<volatile Type*> (&value), (Type) 0);
   #elif JUCE_ATOMICS_GCC
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
                               : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
@@ -288,8 +358,7 @@ inline Type Atomic<Type>::exchange (const Type newValue) noexcept
     while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
     return currentVal;
   #elif JUCE_ATOMICS_WINDOWS
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedExchange ((volatile long*) &value, (long) castTo32Bit (newValue)))
-                              : castFrom64Bit ((int64) juce_InterlockedExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue)));
+    return WindowsInterlockedHelpers<Type>::exchange (&value, newValue);
   #endif
 }
 
@@ -300,8 +369,7 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) noexcept
     return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
                               : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
-    return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
-                              : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
+    return WindowsInterlockedHelpers<Type>::add (&value, amountToAdd);
   #elif JUCE_ATOMICS_GCC
     return (Type) __sync_add_and_fetch (&value, amountToAdd);
   #endif
@@ -320,8 +388,7 @@ inline Type Atomic<Type>::operator++() noexcept
     return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
                               : (Type) OSAtomicIncrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
-    return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
-                              : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
+    return WindowsInterlockedHelpers<Type>::inc (&value);
   #elif JUCE_ATOMICS_GCC
     return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (&value, (Type) 1)
                               : (Type) __sync_add_and_fetch ((int64_t*) &value, 1);
@@ -335,8 +402,7 @@ inline Type Atomic<Type>::operator--() noexcept
     return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((JUCE_MAC_ATOMICS_VOLATILE int32_t*) &value)
                               : (Type) OSAtomicDecrement64Barrier ((JUCE_MAC_ATOMICS_VOLATILE int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
-    return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
-                              : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
+    return WindowsInterlockedHelpers<Type>::dec (&value);
   #elif JUCE_ATOMICS_GCC
     return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (&value, (Type) -1)
                               : (Type) __sync_add_and_fetch ((int64_t*) &value, -1);
@@ -372,8 +438,7 @@ inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type va
     }
 
   #elif JUCE_ATOMICS_WINDOWS
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) juce_InterlockedCompareExchange ((volatile long*) &value, (long) castTo32Bit (newValue), (long) castTo32Bit (valueToCompare)))
-                              : castFrom64Bit ((int64) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) castTo64Bit (newValue), (__int64) castTo64Bit (valueToCompare)));
+    return WindowsInterlockedHelpers<Type>::cmp (&value, newValue, valueToCompare);
   #elif JUCE_ATOMICS_GCC
     return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
                               : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));

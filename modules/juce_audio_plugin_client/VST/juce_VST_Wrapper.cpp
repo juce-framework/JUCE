@@ -1374,8 +1374,8 @@ public:
 
         void resized() override
         {
-            if (Component* const editor = getChildComponent(0))
-                editor->setBounds (getLocalBounds());
+            if (Component* const editorChildComp = getChildComponent(0))
+                editorChildComp->setBounds (getLocalBounds());
 
            #if JUCE_MAC && ! JUCE_64BIT
             if (! wrapper.useNSView)

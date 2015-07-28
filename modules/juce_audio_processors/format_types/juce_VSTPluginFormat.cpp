@@ -895,13 +895,13 @@ public:
         if (effect == nullptr)
             return 0.0;
 
-        const double sampleRate = getSampleRate();
+        const double currentSampleRate = getSampleRate();
 
-        if (sampleRate <= 0)
+        if (currentSampleRate <= 0)
             return 0.0;
 
         VstIntPtr samples = dispatch (effGetTailSize, 0, 0, 0, 0);
-        return samples / sampleRate;
+        return samples / currentSampleRate;
     }
 
     bool acceptsMidi() const override    { return wantsMidiMessages; }
@@ -986,10 +986,10 @@ public:
 
         if (initialised)
         {
-            if (AudioPlayHead* const playHead = getPlayHead())
+            if (AudioPlayHead* const currentPlayHead = getPlayHead())
             {
                 AudioPlayHead::CurrentPositionInfo position;
-                if (playHead->getCurrentPosition (position))
+                if (currentPlayHead->getCurrentPosition (position))
                 {
 
                     vstHostTime.samplePos          = (double) position.timeInSamples;
@@ -2089,13 +2089,13 @@ public:
             }
            #endif
 
-            static bool reentrant = false;
+            static bool reentrantGuard = false;
 
-            if (! reentrant)
+            if (! reentrantGuard)
             {
-                reentrant = true;
+                reentrantGuard = true;
                 plugin.dispatch (effEditIdle, 0, 0, 0, 0);
-                reentrant = false;
+                reentrantGuard = false;
             }
 
            #if JUCE_LINUX
