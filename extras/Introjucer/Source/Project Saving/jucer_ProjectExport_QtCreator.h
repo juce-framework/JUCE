@@ -97,7 +97,11 @@ protected:
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archNames, numElementsInArray (archNames)),
                                                     Array<var> (archFlags, numElementsInArray (archFlags)))); */
+            addGCCOptimisationProperty (props);
         }
+
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
+
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
