@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="LrATE6" name="AnimationAppExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.AnimationAppExample" includeBinaryInAppConfig="1"
-              jucerVersion="3.1.0">
+              jucerVersion="3.2.0">
   <MAINGROUP id="F3keCY" name="AnimationAppExample">
     <GROUP id="{5E4132EA-C4A0-CBDE-BEDA-FD6772DA79D5}" name="Source">
       <FILE id="n1FmZc" name="MainComponent.cpp" compile="1" resource="0"

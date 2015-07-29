@@ -70,7 +70,7 @@ public:
 
     void releaseResources() override
     {
-        // This gets automatically called when audio device paramters change
+        // This gets automatically called when audio device parameters change
         // or device is restarted.
     }
 
@@ -115,7 +115,7 @@ public:
         frequency = (getHeight() - e.y) * 10.0f;
         amplitude = jmin (0.9f, 0.2f * e.position.x / getWidth());
 
-        phaseDelta = 2.0f * float_Pi * frequency / sampleRate;
+        phaseDelta = (float) (2.0 * double_Pi * frequency / sampleRate);
 
         repaint();
     }

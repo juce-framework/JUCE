@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,35 +22,36 @@
   ==============================================================================
 */
 
-ResizableWindow::ResizableWindow (const String& name,
-                                  const bool addToDesktop_)
-    : TopLevelWindow (name, addToDesktop_),
+ResizableWindow::ResizableWindow (const String& name, bool shouldAddToDesktop)
+    : TopLevelWindow (name, shouldAddToDesktop),
       ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
+      canDrag (true),
+      dragStarted (false),
       constrainer (nullptr)
      #if JUCE_DEBUG
       , hasBeenResized (false)
      #endif
 {
-    initialise (addToDesktop_);
+    initialise (shouldAddToDesktop);
 }
 
-ResizableWindow::ResizableWindow (const String& name,
-                                  Colour backgroundColour_,
-                                  const bool addToDesktop_)
-    : TopLevelWindow (name, addToDesktop_),
+ResizableWindow::ResizableWindow (const String& name, Colour bkgnd, bool shouldAddToDesktop)
+    : TopLevelWindow (name, shouldAddToDesktop),
       ownsContentComponent (false),
       resizeToFitContent (false),
       fullscreen (false),
+      canDrag (true),
+      dragStarted (false),
       constrainer (nullptr)
      #if JUCE_DEBUG
       , hasBeenResized (false)
      #endif
 {
-    setBackgroundColour (backgroundColour_);
+    setBackgroundColour (bkgnd);
 
-    initialise (addToDesktop_);
+    initialise (shouldAddToDesktop);
 }
 
 ResizableWindow::~ResizableWindow()
@@ -316,6 +317,11 @@ void ResizableWindow::setResizeLimits (const int newMinimumWidth,
     setBoundsConstrained (getBounds());
 }
 
+void ResizableWindow::setDraggable (bool shouldBeDraggable) noexcept
+{
+    canDrag = shouldBeDraggable;
+}
+
 void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer)
 {
     if (constrainer != newConstrainer)
@@ -573,14 +579,22 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 //==============================================================================
 void ResizableWindow::mouseDown (const MouseEvent& e)
 {
-    if (! isFullScreen())
+    if (canDrag && ! isFullScreen())
+    {
+        dragStarted = true;
         dragger.startDraggingComponent (this, e);
+    }
 }
 
 void ResizableWindow::mouseDrag (const MouseEvent& e)
 {
-    if (! isFullScreen())
+    if (dragStarted)
         dragger.dragComponent (this, e, constrainer);
+}
+
+void ResizableWindow::mouseUp (const MouseEvent&)
+{
+    dragStarted = false;
 }
 
 //==============================================================================

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -75,20 +75,20 @@ PositionedGlyph& PositionedGlyph::operator= (const PositionedGlyph& other)
     return *this;
 }
 
-static inline void drawGlyphWithFont (const Graphics& g, int glyph, const Font& font, const AffineTransform& t)
+static inline void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, const AffineTransform& t)
 {
     LowLevelGraphicsContext& context = g.getInternalContext();
     context.setFont (font);
     context.drawGlyph (glyph, t);
 }
 
-void PositionedGlyph::draw (const Graphics& g) const
+void PositionedGlyph::draw (Graphics& g) const
 {
     if (! isWhitespace())
         drawGlyphWithFont (g, glyph, font, AffineTransform::translation (x, y));
 }
 
-void PositionedGlyph::draw (const Graphics& g, const AffineTransform& transform) const
+void PositionedGlyph::draw (Graphics& g, const AffineTransform& transform) const
 {
     if (! isWhitespace())
         drawGlyphWithFont (g, glyph, font, AffineTransform::translation (x, y).followedBy (transform));
@@ -223,16 +223,14 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
 
                 break;
             }
-            else
-            {
-                const float thisX = xOffsets.getUnchecked (i);
-                const bool isWhitespace = t.isWhitespace();
 
-                glyphs.add (PositionedGlyph (font, t.getAndAdvance(),
-                                             newGlyphs.getUnchecked(i),
-                                             xOffset + thisX, yOffset,
-                                             nextX - thisX, isWhitespace));
-            }
+            const float thisX = xOffsets.getUnchecked (i);
+            const bool isWhitespace = t.isWhitespace();
+
+            glyphs.add (PositionedGlyph (font, t.getAndAdvance(),
+                                         newGlyphs.getUnchecked(i),
+                                         xOffset + thisX, yOffset,
+                                         nextX - thisX, isWhitespace));
         }
     }
 }
@@ -316,7 +314,8 @@ void GlyphArrangement::addJustifiedText (const Font& font,
 
                 break;
             }
-            else if (pg.isWhitespace())
+
+            if (pg.isWhitespace())
             {
                 lastWordBreakIndex = i + 1;
             }
@@ -367,8 +366,11 @@ void GlyphArrangement::addFittedText (const Font& f,
                                       const float width, const float height,
                                       Justification layout,
                                       int maximumLines,
-                                      const float minimumHorizontalScale)
+                                      float minimumHorizontalScale)
 {
+    if (minimumHorizontalScale == 0.0f)
+        minimumHorizontalScale = Font::getDefaultMinimumHorizontalScaleFactor();
+
     // doesn't make much sense if this is outside a sensible range of 0.5 to 1.0
     jassert (minimumHorizontalScale > 0 && minimumHorizontalScale <= 1.0f);
 
@@ -758,19 +760,15 @@ void GlyphArrangement::drawGlyphUnderline (const Graphics& g, const PositionedGl
 
 void GlyphArrangement::draw (const Graphics& g) const
 {
-    for (int i = 0; i < glyphs.size(); ++i)
-    {
-        const PositionedGlyph& pg = glyphs.getReference(i);
-
-        if (pg.font.isUnderlined())
-            drawGlyphUnderline (g, pg, i, AffineTransform::identity);
-
-        pg.draw (g);
-    }
+    draw (g, AffineTransform());
 }
 
 void GlyphArrangement::draw (const Graphics& g, const AffineTransform& transform) const
 {
+    LowLevelGraphicsContext& context = g.getInternalContext();
+    Font lastFont (context.getFont());
+    bool needToRestore = false;
+
     for (int i = 0; i < glyphs.size(); ++i)
     {
         const PositionedGlyph& pg = glyphs.getReference(i);
@@ -778,8 +776,27 @@ void GlyphArrangement::draw (const Graphics& g, const AffineTransform& transform
         if (pg.font.isUnderlined())
             drawGlyphUnderline (g, pg, i, transform);
 
-        pg.draw (g, transform);
+        if (! pg.isWhitespace())
+        {
+            if (lastFont != pg.font)
+            {
+                lastFont = pg.font;
+
+                if (! needToRestore)
+                {
+                    needToRestore = true;
+                    context.saveState();
+                }
+
+                context.setFont (lastFont);
+            }
+
+            context.drawGlyph (pg.glyph, AffineTransform::translation (pg.x, pg.y).followedBy (transform));
+        }
     }
+
+    if (needToRestore)
+        context.restoreState();
 }
 
 void GlyphArrangement::createPath (Path& path) const

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -46,7 +46,7 @@ inline uint32 clampPixelComponents (uint32 x) noexcept
 
 //==============================================================================
 /**
-    Represents a 32-bit ARGB pixel with premultiplied alpha, and can perform compositing
+    Represents a 32-bit INTERNAL pixel with premultiplied alpha, and can perform compositing
     operations with it.
 
     This is used internally by the imaging classes.
@@ -60,13 +60,6 @@ public:
     PixelARGB() noexcept {}
     ~PixelARGB() noexcept {}
 
-    /** Creates a pixel from a 32-bit argb value.
-    */
-    PixelARGB (const uint32 argbValue) noexcept
-        : argb (argbValue)
-    {
-    }
-
     PixelARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
     {
         components.b = b;
@@ -75,30 +68,81 @@ public:
         components.a = a;
     }
 
-    forcedinline uint32 getARGB() const noexcept                { return argb; }
-    forcedinline uint32 getUnpremultipliedARGB() const noexcept { PixelARGB p (argb); p.unpremultiply(); return p.getARGB(); }
+    //==============================================================================
+    /** Returns a uint32 which represents the pixel in a platform dependent format. */
+    forcedinline uint32 getNativeARGB() const noexcept { return internal; }
 
-    forcedinline uint32 getRB() const noexcept      { return 0x00ff00ff & argb; }
-    forcedinline uint32 getAG() const noexcept      { return 0x00ff00ff & (argb >> 8); }
+    /** Returns a uint32 which will be in argb order as if constructed with the following mask operation
+        ((alpha << 24) | (red << 16) | (green << 8) | blue). */
+    forcedinline uint32 getInARGBMaskOrder() const noexcept
+    {
+       #if JUCE_ANDROID
+        return (uint32) ((components.a << 24) | (components.r << 16) | (components.g << 8) | (components.b << 0));
+       #else
+        return getNativeARGB();
+       #endif
+    }
 
-    forcedinline uint8 getAlpha() const noexcept    { return components.a; }
-    forcedinline uint8 getRed() const noexcept      { return components.r; }
-    forcedinline uint8 getGreen() const noexcept    { return components.g; }
-    forcedinline uint8 getBlue() const noexcept     { return components.b; }
+    /** Returns a uint32 which when written to memory, will be in the order a, r, g, b. In other words,
+        if the return-value is read as a uint8 array then the elements will be in the order of a, r, g, b*/
+    inline uint32 getInARGBMemoryOrder() const noexcept
+    {
+       #if JUCE_BIG_ENDIAN
+        return getInARGBMaskOrder();
+       #else
+        return (uint32) ((components.b << 24) | (components.g << 16) | (components.r << 8) | components.a);
+       #endif
+    }
+
+    /** Return channels with an even index and insert zero bytes between them. This is useful for blending
+        operations. The exact channels which are returned is platform dependent. */
+    forcedinline uint32 getEvenBytes() const noexcept { return 0x00ff00ff & internal; }
+
+    /** Return channels with an odd index and insert zero bytes between them. This is useful for blending
+        operations. The exact channels which are returned is platform dependent. */
+    forcedinline uint32 getOddBytes() const noexcept  { return 0x00ff00ff & (internal >> 8); }
+
+    //==============================================================================
+    forcedinline uint8 getAlpha() const noexcept      { return components.a; }
+    forcedinline uint8 getRed() const noexcept        { return components.r; }
+    forcedinline uint8 getGreen() const noexcept      { return components.g; }
+    forcedinline uint8 getBlue() const noexcept       { return components.b; }
 
    #if JUCE_GCC && ! JUCE_CLANG
     // NB these are here as a workaround because GCC refuses to bind to packed values.
-    forcedinline uint8& getAlpha() noexcept         { return comps [indexA]; }
-    forcedinline uint8& getRed() noexcept           { return comps [indexR]; }
-    forcedinline uint8& getGreen() noexcept         { return comps [indexG]; }
-    forcedinline uint8& getBlue() noexcept          { return comps [indexB]; }
+    forcedinline uint8& getAlpha() noexcept           { return comps [indexA]; }
+    forcedinline uint8& getRed() noexcept             { return comps [indexR]; }
+    forcedinline uint8& getGreen() noexcept           { return comps [indexG]; }
+    forcedinline uint8& getBlue() noexcept            { return comps [indexB]; }
    #else
-    forcedinline uint8& getAlpha() noexcept         { return components.a; }
-    forcedinline uint8& getRed() noexcept           { return components.r; }
-    forcedinline uint8& getGreen() noexcept         { return components.g; }
-    forcedinline uint8& getBlue() noexcept          { return components.b; }
+    forcedinline uint8& getAlpha() noexcept           { return components.a; }
+    forcedinline uint8& getRed() noexcept             { return components.r; }
+    forcedinline uint8& getGreen() noexcept           { return components.g; }
+    forcedinline uint8& getBlue() noexcept            { return components.b; }
    #endif
 
+    //==============================================================================
+    /** Copies another pixel colour over this one.
+
+        This doesn't blend it - this colour is simply replaced by the other one.
+    */
+    template <class Pixel>
+    forcedinline void set (const Pixel& src) noexcept
+    {
+        internal = src.getNativeARGB();
+    }
+
+    //==============================================================================
+    /** Sets the pixel's colour from individual components. */
+    void setARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
+    {
+        components.b = b;
+        components.g = g;
+        components.r = r;
+        components.a = a;
+    }
+
+    //==============================================================================
     /** Blends another pixel onto this one.
 
         This takes into account the opacity of the pixel being overlaid, and blends
@@ -107,10 +151,15 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        const uint32 alpha = 0x100 - src.getAlpha();
-        uint32 rb = src.getRB() + maskPixelComponents (getRB() * alpha);
-        uint32 ag = src.getAG() + maskPixelComponents (getAG() * alpha);
-        argb = clampPixelComponents (rb) + (clampPixelComponents (ag) << 8);
+        uint32 rb = src.getEvenBytes();
+        uint32 ag = src.getOddBytes();
+
+        const uint32 alpha = 0x100 - (ag >> 16);
+
+        rb += maskPixelComponents (getEvenBytes() * alpha);
+        ag += maskPixelComponents (getOddBytes() * alpha);
+
+        internal = clampPixelComponents (rb) | (clampPixelComponents (ag) << 8);
     }
 
     /** Blends another pixel onto this one.
@@ -129,14 +178,15 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src, uint32 extraAlpha) noexcept
     {
-        uint32 ag = maskPixelComponents (extraAlpha * src.getAG());
+        uint32 rb = maskPixelComponents (extraAlpha * src.getEvenBytes());
+        uint32 ag = maskPixelComponents (extraAlpha * src.getOddBytes());
+
         const uint32 alpha = 0x100 - (ag >> 16);
-        ag += maskPixelComponents (getAG() * alpha);
 
-        uint32 rb = maskPixelComponents (extraAlpha * src.getRB())
-                     + maskPixelComponents (getRB() * alpha);
+        rb += maskPixelComponents (getEvenBytes() * alpha);
+        ag += maskPixelComponents (getOddBytes() * alpha);
 
-        argb = clampPixelComponents(rb) + (clampPixelComponents (ag) << 8);
+        internal = clampPixelComponents (rb) | (clampPixelComponents (ag) << 8);
     }
 
     /** Blends another pixel with this one, creating a colour that is somewhere
@@ -145,29 +195,20 @@ public:
     template <class Pixel>
     forcedinline void tween (const Pixel& src, const uint32 amount) noexcept
     {
-        uint32 drb = getRB();
-        drb += (((src.getRB() - drb) * amount) >> 8);
-        drb &= 0x00ff00ff;
+        uint32 dEvenBytes = getEvenBytes();
+        dEvenBytes += (((src.getEvenBytes() - dEvenBytes) * amount) >> 8);
+        dEvenBytes &= 0x00ff00ff;
 
-        uint32 dag = getAG();
-        dag += (((src.getAG() - dag) * amount) >> 8);
-        dag &= 0x00ff00ff;
-        dag <<= 8;
+        uint32 dOddBytes = getOddBytes();
+        dOddBytes += (((src.getOddBytes() - dOddBytes) * amount) >> 8);
+        dOddBytes &= 0x00ff00ff;
+        dOddBytes <<= 8;
 
-        dag |= drb;
-        argb = dag;
+        dOddBytes |= dEvenBytes;
+        internal = dOddBytes;
     }
 
-    /** Copies another pixel colour over this one.
-
-        This doesn't blend it - this colour is simply replaced by the other one.
-    */
-    template <class Pixel>
-    forcedinline void set (const Pixel& src) noexcept
-    {
-        argb = src.getARGB();
-    }
-
+    //==============================================================================
     /** Replaces the colour's alpha value with another one. */
     forcedinline void setAlpha (const uint8 newAlpha) noexcept
     {
@@ -177,10 +218,12 @@ public:
     /** Multiplies the colour's alpha value with another one. */
     forcedinline void multiplyAlpha (int multiplier) noexcept
     {
+        // increment alpha by 1, so that if multiplier == 255 (full alpha),
+        // this function will not change the values.
         ++multiplier;
 
-        argb = ((((uint32) multiplier) * getAG()) & 0xff00ff00)
-                | (((((uint32) multiplier) * getRB()) >> 8) & 0x00ff00ff);
+        internal = ((((uint32) multiplier) * getOddBytes()) & 0xff00ff00)
+                | (((((uint32) multiplier) * getEvenBytes()) >> 8) & 0x00ff00ff);
     }
 
     forcedinline void multiplyAlpha (const float multiplier) noexcept
@@ -188,14 +231,8 @@ public:
         multiplyAlpha ((int) (multiplier * 255.0f));
     }
 
-    /** Sets the pixel's colour from individual components. */
-    void setARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
-    {
-        components.b = b;
-        components.g = g;
-        components.r = r;
-        components.a = a;
-    }
+
+    inline PixelARGB getUnpremultiplied() const noexcept { PixelARGB p (internal); p.unpremultiply(); return p; }
 
     /** Premultiplies the pixel's RGB values by its alpha. */
     forcedinline void premultiply() noexcept
@@ -234,9 +271,9 @@ public:
             }
             else
             {
-                components.b = (uint8) jmin ((uint32) 0xff, (components.b * 0xff) / alpha);
-                components.g = (uint8) jmin ((uint32) 0xff, (components.g * 0xff) / alpha);
-                components.r = (uint8) jmin ((uint32) 0xff, (components.r * 0xff) / alpha);
+                components.b = (uint8) jmin ((uint32) 0xffu, (components.b * 0xffu) / alpha);
+                components.g = (uint8) jmin ((uint32) 0xffu, (components.g * 0xffu) / alpha);
+                components.r = (uint8) jmin ((uint32) 0xffu, (components.r * 0xffu) / alpha);
             }
         }
     }
@@ -257,41 +294,53 @@ public:
         }
     }
 
-    /** Returns a uint32 which when written to memory, will be in the order r, g, b, a. */
-    inline uint32 getInRGBAMemoryOrder() const noexcept
-    {
-       #if JUCE_BIG_ENDIAN
-        return (((uint32) components.r) << 24) | (((uint32) components.g) << 16) | (((uint32) components.b) << 8) | components.a;
-       #else
-        return (((uint32) components.a) << 24) | (((uint32) components.b) << 16) | (((uint32) components.g) << 8) | components.r;
-       #endif
-    }
-
     //==============================================================================
     /** The indexes of the different components in the byte layout of this type of colour. */
+  #if JUCE_ANDROID
+   #if JUCE_BIG_ENDIAN
+    enum { indexA = 0, indexR = 3, indexG = 2, indexB = 1 };
+   #else
+    enum { indexA = 3, indexR = 0, indexG = 1, indexB = 2 };
+   #endif
+  #else
    #if JUCE_BIG_ENDIAN
     enum { indexA = 0, indexR = 1, indexG = 2, indexB = 3 };
    #else
     enum { indexA = 3, indexR = 2, indexG = 1, indexB = 0 };
    #endif
+  #endif
 
 private:
     //==============================================================================
+    PixelARGB (const uint32 internalValue) noexcept
+        : internal (internalValue)
+    {
+    }
+
+    //==============================================================================
     struct Components
     {
+      #if JUCE_ANDROID
+       #if JUCE_BIG_ENDIAN
+        uint8 a, b, g, r;
+       #else
+        uint8 r, g, b, a;
+       #endif
+      #else
        #if JUCE_BIG_ENDIAN
         uint8 a, r, g, b;
        #else
         uint8 b, g, r, a;
        #endif
+      #endif
     } JUCE_PACKED;
 
     union
     {
-        uint32 argb;
+        uint32 internal;
         Components components;
        #if JUCE_GCC
-        uint8 comps[4];
+        uint8 comps[4];  // helper struct needed because gcc does not allow references to packed union members
        #endif
     };
 }
@@ -316,23 +365,64 @@ public:
     PixelRGB() noexcept {}
     ~PixelRGB() noexcept {}
 
-    /** Creates a pixel from a 32-bit argb value.
+    //==============================================================================
+    /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible
+        with the native format of a PixelARGB.
 
-        (The argb format is that used by PixelARGB)
-    */
-    PixelRGB (const uint32 argb) noexcept
+        @see PixelARGB::getNativeARGB */
+    forcedinline uint32 getNativeARGB() const noexcept
     {
-        r = (uint8) (argb >> 16);
-        g = (uint8) (argb >> 8);
-        b = (uint8) (argb);
+       #if JUCE_ANDROID
+        return (uint32) ((0xff << 24) | r | (g << 8) | (b << 16));
+       #else
+        return (uint32) ((0xff << 24) | b | (g << 8) | (r << 16));
+       #endif
     }
 
-    forcedinline uint32 getARGB() const noexcept                { return 0xff000000 | b | (((uint32) g) << 8) | (((uint32) r) << 16); }
-    forcedinline uint32 getUnpremultipliedARGB() const noexcept { return getARGB(); }
+    /** Returns a uint32 which will be in argb order as if constructed with the following mask operation
+        ((alpha << 24) | (red << 16) | (green << 8) | blue). */
+    forcedinline uint32 getInARGBMaskOrder() const noexcept
+    {
+       #if JUCE_ANDROID
+        return (uint32) ((0xff << 24) | (r << 16) | (g << 8) | (b << 0));
+       #else
+        return getNativeARGB();
+       #endif
+    }
 
-    forcedinline uint32 getRB() const noexcept      { return b | (uint32) (r << 16); }
-    forcedinline uint32 getAG() const noexcept      { return (uint32) (0xff0000 | g); }
+    /** Returns a uint32 which when written to memory, will be in the order a, r, g, b. In other words,
+        if the return-value is read as a uint8 array then the elements will be in the order of a, r, g, b*/
+    inline uint32 getInARGBMemoryOrder() const noexcept
+    {
+       #if JUCE_BIG_ENDIAN
+        return getInARGBMaskOrder();
+       #else
+        return (uint32) ((b << 24) | (g << 16) | (r << 8) | 0xff);
+       #endif
+    }
 
+    /** Return channels with an even index and insert zero bytes between them. This is useful for blending
+        operations. The exact channels which are returned is platform dependent but compatible with the
+        return value of getEvenBytes of the PixelARGB class.
+
+        @see PixelARGB::getEvenBytes */
+    forcedinline uint32 getEvenBytes() const noexcept
+    {
+       #if JUCE_ANDROID
+        return (uint32) (r | (b << 16));
+       #else
+        return (uint32) (b | (r << 16));
+       #endif
+    }
+
+    /** Return channels with an odd index and insert zero bytes between them. This is useful for blending
+        operations. The exact channels which are returned is platform dependent but compatible with the
+        return value of getOddBytes of the PixelARGB class.
+
+        @see PixelARGB::getOddBytes */
+    forcedinline uint32 getOddBytes() const noexcept       { return (uint32)0xff0000 | g; }
+
+    //==============================================================================
     forcedinline uint8 getAlpha() const noexcept    { return 0xff; }
     forcedinline uint8 getRed() const noexcept      { return r; }
     forcedinline uint8 getGreen() const noexcept    { return g; }
@@ -342,6 +432,30 @@ public:
     forcedinline uint8& getGreen() noexcept         { return g; }
     forcedinline uint8& getBlue() noexcept          { return b; }
 
+    //==============================================================================
+    /** Copies another pixel colour over this one.
+
+        This doesn't blend it - this colour is simply replaced by the other one.
+        Because PixelRGB has no alpha channel, any alpha value in the source pixel
+        is thrown away.
+    */
+    template <class Pixel>
+    forcedinline void set (const Pixel& src) noexcept
+    {
+        b = src.getBlue();
+        g = src.getGreen();
+        r = src.getRed();
+    }
+
+    /** Sets the pixel's colour from individual components. */
+    void setARGB (const uint8, const uint8 red, const uint8 green, const uint8 blue) noexcept
+    {
+        r = red;
+        g = green;
+        b = blue;
+    }
+
+    //==============================================================================
     /** Blends another pixel onto this one.
 
         This takes into account the opacity of the pixel being overlaid, and blends
@@ -350,14 +464,22 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        const uint32 alpha = 0x100 - src.getAlpha();
+        const uint32 alpha = (uint32) (0x100 - src.getAlpha());
 
-        uint32 rb = clampPixelComponents (src.getRB() + maskPixelComponents (getRB() * alpha));
-        uint32 ag = src.getAG() + (g * alpha >> 8);
+        // getEvenBytes returns 0x00rr00bb on non-android
+        uint32 rb = clampPixelComponents (src.getEvenBytes() + maskPixelComponents (getEvenBytes() * alpha));
+        // getOddBytes returns 0x00aa00gg on non-android
+        uint32 ag = clampPixelComponents (src.getOddBytes() + ((g * alpha) >> 8));
 
+        g = (uint8) (ag & 0xff);
+
+       #if JUCE_ANDROID
+        b = (uint8) (rb >> 16);
+        r = (uint8) (rb & 0xff);
+       #else
         r = (uint8) (rb >> 16);
-        g = (uint8) clampPixelComponents (ag);
-        b = (uint8) rb;
+        b = (uint8) (rb & 0xff);
+       #endif
     }
 
     forcedinline void blend (const PixelRGB src) noexcept
@@ -373,16 +495,23 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src, uint32 extraAlpha) noexcept
     {
-        uint32 ag = maskPixelComponents (extraAlpha * src.getAG());
+        uint32 ag = maskPixelComponents (extraAlpha * src.getOddBytes());
+        uint32 rb = maskPixelComponents (extraAlpha * src.getEvenBytes());
+
         const uint32 alpha = 0x100 - (ag >> 16);
-        ag += g * alpha >> 8;
 
-        uint32 rb = clampPixelComponents (maskPixelComponents (extraAlpha * src.getRB())
-                                           + maskPixelComponents (getRB() * alpha));
+        ag = clampPixelComponents (ag + (g * alpha >> 8));
+        rb = clampPixelComponents (rb + maskPixelComponents (getEvenBytes() * alpha));
 
-        b = (uint8) rb;
-        g = (uint8) clampPixelComponents (ag);
+        g = (uint8) (ag & 0xff);
+
+       #if JUCE_ANDROID
+        b = (uint8) (rb >> 16);
+        r = (uint8) (rb & 0xff);
+       #else
         r = (uint8) (rb >> 16);
+        b = (uint8) (rb & 0xff);
+       #endif
     }
 
     /** Blends another pixel with this one, creating a colour that is somewhere
@@ -391,31 +520,24 @@ public:
     template <class Pixel>
     forcedinline void tween (const Pixel& src, const uint32 amount) noexcept
     {
-        uint32 drb = getRB();
-        drb += (((src.getRB() - drb) * amount) >> 8);
+        uint32 dEvenBytes = getEvenBytes();
+        dEvenBytes += (((src.getEvenBytes() - dEvenBytes) * amount) >> 8);
 
-        uint32 dag = getAG();
-        dag += (((src.getAG() - dag) * amount) >> 8);
+        uint32 dOddBytes = getOddBytes();
+        dOddBytes += (((src.getOddBytes() - dOddBytes) * amount) >> 8);
 
-        b = (uint8) drb;
-        g = (uint8) dag;
-        r = (uint8) (drb >> 16);
+        g = (uint8) (dOddBytes & 0xff);  // dOddBytes =  0x00aa00gg
+
+       #if JUCE_ANDROID
+        r = (uint8) (dEvenBytes & 0xff); // dEvenBytes = 0x00bb00rr
+        b = (uint8) (dEvenBytes >> 16);
+       #else
+        b = (uint8) (dEvenBytes & 0xff); // dEvenBytes = 0x00rr00bb
+        r = (uint8) (dEvenBytes >> 16);
+       #endif
     }
 
-    /** Copies another pixel colour over this one.
-
-        This doesn't blend it - this colour is simply replaced by the other one.
-        Because PixelRGB has no alpha channel, any alpha value in the source pixel
-        is thrown away.
-    */
-    template <class Pixel>
-    forcedinline void set (const Pixel& src) noexcept
-    {
-        b = src.getBlue();
-        g = src.getGreen();
-        r = src.getRed();
-    }
-
+    //==============================================================================
     /** This method is included for compatibility with the PixelARGB class. */
     forcedinline void setAlpha (const uint8) noexcept {}
 
@@ -424,14 +546,6 @@ public:
 
     /** Multiplies the colour's alpha value with another one. */
     forcedinline void multiplyAlpha (float) noexcept {}
-
-    /** Sets the pixel's colour from individual components. */
-    void setARGB (const uint8, const uint8 red, const uint8 green, const uint8 blue) noexcept
-    {
-        r = red;
-        g = green;
-        b = blue;
-    }
 
     /** Premultiplies the pixel's RGB values by its alpha. */
     forcedinline void premultiply() noexcept {}
@@ -453,6 +567,20 @@ public:
    #endif
 
 private:
+    //==============================================================================
+    PixelRGB (const uint32 internal) noexcept
+    {
+      #if JUCE_ANDROID
+        b = (uint8) (internal >> 16);
+        g = (uint8) (internal >> 8);
+        r = (uint8) (internal);
+      #else
+        r = (uint8) (internal >> 16);
+        g = (uint8) (internal >> 8);
+        b = (uint8) (internal);
+      #endif
+    }
+
     //==============================================================================
    #if JUCE_MAC
     uint8 r, g, b;
@@ -486,21 +614,36 @@ public:
     PixelAlpha() noexcept {}
     ~PixelAlpha() noexcept {}
 
-    /** Creates a pixel from a 32-bit argb value.
+    //==============================================================================
+    /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible
+        with the native format of a PixelARGB.
 
-        (The argb format is that used by PixelARGB)
-    */
-    PixelAlpha (const uint32 argb) noexcept
-    {
-        a = (uint8) (argb >> 24);
-    }
+        @see PixelARGB::getNativeARGB */
+    forcedinline uint32 getNativeARGB() const noexcept      { return (uint32) ((a << 24) | (a << 16) | (a << 8) | a); }
 
-    forcedinline uint32 getARGB() const noexcept                { return (((uint32) a) << 24) | (((uint32) a) << 16) | (((uint32) a) << 8) | a; }
-    forcedinline uint32 getUnpremultipliedARGB() const noexcept { return (((uint32) a) << 24) | 0xffffff; }
+    /** Returns a uint32 which will be in argb order as if constructed with the following mask operation
+        ((alpha << 24) | (red << 16) | (green << 8) | blue). */
+    forcedinline uint32 getInARGBMaskOrder() const noexcept { return getNativeARGB(); }
 
-    forcedinline uint32 getRB() const noexcept      { return (((uint32) a) << 16) | a; }
-    forcedinline uint32 getAG() const noexcept      { return (((uint32) a) << 16) | a; }
+    /** Returns a uint32 which when written to memory, will be in the order a, r, g, b. In other words,
+        if the return-value is read as a uint8 array then the elements will be in the order of a, r, g, b*/
+    inline uint32 getInARGBMemoryOrder() const noexcept     { return getNativeARGB(); }
 
+    /** Return channels with an even index and insert zero bytes between them. This is useful for blending
+        operations. The exact channels which are returned is platform dependent but compatible with the
+        return value of getEvenBytes of the PixelARGB class.
+
+        @see PixelARGB::getEvenBytes */
+    forcedinline uint32 getEvenBytes() const noexcept      { return (uint32) ((a << 16) | a); }
+
+    /** Return channels with an odd index and insert zero bytes between them. This is useful for blending
+        operations. The exact channels which are returned is platform dependent but compatible with the
+        return value of getOddBytes of the PixelARGB class.
+
+        @see PixelARGB::getOddBytes */
+    forcedinline uint32 getOddBytes() const noexcept       { return (uint32) ((a << 16) | a); }
+
+    //==============================================================================
     forcedinline uint8 getAlpha() const noexcept    { return a; }
     forcedinline uint8& getAlpha() noexcept         { return a; }
 
@@ -508,6 +651,24 @@ public:
     forcedinline uint8 getGreen() const noexcept    { return 0; }
     forcedinline uint8 getBlue() const noexcept     { return 0; }
 
+    //==============================================================================
+    /** Copies another pixel colour over this one.
+
+        This doesn't blend it - this colour is simply replaced by the other one.
+    */
+    template <class Pixel>
+    forcedinline void set (const Pixel& src) noexcept
+    {
+        a = src.getAlpha();
+    }
+
+    /** Sets the pixel's colour from individual components. */
+    forcedinline void setARGB (const uint8 a_, const uint8 /*r*/, const uint8 /*g*/, const uint8 /*b*/) noexcept
+    {
+        a = a_;
+    }
+
+    //==============================================================================
     /** Blends another pixel onto this one.
 
         This takes into account the opacity of the pixel being overlaid, and blends
@@ -542,16 +703,7 @@ public:
         a += ((src.getAlpha() - a) * amount) >> 8;
     }
 
-    /** Copies another pixel colour over this one.
-
-        This doesn't blend it - this colour is simply replaced by the other one.
-    */
-    template <class Pixel>
-    forcedinline void set (const Pixel& src) noexcept
-    {
-        a = src.getAlpha();
-    }
-
+    //==============================================================================
     /** Replaces the colour's alpha value with another one. */
     forcedinline void setAlpha (const uint8 newAlpha) noexcept
     {
@@ -570,12 +722,6 @@ public:
         a = (uint8) (a * multiplier);
     }
 
-    /** Sets the pixel's colour from individual components. */
-    forcedinline void setARGB (const uint8 a_, const uint8 /*r*/, const uint8 /*g*/, const uint8 /*b*/) noexcept
-    {
-        a = a_;
-    }
-
     /** Premultiplies the pixel's RGB values by its alpha. */
     forcedinline void premultiply() noexcept {}
 
@@ -589,6 +735,12 @@ public:
     enum { indexA = 0 };
 
 private:
+    //==============================================================================
+    PixelAlpha (const uint32 internal) noexcept
+    {
+        a = (uint8) (internal >> 24);
+    }
+
     //==============================================================================
     uint8 a;
 }

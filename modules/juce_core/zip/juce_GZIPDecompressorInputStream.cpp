@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -90,7 +90,7 @@ namespace zlibNamespace
 class GZIPDecompressorInputStream::GZIPDecompressHelper
 {
 public:
-    GZIPDecompressHelper (const bool dontWrap)
+    GZIPDecompressHelper (Format f)
         : finished (true),
           needsDictionary (false),
           error (true),
@@ -100,7 +100,7 @@ public:
     {
         using namespace zlibNamespace;
         zerostruct (stream);
-        streamIsValid = (inflateInit2 (&stream, dontWrap ? -MAX_WBITS : MAX_WBITS) == Z_OK);
+        streamIsValid = (inflateInit2 (&stream, getBitsForFormat (f)) == Z_OK);
         finished = error = ! streamIsValid;
     }
 
@@ -157,6 +157,19 @@ public:
         return 0;
     }
 
+    static int getBitsForFormat (Format f) noexcept
+    {
+        switch (f)
+        {
+            case zlibFormat:     return  MAX_WBITS;
+            case deflateFormat:  return -MAX_WBITS;
+            case gzipFormat:     return  MAX_WBITS | 16;
+            default:             jassertfalse; break;
+        }
+
+        return MAX_WBITS;
+    }
+
     bool finished, needsDictionary, error, streamIsValid;
 
     enum { gzipDecompBufferSize = 32768 };
@@ -170,32 +183,30 @@ private:
 };
 
 //==============================================================================
-GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const source,
-                                                          const bool deleteSourceWhenDestroyed,
-                                                          const bool noWrap_,
-                                                          const int64 uncompressedStreamLength_)
+GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* source, bool deleteSourceWhenDestroyed,
+                                                          Format f, int64 uncompressedLength)
   : sourceStream (source, deleteSourceWhenDestroyed),
-    uncompressedStreamLength (uncompressedStreamLength_),
-    noWrap (noWrap_),
+    uncompressedStreamLength (uncompressedLength),
+    format (f),
     isEof (false),
     activeBufferSize (0),
     originalSourcePos (source->getPosition()),
     currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
-    helper (new GZIPDecompressHelper (noWrap_))
+    helper (new GZIPDecompressHelper (f))
 {
 }
 
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream& source)
   : sourceStream (&source, false),
     uncompressedStreamLength (-1),
-    noWrap (false),
+    format (zlibFormat),
     isEof (false),
     activeBufferSize (0),
     originalSourcePos (source.getPosition()),
     currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
-    helper (new GZIPDecompressHelper (false))
+    helper (new GZIPDecompressHelper (zlibFormat))
 {
 }
 
@@ -278,7 +289,7 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
         isEof = false;
         activeBufferSize = 0;
         currentPos = 0;
-        helper = new GZIPDecompressHelper (noWrap);
+        helper = new GZIPDecompressHelper (format);
 
         sourceStream->setPosition (originalSourcePos);
     }

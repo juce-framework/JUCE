@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -193,47 +193,72 @@ namespace AiffFileHelpers
    #endif
 
     //==============================================================================
-    static String readCATEChunk (InputStream& input, const uint32 length)
+    namespace CATEChunk
     {
-        MemoryBlock mb;
-        input.skipNextBytes (4);
-        input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
-
-        static const char* appleGenres[] =
+        static bool isValidTag (const char* d) noexcept
         {
-            "Rock/Blues",
-            "Electronic/Dance",
-            "Jazz",
-            "Urban",
-            "World/Ethnic",
-            "Cinematic/New Age",
-            "Orchestral",
-            "Country/Folk",
-            "Experimental",
-            "Other Genre",
-            nullptr
-        };
-
-        const StringArray genres (appleGenres);
-        StringArray tagsArray;
-
-        int bytesLeft = (int) mb.getSize();
-        const char* data = static_cast<const char*> (mb.getData());
-
-        while (bytesLeft > 0)
-        {
-            const String tag (CharPointer_UTF8 (data),
-                              CharPointer_UTF8 (data + bytesLeft));
-
-            if (tag.isNotEmpty())
-                tagsArray.add (data);
-
-            const int numBytesInTag = genres.contains (tag) ? 118 : 50;
-            data += numBytesInTag;
-            bytesLeft -= numBytesInTag;
+            return CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (d[0])
+                && CharacterFunctions::isLetterOrDigit (d[1]) && CharacterFunctions::isLowerCase (d[1])
+                && CharacterFunctions::isLetterOrDigit (d[2]) && CharacterFunctions::isLowerCase (d[2]);
         }
 
-        return tagsArray.joinIntoString (";");
+        static bool isAppleGenre (const String& tag) noexcept
+        {
+            static const char* appleGenres[] =
+            {
+                "Rock/Blues",
+                "Electronic/Dance",
+                "Jazz",
+                "Urban",
+                "World/Ethnic",
+                "Cinematic/New Age",
+                "Orchestral",
+                "Country/Folk",
+                "Experimental",
+                "Other Genre"
+            };
+
+            for (int i = 0; i < numElementsInArray (appleGenres); ++i)
+                if (tag == appleGenres[i])
+                    return true;
+
+            return false;
+        }
+
+        static String read (InputStream& input, const uint32 length)
+        {
+            MemoryBlock mb;
+            input.skipNextBytes (4);
+            input.readIntoMemoryBlock (mb, (ssize_t) length - 4);
+
+            StringArray tagsArray;
+
+            const char* data = static_cast<const char*> (mb.getData());
+            const char* dataEnd = data + mb.getSize();
+
+            while (data < dataEnd)
+            {
+                bool isGenre = false;
+
+                if (isValidTag (data))
+                {
+                    const String tag = String (CharPointer_UTF8 (data), CharPointer_UTF8 (dataEnd));
+                    isGenre = isAppleGenre (tag);
+                    tagsArray.add (tag);
+                }
+
+                data += isGenre ? 118 : 50;
+
+                if (data[0] == 0)
+                {
+                    if      (data + 52  < dataEnd && isValidTag (data + 50))   data += 50;
+                    else if (data + 120 < dataEnd && isValidTag (data + 118))  data += 118;
+                    else if (data + 170 < dataEnd && isValidTag (data + 168))  data += 168;
+                }
+            }
+
+            return tagsArray.joinIntoString (";");
+        }
     }
 
     //==============================================================================
@@ -316,10 +341,10 @@ namespace AiffFileHelpers
                     out.writeByte ((char) labelLength + 1);
                     out.write (label.toUTF8(), labelLength);
                     out.writeByte (0);
-                }
 
-                if ((out.getDataSize() & 1) != 0)
-                    out.writeByte (0);
+                    if ((out.getDataSize() & 1) != 0)
+                        out.writeByte (0);
+                }
             }
         }
     }
@@ -518,7 +543,7 @@ public:
                     else if (type == chunkName ("cate"))
                     {
                         metadataValues.set (AiffAudioFormat::appleTag,
-                                            AiffFileHelpers::readCATEChunk (*input, length));;
+                                            AiffFileHelpers::CATEChunk::read (*input, length));
                     }
                     else if ((hasGotVer && hasGotData && hasGotType)
                               || chunkEnd < input->getPosition()
@@ -821,12 +846,54 @@ public:
         return true;
     }
 
-    void readMaxLevels (int64 startSampleInFile, int64 numSamples,
-                        float& min0, float& max0, float& min1, float& max1)
+    void getSample (int64 sample, float* result) const noexcept override
+    {
+        const int num = (int) numChannels;
+
+        if (map == nullptr || ! mappedSection.contains (sample))
+        {
+            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+
+            zeromem (result, sizeof (float) * (size_t) num);
+            return;
+        }
+
+        float** dest = &result;
+        const void* source = sampleToPointer (sample);
+
+        if (littleEndian)
+        {
+            switch (bitsPerSample)
+            {
+                case 8:     ReadHelper<AudioData::Float32, AudioData::UInt8, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 16:    ReadHelper<AudioData::Float32, AudioData::Int16, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 24:    ReadHelper<AudioData::Float32, AudioData::Int24, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num);
+                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                default:    jassertfalse; break;
+            }
+        }
+        else
+        {
+            switch (bitsPerSample)
+            {
+                case 8:     ReadHelper<AudioData::Float32, AudioData::UInt8, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 16:    ReadHelper<AudioData::Float32, AudioData::Int16, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 24:    ReadHelper<AudioData::Float32, AudioData::Int24, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num);
+                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                default:    jassertfalse; break;
+            }
+        }
+    }
+
+    void readMaxLevels (int64 startSampleInFile, int64 numSamples, Range<float>* results, int numChannelsToRead) override
     {
         if (numSamples <= 0)
         {
-            min0 = max0 = min1 = max1 = 0;
+            for (int i = 0; i < numChannelsToRead; ++i)
+                results[i] = Range<float>();
+
             return;
         }
 
@@ -834,17 +901,19 @@ public:
         {
             jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 
-            min0 = max0 = min1 = max1 = 0;
+            for (int i = 0; i < numChannelsToRead; ++i)
+                results[i] = Range<float>();
+
             return;
         }
 
         switch (bitsPerSample)
         {
-            case 8:     scanMinAndMax<AudioData::UInt8> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
-            case 16:    scanMinAndMax<AudioData::Int16> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
-            case 24:    scanMinAndMax<AudioData::Int24> (startSampleInFile, numSamples, min0, max0, min1, max1); break;
-            case 32:    if (usesFloatingPointData) scanMinAndMax<AudioData::Float32> (startSampleInFile, numSamples, min0, max0, min1, max1);
-                        else                       scanMinAndMax<AudioData::Int32>   (startSampleInFile, numSamples, min0, max0, min1, max1); break;
+            case 8:     scanMinAndMax<AudioData::UInt8> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 16:    scanMinAndMax<AudioData::Int16> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 24:    scanMinAndMax<AudioData::Int24> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 32:    if (usesFloatingPointData) scanMinAndMax<AudioData::Float32> (startSampleInFile, numSamples, results, numChannelsToRead);
+                        else                       scanMinAndMax<AudioData::Int32>   (startSampleInFile, numSamples, results, numChannelsToRead); break;
             default:    jassertfalse; break;
         }
     }
@@ -853,24 +922,17 @@ private:
     const bool littleEndian;
 
     template <typename SampleType>
-    void scanMinAndMax (int64 startSampleInFile, int64 numSamples,
-                        float& min0, float& max0, float& min1, float& max1) const noexcept
+    void scanMinAndMax (int64 startSampleInFile, int64 numSamples, Range<float>* results, int numChannelsToRead) const noexcept
     {
-        scanMinAndMax2<SampleType> (0, startSampleInFile, numSamples, min0, max0);
-
-        if (numChannels > 1)
-            scanMinAndMax2<SampleType> (1, startSampleInFile, numSamples, min1, max1);
-        else
-            min1 = max1 = 0;
+        for (int i = 0; i < numChannelsToRead; ++i)
+            results[i] = scanMinAndMaxForChannel<SampleType> (i, startSampleInFile, numSamples);
     }
 
     template <typename SampleType>
-    void scanMinAndMax2 (int channel, int64 startSampleInFile, int64 numSamples, float& mn, float& mx) const noexcept
+    Range<float> scanMinAndMaxForChannel (int channel, int64 startSampleInFile, int64 numSamples) const noexcept
     {
-        if (littleEndian)
-            scanMinAndMaxInterleaved<SampleType, AudioData::LittleEndian> (channel, startSampleInFile, numSamples, mn, mx);
-        else
-            scanMinAndMaxInterleaved<SampleType, AudioData::BigEndian>    (channel, startSampleInFile, numSamples, mn, mx);
+        return littleEndian ? scanMinAndMaxInterleaved<SampleType, AudioData::LittleEndian> (channel, startSampleInFile, numSamples)
+                            : scanMinAndMaxInterleaved<SampleType, AudioData::BigEndian>    (channel, startSampleInFile, numSamples);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedAiffReader)

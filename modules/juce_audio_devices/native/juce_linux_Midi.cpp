@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -133,14 +133,14 @@ private:
             if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
             {
                 const int numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
-                HeapBlock<pollfd> pfd (numPfds);
-                snd_seq_poll_descriptors (seqHandle, pfd, numPfds, POLLIN);
+                HeapBlock<pollfd> pfd ((size_t) numPfds);
+                snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
 
                 HeapBlock <uint8> buffer (maxEventSize);
 
                 while (! threadShouldExit())
                 {
-                    if (poll (pfd, numPfds, 100) > 0) // there was a "500" here which is a bit long when we exit the program and have to wait for a timeout on this poll call
+                    if (poll (pfd, (nfds_t) numPfds, 100) > 0) // there was a "500" here which is a bit long when we exit the program and have to wait for a timeout on this poll call
                     {
                         if (threadShouldExit())
                             break;
@@ -154,14 +154,14 @@ private:
                             if (snd_seq_event_input (seqHandle, &inputEvent) >= 0)
                             {
                                 // xxx what about SYSEXes that are too big for the buffer?
-                                const int numBytes = snd_midi_event_decode (midiParser, buffer,
+                                const long numBytes = snd_midi_event_decode (midiParser, buffer,
                                                                             maxEventSize, inputEvent);
 
                                 snd_midi_event_reset_decode (midiParser);
 
                                 if (numBytes > 0)
                                 {
-                                    const MidiMessage message ((const uint8*) buffer, numBytes,
+                                    const MidiMessage message ((const uint8*) buffer, (int) numBytes,
                                                                Time::getMillisecondCounter() * 0.001);
 
                                     client.handleIncomingMidiMessage (message, inputEvent->dest.port);
@@ -410,7 +410,7 @@ public:
           maxEventSize (16 * 1024)
     {
         jassert (port.isValid() && midiOutput != nullptr);
-        snd_midi_event_new (maxEventSize, &midiParser);
+        snd_midi_event_new ((size_t) maxEventSize, &midiParser);
     }
 
     ~MidiOutputDevice()
@@ -425,7 +425,7 @@ public:
         {
             maxEventSize = message.getRawDataSize();
             snd_midi_event_free (midiParser);
-            snd_midi_event_new (maxEventSize, &midiParser);
+            snd_midi_event_new ((size_t) maxEventSize, &midiParser);
         }
 
         snd_seq_event_t event;

@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="c3KrlE" name="OpenGLAppExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.OpenGLAppExample" includeBinaryInAppConfig="1"
-              jucerVersion="3.1.0">
+              jucerVersion="3.2.0">
   <MAINGROUP id="amjEXL" name="OpenGLAppExample">
     <GROUP id="{F5EA45A1-E25D-1821-14F8-EBCFBA9B2B81}" name="Shaders">
       <FILE id="D3dDWc" name="FragmentShader.glsl" compile="1" resource="0"

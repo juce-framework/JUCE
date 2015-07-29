@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PAINTELEMENTIMAGE_JUCEHEADER__
-#define __JUCER_PAINTELEMENTIMAGE_JUCEHEADER__
+#ifndef JUCER_PAINTELEMENTIMAGE_H_INCLUDED
+#define JUCER_PAINTELEMENTIMAGE_H_INCLUDED
 
 #include "../jucer_PaintRoutine.h"
 #include "../properties/jucer_FilePropertyComponent.h"
@@ -100,7 +100,7 @@ public:
         {
             if (dynamic_cast <const DrawableImage*> (getDrawable()) != 0)
             {
-                const String imageVariable ("cachedImage_" + resourceName);
+                const String imageVariable ("cachedImage_" + resourceName.replace ("::", "_") + "_" + String (code.getUniqueSuffix()));
 
                 code.addImageResourceLoader (imageVariable, resourceName);
 
@@ -483,4 +483,4 @@ private:
 };
 
 
-#endif   // __JUCER_PAINTELEMENTIMAGE_JUCEHEADER__
+#endif   // JUCER_PAINTELEMENTIMAGE_H_INCLUDED

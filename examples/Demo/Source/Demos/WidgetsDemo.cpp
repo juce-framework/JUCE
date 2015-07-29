@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-12 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2015 - ROLI Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -741,10 +740,12 @@ public:
     }
 
     // This is overloaded from TableListBoxModel, and should fill in the background of the whole row
-    void paintRowBackground (Graphics& g, int /*rowNumber*/, int /*width*/, int /*height*/, bool rowIsSelected) override
+    void paintRowBackground (Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override
     {
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
+        else if (rowNumber % 2)
+            g.fillAll (Colour (0xffeeeeee));
     }
 
     // This is overloaded from TableListBoxModel, and must paint any cells that aren't using custom
@@ -785,7 +786,12 @@ public:
     Component* refreshComponentForCell (int rowNumber, int columnId, bool /*isRowSelected*/,
                                         Component* existingComponentToUpdate) override
     {
-        if (columnId == 5) // If it's the ratings column, we'll return our custom component..
+        if (columnId == 1 || columnId == 7) // The ID and Length columns do not have a custom component
+        {
+            jassert (existingComponentToUpdate == 0);
+            return 0;
+        }
+        else if (columnId == 5) // For the ratings column, we return the custom combobox component
         {
             RatingColumnCustomComponent* ratingsBox = (RatingColumnCustomComponent*) existingComponentToUpdate;
 
@@ -798,12 +804,17 @@ public:
 
             return ratingsBox;
         }
-        else
+        else // The other columns are editable text columns, for which we use the custom Label component
         {
-            // for any other column, just return 0, as we'll be painting these columns directly.
+            EditableTextCustomComponent* textLabel = (EditableTextCustomComponent*) existingComponentToUpdate;
 
-            jassert (existingComponentToUpdate == 0);
-            return 0;
+            // same as above...
+            if (textLabel == 0)
+                textLabel = new EditableTextCustomComponent (*this);
+
+            textLabel->setRowAndColumn (rowNumber, columnId);
+
+            return textLabel;
         }
     }
 
@@ -812,7 +823,7 @@ public:
     int getColumnAutoSizeWidth (int columnId) override
     {
         if (columnId == 5)
-            return 100; // (this is the ratings column, containing a custom component)
+            return 100; // (this is the ratings column, containing a custom combobox component)
 
         int widest = 32;
 
@@ -832,8 +843,7 @@ public:
         return widest + 8;
     }
 
-    // A couple of quick methods to set and get the "rating" value when the user
-    // changes the combo box
+    // A couple of quick methods to set and get cell values when the user changes them
     int getRating (const int rowNumber) const
     {
         return dataList->getChildElement (rowNumber)->getIntAttribute ("Rating");
@@ -842,6 +852,17 @@ public:
     void setRating (const int rowNumber, const int newRating)
     {
         dataList->getChildElement (rowNumber)->setAttribute ("Rating", newRating);
+    }
+
+    String getText (const int columnNumber, const int rowNumber) const
+    {
+        return dataList->getChildElement (rowNumber)->getStringAttribute ( getAttributeNameForColumnId(columnNumber));
+    }
+
+    void setText (const int columnNumber, const int rowNumber, const String& newText)
+    {
+        const String& columnName = table.getHeader().getColumnName (columnNumber);
+        dataList->getChildElement (rowNumber)->setAttribute (columnName, newText);
     }
 
     //==============================================================================
@@ -862,6 +883,46 @@ private:
     int numRows;            // The number of rows of data we've got
 
     //==============================================================================
+    // This is a custom Label component, which we use for the table's editable text columns.
+    class EditableTextCustomComponent : public Label
+    {
+    public:
+        EditableTextCustomComponent (TableDemoComponent& owner_)
+            : owner (owner_)
+        {
+            // double click to edit the label text; single click handled below
+            setEditable (false, true, false);
+            setColour (textColourId, Colours::black);
+        }
+
+        void mouseDown (const MouseEvent& event) override
+        {
+            // single click on the label should simply select the row
+            owner.table.selectRowsBasedOnModifierKeys (row, event.mods, false);
+
+            Label::mouseDown (event);
+        }
+
+        void textWasEdited() override
+        {
+            owner.setText (columnId, row, getText());
+        }
+
+        // Our demo code will call this when we may need to update our contents
+        void setRowAndColumn (const int newRow, const int newColumn)
+        {
+            row = newRow;
+            columnId = newColumn;
+            setText (owner.getText(columnId, row), dontSendNotification);
+        }
+
+    private:
+        TableDemoComponent& owner;
+        int row, columnId;
+    };
+
+
+    //==============================================================================
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
     class RatingColumnCustomComponent    : public Component,
@@ -876,10 +937,10 @@ private:
             comboBox.addItem ("fab", 1);
             comboBox.addItem ("groovy", 2);
             comboBox.addItem ("hep", 3);
-            comboBox.addItem ("neat", 4);
-            comboBox.addItem ("wild", 5);
+            comboBox.addItem ("mad for it", 4);
+            comboBox.addItem ("neat", 5);
             comboBox.addItem ("swingin", 6);
-            comboBox.addItem ("mad for it", 7);
+            comboBox.addItem ("wild", 7);
 
             // when the combo is changed, we'll get a callback.
             comboBox.addListener (this);
@@ -1191,6 +1252,8 @@ public:
         popupButton.setTriggeredOnMouseDown (true);
         popupButton.addListener (this);
         addAndMakeVisible (popupButton);
+
+        setApplicationCommandManagerToWatch (&MainAppWindow::getApplicationCommandManager());
     }
 
     ~MenusDemo()

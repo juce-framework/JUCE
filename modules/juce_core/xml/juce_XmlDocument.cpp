@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -555,7 +555,8 @@ void XmlDocument::readChildElements (XmlElement& parent)
         else  // must be a character block
         {
             input = preWhitespaceInput; // roll back to include the leading whitespace
-            String textElementContent;
+            MemoryOutputStream textElementContent;
+            bool contentShouldBeUsed = ! ignoreEmptyTextElements;
 
             for (;;)
             {
@@ -602,28 +603,20 @@ void XmlDocument::readChildElements (XmlElement& parent)
                         input = entity.getCharPointer();
                         outOfData = false;
 
-                        for (;;)
-                        {
-                            XmlElement* const n = readNextElement (true);
-
-                            if (n == nullptr)
-                                break;
-
+                        while (XmlElement* n = readNextElement (true))
                             childAppender.append (n);
-                        }
 
                         input = oldInput;
                         outOfData = oldOutOfData;
                     }
                     else
                     {
-                        textElementContent += entity;
+                        textElementContent << entity;
+                        contentShouldBeUsed = contentShouldBeUsed || entity.containsNonWhitespaceChars();
                     }
                 }
                 else
                 {
-                    const String::CharPointerType start (input);
-
                     for (;;)
                     {
                         const juce_wchar nextChar = *input;
@@ -638,15 +631,15 @@ void XmlDocument::readChildElements (XmlElement& parent)
                             return;
                         }
 
+                        textElementContent.appendUTF8Char (nextChar);
+                        contentShouldBeUsed = contentShouldBeUsed || ! CharacterFunctions::isWhitespace (nextChar);
                         ++input;
                     }
-
-                    textElementContent.appendCharPointer (start, input);
                 }
             }
 
-            if ((! ignoreEmptyTextElements) || textElementContent.containsNonWhitespaceChars())
-                childAppender.append (XmlElement::createTextElement (textElementContent));
+            if (contentShouldBeUsed)
+                childAppender.append (XmlElement::createTextElement (textElementContent.toUTF8()));
         }
     }
 }

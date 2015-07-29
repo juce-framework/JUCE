@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -44,7 +44,7 @@
     destructor, in case it is deleted by other means than deleteInstance()
 
     Clients can then call the static method MyClass::getInstance() to get a pointer
-    to the singleton, or MyClass::getInstanceWithoutCreating() which will return 0 if
+    to the singleton, or MyClass::getInstanceWithoutCreating() which will return nullptr if
     no instance currently exists.
 
     e.g. @code

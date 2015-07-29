@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -203,7 +203,7 @@ public:
         setValueIfVoid (getPluginDesc (project),                   project.getTitle());
         setValueIfVoid (getPluginManufacturer (project),           "yourcompany");
         setValueIfVoid (getPluginManufacturerCode (project),       "Manu");
-        setValueIfVoid (getPluginCode (project),                   "Plug");
+        setValueIfVoid (getPluginCode (project),                   makeValid4CC (project.getProjectUID() + project.getProjectUID()));
         setValueIfVoid (getPluginChannelConfigs (project),         "{1, 1}, {2, 2}");
         setValueIfVoid (getPluginIsSynth (project),                false);
         setValueIfVoid (getPluginWantsMidiInput (project),         false);
@@ -262,6 +262,9 @@ public:
         props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus (project), "Key Focus", "Plugin editor requires keyboard focus"),
                    "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
 
+        props.add (new TextPropertyComponent (getPluginAUSDKLocation (project), "Plugin AU SDK Path", 512, false),
+                   "An optional path to the Apple AudioUnit SDK's 'CoreAudio' folder. Leave this blank to use the default location.");
+
         props.add (new TextPropertyComponent (getPluginAUExportPrefix (project), "Plugin AU Export Prefix", 64, false),
                    "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
 
@@ -303,6 +306,14 @@ public:
         exporter.msvcIsDLL = true;
 
         exporter.makefileIsDLL = true;
+    }
+
+    static String makeValid4CC (const String& seed)
+    {
+        String s (CodeHelpers::makeValidIdentifier (seed, false, true, false) + "xxxx");
+
+        return s.substring (0, 1).toUpperCase()
+             + s.substring (1, 4).toLowerCase();
     }
 };
 

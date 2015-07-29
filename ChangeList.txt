@@ -1,0 +1,46 @@
+
+﻿== Major JUCE features and updates ==
+
+
+This file just lists the more notable headline features. For more detailed info about minor changes and bugfixes, please see the git log.
+
+
+Version 3.2.0
+  - Major OpenGL performance/stability improvements
+  - Performance improvements to FloatVectorOperations math functions
+  - New FloatVectorOperations: abs, min, max, addWithMultiply, clip
+  - Midi channel pressure support
+  - New example projects ComponentTutorialExample, SimpleFFTExample,
+    PluckedStringsDemo
+  - New class ValueTreeSynchroniser, for remote-syncing multiple
+    ValueTrees
+  - HTTPS/SSL support on Linux
+  - Added methods for degrees to radians conversions
+  - Added Neon instruction set support for Android targets
+  - JUCE ValueTree performance improvements
+  - Linux and Android multi-monitor HiDPI support
+  - Support the “display=none” attribute in SVG files
+  - Support for text elements in SVG files
+  - Added Whirlpool hash class to the cryptography module
+  - Various improvements for parameter automation in VST, VST-3,
+    AudioUnits and AAX
+  - Various improvements to JUCE Synthesiser
+  - Linux Code::Blocks project support
+  - Multicast support
+  - Add support to generate project version numbers from project git tags
+  - Various updates to example projects
+  - Stability improvements to re-order and resize code of plug-in windows
+  - Support for external third-party native libraries on Android
+  - Introjucer’s auto-update now displays release notes
+  - Various Introjucer usability improvements
+  - Support for in-memory fonts on Android
+  - New FFT class
+  - WASAPI exclusive mode support
+  - More C++11 feature support macros
+  - Performance improvements to XML parsing
+  - Add compatibility for AAX SDK 2.2.0
+  - Added parameters to the ValueTree::Listener::valueTreeChildRemoved()
+    and valueTreeChildOrderChanged() methods to include more info about
+    exactly what changed
+  - Over 400 minor changes, bug-fixes, documentation improvements, etc.
+

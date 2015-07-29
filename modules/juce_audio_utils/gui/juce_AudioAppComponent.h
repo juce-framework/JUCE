@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -31,8 +31,8 @@
     A base class for writing audio apps that stream from the audio i/o devices.
 
     A subclass can inherit from this and implement just a few methods such as
-    renderAudio(). The base class provides a basic AudioDeviceManager object
-    and runs audio through the
+    getNextAudioBlock(). The base class provides a basic AudioDeviceManager object
+    and runs audio through the default output device.
 */
 class AudioAppComponent   : public Component,
                             public AudioSource

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -138,22 +138,47 @@ public:
     {
         JNIEnv* const env = getEnv();
 
-        const bool isBold   = style.contains ("Bold");
-        const bool isItalic = style.contains ("Italic");
+        // First check whether there's an embedded asset with this font name:
+        typeface = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.getTypeFaceFromAsset,
+                                                                 javaString ("fonts/" + name).get()));
 
-        File fontFile (getFontFile (name, style));
+        if (typeface.get() == nullptr)
+        {
+            const bool isBold   = style.contains ("Bold");
+            const bool isItalic = style.contains ("Italic");
 
-        if (! fontFile.exists())
-            fontFile = findFontFile (name, isBold, isItalic);
+            File fontFile (getFontFile (name, style));
 
-        if (fontFile.exists())
-            typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
-                                                               javaString (fontFile.getFullPathName()).get()));
-        else
-            typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.create,
-                                                               javaString (getName()).get(),
-                                                               (isBold ? 1 : 0) + (isItalic ? 2 : 0)));
+            if (! fontFile.exists())
+                fontFile = findFontFile (name, isBold, isItalic);
 
+            if (fontFile.exists())
+                typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
+                                                                   javaString (fontFile.getFullPathName()).get()));
+            else
+                typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.create,
+                                                                   javaString (getName()).get(),
+                                                                   (isBold ? 1 : 0) + (isItalic ? 2 : 0)));
+        }
+
+        initialise (env);
+    }
+
+    AndroidTypeface (const void* data, size_t size)
+        : Typeface (String(), String())
+    {
+        JNIEnv* const env = getEnv();
+
+        LocalRef<jbyteArray> bytes (env->NewByteArray (size));
+        env->SetByteArrayRegion (bytes, 0, size, (const jbyte*) data);
+
+        typeface = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.getTypeFaceFromByteArray, bytes.get()));
+
+        initialise (env);
+    }
+
+    void initialise (JNIEnv* const env)
+    {
         rect = GlobalRef (env->NewObject (RectClass, RectClass.constructor, 0, 0, 0, 0));
 
         paint = GlobalRef (GraphicsHelpers::createPaint (Graphics::highResamplingQuality));
@@ -315,10 +340,9 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new AndroidTypeface (font);
 }
 
-Typeface::Ptr Typeface::createSystemTypefaceFor (const void*, size_t)
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t size)
 {
-    jassertfalse; // not yet implemented!
-    return nullptr;
+    return new AndroidTypeface (data, size);
 }
 
 void Typeface::scanFolderForFonts (const File&)

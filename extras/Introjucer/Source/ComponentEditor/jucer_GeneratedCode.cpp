@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -164,9 +164,7 @@ String GeneratedCode::getClassDeclaration() const
     parentClassLines.addTokens (parentClasses, ",", StringRef());
     parentClassLines.addArray (getExtraParentClasses());
 
-    parentClassLines.trim();
-    parentClassLines.removeEmptyStrings();
-    parentClassLines.removeDuplicates (false);
+    parentClassLines = getCleanedStringArray (parentClassLines);
 
     if (parentClassLines.contains ("public Button", false))
         parentClassLines.removeString ("public Component", false);
@@ -186,9 +184,7 @@ String GeneratedCode::getInitialiserList() const
     if (parentClassInitialiser.isNotEmpty())
         inits.insert (0, parentClassInitialiser);
 
-    inits.trim();
-    inits.removeEmptyStrings();
-    inits.removeDuplicates (false);
+    inits = getCleanedStringArray (inits);
 
     String s;
 
@@ -217,11 +213,9 @@ String GeneratedCode::getInitialiserList() const
 
 static String getIncludeFileCode (StringArray files)
 {
-    files.trim();
-    files.removeEmptyStrings();
-    files.removeDuplicates (false);
-
     String s;
+
+    files = getCleanedStringArray (files);
 
     for (int i = 0; i < files.size(); ++i)
         s << "#include \"" << files[i] << "\"\n";

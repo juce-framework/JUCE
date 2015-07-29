@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -21,7 +21,6 @@
 
   ==============================================================================
 */
-
 
 #include "jucer_SlidingPanelComponent.h"
 
@@ -86,12 +85,10 @@ void SlidingPanelComponent::addTab (const String& tabName,
 
 void SlidingPanelComponent::goToTab (int targetTabIndex)
 {
-    const int xTranslation = (currentIndex - targetTabIndex) * getWidth();
-
     currentIndex = targetTabIndex;
 
     Desktop::getInstance().getAnimator()
-        .animateComponent (&pageHolder, pageHolder.getBounds().translated (xTranslation, 0),
+        .animateComponent (&pageHolder, pageHolder.getBounds().withX (-targetTabIndex * getWidth()),
                            1.0f, 600, false, 0.0, 0.0);
 
     repaint();

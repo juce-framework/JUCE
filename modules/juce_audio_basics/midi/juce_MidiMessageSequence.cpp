@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -276,14 +276,11 @@ void MidiMessageSequence::deleteSysExMessages()
 }
 
 //==============================================================================
-void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumber,
-                                                          const double time,
-                                                          OwnedArray<MidiMessage>& dest)
+void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumber, const double time, Array<MidiMessage>& dest)
 {
     bool doneProg = false;
     bool donePitchWheel = false;
-    Array<int> doneControllers;
-    doneControllers.ensureStorageAllocated (32);
+    bool doneControllers[128] = { 0 };
 
     for (int i = list.size(); --i >= 0;)
     {
@@ -291,28 +288,25 @@ void MidiMessageSequence::createControllerUpdatesForTime (const int channelNumbe
 
         if (mm.isForChannel (channelNumber) && mm.getTimeStamp() <= time)
         {
-            if (mm.isProgramChange())
+            if (mm.isProgramChange() && ! doneProg)
             {
-                if (! doneProg)
-                {
-                    dest.add (new MidiMessage (mm, 0.0));
-                    doneProg = true;
-                }
+                doneProg = true;
+                dest.add (MidiMessage (mm, 0.0));
+            }
+            else if (mm.isPitchWheel() && ! donePitchWheel)
+            {
+                donePitchWheel = true;
+                dest.add (MidiMessage (mm, 0.0));
             }
             else if (mm.isController())
             {
-                if (! doneControllers.contains (mm.getControllerNumber()))
+                const int controllerNumber = mm.getControllerNumber();
+                jassert (isPositiveAndBelow (controllerNumber, 128));
+
+                if (! doneControllers[controllerNumber])
                 {
-                    dest.add (new MidiMessage (mm, 0.0));
-                    doneControllers.add (mm.getControllerNumber());
-                }
-            }
-            else if (mm.isPitchWheel())
-            {
-                if (! donePitchWheel)
-                {
-                    dest.add (new MidiMessage (mm, 0.0));
-                    donePitchWheel = true;
+                    doneControllers[controllerNumber] = true;
+                    dest.add (MidiMessage (mm, 0.0));
                 }
             }
         }

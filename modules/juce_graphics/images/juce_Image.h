@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -443,6 +443,11 @@ public:
     virtual ImageType* createType() const = 0;
     /** Initialises a BitmapData object. */
     virtual void initialiseBitmapData (Image::BitmapData&, int x, int y, Image::BitmapData::ReadWriteMode) = 0;
+    /** Returns the number of Image objects which are currently referring to the same internal
+        shared image data. This is different to the reference count as an instance of ImagePixelData
+        can internally depend on another ImagePixelData via it's member variables. */
+    virtual int getSharedCount() const noexcept;
+
 
     /** The pixel format of the image data. */
     const Image::PixelFormat pixelFormat;

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -162,15 +162,6 @@ public:
     }
 
     //==============================================================================
-    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
-    {
-        if (ReferenceCountedObjectPtr<CachedGlyphType> glyph = findOrCreateGlyph (font, glyphNumber))
-        {
-            glyph->lastAccessCount = ++accessCounter;
-            glyph->draw (target, pos);
-        }
-    }
-
     void reset()
     {
         const ScopedLock sl (lock);
@@ -180,11 +171,14 @@ public:
         misses.set (0);
     }
 
-private:
-    friend struct ContainerDeletePolicy<CachedGlyphType>;
-    ReferenceCountedArray<CachedGlyphType> glyphs;
-    Atomic<int> accessCounter, hits, misses;
-    CriticalSection lock;
+    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
+    {
+        if (ReferenceCountedObjectPtr<CachedGlyphType> glyph = findOrCreateGlyph (font, glyphNumber))
+        {
+            glyph->lastAccessCount = ++accessCounter;
+            glyph->draw (target, pos);
+        }
+    }
 
     ReferenceCountedObjectPtr<CachedGlyphType> findOrCreateGlyph (const Font& font, int glyphNumber)
     {
@@ -202,6 +196,12 @@ private:
         g->generate (font, glyphNumber);
         return g;
     }
+
+private:
+    friend struct ContainerDeletePolicy<CachedGlyphType>;
+    ReferenceCountedArray<CachedGlyphType> glyphs;
+    Atomic<int> accessCounter, hits, misses;
+    CriticalSection lock;
 
     CachedGlyphType* findExistingGlyph (const Font& font, int glyphNumber) const
     {
@@ -302,11 +302,9 @@ public:
     }
 
     Font font;
+    ScopedPointer<EdgeTable> edgeTable;
     int glyph, lastAccessCount;
     bool snapToIntegerCoordinate;
-
-private:
-    ScopedPointer<EdgeTable> edgeTable;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
 };
@@ -435,12 +433,12 @@ namespace GradientPixelIterators
             if (vertical)
             {
                 scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.y - p1.y));
-                start = roundToInt (p1.y * scale);
+                start = roundToInt (p1.y * (float) scale);
             }
             else if (horizontal)
             {
                 scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.x - p1.x));
-                start = roundToInt (p1.x * scale);
+                start = roundToInt (p1.x * (float) scale);
             }
             else
             {
@@ -536,8 +534,9 @@ namespace GradientPixelIterators
 
         forcedinline void setY (const int y) noexcept
         {
-            lineYM01 = inverseTransform.mat01 * y + inverseTransform.mat02 - gx1;
-            lineYM11 = inverseTransform.mat11 * y + inverseTransform.mat12 - gy1;
+            const float floatY = (float) y;
+            lineYM01 = inverseTransform.mat01 * floatY + inverseTransform.mat02 - gx1;
+            lineYM11 = inverseTransform.mat11 * floatY + inverseTransform.mat12 - gy1;
         }
 
         inline PixelARGB getPixel (const int px) const noexcept
@@ -1303,7 +1302,7 @@ namespace EdgeTableFillers
                 sx += pixelOffset;
                 sy += pixelOffset;
                 float x1 = sx, y1 = sy;
-                sx += numPixels;
+                sx += (float) numPixels;
                 inverseTransform.transformPoints (x1, y1, sx, sy);
 
                 xBresenham.set ((int) (x1 * 256.0f), (int) (sx * 256.0f), numPixels, pixelOffsetInt);

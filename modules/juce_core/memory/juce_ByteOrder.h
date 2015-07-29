@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -153,7 +153,7 @@ inline uint64 ByteOrder::swap (uint64 value) noexcept
    #elif JUCE_USE_MSVC_INTRINSICS
     return _byteswap_uint64 (value);
    #else
-    return (((int64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));
+    return (((uint64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));
    #endif
 }
 

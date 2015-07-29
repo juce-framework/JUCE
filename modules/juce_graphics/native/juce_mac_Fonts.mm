@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -385,7 +385,7 @@ namespace CoreTextTypeLayout
 
     static void createLayout (TextLayout& glyphLayout, const AttributedString& text)
     {
-        const CGFloat boundsHeight = 1.0e6f;
+        const CGFloat boundsHeight = glyphLayout.getHeight();
         CTFrameRef frame = createCTFrame (text, CGRectMake (0, 0, glyphLayout.getWidth(), boundsHeight));
 
         CFArrayRef lines = CTFrameGetLines (frame);

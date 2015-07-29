@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -118,6 +118,22 @@ inline Type jmin (const Type a, const Type b, const Type c)                     
 /** Returns the smaller of four values. */
 template <typename Type>
 inline Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
+
+/** Remaps a normalised value (between 0 and 1) to a target range.
+    This effectively returns (targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin))
+*/
+template <class Type>
+static Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
+{
+    return targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin);
+}
+
+/** Remaps a value from a source range to a target range. */
+template <class Type>
+static Type jmap (Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targetRangeMin, Type targetRangeMax)
+{
+    return targetRangeMin + ((targetRangeMax - targetRangeMin) * (sourceValue - sourceRangeMin)) / (sourceRangeMax - sourceRangeMin);
+}
 
 /** Scans an array of values, returning the minimum value that it contains. */
 template <typename Type>
@@ -258,6 +274,19 @@ inline void swapVariables (Type& variable1, Type& variable2)
     std::swap (variable1, variable2);
 }
 
+/** Handy function for avoiding unused variables warning. */
+template <typename Type1>
+void ignoreUnused (const Type1&) noexcept {}
+
+template <typename Type1, typename Type2>
+void ignoreUnused (const Type1&, const Type2&) noexcept {}
+
+template <typename Type1, typename Type2, typename Type3>
+void ignoreUnused (const Type1&, const Type2&, const Type3&) noexcept {}
+
+template <typename Type1, typename Type2, typename Type3, typename Type4>
+void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexcept {}
+
 /** Handy function for getting the number of elements in a simple const C array.
     E.g.
     @code
@@ -283,11 +312,23 @@ template <typename Type>
 inline Type juce_hypot (Type a, Type b) noexcept
 {
    #if JUCE_MSVC
-    return static_cast <Type> (_hypot (a, b));
+    return static_cast<Type> (_hypot (a, b));
    #else
-    return static_cast <Type> (hypot (a, b));
+    return static_cast<Type> (hypot (a, b));
    #endif
 }
+
+#ifndef DOXYGEN
+template <>
+inline float juce_hypot (float a, float b) noexcept
+{
+   #if JUCE_MSVC
+    return (_hypotf (a, b));
+   #else
+    return (hypotf (a, b));
+   #endif
+}
+#endif
 
 /** 64-bit abs function. */
 inline int64 abs64 (const int64 n) noexcept
@@ -313,17 +354,40 @@ const double  double_Pi  = 3.1415926535897932384626433832795;
 const float   float_Pi   = 3.14159265358979323846f;
 
 
+/** Converts an angle in degrees to radians. */
+template <typename FloatType>
+inline FloatType degreesToRadians (FloatType degrees) noexcept  { return degrees * static_cast<FloatType> (double_Pi / 180.0); }
+
+/** Converts an angle in radians to degrees. */
+template <typename FloatType>
+inline FloatType radiansToDegrees (FloatType radians) noexcept  { return radians * static_cast<FloatType> (180.0 / double_Pi); }
+
+
 //==============================================================================
 /** The isfinite() method seems to vary between platforms, so this is a
     platform-independent function for it.
 */
-template <typename FloatingPointType>
-inline bool juce_isfinite (FloatingPointType value)
+template <typename NumericType>
+inline bool juce_isfinite (NumericType) noexcept
+{
+    return true; // Integer types are always finite
+}
+
+template <>
+inline bool juce_isfinite (float value) noexcept
 {
    #if JUCE_WINDOWS
-    return _finite (value);
-   #elif JUCE_ANDROID
-    return isfinite (value);
+    return _finite (value) != 0;
+   #else
+    return std::isfinite (value);
+   #endif
+}
+
+template <>
+inline bool juce_isfinite (double value) noexcept
+{
+   #if JUCE_WINDOWS
+    return _finite (value) != 0;
    #else
     return std::isfinite (value);
    #endif
@@ -422,16 +486,14 @@ inline int roundFloatToInt (const float value) noexcept
 }
 
 //==============================================================================
-/** Returns true if the specified integer is a power-of-two.
-*/
+/** Returns true if the specified integer is a power-of-two. */
 template <typename IntegerType>
 bool isPowerOfTwo (IntegerType value)
 {
    return (value & (value - 1)) == 0;
 }
 
-/** Returns the smallest power-of-two which is equal to or greater than the given integer.
-*/
+/** Returns the smallest power-of-two which is equal to or greater than the given integer. */
 inline int nextPowerOfTwo (int n) noexcept
 {
     --n;
@@ -478,13 +540,14 @@ NumericType square (NumericType n) noexcept
     return n * n;
 }
 
+
 //==============================================================================
-#if (JUCE_INTEL && JUCE_32BIT) || defined (DOXYGEN)
+#if JUCE_INTEL || defined (DOXYGEN)
  /** This macro can be applied to a float variable to check whether it contains a denormalised
      value, and to normalise it if necessary.
      On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
  */
- #define JUCE_UNDENORMALISE(x)   x += 1.0f; x -= 1.0f;
+ #define JUCE_UNDENORMALISE(x)   { (x) += 0.1f; (x) -= 0.1f; }
 #else
  #define JUCE_UNDENORMALISE(x)
 #endif

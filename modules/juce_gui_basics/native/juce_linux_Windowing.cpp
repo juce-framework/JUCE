@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-extern Display* display;
+extern ::Display* display;
 extern XContext windowHandleXContext;
 typedef void (*WindowMessageReceiveCallback) (XEvent&);
 extern WindowMessageReceiveCallback dispatchWindowMessage;
@@ -165,6 +165,9 @@ namespace Keys
 
 bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
+    if (display == nullptr)
+        return false;
+
     int keysym;
 
     if (keyCode & Keys::extendedKeyModifier)
@@ -186,7 +189,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 
     ScopedXLock xlock;
 
-    const int keycode = XKeysymToKeycode (display, keysym);
+    const int keycode = XKeysymToKeycode (display, (KeySym) keysym);
 
     const int keybyte = keycode >> 3;
     const int keybit = (1 << (keycode & 7));
@@ -212,54 +215,58 @@ namespace XSHMHelpers
         if (! isChecked)
         {
             isChecked = true;
-            int major, minor;
-            Bool pixmaps;
 
-            ScopedXLock xlock;
-
-            if (XShmQueryVersion (display, &major, &minor, &pixmaps))
+            if (display != nullptr)
             {
-                trappedErrorCode = 0;
-                XErrorHandler oldHandler = XSetErrorHandler (errorTrapHandler);
+                int major, minor;
+                Bool pixmaps;
 
-                XShmSegmentInfo segmentInfo;
-                zerostruct (segmentInfo);
+                ScopedXLock xlock;
 
-                XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                  24, ZPixmap, 0, &segmentInfo, 50, 50);
-
-                if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
-                                                 xImage->bytes_per_line * xImage->height,
-                                                 IPC_CREAT | 0777)) >= 0)
+                if (XShmQueryVersion (display, &major, &minor, &pixmaps))
                 {
-                    segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
+                    trappedErrorCode = 0;
+                    XErrorHandler oldHandler = XSetErrorHandler (errorTrapHandler);
 
-                    if (segmentInfo.shmaddr != (void*) -1)
+                    XShmSegmentInfo segmentInfo;
+                    zerostruct (segmentInfo);
+
+                    XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
+                                                      24, ZPixmap, 0, &segmentInfo, 50, 50);
+
+                    if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
+                                                     (size_t) (xImage->bytes_per_line * xImage->height),
+                                                     IPC_CREAT | 0777)) >= 0)
                     {
-                        segmentInfo.readOnly = False;
-                        xImage->data = segmentInfo.shmaddr;
-                        XSync (display, False);
+                        segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
 
-                        if (XShmAttach (display, &segmentInfo) != 0)
+                        if (segmentInfo.shmaddr != (void*) -1)
                         {
+                            segmentInfo.readOnly = False;
+                            xImage->data = segmentInfo.shmaddr;
                             XSync (display, False);
-                            XShmDetach (display, &segmentInfo);
 
-                            isAvailable = true;
+                            if (XShmAttach (display, &segmentInfo) != 0)
+                            {
+                                XSync (display, False);
+                                XShmDetach (display, &segmentInfo);
+
+                                isAvailable = true;
+                            }
                         }
+
+                        XFlush (display);
+                        XDestroyImage (xImage);
+
+                        shmdt (segmentInfo.shmaddr);
                     }
 
-                    XFlush (display);
-                    XDestroyImage (xImage);
+                    shmctl (segmentInfo.shmid, IPC_RMID, 0);
 
-                    shmdt (segmentInfo.shmaddr);
+                    XSetErrorHandler (oldHandler);
+                    if (trappedErrorCode != 0)
+                        isAvailable = false;
                 }
-
-                shmctl (segmentInfo.shmid, IPC_RMID, 0);
-
-                XSetErrorHandler (oldHandler);
-                if (trappedErrorCode != 0)
-                    isAvailable = false;
             }
         }
 
@@ -288,25 +295,29 @@ namespace XRender
 
         if (! hasLoaded)
         {
-            ScopedXLock xlock;
-            hasLoaded = true;
-
-            if (void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW))
+            if (display != nullptr)
             {
-                xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
-                xRenderFindStandardFormat   = (tXRenderFindStandardFormat)  dlsym (h, "XRenderFindStandardFormat");
-                xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
-                xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
-            }
+                hasLoaded = true;
 
-            if (xRenderQueryVersion != nullptr
-                 && xRenderFindStandardFormat != nullptr
-                 && xRenderFindFormat != nullptr
-                 && xRenderFindVisualFormat != nullptr)
-            {
-                int major, minor;
-                if (xRenderQueryVersion (display, &major, &minor))
-                    return true;
+                ScopedXLock xlock;
+
+                if (void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW))
+                {
+                    xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
+                    xRenderFindStandardFormat   = (tXRenderFindStandardFormat)  dlsym (h, "XRenderFindStandardFormat");
+                    xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
+                    xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
+                }
+
+                if (xRenderQueryVersion != nullptr
+                     && xRenderFindStandardFormat != nullptr
+                     && xRenderFindFormat != nullptr
+                     && xRenderFindVisualFormat != nullptr)
+                {
+                    int major, minor;
+                    if (xRenderQueryVersion (display, &major, &minor))
+                        return true;
+                }
             }
 
             xRenderQueryVersion = nullptr;
@@ -317,7 +328,7 @@ namespace XRender
 
     static bool hasCompositingWindowManager()
     {
-        return XGetSelectionOwner (display, Atoms::get().compositingManager) != 0;
+        return display != nullptr && XGetSelectionOwner (display, Atoms::get().compositingManager) != 0;
     }
 
     static XRenderPictFormat* findPictureFormat()
@@ -494,7 +505,7 @@ class XBitmapImage  : public ImagePixelData
 {
 public:
     XBitmapImage (const Image::PixelFormat format, const int w, const int h,
-                  const bool clearImage, const int imageDepth_, Visual* visual)
+                  const bool clearImage, const unsigned int imageDepth_, Visual* visual)
         : ImagePixelData (format, w, h),
           imageDepth (imageDepth_),
           gc (None)
@@ -517,12 +528,13 @@ public:
             segmentInfo.shmaddr = (char *) -1;
             segmentInfo.readOnly = False;
 
-            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, 0, &segmentInfo, w, h);
+            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, 0,
+                                      &segmentInfo, (unsigned int) w, (unsigned int) h);
 
             if (xImage != nullptr)
             {
                 if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
-                                                 xImage->bytes_per_line * xImage->height,
+                                                 (size_t) (xImage->bytes_per_line * xImage->height),
                                                  IPC_CREAT | 0777)) >= 0)
                 {
                     if (segmentInfo.shmid != -1)
@@ -550,10 +562,10 @@ public:
             }
         }
 
-        if (! usingXShm)
+        if (! isUsingXShm())
        #endif
         {
-            imageDataAllocated.allocate (lineStride * h, format == Image::ARGB && clearImage);
+            imageDataAllocated.allocate ((size_t) (lineStride * h), format == Image::ARGB && clearImage);
             imageData = imageDataAllocated;
 
             xImage = (XImage*) ::calloc (1, sizeof (XImage));
@@ -576,15 +588,15 @@ public:
 
             if (imageDepth == 16)
             {
-                const int pixelStride = 2;
-                const int lineStride = ((w * pixelStride + 3) & ~3);
+                const int pixStride = 2;
+                const int stride = ((w * pixStride + 3) & ~3);
 
-                imageData16Bit.malloc (lineStride * h);
+                imageData16Bit.malloc ((size_t) (stride * h));
                 xImage->data = imageData16Bit;
                 xImage->bitmap_pad = 16;
-                xImage->depth = pixelStride * 8;
-                xImage->bytes_per_line = lineStride;
-                xImage->bits_per_pixel = pixelStride * 8;
+                xImage->depth = pixStride * 8;
+                xImage->bytes_per_line = stride;
+                xImage->bits_per_pixel = pixStride * 8;
                 xImage->red_mask   = visual->red_mask;
                 xImage->green_mask = visual->green_mask;
                 xImage->blue_mask  = visual->blue_mask;
@@ -603,7 +615,7 @@ public:
             XFreeGC (display, gc);
 
        #if JUCE_USE_XSHM
-        if (usingXShm)
+        if (isUsingXShm())
         {
             XShmDetach (display, &segmentInfo);
 
@@ -646,7 +658,7 @@ public:
 
     ImageType* createType() const override     { return new NativeImageType(); }
 
-    void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
+    void blitToWindow (Window window, int dx, int dy, unsigned int dw, unsigned int dh, int sx, int sy)
     {
         ScopedXLock xlock;
 
@@ -667,50 +679,54 @@ public:
 
         if (imageDepth == 16)
         {
-            const uint32 rMask   = xImage->red_mask;
-            const uint32 gMask   = xImage->green_mask;
-            const uint32 bMask   = xImage->blue_mask;
-            const uint32 rShiftL = jmax (0,  getShiftNeeded (rMask));
-            const uint32 rShiftR = jmax (0, -getShiftNeeded (rMask));
-            const uint32 gShiftL = jmax (0,  getShiftNeeded (gMask));
-            const uint32 gShiftR = jmax (0, -getShiftNeeded (gMask));
-            const uint32 bShiftL = jmax (0,  getShiftNeeded (bMask));
-            const uint32 bShiftR = jmax (0, -getShiftNeeded (bMask));
+            const uint32 rMask   = (uint32) xImage->red_mask;
+            const uint32 gMask   = (uint32) xImage->green_mask;
+            const uint32 bMask   = (uint32) xImage->blue_mask;
+            const uint32 rShiftL = (uint32) jmax (0,  getShiftNeeded (rMask));
+            const uint32 rShiftR = (uint32) jmax (0, -getShiftNeeded (rMask));
+            const uint32 gShiftL = (uint32) jmax (0,  getShiftNeeded (gMask));
+            const uint32 gShiftR = (uint32) jmax (0, -getShiftNeeded (gMask));
+            const uint32 bShiftL = (uint32) jmax (0,  getShiftNeeded (bMask));
+            const uint32 bShiftR = (uint32) jmax (0, -getShiftNeeded (bMask));
 
             const Image::BitmapData srcData (Image (this), Image::BitmapData::readOnly);
 
-            for (int y = sy; y < sy + dh; ++y)
+            for (int y = sy; y < sy + (int)dh; ++y)
             {
                 const uint8* p = srcData.getPixelPointer (sx, y);
 
-                for (int x = sx; x < sx + dw; ++x)
+                for (int x = sx; x < sx + (int)dw; ++x)
                 {
                     const PixelRGB* const pixel = (const PixelRGB*) p;
                     p += srcData.pixelStride;
 
                     XPutPixel (xImage, x, y,
-                               (((((uint32) pixel->getRed()) << rShiftL) >> rShiftR) & rMask)
+                                   (((((uint32) pixel->getRed())   << rShiftL) >> rShiftR) & rMask)
                                  | (((((uint32) pixel->getGreen()) << gShiftL) >> gShiftR) & gMask)
-                                 | (((((uint32) pixel->getBlue()) << bShiftL) >> bShiftR) & bMask));
+                                 | (((((uint32) pixel->getBlue())  << bShiftL) >> bShiftR) & bMask));
                 }
             }
         }
 
         // blit results to screen.
        #if JUCE_USE_XSHM
-        if (usingXShm)
+        if (isUsingXShm())
             XShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
         else
        #endif
             XPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
     }
 
+    #if JUCE_USE_XSHM
+    bool isUsingXShm() const noexcept       { return usingXShm; }
+    #endif
+
 private:
     //==============================================================================
     XImage* xImage;
-    const int imageDepth;
-    HeapBlock <uint8> imageDataAllocated;
-    HeapBlock <char> imageData16Bit;
+    const unsigned int imageDepth;
+    HeapBlock<uint8> imageDataAllocated;
+    HeapBlock<char> imageData16Bit;
     int pixelStride, lineStride;
     uint8* imageData;
     GC gc;
@@ -734,19 +750,687 @@ private:
 };
 
 //==============================================================================
+#if JUCE_USE_XRANDR
+template <>
+struct ContainerDeletePolicy<XRRScreenResources>
+{
+    static void destroy (XRRScreenResources* object);
+};
+
+template <>
+struct ContainerDeletePolicy<XRROutputInfo>
+{
+    static void destroy (XRROutputInfo* object);
+};
+
+template <>
+struct ContainerDeletePolicy<XRRCrtcInfo>
+{
+    static void destroy (XRRCrtcInfo* object);
+};
+#endif
+
+//==============================================================================
+class DisplayGeometry
+{
+private:
+    //==============================================================================
+    DisplayGeometry (::Display* dpy, double masterScale)
+    {
+        jassert (instance == nullptr);
+        instance = this;
+
+        queryDisplayInfos (dpy, masterScale);
+        updatePositions();
+    }
+
+public:
+    //==============================================================================
+    struct ExtendedInfo
+    {
+        // Unlike Desktop::Displays::Display, the following is in
+        // physical pixels, i.e. the area is not scaled
+        Rectangle<int> totalBounds;
+        // Usable bounds is the usable area in local coordinates
+        // with respect to the above totalBounds
+        Rectangle<int> usableBounds;
+        // top-left point of display in scaled coordinates. This
+        // is different from totalBounds.getTopLeft() / scale,
+        // because the neighbouring display may have a different
+        // scale factor
+        Point<int> topLeftScaled;
+        double dpi, scale;
+        bool isMain;
+    };
+
+    Array<ExtendedInfo> infos;
+
+    //==============================================================================
+    ExtendedInfo& findDisplayForRect (const Rectangle<int>& bounds, bool isScaledBounds)
+    {
+        int maxArea = -1;
+        ExtendedInfo* retval = nullptr;
+
+        for (int i = 0; i < infos.size(); ++i)
+        {
+            ExtendedInfo& dpy = infos.getReference (i);
+
+            Rectangle<int> displayBounds = dpy.totalBounds;
+
+            if (isScaledBounds)
+                displayBounds = (displayBounds.withZeroOrigin() / dpy.scale) + dpy.topLeftScaled;
+
+            displayBounds = displayBounds.getIntersection (bounds);
+            int area = displayBounds.getWidth() * displayBounds.getHeight();
+
+            if (area >= maxArea)
+            {
+                maxArea = area;
+                retval = &dpy;
+            }
+        }
+
+        return *retval;
+    }
+
+    ExtendedInfo& findDisplayForPoint (Point<int> pt, bool isScaledPoint)
+    {
+        int minDistance = (int) ((((unsigned int)(-1)) >> 1) - 1);
+        ExtendedInfo* retval = nullptr;
+
+        for (int i = 0; i < infos.size(); ++i)
+        {
+            ExtendedInfo& dpy = infos.getReference (i);
+
+            Rectangle<int> displayBounds = dpy.totalBounds;
+
+            if (isScaledPoint)
+                displayBounds = (displayBounds.withZeroOrigin() / dpy.scale) + dpy.topLeftScaled;
+
+            if (displayBounds.contains (pt))
+                return dpy;
+
+            int distance = displayBounds.getCentre().getDistanceFrom (pt);
+            if (distance <= minDistance)
+            {
+                minDistance = distance;
+                retval = &dpy;
+            }
+        }
+
+        return *retval;
+    }
+
+    //==============================================================================
+    static Rectangle<int> physicalToScaled (const Rectangle<int>& physicalBounds)
+    {
+        // first find with which display physicalBounds has the most overlap
+        ExtendedInfo& dpy = getInstance().findDisplayForRect (physicalBounds, false);
+
+        // convert to local screen bounds
+        Rectangle<int> retval = physicalBounds - dpy.totalBounds.getTopLeft();
+
+        // now we can safely scale the coordinates and convert to global again
+        return (retval / dpy.scale) + dpy.topLeftScaled;
+    }
+
+    static Rectangle<int> scaledToPhysical (const Rectangle<int>& scaledBounds)
+    {
+        // first find with which display physicalBounds has the most overlap
+        ExtendedInfo& dpy = getInstance().findDisplayForRect (scaledBounds, true);
+
+        // convert to local screen bounds
+        Rectangle<int> retval = scaledBounds - dpy.topLeftScaled;
+
+        // now we can safely scale the coordinates and convert to global again
+        return (retval * dpy.scale) + dpy.totalBounds.getTopLeft();
+    }
+
+    //==============================================================================
+    template <typename ValueType>
+    static Point<ValueType> physicalToScaled (const Point<ValueType>& physicalPoint)
+    {
+        ExtendedInfo& dpy = getInstance().findDisplayForPoint (physicalPoint.roundToInt(), false);
+        Point<ValueType> scaledTopLeft =
+            Point<ValueType> (dpy.topLeftScaled.getX(), dpy.topLeftScaled.getY());
+        Point<ValueType> physicalTopLeft =
+            Point<ValueType> (dpy.totalBounds.getX(), dpy.totalBounds.getY());
+
+        return ((physicalPoint - physicalTopLeft) / dpy.scale) + scaledTopLeft;
+    }
+
+    template <typename ValueType>
+    static Point<ValueType> scaledToPhysical (const Point<ValueType>& scaledPoint)
+    {
+        ExtendedInfo& dpy = getInstance().findDisplayForPoint (scaledPoint.roundToInt(), true);
+        Point<ValueType> scaledTopLeft =
+            Point<ValueType> (dpy.topLeftScaled.getX(), dpy.topLeftScaled.getY());
+        Point<ValueType> physicalTopLeft =
+            Point<ValueType> (dpy.totalBounds.getX(), dpy.totalBounds.getY());
+
+        return ((scaledPoint - scaledTopLeft) * dpy.scale) + physicalTopLeft;
+    }
+
+    //==============================================================================
+    static DisplayGeometry& getInstance()
+    {
+        jassert (instance != nullptr);
+        return *instance;
+    }
+
+    static DisplayGeometry& getOrCreateInstance (::Display* dpy, double masterScale)
+    {
+        if (instance == nullptr)
+            new DisplayGeometry (dpy, masterScale);
+
+        return getInstance();
+    }
+
+private:
+    //==============================================================================
+    static DisplayGeometry* instance;
+
+    //==============================================================================
+   #if JUCE_USE_XINERAMA
+    static Array<XineramaScreenInfo> XineramaQueryDisplays (::Display* dpy)
+    {
+        typedef Bool (*tXineramaIsActive) (::Display*);
+        typedef XineramaScreenInfo* (*tXineramaQueryScreens) (::Display*, int*);
+
+        int major_opcode, first_event, first_error;
+
+        if (XQueryExtension (dpy, "XINERAMA", &major_opcode, &first_event, &first_error))
+        {
+            static void* libXinerama = nullptr;
+            static tXineramaIsActive isActiveFuncPtr = nullptr;
+            static tXineramaQueryScreens xineramaQueryScreens = nullptr;
+
+            if (libXinerama == nullptr)
+            {
+                libXinerama = dlopen ("libXinerama.so", RTLD_GLOBAL | RTLD_NOW);
+
+                if (libXinerama == nullptr)
+                    libXinerama = dlopen ("libXinerama.so.1", RTLD_GLOBAL | RTLD_NOW);
+
+                if (libXinerama != nullptr)
+                {
+                    isActiveFuncPtr = (tXineramaIsActive) dlsym (libXinerama, "XineramaIsActive");
+                    xineramaQueryScreens = (tXineramaQueryScreens) dlsym (libXinerama, "XineramaQueryScreens");
+                }
+            }
+
+            if (isActiveFuncPtr != nullptr && xineramaQueryScreens != nullptr && isActiveFuncPtr (dpy) != 0)
+            {
+                int numScreens;
+                if (XineramaScreenInfo* xinfo = xineramaQueryScreens (dpy, &numScreens))
+                {
+                    Array<XineramaScreenInfo> infos (xinfo, numScreens);
+                    XFree (xinfo);
+
+                    return infos;
+                }
+            }
+        }
+
+        return Array<XineramaScreenInfo>();
+    }
+   #endif
+
+    //==============================================================================
+   #if JUCE_USE_XRANDR
+    friend struct ContainerDeletePolicy<XRRScreenResources>;
+    friend struct ContainerDeletePolicy<XRROutputInfo>;
+    friend struct ContainerDeletePolicy<XRRCrtcInfo>;
+
+    class XRandrWrapper
+    {
+    private:
+        XRandrWrapper()
+            : libXrandr (nullptr),
+              getScreenResourcesPtr (nullptr),
+              freeScreenResourcesPtr (nullptr),
+              getOutputInfoPtr (nullptr),
+              freeOutputInfoPtr (nullptr),
+              getCrtcInfoPtr (nullptr),
+              freeCrtcInfoPtr (nullptr),
+              getOutputPrimaryPtr (nullptr)
+        {
+            if (libXrandr == nullptr)
+            {
+                libXrandr = dlopen ("libXrandr.so", RTLD_GLOBAL | RTLD_NOW);
+
+                if (libXrandr == nullptr)
+                    libXrandr = dlopen ("libXinerama.so.2", RTLD_GLOBAL | RTLD_NOW);
+
+                if (libXrandr != nullptr)
+                {
+                    getScreenResourcesPtr  = (tXRRGetScreenResources)  dlsym (libXrandr, "XRRGetScreenResources");
+                    freeScreenResourcesPtr = (tXRRFreeScreenResources) dlsym (libXrandr, "XRRFreeScreenResources");
+                    getOutputInfoPtr       = (tXRRGetOutputInfo)       dlsym (libXrandr, "XRRGetOutputInfo");
+                    freeOutputInfoPtr      = (tXRRFreeOutputInfo)      dlsym (libXrandr, "XRRFreeOutputInfo");
+                    getCrtcInfoPtr         = (tXRRGetCrtcInfo)         dlsym (libXrandr, "XRRGetCrtcInfo");
+                    freeCrtcInfoPtr        = (tXRRFreeCrtcInfo)        dlsym (libXrandr, "XRRFreeCrtcInfo");
+                    getOutputPrimaryPtr    = (tXRRGetOutputPrimary)    dlsym (libXrandr, "XRRGetOutputPrimary");
+                }
+            }
+
+            instance = this;
+        }
+
+    public:
+        //==============================================================================
+        static XRandrWrapper& getInstance()
+        {
+            if (instance == nullptr)
+                instance = new XRandrWrapper();
+
+            return *instance;
+        }
+
+        //==============================================================================
+        XRRScreenResources* getScreenResources (::Display* dpy, ::Window window)
+        {
+            if (getScreenResourcesPtr != nullptr)
+                return getScreenResourcesPtr (dpy, window);
+
+            return nullptr;
+        }
+
+        XRROutputInfo* getOutputInfo (::Display* dpy, XRRScreenResources* resources, RROutput output)
+        {
+            if (getOutputInfoPtr != nullptr)
+                return getOutputInfoPtr (dpy, resources, output);
+
+            return nullptr;
+        }
+
+        XRRCrtcInfo* getCrtcInfo (::Display* dpy, XRRScreenResources* resources, RRCrtc crtc)
+        {
+            if (getCrtcInfoPtr != nullptr)
+                return getCrtcInfoPtr (dpy, resources, crtc);
+
+            return nullptr;
+        }
+
+        RROutput getOutputPrimary (::Display* dpy, ::Window window)
+        {
+            if (getOutputPrimaryPtr != nullptr)
+                return getOutputPrimaryPtr (dpy, window);
+
+            return 0;
+        }
+
+    private:
+        //==============================================================================
+        friend struct ContainerDeletePolicy<XRRScreenResources>;
+        friend struct ContainerDeletePolicy<XRROutputInfo>;
+        friend struct ContainerDeletePolicy<XRRCrtcInfo>;
+
+        void freeScreenResources (XRRScreenResources* ptr)
+        {
+            if (freeScreenResourcesPtr != nullptr)
+                freeScreenResourcesPtr (ptr);
+        }
+
+        void freeOutputInfo (XRROutputInfo* ptr)
+        {
+            if (freeOutputInfoPtr != nullptr)
+                freeOutputInfoPtr (ptr);
+        }
+
+        void freeCrtcInfo (XRRCrtcInfo* ptr)
+        {
+            if (freeCrtcInfoPtr != nullptr)
+                freeCrtcInfoPtr (ptr);
+        }
+    private:
+        static XRandrWrapper* instance;
+
+        typedef XRRScreenResources* (*tXRRGetScreenResources) (::Display*, ::Window);
+        typedef void (*tXRRFreeScreenResources) (XRRScreenResources*);
+        typedef XRROutputInfo* (*tXRRGetOutputInfo) (::Display*, XRRScreenResources*, RROutput);
+        typedef void (*tXRRFreeOutputInfo) (XRROutputInfo*);
+        typedef XRRCrtcInfo* (*tXRRGetCrtcInfo) (::Display*, XRRScreenResources*, RRCrtc);
+        typedef void (*tXRRFreeCrtcInfo) (XRRCrtcInfo*);
+        typedef RROutput (*tXRRGetOutputPrimary) (::Display*, ::Window);
+
+        void* libXrandr;
+        tXRRGetScreenResources getScreenResourcesPtr;
+        tXRRFreeScreenResources freeScreenResourcesPtr;
+        tXRRGetOutputInfo getOutputInfoPtr;
+        tXRRFreeOutputInfo freeOutputInfoPtr;
+        tXRRGetCrtcInfo getCrtcInfoPtr;
+        tXRRFreeCrtcInfo freeCrtcInfoPtr;
+        tXRRGetOutputPrimary getOutputPrimaryPtr;
+    };
+   #endif
+
+
+    static double getDisplayDPI (int index)
+    {
+        double dpiX = (DisplayWidth  (display, index) * 25.4) / DisplayWidthMM  (display, index);
+        double dpiY = (DisplayHeight (display, index) * 25.4) / DisplayHeightMM (display, index);
+        return (dpiX + dpiY) / 2.0;
+    }
+
+    static double getScaleForDisplay (const String& name, const ExtendedInfo& info)
+    {
+        if (! name.isEmpty())
+        {
+            // Ubuntu and derived distributions now save a per-display scale factor as a configuration
+            // variable. This can be changed in the Monitor system settings panel.
+            ChildProcess dconf;
+            if (File ("/usr/bin/dconf").existsAsFile() &&
+                dconf.start ("/usr/bin/dconf read /com/ubuntu/user-interface/scale-factor", ChildProcess::wantStdOut))
+            {
+                if (dconf.waitForProcessToFinish (200))
+                {
+                    String jsonOutput = dconf.readAllProcessOutput().replaceCharacter ('\'', '"');
+
+                    if (dconf.getExitCode() == 0 && jsonOutput.isNotEmpty())
+                    {
+                        var jsonVar = JSON::parse (jsonOutput);
+
+                        if (DynamicObject* object = jsonVar.getDynamicObject())
+                        {
+                            var scaleFactorVar = object->getProperty (name);
+                            if (! scaleFactorVar.isVoid())
+                            {
+                                double scaleFactor = ((double) scaleFactorVar) / 8.0;
+
+                                if (scaleFactor > 0.0)
+                                    return scaleFactor;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        {
+            // Other gnome based distros now use gsettings for a global scale factor
+            ChildProcess gsettings;
+            if (File ("/usr/bin/gsettings").existsAsFile() &&
+                gsettings.start ("/usr/bin/gsettings get org.gnome.desktop.interface scaling-factor", ChildProcess::wantStdOut))
+            {
+                if (gsettings.waitForProcessToFinish (200))
+                {
+                    StringArray gsettingsOutput = StringArray::fromTokens (gsettings.readAllProcessOutput(), true);
+                    if (gsettingsOutput.size() >= 2 && gsettingsOutput[1].length() > 0)
+                    {
+                        double scaleFactor = gsettingsOutput[1].getDoubleValue();
+
+                        if (scaleFactor > 0.0)
+                            return scaleFactor;
+                    }
+                }
+            }
+        }
+
+        // If no scale factor is set by GNOME or Ubuntu then calculate from monitor dpi
+        // We use the same approach as chromium which simply divides the dpi by 96
+        // and then rounds the result
+        return round (info.dpi / 150.0);
+    }
+
+    //==============================================================================
+    void queryDisplayInfos (::Display* dpy, double masterScale) noexcept
+    {
+        ScopedXLock xlock;
+
+       #if JUCE_USE_XRANDR
+        {
+            int major_opcode, first_event, first_error;
+
+            if (XQueryExtension (dpy, "RANDR", &major_opcode, &first_event, &first_error))
+            {
+                XRandrWrapper& xrandr = XRandrWrapper::getInstance();
+
+                ScopedPointer<XRRScreenResources> screens;
+
+                const int numMonitors = ScreenCount (dpy);
+                RROutput mainDisplay = xrandr.getOutputPrimary (dpy, RootWindow (dpy, 0));
+
+                for (int i = 0; i < numMonitors; ++i)
+                {
+                    if ((screens = xrandr.getScreenResources (dpy, RootWindow (dpy, i))).get())
+                    {
+                        for (int j = 0; j < screens->noutput; ++j)
+                        {
+                            if (! screens->outputs[j])
+                                continue;
+
+                            // Xrandr on the raspberry pi fails to determine the main display (mainDisplay == 0)!
+                            // Detect this edge case and make the first found display the main display
+                            if (! mainDisplay)
+                                mainDisplay = screens->outputs[j];
+
+                            ScopedPointer<XRROutputInfo> output;
+
+                            if ((output = xrandr.getOutputInfo (dpy, screens.get(), screens->outputs[j])).get())
+                            {
+                                if (! output->crtc)
+                                    continue;
+
+                                ScopedPointer<XRRCrtcInfo> crtc;
+
+                                if ((crtc = xrandr.getCrtcInfo (dpy, screens.get(), output->crtc)).get())
+                                {
+                                    ExtendedInfo e;
+                                    e.totalBounds = Rectangle<int> (crtc->x, crtc->y,
+                                                                    (int) crtc->width, (int) crtc->height);
+                                    e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
+                                    e.topLeftScaled = e.totalBounds.getTopLeft();
+                                    e.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
+                                    e.dpi = getDisplayDPI (0);
+
+                                    // The raspberry pi returns a zero sized display, so we need to guard for divide-by-zero
+                                    if (output->mm_width > 0 && output->mm_height > 0)
+                                        e.dpi = ((static_cast<double> (crtc->width) * 25.4 * 0.5) / static_cast<double> (output->mm_width))
+                                            + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
+
+                                    e.scale = masterScale * getScaleForDisplay (output->name, e);
+
+                                    infos.add (e);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (infos.size() == 0)
+       #endif
+       #if JUCE_USE_XINERAMA
+        {
+            Array<XineramaScreenInfo> screens = XineramaQueryDisplays (dpy);
+            int numMonitors = screens.size();
+
+            for (int index = 0; index < numMonitors; ++index)
+            {
+                for (int j = numMonitors; --j >= 0;)
+                {
+                    if (screens[j].screen_number == index)
+                    {
+                        ExtendedInfo e;
+                        e.totalBounds = Rectangle<int> (screens[j].x_org,
+                                                        screens[j].y_org,
+                                                        screens[j].width,
+                                                        screens[j].height);
+                        e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
+                        e.topLeftScaled = e.totalBounds.getTopLeft(); // this will be overwritten by updatePositions later
+                        e.isMain = (index == 0);
+                        e.scale = masterScale;
+                        e.dpi = getDisplayDPI (0); // (all screens share the same DPI)
+
+                        infos.add (e);
+                    }
+                }
+            }
+        }
+
+        if (infos.size() == 0)
+       #endif
+        {
+            Atom hints = Atoms::getIfExists ("_NET_WORKAREA");
+
+            if (hints != None)
+            {
+                const int numMonitors = ScreenCount (dpy);
+
+                for (int i = 0; i < numMonitors; ++i)
+                {
+                    GetXProperty prop (RootWindow (dpy, i), hints, 0, 4, false, XA_CARDINAL);
+
+                    if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
+                    {
+                        const long* const position = (const long*) prop.data;
+
+                        ExtendedInfo e;
+                        e.totalBounds = Rectangle<int> ((int) position[0], (int) position[1],
+                                                        (int) position[2], (int) position[3]);
+                        e.usableBounds = e.totalBounds.withZeroOrigin(); // Support for usable area is not implemented in JUCE yet
+                        e.topLeftScaled = e.totalBounds.getTopLeft(); // this will be overwritten by updatePositions later
+                        e.isMain = (infos.size() == 0);
+                        e.scale = masterScale;
+                        e.dpi = getDisplayDPI (i);
+
+                        infos.add (e);
+                    }
+                }
+            }
+
+            if (infos.size() == 0)
+            {
+                ExtendedInfo e;
+                e.totalBounds = Rectangle<int> (DisplayWidth  (dpy, DefaultScreen (dpy)),
+                                                DisplayHeight (dpy, DefaultScreen (dpy)));
+                e.usableBounds = e.totalBounds; // Support for usable area is not implemented in JUCE yet
+                e.topLeftScaled = e.totalBounds.getTopLeft(); // this will be overwritten by updatePositions later
+                e.isMain = true;
+                e.scale = masterScale;
+                e.dpi = getDisplayDPI (0);
+
+                infos.add (e);
+            }
+        }
+    }
+
+    //==============================================================================
+    struct SortByCoordinate
+    {
+        bool sortByYCoordinate;
+
+        SortByCoordinate (bool byYCoordinate)
+            : sortByYCoordinate (byYCoordinate)
+        {
+        }
+
+        int compareElements (const ExtendedInfo* a, const ExtendedInfo* b)
+        {
+            int coordinateA, coordinateB;
+
+            if (sortByYCoordinate)
+            {
+                coordinateA = a->totalBounds.getY();
+                coordinateB = b->totalBounds.getY();
+            }
+            else
+            {
+                coordinateA = a->totalBounds.getX();
+                coordinateB = b->totalBounds.getX();
+            }
+
+            return coordinateA - coordinateB;
+        }
+    };
+
+    //==============================================================================
+    void updateScaledDisplayCoordinate(bool updateYCoordinates)
+    {
+        if (infos.size() < 2)
+            return;
+
+        Array<ExtendedInfo*> copy;
+        {
+            SortByCoordinate sorter (updateYCoordinates);
+            for (int i = 0; i < infos.size(); ++i)
+                copy.addSorted (sorter, &infos.getReference (i));
+        }
+
+        for (int i = 1; i < copy.size(); ++i)
+        {
+            ExtendedInfo& current = *copy[i];
+
+            // Is this screen's position aligned to any other previous display?
+            for (int j = i - 1; j >= 0; --j)
+            {
+                ExtendedInfo& other = *copy[j];
+                int prevCoordinate = updateYCoordinates ? other.totalBounds.getBottom() : other.totalBounds.getRight();
+                int curCoordinate = updateYCoordinates ? current.totalBounds.getY() : current.totalBounds.getX();
+                if (prevCoordinate == curCoordinate)
+                {
+                    // both displays are aligned! As "other" comes before "current" in the array, it must already
+                    // have a valid topLeftScaled which we can use
+                    Point<int> topLeftScaled = other.topLeftScaled;
+                    topLeftScaled += Point<int> (other.totalBounds.getWidth(), other.totalBounds.getHeight()) / other.scale;
+
+                    if (updateYCoordinates)
+                        current.topLeftScaled.setY (topLeftScaled.getY());
+                    else
+                        current.topLeftScaled.setX (topLeftScaled.getX());
+
+                    break;
+                }
+            }
+        }
+    }
+
+    void updatePositions()
+    {
+        updateScaledDisplayCoordinate (false);
+        updateScaledDisplayCoordinate (true);
+    }
+};
+
+DisplayGeometry* DisplayGeometry::instance = nullptr;
+
+#if JUCE_USE_XRANDR
+DisplayGeometry::XRandrWrapper* DisplayGeometry::XRandrWrapper::instance = nullptr;
+
+void ContainerDeletePolicy<XRRScreenResources>::destroy (XRRScreenResources* ptr)
+{
+    if (ptr != nullptr)
+        DisplayGeometry::XRandrWrapper::getInstance().freeScreenResources (ptr);
+}
+
+void ContainerDeletePolicy<XRROutputInfo>::destroy (XRROutputInfo* ptr)
+{
+    if (ptr != nullptr)
+        DisplayGeometry::XRandrWrapper::getInstance().freeOutputInfo (ptr);
+}
+
+void ContainerDeletePolicy<XRRCrtcInfo>::destroy (XRRCrtcInfo* ptr)
+{
+    if (ptr != nullptr)
+        DisplayGeometry::XRandrWrapper::getInstance().freeCrtcInfo (ptr);
+}
+#endif
+
+//==============================================================================
 namespace PixmapHelpers
 {
     Pixmap createColourPixmapFromImage (Display* display, const Image& image)
     {
         ScopedXLock xlock;
 
-        const int width = image.getWidth();
-        const int height = image.getHeight();
-        HeapBlock <uint32> colour (width * height);
+        const unsigned int width = (unsigned int) image.getWidth();
+        const unsigned int height = (unsigned int) image.getHeight();
+        HeapBlock<uint32> colour (width * height);
         int index = 0;
 
-        for (int y = 0; y < height; ++y)
-            for (int x = 0; x < width; ++x)
+        for (int y = 0; y < (int)  height; ++y)
+            for (int x = 0; x < (int) width; ++x)
                 colour[index++] = image.getPixelAt (x, y).getARGB();
 
         XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
@@ -767,21 +1451,21 @@ namespace PixmapHelpers
     {
         ScopedXLock xlock;
 
-        const int width = image.getWidth();
-        const int height = image.getHeight();
-        const int stride = (width + 7) >> 3;
-        HeapBlock <char> mask;
+        const unsigned int width = (unsigned int) image.getWidth();
+        const unsigned int height = (unsigned int) image.getHeight();
+        const unsigned int stride = (width + 7) >> 3;
+        HeapBlock<char> mask;
         mask.calloc (stride * height);
         const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
 
-        for (int y = 0; y < height; ++y)
+        for (unsigned int y = 0; y < height; ++y)
         {
-            for (int x = 0; x < width; ++x)
+            for (unsigned int x = 0; x < width; ++x)
             {
                 const char bit = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
-                const int offset = y * stride + (x >> 3);
+                const unsigned int offset = y * stride + (x >> 3);
 
-                if (image.getPixelAt (x, y).getAlpha() >= 128)
+                if (image.getPixelAt ((int) x, (int) y).getAlpha() >= 128)
                     mask[offset] |= bit;
             }
         }
@@ -818,7 +1502,8 @@ public:
           windowH (0), parentWindow (0),
           fullScreen (false), mapped (false),
           visual (nullptr), depth (0),
-          isAlwaysOnTop (comp.isAlwaysOnTop())
+          isAlwaysOnTop (comp.isAlwaysOnTop()),
+          currentScaleFactor (1.0)
     {
         // it's dangerous to create a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
@@ -872,17 +1557,22 @@ public:
     {
         XPointer peer = nullptr;
 
-        ScopedXLock xlock;
-        if (! XFindContext (display, (XID) windowHandle, windowHandleXContext, &peer))
-            if (peer != nullptr && ! ComponentPeer::isValidPeer (reinterpret_cast <LinuxComponentPeer*> (peer)))
-                peer = nullptr;
+        if (display != nullptr)
+        {
+            ScopedXLock xlock;
 
-        return reinterpret_cast <LinuxComponentPeer*> (peer);
+            if (! XFindContext (display, (XID) windowHandle, windowHandleXContext, &peer))
+                if (peer != nullptr && ! ComponentPeer::isValidPeer (reinterpret_cast<LinuxComponentPeer*> (peer)))
+                    peer = nullptr;
+        }
+
+        return reinterpret_cast<LinuxComponentPeer*> (peer);
     }
 
     void setVisible (bool shouldBeVisible) override
     {
         ScopedXLock xlock;
+
         if (shouldBeVisible)
             XMapWindow (display, windowH);
         else
@@ -892,7 +1582,7 @@ public:
     void setTitle (const String& title) override
     {
         XTextProperty nameProperty;
-        char* strings[] = { const_cast <char*> (title.toRawUTF8()) };
+        char* strings[] = { const_cast<char*> (title.toRawUTF8()) };
         ScopedXLock xlock;
 
         if (XStringListToTextProperty (strings, 1, &nameProperty))
@@ -923,7 +1613,7 @@ public:
                 clientMsg.format = 32;
                 clientMsg.message_type = Atoms::get().windowState;
                 clientMsg.data.l[0] = 0;  // Remove
-                clientMsg.data.l[1] = fs;
+                clientMsg.data.l[1] = (long) fs;
                 clientMsg.data.l[2] = 0;
                 clientMsg.data.l[3] = 1;  // Normal Source
 
@@ -941,17 +1631,22 @@ public:
             bounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
                                          jmax (1, newBounds.getHeight()));
 
+            currentScaleFactor = DisplayGeometry::getInstance().findDisplayForRect (bounds, true).scale;
+
+            Rectangle<int> physicalBounds =
+                DisplayGeometry::scaledToPhysical (bounds);
+
             WeakReference<Component> deletionChecker (&component);
             ScopedXLock xlock;
 
             XSizeHints* const hints = XAllocSizeHints();
             hints->flags  = USSize | USPosition;
-            hints->x      = bounds.getX();
-            hints->y      = bounds.getY();
-            hints->width  = bounds.getWidth();
-            hints->height = bounds.getHeight();
+            hints->x      = physicalBounds.getX();
+            hints->y      = physicalBounds.getY();
+            hints->width  = physicalBounds.getWidth();
+            hints->height = physicalBounds.getHeight();
 
-            if ((getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == windowHasTitleBar)
+            if ((getStyleFlags() & windowIsResizable) == 0)
             {
                 hints->min_width  = hints->max_width  = hints->width;
                 hints->min_height = hints->max_height = hints->height;
@@ -962,10 +1657,10 @@ public:
             XFree (hints);
 
             XMoveResizeWindow (display, windowH,
-                               bounds.getX() - windowBorder.getLeft(),
-                               bounds.getY() - windowBorder.getTop(),
-                               bounds.getWidth(),
-                               bounds.getHeight());
+                               physicalBounds.getX() - windowBorder.getLeft(),
+                               physicalBounds.getY() - windowBorder.getTop(),
+                               (unsigned int) physicalBounds.getWidth(),
+                               (unsigned int) physicalBounds.getHeight());
 
             if (deletionChecker != nullptr)
             {
@@ -1085,7 +1780,7 @@ public:
 
         if (XQueryTree (display, root, &root, &parent, &windowList, &windowListSize) != 0)
         {
-            for (int i = windowListSize; --i >= 0;)
+            for (int i = (int) windowListSize; --i >= 0;)
             {
                 if (LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (windowList[i]))
                 {
@@ -1123,11 +1818,13 @@ public:
 
         ::Window root, child;
         int wx, wy;
-        unsigned int ww, wh, bw, depth;
+        unsigned int ww, wh, bw, bitDepth;
 
         ScopedXLock xlock;
 
-        return XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &depth)
+        localPos *= currentScaleFactor;
+
+        return XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth)
                 && XTranslateCoordinates (display, windowH, windowH, localPos.getX(), localPos.getY(), &wx, &wy, &child)
                 && child == None;
     }
@@ -1215,7 +1912,7 @@ public:
             && atts.map_state == IsViewable
             && ! isFocused())
         {
-            XSetInputFocus (display, windowH, RevertToParent, getUserTime());
+            XSetInputFocus (display, windowH, RevertToParent, (::Time) getUserTime());
             isActiveApplication = true;
         }
     }
@@ -1235,7 +1932,7 @@ public:
     void setIcon (const Image& newIcon) override
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
-        HeapBlock <unsigned long> data (dataSize);
+        HeapBlock<unsigned long> data ((size_t) dataSize);
 
         int index = 0;
         data[index++] = (unsigned long) newIcon.getWidth();
@@ -1343,6 +2040,8 @@ public:
 
     void handleKeyPressEvent (XKeyEvent& keyEvent)
     {
+        const ModifierKeys oldMods (currentModifiers);
+
         char utf8 [64] = { 0 };
         juce_wchar unicodeChar = 0;
         int keyCode = 0;
@@ -1351,7 +2050,7 @@ public:
 
         {
             ScopedXLock xlock;
-            updateKeyStates (keyEvent.keycode, true);
+            updateKeyStates ((int) keyEvent.keycode, true);
 
             String oldLocale (::setlocale (LC_ALL, 0));
             ::setlocale (LC_ALL, "");
@@ -1364,12 +2063,11 @@ public:
             keyCode = (int) unicodeChar;
 
             if (keyCode < 0x20)
-                keyCode = XkbKeycodeToKeysym (display, keyEvent.keycode, 0, currentModifiers.isShiftDown() ? 1 : 0);
+                keyCode = (int) XkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, currentModifiers.isShiftDown() ? 1 : 0);
 
             keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
         }
 
-        const ModifierKeys oldMods (currentModifiers);
         bool keyPressed = false;
 
         if ((sym & 0xff00) == 0xff00 || keyCode == XK_ISO_Left_Tab)
@@ -1479,12 +2177,12 @@ public:
     {
         if (! isKeyReleasePartOfAutoRepeat (keyEvent))
         {
-            updateKeyStates (keyEvent.keycode, false);
+            updateKeyStates ((int) keyEvent.keycode, false);
             KeySym sym;
 
             {
                 ScopedXLock xlock;
-                sym = XkbKeycodeToKeysym (display, keyEvent.keycode, 0, 0);
+                sym = XkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, 0);
             }
 
             const ModifierKeys oldMods (currentModifiers);
@@ -1499,9 +2197,9 @@ public:
     }
 
     template <typename EventType>
-    static Point<float> getMousePos (const EventType& e) noexcept
+    Point<float> getMousePos (const EventType& e) noexcept
     {
-        return Point<float> ((float) e.x, (float) e.y);
+        return Point<float> ((float) e.x, (float) e.y) / currentScaleFactor;
     }
 
     void handleWheelEvent (const XButtonPressedEvent& buttonPressEvent, const float amount)
@@ -1511,6 +2209,7 @@ public:
         wheel.deltaY = amount;
         wheel.isReversed = false;
         wheel.isSmooth = false;
+        wheel.isInertial = false;
 
         handleMouseWheel (0, getMousePos (buttonPressEvent), getEventTime (buttonPressEvent), wheel);
     }
@@ -1524,7 +2223,7 @@ public:
 
     void handleButtonPressEvent (const XButtonPressedEvent& buttonPressEvent)
     {
-        updateKeyModifiers (buttonPressEvent.state);
+        updateKeyModifiers ((int) buttonPressEvent.state);
 
         switch (pointerMap [buttonPressEvent.button - Button1])
         {
@@ -1541,7 +2240,7 @@ public:
 
     void handleButtonReleaseEvent (const XButtonReleasedEvent& buttonRelEvent)
     {
-        updateKeyModifiers (buttonRelEvent.state);
+        updateKeyModifiers ((int) buttonRelEvent.state);
 
         if (parentWindow != 0)
             updateWindowBounds();
@@ -1564,7 +2263,7 @@ public:
 
     void handleMotionNotifyEvent (const XPointerMovedEvent& movedEvent)
     {
-        updateKeyModifiers (movedEvent.state);
+        updateKeyModifiers ((int) movedEvent.state);
 
         lastMousePos = Point<int> (movedEvent.x_root, movedEvent.y_root);
 
@@ -1583,7 +2282,7 @@ public:
 
         if (! currentModifiers.isAnyMouseButtonDown())
         {
-            updateKeyModifiers (enterEvent.state);
+            updateKeyModifiers ((int) enterEvent.state);
             handleMouseEvent (0, getMousePos (enterEvent), currentModifiers, getEventTime (enterEvent));
         }
     }
@@ -1596,7 +2295,7 @@ public:
         if (((! currentModifiers.isAnyMouseButtonDown()) && leaveEvent.mode == NotifyNormal)
              || leaveEvent.mode == NotifyUngrab)
         {
-            updateKeyModifiers (leaveEvent.state);
+            updateKeyModifiers ((int) leaveEvent.state);
             handleMouseEvent (0, getMousePos (leaveEvent), currentModifiers, getEventTime (leaveEvent));
         }
     }
@@ -1621,6 +2320,10 @@ public:
         XEvent nextEvent;
         ScopedXLock xlock;
 
+        // if we have opengl contexts then just repaint them all
+        // regardless if this is really necessary
+        repaintOpenGLContexts ();
+
         if (exposeEvent.window != windowH)
         {
             Window child;
@@ -1629,8 +2332,10 @@ public:
                                    &child);
         }
 
+        // exposeEvent is in local window local coordinates so do not convert with
+        // physicalToScaled, but rather use currentScaleFactor
         repaint (Rectangle<int> (exposeEvent.x, exposeEvent.y,
-                                 exposeEvent.width, exposeEvent.height));
+                                 exposeEvent.width, exposeEvent.height) / currentScaleFactor);
 
         while (XEventsQueued (display, QueuedAfterFlush) > 0)
         {
@@ -1641,7 +2346,7 @@ public:
             XNextEvent (display, &nextEvent);
             const XExposeEvent& nextExposeEvent = (const XExposeEvent&) nextEvent.xexpose;
             repaint (Rectangle<int> (nextExposeEvent.x, nextExposeEvent.y,
-                                     nextExposeEvent.width, nextExposeEvent.height));
+                                     nextExposeEvent.width, nextExposeEvent.height) / currentScaleFactor);
         }
     }
 
@@ -1731,7 +2436,7 @@ public:
                          && XGetWindowAttributes (display, clientMsg.window, &atts))
                     {
                         if (atts.map_state == IsViewable)
-                            XSetInputFocus (display, clientMsg.window, RevertToParent, clientMsg.data.l[1]);
+                            XSetInputFocus (display, clientMsg.window, RevertToParent, (::Time) clientMsg.data.l[1]);
                     }
                 }
             }
@@ -1803,6 +2508,34 @@ public:
     }
 
     //==============================================================================
+    double getCurrentScale() noexcept
+    {
+        return currentScaleFactor;
+    }
+
+    //===============================================================================
+    void addOpenGLRepaintListener (Component* dummy)
+    {
+        if (dummy != nullptr)
+            glRepaintListeners.addIfNotAlreadyThere (dummy);
+    }
+
+    void removeOpenGLRepaintListener (Component* dummy)
+    {
+        if (dummy != nullptr)
+            glRepaintListeners.removeAllInstancesOf (dummy);
+    }
+
+    void repaintOpenGLContexts()
+    {
+        for (int i = 0; i < glRepaintListeners.size(); ++i)
+        {
+            if (Component* c = glRepaintListeners [i])
+                c->handleCommandMessage (0);
+        }
+    }
+
+    //==============================================================================
     bool dontRepaint;
 
     static ModifierKeys currentModifiers;
@@ -1860,7 +2593,7 @@ private:
             if (! isTimerRunning())
                 startTimer (repaintTimerPeriod);
 
-            regionsNeedingRepaint.add (area);
+            regionsNeedingRepaint.add (area * peer.currentScaleFactor);
         }
 
         void performAnyPendingRepaintsNow()
@@ -1890,7 +2623,7 @@ private:
                    #endif
                                                      (totalArea.getWidth()  + 31) & ~31,
                                                      (totalArea.getHeight() + 31) & ~31,
-                                                     false, peer.depth, peer.visual));
+                                                     false, (unsigned int) peer.depth, peer.visual));
                 }
 
                 startTimer (repaintTimerPeriod);
@@ -1905,20 +2638,24 @@ private:
                 {
                     ScopedPointer<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
                                                                       .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
+                    context->addTransform (AffineTransform::scale ((float) peer.currentScaleFactor));
                     peer.handlePaint (*context);
                 }
 
                 for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
                 {
+                    XBitmapImage* xbitmap = static_cast<XBitmapImage*> (image.getPixelData());
                    #if JUCE_USE_XSHM
-                    if (XSHMHelpers::isShmAvailable())
+                    if (xbitmap->isUsingXShm())
                         ++shmPaintsPending;
                    #endif
 
-                    static_cast<XBitmapImage*> (image.getPixelData())
-                        ->blitToWindow (peer.windowH,
-                                        i->getX(), i->getY(), i->getWidth(), i->getHeight(),
-                                        i->getX() - totalArea.getX(), i->getY() - totalArea.getY());
+
+                   xbitmap->blitToWindow (peer.windowH,
+                                          i->getX(), i->getY(),
+                                          (unsigned int) i->getWidth(),
+                                          (unsigned int) i->getHeight(),
+                                          i->getX() - totalArea.getX(), i->getY() - totalArea.getY());
                 }
             }
 
@@ -1945,7 +2682,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
 
-    ScopedPointer <LinuxRepaintManager> repainter;
+    ScopedPointer<LinuxRepaintManager> repainter;
 
     friend class LinuxRepaintManager;
     Window windowH, parentWindow;
@@ -1956,6 +2693,8 @@ private:
     int depth;
     BorderSize<int> windowBorder;
     bool isAlwaysOnTop;
+    double currentScaleFactor;
+    Array<Component*> glRepaintListeners;
     enum { KeyPressEventType = 2 };
 
     struct MotifWmHints
@@ -2199,6 +2938,8 @@ private:
         const int screen = DefaultScreen (display);
         Window root = RootWindow (display, screen);
 
+        parentWindow = parentToAddTo;
+
         // Try to obtain a 32-bit visual or fallback to 24 or 16
         visual = Visuals::findVisualFormat ((styleFlags & windowIsSemiTransparent) ? 32 : 24, depth);
 
@@ -2263,7 +3004,7 @@ private:
         const Atoms& atoms = Atoms::get();
 
         // Associate the PID, allowing to be shut down when something goes wrong
-        unsigned long pid = getpid();
+        unsigned long pid = (unsigned long) getpid();
         xchangeProperty (windowH, atoms.pid, XA_CARDINAL, 32, &pid, 1);
 
         // Set window manager protocols
@@ -2314,7 +3055,7 @@ private:
     static int64 getEventTime (::Time t)
     {
         static int64 eventTimeOffset = 0x12345678;
-        const int64 thisMessageTime = t;
+        const int64 thisMessageTime = (int64) t;
 
         if (eventTimeOffset == 0x12345678)
             eventTimeOffset = Time::currentTimeMillis() - thisMessageTime;
@@ -2361,15 +3102,20 @@ private:
         {
             Window root, child;
             int wx = 0, wy = 0;
-            unsigned int ww = 0, wh = 0, bw, depth;
+            unsigned int ww = 0, wh = 0, bw, bitDepth;
 
             ScopedXLock xlock;
 
-            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &depth))
+            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth))
                 if (! XTranslateCoordinates (display, windowH, root, 0, 0, &wx, &wy, &child))
                     wx = wy = 0;
 
-            bounds.setBounds (wx, wy, ww, wh);
+            Rectangle<int> physicalBounds (wx, wy, (int) ww, (int) wh);
+
+            currentScaleFactor =
+                DisplayGeometry::getInstance().findDisplayForRect (physicalBounds, false).scale;
+
+            bounds = DisplayGeometry::physicalToScaled (physicalBounds);
         }
     }
 
@@ -2429,7 +3175,7 @@ private:
         msg.display = display;
         msg.window = dragAndDropSourceWindow;
         msg.format = 32;
-        msg.data.l[0] = windowH;
+        msg.data.l[0] = (long) windowH;
 
         ScopedXLock xlock;
         XSendEvent (display, dragAndDropSourceWindow, False, 0, (XEvent*) &msg);
@@ -2441,7 +3187,7 @@ private:
         msg.display   = display;
         msg.window    = targetWindow;
         msg.format    = 32;
-        msg.data.l[0] = windowH;
+        msg.data.l[0] = (long) windowH;
 
         ScopedXLock xlock;
         return XSendEvent (display, targetWindow, False, 0, (XEvent*) &msg) != 0;
@@ -2469,9 +3215,9 @@ private:
         const int numMimeTypes = dragState.getNumMimeTypes();
 
         msg.data.l[1] = (dragState.xdndVersion << 24) | (numMimeTypes > 3);
-        msg.data.l[2] = numMimeTypes > 0 ? mimeTypes[0] : 0;
-        msg.data.l[3] = numMimeTypes > 1 ? mimeTypes[1] : 0;
-        msg.data.l[4] = numMimeTypes > 2 ? mimeTypes[2] : 0;
+        msg.data.l[2] = numMimeTypes > 0 ? (long) mimeTypes[0] : 0;
+        msg.data.l[3] = numMimeTypes > 1 ? (long) mimeTypes[1] : 0;
+        msg.data.l[4] = numMimeTypes > 2 ? (long) mimeTypes[2] : 0;
 
         sendExternalDragAndDropMessage (msg, targetWindow);
     }
@@ -2483,15 +3229,16 @@ private:
 
         msg.message_type = Atoms::get().XdndPosition;
 
-        const Point<int> mousePos (Desktop::getInstance().getMousePosition());
+        Point<int> mousePos (Desktop::getInstance().getMousePosition());
 
         if (dragState.silentRect.contains (mousePos)) // we've been asked to keep silent
             return;
 
+        mousePos = DisplayGeometry::scaledToPhysical (mousePos);
         msg.data.l[1] = 0;
         msg.data.l[2] = (mousePos.x << 16) | mousePos.y;
         msg.data.l[3] = CurrentTime;
-        msg.data.l[4] = Atoms::get().XdndActionCopy; // this is all JUCE currently supports
+        msg.data.l[4] = (long) Atoms::get().XdndActionCopy; // this is all JUCE currently supports
 
         dragState.expectingStatus = sendExternalDragAndDropMessage (msg, targetWindow);
     }
@@ -2503,7 +3250,7 @@ private:
 
         msg.message_type = Atoms::get().XdndStatus;
         msg.data.l[1] = (acceptDrop ? 1 : 0) | 2; // 2 indicates that we want to receive position messages
-        msg.data.l[4] = dropAction;
+        msg.data.l[4] = (long) dropAction;
 
         sendDragAndDropMessage (msg);
     }
@@ -2552,7 +3299,7 @@ private:
                              evt.xselectionrequest.property,
                              targetType, 8,
                              dragState.textOrFiles.toRawUTF8(),
-                             dragState.textOrFiles.getNumBytesAsUTF8());
+                             (int) dragState.textOrFiles.getNumBytesAsUTF8());
         }
 
         XSendEvent (display, evt.xselectionrequest.requestor, True, 0, &s);
@@ -2571,10 +3318,10 @@ private:
                       || (Atom) clientMsg.data.l[4] == Atoms::get().XdndActionPrivate))
             {
                 if ((clientMsg.data.l[1] & 2) == 0) // target requests silent rectangle
-                    dragState.silentRect.setBounds (clientMsg.data.l[2] >> 16,
-                                                    clientMsg.data.l[2] & 0xffff,
-                                                    clientMsg.data.l[3] >> 16,
-                                                    clientMsg.data.l[3] & 0xffff);
+                    dragState.silentRect.setBounds ((int) clientMsg.data.l[2] >> 16,
+                                                    (int) clientMsg.data.l[2] & 0xffff,
+                                                    (int) clientMsg.data.l[3] >> 16,
+                                                    (int) clientMsg.data.l[3] & 0xffff);
 
                 dragState.canDrop = true;
             }
@@ -2641,7 +3388,7 @@ private:
         if (dragAndDropSourceWindow == 0)
             return;
 
-        dragAndDropSourceWindow = clientMsg.data.l[0];
+        dragAndDropSourceWindow = (::Window) clientMsg.data.l[0];
 
         Point<int> dropPos ((int) clientMsg.data.l[2] >> 16,
                             (int) clientMsg.data.l[2] & 0xffff);
@@ -2704,7 +3451,7 @@ private:
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
-        const unsigned long dndCurrentVersion = static_cast <unsigned long> (clientMsg.data.l[1] & 0xff000000) >> 24;
+        const unsigned long dndCurrentVersion = static_cast<unsigned long> (clientMsg.data.l[1] & 0xff000000) >> 24;
 
         if (dndCurrentVersion < 3 || dndCurrentVersion > Atoms::DndVersion)
         {
@@ -2712,7 +3459,7 @@ private:
             return;
         }
 
-        dragAndDropSourceWindow = clientMsg.data.l[0];
+        dragAndDropSourceWindow = (::Window) clientMsg.data.l[0];
 
         if ((clientMsg.data.l[1] & 1) != 0)
         {
@@ -2736,7 +3483,7 @@ private:
         {
             for (int i = 2; i < 5; ++i)
                 if (clientMsg.data.l[i] != None)
-                    srcMimeTypeAtomList.add (clientMsg.data.l[i]);
+                    srcMimeTypeAtomList.add ((unsigned long) clientMsg.data.l[i]);
 
             if (srcMimeTypeAtomList.size() == 0)
             {
@@ -2773,7 +3520,7 @@ private:
                     if (! prop.success)
                         break;
 
-                    dropData.append (prop.data, prop.numItems * prop.actualFormat / 8);
+                    dropData.append (prop.data, prop.numItems * (size_t) prop.actualFormat / 8);
 
                     if (prop.bytesLeft <= 0)
                         break;
@@ -2813,7 +3560,7 @@ private:
                                dragAndDropCurrentMimeType,
                                Atoms::getCreating ("JXSelectionWindowProperty"),
                                windowH,
-                               clientMsg.data.l[2]);
+                               (::Time) clientMsg.data.l[2]);
         }
     }
 
@@ -2901,7 +3648,7 @@ private:
     Window dragAndDropSourceWindow;
     bool finishAfterDropDataReceived;
 
-    Array <Atom> srcMimeTypeAtomList;
+    Array<Atom> srcMimeTypeAtomList;
 
     int pointerMap[5];
 
@@ -2961,31 +3708,35 @@ void ModifierKeys::updateCurrentModifiers() noexcept
 
 ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
-    Window root, child;
-    int x, y, winx, winy;
-    unsigned int mask;
-    int mouseMods = 0;
-
-    ScopedXLock xlock;
-
-    if (XQueryPointer (display, RootWindow (display, DefaultScreen (display)),
-                       &root, &child, &x, &y, &winx, &winy, &mask) != False)
+    if (display != nullptr)
     {
-        if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
-        if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
-        if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
+        Window root, child;
+        int x, y, winx, winy;
+        unsigned int mask;
+        int mouseMods = 0;
+
+        ScopedXLock xlock;
+
+        if (XQueryPointer (display, RootWindow (display, DefaultScreen (display)),
+                           &root, &child, &x, &y, &winx, &winy, &mask) != False)
+        {
+            if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
+            if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
+            if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
+        }
+
+        LinuxComponentPeer::currentModifiers = LinuxComponentPeer::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
     }
 
-    LinuxComponentPeer::currentModifiers = LinuxComponentPeer::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
     return LinuxComponentPeer::currentModifiers;
 }
 
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /* allowMenusAndBars */)
+void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* allowMenusAndBars */)
 {
     if (enableOrDisable)
-        kioskModeComponent->setBounds (getDisplays().getMainDisplay().totalArea);
+        comp->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
 //==============================================================================
@@ -2995,118 +3746,56 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAtt
 }
 
 //==============================================================================
-static double getDisplayDPI (int index)
-{
-    double dpiX = (DisplayWidth  (display, index) * 25.4) / DisplayWidthMM  (display, index);
-    double dpiY = (DisplayHeight (display, index) * 25.4) / DisplayHeightMM (display, index);
-    return (dpiX + dpiY) / 2.0;
-}
-
 void Desktop::Displays::findDisplays (float masterScale)
 {
-    if (display == 0)
-        return;
+    DisplayGeometry& geometry = DisplayGeometry::getOrCreateInstance (display, masterScale);
 
-    ScopedXLock xlock;
-
-  #if JUCE_USE_XINERAMA
-    int major_opcode, first_event, first_error;
-
-    if (XQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error))
+    // add the main display first
+    int mainDisplayIdx;
+    for (mainDisplayIdx = 0; mainDisplayIdx < geometry.infos.size(); ++mainDisplayIdx)
     {
-        typedef Bool (*tXineramaIsActive) (::Display*);
-        typedef XineramaScreenInfo* (*tXineramaQueryScreens) (::Display*, int*);
-
-        static tXineramaIsActive xineramaIsActive = nullptr;
-        static tXineramaQueryScreens xineramaQueryScreens = nullptr;
-
-        if (xineramaIsActive == nullptr || xineramaQueryScreens == nullptr)
-        {
-            void* h = dlopen ("libXinerama.so", RTLD_GLOBAL | RTLD_NOW);
-
-            if (h == nullptr)
-                h = dlopen ("libXinerama.so.1", RTLD_GLOBAL | RTLD_NOW);
-
-            if (h != nullptr)
-            {
-                xineramaIsActive = (tXineramaIsActive) dlsym (h, "XineramaIsActive");
-                xineramaQueryScreens = (tXineramaQueryScreens) dlsym (h, "XineramaQueryScreens");
-            }
-        }
-
-        if (xineramaIsActive != nullptr
-            && xineramaQueryScreens != nullptr
-            && xineramaIsActive (display))
-        {
-            int numMonitors = 0;
-
-            if (XineramaScreenInfo* const screens = xineramaQueryScreens (display, &numMonitors))
-            {
-                for (int index = 0; index < numMonitors; ++index)
-                {
-                    for (int j = numMonitors; --j >= 0;)
-                    {
-                        if (screens[j].screen_number == index)
-                        {
-                            Display d;
-                            d.userArea = d.totalArea = Rectangle<int> (screens[j].x_org,
-                                                                       screens[j].y_org,
-                                                                       screens[j].width,
-                                                                       screens[j].height) / masterScale;
-                            d.isMain = (index == 0);
-                            d.scale = masterScale;
-                            d.dpi = getDisplayDPI (0); // (all screens share the same DPI)
-
-                            displays.add (d);
-                        }
-                    }
-                }
-
-                XFree (screens);
-            }
-        }
+        const DisplayGeometry::ExtendedInfo& info = geometry.infos.getReference (mainDisplayIdx);
+        if (info.isMain)
+        break;
     }
 
-    if (displays.size() == 0)
-  #endif
+    // no main display found then use the first
+    if (mainDisplayIdx >= geometry.infos.size())
+        mainDisplayIdx = 0;
+
+    // add the main display
     {
-        Atom hints = Atoms::getIfExists ("_NET_WORKAREA");
+        const DisplayGeometry::ExtendedInfo& info =
+      geometry.infos.getReference (mainDisplayIdx);
+        Desktop::Displays::Display d;
 
-        if (hints != None)
-        {
-            const int numMonitors = ScreenCount (display);
+        d.isMain = true;
+        d.scale = masterScale * info.scale;
+        d.dpi = info.dpi;
 
-            for (int i = 0; i < numMonitors; ++i)
-            {
-                GetXProperty prop (RootWindow (display, i), hints, 0, 4, false, XA_CARDINAL);
+        d.totalArea = DisplayGeometry::physicalToScaled (info.totalBounds);
+        d.userArea = (info.usableBounds / d.scale) + info.topLeftScaled;
 
-                if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
-                {
-                    const long* const position = (const long*) prop.data;
+        displays.add (d);
+    }
 
-                    Display d;
-                    d.userArea = d.totalArea = Rectangle<int> (position[0], position[1],
-                                                               position[2], position[3]) / masterScale;
-                    d.isMain = (displays.size() == 0);
-                    d.scale = masterScale;
-                    d.dpi = getDisplayDPI (i);
+    for (int i = 0; i < geometry.infos.size(); ++i)
+    {
+        // don't add the main display a second time
+        if (i == mainDisplayIdx)
+            continue;
 
-                    displays.add (d);
-                }
-            }
-        }
+        const DisplayGeometry::ExtendedInfo& info = geometry.infos.getReference (i);
+        Desktop::Displays::Display d;
 
-        if (displays.size() == 0)
-        {
-            Display d;
-            d.userArea = d.totalArea = Rectangle<int> (DisplayWidth  (display, DefaultScreen (display)),
-                                                       DisplayHeight (display, DefaultScreen (display))) * masterScale;
-            d.isMain = true;
-            d.scale = masterScale;
-            d.dpi = getDisplayDPI (0);
+        d.isMain = false;
+        d.scale = masterScale * info.scale;
+        d.dpi = info.dpi;
 
-            displays.add (d);
-        }
+        d.totalArea = DisplayGeometry::physicalToScaled (info.totalBounds);
+        d.userArea = (info.usableBounds / d.scale) + info.topLeftScaled;
+
+        displays.add (d);
     }
 }
 
@@ -3139,6 +3828,9 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
+    if (display == nullptr)
+        return Point<float>();
+
     Window root, child;
     int x, y, winx, winy;
     unsigned int mask;
@@ -3154,14 +3846,18 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
         x = y = -1;
     }
 
-    return Point<float> ((float) x, (float) y);
+    return DisplayGeometry::physicalToScaled (Point<float> ((float) x, (float) y));
 }
 
 void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
-    ScopedXLock xlock;
-    Window root = RootWindow (display, DefaultScreen (display));
-    XWarpPointer (display, None, root, 0, 0, 0, 0, roundToInt (newPosition.getX()), roundToInt (newPosition.getY()));
+    if (display != nullptr)
+    {
+        ScopedXLock xlock;
+        Window root = RootWindow (display, DefaultScreen (display));
+        newPosition = DisplayGeometry::scaledToPhysical (newPosition);
+        XWarpPointer (display, None, root, 0, 0, 0, 0, roundToInt (newPosition.getX()), roundToInt (newPosition.getY()));
+    }
 }
 
 double Desktop::getDefaultMasterScale()
@@ -3183,16 +3879,19 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
     {
         screenSaverAllowed = isEnabled;
 
-        typedef void (*tXScreenSaverSuspend) (Display*, Bool);
-        static tXScreenSaverSuspend xScreenSaverSuspend = nullptr;
+        if (display != nullptr)
+        {
+            typedef void (*tXScreenSaverSuspend) (Display*, Bool);
+            static tXScreenSaverSuspend xScreenSaverSuspend = nullptr;
 
-        if (xScreenSaverSuspend == nullptr)
-            if (void* h = dlopen ("libXss.so", RTLD_GLOBAL | RTLD_NOW))
-                xScreenSaverSuspend = (tXScreenSaverSuspend) dlsym (h, "XScreenSaverSuspend");
+            if (xScreenSaverSuspend == nullptr)
+                if (void* h = dlopen ("libXss.so", RTLD_GLOBAL | RTLD_NOW))
+                    xScreenSaverSuspend = (tXScreenSaverSuspend) dlsym (h, "XScreenSaverSuspend");
 
-        ScopedXLock xlock;
-        if (xScreenSaverSuspend != nullptr)
-            xScreenSaverSuspend (display, ! isEnabled);
+            ScopedXLock xlock;
+            if (xScreenSaverSuspend != nullptr)
+                xScreenSaverSuspend (display, ! isEnabled);
+        }
     }
 }
 
@@ -3204,9 +3903,12 @@ bool Desktop::isScreenSaverEnabled()
 //==============================================================================
 void* CustomMouseCursorInfo::create() const
 {
+    if (display == nullptr)
+        return nullptr;
+
     ScopedXLock xlock;
-    const unsigned int imageW = image.getWidth();
-    const unsigned int imageH = image.getHeight();
+    const unsigned int imageW = (unsigned int) image.getWidth();
+    const unsigned int imageH = (unsigned int) image.getHeight();
     int hotspotX = hotspot.x;
     int hotspotY = hotspot.y;
 
@@ -3243,10 +3945,10 @@ void* CustomMouseCursorInfo::create() const
 
         if (xcursorSupportsARGB != nullptr)
         {
-            if (XcursorImage* xcImage = xcursorImageCreate (imageW, imageH))
+            if (XcursorImage* xcImage = xcursorImageCreate ((int) imageW, (int) imageH))
             {
-                xcImage->xhot = hotspotX;
-                xcImage->yhot = hotspotY;
+                xcImage->xhot = (XcursorDim) hotspotX;
+                xcImage->yhot = (XcursorDim) hotspotY;
                 XcursorPixel* dest = xcImage->pixels;
 
                 for (int y = 0; y < (int) imageH; ++y)
@@ -3268,17 +3970,17 @@ void* CustomMouseCursorInfo::create() const
     if (! XQueryBestCursor (display, root, imageW, imageH, &cursorW, &cursorH))
         return nullptr;
 
-    Image im (Image::ARGB, cursorW, cursorH, true);
+    Image im (Image::ARGB, (int) cursorW, (int) cursorH, true);
 
     {
         Graphics g (im);
 
         if (imageW > cursorW || imageH > cursorH)
         {
-            hotspotX = (hotspotX * cursorW) / imageW;
-            hotspotY = (hotspotY * cursorH) / imageH;
+            hotspotX = (hotspotX * (int) cursorW) / (int) imageW;
+            hotspotY = (hotspotY * (int) cursorH) / (int) imageH;
 
-            g.drawImageWithin (image, 0, 0, imageW, imageH,
+            g.drawImageWithin (image, 0, 0, (int) imageW, (int) imageH,
                                RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
                                false);
         }
@@ -3288,19 +3990,19 @@ void* CustomMouseCursorInfo::create() const
         }
     }
 
-    const int stride = (cursorW + 7) >> 3;
-    HeapBlock <char> maskPlane, sourcePlane;
+    const unsigned int stride = (cursorW + 7) >> 3;
+    HeapBlock<char> maskPlane, sourcePlane;
     maskPlane.calloc (stride * cursorH);
     sourcePlane.calloc (stride * cursorH);
 
     const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
 
-    for (int y = cursorH; --y >= 0;)
+    for (int y = (int) cursorH; --y >= 0;)
     {
-        for (int x = cursorW; --x >= 0;)
+        for (int x = (int) cursorW; --x >= 0;)
         {
             const char mask = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
-            const int offset = y * stride + (x >> 3);
+            const unsigned int offset = (unsigned int) y * stride + ((unsigned int) x >> 3);
 
             const Colour c (im.getPixelAt (x, y));
 
@@ -3316,7 +4018,8 @@ void* CustomMouseCursorInfo::create() const
     black.red = black.green = black.blue = 0;
     white.red = white.green = white.blue = 0xffff;
 
-    void* result = (void*) XCreatePixmapCursor (display, sourcePixmap, maskPixmap, &white, &black, hotspotX, hotspotY);
+    void* result = (void*) XCreatePixmapCursor (display, sourcePixmap, maskPixmap, &white, &black,
+                                                (unsigned int) hotspotX, (unsigned int) hotspotY);
 
     XFreePixmap (display, sourcePixmap);
     XFreePixmap (display, maskPixmap);
@@ -3326,13 +4029,18 @@ void* CustomMouseCursorInfo::create() const
 
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool)
 {
-    ScopedXLock xlock;
-    if (cursorHandle != nullptr)
+    if (cursorHandle != nullptr && display != nullptr)
+    {
+        ScopedXLock xlock;
         XFreeCursor (display, (Cursor) cursorHandle);
+    }
 }
 
 void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)
 {
+    if (display == nullptr)
+        return None;
+
     unsigned int shape;
 
     switch (type)
@@ -3432,7 +4140,28 @@ void LookAndFeel::playAlertSound()
 {
     std::cout << "\a" << std::flush;
 }
+//==============================================================================
+Rectangle<int> juce_LinuxScaledToPhysicalBounds(ComponentPeer* peer, const Rectangle<int>& bounds)
+{
+    Rectangle<int> retval = bounds;
 
+    if (LinuxComponentPeer* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
+        retval *= linuxPeer->getCurrentScale();
+
+    return retval;
+}
+
+void juce_LinuxAddRepaintListener (ComponentPeer* peer, Component* dummy)
+{
+    if (LinuxComponentPeer* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
+        linuxPeer->addOpenGLRepaintListener (dummy);
+}
+
+void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy)
+{
+    if (LinuxComponentPeer* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
+        linuxPeer->removeOpenGLRepaintListener (dummy);
+}
 
 //==============================================================================
 #if JUCE_MODAL_LOOPS_PERMITTED
@@ -3522,7 +4251,7 @@ const int KeyPress::numberPadSeparator      = (XK_KP_Separator & 0xff)| Keys::ex
 const int KeyPress::numberPadDecimalPoint   = (XK_KP_Decimal & 0xff)| Keys::extendedKeyModifier;
 const int KeyPress::numberPadEquals         = (XK_KP_Equal & 0xff)| Keys::extendedKeyModifier;
 const int KeyPress::numberPadDelete         = (XK_KP_Delete & 0xff)| Keys::extendedKeyModifier;
-const int KeyPress::playKey                 = (0xffeeff00) | Keys::extendedKeyModifier;
-const int KeyPress::stopKey                 = (0xffeeff01) | Keys::extendedKeyModifier;
-const int KeyPress::fastForwardKey          = (0xffeeff02) | Keys::extendedKeyModifier;
-const int KeyPress::rewindKey               = (0xffeeff03) | Keys::extendedKeyModifier;
+const int KeyPress::playKey                 = ((int) 0xffeeff00) | Keys::extendedKeyModifier;
+const int KeyPress::stopKey                 = ((int) 0xffeeff01) | Keys::extendedKeyModifier;
+const int KeyPress::fastForwardKey          = ((int) 0xffeeff02) | Keys::extendedKeyModifier;
+const int KeyPress::rewindKey               = ((int) 0xffeeff03) | Keys::extendedKeyModifier;

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -122,9 +122,7 @@ public:
             If your content component needs to find the dialog window that it is
             contained in, a quick trick is to do this:
             @code
-            Dialogwindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>();
-
-            if (dw != nullptr)
+            if (DialogWindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>())
                 dw->exitModalState (1234);
             @endcode
         */
@@ -163,9 +161,7 @@ public:
         the DialogWindow that is created. To find a pointer to this window from your
         contentComponent, you can do something like this:
         @code
-        Dialogwindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>();
-
-        if (dw != nullptr)
+        if (DialogWindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>())
             dw->exitModalState (1234);
         @endcode
 
@@ -211,9 +207,7 @@ public:
         the DialogWindow that is created. To find a pointer to this window from your
         contentComponent, you can do something like this:
         @code
-        Dialogwindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>();
-
-        if (dw != nullptr)
+        if (DialogWindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>())
             dw->exitModalState (1234);
         @endcode
 

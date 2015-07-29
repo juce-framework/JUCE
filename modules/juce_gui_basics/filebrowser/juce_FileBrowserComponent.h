@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -51,18 +51,19 @@ public:
     */
     enum FileChooserFlags
     {
-        openMode                = 1,    /**< specifies that the component should allow the user to
-                                             choose an existing file with the intention of opening it. */
-        saveMode                = 2,    /**< specifies that the component should allow the user to specify
-                                             the name of a file that will be used to save something. */
-        canSelectFiles          = 4,    /**< specifies that the user can select files (can be used in
-                                             conjunction with canSelectDirectories). */
-        canSelectDirectories    = 8,    /**< specifies that the user can select directories (can be used in
-                                             conjuction with canSelectFiles). */
-        canSelectMultipleItems  = 16,   /**< specifies that the user can select multiple items. */
-        useTreeView             = 32,   /**< specifies that a tree-view should be shown instead of a file list. */
-        filenameBoxIsReadOnly   = 64,   /**< specifies that the user can't type directly into the filename box. */
-        warnAboutOverwriting    = 128   /**< specifies that the dialog should warn about overwriting existing files (if possible). */
+        openMode                        = 1,    /**< specifies that the component should allow the user to
+                                                     choose an existing file with the intention of opening it. */
+        saveMode                        = 2,    /**< specifies that the component should allow the user to specify
+                                                     the name of a file that will be used to save something. */
+        canSelectFiles                  = 4,    /**< specifies that the user can select files (can be used in
+                                                     conjunction with canSelectDirectories). */
+        canSelectDirectories            = 8,    /**< specifies that the user can select directories (can be used in
+                                                     conjuction with canSelectFiles). */
+        canSelectMultipleItems          = 16,   /**< specifies that the user can select multiple items. */
+        useTreeView                     = 32,   /**< specifies that a tree-view should be shown instead of a file list. */
+        filenameBoxIsReadOnly           = 64,   /**< specifies that the user can't type directly into the filename box. */
+        warnAboutOverwriting            = 128,  /**< specifies that the dialog should warn about overwriting existing files (if possible). */
+        doNotClearFileNameOnRootChange  = 256   /**< specifies that the file name should not be cleared upon root change. */
     };
 
     //==============================================================================

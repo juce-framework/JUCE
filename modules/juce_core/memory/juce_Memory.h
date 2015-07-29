@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -50,7 +50,7 @@ inline void deleteAndZero (Type& pointer)                           { delete poi
     a specific number of bytes,
 */
 template <typename Type, typename IntegerType>
-inline Type* addBytesToPointer (Type* pointer, IntegerType bytes) noexcept  { return (Type*) (((char*) pointer) + bytes); }
+inline Type* addBytesToPointer (Type* basePointer, IntegerType bytes) noexcept  { return (Type*) (((char*) basePointer) + bytes); }
 
 /** A handy function which returns the difference between any two pointers, in bytes.
     The address of the second pointer is subtracted from the first, and the difference in bytes is returned.
@@ -62,7 +62,25 @@ inline int getAddressDifference (Type1* pointer1, Type2* pointer2) noexcept  { r
     nullptr if the pointer is null.
 */
 template <class Type>
-inline Type* createCopyIfNotNull (const Type* pointer)     { return pointer != nullptr ? new Type (*pointer) : nullptr; }
+inline Type* createCopyIfNotNull (const Type* objectToCopy) { return objectToCopy != nullptr ? new Type (*objectToCopy) : nullptr; }
+
+//==============================================================================
+/** A handy function to read un-aligned memory without a performance penalty or bus-error. */
+template <typename Type>
+inline Type readUnaligned (const void* srcPtr) noexcept
+{
+    Type value;
+    memcpy (&value, srcPtr, sizeof (Type));
+
+    return value;
+}
+
+/** A handy function to write un-aligned memory without a performance penalty or bus-error. */
+template <typename Type>
+inline void writeUnaligned (void* dstPtr, Type value) noexcept
+{
+    memcpy (dstPtr, &value, sizeof(Type));
+}
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS || DOXYGEN

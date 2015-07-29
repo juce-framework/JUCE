@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -25,8 +25,8 @@
 /*
     IMPORTANT DISCLAIMER: By choosing to enable the JUCE_USE_MP3AUDIOFORMAT flag and
     to compile this MP3 code into your software, you do so AT YOUR OWN RISK! By doing so,
-    you are agreeing that Raw Material Software is in no way responsible for any patent,
-    copyright, or other legal issues that you may suffer as a result.
+    you are agreeing that ROLI Ltd. is in no way responsible for any patent, copyright,
+    or other legal issues that you may suffer as a result.
 
     The code in juce_MP3AudioFormat.cpp is NOT guaranteed to be free from infringements of 3rd-party
     intellectual property. If you wish to use it, please seek your own independent advice about the
@@ -426,9 +426,8 @@ struct VBRTagData
 
         if (flags & 4)
         {
-            if (toc != nullptr)
-                for (int i = 0; i < 100; ++i)
-                    toc[i] = data[i];
+            for (int i = 0; i < 100; ++i)
+                toc[i] = data[i];
 
             data += 100;
         }

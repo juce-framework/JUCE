@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PAINTELEMENTTEXT_JUCEHEADER__
-#define __JUCER_PAINTELEMENTTEXT_JUCEHEADER__
+#ifndef JUCER_PAINTELEMENTTEXT_H_INCLUDED
+#define JUCER_PAINTELEMENTTEXT_H_INCLUDED
 
 #include "jucer_ColouredElement.h"
 #include "../properties/jucer_FontPropertyComponent.h"
@@ -331,24 +331,33 @@ public:
 
     void convertToPath()
     {
-        font = FontPropertyComponent::applyNameToFont (typefaceName, font);
+        if (PaintRoutineEditor* parent = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
+        {
 
-        const Rectangle<int> r (getCurrentAbsoluteBounds());
+            font = FontPropertyComponent::applyNameToFont (typefaceName, font);
 
-        GlyphArrangement arr;
-        arr.addCurtailedLineOfText (font, text,
-                                    0.0f, 0.0f, (float) r.getWidth(),
-                                    true);
+            const Rectangle<int> r =
+                getCurrentBounds (parent->getComponentArea().withZeroOrigin());
 
-        arr.justifyGlyphs (0, arr.getNumGlyphs(),
-                           (float) r.getX(), (float) r.getY(),
-                           (float) r.getWidth(), (float) r.getHeight(),
-                           justification);
+            GlyphArrangement arr;
+            arr.addCurtailedLineOfText (font, text,
+                                        0.0f, 0.0f, (float) r.getWidth(),
+                                        true);
 
-        Path path;
-        arr.createPath (path);
+            arr.justifyGlyphs (0, arr.getNumGlyphs(),
+                               (float) r.getX(), (float) r.getY(),
+                               (float) r.getWidth(), (float) r.getHeight(),
+                               justification);
 
-        convertToNewPathElement (path);
+            Path path;
+            arr.createPath (path);
+
+            convertToNewPathElement (path);
+        }
+        else
+        {
+            jassertfalse;
+        }
     }
 
 private:
@@ -558,4 +567,4 @@ private:
 };
 
 
-#endif   // __JUCER_PAINTELEMENTTEXT_JUCEHEADER__
+#endif   // JUCER_PAINTELEMENTTEXT_H_INCLUDED

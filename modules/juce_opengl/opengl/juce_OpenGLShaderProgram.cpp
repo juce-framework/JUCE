@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -141,10 +141,10 @@ OpenGLShaderProgram::Uniform::Uniform (const OpenGLShaderProgram& program, const
 }
 
 OpenGLShaderProgram::Attribute::Attribute (const OpenGLShaderProgram& program, const char* name)
-    : attributeID (program.context.extensions.glGetAttribLocation (program.getProgramID(), name))
+    : attributeID ((GLuint) program.context.extensions.glGetAttribLocation (program.getProgramID(), name))
 {
    #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
-    jassert (attributeID >= 0);
+    jassert ((GLint) attributeID >= 0);
    #endif
 }
 

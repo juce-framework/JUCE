@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -48,7 +48,8 @@ public:
                    void* contextToShare,
                    bool multisampling,
                    OpenGLVersion version)
-        : context (nil), frameBufferHandle (0), colorBufferHandle (0),
+        : context (nil), openGLversion (version),
+          frameBufferHandle (0), colorBufferHandle (0),
           depthBufferHandle (0), msaaColorHandle (0), msaaBufferHandle (0),
           lastWidth (0), lastHeight (0), needToRebuildBuffers (false),
           swapFrames (0), useDepthBuffer (pixFormat.depthBufferBits > 0),
@@ -70,13 +71,13 @@ public:
             view.userInteractionEnabled = NO;
 
             glLayer = (CAEAGLLayer*) [view layer];
-            glLayer.contentsScale = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            glLayer.contentsScale = (CGFloat) Desktop::getInstance().getDisplays().getMainDisplay().scale;
             glLayer.opaque = true;
 
             [((UIView*) peer->getNativeHandle()) addSubview: view];
 
            #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
-            if (version == OpenGLContext::openGL3_2 && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
+            if (version == openGL3_2 && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
             {
                 if (! createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
                 {
@@ -148,10 +149,17 @@ public:
             glBindFramebuffer (GL_READ_FRAMEBUFFER, msaaBufferHandle);
 
            #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
-            glBlitFramebuffer (0, 0, lastWidth, lastHeight, 0, 0, lastWidth, lastHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-           #else
-            glResolveMultisampleFramebufferAPPLE();
+            if (openGLversion >= openGL3_2)
+            {
+                glBlitFramebuffer (0, 0, lastWidth, lastHeight, 0, 0, lastWidth, lastHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            }
+            else
            #endif
+            {
+               #ifdef GL_APPLE_framebuffer_multisample
+                glResolveMultisampleFramebufferAPPLE();
+               #endif
+            }
         }
 
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
@@ -193,6 +201,7 @@ private:
     JuceGLView* view;
     CAEAGLLayer* glLayer;
     EAGLContext* context;
+    const OpenGLVersion openGLversion;
     GLuint frameBufferHandle, colorBufferHandle, depthBufferHandle,
            msaaColorHandle, msaaBufferHandle;
 

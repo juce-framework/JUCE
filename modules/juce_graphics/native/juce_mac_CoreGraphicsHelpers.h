@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -30,25 +30,25 @@
 namespace
 {
     template <class RectType>
-    Rectangle<int> convertToRectInt (const RectType& r) noexcept
+    Rectangle<int> convertToRectInt (RectType r) noexcept
     {
         return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
     }
 
     template <class RectType>
-    Rectangle<float> convertToRectFloat (const RectType& r) noexcept
+    Rectangle<float> convertToRectFloat (RectType r) noexcept
     {
         return Rectangle<float> (r.origin.x, r.origin.y, r.size.width, r.size.height);
     }
 
     template <class RectType>
-    CGRect convertToCGRect (const RectType& r) noexcept
+    CGRect convertToCGRect (RectType r) noexcept
     {
         return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
     }
 
     template <typename PointType>
-    CGPoint convertToCGPoint (const PointType& p) noexcept
+    CGPoint convertToCGPoint (PointType p) noexcept
     {
         return CGPointMake ((CGFloat) p.x, (CGFloat) p.y);
     }

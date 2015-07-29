@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_GROUPINFORMATIONCOMPONENT_JUCEHEADER__
-#define __JUCER_GROUPINFORMATIONCOMPONENT_JUCEHEADER__
+#ifndef JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED
+#define JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED
 
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
@@ -96,8 +96,8 @@ public:
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override                { itemChanged(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) override              { itemChanged(); }
-    void valueTreeChildOrderChanged (ValueTree&) override                     { itemChanged(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override         { itemChanged(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override           { itemChanged(); }
     void valueTreeParentChanged (ValueTree&) override                         { itemChanged(); }
 
 private:
@@ -164,4 +164,4 @@ private:
 };
 
 
-#endif   // __JUCER_GROUPINFORMATIONCOMPONENT_JUCEHEADER__
+#endif   // JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED

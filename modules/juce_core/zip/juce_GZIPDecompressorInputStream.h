@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -43,21 +43,28 @@
 class JUCE_API  GZIPDecompressorInputStream  : public InputStream
 {
 public:
+    enum Format
+    {
+        zlibFormat = 0,
+        deflateFormat,
+        gzipFormat
+    };
+
     //==============================================================================
     /** Creates a decompressor stream.
 
         @param sourceStream                 the stream to read from
         @param deleteSourceWhenDestroyed    whether or not to delete the source stream
                                             when this object is destroyed
-        @param noWrap                       this is used internally by the ZipFile class
-                                            and should be ignored by user applications
+        @param sourceFormat                 can be used to select which of the supported
+                                            formats the data is expected to be in
         @param uncompressedStreamLength     if the creator knows the length that the
                                             uncompressed stream will be, then it can supply this
                                             value, which will be returned by getTotalLength()
     */
     GZIPDecompressorInputStream (InputStream* sourceStream,
                                  bool deleteSourceWhenDestroyed,
-                                 bool noWrap = false,
+                                 Format sourceFormat = zlibFormat,
                                  int64 uncompressedStreamLength = -1);
 
     /** Creates a decompressor stream.
@@ -81,7 +88,7 @@ private:
     //==============================================================================
     OptionalScopedPointer<InputStream> sourceStream;
     const int64 uncompressedStreamLength;
-    const bool noWrap;
+    const Format format;
     bool isEof;
     int activeBufferSize;
     int64 originalSourcePos, currentPos;
@@ -90,6 +97,11 @@ private:
     class GZIPDecompressHelper;
     friend struct ContainerDeletePolicy<GZIPDecompressHelper>;
     ScopedPointer<GZIPDecompressHelper> helper;
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // The arguments to this method have changed! Please pass a Format enum instead of the old dontWrap bool.
+    GZIPDecompressorInputStream (InputStream*, bool, bool, int64 x = -1);
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPDecompressorInputStream)
 };

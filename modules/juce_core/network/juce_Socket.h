@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -64,6 +64,25 @@ public:
                     on the same port
     */
     bool bindToPort (int localPortNumber);
+
+    /** Binds the socket to the specified local port and local address.
+
+        If localAddress is not an empty string then the socket will be bound to localAddress
+        as well. This is useful if you would like to bind your socket to a specific network
+        adapter. Note that localAddress must be an IP address assigned to one of your
+        network address otherwise this function will fail.
+        @returns    true on success; false may indicate that another socket is already bound
+                    on the same port
+        @see bindToPort(int localPortNumber), IPAddress::findAllAddresses
+    */
+    bool bindToPort (int localPortNumber, const String& localAddress);
+
+    /** Returns the local port number to which this socket is currently bound.
+
+        This is useful if you need to know to which port the OS has actually bound your
+        socket when calling the constructor or bindToPort with zero as the
+        localPortNumber argument. Returns -1 if the function fails. */
+    int getBoundPort() const noexcept;
 
     /** Tries to connect the socket to hostname:port.
 
@@ -164,6 +183,7 @@ private:
     String hostName;
     int volatile portNumber, handle;
     bool connected, isListener;
+    mutable CriticalSection readLock;
 
     StreamingSocket (const String& hostname, int portNumber, int handle);
 
@@ -185,22 +205,16 @@ class JUCE_API  DatagramSocket
 public:
     //==============================================================================
     /**
-        Creates an (uninitialised) datagram socket.
+        Creates a datagram socket.
 
-        The localPortNumber is the port on which to bind this socket. If this value is 0,
-        the port number is assigned by the operating system.
-
-        To use the socket for sending, call the connect() method. This will not immediately
-        make a connection, but will save the destination you've provided. After this, you can
-        call read() or write().
+        You first need to bind this socket to a port with bindToPort if you intend to read
+        from this socket.
 
         If enableBroadcasting is true, the socket will be allowed to send broadcast messages
         (may require extra privileges on linux)
-
-        To wait for other sockets to connect to this one, call waitForNextConnection().
     */
-    DatagramSocket (int localPortNumber,
-                    bool enableBroadcasting = false);
+    DatagramSocket (bool enableBroadcasting = false);
+
 
     /** Destructor. */
     ~DatagramSocket();
@@ -208,37 +222,33 @@ public:
     //==============================================================================
     /** Binds the socket to the specified local port.
 
+        The localPortNumber is the port on which to bind this socket. If this value is 0,
+        the port number is assigned by the operating system.
+
         @returns    true on success; false may indicate that another socket is already bound
                     on the same port
     */
     bool bindToPort (int localPortNumber);
 
-    /** Tries to connect the socket to hostname:port.
+    /** Binds the socket to the specified local port and local address.
 
-        If timeOutMillisecs is 0, then this method will block until the operating system
-        rejects the connection (which could take a long time).
-
-        @returns true if it succeeds.
-        @see isConnected
+        If localAddress is not an empty string then the socket will be bound to localAddress
+        as well. This is useful if you would like to bind your socket to a specific network
+        adapter. Note that localAddress must be an IP address assigned to one of your
+        network address otherwise this function will fail.
+        @returns    true on success; false may indicate that another socket is already bound
+                    on the same port
+        @see bindToPort(int localPortNumber), IPAddress::findAllAddresses
     */
-    bool connect (const String& remoteHostname,
-                  int remotePortNumber,
-                  int timeOutMillisecs = 3000);
+    bool bindToPort (int localPortNumber, const String& localAddress);
 
-    /** True if the socket is currently connected. */
-    bool isConnected() const noexcept                           { return connected; }
+    /** Returns the local port number to which this socket is currently bound.
 
-    /** Closes the connection. */
-    void close();
+        This is useful if you need to know to which port the OS has actually bound your
+        socket when bindToPort was called with zero.
 
-    /** Returns the name of the currently connected host. */
-    const String& getHostName() const noexcept                  { return hostName; }
-
-    /** Returns the port number that's currently open. */
-    int getPort() const noexcept                                { return portNumber; }
-
-    /** True if the socket is connected to this machine rather than over the network. */
-    bool isLocal() const noexcept;
+        Returns -1 if the socket didn't bind to any port yet or an error occured. */
+    int getBoundPort() const noexcept;
 
     /** Returns the OS's socket handle that's currently open. */
     int getRawSocketHandle() const noexcept                     { return handle; }
@@ -271,6 +281,21 @@ public:
     int read (void* destBuffer, int maxBytesToRead,
               bool blockUntilSpecifiedAmountHasArrived);
 
+    /** Reads bytes from the socket and return the IP address of the sender.
+
+        If blockUntilSpecifiedAmountHasArrived is true, the method will block until
+        maxBytesToRead bytes have been read, (or until an error occurs). If this
+        flag is false, the method will return as much data as is currently available
+        without blocking.
+
+        @returns the number of bytes read, or -1 if there was an error. On a successful
+                 result, the senderIPAddress value will be set to the IP of the sender.
+        @see waitUntilReady
+    */
+    int read (void* destBuffer, int maxBytesToRead,
+              bool blockUntilSpecifiedAmountHasArrived,
+              String& senderIPAddress, int& senderPortNumber);
+
     /** Writes bytes to the socket from a buffer.
 
         Note that this method will block unless you have checked the socket is ready
@@ -278,25 +303,30 @@ public:
 
         @returns the number of bytes written, or -1 if there was an error.
     */
-    int write (const void* sourceBuffer, int numBytesToWrite);
+    int write (const String& remoteHostname, int remotePortNumber,
+               const void* sourceBuffer, int numBytesToWrite);
 
     //==============================================================================
-    /** This waits for incoming data to be sent, and returns a socket that can be used
-        to read it.
+    /** Join a multicast group
 
-        The object that gets returned is owned by the caller, and can't be used for
-        sending, but can be used to read the data.
+        @returns true if it succeeds.
     */
-    DatagramSocket* waitForNextConnection() const;
+    bool joinMulticast (const String& multicastIPAddress);
+
+    /** Leave a multicast group
+
+        @returns true if it succeeds.
+    */
+    bool leaveMulticast (const String& multicastIPAddress);
 
 private:
     //==============================================================================
-    String hostName;
-    int volatile portNumber, handle;
-    bool connected, allowBroadcast;
-    void* serverAddress;
-
-    DatagramSocket (const String& hostname, int portNumber, int handle, int localPortNumber);
+    int handle;
+    bool isBound;
+    String lastBindAddress, lastServerHost;
+    int lastServerPort;
+    void* lastServerAddress;
+    mutable CriticalSection readLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DatagramSocket)
 };

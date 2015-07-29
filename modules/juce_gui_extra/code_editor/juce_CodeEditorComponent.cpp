@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -103,11 +103,11 @@ public:
                 break;
 
             const SyntaxToken& token = tokens.getReference(i);
-            as.append (token.text.removeCharacters ("\r\n"), fontToUse, owner.getColourForTokenType (token.tokenType));
+            as.append (token.text.initialSectionNotContaining ("\r\n"), fontToUse, owner.getColourForTokenType (token.tokenType));
             column += token.length;
         }
 
-        as.draw (g, Rectangle<float> (x, (float) y, 10000.0f, (float) lineH));
+        as.draw (g, Rectangle<float> (x, (float) y, column * characterWidth + 10.0f, (float) lineH));
     }
 
 private:

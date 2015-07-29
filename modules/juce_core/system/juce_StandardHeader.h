@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -35,8 +35,8 @@
     See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION      3
-#define JUCE_MINOR_VERSION      1
-#define JUCE_BUILDNUMBER        1
+#define JUCE_MINOR_VERSION      2
+#define JUCE_BUILDNUMBER        0
 
 /** Current Juce version number.
 
@@ -50,6 +50,8 @@
 
 
 //==============================================================================
+#include <vector>  // included before platform defs to provide a definition of _LIBCPP_VERSION
+
 #include "juce_PlatformDefs.h"
 #include "juce_CompilerSupport.h"
 
@@ -71,7 +73,6 @@
 #include <cstring>
 #include <cstdio>
 #include <iostream>
-#include <vector>
 #include <algorithm>
 #include <functional>
 
@@ -104,7 +105,7 @@
 #endif
 
 #if JUCE_ANDROID
- #include <sys/atomics.h>
+ #include <atomic>
  #include <byteswap.h>
 #endif
 
@@ -113,6 +114,8 @@
 #undef TYPE_BOOL
 #undef max
 #undef min
+#undef major
+#undef minor
 
 //==============================================================================
 // DLL building settings on Windows

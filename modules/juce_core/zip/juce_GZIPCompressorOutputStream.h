@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -72,7 +72,7 @@ public:
         the stream is closed - this means that no more data can be written to it, and any
         subsequent attempts to call write() will cause an assertion.
     */
-    void flush();
+    void flush() override;
 
     int64 getPosition() override;
     bool setPosition (int64) override;

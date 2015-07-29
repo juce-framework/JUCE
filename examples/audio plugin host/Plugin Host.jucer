@@ -9,9 +9,8 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="JuceProjectAU" pluginAUViewClass="JuceProjectAU_V1"
-              pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.pluginhost"
-              jucerVersion="3.1.0" companyName="Raw Material Software Ltd."
-              includeBinaryInAppConfig="1">
+              pluginRTASCategory="" bundleIdentifier="com.roli.pluginhost"
+              jucerVersion="3.2.0" companyName="ROLI Ltd." includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="M73TRi" vst3Folder="~/SDKs/VST3 SDK">

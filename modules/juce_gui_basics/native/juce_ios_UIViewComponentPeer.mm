@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -862,12 +862,18 @@ void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
 {
 }
 
+static bool isIOS4_1() noexcept
+{
+    return [[[UIDevice currentDevice] systemVersion] doubleValue] >= 4.1;
+}
+
 static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept
 {
     switch (type)
     {
         case TextInputTarget::textKeyboard:          return UIKeyboardTypeAlphabet;
-        case TextInputTarget::numericKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
+        case TextInputTarget::numericKeyboard:       return isIOS4_1() ? UIKeyboardTypeNumberPad  : UIKeyboardTypeNumbersAndPunctuation;
+        case TextInputTarget::decimalKeyboard:       return isIOS4_1() ? UIKeyboardTypeDecimalPad : UIKeyboardTypeNumbersAndPunctuation;
         case TextInputTarget::urlKeyboard:           return UIKeyboardTypeURL;
         case TextInputTarget::emailAddressKeyboard:  return UIKeyboardTypeEmailAddress;
         case TextInputTarget::phoneNumberKeyboard:   return UIKeyboardTypePhonePad;
@@ -881,7 +887,7 @@ void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget* target)
 {
     view->hiddenTextView.keyboardType = getUIKeyboardType (target->getKeyboardType());
     view->hiddenTextView.text = juceStringToNS (target->getTextInRange (Range<int> (0, target->getHighlightedRegion().getStart())));
-    view->hiddenTextView.selectedRange = NSMakeRange (target->getHighlightedRegion().getStart(), 0);
+    view->hiddenTextView.selectedRange = NSMakeRange ((NSUInteger) target->getHighlightedRegion().getStart(), 0);
 }
 
 BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const String& text)

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -29,9 +29,11 @@ struct FileChooserDelegateClass  : public ObjCClass <NSObject>
     FileChooserDelegateClass()  : ObjCClass <NSObject> ("JUCEFileChooser_")
     {
         addIvar<StringArray*> ("filters");
+        addIvar<FilePreviewComponent*> ("filePreviewComponent");
 
-        addMethod (@selector (dealloc),                   dealloc,            "v@:");
-        addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename, "c@:@@");
+        addMethod (@selector (dealloc),                   dealloc,                 "v@:");
+        addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename,      "c@:@@");
+        addMethod (@selector (panelSelectionDidChange:),  panelSelectionDidChange, "c@");
 
        #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         addProtocol (@protocol (NSOpenSavePanelDelegate));
@@ -40,21 +42,21 @@ struct FileChooserDelegateClass  : public ObjCClass <NSObject>
         registerClass();
     }
 
-    static void setFilters (id self, StringArray* filters)
-    {
-        object_setInstanceVariable (self, "filters", filters);
-    }
+    static void setFilters (id self, StringArray* filters)                      { object_setInstanceVariable (self, "filters", filters); }
+    static void setFilePreviewComponent (id self, FilePreviewComponent* comp)   { object_setInstanceVariable (self, "filePreviewComponent", comp); }
+    static StringArray* getFilters (id self)                                    { return getIvar<StringArray*> (self, "filters"); }
+    static FilePreviewComponent* getFilePreviewComponent (id self)              { return getIvar<FilePreviewComponent*> (self, "filePreviewComponent"); }
 
 private:
     static void dealloc (id self, SEL)
     {
-        delete getIvar<StringArray*> (self, "filters");
+        delete getFilters (self);
         sendSuperclassMessage (self, @selector (dealloc));
     }
 
     static BOOL shouldShowFilename (id self, SEL, id /*sender*/, NSString* filename)
     {
-        StringArray* const filters = getIvar<StringArray*> (self, "filters");
+        StringArray* const filters = getFilters (self);
 
         const File f (nsStringToJuce (filename));
 
@@ -80,6 +82,32 @@ private:
 
         return f.isDirectory()
                  && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: filename];
+    }
+
+    static StringArray getSelectedPaths (id sender)
+    {
+        StringArray paths;
+
+        if ([sender isKindOfClass: [NSOpenPanel class]])
+        {
+            NSArray* urls = [(NSOpenPanel*) sender URLs];
+
+            for (NSUInteger i = 0; i < [urls count]; ++i)
+                paths.add (nsStringToJuce ([[urls objectAtIndex: i] path]));
+        }
+        else if ([sender isKindOfClass: [NSSavePanel class]])
+        {
+            paths.add (nsStringToJuce ([[(NSSavePanel*) sender URL] path]));
+        }
+
+        return paths;
+    }
+
+    static void panelSelectionDidChange (id self, SEL, id sender)
+    {
+        // NB: would need to extend FilePreviewComponent to handle the full list rather than just the first one
+        if (FilePreviewComponent* const previewComp = getFilePreviewComponent (self))
+            previewComp->selectedFileChanged (File (getSelectedPaths (sender)[0]));
     }
 };
 
@@ -113,7 +141,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool isSaveDialogue,
                                       bool /*warnAboutOverwritingExistingFiles*/,
                                       bool selectMultipleFiles,
-                                      FilePreviewComponent* /*extraInfoComponent*/)
+                                      FilePreviewComponent* extraInfoComponent)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -149,6 +177,16 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             [openPanel setCanChooseFiles: selectsFiles];
             [openPanel setAllowsMultipleSelection: selectMultipleFiles];
             [openPanel setResolvesAliases: YES];
+        }
+
+        if (extraInfoComponent != nullptr)
+        {
+            NSView* view = [[[NSView alloc] initWithFrame: makeNSRect (extraInfoComponent->getLocalBounds())] autorelease];
+            extraInfoComponent->addToDesktop (0, (void*) view);
+            extraInfoComponent->setVisible (true);
+            FileChooserDelegateClass::setFilePreviewComponent (delegate, extraInfoComponent);
+
+            [panel setAccessoryView: view];
         }
 
         [panel setDelegate: delegate];

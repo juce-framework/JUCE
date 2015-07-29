@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -310,10 +310,10 @@ void Project::valueTreePropertyChanged (ValueTree&, const Identifier& property)
     changed();
 }
 
-void Project::valueTreeChildAdded (ValueTree&, ValueTree&)      { changed(); }
-void Project::valueTreeChildRemoved (ValueTree&, ValueTree&)    { changed(); }
-void Project::valueTreeChildOrderChanged (ValueTree&)           { changed(); }
-void Project::valueTreeParentChanged (ValueTree&)               {}
+void Project::valueTreeChildAdded (ValueTree&, ValueTree&)          { changed(); }
+void Project::valueTreeChildRemoved (ValueTree&, ValueTree&, int)   { changed(); }
+void Project::valueTreeChildOrderChanged (ValueTree&, int, int)     { changed(); }
+void Project::valueTreeParentChanged (ValueTree&)                   {}
 
 //==============================================================================
 File Project::resolveFilename (String filename) const
@@ -566,7 +566,7 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
         }
     }
 
-    return Item (project, ValueTree::invalid);
+    return Item (project, ValueTree());
 }
 
 bool Project::Item::canContain (const Item& child) const
@@ -660,7 +660,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
         }
     }
 
-    return Item (project, ValueTree::invalid);
+    return Item (project, ValueTree());
 }
 
 File Project::Item::determineGroupFolder() const

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -433,10 +433,8 @@ struct AppearanceEditor
                             AppearanceSettings::getSchemeFileWildCard());
 
             if (fc.browseForFileToOpen())
-            {
                 if (getAppSettings().appearance.readFromFile (fc.getResult()))
                     rebuildProperties();
-            }
         }
 
         JUCE_DECLARE_NON_COPYABLE (EditorPanel)
@@ -515,6 +513,7 @@ void AppearanceSettings::showEditorWindow (ScopedPointer<Component>& ownerPointe
     else
     {
         Component* content;
+
         if (getAppSettings().monospacedFontNames.size() == 0)
             content = new AppearanceEditor::FontScanPanel();
         else
@@ -537,7 +536,7 @@ IntrojucerLookAndFeel::IntrojucerLookAndFeel()
 
 int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton&, int)   { return 120; }
 
-static Colour getTabBackgroundColour (TabBarButton& button)
+Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
 {
     const Colour bkg (button.findColour (mainBackgroundColourId).contrasting (0.15f));
 
@@ -567,6 +566,25 @@ void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bo
     LookAndFeel_V3::createTabTextLayout (button, (float) activeArea.getWidth(), (float) activeArea.getHeight(), col, textLayout);
 
     textLayout.draw (g, button.getTextArea().toFloat());
+}
+
+void IntrojucerLookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+                                                       bool isMouseOver, bool /*isMouseDown*/,
+                                                       ConcertinaPanel&, Component& panel)
+{
+    const Colour bkg (Colours::grey);
+
+    g.setGradientFill (ColourGradient (Colour::greyLevel (isMouseOver ? 0.6f : 0.5f), 0, (float) area.getY(),
+                                       Colour::greyLevel (0.4f), 0, (float) area.getBottom(), false));
+    g.fillAll();
+
+    g.setColour (bkg.contrasting().withAlpha (0.1f));
+    g.fillRect (area.withHeight (1));
+    g.fillRect (area.withTop (area.getBottom() - 1));
+
+    g.setColour (bkg.contrasting());
+    g.setFont (Font (area.getHeight() * 0.6f).boldened());
+    g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centredLeft, 1);
 }
 
 static Range<float> getBrightnessRange (const Image& im)

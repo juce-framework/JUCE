@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -165,6 +165,18 @@ StringArray getSearchPathsFromString (const String& searchPath)
 {
     StringArray s;
     s.addTokens (searchPath, ";\r\n", StringRef());
+    return getCleanedStringArray (s);
+}
+
+StringArray getCommaOrWhitespaceSeparatedItems (const String& sourceString)
+{
+    StringArray s;
+    s.addTokens (sourceString, ", \t\r\n", StringRef());
+    return getCleanedStringArray (s);
+}
+
+StringArray getCleanedStringArray (StringArray s)
+{
     s.trim();
     s.removeEmptyStrings();
     s.removeDuplicates (false);

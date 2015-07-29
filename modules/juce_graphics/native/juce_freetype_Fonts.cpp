@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -244,7 +244,7 @@ private:
             if (face.face != 0)
             {
                 if (faceIndex == 0)
-                    numFaces = face.face->num_faces;
+                    numFaces = (int) face.face->num_faces;
 
                 if ((face.face->face_flags & FT_FACE_FLAG_SCALABLE) != 0)
                     faces.add (new KnownTypeface (file, faceIndex, face));
@@ -307,9 +307,9 @@ public:
                                        faceWrapper->face->style_name);
     }
 
-    void initialiseCharacteristics (const String& name, const String& style)
+    void initialiseCharacteristics (const String& fontName, const String& fontStyle)
     {
-        setCharacteristics (name, style,
+        setCharacteristics (fontName, fontStyle,
                             faceWrapper->face->ascender / (float) (faceWrapper->face->ascender - faceWrapper->face->descender),
                             L' ');
     }
@@ -319,7 +319,7 @@ public:
         if (faceWrapper != nullptr)
         {
             FT_Face face = faceWrapper->face;
-            const unsigned int glyphIndex = FT_Get_Char_Index (face, character);
+            const unsigned int glyphIndex = FT_Get_Char_Index (face, (FT_ULong) character);
 
             if (FT_Load_Glyph (face, glyphIndex, FT_LOAD_NO_SCALE | FT_LOAD_NO_BITMAP | FT_LOAD_IGNORE_TRANSFORM | FT_LOAD_NO_HINTING) == 0
                   && face->glyph->format == ft_glyph_format_outline)
@@ -332,7 +332,7 @@ public:
                     addGlyph (character, destShape, face->glyph->metrics.horiAdvance * scale);
 
                     if ((face->face_flags & FT_FACE_FLAG_KERNING) != 0)
-                        addKerning (face, character, glyphIndex);
+                        addKerning (face, (uint32) character, glyphIndex);
 
                     return true;
                 }
@@ -437,7 +437,7 @@ private:
         const float height = (float) (face->ascender - face->descender);
 
         uint32 rightGlyphIndex;
-        uint32 rightCharCode = FT_Get_First_Char (face, &rightGlyphIndex);
+        FT_ULong rightCharCode = FT_Get_First_Char (face, &rightGlyphIndex);
 
         while (rightGlyphIndex != 0)
         {
@@ -445,7 +445,7 @@ private:
 
             if (FT_Get_Kerning (face, glyphIndex, rightGlyphIndex, ft_kerning_unscaled, &kerning) == 0
                    && kerning.x != 0)
-                addKerningPair (character, rightCharCode, kerning.x / height);
+                addKerningPair ((juce_wchar) character, (juce_wchar) rightCharCode, kerning.x / height);
 
             rightCharCode = FT_Get_Next_Char (face, rightCharCode, &rightGlyphIndex);
         }

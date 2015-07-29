@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -48,7 +48,7 @@ AudioProcessor::~AudioProcessor()
     // that it refers to is deleted..
     jassert (activeEditor == nullptr);
 
-   #if JUCE_DEBUG
+   #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     // This will fail if you've called beginParameterChangeGesture() for one
     // or more parameters without having made a corresponding call to endParameterChangeGesture...
     jassert (changingParams.countNumberOfSetBits() == 0);
@@ -142,7 +142,7 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 {
     if (isPositiveAndBelow (parameterIndex, getNumParameters()))
     {
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
         // This means you've called beginParameterChangeGesture twice in succession without a matching
         // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
         jassert (! changingParams [parameterIndex]);
@@ -163,9 +163,9 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
 {
     if (isPositiveAndBelow (parameterIndex, getNumParameters()))
     {
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
         // This means you've called endParameterChangeGesture without having previously called
-        // endParameterChangeGesture. That might be fine in most hosts, but better to keep the
+        // beginParameterChangeGesture. That might be fine in most hosts, but better to keep the
         // calls matched correctly.
         jassert (changingParams [parameterIndex]);
         changingParams.clearBit (parameterIndex);

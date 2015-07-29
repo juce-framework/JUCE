@@ -95,25 +95,35 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
     if (lastDisplayedPosition != newPos)
         displayPositionInfo (newPos);
 
-    gainSlider.setValue (ourProcessor.gain, dontSendNotification);
-    delaySlider.setValue (ourProcessor.delay, dontSendNotification);
+    gainSlider.setValue (ourProcessor.gain->getValue(), dontSendNotification);
+    delaySlider.setValue (ourProcessor.delay->getValue(), dontSendNotification);
 }
 
 // This is our Slider::Listener callback, when the user drags a slider.
 void JuceDemoPluginAudioProcessorEditor::sliderValueChanged (Slider* slider)
 {
-    if (slider == &gainSlider)
+    if (AudioProcessorParameter* param = getParameterFromSlider (slider))
     {
-        // It's vital to use setParameterNotifyingHost to change any parameters that are automatable
+        // It's vital to use setValueNotifyingHost to change any parameters that are automatable
         // by the host, rather than just modifying them directly, otherwise the host won't know
         // that they've changed.
-        getProcessor().setParameterNotifyingHost (JuceDemoPluginAudioProcessor::gainParam,
-                                                  (float) gainSlider.getValue());
+        param->setValueNotifyingHost ((float) slider->getValue());
     }
-    else if (slider == &delaySlider)
+}
+
+void JuceDemoPluginAudioProcessorEditor::sliderDragStarted (Slider* slider)
+{
+    if (AudioProcessorParameter* param = getParameterFromSlider (slider))
     {
-        getProcessor().setParameterNotifyingHost (JuceDemoPluginAudioProcessor::delayParam,
-                                                  (float) delaySlider.getValue());
+        param->beginChangeGesture();
+    }
+}
+
+void JuceDemoPluginAudioProcessorEditor::sliderDragEnded (Slider* slider)
+{
+    if (AudioProcessorParameter* param = getParameterFromSlider (slider))
+    {
+        param->endChangeGesture();
     }
 }
 
@@ -153,6 +163,17 @@ static String ppqToBarsBeatsString (double ppq, double /*lastBarPPQ*/, int numer
     String s;
     s << bar << '|' << beat << '|' << ticks;
     return s;
+}
+
+AudioProcessorParameter* JuceDemoPluginAudioProcessorEditor::getParameterFromSlider (const Slider* slider) const
+{
+    if (slider == &gainSlider)
+        return getProcessor().gain;
+
+    if (slider == &delaySlider)
+        return getProcessor().delay;
+
+    return nullptr;
 }
 
 // Updates the text in our position label.

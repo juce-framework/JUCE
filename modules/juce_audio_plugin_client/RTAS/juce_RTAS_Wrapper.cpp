@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -471,7 +471,7 @@ public:
         DefineMasterBypassControlIndex (bypassControlIndex);
 
         for (int i = 0; i < juceFilter->getNumParameters(); ++i)
-            AddControl (new JucePluginControl (juceFilter, i));
+            AddControl (new JucePluginControl (*juceFilter, i));
 
         // we need to do this midi log-in to get timecode, regardless of whether
         // the plugin actually uses midi...
@@ -807,17 +807,17 @@ private:
     {
     public:
         //==============================================================================
-        JucePluginControl (AudioProcessor* const juceFilter_, const int index_)
-            : juceFilter (juceFilter_),
-              index (index_)
+        JucePluginControl (AudioProcessor& p, const int i)
+            : processor (p), index (i)
         {
+            CPluginControl::SetValue (GetDefaultValue());
         }
 
         //==============================================================================
         OSType GetID() const            { return index + 1; }
-        long GetDefaultValue() const    { return floatToLong (juceFilter->getParameterDefaultValue (index)); }
+        long GetDefaultValue() const    { return floatToLong (processor.getParameterDefaultValue (index)); }
         void SetDefaultValue (long)     {}
-        long GetNumSteps() const        { return juceFilter->getParameterNumSteps (index); }
+        long GetNumSteps() const        { return processor.getParameterNumSteps (index); }
 
         long ConvertStringToValue (const char* valueString) const
         {
@@ -829,16 +829,16 @@ private:
         void GetNameOfLength (char* name, int maxLength, OSType inControllerType) const
         {
             // Pro-tools expects all your parameters to have valid names!
-            jassert (juceFilter->getParameterName (index, maxLength).isNotEmpty());
+            jassert (processor.getParameterName (index, maxLength).isNotEmpty());
 
-            juceFilter->getParameterName (index, maxLength).copyToUTF8 (name, (size_t) maxLength + 1);
+            processor.getParameterName (index, maxLength).copyToUTF8 (name, (size_t) maxLength + 1);
         }
 
         long GetPriority() const        { return kFicCooperativeTaskPriority; }
 
         long GetOrientation() const
         {
-            return juceFilter->isParameterOrientationInverted (index)
+            return processor.isParameterOrientationInverted (index)
                      ? kDAE_RightMinLeftMax | kDAE_TopMinBottomMax | kDAE_RotarySingleDotMode | kDAE_RotaryRightMinLeftMax
                      : kDAE_LeftMinRightMax | kDAE_BottomMinTopMax | kDAE_RotarySingleDotMode | kDAE_RotaryLeftMinRightMax;
         }
@@ -847,17 +847,17 @@ private:
 
         void GetValueString (char* valueString, int maxLength, long value) const
         {
-            juceFilter->getParameterText (index, maxLength).copyToUTF8 (valueString, (size_t) maxLength + 1);
+            processor.getParameterText (index, maxLength).copyToUTF8 (valueString, (size_t) maxLength + 1);
         }
 
         Cmn_Bool IsAutomatable() const
         {
-            return juceFilter->isParameterAutomatable (index);
+            return processor.isParameterAutomatable (index);
         }
 
     private:
         //==============================================================================
-        AudioProcessor* const juceFilter;
+        AudioProcessor& processor;
         const int index;
 
         JUCE_DECLARE_NON_COPYABLE (JucePluginControl)

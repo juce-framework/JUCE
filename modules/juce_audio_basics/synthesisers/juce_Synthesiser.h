@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -161,6 +161,11 @@ public:
     */
     virtual void aftertouchChanged (int newAftertouchValue);
 
+    /** Called to let the voice know that the channel pressure has changed.
+        This will be called during the rendering callback, so must be fast and thread-safe.
+    */
+    virtual void channelPressureChanged (int newChannelPressureValue);
+
     //==============================================================================
     /** Renders the next block of data for this voice.
 
@@ -209,8 +214,17 @@ public:
     */
     bool isKeyDown() const noexcept                             { return keyIsDown; }
 
+    /** Returns true if the sustain pedal is currently active for this voice. */
+    bool isSustainPedalDown() const noexcept                    { return sustainPedalDown; }
+
     /** Returns true if the sostenuto pedal is currently active for this voice. */
     bool isSostenutoPedalDown() const noexcept                  { return sostenutoPedalDown; }
+
+    /** Returns true if a voice is sounding in its release phase **/
+    bool isPlayingButReleased() const noexcept
+    {
+        return isVoiceActive() && ! (isKeyDown() || isSostenutoPedalDown() || isSustainPedalDown());
+    }
 
     /** Returns true if this voice started playing its current note before the other voice did. */
     bool wasStartedBefore (const SynthesiserVoice& other) const noexcept;
@@ -236,10 +250,10 @@ private:
     friend class Synthesiser;
 
     double currentSampleRate;
-    int currentlyPlayingNote;
+    int currentlyPlayingNote, currentPlayingMidiChannel;
     uint32 noteOnTime;
     SynthesiserSound::Ptr currentlyPlayingSound;
-    bool keyIsDown, sostenutoPedalDown;
+    bool keyIsDown, sustainPedalDown, sostenutoPedalDown;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // Note the new parameters for this method.
@@ -440,6 +454,20 @@ public:
     */
     virtual void handleAftertouch (int midiChannel, int midiNoteNumber, int aftertouchValue);
 
+    /** Sends a channel pressure message.
+
+        This will send a channel pressure message to any voices that are playing sounds on
+        the given midi channel.
+
+        This method will be called automatically according to the midi data passed into
+        renderNextBlock(), but may be called explicitly too.
+
+        @param midiChannel              the midi channel, from 1 to 16 inclusive
+        @param channelPressureValue     the pressure value, between 0 and 127, as returned
+                                        by MidiMessage::getChannelPressureValue()
+    */
+    virtual void handleChannelPressure (int midiChannel, int channelPressureValue);
+
     /** Handles a sustain pedal event. */
     virtual void handleSustainPedal (int midiChannel, bool isDown);
 
@@ -448,6 +476,13 @@ public:
 
     /** Can be overridden to handle soft pedal events. */
     virtual void handleSoftPedal (int midiChannel, bool isDown);
+
+    /** Can be overridden to handle an incoming program change message.
+        The base class implementation of this has no effect, but you may want to make your
+        own synth react to program changes.
+    */
+    virtual void handleProgramChange (int midiChannel,
+                                      int programNumber);
 
     //==============================================================================
     /** Tells the synthesiser what the sample rate is for the audio it's being used to render.
@@ -478,6 +513,22 @@ public:
         Subclasses may need to know this so that they can pitch things correctly.
     */
     double getSampleRate() const noexcept                       { return sampleRate; }
+
+    /** Sets a minimum limit on the size to which audio sub-blocks will be divided when rendering.
+
+        When rendering, the audio blocks that are passed into renderNextBlock() will be split up
+        into smaller blocks that lie between all the incoming midi messages, and it is these smaller
+        sub-blocks that are rendered with multiple calls to renderVoices().
+
+        Obviously in a pathological case where there are midi messages on every sample, then
+        renderVoices() could be called once per sample and lead to poor performance, so this
+        setting allows you to set a lower limit on the block size.
+
+        The default setting is 32, which means that midi messages are accurate to about < 1ms
+        accuracy, which is probably fine for most purposes, but you may want to increase or
+        decrease this value for your synth.
+    */
+    void setMinimumRenderingSubdivisionSize (int numSamples) noexcept;
 
 protected:
     //==============================================================================
@@ -537,6 +588,7 @@ private:
     //==============================================================================
     double sampleRate;
     uint32 lastNoteOnCounter;
+    int minimumSubBlockSize;
     bool shouldStealNotes;
     BigInteger sustainPedalsDown;
 

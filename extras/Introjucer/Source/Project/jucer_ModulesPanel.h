@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -21,7 +21,6 @@
 
   ==============================================================================
 */
-
 
 class ModulesPanel  : public Component,
                       private TableListBoxModel,
@@ -208,8 +207,8 @@ private:
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override                { itemChanged(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) override              { itemChanged(); }
-    void valueTreeChildOrderChanged (ValueTree&) override                     { itemChanged(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override         { itemChanged(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override           { itemChanged(); }
     void valueTreeParentChanged (ValueTree&) override                         { itemChanged(); }
 
     void itemChanged()
@@ -418,124 +417,124 @@ private:
         ModulesPanel& panel;
     };
 
+    //==============================================================================
+    class DownloadAndInstallThread   : public ThreadWithProgressWindow
+    {
+    public:
+        DownloadAndInstallThread (const Array<ModuleDescription>& modulesToInstall)
+            : ThreadWithProgressWindow ("Installing New Modules", true, true),
+              result (Result::ok()),
+              modules (modulesToInstall)
+        {
+        }
+
+        static void updateModulesFromWeb (Project& project, const Array<ModuleDescription>& mods)
+        {
+            DownloadAndInstallThread d (mods);
+
+            if (d.runThread())
+            {
+                if (d.result.failed())
+                {
+                    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                      "Module Install Failed",
+                                                      d.result.getErrorMessage());
+                }
+                else
+                {
+                    for (int i = 0; i < d.modules.size(); ++i)
+                        project.getModules().addModule (d.modules.getReference(i).manifestFile,
+                                                        project.getModules().areMostModulesCopiedLocally());
+                }
+            }
+        }
+
+        static void addModuleFromWebsite (Project& project, const ModuleDescription& module)
+        {
+            Array<ModuleDescription> mods;
+            mods.add (module);
+
+            static File lastLocation (EnabledModuleList::findDefaultModulesFolder (project));
+
+            FileChooser fc ("Select the parent folder for the new module...", lastLocation, String::empty, false);
+
+            if (fc.browseForDirectory())
+            {
+                lastLocation = fc.getResult();
+
+                if (lastLocation.getChildFile (ModuleDescription::getManifestFileName()).exists())
+                {
+                    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                      "Adding Module",
+                                                      "You chose a folder that appears to be a module.\n\n"
+                                                      "You need to select the *parent* folder inside which the new modules will be created.");
+                    return;
+                }
+
+                for (int i = 0; i < mods.size(); ++i)
+                    mods.getReference(i).manifestFile = lastLocation.getChildFile (mods.getReference(i).getID())
+                                                                    .getChildFile (ModuleDescription::getManifestFileName());
+
+                updateModulesFromWeb (project, mods);
+            }
+        }
+
+        void run() override
+        {
+            for (int i = 0; i < modules.size(); ++i)
+            {
+                const ModuleDescription& m = modules.getReference(i);
+
+                setProgress (i / (double) modules.size());
+
+                MemoryBlock downloaded;
+                result = download (m, downloaded);
+
+                if (result.failed() || threadShouldExit())
+                    break;
+
+                result = unzip (m, downloaded);
+
+                if (result.failed() || threadShouldExit())
+                    break;
+            }
+        }
+
+        Result download (const ModuleDescription& m, MemoryBlock& dest)
+        {
+            setStatusMessage ("Downloading " + m.getID() + "...");
+
+            const ScopedPointer<InputStream> in (m.url.createInputStream (false, nullptr, nullptr, String::empty, 10000));
+
+            if (in != nullptr && in->readIntoMemoryBlock (dest))
+                return Result::ok();
+
+            return Result::fail ("Failed to download from: " + m.url.toString (false));
+        }
+
+        Result unzip (const ModuleDescription& m, const MemoryBlock& data)
+        {
+            setStatusMessage ("Installing " + m.getID() + "...");
+
+            MemoryInputStream input (data, false);
+            ZipFile zip (input);
+
+            if (zip.getNumEntries() == 0)
+                return Result::fail ("The downloaded file wasn't a valid module file!");
+
+            if (! m.getFolder().deleteRecursively())
+                return Result::fail ("Couldn't delete the existing folder:\n" + m.getFolder().getFullPathName());
+
+            return zip.uncompressTo (m.getFolder().getParentDirectory(), true);
+        }
+
+        Result result;
+        Array<ModuleDescription> modules;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadAndInstallThread)
+    };
+
     ScopedPointer<WebsiteUpdateFetchThread> webUpdateThread;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModulesPanel)
-};
-
-//==============================================================================
-class DownloadAndInstallThread   : public ThreadWithProgressWindow
-{
-public:
-    DownloadAndInstallThread (const Array<ModuleDescription>& modulesToInstall)
-        : ThreadWithProgressWindow ("Installing New Modules", true, true),
-          result (Result::ok()),
-          modules (modulesToInstall)
-    {
-    }
-
-    static void updateModulesFromWeb (Project& project, const Array<ModuleDescription>& mods)
-    {
-        DownloadAndInstallThread d (mods);
-
-        if (d.runThread())
-        {
-            if (d.result.failed())
-            {
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  "Module Install Failed",
-                                                  d.result.getErrorMessage());
-            }
-            else
-            {
-                for (int i = 0; i < d.modules.size(); ++i)
-                    project.getModules().addModule (d.modules.getReference(i).manifestFile,
-                                                    project.getModules().areMostModulesCopiedLocally());
-            }
-        }
-    }
-
-    static void addModuleFromWebsite (Project& project, const ModuleDescription& module)
-    {
-        Array<ModuleDescription> mods;
-        mods.add (module);
-
-        static File lastLocation (EnabledModuleList::findDefaultModulesFolder (project));
-
-        FileChooser fc ("Select the parent folder for the new module...", lastLocation, String::empty, false);
-
-        if (fc.browseForDirectory())
-        {
-            lastLocation = fc.getResult();
-
-            if (lastLocation.getChildFile (ModuleDescription::getManifestFileName()).exists())
-            {
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  "Adding Module",
-                                                  "You chose a folder that appears to be a module.\n\n"
-                                                  "You need to select the *parent* folder inside which the new modules will be created.");
-                return;
-            }
-
-            for (int i = 0; i < mods.size(); ++i)
-                mods.getReference(i).manifestFile = lastLocation.getChildFile (mods.getReference(i).getID())
-                                                                .getChildFile (ModuleDescription::getManifestFileName());
-
-            updateModulesFromWeb (project, mods);
-        }
-    }
-
-    void run() override
-    {
-        for (int i = 0; i < modules.size(); ++i)
-        {
-            const ModuleDescription& m = modules.getReference(i);
-
-            setProgress (i / (double) modules.size());
-
-            MemoryBlock downloaded;
-            result = download (m, downloaded);
-
-            if (result.failed() || threadShouldExit())
-                break;
-
-            result = unzip (m, downloaded);
-
-            if (result.failed() || threadShouldExit())
-                break;
-        }
-    }
-
-    Result download (const ModuleDescription& m, MemoryBlock& dest)
-    {
-        setStatusMessage ("Downloading " + m.getID() + "...");
-
-        const ScopedPointer<InputStream> in (m.url.createInputStream (false, nullptr, nullptr, String::empty, 10000));
-
-        if (in != nullptr && in->readIntoMemoryBlock (dest))
-            return Result::ok();
-
-        return Result::fail ("Failed to download from: " + m.url.toString (false));
-    }
-
-    Result unzip (const ModuleDescription& m, const MemoryBlock& data)
-    {
-        setStatusMessage ("Installing " + m.getID() + "...");
-
-        MemoryInputStream input (data, false);
-        ZipFile zip (input);
-
-        if (zip.getNumEntries() == 0)
-            return Result::fail ("The downloaded file wasn't a valid module file!");
-
-        if (! m.getFolder().deleteRecursively())
-            return Result::fail ("Couldn't delete the existing folder:\n" + m.getFolder().getFullPathName());
-
-        return zip.uncompressTo (m.getFolder().getParentDirectory(), true);
-    }
-
-    Result result;
-    Array<ModuleDescription> modules;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadAndInstallThread)
 };

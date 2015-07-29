@@ -8,7 +8,7 @@
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="JuceProjectAU" pluginAUViewClass="JuceProjectAU_V1"
               pluginRTASCategory="" bundleIdentifier="com.yourcompany.JuceDemo"
-              jucerVersion="3.1.0" defines="JUCE_UNIT_TESTS=1" includeBinaryInAppConfig="1">
+              jucerVersion="3.2.0" defines="JUCE_UNIT_TESTS=1" includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="hZh0GG" bigIcon="BvyE0d" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter">
@@ -147,7 +147,7 @@
              androidMinimumSDK="9" androidInternetNeeded="1" androidKeyStore="${user.home}/.android/debug.keystore"
              androidKeyStorePass="android" androidKeyAlias="androiddebugkey"
              androidKeyAliasPass="android" androidMicNeeded="1" bigIcon="xycKOk"
-             androidCpp11="1" smallIcon="BvyE0d">
+             androidCpp11="1" smallIcon="BvyE0d" androidVersionCode="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a" isDebug="1"
                        optimisation="1" targetName="JuceDemo"/>
@@ -290,7 +290,7 @@
       </GROUP>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_ENABLE_LIVE_CONSTANT_EDITOR="enabled"/>
+  <JUCEOPTIONS JUCE_ENABLE_LIVE_CONSTANT_EDITOR="enabled" JUCE_WASAPI_EXCLUSIVE="enabled"/>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -44,18 +44,19 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
 {
     Array<ProjectExporter::ExporterTypeInfo> types;
 
-    addType (types, XCodeProjectExporter::getNameMac(),             BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize);
-    addType (types, XCodeProjectExporter::getNameiOS(),             BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize);
-    addType (types, MSVCProjectExporterVC2015::getName(),           BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2013::getName(),           BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2012::getName(),           BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2010::getName(),           BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2008::getName(),           BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2005::getName(),           BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MakefileProjectExporter::getNameLinux(),        BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
-    addType (types, AndroidProjectExporter::getNameAndroid(),       BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
-    addType (types, CodeBlocksProjectExporter::getNameCodeBlocks(), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
-    addType (types, QtCreatorProjectExporter::getNameQtCreator(),   BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
+    addType (types, XCodeProjectExporter::getNameMac(),          BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize);
+    addType (types, XCodeProjectExporter::getNameiOS(),          BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize);
+    addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2012::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2010::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2008::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MSVCProjectExporterVC2005::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
+    addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
+    addType (types, AndroidProjectExporter::getNameAndroid(),    BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
+    addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
+    addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
+    addType (types, QtCreatorProjectExporter::getNameQtCreator(),BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
 
     return types;
 }
@@ -76,9 +77,9 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 7:     exp = new MSVCProjectExporterVC2005 (project, ValueTree (MSVCProjectExporterVC2005::getValueTreeTypeName())); break;
         case 8:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter  ::getValueTreeTypeName())); break;
         case 9:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter   ::getValueTreeTypeName())); break;
-        case 10:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName())); break;
-        case 11:    exp = new QtCreatorProjectExporter  (project, ValueTree (QtCreatorProjectExporter ::getValueTreeTypeName())); break;
-
+        case 10:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
+        case 11:    exp = new CodeBlocksProjectExporter (project, ValueTree (CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
+        case 12:    exp = new QtCreatorProjectExporter  (project, ValueTree (QtCreatorProjectExporter ::getValueTreeTypeName())); break;
         default:    jassertfalse; return 0;
     }
 
@@ -347,10 +348,10 @@ void ProjectExporter::removePathForModule (const String& moduleID)
     paths.removeChild (m, project.getUndoManagerFor (settings));
 }
 
-RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID, ProjectSaver& projectSaver) const
+RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID) const
 {
     if (project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue())
-        return RelativePath (project.getRelativePathForFile (projectSaver.getLocalModuleFolder (moduleID)),
+        return RelativePath (project.getRelativePathForFile (project.getLocalModuleFolder (moduleID)),
                              RelativePath::projectFolder);
 
     String path (getPathForModuleString (moduleID));
@@ -405,9 +406,10 @@ static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExpo
 {
     return (p1.isVisualStudio() && p2.isVisualStudio())
         || (p1.isXcode() && p2.isXcode())
-        || (p1.isLinux() && p2.isLinux())
+        || (p1.isLinuxMakefile() && p2.isLinuxMakefile())
         || (p1.isAndroid() && p2.isAndroid())
-        || (p1.isCodeBlocks() && p2.isCodeBlocks())
+        || (p1.isCodeBlocksWindows() && p2.isCodeBlocksWindows())
+        || (p1.isCodeBlocksLinux() && p2.isCodeBlocksLinux())
         || (p1.isQtCreator() && p2.isQtCreator());
 }
 
@@ -530,7 +532,7 @@ void ProjectExporter::createDefaultConfigs()
 
         config->getNameValue() = debugConfig ? "Debug" : "Release";
         config->isDebugValue() = debugConfig;
-        config->getOptimisationLevel() = debugConfig ? optimisationOff : optimiseMinSize;
+        config->getOptimisationLevel() = config->getDefaultOptimisationLevel();
         config->getTargetBinaryName() = project.getProjectFilenameRoot();
     }
 }
@@ -646,10 +648,40 @@ String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
 {
     switch (getOptimisationLevelInt())
     {
-        case optimiseMaxSpeed:  return "3";
-        case optimiseMinSize:   return "s";
-        default:                return "0";
+        case gccO0:     return "0";
+        case gccO1:     return "1";
+        case gccO2:     return "2";
+        case gccO3:     return "3";
+        case gccOs:     return "s";
+        case gccOfast:  return "fast";
+        default:        break;
     }
+
+    return "0";
+}
+
+void ProjectExporter::BuildConfiguration::addGCCOptimisationProperty (PropertyListBuilder& props)
+{
+    static const char* optimisationLevels[] = { "-O0 (no optimisation)",
+                                                "-Os (minimise code size)",
+                                                "-O1 (fast)",
+                                                "-O2 (faster)",
+                                                "-O3 (fastest with safe optimisations)",
+                                                "-Ofast (uses aggressive optimisations)",
+                                                nullptr };
+
+    static const int optimisationLevelValues[] = { gccO0,
+                                                   gccOs,
+                                                   gccO1,
+                                                   gccO2,
+                                                   gccO3,
+                                                   gccOfast,
+                                                   0 };
+
+    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
+                                            StringArray (optimisationLevels),
+                                            Array<var> (optimisationLevelValues)),
+               "The optimisation level for this configuration");
 }
 
 void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
@@ -660,11 +692,7 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
     props.add (new BooleanPropertyComponent (isDebugValue(), "Debug mode", "Debugging enabled"),
                "If enabled, this means that the configuration should be built with debug synbols.");
 
-    static const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
-    const int optimisationLevelValues[]     = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
-    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
-                                            StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
-               "The optimisation level for this configuration");
+//    addGCCOptimisationProperty (props);
 
     props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false),
                "The filename to use for the destination binary executable file. If you don't add a suffix to this name, "
@@ -709,7 +737,7 @@ String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
     const StringArray libraryPaths (getLibrarySearchPaths());
 
     for (int i = 0; i < libraryPaths.size(); ++i)
-        s << " -L" << addQuotesIfContainsSpaces (libraryPaths[i]);
+        s << " -L" << escapeSpaces (libraryPaths[i]);
 
     return s;
 }

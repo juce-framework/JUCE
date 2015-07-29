@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -492,6 +492,9 @@ public:
 
         Note that the destination file isn't the directory to put it in, it's the actual
         filename that you want the new file to have.
+
+        Also note that on some OSes (e.g. Windows), moving files between different
+        volumes may not be possible.
 
         @returns    true if the operation succeeds
     */

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PROJECTCONTENTCOMPONENT_JUCEHEADER__
-#define __JUCER_PROJECTCONTENTCOMPONENT_JUCEHEADER__
+#ifndef JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED
+#define JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED
 
 #include "jucer_Project.h"
 #include "../Application/jucer_OpenDocumentManager.h"
@@ -70,8 +70,8 @@ public:
 
     bool saveProject();
     void closeProject();
-    void openInIDE();
-    void openInIDE (int exporterIndex);
+    void openInIDE (bool saveFirst);
+    void openInIDE (int exporterIndex, bool saveFirst);
 
     void showFilesTab();
     void showConfigTab();
@@ -129,4 +129,4 @@ protected:
 };
 
 
-#endif   // __JUCER_PROJECTCONTENTCOMPONENT_JUCEHEADER__
+#endif   // JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED

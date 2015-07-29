@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -231,7 +231,6 @@ public:
     Rectangle<int> getColumnPosition (int index) const;
 
     /** Finds the column ID at a given x-position in the component.
-
         If there is a column at this point this returns its ID, or if not, it will return 0.
     */
     int getColumnIdAtX (int xToFind) const;
@@ -412,9 +411,9 @@ private:
         bool isVisible() const;
     };
 
-    OwnedArray <ColumnInfo> columns;
-    Array <Listener*> listeners;
-    ScopedPointer <Component> dragOverlayComp;
+    OwnedArray<ColumnInfo> columns;
+    Array<Listener*> listeners;
+    ScopedPointer<Component> dragOverlayComp;
     class DragOverlayComp;
 
     bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;

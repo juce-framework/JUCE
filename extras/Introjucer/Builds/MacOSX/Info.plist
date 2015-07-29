@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string>Icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>com.rawmaterialsoftware.introjucer</string>
+    <string>com.roli.introjucer</string>
     <key>CFBundleName</key>
     <string>The Introjucer</string>
     <key>CFBundlePackageType</key>
@@ -16,11 +16,11 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>3.1.0</string>
+    <string>3.2.0</string>
     <key>CFBundleVersion</key>
-    <string>3.1.0</string>
+    <string>3.2.0</string>
     <key>NSHumanReadableCopyright</key>
-    <string>Raw Material Software Ltd.</string>
+    <string>ROLI Ltd.</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>CFBundleDocumentTypes</key>

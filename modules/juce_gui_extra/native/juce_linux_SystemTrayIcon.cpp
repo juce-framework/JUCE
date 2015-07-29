@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-extern Display* display;
+extern ::Display* display;
 
 //==============================================================================
 class SystemTrayIconComponent::Pimpl
@@ -57,7 +57,7 @@ public:
             ev.xclient.format = 32;
             ev.xclient.data.l[0] = CurrentTime;
             ev.xclient.data.l[1] = 0 /*SYSTEM_TRAY_REQUEST_DOCK*/;
-            ev.xclient.data.l[2] = windowH;
+            ev.xclient.data.l[2] = (long) windowH;
             ev.xclient.data.l[3] = 0;
             ev.xclient.data.l[4] = 0;
 

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -104,6 +104,11 @@
  #include <X11/XKBlib.h>
  #include <X11/cursorfont.h>
  #include <unistd.h>
+
+ #if JUCE_USE_XRANDR
+  /* If you're trying to use Xrandr, you'll need to install the "libxrandr-dev" package..  */
+  #include <X11/extensions/Xrandr.h>
+ #endif
 
  #if JUCE_USE_XINERAMA
   /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..  */

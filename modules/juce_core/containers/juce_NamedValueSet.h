@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -78,14 +78,14 @@ public:
         @returns    true if a value was changed or added; false if the
                     value was already set the value passed-in.
     */
-    bool set (Identifier name, const var& newValue);
+    bool set (const Identifier& name, const var& newValue);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
                     value was already set the value passed-in.
     */
-    bool set (Identifier name, var&& newValue);
+    bool set (const Identifier& name, var&& newValue);
    #endif
 
     /** Returns true if the set contains an item with the specified name. */

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -69,7 +69,7 @@
         void readFromFifo (int* someData, int numItems)
         {
             int start1, size1, start2, size2;
-            abstractFifo.prepareToRead (numSamples, start1, size1, start2, size2);
+            abstractFifo.prepareToRead (numItems, start1, size1, start2, size2);
 
             if (size1 > 0)
                 copySomeData (someData, myBuffer + start1, size1);

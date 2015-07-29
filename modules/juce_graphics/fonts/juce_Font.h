@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -279,8 +279,12 @@ public:
     //==============================================================================
     /** Makes the font bold or non-bold. */
     void setBold (bool shouldBeBold);
-    /** Returns a copy of this font with the bold attribute set. */
+
+    /** Returns a copy of this font with the bold attribute set.
+        If the font does not have a bold version, this will return the default font.
+     */
     Font boldened() const;
+
     /** Returns true if the font is bold. */
     bool isBold() const noexcept;
 
@@ -318,6 +322,18 @@ public:
                             narrower, greater than 1.0 will be stretched out.
     */
     void setHorizontalScale (float scaleFactor);
+
+    /** Returns the minimum horizontal scale to which fonts may be squashed when trying to
+        create a layout.
+        @see setDefaultMinimumHorizontalScaleFactor
+    */
+    static float getDefaultMinimumHorizontalScaleFactor() noexcept;
+
+    /** Sets the minimum horizontal scale to which fonts may be squashed when trying to
+        create a text layout.
+        @see getDefaultMinimumHorizontalScaleFactor
+    */
+    static void setDefaultMinimumHorizontalScaleFactor (float newMinimumScaleFactor) noexcept;
 
     /** Returns the font's kerning.
 

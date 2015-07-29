@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -158,11 +158,7 @@ void JucerDocument::setParentClasses (const String& classes)
 {
     if (classes != parentClasses)
     {
-        StringArray parentClassLines;
-        parentClassLines.addTokens (classes, ",", StringRef());
-        parentClassLines.trim();
-        parentClassLines.removeEmptyStrings();
-        parentClassLines.removeDuplicates (false);
+        StringArray parentClassLines (getCleanedStringArray (StringArray::fromTokens (classes, ",", StringRef())));
 
         for (int i = parentClassLines.size(); --i >= 0;)
         {

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -31,12 +31,16 @@
 namespace juce
 {
 
+#undef Complex  // apparently some C libraries actually define these symbols (!)
+#undef Factor
+
 #include "buffers/juce_AudioDataConverters.h"
 #include "buffers/juce_AudioSampleBuffer.h"
 #include "buffers/juce_FloatVectorOperations.h"
 #include "effects/juce_Decibels.h"
 #include "effects/juce_IIRFilter.h"
 #include "effects/juce_LagrangeInterpolator.h"
+#include "effects/juce_FFT.h"
 #include "effects/juce_Reverb.h"
 #include "midi/juce_MidiMessage.h"
 #include "midi/juce_MidiBuffer.h"

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -192,7 +192,7 @@ public:
     {
     }
 
-    bool registerCoordinates()
+    bool registerCoordinates() override
     {
         bool ok = addCoordinate (rectangle.left);
         ok = addCoordinate (rectangle.right) && ok;
@@ -206,7 +206,7 @@ public:
         return rectangle == other;
     }
 
-    void applyToComponentBounds()
+    void applyToComponentBounds() override
     {
         for (int i = 32; --i >= 0;)
         {
@@ -222,7 +222,7 @@ public:
         jassertfalse; // Seems to be a recursive reference!
     }
 
-    void applyNewBounds (const Rectangle<int>& newBounds)
+    void applyNewBounds (const Rectangle<int>& newBounds) override
     {
         if (newBounds != getComponent().getBounds())
         {

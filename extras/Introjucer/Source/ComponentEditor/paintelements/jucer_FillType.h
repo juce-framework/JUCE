@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,12 +22,12 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_FILLTYPE_JUCEHEADER__
-#define __JUCER_FILLTYPE_JUCEHEADER__
+#ifndef JUCER_FILLTYPE_H_INCLUDED
+#define JUCER_FILLTYPE_H_INCLUDED
 
 #include "../jucer_JucerDocument.h"
 #include "../jucer_UtilityFunctions.h"
-
+#include "../../Project Saving/jucer_ResourceFile.h"
 
 //==============================================================================
 class JucerFillType
@@ -147,7 +147,7 @@ public:
 
         case imageBrush:
             {
-                const String imageVariable ("cachedImage_" + imageResourceName + "_" + String (code.getUniqueSuffix()));
+                const String imageVariable ("cachedImage_" + imageResourceName.replace ("::", "_") + "_" + String (code.getUniqueSuffix()));
 
                 code.addImageResourceLoader (imageVariable, imageResourceName);
 
@@ -191,7 +191,7 @@ public:
                     + ", 1=" + gradCol2.toString();
 
         case imageBrush:
-            return "image: " + imageResourceName
+            return "image: " + imageResourceName.replaceCharacter (':', '#')
                     + ", "
                     + String (imageOpacity)
                     + ", "
@@ -236,7 +236,7 @@ public:
             else if (toks[0] == "image")
             {
                 mode = imageBrush;
-                imageResourceName = toks[1];
+                imageResourceName = toks[1].replaceCharacter ('#', ':');
                 imageOpacity = toks[2].getDoubleValue();
                 imageAnchor= RelativePositionedRectangle();
                 imageAnchor.rect = PositionedRectangle (toks[3]);
@@ -340,7 +340,30 @@ private:
         if (image.isNull())
         {
             if (document != nullptr)
-                image = document->getResources().getImageFromCache (imageResourceName);
+            {
+                if (imageResourceName.contains ("::"))
+                {
+                    if (Project* project = document->getCppDocument().getProject())
+                    {
+                        ResourceFile resourceFile (*project);
+
+                        for (int i = 0; i < resourceFile.getNumFiles(); ++i)
+                        {
+                            const File& file = resourceFile.getFile(i);
+
+                            if (imageResourceName == resourceFile.getClassName() + "::" + resourceFile.getDataVariableFor (file))
+                            {
+                                image = ImageCache::getFromFile (file);
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    image = document->getResources().getImageFromCache (imageResourceName);
+                }
+            }
 
             if (image.isNull())
             {
@@ -368,4 +391,4 @@ private:
 };
 
 
-#endif   // __JUCER_FILLTYPE_JUCEHEADER__
+#endif   // JUCER_FILLTYPE_H_INCLUDED

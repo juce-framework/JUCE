@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_RESOURCEFILE_JUCEHEADER__
-#define __JUCER_RESOURCEFILE_JUCEHEADER__
+#ifndef JUCER_RESOURCEFILE_H_INCLUDED
+#define JUCER_RESOURCEFILE_H_INCLUDED
 
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
@@ -46,9 +46,11 @@ public:
     String getSizeVariableFor (const File& file) const;
 
     int getNumFiles() const                 { return files.size(); }
+    const File& getFile (int index) const   { return files.getReference (index); }
+
     int64 getTotalDataSize() const;
 
-    bool write (Array<File>& filesCreated, int maxFileSize);
+    Result write (Array<File>& filesCreated, int maxFileSize);
 
     //==============================================================================
 private:
@@ -57,12 +59,12 @@ private:
     Project& project;
     String className;
 
-    bool writeHeader (MemoryOutputStream&);
-    bool writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
+    Result writeHeader (MemoryOutputStream&);
+    Result writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
     void addResourcesFromProjectItem (const Project::Item& node);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)
 };
 
 
-#endif   // __JUCER_RESOURCEFILE_JUCEHEADER__
+#endif   // JUCER_RESOURCEFILE_H_INCLUDED

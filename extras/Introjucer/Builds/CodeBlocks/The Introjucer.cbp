@@ -24,8 +24,8 @@
           <Add option="-DDEBUG=1"/>
           <Add option="-D_DEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
-          <Add option="-DJUCE_APP_VERSION=3.1.0"/>
-          <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
+          <Add option="-DJUCE_APP_VERSION=3.2.0"/>
+          <Add option="-DJUCE_APP_VERSION_HEX=0x30200"/>
           <Add directory="."/>
           <Add directory="..\..\JuceLibraryCode"/>
         </Compiler>
@@ -59,8 +59,8 @@
           <Add option="-D__MINGW_EXTENSION="/>
           <Add option="-DNDEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
-          <Add option="-DJUCE_APP_VERSION=3.1.0"/>
-          <Add option="-DJUCE_APP_VERSION_HEX=0x30100"/>
+          <Add option="-DJUCE_APP_VERSION=3.2.0"/>
+          <Add option="-DJUCE_APP_VERSION_HEX=0x30200"/>
           <Add directory="."/>
           <Add directory="..\..\JuceLibraryCode"/>
         </Compiler>
@@ -97,6 +97,7 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Application/jucer_AutoUpdater.cpp"/>
     <Unit filename="../../Source/Application/jucer_Application.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -510,6 +511,10 @@
     </Unit>
     <Unit filename="../../Source/Project/jucer_ProjectType.cpp"/>
     <Unit filename="../../Source/Project/jucer_ProjectType.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_TreeItemTypes.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -1494,6 +1499,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/native/juce_curl_Network.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/native/juce_linux_CommonFile.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1618,6 +1627,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_cryptography/hashing/juce_Whirlpool.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_cryptography/hashing/juce_Whirlpool.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_cryptography/juce_module_info">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1639,6 +1656,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_data_structures/values/juce_ValueTree.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -154,7 +154,7 @@ private:
 
         bool shouldBailOut() const noexcept
         {
-            return checker.shouldBailOut() || safePointer == 0;
+            return checker.shouldBailOut() || safePointer == nullptr;
         }
 
     private:
@@ -200,7 +200,7 @@ struct ScalingHelpers
 
     // For these, we need to avoid getSmallestIntegerContainer being used, which causes
     // judder when moving windows
-    static Rectangle<int> unscaledScreenPosToScaled (float scale, const Rectangle<int>& pos) noexcept
+    static Rectangle<int> unscaledScreenPosToScaled (float scale, Rectangle<int> pos) noexcept
     {
         return scale != 1.0f ? Rectangle<int> (roundToInt (pos.getX() / scale),
                                                roundToInt (pos.getY() / scale),
@@ -208,7 +208,7 @@ struct ScalingHelpers
                                                roundToInt (pos.getHeight() / scale)) : pos;
     }
 
-    static Rectangle<int> scaledScreenPosToUnscaled (float scale, Rectangle<int>& pos) noexcept
+    static Rectangle<int> scaledScreenPosToUnscaled (float scale, Rectangle<int> pos) noexcept
     {
         return scale != 1.0f ? Rectangle<int> (roundToInt (pos.getX() * scale),
                                                roundToInt (pos.getY() * scale),
@@ -399,7 +399,7 @@ struct Component::ComponentHelpers
         return convertFromDistantParentSpace (topLevelComp, *target, p);
     }
 
-    static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int>& clipRect, Point<int> delta)
+    static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int> clipRect, Point<int> delta)
     {
         bool nothingChanged = true;
 
@@ -1153,12 +1153,15 @@ void Component::setBounds (const int x, const int y, int w, int h)
 
 void Component::sendMovedResizedMessagesIfPending()
 {
-    if (flags.isMoveCallbackPending || flags.isResizeCallbackPending)
-    {
-        sendMovedResizedMessages (flags.isMoveCallbackPending, flags.isResizeCallbackPending);
+    const bool wasMoved   = flags.isMoveCallbackPending;
+    const bool wasResized = flags.isResizeCallbackPending;
 
+    if (wasMoved || wasResized)
+    {
         flags.isMoveCallbackPending = false;
         flags.isResizeCallbackPending = false;
+
+        sendMovedResizedMessages (wasMoved, wasResized);
     }
 }
 
@@ -1881,15 +1884,15 @@ void Component::repaintParent()
         parentComponent->internalRepaint (ComponentHelpers::convertToParentSpace (*this, getLocalBounds()));
 }
 
-void Component::internalRepaint (const Rectangle<int>& area)
+void Component::internalRepaint (Rectangle<int> area)
 {
-    const Rectangle<int> r (area.getIntersection (getLocalBounds()));
+    area = area.getIntersection (getLocalBounds());
 
-    if (! r.isEmpty())
-        internalRepaintUnchecked (r, false);
+    if (! area.isEmpty())
+        internalRepaintUnchecked (area, false);
 }
 
-void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool isEntireComponent)
+void Component::internalRepaintUnchecked (Rectangle<int> area, const bool isEntireComponent)
 {
     if (flags.visibleFlag)
     {
@@ -2309,16 +2312,15 @@ void Component::internalModalInputAttempt()
 //==============================================================================
 void Component::postCommandMessage (const int commandId)
 {
-    class CustomCommandMessage   : public CallbackMessage
+    struct CustomCommandMessage   : public CallbackMessage
     {
-    public:
         CustomCommandMessage (Component* const c, const int command)
             : target (c), commandId (command) {}
 
         void messageCallback() override
         {
-            if (target.get() != nullptr)  // (get() required for VS2003 bug)
-                target->handleCommandMessage (commandId);
+            if (Component* c = target.get())
+                c->handleCommandMessage (commandId);
         }
 
     private:

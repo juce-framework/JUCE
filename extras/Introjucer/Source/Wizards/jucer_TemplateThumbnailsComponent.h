@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -55,34 +55,34 @@ public:
 
     void paintButton (Graphics& g, bool isMouseOverButton, bool /*isButtonDown*/) override
     {
-        const Rectangle<float> bounds (getLocalBounds().toFloat());
+        const Rectangle<float> r (getLocalBounds().toFloat());
         const Colour buttonColour (0xfff29300);
 
         if (isMouseOverButton)
         {
             if (getStyle() == ImageFitted)
             {
-                hoverBackground->drawWithin (g, bounds, RectanglePlacement::centred, 1.0);
-                thumb->drawWithin (g, bounds, RectanglePlacement::centred, 1.0);
+                hoverBackground->drawWithin (g, r, RectanglePlacement::centred, 1.0);
+                thumb->drawWithin (g, r, RectanglePlacement::centred, 1.0);
             }
             else
             {
                 g.setColour (buttonColour.withAlpha (0.3f));
-                g.fillRoundedRectangle (bounds.reduced (2.0f, 2.0f), 10.0f);
+                g.fillRoundedRectangle (r.reduced (2.0f, 2.0f), 10.0f);
                 g.setColour (buttonColour);
-                g.drawRoundedRectangle (bounds.reduced (2.0f, 2.0f), 10.0f, 2.0f);
+                g.drawRoundedRectangle (r.reduced (2.0f, 2.0f), 10.0f, 2.0f);
             }
         }
         else
         {
             if (getStyle() == ImageFitted)
             {
-                thumb->drawWithin (g, bounds, RectanglePlacement::centred, 1.0);
+                thumb->drawWithin (g, r, RectanglePlacement::centred, 1.0);
             }
             else
             {
                 g.setColour (buttonColour);
-                g.drawRoundedRectangle (bounds.reduced (2.0f, 2.0f), 10.0f, 2.0f);
+                g.drawRoundedRectangle (r.reduced (2.0f, 2.0f), 10.0f, 2.0f);
             }
         }
 
@@ -95,7 +95,7 @@ public:
         }
         else
         {
-            textTarget = RectanglePlacement (RectanglePlacement::centred).appliedTo (thumb->getDrawableBounds(), bounds);
+            textTarget = RectanglePlacement (RectanglePlacement::centred).appliedTo (thumb->getDrawableBounds(), r);
             textTarget = textTarget.removeFromBottom (textTarget.getHeight() * 0.3f);
         }
 
@@ -281,4 +281,4 @@ private:
 };
 
 
-#endif  // JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED
+#endif   // JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED

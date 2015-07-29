@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -136,7 +136,7 @@ namespace ColourHelpers
 
 //==============================================================================
 Colour::Colour() noexcept
-    : argb (0)
+    : argb (0, 0, 0, 0)
 {
 }
 
@@ -151,11 +151,12 @@ Colour& Colour::operator= (const Colour& other) noexcept
     return *this;
 }
 
-bool Colour::operator== (const Colour& other) const noexcept    { return argb.getARGB() == other.argb.getARGB(); }
-bool Colour::operator!= (const Colour& other) const noexcept    { return argb.getARGB() != other.argb.getARGB(); }
+bool Colour::operator== (const Colour& other) const noexcept    { return argb.getNativeARGB() == other.argb.getNativeARGB(); }
+bool Colour::operator!= (const Colour& other) const noexcept    { return argb.getNativeARGB() != other.argb.getNativeARGB(); }
 
 //==============================================================================
-Colour::Colour (const uint32 col) noexcept  : argb (col)
+Colour::Colour (const uint32 col) noexcept
+    : argb ((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, col & 0xff)
 {
 }
 
@@ -206,9 +207,25 @@ Colour::Colour (const float hue, const float saturation, const float brightness,
 {
 }
 
+Colour::Colour (PixelARGB argb_) noexcept
+    : argb (argb_)
+{
+}
+
+Colour::Colour (PixelRGB rgb) noexcept
+    : argb (Colour (rgb.getInARGBMaskOrder()).argb)
+{
+}
+
+Colour::Colour (PixelAlpha alpha) noexcept
+    : argb (Colour (alpha.getInARGBMaskOrder()).argb)
+{
+}
+
 Colour::~Colour() noexcept
 {
 }
+
 
 //==============================================================================
 const PixelARGB Colour::getPixelARGB() const noexcept
@@ -220,7 +237,7 @@ const PixelARGB Colour::getPixelARGB() const noexcept
 
 uint32 Colour::getARGB() const noexcept
 {
-    return argb.getARGB();
+    return argb.getInARGBMaskOrder();
 }
 
 //==============================================================================
@@ -238,7 +255,7 @@ Colour Colour::withAlpha (const uint8 newAlpha) const noexcept
 {
     PixelARGB newCol (argb);
     newCol.setAlpha (newAlpha);
-    return Colour (newCol.getARGB());
+    return Colour (newCol);
 }
 
 Colour Colour::withAlpha (const float newAlpha) const noexcept
@@ -247,7 +264,7 @@ Colour Colour::withAlpha (const float newAlpha) const noexcept
 
     PixelARGB newCol (argb);
     newCol.setAlpha (ColourHelpers::floatToUInt8 (newAlpha));
-    return Colour (newCol.getARGB());
+    return Colour (newCol);
 }
 
 Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const noexcept
@@ -256,7 +273,7 @@ Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const noexcept
 
     PixelARGB newCol (argb);
     newCol.setAlpha ((uint8) jmin (0xff, roundToInt (alphaMultiplier * newCol.getAlpha())));
-    return Colour (newCol.getARGB());
+    return Colour (newCol);
 }
 
 //==============================================================================
@@ -294,7 +311,7 @@ Colour Colour::interpolatedWith (Colour other, float proportionOfOther) const no
     c1.tween (c2, (uint32) roundToInt (proportionOfOther * 255.0f));
     c1.unpremultiply();
 
-    return Colour (c1.getARGB());
+    return Colour (c1);
 }
 
 //==============================================================================
@@ -428,7 +445,7 @@ Colour Colour::contrasting (Colour colour1,
 //==============================================================================
 String Colour::toString() const
 {
-    return String::toHexString ((int) argb.getARGB());
+    return String::toHexString ((int) argb.getInARGBMaskOrder());
 }
 
 Colour Colour::fromString (StringRef encodedColourString)
@@ -438,7 +455,7 @@ Colour Colour::fromString (StringRef encodedColourString)
 
 String Colour::toDisplayString (const bool includeAlphaValue) const
 {
-    return String::toHexString ((int) (argb.getARGB() & (includeAlphaValue ? 0xffffffff : 0xffffff)))
+    return String::toHexString ((int) (argb.getInARGBMaskOrder() & (includeAlphaValue ? 0xffffffff : 0xffffff)))
                   .paddedLeft ('0', includeAlphaValue ? 8 : 6)
                   .toUpperCase();
 }

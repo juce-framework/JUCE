@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -150,7 +150,7 @@ public:
         /** The attribute's ID number.
             If the uniform couldn't be found, this value will be < 0.
         */
-        GLint attributeID;
+        GLuint attributeID;
     };
 
     /** The ID number of the compiled program. */

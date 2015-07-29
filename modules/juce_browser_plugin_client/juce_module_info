@@ -1,7 +1,7 @@
 {
   "id":             "juce_browser_plugin_client",
   "name":           "JUCE browser plugin wrapper classes",
-  "version":        "3.1.1",
+  "version":        "3.2.0",
   "description":    "Classes for building NPAPI and ActiveX browser plugins.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

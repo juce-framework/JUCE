@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -140,11 +140,17 @@ public:
     /** Returns the current AudioPlayHead object that should be used to find
         out the state and position of the playhead.
 
-        You can call this from your processBlock() method, and use the AudioPlayHead
-        object to get the details about the time of the start of the block currently
-        being processed.
+        You can ONLY call this from your processBlock() method! Calling it at other
+        times will produce undefined behaviour, as the host may not have any context
+        in which a time would make sense, and some hosts will almost certainly have
+        multithreading issues if it's not called on the audio thread.
 
-        If the host hasn't supplied a playhead object, this will return nullptr.
+        The AudioPlayHead object that is returned can be used to get the details about
+        the time of the start of the block currently being processed. But do not
+        store this pointer or use it outside of the current audio callback, because
+        the host may delete or re-use it.
+
+        If the host can't or won't provide any time info, this will return nullptr.
     */
     AudioPlayHead* getPlayHead() const noexcept                 { return playHead; }
 
@@ -376,10 +382,17 @@ public:
     //==============================================================================
     /** This must return the correct value immediately after the object has been
         created, and mustn't change the number of parameters later.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        AudioProcessorParameter class instead to manage your parameters.
     */
     virtual int getNumParameters();
 
-    /** Returns the name of a particular parameter. */
+    /** Returns the name of a particular parameter.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        AudioProcessorParameter class instead to manage your parameters.
+    */
     virtual const String getParameterName (int parameterIndex);
 
     /** Called by the host to find out the value of one of the filter's parameters.
@@ -389,11 +402,11 @@ public:
         This could be called quite frequently, so try to make your code efficient.
         It's also likely to be called by non-UI threads, so the code in here should
         be thread-aware.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        AudioProcessorParameter class instead to manage your parameters.
     */
     virtual float getParameter (int parameterIndex);
-
-    /** Returns the value of a parameter as a text string. */
-    virtual const String getParameterText (int parameterIndex);
 
     /** Returns the name of a parameter as a text string with a preferred maximum length.
         If you want to provide customised short versions of your parameter names that
@@ -401,8 +414,17 @@ public:
         devices or mixing desks) then you should implement this method.
         If you don't override it, the default implementation will call getParameterText(int),
         and truncate the result.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::getName() instead.
     */
     virtual String getParameterName (int parameterIndex, int maximumStringLength);
+
+    /** Returns the value of a parameter as a text string.
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::getText() instead.
+    */
+    virtual const String getParameterText (int parameterIndex);
 
     /** Returns the value of a parameter as a text string with a preferred maximum length.
         If you want to provide customised short versions of your parameter values that
@@ -410,6 +432,9 @@ public:
         devices or mixing desks) then you should implement this method.
         If you don't override it, the default implementation will call getParameterText(int),
         and truncate the result.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::getText() instead.
     */
     virtual String getParameterText (int parameterIndex, int maximumStringLength);
 
@@ -418,10 +443,16 @@ public:
         AudioProcessor::getDefaultNumParameterSteps().
         If your parameter is boolean, then you may want to make this return 2.
         The value that is returned may or may not be used, depending on the host.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::getNumSteps() instead.
     */
     virtual int getParameterNumSteps (int parameterIndex);
 
     /** Returns the default number of steps for a parameter.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::getNumSteps() instead.
         @see getParameterNumSteps
     */
     static int getDefaultNumParameterSteps() noexcept;
@@ -429,16 +460,25 @@ public:
     /** Returns the default value for the parameter.
         By default, this just returns 0.
         The value that is returned may or may not be used, depending on the host.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::getDefaultValue() instead.
     */
     virtual float getParameterDefaultValue (int parameterIndex);
 
     /** Some plugin types may be able to return a label string for a
         parameter's units.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::getLabel() instead.
     */
     virtual String getParameterLabel (int index) const;
 
     /** This can be overridden to tell the host that particular parameters operate in the
         reverse direction. (Not all plugin formats or hosts will actually use this information).
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::isOrientationInverted() instead.
     */
     virtual bool isParameterOrientationInverted (int index) const;
 
@@ -454,6 +494,9 @@ public:
         won't be able to automate your parameters properly.
 
         The value passed will be between 0 and 1.0.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::setValue() instead.
     */
     virtual void setParameter (int parameterIndex, float newValue);
 
@@ -466,11 +509,17 @@ public:
         Note that to make sure the host correctly handles automation, you should call
         the beginParameterChangeGesture() and endParameterChangeGesture() methods to
         tell the host when the user has started and stopped changing the parameter.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::setValueNotifyingHost() instead.
     */
     void setParameterNotifyingHost (int parameterIndex, float newValue);
 
     /** Returns true if the host can automate this parameter.
         By default, this returns true for all parameters.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::isAutomatable() instead.
     */
     virtual bool isParameterAutomatable (int parameterIndex) const;
 
@@ -478,6 +527,9 @@ public:
         A meta-parameter is a parameter that changes other params. It is used
         by some hosts (e.g. AudioUnit hosts).
         By default this returns false.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::isMetaParameter() instead.
     */
     virtual bool isMetaParameter (int parameterIndex) const;
 
@@ -488,6 +540,9 @@ public:
         it may use this information to help it record automation.
 
         If you call this, it must be matched by a later call to endParameterChangeGesture().
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::beginChangeGesture() instead.
     */
     void beginParameterChangeGesture (int parameterIndex);
 
@@ -497,6 +552,9 @@ public:
         it may use this information to help it record automation.
 
         A call to this method must follow a call to beginParameterChangeGesture().
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::endChangeGesture() instead.
     */
     void endParameterChangeGesture (int parameterIndex);
 
@@ -676,7 +734,7 @@ private:
     OwnedArray<AudioProcessorParameter> managedParameters;
     AudioProcessorParameter* getParamChecked (int) const noexcept;
 
-   #if JUCE_DEBUG
+   #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     BigInteger changingParams;
    #endif
 

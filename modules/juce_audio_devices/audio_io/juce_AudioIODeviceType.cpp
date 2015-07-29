@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -50,7 +50,7 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_iOSAudio()        
 #endif
 
 #if ! (JUCE_WINDOWS && JUCE_WASAPI)
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI()          { return nullptr; }
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI (bool)     { return nullptr; }
 #endif
 
 #if ! (JUCE_WINDOWS && JUCE_DIRECTSOUND)

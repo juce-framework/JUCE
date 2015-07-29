@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -333,7 +333,6 @@ bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::
 void Desktop::Displays::init (Desktop& desktop)
 {
     findDisplays (desktop.getGlobalScaleFactor());
-    jassert (displays.size() > 0);
 }
 
 void Desktop::Displays::refresh()
@@ -342,7 +341,6 @@ void Desktop::Displays::refresh()
     oldDisplays.swapWith (displays);
 
     init (Desktop::getInstance());
-    jassert (displays.size() > 0);
 
     if (oldDisplays != displays)
     {

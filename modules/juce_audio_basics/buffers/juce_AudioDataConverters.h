@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -487,13 +487,10 @@ public:
         }
 
         /** Scans a block of data, returning the lowest and highest levels as floats */
-        void findMinAndMax (size_t numSamples, float& minValue, float& maxValue) const noexcept
+        Range<float> findMinAndMax (size_t numSamples) const noexcept
         {
             if (numSamples == 0)
-            {
-                minValue = maxValue = 0;
-                return;
-            }
+                return Range<float>();
 
             Pointer dest (*this);
 
@@ -512,27 +509,32 @@ public:
                     if (v < mn)  mn = v;
                 }
 
-                minValue = mn;
-                maxValue = mx;
+                return Range<float> (mn, mx);
             }
-            else
+
+            int32 mn = dest.getAsInt32();
+            dest.advance();
+            int32 mx = mn;
+
+            while (--numSamples > 0)
             {
-                int32 mn = dest.getAsInt32();
+                const int v = dest.getAsInt32();
                 dest.advance();
-                int32 mx = mn;
 
-                while (--numSamples > 0)
-                {
-                    const int v = dest.getAsInt32();
-                    dest.advance();
-
-                    if (mx < v)  mx = v;
-                    if (v < mn)  mn = v;
-                }
-
-                minValue = mn * (float) (1.0 / (1.0 + Int32::maxValue));
-                maxValue = mx * (float) (1.0 / (1.0 + Int32::maxValue));
+                if (mx < v)  mx = v;
+                if (v < mn)  mn = v;
             }
+
+            return Range<float> (mn * (float) (1.0 / (1.0 + Int32::maxValue)),
+                                 mx * (float) (1.0 / (1.0 + Int32::maxValue)));
+        }
+
+        /** Scans a block of data, returning the lowest and highest levels as floats */
+        void findMinAndMax (size_t numSamples, float& minValue, float& maxValue) const noexcept
+        {
+            Range<float> r (findMinAndMax (numSamples));
+            minValue = r.getStart();
+            maxValue = r.getEnd();
         }
 
         /** Returns true if the pointer is using a floating-point format. */

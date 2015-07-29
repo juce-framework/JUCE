@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -32,14 +32,17 @@
 
     To enable tooltips in your app, just create a single instance of a TooltipWindow
     object. Note that if you instantiate more than one instance of this class, you'll
-    end up with multiple tooltips being shown!
+    end up with multiple tooltips being shown! This is a common problem when compiling
+    audio plug-ins with JUCE: depending on the way you instantiate TooltipWindow,
+    you may end up with a TooltipWindow for each plug-in instance. To avoid this use a
+    SharedResourcePointer to instantiate the TooltipWindow only once.
 
     The TooltipWindow object will then stay invisible, waiting until the mouse
     hovers for the specified length of time - it will then see if it's currently
     over a component which implements the TooltipClient interface, and if so,
     it will make itself visible to show the tooltip in the appropriate place.
 
-    @see TooltipClient, SettableTooltipClient
+    @see TooltipClient, SettableTooltipClient, SharedResourcePointer
 */
 class JUCE_API  TooltipWindow  : public Component,
                                  private Timer
@@ -61,7 +64,7 @@ public:
         @param millisecondsBeforeTipAppears     the time for which the mouse has to stay still
                                                 before a tooltip will be shown
 
-        @see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipSize
+        @see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipBounds
     */
     explicit TooltipWindow (Component* parentComponent = nullptr,
                             int millisecondsBeforeTipAppears = 700);
@@ -104,8 +107,14 @@ public:
     {
         virtual ~LookAndFeelMethods() {}
 
-        virtual void getTooltipSize (const String& tipText, int& width, int& height) = 0;
+        /** returns the bounds for a tooltip at the given screen coordinate, constrained within the given desktop area. */
+        virtual Rectangle<int> getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea) = 0;
         virtual void drawTooltip (Graphics&, const String& text, int width, int height) = 0;
+
+       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+        // This method has been replaced by getTooltipBounds()
+        virtual int getTooltipSize (const String&, int&, int&) { return 0; }
+       #endif
     };
 
 private:
@@ -121,7 +130,7 @@ private:
     void paint (Graphics&) override;
     void mouseEnter (const MouseEvent&) override;
     void timerCallback() override;
-    void updatePosition (const String&, Point<int>, const Rectangle<int>&);
+    void updatePosition (const String&, Point<int>, Rectangle<int>);
 
     static String getTipFor (Component*);
 

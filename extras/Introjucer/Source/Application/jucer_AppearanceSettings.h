@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_APPEARANCESETTINGS_JUCEHEADER__
-#define __JUCER_APPEARANCESETTINGS_JUCEHEADER__
+#ifndef JUCER_APPEARANCESETTINGS_H_INCLUDED
+#define JUCER_APPEARANCESETTINGS_H_INCLUDED
 
 
 class AppearanceSettings    : private ValueTree::Listener
@@ -69,8 +69,8 @@ private:
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override   { updateColourScheme(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override               { updateColourScheme(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&) override             { updateColourScheme(); }
-    void valueTreeChildOrderChanged (ValueTree&) override                    { updateColourScheme(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override        { updateColourScheme(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override          { updateColourScheme(); }
     void valueTreeParentChanged (ValueTree&) override                        { updateColourScheme(); }
     void valueTreeRedirected (ValueTree&) override                           { updateColourScheme(); }
 
@@ -88,8 +88,9 @@ public:
 
     void drawTabButton (TabBarButton& button, Graphics&, bool isMouseOver, bool isMouseDown) override;
     void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) override {}
-
     int getTabButtonBestWidth (TabBarButton&, int tabDepth) override;
+    void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>&, bool, bool, ConcertinaPanel&, Component&) override;
+    static Colour getTabBackgroundColour (TabBarButton&);
 
 private:
     Image backgroundTexture;
@@ -97,4 +98,4 @@ private:
 };
 
 
-#endif   // __JUCER_APPEARANCESETTINGS_JUCEHEADER__
+#endif   // JUCER_APPEARANCESETTINGS_H_INCLUDED

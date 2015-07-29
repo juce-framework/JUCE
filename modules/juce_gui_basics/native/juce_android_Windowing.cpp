@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -41,9 +41,15 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
 
     initialiseJuce_GUI();
 
-    JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
-    if (! app->initialiseApp())
-        exit (app->getApplicationReturnValue());
+    if (JUCEApplicationBase* app = JUCEApplicationBase::createInstance())
+    {
+        if (! app->initialiseApp())
+            exit (app->shutdownApp());
+    }
+    else
+    {
+        jassertfalse; // you must supply an application object for an android app!
+    }
 
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }
@@ -106,7 +112,8 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           usingAndroidGraphics (false),
           fullScreen (false),
-          sizeAllocated (0)
+          sizeAllocated (0),
+          scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
     {
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
@@ -183,8 +190,10 @@ public:
         view.callVoidMethod (ComponentPeerView.setViewName, javaString (title).get());
     }
 
-    void setBounds (const Rectangle<int>& r, bool isNowFullScreen) override
+    void setBounds (const Rectangle<int>& userRect, bool isNowFullScreen) override
     {
+        Rectangle<int> r = userRect * scale;
+
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             fullScreen = isNowFullScreen;
@@ -218,7 +227,7 @@ public:
         return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
                                view.callIntMethod (ComponentPeerView.getTop),
                                view.callIntMethod (ComponentPeerView.getWidth),
-                               view.callIntMethod (ComponentPeerView.getHeight));
+                               view.callIntMethod (ComponentPeerView.getHeight)) / scale;
     }
 
     void handleScreenSizeChange()
@@ -232,7 +241,7 @@ public:
     Point<int> getScreenPosition() const
     {
         return Point<int> (view.callIntMethod (ComponentPeerView.getLeft),
-                           view.callIntMethod (ComponentPeerView.getTop));
+                           view.callIntMethod (ComponentPeerView.getTop)) / scale;
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
@@ -285,7 +294,8 @@ public:
         return isPositiveAndBelow (localPos.x, component.getWidth())
             && isPositiveAndBelow (localPos.y, component.getHeight())
             && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
-                                                                    localPos.x, localPos.y));
+                                                                    localPos.x * scale,
+                                                                    localPos.y * scale));
     }
 
     BorderSize<int> getFrameSize() const override
@@ -316,19 +326,21 @@ public:
     }
 
     //==============================================================================
-    void handleMouseDownCallback (int index, Point<float> pos, int64 time)
+    void handleMouseDownCallback (int index, Point<float> sysPos, int64 time)
     {
+        Point<float> pos = sysPos / scale;
         lastMousePos = pos;
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
         handleMouseEvent (index, pos, currentModifiers.withoutMouseButtons(), time);
 
         if (isValidPeer (this))
-            handleMouseDragCallback (index, pos, time);
+            handleMouseDragCallback (index, sysPos, time);
     }
 
     void handleMouseDragCallback (int index, Point<float> pos, int64 time)
     {
+        pos /= scale;
         lastMousePos = pos;
 
         jassert (index < 64);
@@ -340,6 +352,7 @@ public:
 
     void handleMouseUpCallback (int index, Point<float> pos, int64 time)
     {
+        pos /= scale;
         lastMousePos = pos;
 
         jassert (index < 64);
@@ -385,6 +398,7 @@ public:
         {
             case TextInputTarget::textKeyboard:          return "text";
             case TextInputTarget::numericKeyboard:       return "number";
+            case TextInputTarget::decimalKeyboard:       return "numberDecimal";
             case TextInputTarget::urlKeyboard:           return "textUri";
             case TextInputTarget::emailAddressKeyboard:  return "textEmailAddress";
             case TextInputTarget::phoneNumberKeyboard:   return "phone";
@@ -406,7 +420,7 @@ public:
      }
 
     //==============================================================================
-    void handlePaintCallback (JNIEnv* env, jobject canvas)
+    void handlePaintCallback (JNIEnv* env, jobject canvas, jobject paint)
     {
         jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
         const int left   = env->GetIntField (rect, RectClass.left);
@@ -434,6 +448,7 @@ public:
                 {
                     LowLevelGraphicsSoftwareRenderer g (temp);
                     g.setOrigin (-clip.getPosition());
+                    g.addTransform (AffineTransform::scale (scale));
                     handlePaint (g);
                 }
             }
@@ -442,12 +457,14 @@ public:
 
             env->CallVoidMethod (canvas, CanvasMinimal.drawBitmap, (jintArray) buffer.get(), 0, clip.getWidth(),
                                  (jfloat) clip.getX(), (jfloat) clip.getY(),
-                                 clip.getWidth(), clip.getHeight(), true, (jobject) 0);
+                                 clip.getWidth(), clip.getHeight(), true, paint);
         }
     }
 
-    void repaint (const Rectangle<int>& area) override
+    void repaint (const Rectangle<int>& userArea) override
     {
+        Rectangle<int> area = userArea * scale;
+
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
@@ -500,6 +517,7 @@ private:
     GlobalRef buffer;
     bool usingAndroidGraphics, fullScreen;
     int sizeAllocated;
+    float scale;
 
     class PreallocatedImage  : public ImagePixelData
     {
@@ -568,7 +586,7 @@ int64 AndroidComponentPeer::touchesDown = 0;
           peer->juceMethodInvocation; \
   }
 
-JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jlong host, jobject canvas),                          handlePaintCallback (env, canvas))
+JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
 JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
 JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
 JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
@@ -716,11 +734,12 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 void Desktop::Displays::findDisplays (float masterScale)
 {
     Display d;
-    d.userArea = d.totalArea = Rectangle<int> (android.screenWidth,
-                                               android.screenHeight) / masterScale;
+
     d.isMain = true;
-    d.scale = masterScale;
     d.dpi = android.dpi;
+    d.scale = masterScale * (d.dpi / 150.);
+    d.userArea = d.totalArea = Rectangle<int> (android.screenWidth,
+                                               android.screenHeight) / d.scale;
 
     displays.add (d);
 }

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -38,8 +38,20 @@
  #define JUCE_ENABLE_REPAINT_DEBUGGING 0
 #endif
 
+/** JUCE_USE_XRANDR: Enables Xrandr multi-monitor support (Linux only).
+    Unless you specifically want to disable this, it's best to leave this option turned on.
+    Note that your users do not need to have Xrandr installed for your JUCE app to run, as
+    the availability of Xrandr is queried during runtime.
+*/
+#ifndef JUCE_USE_XRANDR
+ #define JUCE_USE_XRANDR 1
+#endif
+
 /** JUCE_USE_XINERAMA: Enables Xinerama multi-monitor support (Linux only).
     Unless you specifically want to disable this, it's best to leave this option turned on.
+    This will be used as a fallback if JUCE_USE_XRANDR not set or libxrandr cannot be found.
+    Note that your users do not need to have Xrandr installed for your JUCE app to run, as
+    the availability of Xinerama is queried during runtime.
 */
 #ifndef JUCE_USE_XINERAMA
  #define JUCE_USE_XINERAMA 1

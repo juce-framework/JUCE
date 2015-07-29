@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -50,34 +50,62 @@ namespace MouseCursorHelpers
         }
     }
 
-    static void* fromWebKitFile (const char* filename, float hx, float hy)
+    static NSCursor* fromNSImage (NSImage* im, NSPoint hotspot)
     {
-        FileInputStream fileStream (File ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources")
-                                        .getChildFile (filename));
+        NSCursor* c = [[NSCursor alloc] initWithImage: im
+                                              hotSpot: hotspot];
+        [im release];
+        return c;
+    }
 
-        if (fileStream.openedOk())
+    static void* fromHIServices (const char* filename)
+    {
+        JUCE_AUTORELEASEPOOL
         {
-            BufferedInputStream buf (fileStream, 4096);
+            const String cursorPath (String ("/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/"
+                                             "HIServices.framework/Versions/A/Resources/cursors/")
+                                       + filename);
 
-            PNGImageFormat pngFormat;
-            Image im (pngFormat.decodeImage (buf));
+            NSImage* originalImage = [[NSImage alloc] initByReferencingFile: juceStringToNS (cursorPath + "/cursor.pdf")];
+            NSSize originalSize = [originalImage size];
+            NSImage* resultImage   = [[NSImage alloc] initWithSize: originalSize];
 
-            if (im.isValid())
-                return CustomMouseCursorInfo (im, (int) (hx * im.getWidth()),
-                                                  (int) (hy * im.getHeight())).create();
+            for (int scale = 1; scale <= 4; ++scale)
+            {
+                NSAffineTransform* scaleTransform = [NSAffineTransform transform];
+                [scaleTransform scaleBy: (float) scale];
+
+                if (CGImageRef rasterCGImage = [originalImage CGImageForProposedRect: nil
+                                                                             context: nil
+                                                                               hints: [NSDictionary dictionaryWithObjectsAndKeys:
+                                                                                         NSImageHintCTM, scaleTransform, nil]])
+                {
+                    NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: rasterCGImage];
+                    [imageRep setSize: originalSize];
+
+                    [resultImage addRepresentation: imageRep];
+                    [imageRep release];
+                }
+                else
+                {
+                    return nil;
+                }
+            }
+
+            NSDictionary* info = [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (cursorPath + "/info.plist")];
+
+            const float hotspotX = (float) [[info valueForKey: nsStringLiteral ("hotx")] doubleValue];
+            const float hotspotY = (float) [[info valueForKey: nsStringLiteral ("hoty")] doubleValue];
+
+            return fromNSImage (resultImage, NSMakePoint (hotspotX, hotspotY));
         }
-
-        return nullptr;
     }
 }
 
 void* CustomMouseCursorInfo::create() const
 {
-    NSImage* im = MouseCursorHelpers::createNSImage (image);
-    NSCursor* c = [[NSCursor alloc] initWithImage: im
-                                          hotSpot: NSMakePoint (hotspot.x, hotspot.y)];
-    [im release];
-    return c;
+    return MouseCursorHelpers::fromNSImage (MouseCursorHelpers::createNSImage (image),
+                                            NSMakePoint (hotspot.x, hotspot.y));
 }
 
 void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)
@@ -102,9 +130,10 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case CopyingCursor:
             {
                #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6
-                if (void* m = MouseCursorHelpers::fromWebKitFile ("copyCursor.png", 0, 0))
+                if (void* m = MouseCursorHelpers::fromHIServices ("copy"))
                     return m;
                #endif
+
                 c = [NSCursor dragCopyCursor]; // added in 10.6
                 break;
             }
@@ -112,10 +141,14 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case UpDownResizeCursor:
             case TopEdgeResizeCursor:
             case BottomEdgeResizeCursor:
-                return MouseCursorHelpers::fromWebKitFile ("northSouthResizeCursor.png", 0.5f, 0.5f);
+                if (void* m = MouseCursorHelpers::fromHIServices ("resizenorthsouth"))
+                    return m;
+
+                c = [NSCursor resizeUpDownCursor];
+                break;
 
             case LeftRightResizeCursor:
-                if (void* m = MouseCursorHelpers::fromWebKitFile ("eastWestResizeCursor.png", 0.5f, 0.5f))
+                if (void* m = MouseCursorHelpers::fromHIServices ("resizeeastwest"))
                     return m;
 
                 c = [NSCursor resizeLeftRightCursor];
@@ -123,14 +156,14 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
             case TopLeftCornerResizeCursor:
             case BottomRightCornerResizeCursor:
-                return MouseCursorHelpers::fromWebKitFile ("northWestSouthEastResizeCursor.png", 0.5f, 0.5f);
+                return MouseCursorHelpers::fromHIServices ("resizenorthwestsoutheast");
 
             case TopRightCornerResizeCursor:
             case BottomLeftCornerResizeCursor:
-                return MouseCursorHelpers::fromWebKitFile ("northEastSouthWestResizeCursor.png", 0.5f, 0.5f);
+                return MouseCursorHelpers::fromHIServices ("resizenortheastsouthwest");
 
             case UpDownLeftRightResizeCursor:
-                return MouseCursorHelpers::fromWebKitFile ("moveCursor.png", 0.5f, 0.5f);
+                return MouseCursorHelpers::fromHIServices ("move");
 
             default:
                 jassertfalse;

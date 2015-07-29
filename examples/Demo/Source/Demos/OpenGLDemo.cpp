@@ -1,24 +1,23 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-12 by Raw Material Software Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2015 - ROLI Ltd.
 
-  ------------------------------------------------------------------------------
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
 
-   JUCE can be redistributed and/or modified under the terms of the GNU General
-   Public License (Version 2), as published by the Free Software Foundation.
-   A copy of the license is included in the JUCE distribution, or can be found
-   online at www.gnu.org/licenses.
+   Details of these licenses can be found at: www.gnu.org/licenses
 
    JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
    A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-  ------------------------------------------------------------------------------
+   ------------------------------------------------------------------------------
 
    To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.rawmaterialsoftware.com/juce for more information.
+   available: visit www.juce.com for more information.
 
   ==============================================================================
 */
@@ -174,12 +173,12 @@ struct OpenGLDemoClasses
                 Array<Vertex> vertices;
                 createVertexListFromMesh (shape.mesh, vertices, Colours::green);
 
-                openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER, vertices.size() * sizeof (Vertex),
+                openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER, vertices.size() * (int) sizeof (Vertex),
                                                        vertices.getRawDataPointer(), GL_STATIC_DRAW);
 
                 openGLContext.extensions.glGenBuffers (1, &indexBuffer);
                 openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-                openGLContext.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof (juce::uint32),
+                openGLContext.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, numIndices * (int) sizeof (juce::uint32),
                                                        shape.mesh.indices.getRawDataPointer(), GL_STATIC_DRAW);
             }
 
@@ -280,7 +279,7 @@ struct OpenGLDemoClasses
 
     struct BuiltInTexture   : public DemoTexture
     {
-        BuiltInTexture (const char* nm, const void* imageData, int imageSize)
+        BuiltInTexture (const char* nm, const void* imageData, size_t imageSize)
             : image (resizeImageToPowerOfTwo (ImageFileFormat::loadFrom (imageData, imageSize)))
         {
             name = nm;
@@ -701,13 +700,12 @@ struct OpenGLDemoClasses
 
         Matrix3D<float> getViewMatrix() const
         {
-            Matrix3D<float> viewMatrix (Vector3D<float> (0.0f, 1.0f, -10.0f));
-
-            viewMatrix *= draggableOrientation.getRotationMatrix();
+            Matrix3D<float> viewMatrix = draggableOrientation.getRotationMatrix()
+                                            * Vector3D<float> (0.0f, 1.0f, -10.0f);
 
             Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (rotation, rotation, -0.3f));
 
-            return viewMatrix * rotationMatrix;
+            return rotationMatrix * viewMatrix;
         }
 
         void setTexture (DemoTexture* t)

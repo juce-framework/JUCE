@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -53,14 +53,14 @@ public:
         startPlaying();
     }
 
-    ~StandalonePluginHolder()
+    virtual ~StandalonePluginHolder()
     {
         deletePlugin();
         shutDownAudioDevices();
     }
 
     //==============================================================================
-    void createPlugin()
+    virtual void createPlugin()
     {
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
         processor = createPluginFilter();
@@ -72,7 +72,7 @@ public:
                                          44100, 512);
     }
 
-    void deletePlugin()
+    virtual void deletePlugin()
     {
         stopPlaying();
         processor = nullptr;
@@ -120,9 +120,9 @@ public:
             processor->getStateInformation (data);
 
             if (! fc.getResult().replaceWithData (data.getData(), data.getSize()))
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                             TRANS("Error whilst saving"),
-                                             TRANS("Couldn't write to the specified file!"));
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  TRANS("Error whilst saving"),
+                                                  TRANS("Couldn't write to the specified file!"));
         }
     }
 
@@ -140,9 +140,9 @@ public:
             if (fc.getResult().loadFileAsData (data))
                 processor->setStateInformation (data.getData(), (int) data.getSize());
             else
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                             TRANS("Error whilst loading"),
-                                             TRANS("Couldn't read from the specified file!"));
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  TRANS("Error whilst loading"),
+                                                  TRANS("Couldn't read from the specified file!"));
         }
     }
 
@@ -365,7 +365,13 @@ public:
         m.addSeparator();
         m.addItem (4, TRANS("Reset to default state"));
 
-        switch (m.showAt (&optionsButton))
+        m.showMenuAsync (PopupMenu::Options(),
+                         ModalCallbackFunction::forComponent (menuCallback, this));
+    }
+
+    void handleMenuResult (int result)
+    {
+        switch (result)
         {
             case 1:  pluginHolder->showAudioSettingsDialog(); break;
             case 2:  pluginHolder->askUserToSaveState(); break;
@@ -373,6 +379,12 @@ public:
             case 4:  resetToDefaultState(); break;
             default: break;
         }
+    }
+
+    static void menuCallback (int result, StandaloneFilterWindow* button)
+    {
+        if (button != nullptr && result != 0)
+            button->handleMenuResult (result);
     }
 
     void resized() override

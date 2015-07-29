@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -188,6 +188,48 @@ namespace
         return proj.save (false);
     }
 
+    static int gitTag (const StringArray& args)
+    {
+        if (! checkArgumentCount (args, 2))
+            return 1;
+
+        LoadedProject proj;
+
+        int res = proj.load (getFile (args[1]));
+
+        if (res != 0)
+            return res;
+
+        String version (proj.project->getVersionValue().toString());
+
+        if (version.trim().isEmpty())
+        {
+            std::cout << "Cannot read version number from project!" << std::endl;
+            return 1;
+        }
+
+        StringArray command;
+        command.add ("git");
+        command.add ("tag");
+        command.add ("-a");
+        command.add (version);
+        command.add ("-m");
+        command.add (version.quoted());
+
+        std::cout << "Performing command: " << command.joinIntoString(" ") << std::endl;
+
+        ChildProcess c;
+
+        if (! c.start (command, 0))
+        {
+            std::cout << "Cannot run git!" << std::endl;
+            return 1;
+        }
+
+        c.waitForProcessToFinish (10000);
+        return (int) c.getExitCode();
+    }
+
     //==============================================================================
     int showStatus (const StringArray& args)
     {
@@ -348,6 +390,9 @@ namespace
                   << " introjucer --bump-version project_file" << std::endl
                   << "    Updates the minor version number in a project by 1." << std::endl
                   << std::endl
+                  << " introjucer --git-tag-version project_file" << std::endl
+                  << "    Invokes 'git tag' to attach the project's version number to the current git repository." << std::endl
+                  << std::endl
                   << " introjucer --status project_file" << std::endl
                   << "    Displays information about a project." << std::endl
                   << std::endl
@@ -369,14 +414,18 @@ int performCommandLine (const String& commandLine)
     args.addTokens (commandLine, true);
     args.trim();
 
-    if (matchArgument (args[0], "help"))                return showHelp();
-    if (matchArgument (args[0], "resave"))              return resaveProject (args, false);
-    if (matchArgument (args[0], "resave-resources"))    return resaveProject (args, true);
-    if (matchArgument (args[0], "set-version"))         return setVersion (args);
-    if (matchArgument (args[0], "bump-version"))        return bumpVersion (args);
-    if (matchArgument (args[0], "buildmodule"))         return buildModules (args, false);
-    if (matchArgument (args[0], "buildallmodules"))     return buildModules (args, true);
-    if (matchArgument (args[0], "status"))              return showStatus (args);
+    String command (args[0]);
+
+    if (matchArgument (command, "help"))                return showHelp();
+    if (matchArgument (command, "h"))                   return showHelp();
+    if (matchArgument (command, "resave"))              return resaveProject (args, false);
+    if (matchArgument (command, "resave-resources"))    return resaveProject (args, true);
+    if (matchArgument (command, "set-version"))         return setVersion (args);
+    if (matchArgument (command, "bump-version"))        return bumpVersion (args);
+    if (matchArgument (command, "git-tag-version"))     return gitTag (args);
+    if (matchArgument (command, "buildmodule"))         return buildModules (args, false);
+    if (matchArgument (command, "buildallmodules"))     return buildModules (args, true);
+    if (matchArgument (command, "status"))              return showStatus (args);
 
     return commandLineNotPerformed;
 }

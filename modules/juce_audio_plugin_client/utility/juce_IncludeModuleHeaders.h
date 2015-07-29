@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,13 +22,16 @@
   ==============================================================================
 */
 
+#ifndef JUCE_INCLUDEMODULEHEADERS_H_INCLUDED
+#define JUCE_INCLUDEMODULEHEADERS_H_INCLUDED
+
 #include "../juce_audio_plugin_client.h"
 
 using namespace juce;
 
 namespace juce
 {
-    #if JUCE_MAC && ! DOXYGEN
+    #if JUCE_MAC
      #define Point     juce::Point
      #define Component juce::Component
 
@@ -44,3 +47,5 @@ namespace juce
 }
 
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
+
+#endif   // JUCE_INCLUDEMODULEHEADERS_H_INCLUDED

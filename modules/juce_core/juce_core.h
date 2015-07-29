@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -45,6 +45,15 @@
   #pragma message ("Have you included your AppConfig.h file before including the JUCE headers?")
  #else
   #warning "Have you included your AppConfig.h file before including the JUCE headers?"
+ #endif
+#endif
+
+#ifdef _MSC_VER
+ #pragma warning (push)
+ // Disable warnings for long class names, padding, and undefined preprocessor definitions.
+ #pragma warning (disable: 4251 4786 4668 4820)
+ #ifdef __INTEL_COMPILER
+  #pragma warning (disable: 1125)
  #endif
 #endif
 
@@ -117,6 +126,17 @@
  #define JUCE_ZLIB_INCLUDE_PATH <zlib.h>
 #endif
 
+/** Config: JUCE_USE_CURL
+    Enables http/https support via libcurl (Linux only). Enabling this will add an additional
+    run-time dynmic dependency to libcurl.
+
+    If you disable this then https/ssl support will not be available on linux.
+*/
+#ifndef JUCE_USE_CURL
+ #define JUCE_USE_CURL 0
+#endif
+
+
 /*  Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
     If enabled, this will add some exception-catching code to forward unhandled exceptions
     to your JUCEApplicationBase::unhandledException() callback.
@@ -131,14 +151,6 @@
 
 //=============================================================================
 //=============================================================================
-#if JUCE_MSVC
- #pragma warning (disable: 4251) // (DLL build warning, must be disabled before pushing the warning state)
- #pragma warning (push)
- #pragma warning (disable: 4786) // (long class name warning)
- #ifdef __INTEL_COMPILER
-  #pragma warning (disable: 1125)
- #endif
-#endif
 
 #include "system/juce_StandardHeader.h"
 
@@ -244,8 +256,6 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "maths/juce_Random.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
-#include "system/juce_PlatformDefs.h"
-#include "system/juce_CompilerSupport.h"
 #include "system/juce_SystemStats.h"
 #include "threads/juce_ChildProcess.h"
 #include "threads/juce_DynamicLibrary.h"

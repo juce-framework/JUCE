@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -117,7 +117,7 @@ public:
     void setJustificationType (Justification justification);
 
     /** Returns the type of justification, as set in setJustificationType(). */
-    Justification getJustificationType() const noexcept                 { return justification; }
+    Justification getJustificationType() const noexcept                         { return justification; }
 
     /** Changes the border that is left between the edge of the component and the text.
         By default there's a small gap left at the sides of the component to allow for
@@ -126,7 +126,7 @@ public:
     void setBorderSize (BorderSize<int> newBorderSize);
 
     /** Returns the size of the border to be left around the text. */
-    BorderSize<int> getBorderSize() const noexcept                      { return border; }
+    BorderSize<int> getBorderSize() const noexcept                              { return border; }
 
     /** Makes this label "stick to" another component.
 
@@ -151,17 +151,20 @@ public:
         Returns false if the label is above the other component. This is only relevent if
         attachToComponent() has been called.
     */
-    bool isAttachedOnLeft() const noexcept                              { return leftOfOwnerComp; }
+    bool isAttachedOnLeft() const noexcept                                      { return leftOfOwnerComp; }
 
     /** Specifies the minimum amount that the font can be squashed horizontally before it starts
-        using ellipsis.
+        using ellipsis. Use a value of 0 for a default value.
 
         @see Graphics::drawFittedText
     */
     void setMinimumHorizontalScale (float newScale);
 
     /** Specifies the amount that the font can be squashed horizontally. */
-    float getMinimumHorizontalScale() const noexcept                    { return minimumHorizontalScale; }
+    float getMinimumHorizontalScale() const noexcept                            { return minimumHorizontalScale; }
+
+    /** Set a keyboard type for use when the text editor is shown. */
+    void setKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept   { keyboardType = type; }
 
     //==============================================================================
     /**
@@ -185,6 +188,9 @@ public:
 
         /** Called when a Label goes into editing mode and displays a TextEditor. */
         virtual void editorShown (Label*, TextEditor&) {}
+
+        /** Called when a Label is about to delete its TextEditor and exit editing mode. */
+        virtual void editorHidden (Label*, TextEditor&) {}
     };
 
     /** Registers a listener that will be called when the label's text changes. */
@@ -331,6 +337,7 @@ private:
     WeakReference<Component> ownerComponent;
     BorderSize<int> border;
     float minimumHorizontalScale;
+    TextInputTarget::VirtualKeyboardType keyboardType;
     bool editSingleClick;
     bool editDoubleClick;
     bool lossOfFocusDiscardsChanges;

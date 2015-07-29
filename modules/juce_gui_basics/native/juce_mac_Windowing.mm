@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -45,9 +45,9 @@ public:
     {
         switch (getRawResult())
         {
-            case NSAlertDefaultReturn:  return 1;
-            case NSAlertOtherReturn:    return 2;
-            default:                    return 0;
+            case NSAlertFirstButtonReturn:  return 1;
+            case NSAlertThirdButtonReturn:  return 2;
+            default:                        return 0;
         }
     }
 
@@ -82,25 +82,26 @@ private:
         delete this;
     }
 
-    static NSString* translateIfNotNull (const char* s)
-    {
-        return s != nullptr ? juceStringToNS (TRANS (s)) : nil;
-    }
-
     NSInteger getRawResult() const
     {
-        NSString* msg = juceStringToNS (message);
-        NSString* ttl = juceStringToNS (title);
-        NSString* b1  = translateIfNotNull (button1);
-        NSString* b2  = translateIfNotNull (button2);
-        NSString* b3  = translateIfNotNull (button3);
+        NSAlert* alert = [[[NSAlert alloc] init] autorelease];
 
-        switch (iconType)
-        {
-            case AlertWindow::InfoIcon:     return NSRunInformationalAlertPanel (ttl, msg, b1, b2, b3);
-            case AlertWindow::WarningIcon:  return NSRunCriticalAlertPanel      (ttl, msg, b1, b2, b3);
-            default:                        return NSRunAlertPanel              (ttl, msg, b1, b2, b3);
-        }
+        [alert setMessageText:     juceStringToNS (title)];
+        [alert setInformativeText: juceStringToNS (message)];
+
+        [alert setAlertStyle: iconType == AlertWindow::WarningIcon ? NSCriticalAlertStyle
+                                                                   : NSInformationalAlertStyle];
+        addButton (alert, button1);
+        addButton (alert, button2);
+        addButton (alert, button3);
+
+        return [alert runModal];
+    }
+
+    static void addButton (NSAlert* alert, const char* button)
+    {
+        if (button != nullptr)
+            [alert addButtonWithTitle: juceStringToNS (TRANS (button))];
     }
 };
 

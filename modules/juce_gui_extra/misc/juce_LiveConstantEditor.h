@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -194,7 +194,7 @@ namespace LiveConstantEditor
         ValueList();
         ~ValueList();
 
-        static ValueList& getInstance();
+        juce_DeclareSingleton (ValueList, false)
 
         template <typename Type>
         LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
@@ -233,7 +233,7 @@ namespace LiveConstantEditor
     template <typename Type>
     inline LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
     {
-        return ValueList::getInstance().getValue (file, line, initialValue);
+        return ValueList::getInstance()->getValue (file, line, initialValue);
     }
 
     inline LiveValue<String>& getValue (const char* file, int line, const char* initialValue)

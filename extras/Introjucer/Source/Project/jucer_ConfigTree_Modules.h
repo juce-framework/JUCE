@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -21,7 +21,6 @@
 
   ==============================================================================
 */
-
 
 class ModuleItem   : public ConfigTreeItemBase
 {
@@ -88,8 +87,9 @@ private:
                 props.add (new MissingDependenciesComponent (project, moduleID));
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
-                props.add (new TextPropertyComponent (exporter->getPathForModuleValue (moduleID),
-                                                      "Path for " + exporter->getName().quoted(), 1024, false),
+                props.add (new FilePathPropertyComponent (exporter->getPathForModuleValue (moduleID),
+                                                          "Path for " + exporter->getName().quoted(),
+                                                          true, "*", project.getProjectFolder()),
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
                             + exporter->getName().quoted() + " target. "
                            "This can be an absolute path, or relative to the jucer project folder, but it "
@@ -146,27 +146,36 @@ private:
         String moduleID;
 
         //==============================================================================
-        class ModuleInfoComponent  : public PropertyComponent
+        class ModuleInfoComponent  : public PropertyComponent,
+                                     private Value::Listener
         {
         public:
             ModuleInfoComponent (Project& p, const String& modID)
                 : PropertyComponent ("Module", 150), project (p), moduleID (modID)
             {
+                for (Project::ExporterIterator exporter (project); exporter.next();)
+                    listeningValues.add (new Value (exporter->getPathForModuleValue (moduleID)))
+                        ->addListener (this);
+
+                refresh();
             }
 
-            void refresh() {}
+        private:
+            void refresh() override
+            {
+                info = project.getModules().getModuleInfo (moduleID);
+                repaint();
+            }
 
-            void paint (Graphics& g)
+            void paint (Graphics& g) override
             {
                 g.setColour (Colours::white.withAlpha (0.4f));
-                g.fillRect (0, 0, getWidth(), getHeight() - 1);
+                g.fillRect (getLocalBounds().withTrimmedBottom (1));
 
                 AttributedString s;
                 s.setJustification (Justification::topLeft);
 
                 Font f (14.0f);
-
-                ModuleDescription info (project.getModules().getModuleInfo (moduleID));
 
                 if (info.isValid())
                 {
@@ -184,9 +193,15 @@ private:
                 s.draw (g, getLocalBounds().reduced (6, 5).toFloat());
             }
 
-        private:
+            void valueChanged (Value&) override
+            {
+                refresh();
+            }
+
             Project& project;
             String moduleID;
+            OwnedArray<Value> listeningValues;
+            ModuleDescription info;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleInfoComponent)
         };
@@ -208,9 +223,9 @@ private:
                 fixButton.addListener (this);
             }
 
-            void refresh() {}
+            void refresh() override {}
 
-            void paint (Graphics& g)
+            void paint (Graphics& g) override
             {
                 g.setColour (Colours::white.withAlpha (0.4f));
                 g.fillRect (0, 0, getWidth(), getHeight() - 1);
@@ -225,7 +240,7 @@ private:
                 s.draw (g, getLocalBounds().reduced (4, 16).toFloat());
             }
 
-            void buttonClicked (Button*)
+            void buttonClicked (Button*) override
             {
                 bool anyFailed = false;
 
@@ -250,7 +265,7 @@ private:
                                                       "folders manually and add them to the list.");
             }
 
-            void resized()
+            void resized() override
             {
                 fixButton.setBounds (getWidth() - 168, getHeight() - 26, 160, 22);
             }
@@ -289,7 +304,7 @@ public:
     bool isMissing() override               { return false; }
     Icon getIcon() const override           { return Icon (getIcons().graph, getContrastingColour (Colours::red, 0.5f)); }
 
-    void showDocument()
+    void showDocument() override
     {
         if (ProjectContentComponent* pcc = getProjectContentComponent())
             pcc->setEditorComponent (new ModulesPanel (project), nullptr);
@@ -366,9 +381,9 @@ public:
     }
 
     //==============================================================================
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override   { refreshIfNeeded (parentTree); }
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&) override { refreshIfNeeded (parentTree); }
-    void valueTreeChildOrderChanged (ValueTree& parentTree) override        { refreshIfNeeded (parentTree); }
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { refreshIfNeeded (parentTree); }
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { refreshIfNeeded (parentTree); }
+    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { refreshIfNeeded (parentTree); }
 
     void refreshIfNeeded (ValueTree& changedTree)
     {

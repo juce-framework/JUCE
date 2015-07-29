@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -45,6 +45,16 @@ struct ContainerDeletePolicy
 {
     static void destroy (ObjectType* object)
     {
+        // If the line below triggers a compiler error, it means that you are using
+        // an incomplete type for ObjectType (for example, a type that is declared
+        // but not defined). This is a problem because then the following delete is
+        // undefined behaviour. The purpose of the sizeof is to capture this situation.
+        // If this was caused by a ScopedPointer to a forward-declared type, move the
+        // implementation of all methods trying to use the ScopedPointer (e.g. the destructor
+        // of the class owning it) into cpp files where they can see to the definition
+        // of ObjectType. This should fix the error.
+        ignoreUnused (sizeof (ObjectType));
+
         delete object;
     }
 };

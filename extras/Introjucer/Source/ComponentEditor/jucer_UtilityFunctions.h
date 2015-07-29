@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,8 +22,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_UTILITYFUNCTIONS_JUCEHEADER__
-#define __JUCER_UTILITYFUNCTIONS_JUCEHEADER__
+#ifndef JUCER_UTILITYFUNCTIONS_H_INCLUDED
+#define JUCER_UTILITYFUNCTIONS_H_INCLUDED
 
 inline String quotedString (const String& s, bool wrapInTransMacro)
 {
@@ -113,4 +113,4 @@ inline void drawMouseOverCorners (Graphics& g, int w, int h)
         g.fillRect (r.getRectangle (i));
 }
 
-#endif   // __JUCER_UTILITYFUNCTIONS_JUCEHEADER__
+#endif   // JUCER_UTILITYFUNCTIONS_H_INCLUDED

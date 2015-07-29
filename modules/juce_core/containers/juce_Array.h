@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -96,8 +96,7 @@ public:
         @param values   the array to copy from
     */
     template <typename TypeToCreateFrom>
-    explicit Array (const TypeToCreateFrom* values)
-       : numUsed (0)
+    explicit Array (const TypeToCreateFrom* values)  : numUsed (0)
     {
         while (*values != TypeToCreateFrom())
             add (*values++);
@@ -109,14 +108,21 @@ public:
         @param numValues    the number of values in the array
     */
     template <typename TypeToCreateFrom>
-    Array (const TypeToCreateFrom* values, int numValues)
-       : numUsed (numValues)
+    Array (const TypeToCreateFrom* values, int numValues)  : numUsed (numValues)
     {
         data.setAllocatedSize (numValues);
 
         for (int i = 0; i < numValues; ++i)
             new (data.elements + i) ElementType (values[i]);
     }
+
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    template <typename TypeToCreateFrom>
+    Array (const std::initializer_list<TypeToCreateFrom>& items)  : numUsed (0)
+    {
+        addArray (items);
+    }
+   #endif
 
     /** Destructor. */
     ~Array()
@@ -604,6 +610,21 @@ public:
         }
     }
 
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    template <typename TypeToCreateFrom>
+    void addArray (const std::initializer_list<TypeToCreateFrom>& items)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (numUsed + (int) items.size());
+
+        for (auto& item : items)
+        {
+            new (data.elements + numUsed) ElementType (item);
+            ++numUsed;
+        }
+    }
+   #endif
+
     /** Adds elements from a null-terminated array of pointers to the end of this array.
 
         @param elementsToAdd    an array of pointers to some kind of object from which elements
@@ -811,8 +832,8 @@ public:
 
     /** Removes an item from the array.
 
-        This will remove the first occurrence of the given element from the array.
-        If the item isn't found, no action is taken.
+        This will remove all occurrences of the given element from the array.
+        If no such items are found, no action is taken.
 
         @param valueToRemove   the object to try to remove
         @see remove, removeRange

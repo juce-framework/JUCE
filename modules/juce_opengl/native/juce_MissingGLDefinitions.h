@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -45,6 +45,10 @@ enum MissingOpenGLDefinitions
 
    #ifndef GL_RGBA8
     GL_RGBA8                        = GL_RGBA,
+   #endif
+
+   #ifndef GL_RGBA32F
+    GL_RGBA32F                      = 0x8814,
    #endif
 
    #ifndef GL_COLOR_ATTACHMENT0

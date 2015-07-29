@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -277,7 +277,7 @@ public:
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, ranges)))
             {
-                static const double possibleRates[] = { 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 };
+                static const double possibleRates[] = { 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0, 384000.0 };
 
                 for (int i = 0; i < numElementsInArray (possibleRates); ++i)
                 {
@@ -543,7 +543,7 @@ public:
         // set sample rate
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioDevicePropertyNominalSampleRate;
-        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mScope = kAudioObjectPropertyScopeGlobal;
         pa.mElement = kAudioObjectPropertyElementMaster;
         Float64 sr = newSampleRate;
 
@@ -1067,6 +1067,12 @@ public:
         jassert (! isOpen());
         jassert (! device->isOpen());
         devices.add (new DeviceWrapper (*this, device, useInputs, useOutputs));
+
+        if (currentSampleRate == 0)
+            currentSampleRate = device->getCurrentSampleRate();
+
+        if (currentBufferSize == 0)
+            currentBufferSize = device->getCurrentBufferSizeSamples();
     }
 
     Array<AudioIODevice*> getDevices() const

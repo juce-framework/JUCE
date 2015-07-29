@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -916,6 +916,11 @@ public:
         const File temp (File::getSpecialLocation (File::tempDirectory));
 
         expect (! File::nonexistent.exists());
+        expect (! File::nonexistent.existsAsFile());
+        expect (! File::nonexistent.isDirectory());
+       #if ! JUCE_WINDOWS
+        expect (File("/").isDirectory());
+       #endif
         expect (home.isDirectory());
         expect (home.exists());
         expect (! home.existsAsFile());

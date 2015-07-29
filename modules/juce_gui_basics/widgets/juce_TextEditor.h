@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -194,6 +194,8 @@ public:
 
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
         methods.
+
+        NB: You can also set the caret colour using CaretComponent::caretColourId
 
         @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
     */
@@ -569,7 +571,7 @@ public:
     void setInputFilter (InputFilter* newFilter, bool takeOwnership);
 
     /** Returns the current InputFilter, as set by setInputFilter(). */
-    InputFilter* getInputFilter() const noexcept            { return inputFilter; }
+    InputFilter* getInputFilter() const noexcept                { return inputFilter; }
 
     /** Sets limits on the characters that can be entered.
         This is just a shortcut that passes an instance of the LengthAndCharacterRestriction
@@ -582,6 +584,8 @@ public:
     */
     void setInputRestrictions (int maxTextLength,
                                const String& allowedCharacters = String::empty);
+
+    void setKeyboardType (VirtualKeyboardType type) noexcept    { keyboardType = type; }
 
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
@@ -631,7 +635,9 @@ public:
     /** @internal */
     bool isTextInputActive() const override;
     /** @internal */
-    void setTemporaryUnderlining (const Array <Range<int> >&) override;
+    void setTemporaryUnderlining (const Array<Range<int> >&) override;
+    /** @internal */
+    VirtualKeyboardType getKeyboardType() override    { return keyboardType; }
 
 protected:
     //==============================================================================
@@ -692,6 +698,7 @@ private:
     juce_wchar passwordCharacter;
     OptionalScopedPointer<InputFilter> inputFilter;
     Value textValue;
+    VirtualKeyboardType keyboardType;
 
     enum
     {
@@ -700,8 +707,8 @@ private:
         draggingSelectionEnd
     } dragType;
 
-    ListenerList <Listener> listeners;
-    Array <Range<int> > underlinedSections;
+    ListenerList<Listener> listeners;
+    Array<Range<int> > underlinedSections;
 
     void moveCaret (int newCaretPos);
     void moveCaretTo (int newPosition, bool isSelecting);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceLinkage="amalg_template" juceFolder="../../../juce" jucerVersion="3.1.0"
+              juceLinkage="amalg_template" juceFolder="../../../juce" jucerVersion="3.2.0"
               version="1.0.0" buildVST="1" buildRTAS="0" buildAU="1" pluginName="BinaryBuilder"
               pluginDesc="BinaryBuilder" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
               pluginCode="Abcd" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
@@ -14,31 +14,35 @@
                objCExtraSuffix="OeJtJb">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"
-                       osxSDK="1" osxCompatibility="1"/>
+                       osxSDK="1" osxCompatibility="1" osxArchitecture="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"
-                       osxSDK="1" osxCompatibility="1"/>
+                       osxSDK="1" osxCompatibility="1" osxArchitecture="default"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"
+                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"
+                       winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2008>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"
+                       libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"
+                       libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
   </EXPORTFORMATS>

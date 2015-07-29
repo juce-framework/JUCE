@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -92,15 +92,15 @@ public:
 
     //==============================================================================
     /** @internal */
-    Drawable* createCopy() const;
+    Drawable* createCopy() const override;
     /** @internal */
-    void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
     /** @internal */
-    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const override;
     /** @internal */
     static const Identifier valueTreeType;
     /** @internal */
-    Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const override;
     /** @internal */
     void childBoundsChanged (Component*) override;
     /** @internal */

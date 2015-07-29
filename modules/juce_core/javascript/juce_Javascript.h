@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -78,7 +78,7 @@ public:
         The function arguments are passed in the same format as used by native
         methods in the var class.
     */
-    var callFunction (Identifier function,
+    var callFunction (const Identifier& function,
                       const var::NativeFunctionArgs& args,
                       Result* errorMessage = nullptr);
 
@@ -87,7 +87,7 @@ public:
         engine until the engine is deleted. The name must be a simple JS identifier,
         without any dots.
     */
-    void registerNativeObject (Identifier objectName, DynamicObject* object);
+    void registerNativeObject (const Identifier& objectName, DynamicObject* object);
 
     /** This value indicates how long a call to one of the evaluate methods is permitted
         to run before timing-out and failing.

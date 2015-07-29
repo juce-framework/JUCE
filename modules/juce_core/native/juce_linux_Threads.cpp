@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -50,28 +50,6 @@ JUCE_API void JUCE_CALLTYPE Process::setPriority (const ProcessPriority prior)
     }
 
     pthread_setschedparam (pthread_self(), policy, &param);
-}
-
-JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
-{
-   #if JUCE_BSD
-    return false;
-   #else
-    static char testResult = 0;
-
-    if (testResult == 0)
-    {
-        testResult = (char) ptrace (PT_TRACE_ME, 0, 0, 0);
-
-        if (testResult >= 0)
-        {
-            ptrace (PT_DETACH, 0, (caddr_t) 1, 0);
-            testResult = 1;
-        }
-    }
-
-    return testResult < 0;
-   #endif
 }
 
 JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()

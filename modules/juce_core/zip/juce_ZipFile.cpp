@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -298,7 +298,9 @@ InputStream* ZipFile::createStreamForEntry (const int index)
 
         if (zei->compressed)
         {
-            stream = new GZIPDecompressorInputStream (stream, true, true, (int64) zei->entry.uncompressedSize);
+            stream = new GZIPDecompressorInputStream (stream, true,
+                                                      GZIPDecompressorInputStream::deflateFormat,
+                                                      (int64) zei->entry.uncompressedSize);
 
             // (much faster to unzip in big blocks using a buffer..)
             stream = new BufferedInputStream (stream, 32768, true);
@@ -326,7 +328,7 @@ void ZipFile::sortEntriesByFilename()
 //==============================================================================
 void ZipFile::init()
 {
-    ScopedPointer <InputStream> toDelete;
+    ScopedPointer<InputStream> toDelete;
     InputStream* in = inputStream;
 
     if (inputSource != nullptr)
@@ -356,7 +358,7 @@ void ZipFile::init()
                     if (pos + 46 > size)
                         break;
 
-                    const char* const buffer = static_cast <const char*> (headerData.getData()) + pos;
+                    const char* const buffer = static_cast<const char*> (headerData.getData()) + pos;
 
                     const int fileNameLen = ByteOrder::littleEndianShort (buffer + 28);
 

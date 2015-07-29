@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -55,16 +55,21 @@ bool SystemStats::isOperatingSystem64Bit()
 //==============================================================================
 namespace LinuxStatsHelpers
 {
-    String getCpuInfo (const char* const key)
+    String getConfigFileValue (const char* file, const char* const key)
     {
         StringArray lines;
-        File ("/proc/cpuinfo").readLines (lines);
+        File (file).readLines (lines);
 
         for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
             if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
                 return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
         return String();
+    }
+
+    String getCpuInfo (const char* key)
+    {
+        return getConfigFileValue ("/proc/cpuinfo", key);
     }
 }
 
@@ -93,14 +98,14 @@ int SystemStats::getMemorySizeInMegabytes()
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
-        return sysi.totalram * sysi.mem_unit / (1024 * 1024);
+        return (int) (sysi.totalram * sysi.mem_unit / (1024 * 1024));
 
     return 0;
 }
 
 int SystemStats::getPageSize()
 {
-    return sysconf (_SC_PAGESIZE);
+    return (int) sysconf (_SC_PAGESIZE);
 }
 
 //==============================================================================
@@ -150,6 +155,8 @@ void CPUInformation::initialise() noexcept
     hasSSE2  = flags.contains ("sse2");
     hasSSE3  = flags.contains ("sse3");
     has3DNow = flags.contains ("3dnow");
+    hasSSSE3 = flags.contains ("ssse3");
+    hasAVX   = flags.contains ("avx");
 
     numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
 }
@@ -160,7 +167,7 @@ uint32 juce_millisecondsSinceStartup() noexcept
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
 
-    return t.tv_sec * 1000 + t.tv_nsec / 1000000;
+    return (uint32) (t.tv_sec * 1000 + t.tv_nsec / 1000000);
 }
 
 int64 Time::getHighResolutionTicks() noexcept
@@ -188,4 +195,14 @@ bool Time::setSystemTimeToThisTime() const
     t.tv_usec = (millisSinceEpoch - t.tv_sec * 1000) * 1000;
 
     return settimeofday (&t, 0) == 0;
+}
+
+JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
+{
+   #if JUCE_BSD
+    return false;
+   #else
+    return LinuxStatsHelpers::getConfigFileValue ("/proc/self/status", "TracerPid")
+             .getIntValue() > 0;
+   #endif
 }

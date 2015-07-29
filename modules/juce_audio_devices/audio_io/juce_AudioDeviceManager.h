@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -450,7 +450,6 @@ private:
     BigInteger inputChannels, outputChannels;
     ScopedPointer<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
-    bool useInputNames;
     Atomic<int> inputLevelMeasurementEnabledCount;
     double inputLevel;
     ScopedPointer<AudioSampleBuffer> testSound;

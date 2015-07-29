@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -94,13 +94,12 @@ public:
     */
     SharedResourcePointer()
     {
-        SharedObjectHolder& holder = getSharedObjectHolder();
-        const SpinLock::ScopedLockType sl (holder.lock);
+        initialise();
+    }
 
-        if (++(holder.refCount) == 1)
-            holder.sharedInstance = new SharedObjectType();
-
-        sharedObject = holder.sharedInstance;
+    SharedResourcePointer (const SharedResourcePointer&)
+    {
+        initialise();
     }
 
     /** Destructor.
@@ -145,7 +144,22 @@ private:
 
     SharedObjectType* sharedObject;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedResourcePointer)
+    void initialise()
+    {
+        SharedObjectHolder& holder = getSharedObjectHolder();
+        const SpinLock::ScopedLockType sl (holder.lock);
+
+        if (++(holder.refCount) == 1)
+            holder.sharedInstance = new SharedObjectType();
+
+        sharedObject = holder.sharedInstance;
+    }
+
+    // There's no need to assign to a SharedResourcePointer because every
+    // instance of the class is exactly the same!
+    SharedResourcePointer& operator= (const SharedResourcePointer&) JUCE_DELETED_FUNCTION;
+
+    JUCE_LEAK_DETECTOR (SharedResourcePointer)
 };
 
 

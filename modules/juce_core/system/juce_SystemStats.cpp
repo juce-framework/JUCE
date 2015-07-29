@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission to use, copy, modify, and/or distribute this software for any purpose with
    or without fee is hereby granted, provided that the above copyright notice and this
@@ -67,7 +67,8 @@ struct CPUInformation
 {
     CPUInformation() noexcept
         : numCpus (0), hasMMX (false), hasSSE (false),
-          hasSSE2 (false), hasSSE3 (false), has3DNow (false)
+          hasSSE2 (false), hasSSE3 (false), has3DNow (false),
+          hasSSSE3 (false), hasAVX (false)
     {
         initialise();
     }
@@ -75,7 +76,7 @@ struct CPUInformation
     void initialise() noexcept;
 
     int numCpus;
-    bool hasMMX, hasSSE, hasSSE2, hasSSE3, has3DNow;
+    bool hasMMX, hasSSE, hasSSE2, hasSSE3, has3DNow, hasSSSE3, hasAVX;
 };
 
 static const CPUInformation& getCPUInformation() noexcept
@@ -86,10 +87,12 @@ static const CPUInformation& getCPUInformation() noexcept
 
 int SystemStats::getNumCpus() noexcept        { return getCPUInformation().numCpus; }
 bool SystemStats::hasMMX() noexcept           { return getCPUInformation().hasMMX; }
+bool SystemStats::has3DNow() noexcept         { return getCPUInformation().has3DNow; }
 bool SystemStats::hasSSE() noexcept           { return getCPUInformation().hasSSE; }
 bool SystemStats::hasSSE2() noexcept          { return getCPUInformation().hasSSE2; }
 bool SystemStats::hasSSE3() noexcept          { return getCPUInformation().hasSSE3; }
-bool SystemStats::has3DNow() noexcept         { return getCPUInformation().has3DNow; }
+bool SystemStats::hasSSSE3() noexcept         { return getCPUInformation().hasSSSE3; }
+bool SystemStats::hasAVX() noexcept           { return getCPUInformation().hasAVX; }
 
 
 //==============================================================================

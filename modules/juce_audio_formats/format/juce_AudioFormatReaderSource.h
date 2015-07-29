@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -58,10 +58,10 @@ public:
 
         @see isLooping
     */
-    void setLooping (bool shouldLoop);
+    void setLooping (bool shouldLoop) override;
 
     /** Returns whether loop-mode is turned on or not. */
-    bool isLooping() const                                      { return looping; }
+    bool isLooping() const override                             { return looping; }
 
     /** Returns the reader that's being used. */
     AudioFormatReader* getAudioFormatReader() const noexcept    { return reader; }

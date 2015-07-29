@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -123,9 +123,9 @@ struct ASIOSampleFormat
         {
             switch (bitDepth)
             {
-                case 16: convertInt16ToFloat (static_cast <const char*> (src), dst, byteStride, samps, littleEndian); break;
-                case 24: convertInt24ToFloat (static_cast <const char*> (src), dst, byteStride, samps, littleEndian); break;
-                case 32: convertInt32ToFloat (static_cast <const char*> (src), dst, byteStride, samps, littleEndian); break;
+                case 16: convertInt16ToFloat (static_cast<const char*> (src), dst, byteStride, samps, littleEndian); break;
+                case 24: convertInt24ToFloat (static_cast<const char*> (src), dst, byteStride, samps, littleEndian); break;
+                case 32: convertInt32ToFloat (static_cast<const char*> (src), dst, byteStride, samps, littleEndian); break;
                 default: jassertfalse; break;
             }
         }
@@ -141,9 +141,9 @@ struct ASIOSampleFormat
         {
             switch (bitDepth)
             {
-                case 16: convertFloatToInt16 (src, static_cast <char*> (dst), byteStride, samps, littleEndian); break;
-                case 24: convertFloatToInt24 (src, static_cast <char*> (dst), byteStride, samps, littleEndian); break;
-                case 32: convertFloatToInt32 (src, static_cast <char*> (dst), byteStride, samps, littleEndian); break;
+                case 16: convertFloatToInt16 (src, static_cast<char*> (dst), byteStride, samps, littleEndian); break;
+                case 24: convertFloatToInt24 (src, static_cast<char*> (dst), byteStride, samps, littleEndian); break;
+                case 32: convertFloatToInt32 (src, static_cast<char*> (dst), byteStride, samps, littleEndian); break;
                 default: jassertfalse; break;
             }
         }
@@ -300,7 +300,7 @@ private:
 
 //==============================================================================
 class ASIOAudioIODevice;
-static ASIOAudioIODevice* volatile currentASIODev[3] = { 0 };
+static ASIOAudioIODevice* volatile currentASIODev[16] = { 0 };
 
 extern HWND juce_messageWindowHandle;
 
@@ -438,8 +438,6 @@ public:
         currentBlockSizeSamples = bufferSizeSamples;
         currentChansOut.clear();
         currentChansIn.clear();
-        inBuffers.clear (totalNumInputChans + 1);
-        outBuffers.clear (totalNumOutputChans + 1);
 
         updateSampleRates();
 
@@ -457,6 +455,13 @@ public:
         buffersCreated = false;
 
         setSampleRate (sampleRate);
+
+        // (need to get this again in case a sample rate change affected the channel count)
+        err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans);
+        jassert (err == ASE_OK);
+
+        inBuffers.calloc (totalNumInputChans + 8);
+        outBuffers.calloc (totalNumOutputChans + 8);
 
         if (needToReset)
         {
@@ -1320,7 +1325,7 @@ private:
                     inputFormat[i].convertToFloat (infos[i].buffers[bi], inBuffers[i], samps);
                 }
 
-                currentCallback->audioDeviceIOCallback (const_cast <const float**> (inBuffers.getData()), numActiveInputChans,
+                currentCallback->audioDeviceIOCallback (const_cast<const float**> (inBuffers.getData()), numActiveInputChans,
                                                         outBuffers, numActiveOutputChans, samps);
 
                 for (int i = 0; i < numActiveOutputChans; ++i)
@@ -1338,6 +1343,29 @@ private:
 
         if (postOutput)
             asioObject->outputReady();
+    }
+
+    long asioMessagesCallback (long selector, long value)
+    {
+        switch (selector)
+        {
+            case kAsioSelectorSupported:
+                if (value == kAsioResetRequest || value == kAsioEngineVersion || value == kAsioResyncRequest
+                     || value == kAsioLatenciesChanged || value == kAsioSupportsInputMonitor)
+                    return 1;
+                break;
+
+            case kAsioBufferSizeChange: JUCE_ASIO_LOG ("kAsioBufferSizeChange"); resetRequest(); return 1;
+            case kAsioResetRequest:     JUCE_ASIO_LOG ("kAsioResetRequest");     resetRequest(); return 1;
+            case kAsioResyncRequest:    JUCE_ASIO_LOG ("kAsioResyncRequest");    resetRequest(); return 1;
+            case kAsioLatenciesChanged: JUCE_ASIO_LOG ("kAsioLatenciesChanged"); return 1;
+            case kAsioEngineVersion:    return 2;
+
+            case kAsioSupportsTimeInfo:
+            case kAsioSupportsTimeCode: return 0;
+        }
+
+        return 0;
     }
 
     //==============================================================================
@@ -1360,56 +1388,43 @@ private:
 
         static long JUCE_ASIOCALLBACK asioMessagesCallback (long selector, long value, void*, double*)
         {
-            switch (selector)
-            {
-                case kAsioSelectorSupported:
-                    if (value == kAsioResetRequest || value == kAsioEngineVersion || value == kAsioResyncRequest
-                         || value == kAsioLatenciesChanged || value == kAsioSupportsInputMonitor)
-                        return 1;
-                    break;
-
-                case kAsioBufferSizeChange: JUCE_ASIO_LOG ("kAsioBufferSizeChange"); return sendResetRequest (deviceIndex);
-                case kAsioResetRequest:     JUCE_ASIO_LOG ("kAsioResetRequest");     return sendResetRequest (deviceIndex);
-                case kAsioResyncRequest:    JUCE_ASIO_LOG ("kAsioResyncRequest");    return sendResetRequest (deviceIndex);
-                case kAsioLatenciesChanged: JUCE_ASIO_LOG ("kAsioLatenciesChanged"); return 1;
-                case kAsioEngineVersion:    return 2;
-
-                case kAsioSupportsTimeInfo:
-                case kAsioSupportsTimeCode:
-                    return 0;
-            }
-
-            return 0;
+            return currentASIODev[deviceIndex] != nullptr
+                     ? currentASIODev[deviceIndex]->asioMessagesCallback (selector, value)
+                     : 0;
         }
 
         static void JUCE_ASIOCALLBACK sampleRateChangedCallback (ASIOSampleRate)
         {
-            sendResetRequest (deviceIndex);
+            if (currentASIODev[deviceIndex] != nullptr)
+                currentASIODev[deviceIndex]->resetRequest();
         }
 
-        static long sendResetRequest (int index)
+        static void setCallbacks (ASIOCallbacks& callbacks) noexcept
         {
-            if (currentASIODev[index] != nullptr)
-                currentASIODev[index]->resetRequest();
-
-            return 1;
+            callbacks.bufferSwitch          = &bufferSwitchCallback;
+            callbacks.asioMessage           = &asioMessagesCallback;
+            callbacks.bufferSwitchTimeInfo  = &bufferSwitchTimeInfoCallback;
+            callbacks.sampleRateDidChange   = &sampleRateChangedCallback;
         }
 
-        static void setCallbacks (ASIOCallbacks& callbacks)
+        static void setCallbacksForDevice (ASIOCallbacks& callbacks, ASIOAudioIODevice* device) noexcept
         {
-            callbacks.bufferSwitch = &bufferSwitchCallback;
-            callbacks.asioMessage = &asioMessagesCallback;
-            callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback;
-            callbacks.sampleRateDidChange = &sampleRateChangedCallback;
+            if (currentASIODev[deviceIndex] == device)
+                setCallbacks (callbacks);
+            else
+                ASIOCallbackFunctions<deviceIndex + 1>::setCallbacksForDevice (callbacks, device);
         }
     };
 
-    void setCallbackFunctions()
+    template <>
+    struct ASIOCallbackFunctions <sizeof(currentASIODev) / sizeof(currentASIODev[0])>
     {
-        if      (currentASIODev[0] == this)  ASIOCallbackFunctions<0>::setCallbacks (callbacks);
-        else if (currentASIODev[1] == this)  ASIOCallbackFunctions<1>::setCallbacks (callbacks);
-        else if (currentASIODev[2] == this)  ASIOCallbackFunctions<2>::setCallbacks (callbacks);
-        else                                 jassertfalse;
+        static void setCallbacksForDevice (ASIOCallbacks&, ASIOAudioIODevice*) noexcept {}
+    };
+
+    void setCallbackFunctions() noexcept
+    {
+        ASIOCallbackFunctions<0>::setCallbacksForDevice (callbacks, this);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ASIOAudioIODevice)
@@ -1503,15 +1518,16 @@ public:
         jassert (inputDeviceName == outputDeviceName || outputDeviceName.isEmpty() || inputDeviceName.isEmpty());
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int index = deviceNames.indexOf (outputDeviceName.isNotEmpty() ? outputDeviceName
-                                                                             : inputDeviceName);
+        const String deviceName (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                               : inputDeviceName);
+        const int index = deviceNames.indexOf (deviceName);
 
         if (index >= 0)
         {
             const int freeSlot = findFreeSlot();
 
             if (freeSlot >= 0)
-                return new ASIOAudioIODevice (this, outputDeviceName,
+                return new ASIOAudioIODevice (this, deviceName,
                                               classIds.getReference (index), freeSlot);
         }
 

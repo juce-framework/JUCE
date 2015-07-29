@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -53,7 +53,7 @@ public:
 
             [[NSDistributedNotificationCenter defaultCenter] addObserver: delegate
                                                                 selector: @selector (broadcastMessageCallback:)
-                                                                    name: getBroacastEventName()
+                                                                    name: getBroadcastEventName()
                                                                   object: nil];
         }
         else
@@ -79,14 +79,14 @@ public:
             [NSApp setDelegate: nil];
 
             [[NSDistributedNotificationCenter defaultCenter] removeObserver: delegate
-                                                                       name: getBroacastEventName()
+                                                                       name: getBroadcastEventName()
                                                                      object: nil];
         }
 
         [delegate release];
     }
 
-    static NSString* getBroacastEventName()
+    static NSString* getBroadcastEventName()
     {
         return juceStringToNS ("juce_" + String::toHexString (File::getSpecialLocation (File::currentExecutableFile).hashCode64()));
     }
@@ -96,26 +96,36 @@ public:
 
 private:
     //==============================================================================
-    struct AppDelegateClass   : public ObjCClass <NSObject>
+    struct AppDelegateClass   : public ObjCClass<NSObject>
     {
-        AppDelegateClass()  : ObjCClass <NSObject> ("JUCEAppDelegate_")
+        AppDelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
         {
-            addMethod (@selector (applicationShouldTerminate:),   applicationShouldTerminate, "I@:@");
-            addMethod (@selector (applicationWillTerminate:),     applicationWillTerminate,   "v@:@");
-            addMethod (@selector (application:openFile:),         application_openFile,       "c@:@@");
-            addMethod (@selector (application:openFiles:),        application_openFiles,      "v@:@@");
-            addMethod (@selector (applicationDidBecomeActive:),   applicationDidBecomeActive, "v@:@");
-            addMethod (@selector (applicationDidResignActive:),   applicationDidResignActive, "v@:@");
-            addMethod (@selector (applicationWillUnhide:),        applicationWillUnhide,      "v@:@");
-            addMethod (@selector (broadcastMessageCallback:),     broadcastMessageCallback,   "v@:@");
-            addMethod (@selector (mainMenuTrackingBegan:),        mainMenuTrackingBegan,      "v@:@");
-            addMethod (@selector (mainMenuTrackingEnded:),        mainMenuTrackingEnded,      "v@:@");
-            addMethod (@selector (dummyMethod),                   dummyMethod,                "v@:");
+            addMethod (@selector (applicationWillFinishLaunching:), applicationWillFinishLaunching, "v@:@@");
+            addMethod (@selector (getUrl:withReplyEvent:),          getUrl_withReplyEvent,          "v@:@@");
+            addMethod (@selector (applicationShouldTerminate:),     applicationShouldTerminate,     "I@:@");
+            addMethod (@selector (applicationWillTerminate:),       applicationWillTerminate,       "v@:@");
+            addMethod (@selector (application:openFile:),           application_openFile,           "c@:@@");
+            addMethod (@selector (application:openFiles:),          application_openFiles,          "v@:@@");
+            addMethod (@selector (applicationDidBecomeActive:),     applicationDidBecomeActive,     "v@:@");
+            addMethod (@selector (applicationDidResignActive:),     applicationDidResignActive,     "v@:@");
+            addMethod (@selector (applicationWillUnhide:),          applicationWillUnhide,          "v@:@");
+            addMethod (@selector (broadcastMessageCallback:),       broadcastMessageCallback,       "v@:@");
+            addMethod (@selector (mainMenuTrackingBegan:),          mainMenuTrackingBegan,          "v@:@");
+            addMethod (@selector (mainMenuTrackingEnded:),          mainMenuTrackingEnded,          "v@:@");
+            addMethod (@selector (dummyMethod),                     dummyMethod,                    "v@:");
 
             registerClass();
         }
 
     private:
+        static void applicationWillFinishLaunching (id self, SEL, NSApplication*, NSNotification*)
+        {
+            [[NSAppleEventManager sharedAppleEventManager] setEventHandler: self
+                                                               andSelector: @selector (getUrl:withReplyEvent:)
+                                                             forEventClass: kInternetEventClass
+                                                                andEventID: kAEGetURL];
+        }
+
         static NSApplicationTerminateReply applicationShouldTerminate (id /*self*/, SEL, NSApplication*)
         {
             if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
@@ -184,11 +194,16 @@ private:
 
         static void dummyMethod (id /*self*/, SEL) {}   // (used as a way of running a dummy thread)
 
-    private:
         static void focusChanged()
         {
             if (appFocusChangeCallback != nullptr)
                 (*appFocusChangeCallback)();
+        }
+
+        static void getUrl_withReplyEvent (id /*self*/, SEL, NSAppleEventDescriptor* event, NSAppleEventDescriptor*)
+        {
+            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+                app->anotherInstanceStarted (quotedIfContainsSpaces ([[event paramDescriptorForKeyword: keyDirectObject] stringValue]));
         }
 
         static String quotedIfContainsSpaces (NSString* file)
@@ -246,11 +261,13 @@ static void shutdownNSApp()
 
 void MessageManager::stopDispatchLoop()
 {
+   #if JUCE_PROJUCER_LIVE_BUILD
     quitMessagePosted = true;
+   #else
 
-   #if ! JUCE_PROJUCER_LIVE_BUILD
     if (isThisTheMessageThread())
     {
+        quitMessagePosted = true;
         shutdownNSApp();
     }
     else
@@ -258,7 +275,7 @@ void MessageManager::stopDispatchLoop()
         struct QuitCallback  : public CallbackMessage
         {
             QuitCallback() {}
-            void messageCallback() override   { shutdownNSApp(); }
+            void messageCallback() override    { MessageManager::getInstance()->stopDispatchLoop(); }
         };
 
         (new QuitCallback())->post();
@@ -341,7 +358,7 @@ void MessageManager::broadcastMessage (const String& message)
     NSDictionary* info = [NSDictionary dictionaryWithObject: juceStringToNS (message)
                                                      forKey: nsStringLiteral ("message")];
 
-    [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegate::getBroacastEventName()
+    [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegate::getBroadcastEventName()
                                                                    object: nil
                                                                  userInfo: info];
 }

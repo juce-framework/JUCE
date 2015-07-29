@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -79,7 +79,7 @@ public:
         Like an XmlElement, each ValueTree node has a type, which you can access with
         getType() and hasType().
     */
-    explicit ValueTree (Identifier type);
+    explicit ValueTree (const Identifier& type);
 
     /** Creates a reference to another ValueTree. */
     ValueTree (const ValueTree&);
@@ -134,7 +134,7 @@ public:
     /** Returns true if the node has this type.
         The comparison is case-sensitive.
     */
-    bool hasType (const Identifier typeName) const;
+    bool hasType (const Identifier& typeName) const;
 
     //==============================================================================
     /** Returns the value of a named property.
@@ -142,21 +142,21 @@ public:
         You can also use operator[] to get a property.
         @see var, setProperty, hasProperty
     */
-    const var& getProperty (const Identifier name) const;
+    const var& getProperty (const Identifier& name) const;
 
     /** Returns the value of a named property, or a user-specified default if the property doesn't exist.
         If no such property has been set, this will return the value of defaultReturnValue.
         You can also use operator[] and getProperty to get a property.
         @see var, getProperty, setProperty, hasProperty
     */
-    var getProperty (const Identifier name, const var& defaultReturnValue) const;
+    var getProperty (const Identifier& name, const var& defaultReturnValue) const;
 
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant. This is the same as
         calling getProperty().
         @see getProperty
     */
-    const var& operator[] (const Identifier name) const;
+    const var& operator[] (const Identifier& name) const;
 
     /** Changes a named property of the node.
         The name identifier must not be an empty string.
@@ -165,16 +165,16 @@ public:
         @see var, getProperty, removeProperty
         @returns a reference to the value tree, so that you can daisy-chain calls to this method.
     */
-    ValueTree& setProperty (const Identifier name, const var& newValue, UndoManager* undoManager);
+    ValueTree& setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager);
 
     /** Returns true if the node contains a named property. */
-    bool hasProperty (const Identifier name) const;
+    bool hasProperty (const Identifier& name) const;
 
     /** Removes a property from the node.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void removeProperty (const Identifier name, UndoManager* undoManager);
+    void removeProperty (const Identifier& name, UndoManager* undoManager);
 
     /** Removes all properties from the node.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
@@ -198,7 +198,7 @@ public:
         it needs to change the value. Attaching a Value::Listener to the value object will provide
         callbacks whenever the property changes.
     */
-    Value getPropertyAsValue (const Identifier name, UndoManager* undoManager);
+    Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager);
 
     /** Overwrites all the properties in this tree with the properties of the source tree.
         Any properties that already exist will be updated; and new ones will be added, and
@@ -223,7 +223,7 @@ public:
         whether a node is valid).
         @see getOrCreateChildWithName
     */
-    ValueTree getChildWithName (const Identifier type) const;
+    ValueTree getChildWithName (const Identifier& type) const;
 
     /** Returns the first child node with the speficied type name, creating and adding
         a child with this name if there wasn't already one there.
@@ -232,7 +232,7 @@ public:
         the method on is itself invalid.
         @see getChildWithName
     */
-    ValueTree getOrCreateChildWithName (const Identifier type, UndoManager* undoManager);
+    ValueTree getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager);
 
     /** Looks for the first child node that has the speficied property value.
 
@@ -242,7 +242,7 @@ public:
         If no such node is found, it'll return an invalid node. (See isValid() to find out
         whether a node is valid).
     */
-    ValueTree getChildWithProperty (const Identifier propertyName, const var& propertyValue) const;
+    ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const;
 
     /** Adds a child to this node.
 
@@ -403,7 +403,8 @@ public:
             just check the parentTree parameter to make sure it's the one that you're interested in.
         */
         virtual void valueTreeChildRemoved (ValueTree& parentTree,
-                                            ValueTree& childWhichHasBeenRemoved) = 0;
+                                            ValueTree& childWhichHasBeenRemoved,
+                                            int indexFromWhichChildWasRemoved) = 0;
 
         /** This method is called when a tree's children have been re-shuffled.
 
@@ -412,7 +413,8 @@ public:
             If your tree has sub-trees but you only want to know about changes to the top level tree,
             just check the parameter to make sure it's the tree that you're interested in.
         */
-        virtual void valueTreeChildOrderChanged (ValueTree& parentTreeWhoseChildrenHaveMoved) = 0;
+        virtual void valueTreeChildOrderChanged (ValueTree& parentTreeWhoseChildrenHaveMoved,
+                                                 int oldIndex, int newIndex) = 0;
 
         /** This method is called when a tree has been added or removed from a parent node.
 
@@ -451,7 +453,7 @@ public:
     /** Causes a property-change callback to be triggered for the specified property,
         calling any listeners that are registered.
     */
-    void sendPropertyChangeMessage (const Identifier property);
+    void sendPropertyChangeMessage (const Identifier& property);
 
     //==============================================================================
     /** This method uses a comparator object to sort the tree's children into order.
@@ -482,7 +484,7 @@ public:
         {
             OwnedArray<ValueTree> sortedList;
             createListOfChildren (sortedList);
-            ComparatorAdapter <ElementComparator> adapter (comparator);
+            ComparatorAdapter<ElementComparator> adapter (comparator);
             sortedList.sort (adapter, retainOrderOfEquivalentItems);
             reorderChildren (sortedList, undoManager);
         }

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -57,17 +57,10 @@ bool AudioSubsectionReader::readSamples (int** destSamples, int numDestChannels,
                                 startSampleInFile + startSample, numSamples);
 }
 
-void AudioSubsectionReader::readMaxLevels (int64 startSampleInFile,
-                                           int64 numSamples,
-                                           float& lowestLeft,
-                                           float& highestLeft,
-                                           float& lowestRight,
-                                           float& highestRight)
+void AudioSubsectionReader::readMaxLevels (int64 startSampleInFile, int64 numSamples, Range<float>* results, int numChannelsToRead)
 {
     startSampleInFile = jmax ((int64) 0, startSampleInFile);
     numSamples = jmax ((int64) 0, jmin (numSamples, length - startSampleInFile));
 
-    source->readMaxLevels (startSampleInFile + startSample, numSamples,
-                           lowestLeft, highestLeft,
-                           lowestRight, highestRight);
+    source->readMaxLevels (startSampleInFile + startSample, numSamples, results, numChannelsToRead);
 }
