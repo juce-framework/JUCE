@@ -837,7 +837,8 @@ public:
             {
                 showPopupMenu();
             }
-            else if (canDoubleClickToValue() && e.mods.isAltDown())
+            else if (canDoubleClickToValue()
+                      && e.mods.withoutMouseButtons() == ModifierKeys (ModifierKeys::altModifier))
             {
                 mouseDoubleClick();
             }
