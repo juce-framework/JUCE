@@ -27,13 +27,16 @@ namespace MouseCursorHelpers
     extern NSImage* createNSImage (const Image&);
 }
 
-class SystemTrayIconComponent::Pimpl
+extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelMenuId,
+                             int topLevelIndex, bool addDelegate);
+
+class SystemTrayIconComponent::Pimpl  : private Timer
 {
 public:
     Pimpl (SystemTrayIconComponent& iconComp, const Image& im)
         : owner (iconComp), statusItem (nil),
           statusIcon (MouseCursorHelpers::createNSImage (im)),
-          isHighlighted (false)
+          view (nil), isHighlighted (false)
     {
         static SystemTrayViewClass cls;
         view = [cls.createInstance() init];
@@ -104,6 +107,9 @@ public:
 
             if (isLeft || isRight)  // Only mouse up is sent by the OS, so simulate a down/up
             {
+                setHighlighted (true);
+                startTimer (150);
+
                 owner.mouseDown (MouseEvent (mouseSource, Point<float>(),
                                              eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                          : ModifierKeys::rightButtonModifier),
@@ -123,6 +129,17 @@ public:
         }
     }
 
+    void showMenu (const PopupMenu& menu)
+    {
+        if (NSMenu* m = createNSMenu (menu, "MenuBarItem", -2, -3, true))
+        {
+            setHighlighted (true);
+            stopTimer();
+            [statusItem popUpStatusItemMenu: m];
+            startTimer (1);
+        }
+    }
+
     SystemTrayIconComponent& owner;
     NSStatusItem* statusItem;
 
@@ -134,6 +151,12 @@ private:
     void setIconSize()
     {
         [statusIcon setSize: NSMakeSize (20.0f, 20.0f)];
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+        setHighlighted (false);
     }
 
     struct SystemTrayViewClass : public ObjCClass<NSControl>
@@ -171,10 +194,7 @@ private:
         static void handleEventDown (id self, SEL, NSEvent* e)
         {
             if (Pimpl* const owner = getOwner (self))
-            {
-                owner->setHighlighted (! owner->isHighlighted);
                 owner->handleStatusItemAction (e);
-            }
         }
 
         static void drawRect (id self, SEL, NSRect)
@@ -243,4 +263,10 @@ void SystemTrayIconComponent::hideInfoBubble()
 void* SystemTrayIconComponent::getNativeHandle() const
 {
     return pimpl != nullptr ? pimpl->statusItem : nullptr;
+}
+
+void SystemTrayIconComponent::showDropdownMenu (const PopupMenu& menu)
+{
+    if (pimpl != nullptr)
+        pimpl->showMenu (menu);
 }

@@ -116,6 +116,7 @@
 #undef min
 #undef major
 #undef minor
+#undef KeyPress
 
 //==============================================================================
 // DLL building settings on Windows

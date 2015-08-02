@@ -87,6 +87,9 @@ public:
     /** Returns the component to which this context is currently attached, or nullptr. */
     Component* getTargetComponent() const noexcept;
 
+    /** If the given component has an OpenGLContext attached, then this will return it. */
+    static OpenGLContext* getContextAttachedTo (Component& component) noexcept;
+
     //==============================================================================
     /** Sets the pixel format which you'd like to use for the target GL surface.
         Note: This must be called BEFORE attaching your context to a target component!

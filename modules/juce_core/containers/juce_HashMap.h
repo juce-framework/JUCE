@@ -46,6 +46,8 @@ struct DefaultHashFunctions
     int generateHash (const String& key, const int upperLimit) const noexcept    { return (int) (((uint32) key.hashCode()) % (uint32) upperLimit); }
     /** Generates a simple hash from a variant. */
     int generateHash (const var& key, const int upperLimit) const noexcept       { return generateHash (key.toString(), upperLimit); }
+    /** Generates a simple hash from a void ptr. */
+    int generateHash (const void* key, const int upperLimit) const noexcept      { return (int)(((pointer_sized_uint) key) % ((pointer_sized_uint) upperLimit)); }
 };
 
 

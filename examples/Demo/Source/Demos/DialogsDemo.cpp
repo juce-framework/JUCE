@@ -154,7 +154,7 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         fillTiledBackground (g);
     }

@@ -66,6 +66,7 @@ public class JuceDemo   extends Activity
     {
         super.onCreate (savedInstanceState);
 
+        isScreenSaverEnabled = true;
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
 
@@ -141,6 +142,7 @@ public class JuceDemo   extends Activity
 
     //==============================================================================
     private ViewHolder viewHolder;
+    private boolean isScreenSaverEnabled;
 
     public final ComponentPeerView createNewView (boolean opaque, long host)
     {
@@ -220,6 +222,24 @@ public class JuceDemo   extends Activity
     public final void excludeClipRegion (android.graphics.Canvas canvas, float left, float top, float right, float bottom)
     {
         canvas.clipRect (left, top, right, bottom, android.graphics.Region.Op.DIFFERENCE);
+    }
+
+    //==============================================================================
+    public final void setScreenSaver (boolean enabled)
+    {
+        if (isScreenSaverEnabled != enabled)
+        {
+            isScreenSaverEnabled = enabled;
+            if (enabled)
+                getWindow().clearFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else
+                getWindow().addFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    public final boolean getScreenSaver ()
+    {
+        return isScreenSaverEnabled;
     }
 
     //==============================================================================
@@ -699,11 +719,10 @@ public class JuceDemo   extends Activity
         private long position;
     }
 
-    public static final HTTPStream createHTTPStream (String address,
-                                                     boolean isPost, byte[] postData, String headers,
-                                                     int timeOutMs, int[] statusCode,
-                                                     StringBuffer responseHeaders,
-                                                     int numRedirectsToFollow)
+    public static final HTTPStream createHTTPStream (String address, boolean isPost, byte[] postData,
+                                                     String headers, int timeOutMs, int[] statusCode,
+                                                     StringBuffer responseHeaders, int numRedirectsToFollow,
+                                                     String httpRequestCmd)
     {
         // timeout parameter of zero for HttpUrlConnection is a blocking connect (negative value for juce::URL)
         if (timeOutMs < 0)
@@ -744,9 +763,9 @@ public class JuceDemo   extends Activity
                             }
                         }
 
+                        connection.setRequestMethod (httpRequestCmd);
                         if (isPost)
                         {
-                            connection.setRequestMethod ("POST");
                             connection.setDoOutput (true);
 
                             if (postData != null)

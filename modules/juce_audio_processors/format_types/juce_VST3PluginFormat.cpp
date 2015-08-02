@@ -143,22 +143,22 @@ static Array<int> getNumSingleDirectionChannelsForEachBusFor (Vst::IComponent* c
                                                               bool checkAudioChannels)
 {
     jassert (component != nullptr);
-    
+
     Array<int> result;
-    
+
     const Vst::BusDirections direction  = checkInputs ? Vst::kInput : Vst::kOutput;
     const Vst::MediaTypes mediaType     = checkAudioChannels ? Vst::kAudio : Vst::kEvent;
     const Steinberg::int32 numBuses     = component->getBusCount (mediaType, direction);
-    
+
     int numChannels = 0;
-    
+
     for (Steinberg::int32 i = numBuses; --i >= 0;)
     {
         Vst::BusInfo busInfo;
         warnOnFailure (component->getBusInfo (mediaType, direction, i, busInfo));
         result.add((int) busInfo.channelCount);
     }
-    
+
     return result;
 }
 
@@ -174,7 +174,7 @@ static int getNumSingleDirectionChannelsFor (Vst::IComponent* component,
     }
     return result;
 }
-    
+
 static void setStateForAllBussesOfType (Vst::IComponent* component,
                                         bool state,
                                         bool activateInputs,
@@ -1705,11 +1705,11 @@ public:
             outputArrangements.add (getArrangementForBus (processor, false, i));
     }
 
-    void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock) override
+    void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock) override
     {
         // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
         if (isActive
-              && getSampleRate() == sampleRate
+              && getSampleRate() == newSampleRate
               && getBlockSize() == estimatedSamplesPerBlock)
             return;
 
@@ -1718,7 +1718,7 @@ public:
         ProcessSetup setup;
         setup.symbolicSampleSize    = kSample32;
         setup.maxSamplesPerBlock    = estimatedSamplesPerBlock;
-        setup.sampleRate            = sampleRate;
+        setup.sampleRate            = newSampleRate;
         setup.processMode           = isNonRealtime() ? kOffline : kRealtime;
 
         warnOnFailure (processor->setupProcessing (setup));
@@ -1749,7 +1749,7 @@ public:
         }
 
         // Needed for having the same sample rate in processBlock(); some plugins need this!
-        setPlayConfigDetails (getNumSingleDirectionChannelsForEachBusFor (component, true, true), getNumSingleDirectionChannelsForEachBusFor (component, false, true), sampleRate, estimatedSamplesPerBlock);
+        setPlayConfigDetails (getNumSingleDirectionChannelsForEachBusFor (component, true, true), getNumSingleDirectionChannelsForEachBusFor (component, false, true), newSampleRate, estimatedSamplesPerBlock);
 
         setStateForAllBusses (true);
 
@@ -1871,10 +1871,10 @@ public:
     {
         if (processor != nullptr)
         {
-            const double sampleRate = getSampleRate();
+            const double currentSampleRate = getSampleRate();
 
-            if (sampleRate > 0.0)
-                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / sampleRate;
+            if (currentSampleRate > 0.0)
+                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / currentSampleRate;
         }
 
         return 0.0;

@@ -71,7 +71,7 @@ public:
         shader = nullptr;
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillCheckerBoard (getLocalBounds(), 48, 48, Colours::lightgrey, Colours::white);
 

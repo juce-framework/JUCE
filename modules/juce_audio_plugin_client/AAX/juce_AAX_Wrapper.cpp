@@ -341,7 +341,7 @@ struct AAXClasses
                 {
                     AudioProcessorEditor::ParameterControlHighlightInfo info;
                     info.parameterIndex  = getParamIndexFromID (paramID);
-                    info.isHighlighted   = isHighlighted;
+                    info.isHighlighted   = (isHighlighted != 0);
                     info.suggestedColour = getColourFromHighlightEnum (colour);
 
                     component->pluginEditor->setControlHighlight (info);

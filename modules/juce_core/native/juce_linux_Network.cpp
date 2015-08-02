@@ -75,11 +75,11 @@ public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
-                    const int maxRedirects)
+                    const int maxRedirects, const String& httpRequestCmd_)
       : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
         address (address_), headers (headers_), postData (postData_), contentLength (-1), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects),
-        chunkEnd (0), isChunked (false), readingChunk (false)
+        httpRequestCmd (httpRequestCmd_), chunkEnd (0), isChunked (false), readingChunk (false)
     {
         statusCode = createConnection (progressCallback, progressCallbackContext, numRedirectsToFollow);
 
@@ -218,6 +218,7 @@ private:
     const bool isPost;
     const int timeOutMs;
     const int numRedirectsToFollow;
+    String httpRequestCmd;
     int64 chunkEnd;
     bool isChunked, readingChunk;
 
@@ -306,8 +307,8 @@ private:
         freeaddrinfo (result);
 
         {
-            const MemoryBlock requestHeader (createRequestHeader (hostName, hostPort, proxyName, proxyPort,
-                                                                  hostPath, address, headers, postData, isPost));
+            const MemoryBlock requestHeader (createRequestHeader (hostName, hostPort, proxyName, proxyPort, hostPath,
+                                                                  address, headers, postData, isPost, httpRequestCmd));
 
             if (! sendHeader (socketHandle, requestHeader, timeOutTime,
                               progressCallback, progressCallbackContext))
@@ -399,10 +400,10 @@ private:
             dest << "\r\n" << key << ' ' << value;
     }
 
-    static void writeHost (MemoryOutputStream& dest, const bool isPost,
+    static void writeHost (MemoryOutputStream& dest, const String& httpRequestCmd,
                            const String& path, const String& host, int port)
     {
-        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.1\r\nHost: " << host;
+        dest << httpRequestCmd << ' ' << path << " HTTP/1.1\r\nHost: " << host;
 
         /* HTTP spec 14.23 says that the port number must be included in the header if it is not 80 */
         if (port != 80)
@@ -413,14 +414,14 @@ private:
                                             const String& proxyName, const int proxyPort,
                                             const String& hostPath, const String& originalURL,
                                             const String& userHeaders, const MemoryBlock& postData,
-                                            const bool isPost)
+                                            const bool isPost, const String& httpRequestCmd)
     {
         MemoryOutputStream header;
 
         if (proxyName.isEmpty())
-            writeHost (header, isPost, hostPath, hostName, hostPort);
+            writeHost (header, httpRequestCmd, hostPath, hostName, hostPort);
         else
-            writeHost (header, isPost, originalURL, proxyName, proxyPort);
+            writeHost (header, httpRequestCmd, originalURL, proxyName, proxyPort);
 
         writeValueIfNotPresent (header, userHeaders, "User-Agent:", "JUCE/" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
                                                                         "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)

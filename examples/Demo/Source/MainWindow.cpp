@@ -368,19 +368,19 @@ private:
             case MainAppWindow::useLookAndFeelV1:
                 result.setInfo ("Use LookAndFeel_V1", String::empty, generalCategory, 0);
                 result.addDefaultKeypress ('i', ModifierKeys::commandModifier);
-                result.setTicked (typeid (LookAndFeel_V1) == typeid (getLookAndFeel()));
+                result.setTicked (isLookAndFeelSelected<LookAndFeel_V1>());
                 break;
 
             case MainAppWindow::useLookAndFeelV2:
                 result.setInfo ("Use LookAndFeel_V2", String::empty, generalCategory, 0);
                 result.addDefaultKeypress ('o', ModifierKeys::commandModifier);
-                result.setTicked (typeid (LookAndFeel_V2) == typeid (getLookAndFeel()));
+                result.setTicked (isLookAndFeelSelected<LookAndFeel_V2>());
                 break;
 
             case MainAppWindow::useLookAndFeelV3:
                 result.setInfo ("Use LookAndFeel_V3", String::empty, generalCategory, 0);
                 result.addDefaultKeypress ('p', ModifierKeys::commandModifier);
-                result.setTicked (typeid (LookAndFeel_V3) == typeid (getLookAndFeel()));
+                result.setTicked (isLookAndFeelSelected<LookAndFeel_V3>());
                 break;
 
             case MainAppWindow::toggleRepaintDebugging:
@@ -477,6 +477,13 @@ private:
         }
 
         return true;
+    }
+
+    template <typename LookAndFeelType>
+    bool isLookAndFeelSelected()
+    {
+        LookAndFeel& lf = getLookAndFeel();
+        return typeid (LookAndFeelType) == typeid (lf);
     }
 };
 

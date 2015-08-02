@@ -94,10 +94,12 @@ public:
         // not interested in this for now
     }
 
-    File getSuggestedSaveAsFile (const File&)
+   #if JUCE_MODAL_LOOPS_PERMITTED
+    File getSuggestedSaveAsFile (const File&) override
     {
         return File::getSpecialLocation (File::userDesktopDirectory).getChildFile (getName()).withFileExtension ("jnote");
     }
+   #endif
 
 private:
     Value textValueObject;
