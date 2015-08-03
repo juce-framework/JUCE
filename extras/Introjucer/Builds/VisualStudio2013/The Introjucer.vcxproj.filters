@@ -418,6 +418,9 @@
     <ClCompile Include="..\..\Source\BinaryData\jucer_OpenGLComponentTemplate.cpp">
       <Filter>The Introjucer\BinaryData\templates</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_Base64.cpp">
+      <Filter>Juce Modules\juce_core\text</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClCompile>
@@ -1739,6 +1742,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
       <Filter>The Introjucer\BinaryData\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_Base64.h">
+      <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h">
       <Filter>Juce Modules\juce_core\text</Filter>
