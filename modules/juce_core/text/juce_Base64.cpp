@@ -137,7 +137,7 @@ public:
         MemoryOutputStream m;
 
         for (int i = r.nextInt (400); --i >= 0;)
-            m.writeByte (r.nextInt (256));
+            m.writeByte ((char) r.nextInt (256));
 
         return m.getMemoryBlock();
     }
