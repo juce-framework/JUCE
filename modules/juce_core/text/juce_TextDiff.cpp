@@ -35,7 +35,7 @@ struct TextDiffHelpers
         StringRegion (const String& s) noexcept
             : text (s.getCharPointer()), start (0), length (s.length()) {}
 
-        StringRegion (const String::CharPointerType t, int s, int len)  noexcept
+        StringRegion (const String::CharPointerType t, int s, int len) noexcept
             : text (t), start (s), length (len) {}
 
         String::CharPointerType text;
@@ -47,7 +47,7 @@ struct TextDiffHelpers
         TextDiff::Change c;
         c.insertedText = String (text, (size_t) length);
         c.start = index;
-        c.length = length;
+        c.length = 0;
         td.changes.add (c);
     }
 
@@ -59,7 +59,7 @@ struct TextDiffHelpers
         td.changes.add (c);
     }
 
-    static void diffSkippingCommonStart (TextDiff& td, const StringRegion& a, const StringRegion& b)
+    static void diffSkippingCommonStart (TextDiff& td, StringRegion a, StringRegion b)
     {
         String::CharPointerType sa (a.text);
         String::CharPointerType sb (b.text);
@@ -76,7 +76,7 @@ struct TextDiffHelpers
         }
     }
 
-    static void diffRecursively (TextDiff& td, const StringRegion& a, const StringRegion& b)
+    static void diffRecursively (TextDiff& td, StringRegion a, StringRegion b)
     {
         int indexA, indexB;
         const int len = findLongestCommonSubstring (a.text, a.length,
@@ -93,8 +93,8 @@ struct TextDiffHelpers
             else if (indexB > 0)
                 addInsertion (td, b.text, b.start, indexB);
 
-            diffRecursively (td, StringRegion (a.text + indexA + len, a.start + indexA + len, a.length - indexA - len),
-                                 StringRegion (b.text + indexB + len, b.start + indexB + len, b.length - indexB - len));
+            diffRecursively (td, StringRegion (a.text + (indexA + len), a.start + indexA + len, a.length - indexA - len),
+                                 StringRegion (b.text + (indexB + len), b.start + indexB + len, b.length - indexB - len));
         }
         else
         {
@@ -178,8 +178,7 @@ bool TextDiff::Change::isDeletion() const noexcept
 
 String TextDiff::Change::appliedTo (const String& text) const noexcept
 {
-    return text.substring (0, start) + (isDeletion() ? text.substring (start + length)
-                                                     : (insertedText + text.substring (start)));
+    return text.replaceSection (start, length, insertedText);
 }
 
 //==============================================================================
@@ -193,9 +192,9 @@ public:
 
     static String createString (Random& r)
     {
-        juce_wchar buffer[50] = { 0 };
+        juce_wchar buffer[500] = { 0 };
 
-        for (int i = r.nextInt (49); --i >= 0;)
+        for (int i = r.nextInt (numElementsInArray (buffer) - 1); --i >= 0;)
         {
             if (r.nextInt (10) == 0)
             {
@@ -233,7 +232,7 @@ public:
         testDiff ("xxx", "x");
         testDiff ("x", "xxx");
 
-        for (int i = 5000; --i >= 0;)
+        for (int i = 1000; --i >= 0;)
         {
             String s (createString (r));
             testDiff (s, createString (r));
