@@ -331,15 +331,8 @@ public:
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) noexcept
     {
-        for (;;)
-        {
-            const juce_wchar c = src.getAndAdvance();
-
-            if (c == 0)
-                break;
-
+        while (juce_wchar c = src.getAndAdvance())
             dest.write (c);
-        }
 
         dest.writeNull();
     }

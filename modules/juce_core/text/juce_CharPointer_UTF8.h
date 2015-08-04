@@ -90,9 +90,9 @@ public:
         uint32 n = (uint32) (uint8) byte;
         uint32 mask = 0x7f;
         uint32 bit = 0x40;
-        size_t numExtraValues = 0;
+        int numExtraValues = 0;
 
-        while ((n & bit) != 0 && bit > 0x10)
+        while ((n & bit) != 0 && bit > 0x8)
         {
             mask >>= 1;
             ++numExtraValues;
@@ -101,9 +101,9 @@ public:
 
         n &= mask;
 
-        for (size_t i = 1; i <= numExtraValues; ++i)
+        for (int i = 1; i <= numExtraValues; ++i)
         {
-            const uint8 nextByte = (uint8) data [i];
+            const uint32 nextByte = (uint32) (uint8) data[i];
 
             if ((nextByte & 0xc0) != 0x80)
                 break;
@@ -312,9 +312,8 @@ public:
     static size_t getBytesRequiredFor (CharPointer text) noexcept
     {
         size_t count = 0;
-        juce_wchar n;
 
-        while ((n = text.getAndAdvance()) != 0)
+        while (juce_wchar n = text.getAndAdvance())
             count += getBytesRequiredFor (n);
 
         return count;
