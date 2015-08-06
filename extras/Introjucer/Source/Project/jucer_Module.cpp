@@ -728,7 +728,7 @@ void EnabledModuleList::addModule (const File& moduleManifestFile, bool copyLoca
 
         if (! isModuleEnabled (moduleID))
         {
-            ValueTree module (Ids::MODULES);
+            ValueTree module (Ids::MODULE);
             module.setProperty (Ids::ID, moduleID, nullptr);
 
             state.addChild (module, -1, getUndoManager());
