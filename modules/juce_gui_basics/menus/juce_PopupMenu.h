@@ -165,10 +165,15 @@ public:
         @param commandID            the ID of the command
         @param displayName          if this is non-empty, then this string will be used instead of
                                     the command's registered name
+        @param iconToUse            an optional Drawable object to use as the icon to the left of the item.
+                                    The menu will take ownership of this drawable object and will
+                                    delete it later when no longer needed
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
                          CommandID commandID,
-                         const String& displayName = String::empty);
+                         const String& displayName = String::empty,
+                         Drawable* iconToUse = nullptr);
+
 
 
     /** Appends a text item with a special colour.
