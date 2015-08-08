@@ -435,7 +435,7 @@ private:
 
         void resized() override
         {
-            Rectangle<int> r (getLocalBounds());
+            juce::Rectangle<int> r (getLocalBounds());
 
             button.setBounds (r.removeFromRight (24));
             textbox.setBounds (r);

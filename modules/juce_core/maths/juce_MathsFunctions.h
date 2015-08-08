@@ -88,7 +88,7 @@ typedef unsigned int                uint32;
   typedef unsigned int              pointer_sized_uint;
 #endif
 
-#if JUCE_MSVC
+#if JUCE_WINDOWS && ! JUCE_MINGW
   typedef pointer_sized_int ssize_t;
 #endif
 
