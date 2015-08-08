@@ -24,9 +24,9 @@
 
 /**
     Contains static utilities for generating key-files that can be unlocked by
-    the TracktionMarketplaceStatus class.
+    the OnlineUnlockStatus class.
 */
-class JUCE_API  TracktionMarketplaceKeyGeneration
+class JUCE_API  KeyGeneration
 {
 public:
     /**
@@ -35,7 +35,7 @@ public:
 
         The returned value is a block of text containing an RSA-encoded block, followed
         by some human-readable details. If you pass this block of text to
-        TracktionMarketplaceStatus::applyKeyFile(), it will decrpyt it, and if the
+        OnlineUnlockStatus::applyKeyFile(), it will decrpyt it, and if the
         key matches and the machine numbers match, it will unlock that machine.
 
         Typically the way you'd use this on a server would be to build a small executable
@@ -43,7 +43,7 @@ public:
         use this as a reply to the product's auto-registration mechanism. The
         keyGenerationAppMain() function is an example of how to build such a function.
 
-        @see TracktionMarketplaceStatus
+        @see OnlineUnlockStatus
     */
     static String JUCE_CALLTYPE generateKeyFile (const String& appName,
                                                  const String& userEmail,

@@ -33,11 +33,11 @@ struct Spinner  : public Component, private Timer
     }
 };
 
-struct TracktionMarketplaceUnlockForm::OverlayComp  : public Component,
-                                                      private Thread,
-                                                      private Timer
+struct OnlineUnlockForm::OverlayComp  : public Component,
+                                        private Thread,
+                                        private Timer
 {
-    OverlayComp (TracktionMarketplaceUnlockForm& f)  : Thread (String()), form (f)
+    OverlayComp (OnlineUnlockForm& f)  : Thread (String()), form (f)
     {
         email = form.emailBox.getText();
         password = form.passwordBox.getText();
@@ -100,7 +100,7 @@ struct TracktionMarketplaceUnlockForm::OverlayComp  : public Component,
 
         // (local copies because we're about to delete this)
         const bool worked = result.succeeded;
-        TracktionMarketplaceUnlockForm& f = form;
+        OnlineUnlockForm& f = form;
 
         delete this;
 
@@ -108,9 +108,9 @@ struct TracktionMarketplaceUnlockForm::OverlayComp  : public Component,
             f.dismiss();
     }
 
-    TracktionMarketplaceUnlockForm& form;
+    OnlineUnlockForm& form;
     Spinner spinner;
-    TracktionMarketplaceStatus::UnlockResult result;
+    OnlineUnlockStatus::UnlockResult result;
     String email, password;
 };
 
@@ -123,9 +123,9 @@ static juce_wchar getDefaultPasswordChar() noexcept
    #endif
 }
 
-TracktionMarketplaceUnlockForm::TracktionMarketplaceUnlockForm (TracktionMarketplaceStatus& s,
-                                                                const String& userInstructions,
-                                                                bool hasCancelButton)
+OnlineUnlockForm::OnlineUnlockForm (OnlineUnlockStatus& s,
+                                    const String& userInstructions,
+                                    bool hasCancelButton)
     : message (String(), userInstructions),
       passwordBox (String(), getDefaultPasswordChar()),
       registerButton (TRANS("Register")),
@@ -160,17 +160,17 @@ TracktionMarketplaceUnlockForm::TracktionMarketplaceUnlockForm (TracktionMarketp
     setSize (500, 250);
 }
 
-TracktionMarketplaceUnlockForm::~TracktionMarketplaceUnlockForm()
+OnlineUnlockForm::~OnlineUnlockForm()
 {
     unlockingOverlay.deleteAndZero();
 }
 
-void TracktionMarketplaceUnlockForm::paint (Graphics& g)
+void OnlineUnlockForm::paint (Graphics& g)
 {
     g.fillAll (Colours::lightgrey);
 }
 
-void TracktionMarketplaceUnlockForm::resized()
+void OnlineUnlockForm::resized()
 {
     /* If you're writing a plugin, then DO NOT USE A POP-UP A DIALOG WINDOW!
        Plugins that create external windows are incredibly annoying for users, and
@@ -220,7 +220,7 @@ void TracktionMarketplaceUnlockForm::resized()
         unlockingOverlay->setBounds (getLocalBounds());
 }
 
-void TracktionMarketplaceUnlockForm::lookAndFeelChanged()
+void OnlineUnlockForm::lookAndFeelChanged()
 {
     Colour labelCol (findColour (TextEditor::backgroundColourId).contrasting (0.5f));
 
@@ -228,7 +228,7 @@ void TracktionMarketplaceUnlockForm::lookAndFeelChanged()
     passwordBox.setTextToShowWhenEmpty (TRANS("Password"), labelCol);
 }
 
-void TracktionMarketplaceUnlockForm::showBubbleMessage (const String& text, Component& target)
+void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)
 {
     bubble = new BubbleMessageComponent (500);
     addChildComponent (bubble);
@@ -242,7 +242,7 @@ void TracktionMarketplaceUnlockForm::showBubbleMessage (const String& text, Comp
                     false); // deleteSelfAfterUse
 }
 
-void TracktionMarketplaceUnlockForm::buttonClicked (Button* b)
+void OnlineUnlockForm::buttonClicked (Button* b)
 {
     if (b == &registerButton)
         attemptRegistration();
@@ -250,7 +250,7 @@ void TracktionMarketplaceUnlockForm::buttonClicked (Button* b)
         dismiss();
 }
 
-void TracktionMarketplaceUnlockForm::attemptRegistration()
+void OnlineUnlockForm::attemptRegistration()
 {
     if (unlockingOverlay == nullptr)
     {
@@ -274,7 +274,7 @@ void TracktionMarketplaceUnlockForm::attemptRegistration()
     }
 }
 
-void TracktionMarketplaceUnlockForm::dismiss()
+void OnlineUnlockForm::dismiss()
 {
     delete this;
 }

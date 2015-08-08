@@ -46,12 +46,13 @@
 
 namespace juce
 {
+    #include "marketplace/juce_OnlineUnlockStatus.h"
     #include "marketplace/juce_TracktionMarketplaceStatus.h"
-    #include "marketplace/juce_TracktionMarketplaceServer.h"
+    #include "marketplace/juce_KeyFileGeneration.h"
 
-    #if JUCE_MODULE_AVAILABLE_juce_gui_extra
-     #include "marketplace/juce_TracktionMarketplaceUnlockForm.h"
-    #endif
+   #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    #include "marketplace/juce_OnlineUnlockForm.h"
+   #endif
 }
 
 
