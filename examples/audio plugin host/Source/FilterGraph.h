@@ -86,6 +86,7 @@ public:
     void restoreFromXml (const XmlElement& xml);
 
     //==============================================================================
+    void newDocument();
     String getDocumentTitle();
     Result loadDocument (const File& file);
     Result saveDocument (const File& file);

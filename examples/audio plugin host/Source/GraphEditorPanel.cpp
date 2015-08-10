@@ -44,8 +44,11 @@ PluginWindow::PluginWindow (Component* const pluginEditor,
 
     setContentOwned (pluginEditor, true);
 
-    setTopLeftPosition (owner->properties.getWithDefault ("uiLastX", Random::getSystemRandom().nextInt (500)),
-                        owner->properties.getWithDefault ("uiLastY", Random::getSystemRandom().nextInt (500)));
+    setTopLeftPosition (owner->properties.getWithDefault ("uiLastX" + toString (type), Random::getSystemRandom().nextInt (500)),
+                        owner->properties.getWithDefault ("uiLastY" + toString (type), Random::getSystemRandom().nextInt (500)));
+
+    owner->properties.set ("uiopen" + toString (type), true);
+
     setVisible (true);
 
     activePluginWindows.add (this);
@@ -198,12 +201,13 @@ PluginWindow::~PluginWindow()
 
 void PluginWindow::moved()
 {
-    owner->properties.set ("uiLastX", getX());
-    owner->properties.set ("uiLastY", getY());
+    owner->properties.set ("uiLastX" + toString (type), getX());
+    owner->properties.set ("uiLastY" + toString (type), getY());
 }
 
 void PluginWindow::closeButtonPressed()
 {
+    owner->properties.set ("uiopen" + toString (type), false);
     delete this;
 }
 
