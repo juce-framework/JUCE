@@ -119,8 +119,8 @@ public:
 
         Before returning, the dialog box will be hidden.
 
-        @param threadPriority   the priority to use when starting the thread - see
-                                Thread::startThread() for values
+        @param priority   the priority to use when starting the thread - see
+                          Thread::startThread() for values
         @returns true if the thread finished normally; false if the user pressed cancel
     */
     bool runThread (int priority = 5);
@@ -132,8 +132,8 @@ public:
         the thread finishes normally, or the cancel button is pressed, the window will be
         hidden and the threadComplete() method will be called.
 
-        @param threadPriority   the priority to use when starting the thread - see
-                                Thread::startThread() for values
+        @param priority   the priority to use when starting the thread - see
+                          Thread::startThread() for values
     */
     void launchThread (int priority = 5);
 
