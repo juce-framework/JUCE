@@ -43,3 +43,4 @@ profile
 **/CodeBlocks/obj
 **/CodeBlocks/*.depend
 **/CodeBlocks/*.layout
+doxygen/doc
