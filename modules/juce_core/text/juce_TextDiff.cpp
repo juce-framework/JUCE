@@ -29,7 +29,7 @@
 struct TextDiffHelpers
 {
     enum { minLengthToMatch = 3,
-           maxLengthToScan = 128 * 1024 };
+           maxComplexity = 16 * 1024 * 1024 };
 
     struct StringRegion
     {
@@ -111,7 +111,7 @@ struct TextDiffHelpers
         if (lenA == 0 || lenB == 0)
             return 0;
 
-        if (lenA > maxLengthToScan || lenB > maxLengthToScan)
+        if (lenA * lenB > maxComplexity)
             return findCommonSuffix (a, lenA, indexInA,
                                      b, lenB, indexInB);
 
