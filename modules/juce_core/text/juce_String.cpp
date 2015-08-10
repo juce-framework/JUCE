@@ -2224,7 +2224,7 @@ public:
         return CharPointer_UTF32 (buffer);
     }
 
-    void runTest()
+    void runTest() override
     {
         Random r = getRandom();
 

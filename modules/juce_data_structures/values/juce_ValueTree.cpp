@@ -1106,7 +1106,7 @@ public:
         return v;
     }
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("ValueTree");
         Random r = getRandom();

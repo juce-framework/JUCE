@@ -646,7 +646,7 @@ public:
         }
     }
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Whirlpool");
 

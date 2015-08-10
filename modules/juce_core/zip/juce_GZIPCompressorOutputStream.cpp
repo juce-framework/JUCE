@@ -166,7 +166,7 @@ class GZIPTests  : public UnitTest
 public:
     GZIPTests()   : UnitTest ("GZIP") {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("GZIP");
         Random rng = getRandom();

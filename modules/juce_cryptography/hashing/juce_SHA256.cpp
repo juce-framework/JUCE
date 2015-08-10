@@ -260,7 +260,7 @@ public:
         }
     }
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("SHA256");
 

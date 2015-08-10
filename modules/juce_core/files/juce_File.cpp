@@ -908,7 +908,7 @@ class FileTests  : public UnitTest
 public:
     FileTests() : UnitTest ("Files") {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Reading");
 

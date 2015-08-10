@@ -242,7 +242,7 @@ public:
         expectEquals (result, b);
     }
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("TextDiff");
 

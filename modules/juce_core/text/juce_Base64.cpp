@@ -142,7 +142,7 @@ public:
         return m.getMemoryBlock();
     }
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Base64");
 

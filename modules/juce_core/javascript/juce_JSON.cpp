@@ -607,7 +607,7 @@ public:
         }
     }
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("JSON");
         Random r = getRandom();
