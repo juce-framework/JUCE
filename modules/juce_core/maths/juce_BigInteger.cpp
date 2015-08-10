@@ -1012,12 +1012,12 @@ void BigInteger::loadFromMemoryBlock (const MemoryBlock& data)
     values.malloc (numValues + 1);
 
     for (int i = 0; i < (int) numValues - 1; ++i)
-        values[i] = (uint32) ByteOrder::littleEndianInt (addBytesToPointer (data.getData(), sizeof (uint32) * i));
+        values[i] = (uint32) ByteOrder::littleEndianInt (addBytesToPointer (data.getData(), sizeof (uint32) * (size_t) i));
 
     values[numValues - 1] = 0;
     values[numValues] = 0;
 
-    for (int i = (int) (numBytes & ~3); i < (int) numBytes; ++i)
+    for (int i = (int) (numBytes & ~3u); i < (int) numBytes; ++i)
         this->setBitRangeAsInt (i << 3, 8, (uint32) data [i]);
 
     highestBit = (int) numBytes * 8;
