@@ -241,7 +241,7 @@ bool isPositiveAndBelow (Type valueToTest, Type upperLimit) noexcept
 }
 
 template <>
-bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noexcept
+inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
@@ -260,7 +260,7 @@ bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) noexcept
 }
 
 template <>
-bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) noexcept
+inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
@@ -320,7 +320,7 @@ Type juce_hypot (Type a, Type b) noexcept
 
 #ifndef DOXYGEN
 template <>
-float juce_hypot (float a, float b) noexcept
+inline float juce_hypot (float a, float b) noexcept
 {
    #if JUCE_MSVC
     return (_hypotf (a, b));
@@ -374,7 +374,7 @@ bool juce_isfinite (NumericType) noexcept
 }
 
 template <>
-bool juce_isfinite (float value) noexcept
+inline bool juce_isfinite (float value) noexcept
 {
    #if JUCE_WINDOWS
     return _finite (value) != 0;
@@ -384,7 +384,7 @@ bool juce_isfinite (float value) noexcept
 }
 
 template <>
-bool juce_isfinite (double value) noexcept
+inline bool juce_isfinite (double value) noexcept
 {
    #if JUCE_WINDOWS
     return _finite (value) != 0;
