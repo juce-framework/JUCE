@@ -101,7 +101,7 @@ public:
         If you're going to generate a thumbnail yourself, call this before using addBlock()
         to add the data.
     */
-    void reset (int numChannels, double sampleRate, int64 totalSamplesInSource = 0);
+    void reset (int numChannels, double sampleRate, int64 totalSamplesInSource = 0) override;
 
     /** Adds a block of level data to the thumbnail.
         Call reset() before using this, to tell the thumbnail about the data format.
