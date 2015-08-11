@@ -133,6 +133,7 @@
     <ClCompile Include="..\..\Source\Application\jucer_AutoUpdater.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
+    <ClCompile Include="..\..\Source\Application\jucer_GlobalPreferences.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
@@ -159,6 +160,7 @@
     <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp"/>
     <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp"/>
     <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp"/>
+    <ClCompile Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Project.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
@@ -1069,6 +1071,7 @@
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
+    <ClInclude Include="..\..\Source\Application\jucer_GlobalPreferences.h"/>
     <ClInclude Include="..\..\Source\jucer_Headers.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_OpenDocumentManager.h"/>
@@ -1149,6 +1152,7 @@
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Base.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Exporter.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h"/>
+    <ClInclude Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Module.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ModulesPanel.h"/>

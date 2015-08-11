@@ -53,6 +53,7 @@ OBJECTS := \
   $(OBJDIR)/jucer_AutoUpdater_ca658dc2.o \
   $(OBJDIR)/jucer_CommandLine_f35de107.o \
   $(OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o \
+  $(OBJDIR)/jucer_GlobalPreferences_b0f1bd3d.o \
   $(OBJDIR)/jucer_Main_f8488f5b.o \
   $(OBJDIR)/jucer_MainWindow_1e163aeb.o \
   $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o \
@@ -79,6 +80,7 @@ OBJECTS := \
   $(OBJDIR)/jucer_PaintRoutine_e1e891ee.o \
   $(OBJDIR)/jucer_ProjectExporter_eefe2e5b.o \
   $(OBJDIR)/jucer_ResourceFile_6af120d3.o \
+  $(OBJDIR)/jucer_DependencyPathPropertyComponent_4d137229.o \
   $(OBJDIR)/jucer_Module_3f7666a5.o \
   $(OBJDIR)/jucer_Project_c131864a.o \
   $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o \
@@ -136,6 +138,11 @@ $(OBJDIR)/jucer_CommandLine_f35de107.o: ../../Source/Application/jucer_CommandLi
 $(OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o: ../../Source/Application/jucer_DocumentEditorComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_DocumentEditorComponent.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_GlobalPreferences_b0f1bd3d.o: ../../Source/Application/jucer_GlobalPreferences.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_GlobalPreferences.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_Main_f8488f5b.o: ../../Source/Application/jucer_Main.cpp
@@ -266,6 +273,11 @@ $(OBJDIR)/jucer_ProjectExporter_eefe2e5b.o: ../../Source/Project\ Saving/jucer_P
 $(OBJDIR)/jucer_ResourceFile_6af120d3.o: ../../Source/Project\ Saving/jucer_ResourceFile.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_ResourceFile.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_DependencyPathPropertyComponent_4d137229.o: ../../Source/Project/jucer_DependencyPathPropertyComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_DependencyPathPropertyComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_Module_3f7666a5.o: ../../Source/Project/jucer_Module.cpp

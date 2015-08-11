@@ -23,6 +23,11 @@
 */
 
 //==============================================================================
+
+#ifndef JUCER_MISCUTILITIES_H_INCLUDED
+#define JUCER_MISCUTILITIES_H_INCLUDED
+
+
 String hexString8Digits (int value);
 
 String createAlphaNumericUID();
@@ -496,3 +501,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilePathPropertyComponent)
 };
+
+#endif // JUCER_MISCUTILITIES_H_INCLUDED

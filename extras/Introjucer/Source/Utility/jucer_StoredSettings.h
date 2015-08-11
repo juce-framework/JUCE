@@ -25,11 +25,11 @@
 #ifndef JUCER_STOREDSETTINGS_H_INCLUDED
 #define JUCER_STOREDSETTINGS_H_INCLUDED
 
+#include <map>
 #include "../Application/jucer_AppearanceSettings.h"
 
-
 //==============================================================================
-class StoredSettings
+class StoredSettings : public ValueTree::Listener
 {
 public:
     StoredSettings();
@@ -42,6 +42,13 @@ public:
     void reload();
 
     //==============================================================================
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { changed(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override              { changed(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override       { changed(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override         { changed(); }
+    void valueTreeParentChanged (ValueTree&) override                       { changed(); }
+
+    //==============================================================================
     RecentlyOpenedFilesList recentFiles;
 
     Array<File> getLastProjects();
@@ -50,9 +57,8 @@ public:
     //==============================================================================
     Array<Colour> swatchColours;
 
-    class ColourSelectorWithSwatches    : public ColourSelector
+    struct ColourSelectorWithSwatches    : public ColourSelector
     {
-    public:
         ColourSelectorWithSwatches() {}
 
         int getNumSwatches() const override;
@@ -65,10 +71,23 @@ public:
 
     StringArray monospacedFontNames;
 
+    ValueTree projectDefaults;
+    std::map<String, Value> pathValues;
+
 private:
     OwnedArray<PropertiesFile> propertyFiles;
 
-    void updateGlobalProps();
+    void changed()
+    {
+        ScopedPointer<XmlElement> data (projectDefaults.createXml());
+        propertyFiles.getUnchecked (0)->setValue ("PROJECT_DEFAULT_SETTINGS", data);
+    }
+
+    void updateGlobalPreferences();
+    void updateAppearanceSettings();
+    void updateRecentFiles();
+    void updateKeyMappings();
+
     void loadSwatchColours();
     void saveSwatchColours();
 

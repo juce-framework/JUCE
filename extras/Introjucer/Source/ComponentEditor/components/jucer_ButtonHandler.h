@@ -172,13 +172,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new ButtonTextChangeAction (component, *document.getComponentLayout(), newText),
                               "Change button text");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->getButtonText();
         }
@@ -269,13 +269,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new ButtonRadioGroupChangeAction (component, *document.getComponentLayout(), newText.getIntValue()),
                               "Change radio group ID");
         }
 
-        String getText() const
+        String getText() const override
         {
             return String (component->getRadioGroupId());
         }

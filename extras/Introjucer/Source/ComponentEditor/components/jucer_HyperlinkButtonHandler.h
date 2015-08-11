@@ -94,13 +94,13 @@ private:
             : ComponentTextProperty <HyperlinkButton> ("URL", 512, false, comp, doc)
         {}
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new HyperlinkURLChangeAction (component, *document.getComponentLayout(), URL (newText)),
                               "Change hyperlink URL");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->getURL().toString (false);
         }

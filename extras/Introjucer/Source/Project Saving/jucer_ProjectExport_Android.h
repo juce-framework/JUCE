@@ -51,9 +51,6 @@ public:
         if (getActivityClassPath().isEmpty())
             getActivityClassPathValue() = createDefaultClassName();
 
-        if (getSDKPathString().isEmpty())       getSDKPathValue() = "${user.home}/SDKs/android-sdk";
-        if (getNDKPathString().isEmpty())       getNDKPathValue() = "${user.home}/SDKs/android-ndk";
-
         if (getMinimumSDKVersionString().isEmpty())
             getMinimumSDKVersionValue() = 10;
 
@@ -86,10 +83,10 @@ public:
         props.add (new TextPropertyComponent (getVersionCodeValue(), "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
-        props.add (new TextPropertyComponent (getSDKPathValue(), "Android SDK Path", 1024, false),
+        props.add (new DependencyPathPropertyComponent (getSDKPathValue(), "Android SDK Path", PathSettingsTab::androidSdkKeyName),
                    "The path to the Android SDK folder on the target build machine");
 
-        props.add (new TextPropertyComponent (getNDKPathValue(), "Android NDK Path", 1024, false),
+        props.add (new DependencyPathPropertyComponent (getNDKPathValue(), "Android NDK Path", PathSettingsTab::androidNdkKeyName),
                    "The path to the Android NDK folder on the target build machine");
 
         props.add (new TextPropertyComponent (getMinimumSDKVersionValue(), "Minimum SDK version", 32, false),

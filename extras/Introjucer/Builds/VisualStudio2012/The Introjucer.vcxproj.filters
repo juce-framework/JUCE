@@ -262,6 +262,9 @@
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Application\jucer_GlobalPreferences.cpp">
+      <Filter>The Introjucer\Application</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
@@ -339,6 +342,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp">
       <Filter>The Introjucer\Project Saving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp">
+      <Filter>The Introjucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
       <Filter>The Introjucer\Project</Filter>
@@ -1368,6 +1374,9 @@
     <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Application\jucer_GlobalPreferences.h">
+      <Filter>The Introjucer\Application</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\jucer_Headers.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
@@ -1606,6 +1615,9 @@
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">

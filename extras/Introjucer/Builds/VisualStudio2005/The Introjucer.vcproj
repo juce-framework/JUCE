@@ -138,6 +138,8 @@
         <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
         <File RelativePath="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_GlobalPreferences.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_GlobalPreferences.h"/>
         <File RelativePath="..\..\Source\jucer_Headers.h"/>
         <File RelativePath="..\..\Source\Application\jucer_Main.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_MainWindow.cpp"/>
@@ -262,6 +264,8 @@
         <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Base.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Exporter.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ConfigTree_Modules.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_DependencyPathPropertyComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.h"/>

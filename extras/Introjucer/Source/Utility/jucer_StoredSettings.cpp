@@ -25,6 +25,7 @@
 #include "../jucer_Headers.h"
 #include "jucer_StoredSettings.h"
 #include "../Application/jucer_Application.h"
+#include "../Application/jucer_GlobalPreferences.h"
 
 //==============================================================================
 StoredSettings& getAppSettings()
@@ -39,13 +40,15 @@ PropertiesFile& getGlobalProperties()
 
 //==============================================================================
 StoredSettings::StoredSettings()
-    : appearance (true)
+    : appearance (true), projectDefaults ("PROJECT_DEFAULT_SETTINGS")
 {
     reload();
+    projectDefaults.addListener (this);
 }
 
 StoredSettings::~StoredSettings()
 {
+    projectDefaults.removeListener (this);
     flush();
 }
 
@@ -76,31 +79,43 @@ PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
     return *p;
 }
 
-void StoredSettings::updateGlobalProps()
+void StoredSettings::updateGlobalPreferences()
 {
-    PropertiesFile& props = getGlobalProperties();
+    // update global settings editable from the global preferences window
+    updateAppearanceSettings();
 
-    {
-        const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
-        props.setValue ("editorColours", xml);
-    }
+    // update 'invisible' global settings
+    updateRecentFiles();
+    updateKeyMappings();
+}
 
-    props.setValue ("recentFiles", recentFiles.toString());
+void StoredSettings::updateAppearanceSettings()
+{
+    const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
+    getGlobalProperties().setValue ("editorColours", xml);
+}
 
-    props.removeValue ("keyMappings");
+void StoredSettings::updateRecentFiles()
+{
+    getGlobalProperties().setValue ("recentFiles", recentFiles.toString());
+}
+
+void StoredSettings::updateKeyMappings()
+{
+    getGlobalProperties().removeValue ("keyMappings");
 
     if (ApplicationCommandManager* commandManager = IntrojucerApp::getApp().commandManager)
     {
-        const ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
+        const ScopedPointer<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
         if (keys != nullptr)
-            props.setValue ("keyMappings", keys);
+            getGlobalProperties().setValue ("keyMappings", keys);
     }
 }
 
 void StoredSettings::flush()
 {
-    updateGlobalProps();
+    updateGlobalPreferences();
     saveSwatchColours();
 
     for (int i = propertyFiles.size(); --i >= 0;)
@@ -111,6 +126,11 @@ void StoredSettings::reload()
 {
     propertyFiles.clear();
     propertyFiles.add (createPropsFile ("Introjucer"));
+
+    ScopedPointer<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
+
+    if (projectDefaultsXml != nullptr)
+        projectDefaults = ValueTree::fromXml (*projectDefaultsXml);
 
     // recent files...
     recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));

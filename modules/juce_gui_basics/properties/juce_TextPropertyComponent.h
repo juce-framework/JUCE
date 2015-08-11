@@ -64,15 +64,14 @@ public:
     ~TextPropertyComponent();
 
     //==============================================================================
-    /** Called when the user edits the text.
-
-        Your subclass must use this callback to change the value of whatever item
-        this property component represents.
-    */
+    /** Set the value of the text shown in the text editor to the specified string. */
     virtual void setText (const String& newText);
 
     /** Returns the text that should be shown in the text editor. */
     virtual String getText() const;
+
+    /** Returns the text that should be shown in the text editor as a Value object. */
+    Value& getValue() const;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.
@@ -89,21 +88,54 @@ public:
         outlineColourId             = 0x100e403,    /**< The colour to use to draw an outline around the text area. */
     };
 
+    void colourChanged() override;
+
+    //==============================================================================
+    class JUCE_API Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        /** Called when text has finished being entered (i.e. not per keypress) has changed. */
+        virtual void textPropertyComponentChanged (TextPropertyComponent* component) = 0;
+    };
+
+    /** Registers a listener to receive events when this button's state changes.
+        If the listener is already registered, this will not register it again.
+        @see removeListener
+    */
+    void addListener (Listener* const newListener);
+
+    /** Removes a previously-registered button listener
+        @see addListener
+    */
+    void removeListener (Listener* const listener);
+
     //==============================================================================
     /** @internal */
     void refresh();
+    /** @internal */
+    virtual void textWasEdited();
 
 private:
-    ScopedPointer<Label> textEditor;
-
     class LabelComp;
     friend class LabelComp;
 
-    void textWasEdited();
+    ScopedPointer<LabelComp> textEditor;
+
+    ListenerList<Listener> listenerList;
+
+    void callListeners();
+
     void createEditor (int maxNumChars, bool isMultiLine);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent)
 };
 
+#ifndef DOXYGEN
+ /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
+ typedef TextPropertyComponent::Listener TextPropertyComponentListener;
+#endif
 
 #endif   // JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED

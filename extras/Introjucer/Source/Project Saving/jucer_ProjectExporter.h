@@ -28,6 +28,8 @@
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
+#include "../Application/jucer_GlobalPreferences.h"
+
 class ProjectSaver;
 
 //==============================================================================

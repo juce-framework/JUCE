@@ -385,8 +385,8 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setText (const String& newText)    { element->setText (newText, true); }
-        String getText() const                  { return element->getText(); }
+        void setText (const String& newText) override    { element->setText (newText, true); }
+        String getText() const override                  { return element->getText(); }
 
         void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 

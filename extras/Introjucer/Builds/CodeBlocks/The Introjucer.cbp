@@ -128,6 +128,11 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Application/jucer_GlobalPreferences.cpp"/>
+    <Unit filename="../../Source/Application/jucer_GlobalPreferences.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/jucer_Headers.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -471,6 +476,11 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/Project/jucer_ConfigTree_Modules.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project/jucer_DependencyPathPropertyComponent.cpp"/>
+    <Unit filename="../../Source/Project/jucer_DependencyPathPropertyComponent.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

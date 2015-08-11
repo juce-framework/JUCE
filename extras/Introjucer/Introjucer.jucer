@@ -170,6 +170,23 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </CODEBLOCKS>
+    <VS2015 targetFolder="Builds/VisualStudio2015">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="The Introjucer"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="The Introjucer"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2015>
   </EXPORTFORMATS>
   <MAINGROUP name="The Introjucer" id="NhrJq66R">
     <GROUP id="mslFIKZ" name="Application">
@@ -197,6 +214,10 @@
             resource="0" file="Source/Application/jucer_DocumentEditorComponent.h"/>
       <FILE id="C4MqR1U" name="jucer_FilePreviewComponent.h" compile="0"
             resource="0" file="Source/Application/jucer_FilePreviewComponent.h"/>
+      <FILE id="Dj0hhq" name="jucer_GlobalPreferences.cpp" compile="1" resource="0"
+            file="Source/Application/jucer_GlobalPreferences.cpp"/>
+      <FILE id="PCFpKh" name="jucer_GlobalPreferences.h" compile="0" resource="0"
+            file="Source/Application/jucer_GlobalPreferences.h"/>
       <FILE id="qXOJtpg" name="jucer_Headers.h" compile="0" resource="0"
             file="Source/jucer_Headers.h"/>
       <FILE id="ga7xgxf" name="jucer_Main.cpp" compile="1" resource="0" file="Source/Application/jucer_Main.cpp"/>
@@ -426,6 +447,10 @@
             file="Source/Project/jucer_ConfigTree_Exporter.h"/>
       <FILE id="OO3lfM" name="jucer_ConfigTree_Modules.h" compile="0" resource="0"
             file="Source/Project/jucer_ConfigTree_Modules.h"/>
+      <FILE id="S2W7Wj" name="jucer_DependencyPathPropertyComponent.cpp"
+            compile="1" resource="0" file="Source/Project/jucer_DependencyPathPropertyComponent.cpp"/>
+      <FILE id="hp5z1D" name="jucer_DependencyPathPropertyComponent.h" compile="0"
+            resource="0" file="Source/Project/jucer_DependencyPathPropertyComponent.h"/>
       <FILE id="sQjHbVN" name="jucer_GroupInformationComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_GroupInformationComponent.h"/>
       <FILE id="MJkOAX" name="jucer_Module.cpp" compile="1" resource="0"

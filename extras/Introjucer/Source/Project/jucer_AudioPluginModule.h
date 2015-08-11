@@ -25,6 +25,7 @@
 #ifndef JUCER_AUDIOPLUGINMODULE_H_INCLUDED
 #define JUCER_AUDIOPLUGINMODULE_H_INCLUDED
 
+#include "../Application/jucer_GlobalPreferences.h"
 
 //==============================================================================
 namespace
@@ -222,6 +223,17 @@ namespace
                                               exporter.rebaseFromProjectFolderToBuildTarget (path)
                                                       .toWindowsStyle());
     }
+
+    DependencyPathOS getDependencyPathOS (const ProjectExporter& exporter)
+    {
+        if (exporter.isWindows())   return DependencyPath::windows;
+        if (exporter.isXcode())     return DependencyPath::osx;
+        if (exporter.isLinux())     return DependencyPath::linux;
+
+        // cannot figure out which OS's dependency paths this exporter wants!!
+        jassertfalse;
+        return DependencyPath::unknown;
+    }
 }
 
 //==============================================================================
@@ -252,22 +264,16 @@ namespace VSTHelpers
     {
         const String vstFormat (isVST3 ? "VST3" : "VST");
 
-        props.add (new TextPropertyComponent (getVSTFolder (exporter, isVST3), vstFormat + " Folder", 1024, false),
+        props.add (new DependencyPathPropertyComponent (getVSTFolder (exporter, isVST3),
+                                                        vstFormat + " Folder",
+                                                        isVST3 ? PathSettingsTab::vst3KeyName : PathSettingsTab::vst2KeyName,
+                                                        getDependencyPathOS (exporter)),
                    "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
-    }
-
-    static void fixMissingVSTValues (ProjectExporter& exporter, bool isVST3)
-    {
-        if (getVSTFolder (exporter, isVST3).toString().isEmpty())
-            getVSTFolder (exporter, isVST3) = exporter.isWindows() ? (isVST3 ? "c:\\SDKs\\VST3 SDK" : "c:\\SDKs\\vstsdk2.4")
-                                                                   : (isVST3 ? "~/SDKs/VST3 SDK"    : "~/SDKs/vstsdk2.4");
-
-        fixMissingXcodePostBuildScript (exporter);
     }
 
     static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, bool isVST3)
     {
-        fixMissingVSTValues (exporter, isVST3);
+        fixMissingXcodePostBuildScript (exporter);
         writePluginCharacteristicsFile (projectSaver);
 
         exporter.makefileTargetSuffix = ".so";
@@ -312,7 +318,7 @@ namespace VSTHelpers
 
     static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        fixMissingVSTValues (exporter, isVST3);
+        fixMissingXcodePostBuildScript (exporter);
         createVSTPathEditor (exporter, props, isVST3);
     }
 }
@@ -325,19 +331,6 @@ namespace RTASHelpers
                                                                                               RelativePath::projectFolder); }
 
     static bool isExporterSupported (ProjectExporter& exporter)   { return exporter.isVisualStudio() || exporter.isXcode(); }
-
-    static void fixMissingRTASValues (ProjectExporter& exporter)
-    {
-        if (getRTASFolder (exporter).toString().isEmpty())
-        {
-            if (exporter.isVisualStudio())
-                getRTASFolder (exporter) = "c:\\SDKs\\PT_80_SDK";
-            else
-                getRTASFolder (exporter) = "~/SDKs/PT_80_SDK";
-        }
-
-        fixMissingXcodePostBuildScript (exporter);
-    }
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
@@ -424,7 +417,7 @@ namespace RTASHelpers
     {
         if (isExporterSupported (exporter))
         {
-            fixMissingRTASValues (exporter);
+            fixMissingXcodePostBuildScript (exporter);
 
             const RelativePath rtasFolder (getRTASFolderPath (exporter));
 
@@ -479,9 +472,12 @@ namespace RTASHelpers
     {
         if (isExporterSupported (exporter))
         {
-            fixMissingRTASValues (exporter);
+            fixMissingXcodePostBuildScript (exporter);
 
-            props.add (new TextPropertyComponent (getRTASFolder (exporter), "RTAS Folder", 1024, false),
+            props.add (new DependencyPathPropertyComponent (getRTASFolder (exporter),
+                                                            "RTAS Folder",
+                                                            PathSettingsTab::rtasKeyName,
+                                                            getDependencyPathOS (exporter)),
                        "If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
         }
     }
@@ -621,19 +617,6 @@ namespace AAXHelpers
 
     static bool isExporterSupported (ProjectExporter& exporter)       { return exporter.isVisualStudio() || exporter.isXcode(); }
 
-    static void fixMissingAAXValues (ProjectExporter& exporter)
-    {
-        if (getAAXFolder (exporter).toString().isEmpty())
-        {
-            if (exporter.isVisualStudio())
-                getAAXFolder (exporter) = "c:\\SDKs\\AAX";
-            else
-                getAAXFolder (exporter) = "~/SDKs/AAX";
-        }
-
-        fixMissingXcodePostBuildScript (exporter);
-    }
-
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
         const RelativePath aaxFolder (getAAXFolderPath (exporter));
@@ -647,7 +630,7 @@ namespace AAXHelpers
     {
         if (isExporterSupported (exporter))
         {
-            fixMissingAAXValues (exporter);
+            fixMissingXcodePostBuildScript (exporter);
 
             const RelativePath aaxLibsFolder (getAAXFolderPath (exporter).getChildFile ("Libs"));
 
@@ -676,9 +659,12 @@ namespace AAXHelpers
     {
         if (isExporterSupported (exporter))
         {
-            fixMissingAAXValues (exporter);
+            fixMissingXcodePostBuildScript (exporter);
 
-            props.add (new TextPropertyComponent (getAAXFolder (exporter), "AAX SDK Folder", 1024, false),
+            props.add (new DependencyPathPropertyComponent (getAAXFolder (exporter),
+                                                            "AAX SDK Folder",
+                                                            PathSettingsTab::aaxKeyName,
+                                                            getDependencyPathOS (exporter)),
                        "If you're building an AAX, this must be the folder containing the AAX SDK. This should be an absolute path.");
         }
     }

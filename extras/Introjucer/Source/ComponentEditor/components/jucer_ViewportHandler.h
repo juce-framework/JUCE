@@ -559,13 +559,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new ViewportClassNameChangeAction (component, *document.getComponentLayout(), newText),
                               "Change Viewport content class");
         }
 
-        String getText() const
+        String getText() const override
         {
             return getViewportGenericComponentClass (component);
         }
@@ -612,13 +612,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new ConstructorParamChangeAction (component, *document.getComponentLayout(), newText),
                               "Change Viewport content constructor params");
         }
 
-        String getText() const
+        String getText() const override
         {
             return getViewportConstructorParams (component);
         }

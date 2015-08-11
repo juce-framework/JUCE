@@ -726,13 +726,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new TabNameChangeAction (component, *document.getComponentLayout(), tabIndex, newText),
                               "Change tab name");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->getTabNames() [tabIndex];
         }
@@ -994,13 +994,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new TabClassNameChangeAction (component, *document.getComponentLayout(), tabIndex, newText),
                               "Change TabbedComponent content class");
         }
 
-        String getText() const
+        String getText() const override
         {
             return getTabClassName (component, tabIndex);
         }
@@ -1052,13 +1052,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new TabConstructorParamChangeAction (component, *document.getComponentLayout(), tabIndex, newText),
                               "Change TabbedComponent content constructor param");
         }
 
-        String getText() const
+        String getText() const override
         {
             return getTabConstructorParams (component, tabIndex);
         }
