@@ -62,8 +62,23 @@ public:
         if (commandLine.isNotEmpty()
              && ! commandLine.trimStart().startsWith ("-")
              && mainWindow->getGraphEditor() != nullptr)
+        {
             mainWindow->getGraphEditor()->graph.loadFrom (File::getCurrentWorkingDirectory()
                                                             .getChildFile (commandLine), true);
+        }
+        else
+        {
+            RecentlyOpenedFilesList recentFiles;
+            recentFiles.restoreFromString (getAppProperties().getUserSettings()->getValue ("recentFilterGraphFiles"));
+
+            if (recentFiles.getNumFiles() > 0)
+            {
+                File f = recentFiles.getFile (0);
+
+                if (f.existsAsFile())
+                    mainWindow->getGraphEditor()->graph.loadFrom (f, true);
+            }
+        }
     }
 
     void shutdown() override
