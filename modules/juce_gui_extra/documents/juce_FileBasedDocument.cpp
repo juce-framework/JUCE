@@ -169,6 +169,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
         setChangedFlag (false);
         MouseCursor::hideWaitCursor();
 
+        changed(); // because the filename may have changed
         return savedOk;
     }
 
@@ -184,6 +185,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                            + "\n\n"
                                            + result.getErrorMessage());
 
+    changed(); // because the filename may have changed
     return failedToWriteToFile;
 }
 
