@@ -129,13 +129,13 @@ Value& PathSettingsTab::getPathByKey (const String& key, DependencyPathOS os)
 String PathSettingsTab::getFallbackPathByKey (const String& key, DependencyPathOS os)
 {
     if (key == vst2KeyName || key == vst3KeyName)
-        return os == DependencyPathOS::windows ? "c:\\SDKs\\VST3 SDK"
-                                               : "~/SDKs/VST3 SDK";
+        return os == DependencyPath::windows ? "c:\\SDKs\\VST3 SDK"
+                                             : "~/SDKs/VST3 SDK";
 
     if (key == rtasKeyName)
     {
-        if (os == DependencyPathOS::windows)    return "c:\\SDKs\\PT_80_SDK";
-        if (os == DependencyPathOS::osx)        return "~/SDKs/PT_80_SDK";
+        if (os == DependencyPath::windows)   return "c:\\SDKs\\PT_80_SDK";
+        if (os == DependencyPath::osx)       return "~/SDKs/PT_80_SDK";
 
         // no RTAS on this OS!
         jassertfalse;
@@ -144,8 +144,8 @@ String PathSettingsTab::getFallbackPathByKey (const String& key, DependencyPathO
 
     if (key == aaxKeyName)
     {
-        if (os == DependencyPathOS::windows)    return "c:\\SDKs\\AAX";
-        if (os == DependencyPathOS::osx)        return "~/SDKs/AAX" ;
+        if (os == DependencyPath::windows)   return "c:\\SDKs\\AAX";
+        if (os == DependencyPath::osx)       return "~/SDKs/AAX" ;
 
         // no RTAS on this OS!
         jassertfalse;
@@ -153,12 +153,12 @@ String PathSettingsTab::getFallbackPathByKey (const String& key, DependencyPathO
     }
 
     if (key == androidSdkKeyName)
-        return os == DependencyPathOS::windows ? "c:\\SDKs\\android-sdk"
-                                               : "~/Library/Android/sdk";
+        return os == DependencyPath::windows ? "c:\\SDKs\\android-sdk"
+                                             : "~/Library/Android/sdk";
 
     if (key == androidNdkKeyName)
-        return os == DependencyPathOS::windows ? "c:\\SDKs\\android-ndk"
-                                               : "~/Library/Android/ndk";
+        return os == DependencyPath::windows ? "c:\\SDKs\\android-ndk"
+                                             : "~/Library/Android/ndk";
 
     // didn't recognise the key provided!
     jassertfalse;
