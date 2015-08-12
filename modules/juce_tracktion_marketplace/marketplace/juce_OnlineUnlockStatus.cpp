@@ -71,9 +71,11 @@ struct KeyFileUtils
         val.parseString (hexData, 16);
 
         RSAKey key (rsaPublicKey);
+        jassert (key.isValid());
+
         ScopedPointer<XmlElement> xml;
 
-        if (key.isValid())
+        if (! val.isZero())
         {
             key.applyToValue (val);
             xml = XmlDocument::parse (val.toMemoryBlock().toString());
