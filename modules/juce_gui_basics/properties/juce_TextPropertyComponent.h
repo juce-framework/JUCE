@@ -102,23 +102,23 @@ public:
         virtual ~Listener() {}
 
         /** Called when text has finished being entered (i.e. not per keypress) has changed. */
-        virtual void textPropertyComponentChanged (TextPropertyComponent* component) = 0;
+        virtual void textPropertyComponentChanged (TextPropertyComponent*) = 0;
     };
 
     /** Registers a listener to receive events when this button's state changes.
         If the listener is already registered, this will not register it again.
         @see removeListener
     */
-    void addListener (Listener* const newListener);
+    void addListener (Listener* newListener);
 
     /** Removes a previously-registered button listener
         @see addListener
     */
-    void removeListener (Listener* const listener);
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** @internal */
-    void refresh();
+    void refresh() override;
     /** @internal */
     virtual void textWasEdited();
 
@@ -127,11 +127,9 @@ private:
     friend class LabelComp;
 
     ScopedPointer<LabelComp> textEditor;
-
     ListenerList<Listener> listenerList;
 
     void callListeners();
-
     void createEditor (int maxNumChars, bool isMultiLine);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent)
