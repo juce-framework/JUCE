@@ -74,7 +74,10 @@ struct KeyFileUtils
         ScopedPointer<XmlElement> xml;
 
         if (key.isValid())
-             xml = XmlDocument::parse (val.toMemoryBlock().toString());
+        {
+            key.applyToValue (val);
+            xml = XmlDocument::parse (val.toMemoryBlock().toString());
+        }
 
         return xml != nullptr ? *xml : XmlElement("key");
     }
