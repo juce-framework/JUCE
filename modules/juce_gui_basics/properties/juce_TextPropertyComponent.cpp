@@ -138,6 +138,11 @@ void TextPropertyComponent::refresh()
 
 void TextPropertyComponent::textWasEdited()
 {
+    const String newText (textEditor->getText());
+
+    if (getText() != newText)
+        setText (newText);
+
     callListeners();
 }
 

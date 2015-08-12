@@ -64,7 +64,11 @@ public:
     ~TextPropertyComponent();
 
     //==============================================================================
-    /** Set the value of the text shown in the text editor to the specified string. */
+    /** Called when the user edits the text.
+
+        Your subclass must use this callback to change the value of whatever item
+        this property component represents.
+    */
     virtual void setText (const String& newText);
 
     /** Returns the text that should be shown in the text editor. */
