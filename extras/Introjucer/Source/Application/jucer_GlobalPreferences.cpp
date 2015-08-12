@@ -116,7 +116,7 @@ void PathSettingsTab::resized()
 //==============================================================================
 Value& PathSettingsTab::getPathByKey (const String& key, DependencyPathOS os)
 {
-    getAppSettings().pathValues[key] = getAppSettings().projectDefaults.getPropertyAsValue (key, nullptr);
+    getAppSettings().pathValues[key].referTo (getAppSettings().projectDefaults.getPropertyAsValue (key, nullptr));
     Value& value = getAppSettings().pathValues[key];
 
     if (value.toString().isEmpty())
