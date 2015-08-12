@@ -80,10 +80,10 @@ void DependencyPathPropertyComponent::labelTextChanged (Label*)
 {
 }
 
-void DependencyPathPropertyComponent::editorShown (Label* /*label*/, TextEditor& textEditor)
+void DependencyPathPropertyComponent::editorShown (Label* /*label*/, TextEditor& editor)
 {
     if (! pathValueSource->isUsingProjectSettings())
-        textEditor.setText (String::empty, dontSendNotification);
+        editor.setText (String::empty, dontSendNotification);
 }
 
 void DependencyPathPropertyComponent::editorHidden (Label*, TextEditor&)
