@@ -22,6 +22,18 @@ const String DependencyPath::androidNdkKeyName = "androidNdkPath";
 
 //==============================================================================
 
+DependencyPathValueSource::DependencyPathValueSource (const Value& projectSettingsPath,
+                                                      String globalSettingsKey,
+                                                      DependencyPathOS osThisSettingAppliesTo)
+  : projectSettingsValue (projectSettingsPath),
+    globalKey (globalSettingsKey),
+    os (osThisSettingAppliesTo),
+    globalSettingsValue (PathSettingsTab::getPathByKey (globalKey, os)),
+    fallbackValue (PathSettingsTab::getFallbackPathByKey (globalKey, os))
+{
+    globalSettingsValue.addListener (this);
+}
+
 bool DependencyPathValueSource::isValidPath() const
 {
     // if we are on another OS than the one which this path setting is for,
@@ -34,16 +46,10 @@ bool DependencyPathValueSource::isValidPath() const
 
 //==============================================================================
 DependencyPathPropertyComponent::DependencyPathPropertyComponent (const Value& value,
-                                                                  const String& propertyName,
-                                                                  const String& globalKey,
-                                                                  DependencyPathOS os)
-    : TextPropertyComponent (propertyName, 1024, false),
-      pathValueSource (new DependencyPathValueSource (value,
-                                                     PathSettingsTab::getPathByKey (globalKey, os),
-                                                     PathSettingsTab::getFallbackPathByKey (globalKey, os),
-                                                     globalKey,
-                                                     os)),
-      pathValue (pathValueSource)
+                                                                  const String& propertyName)
+try : TextPropertyComponent (propertyName, 1024, false),
+      pathValue (value),
+      pathValueSource (dynamic_cast<DependencyPathValueSource&> (pathValue.getValueSource()))
 {
     bool initialValueIsEmpty = value.toString().isEmpty();
 
@@ -60,12 +66,19 @@ DependencyPathPropertyComponent::DependencyPathPropertyComponent (const Value& v
     else
         jassertfalse;
 }
+catch (const std::bad_cast&)
+{
+    // a DependencyPathPropertyComponent must be initialised with a Value
+    // that is referring to a DependencyPathValueSource!
+    jassertfalse;
+    throw;
+}
 
 void DependencyPathPropertyComponent::valueChanged (Value& value)
 {
     // this callback handles the update of this setting in case
     // the user changed the global preferences.
-    if (value.refersToSameSourceAs (pathValue) && pathValueSource->isUsingGlobalSettings())
+    if (value.refersToSameSourceAs (pathValue) && pathValueSource.isUsingGlobalSettings())
         textWasEdited();
 }
 
@@ -77,11 +90,11 @@ void DependencyPathPropertyComponent::textWasEdited()
 
 Colour DependencyPathPropertyComponent::getTextColourToDisplay() const
 {
-    if (! pathValueSource->isUsingProjectSettings())
-        return pathValueSource->isValidPath() ? Colours::grey
+    if (! pathValueSource.isUsingProjectSettings())
+        return pathValueSource.isValidPath() ? Colours::grey
                                               : Colours::lightpink;
 
-    return pathValueSource->isValidPath() ? Colours::black
+    return pathValueSource.isValidPath() ? Colours::black
                                           : Colours::red;
 }
 
@@ -91,7 +104,7 @@ void DependencyPathPropertyComponent::labelTextChanged (Label*)
 
 void DependencyPathPropertyComponent::editorShown (Label* /*label*/, TextEditor& editor)
 {
-    if (! pathValueSource->isUsingProjectSettings())
+    if (! pathValueSource.isUsingProjectSettings())
         editor.setText (String::empty, dontSendNotification);
 }
 

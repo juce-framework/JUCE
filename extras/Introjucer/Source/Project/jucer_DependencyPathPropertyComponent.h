@@ -54,18 +54,8 @@ class DependencyPathValueSource : public Value::ValueSource,
 {
 public:
     DependencyPathValueSource (const Value& projectSettingsPath,
-                               const Value& globalSettingsPath,
-                               const String& fallbackPath,
                                String globalSettingsKey,
-                               DependencyPathOS osThisSettingAppliesTo)
-      : projectSettingsValue (projectSettingsPath),
-        globalSettingsValue (globalSettingsPath),
-        fallbackValue (fallbackPath),
-        globalKey (globalSettingsKey),
-        os (osThisSettingAppliesTo)
-    {
-        globalSettingsValue.addListener (this);
-    }
+                               DependencyPathOS osThisSettingAppliesTo = DependencyPath::getThisOS());
 
     /** This gets the currently used value, which may be either
         the project setting, the global setting, or the fallback value. */
@@ -142,6 +132,16 @@ private:
     /** the dependency path setting as set in this Introjucer project. */
     Value projectSettingsValue;
 
+    /** the global key used in the application settings for the global setting value.
+        needed for checking whether the path is valid. */
+    String globalKey;
+
+    /** on what operating system should this dependency path be used?
+     note that this is *not* the os that is targeted by the project,
+     but rather the os on which the project will be compiled
+     (= on which the path settings need to be set correctly). */
+    DependencyPathOS os;
+
     /** the dependency path global setting on this machine.
         used when there value set for this project is invalid. */
     Value globalSettingsValue;
@@ -150,16 +150,6 @@ private:
         whenever the latter doesn't apply, e.g. the setting is for another
         OS than the ome this machine is running. */
     String fallbackValue;
-
-    /** the global key used in the application settings for the global setting value.
-        needed for checking whether the path is valid. */
-     String globalKey;
-
-    /** on what operating system should this dependency path be used?
-     note that this is *not* the os that is targeted by the project,
-     but rather the os on which the project will be compiled
-     (= on which the path settings need to be set correctly). */
-    DependencyPathOS os;
 };
 
 
@@ -170,9 +160,7 @@ class DependencyPathPropertyComponent : public TextPropertyComponent,
 {
 public:
     DependencyPathPropertyComponent (const Value& value,
-                                     const String& propertyName,
-                                     const String& globalKey,
-                                     DependencyPathOS os = DependencyPath::getThisOS());
+                                     const String& propertyName);
 
 
 private:
@@ -186,11 +174,11 @@ private:
     /** This function handles path changes because the global path changed. */
     void valueChanged (Value& value) override;
 
-    /** the value source of this dependency path setting. */
-    DependencyPathValueSource* pathValueSource;
-
-    /** the value object around the value source. */
+    /** the value that represents this dependency path setting. */
     Value pathValue;
+
+    /** a reference to the value source that this value refers to. */
+    DependencyPathValueSource& pathValueSource;
 
     // Label::Listener overrides:
     void labelTextChanged (Label* labelThatHasChanged) override;
