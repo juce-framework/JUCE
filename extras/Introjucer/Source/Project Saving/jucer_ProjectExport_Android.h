@@ -83,10 +83,10 @@ public:
         props.add (new TextPropertyComponent (getVersionCodeValue(), "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
-        props.add (new DependencyPathPropertyComponent (getSDKPathValue(), "Android SDK Path", PathSettingsTab::androidSdkKeyName),
+        props.add (new DependencyPathPropertyComponent (getSDKPathValue(), "Android SDK Path", DependencyPath::androidSdkKeyName),
                    "The path to the Android SDK folder on the target build machine");
 
-        props.add (new DependencyPathPropertyComponent (getNDKPathValue(), "Android NDK Path", PathSettingsTab::androidNdkKeyName),
+        props.add (new DependencyPathPropertyComponent (getNDKPathValue(), "Android NDK Path", DependencyPath::androidNdkKeyName),
                    "The path to the Android NDK folder on the target build machine");
 
         props.add (new TextPropertyComponent (getMinimumSDKVersionValue(), "Minimum SDK version", 32, false),

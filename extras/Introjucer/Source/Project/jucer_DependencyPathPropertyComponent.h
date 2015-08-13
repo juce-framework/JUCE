@@ -12,8 +12,9 @@
 #define JUCER_DEPENDENCYPATHPROPERTYCOMPONENT_H_INCLUDED
 
 //==============================================================================
-namespace DependencyPath
+class DependencyPath
 {
+public:
     enum OS
     {
         windows = 0,
@@ -34,6 +35,9 @@ namespace DependencyPath
         return DependencyPath::unknown;
        #endif
     }
+
+    const static String vst2KeyName, vst3KeyName, rtasKeyName, aaxKeyName,
+                        androidSdkKeyName, androidNdkKeyName;
 };
 
 typedef DependencyPath::OS DependencyPathOS;

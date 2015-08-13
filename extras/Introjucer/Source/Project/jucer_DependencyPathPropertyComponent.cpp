@@ -12,6 +12,13 @@
 #include "jucer_DependencyPathPropertyComponent.h"
 #include "../Application/jucer_GlobalPreferences.h"
 
+//==============================================================================
+const String DependencyPath::vst2KeyName = "vst2Path";
+const String DependencyPath::vst3KeyName = "vst3Path";
+const String DependencyPath::rtasKeyName = "rtasPath";
+const String DependencyPath::aaxKeyName = "aaxPath";
+const String DependencyPath::androidSdkKeyName = "androidSdkPath";
+const String DependencyPath::androidNdkKeyName = "androidNdkPath";
 
 //==============================================================================
 DependencyPathPropertyComponent::DependencyPathPropertyComponent (const Value& value,

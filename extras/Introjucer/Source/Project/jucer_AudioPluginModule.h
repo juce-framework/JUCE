@@ -266,7 +266,7 @@ namespace VSTHelpers
 
         props.add (new DependencyPathPropertyComponent (getVSTFolder (exporter, isVST3),
                                                         vstFormat + " Folder",
-                                                        isVST3 ? PathSettingsTab::vst3KeyName : PathSettingsTab::vst2KeyName,
+                                                        isVST3 ? DependencyPath::vst3KeyName : DependencyPath::vst2KeyName,
                                                         getDependencyPathOS (exporter)),
                    "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
     }
@@ -476,7 +476,7 @@ namespace RTASHelpers
 
             props.add (new DependencyPathPropertyComponent (getRTASFolder (exporter),
                                                             "RTAS Folder",
-                                                            PathSettingsTab::rtasKeyName,
+                                                            DependencyPath::rtasKeyName,
                                                             getDependencyPathOS (exporter)),
                        "If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
         }
@@ -663,7 +663,7 @@ namespace AAXHelpers
 
             props.add (new DependencyPathPropertyComponent (getAAXFolder (exporter),
                                                             "AAX SDK Folder",
-                                                            PathSettingsTab::aaxKeyName,
+                                                            DependencyPath::aaxKeyName,
                                                             getDependencyPathOS (exporter)),
                        "If you're building an AAX, this must be the folder containing the AAX SDK. This should be an absolute path.");
         }
