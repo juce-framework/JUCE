@@ -239,15 +239,9 @@ namespace
 //==============================================================================
 namespace VSTHelpers
 {
-    static Value getVSTFolder (ProjectExporter& exporter, bool isVST3)
-    {
-        return exporter.getSetting (isVST3 ? Ids::vst3Folder
-                                           : Ids::vstFolder);
-    }
-
     static void addVSTFolderToPath (ProjectExporter& exporter, bool isVST3)
     {
-        const String vstFolder (getVSTFolder (exporter, isVST3).toString());
+        const String vstFolder (exporter.getVSTPathValue (isVST3).toString());
 
         if (vstFolder.isNotEmpty())
         {
@@ -264,10 +258,8 @@ namespace VSTHelpers
     {
         const String vstFormat (isVST3 ? "VST3" : "VST");
 
-        props.add (new DependencyPathPropertyComponent (getVSTFolder (exporter, isVST3),
-                                                        vstFormat + " Folder",
-                                                        isVST3 ? DependencyPath::vst3KeyName : DependencyPath::vst2KeyName,
-                                                        getDependencyPathOS (exporter)),
+        props.add (new DependencyPathPropertyComponent (exporter.getVSTPathValue (isVST3),
+                                                       vstFormat + " Folder"),
                    "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
     }
 
@@ -326,15 +318,19 @@ namespace VSTHelpers
 //==============================================================================
 namespace RTASHelpers
 {
-    static Value getRTASFolder (ProjectExporter& exporter)             { return exporter.getSetting (Ids::rtasFolder); }
-    static RelativePath getRTASFolderPath (ProjectExporter& exporter)  { return RelativePath (exporter.getSettingString (Ids::rtasFolder),
-                                                                                              RelativePath::projectFolder); }
+    static RelativePath getRTASRelativeFolderPath (ProjectExporter& exporter)
+    {
+        return RelativePath (exporter.getRTASPathValue().toString(), RelativePath::projectFolder);
+    }
 
-    static bool isExporterSupported (ProjectExporter& exporter)   { return exporter.isVisualStudio() || exporter.isXcode(); }
+    static bool isExporterSupported (ProjectExporter& exporter)
+    {
+        return exporter.isVisualStudio() || exporter.isXcode();
+    }
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
-        RelativePath rtasFolder (getRTASFolderPath (exporter));
+        RelativePath rtasFolder (getRTASRelativeFolderPath (exporter));
 
         if (exporter.isVisualStudio())
         {
@@ -419,7 +415,7 @@ namespace RTASHelpers
         {
             fixMissingXcodePostBuildScript (exporter);
 
-            const RelativePath rtasFolder (getRTASFolderPath (exporter));
+            const RelativePath rtasFolder (getRTASRelativeFolderPath (exporter));
 
             if (exporter.isVisualStudio())
             {
@@ -474,10 +470,8 @@ namespace RTASHelpers
         {
             fixMissingXcodePostBuildScript (exporter);
 
-            props.add (new DependencyPathPropertyComponent (getRTASFolder (exporter),
-                                                            "RTAS Folder",
-                                                            DependencyPath::rtasKeyName,
-                                                            getDependencyPathOS (exporter)),
+            props.add (new DependencyPathPropertyComponent (exporter.getRTASPathValue(),
+                                                            "RTAS Folder"),
                        "If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
         }
     }
@@ -611,15 +605,19 @@ namespace AUHelpers
 //==============================================================================
 namespace AAXHelpers
 {
-    static Value getAAXFolder (ProjectExporter& exporter)             { return exporter.getSetting (Ids::aaxFolder); }
-    static RelativePath getAAXFolderPath (ProjectExporter& exporter)  { return RelativePath (exporter.getSettingString (Ids::aaxFolder),
-                                                                                             RelativePath::projectFolder); }
+    static RelativePath getAAXRelativeFolderPath (ProjectExporter& exporter)
+    {
+        return RelativePath (exporter.getAAXPathValue().toString(), RelativePath::projectFolder);
+    }
 
-    static bool isExporterSupported (ProjectExporter& exporter)       { return exporter.isVisualStudio() || exporter.isXcode(); }
+    static bool isExporterSupported (ProjectExporter& exporter)
+    {
+        return exporter.isVisualStudio() || exporter.isXcode();
+    }
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
-        const RelativePath aaxFolder (getAAXFolderPath (exporter));
+        const RelativePath aaxFolder (getAAXRelativeFolderPath (exporter));
 
         exporter.addToExtraSearchPaths (aaxFolder);
         exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces"));
@@ -632,7 +630,7 @@ namespace AAXHelpers
         {
             fixMissingXcodePostBuildScript (exporter);
 
-            const RelativePath aaxLibsFolder (getAAXFolderPath (exporter).getChildFile ("Libs"));
+            const RelativePath aaxLibsFolder (getAAXRelativeFolderPath (exporter).getChildFile ("Libs"));
 
             if (exporter.isVisualStudio())
             {
@@ -661,10 +659,8 @@ namespace AAXHelpers
         {
             fixMissingXcodePostBuildScript (exporter);
 
-            props.add (new DependencyPathPropertyComponent (getAAXFolder (exporter),
-                                                            "AAX SDK Folder",
-                                                            DependencyPath::aaxKeyName,
-                                                            getDependencyPathOS (exporter)),
+            props.add (new DependencyPathPropertyComponent (exporter.getAAXPathValue(),
+                                                            "AAX SDK Folder"),
                        "If you're building an AAX, this must be the folder containing the AAX SDK. This should be an absolute path.");
         }
     }
