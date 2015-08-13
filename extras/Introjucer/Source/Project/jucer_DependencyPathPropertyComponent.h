@@ -56,10 +56,12 @@ public:
     DependencyPathValueSource (const Value& projectSettingsPath,
                                const Value& globalSettingsPath,
                                const String& fallbackPath,
+                               String globalSettingsKey,
                                DependencyPathOS osThisSettingAppliesTo)
       : projectSettingsValue (projectSettingsPath),
         globalSettingsValue (globalSettingsPath),
         fallbackValue (fallbackPath),
+        globalKey (globalSettingsKey),
         os (osThisSettingAppliesTo)
     {
         globalSettingsValue.addListener (this);
@@ -106,6 +108,8 @@ public:
         return os == DependencyPath::getThisOS();
     }
 
+    bool isValidPath() const;
+
 private:
     void valueChanged (Value& value) override
     {
@@ -147,10 +151,14 @@ private:
         OS than the ome this machine is running. */
     String fallbackValue;
 
+    /** the global key used in the application settings for the global setting value.
+        needed for checking whether the path is valid. */
+     String globalKey;
+
     /** on what operating system should this dependency path be used?
-        note that this is *not* the os that is targeted by the project,
-        but rather the os on which the project will be compiled
-        (= on which the path settings need to be set correctly). */
+     note that this is *not* the os that is targeted by the project,
+     but rather the os on which the project will be compiled
+     (= on which the path settings need to be set correctly). */
     DependencyPathOS os;
 };
 
@@ -177,12 +185,6 @@ private:
 
     /** This function handles path changes because the global path changed. */
     void valueChanged (Value& value) override;
-
-    /** Check if the current value is a valid path. */
-    bool isValidPath() const;
-
-    /** the property key of the global property that this component is tracking. */
-    String globalKey;
 
     /** the value source of this dependency path setting. */
     DependencyPathValueSource* pathValueSource;

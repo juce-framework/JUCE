@@ -21,15 +21,27 @@ const String DependencyPath::androidSdkKeyName = "androidSdkPath";
 const String DependencyPath::androidNdkKeyName = "androidNdkPath";
 
 //==============================================================================
+
+bool DependencyPathValueSource::isValidPath() const
+{
+    // if we are on another OS than the one which this path setting is for,
+    // we have no way of knowing whether the path is valid - so just assume it is:
+    if (! appliesToThisOS())
+        return true;
+
+    return PathSettingsTab::checkPathByKey (globalKey, getValue().toString());
+}
+
+//==============================================================================
 DependencyPathPropertyComponent::DependencyPathPropertyComponent (const Value& value,
                                                                   const String& propertyName,
-                                                                  const String& globalKeyName,
+                                                                  const String& globalKey,
                                                                   DependencyPathOS os)
     : TextPropertyComponent (propertyName, 1024, false),
-      globalKey (globalKeyName),
       pathValueSource (new DependencyPathValueSource (value,
-                                                     PathSettingsTab::getPathByKey (globalKeyName, os),
-                                                     PathSettingsTab::getFallbackPathByKey (globalKeyName, os),
+                                                     PathSettingsTab::getPathByKey (globalKey, os),
+                                                     PathSettingsTab::getFallbackPathByKey (globalKey, os),
+                                                     globalKey,
                                                      os)),
       pathValue (pathValueSource)
 {
@@ -66,21 +78,11 @@ void DependencyPathPropertyComponent::textWasEdited()
 Colour DependencyPathPropertyComponent::getTextColourToDisplay() const
 {
     if (! pathValueSource->isUsingProjectSettings())
-        return isValidPath() ? Colours::grey
-                             : Colours::lightpink;
+        return pathValueSource->isValidPath() ? Colours::grey
+                                              : Colours::lightpink;
 
-    return isValidPath() ? Colours::black
-                         : Colours::red;
-}
-
-bool DependencyPathPropertyComponent::isValidPath() const
-{
-    // if we are on another OS than the one which this path setting is for,
-    // we have no way of knowing whether the path is valid - so just assume it is:
-    if (! pathValueSource->appliesToThisOS())
-        return true;
-
-    return PathSettingsTab::checkPathByKey (globalKey, getValue().toString());
+    return pathValueSource->isValidPath() ? Colours::black
+                                          : Colours::red;
 }
 
 void DependencyPathPropertyComponent::labelTextChanged (Label*)
