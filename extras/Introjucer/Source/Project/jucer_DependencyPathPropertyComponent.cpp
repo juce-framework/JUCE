@@ -12,24 +12,52 @@
 #include "jucer_DependencyPathPropertyComponent.h"
 #include "../Application/jucer_GlobalPreferences.h"
 
+//==============================================================================
+const String DependencyPath::vst2KeyName = "vst2Path";
+const String DependencyPath::vst3KeyName = "vst3Path";
+const String DependencyPath::rtasKeyName = "rtasPath";
+const String DependencyPath::aaxKeyName = "aaxPath";
+const String DependencyPath::androidSdkKeyName = "androidSdkPath";
+const String DependencyPath::androidNdkKeyName = "androidNdkPath";
+
+//==============================================================================
+
+DependencyPathValueSource::DependencyPathValueSource (const Value& projectSettingsPath,
+                                                      String globalSettingsKey,
+                                                      DependencyPathOS osThisSettingAppliesTo)
+  : projectSettingsValue (projectSettingsPath),
+    globalKey (globalSettingsKey),
+    os (osThisSettingAppliesTo),
+    globalSettingsValue (PathSettingsTab::getPathByKey (globalKey, os)),
+    fallbackValue (PathSettingsTab::getFallbackPathByKey (globalKey, os))
+{
+    globalSettingsValue.addListener (this);
+}
+
+bool DependencyPathValueSource::isValidPath() const
+{
+    // if we are on another OS than the one which this path setting is for,
+    // we have no way of knowing whether the path is valid - so just assume it is:
+    if (! appliesToThisOS())
+        return true;
+
+    return PathSettingsTab::checkPathByKey (globalKey, getValue().toString());
+}
 
 //==============================================================================
 DependencyPathPropertyComponent::DependencyPathPropertyComponent (const Value& value,
-                                                                  const String& propertyName,
-                                                                  const String& globalKeyName,
-                                                                  DependencyPathOS os)
-    : TextPropertyComponent (propertyName, 1024, false),
-      globalKey (globalKeyName),
-      pathValueSource (new DependencyPathValueSource (value,
-                                                     PathSettingsTab::getPathByKey (globalKeyName, os),
-                                                     PathSettingsTab::getFallbackPathByKey (globalKeyName, os),
-                                                     os)),
-      pathValue (pathValueSource)
+                                                                  const String& propertyName)
+try : TextPropertyComponent (propertyName, 1024, false),
+      pathValue (value),
+      pathValueSource (dynamic_cast<DependencyPathValueSource&> (pathValue.getValueSource()))
 {
-    bool initialValueIsEmpty = value.toString().isEmpty();
+    bool initialValueIsEmpty = ! pathValueSource.isUsingProjectSettings();
 
     getValue().referTo (pathValue);
 
+    // the following step is necessary because the above referTo() has internally called setValue(),
+    // which has set the project value to whatever is displayed in the label (this may be the
+    // global/fallback value). In this case we have to reset the project value to blank:
     if (initialValueIsEmpty)
         getValue().setValue (String::empty);
 
@@ -41,12 +69,19 @@ DependencyPathPropertyComponent::DependencyPathPropertyComponent (const Value& v
     else
         jassertfalse;
 }
+catch (const std::bad_cast&)
+{
+    // a DependencyPathPropertyComponent must be initialised with a Value
+    // that is referring to a DependencyPathValueSource!
+    jassertfalse;
+    throw;
+}
 
 void DependencyPathPropertyComponent::valueChanged (Value& value)
 {
     // this callback handles the update of this setting in case
     // the user changed the global preferences.
-    if (value.refersToSameSourceAs (pathValue) && pathValueSource->isUsingGlobalSettings())
+    if (value.refersToSameSourceAs (pathValue) && pathValueSource.isUsingGlobalSettings())
         textWasEdited();
 }
 
@@ -58,22 +93,12 @@ void DependencyPathPropertyComponent::textWasEdited()
 
 Colour DependencyPathPropertyComponent::getTextColourToDisplay() const
 {
-    if (! pathValueSource->isUsingProjectSettings())
-        return isValidPath() ? Colours::grey
-                             : Colours::lightpink;
+    if (! pathValueSource.isUsingProjectSettings())
+        return pathValueSource.isValidPath() ? Colours::grey
+                                              : Colours::lightpink;
 
-    return isValidPath() ? Colours::black
-                         : Colours::red;
-}
-
-bool DependencyPathPropertyComponent::isValidPath() const
-{
-    // if we are on another OS than the one which this path setting is for,
-    // we have no way of knowing whether the path is valid - so just assume it is:
-    if (! pathValueSource->appliesToThisOS())
-        return true;
-
-    return PathSettingsTab::checkPathByKey (globalKey, getValue().toString());
+    return pathValueSource.isValidPath() ? Colours::black
+                                          : Colours::red;
 }
 
 void DependencyPathPropertyComponent::labelTextChanged (Label*)
@@ -82,7 +107,7 @@ void DependencyPathPropertyComponent::labelTextChanged (Label*)
 
 void DependencyPathPropertyComponent::editorShown (Label* /*label*/, TextEditor& editor)
 {
-    if (! pathValueSource->isUsingProjectSettings())
+    if (! pathValueSource.isUsingProjectSettings())
         editor.setText (String::empty, dontSendNotification);
 }
 

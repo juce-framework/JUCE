@@ -53,6 +53,8 @@ public:
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
+
+        initialiseDependencyPathValues();
     }
 
     static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -1498,5 +1500,32 @@ private:
     {
         jassert (version >= 4);
         return "10." + String (version) + " SDK";
+    }
+
+    void initialiseDependencyPathValues()
+    {
+        vst2Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vstFolder),
+             DependencyPath::vst2KeyName,
+             DependencyPathOS::osx
+        ));
+
+        vst3Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vst3Folder),
+             DependencyPath::vst3KeyName,
+             DependencyPathOS::osx
+        ));
+
+        aaxPath = Value (new DependencyPathValueSource (
+             getSetting (Ids::aaxFolder),
+             DependencyPath::aaxKeyName,
+             DependencyPathOS::osx
+        ));
+
+        rtasPath = Value (new DependencyPathValueSource (
+             getSetting (Ids::rtasFolder),
+             DependencyPath::rtasKeyName,
+             DependencyPathOS::osx
+        ));
     }
 };

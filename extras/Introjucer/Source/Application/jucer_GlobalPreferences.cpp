@@ -12,13 +12,7 @@
 #include "jucer_GlobalPreferences.h"
 
 
-//==============================================================================
-const String PathSettingsTab::vst2KeyName = "vst2Path";
-const String PathSettingsTab::vst3KeyName = "vst3Path";
-const String PathSettingsTab::rtasKeyName = "rtasPath";
-const String PathSettingsTab::aaxKeyName = "aaxPath";
-const String PathSettingsTab::androidSdkKeyName = "androidSdkPath";
-const String PathSettingsTab::androidNdkKeyName = "androidNdkPath";
+
 
 //==============================================================================
 class AppearanceSettingsTab  : public GlobalPreferencesTab,
@@ -47,16 +41,16 @@ PathSettingsTab::PathSettingsTab (DependencyPathOS os)
 {
     const int maxChars = 1024;
 
-    vst2PathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (vst2KeyName, os), "VST SDK",  maxChars, false));
-    vst3PathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (vst3KeyName, os), "VST3 SDK", maxChars, false));
+    vst2PathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::vst2KeyName, os), "VST SDK",  maxChars, false));
+    vst3PathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::vst3KeyName, os), "VST3 SDK", maxChars, false));
 
    #if ! JUCE_LINUX
-    rtasPathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (rtasKeyName, os), "RTAS SDK", maxChars, false));
-    aaxPathComponent        = pathComponents.add (new TextPropertyComponent (getPathByKey (aaxKeyName, os),  "AAX SDK",  maxChars, false));
+    rtasPathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::rtasKeyName, os), "RTAS SDK", maxChars, false));
+    aaxPathComponent        = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::aaxKeyName, os),  "AAX SDK",  maxChars, false));
    #endif
 
-    androidSdkPathComponent = pathComponents.add (new TextPropertyComponent (getPathByKey (androidSdkKeyName, os), "Android SDK", maxChars, false));
-    androidNdkPathComponent = pathComponents.add (new TextPropertyComponent (getPathByKey (androidNdkKeyName, os), "Android NDK", maxChars, false));
+    androidSdkPathComponent = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::androidSdkKeyName, os), "Android SDK", maxChars, false));
+    androidNdkPathComponent = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::androidNdkKeyName, os), "Android NDK", maxChars, false));
 
     for (TextPropertyComponent** component = pathComponents.begin(); component != pathComponents.end(); ++component)
     {
@@ -80,12 +74,12 @@ void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textP
 
 String PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* component) const
 {
-    if (component == vst2PathComponent)       return vst2KeyName;
-    if (component == vst3PathComponent)       return vst3KeyName;
-    if (component == rtasPathComponent)       return rtasKeyName;
-    if (component == aaxPathComponent)        return aaxKeyName;
-    if (component == androidSdkPathComponent) return androidSdkKeyName;
-    if (component == androidNdkPathComponent) return androidNdkKeyName;
+    if (component == vst2PathComponent)       return DependencyPath::vst2KeyName;
+    if (component == vst3PathComponent)       return DependencyPath::vst3KeyName;
+    if (component == rtasPathComponent)       return DependencyPath::rtasKeyName;
+    if (component == aaxPathComponent)        return DependencyPath::aaxKeyName;
+    if (component == androidSdkPathComponent) return DependencyPath::androidSdkKeyName;
+    if (component == androidNdkPathComponent) return DependencyPath::androidNdkKeyName;
 
     // this property component does not have a key associated to it!
     jassertfalse;
@@ -128,11 +122,11 @@ Value& PathSettingsTab::getPathByKey (const String& key, DependencyPathOS os)
 //==============================================================================
 String PathSettingsTab::getFallbackPathByKey (const String& key, DependencyPathOS os)
 {
-    if (key == vst2KeyName || key == vst3KeyName)
+    if (key == DependencyPath::vst2KeyName || key == DependencyPath::vst3KeyName)
         return os == DependencyPath::windows ? "c:\\SDKs\\VST3 SDK"
                                              : "~/SDKs/VST3 SDK";
 
-    if (key == rtasKeyName)
+    if (key == DependencyPath::rtasKeyName)
     {
         if (os == DependencyPath::windows)   return "c:\\SDKs\\PT_80_SDK";
         if (os == DependencyPath::osx)       return "~/SDKs/PT_80_SDK";
@@ -142,7 +136,7 @@ String PathSettingsTab::getFallbackPathByKey (const String& key, DependencyPathO
         return String();
     }
 
-    if (key == aaxKeyName)
+    if (key == DependencyPath::aaxKeyName)
     {
         if (os == DependencyPath::windows)   return "c:\\SDKs\\AAX";
         if (os == DependencyPath::osx)       return "~/SDKs/AAX" ;
@@ -152,11 +146,11 @@ String PathSettingsTab::getFallbackPathByKey (const String& key, DependencyPathO
         return String();
     }
 
-    if (key == androidSdkKeyName)
+    if (key == DependencyPath::androidSdkKeyName)
         return os == DependencyPath::windows ? "c:\\SDKs\\android-sdk"
                                              : "~/Library/Android/sdk";
 
-    if (key == androidNdkKeyName)
+    if (key == DependencyPath::androidNdkKeyName)
         return os == DependencyPath::windows ? "c:\\SDKs\\android-ndk"
                                              : "~/Library/Android/ndk";
 
@@ -170,23 +164,23 @@ bool PathSettingsTab::checkPathByKey (const String& key, const String& path)
 {
     String fileToCheckFor;
 
-    if (key == vst2KeyName)
+    if (key == DependencyPath::vst2KeyName)
     {
         fileToCheckFor = "public.sdk/source/vst2.x/audioeffectx.h";
     }
-    else if (key == vst3KeyName)
+    else if (key == DependencyPath::vst3KeyName)
     {
         fileToCheckFor = "base/source/baseiids.cpp";
     }
-    else if (key == rtasKeyName)
+    else if (key == DependencyPath::rtasKeyName)
     {
         fileToCheckFor = "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses/CEffectProcessMIDI.cpp";
     }
-    else if (key == aaxKeyName)
+    else if (key == DependencyPath::aaxKeyName)
     {
         fileToCheckFor = "Interfaces/AAX_Exports.cpp";
     }
-    else if (key == androidSdkKeyName)
+    else if (key == DependencyPath::androidSdkKeyName)
     {
        #if JUCE_WINDOWS
         fileToCheckFor = "platform-tools/adb.exe";
@@ -194,7 +188,7 @@ bool PathSettingsTab::checkPathByKey (const String& key, const String& path)
         fileToCheckFor = "platform-tools/adb";
        #endif
     }
-    else if (key == androidNdkKeyName)
+    else if (key == DependencyPath::androidNdkKeyName)
     {
        #if JUCE_WINDOWS
         fileToCheckFor = "ndk-depends.exe";

@@ -33,6 +33,8 @@ public:
 
         projectGUID = createGUID (project.getProjectUID());
         updateOldSettings();
+
+        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -553,6 +555,33 @@ protected:
     {
         return FileHelpers::isAbsolutePath (filename) ? filename
                                                       : (".\\" + filename);
+    }
+
+    void initialiseDependencyPathValues()
+    {
+        vst2Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vstFolder),
+             DependencyPath::vst2KeyName,
+             DependencyPathOS::windows
+        ));
+
+        vst3Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vst3Folder),
+             DependencyPath::vst3KeyName,
+             DependencyPathOS::windows
+        ));
+
+        aaxPath = Value (new DependencyPathValueSource (
+             getSetting (Ids::aaxFolder),
+             DependencyPath::aaxKeyName,
+             DependencyPathOS::windows
+        ));
+
+        rtasPath = Value (new DependencyPathValueSource (
+             getSetting (Ids::rtasFolder),
+             DependencyPath::rtasKeyName,
+             DependencyPathOS::windows
+        ));
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase)

@@ -45,6 +45,8 @@ public:
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + "LinuxMakefile";
+
+        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -344,6 +346,21 @@ private:
     {
         return file.getFileNameWithoutExtension()
                 + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";
+    }
+
+    void initialiseDependencyPathValues()
+    {
+        vst2Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vstFolder),
+             DependencyPath::vst2KeyName,
+             DependencyPathOS::linux
+        ));
+
+        vst3Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vst3Folder),
+             DependencyPath::vst3KeyName,
+             DependencyPathOS::linux
+        ));
     }
 
     JUCE_DECLARE_NON_COPYABLE (MakefileProjectExporter)

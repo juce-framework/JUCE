@@ -47,9 +47,6 @@ public:
     static String getFallbackPathByKey (const String& key, DependencyPathOS);
     static bool checkPathByKey (const String& key,  const String& path);
 
-    const static String vst2KeyName, vst3KeyName, rtasKeyName, aaxKeyName,
-                        androidSdkKeyName, androidNdkKeyName;
-
 private:
     void textPropertyComponentChanged (TextPropertyComponent*) override;
 
