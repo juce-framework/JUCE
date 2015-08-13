@@ -55,7 +55,7 @@ class DependencyPathValueSource : public Value::ValueSource,
 public:
     DependencyPathValueSource (const Value& projectSettingsPath,
                                String globalSettingsKey,
-                               DependencyPathOS osThisSettingAppliesTo = DependencyPath::getThisOS());
+                               DependencyPathOS osThisSettingAppliesTo);
 
     /** This gets the currently used value, which may be either
         the project setting, the global setting, or the fallback value. */

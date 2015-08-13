@@ -64,17 +64,7 @@ public:
         if (getKeyAliasPassValue().getValue().isVoid())     getKeyAliasPassValue()  = "android";
         if (getCPP11EnabledValue().getValue().isVoid())     getCPP11EnabledValue()  = true;
 
-        sdkPath = Value (new DependencyPathValueSource (
-             getSetting (Ids::androidSDKPath),
-             DependencyPath::androidSdkKeyName,
-             DependencyPath::getThisOS()
-        ));
-
-        ndkPath = Value (new DependencyPathValueSource (
-             getSetting (Ids::androidNDKPath),
-             DependencyPath::androidNdkKeyName,
-             DependencyPath::getThisOS()
-        ));
+        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -759,6 +749,21 @@ private:
         resourceName->addTextElement (projectName);
 
         writeXmlOrThrow (strings, file, "utf-8", 100);
+    }
+
+    void initialiseDependencyPathValues()
+    {
+        sdkPath = Value (new DependencyPathValueSource (
+             getSetting (Ids::androidSDKPath),
+             DependencyPath::androidSdkKeyName,
+             DependencyPath::getThisOS()
+        ));
+
+        ndkPath = Value (new DependencyPathValueSource (
+             getSetting (Ids::androidNDKPath),
+             DependencyPath::androidNdkKeyName,
+             DependencyPath::getThisOS()
+        ));
     }
 
     //==============================================================================

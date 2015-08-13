@@ -89,6 +89,8 @@ public:
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + getTargetFolderName (os);
+
+        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -399,6 +401,38 @@ private:
     void setAddOption (XmlElement& xml, const String& nm, const String& value) const
     {
         xml.createNewChildElement ("Add")->setAttribute (nm, value);
+    }
+
+    void initialiseDependencyPathValues()
+    {
+        DependencyPathOS pathOS = isLinux() ? DependencyPathOS::linux : DependencyPathOS::windows;
+
+        vst2Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vstFolder),
+             DependencyPath::vst2KeyName,
+             pathOS
+        ));
+
+        vst3Path = Value (new DependencyPathValueSource (
+             getSetting (Ids::vst3Folder),
+             DependencyPath::vst3KeyName,
+             pathOS
+        ));
+
+        if (! isLinux())
+        {
+            aaxPath = Value (new DependencyPathValueSource (
+                 getSetting (Ids::aaxFolder),
+                 DependencyPath::aaxKeyName,
+                 pathOS
+            ));
+
+            rtasPath = Value (new DependencyPathValueSource (
+                 getSetting (Ids::rtasFolder),
+                 DependencyPath::rtasKeyName,
+                 pathOS
+            ));
+        }
     }
 
     CodeBlocksOS os;

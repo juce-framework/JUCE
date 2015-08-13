@@ -223,17 +223,6 @@ namespace
                                               exporter.rebaseFromProjectFolderToBuildTarget (path)
                                                       .toWindowsStyle());
     }
-
-    DependencyPathOS getDependencyPathOS (const ProjectExporter& exporter)
-    {
-        if (exporter.isWindows())   return DependencyPath::windows;
-        if (exporter.isXcode())     return DependencyPath::osx;
-        if (exporter.isLinux())     return DependencyPath::linux;
-
-        // cannot figure out which OS's dependency paths this exporter wants!!
-        jassertfalse;
-        return DependencyPath::unknown;
-    }
 }
 
 //==============================================================================
