@@ -51,10 +51,13 @@ try : TextPropertyComponent (propertyName, 1024, false),
       pathValue (value),
       pathValueSource (dynamic_cast<DependencyPathValueSource&> (pathValue.getValueSource()))
 {
-    bool initialValueIsEmpty = value.toString().isEmpty();
+    bool initialValueIsEmpty = ! pathValueSource.isUsingProjectSettings();
 
     getValue().referTo (pathValue);
 
+    // the following step is necessary because the above referTo() has internally called setValue(),
+    // which has set the project value to whatever is displayed in the label (this may be the
+    // global/fallback value). In this case we have to reset the project value to blank:
     if (initialValueIsEmpty)
         getValue().setValue (String::empty);
 
