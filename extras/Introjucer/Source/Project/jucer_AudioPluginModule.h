@@ -248,7 +248,7 @@ namespace VSTHelpers
         const String vstFormat (isVST3 ? "VST3" : "VST");
 
         props.add (new DependencyPathPropertyComponent (exporter.getVSTPathValue (isVST3),
-                                                       vstFormat + " Folder"),
+                                                        vstFormat + " Folder"),
                    "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
     }
 
