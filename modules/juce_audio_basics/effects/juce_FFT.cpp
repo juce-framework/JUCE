@@ -22,6 +22,10 @@
   ==============================================================================
 */
 
+#if JUCE_MINGW
+ #define alloca __builtin_alloca
+#endif
+
 // (For the moment, we'll implement a few local operators for this complex class - one
 // day we'll probably either have a juce complex class, or use the C++11 one)
 static FFT::Complex operator+ (FFT::Complex a, FFT::Complex b) noexcept     { FFT::Complex c = { a.r + b.r, a.i + b.i }; return c; }
