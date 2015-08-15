@@ -26,6 +26,10 @@
   ==============================================================================
 */
 
+#if JUCE_MINGW
+ #include <sys/time.h>
+#endif
+
 namespace TimeHelpers
 {
     static struct tm millisToLocal (const int64 millis) noexcept
@@ -65,10 +69,16 @@ namespace TimeHelpers
             time_t now = static_cast <time_t> (seconds);
 
            #if JUCE_WINDOWS
+            #if JUCE_MINGW
+              struct tm *timeinfo;
+              timeinfo = localtime(&now);
+              result = *timeinfo;
+            #else
             if (now >= 0 && now <= 0x793406fff)
                 localtime_s (&result, &now);
             else
                 zerostruct (result);
+            #endif
            #else
             localtime_r (&now, &result); // more thread-safe
            #endif
@@ -190,7 +200,7 @@ Time& Time::operator= (const Time& other) noexcept
 //==============================================================================
 int64 Time::currentTimeMillis() noexcept
 {
-   #if JUCE_WINDOWS
+   #if JUCE_WINDOWS && ! JUCE_MINGW
     struct _timeb t;
     _ftime_s (&t);
     return ((int64) t.time) * 1000 + t.millitm;
