@@ -310,7 +310,7 @@ public:
     void audioProcessorChanged (AudioProcessor*) override
     {
         if (componentHandler != nullptr)
-            componentHandler->restartComponent (Vst::kLatencyChanged & Vst::kParamValuesChanged);
+            componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged);
     }
 
     //==============================================================================
