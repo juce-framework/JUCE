@@ -405,33 +405,33 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        DependencyPathOS pathOS = isLinux() ? DependencyPathOS::linux : DependencyPathOS::windows;
+        DependencyPathOS pathOS = isLinux() ? DependencyPath::linux : DependencyPath::windows;
 
-        vst2Path = Value (new DependencyPathValueSource (
+        vst2Path.referTo (Value (new DependencyPathValueSource (
              getSetting (Ids::vstFolder),
              DependencyPath::vst2KeyName,
              pathOS
-        ));
+        )));
 
-        vst3Path = Value (new DependencyPathValueSource (
+        vst3Path.referTo (Value (new DependencyPathValueSource (
              getSetting (Ids::vst3Folder),
              DependencyPath::vst3KeyName,
              pathOS
-        ));
+        )));
 
         if (! isLinux())
         {
-            aaxPath = Value (new DependencyPathValueSource (
+            aaxPath.referTo (Value (new DependencyPathValueSource (
                  getSetting (Ids::aaxFolder),
                  DependencyPath::aaxKeyName,
                  pathOS
-            ));
+            )));
 
-            rtasPath = Value (new DependencyPathValueSource (
+            rtasPath.referTo (Value (new DependencyPathValueSource (
                  getSetting (Ids::rtasFolder),
                  DependencyPath::rtasKeyName,
                  pathOS
-            ));
+            )));
         }
     }
 
