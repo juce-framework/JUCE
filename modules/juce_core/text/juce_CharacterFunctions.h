@@ -44,6 +44,10 @@
  #define JUCE_NATIVE_WCHAR_IS_UTF32     1
 #endif
 
+#if JUCE_MINGW
+ #include <sys/types.h>
+#endif
+
 #if JUCE_NATIVE_WCHAR_IS_UTF32 || DOXYGEN
  /** A platform-independent 32-bit unicode character type. */
  typedef wchar_t        juce_wchar;

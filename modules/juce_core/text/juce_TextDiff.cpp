@@ -26,6 +26,10 @@
   ==============================================================================
 */
 
+#if JUCE_MINGW
+ #define alloca __builtin_alloca
+#endif
+
 struct TextDiffHelpers
 {
     enum { minLengthToMatch = 3,
