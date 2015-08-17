@@ -32,7 +32,7 @@ struct KeyFileUtils
     static String encryptXML (const XmlElement& xml, RSAKey privateKey)
     {
         MemoryOutputStream text;
-        text << xml.createDocument (String::empty, true);
+        text << xml.createDocument (StringRef(), true);
 
         BigInteger val;
         val.loadFromMemoryBlock (text.getMemoryBlock());
@@ -50,7 +50,7 @@ struct KeyFileUtils
 
         StringArray lines;
         lines.add (comment);
-        lines.add (String::empty);
+        lines.add (String());
 
         const int charsPerLine = 70;
         while (asHex.length() > 0)
@@ -59,7 +59,7 @@ struct KeyFileUtils
             asHex = asHex.substring (charsPerLine);
         }
 
-        lines.add (String::empty);
+        lines.add (String());
 
         return lines.joinIntoString ("\r\n");
     }
@@ -78,7 +78,11 @@ struct KeyFileUtils
         if (! val.isZero())
         {
             key.applyToValue (val);
-            xml = XmlDocument::parse (val.toMemoryBlock().toString());
+
+            const MemoryBlock mb (val.toMemoryBlock());
+
+            if (CharPointer_UTF8::isValidString (static_cast<const char*> (mb.getData()), (int) mb.getSize()))
+                xml = XmlDocument::parse (mb.toString());
         }
 
         return xml != nullptr ? *xml : XmlElement("key");
@@ -92,7 +96,7 @@ struct KeyFileUtils
     static StringArray getMachineNumbers (XmlElement xml)
     {
         StringArray numbers;
-        numbers.addTokens (xml.getStringAttribute ("mach"), ",; ", String::empty);
+        numbers.addTokens (xml.getStringAttribute ("mach"), ",; ", StringRef());
         numbers.trim();
         numbers.removeEmptyStrings();
         return numbers;
