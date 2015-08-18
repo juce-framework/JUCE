@@ -806,6 +806,7 @@ EXCLUDE                = ../modules/juce_graphics/image_formats \
                          ../modules/juce_audio_formats/juce_audio_formats.h \
                          ../modules/juce_audio_formats/juce_audio_formats.cpp \
                          ../modules/juce_audio_plugin_client/juce_audio_plugin_client.h \
+                         ../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses \
                          ../modules/juce_audio_processors/juce_audio_processors.h \
                          ../modules/juce_audio_processors/juce_audio_processors.cpp \
                          ../modules/juce_audio_utils/juce_audio_utils.h \

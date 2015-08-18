@@ -64,8 +64,8 @@
     juce website for more info on how to get them:
     http://www.juce.com/forum/topic/aus-xcode
 */
-#include "AUMIDIEffectBase.h"
-#include "MusicDeviceBase.h"
+#include "CoreAudioUtilityClasses/AUMIDIEffectBase.h"
+#include "CoreAudioUtilityClasses/MusicDeviceBase.h"
 #undef Point
 #undef Component
 
@@ -84,7 +84,7 @@
 #if BUILD_AU_CARBON_UI
  #undef Button
  #define Point CarbonDummyPointName
- #include "AUCarbonViewBase.h"
+ #include "CoreAudioUtilityClasses/AUCarbonViewBase.h"
  #undef Point
 #endif
 
@@ -1647,7 +1647,7 @@ JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
 #endif
 
 #if ! JUCE_DISABLE_AU_FACTORY_ENTRY
- #include "AUPlugInDispatch.cpp"
+ #include "CoreAudioUtilityClasses/AUPlugInDispatch.cpp"
 #endif
 
 #endif
