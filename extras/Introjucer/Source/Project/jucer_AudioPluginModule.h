@@ -48,7 +48,6 @@ namespace
     Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
     Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
     Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
-    Value getPluginAUSDKLocation (Project& project)               { return project.getProjectValue ("pluginAUSDKLocation"); }
     Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
     Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
