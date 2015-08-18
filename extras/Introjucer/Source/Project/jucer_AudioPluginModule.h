@@ -30,34 +30,34 @@
 //==============================================================================
 namespace
 {
-    Value shouldBuildVST (Project& project)                       { return project.getProjectValue ("buildVST"); }
-    Value shouldBuildVST3 (Project& project)                      { return project.getProjectValue ("buildVST3"); }
-    Value shouldBuildAU (Project& project)                        { return project.getProjectValue ("buildAU"); }
-    Value shouldBuildRTAS (Project& project)                      { return project.getProjectValue ("buildRTAS"); }
-    Value shouldBuildAAX (Project& project)                       { return project.getProjectValue ("buildAAX"); }
+    inline Value shouldBuildVST (Project& project)                       { return project.getProjectValue ("buildVST"); }
+    inline Value shouldBuildVST3 (Project& project)                      { return project.getProjectValue ("buildVST3"); }
+    inline Value shouldBuildAU (Project& project)                        { return project.getProjectValue ("buildAU"); }
+    inline Value shouldBuildRTAS (Project& project)                      { return project.getProjectValue ("buildRTAS"); }
+    inline Value shouldBuildAAX (Project& project)                       { return project.getProjectValue ("buildAAX"); }
 
-    Value getPluginName (Project& project)                        { return project.getProjectValue ("pluginName"); }
-    Value getPluginDesc (Project& project)                        { return project.getProjectValue ("pluginDesc"); }
-    Value getPluginManufacturer (Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
-    Value getPluginManufacturerCode (Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
-    Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
-    Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
-    Value getPluginIsSynth (Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
-    Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
-    Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
-    Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
-    Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
-    Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
-    Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
-    Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
-    Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
-    Value getPluginRTASBypassDisabled (Project& project)          { return project.getProjectValue ("pluginRTASDisableBypass"); }
-    Value getPluginRTASMultiMonoDisabled (Project& project)       { return project.getProjectValue ("pluginRTASDisableMultiMono"); }
-    Value getPluginAAXCategory (Project& project)                 { return project.getProjectValue ("pluginAAXCategory"); }
-    Value getPluginAAXBypassDisabled (Project& project)           { return project.getProjectValue ("pluginAAXDisableBypass"); }
-    Value getPluginAAXMultiMonoDisabled (Project& project)        { return project.getProjectValue ("pluginAAXDisableMultiMono"); }
+    inline Value getPluginName (Project& project)                        { return project.getProjectValue ("pluginName"); }
+    inline Value getPluginDesc (Project& project)                        { return project.getProjectValue ("pluginDesc"); }
+    inline Value getPluginManufacturer (Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
+    inline Value getPluginManufacturerCode (Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
+    inline Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
+    inline Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
+    inline Value getPluginIsSynth (Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
+    inline Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
+    inline Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
+    inline Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
+    inline Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
+    inline Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
+    inline Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
+    inline Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
+    inline Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
+    inline Value getPluginRTASBypassDisabled (Project& project)          { return project.getProjectValue ("pluginRTASDisableBypass"); }
+    inline Value getPluginRTASMultiMonoDisabled (Project& project)       { return project.getProjectValue ("pluginRTASDisableMultiMono"); }
+    inline Value getPluginAAXCategory (Project& project)                 { return project.getProjectValue ("pluginAAXCategory"); }
+    inline Value getPluginAAXBypassDisabled (Project& project)           { return project.getProjectValue ("pluginAAXDisableBypass"); }
+    inline Value getPluginAAXMultiMonoDisabled (Project& project)        { return project.getProjectValue ("pluginAAXDisableMultiMono"); }
 
-    String getPluginRTASCategoryCode (Project& project)
+    inline String getPluginRTASCategoryCode (Project& project)
     {
         if (static_cast <bool> (getPluginIsSynth (project).getValue()))
             return "ePlugInCategory_SWGenerators";
@@ -69,7 +69,7 @@ namespace
         return s;
     }
 
-    String getAUMainTypeString (Project& project)
+    inline String getAUMainTypeString (Project& project)
     {
         String s (getPluginAUMainType (project).toString());
 
@@ -83,7 +83,7 @@ namespace
         return s;
     }
 
-    String getAUMainTypeCode (Project& project)
+    inline String getAUMainTypeCode (Project& project)
     {
         String s (getPluginAUMainType (project).toString());
 
@@ -97,7 +97,7 @@ namespace
         return s;
     }
 
-    String getPluginVSTCategoryString (Project& project)
+    inline String getPluginVSTCategoryString (Project& project)
     {
         String s (getPluginVSTCategory (project).toString().trim());
 
@@ -107,7 +107,7 @@ namespace
         return s;
     }
 
-    int countMaxPluginChannels (const String& configString, bool isInput)
+    inline int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
         configs.addTokens (configString, ", {}", StringRef());
@@ -122,22 +122,22 @@ namespace
         return maxVal;
     }
 
-    String valueToBool (const Value& v)
+    inline String valueToBool (const Value& v)
     {
         return static_cast<bool> (v.getValue()) ? "1" : "0";
     }
 
-    String valueToStringLiteral (const var& v)
+    inline String valueToStringLiteral (const var& v)
     {
         return CppTokeniserFunctions::addEscapeChars (v.toString()).quoted();
     }
 
-    String valueToCharLiteral (const var& v)
+    inline String valueToCharLiteral (const var& v)
     {
         return CppTokeniserFunctions::addEscapeChars (v.toString().trim().substring (0, 4)).quoted ('\'');
     }
 
-    void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
+    inline void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
     {
         Project& project = projectSaver.project;
 
@@ -202,21 +202,21 @@ namespace
         projectSaver.setExtraAppConfigFileContent (mem.toString());
     }
 
-    static void fixMissingXcodePostBuildScript (ProjectExporter& exporter)
+    inline static void fixMissingXcodePostBuildScript (ProjectExporter& exporter)
     {
         if (exporter.isXcode() && exporter.settings [Ids::postbuildCommand].toString().isEmpty())
             exporter.getSetting (Ids::postbuildCommand) = String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt,
                                                                             BinaryData::AudioPluginXCodeScript_txtSize);
     }
 
-    String createEscapedStringForVersion (ProjectExporter& exporter, const String& text)
+    inline String createEscapedStringForVersion (ProjectExporter& exporter, const String& text)
     {
         // (VS10 automatically adds escape characters to the quotes for this definition)
         return exporter.getVisualStudioVersion() < 10 ? CppTokeniserFunctions::addEscapeChars (text.quoted())
                                                       : CppTokeniserFunctions::addEscapeChars (text).quoted();
     }
 
-    String createRebasedPath (ProjectExporter& exporter, const RelativePath& path)
+    inline String createRebasedPath (ProjectExporter& exporter, const RelativePath& path)
     {
         return createEscapedStringForVersion (exporter,
                                               exporter.rebaseFromProjectFolderToBuildTarget (path)
