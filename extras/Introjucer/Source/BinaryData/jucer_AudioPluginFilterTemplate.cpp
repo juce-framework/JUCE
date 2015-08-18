@@ -26,30 +26,6 @@ const String FILTERCLASSNAME::getName() const
     return JucePlugin_Name;
 }
 
-int FILTERCLASSNAME::getNumParameters()
-{
-    return 0;
-}
-
-float FILTERCLASSNAME::getParameter (int index)
-{
-    return 0.0f;
-}
-
-void FILTERCLASSNAME::setParameter (int index, float newValue)
-{
-}
-
-const String FILTERCLASSNAME::getParameterName (int index)
-{
-    return String();
-}
-
-const String FILTERCLASSNAME::getParameterText (int index)
-{
-    return String();
-}
-
 const String FILTERCLASSNAME::getInputChannelName (int channelIndex) const
 {
     return String (channelIndex + 1);
