@@ -77,7 +77,7 @@ public:
                 if (! other.isSelected (selectedItems.getReference (i)))
                     itemDeselected (selectedItems.remove (i));
 
-            for (SelectableItemType* i = other.selectedItems.begin(), *e = other.selectedItems.begin(); i != e; ++i)
+            for (SelectableItemType* i = other.selectedItems.begin(), *e = other.selectedItems.end(); i != e; ++i)
             {
                 if (! isSelected (*i))
                 {
