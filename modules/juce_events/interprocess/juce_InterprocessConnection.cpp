@@ -91,13 +91,13 @@ bool InterprocessConnection::connectToPipe (const String& pipeName, const int ti
     return false;
 }
 
-bool InterprocessConnection::createPipe (const String& pipeName, const int timeoutMs)
+bool InterprocessConnection::createPipe (const String& pipeName, const int timeoutMs, bool mustNotExist)
 {
     disconnect();
 
     ScopedPointer<NamedPipe> newPipe (new NamedPipe());
 
-    if (newPipe->createNewPipe (pipeName))
+    if (newPipe->createNewPipe (pipeName, mustNotExist))
     {
         const ScopedLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = timeoutMs;

@@ -41,7 +41,7 @@ bool NamedPipe::openExisting (const String& pipeName)
 
     ScopedWriteLock sl (lock);
     currentPipeName = pipeName;
-    return openInternal (pipeName, false);
+    return openInternal (pipeName, false, false);
 }
 
 bool NamedPipe::isOpen() const
@@ -49,13 +49,13 @@ bool NamedPipe::isOpen() const
     return pimpl != nullptr;
 }
 
-bool NamedPipe::createNewPipe (const String& pipeName)
+bool NamedPipe::createNewPipe (const String& pipeName, bool mustNotExist)
 {
     close();
 
     ScopedWriteLock sl (lock);
     currentPipeName = pipeName;
-    return openInternal (pipeName, true);
+    return openInternal (pipeName, true, mustNotExist);
 }
 
 String NamedPipe::getName() const
