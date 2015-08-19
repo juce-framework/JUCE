@@ -63,7 +63,7 @@ private:
     ATOM atom;
     HWND hwnd;
 
-    LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) atom; }
+    LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) (pointer_sized_uint) atom; }
 };
 
 //==============================================================================
