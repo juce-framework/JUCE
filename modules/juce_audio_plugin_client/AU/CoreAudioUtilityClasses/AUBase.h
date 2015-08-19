@@ -47,6 +47,8 @@
 #ifndef __AUBase_h__
 #define __AUBase_h__
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 #include <TargetConditionals.h>
 
 #if TARGET_OS_MAC

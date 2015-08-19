@@ -47,6 +47,8 @@
 #ifndef __AUCarbonViewBase_h__
 #define __AUCarbonViewBase_h__
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 #include <vector>
 #include "AUCarbonViewControl.h"
 #include "ComponentBase.h"

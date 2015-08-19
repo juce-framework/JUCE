@@ -47,6 +47,8 @@
 #if !defined(__CADebugMacros_h__)
 #define __CADebugMacros_h__
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 //=============================================================================
 //	Includes
 //=============================================================================
