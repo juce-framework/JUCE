@@ -506,7 +506,7 @@ public:
         logger = nullptr;
     }
 
-    virtual bool doExtraInitialisation() {}
+    virtual bool doExtraInitialisation()  { return true; }
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
 
    #if JUCE_LINUX
