@@ -73,11 +73,15 @@ public:
 
         icons = new Icons();
 
+        if (! doExtraInitialisation())
+        {
+            quit();
+            return;
+        }
+
         initCommandManager();
 
         menuModel = new MainMenuModel();
-
-        doExtraInitialisation();
 
         settings->appearance.refreshPresetSchemeList();
 
@@ -502,7 +506,7 @@ public:
         logger = nullptr;
     }
 
-    virtual void doExtraInitialisation() {}
+    virtual bool doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
 
    #if JUCE_LINUX
