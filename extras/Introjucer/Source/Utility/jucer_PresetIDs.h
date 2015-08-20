@@ -55,6 +55,10 @@ namespace Ids
     DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
+    DECLARE_ID (vst2Path);
+    DECLARE_ID (vst3Path);
+    DECLARE_ID (rtasPath);
+    DECLARE_ID (aaxPath);
     DECLARE_ID (flags);
     DECLARE_ID (line);
     DECLARE_ID (index);

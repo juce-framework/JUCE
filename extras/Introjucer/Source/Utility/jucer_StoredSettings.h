@@ -42,13 +42,6 @@ public:
     void reload();
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { changed(); }
-    void valueTreeChildAdded (ValueTree&, ValueTree&) override              { changed(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override       { changed(); }
-    void valueTreeChildOrderChanged (ValueTree&, int, int) override         { changed(); }
-    void valueTreeParentChanged (ValueTree&) override                       { changed(); }
-
-    //==============================================================================
     RecentlyOpenedFilesList recentFiles;
 
     Array<File> getLastProjects();
@@ -71,11 +64,14 @@ public:
 
     StringArray monospacedFontNames;
 
-    ValueTree projectDefaults;
-    std::map<String, Value> pathValues;
+    //==============================================================================
+    Value getGlobalPath (const Identifier& key, DependencyPathOS);
+    String getFallbackPath (const Identifier& key, DependencyPathOS);
+    bool isGlobalPathValid (const Identifier& key, const String& path);
 
 private:
     OwnedArray<PropertiesFile> propertyFiles;
+    ValueTree projectDefaults;
 
     void changed()
     {
@@ -90,6 +86,13 @@ private:
 
     void loadSwatchColours();
     void saveSwatchColours();
+
+    //==============================================================================
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { changed(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override              { changed(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override       { changed(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override         { changed(); }
+    void valueTreeParentChanged (ValueTree&) override                       { changed(); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings)
 };

@@ -216,3 +216,104 @@ void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, con
 {
     getAppSettings().swatchColours.set (index, newColour);
 }
+
+//==============================================================================
+static bool doesSDKPathContainFile (const String& path, const String& fileToCheckFor)
+{
+    return File::getCurrentWorkingDirectory().getChildFile( path + "/" + fileToCheckFor).existsAsFile();
+}
+
+Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
+{
+    Value v (projectDefaults.getPropertyAsValue (key, nullptr));
+
+    if (v.toString().isEmpty())
+        v = getFallbackPath (key, os);
+
+    return v;
+}
+
+String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS os)
+{
+    if (key == Ids::vst2Path || key == Ids::vst3Path)
+        return os == TargetOS::windows ? "c:\\SDKs\\VST3 SDK"
+                                       : "~/SDKs/VST3 SDK";
+
+    if (key == Ids::rtasPath)
+    {
+        if (os == TargetOS::windows)   return "c:\\SDKs\\PT_80_SDK";
+        if (os == TargetOS::osx)       return "~/SDKs/PT_80_SDK";
+
+        // no RTAS on this OS!
+        jassertfalse;
+        return String();
+    }
+
+    if (key == Ids::aaxPath)
+    {
+        if (os == TargetOS::windows)   return "c:\\SDKs\\AAX";
+        if (os == TargetOS::osx)       return "~/SDKs/AAX" ;
+
+        // no AAX on this OS!
+        jassertfalse;
+        return String();
+    }
+
+    if (key == Ids::androidSDKPath)
+        return os == TargetOS::windows ? "c:\\SDKs\\android-sdk"
+                                       : "~/Library/Android/sdk";
+
+    if (key == Ids::androidNDKPath)
+        return os == TargetOS::windows ? "c:\\SDKs\\android-ndk"
+                                       : "~/Library/Android/ndk";
+
+    // didn't recognise the key provided!
+    jassertfalse;
+    return String();
+}
+
+bool StoredSettings::isGlobalPathValid (const Identifier& key, const String& path)
+{
+    String fileToCheckFor;
+
+    if (key == Ids::vst2Path)
+    {
+        fileToCheckFor = "public.sdk/source/vst2.x/audioeffectx.h";
+    }
+    else if (key == Ids::vst3Path)
+    {
+        fileToCheckFor = "base/source/baseiids.cpp";
+    }
+    else if (key == Ids::rtasPath)
+    {
+        fileToCheckFor = "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses/CEffectProcessMIDI.cpp";
+    }
+    else if (key == Ids::aaxPath)
+    {
+        fileToCheckFor = "Interfaces/AAX_Exports.cpp";
+    }
+    else if (key == Ids::androidSDKPath)
+    {
+       #if JUCE_WINDOWS
+        fileToCheckFor = "platform-tools/adb.exe";
+       #else
+        fileToCheckFor = "platform-tools/adb";
+       #endif
+    }
+    else if (key == Ids::androidNDKPath)
+    {
+       #if JUCE_WINDOWS
+        fileToCheckFor = "ndk-depends.exe";
+       #else
+        fileToCheckFor = "ndk-depends";
+       #endif
+    }
+    else
+    {
+        // didn't recognise the key provided!
+        jassertfalse;
+        return false;
+    }
+
+    return doesSDKPathContainFile (path, fileToCheckFor);
+}

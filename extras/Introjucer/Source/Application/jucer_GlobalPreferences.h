@@ -43,14 +43,10 @@ public:
 
     void resized() override;
 
-    static Value& getPathByKey (const String& key, DependencyPathOS);
-    static String getFallbackPathByKey (const String& key, DependencyPathOS);
-    static bool checkPathByKey (const String& key,  const String& path);
-
 private:
     void textPropertyComponentChanged (TextPropertyComponent*) override;
 
-    String getKeyForPropertyComponent (TextPropertyComponent*) const;
+    Identifier getKeyForPropertyComponent (TextPropertyComponent*) const;
 
     OwnedArray<TextPropertyComponent> pathComponents;
 

@@ -405,33 +405,16 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        DependencyPathOS pathOS = isLinux() ? DependencyPath::linux : DependencyPath::windows;
+        DependencyPathOS pathOS = isLinux() ? TargetOS::linux
+                                            : TargetOS::windows;
 
-        vst2Path.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::vstFolder),
-             DependencyPath::vst2KeyName,
-             pathOS
-        )));
-
-        vst3Path.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::vst3Folder),
-             DependencyPath::vst3KeyName,
-             pathOS
-        )));
+        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder), Ids::vst2Path, pathOS)));
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
 
         if (! isLinux())
         {
-            aaxPath.referTo (Value (new DependencyPathValueSource (
-                 getSetting (Ids::aaxFolder),
-                 DependencyPath::aaxKeyName,
-                 pathOS
-            )));
-
-            rtasPath.referTo (Value (new DependencyPathValueSource (
-                 getSetting (Ids::rtasFolder),
-                 DependencyPath::rtasKeyName,
-                 pathOS
-            )));
+            aaxPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder), Ids::aaxPath, pathOS)));
+            rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, pathOS)));
         }
     }
 

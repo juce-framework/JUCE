@@ -25,7 +25,34 @@
 #ifndef JUCER_COMMONHEADERS_H_INCLUDED
 #define JUCER_COMMONHEADERS_H_INCLUDED
 
+//==============================================================================
+struct TargetOS
+{
+    enum OS
+    {
+        windows = 0,
+        osx,
+        linux,
+        unknown
+    };
 
+    static OS getThisOS() noexcept
+    {
+       #if JUCE_WINDOWS
+        return windows;
+       #elif JUCE_MAC
+        return osx;
+       #elif JUCE_LINUX
+        return linux;
+       #else
+        return unknown;
+       #endif
+    }
+};
+
+typedef TargetOS::OS DependencyPathOS;
+
+//==============================================================================
 #include "../Utility/jucer_StoredSettings.h"
 #include "../Utility/jucer_Icons.h"
 #include "../Utility/jucer_MiscUtilities.h"

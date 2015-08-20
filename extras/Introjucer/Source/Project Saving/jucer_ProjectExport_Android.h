@@ -753,17 +753,13 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        sdkPath.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::androidSDKPath),
-             DependencyPath::androidSdkKeyName,
-             DependencyPath::getThisOS()
-        )));
+        sdkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath),
+                                                               Ids::androidSDKPath,
+                                                               TargetOS::getThisOS())));
 
-        ndkPath.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::androidNDKPath),
-             DependencyPath::androidNdkKeyName,
-             DependencyPath::getThisOS()
-        )));
+        ndkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath),
+                                                               Ids::androidNDKPath,
+                                                               TargetOS::getThisOS())));
     }
 
     //==============================================================================

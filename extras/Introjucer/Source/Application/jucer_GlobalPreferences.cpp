@@ -29,28 +29,22 @@ public:
 };
 
 //==============================================================================
-namespace PathSettingsHelpers
-{
-    bool checkSdkPathContainsFile (const String& path, const String& fileToCheckFor)
-    {
-        return File::getCurrentWorkingDirectory().getChildFile( path + "/" + fileToCheckFor).existsAsFile();
-    }
-}
-
 PathSettingsTab::PathSettingsTab (DependencyPathOS os)
 {
     const int maxChars = 1024;
 
-    vst2PathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::vst2KeyName, os), "VST SDK",  maxChars, false));
-    vst3PathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::vst3KeyName, os), "VST3 SDK", maxChars, false));
+    StoredSettings& settings = getAppSettings();
+
+    vst2PathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::vst2Path, os), "VST SDK",  maxChars, false));
+    vst3PathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::vst3Path, os), "VST3 SDK", maxChars, false));
 
    #if ! JUCE_LINUX
-    rtasPathComponent       = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::rtasKeyName, os), "RTAS SDK", maxChars, false));
-    aaxPathComponent        = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::aaxKeyName, os),  "AAX SDK",  maxChars, false));
+    rtasPathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::rtasPath, os), "RTAS SDK", maxChars, false));
+    aaxPathComponent        = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::aaxPath, os),  "AAX SDK",  maxChars, false));
    #endif
 
-    androidSdkPathComponent = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::androidSdkKeyName, os), "Android SDK", maxChars, false));
-    androidNdkPathComponent = pathComponents.add (new TextPropertyComponent (getPathByKey (DependencyPath::androidNdkKeyName, os), "Android NDK", maxChars, false));
+    androidSdkPathComponent = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::androidSDKPath, os), "Android SDK", maxChars, false));
+    androidNdkPathComponent = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::androidNDKPath, os), "Android NDK", maxChars, false));
 
     for (TextPropertyComponent** component = pathComponents.begin(); component != pathComponents.end(); ++component)
     {
@@ -66,20 +60,23 @@ PathSettingsTab::~PathSettingsTab()
 
 void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textPropertyComponent)
 {
-    String keyName = getKeyForPropertyComponent (textPropertyComponent);
+    Identifier keyName = getKeyForPropertyComponent (textPropertyComponent);
 
-    Colour textColour = checkPathByKey (keyName, textPropertyComponent->getText()) ? Colours::black : Colours::red;
+    Colour textColour = getAppSettings().isGlobalPathValid (keyName, textPropertyComponent->getText())
+                            ? Colours::black
+                            : Colours::red;
+
     textPropertyComponent->setColour (TextPropertyComponent::textColourId, textColour);
 }
 
-String PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* component) const
+Identifier PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* component) const
 {
-    if (component == vst2PathComponent)       return DependencyPath::vst2KeyName;
-    if (component == vst3PathComponent)       return DependencyPath::vst3KeyName;
-    if (component == rtasPathComponent)       return DependencyPath::rtasKeyName;
-    if (component == aaxPathComponent)        return DependencyPath::aaxKeyName;
-    if (component == androidSdkPathComponent) return DependencyPath::androidSdkKeyName;
-    if (component == androidNdkPathComponent) return DependencyPath::androidNdkKeyName;
+    if (component == vst2PathComponent)       return Ids::vst2Path;
+    if (component == vst3PathComponent)       return Ids::vst3Path;
+    if (component == rtasPathComponent)       return Ids::rtasPath;
+    if (component == aaxPathComponent)        return Ids::aaxPath;
+    if (component == androidSdkPathComponent) return Ids::androidSDKPath;
+    if (component == androidNdkPathComponent) return Ids::androidNDKPath;
 
     // this property component does not have a key associated to it!
     jassertfalse;
@@ -107,104 +104,6 @@ void PathSettingsTab::resized()
     }
 }
 
-//==============================================================================
-Value& PathSettingsTab::getPathByKey (const String& key, DependencyPathOS os)
-{
-    getAppSettings().pathValues[key].referTo (getAppSettings().projectDefaults.getPropertyAsValue (key, nullptr));
-    Value& value = getAppSettings().pathValues[key];
-
-    if (value.toString().isEmpty())
-        value = getFallbackPathByKey (key, os);
-
-    return value;
-}
-
-//==============================================================================
-String PathSettingsTab::getFallbackPathByKey (const String& key, DependencyPathOS os)
-{
-    if (key == DependencyPath::vst2KeyName || key == DependencyPath::vst3KeyName)
-        return os == DependencyPath::windows ? "c:\\SDKs\\VST3 SDK"
-                                             : "~/SDKs/VST3 SDK";
-
-    if (key == DependencyPath::rtasKeyName)
-    {
-        if (os == DependencyPath::windows)   return "c:\\SDKs\\PT_80_SDK";
-        if (os == DependencyPath::osx)       return "~/SDKs/PT_80_SDK";
-
-        // no RTAS on this OS!
-        jassertfalse;
-        return String();
-    }
-
-    if (key == DependencyPath::aaxKeyName)
-    {
-        if (os == DependencyPath::windows)   return "c:\\SDKs\\AAX";
-        if (os == DependencyPath::osx)       return "~/SDKs/AAX" ;
-
-        // no RTAS on this OS!
-        jassertfalse;
-        return String();
-    }
-
-    if (key == DependencyPath::androidSdkKeyName)
-        return os == DependencyPath::windows ? "c:\\SDKs\\android-sdk"
-                                             : "~/Library/Android/sdk";
-
-    if (key == DependencyPath::androidNdkKeyName)
-        return os == DependencyPath::windows ? "c:\\SDKs\\android-ndk"
-                                             : "~/Library/Android/ndk";
-
-    // didn't recognise the key provided!
-    jassertfalse;
-    return String();
-}
-
-//==============================================================================
-bool PathSettingsTab::checkPathByKey (const String& key, const String& path)
-{
-    String fileToCheckFor;
-
-    if (key == DependencyPath::vst2KeyName)
-    {
-        fileToCheckFor = "public.sdk/source/vst2.x/audioeffectx.h";
-    }
-    else if (key == DependencyPath::vst3KeyName)
-    {
-        fileToCheckFor = "base/source/baseiids.cpp";
-    }
-    else if (key == DependencyPath::rtasKeyName)
-    {
-        fileToCheckFor = "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses/CEffectProcessMIDI.cpp";
-    }
-    else if (key == DependencyPath::aaxKeyName)
-    {
-        fileToCheckFor = "Interfaces/AAX_Exports.cpp";
-    }
-    else if (key == DependencyPath::androidSdkKeyName)
-    {
-       #if JUCE_WINDOWS
-        fileToCheckFor = "platform-tools/adb.exe";
-       #else
-        fileToCheckFor = "platform-tools/adb";
-       #endif
-    }
-    else if (key == DependencyPath::androidNdkKeyName)
-    {
-       #if JUCE_WINDOWS
-        fileToCheckFor = "ndk-depends.exe";
-       #else
-        fileToCheckFor = "ndk-depends";
-       #endif
-    }
-    else
-    {
-        // didn't recognise the key provided!
-        jassertfalse;
-        return false;
-    }
-
-    return PathSettingsHelpers::checkSdkPathContainsFile (path, fileToCheckFor);
-}
 
 //==============================================================================
 struct AppearanceEditor
@@ -469,7 +368,7 @@ String AppearanceSettingsTab::getName() const noexcept
 GlobalPreferencesComponent::GlobalPreferencesComponent()
    : TabbedComponent (TabbedButtonBar::TabsAtTop)
 {
-    preferenceTabs.add (new PathSettingsTab (DependencyPath::getThisOS()));
+    preferenceTabs.add (new PathSettingsTab (TargetOS::getThisOS()));
     preferenceTabs.add (new AppearanceSettingsTab);
 
     for (GlobalPreferencesTab** tab = preferenceTabs.begin(); tab != preferenceTabs.end(); ++tab)

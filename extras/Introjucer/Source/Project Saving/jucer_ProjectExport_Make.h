@@ -350,17 +350,13 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        vst2Path.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::vstFolder),
-             DependencyPath::vst2KeyName,
-             DependencyPath::linux
-        )));
+        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),
+                                                                Ids::vst2Path,
+                                                                TargetOS::linux)));
 
-        vst3Path.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::vst3Folder),
-             DependencyPath::vst3KeyName,
-             DependencyPath::linux
-        )));
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path,
+                                                                TargetOS::linux)));
     }
 
     JUCE_DECLARE_NON_COPYABLE (MakefileProjectExporter)

@@ -11,36 +11,6 @@
 #ifndef JUCER_DEPENDENCYPATHPROPERTYCOMPONENT_H_INCLUDED
 #define JUCER_DEPENDENCYPATHPROPERTYCOMPONENT_H_INCLUDED
 
-//==============================================================================
-class DependencyPath
-{
-public:
-    enum OS
-    {
-        windows = 0,
-        osx,
-        linux,
-        unknown
-    };
-
-    static OS getThisOS()
-    {
-       #if JUCE_WINDOWS
-        return DependencyPath::windows;
-       #elif JUCE_MAC
-        return DependencyPath::osx;
-       #elif JUCE_LINUX
-        return DependencyPath::linux;
-       #else
-        return DependencyPath::unknown;
-       #endif
-    }
-
-    const static String vst2KeyName, vst3KeyName, rtasKeyName, aaxKeyName,
-                        androidSdkKeyName, androidNdkKeyName;
-};
-
-typedef DependencyPath::OS DependencyPathOS;
 
 //==============================================================================
 /** This ValueSource type implements the fallback logic required for dependency
@@ -54,7 +24,7 @@ class DependencyPathValueSource : public Value::ValueSource,
 {
 public:
     DependencyPathValueSource (const Value& projectSettingsPath,
-                               String globalSettingsKey,
+                               Identifier globalSettingsKey,
                                DependencyPathOS osThisSettingAppliesTo);
 
     /** This gets the currently used value, which may be either
@@ -95,7 +65,7 @@ public:
 
     bool appliesToThisOS() const
     {
-        return os == DependencyPath::getThisOS();
+        return os == TargetOS::getThisOS();
     }
 
     bool isValidPath() const;
@@ -124,9 +94,9 @@ private:
     {
         // only use the global settings if they are set on the same OS
         // that this setting is for!
-        DependencyPathOS thisOS = DependencyPath::getThisOS();
+        DependencyPathOS thisOS = TargetOS::getThisOS();
 
-        return thisOS == DependencyPath::unknown ? false : os == thisOS;
+        return thisOS == TargetOS::unknown ? false : os == thisOS;
     }
 
     /** the dependency path setting as set in this Introjucer project. */
@@ -134,7 +104,7 @@ private:
 
     /** the global key used in the application settings for the global setting value.
         needed for checking whether the path is valid. */
-    String globalKey;
+    Identifier globalKey;
 
     /** on what operating system should this dependency path be used?
      note that this is *not* the os that is targeted by the project,

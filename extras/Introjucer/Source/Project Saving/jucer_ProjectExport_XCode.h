@@ -1504,28 +1504,16 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        vst2Path.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::vstFolder),
-             DependencyPath::vst2KeyName,
-             DependencyPath::osx
-        )));
+        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),
+                                                                Ids::vst2Path, TargetOS::osx)));
 
-        vst3Path.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::vst3Folder),
-             DependencyPath::vst3KeyName,
-             DependencyPath::osx
-        )));
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path, TargetOS::osx)));
 
-        aaxPath.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::aaxFolder),
-             DependencyPath::aaxKeyName,
-             DependencyPath::osx
-        )));
+        aaxPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),
+                                                               Ids::aaxPath, TargetOS::osx)));
 
-        rtasPath.referTo (Value (new DependencyPathValueSource (
-             getSetting (Ids::rtasFolder),
-             DependencyPath::rtasKeyName,
-             DependencyPath::osx
-        )));
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
+                                                                Ids::rtasPath, TargetOS::osx)));
     }
 };

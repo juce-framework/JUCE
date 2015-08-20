@@ -12,24 +12,16 @@
 #include "jucer_DependencyPathPropertyComponent.h"
 #include "../Application/jucer_GlobalPreferences.h"
 
-//==============================================================================
-const String DependencyPath::vst2KeyName = "vst2Path";
-const String DependencyPath::vst3KeyName = "vst3Path";
-const String DependencyPath::rtasKeyName = "rtasPath";
-const String DependencyPath::aaxKeyName = "aaxPath";
-const String DependencyPath::androidSdkKeyName = "androidSdkPath";
-const String DependencyPath::androidNdkKeyName = "androidNdkPath";
 
 //==============================================================================
-
 DependencyPathValueSource::DependencyPathValueSource (const Value& projectSettingsPath,
-                                                      String globalSettingsKey,
+                                                      Identifier globalSettingsKey,
                                                       DependencyPathOS osThisSettingAppliesTo)
   : projectSettingsValue (projectSettingsPath),
     globalKey (globalSettingsKey),
     os (osThisSettingAppliesTo),
-    globalSettingsValue (PathSettingsTab::getPathByKey (globalKey, os)),
-    fallbackValue (PathSettingsTab::getFallbackPathByKey (globalKey, os))
+    globalSettingsValue (getAppSettings().getGlobalPath (globalKey, os)),
+    fallbackValue (getAppSettings().getFallbackPath (globalKey, os))
 {
     globalSettingsValue.addListener (this);
 }
@@ -41,7 +33,7 @@ bool DependencyPathValueSource::isValidPath() const
     if (! appliesToThisOS())
         return true;
 
-    return PathSettingsTab::checkPathByKey (globalKey, getValue().toString());
+    return getAppSettings().isGlobalPathValid (globalKey, getValue().toString());
 }
 
 //==============================================================================
