@@ -601,9 +601,9 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
                                pathWithinModule);
     }
 
-    sourceGroup.addFile (localModuleFolder.getChildFile (FileHelpers::getRelativePathFrom (moduleInfo.manifestFile,
-                                                                                           moduleInfo.getFolder())), -1, false);
-    sourceGroup.addFile (getModuleHeaderFile (localModuleFolder), -1, false);
+    sourceGroup.addFileAtIndex (localModuleFolder.getChildFile (FileHelpers::getRelativePathFrom (moduleInfo.manifestFile,
+                                                                                                  moduleInfo.getFolder())), -1, false);
+    sourceGroup.addFileAtIndex (getModuleHeaderFile (localModuleFolder), -1, false);
 
     exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
 }

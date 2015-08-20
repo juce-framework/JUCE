@@ -752,8 +752,8 @@ public:
                         odm.closeDocument (cpp, true);
                         odm.closeDocument (header, true);
 
-                        parent.addFile (headerFile, 0, true);
-                        parent.addFile (cppFile, 0, true);
+                        parent.addFileRetainingSortOrder (headerFile, true);
+                        parent.addFileRetainingSortOrder (cppFile, true);
                     }
                 }
             }

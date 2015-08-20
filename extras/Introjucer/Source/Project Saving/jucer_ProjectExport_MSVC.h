@@ -627,11 +627,11 @@ public:
                 {
                     if (iconFile != File::nonexistent)
                     {
-                        group.addFile (iconFile, -1, true);
+                        group.addFileAtIndex (iconFile, -1, true);
                         group.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
                     }
 
-                    group.addFile (rcFile, -1, true);
+                    group.addFileAtIndex (rcFile, -1, true);
                     group.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
 
                     break;

@@ -48,15 +48,21 @@ public:
         return false;
     }
 
-    void addFiles (const StringArray& files, int insertIndex) override
+    void addFilesAtIndex (const StringArray& files, int insertIndex) override
     {
         for (int i = 0; i < files.size(); ++i)
         {
             const File file (files[i]);
 
-            if (item.addFile (file, insertIndex, true))
+            if (item.addFileAtIndex (file, insertIndex, true))
                 ++insertIndex;
         }
+    }
+
+    void addFilesRetainingSortOrder (const StringArray& files) override
+    {
+        for (int i = files.size(); --i >= 0;)
+            item.addFileRetainingSortOrder (files[i], true);
     }
 
     void moveSelectedItemsTo (OwnedArray<Project::Item>& selectedNodes, int insertIndex) override

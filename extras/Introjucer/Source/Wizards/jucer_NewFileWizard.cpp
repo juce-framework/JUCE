@@ -67,7 +67,7 @@ public:
     {
         if (fillInNewCppFileTemplate (newFile, parent, templateName))
         {
-            parent.addFile (newFile, 0, true);
+            parent.addFileRetainingSortOrder (newFile, true);
             return true;
         }
 
@@ -96,7 +96,7 @@ public:
     {
         if (fillInNewCppFileTemplate (newFile, parent, templateName))
         {
-            parent.addFile (newFile, 0, true);
+            parent.addFileRetainingSortOrder (newFile, true);
             return true;
         }
 
@@ -171,7 +171,7 @@ public:
 
         if (FileHelpers::overwriteFileWithNewDataIfDifferent (newFile, content))
         {
-            parent.addFile (newFile, 0, true);
+            parent.addFileRetainingSortOrder (newFile, true);
             return true;
         }
 

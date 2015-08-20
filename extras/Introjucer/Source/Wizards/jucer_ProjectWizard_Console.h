@@ -74,7 +74,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            sourceGroup.addFile (mainCppFile, -1, true);
+            sourceGroup.addFileAtIndex (mainCppFile, -1, true);
         }
 
         return true;
