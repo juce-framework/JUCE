@@ -394,6 +394,9 @@ public:
     */
     virtual void itemSelectionChanged (bool isNowSelected);
 
+    /** Called when the owner view changes */
+    virtual void ownerViewChanged (TreeView* newOwner);
+
     /** The item can return a tool tip string here if it wants to.
         @see TooltipClient
     */

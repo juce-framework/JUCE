@@ -1381,6 +1381,10 @@ String TreeViewItem::getTooltip()
     return String::empty;
 }
 
+void TreeViewItem::ownerViewChanged (TreeView*)
+{
+}
+
 var TreeViewItem::getDragSourceDescription()
 {
     return var();
@@ -1487,7 +1491,11 @@ void TreeViewItem::setOwnerView (TreeView* const newOwner) noexcept
     ownerView = newOwner;
 
     for (int i = subItems.size(); --i >= 0;)
-        subItems.getUnchecked(i)->setOwnerView (newOwner);
+    {
+        TreeViewItem* subItem = subItems.getUnchecked(i);
+        subItem->setOwnerView (newOwner);
+        subItem->ownerViewChanged (newOwner);
+    }
 }
 
 int TreeViewItem::getIndentX() const noexcept
