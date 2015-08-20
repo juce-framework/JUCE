@@ -220,7 +220,8 @@ void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, con
 //==============================================================================
 static bool doesSDKPathContainFile (const String& path, const String& fileToCheckFor)
 {
-    return File::getCurrentWorkingDirectory().getChildFile( path + "/" + fileToCheckFor).existsAsFile();
+    String actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+    return File::getCurrentWorkingDirectory().getChildFile (actualPath + "/" + fileToCheckFor).existsAsFile();
 }
 
 Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
@@ -260,12 +261,10 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
     }
 
     if (key == Ids::androidSDKPath)
-        return os == TargetOS::windows ? "c:\\SDKs\\android-sdk"
-                                       : "~/Library/Android/sdk";
+        return "${user.home}/SDKs/android-sdk";
 
     if (key == Ids::androidNDKPath)
-        return os == TargetOS::windows ? "c:\\SDKs\\android-ndk"
-                                       : "~/Library/Android/ndk";
+        return "${user.home}/SDKs/android-ndk";
 
     // didn't recognise the key provided!
     jassertfalse;
