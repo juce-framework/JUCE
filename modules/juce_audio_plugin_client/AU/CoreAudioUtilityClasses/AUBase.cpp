@@ -55,6 +55,8 @@
 #include "CAVectorUnit.h"
 #include "CAXException.h"
 
+// NB: This line added for JUCE, for backwards-compatibility with pre-10.8 frameworks
+#define kAudioUnitProperty_NickName ((AudioUnitPropertyID) 54)
 
 
 #if TARGET_OS_MAC && (TARGET_CPU_X86 || TARGET_CPU_X86_64)
