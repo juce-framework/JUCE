@@ -509,7 +509,7 @@ OSStatus			AUBase::DispatchGetPropertyInfo(AudioUnitPropertyID				inID,
 #if !CA_NO_AU_HOST_CALLBACKS
 	case kAudioUnitProperty_HostCallbacks:
 		ca_require(inScope == kAudioUnitScope_Global, InvalidScope);
-		outDataSize = sizeof(mHostCallbackInfo);
+		outDataSize = sizeof(OldHostCallbackInfo);
 		outWritable = true;
 		break;
 #endif
@@ -743,7 +743,7 @@ OSStatus			AUBase::DispatchGetProperty(	AudioUnitPropertyID 			inID,
 
 #if !CA_NO_AU_HOST_CALLBACKS
 	case kAudioUnitProperty_HostCallbacks:
-		memcpy(outData, &mHostCallbackInfo, sizeof(mHostCallbackInfo));
+		memcpy(outData, &mHostCallbackInfo, sizeof(OldHostCallbackInfo));
 		break;
 #endif
 #if !CA_NO_AU_UI_FEATURES
