@@ -58,6 +58,15 @@
 // NB: This line added for JUCE, for backwards-compatibility with pre-10.8 frameworks
 #define kAudioUnitProperty_NickName ((AudioUnitPropertyID) 54)
 
+// This is for JUCE, added as a workaround for problems in older hosts following an API change.
+struct OldHostCallbackInfo
+{
+    void* hostUserData;
+    HostCallback_GetBeatAndTempo beatAndTempoProc;
+    HostCallback_GetMusicalTimeLocation musicalTimeLocationProc;
+    HostCallback_GetTransportState transportStateProc;
+};
+
 
 #if TARGET_OS_MAC && (TARGET_CPU_X86 || TARGET_CPU_X86_64)
 	// our compiler does ALL floating point with SSE
@@ -509,7 +518,7 @@ OSStatus			AUBase::DispatchGetPropertyInfo(AudioUnitPropertyID				inID,
 #if !CA_NO_AU_HOST_CALLBACKS
 	case kAudioUnitProperty_HostCallbacks:
 		ca_require(inScope == kAudioUnitScope_Global, InvalidScope);
-		outDataSize = sizeof(mHostCallbackInfo);
+		outDataSize = sizeof(OldHostCallbackInfo);
 		outWritable = true;
 		break;
 #endif
@@ -743,7 +752,7 @@ OSStatus			AUBase::DispatchGetProperty(	AudioUnitPropertyID 			inID,
 
 #if !CA_NO_AU_HOST_CALLBACKS
 	case kAudioUnitProperty_HostCallbacks:
-		memcpy(outData, &mHostCallbackInfo, sizeof(mHostCallbackInfo));
+		memcpy(outData, &mHostCallbackInfo, sizeof(OldHostCallbackInfo));
 		break;
 #endif
 #if !CA_NO_AU_UI_FEATURES
