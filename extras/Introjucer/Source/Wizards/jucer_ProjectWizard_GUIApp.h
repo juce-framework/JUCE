@@ -93,8 +93,8 @@ struct GUIAppWizard   : public NewProjectWizard
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
                 failedFiles.add (contentCompCpp.getFullPathName());
 
-            sourceGroup.addFile (contentCompCpp, -1, true);
-            sourceGroup.addFile (contentCompH, -1, false);
+            sourceGroup.addFileAtIndex (contentCompCpp, -1, true);
+            sourceGroup.addFileAtIndex (contentCompH, -1, false);
         }
 
         if (createMainCpp)
@@ -110,7 +110,7 @@ struct GUIAppWizard   : public NewProjectWizard
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            sourceGroup.addFile (mainCppFile, -1, true);
+            sourceGroup.addFileAtIndex (mainCppFile, -1, true);
         }
 
         return true;

@@ -30,9 +30,11 @@
 
 #include "box2d/Box2D.h"
 
+#ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
 namespace juce
 {
   #include "utils/juce_Box2DRenderer.h"
 }
+#endif // DOXYGEN
 
 #endif   // JUCE_BOX2D_H_INCLUDED

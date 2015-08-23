@@ -264,13 +264,13 @@ public:
     {
     }
 
-    String getText() const
+    String getText() const override
     {
         SettableTooltipClient* ttc = dynamic_cast <SettableTooltipClient*> (component);
         return ttc->getTooltip();
     }
 
-    void setText (const String& newText)
+    void setText (const String& newText) override
     {
         document.perform (new SetTooltipAction (component, *document.getComponentLayout(), newText),
                           "Change tooltip");
@@ -366,12 +366,12 @@ public:
     {
     }
 
-    String getText() const
+    String getText() const override
     {
         return String (component->getExplicitFocusOrder());
     }
 
-    void setText (const String& newText)
+    void setText (const String& newText) override
     {
         document.perform (new SetFocusOrderAction (component, *document.getComponentLayout(), jmax (0, newText.getIntValue())),
                           "Change focus order");

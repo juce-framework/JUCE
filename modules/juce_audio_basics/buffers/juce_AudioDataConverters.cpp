@@ -579,7 +579,7 @@ public:
         }
     };
 
-    void runTest()
+    void runTest() override
     {
         Random r = getRandom();
         beginTest ("Round-trip conversion: Int8");

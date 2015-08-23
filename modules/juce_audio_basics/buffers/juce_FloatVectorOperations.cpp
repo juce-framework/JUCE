@@ -1146,7 +1146,7 @@ public:
         }
     };
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("FloatVectorOperations");
 

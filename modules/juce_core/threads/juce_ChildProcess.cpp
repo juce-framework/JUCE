@@ -89,7 +89,7 @@ class ChildProcessTests  : public UnitTest
 public:
     ChildProcessTests() : UnitTest ("ChildProcess") {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Child Processes");
 

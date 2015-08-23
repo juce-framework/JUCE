@@ -44,7 +44,7 @@ class UnitTestRunner;
     public:
         MyTest()  : UnitTest ("Foobar testing") {}
 
-        void runTest()
+        void runTest() override
         {
             beginTest ("Part 1");
 

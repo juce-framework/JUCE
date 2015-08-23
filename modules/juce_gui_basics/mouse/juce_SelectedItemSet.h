@@ -71,8 +71,20 @@ public:
     {
         if (selectedItems != other.selectedItems)
         {
-            selectedItems = other.selectedItems;
             changed();
+
+            for (int i = selectedItems.size(); --i >= 0;)
+                if (! other.isSelected (selectedItems.getReference (i)))
+                    itemDeselected (selectedItems.remove (i));
+
+            for (SelectableItemType* i = other.selectedItems.begin(), *e = other.selectedItems.end(); i != e; ++i)
+            {
+                if (! isSelected (*i))
+                {
+                    selectedItems.add (*i);
+                    itemSelected (*i);
+                }
+            }
         }
 
         return *this;
@@ -101,8 +113,8 @@ public:
         }
         else
         {
-            deselectAll();
             changed();
+            deselectAll();
 
             selectedItems.add (item);
             itemSelected (item);

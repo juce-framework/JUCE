@@ -90,7 +90,10 @@ juce_ImplementSingleton (ValueList)
 //==============================================================================
 int64 parseInt (String s)
 {
-    s = s.retainCharacters ("0123456789abcdefABCDEFx");
+    s = s.trimStart();
+
+    if (s.startsWithChar ('-'))
+        return -parseInt (s.substring (1));
 
     if (s.startsWith ("0x"))
         return s.substring(2).getHexValue64();

@@ -1000,15 +1000,83 @@ MemoryBlock BigInteger::toMemoryBlock() const
     MemoryBlock mb ((size_t) numBytes);
 
     for (int i = 0; i < numBytes; ++i)
-        mb[i] = (char) getBitRangeAsInt (i << 3, 8);
+        mb[i] = (char) ((values[i / 4] >> ((i & 3) * 8)) & 0xff);
 
     return mb;
 }
 
 void BigInteger::loadFromMemoryBlock (const MemoryBlock& data)
 {
-    clear();
+    const size_t numBytes = data.getSize();
+    numValues = 1 + (numBytes / sizeof (uint32));
+    values.malloc (numValues + 1);
 
-    for (int i = (int) data.getSize(); --i >= 0;)
+    for (int i = 0; i < (int) numValues - 1; ++i)
+        values[i] = (uint32) ByteOrder::littleEndianInt (addBytesToPointer (data.getData(), sizeof (uint32) * (size_t) i));
+
+    values[numValues - 1] = 0;
+    values[numValues] = 0;
+
+    for (int i = (int) (numBytes & ~3u); i < (int) numBytes; ++i)
         this->setBitRangeAsInt (i << 3, 8, (uint32) data [i]);
+
+    highestBit = (int) numBytes * 8;
+    highestBit = getHighestBit();
 }
+
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class BigIntegerTests  : public UnitTest
+{
+public:
+    BigIntegerTests() : UnitTest ("BigInteger") {}
+
+    static BigInteger getBigRandom (Random& r)
+    {
+        BigInteger b;
+
+        while (b < 2)
+            r.fillBitsRandomly (b, 0, r.nextInt (150) + 1);
+
+        return b;
+    }
+
+    void runTest() override
+    {
+        beginTest ("BigInteger");
+
+        Random r = getRandom();
+
+        expect (BigInteger().isZero());
+        expect (BigInteger(1).isOne());
+
+        for (int j = 10000; --j >= 0;)
+        {
+            BigInteger b1 (getBigRandom(r)),
+                       b2 (getBigRandom(r));
+
+            BigInteger b3 = b1 + b2;
+            expect (b3 > b1 && b3 > b2);
+            expect (b3 - b1 == b2);
+            expect (b3 - b2 == b1);
+
+            BigInteger b4 = b1 * b2;
+            expect (b4 > b1 && b4 > b2);
+            expect (b4 / b1 == b2);
+            expect (b4 / b2 == b1);
+
+            // TODO: should add tests for other ops (although they also get pretty well tested in the RSA unit test)
+
+            BigInteger b5;
+            b5.loadFromMemoryBlock (b3.toMemoryBlock());
+            expect (b3 == b5);
+        }
+    }
+};
+
+static BigIntegerTests bigIntegerTests;
+
+#endif

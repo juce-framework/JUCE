@@ -54,7 +54,7 @@ public:
 
     static Font getDefaultCodeFont();
 
-    static void showEditorWindow (ScopedPointer<Component>& ownerPointer);
+    static void showGlobalPreferences (ScopedPointer<Component>& ownerPointer);
 
     static const char* getSchemeFileSuffix()      { return ".scheme"; }
     static const char* getSchemeFileWildCard()    { return "*.scheme"; }
@@ -89,7 +89,7 @@ public:
     void drawTabButton (TabBarButton& button, Graphics&, bool isMouseOver, bool isMouseDown) override;
     void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) override {}
     int getTabButtonBestWidth (TabBarButton&, int tabDepth) override;
-    void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>&, bool, bool, ConcertinaPanel&, Component&) override;
+    void drawConcertinaPanelHeader (Graphics&, const juce::Rectangle<int>&, bool, bool, ConcertinaPanel&, Component&) override;
     static Colour getTabBackgroundColour (TabBarButton&);
 
 private:

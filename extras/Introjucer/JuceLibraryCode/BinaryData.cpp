@@ -307,30 +307,6 @@ static const unsigned char temp_binary_data_4[] =
 "    return JucePlugin_Name;\r\n"
 "}\r\n"
 "\r\n"
-"int FILTERCLASSNAME::getNumParameters()\r\n"
-"{\r\n"
-"    return 0;\r\n"
-"}\r\n"
-"\r\n"
-"float FILTERCLASSNAME::getParameter (int index)\r\n"
-"{\r\n"
-"    return 0.0f;\r\n"
-"}\r\n"
-"\r\n"
-"void FILTERCLASSNAME::setParameter (int index, float newValue)\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"const String FILTERCLASSNAME::getParameterName (int index)\r\n"
-"{\r\n"
-"    return String();\r\n"
-"}\r\n"
-"\r\n"
-"const String FILTERCLASSNAME::getParameterText (int index)\r\n"
-"{\r\n"
-"    return String();\r\n"
-"}\r\n"
-"\r\n"
 "const String FILTERCLASSNAME::getInputChannelName (int channelIndex) const\r\n"
 "{\r\n"
 "    return String (channelIndex + 1);\r\n"
@@ -511,13 +487,6 @@ static const unsigned char temp_binary_data_5[] =
 "\r\n"
 "    //==============================================================================\r\n"
 "    const String getName() const override;\r\n"
-"\r\n"
-"    int getNumParameters() override;\r\n"
-"    float getParameter (int index) override;\r\n"
-"    void setParameter (int index, float newValue) override;\r\n"
-"\r\n"
-"    const String getParameterName (int index) override;\r\n"
-"    const String getParameterText (int index) override;\r\n"
 "\r\n"
 "    const String getInputChannelName (int channelIndex) const override;\r\n"
 "    const String getOutputChannelName (int channelIndex) const override;\r\n"
@@ -1432,14 +1401,6 @@ static const unsigned char temp_binary_data_21[] =
 "  cp -r \"$original\" \"$AU\"\r\n"
 "  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
 "  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
-"\r\n"
-"  # Fix info.plist for AUs built with Xcode 3\r\n"
-"  if [ -f \"$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp\" ]; then\r\n"
-"    echo\r\n"
-"  else\r\n"
-"    echo \"Removing AudioComponents entry from Info.plist because this is not a new-format AU\"\r\n"
-"    /usr/libexec/PlistBuddy -c \"Delete AudioComponents\" \"$AU/Contents/Info.plist\"\r\n"
-"  fi\r\n"
 "fi\r\n"
 "\r\n"
 "if [ $copyVST -gt 0 ]; then\r\n"
@@ -4088,8 +4049,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3189; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1180; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5039; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2727; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 4648; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2464; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2161; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2141; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
@@ -4105,7 +4066,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
         case 0x7fbac252:  numBytes = 1827; return jucer_OpenGLComponentTemplate_cpp;
-        case 0x44be9398:  numBytes = 3108; return AudioPluginXCodeScript_txt;
+        case 0x44be9398:  numBytes = 2745; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;

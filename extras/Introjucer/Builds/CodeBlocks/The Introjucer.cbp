@@ -128,6 +128,11 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Application/jucer_GlobalPreferences.cpp"/>
+    <Unit filename="../../Source/Application/jucer_GlobalPreferences.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/jucer_Headers.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -474,6 +479,11 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Project/jucer_DependencyPathPropertyComponent.cpp"/>
+    <Unit filename="../../Source/Project/jucer_DependencyPathPropertyComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Project/jucer_GroupInformationComponent.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -804,6 +814,14 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/BinaryData/wizard_StaticLibrary.svg">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/text/juce_Base64.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/text/juce_Base64.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

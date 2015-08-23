@@ -76,7 +76,7 @@ public:
     /** Writes a set of samples to the audio stream.
 
         Note that if you're trying to write the contents of an AudioSampleBuffer, you
-        can use AudioSampleBuffer::writeToAudioWriter().
+        can use writeFromAudioSampleBuffer().
 
         @param samplesToWrite   an array of arrays containing the sample data for
                                 each channel to write. This is a zero-terminated

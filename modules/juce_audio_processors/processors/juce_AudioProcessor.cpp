@@ -362,6 +362,10 @@ void AudioProcessor::addParameter (AudioProcessorParameter* p)
     p->processor = this;
     p->parameterIndex = managedParameters.size();
     managedParameters.add (p);
+
+    // if you're using parameter objects, then you must not override the
+    // deprecated getNumParameters() method!
+    jassert (getNumParameters() == AudioProcessor::getNumParameters());
 }
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)

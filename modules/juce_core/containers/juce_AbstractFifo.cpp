@@ -183,7 +183,7 @@ public:
         Random random;
     };
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("AbstractFifo");
 

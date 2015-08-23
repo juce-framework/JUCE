@@ -162,7 +162,7 @@ class RandomTests  : public UnitTest
 public:
     RandomTests() : UnitTest ("Random") {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Random");
 

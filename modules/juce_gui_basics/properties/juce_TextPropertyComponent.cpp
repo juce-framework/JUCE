@@ -34,9 +34,7 @@ public:
     {
         setEditable (true, true, false);
 
-        setColour (backgroundColourId, owner.findColour (TextPropertyComponent::backgroundColourId));
-        setColour (outlineColourId,    owner.findColour (TextPropertyComponent::outlineColourId));
-        setColour (textColourId,       owner.findColour (TextPropertyComponent::textColourId));
+        updateColours();
     }
 
     bool isInterestedInFileDrag (const StringArray&) override
@@ -67,6 +65,14 @@ public:
     void textWasEdited() override
     {
         owner.textWasEdited();
+    }
+
+    void updateColours()
+    {
+        setColour (backgroundColourId, owner.findColour (TextPropertyComponent::backgroundColourId));
+        setColour (outlineColourId,    owner.findColour (TextPropertyComponent::outlineColourId));
+        setColour (textColourId,       owner.findColour (TextPropertyComponent::textColourId));
+        repaint();
     }
 
 private:
@@ -109,6 +115,11 @@ String TextPropertyComponent::getText() const
     return textEditor->getText();
 }
 
+Value& TextPropertyComponent::getValue() const
+{
+    return textEditor->getTextValue();
+}
+
 void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMultiLine)
 {
     addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars, isMultiLine));
@@ -131,4 +142,28 @@ void TextPropertyComponent::textWasEdited()
 
     if (getText() != newText)
         setText (newText);
+
+    callListeners();
+}
+
+void TextPropertyComponent::addListener (TextPropertyComponentListener* const listener)
+{
+    listenerList.add (listener);
+}
+
+void TextPropertyComponent::removeListener (TextPropertyComponentListener* const listener)
+{
+    listenerList.remove (listener);
+}
+
+void TextPropertyComponent::callListeners()
+{
+    Component::BailOutChecker checker (this);
+    listenerList.callChecked (checker, &TextPropertyComponentListener::textPropertyComponentChanged, this);
+}
+
+void TextPropertyComponent::colourChanged()
+{
+    PropertyComponent::colourChanged();
+    textEditor->updateColours();
 }

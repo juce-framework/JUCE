@@ -133,7 +133,9 @@ public:
     TreeViewItem* getParentItem() const noexcept        { return parentItem; }
 
     //==============================================================================
-    /** True if this item is currently open in the treeview. */
+    /** True if this item is currently open in the treeview.
+        @see getOpenness
+    */
     bool isOpen() const noexcept;
 
     /** Opens or closes the item.
@@ -142,9 +144,37 @@ public:
         and a subclass should use this callback to create and add any sub-items that
         it needs to.
 
-        @see itemOpennessChanged, mightContainSubItems
+        Note that if this is called when the item is in its default openness state, and
+        this call would not change whether it's open or closed, then no change will be
+        stored. If you want to explicitly set the openness state to be non-default then
+        you should use setOpenness instead.
+
+        @see setOpenness, itemOpennessChanged, mightContainSubItems
     */
     void setOpen (bool shouldBeOpen);
+
+    /** An enum of states to describe the explicit or implicit openness of an item. */
+    enum Openness
+    {
+        opennessDefault = 0,
+        opennessClosed = 1,
+        opennessOpen = 2
+    };
+
+    /** Returns the openness state of this item.
+        @see isOpen
+    */
+    Openness getOpenness() const noexcept;
+
+    /** Opens or closes the item.
+
+        If this causes the value of isOpen() to change, then the item's itemOpennessChanged()
+        method will be called, and a subclass should use this callback to create and add any
+        sub-items that it needs to.
+
+        @see setOpen
+    */
+    void setOpenness (Openness newOpenness);
 
     /** True if this item is currently selected.
         Use this when painting the node, to decide whether to draw it as selected or not.
@@ -363,6 +393,9 @@ public:
         changes. By default it'll get repainted when this happens.
     */
     virtual void itemSelectionChanged (bool isNowSelected);
+
+    /** Called when the owner view changes */
+    virtual void ownerViewChanged (TreeView* newOwner);
 
     /** The item can return a tool tip string here if it wants to.
         @see TooltipClient

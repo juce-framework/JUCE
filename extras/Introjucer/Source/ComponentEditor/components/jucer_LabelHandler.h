@@ -193,13 +193,13 @@ private:
             : ComponentTextProperty <Label> ("text", 10000, true, comp, doc)
         {}
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new LabelTextChangeAction (component, *document.getComponentLayout(), newText),
                               "Change Label text");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->getText();
         }

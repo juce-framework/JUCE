@@ -56,7 +56,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -95,9 +95,9 @@
       <HeaderFileName/>
     </Midl>
     <ClCompile>
-      <Optimization>MinSpace</Optimization>
+      <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -133,6 +133,7 @@
     <ClCompile Include="..\..\Source\Application\jucer_AutoUpdater.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
+    <ClCompile Include="..\..\Source\Application\jucer_GlobalPreferences.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
@@ -159,6 +160,7 @@
     <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp"/>
     <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp"/>
     <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp"/>
+    <ClCompile Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Project.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
@@ -209,6 +211,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_OpenGLComponentTemplate.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_Base64.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
@@ -1066,6 +1071,7 @@
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
+    <ClInclude Include="..\..\Source\Application\jucer_GlobalPreferences.h"/>
     <ClInclude Include="..\..\Source\jucer_Headers.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_OpenDocumentManager.h"/>
@@ -1146,6 +1152,7 @@
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Base.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Exporter.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h"/>
+    <ClInclude Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Module.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ModulesPanel.h"/>
@@ -1191,6 +1198,7 @@
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_Base64.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h"/>
@@ -1567,7 +1575,6 @@
     <None Include="..\..\..\..\modules\juce_graphics\juce_module_info"/>
     <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info"/>
-    <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>

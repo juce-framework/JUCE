@@ -40,13 +40,13 @@ public:
     }
 
 
-    void setText (const String& newText)
+    void setText (const String& newText) override
     {
         document.perform (new CompNameChangeAction (component, *document.getComponentLayout(), newText),
                           "Change component name");
     }
 
-    String getText() const
+    String getText() const override
     {
         return component->getName();
     }
@@ -90,13 +90,13 @@ public:
     {
     }
 
-    void setText (const String& newText)
+    void setText (const String& newText) override
     {
         document.perform (new CompMemberNameChangeAction (component, *document.getComponentLayout(), newText),
                           "Change component member name");
     }
 
-    String getText() const
+    String getText() const override
     {
         return document.getComponentLayout()->getComponentMemberVariableName (component);
     }
@@ -139,13 +139,13 @@ public:
     {
     }
 
-    void setText (const String& newText)
+    void setText (const String& newText) override
     {
         document.perform (new CompVirtualClassChangeAction (component, *document.getComponentLayout(), newText),
                           "Change component virtual class name");
     }
 
-    String getText() const
+    String getText() const override
     {
         return document.getComponentLayout()->getComponentVirtualClassName (component);
     }

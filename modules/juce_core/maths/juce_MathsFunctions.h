@@ -88,7 +88,7 @@ typedef unsigned int                uint32;
   typedef unsigned int              pointer_sized_uint;
 #endif
 
-#if JUCE_MSVC
+#if JUCE_WINDOWS && ! JUCE_MINGW
   typedef pointer_sized_int ssize_t;
 #endif
 
@@ -97,47 +97,48 @@ typedef unsigned int                uint32;
 
 /** Returns the larger of two values. */
 template <typename Type>
-inline Type jmax (const Type a, const Type b)                                               { return (a < b) ? b : a; }
+Type jmax (const Type a, const Type b)                                               { return (a < b) ? b : a; }
 
 /** Returns the larger of three values. */
 template <typename Type>
-inline Type jmax (const Type a, const Type b, const Type c)                                 { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+Type jmax (const Type a, const Type b, const Type c)                                 { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
 
 /** Returns the larger of four values. */
 template <typename Type>
-inline Type jmax (const Type a, const Type b, const Type c, const Type d)                   { return jmax (a, jmax (b, c, d)); }
+Type jmax (const Type a, const Type b, const Type c, const Type d)                   { return jmax (a, jmax (b, c, d)); }
 
 /** Returns the smaller of two values. */
 template <typename Type>
-inline Type jmin (const Type a, const Type b)                                               { return (b < a) ? b : a; }
+Type jmin (const Type a, const Type b)                                               { return (b < a) ? b : a; }
 
 /** Returns the smaller of three values. */
 template <typename Type>
-inline Type jmin (const Type a, const Type b, const Type c)                                 { return (b < a) ? ((c < b) ? c : b) : ((c < a) ? c : a); }
+Type jmin (const Type a, const Type b, const Type c)                                 { return (b < a) ? ((c < b) ? c : b) : ((c < a) ? c : a); }
 
 /** Returns the smaller of four values. */
 template <typename Type>
-inline Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
+Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
 
 /** Remaps a normalised value (between 0 and 1) to a target range.
-    This effectively returns (targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin))
+    This effectively returns (targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin)).
 */
-template <class Type>
-static Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
+template <typename Type>
+Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
 {
     return targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin);
 }
 
 /** Remaps a value from a source range to a target range. */
-template <class Type>
-static Type jmap (Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targetRangeMin, Type targetRangeMax)
+template <typename Type>
+Type jmap (Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targetRangeMin, Type targetRangeMax)
 {
+    jassert (sourceRangeMax != sourceRangeMin); // mapping from a range of zero will produce NaN!
     return targetRangeMin + ((targetRangeMax - targetRangeMin) * (sourceValue - sourceRangeMin)) / (sourceRangeMax - sourceRangeMin);
 }
 
 /** Scans an array of values, returning the minimum value that it contains. */
 template <typename Type>
-const Type findMinimum (const Type* data, int numValues)
+Type findMinimum (const Type* data, int numValues)
 {
     if (numValues <= 0)
         return Type();
@@ -155,7 +156,7 @@ const Type findMinimum (const Type* data, int numValues)
 
 /** Scans an array of values, returning the maximum value that it contains. */
 template <typename Type>
-const Type findMaximum (const Type* values, int numValues)
+Type findMaximum (const Type* values, int numValues)
 {
     if (numValues <= 0)
         return Type();
@@ -217,9 +218,9 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
     @see jlimit0To, jmin, jmax
 */
 template <typename Type>
-inline Type jlimit (const Type lowerLimit,
-                    const Type upperLimit,
-                    const Type valueToConstrain) noexcept
+Type jlimit (const Type lowerLimit,
+             const Type upperLimit,
+             const Type valueToConstrain) noexcept
 {
     jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
@@ -234,7 +235,7 @@ inline Type jlimit (const Type lowerLimit,
     @endcode
 */
 template <typename Type>
-inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) noexcept
+bool isPositiveAndBelow (Type valueToTest, Type upperLimit) noexcept
 {
     jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
     return Type() <= valueToTest && valueToTest < upperLimit;
@@ -253,7 +254,7 @@ inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noe
     @endcode
 */
 template <typename Type>
-inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) noexcept
+bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) noexcept
 {
     jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
     return Type() <= valueToTest && valueToTest <= upperLimit;
@@ -269,7 +270,7 @@ inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperL
 //==============================================================================
 /** Handy function to swap two values. */
 template <typename Type>
-inline void swapVariables (Type& variable1, Type& variable2)
+void swapVariables (Type& variable1, Type& variable2)
 {
     std::swap (variable1, variable2);
 }
@@ -296,7 +297,7 @@ void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexc
     @endcode
 */
 template <typename Type, int N>
-inline int numElementsInArray (Type (&array)[N])
+int numElementsInArray (Type (&array)[N])
 {
     (void) array; // (required to avoid a spurious warning in MS compilers)
     (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
@@ -309,7 +310,7 @@ inline int numElementsInArray (Type (&array)[N])
 /** Using juce_hypot is easier than dealing with the different types of hypot function
     that are provided by the various platforms and compilers. */
 template <typename Type>
-inline Type juce_hypot (Type a, Type b) noexcept
+Type juce_hypot (Type a, Type b) noexcept
 {
    #if JUCE_MSVC
     return static_cast<Type> (_hypot (a, b));
@@ -337,9 +338,9 @@ inline int64 abs64 (const int64 n) noexcept
 }
 
 #if JUCE_MSVC && ! defined (DOXYGEN)  // The MSVC libraries omit these functions for some reason...
- template<typename Type> Type asinh (Type x) noexcept  { return std::log (x + std::sqrt (x * x + (Type) 1)); }
- template<typename Type> Type acosh (Type x) noexcept  { return std::log (x + std::sqrt (x * x - (Type) 1)); }
- template<typename Type> Type atanh (Type x) noexcept  { return (std::log (x + (Type) 1) - std::log (((Type) 1) - x)) / (Type) 2; }
+ template<typename Type> Type asinh (Type x)  { return std::log (x + std::sqrt (x * x + (Type) 1)); }
+ template<typename Type> Type acosh (Type x)  { return std::log (x + std::sqrt (x * x - (Type) 1)); }
+ template<typename Type> Type atanh (Type x)  { return (std::log (x + (Type) 1) - std::log (((Type) 1) - x)) / (Type) 2; }
 #endif
 
 //==============================================================================
@@ -356,11 +357,11 @@ const float   float_Pi   = 3.14159265358979323846f;
 
 /** Converts an angle in degrees to radians. */
 template <typename FloatType>
-inline FloatType degreesToRadians (FloatType degrees) noexcept  { return degrees * static_cast<FloatType> (double_Pi / 180.0); }
+FloatType degreesToRadians (FloatType degrees) noexcept  { return degrees * static_cast<FloatType> (double_Pi / 180.0); }
 
 /** Converts an angle in radians to degrees. */
 template <typename FloatType>
-inline FloatType radiansToDegrees (FloatType radians) noexcept  { return radians * static_cast<FloatType> (180.0 / double_Pi); }
+FloatType radiansToDegrees (FloatType radians) noexcept  { return radians * static_cast<FloatType> (180.0 / double_Pi); }
 
 
 //==============================================================================
@@ -368,7 +369,7 @@ inline FloatType radiansToDegrees (FloatType radians) noexcept  { return radians
     platform-independent function for it.
 */
 template <typename NumericType>
-inline bool juce_isfinite (NumericType) noexcept
+bool juce_isfinite (NumericType) noexcept
 {
     return true; // Integer types are always finite
 }
@@ -376,7 +377,7 @@ inline bool juce_isfinite (NumericType) noexcept
 template <>
 inline bool juce_isfinite (float value) noexcept
 {
-   #if JUCE_WINDOWS
+   #if JUCE_WINDOWS && ! JUCE_MINGW
     return _finite (value) != 0;
    #else
     return std::isfinite (value);
@@ -386,7 +387,7 @@ inline bool juce_isfinite (float value) noexcept
 template <>
 inline bool juce_isfinite (double value) noexcept
 {
-   #if JUCE_WINDOWS
+   #if JUCE_WINDOWS && ! JUCE_MINGW
     return _finite (value) != 0;
    #else
     return std::isfinite (value);
@@ -412,7 +413,7 @@ inline bool juce_isfinite (double value) noexcept
     even numbers will be rounded up or down differently.
 */
 template <typename FloatType>
-inline int roundToInt (const FloatType value) noexcept
+int roundToInt (const FloatType value) noexcept
 {
   #ifdef __INTEL_COMPILER
    #pragma float_control (precise, on, push)

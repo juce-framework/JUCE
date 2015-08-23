@@ -137,14 +137,14 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new GenericCompClassChangeAction (component, *document.getComponentLayout(),
                                                                 CodeHelpers::makeValidIdentifier (newText, false, false, true)),
                               "Change generic component class");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->actualClassName;
         }
@@ -188,13 +188,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new GenericCompParamsChangeAction (component, *document.getComponentLayout(), newText),
                               "Change generic component class");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->constructorParams;
         }

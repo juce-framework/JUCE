@@ -378,13 +378,13 @@ private:
             : ComponentTextProperty <TextEditor> ("initial text", 10000, true, comp, doc)
         {}
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new TextEditorInitialTextChangeAction (component, *document.getComponentLayout(), newText),
                               "Change TextEditor initial text");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->getProperties() ["initialText"];
         }

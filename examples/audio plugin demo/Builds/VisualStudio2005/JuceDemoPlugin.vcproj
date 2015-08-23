@@ -31,7 +31,7 @@
             BufferSecurityCheck=""
             DebugInformationFormat="4"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK"
-            PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000"
+            PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000"
             RuntimeLibrary="3"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -89,7 +89,7 @@
             InlineFunctionExpansion="1"
             StringPooling="true"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules;c:\SDKs\vstsdk2.4;c:\SDKs\VST3 SDK"
-            PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000"
+            PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000"
             RuntimeLibrary="2"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -1154,6 +1154,17 @@
       </Filter>
       <Filter Name="juce_core">
         <Filter Name="text">
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_Base64.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\text\juce_Base64.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

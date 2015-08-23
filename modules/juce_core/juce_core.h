@@ -224,6 +224,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "text/juce_StringPairArray.h"
 #include "text/juce_TextDiff.h"
 #include "text/juce_LocalisedStrings.h"
+#include "text/juce_Base64.h"
 #include "misc/juce_Result.h"
 #include "containers/juce_Variant.h"
 #include "containers/juce_NamedValueSet.h"

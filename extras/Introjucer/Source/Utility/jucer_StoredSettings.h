@@ -25,11 +25,11 @@
 #ifndef JUCER_STOREDSETTINGS_H_INCLUDED
 #define JUCER_STOREDSETTINGS_H_INCLUDED
 
+#include <map>
 #include "../Application/jucer_AppearanceSettings.h"
 
-
 //==============================================================================
-class StoredSettings
+class StoredSettings : public ValueTree::Listener
 {
 public:
     StoredSettings();
@@ -50,9 +50,8 @@ public:
     //==============================================================================
     Array<Colour> swatchColours;
 
-    class ColourSelectorWithSwatches    : public ColourSelector
+    struct ColourSelectorWithSwatches    : public ColourSelector
     {
-    public:
         ColourSelectorWithSwatches() {}
 
         int getNumSwatches() const override;
@@ -65,12 +64,35 @@ public:
 
     StringArray monospacedFontNames;
 
+    //==============================================================================
+    Value getGlobalPath (const Identifier& key, DependencyPathOS);
+    String getFallbackPath (const Identifier& key, DependencyPathOS);
+    bool isGlobalPathValid (const Identifier& key, const String& path);
+
 private:
     OwnedArray<PropertiesFile> propertyFiles;
+    ValueTree projectDefaults;
 
-    void updateGlobalProps();
+    void changed()
+    {
+        ScopedPointer<XmlElement> data (projectDefaults.createXml());
+        propertyFiles.getUnchecked (0)->setValue ("PROJECT_DEFAULT_SETTINGS", data);
+    }
+
+    void updateGlobalPreferences();
+    void updateAppearanceSettings();
+    void updateRecentFiles();
+    void updateKeyMappings();
+
     void loadSwatchColours();
     void saveSwatchColours();
+
+    //==============================================================================
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { changed(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override              { changed(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override       { changed(); }
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override         { changed(); }
+    void valueTreeParentChanged (ValueTree&) override                       { changed(); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings)
 };

@@ -33,6 +33,8 @@ public:
        : pipeInName  (pipePath + "_in"),
          pipeOutName (pipePath + "_out"),
          pipeIn (-1), pipeOut (-1),
+         createdFifoIn (false),
+         createdFifoOut (false),
          createdPipe (createPipe),
          stopReadOperation (false)
     {
@@ -47,8 +49,8 @@ public:
 
         if (createdPipe)
         {
-            unlink (pipeInName.toUTF8());
-            unlink (pipeOutName.toUTF8());
+            if (createdFifoIn)  unlink (pipeInName.toUTF8());
+            if (createdFifoOut) unlink (pipeOutName.toUTF8());
         }
     }
 
@@ -119,14 +121,22 @@ public:
         return bytesWritten;
     }
 
-    bool createFifos() const
+    static bool createFifo (const String& name, bool mustNotExist)
     {
-        return (mkfifo (pipeInName .toUTF8(), 0666) == 0 || errno == EEXIST)
-            && (mkfifo (pipeOutName.toUTF8(), 0666) == 0 || errno == EEXIST);
+        return mkfifo (name.toUTF8(), 0666) == 0 || ((! mustNotExist) && errno == EEXIST);
+    }
+
+    bool createFifos (bool mustNotExist)
+    {
+        createdFifoIn  = createFifo (pipeInName, mustNotExist);
+        createdFifoOut = createFifo (pipeOutName, mustNotExist);
+
+        return createdFifoIn && createdFifoOut;
     }
 
     const String pipeInName, pipeOutName;
     int pipeIn, pipeOut;
+    bool createdFifoIn, createdFifoOut;
 
     const bool createdPipe;
     bool stopReadOperation;
@@ -188,7 +198,7 @@ void NamedPipe::close()
     }
 }
 
-bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
+bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, bool mustNotExist)
 {
    #if JUCE_IOS
     pimpl = new Pimpl (File::getSpecialLocation (File::tempDirectory)
@@ -202,7 +212,7 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
     pimpl = new Pimpl (file, createPipe);
    #endif
 
-    if (createPipe && ! pimpl->createFifos())
+    if (createPipe && ! pimpl->createFifos (mustNotExist))
     {
         pimpl = nullptr;
         return false;

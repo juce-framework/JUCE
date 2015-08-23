@@ -1130,13 +1130,6 @@ void TreeView::itemDropped (const SourceDetails& dragSourceDetails)
 }
 
 //==============================================================================
-enum TreeViewOpenness
-{
-    opennessDefault = 0,
-    opennessClosed = 1,
-    opennessOpen = 2
-};
-
 TreeViewItem::TreeViewItem()
     : ownerView (nullptr),
       parentItem (nullptr),
@@ -1262,6 +1255,24 @@ bool TreeViewItem::removeSubItemFromList (int index, bool deleteItem)
     return false;
 }
 
+TreeViewItem::Openness TreeViewItem::getOpenness() const noexcept
+{
+    return (Openness) openness;
+}
+
+void TreeViewItem::setOpenness (Openness newOpenness)
+{
+    const bool wasOpen = isOpen();
+    openness = newOpenness;
+    const bool isNowOpen = isOpen();
+
+    if (isNowOpen != wasOpen)
+    {
+        treeHasChanged();
+        itemOpennessChanged (isNowOpen);
+    }
+}
+
 bool TreeViewItem::isOpen() const noexcept
 {
     if (openness == opennessDefault)
@@ -1273,13 +1284,8 @@ bool TreeViewItem::isOpen() const noexcept
 void TreeViewItem::setOpen (const bool shouldBeOpen)
 {
     if (isOpen() != shouldBeOpen)
-    {
-        openness = shouldBeOpen ? opennessOpen
-                                : opennessClosed;
-        treeHasChanged();
-
-        itemOpennessChanged (isOpen());
-    }
+        setOpenness (shouldBeOpen ? opennessOpen
+                                  : opennessClosed);
 }
 
 bool TreeViewItem::isFullyOpen() const noexcept
@@ -1296,11 +1302,7 @@ bool TreeViewItem::isFullyOpen() const noexcept
 
 void TreeViewItem::restoreToDefaultOpenness()
 {
-    if (openness != opennessDefault && ownerView != nullptr)
-    {
-        setOpen (ownerView->defaultOpenness);
-        openness = opennessDefault;
-    }
+    setOpenness (opennessDefault);
 }
 
 bool TreeViewItem::isSelected() const noexcept
@@ -1377,6 +1379,10 @@ void TreeViewItem::itemSelectionChanged (bool)
 String TreeViewItem::getTooltip()
 {
     return String::empty;
+}
+
+void TreeViewItem::ownerViewChanged (TreeView*)
+{
 }
 
 var TreeViewItem::getDragSourceDescription()
@@ -1485,7 +1491,11 @@ void TreeViewItem::setOwnerView (TreeView* const newOwner) noexcept
     ownerView = newOwner;
 
     for (int i = subItems.size(); --i >= 0;)
-        subItems.getUnchecked(i)->setOwnerView (newOwner);
+    {
+        TreeViewItem* subItem = subItems.getUnchecked(i);
+        subItem->setOwnerView (newOwner);
+        subItem->ownerViewChanged (newOwner);
+    }
 }
 
 int TreeViewItem::getIndentX() const noexcept
@@ -1856,6 +1866,7 @@ void TreeViewItem::restoreOpennessState (const XmlElement& e)
             }
         }
 
+        // for any items that weren't mentioned in the XML, reset them to default:
         for (int i = 0; i < items.size(); ++i)
             items.getUnchecked(i)->restoreToDefaultOpenness();
     }

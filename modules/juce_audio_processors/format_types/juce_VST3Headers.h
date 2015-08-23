@@ -110,7 +110,6 @@ namespace Steinberg
     DEF_CLASS_IID (IPlugView)
     DEF_CLASS_IID (IPlugFrame)
     DEF_CLASS_IID (IBStream)
-    DEF_CLASS_IID (ISizeableStream)
     DEF_CLASS_IID (IPluginFactory)
     DEF_CLASS_IID (IPluginFactory2)
     DEF_CLASS_IID (IPluginFactory3)

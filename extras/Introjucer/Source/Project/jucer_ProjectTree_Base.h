@@ -151,7 +151,7 @@ public:
             for (int i = 0; i < fc.getResults().size(); ++i)
                 files.add (fc.getResults().getReference(i).getFullPathName());
 
-            addFiles (files, 0);
+            addFilesRetainingSortOrder (files);
         }
     }
 
@@ -167,10 +167,16 @@ public:
         }
     }
 
-    virtual void addFiles (const StringArray& files, int insertIndex)
+    virtual void addFilesAtIndex (const StringArray& files, int insertIndex)
     {
         if (ProjectTreeItemBase* p = getParentProjectItem())
-            p->addFiles (files, insertIndex);
+            p->addFilesAtIndex (files, insertIndex);
+    }
+
+    virtual void addFilesRetainingSortOrder (const StringArray& files)
+    {
+        if (ProjectTreeItemBase* p = getParentProjectItem())
+            p->addFilesRetainingSortOrder (files);
     }
 
     virtual void moveSelectedItemsTo (OwnedArray <Project::Item>&, int /*insertIndex*/)
@@ -264,7 +270,7 @@ public:
         if (files.size() == 1 && File (files[0]).hasFileExtension (Project::projectFileExtension))
             IntrojucerApp::getApp().openFile (files[0]);
         else
-            addFiles (files, insertIndex);
+            addFilesAtIndex (files, insertIndex);
     }
 
     bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override

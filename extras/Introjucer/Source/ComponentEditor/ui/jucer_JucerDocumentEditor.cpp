@@ -24,6 +24,7 @@
 
 #include "../../jucer_Headers.h"
 #include "../../Application/jucer_AppearanceSettings.h"
+#include "../../Application/jucer_GlobalPreferences.h"
 #include "../../Application/jucer_Application.h"
 #include "jucer_JucerDocumentEditor.h"
 #include "jucer_TestComponent.h"
@@ -187,8 +188,8 @@ private:
             : ComponentTextProperty <Component> ("Class name", 128, false, 0, doc)
         {}
 
-        void setText (const String& newText)    { document.setClassName (newText); }
-        String getText() const                  { return document.getClassName(); }
+        void setText (const String& newText) override    { document.setClassName (newText); }
+        String getText() const override                  { return document.getClassName(); }
     };
 
     //==============================================================================
@@ -199,8 +200,8 @@ private:
             : ComponentTextProperty <Component> ("Component name", 200, false, 0, doc)
         {}
 
-        void setText (const String& newText)    { document.setComponentName (newText); }
-        String getText() const                  { return document.getComponentName(); }
+        void setText (const String& newText) override    { document.setComponentName (newText); }
+        String getText() const override                  { return document.getComponentName(); }
     };
 
     //==============================================================================
@@ -211,8 +212,8 @@ private:
             : ComponentTextProperty <Component> ("Parent classes", 512, false, 0, doc)
         {}
 
-        void setText (const String& newText)    { document.setParentClasses (newText); }
-        String getText() const                  { return document.getParentClassString(); }
+        void setText (const String& newText) override    { document.setParentClasses (newText); }
+        String getText() const override                  { return document.getParentClassString(); }
     };
 
     //==============================================================================
@@ -223,8 +224,8 @@ private:
             : ComponentTextProperty <Component> ("Constructor params", 2048, false, 0, doc)
         {}
 
-        void setText (const String& newText)    { document.setConstructorParams (newText); }
-        String getText() const                  { return document.getConstructorParams(); }
+        void setText (const String& newText) override    { document.setConstructorParams (newText); }
+        String getText() const override                  { return document.getConstructorParams(); }
     };
 
     //==============================================================================
@@ -237,8 +238,8 @@ private:
             preferredHeight = 24 * 3;
         }
 
-        void setText (const String& newText)    { document.setVariableInitialisers (newText); }
-        String getText() const                  { return document.getVariableInitialisers(); }
+        void setText (const String& newText) override    { document.setVariableInitialisers (newText); }
+        String getText() const override                  { return document.getVariableInitialisers(); }
     };
 
 
@@ -253,7 +254,7 @@ private:
               isWidth (isWidth_)
         {}
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             if (isWidth)
                 document.setInitialSize  (newText.getIntValue(), document.getInitialHeight());
@@ -261,7 +262,7 @@ private:
                 document.setInitialSize  (document.getInitialWidth(), newText.getIntValue());
         }
 
-        String getText() const
+        String getText() const override
         {
             return String (isWidth ? document.getInitialWidth()
                                    : document.getInitialHeight());
@@ -294,8 +295,8 @@ private:
             : ComponentTextProperty <Component> ("Template file", 2048, false, 0, doc)
         {}
 
-        void setText (const String& newText)    { document.setTemplateFile (newText); }
-        String getText() const                  { return document.getTemplateFile(); }
+        void setText (const String& newText) override    { document.setTemplateFile (newText); }
+        String getText() const override                  { return document.getTemplateFile(); }
     };
 };
 

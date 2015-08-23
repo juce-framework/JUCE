@@ -137,7 +137,7 @@ public:
         if (item.isValid())
             return item;
 
-        generatedFilesGroup.addFile (file, -1, true);
+        generatedFilesGroup.addFileAtIndex (file, -1, true);
         return generatedFilesGroup.findItemForFile (file);
     }
 
@@ -504,7 +504,7 @@ private:
                     const File& f = binaryDataFiles.getReference(i);
 
                     filesCreated.add (f);
-                    generatedFilesGroup.addFile (f, -1, ! f.hasFileExtension (".h"));
+                    generatedFilesGroup.addFileRetainingSortOrder (f, ! f.hasFileExtension (".h"));
                 }
             }
             else

@@ -23,14 +23,6 @@ if [ $copyAU -gt 0 ]; then
   cp -r "$original" "$AU"
   sed -i "" -e 's/TDMwPTul/BNDLPTul/g' "$AU/Contents/PkgInfo"
   sed -i "" -e 's/TDMw/BNDL/g' "$AU/Contents/$INFOPLIST_FILE"
-
-  # Fix info.plist for AUs built with Xcode 3
-  if [ -f "$DEVELOPER_DIR/Library/Developer/CoreAudio/AudioUnits/AUPublic/AUBase/AUPlugInDispatch.cpp" ]; then
-    echo
-  else
-    echo "Removing AudioComponents entry from Info.plist because this is not a new-format AU"
-    /usr/libexec/PlistBuddy -c "Delete AudioComponents" "$AU/Contents/Info.plist"
-  fi
 fi
 
 if [ $copyVST -gt 0 ]; then

@@ -101,7 +101,7 @@ class MemoryStreamTests  : public UnitTest
 public:
     MemoryStreamTests() : UnitTest ("MemoryInputStream & MemoryOutputStream") {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Basics");
         Random r = getRandom();

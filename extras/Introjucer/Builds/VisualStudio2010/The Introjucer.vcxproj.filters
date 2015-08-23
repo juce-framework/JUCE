@@ -262,6 +262,9 @@
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Application\jucer_GlobalPreferences.cpp">
+      <Filter>The Introjucer\Application</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
@@ -340,6 +343,9 @@
     <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp">
+      <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
@@ -417,6 +423,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_OpenGLComponentTemplate.cpp">
       <Filter>The Introjucer\BinaryData\templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_Base64.cpp">
+      <Filter>Juce Modules\juce_core\text</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <Filter>Juce Modules\juce_core\text</Filter>
@@ -1365,6 +1374,9 @@
     <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Application\jucer_GlobalPreferences.h">
+      <Filter>The Introjucer\Application</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\jucer_Headers.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
@@ -1605,6 +1617,9 @@
     <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
@@ -1739,6 +1754,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
       <Filter>The Introjucer\BinaryData\templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_Base64.h">
+      <Filter>Juce Modules\juce_core\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h">
       <Filter>Juce Modules\juce_core\text</Filter>

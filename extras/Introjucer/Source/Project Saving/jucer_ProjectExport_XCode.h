@@ -53,6 +53,8 @@ public:
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
+
+        initialiseDependencyPathValues();
     }
 
     static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -214,8 +216,8 @@ protected:
 
             if (iOS)
             {
-                const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", "6.0", "6.1", "7.0", "7.1", 0 };
-                const char* iosVersionValues[] = { osxVersionDefault, "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", "6.0", "6.1", "7.0", "7.1", 0 };
+                const char* iosVersions[]      = { "Use Default",     "4.3", "5.0", "5.1", "6.0", "6.1", "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", 0 };
+                const char* iosVersionValues[] = { osxVersionDefault, "4.3", "5.0", "5.1", "6.0", "6.1", "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", 0 };
 
                 props.add (new ChoicePropertyComponent (getiOSCompatibilityVersionValue(), "iOS Deployment Target",
                                                         StringArray (iosVersions), Array<var> (iosVersionValues)),
@@ -1498,5 +1500,20 @@ private:
     {
         jassert (version >= 4);
         return "10." + String (version) + " SDK";
+    }
+
+    void initialiseDependencyPathValues()
+    {
+        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),
+                                                                Ids::vst2Path, TargetOS::osx)));
+
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path, TargetOS::osx)));
+
+        aaxPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),
+                                                               Ids::aaxPath, TargetOS::osx)));
+
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
+                                                                Ids::rtasPath, TargetOS::osx)));
     }
 };

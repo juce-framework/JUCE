@@ -522,7 +522,7 @@ struct OpenGLDemoClasses
             demo.rotationSpeed = (float) speedSlider.getValue();
         }
 
-        void buttonClicked (Button*)
+        void buttonClicked (Button*) override
         {
             demo.doBackgroundDrawing = showBackgroundToggle.getToggleState();
         }
@@ -719,7 +719,7 @@ struct OpenGLDemoClasses
             newFragmentShader = fragmentShader;
         }
 
-        void paint (Graphics&) {}
+        void paint (Graphics&) override {}
 
         void resized() override
         {

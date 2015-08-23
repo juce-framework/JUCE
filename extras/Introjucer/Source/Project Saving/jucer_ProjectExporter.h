@@ -28,6 +28,8 @@
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
+#include "../Application/jucer_GlobalPreferences.h"
+
 class ProjectSaver;
 
 //==============================================================================
@@ -111,6 +113,10 @@ public:
     String getExternalLibrariesString() const   { return getSettingString (Ids::externalLibraries).replaceCharacters ("\r\n", " ;"); }
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
+
+    Value getVSTPathValue (bool isVST3) const   { return isVST3 ? vst3Path : vst2Path; }
+    Value getRTASPathValue() const              { return rtasPath; }
+    Value getAAXPathValue() const               { return aaxPath; }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -327,6 +333,7 @@ protected:
     const ProjectType& projectType;
     const String projectName;
     const File projectFolder;
+    Value vst2Path, vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
 
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;

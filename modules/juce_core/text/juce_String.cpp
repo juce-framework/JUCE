@@ -86,12 +86,7 @@ public:
         if (text.getAddress() == nullptr || text.isEmpty())
             return CharPointerType (&(emptyString.text));
 
-        CharPointer t (text);
-        size_t bytesNeeded = sizeof (CharType);
-
-        while (! t.isEmpty())
-            bytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
-
+        const size_t bytesNeeded = sizeof (CharType) + CharPointerType::getBytesRequiredFor (text);
         const CharPointerType dest (createUninitialisedBytes (bytesNeeded));
         CharPointerType (dest).writeAll (text);
         return dest;
@@ -2229,7 +2224,7 @@ public:
         return CharPointer_UTF32 (buffer);
     }
 
-    void runTest()
+    void runTest() override
     {
         Random r = getRandom();
 

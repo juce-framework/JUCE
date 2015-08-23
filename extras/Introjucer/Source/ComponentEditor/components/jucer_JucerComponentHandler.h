@@ -226,13 +226,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new ConstructorParamChangeAction (component, *document.getComponentLayout(), newText),
                               "Change Viewport content constructor params");
         }
 
-        String getText() const
+        String getText() const override
         {
             return component->getConstructorParams();
         }

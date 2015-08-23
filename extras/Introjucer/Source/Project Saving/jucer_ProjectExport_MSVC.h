@@ -33,6 +33,8 @@ public:
 
         projectGUID = createGUID (project.getProjectUID());
         updateOldSettings();
+
+        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -555,6 +557,25 @@ protected:
                                                       : (".\\" + filename);
     }
 
+    void initialiseDependencyPathValues()
+    {
+        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),
+                                                                Ids::vst2Path,
+                                                                TargetOS::windows)));
+
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path,
+                                                                TargetOS::windows)));
+
+        aaxPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),
+                                                               Ids::aaxPath,
+                                                               TargetOS::windows)));
+
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
+                                                                Ids::rtasPath,
+                                                                TargetOS::windows)));
+    }
+
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase)
 };
 
@@ -598,11 +619,11 @@ public:
                 {
                     if (iconFile != File::nonexistent)
                     {
-                        group.addFile (iconFile, -1, true);
+                        group.addFileAtIndex (iconFile, -1, true);
                         group.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
                     }
 
-                    group.addFile (rcFile, -1, true);
+                    group.addFileAtIndex (rcFile, -1, true);
                     group.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
 
                     break;

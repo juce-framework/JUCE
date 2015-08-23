@@ -56,6 +56,11 @@
     assertions if you try to do anything dangerous, but there are still plenty of ways it
     could go wrong.
 
+    Note that although the children in a tree have a fixed order, the properties are not
+    guaranteed to be stored in any particular order, so don't expect that a property's index
+    will correspond to the order in which the property was added, or that it will remain
+    constant when other properties are added or removed.
+
     Listeners can be added to a ValueTree to be told when properies change and when
     nodes are added or removed.
 
@@ -188,6 +193,9 @@ public:
     int getNumProperties() const;
 
     /** Returns the identifier of the property with a given index.
+        Note that properties are not guaranteed to be stored in any particular order, so don't
+        expect that the index will correspond to the order in which the property was added, or
+        that it will remain constant when other properties are added or removed.
         @see getNumProperties
     */
     Identifier getPropertyName (int index) const;

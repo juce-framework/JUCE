@@ -69,7 +69,7 @@ public:
 
     //==============================================================================
     /** Clears and resets the thumbnail. */
-    void clear();
+    void clear() override;
 
     /** Specifies the file or stream that contains the audio file.
 
@@ -83,7 +83,7 @@ public:
         @returns true if the source could be opened as a valid audio file, false if this failed for
         some reason.
     */
-    bool setSource (InputSource* newSource);
+    bool setSource (InputSource* newSource) override;
 
     /** Gives the thumbnail an AudioFormatReader to use directly.
         This will start parsing the audio in a background thread (unless the hash code
@@ -95,19 +95,19 @@ public:
         should use the setSource() method instead, which will only open the file when
         it needs to.
     */
-    void setReader (AudioFormatReader* newReader, int64 hashCode);
+    void setReader (AudioFormatReader* newReader, int64 hashCode) override;
 
     /** Resets the thumbnail, ready for adding data with the specified format.
         If you're going to generate a thumbnail yourself, call this before using addBlock()
         to add the data.
     */
-    void reset (int numChannels, double sampleRate, int64 totalSamplesInSource = 0);
+    void reset (int numChannels, double sampleRate, int64 totalSamplesInSource = 0) override;
 
     /** Adds a block of level data to the thumbnail.
         Call reset() before using this, to tell the thumbnail about the data format.
     */
     void addBlock (int64 sampleNumberInSource, const AudioSampleBuffer& newData,
-                   int startOffsetInBuffer, int numSamples);
+                   int startOffsetInBuffer, int numSamples) override;
 
     //==============================================================================
     /** Reloads the low res thumbnail data from an input stream.
@@ -116,21 +116,21 @@ public:
         previously have been created by the saveTo() method.
         @see saveTo
     */
-    bool loadFrom (InputStream& input);
+    bool loadFrom (InputStream& input) override;
 
     /** Saves the low res thumbnail data to an output stream.
 
         The data that is written can later be reloaded using loadFrom().
         @see loadFrom
     */
-    void saveTo (OutputStream& output) const;
+    void saveTo (OutputStream& output) const override;
 
     //==============================================================================
     /** Returns the number of channels in the file. */
-    int getNumChannels() const noexcept;
+    int getNumChannels() const noexcept override;
 
     /** Returns the length of the audio file, in seconds. */
-    double getTotalLength() const noexcept;
+    double getTotalLength() const noexcept override;
 
     /** Draws the waveform for a channel.
 
@@ -147,7 +147,7 @@ public:
                       double startTimeSeconds,
                       double endTimeSeconds,
                       int channelNum,
-                      float verticalZoomFactor);
+                      float verticalZoomFactor) override;
 
     /** Draws the waveforms for all channels in the thumbnail.
 
@@ -160,22 +160,22 @@ public:
                        const Rectangle<int>& area,
                        double startTimeSeconds,
                        double endTimeSeconds,
-                       float verticalZoomFactor);
+                       float verticalZoomFactor) override;
 
     /** Returns true if the low res preview is fully generated. */
-    bool isFullyLoaded() const noexcept;
+    bool isFullyLoaded() const noexcept override;
 
     /** Returns a value between 0 and 1 to indicate the progress towards loading the entire file. */
     double getProportionComplete() const noexcept;
 
     /** Returns the number of samples that have been set in the thumbnail. */
-    int64 getNumSamplesFinished() const noexcept;
+    int64 getNumSamplesFinished() const noexcept override;
 
     /** Returns the highest level in the thumbnail.
         Note that because the thumb only stores low-resolution data, this isn't
         an accurate representation of the highest value, it's only a rough approximation.
     */
-    float getApproximatePeak() const;
+    float getApproximatePeak() const override;
 
     /** Reads the approximate min and max levels from a section of the thumbnail.
         The lowest and highest samples are returned in minValue and maxValue, but obviously
@@ -183,10 +183,10 @@ public:
         approximation of the true values.
     */
     void getApproximateMinMax (double startTime, double endTime, int channelIndex,
-                               float& minValue, float& maxValue) const noexcept;
+                               float& minValue, float& maxValue) const noexcept override;
 
     /** Returns the hash code that was set by setSource() or setReader(). */
-    int64 getHashCode() const;
+    int64 getHashCode() const override;
 
 private:
     //==============================================================================

@@ -37,7 +37,7 @@ class PluginHostApp  : public JUCEApplication
 public:
     PluginHostApp() {}
 
-    void initialise (const String& commandLine) override
+    void initialise (const String&) override
     {
         // initialise our settings file..
 
@@ -59,11 +59,28 @@ public:
 
         mainWindow->menuItemsChanged();
 
-        if (commandLine.isNotEmpty()
-             && ! commandLine.trimStart().startsWith ("-")
-             && mainWindow->getGraphEditor() != nullptr)
-            mainWindow->getGraphEditor()->graph.loadFrom (File::getCurrentWorkingDirectory()
-                                                            .getChildFile (commandLine), true);
+        File fileToOpen;
+
+        for (int i = 0; i < getCommandLineParameterArray().size(); ++i)
+        {
+            fileToOpen = File::getCurrentWorkingDirectory().getChildFile (getCommandLineParameterArray()[i]);
+
+            if (fileToOpen.existsAsFile())
+                break;
+        }
+
+        if (! fileToOpen.existsAsFile())
+        {
+            RecentlyOpenedFilesList recentFiles;
+            recentFiles.restoreFromString (getAppProperties().getUserSettings()->getValue ("recentFilterGraphFiles"));
+
+            if (recentFiles.getNumFiles() > 0)
+                fileToOpen = recentFiles.getFile (0);
+        }
+
+        if (fileToOpen.existsAsFile())
+            if (GraphDocumentComponent* graph = mainWindow->getGraphEditor())
+                graph->graph.loadFrom (fileToOpen, true);
     }
 
     void shutdown() override

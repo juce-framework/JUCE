@@ -38,7 +38,8 @@ public:
     }
 
     //==============================================================================
-    AndroidProjectExporter (Project& p, const ValueTree& t)    : ProjectExporter (p, t)
+    AndroidProjectExporter (Project& p, const ValueTree& t)
+        : ProjectExporter (p, t)
     {
         name = getNameAndroid();
 
@@ -51,9 +52,6 @@ public:
         if (getActivityClassPath().isEmpty())
             getActivityClassPathValue() = createDefaultClassName();
 
-        if (getSDKPathString().isEmpty())       getSDKPathValue() = "${user.home}/SDKs/android-sdk";
-        if (getNDKPathString().isEmpty())       getNDKPathValue() = "${user.home}/SDKs/android-ndk";
-
         if (getMinimumSDKVersionString().isEmpty())
             getMinimumSDKVersionValue() = 10;
 
@@ -65,6 +63,8 @@ public:
         if (getKeyAliasValue().getValue().isVoid())         getKeyAliasValue()      = "androiddebugkey";
         if (getKeyAliasPassValue().getValue().isVoid())     getKeyAliasPassValue()  = "android";
         if (getCPP11EnabledValue().getValue().isVoid())     getCPP11EnabledValue()  = true;
+
+        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -86,10 +86,10 @@ public:
         props.add (new TextPropertyComponent (getVersionCodeValue(), "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
-        props.add (new TextPropertyComponent (getSDKPathValue(), "Android SDK Path", 1024, false),
+        props.add (new DependencyPathPropertyComponent (getSDKPathValue(), "Android SDK Path"),
                    "The path to the Android SDK folder on the target build machine");
 
-        props.add (new TextPropertyComponent (getNDKPathValue(), "Android NDK Path", 1024, false),
+        props.add (new DependencyPathPropertyComponent (getNDKPathValue(), "Android NDK Path"),
                    "The path to the Android NDK folder on the target build machine");
 
         props.add (new TextPropertyComponent (getMinimumSDKVersionValue(), "Minimum SDK version", 32, false),
@@ -135,10 +135,10 @@ public:
     String getActivitySubClassPath() const          { return settings [Ids::androidActivitySubClassName]; }
     Value  getVersionCodeValue()                    { return getSetting (Ids::androidVersionCode); }
     String getVersionCodeString() const             { return settings [Ids::androidVersionCode]; }
-    Value  getSDKPathValue()                        { return getSetting (Ids::androidSDKPath); }
-    String getSDKPathString() const                 { return settings [Ids::androidSDKPath]; }
-    Value  getNDKPathValue()                        { return getSetting (Ids::androidNDKPath); }
-    String getNDKPathString() const                 { return settings [Ids::androidNDKPath]; }
+    Value  getSDKPathValue()                        { return sdkPath; }
+    String getSDKPathString() const                 { return sdkPath.toString(); }
+    Value  getNDKPathValue()                        { return ndkPath; }
+    String getNDKPathString() const                 { return ndkPath.toString(); }
     Value  getNDKToolchainVersionValue()            { return getSetting (Ids::toolset); }
     String getNDKToolchainVersionString() const     { return settings [Ids::toolset]; }
 
@@ -751,6 +751,19 @@ private:
         writeXmlOrThrow (strings, file, "utf-8", 100);
     }
 
+    void initialiseDependencyPathValues()
+    {
+        sdkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath),
+                                                               Ids::androidSDKPath,
+                                                               TargetOS::getThisOS())));
+
+        ndkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath),
+                                                               Ids::androidNDKPath,
+                                                               TargetOS::getThisOS())));
+    }
+
     //==============================================================================
+    Value sdkPath, ndkPath;
+
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };

@@ -23,7 +23,7 @@
 */
 
 /** Acts as a GUI which asks the user for their details, and calls the approriate
-    methods on your TracktionMarketplaceStatus object to attempt to register the app.
+    methods on your OnlineUnlockStatus object to attempt to register the app.
 
     You should create one of these components and add it to your parent window,
     or use a DialogWindow to display it as a pop-up. But if you're writing a plugin,
@@ -39,21 +39,21 @@
     Although it deletes itself, it's also OK to delete it manually yourself
     if you need to get rid of it sooner.
 
-    @see TracktionMarketplaceStatus
+    @see OnlineUnlockStatus
 */
-class JUCE_API  TracktionMarketplaceUnlockForm  : public Component,
-                                                  private ButtonListener
+class JUCE_API  OnlineUnlockForm  : public Component,
+                                    private ButtonListener
 {
 public:
     /** Creates an unlock form that will work with the given status object.
         The userInstructions will be displayed above the email and password boxes.
     */
-    TracktionMarketplaceUnlockForm (TracktionMarketplaceStatus&,
-                                    const String& userInstructions,
-                                    bool hasCancelButton = true);
+    OnlineUnlockForm (OnlineUnlockStatus&,
+                      const String& userInstructions,
+                      bool hasCancelButton = true);
 
     /** Destructor. */
-    ~TracktionMarketplaceUnlockForm();
+    ~OnlineUnlockForm();
 
     /** This is called when the form is dismissed (either cancelled or when registration
         succeeds).
@@ -73,7 +73,7 @@ public:
     TextButton registerButton, cancelButton;
 
 private:
-    TracktionMarketplaceStatus& status;
+    OnlineUnlockStatus& status;
     ScopedPointer<BubbleMessageComponent> bubble;
 
     struct OverlayComp;
@@ -84,5 +84,5 @@ private:
     void attemptRegistration();
     void showBubbleMessage (const String&, Component&);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TracktionMarketplaceUnlockForm)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OnlineUnlockForm)
 };

@@ -4,6 +4,10 @@
 
 This file just lists the more notable headline features. For more detailed info about minor changes and bugfixes, please see the git log.
 
+Version 3.3.0
+  - New functions for Base64 conversion
+  - New command-line options in the introjucer for trimming whitespace and replacing tabs in source files
+
 
 Version 3.2.0
   - Major OpenGL performance/stability improvements

@@ -310,7 +310,7 @@ public:
     void audioProcessorChanged (AudioProcessor*) override
     {
         if (componentHandler != nullptr)
-            componentHandler->restartComponent (Vst::kLatencyChanged & Vst::kParamValuesChanged);
+            componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged);
     }
 
     //==============================================================================
@@ -1472,7 +1472,7 @@ private:
  #pragma warning (disable: 4310)
 #elif JUCE_CLANG
  #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-w"
+ #pragma clang diagnostic ignored "-Wall"
 #endif
 
 DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)

@@ -406,13 +406,13 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             document.perform (new SliderBoxSizeChangeAction (component, *document.getComponentLayout(), isWidth, newText.getIntValue()),
                               "Change Slider textbox size");
         }
 
-        String getText() const
+        String getText() const override
         {
             return String (isWidth ? component->getTextBoxWidth()
                                    : component->getTextBoxHeight());
@@ -487,7 +487,7 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             double state [3];
             state [0] = component->getMinimum();
@@ -500,7 +500,7 @@ private:
                               "Change Slider range");
         }
 
-        String getText() const
+        String getText() const override
         {
             Slider* s = dynamic_cast <Slider*> (component);
             jassert (s != nullptr);
@@ -563,7 +563,7 @@ private:
         {
         }
 
-        void setText (const String& newText)
+        void setText (const String& newText) override
         {
             const double skew = jlimit (0.001, 1000.0, newText.getDoubleValue());
 
@@ -571,7 +571,7 @@ private:
                               "Change Slider skew");
         }
 
-        String getText() const
+        String getText() const override
         {
             Slider* s = dynamic_cast <Slider*> (component);
             jassert (s != 0);

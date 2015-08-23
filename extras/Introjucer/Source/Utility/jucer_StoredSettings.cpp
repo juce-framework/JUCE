@@ -25,6 +25,7 @@
 #include "../jucer_Headers.h"
 #include "jucer_StoredSettings.h"
 #include "../Application/jucer_Application.h"
+#include "../Application/jucer_GlobalPreferences.h"
 
 //==============================================================================
 StoredSettings& getAppSettings()
@@ -39,13 +40,15 @@ PropertiesFile& getGlobalProperties()
 
 //==============================================================================
 StoredSettings::StoredSettings()
-    : appearance (true)
+    : appearance (true), projectDefaults ("PROJECT_DEFAULT_SETTINGS")
 {
     reload();
+    projectDefaults.addListener (this);
 }
 
 StoredSettings::~StoredSettings()
 {
+    projectDefaults.removeListener (this);
     flush();
 }
 
@@ -76,31 +79,43 @@ PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
     return *p;
 }
 
-void StoredSettings::updateGlobalProps()
+void StoredSettings::updateGlobalPreferences()
 {
-    PropertiesFile& props = getGlobalProperties();
+    // update global settings editable from the global preferences window
+    updateAppearanceSettings();
 
-    {
-        const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
-        props.setValue ("editorColours", xml);
-    }
+    // update 'invisible' global settings
+    updateRecentFiles();
+    updateKeyMappings();
+}
 
-    props.setValue ("recentFiles", recentFiles.toString());
+void StoredSettings::updateAppearanceSettings()
+{
+    const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
+    getGlobalProperties().setValue ("editorColours", xml);
+}
 
-    props.removeValue ("keyMappings");
+void StoredSettings::updateRecentFiles()
+{
+    getGlobalProperties().setValue ("recentFiles", recentFiles.toString());
+}
+
+void StoredSettings::updateKeyMappings()
+{
+    getGlobalProperties().removeValue ("keyMappings");
 
     if (ApplicationCommandManager* commandManager = IntrojucerApp::getApp().commandManager)
     {
-        const ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
+        const ScopedPointer<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
         if (keys != nullptr)
-            props.setValue ("keyMappings", keys);
+            getGlobalProperties().setValue ("keyMappings", keys);
     }
 }
 
 void StoredSettings::flush()
 {
-    updateGlobalProps();
+    updateGlobalPreferences();
     saveSwatchColours();
 
     for (int i = propertyFiles.size(); --i >= 0;)
@@ -111,6 +126,11 @@ void StoredSettings::reload()
 {
     propertyFiles.clear();
     propertyFiles.add (createPropsFile ("Introjucer"));
+
+    ScopedPointer<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
+
+    if (projectDefaultsXml != nullptr)
+        projectDefaults = ValueTree::fromXml (*projectDefaultsXml);
 
     // recent files...
     recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));
@@ -195,4 +215,104 @@ Colour StoredSettings::ColourSelectorWithSwatches::getSwatchColour (int index) c
 void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, const Colour& newColour) const
 {
     getAppSettings().swatchColours.set (index, newColour);
+}
+
+//==============================================================================
+static bool doesSDKPathContainFile (const String& path, const String& fileToCheckFor)
+{
+    String actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+    return File::getCurrentWorkingDirectory().getChildFile (actualPath + "/" + fileToCheckFor).existsAsFile();
+}
+
+Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
+{
+    Value v (projectDefaults.getPropertyAsValue (key, nullptr));
+
+    if (v.toString().isEmpty())
+        v = getFallbackPath (key, os);
+
+    return v;
+}
+
+String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS os)
+{
+    if (key == Ids::vst2Path || key == Ids::vst3Path)
+        return os == TargetOS::windows ? "c:\\SDKs\\VST3 SDK"
+                                       : "~/SDKs/VST3 SDK";
+
+    if (key == Ids::rtasPath)
+    {
+        if (os == TargetOS::windows)   return "c:\\SDKs\\PT_80_SDK";
+        if (os == TargetOS::osx)       return "~/SDKs/PT_80_SDK";
+
+        // no RTAS on this OS!
+        jassertfalse;
+        return String();
+    }
+
+    if (key == Ids::aaxPath)
+    {
+        if (os == TargetOS::windows)   return "c:\\SDKs\\AAX";
+        if (os == TargetOS::osx)       return "~/SDKs/AAX" ;
+
+        // no AAX on this OS!
+        jassertfalse;
+        return String();
+    }
+
+    if (key == Ids::androidSDKPath)
+        return "${user.home}/SDKs/android-sdk";
+
+    if (key == Ids::androidNDKPath)
+        return "${user.home}/SDKs/android-ndk";
+
+    // didn't recognise the key provided!
+    jassertfalse;
+    return String();
+}
+
+bool StoredSettings::isGlobalPathValid (const Identifier& key, const String& path)
+{
+    String fileToCheckFor;
+
+    if (key == Ids::vst2Path)
+    {
+        fileToCheckFor = "public.sdk/source/vst2.x/audioeffectx.h";
+    }
+    else if (key == Ids::vst3Path)
+    {
+        fileToCheckFor = "base/source/baseiids.cpp";
+    }
+    else if (key == Ids::rtasPath)
+    {
+        fileToCheckFor = "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses/CEffectProcessMIDI.cpp";
+    }
+    else if (key == Ids::aaxPath)
+    {
+        fileToCheckFor = "Interfaces/AAX_Exports.cpp";
+    }
+    else if (key == Ids::androidSDKPath)
+    {
+       #if JUCE_WINDOWS
+        fileToCheckFor = "platform-tools/adb.exe";
+       #else
+        fileToCheckFor = "platform-tools/adb";
+       #endif
+    }
+    else if (key == Ids::androidNDKPath)
+    {
+       #if JUCE_WINDOWS
+        fileToCheckFor = "ndk-depends.exe";
+       #else
+        fileToCheckFor = "ndk-depends";
+       #endif
+    }
+    else
+    {
+        // didn't recognise the key provided!
+        jassertfalse;
+        return false;
+    }
+
+    return doesSDKPathContainFile (path, fileToCheckFor);
 }

@@ -273,7 +273,7 @@ class AtomicTests  : public UnitTest
 public:
     AtomicTests() : UnitTest ("Atomics") {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Misc");
 

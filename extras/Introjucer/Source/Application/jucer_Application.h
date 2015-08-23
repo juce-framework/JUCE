@@ -73,11 +73,15 @@ public:
 
         icons = new Icons();
 
+        if (! doExtraInitialisation())
+        {
+            quit();
+            return;
+        }
+
         initCommandManager();
 
         menuModel = new MainMenuModel();
-
-        doExtraInitialisation();
 
         settings->appearance.refreshPresetSchemeList();
 
@@ -101,6 +105,7 @@ public:
     {
         versionChecker = nullptr;
         appearanceEditorWindow = nullptr;
+        globalPreferencesWindow = nullptr;
         utf8Window = nullptr;
         svgPathWindow = nullptr;
 
@@ -274,8 +279,6 @@ public:
 
     void createColourSchemeItems (PopupMenu& menu)
     {
-        menu.addCommandItem (commandManager, CommandIDs::showAppearanceSettings);
-
         const StringArray presetSchemes (settings->appearance.getPresetSchemes());
 
         if (presetSchemes.size() > 0)
@@ -313,6 +316,8 @@ public:
 
     virtual void createToolsMenu (PopupMenu& menu)
     {
+        menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
+        menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
         menu.addCommandItem (commandManager, CommandIDs::showSVGPathTool);
         menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
@@ -351,7 +356,7 @@ public:
                                   CommandIDs::open,
                                   CommandIDs::closeAllDocuments,
                                   CommandIDs::saveAll,
-                                  CommandIDs::showAppearanceSettings,
+                                  CommandIDs::showGlobalPreferences,
                                   CommandIDs::showUTF8Tool,
                                   CommandIDs::showSVGPathTool };
 
@@ -372,8 +377,8 @@ public:
             result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
             break;
 
-        case CommandIDs::showAppearanceSettings:
-            result.setInfo ("Fonts and Colours...", "Shows the appearance settings window.", CommandCategories::general, 0);
+        case CommandIDs::showGlobalPreferences:
+            result.setInfo ("Global Preferences...", "Shows the global preferences window.", CommandCategories::general, 0);
             break;
 
         case CommandIDs::closeAllDocuments:
@@ -411,7 +416,7 @@ public:
             case CommandIDs::showUTF8Tool:              showUTF8ToolWindow (utf8Window); break;
             case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow (svgPathWindow); break;
 
-            case CommandIDs::showAppearanceSettings:    AppearanceSettings::showEditorWindow (appearanceEditorWindow); break;
+            case CommandIDs::showGlobalPreferences:     AppearanceSettings::showGlobalPreferences (globalPreferencesWindow); break;
             default:                                    return JUCEApplication::perform (info);
         }
 
@@ -501,7 +506,7 @@ public:
         logger = nullptr;
     }
 
-    virtual void doExtraInitialisation() {}
+    virtual bool doExtraInitialisation()  { return true; }
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
 
    #if JUCE_LINUX
@@ -542,7 +547,7 @@ public:
     OpenDocumentManager openDocumentManager;
     ScopedPointer<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> appearanceEditorWindow, utf8Window, svgPathWindow;
+    ScopedPointer<Component> appearanceEditorWindow, globalPreferencesWindow, utf8Window, svgPathWindow;
 
     ScopedPointer<FileLogger> logger;
 

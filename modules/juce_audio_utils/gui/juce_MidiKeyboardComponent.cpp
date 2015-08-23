@@ -79,7 +79,7 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation 
     addChildComponent (scrollDown = new MidiKeyboardUpDownButton (*this, -1));
     addChildComponent (scrollUp   = new MidiKeyboardUpDownButton (*this, 1));
 
-    // initialise with a default set of querty key-mappings..
+    // initialise with a default set of qwerty key-mappings..
     const char* const keymap = "awsedftgyhujkolp;";
 
     for (int i = 0; keymap[i] != 0; ++i)
@@ -104,8 +104,13 @@ MidiKeyboardComponent::~MidiKeyboardComponent()
 //==============================================================================
 void MidiKeyboardComponent::setKeyWidth (const float widthInPixels)
 {
-    keyWidth = widthInPixels;
-    resized();
+    jassert (widthInPixels > 0);
+
+    if (keyWidth != widthInPixels) // Prevent infinite recursion if the width is being computed in a 'resized()' call-back
+    {
+        keyWidth = widthInPixels;
+        resized();
+    }
 }
 
 void MidiKeyboardComponent::setOrientation (const Orientation newOrientation)
@@ -382,14 +387,18 @@ void MidiKeyboardComponent::paint (Graphics& g)
     x += w;
 
     const Colour shadowCol (findColour (shadowColourId));
-    g.setGradientFill (ColourGradient (shadowCol, x1, y1, shadowCol.withAlpha (0.0f), x2, y2, false));
 
-    switch (orientation)
+    if (! shadowCol.isTransparent())
     {
-        case horizontalKeyboard:            g.fillRect (0, 0, x, 5); break;
-        case verticalKeyboardFacingLeft:    g.fillRect (width - 5, 0, 5, x); break;
-        case verticalKeyboardFacingRight:   g.fillRect (0, 0, 5, x); break;
-        default: break;
+        g.setGradientFill (ColourGradient (shadowCol, x1, y1, shadowCol.withAlpha (0.0f), x2, y2, false));
+
+        switch (orientation)
+        {
+            case horizontalKeyboard:            g.fillRect (0, 0, x, 5); break;
+            case verticalKeyboardFacingLeft:    g.fillRect (width - 5, 0, 5, x); break;
+            case verticalKeyboardFacingRight:   g.fillRect (0, 0, 5, x); break;
+            default: break;
+        }
     }
 
     g.setColour (lineColour);
@@ -449,14 +458,16 @@ void MidiKeyboardComponent::drawWhiteNote (int midiNoteNumber,
 
     if (text.isNotEmpty())
     {
+        const float fontHeight = jmin (12.0f, keyWidth * 0.9f);
+
         g.setColour (textColour);
-        g.setFont (Font (jmin (12.0f, keyWidth * 0.9f)).withHorizontalScale (0.8f));
+        g.setFont (Font (fontHeight).withHorizontalScale (0.8f));
 
         switch (orientation)
         {
-            case horizontalKeyboard:            g.drawFittedText (text, x + 1, y,     w - 1, h - 2, Justification::centredBottom, 1); break;
-            case verticalKeyboardFacingLeft:    g.drawFittedText (text, x + 2, y + 2, w - 4, h - 4, Justification::centredLeft,   1); break;
-            case verticalKeyboardFacingRight:   g.drawFittedText (text, x + 2, y + 2, w - 4, h - 4, Justification::centredRight,  1); break;
+            case horizontalKeyboard:            g.drawText (text, x + 1, y,     w - 1, h - 2, Justification::centredBottom, false); break;
+            case verticalKeyboardFacingLeft:    g.drawText (text, x + 2, y + 2, w - 4, h - 4, Justification::centredLeft,   false); break;
+            case verticalKeyboardFacingRight:   g.drawText (text, x + 2, y + 2, w - 4, h - 4, Justification::centredRight,  false); break;
             default: break;
         }
     }
@@ -524,10 +535,10 @@ void MidiKeyboardComponent::setOctaveForMiddleC (const int octaveNum)
 
 String MidiKeyboardComponent::getWhiteNoteText (const int midiNoteNumber)
 {
-    if (keyWidth > 11.0f && midiNoteNumber % 12 == 0)
+    if (midiNoteNumber % 12 == 0)
         return MidiMessage::getMidiNoteName (midiNoteNumber, true, true, octaveNumForMiddleC);
 
-    return String::empty;
+    return String();
 }
 
 void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,

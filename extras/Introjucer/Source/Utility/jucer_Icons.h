@@ -33,7 +33,7 @@ struct Icon
     Icon (const Path& p, Colour c)  : path (&p), colour (c) {}
     Icon (const Path* p, Colour c)  : path (p),  colour (c) {}
 
-    void draw (Graphics& g, const Rectangle<float>& area, bool isCrossedOut) const
+    void draw (Graphics& g, const juce::Rectangle<float>& area, bool isCrossedOut) const
     {
         if (path != nullptr)
         {

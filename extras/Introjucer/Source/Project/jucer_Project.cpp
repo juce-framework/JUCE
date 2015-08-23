@@ -761,18 +761,36 @@ struct ItemSorterWithGroupsAtStart
     }
 };
 
-void Project::Item::sortAlphabetically (bool keepGroupsAtStart)
+static void sortGroup (ValueTree& state, bool keepGroupsAtStart, UndoManager* undoManager)
 {
     if (keepGroupsAtStart)
     {
         ItemSorterWithGroupsAtStart sorter;
-        state.sort (sorter, getUndoManager(), true);
+        state.sort (sorter, undoManager, true);
     }
     else
     {
         ItemSorter sorter;
-        state.sort (sorter, getUndoManager(), true);
+        state.sort (sorter, undoManager, true);
     }
+}
+
+static bool isGroupSorted (const ValueTree& state, bool keepGroupsAtStart)
+{
+    if (state.getNumChildren() == 0)
+        return false;
+
+    if (state.getNumChildren() == 1)
+        return true;
+
+    ValueTree stateCopy (state.createCopy());
+    sortGroup (stateCopy, keepGroupsAtStart, nullptr);
+    return stateCopy.isEquivalentTo (state);
+}
+
+void Project::Item::sortAlphabetically (bool keepGroupsAtStart)
+{
+    sortGroup (state, keepGroupsAtStart, getUndoManager());
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
@@ -802,7 +820,7 @@ Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex
     return group;
 }
 
-bool Project::Item::addFile (const File& file, int insertIndex, const bool shouldCompile)
+bool Project::Item::addFileAtIndex (const File& file, int insertIndex, const bool shouldCompile)
 {
     if (file == File::nonexistent || file.isHidden() || file.getFileName().startsWithChar ('.'))
         return false;
@@ -813,9 +831,7 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
 
         for (DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories); iter.next();)
             if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())
-                group.addFile (iter.getFile(), -1, shouldCompile);
-
-        group.sortAlphabetically (false);
+                group.addFileRetainingSortOrder (iter.getFile(), shouldCompile);
     }
     else if (file.existsAsFile())
     {
@@ -826,6 +842,20 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
     {
         jassertfalse;
     }
+
+    return true;
+}
+
+bool Project::Item::addFileRetainingSortOrder (const File& file, bool shouldCompile)
+{
+    const bool wasSortedGroupsNotFirst = isGroupSorted (state, false);
+    const bool wasSortedGroupsFirst    = isGroupSorted (state, true);
+
+    if (! addFileAtIndex (file, 0, shouldCompile))
+        return false;
+
+    if (wasSortedGroupsNotFirst || wasSortedGroupsFirst)
+        sortAlphabetically (wasSortedGroupsFirst);
 
     return true;
 }

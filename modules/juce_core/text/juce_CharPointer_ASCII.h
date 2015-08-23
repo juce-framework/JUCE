@@ -276,10 +276,10 @@ public:
 
     int compareIgnoreCase (const CharPointer_ASCII other) const
     {
-       #if JUCE_MSVC
-        return stricmp (data, other.data);
-       #elif JUCE_MINGW
+       #if JUCE_MINGW
         return CharacterFunctions::compareIgnoreCase (*this, other);
+       #elif JUCE_WINDOWS
+        return stricmp (data, other.data);
        #else
         return strcasecmp (data, other.data);
        #endif
