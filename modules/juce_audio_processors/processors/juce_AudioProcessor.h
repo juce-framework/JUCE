@@ -106,6 +106,9 @@ public:
         Your code must be able to cope with variable-sized blocks, or you're going to get
         clicks and crashes!
 
+        Also note that some hosts will occasionally decide to pass a buffer containing
+        zero samples, so make sure that your algorithm can deal with that!
+
         If the filter is receiving a midi input, then the midiMessages array will be filled
         with the midi messages for this block. Each message's timestamp will indicate the
         message's time, as a number of samples from the start of the block.
