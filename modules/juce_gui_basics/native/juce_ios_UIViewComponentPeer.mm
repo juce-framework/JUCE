@@ -659,7 +659,7 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 
         // (can't call the component's setBounds method because that'll reset our fullscreen flag)
         if (! r.isEmpty())
-            setBounds (r, shouldBeFullScreen);
+            setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
 
         component.repaint();
     }
@@ -700,8 +700,13 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
 
 bool UIViewComponentPeer::contains (Point<int> localPos, bool trueIfInAChildWindow) const
 {
-    if (! component.getLocalBounds().contains (localPos))
-        return false;
+    {
+        Rectangle<int> localBounds =
+            ScalingHelpers::scaledScreenPosToUnscaled (component, component.getLocalBounds());
+
+        if (! localBounds.contains (localPos))
+            return false;
+    }
 
     UIView* v = [view hitTest: convertToCGPoint (localPos)
                     withEvent: nil];
