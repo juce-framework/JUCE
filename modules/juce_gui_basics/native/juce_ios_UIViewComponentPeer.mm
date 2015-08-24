@@ -771,7 +771,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             continue;
 
         CGPoint p = [touch locationInView: view];
-        const Point<float> pos (p.x, p.y);
+        const Point<float> pos (static_cast<float> (p.x), static_cast<float> (p.y));
         juce_lastMousePos = pos + getBounds (true).getPosition().toFloat();
 
         const int64 time = getMouseTime (event);
@@ -947,7 +947,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, getComponent().getHeight()));
-    CoreGraphicsContext g (cg, getComponent().getHeight(), [UIScreen mainScreen].scale);
+    CoreGraphicsContext g (cg, getComponent().getHeight(), static_cast<float> ([UIScreen mainScreen].scale));
 
     insideDrawRect = true;
     handlePaint (g);
