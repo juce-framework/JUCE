@@ -95,7 +95,7 @@
       <HeaderFileName/>
     </Midl>
     <ClCompile>
-      <Optimization>Full</Optimization>
+      <Optimization>MinSpace</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -1575,6 +1575,7 @@
     <None Include="..\..\..\..\modules\juce_graphics\juce_module_info"/>
     <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info"/>
     <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info"/>
+    <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>
