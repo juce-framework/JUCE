@@ -271,13 +271,32 @@ public:
     }
 
     //==============================================================================
-    tresult PLUGIN_API getMidiControllerAssignment (Steinberg::int32, Steinberg::int16,
-                                                    Vst::CtrlNumber,
-                                                    Vst::ParamID& id) override
+    tresult PLUGIN_API getMidiControllerAssignment (Steinberg::int32 /*busIndex*/, Steinberg::int16 channel,
+                                                    Vst::CtrlNumber midiControllerNumber, Vst::ParamID& resultID) override
     {
-        //TODO
-        id = 0;
-        return kNotImplemented;
+        resultID = midiControllerToParameter[channel][midiControllerNumber];
+
+        return kResultTrue; // Returning false makes some hosts stop asking for further MIDI Controller Assignments
+    }
+
+    // Converts an incoming parameter index to a MIDI controller:
+    bool getMidiControllerForParameter (int index, int& channel, int& ctrlNumber)
+    {
+        const int mappedIndex = index - parameterToMidiControllerOffset;
+
+        if (isPositiveAndBelow (mappedIndex, numElementsInArray (parameterToMidiController)))
+        {
+            const MidiController& mc = parameterToMidiController[mappedIndex];
+
+            if (mc.channel != -1 && mc.ctrlNumber != -1)
+            {
+                channel    = jlimit (1, 16, mc.channel + 1);
+                ctrlNumber = mc.ctrlNumber;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     //==============================================================================
@@ -327,6 +346,18 @@ private:
     ComSmartPtr<JuceAudioProcessor> audioProcessor;
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
+    struct MidiController
+    {
+        MidiController() noexcept  : channel (-1), ctrlNumber (-1) {}
+
+        int channel, ctrlNumber;
+    };
+
+    enum { numMIDIChannels = 16 };
+    int parameterToMidiControllerOffset;
+    MidiController parameterToMidiController[numMIDIChannels * Vst::kCountCtrlNumber];
+    int midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
+
     //==============================================================================
     void setupParameters()
     {
@@ -338,7 +369,27 @@ private:
                 for (int i = 0; i < pluginInstance->getNumParameters(); ++i)
                     parameters.addParameter (new Param (*pluginInstance, i));
 
+            initialiseMidiControllerMappings (pluginInstance->getNumParameters());
             audioProcessorChanged (pluginInstance);
+        }
+    }
+
+    void initialiseMidiControllerMappings (const int numParameters)
+    {
+        parameterToMidiControllerOffset = numParameters;
+
+        for (int c = 0, p = 0; c < numMIDIChannels; ++c)
+        {
+            for (int i = 0; i < Vst::kCountCtrlNumber; ++i, ++p)
+            {
+                midiControllerToParameter[c][i] = p + parameterToMidiControllerOffset;
+                parameterToMidiController[p].channel = c;
+                parameterToMidiController[p].ctrlNumber = i;
+
+                parameters.addParameter (new Vst::Parameter (toString ("MIDI CC " + String (c) + "|" + String (i)),
+                                         p + parameterToMidiControllerOffset, 0, 0, 0,
+                                         Vst::ParameterInfo::kCanAutomate, Vst::kRootUnitId));
+            }
         }
     }
 
@@ -1087,7 +1138,7 @@ public:
     bool getCurrentPosition (CurrentPositionInfo& info) override
     {
         info.timeInSamples              = jmax ((juce::int64) 0, processContext.projectTimeSamples);
-        info.timeInSeconds              = processContext.projectTimeMusic;
+        info.timeInSeconds              = processContext.systemTime / 1000000000.0;
         info.bpm                        = jmax (1.0, processContext.tempo);
         info.timeSigNumerator           = jmax (1, (int) processContext.timeSigNumerator);
         info.timeSigDenominator         = jmax (1, (int) processContext.timeSigDenominator);
@@ -1250,10 +1301,33 @@ public:
                 if (paramQueue->getPoint (numPoints - 1,  offsetSamples, value) == kResultTrue)
                 {
                     const int id = (int) paramQueue->getParameterId();
-                    jassert (isPositiveAndBelow (id, pluginInstance->getNumParameters()));
-                    pluginInstance->setParameter (id, (float) value);
+
+                    if (isPositiveAndBelow (id, pluginInstance->getNumParameters()))
+                        pluginInstance->setParameter (id, (float) value);
+                    else
+                        addParameterChangeToMidiBuffer (offsetSamples, id, value);
                 }
             }
+        }
+    }
+
+    void addParameterChangeToMidiBuffer (const Steinberg::int32 offsetSamples, const int id, const double value)
+    {
+        // If the parameter is mapped to a MIDI CC message then insert it into the midiBuffer.
+        int channel, ctrlNumber;
+
+        if (juceVST3EditController->getMidiControllerForParameter (id, channel, ctrlNumber))
+        {
+            if (ctrlNumber == Vst::kAfterTouch)
+                midiBuffer.addEvent (MidiMessage::channelPressureChange (channel,
+                                                                         jlimit (0, 127, (int) (value * 128.0))), offsetSamples);
+            else if (ctrlNumber == Vst::kPitchBend)
+                midiBuffer.addEvent (MidiMessage::pitchWheel (channel,
+                                                              jlimit (0, 0x3fff, (int) (value * 0x4000))), offsetSamples);
+            else
+                midiBuffer.addEvent (MidiMessage::controllerEvent (channel,
+                                                                   jlimit (0, 127, ctrlNumber),
+                                                                   jlimit (0, 127, (int) (value * 128.0))), offsetSamples);
         }
     }
 
@@ -1385,7 +1459,7 @@ private:
 
     void addEventBusTo (Vst::BusList& busList, const juce::String& name)
     {
-        addBusTo (busList, new Vst::EventBus (toString (name), 16, Vst::kMain, Vst::BusInfo::kDefaultActive));
+        addBusTo (busList, new Vst::EventBus (toString (name), Vst::kMain, Vst::BusInfo::kDefaultActive, 16));
     }
 
     Vst::BusList* getBusListFor (Vst::MediaType type, Vst::BusDirection dir)
