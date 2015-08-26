@@ -885,6 +885,9 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
             break;
     }
 
+    if (isCurrentlyBlockedByAnotherModalComponent())
+        return false;
+
     switch (info.commandID)
     {
         case CommandIDs::saveProject:               saveProject(); break;
