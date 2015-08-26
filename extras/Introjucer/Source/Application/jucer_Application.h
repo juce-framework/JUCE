@@ -46,8 +46,7 @@ public:
     //==============================================================================
     void initialise (const String& commandLine) override
     {
-        LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
-        settings = new StoredSettings();
+        initialiseBasics();
 
         if (commandLine.isNotEmpty())
         {
@@ -69,36 +68,60 @@ public:
             return;
         }
 
-        initialiseLogger ("log_");
-
-        icons = new Icons();
-
-        if (! doExtraInitialisation())
+        if (! initialiseLog())
         {
             quit();
             return;
         }
 
         initCommandManager();
-
         menuModel = new MainMenuModel();
 
         settings->appearance.refreshPresetSchemeList();
 
-        ImageCache::setCacheTimeout (30 * 1000);
-
-        if (commandLine.trim().isNotEmpty() && ! commandLine.trim().startsWithChar ('-'))
-            anotherInstanceStarted (commandLine);
-        else
-            mainWindowList.reopenLastProjects();
-
-        mainWindowList.createWindowIfNoneAreOpen();
+        initialiseWindows (commandLine);
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
 
         versionChecker = new LatestVersionChecker();
+    }
+
+    void initialiseBasics()
+    {
+        LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
+        settings = new StoredSettings();
+        ImageCache::setCacheTimeout (30 * 1000);
+        icons = new Icons();
+    }
+
+    virtual bool initialiseLog()
+    {
+        return initialiseLogger ("log_");
+    }
+
+    bool initialiseLogger (const char* filePrefix)
+    {
+        if (logger == nullptr)
+        {
+            logger = FileLogger::createDateStampedLogger (getLogFolderName(), filePrefix, ".txt",
+                                                          getApplicationName() + " " + getApplicationVersion()
+                                                            + "  ---  Build date: " __DATE__);
+            Logger::setCurrentLogger (logger);
+        }
+
+        return logger != nullptr;
+    }
+
+    virtual void initialiseWindows (const String& commandLine)
+    {
+        if (commandLine.trim().isNotEmpty() && ! commandLine.trim().startsWithChar ('-'))
+            anotherInstanceStarted (commandLine);
+        else
+            mainWindowList.reopenLastProjects();
+
+        mainWindowList.createWindowIfNoneAreOpen();
     }
 
     void shutdown() override
@@ -457,17 +480,6 @@ public:
     }
 
     //==============================================================================
-    void initialiseLogger (const char* filePrefix)
-    {
-        if (logger == nullptr)
-        {
-            logger = FileLogger::createDateStampedLogger (getLogFolderName(), filePrefix, ".txt",
-                                                          getApplicationName() + " " + getApplicationVersion()
-                                                            + "  ---  Build date: " __DATE__);
-            Logger::setCurrentLogger (logger);
-        }
-    }
-
     struct FileWithTime
     {
         FileWithTime (const File& f) : file (f), time (f.getLastModificationTime()) {}
@@ -506,7 +518,6 @@ public:
         logger = nullptr;
     }
 
-    virtual bool doExtraInitialisation()  { return true; }
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
 
    #if JUCE_LINUX
