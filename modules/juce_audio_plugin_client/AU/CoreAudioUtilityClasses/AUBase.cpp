@@ -55,8 +55,14 @@
 #include "CAVectorUnit.h"
 #include "CAXException.h"
 
-// NB: This line added for JUCE, for backwards-compatibility with pre-10.8 frameworks
-#define kAudioUnitProperty_NickName ((AudioUnitPropertyID) 54)
+// This is for JUCE, added as a workaround for problems in older hosts following an API change.
+struct OldHostCallbackInfo
+{
+    void* hostUserData;
+    HostCallback_GetBeatAndTempo beatAndTempoProc;
+    HostCallback_GetMusicalTimeLocation musicalTimeLocationProc;
+    HostCallback_GetTransportState transportStateProc;
+};
 
 
 #if TARGET_OS_MAC && (TARGET_CPU_X86 || TARGET_CPU_X86_64)
@@ -540,7 +546,7 @@ OSStatus			AUBase::DispatchGetPropertyInfo(AudioUnitPropertyID				inID,
 		outWritable = false;
 		break;
 
-    case kAudioUnitProperty_NickName:
+    case /*kAudioUnitProperty_NickName*/ 54:
         ca_require(inScope == kAudioUnitScope_Global, InvalidScope);
         outDataSize = sizeof(CFStringRef);
         outWritable = true;
@@ -791,7 +797,7 @@ OSStatus			AUBase::DispatchGetProperty(	AudioUnitPropertyID 			inID,
 		*(Float64*)outData = mCurrentRenderTime.mSampleTime;
 		break;
 
-    case kAudioUnitProperty_NickName:
+    case /*kAudioUnitProperty_NickName*/ 54:
         // Ownership follows Core Foundation's 'Copy Rule'
         if (mNickName) CFRetain(mNickName);
         *(CFStringRef*)outData = mNickName;
@@ -1006,7 +1012,7 @@ OSStatus			AUBase::DispatchSetProperty(	AudioUnitPropertyID 			inID,
 
 #endif // !CA_NO_AU_UI_FEATURES
 
-    case kAudioUnitProperty_NickName:
+    case /*kAudioUnitProperty_NickName*/ 54:
     {
 		ca_require(inScope == kAudioUnitScope_Global, InvalidScope);
         ca_require(inDataSize == sizeof(CFStringRef), InvalidPropertyValue);
@@ -1093,7 +1099,7 @@ OSStatus			AUBase::DispatchRemovePropertyValue (AudioUnitPropertyID		inID,
 
 #endif // !CA_NO_AU_UI_FEATURES
 
-    case kAudioUnitProperty_NickName:
+    case /*kAudioUnitProperty_NickName*/ 54:
     {
         if(inScope == kAudioUnitScope_Global) {
             if (mNickName) CFRelease(mNickName);

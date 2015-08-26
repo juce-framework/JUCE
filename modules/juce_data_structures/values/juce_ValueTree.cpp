@@ -396,7 +396,7 @@ public:
         }
     }
 
-    bool isEquivalentTo (const SharedObject& other) const
+    bool isEquivalentTo (const SharedObject& other) const noexcept
     {
         if (type != other.type
              || properties.size() != other.properties.size()
@@ -465,7 +465,7 @@ public:
         {
         }
 
-        bool perform()
+        bool perform() override
         {
             jassert (! (isAddingNewProperty && target->hasProperty (name)));
 
@@ -477,7 +477,7 @@ public:
             return true;
         }
 
-        bool undo()
+        bool undo() override
         {
             if (isAddingNewProperty)
                 target->removeProperty (name, nullptr);
@@ -487,12 +487,12 @@ public:
             return true;
         }
 
-        int getSizeInUnits()
+        int getSizeInUnits() override
         {
             return (int) sizeof (*this); //xxx should be more accurate
         }
 
-        UndoableAction* createCoalescedAction (UndoableAction* nextAction)
+        UndoableAction* createCoalescedAction (UndoableAction* nextAction) override
         {
             if (! (isAddingNewProperty || isDeletingProperty))
             {
@@ -528,7 +528,7 @@ public:
             jassert (child != nullptr);
         }
 
-        bool perform()
+        bool perform() override
         {
             if (isDeleting)
                 target->removeChild (childIndex, nullptr);
@@ -538,7 +538,7 @@ public:
             return true;
         }
 
-        bool undo()
+        bool undo() override
         {
             if (isDeleting)
             {
@@ -555,7 +555,7 @@ public:
             return true;
         }
 
-        int getSizeInUnits()
+        int getSizeInUnits() override
         {
             return (int) sizeof (*this); //xxx should be more accurate
         }
@@ -577,24 +577,24 @@ public:
         {
         }
 
-        bool perform()
+        bool perform() override
         {
             parent->moveChild (startIndex, endIndex, nullptr);
             return true;
         }
 
-        bool undo()
+        bool undo() override
         {
             parent->moveChild (endIndex, startIndex, nullptr);
             return true;
         }
 
-        int getSizeInUnits()
+        int getSizeInUnits() override
         {
             return (int) sizeof (*this); //xxx should be more accurate
         }
 
-        UndoableAction* createCoalescedAction (UndoableAction* nextAction)
+        UndoableAction* createCoalescedAction (UndoableAction* nextAction) override
         {
             if (MoveChildAction* next = dynamic_cast<MoveChildAction*> (nextAction))
                 if (next->parent == parent && next->startIndex == endIndex)
@@ -634,11 +634,11 @@ ValueTree::ValueTree (const Identifier& type)  : object (new ValueTree::SharedOb
     jassert (type.toString().isNotEmpty()); // All objects must be given a sensible type name!
 }
 
-ValueTree::ValueTree (SharedObject* so)  : object (so)
+ValueTree::ValueTree (SharedObject* so) noexcept  : object (so)
 {
 }
 
-ValueTree::ValueTree (const ValueTree& other)  : object (other.object)
+ValueTree::ValueTree (const ValueTree& other) noexcept  : object (other.object)
 {
 }
 
@@ -702,23 +702,23 @@ ValueTree ValueTree::createCopy() const
     return ValueTree (createCopyIfNotNull (object.get()));
 }
 
-bool ValueTree::hasType (const Identifier& typeName) const
+bool ValueTree::hasType (const Identifier& typeName) const noexcept
 {
     return object != nullptr && object->type == typeName;
 }
 
-Identifier ValueTree::getType() const
+Identifier ValueTree::getType() const noexcept
 {
     return object != nullptr ? object->type : Identifier();
 }
 
-ValueTree ValueTree::getParent() const
+ValueTree ValueTree::getParent() const noexcept
 {
     return ValueTree (object != nullptr ? object->parent
                                         : static_cast<SharedObject*> (nullptr));
 }
 
-ValueTree ValueTree::getSibling (const int delta) const
+ValueTree ValueTree::getSibling (const int delta) const noexcept
 {
     if (object == nullptr || object->parent == nullptr)
         return invalid;
@@ -727,12 +727,12 @@ ValueTree ValueTree::getSibling (const int delta) const
     return ValueTree (object->parent->children.getObjectPointer (index));
 }
 
-const var& ValueTree::operator[] (const Identifier& name) const
+const var& ValueTree::operator[] (const Identifier& name) const noexcept
 {
     return object == nullptr ? var::null : object->properties[name];
 }
 
-const var& ValueTree::getProperty (const Identifier& name) const
+const var& ValueTree::getProperty (const Identifier& name) const noexcept
 {
     return object == nullptr ? var::null : object->properties[name];
 }
@@ -754,7 +754,7 @@ ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue, 
     return *this;
 }
 
-bool ValueTree::hasProperty (const Identifier& name) const
+bool ValueTree::hasProperty (const Identifier& name) const noexcept
 {
     return object != nullptr && object->hasProperty (name);
 }
@@ -771,12 +771,12 @@ void ValueTree::removeAllProperties (UndoManager* const undoManager)
         object->removeAllProperties (undoManager);
 }
 
-int ValueTree::getNumProperties() const
+int ValueTree::getNumProperties() const noexcept
 {
     return object == nullptr ? 0 : object->properties.size();
 }
 
-Identifier ValueTree::getPropertyName (const int index) const
+Identifier ValueTree::getPropertyName (const int index) const noexcept
 {
     return object == nullptr ? Identifier()
                              : object->properties.getName (index);
@@ -841,7 +841,7 @@ Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const 
 }
 
 //==============================================================================
-int ValueTree::getNumChildren() const
+int ValueTree::getNumChildren() const noexcept
 {
     return object == nullptr ? 0 : object->children.size();
 }
@@ -867,12 +867,12 @@ ValueTree ValueTree::getChildWithProperty (const Identifier& propertyName, const
     return object != nullptr ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree();
 }
 
-bool ValueTree::isAChildOf (const ValueTree& possibleParent) const
+bool ValueTree::isAChildOf (const ValueTree& possibleParent) const noexcept
 {
     return object != nullptr && object->isAChildOf (possibleParent.object);
 }
 
-int ValueTree::indexOf (const ValueTree& child) const
+int ValueTree::indexOf (const ValueTree& child) const noexcept
 {
     return object != nullptr ? object->indexOf (child) : -1;
 }

@@ -2882,6 +2882,9 @@
     <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info">
       <Filter>Juce Modules\juce_gui_extra</Filter>
     </None>
+    <None Include=".\icon.ico">
+      <Filter>Juce Library Code</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc">
