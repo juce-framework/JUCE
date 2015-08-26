@@ -1003,13 +1003,6 @@ private:
 
 #if !CA_NO_AU_HOST_CALLBACKS
 protected:
-	typedef struct {
-		void * hostUserData;
-		HostCallback_GetBeatAndTempo beatAndTempoProc;
-		HostCallback_GetMusicalTimeLocation musicalTimeLocationProc;
-		HostCallback_GetTransportState transportStateProc;
-	} OldHostCallbackInfo;
-
 	/*! @var mHostCallbackInfo */
 	HostCallbackInfo 			mHostCallbackInfo;
 
