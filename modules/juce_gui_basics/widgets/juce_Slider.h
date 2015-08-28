@@ -726,7 +726,7 @@ public:
         If the slider is rotary, this will throw an assertion and return 0. If the
         value is out-of-range, it will be constrained to the length of the slider.
     */
-    float getPositionOfValue (double value);
+    float getPositionOfValue (double value) const;
 
     //==============================================================================
     /** This can be overridden to allow the slider to snap to user-definable values.
