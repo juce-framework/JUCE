@@ -25,8 +25,8 @@
 class ScrollBar::ScrollbarButton  : public Button
 {
 public:
-    ScrollbarButton (const int direction_, ScrollBar& owner_)
-        : Button (String::empty), direction (direction_), owner (owner_)
+    ScrollbarButton (int direc, ScrollBar& s)
+        : Button (String()), direction (direc), owner (s)
     {
         setWantsKeyboardFocus (false);
     }
@@ -52,7 +52,7 @@ private:
 
 
 //==============================================================================
-ScrollBar::ScrollBar (const bool vertical_)
+ScrollBar::ScrollBar (const bool shouldBeVertical)
     : totalRange (0.0, 1.0),
       visibleRange (0.0, 0.1),
       singleStepSize (0.1),
@@ -60,16 +60,13 @@ ScrollBar::ScrollBar (const bool vertical_)
       thumbAreaSize (0),
       thumbStart (0),
       thumbSize (0),
-      minimumScrollBarThumbSize (0),
       initialDelayInMillisecs (100),
       repeatDelayInMillisecs (50),
       minimumDelayInMillisecs (10),
-      vertical (vertical_),
+      vertical (shouldBeVertical),
       isDraggingThumb (false),
       autohides (true)
 {
-    minimumScrollBarThumbSize = getLookAndFeel().getMinimumScrollbarThumbSize (*this);
-
     setRepaintsOnMouseActivity (true);
     setFocusContainer (true);
 }
@@ -97,8 +94,7 @@ void ScrollBar::setRangeLimits (const double newMinimum, const double newMaximum
     setRangeLimits (Range<double> (newMinimum, newMaximum), notification);
 }
 
-bool ScrollBar::setCurrentRange (Range<double> newRange,
-                                 const NotificationType notification)
+bool ScrollBar::setCurrentRange (Range<double> newRange, const NotificationType notification)
 {
     const Range<double> constrainedRange (totalRange.constrainRange (newRange));
 
@@ -155,18 +151,18 @@ bool ScrollBar::scrollToBottom (NotificationType notification)
     return setCurrentRange (visibleRange.movedToEndAt (getMaximumRangeLimit()), notification);
 }
 
-void ScrollBar::setButtonRepeatSpeed (const int initialDelayInMillisecs_,
-                                      const int repeatDelayInMillisecs_,
-                                      const int minimumDelayInMillisecs_)
+void ScrollBar::setButtonRepeatSpeed (const int newInitialDelay,
+                                      const int newRepeatDelay,
+                                      const int newMinimumDelay)
 {
-    initialDelayInMillisecs = initialDelayInMillisecs_;
-    repeatDelayInMillisecs  = repeatDelayInMillisecs_;
-    minimumDelayInMillisecs = minimumDelayInMillisecs_;
+    initialDelayInMillisecs = newInitialDelay;
+    repeatDelayInMillisecs  = newRepeatDelay;
+    minimumDelayInMillisecs = newMinimumDelay;
 
     if (upButton != nullptr)
     {
-        upButton  ->setRepeatSpeed (initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs);
-        downButton->setRepeatSpeed (initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs);
+        upButton  ->setRepeatSpeed (newInitialDelay, newRepeatDelay, newMinimumDelay);
+        downButton->setRepeatSpeed (newInitialDelay, newRepeatDelay, newMinimumDelay);
     }
 }
 
@@ -190,6 +186,8 @@ void ScrollBar::handleAsyncUpdate()
 //==============================================================================
 void ScrollBar::updateThumbPosition()
 {
+    const int minimumScrollBarThumbSize = getLookAndFeel().getMinimumScrollbarThumbSize (*this);
+
     int newThumbSize = roundToInt (totalRange.getLength() > 0 ? (visibleRange.getLength() * thumbAreaSize) / totalRange.getLength()
                                                               : thumbAreaSize);
 
@@ -205,7 +203,8 @@ void ScrollBar::updateThumbPosition()
         newThumbStart += roundToInt (((visibleRange.getStart() - totalRange.getStart()) * (thumbAreaSize - newThumbSize))
                                          / (totalRange.getLength() - visibleRange.getLength()));
 
-    setVisible ((! autohides) || (totalRange.getLength() > visibleRange.getLength() && visibleRange.getLength() > 0.0));
+    setVisible ((! autohides) || (totalRange.getLength() > visibleRange.getLength()
+                                    && visibleRange.getLength() > 0.0));
 
     if (thumbStart != newThumbStart  || thumbSize != newThumbSize)
     {
@@ -281,7 +280,6 @@ void ScrollBar::resized()
     const int length = vertical ? getHeight() : getWidth();
 
     LookAndFeel& lf = getLookAndFeel();
-    minimumScrollBarThumbSize = lf.getMinimumScrollbarThumbSize (*this);
     const bool buttonsVisible = lf.areScrollbarButtonsVisible();
     int buttonSize = 0;
 
@@ -311,20 +309,22 @@ void ScrollBar::resized()
     else
     {
         thumbAreaStart = buttonSize;
-        thumbAreaSize = length - (buttonSize << 1);
+        thumbAreaSize = length - 2 * buttonSize;
     }
 
     if (upButton != nullptr)
     {
+        Rectangle<int> r (getLocalBounds());
+
         if (vertical)
         {
-            upButton->setBounds (0, 0, getWidth(), buttonSize);
-            downButton->setBounds (0, thumbAreaStart + thumbAreaSize, getWidth(), buttonSize);
+            upButton->setBounds (r.removeFromTop (buttonSize));
+            downButton->setBounds (r.removeFromBottom (buttonSize));
         }
         else
         {
-            upButton->setBounds (0, 0, buttonSize, getHeight());
-            downButton->setBounds (thumbAreaStart + thumbAreaSize, 0, buttonSize, getHeight());
+            upButton->setBounds (r.removeFromLeft (buttonSize));
+            downButton->setBounds (r.removeFromRight (buttonSize));
         }
     }
 
