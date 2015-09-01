@@ -249,7 +249,7 @@ void URL::createHeadersAndPostData (String& headers, MemoryBlock& headersAndPost
     if (filesToUpload.size() > 0)
     {
         // (this doesn't currently support mixing custom post-data with uploads..)
-        jassert (postData.isEmpty());
+        jassert (postData.getSize() == 0);
 
         const String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
 
@@ -415,6 +415,11 @@ URL URL::withParameters (const StringPairArray& parametersToAdd) const
 }
 
 URL URL::withPOSTData (const String& newPostData) const
+{
+    return withPOSTData (MemoryBlock (newPostData.toRawUTF8(), newPostData.getNumBytesAsUTF8()));
+}
+
+URL URL::withPOSTData (const MemoryBlock& newPostData) const
 {
     URL u (*this);
     u.postData = newPostData;

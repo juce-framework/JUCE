@@ -214,9 +214,13 @@ public:
         createInputStream().
     */
     URL withPOSTData (const String& postData) const;
+    URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
-    const String& getPostData() const noexcept                  { return postData; }
+    const String& getPostData() const noexcept                  { return postData.toString(); }
+
+    /** Returns the data that was set using withPOSTData() as MemoryBlock. */
+    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
@@ -377,7 +381,8 @@ public:
 
 private:
     //==============================================================================
-    String url, postData;
+    String url;
+    MemoryBlock postData;
     StringArray parameterNames, parameterValues;
 
     struct Upload  : public ReferenceCountedObject
