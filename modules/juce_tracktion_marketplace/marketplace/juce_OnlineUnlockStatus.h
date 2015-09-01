@@ -207,6 +207,31 @@ public:
      */
     void save();
 
+    /** This class contains some utility functions that might help with machine ID generation. */
+    struct MachineIDUtilities
+    {
+        /** Returns a character that represents the current OS.
+            E.g. 'M' for Mac, 'W' for windows, etc
+        */
+        static char getPlatformPrefix();
+
+        /** Returns an encoded hash string from the given input string, prefixing it with
+            a letter to represent the current OS type.
+        */
+        static String getEncodedIDString (const String& inputString);
+
+        /** Utility function that you may want to use in your machine-ID generation code.
+            This adds an ID string to the given array which is a hash of the filesystem ID of the
+            given file.
+        */
+        static bool addFileIDToList (StringArray& result, const File& file);
+
+        /** Utility function that you may want to use in your machine-ID generation code.
+            This adds some ID strings to the given array which represent each MAC address of the machine.
+        */
+        static void addMACAddressesToList (StringArray& result);
+    };
+
 private:
     ValueTree status;
 
