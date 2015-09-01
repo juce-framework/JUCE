@@ -146,7 +146,7 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeDocu
     setEditor (ed);
 }
 
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, CodeEditorComponent* ed)
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* doc, GenericCodeEditorComponent* ed)
     : DocumentEditorComponent (doc)
 {
     setEditor (ed);
@@ -163,7 +163,7 @@ SourceCodeEditor::~SourceCodeEditor()
         doc->updateLastState (*editor);
 }
 
-void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
+void SourceCodeEditor::setEditor (GenericCodeEditorComponent* newEditor)
 {
     if (editor != nullptr)
         editor->getDocument().removeListener (this);
@@ -320,6 +320,16 @@ bool GenericCodeEditorComponent::perform (const InvocationInfo& info)
     }
 
     return CodeEditorComponent::perform (info);
+}
+
+void GenericCodeEditorComponent::addListener (GenericCodeEditorComponent::Listener* listener)
+{
+    listeners.add (listener);
+}
+
+void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Listener* listener)
+{
+    listeners.remove (listener);
 }
 
 //==============================================================================
@@ -525,6 +535,12 @@ void GenericCodeEditorComponent::handleEscapeKey()
 {
     CodeEditorComponent::handleEscapeKey();
     hideFindPanel();
+}
+
+void GenericCodeEditorComponent::editorViewportPositionChanged()
+{
+    CodeEditorComponent::editorViewportPositionChanged();
+    listeners.call (&Listener::codeEditorViewportMoved, *this);
 }
 
 //==============================================================================

@@ -85,7 +85,7 @@ public:
         MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
        #endif
 
-        versionChecker = new LatestVersionChecker();
+        versionChecker = createVersionChecker();
     }
 
     void initialiseBasics()
@@ -168,6 +168,21 @@ public:
     //==============================================================================
     const String getApplicationName() override       { return "Introjucer"; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
+
+    virtual String getVersionDescription() const
+    {
+        String s;
+
+        const Time buildDate (Time::getCompilationDate());
+
+        s << "Introjucer " << ProjectInfo::versionString
+          << newLine
+          << "Build date: " << buildDate.getDayOfMonth()
+          << " " << Time::getMonthName (buildDate.getMonth(), true)
+          << " " << buildDate.getYear();
+
+        return s;
+    }
 
     bool moreThanOneInstanceAllowed() override
     {
@@ -544,6 +559,12 @@ public:
     virtual Component* createProjectContentComponent() const
     {
         return new ProjectContentComponent();
+    }
+
+    //==============================================================================
+    virtual LatestVersionChecker* createVersionChecker() const
+    {
+        return new LatestVersionChecker();
     }
 
     //==============================================================================
