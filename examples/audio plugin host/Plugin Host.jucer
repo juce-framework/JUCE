@@ -12,8 +12,8 @@
               pluginRTASCategory="" bundleIdentifier="com.roli.pluginhost"
               jucerVersion="3.2.0" companyName="ROLI Ltd." includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               objCExtraSuffix="M73TRi" vst3Folder="~/SDKs/VST3 SDK">
+    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
+               objCExtraSuffix="M73TRi" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
@@ -37,7 +37,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4">
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
                        libraryPath="/usr/X11R6/lib/"/>
@@ -61,8 +61,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
-            vst3Folder="c:\SDKs\VST3 SDK">
+    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="Plugin Host"/>
@@ -86,8 +85,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2010>
-    <VS2012 targetFolder="Builds/VisualStudio2012" vstFolder="c:\SDKs\vstsdk2.4"
-            vst3Folder="c:\SDKs\VST3 SDK">
+    <VS2012 targetFolder="Builds/VisualStudio2012" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="Plugin Host"/>
@@ -111,8 +109,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2012>
-    <VS2013 targetFolder="Builds/VisualStudio2013" vstFolder="c:\SDKs\vstsdk2.4"
-            vst3Folder="c:\SDKs\VST3 SDK">
+    <VS2013 targetFolder="Builds/VisualStudio2013" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="Plugin Host"/>
@@ -136,8 +133,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="c:\SDKs\vstsdk2.4"
-            vst3Folder="c:\SDKs\VST3 SDK">
+    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="Plugin Host"/>

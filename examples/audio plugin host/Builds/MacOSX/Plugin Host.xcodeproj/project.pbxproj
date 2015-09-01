@@ -2082,7 +2082,7 @@
 					"JUCE_APP_VERSION=1.0.0",
 					"JUCE_APP_VERSION_HEX=0x10000", );
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "~/SDKs/vstsdk2.4", "../../JuceLibraryCode", "../../../../modules", "$(inherited)");
+				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
@@ -2103,7 +2103,7 @@
 					"JUCE_APP_VERSION_HEX=0x10000", );
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "~/SDKs/vstsdk2.4", "../../JuceLibraryCode", "../../../../modules", "$(inherited)");
+				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
