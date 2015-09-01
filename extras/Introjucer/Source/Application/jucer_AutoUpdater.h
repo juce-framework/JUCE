@@ -35,6 +35,7 @@ public:
     struct JuceVersionTriple
     {
         JuceVersionTriple();
+        JuceVersionTriple (int juceVersionNumber);
         JuceVersionTriple (int majorInt, int minorInt, int buildNumber);
 
         static bool fromString (const String& versionString, JuceVersionTriple& result);
@@ -46,13 +47,22 @@ public:
     };
 
     //==============================================================================
+    struct JuceServerLocationsAndKeys
+    {
+        const char* updateSeverHostname;
+        const char* publicAPIKey;
+        const int apiVersion;
+        const char* updatePath;
+    };
+
+    //==============================================================================
     LatestVersionChecker();
     ~LatestVersionChecker();
 
     static String getOSString();
 
-    static URL getLatestVersionURL (String& headers, const String& path);
-    static URL getLatestVersionURL (String& headers);
+    URL getLatestVersionURL (String& headers, const String& path) const;
+    URL getLatestVersionURL (String& headers) const;
 
     void checkForNewVersion();
     void processResult (var reply, const String& downloadPath);
@@ -65,6 +75,14 @@ public:
     void askUserForLocationToDownload (URL& newVersionToDownload, const String& extraHeaders);
 
     static bool isZipFolder (const File&);
+
+    virtual Result performUpdate (const MemoryBlock& data, File& targetFolder);
+
+protected:
+    virtual const JuceServerLocationsAndKeys& getJuceServerURLsAndKeys() const;
+    virtual int getProductVersionNumber() const;
+    virtual const char* getProductName() const;
+    virtual bool allowCustomLocation() const;
 
 private:
     //==============================================================================

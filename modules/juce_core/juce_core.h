@@ -287,6 +287,26 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "containers/juce_PropertySet.h"
 #include "memory/juce_SharedResourcePointer.h"
 
+#ifndef DOXYGEN
+ /*
+    As the very long class names here try to explain, the purpose of this code is to cause
+    a linker error if not all of your compile units are consistent in the options that they
+    enable before including JUCE headers. The reason this is important is that if you have
+    two cpp files, and one includes the juce headers with debug enabled, and another does so
+    without that, then each will be generating code with different class layouts, and you'll
+    get subtle and hard-to-track-down memory corruption!
+ */
+ #if JUCE_DEBUG
+  struct this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_debug_mode
+  { this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_debug_mode() noexcept; };
+  static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_debug_mode compileUnitMismatchSentinel;
+ #else
+  struct this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode
+  { this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode() noexcept; };
+  static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode compileUnitMismatchSentinel;
+ #endif
+#endif
+
 }
 
 #if JUCE_MSVC

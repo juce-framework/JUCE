@@ -278,6 +278,9 @@ public:
     /** Called when the escape key is pressed - this can be overridden for custom behaviour. */
     virtual void handleEscapeKey();
 
+    /** Called when the view position is scrolled horizontally or vertically. */
+    virtual void editorViewportPositionChanged();
+
     //==============================================================================
     /** This adds the items to the popup menu.
 

@@ -92,13 +92,13 @@ public:
 
     int textX;
 
-protected:
-    ProjectContentComponent* getProjectContentComponent() const;
-    virtual void addSubItems() {}
-
     Colour getBackgroundColour() const;
     Colour getContrastingColour (float contrast) const;
     Colour getContrastingColour (Colour targetColour, float minContrast) const;
+
+protected:
+    ProjectContentComponent* getProjectContentComponent() const;
+    virtual void addSubItems() {}
 
 private:
     class ItemSelectionTimer;
@@ -195,7 +195,13 @@ public:
     {
         g.setColour (Colours::black);
         paintIcon (g);
-        item.paintContent (g, Rectangle<int> (item.textX, 0, getWidth() - item.textX, getHeight()));
+
+        int rightEdge = getWidth();
+
+        if (Component* c = buttons.getFirst())
+            rightEdge = c->getX();
+
+        item.paintContent (g, Rectangle<int> (item.textX, 0, rightEdge - item.textX, getHeight()));
     }
 
     void paintIcon (Graphics& g)
@@ -207,9 +213,23 @@ public:
     void resized() override
     {
         item.textX = (int) item.getIconSize() + 8;
+
+        Rectangle<int> r (getLocalBounds());
+
+        for (int i = buttons.size(); --i >= 0;)
+            buttons.getUnchecked(i)->setBounds (r.removeFromRight (r.getHeight()));
+    }
+
+    void addRightHandButton (Component* button)
+    {
+        buttons.add (button);
+        addAndMakeVisible (button);
     }
 
     JucerTreeViewBase& item;
+    OwnedArray<Component> buttons;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeItemComponent)
 };
 
 

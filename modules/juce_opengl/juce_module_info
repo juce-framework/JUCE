@@ -6,7 +6,7 @@
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",
 
-  "dependencies":   [ { "id": "juce_gui_basics",        "version": "matching" } ],
+  "dependencies":   [ { "id": "juce_gui_extra",        "version": "matching" } ],
 
   "include":        "juce_opengl.h",
 

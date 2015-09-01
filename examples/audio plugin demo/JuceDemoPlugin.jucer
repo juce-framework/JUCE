@@ -14,13 +14,13 @@
               includeBinaryInAppConfig="1" buildVST3="1" pluginManufacturerEmail="support@yourcompany.com"
               companyWebsite="www.juce.com" companyEmail="info@juce.com">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               objCExtraSuffix="JuceDemo" aaxFolder="~/SDKs/AAX" postbuildCommand=""
-               vst3Folder="~/SDKs/VST3 SDK">
+    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
+               objCExtraSuffix="JuceDemo" aaxFolder="~/SDKs/AAX" postbuildCommand="&#13;&#10;# This script takes the build product and copies it to the AU, VST, VST3, RTAS and AAX folders, depending on &#13;&#10;# which plugin types you've built&#13;&#10;&#13;&#10;original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME&#13;&#10;&#13;&#10;# this looks inside the binary to detect which platforms are needed.. &#13;&#10;copyAU=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'AudioUnit' | wc -l&#96;&#13;&#10;copyVST=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'VSTPlugin' | wc -l&#96;&#13;&#10;copyVST3=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'GetPluginFactory' | wc -l&#96;&#13;&#10;copyRTAS=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'CProcess' | wc -l&#96;&#13;&#10;copyAAX=&#96;nm -g &quot;$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH&quot; | grep -i 'ACFStartup' | wc -l&#96;&#13;&#10;&#13;&#10;if [ $copyAU -gt 0 ]; then&#13;&#10;  echo &quot;Copying to AudioUnit folder...&quot;&#13;&#10;  AUDir=~/Library/Audio/Plug-Ins/Components&#13;&#10;  mkdir -p &quot;$AUDir&quot;&#13;&#10;  AU=$AUDir/$PRODUCT_NAME.component&#13;&#10;  if [ -d &quot;$AU&quot; ]; then &#13;&#10;    rm -r &quot;$AU&quot;&#13;&#10;  fi&#13;&#10;&#13;&#10;  cp -r &quot;$original&quot; &quot;$AU&quot;&#13;&#10;  sed -i &quot;&quot; -e 's/TDMwPTul/BNDLPTul/g' &quot;$AU/Contents/PkgInfo&quot;&#13;&#10;  sed -i &quot;&quot; -e 's/TDMw/BNDL/g' &quot;$AU/Contents/$INFOPLIST_FILE&quot;&#13;&#10;fi&#13;&#10;&#13;&#10;if [ $copyVST -gt 0 ]; then&#13;&#10;  echo &quot;Copying to VST folder...&quot;&#13;&#10;  VSTDir=~/Library/Audio/Plug-Ins/VST&#13;&#10;  mkdir -p &quot;$VSTDir&quot;&#13;&#10;  VST=$VSTDir/$PRODUCT_NAME.vst&#13;&#10;  if [ -d &quot;$VST&quot; ]; then &#13;&#10;    rm -r &quot;$VST&quot;&#13;&#10;  fi&#13;&#10;&#13;&#10;  cp -r &quot;$original&quot; &quot;$VST&quot;&#13;&#10;  sed -i &quot;&quot; -e 's/TDMwPTul/BNDLPTul/g' &quot;$VST/Contents/PkgInfo&quot;&#13;&#10;  sed -i &quot;&quot; -e 's/TDMw/BNDL/g' &quot;$VST/Contents/$INFOPLIST_FILE&quot;&#13;&#10;fi&#13;&#10;&#13;&#10;if [ $copyVST3 -gt 0 ]; then&#13;&#10;  echo &quot;Copying to VST3 folder...&quot;&#13;&#10;  VST3Dir=~/Library/Audio/Plug-Ins/VST3&#13;&#10;  mkdir -p &quot;$VST3Dir&quot;&#13;&#10;  VST3=$VST3Dir/$PRODUCT_NAME.vst3&#13;&#10;  if [ -d &quot;$VST3&quot; ]; then &#13;&#10;    rm -r &quot;$VST3&quot;&#13;&#10;  fi&#13;&#10;&#13;&#10;  cp -r &quot;$original&quot; &quot;$VST3&quot;&#13;&#10;  sed -i &quot;&quot; -e 's/TDMwPTul/BNDLPTul/g' &quot;$VST3/Contents/PkgInfo&quot;&#13;&#10;  sed -i &quot;&quot; -e 's/TDMw/BNDL/g' &quot;$VST3/Contents/$INFOPLIST_FILE&quot;&#13;&#10;fi&#13;&#10;&#13;&#10;if [ $copyRTAS -gt 0 ]; then&#13;&#10;  echo &quot;Copying to RTAS folder...&quot;&#13;&#10;  RTASDir=/Library/Application\ Support/Digidesign/Plug-Ins&#13;&#10;  if [ -d &quot;$RTASDir&quot; ]; then&#13;&#10;    RTAS=$RTASDir/$PRODUCT_NAME.dpm&#13;&#10;    if [ -d &quot;$RTAS&quot; ]; then&#13;&#10;      rm -r &quot;$RTAS&quot;&#13;&#10;    fi&#13;&#10;&#13;&#10;    cp -r &quot;$original&quot; &quot;$RTAS&quot;&#13;&#10;  fi&#13;&#10;fi&#13;&#10;&#13;&#10;if [ $copyAAX -gt 0 ]; then&#13;&#10;  echo &quot;Copying to AAX folder...&quot;&#13;&#10;&#13;&#10;  if [ -d &quot;/Applications/ProTools_3PDev/Plug-Ins&quot; ]; then&#13;&#10;    AAX1=&quot;/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin&quot;&#13;&#10;&#13;&#10;    if [ -d &quot;$AAX1&quot; ]; then&#13;&#10;      rm -r &quot;$AAX1&quot;&#13;&#10;    fi&#13;&#10;&#13;&#10;    cp -R -H &quot;$original&quot; &quot;$AAX1&quot;&#13;&#10;  fi&#13;&#10;&#13;&#10;  if [ -d &quot;/Library/Application Support/Avid/Audio/Plug-Ins&quot; ]; then&#13;&#10;    AAX2=&quot;/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin&quot;&#13;&#10;&#13;&#10;    if [ -d &quot;$AAX2&quot; ]; then&#13;&#10;      rm -r &quot;$AAX2&quot;&#13;&#10;    fi&#13;&#10;&#13;&#10;    cp -R -H &quot;$original&quot; &quot;$AAX2&quot;&#13;&#10;  fi&#13;&#10;fi&#13;&#10;"
+               vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="64BitUniversal"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemoPlugin"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="64BitUniversal"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -38,36 +38,12 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" aaxFolder="c:\SDKs\AAX">
+    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="" rtasFolder="c:\SDKs\PT_80_SDK"
+            libraryType="1" aaxFolder="c:\SDKs\AAX" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
                        winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"
-                       winWarningLevel="4" generateManifest="1"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../modules"/>
-        <MODULEPATH id="juce_events" path="../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../modules"/>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
-      </MODULEPATHS>
-    </VS2005>
-    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" aaxFolder="c:\SDKs\AAX"
-            vst3Folder="c:\SDKs\VST3 SDK">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
-                       winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemoPlugin"
                        winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -85,13 +61,12 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2008>
-    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
-            vst3Folder="c:\SDKs\VST3 SDK">
+    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="2" targetName="JuceDemoPlugin"/>
+                       isDebug="0" optimisation="3" targetName="JuceDemoPlugin"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -108,11 +83,34 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2010>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK">
+    <VS2013 targetFolder="Builds/VisualStudio2013" vstFolder="" vst3Folder="">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="JuceDemoPlugin"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2013>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
+                vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
                        libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemoPlugin"
                        libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

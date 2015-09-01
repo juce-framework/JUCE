@@ -35,7 +35,8 @@ Project::Project (const File& f)
                          String ("*") + projectFileExtension,
                          "Choose a Jucer project to load",
                          "Save Jucer project"),
-      projectRoot (Ids::JUCERPROJECT)
+      projectRoot (Ids::JUCERPROJECT),
+      isSaving (false)
 {
     Logger::writeToLog ("Loading project: " + f.getFullPathName());
     setFile (f);
@@ -285,11 +286,16 @@ Result Project::saveDocument (const File& file)
 
 Result Project::saveProject (const File& file, bool isCommandLineApp)
 {
+    if (isSaving)
+        return Result::ok();
+
     updateProjectSettings();
     sanitiseConfigFlags();
 
     if (! isCommandLineApp)
         registerRecentFile (file);
+
+    const ScopedValueSetter<bool> vs (isSaving, true, false);
 
     ProjectSaver saver (*this, file);
     return saver.save (! isCommandLineApp);

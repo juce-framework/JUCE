@@ -141,7 +141,7 @@ struct LogoComponent  : public Component
         Rectangle<int> r (getLocalBounds());
 
         g.setFont (15.0f);
-        g.drawFittedText (getVersionInfo(), r.removeFromBottom (30), Justification::centred, 2);
+        g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centred, 3);
 
         const Path& logo = getIcons().mainJuceLogo;
         g.fillPath (logo, RectanglePlacement (RectanglePlacement::centred)
@@ -150,16 +150,9 @@ struct LogoComponent  : public Component
 
     static String getVersionInfo()
     {
-        const Time buildDate (Time::getCompilationDate());
-
-        String s;
-
-        s << SystemStats::getJUCEVersion() << newLine
-          << "Introjucer built: " << buildDate.getDayOfMonth()
-          << " " << Time::getMonthName (buildDate.getMonth(), true)
-          << " " << buildDate.getYear();
-
-        return s;
+        return SystemStats::getJUCEVersion()
+                + newLine
+                + IntrojucerApp::getApp().getVersionDescription();
     }
 };
 
@@ -884,6 +877,9 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         default:
             break;
     }
+
+    if (isCurrentlyBlockedByAnotherModalComponent())
+        return false;
 
     switch (info.commandID)
     {

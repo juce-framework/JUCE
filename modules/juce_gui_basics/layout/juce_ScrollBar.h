@@ -381,10 +381,9 @@ public:
 
 private:
     //==============================================================================
-    Range <double> totalRange, visibleRange;
+    Range<double> totalRange, visibleRange;
     double singleStepSize, dragStartRange;
     int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
-    int minimumScrollBarThumbSize;
     int dragStartMousePos, lastMousePos;
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
     bool vertical, isDraggingThumb, autohides;

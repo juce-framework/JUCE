@@ -1529,7 +1529,7 @@ bool Slider::isVertical() const noexcept                    { return pimpl->isVe
 bool Slider::isRotary() const noexcept                      { return pimpl->isRotary(); }
 bool Slider::isBar() const noexcept                         { return pimpl->isBar(); }
 
-float Slider::getPositionOfValue (const double value)       { return pimpl->getPositionOfValue (value); }
+float Slider::getPositionOfValue (const double value) const { return pimpl->getPositionOfValue (value); }
 
 //==============================================================================
 void Slider::paint (Graphics& g)        { pimpl->paint (g, getLookAndFeel()); }

@@ -47,6 +47,7 @@ namespace Ids
     DECLARE_ID (source);
     DECLARE_ID (width);
     DECLARE_ID (height);
+    DECLARE_ID (bounds);
     DECLARE_ID (background);
     DECLARE_ID (initialState);
     DECLARE_ID (targetFolder);

@@ -273,6 +273,7 @@ private:
     friend class Item;
     ValueTree projectRoot;
     ScopedPointer<EnabledModuleList> enabledModulesList;
+    bool isSaving;
 
     void updateProjectSettings();
     void sanitiseConfigFlags();
