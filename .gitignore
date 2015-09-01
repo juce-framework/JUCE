@@ -20,6 +20,7 @@ xcuserdata
 *.xccheckout
 contents.xcworkspacedata
 .DS_Store
+Thumbs.db
 .svn
 profile
 **/MacOSX/build
