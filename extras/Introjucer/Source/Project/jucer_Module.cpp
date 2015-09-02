@@ -314,7 +314,11 @@ void LibraryModule::createLocalHeaderWrapper (ProjectSaver& projectSaver, const 
         const RelativePath fileFromHere (headerFromProject.rebased (project.getProjectFolder(),
                                                                     localHeader.getParentDirectory(), RelativePath::unknown));
 
-        paths.add (fileFromHere.toUnixStyle().quoted());
+        if (exporter->isWindows())
+            paths.add (fileFromHere.toWindowsStyle().quoted());
+        else
+            paths.add (fileFromHere.toUnixStyle().quoted());
+
         guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
     }
 
