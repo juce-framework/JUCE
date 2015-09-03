@@ -215,8 +215,25 @@ public:
     */
     URL withPOSTData (const String& postData) const;
 
+    /** Returns a copy of this URL, with a block of data to send as the POST data.
+
+        If you're setting the POST data, be careful not to have any parameters set
+        as well, otherwise it'll all get thrown in together, and might not have the
+        desired effect.
+
+        If the URL already contains some POST data, this will replace it, rather
+        than being appended to it.
+
+        This data will only be used if you specify a post operation when you call
+        createInputStream().
+    */
+    URL withPOSTData (const MemoryBlock& postData) const;
+
     /** Returns the data that was set using withPOSTData(). */
-    const String& getPostData() const noexcept                  { return postData; }
+    String getPostData() const noexcept                  { return postData.toString(); }
+
+    /** Returns the data that was set using withPOSTData() as MemoryBlock. */
+    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
@@ -377,7 +394,8 @@ public:
 
 private:
     //==============================================================================
-    String url, postData;
+    String url;
+    MemoryBlock postData;
     StringArray parameterNames, parameterValues;
 
     struct Upload  : public ReferenceCountedObject

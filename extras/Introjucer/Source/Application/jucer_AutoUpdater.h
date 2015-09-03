@@ -51,7 +51,7 @@ public:
     {
         const char* updateSeverHostname;
         const char* publicAPIKey;
-        const int apiVersion;
+        int apiVersion;
         const char* updatePath;
     };
 

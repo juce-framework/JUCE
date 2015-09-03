@@ -437,7 +437,7 @@ struct AAXClasses
                                 public AudioProcessorListener
     {
     public:
-        JuceAAX_Processor()  : sampleRate (0), lastBufferSize (1024)
+        JuceAAX_Processor()  : sampleRate (0), lastBufferSize (1024), maxBufferSize (1024)
         {
             pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
             pluginInstance->setPlayHead (this);
@@ -874,7 +874,17 @@ struct AAXClasses
                     pluginInstance->setPlayConfigDetails (pluginInstance->getNumChannelsPerInputElement(),
                                                           pluginInstance->getNumChannelsPerOutputElement(),
                                                           sampleRate, bufferSize);
-                    pluginInstance->prepareToPlay (sampleRate, bufferSize);
+
+                    if (bufferSize > maxBufferSize)
+                    {
+                        // we only call prepareToPlay here if the new buffer size is larger than
+                        // the one used last time prepareToPlay was called.
+                        // currently, this should never actually happen, because as of Pro Tools 12,
+                        // the maximum possible value is 1024, and we call prepareToPlay with that
+                        // value during initialisation.
+                        pluginInstance->prepareToPlay (sampleRate, bufferSize);
+                        maxBufferSize = bufferSize;
+                    }
                 }
 
                 const ScopedLock sl (pluginInstance->getCallbackLock());
@@ -994,6 +1004,7 @@ struct AAXClasses
             audioProcessor.setOutputSpeakerArrangement (getSpeakerArrangementString (outputStemFormat));
             
             audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
+            maxBufferSize = lastBufferSize;
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
         }
@@ -1005,7 +1016,7 @@ struct AAXClasses
         Array<float*> channelList;
         int32_t juceChunkIndex;
         AAX_CSampleRate sampleRate;
-        int lastBufferSize;
+        int lastBufferSize, maxBufferSize;
 
         struct ChunkMemoryBlock  : public ReferenceCountedObject
         {
