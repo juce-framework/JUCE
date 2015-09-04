@@ -504,6 +504,31 @@ public:
         return numChannelConfigs;
     }
 
+    UInt32 GetAudioChannelLayout (AudioUnitScope scope,
+                                  AudioUnitElement element,
+                                  AudioChannelLayout *outLayoutPtr,
+                                  Boolean &outWritable)
+    {
+        if (element == 0)
+        {
+            outWritable = true;
+            if (scope == kAudioUnitScope_Output)
+            {
+                return static_cast<UInt32> (findNumOutputChannels());
+            }
+            else if (scope == kAudioUnitScope_Input)
+            {
+               #if JucePlugin_IsSynth
+                return 0;
+               #else
+                return static_cast<UInt32> (findNumInputChannels());
+               #endif
+            }
+        }
+
+        return JuceAUBaseClass::GetAudioChannelLayout(scope, element, outLayoutPtr, outWritable);
+    }
+
     //==============================================================================
     ComponentResult GetParameterInfo (AudioUnitScope inScope,
                                       AudioUnitParameterID inParameterID,
