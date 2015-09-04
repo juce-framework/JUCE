@@ -122,14 +122,14 @@ static juce::uint32 lastMasterIdleCall = 0;
 namespace juce
 {
  #if JUCE_MAC
-  extern void initialiseMac();
-  extern void* attachComponentToWindowRef (Component*, void* parent, bool isNSView);
-  extern void detachComponentFromWindowRef (Component*, void* window, bool isNSView);
-  extern void setNativeHostWindowSize (void* window, Component*, int newWidth, int newHeight, bool isNSView);
-  extern void checkWindowVisibility (void* window, Component*, bool isNSView);
-  extern bool forwardCurrentKeyEventToHost (Component*, bool isNSView);
+  extern void initialiseMacVST();
+  extern void* attachComponentToWindowRefVST (Component*, void* parent, bool isNSView);
+  extern void detachComponentFromWindowRefVST (Component*, void* window, bool isNSView);
+  extern void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
+  extern void checkWindowVisibilityVST (void* window, Component*, bool isNSView);
+  extern bool forwardCurrentKeyEventToHostVST (Component*, bool isNSView);
  #if ! JUCE_64BIT
-  extern void updateEditorCompBounds (Component*);
+  extern void updateEditorCompBoundsVST (Component*);
  #endif
  #endif
 
@@ -1053,7 +1053,7 @@ public:
 
        #if JUCE_MAC
         if (hostWindow != 0)
-            checkWindowVisibility (hostWindow, editorComp, useNSView);
+            checkWindowVisibilityVST (hostWindow, editorComp, useNSView);
        #endif
 
         tryMasterIdle();
@@ -1147,7 +1147,7 @@ public:
                #if JUCE_MAC
                 if (hostWindow != 0)
                 {
-                    detachComponentFromWindowRef (editorComp, hostWindow, useNSView);
+                    detachComponentFromWindowRefVST (editorComp, hostWindow, useNSView);
                     hostWindow = 0;
                 }
                #endif
@@ -1204,7 +1204,7 @@ public:
                 Window editorWnd = (Window) editorComp->getWindowHandle();
                 XReparentWindow (display, editorWnd, hostWindow, 0, 0);
               #else
-                hostWindow = attachComponentToWindowRef (editorComp, ptr, useNSView);
+                hostWindow = attachComponentToWindowRefVST (editorComp, ptr, useNSView);
               #endif
                 editorComp->setVisible (true);
 
@@ -1259,7 +1259,7 @@ public:
             {
                 // some hosts don't support the sizeWindow call, so do it manually..
                #if JUCE_MAC
-                setNativeHostWindowSize (hostWindow, editorComp, newWidth, newHeight, useNSView);
+                setNativeHostWindowSizeVST (hostWindow, editorComp, newWidth, newHeight, useNSView);
 
                #elif JUCE_LINUX
                 // (Currently, all linux hosts support sizeWindow, so this should never need to happen)
@@ -1363,7 +1363,7 @@ public:
         {
             // If we have an unused keypress, move the key-focus to a host window
             // and re-inject the event..
-            return forwardCurrentKeyEventToHost (this, wrapper.useNSView);
+            return forwardCurrentKeyEventToHostVST (this, wrapper.useNSView);
         }
        #endif
 
@@ -1379,7 +1379,7 @@ public:
 
            #if JUCE_MAC && ! JUCE_64BIT
             if (! wrapper.useNSView)
-                updateEditorCompBounds (this);
+                updateEditorCompBoundsVST (this);
            #endif
         }
 
@@ -1572,14 +1572,14 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-        initialiseMac();
+        initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
 
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster)
     {
-        initialiseMac();
+        initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
 

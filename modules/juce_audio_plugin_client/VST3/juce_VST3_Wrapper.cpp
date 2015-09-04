@@ -62,10 +62,10 @@ using namespace Steinberg;
 
 //==============================================================================
 #if JUCE_MAC
- extern void initialiseMac();
- extern void* attachComponentToWindowRef (Component*, void* parent, bool isNSView);
- extern void detachComponentFromWindowRef (Component*, void* window, bool isNSView);
- extern void setNativeHostWindowSize (void* window, Component*, int newWidth, int newHeight, bool isNSView);
+ extern void initialiseMacVST3();
+ extern void* attachComponentToWindowRefVST3 (Component*, void* parent, bool isNSView);
+ extern void detachComponentFromWindowRefVST3 (Component*, void* window, bool isNSView);
+ extern void setNativeHostWindowSizeVST3 (void* window, Component*, int newWidth, int newHeight, bool isNSView);
 #endif
 
 //==============================================================================
@@ -552,7 +552,7 @@ private:
             component->setVisible (true);
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = juce::attachComponentToWindowRef (component, parent, isNSView);
+            macHostWindow = juce::attachComponentToWindowRefVST3 (component, parent, isNSView);
            #endif
 
             component->resizeHostWindow();
@@ -571,7 +571,7 @@ private:
                #else
                 if (macHostWindow != nullptr)
                 {
-                    juce::detachComponentFromWindowRef (component, macHostWindow, isNSView);
+                    juce::detachComponentFromWindowRefVST3 (component, macHostWindow, isNSView);
                     macHostWindow = nullptr;
                 }
                #endif
@@ -683,7 +683,7 @@ private:
                     setSize (w, h);
                    #else
                     if (owner.macHostWindow != nullptr && ! getHostType().isWavelab())
-                        juce::setNativeHostWindowSize (owner.macHostWindow, this, w, h, owner.isNSView);
+                        juce::setNativeHostWindowSizeVST3 (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
                     if (owner.plugFrame != nullptr)
@@ -1769,7 +1769,7 @@ DEF_CLASS_IID (JuceAudioProcessor)
 bool initModule()
 {
    #if JUCE_MAC
-    initialiseMac();
+    initialiseMacVST3();
    #endif
 
     return true;
