@@ -1865,12 +1865,6 @@ public:
             XSendEvent (display, RootWindow (display, DefaultScreen (display)),
                         False, SubstructureRedirectMask | SubstructureNotifyMask, &ev);
 
-            XWindowAttributes attr;
-            XGetWindowAttributes (display, windowH, &attr);
-
-            if (component.isAlwaysOnTop())
-                XRaiseWindow (display, windowH);
-
             XSync (display, False);
         }
 
@@ -2958,7 +2952,7 @@ private:
         swa.border_pixel = 0;
         swa.background_pixmap = None;
         swa.colormap = colormap;
-        swa.override_redirect = (component.isAlwaysOnTop() && (styleFlags & windowIsTemporary) != 0) ? True : False;
+        swa.override_redirect = ((styleFlags & windowIsTemporary) != 0) ? True : False;
         swa.event_mask = getAllEventsMask();
 
         windowH = XCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
