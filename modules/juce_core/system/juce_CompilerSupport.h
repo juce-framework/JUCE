@@ -54,6 +54,12 @@
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ! defined (JUCE_COMPILER_SUPPORTS_LAMBDAS)
   #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
  #endif
+
+ #ifndef JUCE_EXCEPTIONS_DISABLED
+  #if ! __EXCEPTIONS
+   #define JUCE_EXCEPTIONS_DISABLED 1
+  #endif
+ #endif
 #endif
 
 //==============================================================================
@@ -95,6 +101,12 @@
   #define JUCE_COMPILER_SUPPORTS_ARC 1
  #endif
 
+ #ifndef JUCE_EXCEPTIONS_DISABLED
+  #if ! __has_feature (cxx_exceptions)
+   #define JUCE_EXCEPTIONS_DISABLED 1
+  #endif
+ #endif
+
 #endif
 
 //==============================================================================
@@ -118,6 +130,12 @@
 
  #if _MSC_VER >= 1900
   #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
+ #endif
+
+ #ifndef JUCE_EXCEPTIONS_DISABLED
+  #if ! _CPPUNWIND
+   #define JUCE_EXCEPTIONS_DISABLED 1
+  #endif
  #endif
 #endif
 

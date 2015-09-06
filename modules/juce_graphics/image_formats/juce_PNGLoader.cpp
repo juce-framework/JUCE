@@ -313,9 +313,9 @@ namespace PNGHelpers
 
     struct PNGErrorStruct {};
 
-    static void JUCE_CDECL errorCallback (png_structp, png_const_charp)
+    static void JUCE_CDECL errorCallback (png_structp p, png_const_charp)
     {
-        throw PNGErrorStruct();
+        longjmp (*(jmp_buf*) p->error_ptr, 1);
     }
 
     static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
@@ -354,106 +354,102 @@ Image PNGImageFormat::decodeImage (InputStream& in)
 
     if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0))
     {
-        try
+        if (png_infop pngInfoStruct = png_create_info_struct (pngReadStruct))
         {
-            png_infop pngInfoStruct = png_create_info_struct (pngReadStruct);
+            jmp_buf errorJumpBuf;
+            png_set_error_fn (pngReadStruct, &errorJumpBuf, PNGHelpers::errorCallback, PNGHelpers::warningCallback);
 
-            if (pngInfoStruct == nullptr)
+            if (setjmp (errorJumpBuf) == 0)
             {
-                png_destroy_read_struct (&pngReadStruct, 0, 0);
-                return Image::null;
-            }
+                // read the header..
+                png_set_read_fn (pngReadStruct, &in, PNGHelpers::readCallback);
 
-            png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::warningCallback);
+                png_uint_32 width = 0, height = 0;
+                int bitDepth = 0, colorType = 0, interlaceType;
 
-            // read the header..
-            png_set_read_fn (pngReadStruct, &in, PNGHelpers::readCallback);
+                png_read_info (pngReadStruct, pngInfoStruct);
 
-            png_uint_32 width = 0, height = 0;
-            int bitDepth = 0, colorType = 0, interlaceType;
+                png_get_IHDR (pngReadStruct, pngInfoStruct,
+                              &width, &height,
+                              &bitDepth, &colorType,
+                              &interlaceType, 0, 0);
 
-            png_read_info (pngReadStruct, pngInfoStruct);
+                if (bitDepth == 16)
+                    png_set_strip_16 (pngReadStruct);
 
-            png_get_IHDR (pngReadStruct, pngInfoStruct,
-                          &width, &height,
-                          &bitDepth, &colorType,
-                          &interlaceType, 0, 0);
+                if (colorType == PNG_COLOR_TYPE_PALETTE)
+                    png_set_expand (pngReadStruct);
 
-            if (bitDepth == 16)
-                png_set_strip_16 (pngReadStruct);
+                if (bitDepth < 8)
+                    png_set_expand (pngReadStruct);
 
-            if (colorType == PNG_COLOR_TYPE_PALETTE)
-                png_set_expand (pngReadStruct);
+                if (png_get_valid (pngReadStruct, pngInfoStruct, PNG_INFO_tRNS))
+                    png_set_expand (pngReadStruct);
 
-            if (bitDepth < 8)
-                png_set_expand (pngReadStruct);
+                if (colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+                    png_set_gray_to_rgb (pngReadStruct);
 
-            if (png_get_valid (pngReadStruct, pngInfoStruct, PNG_INFO_tRNS))
-                png_set_expand (pngReadStruct);
+                png_set_add_alpha (pngReadStruct, 0xff, PNG_FILLER_AFTER);
 
-            if (colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
-                png_set_gray_to_rgb (pngReadStruct);
+                bool hasAlphaChan = (colorType & PNG_COLOR_MASK_ALPHA) != 0
+                                      || pngInfoStruct->num_trans > 0;
 
-            png_set_add_alpha (pngReadStruct, 0xff, PNG_FILLER_AFTER);
+                // Load the image into a temp buffer in the pnglib format..
+                const size_t lineStride = width * 4;
+                HeapBlock<uint8> tempBuffer (height * lineStride);
 
-            bool hasAlphaChan = (colorType & PNG_COLOR_MASK_ALPHA) != 0
-                                  || pngInfoStruct->num_trans > 0;
+                HeapBlock<png_bytep> rows (height);
+                for (size_t y = 0; y < height; ++y)
+                    rows[y] = (png_bytep) (tempBuffer + lineStride * y);
 
-            // Load the image into a temp buffer in the pnglib format..
-            const size_t lineStride = width * 4;
-            HeapBlock<uint8> tempBuffer (height * lineStride);
-
-            HeapBlock<png_bytep> rows (height);
-            for (size_t y = 0; y < height; ++y)
-                rows[y] = (png_bytep) (tempBuffer + lineStride * y);
-
-            try
-            {
                 png_read_image (pngReadStruct, rows);
                 png_read_end (pngReadStruct, pngInfoStruct);
+                png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
+
+                // now convert the data to a juce image format..
+                image = Image (hasAlphaChan ? Image::ARGB : Image::RGB,
+                               (int) width, (int) height, hasAlphaChan);
+
+                image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
+                hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
+
+                const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
+
+                for (int y = 0; y < (int) height; ++y)
+                {
+                    const uint8* src = rows[y];
+                    uint8* dest = destData.getLinePointer (y);
+
+                    if (hasAlphaChan)
+                    {
+                        for (int i = (int) width; --i >= 0;)
+                        {
+                            ((PixelARGB*) dest)->setARGB (src[3], src[0], src[1], src[2]);
+                            ((PixelARGB*) dest)->premultiply();
+                            dest += destData.pixelStride;
+                            src += 4;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = (int) width; --i >= 0;)
+                        {
+                            ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
+                            dest += destData.pixelStride;
+                            src += 4;
+                        }
+                    }
+                }
             }
-            catch (PNGHelpers::PNGErrorStruct&)
-            {}
-
-            png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
-
-            // now convert the data to a juce image format..
-            image = Image (hasAlphaChan ? Image::ARGB : Image::RGB,
-                           (int) width, (int) height, hasAlphaChan);
-
-            image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
-            hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
-
-            const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
-
-            for (int y = 0; y < (int) height; ++y)
+            else
             {
-                const uint8* src = rows[y];
-                uint8* dest = destData.getLinePointer (y);
-
-                if (hasAlphaChan)
-                {
-                    for (int i = (int) width; --i >= 0;)
-                    {
-                        ((PixelARGB*) dest)->setARGB (src[3], src[0], src[1], src[2]);
-                        ((PixelARGB*) dest)->premultiply();
-                        dest += destData.pixelStride;
-                        src += 4;
-                    }
-                }
-                else
-                {
-                    for (int i = (int) width; --i >= 0;)
-                    {
-                        ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
-                        dest += destData.pixelStride;
-                        src += 4;
-                    }
-                }
+                png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
             }
         }
-        catch (PNGHelpers::PNGErrorStruct&)
-        {}
+        else
+        {
+            png_destroy_read_struct (&pngReadStruct, 0, 0);
+        }
     }
 
     return image;

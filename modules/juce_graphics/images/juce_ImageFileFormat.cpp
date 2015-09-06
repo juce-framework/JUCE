@@ -74,12 +74,10 @@ ImageFileFormat* ImageFileFormat::findImageFormatForFileExtension (const File& f
 //==============================================================================
 Image ImageFileFormat::loadFrom (InputStream& input)
 {
-    ImageFileFormat* const format = findImageFormatForStream (input);
-
-    if (format != nullptr)
+    if (ImageFileFormat* format = findImageFormatForStream (input))
         return format->decodeImage (input);
 
-    return Image::null;
+    return Image();
 }
 
 Image ImageFileFormat::loadFrom (const File& file)
@@ -92,7 +90,7 @@ Image ImageFileFormat::loadFrom (const File& file)
         return loadFrom (b);
     }
 
-    return Image::null;
+    return Image();
 }
 
 Image ImageFileFormat::loadFrom (const void* rawData, const size_t numBytes)
@@ -103,5 +101,5 @@ Image ImageFileFormat::loadFrom (const void* rawData, const size_t numBytes)
         return loadFrom (stream);
     }
 
-    return Image::null;
+    return Image();
 }
