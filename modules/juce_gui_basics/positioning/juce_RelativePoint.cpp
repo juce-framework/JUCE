@@ -55,10 +55,11 @@ RelativePoint::RelativePoint (const RelativeCoordinate& x_, const RelativeCoordi
 
 RelativePoint::RelativePoint (const String& s)
 {
+    String error;
     String::CharPointerType text (s.getCharPointer());
-    x = RelativeCoordinate (Expression::parse (text));
+    x = RelativeCoordinate (Expression::parse (text, error));
     RelativePointHelpers::skipComma (text);
-    y = RelativeCoordinate (Expression::parse (text));
+    y = RelativeCoordinate (Expression::parse (text, error));
 }
 
 bool RelativePoint::operator== (const RelativePoint& other) const noexcept
