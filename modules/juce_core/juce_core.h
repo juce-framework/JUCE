@@ -297,11 +297,11 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
     get subtle and hard-to-track-down memory corruption!
  */
  #if JUCE_DEBUG
-  struct this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_debug_mode
+  struct JUCE_API this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_debug_mode
   { this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_debug_mode() noexcept; };
   static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_debug_mode compileUnitMismatchSentinel;
  #else
-  struct this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode
+  struct JUCE_API this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode
   { this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode() noexcept; };
   static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode compileUnitMismatchSentinel;
  #endif
