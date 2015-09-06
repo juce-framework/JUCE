@@ -84,7 +84,7 @@ public:
     int getSize() const noexcept            { return size; }
 
 private:
-    struct FFTConfig;
+    JUCE_PUBLIC_IN_DLL_BUILD (struct FFTConfig)
     ScopedPointer<FFTConfig> config;
     const int size;
 
