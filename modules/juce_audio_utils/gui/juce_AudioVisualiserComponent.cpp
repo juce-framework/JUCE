@@ -208,13 +208,13 @@ void AudioVisualiserComponent::getChannelAsPath (Path& path, const Range<float>*
     path.closeSubPath();
 }
 
-void AudioVisualiserComponent::paintChannel (Graphics& g, Rectangle<float> bounds,
+void AudioVisualiserComponent::paintChannel (Graphics& g, Rectangle<float> area,
                                              const Range<float>* levels, int numLevels, int nextSample)
 {
     Path p;
     getChannelAsPath (p, levels, numLevels, nextSample);
 
-    g.fillPath (p, AffineTransform::fromTargetPoints (0.0f, -1.0f,      bounds.getX(), bounds.getY(),
-                                                      0.0f, 1.0f,       bounds.getX(), bounds.getBottom(),
-                                                      numLevels, -1.0f, bounds.getRight(), bounds.getY()));
+    g.fillPath (p, AffineTransform::fromTargetPoints (0.0f, -1.0f,               area.getX(), area.getY(),
+                                                      0.0f, 1.0f,                area.getX(), area.getBottom(),
+                                                      (float) numLevels, -1.0f,  area.getRight(), area.getY()));
 }
