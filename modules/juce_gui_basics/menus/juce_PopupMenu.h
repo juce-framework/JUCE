@@ -80,6 +80,8 @@ private:
     class Window;
 
 public:
+    class CustomComponent;
+
     //==============================================================================
     /** Creates an empty popup menu. */
     PopupMenu();
@@ -189,6 +191,17 @@ public:
                           bool isTicked = false,
                           const Image& iconToUse = Image::null);
 
+    /** Appends a custom menu item.
+
+        This will add a user-defined component to use as a menu item. The component
+        passed in will be deleted by this menu when it's no longer needed.
+
+        @see CustomComponent
+    */
+    void addCustomItem (int itemResultID,
+                        CustomComponent* customComponent,
+                        const PopupMenu* optionalSubMenu = nullptr);
+
     /** Appends a custom menu item that can't be used to trigger a result.
 
         This will add a user-defined component to use as a menu item.
@@ -199,12 +212,11 @@ public:
         detection of a mouse-click on your component, and use that to trigger the
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
-
-        @see CustomComponent
     */
     void addCustomItem (int itemResultID,
                         Component* customComponent,
-                        int idealWidth, int idealHeight,
+                        int idealWidth,
+                        int idealHeight,
                         bool triggerMenuItemAutomaticallyWhenClicked,
                         const PopupMenu* optionalSubMenu = nullptr);
 
@@ -535,17 +547,6 @@ public:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponent)
     };
-
-    /** Appends a custom menu item.
-
-        This will add a user-defined component to use as a menu item. The component
-        passed in will be deleted by this menu when it's no longer needed.
-
-        @see CustomComponent
-    */
-    void addCustomItem (int itemResultID, CustomComponent* customComponent,
-                        const PopupMenu* optionalSubMenu = nullptr);
-
 
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
