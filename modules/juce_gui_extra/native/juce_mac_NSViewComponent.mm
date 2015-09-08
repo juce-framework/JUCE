@@ -100,6 +100,7 @@ public:
     {
         [view retain];
         [view setPostsFrameChangedNotifications: YES];
+        updateAlpha();
 
         if (owner.isShowing())
             componentPeerChanged();
@@ -169,6 +170,11 @@ public:
         owner.childBoundsChanged (nullptr);
     }
 
+    void updateAlpha()
+    {
+        [view setAlphaValue: (CGFloat) owner.getAlpha()];
+    }
+
     NSView* const view;
 
 private:
@@ -216,6 +222,12 @@ void NSViewComponent::resizeToFitView()
 }
 
 void NSViewComponent::paint (Graphics&) {}
+
+void NSViewComponent::alphaChanged()
+{
+    if (attachment != nullptr)
+        (static_cast<NSViewAttachment*> (attachment.get()))->updateAlpha();
+}
 
 ReferenceCountedObject* NSViewComponent::attachViewToComponent (Component& comp, void* const view)
 {

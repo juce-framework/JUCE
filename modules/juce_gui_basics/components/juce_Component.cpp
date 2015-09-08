@@ -1838,6 +1838,11 @@ void Component::setRepaintsOnMouseActivity (const bool shouldRepaint) noexcept
 }
 
 //==============================================================================
+float Component::getAlpha() const noexcept
+{
+    return (255 - componentTransparency) / 255.0f;
+}
+
 void Component::setAlpha (const float newAlpha)
 {
     const uint8 newIntAlpha = (uint8) (255 - jlimit (0, 255, roundToInt (newAlpha * 255.0)));
@@ -1845,22 +1850,21 @@ void Component::setAlpha (const float newAlpha)
     if (componentTransparency != newIntAlpha)
     {
         componentTransparency = newIntAlpha;
-
-        if (flags.hasHeavyweightPeerFlag)
-        {
-            if (ComponentPeer* const peer = getPeer())
-                peer->setAlpha (newAlpha);
-        }
-        else
-        {
-            repaint();
-        }
+        alphaChanged();
     }
 }
 
-float Component::getAlpha() const
+void Component::alphaChanged()
 {
-    return (255 - componentTransparency) / 255.0f;
+    if (flags.hasHeavyweightPeerFlag)
+    {
+        if (ComponentPeer* const peer = getPeer())
+            peer->setAlpha (getAlpha());
+    }
+    else
+    {
+        repaint();
+    }
 }
 
 //==============================================================================
