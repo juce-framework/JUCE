@@ -311,7 +311,7 @@ public:
         Closes the underlying socket object and aborts any read or write operations.
         Note that all other methods will return an error after this call. This
         method is useful if another thread is blocking in a read/write call and you
-        woould like to abort the read/write thread. Simply deleting the socket
+        would like to abort the read/write thread. Simply deleting the socket
         object without calling shutdown may cause a race-condition where the read/write
         returns just before the socket is deleted and the subsequent read/write would
         try to read from an invalid pointer. By calling shutdown first, the socket
