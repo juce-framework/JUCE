@@ -511,27 +511,31 @@ public:
     {
         if (element == 0 && (scope == kAudioUnitScope_Output || scope == kAudioUnitScope_Input))
         {
-            outWritable = true;
+            outWritable = false;
 
             const int numChannels = (scope == kAudioUnitScope_Output) ? findNumOutputChannels()
                                                                       : findNumInputChannels();
 
+            const size_t sizeInBytes = (sizeof (AudioChannelLayout) - sizeof (AudioChannelDescription)) +
+                                       (numChannels * sizeof (AudioChannelDescription));
+
             if (outLayoutPtr != nullptr)
             {
-                zeromem (outLayoutPtr, numChannels * sizeof (AudioChannelLayout));
+                zeromem (outLayoutPtr, sizeInBytes);
+
+                outLayoutPtr->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
+                outLayoutPtr->mNumberChannelDescriptions = numChannels;
 
                 for (int i = 0; i < numChannels; ++i)
                 {
-                    AudioChannelLayout& layout = outLayoutPtr [i];
+                    AudioChannelDescription& layoutDescr = outLayoutPtr->mChannelDescriptions [i];
 
-                    layout.mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
-                    layout.mNumberChannelDescriptions = 1;
-                    layout.mChannelDescriptions[0].mChannelLabel = kAudioChannelLabel_Unused;
-                    layout.mChannelDescriptions[0].mChannelFlags = kAudioChannelFlags_AllOff;
+                    layoutDescr.mChannelLabel = kAudioChannelLabel_Unused;
+                    layoutDescr.mChannelFlags = kAudioChannelFlags_AllOff;
                 }
             }
 
-            return numChannels * sizeof (AudioChannelLayout);
+            return static_cast<UInt32> (sizeInBytes);
         }
 
         return JuceAUBaseClass::GetAudioChannelLayout(scope, element, outLayoutPtr, outWritable);
