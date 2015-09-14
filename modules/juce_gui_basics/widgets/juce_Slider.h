@@ -597,7 +597,7 @@ public:
 
         If you pass a component as the parentComponentToUse parameter, the pop-up
         bubble will be added as a child of that component when it's needed. If you
-        pass 0, the pop-up will be placed on the desktop instead (note that it's a
+        pass nullptr, the pop-up will be placed on the desktop instead (note that it's a
         transparent window, so if you're using an OS that can't do transparent windows
         you'll have to add it to a parent component instead).
     */
