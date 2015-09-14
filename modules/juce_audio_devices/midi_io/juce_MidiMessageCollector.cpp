@@ -33,12 +33,12 @@ MidiMessageCollector::~MidiMessageCollector()
 }
 
 //==============================================================================
-void MidiMessageCollector::reset (const double sampleRate_)
+void MidiMessageCollector::reset (const double newSampleRate)
 {
-    jassert (sampleRate_ > 0);
+    jassert (newSampleRate > 0);
 
     const ScopedLock sl (midiCallbackLock);
-    sampleRate = sampleRate_;
+    sampleRate = newSampleRate;
     incomingMessages.clear();
     lastCallbackTime = Time::getMillisecondCounterHiRes();
 }
@@ -139,9 +139,9 @@ void MidiMessageCollector::handleNoteOn (MidiKeyboardState*, int midiChannel, in
     addMessageToQueue (m);
 }
 
-void MidiMessageCollector::handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber)
+void MidiMessageCollector::handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {
-    MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber));
+    MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber, velocity));
     m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
 
     addMessageToQueue (m);

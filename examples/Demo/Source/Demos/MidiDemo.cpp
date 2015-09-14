@@ -215,11 +215,11 @@ private:
         }
     }
 
-    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber) override
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override
     {
         if (! isAddingFromMidiInput)
         {
-            MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber));
+            MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber, velocity));
             m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
             postMessageToList (m);
         }

@@ -664,7 +664,7 @@ void MidiKeyboardComponent::handleNoteOn (MidiKeyboardState*, int /*midiChannel*
     shouldCheckState = true; // (probably being called from the audio thread, so avoid blocking in here)
 }
 
-void MidiKeyboardComponent::handleNoteOff (MidiKeyboardState*, int /*midiChannel*/, int /*midiNoteNumber*/)
+void MidiKeyboardComponent::handleNoteOff (MidiKeyboardState*, int /*midiChannel*/, int /*midiNoteNumber*/, float /*velocity*/)
 {
     shouldCheckState = true; // (probably being called from the audio thread, so avoid blocking in here)
 }
@@ -676,7 +676,7 @@ void MidiKeyboardComponent::resetAnyKeysInUse()
     {
         for (int i = 128; --i >= 0;)
             if (keysPressed[i])
-                state.noteOff (midiChannel, i);
+                state.noteOff (midiChannel, i, 0.0f);
 
         keysPressed.clear();
     }
@@ -687,7 +687,7 @@ void MidiKeyboardComponent::resetAnyKeysInUse()
 
         if (noteDown >= 0)
         {
-            state.noteOff (midiChannel, noteDown);
+            state.noteOff (midiChannel, noteDown, 0.0f);
             mouseDownNotes.set (i, -1);
         }
 
@@ -705,6 +705,8 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
     float mousePositionVelocity = 0.0f;
     const int newNote = xyToNote (pos, mousePositionVelocity);
     const int oldNote = mouseOverNotes.getUnchecked (fingerNum);
+    const int oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
+    const float eventVelocity = useMousePositionForVelocity ? mousePositionVelocity * velocity : 1.0f;
 
     if (oldNote != newNote)
     {
@@ -712,8 +714,6 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
         repaintNote (newNote);
         mouseOverNotes.set (fingerNum, newNote);
     }
-
-    const int oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
 
     if (isDown)
     {
@@ -724,15 +724,12 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
                 mouseDownNotes.set (fingerNum, -1);
 
                 if (! mouseDownNotes.contains (oldNoteDown))
-                    state.noteOff (midiChannel, oldNoteDown);
+                    state.noteOff (midiChannel, oldNoteDown, eventVelocity);
             }
 
             if (newNote >= 0 && ! mouseDownNotes.contains (newNote))
             {
-                if (! useMousePositionForVelocity)
-                    mousePositionVelocity = 1.0f;
-
-                state.noteOn (midiChannel, newNote, mousePositionVelocity * velocity);
+                state.noteOn (midiChannel, newNote, eventVelocity);
                 mouseDownNotes.set (fingerNum, newNote);
             }
         }
@@ -742,7 +739,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, i
         mouseDownNotes.set (fingerNum, -1);
 
         if (! mouseDownNotes.contains (oldNoteDown))
-            state.noteOff (midiChannel, oldNoteDown);
+            state.noteOff (midiChannel, oldNoteDown, eventVelocity);
     }
 }
 
@@ -892,7 +889,7 @@ bool MidiKeyboardComponent::keyStateChanged (const bool /*isKeyDown*/)
             if (keysPressed [note])
             {
                 keysPressed.clearBit (note);
-                state.noteOff (midiChannel, note);
+                state.noteOff (midiChannel, note, 0.0f);
                 keyPressUsed = true;
             }
         }
