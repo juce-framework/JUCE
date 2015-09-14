@@ -509,6 +509,10 @@ public:
                                   AudioChannelLayout *outLayoutPtr,
                                   Boolean &outWritable)
     {
+        // fallback to old code if this plug-in does not have multi channel IO
+        if (! hasMultiChannelConfiguration())
+            return 0;
+
         if (element == 0 && (scope == kAudioUnitScope_Output || scope == kAudioUnitScope_Input))
         {
             outWritable = false;
@@ -1402,6 +1406,21 @@ private:
         currentPreset.presetName = currentProgramName.toCFString();
 
         SetAFactoryPresetAsCurrent (currentPreset);
+    }
+
+    //==============================================================================
+    bool hasMultiChannelConfiguration () noexcept
+    {
+        for (int i = 0; i < numChannelConfigs; ++i)
+        {
+           #if !JucePlugin_IsSynth
+            if (channelConfigs[i][0] > 2)
+                return true;
+           #endif
+            if (channelConfigs[i][1] > 2)
+                return true;
+        }
+        return false;
     }
 
     JUCE_DECLARE_NON_COPYABLE (JuceAU)
