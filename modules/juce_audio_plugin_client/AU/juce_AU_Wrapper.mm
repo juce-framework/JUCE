@@ -509,21 +509,29 @@ public:
                                   AudioChannelLayout *outLayoutPtr,
                                   Boolean &outWritable)
     {
-        if (element == 0)
+        if (element == 0 && (scope == kAudioUnitScope_Output || scope == kAudioUnitScope_Input))
         {
             outWritable = true;
-            if (scope == kAudioUnitScope_Output)
+
+            const int numChannels = (scope == kAudioUnitScope_Output) ? findNumOutputChannels()
+                                                                      : findNumInputChannels();
+
+            if (outLayoutPtr != nullptr)
             {
-                return static_cast<UInt32> (findNumOutputChannels());
+                zeromem (outLayoutPtr, numChannels * sizeof (AudioChannelLayout));
+
+                for (int i = 0; i < numChannels; ++i)
+                {
+                    AudioChannelLayout& layout = outLayoutPtr [i];
+
+                    layout.mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
+                    layout.mNumberChannelDescriptions = 1;
+                    layout.mChannelDescriptions[0].mChannelLabel = kAudioChannelLabel_Unused;
+                    layout.mChannelDescriptions[0].mChannelFlags = kAudioChannelFlags_AllOff;
+                }
             }
-            else if (scope == kAudioUnitScope_Input)
-            {
-               #if JucePlugin_IsSynth
-                return 0;
-               #else
-                return static_cast<UInt32> (findNumInputChannels());
-               #endif
-            }
+
+            return numChannels * sizeof (AudioChannelLayout);
         }
 
         return JuceAUBaseClass::GetAudioChannelLayout(scope, element, outLayoutPtr, outWritable);
