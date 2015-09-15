@@ -238,7 +238,7 @@ public:
 
         @param channel      the midi channel, in the range 1 to 16
         @param noteNumber   the key number, 0 to 127
-        @param velocity     in the range 0 to 127
+        @param velocity     in the range 0 to 1.0
         @see isNoteOff
     */
     static MidiMessage noteOff (int channel, int noteNumber, float velocity) noexcept;
@@ -247,7 +247,7 @@ public:
 
         @param channel      the midi channel, in the range 1 to 16
         @param noteNumber   the key number, 0 to 127
-        @param velocity     in the range 0 to 1
+        @param velocity     in the range 0 to 127
         @see isNoteOff
     */
     static MidiMessage noteOff (int channel, int noteNumber, uint8 velocity) noexcept;
