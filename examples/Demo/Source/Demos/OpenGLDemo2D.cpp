@@ -37,7 +37,9 @@ public:
         : fragmentEditorComp (fragmentDocument, nullptr)
     {
         setOpaque (true);
-        MainAppWindow::getMainAppWindow()->setOpenGLRenderingEngine();
+
+        if (MainAppWindow* mw = MainAppWindow::getMainAppWindow())
+            mw->setOpenGLRenderingEngine();
 
         addAndMakeVisible (statusLabel);
         statusLabel.setJustificationType (Justification::topLeft);

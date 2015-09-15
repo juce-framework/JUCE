@@ -357,7 +357,7 @@ private:
                 return showWindow (*button, static_cast<DialogType> (i));
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogsDemo)
 };
 
 

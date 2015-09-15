@@ -116,7 +116,7 @@ private:
     void textEditorEscapeKeyPressed (TextEditor&) override {}
     void textEditorFocusLost (TextEditor&) override {}
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Note);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Note)
 };
 
 
@@ -146,7 +146,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoMultiDocumentPanel);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoMultiDocumentPanel)
 };
 
 //==============================================================================
@@ -264,7 +264,7 @@ private:
             addNote (String ("Note ") + String (multiDocumentPanel.getNumDocuments() + 1), "Hello World!");
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MDIDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MDIDemo)
 };
 
 

@@ -137,7 +137,7 @@ private:
             webView->goToURL (addressTextBox.getText());
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo)
 };
 
 

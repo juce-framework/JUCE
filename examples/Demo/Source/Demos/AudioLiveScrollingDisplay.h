@@ -76,7 +76,7 @@ public:
                 zeromem (outputChannel, sizeof (float) * (size_t) numSamples);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveScrollingAudioDisplay);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveScrollingAudioDisplay)
 };
 
 

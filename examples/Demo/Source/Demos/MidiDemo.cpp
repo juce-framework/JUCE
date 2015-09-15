@@ -259,7 +259,7 @@ private:
         messageListBox.repaint();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiDemo)
 };
 
 

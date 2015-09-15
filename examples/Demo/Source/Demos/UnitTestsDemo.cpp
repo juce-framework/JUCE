@@ -53,7 +53,7 @@ struct UnitTestClasses
     private:
         TestRunnerThread& owner;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTestRunner);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTestRunner)
     };
 
     //==============================================================================
@@ -93,7 +93,7 @@ struct UnitTestClasses
     private:
         UnitTestsDemo& owner;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestRunnerThread);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestRunnerThread)
     };
 
 
@@ -183,7 +183,7 @@ struct UnitTestClasses
         TextButton startTestButton;
         TextEditor testResultsBox;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnitTestsDemo);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnitTestsDemo)
     };
 };
 

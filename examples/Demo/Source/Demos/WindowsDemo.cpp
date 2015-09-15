@@ -323,7 +323,7 @@ private:
             closeAllWindows();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsDemo)
 };
 
 // This static object will register this demo type in a global list of demos..

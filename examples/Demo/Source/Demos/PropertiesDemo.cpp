@@ -169,7 +169,7 @@ public:
 private:
     PropertyPanel propertyPanel;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesDemo)
 };
 
 //==============================================================================
@@ -235,7 +235,7 @@ private:
         concertinaPanel.setMaximumPanelSize (panel, panel->getTotalContentHeight());
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConcertinaDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConcertinaDemo)
 };
 
 

@@ -1547,7 +1547,7 @@ public:
 private:
     DemoTabbedComponent tabs;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WidgetsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WidgetsDemo)
 };
 
 // This static object will register this demo type in a global list of demos..

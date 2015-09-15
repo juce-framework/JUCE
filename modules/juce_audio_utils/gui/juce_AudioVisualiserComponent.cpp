@@ -75,7 +75,7 @@ struct AudioVisualiserComponent::ChannelInfo
     Range<float> value;
     int nextSample, subSample;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelInfo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelInfo)
 };
 
 //==============================================================================
