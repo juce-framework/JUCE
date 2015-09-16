@@ -78,7 +78,7 @@ private:
     Component pageHolder;
     int currentIndex, dotSize;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SlidingPanelComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SlidingPanelComponent)
 };
 
 

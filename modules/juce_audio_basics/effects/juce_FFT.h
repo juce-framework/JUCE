@@ -84,9 +84,12 @@ public:
     int getSize() const noexcept            { return size; }
 
 private:
-    struct FFTConfig;
+    JUCE_PUBLIC_IN_DLL_BUILD (struct FFTConfig)
     ScopedPointer<FFTConfig> config;
     const int size;
+
+    void performRealOnlyForwardTransform (Complex*, float*) const noexcept;
+    void performRealOnlyInverseTransform (Complex*, float*) const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FFT)
 };

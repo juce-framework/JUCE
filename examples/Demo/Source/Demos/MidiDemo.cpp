@@ -215,11 +215,11 @@ private:
         }
     }
 
-    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber) override
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override
     {
         if (! isAddingFromMidiInput)
         {
-            MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber));
+            MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber, velocity));
             m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
             postMessageToList (m);
         }
@@ -259,7 +259,7 @@ private:
         messageListBox.repaint();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiDemo)
 };
 
 

@@ -123,7 +123,7 @@ private:
         return bits.joinIntoString (", ");
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSettingsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSettingsDemo)
 };
 
 

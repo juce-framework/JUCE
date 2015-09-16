@@ -42,7 +42,7 @@
 //==============================================================================
 namespace juce
 {
-    static void initialiseMac()
+    void initialiseMacVST3()
     {
        #if ! JUCE_64BIT
         NSApplicationLoad();
@@ -50,7 +50,7 @@ namespace juce
     }
 
    #if ! JUCE_64BIT
-    static void updateComponentPos (Component* const comp)
+    static void updateComponentPosVST3 (Component* const comp)
     {
         DBG ("updateComponentPos()");
 
@@ -70,14 +70,14 @@ namespace juce
                                   (int) (windowPos.top + r.origin.y));
     }
 
-    static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
+    static pascal OSStatus viewBoundsChangedEventVST3 (EventHandlerCallRef, EventRef, void* user)
     {
-        updateComponentPos ((Component*) user);
+        updateComponentPosVST3 ((Component*) user);
         return noErr;
     }
    #endif
 
-    static void* attachComponentToWindowRef (Component* comp, void* windowRef, bool isHIView)
+    void* attachComponentToWindowRefVST3 (Component* comp, void* windowRef, bool isHIView)
     {
         DBG ("attachComponentToWindowRef()");
 
@@ -163,10 +163,10 @@ namespace juce
 
             EventHandlerRef ref;
             const EventTypeSpec kControlBoundsChangedEvent = { kEventClassControl, kEventControlBoundsChanged };
-            InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
+            InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEventVST3), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
             comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 
-            updateComponentPos (comp);
+            updateComponentPosVST3 (comp);
 
            #if ! JucePlugin_EditorRequiresKeyboardFocus
             comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
@@ -194,7 +194,7 @@ namespace juce
         }
     }
 
-    static void detachComponentFromWindowRef (Component* comp, void* nsWindow, bool isHIView)
+    void detachComponentFromWindowRefVST3 (Component* comp, void* nsWindow, bool isHIView)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -242,7 +242,7 @@ namespace juce
         }
     }
 
-    static void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, bool isHIView)
+    void setNativeHostWindowSizeVST3 (void* nsWindow, Component* component, int newWidth, int newHeight, bool isHIView)
     {
         JUCE_AUTORELEASEPOOL
         {

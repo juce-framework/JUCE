@@ -81,7 +81,7 @@ void MidiKeyboardState::noteOnInternal  (const int midiChannel, const int midiNo
     }
 }
 
-void MidiKeyboardState::noteOff (const int midiChannel, const int midiNoteNumber)
+void MidiKeyboardState::noteOff (const int midiChannel, const int midiNoteNumber, const float velocity)
 {
     const ScopedLock sl (lock);
 
@@ -91,18 +91,18 @@ void MidiKeyboardState::noteOff (const int midiChannel, const int midiNoteNumber
         eventsToAdd.addEvent (MidiMessage::noteOff (midiChannel, midiNoteNumber), timeNow);
         eventsToAdd.clear (0, timeNow - 500);
 
-        noteOffInternal (midiChannel, midiNoteNumber);
+        noteOffInternal (midiChannel, midiNoteNumber, velocity);
     }
 }
 
-void MidiKeyboardState::noteOffInternal  (const int midiChannel, const int midiNoteNumber)
+void MidiKeyboardState::noteOffInternal  (const int midiChannel, const int midiNoteNumber, const float velocity)
 {
     if (isNoteOn (midiChannel, midiNoteNumber))
     {
         noteStates [midiNoteNumber] &= ~(1 << (midiChannel - 1));
 
         for (int i = listeners.size(); --i >= 0;)
-            listeners.getUnchecked(i)->handleNoteOff (this, midiChannel, midiNoteNumber);
+            listeners.getUnchecked(i)->handleNoteOff (this, midiChannel, midiNoteNumber, velocity);
     }
 }
 
@@ -118,7 +118,7 @@ void MidiKeyboardState::allNotesOff (const int midiChannel)
     else
     {
         for (int i = 0; i < 128; ++i)
-            noteOff (midiChannel, i);
+            noteOff (midiChannel, i, 0.0f);
     }
 }
 
@@ -130,12 +130,12 @@ void MidiKeyboardState::processNextMidiEvent (const MidiMessage& message)
     }
     else if (message.isNoteOff())
     {
-        noteOffInternal (message.getChannel(), message.getNoteNumber());
+        noteOffInternal (message.getChannel(), message.getNoteNumber(), message.getFloatVelocity());
     }
     else if (message.isAllNotesOff())
     {
         for (int i = 0; i < 128; ++i)
-            noteOffInternal (message.getChannel(), i);
+            noteOffInternal (message.getChannel(), i, 0.0f);
     }
 }
 

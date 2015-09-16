@@ -89,7 +89,7 @@ private:
         editor->loadContent (fileChooser.getCurrentFile().loadFileAsString());
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorDemo)
 };
 
 

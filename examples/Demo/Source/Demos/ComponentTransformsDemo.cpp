@@ -125,7 +125,7 @@ private:
         ComponentBoundsConstrainer constrainer;
         ComponentDragger dragger;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CornerDragger);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CornerDragger)
     };
 
     OwnedArray<CornerDragger> draggers;
@@ -147,7 +147,7 @@ private:
                                                                       0, (float) content->getHeight(), p2.x, p2.y));
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentTransformsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentTransformsDemo)
 };
 
 

@@ -184,7 +184,7 @@ public:
 private:
     TextEditor resultsBox;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SystemInfoDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SystemInfoDemo)
 };
 
 // This static object will register this demo type in a global list of demos..

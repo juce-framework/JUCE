@@ -332,7 +332,7 @@ private:
             demoComponent->setUsingPool (result == 2);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultithreadingDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultithreadingDemo)
 };
 
 

@@ -42,6 +42,10 @@ namespace zlibNamespace
 #endif
 }
 
+#if ! defined (jmp_buf) || ! defined (longjmp)
+ #include <setjmp.h>
+#endif
+
 namespace pnglibNamespace
 {
   using namespace zlibNamespace;
@@ -313,12 +317,154 @@ namespace PNGHelpers
 
     struct PNGErrorStruct {};
 
-    static void JUCE_CDECL errorCallback (png_structp, png_const_charp)
+    static void JUCE_CDECL errorCallback (png_structp p, png_const_charp)
     {
-        throw PNGErrorStruct();
+        longjmp (*(jmp_buf*) p->error_ptr, 1);
     }
 
     static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
+
+   #if JUCE_MSVC
+    #pragma warning (push)
+    #pragma warning (disable: 4611) // (warning about setjmp)
+   #endif
+
+    static bool readHeader (InputStream& in, png_structp pngReadStruct, png_infop pngInfoStruct, jmp_buf& errorJumpBuf,
+                            png_uint_32& width, png_uint_32& height, int& bitDepth, int& colorType, int& interlaceType) noexcept
+    {
+        if (setjmp (errorJumpBuf) == 0)
+        {
+            // read the header..
+            png_set_read_fn (pngReadStruct, &in, readCallback);
+
+            png_read_info (pngReadStruct, pngInfoStruct);
+
+            png_get_IHDR (pngReadStruct, pngInfoStruct,
+                          &width, &height,
+                          &bitDepth, &colorType,
+                          &interlaceType, 0, 0);
+
+            if (bitDepth == 16)
+                png_set_strip_16 (pngReadStruct);
+
+            if (colorType == PNG_COLOR_TYPE_PALETTE)
+                png_set_expand (pngReadStruct);
+
+            if (bitDepth < 8)
+                png_set_expand (pngReadStruct);
+
+            if (colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+                png_set_gray_to_rgb (pngReadStruct);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    static bool readImageData (png_structp pngReadStruct, png_infop pngInfoStruct, jmp_buf& errorJumpBuf, png_bytepp rows) noexcept
+    {
+        if (setjmp (errorJumpBuf) == 0)
+        {
+            if (png_get_valid (pngReadStruct, pngInfoStruct, PNG_INFO_tRNS))
+                png_set_expand (pngReadStruct);
+
+            png_set_add_alpha (pngReadStruct, 0xff, PNG_FILLER_AFTER);
+
+            png_read_image (pngReadStruct, rows);
+            png_read_end (pngReadStruct, pngInfoStruct);
+            return true;
+        }
+
+        return false;
+    }
+
+   #if JUCE_MSVC
+    #pragma warning (pop)
+   #endif
+
+    static Image createImageFromData (bool hasAlphaChan, int width, int height, png_bytepp rows)
+    {
+        // now convert the data to a juce image format..
+        Image image (hasAlphaChan ? Image::ARGB : Image::RGB, width, height, hasAlphaChan);
+
+        image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
+        hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
+
+        const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
+
+        for (int y = 0; y < (int) height; ++y)
+        {
+            const uint8* src = rows[y];
+            uint8* dest = destData.getLinePointer (y);
+
+            if (hasAlphaChan)
+            {
+                for (int i = (int) width; --i >= 0;)
+                {
+                    ((PixelARGB*) dest)->setARGB (src[3], src[0], src[1], src[2]);
+                    ((PixelARGB*) dest)->premultiply();
+                    dest += destData.pixelStride;
+                    src += 4;
+                }
+            }
+            else
+            {
+                for (int i = (int) width; --i >= 0;)
+                {
+                    ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
+                    dest += destData.pixelStride;
+                    src += 4;
+                }
+            }
+        }
+
+        return image;
+    }
+
+    static Image readImage (InputStream& in, png_structp pngReadStruct, png_infop pngInfoStruct)
+    {
+        jmp_buf errorJumpBuf;
+        png_set_error_fn (pngReadStruct, &errorJumpBuf, errorCallback, warningCallback);
+
+        png_uint_32 width = 0, height = 0;
+        int bitDepth = 0, colorType = 0, interlaceType = 0;
+
+        if (readHeader (in, pngReadStruct, pngInfoStruct, errorJumpBuf,
+                        width, height, bitDepth, colorType, interlaceType))
+        {
+            // Load the image into a temp buffer..
+            const size_t lineStride = width * 4;
+            HeapBlock<uint8> tempBuffer (height * lineStride);
+            HeapBlock<png_bytep> rows (height);
+
+            for (size_t y = 0; y < height; ++y)
+                rows[y] = (png_bytep) (tempBuffer + lineStride * y);
+
+            if (readImageData (pngReadStruct, pngInfoStruct, errorJumpBuf, rows))
+                return createImageFromData ((colorType & PNG_COLOR_MASK_ALPHA) != 0 || pngInfoStruct->num_trans > 0,
+                                            (int) width, (int) height, rows);
+        }
+
+        return Image();
+    }
+
+    static Image readImage (InputStream& in)
+    {
+        if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0))
+        {
+            if (png_infop pngInfoStruct = png_create_info_struct (pngReadStruct))
+            {
+                Image image (readImage (in, pngReadStruct, pngInfoStruct));
+                png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
+                return image;
+            }
+
+            png_destroy_read_struct (&pngReadStruct, 0, 0);
+        }
+
+        return Image();
+    }
    #endif
 }
 
@@ -341,123 +487,16 @@ bool PNGImageFormat::canUnderstand (InputStream& in)
 }
 
 #if JUCE_USING_COREIMAGE_LOADER
- Image juce_loadWithCoreImage (InputStream& input);
+ Image juce_loadWithCoreImage (InputStream&);
 #endif
 
 Image PNGImageFormat::decodeImage (InputStream& in)
 {
-#if JUCE_USING_COREIMAGE_LOADER
+   #if JUCE_USING_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);
-#else
-    using namespace pnglibNamespace;
-    Image image;
-
-    if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0))
-    {
-        try
-        {
-            png_infop pngInfoStruct = png_create_info_struct (pngReadStruct);
-
-            if (pngInfoStruct == nullptr)
-            {
-                png_destroy_read_struct (&pngReadStruct, 0, 0);
-                return Image::null;
-            }
-
-            png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::warningCallback);
-
-            // read the header..
-            png_set_read_fn (pngReadStruct, &in, PNGHelpers::readCallback);
-
-            png_uint_32 width = 0, height = 0;
-            int bitDepth = 0, colorType = 0, interlaceType;
-
-            png_read_info (pngReadStruct, pngInfoStruct);
-
-            png_get_IHDR (pngReadStruct, pngInfoStruct,
-                          &width, &height,
-                          &bitDepth, &colorType,
-                          &interlaceType, 0, 0);
-
-            if (bitDepth == 16)
-                png_set_strip_16 (pngReadStruct);
-
-            if (colorType == PNG_COLOR_TYPE_PALETTE)
-                png_set_expand (pngReadStruct);
-
-            if (bitDepth < 8)
-                png_set_expand (pngReadStruct);
-
-            if (png_get_valid (pngReadStruct, pngInfoStruct, PNG_INFO_tRNS))
-                png_set_expand (pngReadStruct);
-
-            if (colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
-                png_set_gray_to_rgb (pngReadStruct);
-
-            png_set_add_alpha (pngReadStruct, 0xff, PNG_FILLER_AFTER);
-
-            bool hasAlphaChan = (colorType & PNG_COLOR_MASK_ALPHA) != 0
-                                  || pngInfoStruct->num_trans > 0;
-
-            // Load the image into a temp buffer in the pnglib format..
-            const size_t lineStride = width * 4;
-            HeapBlock<uint8> tempBuffer (height * lineStride);
-
-            HeapBlock<png_bytep> rows (height);
-            for (size_t y = 0; y < height; ++y)
-                rows[y] = (png_bytep) (tempBuffer + lineStride * y);
-
-            try
-            {
-                png_read_image (pngReadStruct, rows);
-                png_read_end (pngReadStruct, pngInfoStruct);
-            }
-            catch (PNGHelpers::PNGErrorStruct&)
-            {}
-
-            png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
-
-            // now convert the data to a juce image format..
-            image = Image (hasAlphaChan ? Image::ARGB : Image::RGB,
-                           (int) width, (int) height, hasAlphaChan);
-
-            image.getProperties()->set ("originalImageHadAlpha", image.hasAlphaChannel());
-            hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
-
-            const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
-
-            for (int y = 0; y < (int) height; ++y)
-            {
-                const uint8* src = rows[y];
-                uint8* dest = destData.getLinePointer (y);
-
-                if (hasAlphaChan)
-                {
-                    for (int i = (int) width; --i >= 0;)
-                    {
-                        ((PixelARGB*) dest)->setARGB (src[3], src[0], src[1], src[2]);
-                        ((PixelARGB*) dest)->premultiply();
-                        dest += destData.pixelStride;
-                        src += 4;
-                    }
-                }
-                else
-                {
-                    for (int i = (int) width; --i >= 0;)
-                    {
-                        ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
-                        dest += destData.pixelStride;
-                        src += 4;
-                    }
-                }
-            }
-        }
-        catch (PNGHelpers::PNGErrorStruct&)
-        {}
-    }
-
-    return image;
-#endif
+   #else
+    return PNGHelpers::readImage (in);
+   #endif
 }
 
 bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)

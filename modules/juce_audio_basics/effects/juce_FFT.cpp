@@ -225,18 +225,42 @@ void FFT::perform (const Complex* const input, Complex* const output) const noex
     config->perform (input, output);
 }
 
+const size_t maxFFTScratchSpaceToAlloca = 256 * 1024;
+
 void FFT::performRealOnlyForwardTransform (float* d) const noexcept
+{
+    const size_t scratchSize = 16 + sizeof (FFT::Complex) * (size_t) size;
+
+    if (scratchSize < maxFFTScratchSpaceToAlloca)
+    {
+        performRealOnlyForwardTransform (static_cast<Complex*> (alloca (scratchSize)), d);
+    }
+    else
+    {
+        HeapBlock<char> heapSpace (scratchSize);
+        performRealOnlyForwardTransform (reinterpret_cast<Complex*> (heapSpace.getData()), d);
+    }
+}
+
+void FFT::performRealOnlyInverseTransform (float* d) const noexcept
+{
+    const size_t scratchSize = 16 + sizeof (FFT::Complex) * (size_t) size;
+
+    if (scratchSize < maxFFTScratchSpaceToAlloca)
+    {
+        performRealOnlyForwardTransform (static_cast<Complex*> (alloca (scratchSize)), d);
+    }
+    else
+    {
+        HeapBlock<char> heapSpace (scratchSize);
+        performRealOnlyInverseTransform (reinterpret_cast<Complex*> (heapSpace.getData()), d);
+    }
+}
+
+void FFT::performRealOnlyForwardTransform (Complex* scratch, float* d) const noexcept
 {
     // This can only be called on an FFT object that was created to do forward transforms.
     jassert (! config->inverse);
-
-    const size_t sizeInBytes = 16 + sizeof (Complex) * (size_t) size;
-
-    Complex* scratch = static_cast<Complex*> (alloca (sizeInBytes));
-
-    // try malloc if alloca fails
-    if (scratch == nullptr)
-        scratch = static_cast<Complex*> (malloc (sizeInBytes));
 
     for (int i = 0; i < size; ++i)
     {
@@ -247,18 +271,10 @@ void FFT::performRealOnlyForwardTransform (float* d) const noexcept
     perform (scratch, reinterpret_cast<Complex*> (d));
 }
 
-void FFT::performRealOnlyInverseTransform (float* d) const noexcept
+void FFT::performRealOnlyInverseTransform (Complex* scratch, float* d) const noexcept
 {
     // This can only be called on an FFT object that was created to do inverse transforms.
     jassert (config->inverse);
-
-    const size_t sizeInBytes = 16 + sizeof (Complex) * (size_t) size;
-
-    Complex* scratch = static_cast<Complex*> (alloca (sizeInBytes));
-
-    // try malloc if alloca fails
-    if (scratch == nullptr)
-        scratch = static_cast<Complex*> (malloc (sizeInBytes));
 
     perform (reinterpret_cast<const Complex*> (d), scratch);
 

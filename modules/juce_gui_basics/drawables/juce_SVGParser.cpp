@@ -377,6 +377,7 @@ private:
         if (tag == "polygon")     return parsePolygon (xml, false);
         if (tag == "text")        return parseText (xml, true);
         if (tag == "switch")      return parseSwitch (xml);
+        if (tag == "a")           return parseLinkElement (xml);
         if (tag == "style")       parseCSSStyle (xml);
 
         return nullptr;
@@ -410,6 +411,11 @@ private:
 
         drawable->resetContentAreaAndBoundingBoxToFitChildren();
         return drawable;
+    }
+
+    DrawableComposite* parseLinkElement (const XmlPath& xml)
+    {
+        return parseGroupElement (xml); // TODO: support for making this clickable
     }
 
     //==============================================================================

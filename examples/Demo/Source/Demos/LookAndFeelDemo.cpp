@@ -606,7 +606,7 @@ private:
             lafBox.setSelectedItemIndex (Random::getSystemRandom().nextInt (lafBox.getNumItems()));
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeelDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeelDemo)
 };
 
 

@@ -49,7 +49,7 @@ public:
 private:
     KeyMappingEditorComponent keyMappingEditor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingsDemo)
 };
 
 

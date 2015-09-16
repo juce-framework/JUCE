@@ -287,7 +287,7 @@ public:
     /** @internal */
     void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     /** @internal */
-    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber) override;
+    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     /** @internal */
     void colourChanged() override;
 

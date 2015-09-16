@@ -64,7 +64,7 @@ public:
         careful not to block, and avoid any UI activity in the callback.
     */
     virtual void handleNoteOff (MidiKeyboardState* source,
-                                int midiChannel, int midiNoteNumber) = 0;
+                                int midiChannel, int midiNoteNumber, float velocity) = 0;
 };
 
 
@@ -135,7 +135,7 @@ public:
 
         But if the note isn't acutally down for the given channel, this method will in fact do nothing.
     */
-    void noteOff (int midiChannel, int midiNoteNumber);
+    void noteOff (int midiChannel, int midiNoteNumber, float velocity);
 
     /** This will turn off any currently-down notes for the given midi channel.
 
@@ -196,7 +196,7 @@ private:
     Array <MidiKeyboardStateListener*> listeners;
 
     void noteOnInternal (int midiChannel, int midiNoteNumber, float velocity);
-    void noteOffInternal (int midiChannel, int midiNoteNumber);
+    void noteOffInternal (int midiChannel, int midiNoteNumber, float velocity);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardState)
 };

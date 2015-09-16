@@ -668,7 +668,7 @@ private:
     ListBox listBox;
     OwnedArray<GraphicsDemoBase> demos;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestListComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestListComponent)
 };
 
 //==============================================================================
@@ -706,7 +706,7 @@ private:
     Label performanceDisplay;
     TestListComponent testList;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphicsDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphicsDemo)
 };
 
 

@@ -789,6 +789,8 @@ public:
             Graphics imG (image);
             LowLevelGraphicsContext& lg = imG.getInternalContext();
 
+            lg.addTransform (AffineTransform::scale (scale));
+
             for (const Rectangle<int>* i = validArea.begin(), * const e = validArea.end(); i != e; ++i)
                 lg.excludeClipRectangle (*i);
 
@@ -799,11 +801,10 @@ public:
                 lg.setFill (Colours::black);
             }
 
-            lg.addTransform (AffineTransform::scale (scale));
             owner.paintEntireComponent (imG, true);
         }
 
-        validArea = imageBounds;
+        validArea = compBounds;
 
         g.setColour (Colours::black.withAlpha (owner.getAlpha()));
         g.drawImageTransformed (image, AffineTransform::scale (compBounds.getWidth()  / (float) imageBounds.getWidth(),
@@ -811,7 +812,7 @@ public:
     }
 
     bool invalidateAll() override                            { validArea.clear(); return true; }
-    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area * scale); return true; }
+    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
     void releaseResources() override                         { image = Image::null; }
 
 private:
@@ -1837,6 +1838,11 @@ void Component::setRepaintsOnMouseActivity (const bool shouldRepaint) noexcept
 }
 
 //==============================================================================
+float Component::getAlpha() const noexcept
+{
+    return (255 - componentTransparency) / 255.0f;
+}
+
 void Component::setAlpha (const float newAlpha)
 {
     const uint8 newIntAlpha = (uint8) (255 - jlimit (0, 255, roundToInt (newAlpha * 255.0)));
@@ -1844,22 +1850,21 @@ void Component::setAlpha (const float newAlpha)
     if (componentTransparency != newIntAlpha)
     {
         componentTransparency = newIntAlpha;
-
-        if (flags.hasHeavyweightPeerFlag)
-        {
-            if (ComponentPeer* const peer = getPeer())
-                peer->setAlpha (newAlpha);
-        }
-        else
-        {
-            repaint();
-        }
+        alphaChanged();
     }
 }
 
-float Component::getAlpha() const
+void Component::alphaChanged()
 {
-    return (255 - componentTransparency) / 255.0f;
+    if (flags.hasHeavyweightPeerFlag)
+    {
+        if (ComponentPeer* const peer = getPeer())
+            peer->setAlpha (getAlpha());
+    }
+    else
+    {
+        repaint();
+    }
 }
 
 //==============================================================================

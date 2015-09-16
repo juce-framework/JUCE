@@ -87,12 +87,8 @@ RelativeCoordinate::RelativeCoordinate (const double absoluteDistanceFromOrigin)
 
 RelativeCoordinate::RelativeCoordinate (const String& s)
 {
-    try
-    {
-        term = Expression (s);
-    }
-    catch (Expression::ParseError&)
-    {}
+    String error;
+    term = Expression (s, error);
 }
 
 RelativeCoordinate::~RelativeCoordinate()
@@ -111,52 +107,35 @@ bool RelativeCoordinate::operator!= (const RelativeCoordinate& other) const noex
 
 double RelativeCoordinate::resolve (const Expression::Scope* scope) const
 {
-    try
-    {
-        if (scope != nullptr)
-            return term.evaluate (*scope);
+    if (scope != nullptr)
+        return term.evaluate (*scope);
 
-        return term.evaluate();
-    }
-    catch (Expression::ParseError&)
-    {}
-
-    return 0.0;
+    return term.evaluate();
 }
 
 bool RelativeCoordinate::isRecursive (const Expression::Scope* scope) const
 {
-    try
-    {
-        if (scope != nullptr)
-            term.evaluate (*scope);
-        else
-            term.evaluate();
-    }
-    catch (Expression::ParseError&)
-    {
-        return true;
-    }
+    String error;
 
-    return false;
+    if (scope != nullptr)
+        term.evaluate (*scope, error);
+    else
+        term.evaluate (Expression::Scope(), error);
+
+    return error.isNotEmpty();
 }
 
 void RelativeCoordinate::moveToAbsolute (double newPos, const Expression::Scope* scope)
 {
-    try
+    if (scope != nullptr)
     {
-        if (scope != nullptr)
-        {
-            term = term.adjustedToGiveNewResult (newPos, *scope);
-        }
-        else
-        {
-            Expression::Scope defaultScope;
-            term = term.adjustedToGiveNewResult (newPos, defaultScope);
-        }
+        term = term.adjustedToGiveNewResult (newPos, *scope);
     }
-    catch (Expression::ParseError&)
-    {}
+    else
+    {
+        Expression::Scope defaultScope;
+        term = term.adjustedToGiveNewResult (newPos, defaultScope);
+    }
 }
 
 bool RelativeCoordinate::isDynamic() const
