@@ -32,10 +32,11 @@ struct MidiOutput::PendingMessage
     PendingMessage* next;
 };
 
-MidiOutput::MidiOutput()
+MidiOutput::MidiOutput(const String& midiName)
     : Thread ("midi out"),
       internal (nullptr),
-      firstMessage (nullptr)
+      firstMessage (nullptr),
+      name (midiName)
 {
 }
 

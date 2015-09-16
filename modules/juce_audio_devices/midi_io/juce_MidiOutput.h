@@ -84,6 +84,9 @@ public:
     /** Destructor. */
     ~MidiOutput();
 
+    /** Returns the name of this device. */
+    const String& getName() const noexcept                      { return name; }
+
     /** Makes this device output a midi message.
         @see MidiMessage
     */
@@ -131,8 +134,9 @@ private:
     CriticalSection lock;
     struct PendingMessage;
     PendingMessage* firstMessage;
+    String name;
 
-    MidiOutput(); // These objects are created with the openDevice() method.
+    MidiOutput(const String& midiName); // These objects are created with the openDevice() method.
     void run() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutput)
