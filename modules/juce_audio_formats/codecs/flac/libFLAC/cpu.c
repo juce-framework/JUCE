@@ -244,7 +244,11 @@ void FLAC__cpu_info(FLAC__CPUInfo *info)
 		struct sigaction sigill_save;
 		struct sigaction sigill_sse;
 		sigill_sse.sa_sigaction = sigill_handler_sse_os;
+      #ifdef __ANDROID__
+        sigemptyset (&sigill_sse.sa_mask);
+      #else
 		__sigemptyset(&sigill_sse.sa_mask);
+      #endif
 		sigill_sse.sa_flags = SA_SIGINFO | SA_RESETHAND; /* SA_RESETHAND just in case our SIGILL return jump breaks, so we don't get stuck in a loop */
 		if(0 == sigaction(SIGILL, &sigill_sse, &sigill_save))
 		{

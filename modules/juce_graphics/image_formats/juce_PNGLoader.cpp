@@ -42,6 +42,10 @@ namespace zlibNamespace
 #endif
 }
 
+#if ! defined (jmp_buf) || ! defined (longjmp)
+ #include <setjmp.h>
+#endif
+
 namespace pnglibNamespace
 {
   using namespace zlibNamespace;
