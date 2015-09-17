@@ -333,6 +333,17 @@ public:
     */
     bool leaveMulticast (const String& multicastIPAddress);
 
+    //==============================================================================
+    /** Allow other applications to re-use the port.
+
+        Allow any other application currently running to bind to the same port.
+        Do not use this if your socket handles sensitive data as it could be
+        read by any, possibly malicious, third-party apps.
+
+        Returns true on success.
+    */
+    bool setEnablePortReuse (bool enabled);
+
 private:
     //==============================================================================
     int handle;

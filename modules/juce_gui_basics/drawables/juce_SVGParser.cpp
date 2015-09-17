@@ -1091,6 +1091,11 @@ private:
     }
 
     //==============================================================================
+    static bool isStartOfNumber (juce_wchar c) noexcept
+    {
+        return CharacterFunctions::isDigit (c) || c == '-' || c == '+';
+    }
+
     static bool parseNextNumber (String::CharPointerType& text, String& value, const bool allowUnits)
     {
         String::CharPointerType s (text);
@@ -1100,14 +1105,21 @@ private:
 
         String::CharPointerType start (s);
 
-        if (s.isDigit() || *s == '.' || *s == '-')
+        if (isStartOfNumber (*s))
             ++s;
 
-        while (s.isDigit() || *s == '.')
+        while (s.isDigit())
             ++s;
 
-        if ((*s == 'e' || *s == 'E')
-             && ((s + 1).isDigit() || s[1] == '-' || s[1] == '+'))
+        if (*s == '.')
+        {
+            ++s;
+
+            while (s.isDigit())
+                ++s;
+        }
+
+        if ((*s == 'e' || *s == 'E') && isStartOfNumber (s[1]))
         {
             s += 2;
 
