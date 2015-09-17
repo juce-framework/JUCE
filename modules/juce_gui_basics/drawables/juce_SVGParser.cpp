@@ -1380,17 +1380,17 @@ Path Drawable::parseSVGPath (const String& svgPath)
 class SVGStateTests : public UnitTest
 {
 public:
-	SVGStateTests() : UnitTest ("SVGState") {}
+    SVGStateTests() : UnitTest ("SVGState") {}
 
 private:
-	void runTest () override
-	{
-		beginTest("parsePathString");
-		SVGState state(nullptr);
-		Path path;
-		state.parsePathString(path, "M.1.1L.9.9.1.9z");
-		expectEquals(path.toString(), String("m 0.1 0.1 l 0.9 0.9 0.1 0.9 z"));
-	}
+    void runTest () override
+    {
+        beginTest("parsePathString");
+        SVGState state(nullptr);
+        Path path;
+        state.parsePathString(path, "M.1.1L.9.9.1.9z");
+        expectEquals(path.toString(), String("m 0.1 0.1 l 0.9 0.9 0.1 0.9 z"));
+    }
 };
 
 static SVGStateTests SVGStateUnitTests;
