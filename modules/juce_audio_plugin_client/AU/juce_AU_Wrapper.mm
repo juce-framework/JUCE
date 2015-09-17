@@ -521,14 +521,14 @@ public:
                                                                       : findNumInputChannels();
 
             const size_t sizeInBytes = (sizeof (AudioChannelLayout) - sizeof (AudioChannelDescription)) +
-                                       (numChannels * sizeof (AudioChannelDescription));
+                                       (static_cast<size_t> (numChannels) * sizeof (AudioChannelDescription));
 
             if (outLayoutPtr != nullptr)
             {
                 zeromem (outLayoutPtr, sizeInBytes);
 
                 outLayoutPtr->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
-                outLayoutPtr->mNumberChannelDescriptions = numChannels;
+                outLayoutPtr->mNumberChannelDescriptions = static_cast<UInt32> (numChannels);
 
                 for (int i = 0; i < numChannels; ++i)
                 {
