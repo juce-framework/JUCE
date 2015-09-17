@@ -1100,11 +1100,24 @@ private:
 
         String::CharPointerType start (s);
 
+        bool dotFound = false;
         if (s.isDigit() || *s == '.' || *s == '-')
+        {
+            if (*s == '.')
+            {
+                dotFound = true;
+            }
             ++s;
+        }
 
-        while (s.isDigit() || *s == '.')
+        while (s.isDigit() || (!dotFound && *s == '.'))
+        {
+            if (*s == '.')
+            {
+                dotFound = true;
+            }
             ++s;
+        }
 
         if ((*s == 'e' || *s == 'E')
              && ((s + 1).isDigit() || s[1] == '-' || s[1] == '+'))
@@ -1361,3 +1374,25 @@ Path Drawable::parseSVGPath (const String& svgPath)
     state.parsePathString (p, svgPath);
     return p;
 }
+
+#if JUCE_UNIT_TESTS
+
+class SVGStateTests : public UnitTest
+{
+public:
+    SVGStateTests() : UnitTest ("SVGState") {}
+
+private:
+    void runTest () override
+    {
+        beginTest("parsePathString");
+        SVGState state(nullptr);
+        Path path;
+        state.parsePathString(path, "M.1.1L.9.9.1.9z");
+        expectEquals(path.toString(), String("m 0.1 0.1 l 0.9 0.9 0.1 0.9 z"));
+    }
+};
+
+static SVGStateTests SVGStateUnitTests;
+
+#endif
