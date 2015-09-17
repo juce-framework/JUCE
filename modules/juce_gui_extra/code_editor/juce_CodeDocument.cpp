@@ -807,21 +807,21 @@ public:
     {
     }
 
-    bool perform()
+    bool perform() override
     {
         owner.currentActionIndex++;
         owner.insert (text, insertPos, false);
         return true;
     }
 
-    bool undo()
+    bool undo() override
     {
         owner.currentActionIndex--;
         owner.remove (insertPos, insertPos + text.length(), false);
         return true;
     }
 
-    int getSizeInUnits()        { return text.length() + 32; }
+    int getSizeInUnits() override        { return text.length() + 32; }
 
 private:
     CodeDocument& owner;
@@ -902,21 +902,21 @@ public:
     {
     }
 
-    bool perform()
+    bool perform() override
     {
         owner.currentActionIndex++;
         owner.remove (startPos, endPos, false);
         return true;
     }
 
-    bool undo()
+    bool undo() override
     {
         owner.currentActionIndex--;
         owner.insert (removedText, startPos, false);
         return true;
     }
 
-    int getSizeInUnits()    { return (endPos - startPos) + 32; }
+    int getSizeInUnits() override    { return (endPos - startPos) + 32; }
 
 private:
     CodeDocument& owner;

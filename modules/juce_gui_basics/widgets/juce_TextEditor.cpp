@@ -723,19 +723,19 @@ public:
     {
     }
 
-    bool perform()
+    bool perform() override
     {
         owner.insert (text, insertIndex, font, colour, 0, newCaretPos);
         return true;
     }
 
-    bool undo()
+    bool undo() override
     {
         owner.remove (Range<int> (insertIndex, insertIndex + text.length()), 0, oldCaretPos);
         return true;
     }
 
-    int getSizeInUnits()
+    int getSizeInUnits() override
     {
         return text.length() + 16;
     }
@@ -767,20 +767,20 @@ public:
         removedSections.addArray (oldSections);
     }
 
-    bool perform()
+    bool perform() override
     {
         owner.remove (range, 0, newCaretPos);
         return true;
     }
 
-    bool undo()
+    bool undo() override
     {
         owner.reinsert (range.getStart(), removedSections);
         owner.moveCaretTo (oldCaretPos, false);
         return true;
     }
 
-    int getSizeInUnits()
+    int getSizeInUnits() override
     {
         int n = 16;
         for (int i = removedSections.size(); --i >= 0;)
