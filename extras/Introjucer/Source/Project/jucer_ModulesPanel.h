@@ -181,7 +181,7 @@ public:
         updateModuleButton.setEnabled (getUpdatableModules().size() != 0);
     }
 
-    void buttonClicked (Button* b)
+    void buttonClicked (Button* b) override
     {
         if (b == &addWebModuleButton)       showAddModuleMenu();
         else if (b == &updateModuleButton)  showUpdateModulesMenu();

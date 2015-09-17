@@ -64,9 +64,9 @@ public:
 
     ComponentLayout& getLayout() const noexcept                 { return layout; }
 
-    void findLassoItemsInArea (Array <Component*>& results, const Rectangle<int>& area);
+    void findLassoItemsInArea (Array <Component*>& results, const Rectangle<int>& area) override;
 
-    SelectedItemSet<Component*>& getLassoSelection();
+    SelectedItemSet<Component*>& getLassoSelection() override;
 
     //==============================================================================
     void refreshAllComponents();

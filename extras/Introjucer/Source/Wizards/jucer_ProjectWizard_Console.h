@@ -30,7 +30,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
     String getDescription() const override  { return TRANS("Creates a command-line application without GUI support."); }
     const char* getIcon() const override    { return BinaryData::wizard_ConsoleApp_svg; }
 
-    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
+    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated) override
     {
         const String fileOptions[] = { TRANS("Create a Main.cpp file"),
                                        TRANS("Don't create any files") };
@@ -39,7 +39,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
                                           StringArray (fileOptions, numElementsInArray (fileOptions)));
     }
 
-    Result processResultsFromSetupItems (WizardComp& setupComp)
+    Result processResultsFromSetupItems (WizardComp& setupComp) override
     {
         createMainCpp = false;
 
@@ -53,7 +53,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
         return Result::ok();
     }
 
-    bool initialiseProject (Project& project)
+    bool initialiseProject (Project& project) override
     {
         createSourceFolder();
 

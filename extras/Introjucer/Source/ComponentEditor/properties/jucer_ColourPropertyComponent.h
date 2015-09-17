@@ -201,7 +201,7 @@ public:
             return owner->getColour();
         }
 
-        void resetToDefault()
+        void resetToDefault() override
         {
             owner->resetToDefault();
         }

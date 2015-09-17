@@ -388,7 +388,7 @@ private:
         void setText (const String& newText) override    { element->setText (newText, true); }
         String getText() const override                  { return element->getText(); }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*) override     { refresh(); }
 
     private:
         PaintElementText* const element;

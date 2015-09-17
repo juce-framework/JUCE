@@ -214,7 +214,7 @@ public:
         setSize (300, 400);
     }
 
-    void resized()
+    void resized() override
     {
         if (defaultButton.isVisible())
         {
@@ -288,7 +288,7 @@ public:
         colourValue.addListener (this);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         const Colour colour (getColour());
 

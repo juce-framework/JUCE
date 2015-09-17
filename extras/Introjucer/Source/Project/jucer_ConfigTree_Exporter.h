@@ -212,7 +212,7 @@ public:
         }
     }
 
-    var getDragSourceDescription()
+    var getDragSourceDescription() override
     {
         return getParentItem()->getUniqueName() + "||" + config->getName();
     }
