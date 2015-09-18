@@ -697,9 +697,8 @@ public:
         return SourceCodeDocument::createEditor();
     }
 
-    class Type  : public OpenDocumentManager::DocumentType
+    struct Type  : public OpenDocumentManager::DocumentType
     {
-    public:
         Type() {}
 
         bool canOpenFile (const File& f) override                { return JucerDocument::isValidJucerCppFile (f); }

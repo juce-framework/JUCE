@@ -302,6 +302,11 @@ private:
 
 static const Colour tabColour (Colour (0xff888888));
 
+static SourceCodeEditor* createCodeEditor (const File& file, SourceCodeDocument& sourceCodeDoc)
+{
+    return new SourceCodeEditor (&sourceCodeDoc,
+                                 new CppCodeEditorComponent (file, sourceCodeDoc.getCodeDocument()));
+}
 
 //==============================================================================
 JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
@@ -330,11 +335,8 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
         tabbedComponent.addTab ("Resources", tabColour, new ResourceEditorPanel (*document), true);
 
-        SourceCodeEditor* codeEditor = new SourceCodeEditor (&document->getCppDocument(),
-                                                             new CppCodeEditorComponent (document->getCppFile(),
-                                                                                         document->getCppDocument().getCodeDocument()));
-
-        tabbedComponent.addTab ("Code", tabColour, codeEditor, true);
+        tabbedComponent.addTab ("Code", tabColour, createCodeEditor (document->getCppFile(),
+                                                                     document->getCppDocument()), true);
 
         updateTabs();
 
@@ -1088,7 +1090,7 @@ JucerDocumentEditor* JucerDocumentEditor::getActiveDocumentHolder()
     ApplicationCommandInfo info (0);
     ApplicationCommandTarget* target = IntrojucerApp::getCommandManager().getTargetForCommand (JucerCommandIDs::editCompLayout, info);
 
-    return dynamic_cast <JucerDocumentEditor*> (target);
+    return dynamic_cast<JucerDocumentEditor*> (target);
 }
 
 Image JucerDocumentEditor::createComponentLayerSnapshot() const
