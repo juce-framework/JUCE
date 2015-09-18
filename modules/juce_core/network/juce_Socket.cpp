@@ -698,6 +698,9 @@ bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
 
 bool DatagramSocket::setEnablePortReuse (bool enabled)
 {
+   #if JUCE_ANDROID
+    return false;
+   #else
     const int reuse = enabled ? 1 : 0;
 
    #if JUCE_WINDOWS
@@ -713,6 +716,7 @@ bool DatagramSocket::setEnablePortReuse (bool enabled)
                             (const char*) &reuse, sizeof (reuse)) == 0);
 
     return false;
+   #endif
 }
 
 #if JUCE_MSVC
