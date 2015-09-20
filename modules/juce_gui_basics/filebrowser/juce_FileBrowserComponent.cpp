@@ -32,7 +32,8 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
      previewComp (previewComp_),
      currentPathBox ("path"),
      fileLabel ("f", TRANS ("file:")),
-     thread ("Juce FileBrowser")
+     thread ("Juce FileBrowser"),
+     wasProcessActive (false)
 {
     // You need to specify one or other of the open/save flags..
     jassert ((flags & (saveMode | openMode)) != 0);
@@ -109,6 +110,8 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     setRoot (currentRoot);
 
     thread.startThread (4);
+
+    startTimer (2000);
 }
 
 FileBrowserComponent::~FileBrowserComponent()
@@ -178,7 +181,7 @@ void FileBrowserComponent::deselectAllFiles()
 bool FileBrowserComponent::isFileSuitable (const File& file) const
 {
     return (flags & canSelectFiles) != 0
-            && (fileFilter == nullptr || fileFilter->isFileSuitable (file));
+             && (fileFilter == nullptr || fileFilter->isFileSuitable (file));
 }
 
 bool FileBrowserComponent::isDirectorySuitable (const File&) const
@@ -190,10 +193,10 @@ bool FileBrowserComponent::isFileOrDirSuitable (const File& f) const
 {
     if (f.isDirectory())
         return (flags & canSelectDirectories) != 0
-                && (fileFilter == nullptr || fileFilter->isDirectorySuitable (f));
+                 && (fileFilter == nullptr || fileFilter->isDirectorySuitable (f));
 
     return (flags & canSelectFiles) != 0 && f.exists()
-            && (fileFilter == nullptr || fileFilter->isFileSuitable (f));
+             && (fileFilter == nullptr || fileFilter->isFileSuitable (f));
 }
 
 //==============================================================================
@@ -401,8 +404,6 @@ void FileBrowserComponent::browserRootChanged (const File&) {}
 
 bool FileBrowserComponent::keyPressed (const KeyPress& key)
 {
-    (void) key;
-
    #if JUCE_LINUX || JUCE_WINDOWS
     if (key.getModifiers().isCommandDown()
          && (key.getKeyCode() == 'H' || key.getKeyCode() == 'h'))
@@ -413,6 +414,7 @@ bool FileBrowserComponent::keyPressed (const KeyPress& key)
     }
    #endif
 
+    ignoreUnused (key);
     return false;
 }
 
@@ -588,4 +590,17 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
 void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
 {
     getDefaultRoots (rootNames, rootPaths);
+}
+
+void FileBrowserComponent::timerCallback()
+{
+    const bool isProcessActive = Process::isForegroundProcess();
+
+    if (wasProcessActive != isProcessActive)
+    {
+        wasProcessActive = isProcessActive;
+
+        if (isProcessActive && fileList != nullptr)
+            refresh();
+    }
 }

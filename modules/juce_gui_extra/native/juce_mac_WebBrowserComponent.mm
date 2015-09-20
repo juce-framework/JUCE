@@ -287,7 +287,7 @@ public:
 private:
    #if JUCE_MAC
     WebView* webView;
-    NSObject* clickListener;
+    id clickListener;
    #else
     UIWebView* webView;
     WebViewTapDetector* tapDetector;

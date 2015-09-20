@@ -30,7 +30,7 @@ struct BlankAppWizard   : public NewProjectWizard
     String getDescription() const override  { return TRANS("Creates a blank JUCE GUI application."); }
     const char* getIcon() const override    { return BinaryData::wizard_GUI_svg; }
 
-    bool initialiseProject (Project& project)
+    bool initialiseProject (Project& project) override
     {
         createSourceFolder();
         project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();

@@ -28,10 +28,15 @@
  #define JUCE_COREAUDIOLOG(a)
 #endif
 
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wnonnull" // aovid some spurious 10.11 SDK warnings
+#endif
+
 //==============================================================================
 struct SystemVol
 {
-    SystemVol (AudioObjectPropertySelector selector)
+    SystemVol (AudioObjectPropertySelector selector) noexcept
         : outputDeviceID (kAudioObjectUnknown)
     {
         addr.mScope    = kAudioObjectPropertyScopeGlobal;
@@ -56,7 +61,7 @@ struct SystemVol
         }
     }
 
-    float getGain()
+    float getGain() const noexcept
     {
         Float32 gain = 0;
 
@@ -70,7 +75,7 @@ struct SystemVol
         return (float) gain;
     }
 
-    bool setGain (float gain)
+    bool setGain (float gain) const noexcept
     {
         if (outputDeviceID != kAudioObjectUnknown && canSetVolume())
         {
@@ -84,7 +89,7 @@ struct SystemVol
         return false;
     }
 
-    bool isMuted()
+    bool isMuted() const noexcept
     {
         UInt32 muted = 0;
 
@@ -98,7 +103,7 @@ struct SystemVol
         return muted != 0;
     }
 
-    bool setMuted (bool mute)
+    bool setMuted (bool mute) const noexcept
     {
         if (outputDeviceID != kAudioObjectUnknown && canSetVolume())
         {
@@ -116,13 +121,17 @@ private:
     AudioDeviceID outputDeviceID;
     AudioObjectPropertyAddress addr;
 
-    bool canSetVolume()
+    bool canSetVolume() const noexcept
     {
         Boolean isSettable = NO;
         return AudioHardwareServiceIsPropertySettable (outputDeviceID, &addr, &isSettable) == noErr
                  && isSettable;
     }
 };
+
+#ifdef __clang__
+ #pragma clang diagnostic pop
+#endif
 
 #define JUCE_SYSTEMAUDIOVOL_IMPLEMENTED 1
 float JUCE_CALLTYPE SystemAudioVolume::getGain()              { return SystemVol (kAudioHardwareServiceDeviceProperty_VirtualMasterVolume).getGain(); }

@@ -264,7 +264,7 @@ protected:
         }
     };
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
         return new AndroidBuildConfiguration (project, v);
     }

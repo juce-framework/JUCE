@@ -605,7 +605,7 @@ public:
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>&) const
+    void create (const OwnedArray<LibraryModule>&) const override
     {
         createResourcesAndIcon();
 
@@ -966,8 +966,8 @@ public:
     }
 
 protected:
-    String getProjectVersionString() const    { return "8.00"; }
-    String getSolutionVersionString() const   { return String ("9.00") + newLine + "# Visual C++ Express 2005"; }
+    String getProjectVersionString() const override    { return "8.00"; }
+    String getSolutionVersionString() const override   { return String ("9.00") + newLine + "# Visual C++ Express 2005"; }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005)
 };
@@ -1017,7 +1017,7 @@ public:
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>&) const
+    void create (const OwnedArray<LibraryModule>&) const override
     {
         createResourcesAndIcon();
 
@@ -1083,7 +1083,7 @@ protected:
 
     virtual void addPlatformToolsetToPropertyGroup (XmlElement&) const {}
 
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
         return new VC2010BuildConfiguration (project, v);
     }
@@ -1097,7 +1097,7 @@ protected:
     File getVCProjFile() const            { return getProjectFile (".vcxproj"); }
     File getVCProjFiltersFile() const     { return getProjectFile (".vcxproj.filters"); }
 
-    String createConfigName (const BuildConfiguration& config) const
+    String createConfigName (const BuildConfiguration& config) const override
     {
         return config.getName() + (is64Bit (config) ? "|x64"
                                                     : "|Win32");
@@ -1570,7 +1570,7 @@ public:
     static const char* getValueTreeTypeName()   { return "VS2012"; }
     int getVisualStudioVersion() const override { return 11; }
     String getSolutionComment() const override  { return "# Visual Studio 2012"; }
-    virtual String getDefaultToolset() const    { return "v110"; }
+    String getDefaultToolset() const override   { return "v110"; }
 
     static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
     {

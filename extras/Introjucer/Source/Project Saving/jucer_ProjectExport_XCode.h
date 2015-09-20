@@ -210,7 +210,7 @@ protected:
 
         var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
 
-        void createConfigProperties (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props) override
         {
             addGCCOptimisationProperty (props);
 
@@ -1493,7 +1493,7 @@ private:
     String createFileRefID (const String& path) const           { return createID ("__fileref_" + path); }
     String getIDForGroup (const Project::Item& item) const      { return createID (item.getID()); }
 
-    bool shouldFileBeCompiledByDefault (const RelativePath& file) const
+    bool shouldFileBeCompiledByDefault (const RelativePath& file) const override
     {
         return file.hasFileExtension (sourceFileExtensions);
     }

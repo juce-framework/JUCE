@@ -103,9 +103,9 @@ void OpenDocumentManager::clear()
 }
 
 //==============================================================================
-void OpenDocumentManager::registerType (DocumentType* type)
+void OpenDocumentManager::registerType (DocumentType* type, int index)
 {
-    types.add (type);
+    types.insert (index, type);
 }
 
 //==============================================================================

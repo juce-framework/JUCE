@@ -58,6 +58,13 @@
   #undef Point
   #undef Component
 
+  #if JUCE_PROJUCER_LIVE_BUILD
+   // This hack is a workaround for a bug (?) in Apple's 10.11 SDK headers
+   // which cause some configurations of Clang to throw out an error..
+   #undef CF_OPTIONS
+   #define CF_OPTIONS(_type, _name) _type _name; enum
+  #endif
+
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1
     #define     JUCE_IOS 1

@@ -108,7 +108,7 @@ public:
         virtual Document* openFile (Project* project, const File& file) = 0;
     };
 
-    void registerType (DocumentType* type);
+    void registerType (DocumentType* type, int index = -1);
 
 
 private:

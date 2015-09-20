@@ -18,7 +18,7 @@
                extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="Native"/>
+                       osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="Native"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
                        osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="Native"/>
       </CONFIGURATIONS>
