@@ -115,6 +115,7 @@ namespace juce
 #include "midi_io/juce_MidiInput.h"
 #include "midi_io/juce_MidiMessageCollector.h"
 #include "midi_io/juce_MidiOutput.h"
+#include "midi_io/juce_MidiSetup.h"
 #include "sources/juce_AudioSourcePlayer.h"
 #include "sources/juce_AudioTransportSource.h"
 #include "audio_cd/juce_AudioCDBurner.h"
