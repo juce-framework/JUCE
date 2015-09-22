@@ -1087,7 +1087,6 @@ void TextEditor::lookAndFeelChanged()
     {
         setCaretVisible (false);
         setCaretVisible (true);
-        updateCaretPosition();
     }
 }
 
@@ -1096,7 +1095,10 @@ void TextEditor::setCaretVisible (const bool shouldCaretBeVisible)
     if (shouldCaretBeVisible && ! isReadOnly())
     {
         if (caret == nullptr)
+        {
             textHolder->addChildComponent (caret = getLookAndFeel().createCaretComponent (this));
+            updateCaretPosition();
+        }
     }
     else
     {
@@ -2126,6 +2128,7 @@ void TextEditor::handleCommandMessage (const int commandId)
 
 void TextEditor::enablementChanged()
 {
+    setCaretVisible (isCaretVisible());
     repaint();
 }
 
