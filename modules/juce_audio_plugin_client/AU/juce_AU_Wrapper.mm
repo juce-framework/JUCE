@@ -507,7 +507,7 @@ public:
     UInt32 GetAudioChannelLayout (AudioUnitScope scope,
                                   AudioUnitElement element,
                                   AudioChannelLayout *outLayoutPtr,
-                                  Boolean &outWritable)
+                                  Boolean &outWritable) override
     {
         // fallback to old code if this plug-in does not have multi channel IO
         if (! hasMultiChannelConfiguration())
