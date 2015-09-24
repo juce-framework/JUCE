@@ -1074,6 +1074,15 @@ struct AAXClasses
         for (JUCEAlgorithmContext* const* iter = instancesBegin; iter < instancesEnd; ++iter)
         {
             const JUCEAlgorithmContext& i = **iter;
+			
+#if JucePlugin_AcceptsSideChain
+			int32_t sideChainChannel = *i.sideChain;
+			if(sideChainChannel){
+				i.pluginInstance->parameters.getPluginInstance().setInputElementActive(1, true);
+			} else {
+				i.pluginInstance->parameters.getPluginInstance().setInputElementActive(1, false);
+			}
+#endif
 
             i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels,
                                                   *(i.bufferSize), *(i.bypass) != 0,
