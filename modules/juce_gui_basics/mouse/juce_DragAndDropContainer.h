@@ -41,7 +41,7 @@
 
     Note: If all that you need to do is to respond to files being drag-and-dropped from
     the operating system onto your component, you don't need any of these classes: you can do this
-    simply by overriding Component::filesDropped().
+    simply by overriding FileDragAndDropTarget::filesDropped().
 
     @see DragAndDropTarget
 */
