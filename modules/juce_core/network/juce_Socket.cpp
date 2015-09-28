@@ -144,8 +144,12 @@ namespace SocketHelpers
         servTmpAddr.sin_addr.s_addr = htonl (INADDR_ANY);
         servTmpAddr.sin_port = htons ((uint16) port);
 
+       #if JUCE_WINDOWS
         if (address.isNotEmpty())
             servTmpAddr.sin_addr.s_addr = ::inet_addr (address.toUTF8());
+       #else
+        ignoreUnused (address);
+       #endif
 
         return bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) >= 0;
     }
