@@ -62,6 +62,7 @@ public:
     void hideEditor();
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
     Component* getEditorComponent() const                       { return contentView; }
+    Component& getTabsComponent()                               { return treeViewTabs; }
 
     bool goToPreviousFile();
     bool goToNextFile();
@@ -97,9 +98,9 @@ public:
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget() override;
-    void getAllCommands (Array <CommandID>& commands) override;
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) override;
-    bool perform (const InvocationInfo& info) override;
+    void getAllCommands (Array<CommandID>&) override;
+    void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
+    bool perform (const InvocationInfo&) override;
 
     void paint (Graphics&) override;
     void paintOverChildren (Graphics&) override;
@@ -111,12 +112,10 @@ protected:
     Project* project;
     OpenDocumentManager::Document* currentDocument;
     RecentDocumentList recentDocumentList;
-    ScopedPointer<Component> logo;
-    ScopedPointer<Component> translationTool;
+    ScopedPointer<Component> logo, translationTool, contentView;
 
     TabbedComponent treeViewTabs;
     ScopedPointer<ResizableEdgeComponent> resizerBar;
-    ScopedPointer<Component> contentView;
 
     ComponentBoundsConstrainer treeSizeConstrainer;
     BubbleMessageComponent bubbleMessage;
