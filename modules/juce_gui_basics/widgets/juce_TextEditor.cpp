@@ -1083,6 +1083,11 @@ void TextEditor::colourChanged()
 
 void TextEditor::lookAndFeelChanged()
 {
+    recreateCaret();
+}
+
+void TextEditor::recreateCaret()
+{
     if (isCaretVisible())
     {
         setCaretVisible (false);
@@ -2128,7 +2133,7 @@ void TextEditor::handleCommandMessage (const int commandId)
 
 void TextEditor::enablementChanged()
 {
-    setCaretVisible (isCaretVisible());
+    recreateCaret();
     repaint();
 }
 
