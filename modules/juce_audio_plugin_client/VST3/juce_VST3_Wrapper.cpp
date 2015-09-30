@@ -111,7 +111,16 @@ public:
     static const FUID iid;
 
     //==============================================================================
+   #if JUCE_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Winconsistent-missing-override"
+   #endif
+
     REFCOUNT_METHODS (ComponentBase)
+
+   #if JUCE_CLANG
+    #pragma clang diagnostic pop
+   #endif
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
