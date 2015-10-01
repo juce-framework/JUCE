@@ -272,16 +272,27 @@ namespace CoreTextTypeLayout
         }
 
         // Paragraph Attributes
+       #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
+        CTTextAlignment ctTextAlignment = kCTTextAlignmentLeft;
+       #else
         CTTextAlignment ctTextAlignment = kCTLeftTextAlignment;
+       #endif
+
         CTLineBreakMode ctLineBreakMode = kCTLineBreakByWordWrapping;
         const CGFloat ctLineSpacing = text.getLineSpacing();
 
         switch (text.getJustification().getOnlyHorizontalFlags())
         {
             case Justification::left:                   break;
+           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
+            case Justification::right:                  ctTextAlignment = kCTTextAlignmentRight; break;
+            case Justification::horizontallyCentred:    ctTextAlignment = kCTTextAlignmentCenter; break;
+            case Justification::horizontallyJustified:  ctTextAlignment = kCTTextAlignmentJustified; break;
+           #else
             case Justification::right:                  ctTextAlignment = kCTRightTextAlignment; break;
             case Justification::horizontallyCentred:    ctTextAlignment = kCTCenterTextAlignment; break;
             case Justification::horizontallyJustified:  ctTextAlignment = kCTJustifiedTextAlignment; break;
+           #endif
             default:                                    jassertfalse; break; // Illegal justification flags
         }
 
