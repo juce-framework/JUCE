@@ -309,14 +309,11 @@ bool File::moveToTrash() const
    #else
     JUCE_AUTORELEASEPOOL
     {
-        NSString* p = juceStringToNS (getFullPathName());
+        NSURL* url = [NSURL fileURLWithPath: juceStringToNS (getFullPathName())];
 
-        return [[NSWorkspace sharedWorkspace]
-                    performFileOperation: NSWorkspaceRecycleOperation
-                                  source: [p stringByDeletingLastPathComponent]
-                             destination: nsEmptyString()
-                                   files: [NSArray arrayWithObject: [p lastPathComponent]]
-                                     tag: nil ];
+        [[NSWorkspace sharedWorkspace] recycleURLs: [NSArray arrayWithObject: url]
+                                 completionHandler: nil];
+        return true;
     }
    #endif
 }
