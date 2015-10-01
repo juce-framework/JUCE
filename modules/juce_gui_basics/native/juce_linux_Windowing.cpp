@@ -2964,9 +2964,13 @@ private:
                                  CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
                                  &swa);
 
+        unsigned int buttonMask = EnterWindowMask | LeaveWindowMask | PointerMotionMask;
+
+        if ((styleFlags & windowIgnoresMouseClicks) == 0)
+            buttonMask |= ButtonPressMask | ButtonReleaseMask;
+
         XGrabButton (display, AnyButton, AnyModifier, windowH, False,
-                     ButtonPressMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask,
-                     GrabModeAsync, GrabModeAsync, None, None);
+                     buttonMask, GrabModeAsync, GrabModeAsync, None, None);
 
         // Set the window context to identify the window handle object
         if (XSaveContext (display, (XID) windowH, windowHandleXContext, (XPointer) this))
@@ -3036,11 +3040,12 @@ private:
         {}
     }
 
-    static int getAllEventsMask() noexcept
+    int getAllEventsMask() const noexcept
     {
-        return NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
+        return NoEventMask | KeyPressMask | KeyReleaseMask
                  | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
-                 | ExposureMask | StructureNotifyMask | FocusChangeMask;
+                 | ExposureMask | StructureNotifyMask | FocusChangeMask
+                 | ((styleFlags & windowIgnoresMouseClicks) != 0 ? (ButtonPressMask | ButtonReleaseMask) : 0);
     }
 
     template <typename EventType>
