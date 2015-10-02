@@ -1384,7 +1384,8 @@ public:
     //==============================================================================
     static tresult setBusArrangementFor (Vst::BusList& list,
                                          Vst::SpeakerArrangement* arrangement,
-                                         Steinberg::int32 numBusses)
+                                         Steinberg::int32 numBusses,
+                                         Steinberg::int32 maxChannelNumber)
     {
         if (arrangement != nullptr)
         {
@@ -1393,7 +1394,13 @@ public:
             FOREACH_CAST (IPtr<Vst::Bus>, Vst::AudioBus, bus, list)
             {
                 if (counter < numBusses)
-                    bus->setArrangement (arrangement[counter]);
+                {
+                    Vst::SpeakerArrangement busArrangement = arrangement[counter];
+                    // Check the number of bus channels for not to exceed the supported channel number limit.
+                    if (Steinberg::Vst::SpeakerArr::getChannelCount(busArrangement) > maxChannelNumber)
+                        return kResultFalse;
+                    bus->setArrangement (busArrangement);
+                }
 
                 counter++;
             }
@@ -1411,7 +1418,7 @@ public:
         (void) inputs; (void) outputs;
 
        #if JucePlugin_MaxNumInputChannels > 0
-        if (setBusArrangementFor (audioInputs, inputs, numIns) != kResultTrue)
+        if (setBusArrangementFor (audioInputs, inputs, numIns, JucePlugin_MaxNumInputChannels) != kResultTrue)
             return kResultFalse;
        #else
         if (numIns != 0)
@@ -1419,7 +1426,7 @@ public:
        #endif
 
        #if JucePlugin_MaxNumOutputChannels > 0
-        if (setBusArrangementFor (audioOutputs, outputs, numOuts) != kResultTrue)
+        if (setBusArrangementFor (audioOutputs, outputs, numOuts, JucePlugin_MaxNumOutputChannels) != kResultTrue)
             return kResultFalse;
        #else
         if (numOuts != 0)
