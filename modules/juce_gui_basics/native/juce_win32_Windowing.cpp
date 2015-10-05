@@ -39,6 +39,14 @@
  #define WM_APPCOMMAND                     0x0319
 #endif
 
+#ifndef MI_WP_SIGNATURE
+ #define MI_WP_SIGNATURE 0xFF515700
+#endif
+
+#ifndef SIGNATURE_MASK
+ #define SIGNATURE_MASK 0xFFFFFF00
+#endif
+
 extern void juce_repeatLastProcessPriority();
 extern void juce_checkCurrentlyFocusedTopLevelWindow();  // in juce_TopLevelWindow.cpp
 extern bool juce_isRunningInWine();
@@ -1706,8 +1714,22 @@ private:
         return 1000 / 60;  // Throttling the incoming mouse-events seems to still be needed in XP..
     }
 
+    bool isTouchEvent() noexcept
+    {
+        if (registerTouchWindow == nullptr)
+            return false;
+
+        LPARAM dw = GetMessageExtraInfo();
+        // see https://msdn.microsoft.com/en-us/library/windows/desktop/ms703320(v=vs.85).aspx
+        return (dw & SIGNATURE_MASK) == MI_WP_SIGNATURE;
+    }
+
     void doMouseMove (Point<float> position)
     {
+        // this will be handled by WM_TOUCH
+        if (isTouchEvent())
+            return;
+
         if (! isMouseOver)
         {
             isMouseOver = true;
@@ -1744,6 +1766,10 @@ private:
 
     void doMouseDown (Point<float> position, const WPARAM wParam)
     {
+        // this will be handled by WM_TOUCH
+        if (isTouchEvent())
+            return;
+
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
 
@@ -1760,6 +1786,10 @@ private:
 
     void doMouseUp (Point<float> position, const WPARAM wParam)
     {
+        // this will be handled by WM_TOUCH
+        if (isTouchEvent())
+            return;
+
         updateModifiersFromWParam (wParam);
         const bool wasDragging = isDragging;
         isDragging = false;
@@ -1879,8 +1909,7 @@ private:
                 const DWORD flags = inputInfo[i].dwFlags;
 
                 if ((flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
-                    if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_PRIMARY) != 0,
-                                            (flags & TOUCHEVENTF_DOWN) != 0, (flags & TOUCHEVENTF_UP) != 0))
+                    if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0, (flags & TOUCHEVENTF_UP) != 0))
                         return 0;  // abandon method if this window was deleted by the callback
             }
         }
@@ -1889,7 +1918,7 @@ private:
         return 0;
     }
 
-    bool handleTouchInput (const TOUCHINPUT& touch, const bool isPrimary, const bool isDown, const bool isUp)
+    bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp)
     {
         bool isCancel = false;
         const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
@@ -1903,13 +1932,10 @@ private:
             currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
             modsToSend = currentModifiers;
 
-            if (! isPrimary)
-            {
-                // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-                handleMouseEvent (touchIndex, pos.toFloat(), modsToSend.withoutMouseButtons(), time);
-                if (! isValidPeer (this)) // (in case this component was deleted by the event)
-                    return false;
-            }
+           // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+           handleMouseEvent (touchIndex, pos.toFloat(), modsToSend.withoutMouseButtons(), time);
+           if (! isValidPeer (this)) // (in case this component was deleted by the event)
+                return false;
         }
         else if (isUp)
         {
@@ -1930,14 +1956,11 @@ private:
             currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
-        if (! isPrimary)
-        {
-            handleMouseEvent (touchIndex, pos.toFloat(), modsToSend, time);
-            if (! isValidPeer (this)) // (in case this component was deleted by the event)
-                return false;
-        }
+        handleMouseEvent (touchIndex, pos.toFloat(), modsToSend, time);
+        if (! isValidPeer (this)) // (in case this component was deleted by the event)
+            return false;
 
-        if ((isUp || isCancel) && ! isPrimary)
+        if (isUp || isCancel)
         {
             handleMouseEvent (touchIndex, Point<float> (-10.0f, -10.0f), currentModifiers, time);
             if (! isValidPeer (this))
