@@ -1145,7 +1145,7 @@ public:
     }
 
     //==============================================================================
-    int getNumParameters()      { return effect != nullptr ? effect->numParams : 0; }
+    int getNumParameters() override      { return effect != nullptr ? effect->numParams : 0; }
 
     float getParameter (int index) override
     {
