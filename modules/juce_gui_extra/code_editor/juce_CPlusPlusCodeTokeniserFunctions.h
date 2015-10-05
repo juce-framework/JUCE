@@ -66,14 +66,14 @@ struct CppTokeniserFunctions
 
         static const char* const keywords7Char[] =
             { "nullptr", "alignas", "alignof", "default", "mutable", "private",
-              "typedef", "virtual", "wchar_t", nullptr };
+              "typedef", "virtual", "wchar_t", "__cdecl", "_Pragma", "uint8_t", nullptr };
 
         static const char* const keywordsOther[] =
             { "char16_t", "char32_t", "const_cast", "constexpr", "continue", "decltype", "dynamic_cast",
               "explicit", "namespace", "noexcept", "operator", "protected", "register", "reinterpret_cast",
               "static_assert", "static_cast", "template", "thread_local", "typename", "unsigned", "volatile",
               "@class", "@dynamic", "@end", "@implementation", "@interface", "@public", "@private",
-              "@protected", "@property", "@synthesize", nullptr };
+              "@protected", "@property", "@synthesize", "__fastcall", "__stdcall", nullptr };
 
         const char* const* k;
 
