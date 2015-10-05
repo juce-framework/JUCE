@@ -605,7 +605,7 @@ private:
         }
 
         addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
-        addPlistDictionaryKey (dict, "CFBundleIconFile",            iconFile.exists() ? iconFile.getFileName() : String::empty);
+        addPlistDictionaryKey (dict, "CFBundleIconFile",            iconFile.exists() ? iconFile.getFileName() : String());
         addPlistDictionaryKey (dict, "CFBundleIdentifier",          project.getBundleIdentifier().toString());
         addPlistDictionaryKey (dict, "CFBundleName",                projectName);
         addPlistDictionaryKey (dict, "CFBundlePackageType",         xcodePackageType);
@@ -617,7 +617,7 @@ private:
 
         StringArray documentExtensions;
         documentExtensions.addTokens (replacePreprocessorDefs (getAllPreprocessorDefs(), settings ["documentExtensions"]),
-                                      ",", String::empty);
+                                      ",", StringRef());
         documentExtensions.trim();
         documentExtensions.removeEmptyStrings (true);
 
@@ -1171,7 +1171,7 @@ private:
                             projectItem.shouldInhibitWarnings());
         }
 
-        return String::empty;
+        return String();
     }
 
     void addFramework (const String& frameworkName) const
@@ -1211,17 +1211,19 @@ private:
     void addMainBuildProduct() const
     {
         jassert (xcodeFileType.isNotEmpty());
-        jassert (xcodeBundleExtension.isEmpty() || xcodeBundleExtension.startsWithChar('.'));
-        ProjectExporter::BuildConfiguration::Ptr config = getConfiguration(0);
-        jassert (config != nullptr);
-        String productName (replacePreprocessorTokens (*config, config->getTargetBinaryNameString()));
+        jassert (xcodeBundleExtension.isEmpty() || xcodeBundleExtension.startsWithChar ('.'));
 
-        if (xcodeFileType == "archive.ar")
-            productName = getLibbedFilename (productName);
-        else
-            productName += xcodeBundleExtension;
+        if (ProjectExporter::BuildConfiguration::Ptr config = getConfiguration(0))
+        {
+            String productName (replacePreprocessorTokens (*config, config->getTargetBinaryNameString()));
 
-        addBuildProduct (xcodeFileType, productName);
+            if (xcodeFileType == "archive.ar")
+                productName = getLibbedFilename (productName);
+            else
+                productName += xcodeBundleExtension;
+
+            addBuildProduct (xcodeFileType, productName);
+        }
     }
 
     void addBuildProduct (const String& fileType, const String& binaryName) const
@@ -1495,7 +1497,7 @@ private:
 
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const override
     {
-        return file.hasFileExtension (sourceFileExtensions);
+        return file.hasFileExtension (sourceFileExtensions) || file.hasFileExtension ("swift");
     }
 
     static String getOSXVersionName (int version)
