@@ -250,7 +250,7 @@ public:
             toString128 (info.title, "Bypass");
             toString128 (info.shortTitle, "Bypass");
             toString128 (info.units, "");
-            info.stepCount = 2;
+            info.stepCount = 1;
             info.defaultNormalizedValue = 0.0f;
             info.unitId = Vst::kRootUnitId;
             info.flags = Vst::ParameterInfo::kIsBypass;
