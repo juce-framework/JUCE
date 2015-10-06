@@ -288,7 +288,7 @@ private:
          out << newLine;
 
         // Linux specific linker flags
-        out << "unix:  LIBS += -L/usr/X11R6/lib/";
+        out << "unix:  LIBS += -L/usr/X11R6/lib/ -lcurl";
         for (int i = 0; i < linuxLibs.size(); ++i)
             out << " -l" << linuxLibs[i];
         out << newLine;
