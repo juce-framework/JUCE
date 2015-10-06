@@ -104,6 +104,10 @@
  #pragma warning (pop)
 #endif
 
+#if JUCE_MINGW
+ #include <sys/types.h>
+#endif
+
 #if JUCE_ANDROID
  #include <atomic>
  #include <byteswap.h>

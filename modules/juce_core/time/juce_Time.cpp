@@ -62,21 +62,18 @@ namespace TimeHelpers
         }
         else
         {
-            time_t now = static_cast <time_t> (seconds);
+            time_t now = static_cast<time_t> (seconds);
 
-          #if JUCE_WINDOWS
-           #ifdef _INC_TIME_INL
-            if (now >= 0 && now <= 0x793406fff)
-                localtime_s (&result, &now);
-            else
-                zerostruct (result);
-           #else
-            result = *localtime (&now);
-           #endif
-          #else
-
-            localtime_r (&now, &result); // more thread-safe
-          #endif
+            #if JUCE_WINDOWS && JUCE_MINGW
+             return *localtime (&now);
+            #elif JUCE_WINDOWS
+             if (now >= 0 && now <= 0x793406fff)
+                 localtime_s (&result, &now);
+             else
+                 zerostruct (result);
+            #else
+             localtime_r (&now, &result); // more thread-safe
+            #endif
         }
 
         return result;
@@ -195,7 +192,7 @@ Time& Time::operator= (const Time& other) noexcept
 //==============================================================================
 int64 Time::currentTimeMillis() noexcept
 {
-  #if JUCE_WINDOWS
+   #if JUCE_WINDOWS && ! JUCE_MINGW
     struct _timeb t;
    #ifdef _INC_TIME_INL
     _ftime_s (&t);
