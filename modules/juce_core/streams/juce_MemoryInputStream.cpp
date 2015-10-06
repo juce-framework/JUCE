@@ -67,13 +67,18 @@ int MemoryInputStream::read (void* const buffer, const int howMany)
 {
     jassert (buffer != nullptr && howMany >= 0);
 
-    const int num = jmin (howMany, (int) (dataSize - position));
-    if (num <= 0)
+    if (howMany <= 0 || position >= dataSize)
         return 0;
 
-    memcpy (buffer, addBytesToPointer (data, position), (size_t) num);
-    position += (unsigned int) num;
-    return num;
+    const size_t num = jmin ((size_t) howMany, dataSize - position);
+
+    if (num > 0)
+    {
+        memcpy (buffer, addBytesToPointer (data, position), num);
+        position += num;
+    }
+
+    return (int) num;
 }
 
 bool MemoryInputStream::isExhausted()
