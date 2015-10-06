@@ -1550,7 +1550,7 @@ private:
 
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const override
     {
-        return file.hasFileExtension (sourceFileExtensions) || file.hasFileExtension ("swift");
+        return file.hasFileExtension (sourceFileExtensions);
     }
 
     static String getOSXVersionName (int version)
