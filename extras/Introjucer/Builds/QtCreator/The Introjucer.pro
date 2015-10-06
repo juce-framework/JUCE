@@ -31,8 +31,8 @@ CONFIG(debug, debug|release){
         "DEBUG=1" \
         "_DEBUG=1" \
         "JUCER_QT_CREATOR_D5F46ABF=1" \
-        "JUCE_APP_VERSION=3.1.0" \
-        "JUCE_APP_VERSION_HEX=0x30100" \
+        "JUCE_APP_VERSION=3.2.0" \
+        "JUCE_APP_VERSION_HEX=0x30200" \
 
 }
 
@@ -45,8 +45,8 @@ CONFIG(release, debug|release){
     DEFINES += \
         "NDEBUG=1" \
         "JUCER_QT_CREATOR_D5F46ABF=1" \
-        "JUCE_APP_VERSION=3.1.0" \
-        "JUCE_APP_VERSION_HEX=0x30100" \
+        "JUCE_APP_VERSION=3.2.0" \
+        "JUCE_APP_VERSION_HEX=0x30200" \
 
 }
 
@@ -58,7 +58,7 @@ QMAKE_CFLAGS_DEBUG   = $$QMAKE_CXXFLAGS_DEBUG
 
 # Linker flags
 LIBS = -L$$DESTDIR 
-unix:  LIBS += -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt
+unix:  LIBS += -L/usr/X11R6/lib/ -lcurl -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt
 win32: LIBS += -lgdi32 -luser32 -lkernel32 -lcomctl32 -lcomdlg32 -limm32 -lole32 -loleaut32 -lrpcrt4 -lshlwapi -luuid -lversion -lwininet -lwinmm -lws2_32 -lwsock32 -static -lpthread
 win32: QMAKE_LFLAGS += -static-libstdc++ -static-libgcc
 QMAKE_LFLAGS += 
@@ -67,6 +67,7 @@ QMAKE_LFLAGS_DEBUG += -fvisibility=hidden
 # Source and header files
 SOURCES = \
 	"../../Source/Application/jucer_AppearanceSettings.cpp" \
+	"../../Source/Application/jucer_AutoUpdater.cpp" \
 	"../../Source/Application/jucer_CommandLine.cpp" \
 	"../../Source/Application/jucer_DocumentEditorComponent.cpp" \
 	"../../Source/Application/jucer_Main.cpp" \
@@ -195,6 +196,7 @@ HEADERS = \
 	"../../Source/ComponentEditor/jucer_ObjectTypes.h" \
 	"../../Source/ComponentEditor/jucer_PaintRoutine.h" \
 	"../../Source/ComponentEditor/jucer_UtilityFunctions.h" \
+	"../../Source/Project Saving/jucer_ProjectExport_QtCreator.h" \
 	"../../Source/Project Saving/jucer_ProjectExport_Android.h" \
 	"../../Source/Project Saving/jucer_ProjectExport_CodeBlocks.h" \
 	"../../Source/Project Saving/jucer_ProjectExport_Make.h" \
@@ -216,6 +218,7 @@ HEADERS = \
 	"../../Source/Project/jucer_ProjectTree_File.h" \
 	"../../Source/Project/jucer_ProjectTree_Group.h" \
 	"../../Source/Project/jucer_ProjectType.h" \
+	"../../Source/Project/jucer_TreeItemTypes.h" \
 	"../../Source/Utility/jucer_CodeHelpers.h" \
 	"../../Source/Utility/jucer_Colours.h" \
 	"../../Source/Utility/jucer_FileHelpers.h" \
@@ -369,9 +372,11 @@ HEADERS = \
 	"../../../../modules/juce_cryptography/encryption/juce_RSAKey.h" \
 	"../../../../modules/juce_cryptography/hashing/juce_MD5.h" \
 	"../../../../modules/juce_cryptography/hashing/juce_SHA256.h" \
+	"../../../../modules/juce_cryptography/hashing/juce_Whirlpool.h" \
 	"../../../../modules/juce_cryptography/juce_cryptography.h" \
 	"../../../../modules/juce_data_structures/values/juce_Value.h" \
 	"../../../../modules/juce_data_structures/values/juce_ValueTree.h" \
+	"../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h" \
 	"../../../../modules/juce_data_structures/undomanager/juce_UndoableAction.h" \
 	"../../../../modules/juce_data_structures/undomanager/juce_UndoManager.h" \
 	"../../../../modules/juce_data_structures/app_properties/juce_ApplicationProperties.h" \
