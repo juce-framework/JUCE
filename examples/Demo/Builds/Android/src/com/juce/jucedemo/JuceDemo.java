@@ -661,7 +661,7 @@ public class JuceDemo   extends Activity
             }
             catch (IOException e)
             {
-                if (connection.getResponseCode() < org.apache.http.HttpStatus.SC_BAD_REQUEST)
+                if (connection.getResponseCode() < 400)
                     throw e;
             }
             finally
@@ -669,7 +669,7 @@ public class JuceDemo   extends Activity
                 statusCode[0] = connection.getResponseCode();
             }
 
-            if (statusCode[0] >= org.apache.http.HttpStatus.SC_BAD_REQUEST)
+            if (statusCode[0] >= 400)
                 inputStream = connection.getErrorStream();
             else
                 inputStream = connection.getInputStream();

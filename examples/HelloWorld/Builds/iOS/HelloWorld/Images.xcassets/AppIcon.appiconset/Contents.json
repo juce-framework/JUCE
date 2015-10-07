@@ -14,9 +14,21 @@
     },
     {
       "idiom": "iphone",
+      "size": "29x29",
+      "filename": "Icon-Small@3x.png",
+      "scale": "3x"
+    },
+    {
+      "idiom": "iphone",
       "size": "40x40",
       "filename": "Icon-Spotlight-40@2x.png",
       "scale": "2x"
+    },
+    {
+      "idiom": "iphone",
+      "size": "40x40",
+      "filename": "Icon-Spotlight-40@3x.png",
+      "scale": "3x"
     },
     {
       "idiom": "iphone",
