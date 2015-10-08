@@ -222,20 +222,21 @@ namespace CoreTextTypeLayout
 
         CFStringRef cfText = text.getText().toCFString();
         CFMutableAttributedStringRef attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
-        CFAttributedStringReplaceString (attribString, CFRangeMake(0, 0), cfText);
+        CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
         CFRelease (cfText);
 
         const int numCharacterAttributes = text.getNumAttributes();
+        const CFIndex attribStringLen = CFAttributedStringGetLength (attribString);
 
         for (int i = 0; i < numCharacterAttributes; ++i)
         {
             const AttributedString::Attribute& attr = *text.getAttribute (i);
+            const int rangeStart = attr.range.getStart();
 
-            if (attr.range.getStart() > CFAttributedStringGetLength (attribString))
+            if (rangeStart >= attribStringLen)
                 continue;
 
-            Range<int> range (attr.range);
-            range.setEnd (jmin (range.getEnd(), (int) CFAttributedStringGetLength (attribString)));
+            CFRange range = CFRangeMake (rangeStart, jmin (attr.range.getEnd(), (int) attribStringLen) - rangeStart);
 
             if (const Font* const f = attr.getFont())
             {
@@ -243,8 +244,19 @@ namespace CoreTextTypeLayout
                 {
                     ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
 
-                    CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
-                                                    kCTFontAttributeName, ctFontRef);
+                    CFAttributedStringSetAttribute (attribString, range, kCTFontAttributeName, ctFontRef);
+
+                    float extraKerning = f->getExtraKerningFactor();
+
+                    if (extraKerning != 0.0f)
+                    {
+                        extraKerning *= f->getHeight();
+
+                        CFNumberRef numberRef = CFNumberCreate (0, kCFNumberFloatType, &extraKerning);
+                        CFAttributedStringSetAttribute (attribString, range, kCTKernAttributeName, numberRef);
+                        CFRelease (numberRef);
+                    }
+
                     CFRelease (ctFontRef);
                 }
             }
@@ -264,9 +276,7 @@ namespace CoreTextTypeLayout
                                                              col->getFloatAlpha());
                #endif
 
-                CFAttributedStringSetAttribute (attribString,
-                                                CFRangeMake (range.getStart(), range.getLength()),
-                                                kCTForegroundColorAttributeName, colour);
+                CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, colour);
                 CGColorRelease (colour);
             }
         }
