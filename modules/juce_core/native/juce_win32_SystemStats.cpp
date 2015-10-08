@@ -429,7 +429,7 @@ String SystemStats::getFullUserName()
 
 String SystemStats::getComputerName()
 {
-    TCHAR text [MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
+    TCHAR text[128] = { 0 };
     DWORD len = (DWORD) numElementsInArray (text) - 1;
     GetComputerName (text, &len);
     return String (text, len);
