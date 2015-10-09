@@ -43,22 +43,31 @@ public:
 
     //==============================================================================
     /** Creates a null address (00-00-00-00-00-00). */
-    MACAddress();
+    MACAddress() noexcept;
 
     /** Creates a copy of another address. */
-    MACAddress (const MACAddress&);
+    MACAddress (const MACAddress&) noexcept;
 
     /** Creates a copy of another address. */
-    MACAddress& operator= (const MACAddress&);
+    MACAddress& operator= (const MACAddress&) noexcept;
 
     /** Creates an address from 6 bytes. */
-    explicit MACAddress (const uint8 bytes[6]);
+    explicit MACAddress (const uint8 bytes[6]) noexcept;
+
+    /** Creates an address from a hex string.
+        If the string isn't a 6-byte hex value, this will just default-initialise
+        the object.
+    */
+    explicit MACAddress (StringRef address);
 
     /** Returns a pointer to the 6 bytes that make up this address. */
     const uint8* getBytes() const noexcept        { return address; }
 
     /** Returns a dash-separated string in the form "11-22-33-44-55-66" */
     String toString() const;
+
+    /** Returns a hex string of this address, using a custom separator between each byte. */
+    String toString (StringRef separator) const;
 
     /** Returns the address in the lower 6 bytes of an int64.
 
