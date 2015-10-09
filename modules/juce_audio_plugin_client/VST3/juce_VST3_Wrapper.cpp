@@ -62,10 +62,15 @@ using namespace Steinberg;
 
 //==============================================================================
 #if JUCE_MAC
- extern void initialiseMacVST3();
- extern void* attachComponentToWindowRefVST3 (Component*, void* parent, bool isNSView);
- extern void detachComponentFromWindowRefVST3 (Component*, void* window, bool isNSView);
- extern void setNativeHostWindowSizeVST3 (void* window, Component*, int newWidth, int newHeight, bool isNSView);
+  extern void initialiseMacVST();
+
+ #if ! JUCE_64BIT
+  extern void updateEditorCompBoundsVST (Component*);
+ #endif
+
+  extern void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
+  extern void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
+  extern void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
 #endif
 
 //==============================================================================
@@ -561,7 +566,7 @@ private:
             component->setVisible (true);
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = juce::attachComponentToWindowRefVST3 (component, parent, isNSView);
+            macHostWindow = juce::attachComponentToWindowRefVST (component, parent, isNSView);
            #endif
 
             component->resizeHostWindow();
@@ -580,7 +585,7 @@ private:
                #else
                 if (macHostWindow != nullptr)
                 {
-                    juce::detachComponentFromWindowRefVST3 (component, macHostWindow, isNSView);
+                    juce::detachComponentFromWindowRefVST (component, macHostWindow, isNSView);
                     macHostWindow = nullptr;
                 }
                #endif
@@ -692,7 +697,7 @@ private:
                     setSize (w, h);
                    #else
                     if (owner.macHostWindow != nullptr && ! getHostType().isWavelab())
-                        juce::setNativeHostWindowSizeVST3 (owner.macHostWindow, this, w, h, owner.isNSView);
+                        juce::setNativeHostWindowSizeVST (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
                     if (owner.plugFrame != nullptr)
@@ -1007,13 +1012,13 @@ public:
 
     void setStateInformation (const void* data, int sizeAsInt)
     {
-        size_t size = static_cast<size_t> (sizeAsInt);
+        int64 size = sizeAsInt;
 
         // Check if this data was written with a newer JUCE version
         // and if it has the JUCE private data magic code at the end
         const size_t jucePrivDataIdentifierSize = std::strlen (kJucePrivateDataIdentifier);
 
-        if (size >= (jucePrivDataIdentifierSize + sizeof (int64)))
+        if (size >= jucePrivDataIdentifierSize + sizeof (int64))
         {
             const char* buffer = static_cast<const char*> (data);
 
@@ -1039,7 +1044,8 @@ public:
             }
         }
 
-        pluginInstance->setStateInformation (data, static_cast<int> (size));
+        if (size >= 0)
+            pluginInstance->setStateInformation (data, static_cast<int> (size));
     }
 
     //==============================================================================
@@ -1778,7 +1784,7 @@ DEF_CLASS_IID (JuceAudioProcessor)
 bool initModule()
 {
    #if JUCE_MAC
-    initialiseMacVST3();
+    initialiseMacVST();
    #endif
 
     return true;
