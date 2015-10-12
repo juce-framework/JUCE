@@ -89,7 +89,7 @@ void AlertWindow::addButton (const String& name,
                              const KeyPress& shortcutKey1,
                              const KeyPress& shortcutKey2)
 {
-    TextButton* const b = new TextButton (name, String::empty);
+    TextButton* const b = new TextButton (name, String());
     buttons.add (b);
 
     b->setWantsKeyboardFocus (true);
@@ -143,9 +143,9 @@ void AlertWindow::addTextEditor (const String& name,
 
     ed->setColour (TextEditor::outlineColourId, findColour (ComboBox::outlineColourId));
     ed->setFont (getLookAndFeel().getAlertWindowMessageFont());
+    addAndMakeVisible (ed);
     ed->setText (initialContents);
     ed->setCaretPosition (initialContents.length());
-    addAndMakeVisible (ed);
     textboxNames.add (onScreenLabel);
 
     updateLayout (false);
@@ -165,7 +165,7 @@ String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
     if (TextEditor* const t = getTextEditor (nameOfTextEditor))
         return t->getText();
 
-    return String::empty;
+    return String();
 }
 
 
