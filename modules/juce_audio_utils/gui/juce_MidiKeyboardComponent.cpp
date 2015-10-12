@@ -230,21 +230,35 @@ void MidiKeyboardComponent::getKeyPos (int midiNoteNumber, int& x, int& w) const
     x -= xOffset + rx;
 }
 
-Rectangle<int> MidiKeyboardComponent::getWhiteNotePos (int noteNum) const
+Rectangle<int> MidiKeyboardComponent::getRectangleForKey (const int note) const
 {
-    int x, w;
-    getKeyPos (noteNum, x, w);
-    Rectangle<int> pos;
+    jassert (note >= rangeStart && note <= rangeEnd);
 
-    switch (orientation)
+    int x, w;
+    getKeyPos (note, x, w);
+
+    if (MidiMessage::isMidiNoteBlack (note))
     {
-        case horizontalKeyboard:            pos.setBounds (x, 0, w, getHeight()); break;
-        case verticalKeyboardFacingLeft:    pos.setBounds (0, x, getWidth(), w); break;
-        case verticalKeyboardFacingRight:   pos.setBounds (0, getHeight() - x - w, getWidth(), w); break;
-        default: break;
+        switch (orientation)
+        {
+            case horizontalKeyboard:            return Rectangle<int> (x, 0, w, blackNoteLength);
+            case verticalKeyboardFacingLeft:    return Rectangle<int> (getWidth() - blackNoteLength, x, blackNoteLength, w);
+            case verticalKeyboardFacingRight:   return Rectangle<int> (0, getHeight() - x - w, blackNoteLength, w);
+            default:                            jassertfalse; break;
+        }
+    }
+    else
+    {
+        switch (orientation)
+        {
+            case horizontalKeyboard:            return Rectangle<int> (x, 0, w, getHeight());
+            case verticalKeyboardFacingLeft:    return Rectangle<int> (0, x, getWidth(), w);
+            case verticalKeyboardFacingRight:   return Rectangle<int> (0, getHeight() - x - w, getWidth(), w);
+            default:                            jassertfalse; break;
+        }
     }
 
-    return pos;
+    return Rectangle<int>();
 }
 
 int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
@@ -339,7 +353,7 @@ int MidiKeyboardComponent::remappedXYToNote (Point<int> pos, float& mousePositio
 void MidiKeyboardComponent::repaintNote (const int noteNum)
 {
     if (noteNum >= rangeStart && noteNum <= rangeEnd)
-        repaint (getWhiteNotePos (noteNum));
+        repaint (getRectangleForKey (noteNum));
 }
 
 void MidiKeyboardComponent::paint (Graphics& g)
@@ -349,9 +363,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
     const Colour lineColour (findColour (keySeparatorLineColourId));
     const Colour textColour (findColour (textLabelColourId));
 
-    int octave;
-
-    for (octave = 0; octave < 128; octave += 12)
+    for (int octave = 0; octave < 128; octave += 12)
     {
         for (int white = 0; white < 7; ++white)
         {
@@ -359,7 +371,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
 
             if (noteNum >= rangeStart && noteNum <= rangeEnd)
             {
-                const Rectangle<int> pos (getWhiteNotePos (noteNum));
+                Rectangle<int> pos = getRectangleForKey (noteNum);
 
                 drawWhiteNote (noteNum, g, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
@@ -416,7 +428,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
 
     const Colour blackNoteColour (findColour (blackNoteColourId));
 
-    for (octave = 0; octave < 128; octave += 12)
+    for (int octave = 0; octave < 128; octave += 12)
     {
         for (int black = 0; black < 5; ++black)
         {
@@ -424,16 +436,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
 
             if (noteNum >= rangeStart && noteNum <= rangeEnd)
             {
-                getKeyPos (noteNum, x, w);
-                Rectangle<int> pos;
-
-                switch (orientation)
-                {
-                    case horizontalKeyboard:            pos.setBounds (x, 0, w, blackNoteLength); break;
-                    case verticalKeyboardFacingLeft:    pos.setBounds (width - blackNoteLength, x, blackNoteLength, w); break;
-                    case verticalKeyboardFacingRight:   pos.setBounds (0, height - x - w, blackNoteLength, w); break;
-                    default: break;
-                }
+                Rectangle<int> pos = getRectangleForKey (noteNum);
 
                 drawBlackNote (noteNum, g, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
