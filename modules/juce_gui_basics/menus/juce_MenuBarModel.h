@@ -131,7 +131,7 @@ public:
     /** OSX ONLY - Sets the model that is currently being shown as the main
         menu bar at the top of the screen on the Mac.
 
-        You can pass 0 to stop the current model being displayed. Be careful
+        You can pass nullptr to stop the current model being displayed. Be careful
         not to delete a model while it is being used.
 
         An optional extra menu can be specified, containing items to add to the top of
