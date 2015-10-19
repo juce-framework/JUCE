@@ -99,9 +99,10 @@ public:
 
             // Check for the plugin creating its own floating window, and if there is one,
             // we need to reparent it to make it visible..
-            if (NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0])
-                [getOwnerWindow() addChildWindow: floatingChildWindow
-                                         ordered: NSWindowAbove];
+            if (carbonWindow.childWindows.count > 0)
+                if (NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0])
+                    [getOwnerWindow() addChildWindow: floatingChildWindow
+                                             ordered: NSWindowAbove];
 
             EventTypeSpec windowEventTypes[] =
             {
