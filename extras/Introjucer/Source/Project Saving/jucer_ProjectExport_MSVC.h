@@ -517,7 +517,7 @@ protected:
            << newLine
            << "  BLOCK \"VarFileInfo\"" << newLine
            << "  BEGIN" << newLine
-           << "    VALUE \"Translation\", 0x409, 65001" << newLine
+           << "    VALUE \"Translation\", 0x409, 1252" << newLine
            << "  END" << newLine
            << "END" << newLine
            << newLine
