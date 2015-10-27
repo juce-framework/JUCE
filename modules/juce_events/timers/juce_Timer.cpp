@@ -55,12 +55,6 @@ public:
         {
             const uint32 now = Time::getMillisecondCounter();
 
-            if (now == lastTime)
-            {
-                wait (1);
-                continue;
-            }
-
             const int elapsed = (int) (now >= lastTime ? (now - lastTime)
                                                        : (std::numeric_limits<uint32>::max() - (lastTime - now)));
             lastTime = now;
@@ -97,6 +91,10 @@ public:
                             break;
                         }
                     }
+                }
+                else
+                {
+                    wait (1);
                 }
             }
             else
