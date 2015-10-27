@@ -763,12 +763,7 @@ void EnabledModuleList::removeModule (String moduleID) // must be pass-by-value,
 void EnabledModuleList::createRequiredModules (OwnedArray<LibraryModule>& modules)
 {
     for (int i = 0; i < getNumModules(); ++i)
-    {
-        ModuleDescription info (getModuleInfo (getModuleID (i)));
-
-        if (info.isValid())
-            modules.add (new LibraryModule (info));
-    }
+        modules.add (new LibraryModule (getModuleInfo (getModuleID (i))));
 }
 
 StringArray EnabledModuleList::getAllModules() const
