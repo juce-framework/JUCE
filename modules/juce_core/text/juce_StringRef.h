@@ -131,8 +131,6 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, StringRef string2
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, StringRef string2) noexcept;
 
-#if JUCE_STRING_UTF_TYPE != 8 && ! defined (DOXYGEN)
- inline String operator+ (String s1, StringRef s2)      { return s1 += String (s2.text); }
-#endif
+inline String operator+ (String s1, StringRef s2)      { return s1 += String (s2.text); }
 
 #endif   // JUCE_STRINGREF_H_INCLUDED

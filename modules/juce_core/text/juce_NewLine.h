@@ -78,9 +78,10 @@ extern NewLine newLine;
     @endcode
 */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&);
+JUCE_API String  JUCE_CALLTYPE operator+  (const NewLine&,  const NewLine&);
 
-#if JUCE_STRING_UTF_TYPE != 8 && ! defined (DOXYGEN)
- inline String operator+ (String s1, const NewLine&)      { return s1 += NewLine::getDefault(); }
-#endif
+inline String operator+ (String s1, const NewLine&)     { return s1 += NewLine::getDefault(); }
+inline String& operator+= (String& s1, const NewLine&)  { return s1 += NewLine::getDefault(); }
+
 
 #endif   // JUCE_NEWLINE_H_INCLUDED

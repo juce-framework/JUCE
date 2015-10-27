@@ -58,10 +58,10 @@ bool File::isHidden() const
     return getFileName().startsWithChar ('.');
 }
 
-static String getLinkedFile (StringRef file)
+static String getLinkedFile (const String& file)
 {
     HeapBlock<char> buffer (8194);
-    const int numBytes = (int) readlink (file.text, buffer, 8192);
+    const int numBytes = (int) readlink (file.toRawUTF8(), buffer, 8192);
     return String::fromUTF8 (buffer, jmax (0, numBytes));
 };
 
