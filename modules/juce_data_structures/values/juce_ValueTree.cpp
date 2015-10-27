@@ -1066,7 +1066,12 @@ public:
         for (int i = 1 + r.nextInt (numElementsInArray (buffer) - 2); --i >= 0;)
             buffer[i] = chars [r.nextInt (sizeof (chars) - 1)];
 
-        return CharPointer_ASCII (buffer);
+        String result (buffer);
+
+        if (! XmlElement::isValidXmlName (result))
+            result = createRandomIdentifier (r);
+
+        return result;
     }
 
     static String createRandomWideCharString (Random& r)
