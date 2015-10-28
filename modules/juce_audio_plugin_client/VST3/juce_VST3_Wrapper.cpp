@@ -1018,7 +1018,7 @@ public:
         // and if it has the JUCE private data magic code at the end
         const size_t jucePrivDataIdentifierSize = std::strlen (kJucePrivateDataIdentifier);
 
-        if (size >= jucePrivDataIdentifierSize + sizeof (int64))
+        if ((size_t) size >= jucePrivDataIdentifierSize + sizeof (int64))
         {
             const char* buffer = static_cast<const char*> (data);
 
