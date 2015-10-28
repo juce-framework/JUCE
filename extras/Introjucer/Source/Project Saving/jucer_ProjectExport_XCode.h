@@ -643,6 +643,7 @@ private:
 
                     addPlistDictionaryKey (dict2, "CFBundleTypeName", ex);
                     addPlistDictionaryKey (dict2, "CFBundleTypeRole", "Editor");
+                    addPlistDictionaryKey (dict2, "CFBundleTypeIconFile", "Icon");
                     addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
                 }
 
