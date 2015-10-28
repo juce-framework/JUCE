@@ -15,7 +15,6 @@
   "compile":        [ { "file": "VST/juce_VST_Wrapper.cpp" },
                       { "file": "VST/juce_VST_Wrapper.mm", "target": "xcode" },
                       { "file": "VST3/juce_VST3_Wrapper.cpp" },
-                      { "file": "VST3/juce_VST3_Wrapper.mm", "target": "xcode" },
                       { "file": "RTAS/juce_RTAS_DigiCode1.cpp", "warnings": "disabled", "stdcall": "1", "target": "xcode, msvc" },
                       { "file": "RTAS/juce_RTAS_DigiCode2.cpp", "warnings": "disabled", "stdcall": "1", "target": "xcode, msvc" },
                       { "file": "RTAS/juce_RTAS_DigiCode3.cpp", "warnings": "disabled", "stdcall": "1", "target": "xcode, msvc" },
