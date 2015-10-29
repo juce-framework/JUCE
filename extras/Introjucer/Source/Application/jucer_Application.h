@@ -116,7 +116,9 @@ public:
 
     virtual void initialiseWindows (const String& commandLine)
     {
-        if (commandLine.trim().isNotEmpty() && ! commandLine.trim().startsWithChar ('-'))
+        const String commandLineWithoutNSDebug (commandLine.replace ("-NSDocumentRevisionsDebugMode YES", ""));
+
+        if (commandLineWithoutNSDebug.trim().isNotEmpty() && ! commandLineWithoutNSDebug.trim().startsWithChar ('-'))
             anotherInstanceStarted (commandLine);
         else
             mainWindowList.reopenLastProjects();
