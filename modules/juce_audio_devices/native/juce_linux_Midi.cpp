@@ -471,7 +471,7 @@ private:
     snd_midi_event_t* midiParser;
     int maxEventSize;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice)
 };
 
 } // namespace

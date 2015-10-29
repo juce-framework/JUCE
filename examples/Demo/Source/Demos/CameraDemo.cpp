@@ -198,7 +198,7 @@ private:
             lastSnapshot.setImage (incomingImage);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDemo);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDemo)
 };
 
 
