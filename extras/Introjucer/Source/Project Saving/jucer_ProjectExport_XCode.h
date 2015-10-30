@@ -1416,8 +1416,8 @@ private:
         const char* extent;
         const char* scale;
         const char* filename;
-        const int   width;
-        const int   height;
+        int width;
+        int height;
     };
 
     static Array<ImageType> getiOSLaunchImageTypes()
@@ -1567,16 +1567,9 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),
-                                                                Ids::vst2Path, TargetOS::osx)));
-
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
-                                                                Ids::vst3Path, TargetOS::osx)));
-
-        aaxPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),
-                                                               Ids::aaxPath, TargetOS::osx)));
-
-        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
-                                                                Ids::rtasPath, TargetOS::osx)));
+        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),  Ids::vst2Path, TargetOS::osx)));
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
+        aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));
     }
 };
