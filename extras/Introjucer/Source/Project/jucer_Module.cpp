@@ -323,7 +323,6 @@ void LibraryModule::createLocalHeaderWrapper (ProjectSaver& projectSaver, const 
     }
 
     writeGuardedInclude (out, paths, guards);
-    out << newLine;
 
     projectSaver.replaceFileIfDifferent (localHeader, out);
 }
