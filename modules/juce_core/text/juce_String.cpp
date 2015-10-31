@@ -881,16 +881,6 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
     return stream;
 }
 
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&)
-{
-    return string1 += NewLine::getDefault();
-}
-
-JUCE_API String JUCE_CALLTYPE operator+ (const NewLine&, const NewLine&)
-{
-    return String (NewLine::getDefault()) + NewLine::getDefault();
-}
-
 //==============================================================================
 int String::indexOfChar (const juce_wchar character) const noexcept
 {
