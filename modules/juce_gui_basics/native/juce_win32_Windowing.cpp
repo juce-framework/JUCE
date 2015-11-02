@@ -1663,9 +1663,9 @@ private:
     }
 
     //==============================================================================
-    void doMouseEvent (Point<float> position)
+    void doMouseEvent (Point<float> position, float pressure)
     {
-        handleMouseEvent (0, position, currentModifiers, getMouseEventTime());
+        handleMouseEvent (0, position, currentModifiers, pressure, getMouseEventTime());
     }
 
     StringArray getAvailableRenderingEngines() override
@@ -1760,7 +1760,7 @@ private:
         if (now >= lastMouseTime + minTimeBetweenMouses)
         {
             lastMouseTime = now;
-            doMouseEvent (position);
+            doMouseEvent (position, MouseInputSource::invalidPressure);
         }
     }
 
@@ -1780,7 +1780,7 @@ private:
             updateModifiersFromWParam (wParam);
             isDragging = true;
 
-            doMouseEvent (position);
+            doMouseEvent (position, MouseInputSource::invalidPressure);
         }
     }
 
@@ -1801,7 +1801,7 @@ private:
         // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
         // arrive without a mouse-down, so in that case we need to avoid sending a message.
         if (wasDragging)
-            doMouseEvent (position);
+            doMouseEvent (position, MouseInputSource::invalidPressure);
     }
 
     void doCaptureChanged()
@@ -1821,7 +1821,7 @@ private:
     void doMouseExit()
     {
         isMouseOver = false;
-        doMouseEvent (getCurrentMousePos());
+        doMouseEvent (getCurrentMousePos(), MouseInputSource::invalidPressure);
     }
 
     ComponentPeer* findPeerUnderMouse (Point<float>& localPos)
@@ -1925,6 +1925,7 @@ private:
         const int64 time = getMouseEventTime();
         const Point<float> pos (globalToLocal (Point<float> (static_cast<float> (TOUCH_COORD_TO_PIXEL (touch.x)),
                                                              static_cast<float> (TOUCH_COORD_TO_PIXEL (touch.y)))));
+        const float pressure = MouseInputSource::invalidPressure;
         ModifierKeys modsToSend (currentModifiers);
 
         if (isDown)
@@ -1932,9 +1933,10 @@ private:
             currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
             modsToSend = currentModifiers;
 
-           // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-           handleMouseEvent (touchIndex, pos.toFloat(), modsToSend.withoutMouseButtons(), time);
-           if (! isValidPeer (this)) // (in case this component was deleted by the event)
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            handleMouseEvent (touchIndex, pos.toFloat(), modsToSend.withoutMouseButtons(), pressure, time);
+
+            if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return false;
         }
         else if (isUp)
@@ -1956,13 +1958,15 @@ private:
             currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
-        handleMouseEvent (touchIndex, pos.toFloat(), modsToSend, time);
+        handleMouseEvent (touchIndex, pos.toFloat(), modsToSend, pressure, time);
+
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return false;
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex, Point<float> (-10.0f, -10.0f), currentModifiers, time);
+            handleMouseEvent (touchIndex, Point<float> (-10.0f, -10.0f), currentModifiers, pressure, time);
+
             if (! isValidPeer (this))
                 return false;
         }
@@ -2248,7 +2252,7 @@ private:
 
         if (contains (pos.roundToInt(), false))
         {
-            doMouseEvent (pos);
+            doMouseEvent (pos, MouseInputSource::invalidPressure);
 
             if (! isValidPeer (this))
                 return true;

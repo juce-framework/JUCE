@@ -767,7 +767,11 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
     {
         UITouch* touch = [touches objectAtIndex: i];
 
+       #if defined (__IPHONE_9_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
+        if ([touch phase] == UITouchPhaseStationary && touch.maximumPossibleForce <= 0)
+       #else
         if ([touch phase] == UITouchPhaseStationary)
+       #endif
             continue;
 
         CGPoint p = [touch locationInView: view];
@@ -788,7 +792,9 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             modsToSend = currentModifiers;
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-            handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(), time);
+            handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(),
+                              MouseInputSource::invalidPressure, time);
+
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return;
         }
@@ -810,13 +816,24 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             modsToSend = currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
-        handleMouseEvent (touchIndex, pos, modsToSend, time);
+        float pressure = MouseInputSource::invalidPressure;
+
+       #if defined (__IPHONE_9_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
+        if (touch.maximumPossibleForce > 0)
+            // NB: other devices return 0 or 1.0 if pressure is unknown, so we'll clip our value to a believable range:
+            pressure = jlimit (0.0001f, 0.9999f, (float) (touch.force / touch.maximumPossibleForce));
+       #endif
+
+        handleMouseEvent (touchIndex, pos, modsToSend, pressure, time);
+
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return;
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex, Point<float> (-1.0f, -1.0f), modsToSend, time);
+            handleMouseEvent (touchIndex, Point<float> (-1.0f, -1.0f),
+                              modsToSend, MouseInputSource::invalidPressure, time);
+
             if (! isValidPeer (this))
                 return;
         }
