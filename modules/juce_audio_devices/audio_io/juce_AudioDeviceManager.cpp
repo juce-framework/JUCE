@@ -1152,17 +1152,13 @@ void AudioDeviceManager::playSound (const File& file)
     }
 }
 
-void AudioDeviceManager::playSound (const char* resourceData, int resourceSize)
+void AudioDeviceManager::playSound (const void* resourceData, size_t resourceSize)
 {
     if (resourceData != nullptr && resourceSize > 0)
     {
         AudioFormatManager formatManager;
         formatManager.registerBasicFormats();
-
-        MemoryInputStream* mem = new MemoryInputStream (resourceData,
-                                                        static_cast<size_t> (resourceSize),
-                                                        false);
-
+        MemoryInputStream* mem = new MemoryInputStream (resourceData, resourceSize, false);
         playSound (formatManager.createReaderFor (mem), true);
     }
 }
