@@ -110,6 +110,16 @@ public:
     /** Checks whether a character is alphabetic or numeric. */
     static bool isLetterOrDigit (juce_wchar character) noexcept;
 
+    /** Checks whether a character is a printable character, i.e. alphabetic, numeric,
+        a punctuation character or a space.
+    */
+    static bool isPrintable (char character) noexcept;
+
+    /** Checks whether a character is a printable character, i.e. alphabetic, numeric,
+        a punctuation character or a space.
+    */
+    static bool isPrintable (juce_wchar character) noexcept;
+
     /** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legal hex digit. */
     static int getHexDigitValue (juce_wchar digit) noexcept;
 

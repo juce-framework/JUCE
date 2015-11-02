@@ -216,11 +216,16 @@ public:
     }
 
     //==============================================================================
-    /** Returns the current number of elements in the array.
-    */
+    /** Returns the current number of elements in the array. */
     inline int size() const noexcept
     {
         return numUsed;
+    }
+
+    /** Returns true if the array is empty, false otherwise. */
+    inline bool empty() const noexcept
+    {
+        return size() == 0;
     }
 
     /** Returns one of the elements in the array.

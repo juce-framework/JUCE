@@ -108,6 +108,16 @@ bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) noexcept
     return iswalnum ((wint_t) character) != 0;
 }
 
+bool CharacterFunctions::isPrintable (const char character) noexcept
+{
+    return (character >= ' ' && character <= '~');
+}
+
+bool CharacterFunctions::isPrintable (const juce_wchar character) noexcept
+{
+    return iswprint ((wint_t) character) != 0;
+}
+
 int CharacterFunctions::getHexDigitValue (const juce_wchar digit) noexcept
 {
     unsigned int d = (unsigned int) digit - '0';
