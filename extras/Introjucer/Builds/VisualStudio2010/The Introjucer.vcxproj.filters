@@ -1584,6 +1584,9 @@
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidStudio.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
@@ -2796,6 +2799,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\background_logo.svg">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\background_tile.png">

@@ -300,6 +300,7 @@ public:
         moduleListTree.addListener (this);
     }
 
+    int getItemHeight() const override      { return 22; }
     bool isModulesList() const override     { return true; }
     bool canBeSelected() const override     { return true; }
     bool mightContainSubItems() override    { return true; }

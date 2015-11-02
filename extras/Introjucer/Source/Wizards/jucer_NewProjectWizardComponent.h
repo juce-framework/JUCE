@@ -139,7 +139,7 @@ public:
         for (int i = 0; i < types.size(); ++i)
         {
             const ProjectExporter::ExporterTypeInfo& type = types.getReference (i);
-            platforms.add (new PlatformType (ImageCache::getFromMemory (type.iconData, type.iconDataSize), type.name));
+            platforms.add (new PlatformType (type.getIcon(), type.name));
         }
 
         listBox.setRowHeight (35);

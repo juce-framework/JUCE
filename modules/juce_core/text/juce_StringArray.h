@@ -209,6 +209,15 @@ public:
                    int startIndex = 0,
                    int numElementsToAdd = -1);
 
+    /** Merges the strings from another array into this one.
+        This will not add a string that already exists.
+
+        @param other                the array to add
+        @param ignoreCase           ignore case when merging
+    */
+    void mergeArray (const StringArray& other,
+                     bool ignoreCase = false);
+
     /** Breaks up a string into tokens and adds them to this array.
 
         This will tokenise the given string using whitespace characters as the

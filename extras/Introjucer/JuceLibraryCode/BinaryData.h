@@ -75,6 +75,9 @@ namespace BinaryData
     extern const char*   AudioPluginXCodeScript_txt;
     const int            AudioPluginXCodeScript_txtSize = 2745;
 
+    extern const char*   background_logo_svg;
+    const int            background_logo_svgSize = 3117;
+
     extern const char*   background_tile_png;
     const int            background_tile_pngSize = 151;
 
@@ -142,7 +145,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 43;
+    const int namedResourceListSize = 44;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

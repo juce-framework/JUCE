@@ -84,11 +84,6 @@ Font JucerTreeViewBase::getFont() const
     return Font (getItemHeight() * 0.6f);
 }
 
-float JucerTreeViewBase::getIconSize() const
-{
-    return jmin (getItemHeight() - 4.0f, 18.0f);
-}
-
 void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver)
 {
     TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (mainBackgroundColourId), isMouseOver);

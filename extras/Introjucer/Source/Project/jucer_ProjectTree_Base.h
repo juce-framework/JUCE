@@ -38,14 +38,12 @@ public:
     }
 
     //==============================================================================
-    virtual bool isRoot() const                         { return false; }
-
     virtual bool acceptsFileDrop (const StringArray& files) const = 0;
     virtual bool acceptsDragItems (const OwnedArray<Project::Item>& selectedNodes) = 0;
 
     //==============================================================================
-    String getDisplayName() const override               { return item.getName(); }
-    String getRenamingName() const override              { return getDisplayName(); }
+    String getDisplayName() const override              { return item.getName(); }
+    String getRenamingName() const override             { return getDisplayName(); }
 
     void setName (const String& newName) override
     {
@@ -55,10 +53,10 @@ public:
             item.getNameValue() = newName;
     }
 
-    bool isMissing() override                            { return isFileMissing; }
-    virtual File getFile() const                         { return item.getFile(); }
+    bool isMissing() override                           { return isFileMissing; }
+    virtual File getFile() const                        { return item.getFile(); }
 
-    void deleteItem() override                           { item.removeItemFromProject(); }
+    void deleteItem() override                          { item.removeItemFromProject(); }
 
     virtual void deleteAllSelectedItems() override
     {

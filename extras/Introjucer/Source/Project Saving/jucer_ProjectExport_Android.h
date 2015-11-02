@@ -22,30 +22,12 @@
   ==============================================================================
 */
 
-class AndroidProjectExporter  : public ProjectExporter
+class AndroidProjectExporterBase  : public ProjectExporter
 {
 public:
-    //==============================================================================
-    static const char* getNameAndroid()         { return "Android Project"; }
-    static const char* getValueTreeTypeName()   { return "ANDROID"; }
-
-    static AndroidProjectExporter* createForSettings (Project& project, const ValueTree& settings)
-    {
-        if (settings.hasType (getValueTreeTypeName()))
-            return new AndroidProjectExporter (project, settings);
-
-        return nullptr;
-    }
-
-    //==============================================================================
-    AndroidProjectExporter (Project& p, const ValueTree& t)
+    AndroidProjectExporterBase (Project& p, const ValueTree& t)
         : ProjectExporter (p, t)
     {
-        name = getNameAndroid();
-
-        if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + "Android";
-
         if (getVersionCodeString().isEmpty())
             getVersionCodeValue() = 1;
 
@@ -67,12 +49,20 @@ public:
         initialiseDependencyPathValues();
     }
 
-    //==============================================================================
     bool canLaunchProject() override                     { return false; }
     bool launchProject() override                        { return false; }
     bool isAndroid() const override                      { return true; }
     bool usesMMFiles() const override                    { return false; }
     bool canCopeWithDuplicateFiles() override            { return false; }
+
+    void create (const OwnedArray<LibraryModule>& modules) const override
+    {
+        const String package (getActivityClassPackage());
+        const String path (package.replaceCharacter ('.', File::separator));
+        const File target (getTargetFolder().getChildFile ("src").getChildFile (path));
+
+        copyActivityJavaFiles (modules, target, package);
+    }
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
@@ -172,6 +162,7 @@ public:
     Value getCPP11EnabledValue()                    { return getSetting (Ids::androidCpp11); }
     bool isCPP11Enabled() const                     { return settings [Ids::androidCpp11]; }
 
+    //==============================================================================
     String createDefaultClassName() const
     {
         String s (project.getBundleIdentifier().toString().toLowerCase());
@@ -192,84 +183,168 @@ public:
         return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRoot(), false, true, false);
     }
 
-    //==============================================================================
-    void create (const OwnedArray<LibraryModule>& modules) const override
+    void initialiseDependencyPathValues()
     {
-        const File target (getTargetFolder());
-        const File jniFolder (target.getChildFile ("jni"));
+        sdkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath),
+                                                               Ids::androidSDKPath, TargetOS::getThisOS())));
 
-        copyActivityJavaFiles (modules);
-        createDirectoryOrThrow (jniFolder);
-        createDirectoryOrThrow (target.getChildFile ("res").getChildFile ("values"));
-        createDirectoryOrThrow (target.getChildFile ("libs"));
-        createDirectoryOrThrow (target.getChildFile ("bin"));
+        ndkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath),
+                                                               Ids::androidNDKPath, TargetOS::getThisOS())));
+    }
 
+    void copyActivityJavaFiles (const OwnedArray<LibraryModule>& modules, const File& targetFolder, const String& package) const
+    {
+        const String className (getActivityName());
+
+        if (className.isEmpty())
+            throw SaveError ("Invalid Android Activity class name: " + getActivityClassPath());
+
+        createDirectoryOrThrow (targetFolder);
+
+        LibraryModule* const coreModule = getCoreModule (modules);
+
+        if (coreModule != nullptr)
         {
-            ScopedPointer<XmlElement> manifest (createManifestXML());
-            writeXmlOrThrow (*manifest, target.getChildFile ("AndroidManifest.xml"), "utf-8", 100, true);
+            File javaDestFile (targetFolder.getChildFile (className + ".java"));
+
+            File javaSourceFile (coreModule->getFolder().getChildFile ("native")
+                                                        .getChildFile ("java")
+                                                        .getChildFile ("JuceAppActivity.java"));
+
+            MemoryOutputStream newFile;
+            newFile << javaSourceFile.loadFileAsString()
+                                     .replace ("JuceAppActivity", className)
+                                     .replace ("package com.juce;", "package " + package + ";");
+
+            overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
         }
+    }
 
-        writeApplicationMk (jniFolder.getChildFile ("Application.mk"));
-        writeAndroidMk (jniFolder.getChildFile ("Android.mk"));
+    String getAppPlatform() const
+    {
+        int ndkVersion = getMinimumSDKVersionString().getIntValue();
+        if (ndkVersion == 9)
+            ndkVersion = 10; // (doesn't seem to be a version '9')
 
+        return "android-" + String (ndkVersion);
+    }
+
+    String getActivityName() const
+    {
+        return getActivityClassPath().fromLastOccurrenceOf (".", false, false);
+    }
+
+    String getActivitySubClassName() const
+    {
+        String activityPath = getActivitySubClassPath();
+
+        return (activityPath.isEmpty()) ? getActivityName() : activityPath.fromLastOccurrenceOf (".", false, false);
+    }
+
+    String getActivityClassPackage() const
+    {
+        return getActivityClassPath().upToLastOccurrenceOf (".", false, false);
+    }
+
+    String getJNIActivityClassName() const
+    {
+        return getActivityClassPath().replaceCharacter ('.', '/');
+    }
+
+    static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
+    {
+        for (int i = modules.size(); --i >= 0;)
+            if (modules.getUnchecked(i)->getID() == "juce_core")
+                return modules.getUnchecked(i);
+
+        return nullptr;
+    }
+
+    String getCppFlags() const
+    {
+        String flags ("-fsigned-char -fexceptions -frtti");
+
+        if (! getNDKToolchainVersionString().startsWithIgnoreCase ("clang"))
+            flags << " -Wno-psabi";
+
+        return flags;
+    }
+
+    StringArray getPermissionsRequired() const
+    {
+        StringArray s;
+        s.addTokens (getOtherPermissions(), ", ", "");
+
+        if (getInternetNeeded())         s.add ("android.permission.INTERNET");
+        if (getAudioRecordNeeded())      s.add ("android.permission.RECORD_AUDIO");
+
+        return getCleanedStringArray (s);
+    }
+
+    template <typename PredicateT>
+    void findAllProjectItemsWithPredicate (const Project::Item& projectItem, Array<RelativePath>& results, const PredicateT& predicate) const
+    {
+        if (projectItem.isGroup())
         {
-            ScopedPointer<XmlElement> antBuildXml (createAntBuildXML());
-            writeXmlOrThrow (*antBuildXml, target.getChildFile ("build.xml"), "UTF-8", 100);
+            for (int i = 0; i < projectItem.getNumChildren(); ++i)
+                findAllProjectItemsWithPredicate (projectItem.getChild(i), results, predicate);
         }
+        else
+        {
+            if (predicate (projectItem))
+                results.add (RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder));
+        }
+    }
 
-        writeProjectPropertiesFile (target.getChildFile ("project.properties"));
-        writeLocalPropertiesFile (target.getChildFile ("local.properties"));
-        writeStringsFile (target.getChildFile ("res/values/strings.xml"));
+    void writeIcon (const File& file, const Image& im) const
+    {
+        if (im.isValid())
+        {
+            createDirectoryOrThrow (file.getParentDirectory());
 
+            PNGImageFormat png;
+            MemoryOutputStream mo;
+
+            if (! png.writeImageToStream (im, mo))
+                throw SaveError ("Can't generate Android icon file");
+
+            overwriteFileIfDifferentOrThrow (file, mo);
+        }
+    }
+
+    void writeIcons (const File& folder) const
+    {
         ScopedPointer<Drawable> bigIcon (getBigIcon());
         ScopedPointer<Drawable> smallIcon (getSmallIcon());
 
         if (bigIcon != nullptr && smallIcon != nullptr)
         {
             const int step = jmax (bigIcon->getWidth(), bigIcon->getHeight()) / 8;
-            writeIcon (target.getChildFile ("res/drawable-xhdpi/icon.png"), getBestIconForSize (step * 8, false));
-            writeIcon (target.getChildFile ("res/drawable-hdpi/icon.png"),  getBestIconForSize (step * 6, false));
-            writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"),  getBestIconForSize (step * 4, false));
-            writeIcon (target.getChildFile ("res/drawable-ldpi/icon.png"),  getBestIconForSize (step * 3, false));
+            writeIcon (folder.getChildFile ("drawable-xhdpi/icon.png"), getBestIconForSize (step * 8, false));
+            writeIcon (folder.getChildFile ("drawable-hdpi/icon.png"),  getBestIconForSize (step * 6, false));
+            writeIcon (folder.getChildFile ("drawable-mdpi/icon.png"),  getBestIconForSize (step * 4, false));
+            writeIcon (folder.getChildFile ("drawable-ldpi/icon.png"),  getBestIconForSize (step * 3, false));
         }
         else if (Drawable* icon = bigIcon != nullptr ? bigIcon : smallIcon)
         {
-            writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"), rescaleImageForIcon (*icon, icon->getWidth()));
+            writeIcon (folder.getChildFile ("drawable-mdpi/icon.png"), rescaleImageForIcon (*icon, icon->getWidth()));
         }
     }
 
-protected:
-    //==============================================================================
-    class AndroidBuildConfiguration  : public BuildConfiguration
+    template <typename BuildConfigType>
+    String getABIs (bool forDebug) const
     {
-    public:
-        AndroidBuildConfiguration (Project& p, const ValueTree& settings)
-            : BuildConfiguration (p, settings)
+        for (ConstConfigIterator config (*this); config.next();)
         {
-            if (getArchitectures().isEmpty())
-                getArchitecturesValue() = "armeabi armeabi-v7a";
+            const BuildConfigType& androidConfig = dynamic_cast<const BuildConfigType&> (*config);
+
+            if (config->isDebug() == forDebug)
+                return androidConfig.getArchitectures();
         }
 
-        Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
-        String getArchitectures() const         { return config [Ids::androidArchitectures]; }
-
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
-
-        void createConfigProperties (PropertyListBuilder& props) override
-        {
-            addGCCOptimisationProperty (props);
-
-            props.add (new TextPropertyComponent (getArchitecturesValue(), "Architectures", 256, false),
-                       "A list of the ARM architectures to build (for a fat binary).");
-        }
-    };
-
-    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
-    {
-        return new AndroidBuildConfiguration (project, v);
+        return String();
     }
 
-private:
     //==============================================================================
     XmlElement* createManifestXML() const
     {
@@ -334,119 +409,109 @@ private:
         return manifest;
     }
 
-    StringArray getPermissionsRequired() const
-    {
-        StringArray s;
-        s.addTokens (getOtherPermissions(), ", ", "");
-
-        if (getInternetNeeded())         s.add ("android.permission.INTERNET");
-        if (getAudioRecordNeeded())      s.add ("android.permission.RECORD_AUDIO");
-
-        return getCleanedStringArray (s);
-    }
-
     //==============================================================================
-    void findAllFilesToCompile (const Project::Item& projectItem, Array<RelativePath>& results) const
-    {
-        if (projectItem.isGroup())
-        {
-            for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                findAllFilesToCompile (projectItem.getChild(i), results);
-        }
-        else
-        {
-            if (projectItem.shouldBeCompiled())
-                results.add (RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder));
-        }
-    }
+    Value sdkPath, ndkPath;
 
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidProjectExporterBase)
+};
+
+
+//==============================================================================
+//==============================================================================
+class AndroidAntProjectExporter  : public AndroidProjectExporterBase
+{
+public:
     //==============================================================================
-    String getActivityName() const
-    {
-        return getActivityClassPath().fromLastOccurrenceOf (".", false, false);
-    }
+    static const char* getName()                { return "Android Project"; }
+    static const char* getValueTreeTypeName()   { return "ANDROID"; }
 
-    String getActivitySubClassName() const
+    static AndroidAntProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
-        String activityPath = getActivitySubClassPath();
-
-        return (activityPath.isEmpty()) ? getActivityName() : activityPath.fromLastOccurrenceOf (".", false, false);
-    }
-
-    String getActivityClassPackage() const
-    {
-        return getActivityClassPath().upToLastOccurrenceOf (".", false, false);
-    }
-
-    String getJNIActivityClassName() const
-    {
-        return getActivityClassPath().replaceCharacter ('.', '/');
-    }
-
-    static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
-    {
-        for (int i = modules.size(); --i >= 0;)
-            if (modules.getUnchecked(i)->getID() == "juce_core")
-                return modules.getUnchecked(i);
+        if (settings.hasType (getValueTreeTypeName()))
+            return new AndroidAntProjectExporter (project, settings);
 
         return nullptr;
     }
 
-    void copyActivityJavaFiles (const OwnedArray<LibraryModule>& modules) const
+    //==============================================================================
+    AndroidAntProjectExporter (Project& p, const ValueTree& t)
+        : AndroidProjectExporterBase (p, t)
     {
-        const String className (getActivityName());
-        const String package (getActivityClassPackage());
-        String path (package.replaceCharacter ('.', File::separator));
+        name = getName();
 
-        if (path.isEmpty() || className.isEmpty())
-            throw SaveError ("Invalid Android Activity class name: " + getActivityClassPath());
-
-        const File classFolder (getTargetFolder().getChildFile ("src")
-                                                 .getChildFile (path));
-        createDirectoryOrThrow (classFolder);
-
-        LibraryModule* const coreModule = getCoreModule (modules);
-
-        if (coreModule != nullptr)
-        {
-            File javaDestFile (classFolder.getChildFile (className + ".java"));
-
-            File javaSourceFile (coreModule->getFolder().getChildFile ("native")
-                                                        .getChildFile ("java")
-                                                        .getChildFile ("JuceAppActivity.java"));
-
-            MemoryOutputStream newFile;
-            newFile << javaSourceFile.loadFileAsString()
-                                     .replace ("JuceAppActivity", className)
-                                     .replace ("package com.juce;", "package " + package + ";");
-
-            overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
-        }
+        if (getTargetLocationString().isEmpty())
+            getTargetLocationValue() = getDefaultBuildsRootFolder() + "Android";
     }
 
-    String getABIs (bool forDebug) const
+    //==============================================================================
+    void createExporterProperties (PropertyListBuilder& props) override
     {
-        for (ConstConfigIterator config (*this); config.next();)
-        {
-            const AndroidBuildConfiguration& androidConfig = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+        AndroidProjectExporterBase::createExporterProperties (props);
+    }
 
-            if (config->isDebug() == forDebug)
-                return androidConfig.getArchitectures();
+    void create (const OwnedArray<LibraryModule>& modules) const override
+    {
+        AndroidProjectExporterBase::create (modules);
+
+        const File target (getTargetFolder());
+        const File jniFolder (target.getChildFile ("jni"));
+
+        createDirectoryOrThrow (jniFolder);
+        createDirectoryOrThrow (target.getChildFile ("res").getChildFile ("values"));
+        createDirectoryOrThrow (target.getChildFile ("libs"));
+        createDirectoryOrThrow (target.getChildFile ("bin"));
+
+        {
+            ScopedPointer<XmlElement> manifest (createManifestXML());
+            writeXmlOrThrow (*manifest, target.getChildFile ("AndroidManifest.xml"), "utf-8", 100, true);
         }
 
-        return String();
+        writeApplicationMk (jniFolder.getChildFile ("Application.mk"));
+        writeAndroidMk (jniFolder.getChildFile ("Android.mk"));
+
+        {
+            ScopedPointer<XmlElement> antBuildXml (createAntBuildXML());
+            writeXmlOrThrow (*antBuildXml, target.getChildFile ("build.xml"), "UTF-8", 100);
+        }
+
+        writeProjectPropertiesFile (target.getChildFile ("project.properties"));
+        writeLocalPropertiesFile (target.getChildFile ("local.properties"));
+        writeStringsFile (target.getChildFile ("res/values/strings.xml"));
+        writeIcons (target.getChildFile ("res"));
     }
 
-    String getCppFlags() const
+    //==============================================================================
+    class AndroidBuildConfiguration  : public BuildConfiguration
     {
-       String flags ("-fsigned-char -fexceptions -frtti");
+    public:
+        AndroidBuildConfiguration (Project& p, const ValueTree& settings)
+            : BuildConfiguration (p, settings)
+        {
+            if (getArchitectures().isEmpty())
+                getArchitecturesValue() = "armeabi armeabi-v7a";
+        }
 
-        if (! getNDKToolchainVersionString().startsWithIgnoreCase ("clang"))
-            flags << " -Wno-psabi";
+        Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
+        String getArchitectures() const         { return config [Ids::androidArchitectures]; }
 
-        return flags;
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
+
+        void createConfigProperties (PropertyListBuilder& props) override
+        {
+            addGCCOptimisationProperty (props);
+
+            props.add (new TextPropertyComponent (getArchitecturesValue(), "Architectures", 256, false),
+                       "A list of the ARM architectures to build (for a fat binary).");
+        }
+    };
+
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
+    {
+        return new AndroidBuildConfiguration (project, v);
     }
 
+private:
+    //==============================================================================
     String getToolchainVersion() const
     {
         String v (getNDKToolchainVersionString());
@@ -466,9 +531,9 @@ private:
            << "NDK_TOOLCHAIN_VERSION := " << getToolchainVersion() << newLine
            << newLine
            << "ifeq ($(NDK_DEBUG),1)" << newLine
-           << "    APP_ABI := " << getABIs (true) << newLine
+           << "    APP_ABI := " << getABIs<AndroidBuildConfiguration> (true) << newLine
            << "else" << newLine
-           << "    APP_ABI := " << getABIs (false) << newLine
+           << "    APP_ABI := " << getABIs<AndroidBuildConfiguration> (false) << newLine
            << "endif" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
@@ -478,8 +543,13 @@ private:
     {
         Array<RelativePath> files;
 
+        struct Predicate
+        {
+            bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
+        };
+
         for (int i = 0; i < getAllGroups().size(); ++i)
-            findAllFilesToCompile (getAllGroups().getReference(i), files);
+            findAllProjectItemsWithPredicate (getAllGroups().getReference(i), files, Predicate());
 
         MemoryOutputStream mo;
         writeAndroidMk (mo, files);
@@ -687,15 +757,6 @@ private:
         equals->setAttribute ("arg2", "debug");
     }
 
-    String getAppPlatform() const
-    {
-        int ndkVersion = getMinimumSDKVersionString().getIntValue();
-        if (ndkVersion == 9)
-            ndkVersion = 10; // (doesn't seem to be a version '9')
-
-        return "android-" + String (ndkVersion);
-    }
-
     void writeProjectPropertiesFile (const File& file) const
     {
         MemoryOutputStream mo;
@@ -725,22 +786,6 @@ private:
         overwriteFileIfDifferentOrThrow (file, mo);
     }
 
-    void writeIcon (const File& file, const Image& im) const
-    {
-        if (im.isValid())
-        {
-            createDirectoryOrThrow (file.getParentDirectory());
-
-            PNGImageFormat png;
-            MemoryOutputStream mo;
-
-            if (! png.writeImageToStream (im, mo))
-                throw SaveError ("Can't generate Android icon file");
-
-            overwriteFileIfDifferentOrThrow (file, mo);
-        }
-    }
-
     void writeStringsFile (const File& file) const
     {
         XmlElement strings ("resources");
@@ -751,19 +796,6 @@ private:
         writeXmlOrThrow (strings, file, "utf-8", 100);
     }
 
-    void initialiseDependencyPathValues()
-    {
-        sdkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath),
-                                                               Ids::androidSDKPath,
-                                                               TargetOS::getThisOS())));
-
-        ndkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath),
-                                                               Ids::androidNDKPath,
-                                                               TargetOS::getThisOS())));
-    }
-
     //==============================================================================
-    Value sdkPath, ndkPath;
-
-    JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
+    JUCE_DECLARE_NON_COPYABLE (AndroidAntProjectExporter)
 };

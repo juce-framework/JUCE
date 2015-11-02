@@ -27,12 +27,12 @@ class ExporterItem   : public ConfigTreeItemBase
 public:
     ExporterItem (Project& p, ProjectExporter* e, int index)
         : project (p), exporter (e), configListTree (exporter->getConfigurations()),
-          exporterIndex (index)
+          exporterIndex (index), icon (createIcon (exporter->getName()))
     {
         configListTree.addListener (this);
-        jassert (exporter != nullptr);
     }
 
+    int getItemHeight() const override        { return 22; }
     bool canBeSelected() const override       { return true; }
     bool mightContainSubItems() override      { return exporter->getNumConfigurations() > 0; }
     String getUniqueName() const override     { return "exporter_" + String (exporterIndex); }
@@ -40,8 +40,17 @@ public:
     String getDisplayName() const override    { return exporter->getName(); }
     void setName (const String&) override     {}
     bool isMissing() override                 { return false; }
-    Icon getIcon() const override             { return Icon (getIcons().exporter, getContrastingColour (0.5f)); }
+    Icon getIcon() const override             { return Icon(); }
     void showDocument() override              { showSettingsPage (new SettingsComp (exporter)); }
+
+    void paintIcon (Graphics& g, Rectangle<int> area) override
+    {
+        g.setColour (Colours::black);
+
+        g.drawImageWithin (icon, area.getX(), area.getY(),
+                           area.getWidth(), area.getHeight(),
+                           RectanglePlacement::centred, false);
+    }
 
     void deleteItem() override
     {
@@ -122,6 +131,22 @@ private:
     ScopedPointer<ProjectExporter> exporter;
     ValueTree configListTree;
     int exporterIndex;
+    Image icon;
+
+    static Image createIcon (const String& exporterName)
+    {
+        Array<ProjectExporter::ExporterTypeInfo> types (ProjectExporter::getExporterTypes());
+
+        for (int i = 0; i < types.size(); ++i)
+        {
+            const ProjectExporter::ExporterTypeInfo& type = types.getReference (i);
+
+            if (type.name == exporterName)
+                return type.getIcon();
+        }
+
+        return Image();
+    }
 
     //==============================================================================
     class SettingsComp  : public Component

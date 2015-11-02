@@ -249,6 +249,7 @@
       </Filter>
       <Filter Name="Project Saving">
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_AndroidStudio.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
@@ -535,6 +536,16 @@
           </File>
         </Filter>
         <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\background_logo.svg">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

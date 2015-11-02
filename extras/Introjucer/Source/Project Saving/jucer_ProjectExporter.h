@@ -44,6 +44,8 @@ public:
         String name;
         const void* iconData;
         int iconDataSize;
+
+        Image getIcon() const   { return ImageCache::getFromMemory (iconData, iconDataSize); }
     };
 
     static StringArray getExporterNames();

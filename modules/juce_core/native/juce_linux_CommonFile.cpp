@@ -65,7 +65,7 @@ static String getLinkedFile (const String& file)
     return String::fromUTF8 (buffer, jmax (0, numBytes));
 };
 
-bool File::isLink() const
+bool File::isSymbolicLink() const
 {
     return getLinkedFile (getFullPathName()).isNotEmpty();
 }

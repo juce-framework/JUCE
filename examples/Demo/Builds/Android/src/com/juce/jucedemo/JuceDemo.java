@@ -43,6 +43,13 @@ import android.text.ClipboardManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import java.lang.Runnable;
+import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.TimerTask;
 import java.io.*;
 import java.net.URL;
 import java.net.HttpURLConnection;
@@ -234,7 +241,7 @@ public class JuceDemo   extends Activity
 
             if (keepAliveTimer != null)
             {
-                keepAliveTimer->cancel();
+                keepAliveTimer.cancel();
                 keepAliveTimer = null;
             }
 
@@ -256,7 +263,14 @@ public class JuceDemo   extends Activity
                     public void run()
                     {
                         android.app.Instrumentation instrumentation = new android.app.Instrumentation();
-                        instrumentation.sendKeyDownUpSync (KeyEvent.KEYCODE_BREAK);
+
+                        try
+                        {
+                            instrumentation.sendKeyDownUpSync (KeyEvent.KEYCODE_BREAK);
+                        }
+                        catch (Exception e)
+                        {
+                        }
                     }
                 }, 2000, 2000);
             }

@@ -173,6 +173,12 @@ void StringArray::addArray (const StringArray& otherArray, int startIndex, int n
         strings.add (otherArray.strings.getReference (startIndex++));
 }
 
+void StringArray::mergeArray (const StringArray& otherArray, const bool ignoreCase)
+{
+    for (int i = 0; i < otherArray.size(); ++i)
+        addIfNotAlreadyThere (otherArray[i], ignoreCase);
+}
+
 void StringArray::set (const int index, const String& newString)
 {
     strings.set (index, newString);

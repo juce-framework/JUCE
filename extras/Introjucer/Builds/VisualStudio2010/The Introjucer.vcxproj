@@ -1135,6 +1135,7 @@
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidStudio.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
@@ -1541,6 +1542,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt"/>
+    <None Include="..\..\Source\BinaryData\background_logo.svg"/>
     <None Include="..\..\Source\BinaryData\background_tile.png"/>
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml"/>

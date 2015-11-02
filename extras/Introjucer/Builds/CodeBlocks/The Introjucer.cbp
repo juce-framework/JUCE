@@ -433,6 +433,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidStudio.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Project Saving/jucer_ProjectExport_CodeBlocks.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -730,6 +734,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/BinaryData/AudioPluginXCodeScript.txt">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/background_logo.svg">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
