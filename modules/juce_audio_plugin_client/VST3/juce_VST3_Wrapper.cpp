@@ -743,6 +743,14 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3EditController)
 };
 
+namespace
+{
+    template <typename FloatType> struct AudioBusPointerHelper {};
+    template <> struct AudioBusPointerHelper<float>  { static inline float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
+    template <> struct AudioBusPointerHelper<double> { static inline double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
+}
+
+
 //==============================================================================
 class JuceVST3Component : public Vst::IComponent,
                           public Vst::IAudioProcessor,
@@ -956,8 +964,8 @@ public:
                             ? (int) processSetup.maxSamplesPerBlock
                             : bufferSize;
 
-            channelList.clear();
-            channelList.insertMultiple (0, nullptr, jmax (JucePlugin_MaxNumInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
+            allocateChannelLists (channelListFloat);
+            allocateChannelLists (channelListDouble);
 
             preparePlugin (sampleRate, bufferSize);
         }
@@ -1440,7 +1448,9 @@ public:
 
     tresult PLUGIN_API canProcessSampleSize (Steinberg::int32 symbolicSampleSize) override
     {
-        return symbolicSampleSize == Vst::kSample32 ? kResultTrue : kResultFalse;
+        return (symbolicSampleSize == Vst::kSample32
+                 || (getPluginInstance().supportsDoublePrecisionProcessing()
+                       && symbolicSampleSize == Vst::kSample64)) ? kResultTrue : kResultFalse;
     }
 
     Steinberg::uint32 PLUGIN_API getLatencySamples() override
@@ -1455,6 +1465,10 @@ public:
 
         processSetup = newSetup;
         processContext.sampleRate = processSetup.sampleRate;
+
+        getPluginInstance().setProcessingPrecision (newSetup.symbolicSampleSize == Vst::kSample64
+                                                        ? AudioProcessor::doublePrecision
+                                                        : AudioProcessor::singlePrecision);
 
         preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock);
 
@@ -1532,7 +1546,11 @@ public:
 
     tresult PLUGIN_API process (Vst::ProcessData& data) override
     {
+
         if (pluginInstance == nullptr)
+            return kResultFalse;
+
+        if ((processSetup.symbolicSampleSize == Vst::kSample64) != pluginInstance->isUsingDoublePrecision())
             return kResultFalse;
 
         if (data.processContext != nullptr)
@@ -1551,60 +1569,19 @@ public:
         const int numMidiEventsComingIn = midiBuffer.getNumEvents();
        #endif
 
-        const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
-        const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
-
-        int totalChans = 0;
-
-        while (totalChans < numInputChans)
+        if (getHostType().isWavelab())
         {
-            channelList.set (totalChans, data.inputs[0].channelBuffers32[totalChans]);
-            ++totalChans;
+            const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
+            const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
+
+            if ((pluginInstance->getNumInputChannels() + pluginInstance->getNumOutputChannels()) > 0
+                && (numInputChans + numOutputChans) == 0)
+                return kResultFalse;
         }
 
-        while (totalChans < numOutputChans)
-        {
-            channelList.set (totalChans, data.outputs[0].channelBuffers32[totalChans]);
-            ++totalChans;
-        }
-
-        AudioSampleBuffer buffer;
-
-        if (totalChans != 0)
-            buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
-        else if (getHostType().isWavelab()
-                  && pluginInstance->getNumInputChannels() + pluginInstance->getNumOutputChannels() > 0)
-            return kResultFalse;
-
-        {
-            const ScopedLock sl (pluginInstance->getCallbackLock());
-
-            pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
-
-            if (data.inputParameterChanges != nullptr)
-                processParameterChanges (*data.inputParameterChanges);
-
-            if (pluginInstance->isSuspended())
-            {
-                buffer.clear();
-            }
-            else
-            {
-                if (isBypassed())
-                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
-                else
-                    pluginInstance->processBlock (buffer, midiBuffer);
-            }
-        }
-
-        for (int i = 0; i < numOutputChans; ++i)
-            FloatVectorOperations::copy (data.outputs[0].channelBuffers32[i], buffer.getReadPointer (i), (int) data.numSamples);
-
-        // clear extra busses..
-        if (data.outputs != nullptr)
-            for (int i = 1; i < data.numOutputs; ++i)
-                for (int f = 0; f < data.outputs[i].numChannels; ++f)
-                    FloatVectorOperations::clear (data.outputs[i].channelBuffers32[f], (int) data.numSamples);
+        if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data, channelListFloat);
+        else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data, channelListDouble);
+        else jassertfalse;
 
        #if JucePlugin_ProducesMidiOutput
         if (data.outputEvents != nullptr)
@@ -1648,13 +1625,60 @@ private:
 
     Vst::BusList audioInputs, audioOutputs, eventInputs, eventOutputs;
     MidiBuffer midiBuffer;
-    Array<float*> channelList;
+    Array<float*> channelListFloat;
+    Array<double*> channelListDouble;
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
     int vstBypassParameterId;
 
     static const char* kJucePrivateDataIdentifier;
+
+    //==============================================================================
+    template <typename FloatType>
+    void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
+    {
+        const int totalChans = prepareChannelLists (channelList,  data);
+
+        AudioBuffer<FloatType> buffer;
+
+        if (totalChans != 0)
+            buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
+
+        {
+            const ScopedLock sl (pluginInstance->getCallbackLock());
+
+            pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
+
+            if (data.inputParameterChanges != nullptr)
+                processParameterChanges (*data.inputParameterChanges);
+
+            if (pluginInstance->isSuspended())
+            {
+                buffer.clear();
+            }
+            else
+            {
+                if (isBypassed())
+                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
+                else
+                    pluginInstance->processBlock (buffer, midiBuffer);
+            }
+        }
+
+        if (data.outputs != nullptr)
+        {
+            for (int i = 0; i < data.numOutputs; ++i)
+                FloatVectorOperations::copy (getPointerForAudioBus<FloatType> (data.outputs[0])[i],
+                                             buffer.getReadPointer (i), (int) data.numSamples);
+        }
+
+        // clear extra busses..
+        if (data.outputs != nullptr)
+            for (int i = 1; i < data.numOutputs; ++i)
+                for (int f = 0; f < data.outputs[i].numChannels; ++f)
+                    FloatVectorOperations::clear (getPointerForAudioBus<FloatType> (data.outputs[i])[f], (int) data.numSamples);
+    }
 
     //==============================================================================
     void addBusTo (Vst::BusList& busList, Vst::Bus* newBus)
@@ -1678,6 +1702,50 @@ private:
         if (type == Vst::kEvent)  return dir == Vst::kInput ? &eventInputs : &eventOutputs;
 
         return nullptr;
+    }
+
+    //==============================================================================
+    template <typename FloatType>
+    void allocateChannelLists (Array<FloatType*>& channelList)
+    {
+        channelList.clear();
+        channelList.insertMultiple (0, nullptr, jmax (JucePlugin_MaxNumInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
+    }
+
+    template <typename FloatType>
+    static FloatType** getPointerForAudioBus (Vst::AudioBusBuffers& data) noexcept
+    {
+        return AudioBusPointerHelper<FloatType>::impl (data);
+    }
+
+    template <typename FloatType>
+    static int prepareChannelLists (Array<FloatType*>& channelList, Vst::ProcessData& data) noexcept
+    {
+        int totalChans = 0;
+        FloatType** inChannelBuffers =
+            data.inputs != nullptr ? getPointerForAudioBus<FloatType> (data.inputs[0]) : nullptr;
+
+        FloatType** outChannelBuffers =
+            data.outputs  != nullptr ? getPointerForAudioBus<FloatType> (data.outputs[0]) : nullptr;
+
+        const int numInputChans  = (data.inputs  != nullptr && inChannelBuffers != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
+        const int numOutputChans = (data.outputs != nullptr && outChannelBuffers != nullptr) ? (int) data.outputs[0].numChannels : 0;
+
+        for (int idx = 0; totalChans < numInputChans; ++idx)
+        {
+            channelList.set (totalChans, inChannelBuffers[idx]);
+            ++totalChans;
+        }
+
+        // note that the loop bounds are correct: as VST-3 is always process replacing
+        // we already know the output channel buffers of the first numInputChans channels
+        for (int idx = 0; totalChans < numOutputChans; ++idx)
+        {
+            channelList.set (totalChans, outChannelBuffers[idx]);
+            ++totalChans;
+        }
+
+        return totalChans;
     }
 
     //==============================================================================

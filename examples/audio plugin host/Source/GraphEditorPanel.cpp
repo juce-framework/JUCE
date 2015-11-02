@@ -1087,7 +1087,8 @@ private:
 //==============================================================================
 GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& formatManager,
                                                 AudioDeviceManager* deviceManager_)
-    : graph (formatManager), deviceManager (deviceManager_)
+    : graph (formatManager), deviceManager (deviceManager_),
+      graphPlayer (getAppProperties().getUserSettings()->getBoolValue ("doublePrecisionProcessing", false))
 {
     addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
 

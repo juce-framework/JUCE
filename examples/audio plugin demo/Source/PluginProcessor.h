@@ -28,12 +28,27 @@ public:
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override;
     void reset() override;
+
+    //==============================================================================
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (! isUsingDoublePrecision());
+        process (buffer, midiMessages, delayBufferFloat);
+    }
+
+    void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (isUsingDoublePrecision());
+        process (buffer, midiMessages, delayBufferDouble);
+    }
 
     //==============================================================================
     bool hasEditor() const override                  { return true; }
     AudioProcessorEditor* createEditor() override;
+
+    //==============================================================================
+    bool supportsDoublePrecisionProcessing() const override { return true; }
 
     //==============================================================================
     const String getName() const override            { return JucePlugin_Name; }
@@ -83,7 +98,11 @@ public:
 
 private:
     //==============================================================================
-    AudioSampleBuffer delayBuffer;
+    template <typename floatType>
+    void process (AudioBuffer<floatType>& buffer, MidiBuffer& midiMessages, AudioBuffer<floatType>& delayBuffer);
+
+    AudioBuffer<float> delayBufferFloat;
+    AudioBuffer<double> delayBufferDouble;
     int delayPosition;
 
     // the synth!

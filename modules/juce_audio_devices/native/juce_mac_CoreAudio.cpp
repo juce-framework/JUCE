@@ -233,7 +233,7 @@ public:
 
                 for (int i = 0; i < numStreams; ++i)
                 {
-                    const AudioBuffer& b = bufList->mBuffers[i];
+                    const ::AudioBuffer& b = bufList->mBuffers[i];
 
                     for (unsigned int j = 0; j < b.mNumberChannels; ++j)
                     {
@@ -1945,7 +1945,7 @@ private:
 
                 for (int i = 0; i < numStreams; ++i)
                 {
-                    const AudioBuffer& b = bufList->mBuffers[i];
+                    const ::AudioBuffer& b = bufList->mBuffers[i];
                     total += b.mNumberChannels;
                 }
             }

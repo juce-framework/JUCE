@@ -35,8 +35,8 @@ namespace juce
 #undef Factor
 
 #include "buffers/juce_AudioDataConverters.h"
-#include "buffers/juce_AudioSampleBuffer.h"
 #include "buffers/juce_FloatVectorOperations.h"
+#include "buffers/juce_AudioSampleBuffer.h"
 #include "effects/juce_Decibels.h"
 #include "effects/juce_IIRFilter.h"
 #include "effects/juce_LagrangeInterpolator.h"

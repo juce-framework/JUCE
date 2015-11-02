@@ -38,7 +38,8 @@ AudioProcessor::AudioProcessor()
       numOutputChannels (0),
       latencySamples (0),
       suspended (false),
-      nonRealtime (false)
+      nonRealtime (false),
+      processingPrecision (singlePrecision)
 {
 }
 
@@ -323,7 +324,33 @@ void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 }
 
 void AudioProcessor::reset() {}
-void AudioProcessor::processBlockBypassed (AudioSampleBuffer&, MidiBuffer&) {}
+void AudioProcessor::processBlockBypassed (AudioBuffer<float>&, MidiBuffer&) {}
+void AudioProcessor::processBlockBypassed (AudioBuffer<double>&, MidiBuffer&) {}
+
+void AudioProcessor::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
+{
+    ignoreUnused (buffer, midiMessages);
+
+    // If you hit this assertion then either the caller called the double
+    // precision version of processBlock on a processor which does not support it
+    // (i.e. supportsDoublePrecisionProcessing() returns false), or the implementation
+    // of the AudioProcessor forgot to override the double precision version of this method
+    jassertfalse;
+}
+
+void AudioProcessor::setProcessingPrecision (ProcessingPrecision precision) noexcept
+{
+    // If you hit this assertion then you're trying to use double precision
+    // processing on a processor which does not support it!
+    jassert (precision != doublePrecision || supportsDoublePrecisionProcessing());
+
+    processingPrecision = precision;
+}
+
+bool AudioProcessor::supportsDoublePrecisionProcessing() const
+{
+    return false;
+}
 
 //==============================================================================
 void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) noexcept

@@ -1701,7 +1701,7 @@ public:
         using namespace Vst;
 
         ProcessSetup setup;
-        setup.symbolicSampleSize    = kSample32;
+        setup.symbolicSampleSize    = isUsingDoublePrecision() ? kSample64 : kSample32;
         setup.maxSamplesPerBlock    = estimatedSamplesPerBlock;
         setup.sampleRate            = newSampleRate;
         setup.processMode           = isNonRealtime() ? kOffline : kRealtime;
@@ -1768,39 +1768,56 @@ public:
         JUCE_CATCH_ALL_ASSERT
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
+    bool supportsDoublePrecisionProcessing() const override
+    {
+        return (processor->canProcessSampleSize (Vst::kSample64) == kResultTrue);
+    }
+
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (! isUsingDoublePrecision());
+
+        if (isActive && processor != nullptr)
+            processAudio (buffer, midiMessages, Vst::kSample32);
+    }
+
+    void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (isUsingDoublePrecision());
+
+        if (isActive && processor != nullptr)
+            processAudio (buffer, midiMessages, Vst::kSample64);
+    }
+
+    template <typename FloatType>
+    void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
+                       Vst::SymbolicSampleSizes sampleSize)
     {
         using namespace Vst;
+        const int numSamples = buffer.getNumSamples();
 
-        if (isActive
-             && processor != nullptr
-             && processor->canProcessSampleSize (kSample32) == kResultTrue)
-        {
-            const int numSamples = buffer.getNumSamples();
+        ProcessData data;
+        data.processMode            = isNonRealtime() ? kOffline : kRealtime;
+        data.symbolicSampleSize     = sampleSize;
+        data.numInputs              = numInputAudioBusses;
+        data.numOutputs             = numOutputAudioBusses;
+        data.inputParameterChanges  = inputParameterChanges;
+        data.outputParameterChanges = outputParameterChanges;
+        data.numSamples             = (Steinberg::int32) numSamples;
 
-            ProcessData data;
-            data.processMode            = isNonRealtime() ? kOffline : kRealtime;
-            data.symbolicSampleSize     = kSample32;
-            data.numInputs              = numInputAudioBusses;
-            data.numOutputs             = numOutputAudioBusses;
-            data.inputParameterChanges  = inputParameterChanges;
-            data.outputParameterChanges = outputParameterChanges;
-            data.numSamples             = (Steinberg::int32) numSamples;
+        updateTimingInformation (data, getSampleRate());
 
-            updateTimingInformation (data, getSampleRate());
+        for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
+            buffer.clear (i, 0, numSamples);
 
-            for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
-                buffer.clear (i, 0, numSamples);
+        associateTo (data, buffer);
+        associateTo (data, midiMessages);
 
-            associateTo (data, buffer);
-            associateTo (data, midiMessages);
+        processor->process (data);
 
-            processor->process (data);
+        MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
 
-            MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
-
-            inputParameterChanges->clearAllQueues();
-        }
+        inputParameterChanges->clearAllQueues();
     }
 
     //==============================================================================
@@ -2150,7 +2167,7 @@ private:
     */
     int numInputAudioBusses, numOutputAudioBusses;
     Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements; // Caching to improve performance and to avoid possible non-thread-safe calls to getBusArrangements().
-    VST3BufferExchange::BusMap inputBusMap, outputBusMap;
+    VST3FloatAndDoubleBusMapComposite inputBusMap, outputBusMap;
     Array<Vst::AudioBusBuffers> inputBusses, outputBusses;
 
     //==============================================================================
@@ -2392,12 +2409,11 @@ private:
     }
 
     //==============================================================================
-    void associateTo (Vst::ProcessData& destination, AudioSampleBuffer& buffer)
+    template <typename FloatType>
+    void associateTo (Vst::ProcessData& destination, AudioBuffer<FloatType>& buffer)
     {
-        using namespace VST3BufferExchange;
-
-        mapBufferToBusses (inputBusses, inputBusMap, inputArrangements, buffer);
-        mapBufferToBusses (outputBusses, outputBusMap, outputArrangements, buffer);
+        VST3BufferExchange<FloatType>::mapBufferToBusses (inputBusses, inputBusMap.get<FloatType>(), inputArrangements, buffer);
+        VST3BufferExchange<FloatType>::mapBufferToBusses (outputBusses, outputBusMap.get<FloatType>(), outputArrangements, buffer);
 
         destination.inputs  = inputBusses.getRawDataPointer();
         destination.outputs = outputBusses.getRawDataPointer();

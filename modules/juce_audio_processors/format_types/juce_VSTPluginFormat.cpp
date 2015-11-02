@@ -715,8 +715,7 @@ public:
           name (mh->pluginName),
           wantsMidiMessages (false),
           initialised (false),
-          isPowerOn (false),
-          tempBuffer (1, 1)
+          isPowerOn (false)
     {
         try
         {
@@ -938,6 +937,16 @@ public:
             dispatch (effSetSampleRate, 0, 0, 0, (float) rate);
             dispatch (effSetBlockSize, 0, jmax (16, samplesPerBlockExpected), 0, 0);
 
+            if (supportsDoublePrecisionProcessing())
+            {
+                VstInt32 vstPrecision = isUsingDoublePrecision() ? kVstProcessPrecision64
+                                                                 : kVstProcessPrecision32;
+
+                // if you get an assertion here then your plug-in claims it supports double precision
+                // but returns an error when we try to change the precision
+                jassert (dispatch (effSetProcessPrecision, 0, (VstIntPtr) vstPrecision, 0, 0) > 0);
+            }
+
             tempBuffer.setSize (jmax (1, effect->numOutputs), samplesPerBlockExpected);
 
             if (! isPowerOn)
@@ -980,110 +989,22 @@ public:
         }
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
-        const int numSamples = buffer.getNumSamples();
+        jassert (! isUsingDoublePrecision());
+        processAudio (buffer, midiMessages);
+    }
 
-        if (initialised)
-        {
-            if (AudioPlayHead* const currentPlayHead = getPlayHead())
-            {
-                AudioPlayHead::CurrentPositionInfo position;
-                if (currentPlayHead->getCurrentPosition (position))
-                {
+    void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (isUsingDoublePrecision());
+        processAudio (buffer, midiMessages);
+    }
 
-                    vstHostTime.samplePos          = (double) position.timeInSamples;
-                    vstHostTime.tempo              = position.bpm;
-                    vstHostTime.timeSigNumerator   = position.timeSigNumerator;
-                    vstHostTime.timeSigDenominator = position.timeSigDenominator;
-                    vstHostTime.ppqPos             = position.ppqPosition;
-                    vstHostTime.barStartPos        = position.ppqPositionOfLastBarStart;
-                    vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid | kVstPpqPosValid | kVstBarsValid;
-
-                    VstInt32 newTransportFlags = 0;
-                    if (position.isPlaying)     newTransportFlags |= kVstTransportPlaying;
-                    if (position.isRecording)   newTransportFlags |= kVstTransportRecording;
-
-                    if (newTransportFlags != (vstHostTime.flags & (kVstTransportPlaying | kVstTransportRecording)))
-                        vstHostTime.flags = (vstHostTime.flags & ~(kVstTransportPlaying | kVstTransportRecording)) | newTransportFlags | kVstTransportChanged;
-                    else
-                        vstHostTime.flags &= ~kVstTransportChanged;
-
-                    switch (position.frameRate)
-                    {
-                    case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
-                    case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
-                    case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 29.97, position.timeInSeconds); break;
-                    case AudioPlayHead::fps30:       setHostTimeFrameRate (3, 30.0,  position.timeInSeconds); break;
-                    case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 29.97, position.timeInSeconds); break;
-                    case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 29.97, position.timeInSeconds); break;
-                    default: break;
-                    }
-
-                    if (position.isLooping)
-                    {
-                        vstHostTime.cycleStartPos = position.ppqLoopStart;
-                        vstHostTime.cycleEndPos   = position.ppqLoopEnd;
-                        vstHostTime.flags |= (kVstCyclePosValid | kVstTransportCycleActive);
-                    }
-                    else
-                    {
-                        vstHostTime.flags &= ~(kVstCyclePosValid | kVstTransportCycleActive);
-                    }
-                }
-            }
-
-            vstHostTime.nanoSeconds = getVSTHostTimeNanoseconds();
-
-            if (wantsMidiMessages)
-            {
-                midiEventsToSend.clear();
-                midiEventsToSend.ensureSize (1);
-
-                MidiBuffer::Iterator iter (midiMessages);
-                const uint8* midiData;
-                int numBytesOfMidiData, samplePosition;
-
-                while (iter.getNextEvent (midiData, numBytesOfMidiData, samplePosition))
-                {
-                    midiEventsToSend.addEvent (midiData, numBytesOfMidiData,
-                                               jlimit (0, numSamples - 1, samplePosition));
-                }
-
-                effect->dispatcher (effect, effProcessEvents, 0, 0, midiEventsToSend.events, 0);
-            }
-
-            _clearfp();
-
-            if ((effect->flags & effFlagsCanReplacing) != 0)
-            {
-                effect->processReplacing (effect, buffer.getArrayOfWritePointers(), buffer.getArrayOfWritePointers(), numSamples);
-            }
-            else
-            {
-                tempBuffer.setSize (effect->numOutputs, numSamples);
-                tempBuffer.clear();
-
-                effect->process (effect, buffer.getArrayOfWritePointers(), tempBuffer.getArrayOfWritePointers(), numSamples);
-
-                for (int i = effect->numOutputs; --i >= 0;)
-                    buffer.copyFrom (i, 0, tempBuffer.getReadPointer (i), numSamples);
-            }
-        }
-        else
-        {
-            // Not initialised, so just bypass..
-            for (int i = 0; i < getNumOutputChannels(); ++i)
-                buffer.clear (i, 0, buffer.getNumSamples());
-        }
-
-        {
-            // copy any incoming midi..
-            const ScopedLock sl (midiInLock);
-
-            midiMessages.swapWith (incomingMidi);
-            incomingMidi.clear();
-        }
+    bool supportsDoublePrecisionProcessing() const override
+    {
+        return ((effect->flags & effFlagsCanReplacing) != 0
+             && (effect->flags & effFlagsCanDoubleReplacing) != 0);
     }
 
     //==============================================================================
@@ -1673,11 +1594,131 @@ private:
     CriticalSection lock;
     bool wantsMidiMessages, initialised, isPowerOn;
     mutable StringArray programNames;
-    AudioSampleBuffer tempBuffer;
+    AudioBuffer<float> tempBuffer;
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
     VSTMidiEventList midiEventsToSend;
     VstTimeInfo vstHostTime;
+
+    //==============================================================================
+    template <typename FloatType>
+    void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages)
+    {
+        const int numSamples = buffer.getNumSamples();
+
+        if (initialised)
+        {
+            if (AudioPlayHead* const currentPlayHead = getPlayHead())
+            {
+                AudioPlayHead::CurrentPositionInfo position;
+
+                if (currentPlayHead->getCurrentPosition (position))
+                {
+
+                    vstHostTime.samplePos          = (double) position.timeInSamples;
+                    vstHostTime.tempo              = position.bpm;
+                    vstHostTime.timeSigNumerator   = position.timeSigNumerator;
+                    vstHostTime.timeSigDenominator = position.timeSigDenominator;
+                    vstHostTime.ppqPos             = position.ppqPosition;
+                    vstHostTime.barStartPos        = position.ppqPositionOfLastBarStart;
+                    vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid | kVstPpqPosValid | kVstBarsValid;
+
+                    VstInt32 newTransportFlags = 0;
+                    if (position.isPlaying)     newTransportFlags |= kVstTransportPlaying;
+                    if (position.isRecording)   newTransportFlags |= kVstTransportRecording;
+
+                    if (newTransportFlags != (vstHostTime.flags & (kVstTransportPlaying | kVstTransportRecording)))
+                        vstHostTime.flags = (vstHostTime.flags & ~(kVstTransportPlaying | kVstTransportRecording)) | newTransportFlags | kVstTransportChanged;
+                    else
+                        vstHostTime.flags &= ~kVstTransportChanged;
+
+                    switch (position.frameRate)
+                    {
+                        case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
+                        case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps30:       setHostTimeFrameRate (3, 30.0,  position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 29.97, position.timeInSeconds); break;
+                        default: break;
+                    }
+
+                    if (position.isLooping)
+                    {
+                        vstHostTime.cycleStartPos = position.ppqLoopStart;
+                        vstHostTime.cycleEndPos   = position.ppqLoopEnd;
+                        vstHostTime.flags |= (kVstCyclePosValid | kVstTransportCycleActive);
+                    }
+                    else
+                    {
+                        vstHostTime.flags &= ~(kVstCyclePosValid | kVstTransportCycleActive);
+                    }
+                }
+            }
+
+            vstHostTime.nanoSeconds = getVSTHostTimeNanoseconds();
+
+            if (wantsMidiMessages)
+            {
+                midiEventsToSend.clear();
+                midiEventsToSend.ensureSize (1);
+
+                MidiBuffer::Iterator iter (midiMessages);
+                const uint8* midiData;
+                int numBytesOfMidiData, samplePosition;
+
+                while (iter.getNextEvent (midiData, numBytesOfMidiData, samplePosition))
+                {
+                    midiEventsToSend.addEvent (midiData, numBytesOfMidiData,
+                                               jlimit (0, numSamples - 1, samplePosition));
+                }
+
+                effect->dispatcher (effect, effProcessEvents, 0, 0, midiEventsToSend.events, 0);
+            }
+
+            _clearfp();
+
+            invokeProcessFunction (buffer, numSamples);
+        }
+        else
+        {
+            // Not initialised, so just bypass..
+            for (int i = 0; i < getNumOutputChannels(); ++i)
+                buffer.clear (i, 0, buffer.getNumSamples());
+        }
+
+        {
+            // copy any incoming midi..
+            const ScopedLock sl (midiInLock);
+
+            midiMessages.swapWith (incomingMidi);
+            incomingMidi.clear();
+        }
+    }
+
+    //==============================================================================
+    inline void invokeProcessFunction (AudioBuffer<float>& buffer, VstInt32 sampleFrames)
+    {
+        if ((effect->flags & effFlagsCanReplacing) != 0)
+        {
+            effect->processReplacing (effect, buffer.getArrayOfWritePointers(), buffer.getArrayOfWritePointers(), sampleFrames);
+        }
+        else
+        {
+            tempBuffer.setSize (effect->numOutputs, sampleFrames);
+            tempBuffer.clear();
+
+            effect->process (effect, buffer.getArrayOfWritePointers(), tempBuffer.getArrayOfWritePointers(), sampleFrames);
+
+            for (int i = effect->numOutputs; --i >= 0;)
+                buffer.copyFrom (i, 0, tempBuffer.getReadPointer (i), sampleFrames);
+        }
+    }
+
+    inline void invokeProcessFunction (AudioBuffer<double>& buffer, VstInt32 sampleFrames)
+    {
+        effect->processDoubleReplacing (effect, buffer.getArrayOfWritePointers(), buffer.getArrayOfWritePointers(), sampleFrames);
+    }
 
     //==============================================================================
     void setHostTimeFrameRate (long frameRateIndex, double frameRate, double currentTime) noexcept
