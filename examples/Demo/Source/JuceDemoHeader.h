@@ -47,7 +47,7 @@ public:
     static Array<JuceDemoTypeBase*>& getDemoTypeList();
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (JuceDemoTypeBase);
+    JUCE_DECLARE_NON_COPYABLE (JuceDemoTypeBase)
 };
 
 //==============================================================================
@@ -64,7 +64,7 @@ public:
     Component* createComponent()    { return new DemoType(); }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE (JuceDemoType);
+    JUCE_DECLARE_NON_COPYABLE (JuceDemoType)
 };
 
 

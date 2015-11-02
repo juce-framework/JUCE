@@ -149,7 +149,7 @@ public:
     private:
         struct Pimpl;
         ScopedPointer<Pimpl> pimpl;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAttachment);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAttachment)
     };
 
     //==============================================================================
@@ -172,7 +172,7 @@ public:
     private:
         struct Pimpl;
         ScopedPointer<Pimpl> pimpl;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBoxAttachment);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBoxAttachment)
     };
 
     //==============================================================================
@@ -195,7 +195,7 @@ public:
     private:
         struct Pimpl;
         ScopedPointer<Pimpl> pimpl;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAttachment);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAttachment)
     };
 
 private:

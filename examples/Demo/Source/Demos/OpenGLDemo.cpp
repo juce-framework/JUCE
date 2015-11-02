@@ -513,6 +513,11 @@ struct OpenGLDemoClasses
            #endif
         }
 
+        void updateShader()
+        {
+            startTimer (10);
+        }
+
         Label statusLabel;
 
     private:
@@ -609,6 +614,9 @@ struct OpenGLDemoClasses
             // nothing to do in this case - we'll initialise our shaders + textures
             // on demand, during the render callback.
             freeAllContextObjects();
+
+            if (controlsOverlay != nullptr)
+                controlsOverlay->updateShader();
         }
 
         void openGLContextClosing() override

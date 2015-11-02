@@ -158,7 +158,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
         case hostApplicationPath:
         {
             const File f ("/proc/self/exe");
-            return f.isLink() ? f.getLinkedTarget() : juce_getExecutableFile();
+            return f.isSymbolicLink() ? f.getLinkedTarget() : juce_getExecutableFile();
         }
 
         default:
