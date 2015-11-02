@@ -134,6 +134,7 @@ namespace Ids
     DECLARE_ID (useStdCall);
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
+    DECLARE_ID (overwriteOnSave);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);

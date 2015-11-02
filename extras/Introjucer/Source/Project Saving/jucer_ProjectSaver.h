@@ -217,6 +217,7 @@ public:
     }
 
     Project& project;
+    SortedSet<File> filesCreated;
 
 private:
     const File projectFile, generatedCodeFolder;
@@ -226,7 +227,6 @@ private:
     CriticalSection errorLock;
 
     File appConfigFile;
-    SortedSet<File> filesCreated;
     bool hasBinaryData;
 
     // Recursively clears out any files in a folder that we didn't create, but avoids

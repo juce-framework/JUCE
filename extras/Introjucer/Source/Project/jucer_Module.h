@@ -127,6 +127,7 @@ public:
 
     bool isModuleEnabled (const String& moduleID) const;
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
+    Value shouldNotOverwriteModuleCodeOnSave (const String& moduleID);
     Value shouldCopyModuleFilesLocally (const String& moduleID) const;
     void removeModule (String moduleID);
     bool isAudioPluginModuleMissing() const;

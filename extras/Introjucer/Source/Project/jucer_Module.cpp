@@ -240,23 +240,34 @@ File LibraryModule::getModuleHeaderFile (const File& folder) const
 //==============================================================================
 void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)
 {
-    const File localModuleFolder (projectSaver.project.getLocalModuleFolder (getID()));
+    Project& project = projectSaver.project;
+    EnabledModuleList& modules = project.getModules();
+
+    const String id (getID());
+    const File localModuleFolder (project.getLocalModuleFolder (id));
     const File localHeader (getModuleHeaderFile (localModuleFolder));
+    const bool usingLocalCopyOfModules = modules.shouldCopyModuleFilesLocally (id).getValue();
 
-    localModuleFolder.createDirectory();
-
-    if (projectSaver.project.getModules().shouldCopyModuleFilesLocally (getID()).getValue())
+    if (usingLocalCopyOfModules
+          && modules.shouldNotOverwriteModuleCodeOnSave (id).getValue()
+          && localModuleFolder.getChildFile ("juce_module_info").exists())
     {
-        projectSaver.copyFolder (moduleInfo.getFolder(), localModuleFolder);
+        projectSaver.filesCreated.add (localModuleFolder);
     }
     else
     {
-        localModuleFolder.createDirectory();
-        createLocalHeaderWrapper (projectSaver, getModuleHeaderFile (moduleInfo.getFolder()), localHeader);
-    }
+        const File juceModuleFolder (moduleInfo.getFolder());
 
-    out << CodeHelpers::createIncludeStatement (localHeader, projectSaver.getGeneratedCodeFolder()
-                                                                         .getChildFile ("AppConfig.h")) << newLine;
+        localModuleFolder.createDirectory();
+
+        if (usingLocalCopyOfModules)
+            projectSaver.copyFolder (juceModuleFolder, localModuleFolder);
+        else
+            createLocalHeaderWrapper (projectSaver, getModuleHeaderFile (juceModuleFolder), localHeader);
+
+        out << CodeHelpers::createIncludeStatement (localHeader, projectSaver.getGeneratedCodeFolder()
+                                                                             .getChildFile ("AppConfig.h")) << newLine;
+    }
 }
 
 static void writeGuardedInclude (OutputStream& out, StringArray paths, StringArray guards)
@@ -642,6 +653,12 @@ Value EnabledModuleList::shouldShowAllModuleFilesInProject (const String& module
 {
     return state.getChildWithProperty (Ids::ID, moduleID)
                 .getPropertyAsValue (Ids::showAllCode, getUndoManager());
+}
+
+Value EnabledModuleList::shouldNotOverwriteModuleCodeOnSave (const String& moduleID)
+{
+    return state.getChildWithProperty (Ids::ID, moduleID)
+                .getPropertyAsValue (Ids::overwriteOnSave, getUndoManager());
 }
 
 File EnabledModuleList::findLocalModuleInfoFile (const String& moduleID, bool useExportersForOtherOSes)
