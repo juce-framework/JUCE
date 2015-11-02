@@ -1677,8 +1677,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v140", "v140_xp", nullptr };
-        const var toolsets[]              = { var(),       "v140", "v140_xp" };
+        static const char* toolsetNames[] = { "(default)", "v140", "v140_xp", "CTP_Nov2013", nullptr };
+        const var toolsets[]              = { var(),       "v140", "v140_xp", "CTP_Nov2013" };
 
         props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
                                                 StringArray (toolsetNames),
