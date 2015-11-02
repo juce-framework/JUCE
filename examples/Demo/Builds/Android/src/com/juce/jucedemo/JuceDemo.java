@@ -143,6 +143,7 @@ public class JuceDemo   extends Activity
     //==============================================================================
     private ViewHolder viewHolder;
     private boolean isScreenSaverEnabled;
+    private java.util.Timer keepAliveTimer;
 
     public final ComponentPeerView createNewView (boolean opaque, long host)
     {
@@ -230,14 +231,39 @@ public class JuceDemo   extends Activity
         if (isScreenSaverEnabled != enabled)
         {
             isScreenSaverEnabled = enabled;
+
+            if (keepAliveTimer != null)
+            {
+                keepAliveTimer->cancel();
+                keepAliveTimer = null;
+            }
+
             if (enabled)
+            {
                 getWindow().clearFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
             else
+            {
                 getWindow().addFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+                // If no user input is received after about 3 seconds, the OS will lower the
+                // task's priority, so this timer forces it to be kept active.
+                keepAliveTimer = new java.util.Timer();
+
+                keepAliveTimer.scheduleAtFixedRate (new TimerTask()
+                {
+                    @Override
+                    public void run()
+                    {
+                        android.app.Instrumentation instrumentation = new android.app.Instrumentation();
+                        instrumentation.sendKeyDownUpSync (KeyEvent.KEYCODE_BREAK);
+                    }
+                }, 2000, 2000);
+            }
         }
     }
 
-    public final boolean getScreenSaver ()
+    public final boolean getScreenSaver()
     {
         return isScreenSaverEnabled;
     }
