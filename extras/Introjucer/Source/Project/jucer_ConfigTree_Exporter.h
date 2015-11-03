@@ -66,13 +66,13 @@ public:
     void addSubItems() override
     {
         for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
-            addSubItem (new ConfigItem (config.config, exporter->getName()));
+            addSubItem (new ConfigItem (config.config, *exporter));
     }
 
     void showPopupMenu() override
     {
         PopupMenu menu;
-        menu.addItem (1, "Add a new configuration");
+        menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
         menu.addSeparator();
         menu.addItem (2, "Delete this exporter");
 
@@ -179,8 +179,8 @@ private:
 class ConfigItem   : public ConfigTreeItemBase
 {
 public:
-    ConfigItem (const ProjectExporter::BuildConfiguration::Ptr& conf, const String& expName)
-        : config (conf), exporterName (expName), configTree (config->config)
+    ConfigItem (const ProjectExporter::BuildConfiguration::Ptr& conf, ProjectExporter& e)
+        : config (conf), exporter (e), configTree (config->config)
     {
         jassert (config != nullptr);
         configTree.addListener (this);
@@ -195,7 +195,7 @@ public:
     void setName (const String&) override           {}
     Icon getIcon() const override                   { return Icon (getIcons().config, getContrastingColour (Colours::green, 0.5f)); }
 
-    void showDocument() override                    { showSettingsPage (new SettingsComp (config, exporterName)); }
+    void showDocument() override                    { showSettingsPage (new SettingsComp (config)); }
     void itemOpennessChanged (bool) override        {}
 
     void deleteItem() override
@@ -210,10 +210,12 @@ public:
 
     void showPopupMenu() override
     {
+        bool enabled = exporter.supportsUserDefinedConfigurations();
+
         PopupMenu menu;
-        menu.addItem (1, "Create a copy of this configuration");
+        menu.addItem (1, "Create a copy of this configuration", enabled);
         menu.addSeparator();
-        menu.addItem (2, "Delete this configuration");
+        menu.addItem (2, "Delete this configuration", enabled);
 
         launchPopupMenu (menu);
     }
@@ -226,14 +228,7 @@ public:
         }
         else if (resultCode == 1)
         {
-            for (Project::ExporterIterator exporter (config->project); exporter.next();)
-            {
-                if (config->config.isAChildOf (exporter->settings))
-                {
-                    exporter->addNewConfiguration (config);
-                    break;
-                }
-            }
+            exporter.addNewConfiguration (config);
         }
     }
 
@@ -246,21 +241,21 @@ public:
 
 private:
     ProjectExporter::BuildConfiguration::Ptr config;
-    String exporterName;
+    ProjectExporter& exporter;
     ValueTree configTree;
 
     //==============================================================================
     class SettingsComp  : public Component
     {
     public:
-        SettingsComp (ProjectExporter::BuildConfiguration* conf, const String& expName)
+        SettingsComp (ProjectExporter::BuildConfiguration* conf)
         {
             addAndMakeVisible (group);
 
             PropertyListBuilder props;
             conf->createPropertyEditors (props);
             group.setProperties (props);
-            group.setName (expName + " / " + conf->getName());
+            group.setName (conf->exporter.getName() + " / " + conf->getName());
             parentSizeChanged();
         }
 

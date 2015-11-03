@@ -44,6 +44,8 @@ bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* cons
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, deliverMessage, void, (JNIEnv* env, jobject activity, jlong value))
 {
+    setEnv (env);
+
     JUCE_TRY
     {
         MessageManager::MessageBase* const message = (MessageManager::MessageBase*) (pointer_sized_uint) value;

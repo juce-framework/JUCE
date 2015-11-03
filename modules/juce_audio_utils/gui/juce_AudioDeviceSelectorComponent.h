@@ -37,7 +37,9 @@
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
                                                 private ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
-                                                private ChangeListener
+                                                private ChangeListener,
+                                                private Button::Listener,
+                                                private Timer
 {
 public:
     //==============================================================================
@@ -84,8 +86,13 @@ public:
     //==============================================================================
     /** @internal */
     void resized() override;
+    /** @internal */
+    void timerCallback() override;
 
 private:
+    //==============================================================================
+    void buttonClicked (Button*) override;
+
     //==============================================================================
     ScopedPointer<ComboBox> deviceTypeDropDown;
     ScopedPointer<Label> deviceTypeDropDownLabel;
@@ -101,6 +108,7 @@ private:
     ScopedPointer<MidiInputSelectorComponentListBox> midiInputsList;
     ScopedPointer<ComboBox> midiOutputSelector;
     ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
+    ScopedPointer<TextButton> bluetoothButton;
 
     void comboBoxChanged (ComboBox*) override;
     void changeListenerCallback (ChangeBroadcaster*) override;

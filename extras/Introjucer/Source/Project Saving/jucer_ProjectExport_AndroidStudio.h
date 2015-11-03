@@ -133,8 +133,8 @@ protected:
     class AndroidStudioBuildConfiguration  : public BuildConfiguration
     {
     public:
-        AndroidStudioBuildConfiguration (Project& p, const ValueTree& settings)
-            : BuildConfiguration (p, settings)
+        AndroidStudioBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
+            : BuildConfiguration (p, settings, e)
         {
             if (getArchitectures().isEmpty())
                 getArchitecturesValue() = "armeabi armeabi-v7a";
@@ -156,7 +156,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new AndroidStudioBuildConfiguration (project, v);
+        return new AndroidStudioBuildConfiguration (project, v, *this);
     }
 
 private:

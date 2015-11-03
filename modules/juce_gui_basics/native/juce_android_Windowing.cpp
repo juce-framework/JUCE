@@ -33,6 +33,8 @@ namespace juce
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* env, jobject activity,
                                                                       jstring appFile, jstring appDataDir))
 {
+    setEnv (env);
+
     android.initialise (env, activity, appFile, appDataDir);
 
     DBG (SystemStats::getJUCEVersion());
@@ -56,18 +58,24 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject activity))
 {
+    setEnv (env);
+
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->suspended();
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* env, jobject activity))
 {
+    setEnv (env);
+
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env, jobject activity))
 {
+    setEnv (env);
+
     JUCEApplicationBase::appWillTerminateByForce();
 
     android.shutdown (env);
@@ -98,7 +106,6 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
  METHOD (invalidate,    "invalidate",       "(IIII)V") \
  METHOD (containsPoint, "containsPoint",    "(II)Z") \
  METHOD (showKeyboard,  "showKeyboard",     "(Ljava/lang/String;)V") \
- METHOD (createGLView,  "createGLView",     "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$OpenGLView;") \
 
 DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
@@ -582,6 +589,7 @@ int64 AndroidComponentPeer::touchesDown = 0;
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
   JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024ComponentPeerView), javaMethodName, returnType, params) \
   { \
+      setEnv (env); \
       if (AndroidComponentPeer* peer = (AndroidComponentPeer*) (pointer_sized_uint) host) \
           peer->juceMethodInvocation; \
   }
@@ -599,12 +607,6 @@ JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject view, jlong ho
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 {
     return new AndroidComponentPeer (*this, styleFlags);
-}
-
-jobject createOpenGLView (ComponentPeer* peer)
-{
-    jobject parentView = static_cast<jobject> (peer->getNativeHandle());
-    return getEnv()->CallObjectMethod (parentView, ComponentPeerView.createGLView);
 }
 
 //==============================================================================
@@ -700,6 +702,8 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEnv* env, jobject activity,
                                                                            jlong callbackAsLong, jint result))
 {
+    setEnv (env);
+
     if (ModalComponentManager::Callback* callback = (ModalComponentManager::Callback*) callbackAsLong)
     {
         callback->modalStateFinished (result);
@@ -748,6 +752,8 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
                                                                           jint screenWidth, jint screenHeight,
                                                                           jint dpi))
 {
+    setEnv (env);
+
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
     android.dpi = dpi;

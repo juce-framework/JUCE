@@ -22,18 +22,53 @@
   ==============================================================================
 */
 
-class OpenGLContext::CachedImage  : public CachedComponentImage
-                                 #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
-                                  , private Thread
-                                 #endif
+#if JUCE_IOS
+struct AppInactivityCallback // NB: this is a duplicate of an internal declaration in juce_core
+{
+    virtual ~AppInactivityCallback() {}
+    virtual void appBecomingInactive() = 0;
+};
+
+extern Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+
+// On iOS, all GL calls will crash when the app is running in the background, so
+// this prevents them from happening (which some messy locking behaviour)
+struct iOSBackgroundProcessCheck  : public AppInactivityCallback
+{
+    iOSBackgroundProcessCheck()     { isBackgroundProcess(); appBecomingInactiveCallbacks.add (this); }
+    ~iOSBackgroundProcessCheck()    { appBecomingInactiveCallbacks.removeAllInstancesOf (this); }
+
+    bool isBackgroundProcess()
+    {
+        const bool b = Process::isForegroundProcess();
+        isForeground.set (b ? 1 : 0);
+        return ! b;
+    }
+
+    void appBecomingInactive() override
+    {
+        int counter = 2000;
+
+        while (--counter > 0 && isForeground.get() != 0)
+            Thread::sleep (1);
+    }
+
+private:
+    Atomic<int> isForeground;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSBackgroundProcessCheck)
+};
+
+#endif
+
+//==============================================================================
+class OpenGLContext::CachedImage  : public CachedComponentImage,
+                                    private ThreadPoolJob
 {
 public:
     CachedImage (OpenGLContext& c, Component& comp,
                  const OpenGLPixelFormat& pixFormat, void* contextToShare)
-        :
-         #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
-          Thread ("OpenGL Rendering"),
-         #endif
+        : ThreadPoolJob ("OpenGL Rendering"),
           context (c), component (comp),
           scale (1.0),
          #if JUCE_OPENGL3
@@ -61,20 +96,41 @@ public:
         stop();
     }
 
+    //==============================================================================
     void start()
     {
-       #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
         if (nativeContext != nullptr)
-            startThread (6);
-       #endif
+        {
+            renderThread = new ThreadPool (1);
+            resume();
+        }
     }
 
     void stop()
     {
-       #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
-        stopThread (10000);
-       #endif
+        if (renderThread != nullptr)
+        {
+            pause();
+            renderThread = nullptr;
+        }
+
         hasInitialised = false;
+    }
+
+    //==============================================================================
+    void pause()
+    {
+        if (renderThread != nullptr)
+        {
+            repaintEvent.signal();
+            renderThread->removeJob (this, true, -1);
+        }
+    }
+
+    void resume()
+    {
+        if (renderThread != nullptr)
+            renderThread->addJob (this, false);
     }
 
     //==============================================================================
@@ -99,13 +155,7 @@ public:
     void triggerRepaint()
     {
         needsUpdate = 1;
-
-       #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
-        notify();
-       #else
-        if (nativeContext != nullptr)
-            nativeContext->triggerRepaint();
-       #endif
+        repaintEvent.signal();
     }
 
     //==============================================================================
@@ -156,19 +206,9 @@ public:
         {
             // This avoids hogging the message thread when doing intensive rendering.
             if (lastMMLockReleaseTime + 1 >= Time::getMillisecondCounter())
-            {
-               #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
-                wait (2);
-               #else
                 Thread::sleep (2);
-               #endif
-            }
 
-           #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
             mmLock = new MessageManagerLock (this);  // need to acquire this before locking the context.
-           #else
-            mmLock = new MessageManagerLock (Thread::getCurrentThread());
-           #endif
             if (! mmLock->lockWasGained())
                 return false;
 
@@ -359,43 +399,44 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD
-    void run() override
+    JobStatus runJob() override
     {
         {
             // Allow the message thread to finish setting-up the context before using it..
             MessageManagerLock mml (this);
             if (! mml.lockWasGained())
-                return;
+                return ThreadPoolJob::jobHasFinished;
         }
 
         initialiseOnThread();
-
         hasInitialised = true;
 
-        while (! threadShouldExit())
+        while (! shouldExit())
         {
            #if JUCE_IOS
-            // NB: on iOS, all GL calls will crash when the app is running
-            // in the background..
-            if (! Process::isForegroundProcess())
+            if (backgroundProcessCheck.isBackgroundProcess())
             {
-                wait (500);
+                repaintEvent.wait (300);
                 continue;
             }
            #endif
 
+            if (shouldExit())
+                break;
+
             if (! renderFrame())
-                wait (5); // failed to render, so avoid a tight fail-loop.
-            else if (! context.continuousRepaint)
-                wait (-1);
+                repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
+            else if (! context.continuousRepaint && ! shouldExit())
+                repaintEvent.wait (-1);
         }
 
+        hasInitialised = false;
         context.makeActive();
         shutdownOnThread();
         OpenGLContext::deactivateCurrentContext();
+
+        return ThreadPoolJob::jobHasFinished;
     }
-   #endif
 
     void initialiseOnThread()
     {
@@ -406,6 +447,12 @@ public:
 
         context.makeActive();
         nativeContext->initialiseOnRenderThread (context);
+
+       #if JUCE_ANDROID
+        // On android the context may be created in initialiseOnRenderThread
+        // and we therefore need to call makeActive again
+        context.makeActive();
+       #endif
 
        #if JUCE_OPENGL3
         if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
@@ -467,10 +514,16 @@ public:
     StringArray associatedObjectNames;
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
 
-    WaitableEvent canPaintNowFlag, finishedPaintingFlag;
+    WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent;
     bool shadersAvailable, hasInitialised;
     Atomic<int> needsUpdate;
     uint32 lastMMLockReleaseTime;
+
+    ScopedPointer<ThreadPool> renderThread;
+
+   #if JUCE_IOS
+    iOSBackgroundProcessCheck backgroundProcessCheck;
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
 };
@@ -967,32 +1020,33 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     JUCE_CHECK_OPENGL_ERROR
 }
 
-//==============================================================================
 #if JUCE_ANDROID
-void OpenGLContext::NativeContext::contextCreatedCallback()
+EGLDisplay OpenGLContext::NativeContext::display = EGL_NO_DISPLAY;
+EGLDisplay OpenGLContext::NativeContext::config;
+
+void OpenGLContext::NativeContext::surfaceCreated (jobject holder)
 {
-    isInsideGLCallback = true;
+    ignoreUnused (holder);
 
-    if (CachedImage* const c = CachedImage::get (component))
-        c->initialiseOnThread();
-    else
-        jassertfalse;
+    if (juceContext != nullptr)
+    {
+        if (OpenGLContext::CachedImage* cachedImage = juceContext->getCachedImage())
+            cachedImage->resume();
 
-    isInsideGLCallback = false;
+        juceContext->triggerRepaint();
+    }
 }
 
-void OpenGLContext::NativeContext::renderCallback()
+void OpenGLContext::NativeContext::surfaceDestroyed (jobject holder)
 {
-    isInsideGLCallback = true;
+    ignoreUnused (holder);
+    // unlike the name suggets this will be called just before the
+    // surface is destroyed. We need to pause the render thread.
 
-    if (CachedImage* const c = CachedImage::get (component))
+    if (juceContext != nullptr)
     {
-        if (c->context.continuousRepaint)
-            c->context.triggerRepaint();
-
-        c->renderFrame();
+        if (OpenGLContext::CachedImage* cachedImage = juceContext->getCachedImage())
+            cachedImage->pause();
     }
-
-    isInsideGLCallback = false;
 }
 #endif

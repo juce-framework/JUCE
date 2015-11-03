@@ -166,8 +166,8 @@ protected:
     class XcodeBuildConfiguration  : public BuildConfiguration
     {
     public:
-        XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS)
-            : BuildConfiguration (p, t), iOS (isIOS)
+        XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
+            : BuildConfiguration (p, t, e), iOS (isIOS)
         {
             if (iOS)
             {
@@ -296,7 +296,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new XcodeBuildConfiguration (project, v, iOS);
+        return new XcodeBuildConfiguration (project, v, iOS, *this);
     }
 
 private:
@@ -1121,7 +1121,7 @@ private:
         return "file" + file.getFileExtension();
     }
 
-    String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources, bool inhibitWarnings) const
+    String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources, bool shouldBeAddedToXcodeResources, bool inhibitWarnings) const
     {
         const String pathAsString (path.toUnixStyle());
         const String refID (addFileReference (path.toUnixStyle()));
@@ -1133,11 +1133,11 @@ private:
             else
                 addBuildFile (pathAsString, refID, true, inhibitWarnings);
         }
-        else if (! shouldBeAddedToBinaryResources)
+        else if (! shouldBeAddedToBinaryResources || shouldBeAddedToXcodeResources)
         {
             const String fileType (getFileType (path));
 
-            if (fileType.startsWith ("image.") || fileType.startsWith ("text.") || fileType.startsWith ("file."))
+            if (shouldBeAddedToXcodeResources || fileType.startsWith ("image.") || fileType.startsWith ("text.") || fileType.startsWith ("file."))
             {
                 resourceIDs.add (addBuildFile (pathAsString, refID, false, false));
                 resourceFileRefs.add (refID);
@@ -1175,6 +1175,7 @@ private:
 
             return addFile (path, projectItem.shouldBeCompiled(),
                             projectItem.shouldBeAddedToBinaryResources(),
+                            projectItem.shouldBeAddedToXcodeResources(),
                             projectItem.shouldInhibitWarnings());
         }
 

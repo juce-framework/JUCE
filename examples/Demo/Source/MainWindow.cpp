@@ -520,6 +520,10 @@ MainAppWindow::MainAppWindow()
     taskbarIcon = new DemoTaskbarComponent();
    #endif
 
+   #if JUCE_ANDROID
+    setOpenGLRenderingEngine();
+   #endif
+
     triggerAsyncUpdate();
 }
 

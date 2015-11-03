@@ -167,8 +167,13 @@ public:
         bool shouldBeAddedToTargetProject() const;
         bool shouldBeCompiled() const;
         Value getShouldCompileValue();
+
         bool shouldBeAddedToBinaryResources() const;
-        Value getShouldAddToResourceValue();
+        Value getShouldAddToBinaryResourcesValue();
+
+        bool shouldBeAddedToXcodeResources() const;
+        Value getShouldAddToXcodeResourcesValue();
+
         Value getShouldInhibitWarningsValue();
         bool shouldInhibitWarnings() const;
         Value getShouldUseStdCallValue();

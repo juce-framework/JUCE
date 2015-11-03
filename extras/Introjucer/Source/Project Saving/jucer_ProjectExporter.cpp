@@ -635,8 +635,8 @@ bool ProjectExporter::ConstConfigIterator::next()
 }
 
 //==============================================================================
-ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const ValueTree& configNode)
-   : config (configNode), project (p)
+ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const ValueTree& configNode, const ProjectExporter& e)
+   : config (configNode), project (p), exporter (e)
 {
 }
 
@@ -686,13 +686,12 @@ void ProjectExporter::BuildConfiguration::addGCCOptimisationProperty (PropertyLi
 
 void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getNameValue(), "Name", 96, false),
-               "The name of this configuration.");
+    if (exporter.supportsUserDefinedConfigurations())
+        props.add (new TextPropertyComponent (getNameValue(), "Name", 96, false),
+                   "The name of this configuration.");
 
     props.add (new BooleanPropertyComponent (isDebugValue(), "Debug mode", "Debugging enabled"),
                "If enabled, this means that the configuration should be built with debug synbols.");
-
-//    addGCCOptimisationProperty (props);
 
     props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false),
                "The filename to use for the destination binary executable file. If you don't add a suffix to this name, "

@@ -97,6 +97,9 @@ public:
         props.add (new BooleanPropertyComponent (getAudioRecordNeededValue(), "Audio Input Required", "Specify audio record permission in the manifest"),
                    "If enabled, this will set the android.permission.RECORD_AUDIO flag in the manifest.");
 
+        props.add (new BooleanPropertyComponent (getBluetoothPermissionsValue(), "Bluetooth permissions Required", "Specify bluetooth permission (required for Bluetooth MIDI)"),
+                   "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
+
         props.add (new TextPropertyComponent (getOtherPermissionsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
@@ -145,6 +148,8 @@ public:
     bool   getInternetNeeded() const                { return settings [Ids::androidInternetNeeded]; }
     Value  getAudioRecordNeededValue()              { return getSetting (Ids::androidMicNeeded); }
     bool   getAudioRecordNeeded() const             { return settings [Ids::androidMicNeeded]; }
+    Value  getBluetoothPermissionsValue()           { return getSetting(Ids::androidBluetoothNeeded); }
+    bool   getBluetoothPermissions() const          { return settings[Ids::androidBluetoothNeeded]; }
     Value  getMinimumSDKVersionValue()              { return getSetting (Ids::androidMinimumSDK); }
     String getMinimumSDKVersionString() const       { return settings [Ids::androidMinimumSDK]; }
     Value  getOtherPermissionsValue()               { return getSetting (Ids::androidOtherPermissions); }
@@ -207,14 +212,47 @@ public:
         {
             File javaDestFile (targetFolder.getChildFile (className + ".java"));
 
-            File javaSourceFile (coreModule->getFolder().getChildFile ("native")
-                                                        .getChildFile ("java")
-                                                        .getChildFile ("JuceAppActivity.java"));
+            File javaSourceFolder (coreModule->getFolder().getChildFile ("native")
+                                                          .getChildFile ("java"));
+
+            String juceMidiCode, juceMidiImports;
+
+            juceMidiImports << newLine;
+
+            if (getMinimumSDKVersionString().getIntValue() >= 23)
+            {
+                File javaAndroidMidi (javaSourceFolder.getChildFile ("AndroidMidi.java"));
+
+                juceMidiImports << "import android.media.midi.*;" << newLine
+                                << "import android.bluetooth.*;" << newLine
+                                << "import android.bluetooth.le.*;" << newLine;
+
+                juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
+            }
+            else
+            {
+                juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
+                                   .loadFileAsString()
+                                   .replace ("JuceAppActivity", className);
+            }
+
+            File javaSourceFile (javaSourceFolder.getChildFile ("JuceAppActivity.java"));
+            StringArray javaSourceLines (StringArray::fromLines (javaSourceFile.loadFileAsString()));
 
             MemoryOutputStream newFile;
-            newFile << javaSourceFile.loadFileAsString()
-                                     .replace ("JuceAppActivity", className)
-                                     .replace ("package com.juce;", "package " + package + ";");
+
+            for (int i = 0; i < javaSourceLines.size(); ++i)
+            {
+                const String& line = javaSourceLines[i];
+
+                if (line.contains ("$$JuceAndroidMidiImports$$"))
+                    newFile << juceMidiImports;
+                else if (line.contains ("$$JuceAndroidMidiCode$$"))
+                    newFile << juceMidiCode;
+                else
+                    newFile << line.replace ("JuceAppActivity", className)
+                                   .replace ("package com.juce;", "package " + package + ";") << newLine;
+            }
 
             overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
         }
@@ -275,8 +313,17 @@ public:
         StringArray s;
         s.addTokens (getOtherPermissions(), ", ", "");
 
-        if (getInternetNeeded())         s.add ("android.permission.INTERNET");
-        if (getAudioRecordNeeded())      s.add ("android.permission.RECORD_AUDIO");
+        if (getInternetNeeded())
+            s.add ("android.permission.INTERNET");
+
+        if (getAudioRecordNeeded())
+            s.add ("android.permission.RECORD_AUDIO");
+
+        if (getBluetoothPermissions())
+        {
+            s.add ("android.permission.BLUETOOTH");
+            s.add ("android.permission.BLUETOOTH_ADMIN");
+        }
 
         return getCleanedStringArray (s);
     }
@@ -422,7 +469,7 @@ class AndroidAntProjectExporter  : public AndroidProjectExporterBase
 {
 public:
     //==============================================================================
-    static const char* getName()                { return "Android Project"; }
+    static const char* getName()                { return "Android Ant Project"; }
     static const char* getValueTreeTypeName()   { return "ANDROID"; }
 
     static AndroidAntProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -484,11 +531,16 @@ public:
     class AndroidBuildConfiguration  : public BuildConfiguration
     {
     public:
-        AndroidBuildConfiguration (Project& p, const ValueTree& settings)
-            : BuildConfiguration (p, settings)
+        AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
+            : BuildConfiguration (p, settings, e)
         {
             if (getArchitectures().isEmpty())
-                getArchitecturesValue() = "armeabi armeabi-v7a";
+            {
+                if (isDebug())
+                    getArchitecturesValue() = "armeabi x86";
+                else
+                    getArchitecturesValue() = "armeabi armeabi-v7a x86";
+            }
         }
 
         Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
@@ -507,7 +559,7 @@ public:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new AndroidBuildConfiguration (project, v);
+        return new AndroidBuildConfiguration (project, v, *this);
     }
 
 private:
@@ -545,7 +597,7 @@ private:
 
         struct Predicate
         {
-            bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
+            bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeCompiled(); }
         };
 
         for (int i = 0; i < getAllGroups().size(); ++i)
@@ -629,7 +681,7 @@ private:
     String getLDLIBS (const AndroidBuildConfiguration& config) const
     {
         return "  LOCAL_LDLIBS :=" + config.getGCCLibraryPathFlags()
-                + " -llog -lGLESv2 " + getExternalLibraryFlags (config)
+                + " -llog -lGLESv2 -landroid -lEGL" + getExternalLibraryFlags (config)
                 + " " + replacePreprocessorTokens (config, getExtraLinkerFlagsString());
     }
 
