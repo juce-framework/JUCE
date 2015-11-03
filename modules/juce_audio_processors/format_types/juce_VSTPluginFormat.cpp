@@ -944,7 +944,9 @@ public:
 
                 // if you get an assertion here then your plug-in claims it supports double precision
                 // but returns an error when we try to change the precision
-                jassert (dispatch (effSetProcessPrecision, 0, (VstIntPtr) vstPrecision, 0, 0) > 0);
+                VstIntPtr err = dispatch (effSetProcessPrecision, 0, (VstIntPtr) vstPrecision, 0, 0);
+				jassert (err > 0);
+				ignoreUnused (err);
             }
 
             tempBuffer.setSize (jmax (1, effect->numOutputs), samplesPerBlockExpected);
