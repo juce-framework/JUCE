@@ -250,6 +250,7 @@ void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
 template <typename FloatType>
 void JuceDemoPluginAudioProcessor::applyGain (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer)
 {
+	ignoreUnused (delayBuffer);
     const float gainLevel = *gainParam;
 
     for (int channel = 0; channel < getNumInputChannels(); ++channel)
@@ -272,7 +273,7 @@ void JuceDemoPluginAudioProcessor::applyDelay (AudioBuffer<FloatType>& buffer, A
 
         for (int i = 0; i < numSamples; ++i)
         {
-            const float in = channelData[i];
+            const FloatType in = channelData[i];
             channelData[i] += delayData[delayPos];
             delayData[delayPos] = (delayData[delayPos] + in) * delayLevel;
 
