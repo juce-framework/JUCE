@@ -21,7 +21,7 @@
       <equals arg1="${ant.project.invoked-targets}" arg2="debug"/>
     </condition>
     <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
-      <arg value="--jobs=2"/>
+      <arg value="--jobs=4"/>
       <arg value="CONFIG=${makefileConfig}"/>
       <arg value="${ndkDebugValue}"/>
       <arg value="APP_ABI=${app_abis}"/>

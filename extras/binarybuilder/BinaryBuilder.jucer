@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceLinkage="amalg_template" juceFolder="../../../juce" jucerVersion="3.2.0"
+              juceLinkage="amalg_template" juceFolder="../../../juce" jucerVersion="4.0.1"
               version="1.0.0" buildVST="1" buildRTAS="0" buildAU="1" pluginName="BinaryBuilder"
               pluginDesc="BinaryBuilder" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
               pluginCode="Abcd" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"

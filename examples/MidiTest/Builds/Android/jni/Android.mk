@@ -27,14 +27,14 @@ LOCAL_SRC_FILES := \
 
 ifeq ($(NDK_DEBUG),1)
   LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_yourcompany_miditest_MidiTest" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/yourcompany/miditest/MidiTest\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=1.0.0" -D "JUCE_APP_VERSION_HEX=0x10000"
-  LOCAL_LDLIBS := -llog -lGLESv2
+  LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
   LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_yourcompany_miditest_MidiTest" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/yourcompany/miditest/MidiTest\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=1.0.0" -D "JUCE_APP_VERSION_HEX=0x10000"
-  LOCAL_LDLIBS := -llog -lGLESv2
+  LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
 else
   LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_yourcompany_miditest_MidiTest" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/yourcompany/miditest/MidiTest\" -D "NDEBUG=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=1.0.0" -D "JUCE_APP_VERSION_HEX=0x10000"
-  LOCAL_LDLIBS := -llog -lGLESv2
+  LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
   LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_yourcompany_miditest_MidiTest" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/yourcompany/miditest/MidiTest\" -D "NDEBUG=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=1.0.0" -D "JUCE_APP_VERSION_HEX=0x10000"
-  LOCAL_LDLIBS := -llog -lGLESv2
+  LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
 endif
 
 include $(BUILD_SHARED_LIBRARY)

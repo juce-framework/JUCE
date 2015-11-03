@@ -134,9 +134,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -366,6 +363,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.cpp">
@@ -1308,6 +1308,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnail.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailBase.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_BluetoothMidiDevicePairingDialogue.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.h"/>

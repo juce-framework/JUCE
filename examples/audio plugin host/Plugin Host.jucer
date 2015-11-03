@@ -10,7 +10,7 @@
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="JuceProjectAU" pluginAUViewClass="JuceProjectAU_V1"
               pluginRTASCategory="" bundleIdentifier="com.roli.pluginhost"
-              jucerVersion="3.2.0" companyName="ROLI Ltd." includeBinaryInAppConfig="1">
+              jucerVersion="4.0.1" companyName="ROLI Ltd." includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="M73TRi" vst3Folder="">
