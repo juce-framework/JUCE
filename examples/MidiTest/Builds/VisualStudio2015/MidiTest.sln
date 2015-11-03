@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{6FB140E6-9A4C-826A-B1FF-68BC7A580630}") = "MidiTest", "MidiTest.vcxproj", "{E4A0537A-4F06-DC9E-944E-48CA0A0E2CCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E4A0537A-4F06-DC9E-944E-48CA0A0E2CCA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E4A0537A-4F06-DC9E-944E-48CA0A0E2CCA}.Debug|Win32.Build.0 = Debug|Win32
+		{E4A0537A-4F06-DC9E-944E-48CA0A0E2CCA}.Release|Win32.ActiveCfg = Release|Win32
+		{E4A0537A-4F06-DC9E-944E-48CA0A0E2CCA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
