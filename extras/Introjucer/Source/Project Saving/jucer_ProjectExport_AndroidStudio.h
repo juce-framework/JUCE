@@ -137,7 +137,12 @@ protected:
             : BuildConfiguration (p, settings, e)
         {
             if (getArchitectures().isEmpty())
-                getArchitecturesValue() = "armeabi armeabi-v7a";
+            {
+                if (isDebug())
+                    getArchitecturesValue() = "armeabi x86";
+                else
+                    getArchitecturesValue() = "armeabi armeabi-v7a x86";
+            }
         }
 
         Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
