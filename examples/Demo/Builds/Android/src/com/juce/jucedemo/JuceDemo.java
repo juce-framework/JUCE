@@ -377,7 +377,7 @@ public class JuceDemo   extends Activity
 
                         try
                         {
-                            instrumentation.sendKeyDownUpSync (KeyEvent.KEYCODE_BREAK);
+                            instrumentation.sendKeyDownUpSync (KeyEvent.KEYCODE_UNKNOWN);
                         }
                         catch (Exception e)
                         {
