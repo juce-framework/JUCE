@@ -976,13 +976,13 @@ public:
     {
     }
 
-    void changeListenerCallback (ChangeBroadcaster* source) override
+    void changeListenerCallback (ChangeBroadcaster* newSource) override
     {
         if (AudioTransportSource* currentTransport
                = dynamic_cast<AudioTransportSource*> (getCurrentSource()))
         {
-            ignoreUnused (source);
-            jassert (source == currentTransport);
+            ignoreUnused (newSource);
+            jassert (newSource == currentTransport);
 
             if (! currentTransport->isPlaying())
             {
