@@ -98,10 +98,8 @@ public:
     }
 
     //==========================================================================
-    void selectedRowsChanged (int lastRowSelected) override
+    void selectedRowsChanged (int) override
     {
-        ignoreUnused (lastRowSelected);
-
         SparseSet<int> newSelectedItems = getSelectedRows();
         if (newSelectedItems != lastSelectedItems)
         {
