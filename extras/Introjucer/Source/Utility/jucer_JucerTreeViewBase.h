@@ -195,19 +195,18 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (Colours::black);
-        paintIcon (g);
 
-        int rightEdge = getWidth();
+        Rectangle<int> bounds (getLocalBounds());
 
-        if (Component* c = buttons.getFirst())
-            rightEdge = c->getX();
+        const int border = 5;
+        bounds.removeFromLeft (border);
 
-        item.paintContent (g, Rectangle<int> (item.textX, 0, rightEdge - item.textX, getHeight()));
-    }
+        item.paintIcon (g, bounds.removeFromLeft (15));
 
-    void paintIcon (Graphics& g)
-    {
-        item.paintIcon (g, Rectangle<int> (getHeight(), getHeight()));
+        bounds.removeFromLeft  (border);
+        bounds.removeFromRight (border);
+
+        item.paintContent (g, bounds);
     }
 
     void resized() override
