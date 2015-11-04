@@ -196,17 +196,17 @@ public:
     {
         g.setColour (Colours::black);
 
-        Rectangle<int> bounds (getLocalBounds());
+        Rectangle<int> localBounds (getLocalBounds());
 
         const int border = 5;
-        bounds.removeFromLeft (border);
+        localBounds.removeFromLeft (border);
 
-        item.paintIcon (g, bounds.removeFromLeft (15));
+        item.paintIcon (g, localBounds.removeFromLeft (15));
 
-        bounds.removeFromLeft  (border);
-        bounds.removeFromRight (border);
+        localBounds.removeFromLeft  (border);
+        localBounds.removeFromRight (border);
 
-        item.paintContent (g, bounds);
+        item.paintContent (g, localBounds);
     }
 
     void resized() override
