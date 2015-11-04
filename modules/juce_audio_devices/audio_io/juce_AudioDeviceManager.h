@@ -434,9 +434,9 @@ public:
         a finished audioSource will not restart the sound again. If this is
         desired simply call playSound with the same audioSource again.
 
+        @param audioSource   the audio source to play
         @param deleteWhenFinished If this is true then the audio source will
-                                  be deleted once the device manager has
-                                  finished playing.
+                                  be deleted once the device manager has finished playing.
     */
     void playSound (PositionableAudioSource* audioSource, bool deleteWhenFinished = false);
 

@@ -40,7 +40,7 @@
     OSCReceiver if you wish them to only listen to certain messages with
     matching OSC address patterns.
 
-    @seeOSCMessageListener, OSCAddressPattern, OSCMessage
+    @see OSCMessageListener, OSCAddressPattern, OSCMessage
 */
 class JUCE_API  OSCAddress
 {
