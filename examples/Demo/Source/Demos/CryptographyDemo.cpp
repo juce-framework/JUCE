@@ -33,8 +33,8 @@ public:
     {
         addAndMakeVisible (rsaGroup);
         rsaGroup.setText ("RSA Encryption");
-        rsaGroup.setColour (GroupComponent::outlineColourId, Colours::darkgrey);
-        rsaGroup.setColour (GroupComponent::textColourId, Colours::black);
+        rsaGroup.setColour (GroupComponent::outlineColourId, Colours::grey);
+        rsaGroup.setColour (GroupComponent::textColourId, Colours::white);
 
         bitSizeLabel.setText ("Num Bits to Use:", dontSendNotification);
         bitSizeLabel.attachToComponent (&bitSize, true);
@@ -123,8 +123,8 @@ public:
     {
         addAndMakeVisible (hashGroup);
         hashGroup.setText ("Hashes");
-        hashGroup.setColour (GroupComponent::outlineColourId, Colours::darkgrey);
-        hashGroup.setColour (GroupComponent::textColourId, Colours::black);
+        hashGroup.setColour (GroupComponent::outlineColourId, Colours::grey);
+        hashGroup.setColour (GroupComponent::textColourId, Colours::white);
 
         addAndMakeVisible (hashEntryBox);
         hashEntryBox.setMultiLine (true);

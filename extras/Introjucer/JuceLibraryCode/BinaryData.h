@@ -88,7 +88,7 @@ namespace BinaryData
     const int            colourscheme_light_xmlSize = 1050;
 
     extern const char*   juce_icon_png;
-    const int            juce_icon_pngSize = 83091;
+    const int            juce_icon_pngSize = 40749;
 
     extern const char*   projectIconAndroid_png;
     const int            projectIconAndroid_pngSize = 8150;

@@ -1932,4 +1932,3 @@ public class MidiTest   extends Activity
     }
 
 }
-

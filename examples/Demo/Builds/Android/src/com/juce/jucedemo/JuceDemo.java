@@ -1175,4 +1175,3 @@ public class JuceDemo   extends Activity
     }
 
 }
-

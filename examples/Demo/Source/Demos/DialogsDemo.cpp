@@ -156,7 +156,7 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        fillTiledBackground (g);
+        fillStandardDemoBackground (g);
     }
 
     void resized() override
@@ -215,8 +215,8 @@ private:
             AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
                                           "This is an ok/cancel AlertWindow",
                                           "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
-                                          String::empty,
-                                          String::empty,
+                                          String(),
+                                          String(),
                                           0,
                                           ModalCallbackFunction::forComponent (alertBoxResultChosen, this));
         }

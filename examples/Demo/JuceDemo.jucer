@@ -14,7 +14,7 @@
                objCExtraSuffix="hZh0GG" bigIcon="BvyE0d" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"
                        defines=""/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="10.6 SDK" osxArchitecture="default"
