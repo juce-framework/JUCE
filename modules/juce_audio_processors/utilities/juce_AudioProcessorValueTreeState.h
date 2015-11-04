@@ -66,14 +66,15 @@ public:
         Calling this will create and add a special type of AudioProcessorParameter to the
         AudioProcessor to which this state is attached.
 
-        @param parameterID      A unique string ID for the new parameter
-        @param parameterName    The name that the parameter will return from AudioProcessorParameter::getName()
-        @param labelText        The label that the parameter will return from AudioProcessorParameter::getLabel()
-        @param valueRange       A mapping that will be used to determine the value range which this parameter uses
-        @param defaultValue     A default value for the parameter (in non-normalised units)
-        @param getTextFunction  A function that will convert a non-normalised value to a string for the
-                                AudioProcessorParameter::getText() method. This can be nullptr to use the
-                                default implementation
+        @param parameterID          A unique string ID for the new parameter
+        @param parameterName        The name that the parameter will return from AudioProcessorParameter::getName()
+        @param labelText            The label that the parameter will return from AudioProcessorParameter::getLabel()
+        @param valueRange           A mapping that will be used to determine the value range which this parameter uses
+        @param defaultValue         A default value for the parameter (in non-normalised units)
+        @param valueToTextFunction  A function that will convert a non-normalised value to a string for the
+                                    AudioProcessorParameter::getText() method. This can be nullptr to use the
+                                    default implementation
+        @param textToValueFunction  The inverse of valueToTextFunction
         @returns the parameter object that was created
     */
     AudioProcessorParameter* createAndAddParameter (String parameterID,
