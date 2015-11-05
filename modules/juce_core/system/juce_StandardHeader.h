@@ -52,8 +52,8 @@
 //==============================================================================
 #include <vector>  // included before platform defs to provide a definition of _LIBCPP_VERSION
 
-#include "juce_PlatformDefs.h"
 #include "juce_CompilerSupport.h"
+#include "juce_PlatformDefs.h"
 
 //==============================================================================
 // Now we'll include some common OS headers..
