@@ -63,7 +63,7 @@ public:
         higher, and additionally only if the device itself supports MIDI
         over Bluetooth.
 
-        On deskrop platforms, this will typically be false as the bluetooth
+        On desktop platforms, this will typically be false as the bluetooth
         pairing is not done inside the app but by other means.
 
         @return true if the Bluetooth MIDI pairing dialogue is available,
