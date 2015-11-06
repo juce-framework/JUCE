@@ -247,7 +247,7 @@ private:
     {
         if (path.startsWith ("~"))
         {
-            const String homeFolder (File::getSpecialLocation (File::SpecialLocationType::userHomeDirectory).getFullPathName());
+            const String homeFolder (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
 
             path = path.replaceSection (0, 1, homeFolder);
         }
@@ -366,6 +366,11 @@ private:
         return result;
     }
 
+    struct ShouldBeAddedToProjectPredicate
+    {
+        bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
+    };
+
     StringArray getCPPFlags() const
     {
         StringArray result;
@@ -401,13 +406,8 @@ private:
             Array<RelativePath> cppFiles;
             const Array<Project::Item>& groups = getAllGroups();
 
-            struct Predicate
-            {
-                bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
-            };
-
             for (int i = 0; i < groups.size(); ++i)
-                findAllProjectItemsWithPredicate (groups.getReference (i), cppFiles, Predicate());
+                findAllProjectItemsWithPredicate (groups.getReference (i), cppFiles, ShouldBeAddedToProjectPredicate());
 
             for (int i = 0; i < cppFiles.size(); ++i)
             {

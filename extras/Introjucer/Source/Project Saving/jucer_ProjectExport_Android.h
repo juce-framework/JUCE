@@ -591,17 +591,17 @@ private:
         overwriteFileIfDifferentOrThrow (file, mo);
     }
 
+    struct ShouldFileBeCompiledPredicate
+    {
+        bool operator() (const Project::Item& projectItem) const  { return projectItem.shouldBeCompiled(); }
+    };
+
     void writeAndroidMk (const File& file) const
     {
         Array<RelativePath> files;
 
-        struct Predicate
-        {
-            bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeCompiled(); }
-        };
-
         for (int i = 0; i < getAllGroups().size(); ++i)
-            findAllProjectItemsWithPredicate (getAllGroups().getReference(i), files, Predicate());
+            findAllProjectItemsWithPredicate (getAllGroups().getReference(i), files, ShouldFileBeCompiledPredicate());
 
         MemoryOutputStream mo;
         writeAndroidMk (mo, files);
