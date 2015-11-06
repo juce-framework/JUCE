@@ -165,7 +165,7 @@ public:
     }
 
     AndroidTypeface (const void* data, size_t size)
-        : Typeface (String(), String())
+        : Typeface (String (static_cast<uint64> (reinterpret_cast<uintptr_t> (data))), String())
     {
         JNIEnv* const env = getEnv();
 
