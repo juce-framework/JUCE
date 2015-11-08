@@ -111,14 +111,16 @@ public:
     static const FUID iid;
 
     //==============================================================================
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Winconsistent-missing-override"
-#endif
+   #if JUCE_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Winconsistent-missing-override"
+   #endif
+
     REFCOUNT_METHODS (ComponentBase)
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+
+   #if JUCE_CLANG
+    #pragma clang diagnostic pop
+   #endif
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
@@ -1577,7 +1579,7 @@ public:
                 }
                 Vst::AudioBusBuffers& buffers = data.inputs[elementIndex];
                 jassert(buffers.channelBuffers32 != nullptr);
-                
+
                 int numChannels = (int) buffers.numChannels;
                 numInputChans += numChannels;
 
@@ -1589,7 +1591,7 @@ public:
         }
 
         jassert(numInputChans == pluginInstance->getNumInputChannelsTotal(true));
-        
+
         const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
         while (totalChans < numOutputChans)
