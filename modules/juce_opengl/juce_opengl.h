@@ -34,10 +34,6 @@
  #define JUCE_OPENGL_ES 1
 #endif
 
-#if ! JUCE_ANDROID
- #define JUCE_OPENGL_CREATE_JUCE_RENDER_THREAD 1
-#endif
-
 #if JUCE_WINDOWS
  #ifndef APIENTRY
   #define APIENTRY __stdcall
@@ -75,7 +71,10 @@
   #include <OpenGL/glext.h>
  #endif
 #elif JUCE_ANDROID
+ #include <android/native_window.h>
+ #include <android/native_window_jni.h>
  #include <GLES2/gl2.h>
+ #include <EGL/egl.h>
 #endif
 
 #if GL_ES_VERSION_3_0

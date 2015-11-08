@@ -64,6 +64,11 @@ public:
        #if JUCE_MAC || JUCE_WINDOWS
         ApplicationCommandManager& commandManager = IntrojucerApp::getCommandManager();
 
+        addAndMakeVisible (createExporterButton);
+        createExporterButton.setCommandToTrigger (&commandManager, CommandIDs::createNewExporter, true);
+        createExporterButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::createNewExporter));
+        createExporterButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
+
         addAndMakeVisible (openProjectButton);
         openProjectButton.setCommandToTrigger (&commandManager, CommandIDs::openInIDE, true);
         openProjectButton.setButtonText (commandManager.getNameOfCommand (CommandIDs::openInIDE));
@@ -87,20 +92,32 @@ public:
         if (openProjectButton.isVisible())
             openProjectButton.setBounds (r.removeFromBottom (30).reduced (16, 4));
 
+        if (createExporterButton.isVisible())
+        {
+            r.removeFromBottom (10);
+            createExporterButton.setBounds (r.removeFromBottom (30).reduced (16, 4));
+        }
+
         tree.setBounds (r);
+    }
+
+    static void reselect (TreeViewItem& item)
+    {
+        item.setSelected (false, true);
+        item.setSelected (true, true);
     }
 
     void showProjectSettings()
     {
         if (ConfigTreeItemTypes::ConfigTreeItemBase* root = dynamic_cast<ConfigTreeItemTypes::ConfigTreeItemBase*> (rootItem.get()))
             if (root->isProjectSettings())
-                root->setSelected (true, true);
+                reselect (*root);
     }
 
     void showModules()
     {
         if (ConfigTreeItemTypes::ConfigTreeItemBase* mods = getModulesItem())
-            mods->setSelected (true, true);
+            reselect (*mods);
     }
 
     void showModule (const String& moduleID)
@@ -112,11 +129,11 @@ public:
             for (int i = mods->getNumSubItems(); --i >= 0;)
                 if (ConfigTreeItemTypes::ModuleItem* m = dynamic_cast<ConfigTreeItemTypes::ModuleItem*> (mods->getSubItem (i)))
                     if (m->moduleID == moduleID)
-                        m->setSelected (true, true);
+                        reselect (*m);
         }
     }
 
-    TextButton openProjectButton, saveAndOpenButton;
+    TextButton createExporterButton, openProjectButton, saveAndOpenButton;
 
 private:
     ConfigTreeItemTypes::ConfigTreeItemBase* getModulesItem()
@@ -134,6 +151,12 @@ private:
 //==============================================================================
 struct LogoComponent  : public Component
 {
+    LogoComponent()
+    {
+        ScopedPointer<XmlElement> svg (XmlDocument::parse (BinaryData::background_logo_svg));
+        logo = Drawable::createFromSVG (*svg);
+    }
+
     void paint (Graphics& g)
     {
         g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
@@ -141,11 +164,10 @@ struct LogoComponent  : public Component
         Rectangle<int> r (getLocalBounds());
 
         g.setFont (15.0f);
-        g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centred, 3);
+        g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centredBottom, 3);
 
-        const Path& logo = getIcons().mainJuceLogo;
-        g.fillPath (logo, RectanglePlacement (RectanglePlacement::centred)
-                             .getTransformToFit (logo.getBounds(), r.toFloat()));
+        logo->drawWithin (g, r.withTrimmedBottom (r.getHeight() / 4).toFloat(),
+                          RectanglePlacement (RectanglePlacement::centred), 1.0f);
     }
 
     static String getVersionInfo()
@@ -154,6 +176,8 @@ struct LogoComponent  : public Component
                 + newLine
                 + IntrojucerApp::getApp().getVersionDescription();
     }
+
+    ScopedPointer<Drawable> logo;
 };
 
 //==============================================================================
@@ -618,6 +642,42 @@ void ProjectContentComponent::openInIDE (bool saveFirst)
     }
 }
 
+static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
+{
+    if (comp != nullptr && result > 0)
+    {
+        if (Project* p = comp->getProject())
+        {
+            String exporterName (ProjectExporter::getExporterNames() [result - 1]);
+
+            if (exporterName.isNotEmpty())
+                p->addNewExporter (exporterName);
+        }
+    }
+}
+
+void ProjectContentComponent::showNewExporterMenu()
+{
+    if (project != nullptr)
+    {
+        PopupMenu menu;
+
+        menu.addSectionHeader ("Create a new export target:");
+
+        Array<ProjectExporter::ExporterTypeInfo> exporters (ProjectExporter::getExporterTypes());
+
+        for (int i = 0; i < exporters.size(); ++i)
+        {
+            const ProjectExporter::ExporterTypeInfo& type = exporters.getReference(i);
+
+            menu.addItem (i + 1, type.name, true, false, type.getIcon());
+        }
+
+        menu.showMenuAsync (PopupMenu::Options(),
+                            ModalCallbackFunction::forComponent (newExporterMenuCallback, this));
+    }
+}
+
 void ProjectContentComponent::deleteSelectedTreeItems()
 {
     if (TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()))
@@ -695,6 +755,7 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::closeProject,
                               CommandIDs::openInIDE,
                               CommandIDs::saveAndOpenInIDE,
+                              CommandIDs::createNewExporter,
                               CommandIDs::showFilePanel,
                               CommandIDs::showConfigPanel,
                               CommandIDs::showProjectSettings,
@@ -779,30 +840,27 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         break;
 
     case CommandIDs::openInIDE:
-       #if JUCE_MAC
-        result.setInfo ("Open in Xcode...",
-       #elif JUCE_WINDOWS
-        result.setInfo ("Open in Visual Studio...",
-       #else
-        result.setInfo ("Open as a Makefile...",
-       #endif
+        result.setInfo ("Open in IDE...",
+
                         "Launches the project in an external IDE",
                         CommandCategories::general, 0);
         result.setActive (ProjectExporter::canProjectBeLaunched (project));
         break;
 
     case CommandIDs::saveAndOpenInIDE:
-       #if JUCE_MAC
-        result.setInfo ("Save Project and Open in Xcode...",
-       #elif JUCE_WINDOWS
-        result.setInfo ("Save Project and Open in Visual Studio...",
-       #else
-        result.setInfo ("Save Project and Open as a Makefile...",
-       #endif
+        result.setInfo ("Save Project and Open in IDE...",
+
                         "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
         result.setActive (ProjectExporter::canProjectBeLaunched (project));
         result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        break;
+
+    case CommandIDs::createNewExporter:
+        result.setInfo ("Create New Exporter...",
+                        "Creates a new exporter for a compiler type",
+                        CommandCategories::general, 0);
+        result.setActive (project != nullptr);
         break;
 
     case CommandIDs::showFilePanel:
@@ -900,6 +958,8 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
         case CommandIDs::openInIDE:                 openInIDE (false); break;
         case CommandIDs::saveAndOpenInIDE:          openInIDE (true); break;
+
+        case CommandIDs::createNewExporter:         showNewExporterMenu(); break;
 
         case CommandIDs::deleteSelectedItem:        deleteSelectedTreeItems(); break;
 

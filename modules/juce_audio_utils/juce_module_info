@@ -17,5 +17,8 @@
                       { "file": "juce_audio_utils.mm",  "target": "xcode" } ],
 
   "browse":         [ "gui/*",
-                      "players/*" ]
+                      "players/*",
+                      "native/*" ],
+
+  "iOSFrameworks":  "CoreAudioKit"
 }

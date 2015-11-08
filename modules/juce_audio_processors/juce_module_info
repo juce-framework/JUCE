@@ -17,7 +17,8 @@
   "browse":         [ "processors/*",
                       "format/*",
                       "format_types/*",
-                      "scanning/*" 
+                      "scanning/*",
+                      "utilities/*"
                     ],
 
   "OSXFrameworks":  "CoreAudio CoreMIDI AudioToolbox",

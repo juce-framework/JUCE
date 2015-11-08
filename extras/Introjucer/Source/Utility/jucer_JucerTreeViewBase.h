@@ -37,7 +37,7 @@ public:
     ~JucerTreeViewBase();
 
     int getItemWidth() const override                   { return -1; }
-    int getItemHeight() const override                  { return 20; }
+    int getItemHeight() const override                  { return isRoot() ? 23 : 20; }
 
     void paintOpenCloseButton (Graphics&, const Rectangle<float>& area, Colour backgroundColour, bool isMouseOver) override;
     Component* createItemComponent() override;
@@ -48,17 +48,18 @@ public:
     void cancelDelayedSelectionTimer();
 
     //==============================================================================
+    virtual bool isRoot() const                                 { return false; }
     virtual Font getFont() const;
     virtual String getRenamingName() const = 0;
     virtual String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
     virtual Icon getIcon() const = 0;
-    virtual float getIconSize() const;
-    virtual bool isIconCrossedOut() const               { return false; }
+    virtual bool isIconCrossedOut() const                       { return false; }
+    virtual void paintIcon (Graphics& g, Rectangle<int> area)   { getIcon().draw (g, area.reduced (2).toFloat(), isIconCrossedOut()); }
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
-    virtual int getMillisecsAllowedForDragGesture()     { return 120; };
-    virtual File getDraggableFile() const               { return File::nonexistent; }
+    virtual int getMillisecsAllowedForDragGesture()             { return 120; };
+    virtual File getDraggableFile() const                       { return File(); }
 
     void refreshSubItems();
     virtual void deleteItem();
@@ -194,25 +195,23 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (Colours::black);
-        paintIcon (g);
 
-        int rightEdge = getWidth();
+        Rectangle<int> localBounds (getLocalBounds());
 
-        if (Component* c = buttons.getFirst())
-            rightEdge = c->getX();
+        const int border = 5;
+        localBounds.removeFromLeft (border);
 
-        item.paintContent (g, Rectangle<int> (item.textX, 0, rightEdge - item.textX, getHeight()));
-    }
+        item.paintIcon (g, localBounds.removeFromLeft (15));
 
-    void paintIcon (Graphics& g)
-    {
-        item.getIcon().draw (g, Rectangle<float> (4.0f, 2.0f, item.getIconSize(), getHeight() - 4.0f),
-                             item.isIconCrossedOut());
+        localBounds.removeFromLeft  (border);
+        localBounds.removeFromRight (border);
+
+        item.paintContent (g, localBounds);
     }
 
     void resized() override
     {
-        item.textX = (int) item.getIconSize() + 8;
+        item.textX = getHeight() + 4;
 
         Rectangle<int> r (getLocalBounds());
 

@@ -261,10 +261,10 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
     }
 
     if (key == Ids::androidSDKPath)
-        return "${user.home}/SDKs/android-sdk";
+        return "${user.home}/Library/Android/sdk";
 
     if (key == Ids::androidNDKPath)
-        return "${user.home}/SDKs/android-ndk";
+        return "${user.home}/Library/Android/sdk/ndk-bundle";
 
     // didn't recognise the key provided!
     jassertfalse;

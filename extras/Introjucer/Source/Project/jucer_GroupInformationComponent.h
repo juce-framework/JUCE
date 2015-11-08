@@ -117,15 +117,19 @@ private:
         FileOptionComponent (const Project::Item& fileItem)
             : item (fileItem),
               compileButton ("Compile"),
-              resourceButton ("Add to Binary Resources")
+              binaryResourceButton ("Binary Resource"),
+              xcodeResourceButton ("Xcode Resource")
         {
             if (item.isFile())
             {
                 addAndMakeVisible (compileButton);
                 compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
 
-                addAndMakeVisible (resourceButton);
-                resourceButton.getToggleStateValue().referTo (item.getShouldAddToResourceValue());
+                addAndMakeVisible (binaryResourceButton);
+                binaryResourceButton.getToggleStateValue().referTo (item.getShouldAddToBinaryResourcesValue());
+
+                addAndMakeVisible (xcodeResourceButton);
+                xcodeResourceButton.getToggleStateValue().referTo (item.getShouldAddToXcodeResourcesValue());
             }
         }
 
@@ -148,16 +152,15 @@ private:
 
         void resized() override
         {
-            int w = 180;
-            resourceButton.setBounds (getWidth() - w, 1, w, getHeight() - 2);
-            w = 100;
-            compileButton.setBounds (resourceButton.getX() - w, 1, w, getHeight() - 2);
+            binaryResourceButton.setBounds (getWidth() - 110, 1, 110, getHeight() - 2);
+            xcodeResourceButton.setBounds (binaryResourceButton.getX() - 110, 1, 110, getHeight() - 2);
+            compileButton.setBounds (xcodeResourceButton.getX() - 70, 1, 70, getHeight() - 2);
         }
 
         Project::Item item;
 
     private:
-        ToggleButton compileButton, resourceButton;
+        ToggleButton compileButton, binaryResourceButton, xcodeResourceButton;
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GroupInformationComponent)

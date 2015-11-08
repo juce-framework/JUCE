@@ -44,6 +44,9 @@ public:
         @param source           the source that's invoking the event
         @param position         the position of the mouse, relative to the component that is passed-in
         @param modifiers        the key modifiers at the time of the event
+        @param pressure         the pressure of the touch or stylus, in the range 0 to 1. Devices that
+                                do not support force information may return 0.0, 1.0, or a negative value,
+                                depending on the platform
         @param eventComponent   the component that the mouse event applies to
         @param originator       the component that originally received the event
         @param eventTime        the time the event happened
@@ -59,6 +62,7 @@ public:
     MouseEvent (MouseInputSource source,
                 Point<float> position,
                 ModifierKeys modifiers,
+                float pressure,
                 Component* eventComponent,
                 Component* originator,
                 Time eventTime,
@@ -108,6 +112,13 @@ public:
         just before they were released, so that you can tell which button they let go of.
     */
     const ModifierKeys mods;
+
+    /** The pressure of the touch or stylus for this event.
+        The range is 0 (soft) to 1 (hard).
+        If the input device doesn't provide any pressure data, it may return a negative
+        value here, or 0.0 or 1.0, depending on the platform.
+    */
+    float pressure;
 
     /** The component that this event applies to.
 
@@ -223,6 +234,9 @@ public:
         may be 0 or an undefined value.
     */
     int getLengthOfMousePress() const noexcept;
+
+    /** Returns true if the pressure value for this event is meaningful. */
+    bool isPressureValid() const noexcept;
 
     //==============================================================================
     /** The position of the mouse when the event occurred.

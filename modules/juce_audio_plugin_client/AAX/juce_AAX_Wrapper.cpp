@@ -45,6 +45,11 @@
  #pragma clang diagnostic ignored "-Wsign-conversion"
 #endif
 
+#ifdef _MSC_VER
+ #pragma warning (push)
+ #pragma warning (disable : 4127)
+#endif
+
 #include "AAX_Exports.cpp"
 #include "AAX_ICollection.h"
 #include "AAX_IComponentDescriptor.h"
@@ -62,6 +67,10 @@
 #include "AAX_IMIDINode.h"
 #include "AAX_UtilsNative.h"
 #include "AAX_Enums.h"
+
+#ifdef _MSC_VER
+ #pragma warning (pop)
+#endif
 
 #ifdef __clang__
  #pragma clang diagnostic pop

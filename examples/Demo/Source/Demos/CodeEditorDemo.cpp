@@ -32,7 +32,7 @@ class CodeEditorDemo  : public Component,
 public:
     CodeEditorDemo()
         : fileChooser ("File", File::nonexistent, true, false, false,
-                       "*.cpp;*.h;*.hpp;*.c;*.mm;*.m", String::empty,
+                       "*.cpp;*.h;*.hpp;*.c;*.mm;*.m", String(),
                        "Choose a C++ file to open it in the editor")
     {
         setOpaque (true);

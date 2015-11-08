@@ -92,6 +92,12 @@ class AudioProcessor;
 #include "format_types/juce_VST3PluginFormat.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
+#include "utilities/juce_AudioProcessorValueTreeState.h"
+#include "utilities/juce_AudioProcessorParameterWithID.h"
+#include "utilities/juce_AudioParameterFloat.h"
+#include "utilities/juce_AudioParameterInt.h"
+#include "utilities/juce_AudioParameterBool.h"
+#include "utilities/juce_AudioParameterChoice.h"
 
 }
 

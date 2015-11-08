@@ -841,6 +841,7 @@ void InterProcessLock::exit()
 }
 
 //==============================================================================
+#if ! JUCE_ANDROID
 void JUCE_API juce_threadEntryPoint (void*);
 
 extern "C" void* threadEntryProc (void*);
@@ -848,10 +849,6 @@ extern "C" void* threadEntryProc (void* userData)
 {
     JUCE_AUTORELEASEPOOL
     {
-       #if JUCE_ANDROID
-        const AndroidThreadScope androidEnv;
-       #endif
-
         juce_threadEntryPoint (userData);
     }
 
@@ -925,6 +922,7 @@ bool Thread::setThreadPriority (void* handle, int priority)
     param.sched_priority = ((maxPriority - minPriority) * priority) / 10 + minPriority;
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
+#endif
 
 Thread::ThreadID JUCE_CALLTYPE Thread::getCurrentThreadId()
 {
@@ -1143,6 +1141,7 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 }
 
 //==============================================================================
+#if ! JUCE_ANDROID
 struct HighResolutionTimer::Pimpl
 {
     Pimpl (HighResolutionTimer& t)  : owner (t), thread (0), shouldStop (false)
@@ -1249,20 +1248,6 @@ private:
 
         uint64_t time, delta;
 
-       #elif JUCE_ANDROID
-        Clock (double millis) noexcept  : delta ((uint64) (millis * 1000000))
-        {
-        }
-
-        void wait() noexcept
-        {
-            struct timespec t;
-            t.tv_sec  = (time_t) (delta / 1000000000);
-            t.tv_nsec = (long)   (delta % 1000000000);
-            nanosleep (&t, nullptr);
-        }
-
-        uint64 delta;
        #else
         Clock (double millis) noexcept  : delta ((uint64) (millis * 1000000))
         {
@@ -1311,3 +1296,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
+
+#endif

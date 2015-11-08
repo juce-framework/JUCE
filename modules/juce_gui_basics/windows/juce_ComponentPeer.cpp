@@ -85,10 +85,10 @@ bool ComponentPeer::isKioskMode() const
 }
 
 //==============================================================================
-void ComponentPeer::handleMouseEvent (int touchIndex, Point<float> pos, ModifierKeys newMods, int64 time)
+void ComponentPeer::handleMouseEvent (int touchIndex, Point<float> pos, ModifierKeys newMods, float newPressure, int64 time)
 {
     if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
-        MouseInputSource (*mouse).handleEvent (*this, pos, time, newMods);
+        MouseInputSource (*mouse).handleEvent (*this, pos, time, newMods, newPressure);
 }
 
 void ComponentPeer::handleMouseWheel (int touchIndex, Point<float> pos, int64 time, const MouseWheelDetails& wheel)

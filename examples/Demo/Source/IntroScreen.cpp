@@ -26,9 +26,7 @@
 
 
 //==============================================================================
-/**
-*/
-class IntroScreen  : public Component
+class IntroScreen   : public Component
 {
 public:
     IntroScreen()
@@ -51,15 +49,16 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.16f));
+        g.fillAll (Colour (0xff4d4d4d));
     }
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds().reduced (10).removeFromBottom (24));
+        Rectangle<int> area (getLocalBounds().reduced (10));
+        logo.setBounds (area);
+        area = area.removeFromBottom (24);
         linkButton.setBounds (area.removeFromRight (getWidth() / 4));
         versionLabel.setBounds (area);
-        logo.updateTransform();
     }
 
 private:
@@ -72,8 +71,6 @@ private:
     {
         LogoDrawComponent()   : logoPath (MainAppWindow::getJUCELogoPath()), elapsed (0.0f)
         {
-            setBounds (logoPath.getBounds().withPosition (Point<float>()).getSmallestIntegerContainer());
-
             startTimerHz (60); // try to repaint at 60 fps
         }
 
@@ -82,12 +79,13 @@ private:
             Path wavePath;
 
             const float waveStep = 10.0f;
+            const float waveY = getHeight() * 0.44f;
             int i = 0;
 
             for (float x = waveStep * 0.5f; x < getWidth(); x += waveStep)
             {
-                const float y1 = getHeight() * 0.5f + getHeight() * 0.05f * std::sin (i * 0.38f + elapsed);
-                const float y2 = getHeight() * 0.5f + getHeight() * 0.10f * std::sin (i * 0.20f + elapsed * 2.0f);
+                const float y1 = waveY + getHeight() * 0.05f * std::sin (i * 0.38f + elapsed);
+                const float y2 = waveY + getHeight() * 0.10f * std::sin (i * 0.20f + elapsed * 2.0f);
 
                 wavePath.addLineSegment (Line<float> (x, y1, x, y2), 2.0f);
                 wavePath.addEllipse (x - waveStep * 0.3f, y1 - waveStep * 0.3f, waveStep * 0.6f, waveStep * 0.6f);
@@ -96,28 +94,13 @@ private:
                 ++i;
             }
 
-            g.setColour (Colour::greyLevel (0.3f));
+            g.setColour (Colour::greyLevel (0.4f));
             g.fillPath (wavePath);
 
-            g.setColour (Colours::orange);
-            g.fillPath (logoPath, RectanglePlacement (RectanglePlacement::stretchToFit)
+            g.setColour (Colour (0xc4f39082));
+            g.fillPath (logoPath, RectanglePlacement (RectanglePlacement::centred)
                                     .getTransformToFit (logoPath.getBounds(),
-                                                        getLocalBounds().toFloat().reduced (30, 30)));
-        }
-
-        void updateTransform()
-        {
-            if (Component* parent = getParentComponent())
-            {
-                const Rectangle<float> parentArea (parent->getLocalBounds().toFloat());
-
-                AffineTransform transform = RectanglePlacement (RectanglePlacement::centred)
-                                                    .getTransformToFit (getLocalBounds().toFloat(),
-                                                                        parentArea);
-                setTransform (transform);
-            }
-
-            repaint();
+                                                        getLocalBounds().reduced (20, getHeight() / 4).toFloat()));
         }
 
     private:

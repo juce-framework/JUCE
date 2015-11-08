@@ -40,6 +40,7 @@ namespace CommandIDs
         saveAll                = 0x200080,
         openInIDE              = 0x200072,
         saveAndOpenInIDE       = 0x200073,
+        createNewExporter      = 0x20007d,
 
         showUTF8Tool           = 0x200076,
         showGlobalPreferences  = 0x200077,

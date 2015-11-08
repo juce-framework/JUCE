@@ -886,6 +886,41 @@ File File::createTempFile (StringRef fileNameEnding)
     return tempFile;
 }
 
+bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExisting) const
+{
+    if (linkFileToCreate.exists())
+    {
+        if (! linkFileToCreate.isSymbolicLink())
+        {
+            // user has specified an existing file / directory as the link
+            // this is bad! the user could end up unintentionally destroying data
+            jassertfalse;
+            return false;
+        }
+
+        if (overwriteExisting)
+            linkFileToCreate.deleteFile();
+    }
+
+   #if JUCE_MAC || JUCE_LINUX
+    // one common reason for getting an error here is that the file already exists
+    if (symlink (fullPath.toRawUTF8(), linkFileToCreate.getFullPathName().toRawUTF8()) == -1)
+    {
+        jassertfalse;
+        return false;
+    }
+
+    return true;
+   #elif JUCE_WINDOWS
+    return CreateSymbolicLink (linkFileToCreate.getFullPathName().toWideCharPointer(),
+                               fullPath.toWideCharPointer(),
+                               isDirectory() ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0) != FALSE;
+   #else
+    jassertfalse; // symbolic links not supported on this platform!
+    return false;
+   #endif
+}
+
 //==============================================================================
 MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
     : address (nullptr), range (0, file.getSize()), fileHandle (0)

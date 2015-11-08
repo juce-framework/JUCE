@@ -24,8 +24,8 @@
           <Add option="-DDEBUG=1"/>
           <Add option="-D_DEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
-          <Add option="-DJUCE_APP_VERSION=3.2.0"/>
-          <Add option="-DJUCE_APP_VERSION_HEX=0x30200"/>
+          <Add option="-DJUCE_APP_VERSION=4.0.1"/>
+          <Add option="-DJUCE_APP_VERSION_HEX=0x40001"/>
           <Add directory="."/>
           <Add directory="..\..\JuceLibraryCode"/>
         </Compiler>
@@ -59,8 +59,8 @@
           <Add option="-D__MINGW_EXTENSION="/>
           <Add option="-DNDEBUG=1"/>
           <Add option="-DJUCER_CODEBLOCKS_20734A5D=1"/>
-          <Add option="-DJUCE_APP_VERSION=3.2.0"/>
-          <Add option="-DJUCE_APP_VERSION_HEX=0x30200"/>
+          <Add option="-DJUCE_APP_VERSION=4.0.1"/>
+          <Add option="-DJUCE_APP_VERSION_HEX=0x40001"/>
           <Add directory="."/>
           <Add directory="..\..\JuceLibraryCode"/>
         </Compiler>
@@ -433,6 +433,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidStudio.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Project Saving/jucer_ProjectExport_CodeBlocks.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -730,6 +734,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/BinaryData/AudioPluginXCodeScript.txt">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/BinaryData/background_logo.svg">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

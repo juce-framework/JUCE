@@ -210,7 +210,11 @@ public:
     /** Appends a decimal number at the end of this string. */
     String& operator+= (int numberToAppend);
     /** Appends a decimal number at the end of this string. */
+    String& operator+= (long numberToAppend);
+    /** Appends a decimal number at the end of this string. */
     String& operator+= (int64 numberToAppend);
+    /** Appends a decimal number at the end of this string. */
+    String& operator+= (uint64 numberToAppend);
     /** Appends a character at the end of this string. */
     String& operator+= (char characterToAppend);
     /** Appends a character at the end of this string. */
@@ -936,6 +940,16 @@ public:
         @see getLargeIntValue, getFloatValue, getDoubleValue, toHexString
     */
     explicit String (uint64 largeIntegerValue);
+
+    /** Creates a string containing this signed long integer as a decimal number.
+        @see getIntValue, getFloatValue, getDoubleValue, toHexString
+    */
+    explicit String (long decimalInteger);
+
+    /** Creates a string containing this unsigned long integer as a decimal number.
+        @see getIntValue, getFloatValue, getDoubleValue, toHexString
+    */
+    explicit String (unsigned long decimalInteger);
 
     /** Creates a string representing this floating-point number.
         @param floatValue               the value to convert to a string

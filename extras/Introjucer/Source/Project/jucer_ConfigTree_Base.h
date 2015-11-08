@@ -174,6 +174,7 @@ public:
         exportersTree.addListener (this);
     }
 
+    bool isRoot() const override              { return true; }
     bool isProjectSettings() const override   { return true; }
     String getRenamingName() const override   { return getDisplayName(); }
     String getDisplayName() const override    { return project.getTitle(); }
@@ -197,25 +198,8 @@ public:
 
     void showPopupMenu() override
     {
-        PopupMenu menu;
-
-        const StringArray exporters (ProjectExporter::getExporterNames());
-
-        for (int i = 0; i < exporters.size(); ++i)
-            menu.addItem (i + 1, "Create a new " + exporters[i] + " target");
-
-        launchPopupMenu (menu);
-    }
-
-    void handlePopupMenuResult (int resultCode) override
-    {
-        if (resultCode > 0)
-        {
-            String exporterName (ProjectExporter::getExporterNames() [resultCode - 1]);
-
-            if (exporterName.isNotEmpty())
-                project.addNewExporter (exporterName);
-        }
+        if (ProjectContentComponent* pcc = getProjectContentComponent())
+            pcc->showNewExporterMenu();
     }
 
     bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override

@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{CA413D0D-499A-DC21-B43D-866389917603}") = "OSCReceiver", "OSCReceiver.vcxproj", "{2762823A-FE8D-4DB5-01CA-6BE498EE72E8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2762823A-FE8D-4DB5-01CA-6BE498EE72E8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2762823A-FE8D-4DB5-01CA-6BE498EE72E8}.Debug|Win32.Build.0 = Debug|Win32
+		{2762823A-FE8D-4DB5-01CA-6BE498EE72E8}.Release|Win32.ActiveCfg = Release|Win32
+		{2762823A-FE8D-4DB5-01CA-6BE498EE72E8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

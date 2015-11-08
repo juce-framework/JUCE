@@ -31,7 +31,7 @@
             BufferSecurityCheck=""
             DebugInformationFormat="4"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
-            PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200"
+            PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=4.0.1;JUCE_APP_VERSION_HEX=0x40001"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -86,7 +86,7 @@
             InlineFunctionExpansion="1"
             StringPooling="true"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode;..\..\..\..\modules"
-            PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=3.2.0;JUCE_APP_VERSION_HEX=0x30200"
+            PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1;JUCE_APP_VERSION=4.0.1;JUCE_APP_VERSION_HEX=0x40001"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -249,6 +249,7 @@
       </Filter>
       <Filter Name="Project Saving">
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_AndroidStudio.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
         <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
@@ -535,6 +536,16 @@
           </File>
         </Filter>
         <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\background_logo.svg">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

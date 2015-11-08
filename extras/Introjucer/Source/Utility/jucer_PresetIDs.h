@@ -114,6 +114,7 @@ namespace Ids
     DECLARE_ID (compile);
     DECLARE_ID (noWarnings);
     DECLARE_ID (resource);
+    DECLARE_ID (xcodeResource);
     DECLARE_ID (className);
     DECLARE_ID (classDesc);
     DECLARE_ID (controlPoint);
@@ -134,6 +135,7 @@ namespace Ids
     DECLARE_ID (useStdCall);
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
+    DECLARE_ID (overwriteOnSave);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
@@ -143,6 +145,7 @@ namespace Ids
     DECLARE_ID (androidArchitectures);
     DECLARE_ID (androidCpp11);
     DECLARE_ID (androidMicNeeded);
+    DECLARE_ID (androidBluetoothNeeded);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);

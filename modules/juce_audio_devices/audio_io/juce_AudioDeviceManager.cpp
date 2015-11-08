@@ -93,7 +93,6 @@ AudioDeviceManager::AudioDeviceManager()
       numOutputChansNeeded (2),
       listNeedsScanning (true),
       inputLevel (0),
-      testSoundPosition (0),
       cpuUsageMs (0),
       timeToCpuScale (0)
 {
@@ -589,8 +588,6 @@ void AudioDeviceManager::stopDevice()
 {
     if (currentAudioDevice != nullptr)
         currentAudioDevice->stop();
-
-    testSound = nullptr;
 }
 
 void AudioDeviceManager::closeAudioDevice()
@@ -762,20 +759,6 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
         for (int i = 0; i < numOutputChannels; ++i)
             zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
     }
-
-    if (testSound != nullptr)
-    {
-        const int numSamps = jmin (numSamples, testSound->getNumSamples() - testSoundPosition);
-        const float* const src = testSound->getReadPointer (0, testSoundPosition);
-
-        for (int i = 0; i < numOutputChannels; ++i)
-            for (int j = 0; j < numSamps; ++j)
-                outputChannelData [i][j] += src[j];
-
-        testSoundPosition += numSamps;
-        if (testSoundPosition >= testSound->getNumSamples())
-            testSound = nullptr;
-    }
 }
 
 void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device)
@@ -944,42 +927,311 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
 }
 
 //==============================================================================
-void AudioDeviceManager::playTestSound()
+// This is an AudioTransportSource which will own it's assigned source
+class AudioSourceOwningTransportSource  : public AudioTransportSource
 {
-    { // cunningly nested to swap, unlock and delete in that order.
-        ScopedPointer<AudioSampleBuffer> oldSound;
+public:
+    AudioSourceOwningTransportSource() {}
+    ~AudioSourceOwningTransportSource()  { setSource (nullptr); }
 
+    void setSource (PositionableAudioSource* newSource)
+    {
+        if (src != newSource)
         {
-            const ScopedLock sl (audioCallbackLock);
-            oldSound = testSound;
+            ScopedPointer<PositionableAudioSource> oldSourceDeleter (src);
+            src = newSource;
+
+            // tell the base class about the new source before deleting the old one
+            AudioTransportSource::setSource (newSource);
         }
     }
 
-    testSoundPosition = 0;
+private:
+    ScopedPointer<PositionableAudioSource> src;
 
-    if (currentAudioDevice != nullptr)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourceOwningTransportSource)
+};
+
+//==============================================================================
+// An Audio player which will remove itself from the AudioDeviceManager's
+// callback list once it finishes playing its source
+class AutoRemovingSourcePlayer  : public AudioSourcePlayer,
+                                  private ChangeListener
+{
+public:
+    struct DeleteOnMessageThread  : public CallbackMessage
     {
-        const double sampleRate = currentAudioDevice->getCurrentSampleRate();
-        const int soundLength = (int) sampleRate;
+        DeleteOnMessageThread (AutoRemovingSourcePlayer* p)  : parent (p) {}
+        void messageCallback() override     { delete parent; }
 
-        const double frequency = 440.0;
-        const float amplitude = 0.5f;
+        AutoRemovingSourcePlayer* parent;
+    };
 
-        const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
+    //==============================================================================
+    AutoRemovingSourcePlayer (AudioDeviceManager& deviceManager, bool ownSource)
+        : manager (deviceManager),
+          deleteWhenDone (ownSource),
+          hasAddedCallback (false),
+          recursiveEntry (false)
+    {
+    }
 
-        AudioSampleBuffer* const newSound = new AudioSampleBuffer (1, soundLength);
+    void changeListenerCallback (ChangeBroadcaster* newSource) override
+    {
+        if (AudioTransportSource* currentTransport
+               = dynamic_cast<AudioTransportSource*> (getCurrentSource()))
+        {
+            ignoreUnused (newSource);
+            jassert (newSource == currentTransport);
 
-        for (int i = 0; i < soundLength; ++i)
-            newSound->setSample (0, i, amplitude * (float) std::sin (i * phasePerSample));
+            if (! currentTransport->isPlaying())
+            {
+                // this will call audioDeviceStopped!
+                manager.removeAudioCallback (this);
+            }
+            else if (! hasAddedCallback)
+            {
+                hasAddedCallback = true;
+                manager.addAudioCallback (this);
+            }
+        }
+    }
 
-        newSound->applyGainRamp (0, 0, soundLength / 10, 0.0f, 1.0f);
-        newSound->applyGainRamp (0, soundLength - soundLength / 4, soundLength / 4, 1.0f, 0.0f);
+    void audioDeviceStopped() override
+    {
+        if (! recursiveEntry)
+        {
+            ScopedValueSetter<bool> s (recursiveEntry, true, false);
 
-        const ScopedLock sl (audioCallbackLock);
-        testSound = newSound;
+            manager.removeAudioCallback (this);
+            AudioSourcePlayer::audioDeviceStopped();
+
+            if (MessageManager* mm = MessageManager::getInstanceWithoutCreating())
+            {
+                if (mm->isThisTheMessageThread())
+                    delete this;
+                else
+                    (new DeleteOnMessageThread (this))->post();
+            }
+        }
+    }
+
+    void setSource (AudioTransportSource* newSource)
+    {
+        AudioSource* oldSource = getCurrentSource();
+
+        if (AudioTransportSource* oldTransport = dynamic_cast<AudioTransportSource*> (oldSource))
+            oldTransport->removeChangeListener (this);
+
+        if (newSource != nullptr)
+            newSource->addChangeListener (this);
+
+        AudioSourcePlayer::setSource (newSource);
+
+        if (deleteWhenDone)
+            delete oldSource;
+    }
+
+private:
+    // only allow myself to be deleted when my audio callback has been removed
+    ~AutoRemovingSourcePlayer()
+    {
+        setSource (nullptr);
+    }
+
+    AudioDeviceManager& manager;
+    bool deleteWhenDone, hasAddedCallback, recursiveEntry;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutoRemovingSourcePlayer)
+};
+
+//==============================================================================
+// An AudioSource which simply outputs a buffer
+class AudioSampleBufferSource : public PositionableAudioSource
+{
+public:
+    AudioSampleBufferSource (AudioSampleBuffer* audioBuffer, bool shouldLoop, bool ownBuffer)
+        : position (0),
+          buffer (audioBuffer),
+          looping (shouldLoop),
+          deleteWhenDone (ownBuffer)
+    {}
+
+    ~AudioSampleBufferSource()
+    {
+        if (deleteWhenDone)
+            delete buffer;
+    }
+
+    //==============================================================================
+    void setNextReadPosition (int64 newPosition) override
+    {
+        jassert (newPosition >= 0);
+
+        if (looping)
+            newPosition = newPosition % static_cast<int64> (buffer->getNumSamples());
+
+        position = jmin (buffer->getNumSamples(), static_cast<int> (newPosition));
+    }
+
+    int64 getNextReadPosition() const override
+    {
+        return static_cast<int64> (position);
+    }
+
+    int64 getTotalLength() const override
+    {
+        return static_cast<int64> (buffer->getNumSamples());
+    }
+
+    bool isLooping() const override
+    {
+        return looping;
+    }
+
+    void setLooping (bool shouldLoop) override
+    {
+        looping = shouldLoop;
+    }
+
+    //==============================================================================
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override
+    {
+        ignoreUnused (samplesPerBlockExpected, sampleRate);
+    }
+
+    void releaseResources() override
+    {}
+
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
+    {
+        int max = jmin (buffer->getNumSamples() - position, bufferToFill.numSamples);
+
+        jassert (max >= 0);
+        {
+            int ch;
+            int maxInChannels = buffer->getNumChannels();
+            int maxOutChannels = jmin (bufferToFill.buffer->getNumChannels(),
+                                       jmax (maxInChannels, 2));
+
+            for (ch = 0; ch < maxOutChannels; ch++)
+            {
+                int inChannel = ch % maxInChannels;
+
+                if (max > 0)
+                    bufferToFill.buffer->copyFrom (ch, bufferToFill.startSample, *buffer, inChannel, position, max);
+            }
+
+            for (; ch < bufferToFill.buffer->getNumChannels(); ++ch)
+                bufferToFill.buffer->clear (ch, bufferToFill.startSample, bufferToFill.numSamples);
+        }
+
+        position += max;
+
+        if (looping)
+            position = position % buffer->getNumSamples();
+    }
+
+private:
+    //==============================================================================
+    int position;
+    AudioSampleBuffer* buffer;
+    bool looping, deleteWhenDone;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSampleBufferSource)
+};
+
+void AudioDeviceManager::playSound (const File& file)
+{
+    if (file.existsAsFile())
+    {
+        AudioFormatManager formatManager;
+
+        formatManager.registerBasicFormats();
+        playSound (formatManager.createReaderFor (file), true);
     }
 }
 
+void AudioDeviceManager::playSound (const void* resourceData, size_t resourceSize)
+{
+    if (resourceData != nullptr && resourceSize > 0)
+    {
+        AudioFormatManager formatManager;
+        formatManager.registerBasicFormats();
+        MemoryInputStream* mem = new MemoryInputStream (resourceData, resourceSize, false);
+        playSound (formatManager.createReaderFor (mem), true);
+    }
+}
+
+void AudioDeviceManager::playSound (AudioFormatReader* reader, bool deleteWhenFinished)
+{
+    playSound (new AudioFormatReaderSource (reader, deleteWhenFinished), true);
+}
+
+void AudioDeviceManager::playSound (PositionableAudioSource* audioSource, bool deleteWhenFinished)
+{
+    if (audioSource != nullptr && currentAudioDevice != nullptr)
+    {
+        if (AudioTransportSource* transport = dynamic_cast<AudioTransportSource*> (audioSource))
+        {
+            AutoRemovingSourcePlayer* player = new AutoRemovingSourcePlayer (*this, deleteWhenFinished);
+            player->setSource (transport);
+        }
+        else
+        {
+            AudioTransportSource* transportSource;
+
+            if (deleteWhenFinished)
+            {
+                AudioSourceOwningTransportSource* owningTransportSource = new AudioSourceOwningTransportSource();
+                owningTransportSource->setSource (audioSource);
+                transportSource = owningTransportSource;
+            }
+            else
+            {
+                transportSource = new AudioTransportSource;
+                transportSource->setSource (audioSource);
+            }
+
+            // recursively call myself
+            playSound (transportSource, true);
+            transportSource->start();
+        }
+    }
+    else
+    {
+        if (deleteWhenFinished)
+            delete audioSource;
+    }
+}
+
+void AudioDeviceManager::playSound (AudioSampleBuffer* buffer, bool deleteWhenFinished)
+{
+    playSound (new AudioSampleBufferSource (buffer, false, deleteWhenFinished), true);
+}
+
+void AudioDeviceManager::playTestSound()
+{
+    const double sampleRate = currentAudioDevice->getCurrentSampleRate();
+    const int soundLength = (int) sampleRate;
+
+    const double frequency = 440.0;
+    const float amplitude = 0.5f;
+
+    const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
+
+    AudioSampleBuffer* newSound = new AudioSampleBuffer (1, soundLength);
+
+    for (int i = 0; i < soundLength; ++i)
+        newSound->setSample (0, i, amplitude * (float) std::sin (i * phasePerSample));
+
+    newSound->applyGainRamp (0, 0, soundLength / 10, 0.0f, 1.0f);
+    newSound->applyGainRamp (0, soundLength - soundLength / 4, soundLength / 4, 1.0f, 0.0f);
+
+    playSound (newSound, true);
+}
+
+//==============================================================================
 void AudioDeviceManager::enableInputLevelMeasurement (const bool enableMeasurement)
 {
     if (enableMeasurement)

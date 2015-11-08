@@ -90,8 +90,8 @@ protected:
     class MakeBuildConfiguration  : public BuildConfiguration
     {
     public:
-        MakeBuildConfiguration (Project& p, const ValueTree& settings)
-            : BuildConfiguration (p, settings)
+        MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
+            : BuildConfiguration (p, settings, e)
         {
             setValueIfVoid (getLibrarySearchPathValue(), "/usr/X11R6/lib/");
         }
@@ -116,7 +116,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new MakeBuildConfiguration (project, tree);
+        return new MakeBuildConfiguration (project, tree, *this);
     }
 
 private:

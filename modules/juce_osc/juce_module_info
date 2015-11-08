@@ -1,0 +1,16 @@
+{
+  "id":             "juce_osc",
+  "name":           "JUCE OSC classes",
+  "version":        "3.1.1",
+  "description":    "Open Sound Control implementation",
+  "website":        "http://www.juce.com/juce",
+  "license":        "GPL/Commercial",
+
+  "dependencies":   [ { "id": "juce_core",   "version": "matching" } ],
+
+  "include":        "juce_osc.h",
+
+  "compile":        [ { "file": "juce_osc.cpp" } ],
+
+  "browse":         [ "osc/*" ]
+}

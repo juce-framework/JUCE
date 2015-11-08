@@ -123,8 +123,8 @@ private:
     class CodeBlocksBuildConfiguration  : public BuildConfiguration
     {
     public:
-        CodeBlocksBuildConfiguration (Project& p, const ValueTree& settings)
-            : BuildConfiguration (p, settings)
+        CodeBlocksBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
+            : BuildConfiguration (p, settings, e)
         {
         }
 
@@ -138,7 +138,7 @@ private:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new CodeBlocksBuildConfiguration (project, tree);
+        return new CodeBlocksBuildConfiguration (project, tree, *this);
     }
 
     //==============================================================================

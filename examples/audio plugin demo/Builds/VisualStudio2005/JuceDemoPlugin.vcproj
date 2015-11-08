@@ -131,10 +131,11 @@
   <References/>
   <Files>
     <Filter Name="JuceDemoPlugin">
-      <File RelativePath="..\..\Source\PluginProcessor.cpp"/>
-      <File RelativePath="..\..\Source\PluginProcessor.h"/>
       <File RelativePath="..\..\Source\PluginEditor.cpp"/>
       <File RelativePath="..\..\Source\PluginEditor.h"/>
+      <File RelativePath="..\..\Source\PluginProcessor.cpp"/>
+      <File RelativePath="..\..\Source\PluginProcessor.h"/>
+      <File RelativePath="..\..\Source\SinewaveSynth.h"/>
     </Filter>
     <Filter Name="Juce Modules">
       <Filter Name="juce_audio_basics">
@@ -385,6 +386,16 @@
               <Tool Name="VCCLCompilerTool"/>
             </FileConfiguration>
           </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioDeviceManager.d">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioDeviceManager.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODevice.cpp">
             <FileConfiguration Name="Debug|Win32"
@@ -409,6 +420,26 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SystemAudioVolume.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\Main.d">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_devices\audio_io\MainComponent.d">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
         </Filter>
         <Filter Name="midi_io">
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiInput.h"/>
@@ -628,6 +659,16 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_devices\native\juce_win32_WASAPI.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_devices\native\MainComponent.d">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
               <Tool Name="VCCLCompilerTool"/>
@@ -1056,6 +1097,34 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginListComponent.h"/>
         </Filter>
+        <Filter Name="utilities">
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterBool.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterChoice.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterFloat.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterInt.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameters.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameterWithID.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorValueTreeState.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorValueTreeState.h"/>
+        </Filter>
         <File RelativePath="..\..\..\..\modules\juce_audio_processors\juce_module_info">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
@@ -1115,6 +1184,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_BluetoothMidiDevicePairingDialogue.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -1139,6 +1209,40 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.h"/>
+        </Filter>
+        <Filter Name="native">
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\native\juce_android_BluetoothMidiDevicePairingDialogue.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\native\juce_ios_BluetoothMidiDevicePairingDialogue.mm"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\native\juce_linux_BluetoothMidiDevicePairingDialogue.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\native\juce_mac_BluetoothMidiDevicePairingDialogue.mm"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
         </Filter>
         <File RelativePath="..\..\..\..\modules\juce_audio_utils\juce_module_info">
           <FileConfiguration Name="Debug|Win32"

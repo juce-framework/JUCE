@@ -360,14 +360,6 @@ public:
     */
     bool isHidden() const;
 
-    /** Returns true if this file is a link or alias that can be followed using getLinkedTarget(). */
-    bool isLink() const;
-
-    /** If this file is a link or alias, this returns the file that it points to.
-        If the file isn't actually link, it'll just return itself.
-    */
-    File getLinkedTarget() const;
-
     /** Returns a unique identifier for the file, if one is available.
 
         Depending on the OS and file-system, this may be a unix inode number or
@@ -880,7 +872,6 @@ public:
     */
     static File createTempFile (StringRef fileNameEnding);
 
-
     //==============================================================================
     /** Returns the current working directory.
         @see setAsCurrentWorkingDirectory
@@ -946,8 +937,28 @@ public:
     /** Adds a separator character to the end of a path if it doesn't already have one. */
     static String addTrailingSeparator (const String& path);
 
-   #if JUCE_MAC || JUCE_IOS || DOXYGEN
     //==============================================================================
+    /** Tries to create a symbolic link and returns a boolean to indicate success */
+    bool createSymbolicLink (const File& linkFileToCreate, bool overwriteExisting) const;
+
+    /** Returns true if this file is a link or alias that can be followed using getLinkedTarget(). */
+    bool isSymbolicLink() const;
+
+    /** If this file is a link or alias, this returns the file that it points to.
+        If the file isn't actually link, it'll just return itself.
+    */
+    File getLinkedTarget() const;
+
+   #if JUCE_WINDOWS
+    /** Windows ONLY - Creates a win32 .LNK shortcut file that links to this file. */
+    bool createShortcut (const String& description, const File& linkFileToCreate) const;
+
+    /** Windows ONLY - Returns true if this is a win32 .LNK file. */
+    bool isShortcut() const;
+   #endif
+
+    //==============================================================================
+   #if JUCE_MAC || JUCE_IOS || DOXYGEN
     /** OSX ONLY - Finds the OSType of a file from the its resources. */
     OSType getMacOSType() const;
 
@@ -958,11 +969,6 @@ public:
    #if JUCE_MAC || DOXYGEN
     /** OSX ONLY - Adds this file to the OSX dock */
     void addToDock() const;
-   #endif
-
-   #if JUCE_WINDOWS
-    /** Windows ONLY - Creates a win32 .LNK shortcut file that links to this file. */
-    bool createLink (const String& description, const File& linkFileToCreate) const;
    #endif
 
 private:

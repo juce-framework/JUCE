@@ -158,6 +158,47 @@ public:
     }
 
     //==============================================================================
+    /** Checks that the result of an expression does not throw an exception. */
+    #define expectDoesNotThrow(expr)         \
+        try                                  \
+        {                                    \
+            (expr);                          \
+            expect (true);                   \
+        }                                    \
+        catch (...)                          \
+        {                                    \
+            expect (false, "Expected: does not throw an exception, Actual: throws."); \
+        }
+
+    /** Checks that the result of an expression throws an exception. */
+    #define expectThrows(expr)               \
+        try                                  \
+        {                                    \
+            (expr);                          \
+            expect (false, "Expected: throws an exception, Actual: does not throw."); \
+        }                                    \
+        catch (...)                          \
+        {                                    \
+            expect (true);                   \
+        }
+
+    /** Checks that the result of an expression throws an exception of a certain type. */
+    #define expectThrowsType(expr, type)     \
+        try                                  \
+        {                                    \
+            (expr);                          \
+            expect (false, "Expected: throws an exception of type " #type ", Actual: does not throw."); \
+        }                                    \
+        catch (type&)                        \
+        {                                    \
+            expect (true);                   \
+        }                                    \
+        catch (...)                          \
+        {                                    \
+            expect (false, "Expected: throws an exception of type " #type ", Actual: throws another type."); \
+        }
+
+    //==============================================================================
     /** Writes a message to the test log.
         This can only be called from within your runTest() method.
     */

@@ -404,6 +404,51 @@ public:
     */
     void playTestSound();
 
+    /** Plays a sound from a file. */
+    void playSound (const File& file);
+
+    /** Convenient method to play sound from a JUCE resource. */
+    void playSound (const void* resourceData, size_t resourceSize);
+
+    /** Plays the sound from an audio format reader.
+
+        If deleteWhenFinished is true then the format reader will be
+        automatically deleted once the sound has finished playing.
+    */
+    void playSound (AudioFormatReader* buffer, bool deleteWhenFinished = false);
+
+    /** Plays the sound from a positionable audio source.
+
+        This will output the sound coming from a positionable audio source.
+        This gives you slightly more control over the sound playback compared
+        to  the other playSound methods. For example, if you would like to
+        stop the sound prematurely you can call this method with a
+        TransportAudioSource and then call audioSource->stop. Note that,
+        you must call audioSource->start to start the playback, if your
+        audioSource is a TransportAudioSource.
+
+        The audio device manager will not hold any references to this audio
+        source once the audio source has stopped playing for any reason,
+        for example when the sound has finished playing or when you have
+        called audioSource->stop. Therefore, calling audioSource->start() on
+        a finished audioSource will not restart the sound again. If this is
+        desired simply call playSound with the same audioSource again.
+
+        @param audioSource   the audio source to play
+        @param deleteWhenFinished If this is true then the audio source will
+                                  be deleted once the device manager has finished playing.
+    */
+    void playSound (PositionableAudioSource* audioSource, bool deleteWhenFinished = false);
+
+    /** Plays the sound from an audio sample buffer.
+
+        This will output the sound contained in an audio sample buffer. If
+        deleteWhenFinished is true then the audio sample buffer will be
+        automatically deleted once the sound has finished playing.
+    */
+    void playSound (AudioSampleBuffer* buffer, bool deleteWhenFinished = false);
+
+    //==============================================================================
     /** Turns on level-measuring.
 
         When enabled, the device manager will measure the peak input level
@@ -452,8 +497,6 @@ private:
     mutable bool listNeedsScanning;
     Atomic<int> inputLevelMeasurementEnabledCount;
     double inputLevel;
-    ScopedPointer<AudioSampleBuffer> testSound;
-    int testSoundPosition;
     AudioSampleBuffer tempBuffer;
 
     struct MidiCallbackInfo

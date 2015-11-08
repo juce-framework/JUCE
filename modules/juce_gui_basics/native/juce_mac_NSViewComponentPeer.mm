@@ -587,7 +587,8 @@ public:
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit
-            handleMouseEvent (0, Point<float> (-1.0f, -1.0f), currentModifiers, getMouseTime (ev));
+            handleMouseEvent (0, Point<float> (-1.0f, -1.0f), currentModifiers,
+                              getMousePressure (ev), getMouseTime (ev));
 
         showArrowCursorIfNeeded();
     }
@@ -678,7 +679,8 @@ public:
     void sendMouseEvent (NSEvent* ev)
     {
         updateModifiers (ev);
-        handleMouseEvent (0, getMousePos (ev, view), currentModifiers, getMouseTime (ev));
+        handleMouseEvent (0, getMousePos (ev, view), currentModifiers,
+                          getMousePressure (ev), getMouseTime (ev));
     }
 
     bool handleKeyEvent (NSEvent* ev, bool isKeyDown)
@@ -1080,10 +1082,15 @@ public:
         return keyCode;
     }
 
-    static int64 getMouseTime (NSEvent* e)
+    static int64 getMouseTime (NSEvent* e) noexcept
     {
         return (Time::currentTimeMillis() - Time::getMillisecondCounter())
-                + (int64) ([e timestamp] * 1000.0);
+                 + (int64) ([e timestamp] * 1000.0);
+    }
+
+    static float getMousePressure (NSEvent* e) noexcept
+    {
+        return (float) e.pressure;
     }
 
     static Point<float> getMousePos (NSEvent* e, NSView* view)

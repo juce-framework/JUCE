@@ -36,6 +36,10 @@
 //==============================================================================
 extern JNIEnv* getEnv() noexcept;
 
+// You should rarely need to use this function. Only if you expect callbacks
+// on a java thread which you did not create yourself.
+extern void setEnv (JNIEnv* env) noexcept;
+
 //==============================================================================
 class GlobalRef
 {
@@ -236,6 +240,8 @@ private:
 #define JUCE_JNI_CALLBACK(className, methodName, returnType, params) \
   extern "C" __attribute__ ((visibility("default"))) JUCE_ARM_SOFT_FLOAT_ABI returnType JUCE_JOIN_MACRO (JUCE_JOIN_MACRO (Java_, className), _ ## methodName) params
 
+
+
 //==============================================================================
 class AndroidSystem
 {
@@ -254,141 +260,10 @@ public:
 extern AndroidSystem android;
 
 //==============================================================================
-class ThreadLocalJNIEnvHolder
-{
-public:
-    ThreadLocalJNIEnvHolder() noexcept
-        : jvm (nullptr)
-    {
-        zeromem (threads, sizeof (threads));
-        zeromem (envs, sizeof (envs));
-    }
-
-    void initialise (JNIEnv* env)
-    {
-        // NB: the DLL can be left loaded by the JVM, so the same static
-        // objects can end up being reused by subsequent runs of the app
-        zeromem (threads, sizeof (threads));
-        zeromem (envs, sizeof (envs));
-
-        env->GetJavaVM (&jvm);
-        addEnv (env);
-    }
-
-    JNIEnv* attach() noexcept
-    {
-        if (android.activity != nullptr)
-        {
-            if (JNIEnv* env = attachToCurrentThread())
-            {
-                SpinLock::ScopedLockType sl (addRemoveLock);
-                return addEnv (env);
-            }
-
-            jassertfalse;
-        }
-
-        return nullptr;
-    }
-
-    void detach() noexcept
-    {
-        if (android.activity != nullptr)
-        {
-            jvm->DetachCurrentThread();
-            removeCurrentThreadFromCache();
-        }
-    }
-
-    void removeCurrentThreadFromCache()
-    {
-        const pthread_t thisThread = pthread_self();
-
-        SpinLock::ScopedLockType sl (addRemoveLock);
-
-        for (int i = 0; i < maxThreads; ++i)
-        {
-            if (threads[i] == thisThread)
-            {
-                threads[i] = 0;
-                envs[i] = nullptr;
-            }
-        }
-    }
-
-    JNIEnv* getOrAttach() noexcept
-    {
-        if (JNIEnv* env = get())
-            return env;
-
-        SpinLock::ScopedLockType sl (addRemoveLock);
-
-        if (JNIEnv* env = get())
-            return env;
-
-        if (JNIEnv* env = attachToCurrentThread())
-            return addEnv (env);
-
-        return nullptr;
-    }
-
-private:
-    JavaVM* jvm;
-    enum { maxThreads = 32 };
-    pthread_t threads [maxThreads];
-    JNIEnv* envs [maxThreads];
-    SpinLock addRemoveLock;
-
-    JNIEnv* addEnv (JNIEnv* env) noexcept
-    {
-        const pthread_t thisThread = pthread_self();
-
-        for (int i = 0; i < maxThreads; ++i)
-        {
-            if (threads[i] == 0)
-            {
-                envs[i] = env;
-                threads[i] = thisThread;
-                return env;
-            }
-        }
-
-        jassertfalse; // too many threads!
-        return nullptr;
-    }
-
-    JNIEnv* get() const noexcept
-    {
-        const pthread_t thisThread = pthread_self();
-
-        for (int i = 0; i < maxThreads; ++i)
-            if (threads[i] == thisThread)
-                return envs[i];
-
-        return nullptr;
-    }
-
-    JNIEnv* attachToCurrentThread()
-    {
-        JNIEnv* env = nullptr;
-        jvm->AttachCurrentThread (&env, nullptr);
-        return env;
-    }
-};
-
-extern ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
-
-struct AndroidThreadScope
-{
-    AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
-    ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
-};
-
-//==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (createNewView,          "createNewView",        "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
  METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
- METHOD (deleteOpenGLView,       "deleteOpenGLView",     "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$OpenGLView;)V") \
+ METHOD (createNativeSurfaceView, "createNativeSurfaceView", "(J)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView;") \
  METHOD (postMessage,            "postMessage",          "(J)V") \
  METHOD (finish,                 "finish",               "()V") \
  METHOD (getClipboardContent,    "getClipboardContent",  "()Ljava/lang/String;") \
@@ -405,7 +280,14 @@ struct AndroidThreadScope
  METHOD (getTypeFaceFromAsset,   "getTypeFaceFromAsset", "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
  METHOD (getTypeFaceFromByteArray,"getTypeFaceFromByteArray","([B)Landroid/graphics/Typeface;") \
  METHOD (setScreenSaver,          "setScreenSaver",       "(Z)V") \
- METHOD (getScreenSaver,          "getScreenSaver",       "()Z")
+ METHOD (getScreenSaver,          "getScreenSaver",       "()Z") \
+ METHOD (getAndroidMidiDeviceManager, "getAndroidMidiDeviceManager", "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$MidiDeviceManager;") \
+ METHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager;") \
+ METHOD (getAndroidSDKVersion,    "getAndroidSDKVersion", "()I") \
+ METHOD (audioManagerGetProperty, "audioManagerGetProperty", "(Ljava/lang/String;)Ljava/lang/String;") \
+ METHOD (setCurrentThreadPriority, "setCurrentThreadPriority", "(I)I") \
+ METHOD (hasSystemFeature,         "hasSystemFeature", "(Ljava/lang/String;)Z" ) \
+ METHOD (createNewThread,          "createNewThread", "(J)Ljava/lang/Thread;") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
@@ -433,6 +315,19 @@ DECLARE_JNI_CLASS (Paint, "android/graphics/Paint");
  METHOD (setValues,     "setValues", "([F)V") \
 
 DECLARE_JNI_CLASS (Matrix, "android/graphics/Matrix");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (start, "start", "()V") \
+ METHOD (stop, "stop", "()V") \
+ METHOD (setName, "setName", "(Ljava/lang/String;)V") \
+ METHOD (getName, "getName", "()Ljava/lang/String;") \
+ METHOD (getId, "getId", "()J") \
+ STATICMETHOD (currentThread, "currentThread", "()Ljava/lang/Thread;") \
+ METHOD (setPriority, "setPriority", "(I)V") \
+
+DECLARE_JNI_CLASS (JuceThread, "java/lang/Thread");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

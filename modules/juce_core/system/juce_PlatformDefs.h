@@ -149,20 +149,44 @@
 #endif
 
 //==============================================================================
-#ifndef DOXYGEN
-namespace juce
-{
-    template <bool b> struct JuceStaticAssert;
-    template <>       struct JuceStaticAssert<true> { static void dummy() {} };
-}
+#if ! DOXYGEN
+ #define JUCE_JOIN_MACRO_HELPER(a, b) a ## b
+ #define JUCE_STRINGIFY_MACRO_HELPER(a) #a
 #endif
 
-/** A compile-time assertion macro.
-    If the expression parameter is false, the macro will cause a compile error. (The actual error
-    message that the compiler generates may be completely bizarre and seem to have no relation to
-    the place where you put the static_assert though!)
+/** A good old-fashioned C macro concatenation helper.
+    This combines two items (which may themselves be macros) into a single string,
+    avoiding the pitfalls of the ## macro operator.
 */
-#define static_jassert(expression)      juce::JuceStaticAssert<expression>::dummy();
+#define JUCE_JOIN_MACRO(item1, item2)  JUCE_JOIN_MACRO_HELPER (item1, item2)
+
+/** A handy C macro for stringifying any symbol, rather than just a macro parameter. */
+#define JUCE_STRINGIFY(item)  JUCE_STRINGIFY_MACRO_HELPER (item)
+
+//==============================================================================
+#ifdef JUCE_COMPILER_SUPPORTS_STATIC_ASSERT
+  /** A compile-time assertion macro.
+     If the expression parameter is false, the macro will cause a compile error. (The actual error
+     message that the compiler generates may be completely bizarre and seem to have no relation to
+     the place where you put the static_assert though!)
+  */
+  #define static_jassert(expression) static_assert (expression);
+#else
+ #ifndef DOXYGEN
+  namespace juce
+  {
+     template <bool b> struct JuceStaticAssert;
+     template <>       struct JuceStaticAssert<true> { static void dummy() {} };
+  }
+ #endif
+
+  /** A compile-time assertion macro.
+      If the expression parameter is false, the macro will cause a compile error. (The actual error
+      message that the compiler generates may be completely bizarre and seem to have no relation to
+      the place where you put the static_assert though!)
+  */
+  #define static_jassert(expression)      juce::JuceStaticAssert<expression>::dummy();
+#endif
 
 /** This is a shorthand macro for declaring stubs for a class's copy constructor and operator=.
 
@@ -206,24 +230,6 @@ namespace juce
    private: \
     static void* operator new (size_t) JUCE_DELETED_FUNCTION; \
     static void operator delete (void*) JUCE_DELETED_FUNCTION;
-
-
-//==============================================================================
-#if ! DOXYGEN
- #define JUCE_JOIN_MACRO_HELPER(a, b) a ## b
- #define JUCE_STRINGIFY_MACRO_HELPER(a) #a
-#endif
-
-/** A good old-fashioned C macro concatenation helper.
-    This combines two items (which may themselves be macros) into a single string,
-    avoiding the pitfalls of the ## macro operator.
-*/
-#define JUCE_JOIN_MACRO(item1, item2)  JUCE_JOIN_MACRO_HELPER (item1, item2)
-
-/** A handy C macro for stringifying any symbol, rather than just a macro parameter.
-*/
-#define JUCE_STRINGIFY(item)  JUCE_STRINGIFY_MACRO_HELPER (item)
-
 
 //==============================================================================
 #if JUCE_MSVC && ! defined (DOXYGEN)

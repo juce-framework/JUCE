@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{7CB284D3-A406-8D00-8F8D-CFBF55471571}") = "UnitTestRunner", "UnitTestRunner.vcxproj", "{4600F893-701E-E6ED-9A30-5A8CEB85AC21}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4600F893-701E-E6ED-9A30-5A8CEB85AC21}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4600F893-701E-E6ED-9A30-5A8CEB85AC21}.Debug|Win32.Build.0 = Debug|Win32
+		{4600F893-701E-E6ED-9A30-5A8CEB85AC21}.Release|Win32.ActiveCfg = Release|Win32
+		{4600F893-701E-E6ED-9A30-5A8CEB85AC21}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -105,6 +105,7 @@ public:
 
     //==============================================================================
     File getGeneratedCodeFolder() const                         { return getFile().getSiblingFile ("JuceLibraryCode"); }
+    File getSourceFilesFolder() const                           { return getProjectFolder().getChildFile ("Source"); }
     File getLocalModulesFolder() const                          { return getGeneratedCodeFolder().getChildFile ("modules"); }
     File getLocalModuleFolder (const String& moduleID) const    { return getLocalModulesFolder().getChildFile (moduleID); }
     File getAppIncludeFile() const                              { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
@@ -166,8 +167,13 @@ public:
         bool shouldBeAddedToTargetProject() const;
         bool shouldBeCompiled() const;
         Value getShouldCompileValue();
+
         bool shouldBeAddedToBinaryResources() const;
-        Value getShouldAddToResourceValue();
+        Value getShouldAddToBinaryResourcesValue();
+
+        bool shouldBeAddedToXcodeResources() const;
+        Value getShouldAddToXcodeResourcesValue();
+
         Value getShouldInhibitWarningsValue();
         bool shouldInhibitWarnings() const;
         Value getShouldUseStdCallValue();

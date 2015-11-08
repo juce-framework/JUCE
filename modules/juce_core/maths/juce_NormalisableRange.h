@@ -136,6 +136,8 @@ public:
         return v;
     }
 
+    Range<ValueType> getRange() const noexcept          { return Range<ValueType> (start, end); }
+
     /** The start of the non-normalised range. */
     ValueType start;
 

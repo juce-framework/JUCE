@@ -128,8 +128,8 @@ protected:
     class MSVCBuildConfiguration  : public BuildConfiguration
     {
     public:
-        MSVCBuildConfiguration (Project& p, const ValueTree& settings)
-            : BuildConfiguration (p, settings)
+        MSVCBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
+            : BuildConfiguration (p, settings, e)
         {
             if (getWarningLevel() == 0)
                 getWarningLevelValue() = 4;
@@ -237,7 +237,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new MSVCBuildConfiguration (project, v);
+        return new MSVCBuildConfiguration (project, v, *this);
     }
 
     //==============================================================================
@@ -620,11 +620,11 @@ public:
                     if (iconFile != File::nonexistent)
                     {
                         group.addFileAtIndex (iconFile, -1, true);
-                        group.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
+                        group.findItemForFile (iconFile).getShouldAddToBinaryResourcesValue() = false;
                     }
 
                     group.addFileAtIndex (rcFile, -1, true);
-                    group.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
+                    group.findItemForFile (rcFile).getShouldAddToBinaryResourcesValue() = false;
 
                     break;
                 }
@@ -1048,8 +1048,8 @@ protected:
     class VC2010BuildConfiguration  : public MSVCBuildConfiguration
     {
     public:
-        VC2010BuildConfiguration (Project& p, const ValueTree& settings)
-            : MSVCBuildConfiguration (p, settings)
+        VC2010BuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
+            : MSVCBuildConfiguration (p, settings, e)
         {
             if (getArchitectureType().toString().isEmpty())
                 getArchitectureType() = get32BitArchName();
@@ -1085,7 +1085,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {
-        return new VC2010BuildConfiguration (project, v);
+        return new VC2010BuildConfiguration (project, v, *this);
     }
 
     static bool is64Bit (const BuildConfiguration& config)

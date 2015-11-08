@@ -44,34 +44,33 @@ public:
     }
 
     //==============================================================================
-    bool hasEditor() const override                  { return true; }
+    bool hasEditor() const override                                             { return true; }
     AudioProcessorEditor* createEditor() override;
 
     //==============================================================================
-    bool supportsDoublePrecisionProcessing() const override { return true; }
+    const String getName() const override                                       { return JucePlugin_Name; }
 
-    //==============================================================================
-    const String getName() const override            { return JucePlugin_Name; }
+    const String getInputChannelName (int channelIndex, int elementIndex) const override          { return String (channelIndex + 1); }
+    const String getOutputChannelName (int channelIndex, int elementIndex) const override         { return String (channelIndex + 1); }
 
-    const String getInputChannelName (int channelIndex, int elementIndex) const override;
-    const String getOutputChannelName (int channelIndex, int elementIndex) const override;
-    bool isInputChannelStereoPair (int index, int elementIndex) const override;
-    bool isOutputChannelStereoPair (int index, int elementIndex) const override;
+    bool isInputChannelStereoPair (int /*index*/, int /* elementIndex */) const override                { return true; }
+    bool isOutputChannelStereoPair (int /*index*/, int /* elementIndex */) const override               { return true; }
 
-    bool acceptsMidi() const override;
-    bool producesMidi() const override;
-    bool silenceInProducesSilenceOut() const override;
-    double getTailLengthSeconds() const override;
+    bool acceptsMidi() const override                                           { return true; }
+    bool producesMidi() const override                                          { return true; }
+
+    bool silenceInProducesSilenceOut() const override                           { return false; }
+    double getTailLengthSeconds() const override                                { return 0.0; }
 
     //==============================================================================
     int getNumPrograms() override                                               { return 1; }
     int getCurrentProgram() override                                            { return 0; }
     void setCurrentProgram (int /*index*/) override                             {}
     const String getProgramName (int /*index*/) override                        { return "Default"; }
-    void changeProgramName (int /*index*/, const String& /*newName*/) override  {}
+    void changeProgramName (int /*index*/, const String& /*name*/) override     {}
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override;
+    void getStateInformation (MemoryBlock&) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
@@ -93,20 +92,26 @@ public:
     int lastUIWidth, lastUIHeight;
 
     // Our parameters
-    AudioProcessorParameter* gain;
-    AudioProcessorParameter* delay;
+    AudioParameterFloat* gainParam;
+    AudioParameterFloat* delayParam;
 
 private:
     //==============================================================================
-    template <typename floatType>
-    void process (AudioBuffer<floatType>& buffer, MidiBuffer& midiMessages, AudioBuffer<floatType>& delayBuffer);
+    template <typename FloatType>
+    void process (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioBuffer<FloatType>& delayBuffer);
+    template <typename FloatType>
+    void applyGain (AudioBuffer<FloatType>&, AudioBuffer<FloatType>& delayBuffer);
+    template <typename FloatType>
+    void applyDelay (AudioBuffer<FloatType>&, AudioBuffer<FloatType>& delayBuffer);
 
     AudioBuffer<float> delayBufferFloat;
     AudioBuffer<double> delayBufferDouble;
     int delayPosition;
 
-    // the synth!
     Synthesiser synth;
+
+    void initialiseSynth();
+    void updateCurrentTimeInfoFromHost();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceDemoPluginAudioProcessor)
 };

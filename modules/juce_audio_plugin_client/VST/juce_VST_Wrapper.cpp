@@ -69,6 +69,11 @@
  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
 #endif
 
+#ifdef _MSC_VER
+ #pragma warning (push)
+ #pragma warning (disable : 4458)
+#endif
+
 /*  These files come with the Steinberg VST SDK - to get them, you'll need to
     visit the Steinberg website and agree to whatever is currently required to
     get them. The best version to get is the VST3 SDK, which also contains
@@ -94,6 +99,10 @@
 #if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
  #include <pluginterfaces/base/funknown.h>
  namespace juce { extern Steinberg::FUID getJuceVST3ComponentIID(); }
+#endif
+
+#ifdef _MSC_VER
+ #pragma warning (pop)
 #endif
 
 #ifdef __clang__

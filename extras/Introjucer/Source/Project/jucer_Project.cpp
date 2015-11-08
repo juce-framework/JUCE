@@ -592,8 +592,11 @@ bool Project::Item::shouldBeAddedToTargetProject() const    { return isFile(); }
 Value Project::Item::getShouldCompileValue()                { return state.getPropertyAsValue (Ids::compile, getUndoManager()); }
 bool Project::Item::shouldBeCompiled() const                { return state [Ids::compile]; }
 
-Value Project::Item::getShouldAddToResourceValue()          { return state.getPropertyAsValue (Ids::resource, getUndoManager()); }
+Value Project::Item::getShouldAddToBinaryResourcesValue()   { return state.getPropertyAsValue (Ids::resource, getUndoManager()); }
 bool Project::Item::shouldBeAddedToBinaryResources() const  { return state [Ids::resource]; }
+
+Value Project::Item::getShouldAddToXcodeResourcesValue()    { return state.getPropertyAsValue (Ids::xcodeResource, getUndoManager()); }
+bool Project::Item::shouldBeAddedToXcodeResources() const   { return state [Ids::xcodeResource]; }
 
 Value Project::Item::getShouldInhibitWarningsValue()        { return state.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
 bool Project::Item::shouldInhibitWarnings() const           { return state [Ids::noWarnings]; }
@@ -872,7 +875,7 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile && file.hasFileExtension (fileTypesToCompileByDefault);
-    item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
+    item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
     if (canContain (item))
     {
@@ -887,7 +890,7 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
     item.initialiseMissingProperties();
     item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile;
-    item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
+    item.getShouldAddToBinaryResourcesValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
     if (canContain (item))
     {

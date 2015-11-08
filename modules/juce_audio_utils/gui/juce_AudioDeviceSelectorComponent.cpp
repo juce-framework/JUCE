@@ -80,10 +80,14 @@ public:
           deviceManager (dm),
           noItemsMessage (noItems)
     {
-        items = MidiInput::getDevices();
-
+        updateDevices();
         setModel (this);
         setOutlineThickness (1);
+    }
+
+    void updateDevices()
+    {
+        items = MidiInput::getDevices();
     }
 
     int getNumRows() override
@@ -1011,11 +1015,19 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         midiInputsLabel = new Label (String::empty, TRANS ("Active MIDI inputs:"));
         midiInputsLabel->setJustificationType (Justification::topRight);
         midiInputsLabel->attachToComponent (midiInputsList, true);
+
+        if (BluetoothMidiDevicePairingDialogue::isAvailable())
+        {
+            addAndMakeVisible (bluetoothButton = new TextButton (TRANS("Bluetooth MIDI"),
+                                                                 TRANS("Scan for bluetooth MIDI devices")));
+            bluetoothButton->addListener (this);
+        }
     }
     else
     {
         midiInputsList = nullptr;
         midiInputsLabel = nullptr;
+        bluetoothButton = nullptr;
     }
 
     if (showMidiOutputSelector)
@@ -1034,6 +1046,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 
     deviceManager.addChangeListener (this);
     updateAllControls();
+    startTimer (1000);
 }
 
 AudioDeviceSelectorComponent::~AudioDeviceSelectorComponent()
@@ -1073,8 +1086,24 @@ void AudioDeviceSelectorComponent::resized()
         r.removeFromTop (space);
     }
 
+    if (bluetoothButton != nullptr)
+    {
+        bluetoothButton->setBounds (r.removeFromTop (24));
+        r.removeFromTop (space);
+    }
+
     if (midiOutputSelector != nullptr)
         midiOutputSelector->setBounds (r.removeFromTop (itemHeight));
+}
+
+void AudioDeviceSelectorComponent::timerCallback()
+{
+    // TODO
+    // unfortunately, the AudioDeviceManager only gives us changeListenerCallbacks
+    // if an audio device has changed, but not if a MIDI device has changed.
+    // This needs to be implemented properly. Until then, we use a workaround
+    // where we update the whole component once per second on a timer callback.
+    updateAllControls();
 }
 
 void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
@@ -1133,6 +1162,7 @@ void AudioDeviceSelectorComponent::updateAllControls()
 
     if (midiInputsList != nullptr)
     {
+        midiInputsList->updateDevices();
         midiInputsList->updateContent();
         midiInputsList->repaint();
     }
@@ -1158,4 +1188,10 @@ void AudioDeviceSelectorComponent::updateAllControls()
     }
 
     resized();
+}
+
+void AudioDeviceSelectorComponent::buttonClicked (Button* btn)
+{
+    if (bluetoothButton == btn)
+        BluetoothMidiDevicePairingDialogue::open();
 }

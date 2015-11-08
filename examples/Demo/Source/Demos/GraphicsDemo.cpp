@@ -45,7 +45,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillTiledBackground (g);
+        fillStandardDemoBackground (g);
     }
 
     void resized() override
@@ -310,7 +310,7 @@ public:
         // rescale the logo path so that it's centred about the origin and has the right size.
         logoPath.applyTransform (RectanglePlacement (RectanglePlacement::centred)
                                  .getTransformToFit (logoPath.getBounds(),
-                                                     Rectangle<float> (-200.0f, -200.0f, 400.0f, 400.0f)));
+                                                     Rectangle<float> (-120.0f, -120.0f, 240.0f, 240.0f)));
 
         // Surround it with some other shapes..
         logoPath.addStar (Point<float> (-300.0f, -50.0f), 7, 30.0f, 70.0f, 0.1f);

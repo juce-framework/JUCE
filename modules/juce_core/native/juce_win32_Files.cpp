@@ -631,13 +631,45 @@ String File::getVersion() const
 }
 
 //==============================================================================
-bool File::isLink() const
+bool File::isSymbolicLink() const
+{
+    return (GetFileAttributes (fullPath.toWideCharPointer()) & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+}
+
+bool File::isShortcut() const
 {
     return hasFileExtension (".lnk");
 }
 
 File File::getLinkedTarget() const
 {
+    {
+        HANDLE h = CreateFile (getFullPathName().toWideCharPointer(),
+                               GENERIC_READ, FILE_SHARE_READ, nullptr,
+                               OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+
+        if (h != INVALID_HANDLE_VALUE)
+        {
+            DWORD requiredSize = ::GetFinalPathNameByHandleW (h, nullptr, 0, FILE_NAME_NORMALIZED);
+
+            if (requiredSize > 0)
+            {
+                HeapBlock<WCHAR> buffer (requiredSize + 2);
+                buffer.clear (requiredSize + 2);
+
+                requiredSize = ::GetFinalPathNameByHandleW (h, buffer, requiredSize, FILE_NAME_NORMALIZED);
+
+                if (requiredSize > 0)
+                {
+                    CloseHandle (h);
+                    return File (String (buffer));
+                }
+            }
+
+            CloseHandle (h);
+        }
+    }
+
     File result (*this);
     String p (getFullPathName());
 
@@ -664,7 +696,7 @@ File File::getLinkedTarget() const
     return result;
 }
 
-bool File::createLink (const String& description, const File& linkFileToCreate) const
+bool File::createShortcut (const String& description, const File& linkFileToCreate) const
 {
     linkFileToCreate.deleteFile();
 

@@ -24,6 +24,15 @@
 
 extern bool isIOSAppActive;
 
+struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
+{
+    virtual ~AppInactivityCallback() {}
+    virtual void appBecomingInactive() = 0;
+};
+
+// This is an internal list of callbacks (but currently used between modules)
+Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+
 } // (juce namespace)
 
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
@@ -89,6 +98,9 @@ extern bool isIOSAppActive;
 {
     ignoreUnused (application);
     isIOSAppActive = false;
+
+    for (int i = appBecomingInactiveCallbacks.size(); --i >= 0;)
+        appBecomingInactiveCallbacks.getReference(i)->appBecomingInactive();
 }
 
 @end

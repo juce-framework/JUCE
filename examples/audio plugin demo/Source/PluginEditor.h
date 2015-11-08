@@ -19,25 +19,23 @@
 /** This is the editor component that our filter will display.
 */
 class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
-                                            public SliderListener,
-                                            public Timer
+                                            private Timer
 {
 public:
     JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor&);
     ~JuceDemoPluginAudioProcessorEditor();
 
     //==============================================================================
-    void timerCallback() override;
     void paint (Graphics&) override;
     void resized() override;
-    void sliderValueChanged (Slider*) override;
-    void sliderDragStarted  (Slider*) override;
-    void sliderDragEnded    (Slider*) override;
+    void timerCallback() override;
 
 private:
+    class ParameterSlider;
+
     MidiKeyboardComponent midiKeyboard;
-    Label infoLabel, gainLabel, delayLabel;
-    Slider gainSlider, delaySlider;
+    Label timecodeDisplayLabel, gainLabel, delayLabel;
+    ScopedPointer<ParameterSlider> gainSlider, delaySlider;
     ScopedPointer<ResizableCornerComponent> resizer;
     ComponentBoundsConstrainer resizeLimits;
 
@@ -49,9 +47,7 @@ private:
         return static_cast<JuceDemoPluginAudioProcessor&> (processor);
     }
 
-    AudioProcessorParameter* getParameterFromSlider (const Slider*) const;
-
-    void displayPositionInfo (const AudioPlayHead::CurrentPositionInfo& pos);
+    void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo);
 };
 
 

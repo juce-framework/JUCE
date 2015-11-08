@@ -98,24 +98,19 @@ jfieldID JNIClassBase::resolveStaticField (JNIEnv* env, const char* fieldName, c
 }
 
 //==============================================================================
-ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
-
-#if JUCE_DEBUG
-static bool systemInitialised = false;
-#endif
+ThreadLocalValue<JNIEnv*> androidJNIEnv;
 
 JNIEnv* getEnv() noexcept
 {
-   #if JUCE_DEBUG
-    if (! systemInitialised)
-    {
-        DBG ("*** Call to getEnv() when system not initialised");
-        jassertfalse;
-        std::exit (EXIT_FAILURE);
-    }
-   #endif
+    JNIEnv* env = androidJNIEnv.get();
+    jassert (env != nullptr);
 
-    return threadLocalJNIEnvHolder.getOrAttach();
+    return env;
+}
+
+void setEnv (JNIEnv* env) noexcept
+{
+    androidJNIEnv.get() = env;
 }
 
 extern "C" jint JNI_OnLoad (JavaVM*, void*)
@@ -134,11 +129,6 @@ void AndroidSystem::initialise (JNIEnv* env, jobject act, jstring file, jstring 
     dpi = 160;
     JNIClassBase::initialiseAllClasses (env);
 
-    threadLocalJNIEnvHolder.initialise (env);
-   #if JUCE_DEBUG
-    systemInitialised = true;
-   #endif
-
     activity = GlobalRef (act);
     appFile = juceString (env, file);
     appDataDir = juceString (env, dataDir);
@@ -147,10 +137,6 @@ void AndroidSystem::initialise (JNIEnv* env, jobject act, jstring file, jstring 
 void AndroidSystem::shutdown (JNIEnv* env)
 {
     activity.clear();
-
-   #if JUCE_DEBUG
-    systemInitialised = false;
-   #endif
 
     JNIClassBase::releaseAllClasses (env);
 }
@@ -253,7 +239,7 @@ String SystemStats::getLogonName()
     if (struct passwd* const pw = getpwuid (getuid()))
         return CharPointer_UTF8 (pw->pw_name);
 
-    return String::empty;
+    return String();
 }
 
 String SystemStats::getFullUserName()
@@ -267,7 +253,7 @@ String SystemStats::getComputerName()
     if (gethostname (name, sizeof (name) - 1) == 0)
         return name;
 
-    return String::empty;
+    return String();
 }
 
 

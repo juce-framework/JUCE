@@ -73,6 +73,7 @@ public:
     void closeProject();
     void openInIDE (bool saveFirst);
     void openInIDE (int exporterIndex, bool saveFirst);
+    void showNewExporterMenu();
 
     void showFilesTab();
     void showConfigTab();

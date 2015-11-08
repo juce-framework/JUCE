@@ -101,6 +101,12 @@ private:
                        "so that your project will be self-contained, and won't need to contain any references to files in other folders. "
                        "This also means that you can check the module into your source-control system to make sure it is always in sync with your own code.");
 
+            props.add (new BooleanPropertyComponent (project.getModules().shouldNotOverwriteModuleCodeOnSave (moduleID),
+                                                     "Preserve local module changes",
+                                                     "Don't overwrite changes to JUCE modules"),
+                        "Generally, this should be disabled. However if you've got local changes to "
+                        "JUCE code that you want to preserve, enabling this lets you do that.");
+
             props.add (new BooleanPropertyComponent (project.getModules().shouldShowAllModuleFilesInProject (moduleID),
                                                      "Add source to project", "Make module files browsable in projects"),
                        "If this is enabled, then the entire source tree from this module will be shown inside your project, "
@@ -294,6 +300,7 @@ public:
         moduleListTree.addListener (this);
     }
 
+    int getItemHeight() const override      { return 22; }
     bool isModulesList() const override     { return true; }
     bool canBeSelected() const override     { return true; }
     bool mightContainSubItems() override    { return true; }

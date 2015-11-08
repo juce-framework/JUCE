@@ -1,8 +1,21 @@
 
 ﻿== Major JUCE features and updates ==
 
-
 This file just lists the more notable headline features. For more detailed info about minor changes and bugfixes, please see the git log.
+
+Version 4.0.1
+  - Initial release of the Projucer!
+  - Full OSC support!
+  - Android Studio exporting from the Introjucer
+  - Android-M pro-audio low-latency i/o support
+  - Bluetooth MIDI device support on iOS and Android
+  - AudioSampleBuffer refactored into a templated class AudioBuffer, to allow 32 or 64 bit float support
+  - Audio plugin and hosting now supports 64-bit data
+  - Support for force-touch and pen pressure on iOS and Windows
+  - Added easy sound-file playing methods to AudioDeviceManager
+  - Many updates to Introjucer
+  - Many new tutorials and examples
+
 
 Version 3.3.0
   - New functions for Base64 conversion

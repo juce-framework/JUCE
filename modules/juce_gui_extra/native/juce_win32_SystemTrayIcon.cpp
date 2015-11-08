@@ -111,8 +111,8 @@ public:
             const Time eventTime (getMouseEventTime());
 
             const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
-                                Point<float>(), eventMods, &owner, &owner, eventTime,
-                                Point<float>(), eventTime, 1, false);
+                                Point<float>(), eventMods, MouseInputSource::invalidPressure,
+                                &owner, &owner, eventTime, Point<float>(), eventTime, 1, false);
 
             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
             {

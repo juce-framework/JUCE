@@ -17,7 +17,7 @@
     <condition property="ndkDebugValue" value="NDK_DEBUG=1" else="NDK_DEBUG=0">
       <equals arg1="${ant.project.invoked-targets}" arg2="debug"/>
     </condition>
-    <condition property="app_abis" value="armeabi armeabi-v7a" else="armeabi armeabi-v7a">
+    <condition property="app_abis" value="armeabi x86" else="armeabi armeabi-v7a x86">
       <equals arg1="${ant.project.invoked-targets}" arg2="debug"/>
     </condition>
     <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
