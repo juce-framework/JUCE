@@ -365,6 +365,7 @@ String::String (const CharPointer_UTF16 start, const CharPointer_UTF16 end)  : t
 String::String (const CharPointer_UTF32 start, const CharPointer_UTF32 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
 
 String::String (const std::string& s) : text (StringHolder::createFromFixedLength (s.data(), s.size())) {}
+String::String (StringRef s)          : text (StringHolder::createFromCharPointer (s.text)) {}
 
 String String::charToString (const juce_wchar character)
 {
@@ -768,6 +769,11 @@ String& String::operator+= (const String& other)
     return *this;
 }
 
+String& String::operator+= (StringRef other)
+{
+    return operator+= (String (other));
+}
+
 String& String::operator+= (const char ch)
 {
     const char asString[] = { ch, 0 };
@@ -843,6 +849,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t s2)        
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const char* const s2)        { return s1 += s2; }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const wchar_t* const s2)     { return s1 += s2; }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const String& s2)            { return s1 += s2; }
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, StringRef s2)                { return s1 += s2; }
 
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const int number)            { return s1 += number; }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const short number)          { return s1 += (int) number; }
@@ -872,11 +879,6 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
    #endif
 
     return stream;
-}
-
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&)
-{
-    return string1 += NewLine::getDefault();
 }
 
 //==============================================================================
@@ -2308,6 +2310,10 @@ public:
             expect (String ("abcdEFGH").toLowerCase() == String ("abcdefgh"));
             expect (String ("abcdEFGH").toUpperCase() == String ("ABCDEFGH"));
 
+            expect (String (StringRef ("abc")) == "abc");
+            expect (String (StringRef ("abc")) == StringRef ("abc"));
+            expect (String ("abc") + StringRef ("def") == "abcdef");
+
             String s2 ("123");
             s2 << ((int) 4) << ((short) 5) << "678" << L"9" << '0';
             s2 += "xyz";
@@ -2316,6 +2322,8 @@ public:
             expect (s2 == "1234567890xyz123");
             s2 += (int64) 123;
             expect (s2 == "1234567890xyz123123");
+            s2 << StringRef ("def");
+            expect (s2 == "1234567890xyz123123def");
 
             beginTest ("Numeric conversions");
             expect (String::empty.getIntValue() == 0);

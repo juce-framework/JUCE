@@ -103,7 +103,7 @@ public:
         // show up the detail clearly
         Range<float> maxLevel = FloatVectorOperations::findMinAndMax (fftData, fftSize / 2);
 
-        for (int y = 0; y < imageHeight; ++y)
+        for (int y = 1; y < imageHeight; ++y)
         {
             const float skewedProportionY = 1.0f - std::exp (std::log (y / (float) imageHeight) * 0.2f);
             const int fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * fftSize / 2));

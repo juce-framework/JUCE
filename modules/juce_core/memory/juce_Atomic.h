@@ -207,7 +207,7 @@ private:
   #endif
 
 //==============================================================================
-#elif (JUCE_GCC || JUCE_CLANG) && ! JUCE_WINDOWS
+#elif (JUCE_GCC || JUCE_CLANG) && ! JUCE_MSVC
   #define JUCE_ATOMICS_GCC 1        // GCC with intrinsics
 
   #if JUCE_IOS || JUCE_ANDROID // (64-bit ops will compile but not link on these mobile OSes)

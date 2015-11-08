@@ -62,10 +62,15 @@ using namespace Steinberg;
 
 //==============================================================================
 #if JUCE_MAC
- extern void initialiseMacVST3();
- extern void* attachComponentToWindowRefVST3 (Component*, void* parent, bool isNSView);
- extern void detachComponentFromWindowRefVST3 (Component*, void* window, bool isNSView);
- extern void setNativeHostWindowSizeVST3 (void* window, Component*, int newWidth, int newHeight, bool isNSView);
+  extern void initialiseMacVST();
+
+ #if ! JUCE_64BIT
+  extern void updateEditorCompBoundsVST (Component*);
+ #endif
+
+  extern void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
+  extern void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
+  extern void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
 #endif
 
 //==============================================================================
@@ -250,7 +255,7 @@ public:
             toString128 (info.title, "Bypass");
             toString128 (info.shortTitle, "Bypass");
             toString128 (info.units, "");
-            info.stepCount = 2;
+            info.stepCount = 1;
             info.defaultNormalizedValue = 0.0f;
             info.unitId = Vst::kRootUnitId;
             info.flags = Vst::ParameterInfo::kIsBypass;
@@ -561,7 +566,7 @@ private:
             component->setVisible (true);
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = juce::attachComponentToWindowRefVST3 (component, parent, isNSView);
+            macHostWindow = juce::attachComponentToWindowRefVST (component, parent, isNSView);
            #endif
 
             component->resizeHostWindow();
@@ -580,7 +585,7 @@ private:
                #else
                 if (macHostWindow != nullptr)
                 {
-                    juce::detachComponentFromWindowRefVST3 (component, macHostWindow, isNSView);
+                    juce::detachComponentFromWindowRefVST (component, macHostWindow, isNSView);
                     macHostWindow = nullptr;
                 }
                #endif
@@ -692,7 +697,7 @@ private:
                     setSize (w, h);
                    #else
                     if (owner.macHostWindow != nullptr && ! getHostType().isWavelab())
-                        juce::setNativeHostWindowSizeVST3 (owner.macHostWindow, this, w, h, owner.isNSView);
+                        juce::setNativeHostWindowSizeVST (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
                     if (owner.plugFrame != nullptr)
@@ -737,6 +742,14 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3EditController)
 };
+
+namespace
+{
+    template <typename FloatType> struct AudioBusPointerHelper {};
+    template <> struct AudioBusPointerHelper<float>  { static inline float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
+    template <> struct AudioBusPointerHelper<double> { static inline double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
+}
+
 
 //==============================================================================
 class JuceVST3Component : public Vst::IComponent,
@@ -930,9 +943,8 @@ public:
             if (Vst::Bus* const bus = (Vst::Bus*) busList->at (index))
             {
                 bus->setActive (state);
-                if (dir == Vst::kInput) {
-                    getPluginInstance().setInputElementActive(index, state);
-                }
+                if (dir == Vst::kInput)
+                    getPluginInstance().setInputElementActive (index, state);
                 return kResultTrue;
             }
         }
@@ -960,15 +972,8 @@ public:
                             ? (int) processSetup.maxSamplesPerBlock
                             : bufferSize;
 
-            channelList.clear();
-            const int numInputChannels =
-           #if JucePlugin_AcceptsSideChain
-                JucePlugin_MaxNumInputChannels * 2;
-           #else
-                JucePlugin_MaxNumInputChannels;
-           #endif
-
-            channelList.insertMultiple (0, nullptr, jmax (numInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
+            allocateChannelLists (channelListFloat);
+            allocateChannelLists (channelListDouble);
 
             preparePlugin (sampleRate, bufferSize);
         }
@@ -1023,13 +1028,13 @@ public:
 
     void setStateInformation (const void* data, int sizeAsInt)
     {
-        size_t size = static_cast<size_t> (sizeAsInt);
+        int64 size = sizeAsInt;
 
         // Check if this data was written with a newer JUCE version
         // and if it has the JUCE private data magic code at the end
         const size_t jucePrivDataIdentifierSize = std::strlen (kJucePrivateDataIdentifier);
 
-        if (size >= (jucePrivDataIdentifierSize + sizeof (int64)))
+        if ((size_t) size >= jucePrivDataIdentifierSize + sizeof (int64))
         {
             const char* buffer = static_cast<const char*> (data);
 
@@ -1055,7 +1060,8 @@ public:
             }
         }
 
-        pluginInstance->setStateInformation (data, static_cast<int> (size));
+        if (size >= 0)
+            pluginInstance->setStateInformation (data, static_cast<int> (size));
     }
 
     //==============================================================================
@@ -1457,7 +1463,9 @@ public:
 
     tresult PLUGIN_API canProcessSampleSize (Steinberg::int32 symbolicSampleSize) override
     {
-        return symbolicSampleSize == Vst::kSample32 ? kResultTrue : kResultFalse;
+        return (symbolicSampleSize == Vst::kSample32
+                 || (getPluginInstance().supportsDoublePrecisionProcessing()
+                       && symbolicSampleSize == Vst::kSample64)) ? kResultTrue : kResultFalse;
     }
 
     Steinberg::uint32 PLUGIN_API getLatencySamples() override
@@ -1472,6 +1480,10 @@ public:
 
         processSetup = newSetup;
         processContext.sampleRate = processSetup.sampleRate;
+
+        getPluginInstance().setProcessingPrecision (newSetup.symbolicSampleSize == Vst::kSample64
+                                                        ? AudioProcessor::doublePrecision
+                                                        : AudioProcessor::singlePrecision);
 
         preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock);
 
@@ -1549,7 +1561,11 @@ public:
 
     tresult PLUGIN_API process (Vst::ProcessData& data) override
     {
+
         if (pluginInstance == nullptr)
+            return kResultFalse;
+
+        if ((processSetup.symbolicSampleSize == Vst::kSample64) != pluginInstance->isUsingDoublePrecision())
             return kResultFalse;
 
         if (data.processContext != nullptr)
@@ -1568,75 +1584,19 @@ public:
         const int numMidiEventsComingIn = midiBuffer.getNumEvents();
        #endif
 
-        int totalChans = 0;
-        int numInputChans = 0;
-        if (data.inputs != nullptr)
+        if (getHostType().isWavelab())
         {
-            for (int elementIndex = 0; elementIndex < pluginInstance->getNumChannelsPerInputElement().size(); ++elementIndex)
-            {
-                if (! pluginInstance->getInputElementActive(elementIndex)) {
-                    continue;
-                }
-                Vst::AudioBusBuffers& buffers = data.inputs[elementIndex];
-                jassert(buffers.channelBuffers32 != nullptr);
+            const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
+            const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
-                int numChannels = (int) buffers.numChannels;
-                numInputChans += numChannels;
-
-                for (int channelIndex = 0; channelIndex < numChannels; ++channelIndex) {
-                    channelList.set (totalChans, buffers.channelBuffers32[channelIndex]);
-                    ++totalChans;
-                }
-            }
+            if ((pluginInstance->getNumInputChannelsTotal (true) + pluginInstance->getNumOutputChannels()) > 0
+                && (numInputChans + numOutputChans) == 0)
+                return kResultFalse;
         }
 
-        jassert(numInputChans == pluginInstance->getNumInputChannelsTotal(true));
-
-        const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
-
-        while (totalChans < numOutputChans)
-        {
-            channelList.set (totalChans, data.outputs[0].channelBuffers32[totalChans]);
-            ++totalChans;
-        }
-
-        AudioSampleBuffer buffer;
-
-        if (totalChans != 0)
-            buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
-        else if (getHostType().isWavelab()
-                  && pluginInstance->getNumInputChannelsTotal(true) + pluginInstance->getNumOutputChannelsTotal() > 0)
-            return kResultFalse;
-
-        {
-            const ScopedLock sl (pluginInstance->getCallbackLock());
-
-            pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
-
-            if (data.inputParameterChanges != nullptr)
-                processParameterChanges (*data.inputParameterChanges);
-
-            if (pluginInstance->isSuspended())
-            {
-                buffer.clear();
-            }
-            else
-            {
-                if (isBypassed())
-                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
-                else
-                    pluginInstance->processBlock (buffer, midiBuffer);
-            }
-        }
-
-        for (int i = 0; i < numOutputChans; ++i)
-            FloatVectorOperations::copy (data.outputs[0].channelBuffers32[i], buffer.getReadPointer (i), (int) data.numSamples);
-
-        // clear extra busses..
-        if (data.outputs != nullptr)
-            for (int i = 1; i < data.numOutputs; ++i)
-                for (int f = 0; f < data.outputs[i].numChannels; ++f)
-                    FloatVectorOperations::clear (data.outputs[i].channelBuffers32[f], (int) data.numSamples);
+        if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data, channelListFloat);
+        else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data, channelListDouble);
+        else jassertfalse;
 
        #if JucePlugin_ProducesMidiOutput
         if (data.outputEvents != nullptr)
@@ -1680,13 +1640,60 @@ private:
 
     Vst::BusList audioInputs, audioOutputs, eventInputs, eventOutputs;
     MidiBuffer midiBuffer;
-    Array<float*> channelList;
+    Array<float*> channelListFloat;
+    Array<double*> channelListDouble;
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
     int vstBypassParameterId;
 
     static const char* kJucePrivateDataIdentifier;
+
+    //==============================================================================
+    template <typename FloatType>
+    void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
+    {
+        const int totalChans = prepareChannelLists (channelList,  data);
+
+        AudioBuffer<FloatType> buffer;
+
+        if (totalChans != 0)
+            buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
+
+        {
+            const ScopedLock sl (pluginInstance->getCallbackLock());
+
+            pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
+
+            if (data.inputParameterChanges != nullptr)
+                processParameterChanges (*data.inputParameterChanges);
+
+            if (pluginInstance->isSuspended())
+            {
+                buffer.clear();
+            }
+            else
+            {
+                if (isBypassed())
+                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
+                else
+                    pluginInstance->processBlock (buffer, midiBuffer);
+            }
+        }
+
+        if (data.outputs != nullptr)
+        {
+            for (int i = 0; i < data.numOutputs; ++i)
+                FloatVectorOperations::copy (getPointerForAudioBus<FloatType> (data.outputs[0])[i],
+                                             buffer.getReadPointer (i), (int) data.numSamples);
+        }
+
+        // clear extra busses..
+        if (data.outputs != nullptr)
+            for (int i = 1; i < data.numOutputs; ++i)
+                for (int f = 0; f < data.outputs[i].numChannels; ++f)
+                    FloatVectorOperations::clear (getPointerForAudioBus<FloatType> (data.outputs[i])[f], (int) data.numSamples);
+    }
 
     //==============================================================================
     void addBusTo (Vst::BusList& busList, Vst::Bus* newBus)
@@ -1713,6 +1720,71 @@ private:
     }
 
     //==============================================================================
+    template <typename FloatType>
+    void allocateChannelLists (Array<FloatType*>& channelList)
+    {
+        channelList.clear();
+        const int numInputChannels =
+           #if JucePlugin_AcceptsSideChain
+            JucePlugin_MaxNumInputChannels * 2;
+           #else
+            JucePlugin_MaxNumInputChannels;
+           #endif
+        channelList.insertMultiple (0, nullptr, jmax (numInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
+    }
+
+    template <typename FloatType>
+    static FloatType** getPointerForAudioBus (Vst::AudioBusBuffers& data) noexcept
+    {
+        return AudioBusPointerHelper<FloatType>::impl (data);
+    }
+
+    template <typename FloatType>
+    int prepareChannelLists (Array<FloatType*>& channelList, Vst::ProcessData& data) noexcept
+    {
+        int totalChans = 0;
+
+        int numInputChans = 0;
+        if (data.inputs != nullptr)
+        {
+            for (int elementIndex = 0; elementIndex < pluginInstance->getNumChannelsPerInputElement().size(); ++elementIndex)
+            {
+                if (! pluginInstance->getInputElementActive(elementIndex))
+                    continue;
+                Vst::AudioBusBuffers& buffers = data.inputs[elementIndex];
+                FloatType** inChannelBuffers = getPointerForAudioBus<FloatType> (buffers);
+                jassert (inChannelBuffers != nullptr);
+
+                int numChannels = (int) buffers.numChannels;
+                numInputChans += numChannels;
+
+                for (int channelIndex = 0; channelIndex < numChannels; ++channelIndex)
+                {
+                    channelList.set (totalChans, inChannelBuffers[channelIndex]);
+                    ++totalChans;
+                }
+            }
+        }
+
+        jassert (numInputChans == pluginInstance->getNumInputChannelsTotal (true));
+
+        FloatType** outChannelBuffers =
+            data.outputs  != nullptr ? getPointerForAudioBus<FloatType> (data.outputs[0]) : nullptr;
+
+        const int numOutputChans = (data.outputs != nullptr && outChannelBuffers != nullptr) ? (int) data.outputs[0].numChannels : 0;
+
+        // note that the loop bounds are correct: as VST-3 is always process replacing
+        // we already know the output channel buffers of the first numInputChans channels
+        for (int idx = 0; totalChans < numOutputChans; ++idx)
+        {
+            channelList.set (totalChans, outChannelBuffers[idx]);
+            ++totalChans;
+        }
+
+        return totalChans;
+    }
+
+    //==============================================================================
     enum InternalParameters
     {
         paramPreset = 'prst'
@@ -1736,9 +1808,10 @@ private:
                                                   audioOutputs.size(),
                                                   getNumChannels (audioOutputs),
                                                   sampleRate, bufferSize);
-        for (int elementIndex = 0; elementIndex < audioInputs.size(); ++elementIndex) {
-            getPluginInstance().setInputElementActive(elementIndex, audioInputs.at(elementIndex)->isActive());
-        }
+
+        for (int elementIndex = 0; elementIndex < audioInputs.size(); ++elementIndex)
+            getPluginInstance().setInputElementActive (elementIndex, audioInputs.at (elementIndex)->isActive());
+
         getPluginInstance().prepareToPlay (sampleRate, bufferSize);
     }
 
@@ -1820,7 +1893,7 @@ DEF_CLASS_IID (JuceAudioProcessor)
 bool initModule()
 {
    #if JUCE_MAC
-    initialiseMacVST3();
+    initialiseMacVST();
    #endif
 
     return true;

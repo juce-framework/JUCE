@@ -110,7 +110,7 @@ public:
     String getExtraLinkerFlagsString() const    { return getSettingString (Ids::extraLinkerFlags).replaceCharacters ("\r\n", "  "); }
 
     Value getExternalLibraries()                { return getSetting (Ids::externalLibraries); }
-    String getExternalLibrariesString() const   { return getSettingString (Ids::externalLibraries).replaceCharacters ("\r\n", " ;"); }
+    String getExternalLibrariesString() const   { return getSearchPathsFromString (getSettingString (Ids::externalLibraries)).joinIntoString (";"); }
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 

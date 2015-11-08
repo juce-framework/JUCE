@@ -724,6 +724,9 @@ public:
     /** Creates a text element that can be added to a parent element. */
     static XmlElement* createTextElement (const String& text);
 
+    /** Checks if a given string is a valid XML name */
+    static bool isValidXmlName (StringRef possibleName) noexcept;
+
     //==============================================================================
 private:
     struct XmlAttributeNode

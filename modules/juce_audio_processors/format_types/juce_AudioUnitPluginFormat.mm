@@ -836,9 +836,9 @@ public:
 
         if (audioUnit != nullptr)
         {
-            UInt32 paramListSize = 0;
+            UInt32 dummy = 0, paramListSize = 0;
             AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
-                                  0, 0, &paramListSize);
+                                  0, &dummy, &paramListSize);
 
             if (paramListSize > 0)
             {
@@ -1219,7 +1219,7 @@ private:
     //==============================================================================
     size_t getAudioBufferSizeInBytes() const noexcept
     {
-        return offsetof (AudioBufferList, mBuffers) + (sizeof (AudioBuffer) * numOutputBusChannels);
+        return offsetof (AudioBufferList, mBuffers) + (sizeof (::AudioBuffer) * numOutputBusChannels);
     }
 
     AudioBufferList* getAudioBufferListForBus (AudioUnitElement busIndex) const noexcept

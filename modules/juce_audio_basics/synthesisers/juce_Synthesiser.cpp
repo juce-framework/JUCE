@@ -71,6 +71,18 @@ bool SynthesiserVoice::wasStartedBefore (const SynthesiserVoice& other) const no
     return noteOnTime < other.noteOnTime;
 }
 
+void SynthesiserVoice::renderNextBlock (AudioBuffer<double>& outputBuffer,
+                                        int startSample, int numSamples)
+{
+    AudioBuffer<double> subBuffer (outputBuffer.getArrayOfWritePointers(),
+                                   outputBuffer.getNumChannels(),
+                                   startSample, numSamples);
+
+    tempBuffer.makeCopyOf (subBuffer);
+    renderNextBlock (tempBuffer, 0, numSamples);
+    subBuffer.makeCopyOf (tempBuffer);
+}
+
 //==============================================================================
 Synthesiser::Synthesiser()
     : sampleRate (0),
@@ -156,8 +168,11 @@ void Synthesiser::setCurrentPlaybackSampleRate (const double newRate)
     }
 }
 
-void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBuffer& midiData,
-                                   int startSample, int numSamples)
+template <typename floatType>
+void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
+                                    const MidiBuffer& midiData,
+                                    int startSample,
+                                    int numSamples)
 {
     // must set the sample rate before using this!
     jassert (sampleRate != 0);
@@ -174,7 +189,7 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
     {
         if (! midiIterator.getNextEvent (m, midiEventPos))
         {
-            renderVoices (outputBuffer, startSample, numSamples);
+            renderVoices (outputAudio, startSample, numSamples);
             return;
         }
 
@@ -182,7 +197,7 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
 
         if (samplesToNextMidiMessage >= numSamples)
         {
-            renderVoices (outputBuffer, startSample, numSamples);
+            renderVoices (outputAudio, startSample, numSamples);
             handleMidiEvent (m);
             break;
         }
@@ -193,7 +208,7 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
             continue;
         }
 
-        renderVoices (outputBuffer, startSample, samplesToNextMidiMessage);
+        renderVoices (outputAudio, startSample, samplesToNextMidiMessage);
         handleMidiEvent (m);
         startSample += samplesToNextMidiMessage;
         numSamples  -= samplesToNextMidiMessage;
@@ -203,7 +218,23 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer, const MidiBu
         handleMidiEvent (m);
 }
 
-void Synthesiser::renderVoices (AudioSampleBuffer& buffer, int startSample, int numSamples)
+// explicit template instantiation
+template void Synthesiser::processNextBlock<float> (AudioBuffer<float>& outputAudio,
+                                                    const MidiBuffer& midiData,
+                                                    int startSample,
+                                                    int numSamples);
+template void Synthesiser::processNextBlock<double> (AudioBuffer<double>& outputAudio,
+                                                     const MidiBuffer& midiData,
+                                                     int startSample,
+                                                     int numSamples);
+
+void Synthesiser::renderVoices (AudioBuffer<float>& buffer, int startSample, int numSamples)
+{
+    for (int i = voices.size(); --i >= 0;)
+        voices.getUnchecked (i)->renderNextBlock (buffer, startSample, numSamples);
+}
+
+void Synthesiser::renderVoices (AudioBuffer<double>& buffer, int startSample, int numSamples)
 {
     for (int i = voices.size(); --i >= 0;)
         voices.getUnchecked (i)->renderNextBlock (buffer, startSample, numSamples);

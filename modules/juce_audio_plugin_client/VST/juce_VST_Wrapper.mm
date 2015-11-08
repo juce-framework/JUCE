@@ -37,6 +37,9 @@
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 
+#undef Component
+#undef Point
+
 //==============================================================================
 namespace juce
 {
@@ -103,6 +106,7 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
 
             WindowAttributes attributes;
             GetWindowAttributes ((WindowRef) parentWindowOrView, &attributes);
+
             if ((attributes & kWindowCompositingAttribute) != 0)
             {
                 HIViewRef root = HIViewGetRoot ((WindowRef) parentWindowOrView);
@@ -160,7 +164,7 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
         }
        #endif
 
-        (void) isNSView;
+        ignoreUnused (isNSView);
         NSView* parentView = [(NSView*) parentWindowOrView retain];
 
        #if JucePlugin_EditorRequiresKeyboardFocus
@@ -233,7 +237,7 @@ void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSVi
         }
        #endif
 
-        (void) isNSView;
+        ignoreUnused (isNSView);
         comp->removeFromDesktop();
         [(id) window release];
     }
@@ -261,7 +265,7 @@ void setNativeHostWindowSizeVST (void* window, Component* component, int newWidt
         }
        #endif
 
-        (void) isNSView;
+        ignoreUnused (isNSView);
 
         if (NSView* hostView = (NSView*) window)
         {
@@ -280,7 +284,7 @@ void setNativeHostWindowSizeVST (void* window, Component* component, int newWidt
 void checkWindowVisibilityVST (void* window, Component* comp, bool isNSView);
 void checkWindowVisibilityVST (void* window, Component* comp, bool isNSView)
 {
-    (void) window; (void) comp; (void) isNSView;
+    ignoreUnused (window, comp, isNSView);
 
    #if ! JUCE_64BIT
     if (! isNSView)
@@ -301,7 +305,7 @@ bool forwardCurrentKeyEventToHostVST (Component* comp, bool isNSView)
     }
    #endif
 
-    (void) comp; (void) isNSView;
+    ignoreUnused (comp, isNSView);
     return false;
 }
 

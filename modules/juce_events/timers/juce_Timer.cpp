@@ -31,14 +31,15 @@ public:
 
     TimerThread()
         : Thread ("Juce Timer"),
-          firstTimer (nullptr),
-          callbackNeeded (0)
+          firstTimer (nullptr)
     {
         triggerAsyncUpdate();
     }
 
     ~TimerThread() noexcept
     {
+        signalThreadShouldExit();
+        callbackArrived.signal();
         stopThread (4000);
 
         jassert (instance == this || instance == nullptr);
@@ -55,12 +56,6 @@ public:
         {
             const uint32 now = Time::getMillisecondCounter();
 
-            if (now == lastTime)
-            {
-                wait (1);
-                continue;
-            }
-
             const int elapsed = (int) (now >= lastTime ? (now - lastTime)
                                                        : (std::numeric_limits<uint32>::max() - (lastTime - now)));
             lastTime = now;
@@ -69,42 +64,29 @@ public:
 
             if (timeUntilFirstTimer <= 0)
             {
-                /* If we managed to set the atomic boolean to true then send a message, this is needed
-                   as a memory barrier so the message won't be sent before callbackNeeded is set to true,
-                   but if it fails it means the message-thread changed the value from under us so at least
-                   some processing is happenening and we can just loop around and try again
-                */
-                if (callbackNeeded.compareAndSetBool (1, 0))
+                if (callbackArrived.wait (0))
+                {
+                    // already a message in flight - do nothing..
+                }
+                else
                 {
                     messageToSend->post();
 
-                    /* Sometimes our message can get discarded by the OS (e.g. when running as an RTAS
-                       when the app has a modal loop), so this is how long to wait before assuming the
-                       message has been lost and trying again.
-                    */
-                    const uint32 messageDeliveryTimeout = now + 300;
-
-                    while (callbackNeeded.get() != 0)
+                    if (! callbackArrived.wait (300))
                     {
-                        wait (4);
-
-                        if (threadShouldExit())
-                            return;
-
-                        if (Time::getMillisecondCounter() > messageDeliveryTimeout)
-                        {
-                            messageToSend->post();
-                            break;
-                        }
+                        // Sometimes our message can get discarded by the OS (e.g. when running as an RTAS
+                        // when the app has a modal loop), so this is how long to wait before assuming the
+                        // message has been lost and trying again.
+                        messageToSend->post();
                     }
+
+                    continue;
                 }
             }
-            else
-            {
-                // don't wait for too long because running this loop also helps keep the
-                // Time::getApproximateMillisecondTimer value stay up-to-date
-                wait (jlimit (1, 50, timeUntilFirstTimer));
-            }
+
+            // don't wait for too long because running this loop also helps keep the
+            // Time::getApproximateMillisecondTimer value stay up-to-date
+            wait (jlimit (1, 100, timeUntilFirstTimer));
         }
     }
 
@@ -129,13 +111,7 @@ public:
             JUCE_CATCH_EXCEPTION
         }
 
-        /* This is needed as a memory barrier to make sure all processing of current timers is done
-           before the boolean is set. This set should never fail since if it was false in the first place,
-           we wouldn't get a message (so it can't be changed from false to true from under us), and if we
-           get a message then the value is true and the other thread can only set it to true again and
-           we will get another callback to set it to false.
-        */
-        callbackNeeded.set (0);
+        callbackArrived.signal();
     }
 
     void callTimersSynchronously()
@@ -186,7 +162,7 @@ public:
 
 private:
     Timer* volatile firstTimer;
-    Atomic<int> callbackNeeded;
+    WaitableEvent callbackArrived;
 
     struct CallTimersMessage  : public MessageManager::MessageBase
     {

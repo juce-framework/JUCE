@@ -51,10 +51,10 @@ public:
         Remember that when the target component is resized, it'll need to move and
         resize this component to keep it in place, as this won't happen automatically.
 
-        If the constrainer parameter is non-zero, then this object will be used to enforce
+        If a constrainer object is provided, then this object will be used to enforce
         limits on the size and position that the component can be stretched to. Make sure
         that the constrainer isn't deleted while still in use by this object. If you
-        pass a zero in here, no limits will be put on the sizes it can be stretched to.
+        pass a nullptr in here, no limits will be put on the sizes it can be stretched to.
 
         @see ComponentBoundsConstrainer
     */

@@ -344,21 +344,25 @@ private:
 };
 
 //==============================================================================
-namespace VST3BufferExchange
+template <typename FloatType>
+struct VST3BufferExchange
 {
-    typedef Array<float*> Bus;
+    typedef Array<FloatType*> Bus;
     typedef Array<Bus> BusMap;
+
+    static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
+    static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
 
     /** Assigns a series of AudioSampleBuffer's channels to an AudioBusBuffers'
 
         @warning For speed, does not check the channel count and offsets
                  according to the AudioSampleBuffer
     */
-    void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
-                            Bus& bus,
-                            AudioSampleBuffer& buffer,
-                            int numChannels, int channelStartOffset,
-                            int sampleOffset = 0)
+    static void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
+                                   Bus& bus,
+                                   AudioBuffer<FloatType>& buffer,
+                                   int numChannels, int channelStartOffset,
+                                   int sampleOffset = 0)
     {
         const int channelEnd = numChannels + channelStartOffset;
         jassert (channelEnd >= 0 && channelEnd <= buffer.getNumChannels());
@@ -368,7 +372,7 @@ namespace VST3BufferExchange
         for (int i = channelStartOffset; i < channelEnd; ++i)
             bus.add (buffer.getWritePointer (i, sampleOffset));
 
-        vstBuffers.channelBuffers32 = bus.getRawDataPointer();
+        assignRawPointer (vstBuffers, bus.getRawDataPointer());
         vstBuffers.numChannels      = numChannels;
         vstBuffers.silenceFlags     = 0;
     }
@@ -376,7 +380,7 @@ namespace VST3BufferExchange
     static void mapArrangementToBusses (int& channelIndexOffset, int index,
                                         Array<Steinberg::Vst::AudioBusBuffers>& result,
                                         BusMap& busMapToUse, Steinberg::Vst::SpeakerArrangement arrangement,
-                                        AudioSampleBuffer& source)
+                                        AudioBuffer<FloatType>& source)
     {
         const int numChansForBus = BigInteger ((juce::int64) arrangement).countNumberOfSetBits();
 
@@ -387,18 +391,16 @@ namespace VST3BufferExchange
             busMapToUse.add (Bus());
 
         if (numChansForBus > 0)
-        {
             associateBufferTo (result.getReference (index),
                                busMapToUse.getReference (index),
                                source, numChansForBus, channelIndexOffset);
-        }
 
         channelIndexOffset += numChansForBus;
     }
 
-    inline void mapBufferToBusses (Array<Steinberg::Vst::AudioBusBuffers>& result, BusMap& busMapToUse,
-                                   const Array<Steinberg::Vst::SpeakerArrangement>& arrangements,
-                                   AudioSampleBuffer& source)
+    static inline void mapBufferToBusses (Array<Steinberg::Vst::AudioBusBuffers>& result, BusMap& busMapToUse,
+                                          const Array<Steinberg::Vst::SpeakerArrangement>& arrangements,
+                                          AudioBuffer<FloatType>& source)
     {
         int channelIndexOffset = 0;
 
@@ -407,10 +409,10 @@ namespace VST3BufferExchange
                                     arrangements.getUnchecked (i), source);
     }
 
-    inline void mapBufferToBusses (Array<Steinberg::Vst::AudioBusBuffers>& result,
-                                   Steinberg::Vst::IAudioProcessor& processor,
-                                   BusMap& busMapToUse, bool isInput, int numBusses,
-                                   AudioSampleBuffer& source)
+    static inline void mapBufferToBusses (Array<Steinberg::Vst::AudioBusBuffers>& result,
+                                          Steinberg::Vst::IAudioProcessor& processor,
+                                          BusMap& busMapToUse, bool isInput, int numBusses,
+                                          AudioBuffer<FloatType>& source)
     {
         int channelIndexOffset = 0;
 
@@ -420,6 +422,28 @@ namespace VST3BufferExchange
                                     getArrangementForBus (&processor, isInput, i),
                                     source);
     }
-}
+};
 
+template <typename FloatType>
+struct VST3FloatAndDoubleBusMapCompositeHelper {};
+
+struct VST3FloatAndDoubleBusMapComposite
+{
+    VST3BufferExchange<float>::BusMap  floatVersion;
+    VST3BufferExchange<double>::BusMap doubleVersion;
+
+    template <typename FloatType>
+    inline typename VST3BufferExchange<FloatType>::BusMap& get()   { return VST3FloatAndDoubleBusMapCompositeHelper<FloatType>::get (*this); }
+};
+
+
+template <> struct VST3FloatAndDoubleBusMapCompositeHelper<float>
+{
+    static inline VST3BufferExchange<float>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl)  { return impl.floatVersion; }
+};
+
+template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
+{
+    static inline VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
+};
 #endif   // JUCE_VST3COMMON_H_INCLUDED

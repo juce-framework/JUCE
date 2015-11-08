@@ -129,9 +129,9 @@ public:
                                             JuceAUBaseClass *				This)
     {
         if (This == NULL) return paramErr;
-        
+
         OSStatus result;
-        
+
         switch (params->what) {
             case kMusicDeviceMIDIEventSelect:
             case kMusicDeviceSysExSelect:
@@ -141,7 +141,7 @@ public:
                 result = AUBase::ComponentEntryDispatch(params, This);
                 break;
         }
-        
+
         return result;
     }
 #endif
@@ -912,17 +912,17 @@ public:
                                            AudioUnitElement	inElement)
     {
         jassert(inID == kAudioUnitProperty_SetRenderCallback || inID == kAudioUnitProperty_MakeConnection);
-        
+
         if (inScope != kAudioUnitScope_Input) {
             return;
         }
-        
+
         JuceAU* _this = reinterpret_cast<JuceAU*>(inRefCon);
         AudioProcessor* filter = _this->juceFilter;
         if (filter == nullptr) {
             return;
         }
-        
+
         filter->setInputElementActive(inElement, _this->HasInput(inElement));
     }
 
@@ -952,9 +952,9 @@ public:
             {
                 juceFilter->setInputElementActive(inputElementIndex, HasInput(inputElementIndex));
             }
-            
+
             addPropertyListeners();
-            
+
             bufferSpace.setSize (juceFilter->getNumInputChannelsTotal(false) + juceFilter->getNumOutputChannelsTotal(),
                                  (int) GetMaxFramesPerSlice() + 32);
 
@@ -984,9 +984,9 @@ public:
             if (!HasInput(0))
                 return kAudioUnitErr_NoConnection;
            #endif
-            
+
             int numOutputElements = Outputs().GetNumberOfElements();
-            
+
             int numInputElements = 0;
             for (int inputElementIndex = 0; inputElementIndex < Inputs().GetNumberOfElements(); ++inputElementIndex)
             {
@@ -994,13 +994,13 @@ public:
                     continue;
                 }
                 ++numInputElements;
-                
+
                 ComponentResult result = GetInput(inputElementIndex)->PullInput(ioActionFlags, inTimeStamp, inputElementIndex /* element */, numSamples);
                 if (noErr != result) {
                     return result;
                 }
             }
-            
+
             jassert (prepared);
 
             int numOutChans = 0;
@@ -1016,8 +1016,8 @@ public:
                 AudioBufferList& outBuffer = outputElement->GetBufferList();
                 for (unsigned int i = 0; i < outBuffer.mNumberBuffers && numOutChans < numOut; ++i)
                 {
-                    AudioBuffer& buf = outBuffer.mBuffers[i];
-                    
+                    ::AudioBuffer& buf = outBuffer.mBuffers[i];
+
                     if (buf.mNumberChannels == 1)
                     {
                         channels [numOutChans++] = (float*) buf.mData;
@@ -1025,7 +1025,7 @@ public:
                     else
                     {
                         needToReinterleave = true;
-                        
+
                         for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
                             channels [numOutChans++] = bufferSpace.getWritePointer (nextSpareBufferChan++);
                     }
@@ -1038,13 +1038,13 @@ public:
                 if (!HasInput(inputElementIndex)) {
                     continue;
                 }
-                
+
                 AUInputElement* inputElement = GetInput(inputElementIndex);
                 const AudioBufferList& inBuffer = inputElement->GetBufferList();
                 for (unsigned int i = 0; i < inBuffer.mNumberBuffers && numInChans < numIn; ++i)
                 {
-                    const AudioBuffer& buf = inBuffer.mBuffers[i];
-                    
+                    const ::AudioBuffer& buf = inBuffer.mBuffers[i];
+
                     if (buf.mNumberChannels == 1)
                     {
                         if (numInChans < numOutChans) {
@@ -1061,7 +1061,7 @@ public:
                         for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numInChans < numIn; ++subChan)
                         {
                             float* dest;
-                            
+
                             if (numInChans < numOutChans)
                             {
                                 dest = channels [numInChans++];
@@ -1071,9 +1071,9 @@ public:
                                 dest = bufferSpace.getWritePointer (nextSpareBufferChan++);
                                 channels [numInChans++] = dest;
                             }
-                            
+
                             const float* src = ((const float*) buf.mData) + subChan;
-                            
+
                             for (int j = (int) numSamples; --j >= 0;)
                             {
                                 *dest++ = *src;
@@ -1083,7 +1083,7 @@ public:
                     }
                 }
             }
-            
+
             jassert(numInChans == numIn);
 
             {
@@ -1164,18 +1164,18 @@ public:
                 {
                     AUOutputElement* outputElement = GetOutput(outputElementIndex);
                     AudioBufferList& outBuffer = outputElement->GetBufferList();
-                    
+
                     for (unsigned int i = 0; i < outBuffer.mNumberBuffers; ++i)
                     {
-                        AudioBuffer& buf = outBuffer.mBuffers[i];
-                        
+                        ::AudioBuffer& buf = outBuffer.mBuffers[i];
+
                         if (buf.mNumberChannels > 1)
                         {
                             for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
                             {
                                 const float* src = bufferSpace.getReadPointer (nextSpareBufferChan++);
                                 float* dest = ((float*) buf.mData) + subChan;
-                                
+
                                 for (int j = (int) numSamples; --j >= 0;)
                                 {
                                     *dest = *src++;

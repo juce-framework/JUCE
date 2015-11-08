@@ -68,9 +68,6 @@
     <Filter Include="Juce Modules\juce_audio_plugin_client\VST">
       <UniqueIdentifier>{AF5F4789-D607-BFD8-D853-09473C27449C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Juce Modules\juce_audio_plugin_client\VST3">
-      <UniqueIdentifier>{22689F25-8C5C-52CF-09E4-4308D1521B9B}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Juce Modules\juce_audio_plugin_client\AAX">
       <UniqueIdentifier>{F0C10808-8C36-BCD0-D25F-523774B0ADA2}</UniqueIdentifier>
     </Filter>
@@ -492,9 +489,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm">
       <Filter>Juce Modules\juce_audio_plugin_client\VST</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.mm">
-      <Filter>Juce Modules\juce_audio_plugin_client\VST3</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.mm">
       <Filter>Juce Modules\juce_audio_plugin_client\AAX</Filter>

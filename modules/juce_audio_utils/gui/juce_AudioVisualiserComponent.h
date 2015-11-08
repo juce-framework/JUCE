@@ -123,7 +123,6 @@ private:
 
     OwnedArray<ChannelInfo> channels;
     int numSamples, inputSamplesPerBlock;
-    float interpolation;
     Colour backgroundColour, waveformColour;
 
     void timerCallback() override;

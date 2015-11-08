@@ -608,7 +608,7 @@ private:
                 default:                break;
             }
 
-            return 0;
+            return nullptr;
         }
 
     private:
@@ -629,7 +629,7 @@ private:
                 {
                     ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (i));
 
-                    if (svgFileStream != 0)
+                    if (svgFileStream != nullptr)
                     {
                         iconNames.add (icons.getEntry(i)->filename);
                         iconsFromZipFile.add (Drawable::createFromImageDataStream (*svgFileStream));
@@ -756,9 +756,7 @@ public:
         g.setColour (Colours::black);
         g.setFont (font);
 
-        const XmlElement* rowElement = dataList->getChildElement (rowNumber);
-
-        if (rowElement != 0)
+        if (const XmlElement* rowElement = dataList->getChildElement (rowNumber))
         {
             const String text (rowElement->getStringAttribute (getAttributeNameForColumnId (columnId)));
 
@@ -788,34 +786,32 @@ public:
     {
         if (columnId == 1 || columnId == 7) // The ID and Length columns do not have a custom component
         {
-            jassert (existingComponentToUpdate == 0);
-            return 0;
+            jassert (existingComponentToUpdate == nullptr);
+            return nullptr;
         }
-        else if (columnId == 5) // For the ratings column, we return the custom combobox component
+
+        if (columnId == 5) // For the ratings column, we return the custom combobox component
         {
-            RatingColumnCustomComponent* ratingsBox = (RatingColumnCustomComponent*) existingComponentToUpdate;
+            RatingColumnCustomComponent* ratingsBox = static_cast<RatingColumnCustomComponent*> (existingComponentToUpdate);
 
             // If an existing component is being passed-in for updating, we'll re-use it, but
             // if not, we'll have to create one.
-            if (ratingsBox == 0)
+            if (ratingsBox == nullptr)
                 ratingsBox = new RatingColumnCustomComponent (*this);
 
             ratingsBox->setRowAndColumn (rowNumber, columnId);
-
             return ratingsBox;
         }
-        else // The other columns are editable text columns, for which we use the custom Label component
-        {
-            EditableTextCustomComponent* textLabel = (EditableTextCustomComponent*) existingComponentToUpdate;
 
-            // same as above...
-            if (textLabel == 0)
-                textLabel = new EditableTextCustomComponent (*this);
+        // The other columns are editable text columns, for which we use the custom Label component
+        EditableTextCustomComponent* textLabel = static_cast<EditableTextCustomComponent*> (existingComponentToUpdate);
 
-            textLabel->setRowAndColumn (rowNumber, columnId);
+        // same as above...
+        if (textLabel == nullptr)
+            textLabel = new EditableTextCustomComponent (*this);
 
-            return textLabel;
-        }
+        textLabel->setRowAndColumn (rowNumber, columnId);
+        return textLabel;
     }
 
     // This is overloaded from TableListBoxModel, and should choose the best width for the specified
@@ -830,9 +826,7 @@ public:
         // find the widest bit of text in this column..
         for (int i = getNumRows(); --i >= 0;)
         {
-            const XmlElement* rowElement = dataList->getChildElement (i);
-
-            if (rowElement != 0)
+            if (const XmlElement* rowElement = dataList->getChildElement (i))
             {
                 const String text (rowElement->getStringAttribute (getAttributeNameForColumnId (columnId)));
 
@@ -884,11 +878,10 @@ private:
 
     //==============================================================================
     // This is a custom Label component, which we use for the table's editable text columns.
-    class EditableTextCustomComponent : public Label
+    class EditableTextCustomComponent  : public Label
     {
     public:
-        EditableTextCustomComponent (TableDemoComponent& owner_)
-            : owner (owner_)
+        EditableTextCustomComponent (TableDemoComponent& td)  : owner (td)
         {
             // double click to edit the label text; single click handled below
             setEditable (false, true, false);
@@ -926,11 +919,10 @@ private:
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
     class RatingColumnCustomComponent    : public Component,
-                                           public ComboBoxListener
+                                           private ComboBoxListener
     {
     public:
-        RatingColumnCustomComponent (TableDemoComponent& owner_)
-            : owner (owner_)
+        RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)
         {
             // just put a combo box inside this component
             addAndMakeVisible (comboBox);
@@ -953,14 +945,14 @@ private:
         }
 
         // Our demo code will call this when we may need to update our contents
-        void setRowAndColumn (const int newRow, const int newColumn)
+        void setRowAndColumn (int newRow, int newColumn)
         {
             row = newRow;
             columnId = newColumn;
             comboBox.setSelectedId (owner.getRating (row), dontSendNotification);
         }
 
-        void comboBoxChanged (ComboBox* /*comboBoxThatHasChanged*/) override
+        void comboBoxChanged (ComboBox*) override
         {
             owner.setRating (row, comboBox.getSelectedId());
         }
@@ -976,8 +968,8 @@ private:
     class DemoDataSorter
     {
     public:
-        DemoDataSorter (const String attributeToSort_, bool forwards)
-            : attributeToSort (attributeToSort_),
+        DemoDataSorter (const String& attributeToSortBy, bool forwards)
+            : attributeToSort (attributeToSortBy),
               direction (forwards ? 1 : -1)
         {
         }
@@ -1003,10 +995,9 @@ private:
     // this loads the embedded database XML file into memory
     void loadData()
     {
-        XmlDocument dataDoc (String ((const char*) BinaryData::demo_table_data_xml));
-        demoData = dataDoc.getDocumentElement();
+        demoData = XmlDocument::parse (BinaryData::demo_table_data_xml);
 
-        dataList = demoData->getChildByName ("DATA");
+        dataList   = demoData->getChildByName ("DATA");
         columnList = demoData->getChildByName ("COLUMNS");
 
         numRows = dataList->getNumChildElements();
@@ -1021,7 +1012,7 @@ private:
                 return columnXml->getStringAttribute ("name");
         }
 
-        return String::empty;
+        return String();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableDemoComponent)

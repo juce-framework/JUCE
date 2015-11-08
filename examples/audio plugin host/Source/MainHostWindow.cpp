@@ -240,6 +240,7 @@ PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& 
 
         menu.addSeparator();
         menu.addCommandItem (&getCommandManager(), CommandIDs::showAudioSettings);
+        menu.addCommandItem (&getCommandManager(), CommandIDs::toggleDoublePrecision);
 
         menu.addSeparator();
         menu.addCommandItem (&getCommandManager(), CommandIDs::aboutBox);
@@ -331,6 +332,7 @@ void MainHostWindow::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::saveAs,
                               CommandIDs::showPluginListEditor,
                               CommandIDs::showAudioSettings,
+                              CommandIDs::toggleDoublePrecision,
                               CommandIDs::aboutBox,
                               CommandIDs::allWindowsForward
                             };
@@ -374,6 +376,10 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
     case CommandIDs::showAudioSettings:
         result.setInfo ("Change the audio device settings", String::empty, category, 0);
         result.addDefaultKeypress ('a', ModifierKeys::commandModifier);
+        break;
+
+    case CommandIDs::toggleDoublePrecision:
+        updatePrecisionMenuItem (result);
         break;
 
     case CommandIDs::aboutBox:
@@ -425,6 +431,23 @@ bool MainHostWindow::perform (const InvocationInfo& info)
 
     case CommandIDs::showAudioSettings:
         showAudioSettings();
+        break;
+
+    case CommandIDs::toggleDoublePrecision:
+        if (PropertiesFile* props = getAppProperties().getUserSettings())
+        {
+            bool newIsDoublePrecision = ! isDoublePrecisionProcessing();
+            props->setValue ("doublePrecisionProcessing", var (newIsDoublePrecision));
+
+            {
+                ApplicationCommandInfo cmdInfo (info.commandID);
+                updatePrecisionMenuItem (cmdInfo);
+                menuItemsChanged();
+            }
+
+            if (graphEditor != nullptr)
+                graphEditor->setDoublePrecision (newIsDoublePrecision);
+        }
         break;
 
     case CommandIDs::aboutBox:
@@ -523,4 +546,18 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 GraphDocumentComponent* MainHostWindow::getGraphEditor() const
 {
     return dynamic_cast <GraphDocumentComponent*> (getContentComponent());
+}
+
+bool MainHostWindow::isDoublePrecisionProcessing()
+{
+    if (PropertiesFile* props = getAppProperties().getUserSettings())
+        return props->getBoolValue ("doublePrecisionProcessing", false);
+
+    return false;
+}
+
+void MainHostWindow::updatePrecisionMenuItem (ApplicationCommandInfo& info)
+{
+    info.setInfo ("Double floating point precision rendering", String::empty, "General", 0);
+    info.setTicked (isDoublePrecisionProcessing());
 }

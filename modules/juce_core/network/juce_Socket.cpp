@@ -209,7 +209,7 @@ namespace SocketHelpers
 
             if (bytesThisTime <= 0 || ! connected)
             {
-                if (bytesRead == 0)
+                if (bytesRead == 0 && blockUntilSpecifiedAmountHasArrived)
                     bytesRead = -1;
 
                 break;
@@ -648,22 +648,26 @@ int DatagramSocket::waitUntilReady (const bool readyForReading,
 
 int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock)
 {
-    if (handle < 0)
+    if (handle < 0 || ! isBound)
         return -1;
 
     bool connected = true;
-    return isBound ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
-                                                connected, shouldBlock, readLock) : -1;
+
+    SocketHelpers::setSocketBlockingState (handle, shouldBlock);
+    return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
+                                      connected, shouldBlock, readLock);
 }
 
 int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock, String& senderIPAddress, int& senderPort)
 {
-    if (handle < 0)
+    if (handle < 0 || ! isBound)
         return -1;
 
     bool connected = true;
-    return isBound ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected,
-                                                shouldBlock, readLock, &senderIPAddress, &senderPort) : -1;
+
+    SocketHelpers::setSocketBlockingState (handle, shouldBlock);
+    return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected,
+                                      shouldBlock, readLock, &senderIPAddress, &senderPort);
 }
 
 int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,

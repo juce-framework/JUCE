@@ -366,6 +366,10 @@ protected:
     virtual void getKeyPosition (int midiNoteNumber, float keyWidth,
                                  int& x, int& w) const;
 
+    /** Returns the rectangle for a given key if within the displayable range */
+    Rectangle<int> getRectangleForKey (int midiNoteNumber) const;
+
+
 private:
     //==============================================================================
     friend class MidiKeyboardUpDownButton;
@@ -400,9 +404,8 @@ private:
     void resetAnyKeysInUse();
     void updateNoteUnderMouse (Point<int>, bool isDown, int fingerNum);
     void updateNoteUnderMouse (const MouseEvent&, bool isDown);
-    void repaintNote (const int midiNoteNumber);
+    void repaintNote (int midiNoteNumber);
     void setLowestVisibleKeyFloat (float noteNumber);
-    Rectangle<int> getWhiteNotePos (int noteNumber) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent)
 };

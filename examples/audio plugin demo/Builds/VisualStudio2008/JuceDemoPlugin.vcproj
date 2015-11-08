@@ -868,9 +868,6 @@
         <Filter Name="VST">
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm"/>
         </Filter>
-        <Filter Name="VST3">
-          <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.mm"/>
-        </Filter>
         <Filter Name="AAX">
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.mm"/>
         </Filter>

@@ -234,7 +234,7 @@ void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)
     addChildComponent (bubble);
 
     AttributedString attString;
-    attString.append (text, Font (15.0f));
+    attString.append (text, Font (16.0f));
 
     bubble->showAt (getLocalArea (&target, target.getLocalBounds()),
                     attString, 500,  // numMillisecondsBeforeRemoving

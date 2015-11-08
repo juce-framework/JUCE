@@ -25,7 +25,6 @@
 #ifndef JUCE_AUDIOPROCESSORPLAYER_H_INCLUDED
 #define JUCE_AUDIOPROCESSORPLAYER_H_INCLUDED
 
-
 //==============================================================================
 /**
     An AudioIODeviceCallback object which streams audio through an AudioProcessor.
@@ -43,7 +42,7 @@ class JUCE_API  AudioProcessorPlayer    : public AudioIODeviceCallback,
 {
 public:
     //==============================================================================
-    AudioProcessorPlayer();
+    AudioProcessorPlayer(bool doDoublePrecisionProcessing = false);
 
     /** Destructor. */
     virtual ~AudioProcessorPlayer();
@@ -65,6 +64,20 @@ public:
     */
     MidiMessageCollector& getMidiMessageCollector() noexcept        { return messageCollector; }
 
+    /** Switch between double and single floating point precisions processing.
+        The audio IO callbacks will still operate in single floating point
+        precision, however, all internal processing including the
+        AudioProcessor will be processed in double floating point precision if
+        the AudioProcessor supports it (see
+        AudioProcessor::supportsDoublePrecisionProcessing()).
+        Otherwise, the processing will remain single precision irrespective of
+        the parameter doublePrecision. */
+    void setDoublePrecisionProcessing (bool doublePrecision);
+
+    /** Returns true if this player processes internally processes the samples with
+        double floating point precision. */
+    inline bool getDoublePrecisionProcessing() { return isDoublePrecision; }
+
     //==============================================================================
     /** @internal */
     void audioDeviceIOCallback (const float**, int, float**, int, int) override;
@@ -81,11 +94,12 @@ private:
     CriticalSection lock;
     double sampleRate;
     int blockSize;
-    bool isPrepared;
+    bool isPrepared, isDoublePrecision;
 
     int numInputChans, numOutputChans;
     HeapBlock<float*> channels;
-    AudioSampleBuffer tempBuffer;
+    AudioBuffer<float> tempBuffer;
+    AudioBuffer<double> conversionBuffer;
 
     MidiBuffer incomingMidi;
     MidiMessageCollector messageCollector;

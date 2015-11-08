@@ -9,8 +9,6 @@
     <false/>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
-    <key>CFBundleIconFile</key>
-    <string></string>
     <key>CFBundleIdentifier</key>
     <string>com.yourcompany.AudioAppExample</string>
     <key>CFBundleName</key>
@@ -26,6 +24,8 @@
     <key>NSHumanReadableCopyright</key>
     <string></string>
     <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>UIRequiresFullScreen</key>
     <true/>
     <key>UISupportedInterfaceOrientations</key>
     <array>

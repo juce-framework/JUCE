@@ -85,7 +85,20 @@ public:
         // not interested in controllers in this case.
     }
 
-    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
+    void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
+    {
+        processBlock (outputBuffer, startSample, numSamples);
+    }
+
+    void renderNextBlock (AudioBuffer<double>& outputBuffer, int startSample, int numSamples) override
+    {
+        processBlock (outputBuffer, startSample, numSamples);
+    }
+
+private:
+
+    template <typename FloatType>
+    void processBlock (AudioBuffer<FloatType>& outputBuffer, int startSample, int numSamples)
     {
         if (angleDelta != 0.0)
         {
@@ -93,7 +106,8 @@ public:
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = (float) (sin (currentAngle) * level * tailOff);
+                    const FloatType currentSample =
+                        static_cast<FloatType> (std::sin (currentAngle) * level * tailOff);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -116,7 +130,7 @@ public:
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = (float) (sin (currentAngle) * level);
+                    const FloatType currentSample = static_cast<FloatType> (std::sin (currentAngle) * level);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -128,7 +142,6 @@ public:
         }
     }
 
-private:
     double currentAngle, angleDelta, level, tailOff;
 };
 
@@ -183,7 +196,6 @@ const float defaultDelay = 0.5f;
 
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
-    : delayBuffer (2, 12000)
 {
     // Set up our parameters. The base class will delete them for us.
     addParameter (gain  = new FloatParameter (defaultGain,  "Gain"));
@@ -213,7 +225,19 @@ void JuceDemoPluginAudioProcessor::prepareToPlay (double newSampleRate, int /*sa
     // initialisation that you need..
     synth.setCurrentPlaybackSampleRate (newSampleRate);
     keyboardState.reset();
-    delayBuffer.clear();
+
+    if (isUsingDoublePrecision())
+    {
+        delayBufferDouble.setSize (2, 12000);
+        delayBufferFloat.setSize (1, 1);
+    }
+    else
+    {
+        delayBufferFloat.setSize (2, 12000);
+        delayBufferDouble.setSize (1, 1);
+    }
+
+    reset();
 }
 
 void JuceDemoPluginAudioProcessor::releaseResources()
@@ -227,17 +251,21 @@ void JuceDemoPluginAudioProcessor::reset()
 {
     // Use this method as the place to clear any delay lines, buffers, etc, as it
     // means there's been a break in the audio's continuity.
-    delayBuffer.clear();
+    delayBufferFloat.clear();
+    delayBufferDouble.clear();
 }
 
-void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+template <typename FloatType>
+void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
+                                            MidiBuffer& midiMessages,
+                                            AudioBuffer<FloatType>& delayBuffer)
 {
     const int numSamples = buffer.getNumSamples();
     int channel, dp = 0;
 
     // Go through the incoming data, and apply our gain to it...
     for (channel = 0; channel < getNumInputChannels(); ++channel)
-        buffer.applyGain (channel, 0, buffer.getNumSamples(), gain->getValue());
+        buffer.applyGain (channel, 0, buffer.getNumSamples(), static_cast<FloatType> (gain->getValue()));
 
     // Now pass any incoming midi messages to our keyboard state object, and let it
     // add messages to the buffer if the user is clicking on the on-screen keys
@@ -249,15 +277,16 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
     // Apply our delay effect to the new output..
     for (channel = 0; channel < getNumInputChannels(); ++channel)
     {
-        float* channelData = buffer.getWritePointer (channel);
-        float* delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));
+        FloatType* channelData = buffer.getWritePointer (channel);
+        FloatType* delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));
         dp = delayPosition;
 
         for (int i = 0; i < numSamples; ++i)
         {
-            const float in = channelData[i];
+            const FloatType in = channelData[i];
             channelData[i] += delayData[dp];
-            delayData[dp] = (delayData[dp] + in) * delay->getValue();
+            delayData[dp] = (delayData[dp] + in) * static_cast<FloatType> (delay->getValue());
+
             if (++dp >= delayBuffer.getNumSamples())
                 dp = 0;
         }

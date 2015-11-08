@@ -40,6 +40,7 @@ namespace CommandIDs
     static const int showAudioSettings      = 0x30200;
     static const int aboutBox               = 0x30300;
     static const int allWindowsForward      = 0x30400;
+    static const int toggleDoublePrecision  = 0x30500;
 }
 
 ApplicationCommandManager& getCommandManager();
@@ -85,6 +86,9 @@ public:
     const PluginDescription* getChosenType (const int menuID) const;
 
     GraphDocumentComponent* getGraphEditor() const;
+
+    bool isDoublePrecisionProcessing();
+    void updatePrecisionMenuItem (ApplicationCommandInfo& info);
 
 private:
     //==============================================================================

@@ -992,7 +992,8 @@ double Expression::evaluate() const
 
 double Expression::evaluate (const Expression::Scope& scope) const
 {
-    return term->resolve (scope, 0)->toDouble();
+    String err;
+    return evaluate (scope, err);
 }
 
 double Expression::evaluate (const Scope& scope, String& evaluationError) const
@@ -1038,20 +1039,16 @@ Expression Expression::adjustedToGiveNewResult (const double targetValue, const 
 
     jassert (termToAdjust != nullptr);
 
-    const Term* const parent = Helpers::findDestinationFor (newTerm, termToAdjust);
-
-    if (parent == nullptr)
+    if (const Term* parent = Helpers::findDestinationFor (newTerm, termToAdjust))
     {
-        termToAdjust->value = targetValue;
+        if (const Helpers::TermPtr reverseTerm = parent->createTermToEvaluateInput (scope, termToAdjust, targetValue, newTerm))
+            termToAdjust->value = Expression (reverseTerm).evaluate (scope);
+        else
+            return Expression (targetValue);
     }
     else
     {
-        const Helpers::TermPtr reverseTerm (parent->createTermToEvaluateInput (scope, termToAdjust, targetValue, newTerm));
-
-        if (reverseTerm == nullptr)
-            return Expression (targetValue);
-
-        termToAdjust->value = reverseTerm->resolve (scope, 0)->toDouble();
+        termToAdjust->value = targetValue;
     }
 
     return Expression (newTerm.release());

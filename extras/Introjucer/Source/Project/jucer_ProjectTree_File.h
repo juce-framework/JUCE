@@ -40,12 +40,10 @@ public:
 
     static File findCorrespondingHeaderOrCpp (const File& f)
     {
-        if (f.hasFileExtension (sourceFileExtensions))
-            return f.withFileExtension (".h");
-        else if (f.hasFileExtension (headerFileExtensions))
-            return f.withFileExtension (".cpp");
+        if (f.hasFileExtension (sourceFileExtensions))  return f.withFileExtension (".h");
+        if (f.hasFileExtension (headerFileExtensions))  return f.withFileExtension (".cpp");
 
-        return File::nonexistent;
+        return File();
     }
 
     void setName (const String& newName) override

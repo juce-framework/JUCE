@@ -77,10 +77,12 @@ extern NewLine newLine;
     myString << "Hello World" << newLine << newLine;
     @endcode
 */
-JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&);
+inline String& operator<< (String& string1, const NewLine&) { return string1 += NewLine::getDefault(); }
+inline String& operator+= (String& s1, const NewLine&)      { return s1 += NewLine::getDefault(); }
 
-#if JUCE_STRING_UTF_TYPE != 8 && ! defined (DOXYGEN)
- inline String operator+ (String s1, const NewLine&)      { return s1 += NewLine::getDefault(); }
-#endif
+inline String operator+ (const NewLine&, const NewLine&)    { return String (NewLine::getDefault()) + NewLine::getDefault(); }
+inline String operator+ (String s1, const NewLine&)         { return s1 += NewLine::getDefault(); }
+inline String operator+ (const NewLine&, const char* s2)    { return String (NewLine::getDefault()) + s2; }
+
 
 #endif   // JUCE_NEWLINE_H_INCLUDED

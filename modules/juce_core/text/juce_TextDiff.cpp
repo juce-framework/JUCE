@@ -116,7 +116,21 @@ struct TextDiffHelpers
                                      b, lenB, indexInB);
 
         const size_t scratchSpace = sizeof (int) * (2 + 2 * (size_t) lenB);
-        int* const lines = (int*) alloca (scratchSpace);
+
+        if (scratchSpace < 4096)
+        {
+            int* scratch = (int*) alloca (scratchSpace);
+            return findLongestCommonSubstring (a, lenA, indexInA, b, lenB, indexInB, scratchSpace, scratch);
+        }
+
+        HeapBlock<int> scratch (scratchSpace);
+        return findLongestCommonSubstring (a, lenA, indexInA, b, lenB, indexInB, scratchSpace, scratch);
+    }
+
+    static int findLongestCommonSubstring (String::CharPointerType a, const int lenA, int& indexInA,
+                                           String::CharPointerType b, const int lenB, int& indexInB,
+                                           const size_t scratchSpace, int* const lines) noexcept
+    {
         zeromem (lines, scratchSpace);
 
         int* l0 = lines;

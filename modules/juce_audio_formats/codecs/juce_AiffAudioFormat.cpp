@@ -643,7 +643,7 @@ public:
 
         if (metadataValues.size() > 0)
         {
-            // The meta data should have been santised for the AIFF format.
+            // The meta data should have been sanitised for the AIFF format.
             // If it was originally sourced from a WAV file the MetaDataSource
             // key should be removed (or set to "AIFF") once this has been done
             jassert (metadataValues.getValue ("MetaDataSource", "None") != "WAV");

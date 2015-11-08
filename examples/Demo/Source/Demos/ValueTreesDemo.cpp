@@ -76,12 +76,13 @@ public:
 
     void itemDropped (const DragAndDropTarget::SourceDetails&, int insertIndex) override
     {
-        moveItems (*getOwnerView(),
-                   getSelectedTreeViewItems (*getOwnerView()),
-                   tree, insertIndex, undoManager);
+        OwnedArray<ValueTree> selectedTrees;
+        getSelectedTreeViewItems (*getOwnerView(), selectedTrees);
+
+        moveItems (*getOwnerView(), selectedTrees, tree, insertIndex, undoManager);
     }
 
-    static void moveItems (TreeView& treeView, const Array<ValueTree>& items,
+    static void moveItems (TreeView& treeView, const OwnedArray<ValueTree>& items,
                            ValueTree newParent, int insertIndex, UndoManager& undoManager)
     {
         if (items.size() > 0)
@@ -90,7 +91,7 @@ public:
 
             for (int i = items.size(); --i >= 0;)
             {
-                ValueTree& v = items.getReference(i);
+                ValueTree& v = *items.getUnchecked(i);
 
                 if (v.getParent().isValid() && newParent != v && ! newParent.isAChildOf (v))
                 {
@@ -107,17 +108,13 @@ public:
         }
     }
 
-    static Array<ValueTree> getSelectedTreeViewItems (TreeView& treeView)
+    static void getSelectedTreeViewItems (TreeView& treeView, OwnedArray<ValueTree>& items)
     {
-        Array<ValueTree> items;
-
         const int numSelected = treeView.getNumSelectedItems();
 
         for (int i = 0; i < numSelected; ++i)
             if (const ValueTreeItem* vti = dynamic_cast<ValueTreeItem*> (treeView.getSelectedItem (i)))
-                items.add (vti->tree);
-
-        return items;
+                items.add (new ValueTree (vti->tree));
     }
 
 private:
@@ -237,11 +234,12 @@ public:
 
     void deleteSelectedItems()
     {
-        Array<ValueTree> selectedItems (ValueTreeItem::getSelectedTreeViewItems (tree));
+        OwnedArray<ValueTree> selectedItems;
+        ValueTreeItem::getSelectedTreeViewItems (tree, selectedItems);
 
         for (int i = selectedItems.size(); --i >= 0;)
         {
-            ValueTree& v = selectedItems.getReference(i);
+            ValueTree& v = *selectedItems.getUnchecked(i);
 
             if (v.getParent().isValid())
                 v.getParent().removeChild (v, &undoManager);

@@ -380,7 +380,7 @@ public:
                                                   &destinationAudioFormat);
                 if (status == noErr)
                 {
-                    bufferList.malloc (1, sizeof (AudioBufferList) + numChannels * sizeof (AudioBuffer));
+                    bufferList.malloc (1, sizeof (AudioBufferList) + numChannels * sizeof (::AudioBuffer));
                     bufferList->mNumberBuffers = numChannels;
                     ok = true;
                 }

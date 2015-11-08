@@ -26,6 +26,40 @@
   ==============================================================================
 */
 
+namespace
+{
+    inline bool isValidXmlNameStartCharacter (const juce_wchar character) noexcept
+    {
+        return character == ':'
+            || character == '_'
+            || (character >= 'a'     && character <= 'z')
+            || (character >= 'A'     && character <= 'Z')
+            || (character >= 0xc0    && character <= 0xd6)
+            || (character >= 0xd8    && character <= 0xf6)
+            || (character >= 0xf8    && character <= 0x2ff)
+            || (character >= 0x370   && character <= 0x37d)
+            || (character >= 0x37f   && character <= 0x1fff)
+            || (character >= 0x200c  && character <= 0x200d)
+            || (character >= 0x2070  && character <= 0x218f)
+            || (character >= 0x2c00  && character <= 0x2fef)
+            || (character >= 0x3001  && character <= 0xd7ff)
+            || (character >= 0xf900  && character <= 0xfdcf)
+            || (character >= 0xfdf0  && character <= 0xfffd)
+            || (character >= 0x10000 && character <= 0xeffff);
+    }
+
+    inline bool isValidXmlNameBodyCharacter (const juce_wchar character) noexcept
+    {
+        return isValidXmlNameStartCharacter (character)
+            || character == '-'
+            || character == '.'
+            || character == 0xb7
+            || (character >= '0'    && character <= '9')
+            || (character >= 0x300  && character <= 0x036f)
+            || (character >= 0x203f && character <= 0x2040);
+    }
+}
+
 XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) noexcept
     : name (other.name),
       value (other.value)
@@ -35,58 +69,44 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) n
 XmlElement::XmlAttributeNode::XmlAttributeNode (const Identifier& n, const String& v) noexcept
     : name (n), value (v)
 {
-   #if JUCE_DEBUG
-    // this checks whether the attribute name string contains any illegal characters..
-    for (String::CharPointerType t (name.getCharPointer()); ! t.isEmpty(); ++t)
-        jassert (t.isLetterOrDigit() || *t == '_' || *t == '-' || *t == ':');
-   #endif
+    jassert (isValidXmlName (name));
 }
 
 XmlElement::XmlAttributeNode::XmlAttributeNode (String::CharPointerType nameStart, String::CharPointerType nameEnd)
     : name (nameStart, nameEnd)
 {
+    jassert (isValidXmlName (name));
 }
 
 //==============================================================================
-static void sanityCheckTagName (const String& tag)
-{
-    (void) tag;
-
-    // the tag name mustn't be empty, or it'll look like a text element!
-    jassert (tag.containsNonWhitespaceChars());
-
-    // The tag can't contain spaces or other characters that would create invalid XML!
-    jassert (! tag.containsAnyOf (" <>/&(){}"));
-}
-
 XmlElement::XmlElement (const String& tag)
     : tagName (StringPool::getGlobalPool().getPooledString (tag))
 {
-    sanityCheckTagName (tagName);
+    jassert (isValidXmlName (tagName));
 }
 
 XmlElement::XmlElement (const char* tag)
     : tagName (StringPool::getGlobalPool().getPooledString (tag))
 {
-    sanityCheckTagName (tagName);
+    jassert (isValidXmlName (tagName));
 }
 
 XmlElement::XmlElement (StringRef tag)
     : tagName (StringPool::getGlobalPool().getPooledString (tag))
 {
-    sanityCheckTagName (tagName);
+    jassert (isValidXmlName (tagName));
 }
 
 XmlElement::XmlElement (const Identifier& tag)
     : tagName (tag.toString())
 {
-    sanityCheckTagName (tagName);
+    jassert (isValidXmlName (tagName));
 }
 
 XmlElement::XmlElement (String::CharPointerType tagNameStart, String::CharPointerType tagNameEnd)
     : tagName (StringPool::getGlobalPool().getPooledString (tagNameStart, tagNameEnd))
 {
-    sanityCheckTagName (tagName);
+    jassert (isValidXmlName (tagName));
 }
 
 XmlElement::XmlElement (int /*dummy*/) noexcept
@@ -867,6 +887,21 @@ XmlElement* XmlElement::createTextElement (const String& text)
     XmlElement* const e = new XmlElement ((int) 0);
     e->setAttribute (juce_xmltextContentAttributeName, text);
     return e;
+}
+
+bool XmlElement::isValidXmlName (StringRef text) noexcept
+{
+    if (text.isEmpty() || ! isValidXmlNameStartCharacter (text.text.getAndAdvance()))
+        return false;
+
+    for (;;)
+    {
+        if (text.isEmpty())
+            return true;
+
+        if (! isValidXmlNameBodyCharacter (text.text.getAndAdvance()))
+            return false;
+    }
 }
 
 void XmlElement::addTextElement (const String& text)

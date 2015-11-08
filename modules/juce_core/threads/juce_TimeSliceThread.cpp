@@ -122,45 +122,50 @@ void TimeSliceThread::run()
 
         {
             Time nextClientTime;
+            int numClients = 0;
 
             {
                 const ScopedLock sl2 (listLock);
 
-                index = clients.size() > 0 ? ((index + 1) % clients.size()) : 0;
+                numClients = clients.size();
+                index = numClients > 0 ? ((index + 1) % numClients) : 0;
 
                 if (TimeSliceClient* const firstClient = getNextClient (index))
                     nextClientTime = firstClient->nextCallTime;
             }
 
-            const Time now (Time::getCurrentTime());
-
-            if (nextClientTime > now)
+            if (numClients > 0)
             {
-                timeToWait = (int) jmin ((int64) 500, (nextClientTime - now).inMilliseconds());
-            }
-            else
-            {
-                timeToWait = index == 0 ? 1 : 0;
+                const Time now (Time::getCurrentTime());
 
-                const ScopedLock sl (callbackLock);
-
+                if (nextClientTime > now)
                 {
-                    const ScopedLock sl2 (listLock);
-                    clientBeingCalled = getNextClient (index);
+                    timeToWait = (int) jmin ((int64) 500, (nextClientTime - now).inMilliseconds());
                 }
-
-                if (clientBeingCalled != nullptr)
+                else
                 {
-                    const int msUntilNextCall = clientBeingCalled->useTimeSlice();
+                    timeToWait = index == 0 ? 1 : 0;
 
-                    const ScopedLock sl2 (listLock);
+                    const ScopedLock sl (callbackLock);
 
-                    if (msUntilNextCall >= 0)
-                        clientBeingCalled->nextCallTime = now + RelativeTime::milliseconds (msUntilNextCall);
-                    else
-                        clients.removeFirstMatchingValue (clientBeingCalled);
+                    {
+                        const ScopedLock sl2 (listLock);
+                        clientBeingCalled = getNextClient (index);
+                    }
 
-                    clientBeingCalled = nullptr;
+                    if (clientBeingCalled != nullptr)
+                    {
+                        const int msUntilNextCall = clientBeingCalled->useTimeSlice();
+
+                        const ScopedLock sl2 (listLock);
+
+                        if (msUntilNextCall >= 0)
+                            clientBeingCalled->nextCallTime = now + RelativeTime::milliseconds (msUntilNextCall);
+                        else
+                            clients.removeFirstMatchingValue (clientBeingCalled);
+
+                        clientBeingCalled = nullptr;
+                    }
                 }
             }
         }
