@@ -136,7 +136,7 @@ AudioParameterChoice::AudioParameterChoice (String pid, String nm, const StringA
 AudioParameterChoice::~AudioParameterChoice() {}
 
 int AudioParameterChoice::limitRange (int v) const noexcept              { return jlimit (0, choices.size() - 1, v); }
-float AudioParameterChoice::convertTo0to1 (int v) const noexcept         { return limitRange (v) / (float) choices.size(); }
+float AudioParameterChoice::convertTo0to1 (int v) const noexcept         { return jlimit (0.0f, 1.0f, (v + 0.5f) / (float) choices.size()); }
 int AudioParameterChoice::convertFrom0to1 (float v) const noexcept       { return limitRange ((int) (v * (float) choices.size())); }
 
 float AudioParameterChoice::getValue() const                             { return convertTo0to1 (roundToInt (value)); }
