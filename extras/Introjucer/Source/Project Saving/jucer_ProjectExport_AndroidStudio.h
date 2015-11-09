@@ -70,7 +70,13 @@ public:
     void createExporterProperties (PropertyListBuilder& props) override
     {
         AndroidProjectExporterBase::createExporterProperties (props);
+
+        props.add (new TextPropertyComponent (getNDKPlatformVersionValue(), "NDK Platform Version", 32, false),
+                   "The value to use for android$user.ndk.platformVersion in Gradle");
     }
+
+    Value getNDKPlatformVersionValue() { return getSetting (Ids::androidNdkPlatformVersion); }
+    String getNDKPlatformVersionString() const { return settings [Ids::androidNdkPlatformVersion]; }
 
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
@@ -443,12 +449,17 @@ private:
     String createModelDotAndroidNDK (const String& indent) const
     {
         String result;
+        const String platformVersion (getNDKPlatformVersionString());
 
         result << "android.ndk {" << newLine
                << indent << "moduleName = \"juce_jni\"" << newLine
                << indent << "stl = \"gnustl_static\"" << newLine
-               << indent << "toolchainVersion = 4.9" << newLine
-               << indent << "ext {" << newLine
+               << indent << "toolchainVersion = 4.9" << newLine;
+
+        if (platformVersion.isNotEmpty())
+            result << indent << "platformVersion = " << getNDKPlatformVersionString() << newLine;
+
+        result << indent << "ext {" << newLine
                << indent << indent << "juceRootDir = \"" << "${project.rootDir}/../../../../" << "\".toString()" << newLine
                << indent << indent << "juceModuleDir = \"" << "${juceRootDir}/modules" << "\".toString()" << newLine
                << indent << "}" << newLine;
