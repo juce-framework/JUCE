@@ -263,6 +263,7 @@ struct PluginSorter
             case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName); break;
             case KnownPluginList::sortByFormat:             diff = first->pluginFormatName.compare (second->pluginFormatName); break;
             case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first->fileOrIdentifier).compare (lastPathPart (second->fileOrIdentifier)); break;
+            case KnownPluginList::sortByInfoUpdateTime:     diff = compare (first->lastInfoUpdateTime, second->lastInfoUpdateTime); break;
             default: break;
         }
 
@@ -276,6 +277,14 @@ private:
     static String lastPathPart (const String& path)
     {
         return path.replaceCharacter ('\\', '/').upToLastOccurrenceOf ("/", false, false);
+    }
+
+    static int compare (Time a, Time b) noexcept
+    {
+        if (a < b)   return -1;
+        if (b < a)   return 1;
+
+        return 0;
     }
 
     const KnownPluginList::SortMethod method;

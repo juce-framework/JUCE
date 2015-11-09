@@ -220,6 +220,7 @@ public:
         desc.fileOrIdentifier = module->file.getFullPathName();
         desc.uid = getUID();
         desc.lastFileModTime = module->file.getLastModificationTime();
+        desc.lastInfoUpdateTime = Time::getCurrentTime();
         desc.pluginFormatName = "LADSPA";
         desc.category = getCategory();
         desc.manufacturerName = plugin != nullptr ? String (plugin->Maker) : String();

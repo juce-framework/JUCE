@@ -81,6 +81,11 @@ public:
     */
     Time lastFileModTime;
 
+    /** The last time that this information was updated. This would typically have
+        been during a scan when this plugin was first tested or found to have changed.
+    */
+    Time lastInfoUpdateTime;
+
     /** A unique ID for the plug-in.
 
         Note that this might not be unique between formats, e.g. a VST and some

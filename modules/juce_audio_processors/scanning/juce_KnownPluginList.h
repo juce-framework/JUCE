@@ -136,7 +136,8 @@ public:
         sortByCategory,
         sortByManufacturer,
         sortByFormat,
-        sortByFileSystemLocation
+        sortByFileSystemLocation,
+        sortByInfoUpdateTime
     };
 
     //==============================================================================
