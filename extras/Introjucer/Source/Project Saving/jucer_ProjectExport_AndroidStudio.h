@@ -245,14 +245,15 @@ private:
 
     static String sanitisePath (String path)
     {
-        if (path.startsWith ("~"))
-        {
-            const String homeFolder (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+        return expandHomeFolderToken (path).replace ("\\", "\\\\");
+    }
 
-            path = path.replaceSection (0, 1, homeFolder);
-        }
+    static String expandHomeFolderToken (const String& path)
+    {
+        String homeFolder = File::getSpecialLocation (File::userHomeDirectory).getFullPathName();
 
-        return path.replace ("\\", "\\\\");
+        return path.replace ("${user.home}", homeFolder)
+                   .replace ("~", homeFolder);
     }
 
     void writeLocalDotProperties (const File& folder) const
