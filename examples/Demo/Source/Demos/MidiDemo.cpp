@@ -105,6 +105,7 @@ public:
     {
         setOpaque (true);
 
+        // MIDI Inputs
         addAndMakeVisible (midiInputListLabel);
         midiInputListLabel.setText ("MIDI Input:", dontSendNotification);
         midiInputListLabel.attachToComponent (&midiInputList, true);
@@ -115,7 +116,7 @@ public:
         midiInputList.addItemList (midiInputs, 1);
         midiInputList.addListener (this);
 
-        // find the first enabled device and use that bu default
+        // find the first enabled device and use that by default
         for (int i = 0; i < midiInputs.size(); ++i)
         {
             if (deviceManager.isMidiInputEnabled (midiInputs[i]))
@@ -128,6 +129,17 @@ public:
         // if no enabled devices were found just use the first one in the list
         if (midiInputList.getSelectedId() == 0)
             setMidiInput (0);
+
+
+        // MIDI Outputs
+        addAndMakeVisible (midiOutputListLabel);
+        midiOutputListLabel.setText ("MIDI Output:", dontSendNotification);
+        midiOutputListLabel.attachToComponent (&midiOutputList, true);
+
+        addAndMakeVisible (midiOutputList);
+        midiOutputList.setTextWhenNoChoicesAvailable ("No MIDI Output Enabled");
+        midiOutputList.addItemList (MidiOutput::getDevices(), 1);
+        midiOutputList.addListener (this);
 
         addAndMakeVisible (keyboardComponent);
         keyboardState.addListener (this);
@@ -154,14 +166,15 @@ public:
     {
         Rectangle<int> area (getLocalBounds());
         midiInputList.setBounds (area.removeFromTop (36).removeFromRight (getWidth() - 150).reduced (8));
+        midiOutputList.setBounds (area.removeFromTop (36).removeFromRight (getWidth() - 150).reduced (8));
         keyboardComponent.setBounds (area.removeFromTop (80).reduced(8));
         messageListBox.setBounds (area.reduced (8));
     }
 
 private:
     AudioDeviceManager& deviceManager;
-    ComboBox midiInputList;
-    Label midiInputListLabel;
+    ComboBox midiInputList, midiOutputList;
+    Label midiInputListLabel, midiOutputListLabel;
     int lastInputIndex;
     bool isAddingFromMidiInput;
 
@@ -171,6 +184,7 @@ private:
     ListBox messageListBox;
     Array<MidiMessage> midiMessageList;
     MidiLogListBoxModel midiLogListBoxModel;
+    ScopedPointer<MidiOutput> currentMidiOutput;
 
     //==============================================================================
     /** Starts listening to a MIDI input device, enabling it if necessary. */
@@ -191,10 +205,22 @@ private:
         lastInputIndex = index;
     }
 
+    //==============================================================================
+    void setMidiOutput (int index)
+    {
+        currentMidiOutput = nullptr;
+
+        if (MidiOutput::getDevices() [index].isNotEmpty())
+        {
+            currentMidiOutput = MidiOutput::openDevice (index);
+            jassert (currentMidiOutput);
+   	    }
+    }
+
     void comboBoxChanged (ComboBox* box) override
     {
-        if (box == &midiInputList)
-            setMidiInput (midiInputList.getSelectedItemIndex());
+        if (box == &midiInputList)    setMidiInput  (midiInputList.getSelectedItemIndex());
+        if (box == &midiOutputList)   setMidiOutput (midiOutputList.getSelectedItemIndex());
     }
 
     // These methods handle callbacks from the midi device + on-screen keyboard..
@@ -243,6 +269,9 @@ private:
 
     void postMessageToList (const MidiMessage& message)
     {
+        if (currentMidiOutput != nullptr)
+            currentMidiOutput->sendMessageNow (message);
+
         (new IncomingMessageCallback (this, message))->post();
     }
 
