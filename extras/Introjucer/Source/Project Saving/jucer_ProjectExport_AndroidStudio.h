@@ -84,10 +84,21 @@ public:
     Value getNDKPlatformVersionValue() { return getSetting (Ids::androidNdkPlatformVersion); }
     String getNDKPlatformVersionString() const { return settings [Ids::androidNdkPlatformVersion]; }
 
+    void removeOldFiles (const File& targetFolder) const
+    {
+        targetFolder.getChildFile ("app/src").deleteRecursively();
+        targetFolder.getChildFile ("app/build").deleteRecursively();
+        targetFolder.getChildFile ("app/build.gradle").deleteFile();
+        targetFolder.getChildFile ("gradle").deleteRecursively();
+        targetFolder.getChildFile ("local.properties").deleteFile();
+        targetFolder.getChildFile ("settings.gradle").deleteFile();
+    }
+
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
         const File targetFolder (getTargetFolder());
-        targetFolder.deleteRecursively();
+
+        removeOldFiles (targetFolder);
 
         {
             const String package (getActivityClassPackage());
