@@ -394,6 +394,7 @@ private:
         {
             StringPairArray preprocessorDefinitions = getAllPreprocessorDefs();
             preprocessorDefinitions.set ("JUCE_ANDROID", "1");
+            preprocessorDefinitions.set ("JUCE_ANDROID_API_VERSION", getMinimumSDKVersionString());
             preprocessorDefinitions.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
             preprocessorDefinitions.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\\\"" + getActivityClassPath().replaceCharacter('.', '/') + "\\\"");
 
