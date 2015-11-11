@@ -45,6 +45,8 @@ class ConsoleUnitTestRunner : public UnitTestRunner
 //==============================================================================
 int main (int argc, char* argv[])
 {
+    ignoreUnused (argc, argv);
+
     ScopedPointer<ConsoleLogger> logger;
     Logger::setCurrentLogger (logger);
 

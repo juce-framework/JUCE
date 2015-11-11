@@ -142,6 +142,10 @@
  //#define JUCE_INCLUDE_ZLIB_CODE
 #endif
 
+#ifndef    JUCE_USE_CURL
+ //#define JUCE_USE_CURL
+#endif
+
 //==============================================================================
 // juce_graphics flags:
 
