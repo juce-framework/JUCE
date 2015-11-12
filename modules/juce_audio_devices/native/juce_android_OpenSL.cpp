@@ -131,8 +131,8 @@ public:
         outputBuffer.setSize (jmax (1, numOutputChannels), actualBufferSize);
         outputBuffer.clear();
 
-        const int audioBuffersToEnqueue = hasLowLatencyAudioPath ? buffersToEnqueueForLowLatency
-                                                                 : buffersToEnqueueSlowAudio;
+        const int audioBuffersToEnqueue = hasLowLatencyAudioPath() ? buffersToEnqueueForLowLatency
+                                                                   : buffersToEnqueueSlowAudio;
 
         DBG ("OpenSL: numInputChannels = " << numInputChannels
               << ", numOutputChannels = " << numOutputChannels
