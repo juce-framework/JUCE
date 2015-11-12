@@ -44,6 +44,7 @@ public:
         diagnosticsBox.setScrollbarsShown (true);
         diagnosticsBox.setCaretVisible (false);
         diagnosticsBox.setPopupMenuEnabled (true);
+        diagnosticsBox.setColour (TextEditor::textColourId, Colours::white);
         diagnosticsBox.setColour (TextEditor::backgroundColourId, Colour (0x32ffffff));
         diagnosticsBox.setColour (TextEditor::outlineColourId, Colour (0x1c000000));
         diagnosticsBox.setColour (TextEditor::shadowColourId, Colour (0x16000000));
@@ -85,6 +86,8 @@ public:
             logMessage ("Current audio device: " + device->getName().quoted());
             logMessage ("Sample rate: " + String (device->getCurrentSampleRate()) + " Hz");
             logMessage ("Block size: " + String (device->getCurrentBufferSizeSamples()) + " samples");
+            logMessage ("Output Latency: " + String (device->getOutputLatencyInSamples()) + " samples");
+            logMessage ("Input Latency: " + String (device->getInputLatencyInSamples()) + " samples");
             logMessage ("Bit depth: " + String (device->getCurrentBitDepth()));
             logMessage ("Input channel names: " + device->getInputChannelNames().joinIntoString (", "));
             logMessage ("Active input channels: " + getListOfActiveBits (device->getActiveInputChannels()));

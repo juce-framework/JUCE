@@ -434,6 +434,10 @@ private:
         {
             jassert (socket != nullptr);
             char buffer[oscBufferSize];
+            socket->waitUntilReady (true, -1);
+
+            if (threadShouldExit())
+                return;
 
             const int bytesRead = socket->read (buffer, (int) sizeof (buffer), false);
 

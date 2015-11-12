@@ -70,7 +70,13 @@ public:
     void createExporterProperties (PropertyListBuilder& props) override
     {
         AndroidProjectExporterBase::createExporterProperties (props);
+
+        props.add (new TextPropertyComponent (getNDKPlatformVersionValue(), "NDK Platform Version", 32, false),
+                   "The value to use for android$user.ndk.platformVersion in Gradle");
     }
+
+    Value getNDKPlatformVersionValue() { return getSetting (Ids::androidNdkPlatformVersion); }
+    String getNDKPlatformVersionString() const { return settings [Ids::androidNdkPlatformVersion]; }
 
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
@@ -245,14 +251,15 @@ private:
 
     static String sanitisePath (String path)
     {
-        if (path.startsWith ("~"))
-        {
-            const String homeFolder (File::getSpecialLocation (File::SpecialLocationType::userHomeDirectory).getFullPathName());
+        return expandHomeFolderToken (path).replace ("\\", "\\\\");
+    }
 
-            path = path.replaceSection (0, 1, homeFolder);
-        }
+    static String expandHomeFolderToken (const String& path)
+    {
+        String homeFolder = File::getSpecialLocation (File::userHomeDirectory).getFullPathName();
 
-        return path.replace ("\\", "\\\\");
+        return path.replace ("${user.home}", homeFolder)
+                   .replace ("~", homeFolder);
     }
 
     void writeLocalDotProperties (const File& folder) const
@@ -366,6 +373,11 @@ private:
         return result;
     }
 
+    struct ShouldBeAddedToProjectPredicate
+    {
+        bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
+    };
+
     StringArray getCPPFlags() const
     {
         StringArray result;
@@ -401,13 +413,8 @@ private:
             Array<RelativePath> cppFiles;
             const Array<Project::Item>& groups = getAllGroups();
 
-            struct Predicate
-            {
-                bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
-            };
-
             for (int i = 0; i < groups.size(); ++i)
-                findAllProjectItemsWithPredicate (groups.getReference (i), cppFiles, Predicate());
+                findAllProjectItemsWithPredicate (groups.getReference (i), cppFiles, ShouldBeAddedToProjectPredicate());
 
             for (int i = 0; i < cppFiles.size(); ++i)
             {
@@ -442,12 +449,17 @@ private:
     String createModelDotAndroidNDK (const String& indent) const
     {
         String result;
+        const String platformVersion (getNDKPlatformVersionString());
 
         result << "android.ndk {" << newLine
                << indent << "moduleName = \"juce_jni\"" << newLine
                << indent << "stl = \"gnustl_static\"" << newLine
-               << indent << "toolchainVersion = 4.9" << newLine
-               << indent << "ext {" << newLine
+               << indent << "toolchainVersion = 4.9" << newLine;
+
+        if (platformVersion.isNotEmpty())
+            result << indent << "platformVersion = " << getNDKPlatformVersionString() << newLine;
+
+        result << indent << "ext {" << newLine
                << indent << indent << "juceRootDir = \"" << "${project.rootDir}/../../../../" << "\".toString()" << newLine
                << indent << indent << "juceModuleDir = \"" << "${juceRootDir}/modules" << "\".toString()" << newLine
                << indent << "}" << newLine;

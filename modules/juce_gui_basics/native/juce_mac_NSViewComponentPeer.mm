@@ -1090,7 +1090,15 @@ public:
 
     static float getMousePressure (NSEvent* e) noexcept
     {
-        return (float) e.pressure;
+        @try
+        {
+            if (e.type != NSMouseEntered && e.type != NSMouseExited)
+                return (float) e.pressure;
+        }
+        @catch (NSException* e) {}
+        @finally {}
+
+        return 0.0f;
     }
 
     static Point<float> getMousePos (NSEvent* e, NSView* view)

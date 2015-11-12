@@ -110,6 +110,7 @@ static void createPluginDescription (PluginDescription& description,
 {
     description.fileOrIdentifier    = pluginFile.getFullPathName();
     description.lastFileModTime     = pluginFile.getLastModificationTime();
+    description.lastInfoUpdateTime  = Time::getCurrentTime();
     description.manufacturerName    = company;
     description.name                = name;
     description.descriptiveName     = name;

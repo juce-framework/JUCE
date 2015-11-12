@@ -155,6 +155,7 @@ namespace Ids
     DECLARE_ID (androidTheme);
     DECLARE_ID (androidStaticLibraries);
     DECLARE_ID (androidSharedLibraries);
+    DECLARE_ID (androidNdkPlatformVersion);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

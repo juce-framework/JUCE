@@ -249,7 +249,7 @@ namespace AiffFileHelpers
 
                 data += isGenre ? 118 : 50;
 
-                if (data[0] == 0)
+                if (data < dataEnd && data[0] == 0)
                 {
                     if      (data + 52  < dataEnd && isValidTag (data + 50))   data += 50;
                     else if (data + 120 < dataEnd && isValidTag (data + 118))  data += 118;

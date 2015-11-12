@@ -56,7 +56,7 @@ public:
     //==============================================================================
     void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected) override
     {
-		ignoreUnused (rowIsSelected);
+        ignoreUnused (rowIsSelected);
 
         if (isPositiveAndBelow (row, oscLogList.size()))
         {

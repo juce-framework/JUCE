@@ -804,6 +804,7 @@ public:
         desc.fileOrIdentifier = module->file.getFullPathName();
         desc.uid = getUID();
         desc.lastFileModTime = module->file.getLastModificationTime();
+        desc.lastInfoUpdateTime = Time::getCurrentTime();
         desc.pluginFormatName = "VST";
         desc.category = getCategory();
 

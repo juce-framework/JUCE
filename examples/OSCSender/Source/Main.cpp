@@ -26,7 +26,7 @@ public:
     //==============================================================================
     void initialise (const String& commandLine) override
     {
-		ignoreUnused (commandLine);
+        ignoreUnused (commandLine);
         // This method is where you should put your application's initialisation code..
 
         mainWindow = new MainWindow (getApplicationName());
@@ -49,7 +49,7 @@ public:
 
     void anotherInstanceStarted (const String& commandLine) override
     {
-		ignoreUnused (commandLine);
+        ignoreUnused (commandLine);
         // When another instance of the app is launched while this one is running,
         // this method is invoked, and the commandLine parameter tells you what
         // the other instance's command-line arguments were.
