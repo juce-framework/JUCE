@@ -353,7 +353,7 @@ private:
                << indent << "buildToolsVersion = \"" << "23.0.1" << "\"" << newLine
                << indent << "defaultConfig.with {" << newLine
                << indent << indent << "applicationId = \"" << bundleIdentifier.toLowerCase() << "\"" << newLine
-               << indent << indent << "minSdkVersion.apiLevel = 11" << newLine
+               << indent << indent << "minSdkVersion.apiLevel = " << minimumSDKVersion << newLine
                << indent << indent << "targetSdkVersion.apiLevel = " << minimumSDKVersion << newLine
                << indent << "}" << newLine
                << "}" << newLine;
