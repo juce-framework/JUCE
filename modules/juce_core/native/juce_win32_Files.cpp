@@ -662,7 +662,14 @@ File File::getLinkedTarget() const
                 if (requiredSize > 0)
                 {
                     CloseHandle (h);
-                    return File (String (buffer));
+
+                    const StringRef prefix ("\\\\?\\");
+                    const String path (buffer);
+
+                    // It turns out that GetFinalPathNameByHandleW prepends \\?\ to the path.
+                    // This is not a bug, it's feature. See MSDN for more information.
+                    return File (path.startsWith (prefix) ? path.substring (prefix.length())
+                                                          : path);
                 }
             }
 
