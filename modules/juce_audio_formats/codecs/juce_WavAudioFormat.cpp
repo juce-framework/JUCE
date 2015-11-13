@@ -650,17 +650,23 @@ namespace WavFileHelpers
         {
             while (input.getPosition() < chunkEnd)
             {
-                const int infoType      = input.readInt();
-                const int64 infoLength  = jlimit ((int64) 0, chunkEnd - input.getPosition(), (int64) input.readInt());
+                const int infoType = input.readInt();
 
-                for (int i = 0; i < numElementsInArray (types); ++i)
+                int64 infoLength = chunkEnd - input.getPosition();
+
+                if (infoLength > 0)
                 {
-                    if (isMatchingTypeIgnoringCase (infoType, types[i]))
+                    infoLength = jlimit ((int64) 0, infoLength, (int64) input.readInt());
+
+                    for (int i = 0; i < numElementsInArray (types); ++i)
                     {
-                        MemoryBlock mb;
-                        input.readIntoMemoryBlock (mb, (ssize_t) infoLength);
-                        values.set (types[i], mb.toString());
-                        break;
+                        if (isMatchingTypeIgnoringCase (infoType, types[i]))
+                        {
+                            MemoryBlock mb;
+                            input.readIntoMemoryBlock (mb, (ssize_t) infoLength);
+                            values.set (types[i], mb.toString());
+                            break;
+                        }
                     }
                 }
             }
