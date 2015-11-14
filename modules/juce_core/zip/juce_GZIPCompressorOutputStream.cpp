@@ -30,7 +30,7 @@ class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
     GZIPCompressorHelper (const int compressionLevel, const int windowBits)
-        : compLevel ((compressionLevel < 1 || compressionLevel > 9) ? -1 : compressionLevel),
+        : compLevel ((compressionLevel < 0 || compressionLevel > 9) ? -1 : compressionLevel),
           isFirstDeflate (true),
           streamIsValid (false),
           finished (false)
