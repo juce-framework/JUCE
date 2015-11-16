@@ -1084,6 +1084,7 @@ void TextEditor::colourChanged()
 
 void TextEditor::lookAndFeelChanged()
 {
+    caret = nullptr;
     recreateCaret();
     repaint();
 }
