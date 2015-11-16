@@ -1053,6 +1053,16 @@ public:
     }
 
     //==============================================================================
+    /** Sorts the array using a default comparison operation.
+        If the type of your elements isn't supported by the DefaultElementComparator class
+        then you may need to use the other version of sort, which takes a custom comparator.
+    */
+    void sort()
+    {
+        DefaultElementComparator<ElementType> comparator;
+        sort (comparator);
+    }
+
     /** Sorts the elements in the array.
 
         This will use a comparator object to sort the elements into order. The object
@@ -1081,7 +1091,7 @@ public:
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,
-               const bool retainOrderOfEquivalentItems = false) const
+               const bool retainOrderOfEquivalentItems = false)
     {
         const ScopedLockType lock (getLock());
         (void) comparator;  // if you pass in an object with a static compareElements() method, this

@@ -941,9 +941,7 @@ private:
         }
 
         bufferSizes.addIfNotAlreadyThere (preferredSize);
-
-        DefaultElementComparator <int> comparator;
-        bufferSizes.sort (comparator);
+        bufferSizes.sort();
     }
 
     double getSampleRate() const
