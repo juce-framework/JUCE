@@ -49,7 +49,7 @@ namespace
 
         bool writeUint64 (uint64 value)
         {
-            return output.writeInt64BigEndian (value);
+            return output.writeInt64BigEndian (int64 (value));
         }
 
         bool writeFloat32 (float value)
@@ -80,7 +80,7 @@ namespace
 
         bool writeTimeTag (OSCTimeTag timeTag)
         {
-            return output.writeInt64BigEndian (timeTag.getRawTimeTag());
+            return output.writeInt64BigEndian (int64 (timeTag.getRawTimeTag()));
         }
 
         bool writeAddress (const OSCAddress& address)
@@ -98,11 +98,11 @@ namespace
             output.writeByte (',');
 
             if (typeList.size() > 0)
-                output.write (typeList.begin(), typeList.size());
+                output.write (typeList.begin(), (size_t) typeList.size());
 
             output.writeByte ('\0');
 
-            size_t bytesWritten = typeList.size() + 1;
+            size_t bytesWritten = (size_t) typeList.size() + 1;
             size_t numPaddingZeros = ~bytesWritten & 0x03;
 
             return output.writeRepeatedByte ('\0', numPaddingZeros);
@@ -163,7 +163,7 @@ namespace
         //==========================================================================
         bool writeBundleElement (const OSCBundle::Element& element)
         {
-            const size_t startPos = (size_t) output.getPosition();
+            const int64 startPos = output.getPosition();
 
             if (! writeInt32 (0))   // writing dummy value for element size
                 return false;
@@ -179,11 +179,11 @@ namespace
                     return false;
             }
 
-            const size_t endPos = (size_t) output.getPosition();
-            const size_t elementSize = endPos - (startPos + 4);
+            const int64 endPos = output.getPosition();
+            const int64 elementSize = endPos - (startPos + 4);
 
             return output.setPosition (startPos)
-                     && writeInt32 ((int) elementSize)
+                     && writeInt32 ((int32) elementSize)
                      && output.setPosition (endPos);
         }
 
