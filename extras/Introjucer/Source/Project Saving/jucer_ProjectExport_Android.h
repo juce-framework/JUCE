@@ -40,6 +40,9 @@ public:
         if (getInternetNeededValue().toString().isEmpty())
             getInternetNeededValue() = true;
 
+        if (getBluetoothPermissionsValue().toString().isEmpty())
+            getBluetoothPermissionsValue() = true;
+
         if (getKeyStoreValue().getValue().isVoid())         getKeyStoreValue()      = "${user.home}/.android/debug.keystore";
         if (getKeyStorePassValue().getValue().isVoid())     getKeyStorePassValue()  = "android";
         if (getKeyAliasValue().getValue().isVoid())         getKeyAliasValue()      = "androiddebugkey";
@@ -323,6 +326,7 @@ public:
         {
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
+            s.add ("android.permission.ACCESS_COARSE_LOCATION");
         }
 
         return getCleanedStringArray (s);
