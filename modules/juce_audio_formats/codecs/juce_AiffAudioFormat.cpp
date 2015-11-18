@@ -889,17 +889,11 @@ public:
 
     void readMaxLevels (int64 startSampleInFile, int64 numSamples, Range<float>* results, int numChannelsToRead) override
     {
-        if (numSamples <= 0)
-        {
-            for (int i = 0; i < numChannelsToRead; ++i)
-                results[i] = Range<float>();
+        numSamples = jmin (numSamples, lengthInSamples - startSampleInFile);
 
-            return;
-        }
-
-        if (map == nullptr || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
+        if (map == nullptr || numSamples <= 0 || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {
-            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read.
 
             for (int i = 0; i < numChannelsToRead; ++i)
                 results[i] = Range<float>();

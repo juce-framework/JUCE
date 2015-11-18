@@ -650,17 +650,23 @@ namespace WavFileHelpers
         {
             while (input.getPosition() < chunkEnd)
             {
-                const int infoType      = input.readInt();
-                const int64 infoLength  = jlimit ((int64) 0, chunkEnd - input.getPosition(), (int64) input.readInt());
+                const int infoType = input.readInt();
 
-                for (int i = 0; i < numElementsInArray (types); ++i)
+                int64 infoLength = chunkEnd - input.getPosition();
+
+                if (infoLength > 0)
                 {
-                    if (isMatchingTypeIgnoringCase (infoType, types[i]))
+                    infoLength = jlimit ((int64) 0, infoLength, (int64) input.readInt());
+
+                    for (int i = 0; i < numElementsInArray (types); ++i)
                     {
-                        MemoryBlock mb;
-                        input.readIntoMemoryBlock (mb, (ssize_t) infoLength);
-                        values.set (types[i], mb.toString());
-                        break;
+                        if (isMatchingTypeIgnoringCase (infoType, types[i]))
+                        {
+                            MemoryBlock mb;
+                            input.readIntoMemoryBlock (mb, (ssize_t) infoLength);
+                            values.set (types[i], mb.toString());
+                            break;
+                        }
                     }
                 }
             }
@@ -1513,17 +1519,11 @@ public:
 
     void readMaxLevels (int64 startSampleInFile, int64 numSamples, Range<float>* results, int numChannelsToRead) override
     {
-        if (numSamples <= 0)
-        {
-            for (int i = 0; i < numChannelsToRead; ++i)
-                results[i] = Range<float>();
+        numSamples = jmin (numSamples, lengthInSamples - startSampleInFile);
 
-            return;
-        }
-
-        if (map == nullptr || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
+        if (map == nullptr || numSamples <= 0 || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {
-            jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
+            jassert (numSamples <= 0); // you must make sure that the window contains all the samples you're going to attempt to read.
 
             for (int i = 0; i < numChannelsToRead; ++i)
                 results[i] = Range<float>();

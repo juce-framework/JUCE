@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="The Introjucer" projectType="guiapp" juceLinkage="amalg_multi"
-              juceFolder="../../juce" jucerVersion="4.0.1" version="4.0.1"
+              juceFolder="../../juce" jucerVersion="4.0.2" version="4.0.2"
               buildVST="1" buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4"
               vstFolderPC="c:\SDKs\vstsdk2.4" rtasFolderMac="~/SDKs/PT_80_SDK"
               rtasFolderPC="c:\SDKs\PT_80_SDK" pluginName="The Introjucer"

@@ -2,19 +2,19 @@
 
 <JUCERPROJECT id="Z2Xzcp" name="UnitTestRunner" projectType="consoleapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.UnitTestRunner" includeBinaryInAppConfig="1"
-              jucerVersion="3.2.0" defines="JUCE_UNIT_TESTS=1">
+              jucerVersion="4.0.1" defines="JUCE_UNIT_TESTS=1">
   <MAINGROUP id="GZdWCU" name="UnitTestRunner">
     <GROUP id="{22894462-E1A9-036F-ED94-B51A50C87552}" name="Source">
       <FILE id="ynaYaM" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-pedantic-errors -Wreorder -Wconstant-conversion -Wint-conversion -Woverloaded-virtual -Wuninitialized -Wunused-parameter -Wshorten-64-to-32 -Wstrict-aliasing -Wshadow -Wconversion -Wsign-compare -Wsign-conversion">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"
                        isDebug="1" optimisation="1" targetName="UnitTestRunner"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="3" targetName="UnitTestRunner"/>
+        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="10.10 SDK"
+                       osxArchitecture="default" isDebug="0" optimisation="3" targetName="UnitTestRunner"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>

@@ -55,7 +55,7 @@ namespace
         size_t getDataSize() const noexcept         { return input.getDataSize(); }
 
         /** Returns the current position of the stream. */
-        int64 getPosition()                         { return input.getPosition(); }
+        uint64 getPosition()                         { return uint64 (input.getPosition()); }
 
         /** Attempts to set the current position of the stream. Returns true if this was successful. */
         bool setPosition (int64 pos)                { return input.setPosition (pos); }
@@ -80,7 +80,7 @@ namespace
             if (input.getNumBytesRemaining() < 8)
                 throw OSCFormatError ("OSC input stream exhausted while reading uint64");
 
-            return input.readInt64BigEndian();
+            return (uint64) input.readInt64BigEndian();
         }
 
         float readFloat32()
@@ -114,7 +114,7 @@ namespace
             if (input.getNumBytesRemaining() < 4)
                 throw OSCFormatError ("OSC input stream exhausted while reading blob");
 
-            const size_t blobDataSize = static_cast<size_t> (input.readIntBigEndian());
+            const int64 blobDataSize = input.readIntBigEndian();
 
             if (input.getNumBytesRemaining() < (blobDataSize + 3) % 4)
                 throw OSCFormatError ("OSC input stream exhausted before reaching end of blob");
@@ -132,7 +132,7 @@ namespace
             if (input.getNumBytesRemaining() < 8)
                 throw OSCFormatError ("OSC input stream exhausted while reading time tag");
 
-            return OSCTimeTag (input.readInt64BigEndian());
+            return OSCTimeTag (uint64 (input.readInt64BigEndian()));
         }
 
         OSCAddress readAddress()
@@ -172,7 +172,7 @@ namespace
                 typeList.add (type);
             }
 
-            size_t bytesRead = typeList.size() + 2;
+            size_t bytesRead = (size_t) typeList.size() + 2;
             readPaddingZeros (bytesRead);
 
             return typeList;
@@ -232,7 +232,7 @@ namespace
             if (input.getNumBytesRemaining() < 4)
                 throw OSCFormatError("OSC input stream exhausted while reading bundle element size");
 
-            const int elementSize = readInt32();
+            const size_t elementSize = (size_t) readInt32();
 
             if (elementSize < 4)
                 throw OSCFormatError("OSC input stream format error: invalid bundle element size");
@@ -243,7 +243,7 @@ namespace
         //======================================================================
         OSCBundle::Element readElementWithKnownSize (size_t elementSize)
         {
-            if (input.getNumBytesRemaining() < elementSize)
+            if ((uint64) input.getNumBytesRemaining() < elementSize)
                 throw OSCFormatError ("OSC input stream exhausted while reading bundle element content");
 
             const char firstContentChar = static_cast<const char*> (getData()) [getPosition()];
@@ -393,7 +393,7 @@ struct OSCReceiver::Pimpl   : private Thread,
     };
 
     //==========================================================================
-    void handleBuffer (const char* data, int dataSize)
+    void handleBuffer (const char* data, size_t dataSize)
     {
         OSCInputStream inStream (data, dataSize);
 
@@ -439,7 +439,7 @@ private:
             if (threadShouldExit())
                 return;
 
-            const int bytesRead = socket->read (buffer, (int) sizeof (buffer), false);
+            const size_t bytesRead = (size_t) socket->read (buffer, (int) sizeof (buffer), false);
 
             if (bytesRead >= 4)
                 handleBuffer (buffer, bytesRead);
