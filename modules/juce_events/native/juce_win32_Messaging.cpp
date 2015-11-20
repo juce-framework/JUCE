@@ -58,14 +58,20 @@ namespace WindowsMessageHelpers
             {
                 // (These are trapped early in our dispatch loop, but must also be checked
                 // here in case some 3rd-party code is running the dispatch loop).
-                dispatchMessageFromLParam (lParam);
+                if (lParam != 0)
+                {
+                    dispatchMessageFromLParam (lParam);
+                }
                 return 0;
             }
 
             if (message == broadcastId)
             {
-                const ScopedPointer<String> messageString ((String*) lParam);
-                MessageManager::getInstance()->deliverBroadcastMessage (*messageString);
+                if (lParam != 0)
+                {
+                    const ScopedPointer<String> messageString ((String*) lParam);
+                    MessageManager::getInstance()->deliverBroadcastMessage (*messageString);
+                }
                 return 0;
             }
 
@@ -73,7 +79,7 @@ namespace WindowsMessageHelpers
             {
                 const COPYDATASTRUCT* const data = reinterpret_cast<const COPYDATASTRUCT*> (lParam);
 
-                if (data->dwData == broadcastId)
+                if (data != NULL && data->dwData == broadcastId)
                 {
                     const String messageString (CharPointer_UTF32 ((const CharPointer_UTF32::CharType*) data->lpData),
                                                 data->cbData / sizeof (CharPointer_UTF32::CharType));
