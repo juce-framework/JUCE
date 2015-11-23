@@ -643,6 +643,7 @@ bool File::isShortcut() const
 
 File File::getLinkedTarget() const
 {
+   #if JUCE_MSVC
     {
         HANDLE h = CreateFile (getFullPathName().toWideCharPointer(),
                                GENERIC_READ, FILE_SHARE_READ, nullptr,
@@ -676,6 +677,7 @@ File File::getLinkedTarget() const
             CloseHandle (h);
         }
     }
+   #endif
 
     File result (*this);
     String p (getFullPathName());
