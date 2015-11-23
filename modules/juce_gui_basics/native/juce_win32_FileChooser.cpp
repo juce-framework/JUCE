@@ -225,7 +225,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)),
                             ((filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten));
 
-        for (int i = 0; i < filterSpaceNumChars; ++i)
+        for (size_t i = 0; i < filterSpaceNumChars; ++i)
             if (filters[i] == '|')
                 filters[i] = 0;
 
