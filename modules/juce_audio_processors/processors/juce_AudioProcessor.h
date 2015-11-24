@@ -840,6 +840,9 @@ private:
     Component::SafePointer<AudioProcessorEditor> activeEditor;
     double sampleRate;
     int blockSize, numInputChannels, numOutputChannels, latencySamples;
+   #if JUCE_DEBUG
+    bool textRecursionCheck;
+   #endif
     bool suspended, nonRealtime;
     ProcessingPrecision processingPrecision;
     CriticalSection callbackLock, listenerLock;
