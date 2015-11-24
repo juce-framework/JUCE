@@ -640,7 +640,7 @@ private:
 
     private:
         //==============================================================================
-        class ContentWrapperComponent : public juce::Component
+        class ContentWrapperComponent  : public juce::Component
         {
         public:
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
@@ -692,11 +692,12 @@ private:
                 {
                     const int w = pluginEditor->getWidth();
                     const int h = pluginEditor->getHeight();
+                    const PluginHostType host (getHostType());
 
                    #if JUCE_WINDOWS
                     setSize (w, h);
                    #else
-                    if (owner.macHostWindow != nullptr && ! getHostType().isWavelab())
+                    if (owner.macHostWindow != nullptr && ! (host.isWavelab() || host.isReaper()))
                         juce::setNativeHostWindowSizeVST (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
@@ -705,7 +706,11 @@ private:
                         ViewRect newSize (0, 0, w, h);
                         owner.plugFrame->resizeView (&owner, &newSize);
 
-                        if (getHostType().isWavelab())
+                       #if JUCE_MAC
+                        if (host.isWavelab() || host.isReaper())
+                       #else
+                        if (host.isWavelab())
+                       #endif
                             setBounds (0, 0, w, h);
                     }
                 }
@@ -1575,7 +1580,7 @@ public:
             const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
             if ((pluginInstance->getNumInputChannels() + pluginInstance->getNumOutputChannels()) > 0
-                && (numInputChans + numOutputChans) == 0)
+                 && (numInputChans + numOutputChans) == 0)
                 return kResultFalse;
         }
 
