@@ -90,7 +90,8 @@ struct CachedImageList  : public ReferenceCountedObject,
         CachedImage (CachedImageList& list, ImagePixelData* im)
             : owner (list), pixelData (im),
               lastUsed (Time::getCurrentTime()),
-              imageSize ((size_t) (im->width * im->height))
+              imageSize ((size_t) (im->width * im->height)),
+              textureNeedsReloading (true)
         {
             pixelData->listeners.add (&owner);
         }
@@ -105,8 +106,11 @@ struct CachedImageList  : public ReferenceCountedObject,
         {
             TextureInfo t;
 
-            if (texture.getTextureID() == 0)
+            if (textureNeedsReloading)
+            {
+                textureNeedsReloading = false;
                 texture.loadImage (Image (pixelData));
+            }
 
             t.textureID = texture.getTextureID();
             t.imageWidth = pixelData->width;
@@ -124,6 +128,7 @@ struct CachedImageList  : public ReferenceCountedObject,
         OpenGLTexture texture;
         Time lastUsed;
         const size_t imageSize;
+        bool textureNeedsReloading;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedImage)
     };
@@ -143,8 +148,7 @@ private:
     void imageDataChanged (ImagePixelData* im) override
     {
         if (CachedImage* c = findCachedImage (im))
-            if (canUseContext())
-                c->texture.release();
+            c->textureNeedsReloading = true;
     }
 
     void imageDataBeingDeleted (ImagePixelData* im) override
