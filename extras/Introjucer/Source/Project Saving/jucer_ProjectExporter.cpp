@@ -311,12 +311,14 @@ Project::Item& ProjectExporter::getModulesGroup()
     return *modulesGroup;
 }
 
-void ProjectExporter::addToExtraSearchPaths (const RelativePath& pathFromProjectFolder)
+void ProjectExporter::addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index)
 {
     RelativePath localPath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
 
     const String path (isVisualStudio() ? localPath.toWindowsStyle() : localPath.toUnixStyle());
-    extraSearchPaths.addIfNotAlreadyThere (path, false);
+
+    if (! extraSearchPaths.contains (path))
+        extraSearchPaths.insert (index, path);
 }
 
 Value ProjectExporter::getPathForModuleValue (const String& moduleID)

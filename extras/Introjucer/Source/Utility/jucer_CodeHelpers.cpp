@@ -134,7 +134,7 @@ namespace CodeHelpers
     String stringLiteral (const String& text, int maxLineLength)
     {
         if (text.isEmpty())
-            return "String::empty";
+            return "String()";
 
         StringArray lines;
 

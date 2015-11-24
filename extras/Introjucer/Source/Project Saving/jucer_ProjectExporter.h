@@ -135,7 +135,7 @@ public:
     void updateOldModulePaths();
 
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
-    void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder);
+    void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index = -1);
 
     Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
     Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }

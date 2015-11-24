@@ -4,6 +4,7 @@
           package="com.yourcompany.miditest">
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"/>
   <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="11"/>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
   <uses-permission android:name="android.permission.BLUETOOTH"/>
   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
