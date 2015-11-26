@@ -30,11 +30,12 @@
 #define JUCE_WIN32_COMSMARTPTR_H_INCLUDED
 
 #if ! (defined (_MSC_VER) || defined (__uuidof))
-template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return CLSID(); } };
-#define __uuidof(x)  UUIDGetter<x>::get()
+ #warning "warning: disabling __uuidof()"
+ template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return CLSID(); } };
+ #define __uuidof(x)  UUIDGetter<x>::get()
 #endif
 
-inline GUID uuidFromString (const char* const s) noexcept
+inline GUID uuidFromString (const char* const s) noexcept		// how is this NOEXCEPT ???
 {
     unsigned long p0;
     unsigned int p1, p2, p3, p4, p5, p6, p7, p8, p9, p10;

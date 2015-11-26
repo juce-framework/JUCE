@@ -80,7 +80,12 @@
  #endif
 
  #if JUCE_USE_WINDOWS_MEDIA_FORMAT
-  #include <wmsdk.h>
+  #if JUCE_MSVC
+   #include <wmsdk.h>
+  #else
+   // #include "C:/Program Files (x86)/Windows Kits/8.1/Include/um/wmsdk.h"
+   #include <wmsdkidl.h>
+  #endif
  #endif
 #endif
 

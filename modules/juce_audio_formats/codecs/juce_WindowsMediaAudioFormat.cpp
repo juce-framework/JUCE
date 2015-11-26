@@ -22,6 +22,304 @@
   ==============================================================================
 */
 
+#if JUCE_MINGW
+
+} // close juce namespace
+
+#include <guiddef.h>
+#include <tuple>
+
+using	tupluuid = std::tuple<uint32_t, uint16_t, uint16_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t>;
+
+inline
+tupluuid	UUID_split(const char *s)
+{	
+	GUID	g = juce::uuidFromString(s);
+	
+	return std::make_tuple(g.Data1, g.Data2, g.Data3, g.Data4[0], g.Data4[1], g.Data4[2], g.Data4[3], g.Data4[4], g.Data4[5], g.Data4[6], g.Data4[7]);
+	// __CRT_UUID_DECL(name, g.Data1, g.Data2, g.Data3, g.Data4[0], g.Data4[1], g.Data4[2], g.Data4[3], g.Data4[4], g.Data4[5], g.Data4[6], g.Data4[7]);
+}
+
+/*
+struct bite
+{
+	bite(tupluuid tup)
+		: m_tupid(tup)
+	{
+	}
+	
+	auto&	operator[](const size_t idx)
+	{	return std::get<idx>(m_tupid);
+	}
+	
+	tupluuid	m_tupid;
+};
+*/
+
+/*
+#define	gh(s)	gx = UUID_split(s);
+#define	DeclUUID(typ, s)	__CRT_UUID_DECL(typ,	get<0>(gx), get<1>(gx), get<2>(gx), get<3>(gx), get<4>(gx), \
+							get<5>(gx), get<6>(gx), get<7>(gx), get<8>(gx), get<9>(gx), get<10>(gx));
+*/
+
+typedef 
+enum WMT_RIGHTS
+{
+	WMT_RIGHT_PLAYBACK			= 0x1,
+	WMT_RIGHT_COPY_TO_NON_SDMI_DEVICE	= 0x2,
+	WMT_RIGHT_COPY_TO_CD			= 0x8,
+	WMT_RIGHT_COPY_TO_SDMI_DEVICE		= 0x10,
+	WMT_RIGHT_ONE_TIME			= 0x20,
+	WMT_RIGHT_SAVE_STREAM_PROTECTED		= 0x40,
+	WMT_RIGHT_COPY				= 0x80,
+	WMT_RIGHT_COLLABORATIVE_PLAY		= 0x100,
+	WMT_RIGHT_SDMI_TRIGGER			= 0x10000,
+	WMT_RIGHT_SDMI_NOMORECOPIES		= 0x20000
+} WMT_RIGHTS;
+    
+#include "C:/Program Files (x86)/Windows Kits/8.1/Include/um/nserror.h"
+
+typedef LPCWSTR LPCWSTR_WMSDK_TYPE_SAFE;
+
+    // MIDL_INTERFACE("96406BDA-2B2B-11d3-B36B-00C04F6108FF")
+    struct IWMHeaderInfo : public IUnknown
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE GetAttributeCount( 
+            /* [in] */ WORD wStreamNum,
+            /* [out] */ WORD *pcAttributes) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetAttributeByIndex( 
+            /* [in] */ WORD wIndex,
+            /* [out][in] */ WORD *pwStreamNum,
+            /* [size_is][out] */ WCHAR *pwszName,
+            /* [out][in] */ WORD *pcchNameLen,
+            /* [out] */ WMT_ATTR_DATATYPE *pType,
+            /* [size_is][out] */ BYTE *pValue,
+            /* [out][in] */ WORD *pcbLength) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetAttributeByName( 
+            /* [out][in] */ WORD *pwStreamNum,
+            /* [in] */ LPCWSTR pszName,
+            /* [out] */ WMT_ATTR_DATATYPE *pType,
+            /* [size_is][out] */ BYTE *pValue,
+            /* [out][in] */ WORD *pcbLength) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetAttribute( 
+            /* [in] */ WORD wStreamNum,
+            /* [in] */ LPCWSTR pszName,
+            /* [in] */ WMT_ATTR_DATATYPE Type,
+            /* [size_is][in] */ const BYTE *pValue,
+            /* [in] */ WORD cbLength) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetMarkerCount( 
+            /* [out] */ WORD *pcMarkers) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetMarker( 
+            /* [in] */ WORD wIndex,
+            /* [size_is][out] */ WCHAR *pwszMarkerName,
+            /* [out][in] */ WORD *pcchMarkerNameLen,
+            /* [out] */ QWORD *pcnsMarkerTime) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE AddMarker( 
+            /* [in] */ LPCWSTR_WMSDK_TYPE_SAFE pwszMarkerName,
+            /* [in] */ QWORD cnsMarkerTime) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE RemoveMarker( 
+            /* [in] */ WORD wIndex) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetScriptCount( 
+            /* [out] */ WORD *pcScripts) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetScript( 
+            /* [in] */ WORD wIndex,
+            /* [size_is][out] */ WCHAR *pwszType,
+            /* [out][in] */ WORD *pcchTypeLen,
+            /* [size_is][out] */ WCHAR *pwszCommand,
+            /* [out][in] */ WORD *pcchCommandLen,
+            /* [out] */ QWORD *pcnsScriptTime) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE AddScript( 
+            /* [in] */ LPCWSTR_WMSDK_TYPE_SAFE pwszType,
+            /* [in] */ LPCWSTR_WMSDK_TYPE_SAFE pwszCommand,
+            /* [in] */ QWORD cnsScriptTime) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE RemoveScript( 
+            /* [in] */ WORD wIndex) = 0;
+    };
+    __CRT_UUID_DECL(IWMHeaderInfo, 0x96406BDA, 0x2B2B,0x11d3, 0xB3, 0x6B, 0x00, 0xC0, 0x4F, 0x61, 0x08, 0xFF);
+    // DeclUUID(IWMHeaderInfo, "96406BDA-2B2B-11d3-B36B-00C04F6108FF");
+
+    // MIDL_INTERFACE("96406BDC-2B2B-11d3-B36B-00C04F6108FF")
+    struct IWMStreamConfig : public IUnknown
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE GetStreamType( 
+            /* [out] */ GUID *pguidStreamType) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetStreamNumber( 
+            /* [out] */ WORD *pwStreamNum) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetStreamNumber( 
+            /* [in] */ WORD wStreamNum) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetStreamName( 
+            /* [size_is][out] */ WCHAR *pwszStreamName,
+            /* [out][in] */ WORD *pcchStreamName) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetStreamName( 
+            /* [in] */ LPCWSTR_WMSDK_TYPE_SAFE pwszStreamName) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetConnectionName( 
+            /* [size_is][out] */ WCHAR *pwszInputName,
+            /* [out][in] */ WORD *pcchInputName) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetConnectionName( 
+            /* [in] */ LPCWSTR_WMSDK_TYPE_SAFE pwszInputName) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetBitrate( 
+            /* [out] */ DWORD *pdwBitrate) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetBitrate( 
+            /* [in] */ DWORD pdwBitrate) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetBufferWindow( 
+            /* [out] */ DWORD *pmsBufferWindow) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetBufferWindow( 
+            /* [in] */ DWORD msBufferWindow) = 0;
+    };
+    
+    // MIDL_INTERFACE("96406BDD-2B2B-11d3-B36B-00C04F6108FF")
+    struct IWMStreamList : public IUnknown
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE GetStreams( 
+            /* [size_is][out] */ WORD *pwStreamNumArray,
+            /* [out][in] */ WORD *pcStreams) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE AddStream( 
+            /* [in] */ WORD wStreamNum) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE RemoveStream( 
+            /* [in] */ WORD wStreamNum) = 0;
+        
+    };
+
+    // MIDL_INTERFACE("96406BDE-2B2B-11d3-B36B-00C04F6108FF")
+    struct IWMMutualExclusion : public IWMStreamList
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE GetType( 
+            /* [out] */ GUID *pguidType) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetType( 
+            /* [in] */ REFGUID guidType) = 0;
+        
+    };
+
+    // MIDL_INTERFACE("96406BDB-2B2B-11d3-B36B-00C04F6108FF")
+    struct IWMProfile : public IUnknown
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE GetVersion( 
+            /* [out] */ DWORD *pdwVersion) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetName( 
+            /* [size_is][out] */ WCHAR *pwszName,
+            /* [out][in] */ DWORD *pcchName) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetName( 
+            /* [in] */ const WCHAR *pwszName) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetDescription( 
+            /* [size_is][out] */ WCHAR *pwszDescription,
+            /* [out][in] */ DWORD *pcchDescription) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SetDescription( 
+            /* [in] */ const WCHAR *pwszDescription) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetStreamCount( 
+            /* [out] */ DWORD *pcStreams) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetStream( 
+            /* [in] */ DWORD dwStreamIndex,
+            /* [out] */ IWMStreamConfig **ppConfig) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetStreamByNumber( 
+            /* [in] */ WORD wStreamNum,
+            /* [out] */ IWMStreamConfig **ppConfig) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE RemoveStream( 
+            /* [in] */ IWMStreamConfig *pConfig) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE RemoveStreamByNumber( 
+            /* [in] */ WORD wStreamNum) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE AddStream( 
+            /* [in] */ IWMStreamConfig *pConfig) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE ReconfigStream( 
+            /* [in] */ IWMStreamConfig *pConfig) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE CreateNewStream( 
+            /* [in] */ REFGUID guidStreamType,
+            /* [out] */ IWMStreamConfig **ppConfig) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetMutualExclusionCount( 
+            /* [out] */ DWORD *pcME) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetMutualExclusion( 
+            /* [in] */ DWORD dwMEIndex,
+            /* [out] */ IWMMutualExclusion **ppME) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE RemoveMutualExclusion( 
+            /* [in] */ IWMMutualExclusion *pME) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE AddMutualExclusion( 
+            /* [in] */ IWMMutualExclusion *pME) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE CreateNewMutualExclusion( 
+            /* [out] */ IWMMutualExclusion **ppME) = 0;
+    };
+    // DeclUUID(IWMProfile, "96406BDB-2B2B-11d3-B36B-00C04F6108FF");
+    __CRT_UUID_DECL(IWMProfile, 0x96406BDB, 0x2B2B, 0x11d3, 0xB3, 0x6B, 0x00, 0xC0, 0x4F, 0x61, 0x08, 0xFF);
+    
+    // MIDL_INTERFACE("d16679f2-6ca0-472d-8d31-2f5d55aee155")
+    struct IWMProfileManager : public IUnknown
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE CreateEmptyProfile( 
+            /* [in] */ DWORD dwVersion,
+            /* [out] */ IWMProfile **ppProfile) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE LoadProfileByID( 
+            /* [in] */ REFGUID guidProfile,
+            /* [out] */ IWMProfile **ppProfile) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE LoadProfileByData( 
+            /* [in] */ const WCHAR *pwszProfile,
+            /* [out] */ IWMProfile **ppProfile) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE SaveProfile( 
+            /* [in] */ IWMProfile *pIWMProfile,
+            /* [in] */ WCHAR *pwszProfile,
+            /* [out][in] */ DWORD *pdwLength) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE GetSystemProfileCount( 
+            /* [out] */ DWORD *pcProfiles) = 0;
+        
+        virtual HRESULT STDMETHODCALLTYPE LoadSystemProfile( 
+            /* [in] */ DWORD dwProfileIndex,
+            /* [out] */ IWMProfile **ppProfile) = 0;
+        
+    };
+
+namespace juce
+{
+
+#endif
+
 namespace WindowsMediaCodec
 {
 
