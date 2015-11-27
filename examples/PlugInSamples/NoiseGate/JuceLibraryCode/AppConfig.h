@@ -211,7 +211,7 @@
 // Audio plugin settings..
 
 #ifndef  JucePlugin_Build_VST
- #define JucePlugin_Build_VST              0
+ #define JucePlugin_Build_VST              1
 #endif
 #ifndef  JucePlugin_Build_VST3
  #define JucePlugin_Build_VST3             1
@@ -245,6 +245,15 @@
 #endif
 #ifndef  JucePlugin_PluginCode
  #define JucePlugin_PluginCode             'Nois'
+#endif
+#ifndef  JucePlugin_MaxNumInputChannels
+ #define JucePlugin_MaxNumInputChannels    0
+#endif
+#ifndef  JucePlugin_MaxNumOutputChannels
+ #define JucePlugin_MaxNumOutputChannels   0
+#endif
+#ifndef  JucePlugin_PreferredChannelConfigurations
+ #define JucePlugin_PreferredChannelConfigurations  
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
