@@ -1348,7 +1348,7 @@ public:
         const Array<AudioProcessor::AudioProcessorBus>& buses = dir == Vst::kInput ? busArrangement.inputBuses
                                                                                    : busArrangement.outputBuses;
 
-        return isPositiveAndBelow (index, buses.size()) ? &buses.getReference (index) : nullptr;
+        return isPositiveAndBelow (index, static_cast<Steinberg::int32> (buses.size())) ? &buses.getReference (index) : nullptr;
     }
 
     const AudioProcessor::AudioProcessorBus* getAudioBus (Vst::BusDirection dir, Steinberg::int32 index) const noexcept
