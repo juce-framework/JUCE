@@ -240,15 +240,22 @@ public:
     */
     struct AudioBusArrangement
     {
+        /** An array containing the list of input buses that this processor supports. */
+        Array<AudioProcessorBus> inputBuses;
+
+        /** An array containing the list of output buses that this processor supports. */
+        Array<AudioProcessorBus> outputBuses;
+
+        //==============================================================================
         /** Returns the position of a bus's channels within the processBlock buffer.
             This can be called in processBlock to figure out which channel of the master AudioSampleBuffer
             maps onto a specific bus's channel.
         */
         int getChannelIndexInProcessBlockBuffer (bool isInput, int busIndex, int channelIndex) const noexcept;
 
-        /** Returns an AudioBuffer containing the
-            This can be called in processBlock to get a buffer containing a sub-group of the master AudioSampleBuffer
-            which contains a specific bus's channels.
+        /** Returns an AudioBuffer containing a set of channel pointers for a specific bus.
+            This can be called in processBlock to get a buffer containing a sub-group of the master
+            AudioSampleBuffer which contains all the plugin channels.
         */
         template <typename FloatType>
         AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer, bool isInput, int busIndex) const
@@ -262,14 +269,9 @@ public:
 
         /** Returns the total number of channels in all the input buses. */
         int getTotalNumInputChannels() const noexcept;
+
         /** Returns the total number of channels in all the output buses. */
         int getTotalNumOutputChannels() const noexcept;
-
-        /** An array containing the list of input buses that this processor supports. */
-        Array<AudioProcessorBus> inputBuses;
-
-        /** An array containing the list of output buses that this processor supports. */
-        Array<AudioProcessorBus> outputBuses;
     };
 
     /** The processor's bus arrangement.
