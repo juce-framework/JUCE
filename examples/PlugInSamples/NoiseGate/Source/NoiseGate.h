@@ -20,11 +20,6 @@
 class NoiseGate  : public AudioProcessor
 {
 public:
-    enum
-    {
-        kMaximumNumberOfAudioBuses = 8
-    };
-
     //==============================================================================
     NoiseGate();
     ~NoiseGate();
