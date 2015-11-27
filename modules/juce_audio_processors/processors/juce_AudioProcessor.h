@@ -253,16 +253,16 @@ public:
         template <typename FloatType>
         AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer, bool isInput, int busIndex) const
         {
-            const Array<AudioProcessorBus>& bus = isInput ? inputBuses : outputBuses;
-
-            const int busNumChannels = bus.getReference (busIndex).channels.size();
+            const int busNumChannels = (isInput ? inputBuses : outputBuses).getReference (busIndex).channels.size();
             const int channelOffset = getChannelIndexInProcessBlockBuffer (isInput, busIndex, 0);
 
             return AudioBuffer<FloatType> (processBlockBuffer.getArrayOfWritePointers() + channelOffset,
                                            busNumChannels, processBlockBuffer.getNumSamples());
         }
 
+        /** Returns the total number of channels in all the input buses. */
         int getTotalNumInputChannels() const noexcept;
+        /** Returns the total number of channels in all the output buses. */
         int getTotalNumOutputChannels() const noexcept;
 
         /** An array containing the list of input buses that this processor supports. */
@@ -273,8 +273,14 @@ public:
     };
 
     /** The processor's bus arrangement.
-        Your plugin can modify this when the plugin is not active.
-        The host may change it by calling setPreferredBusArrangement().
+
+        Your plugin can modify this either
+          - in the plugin's constructor
+          - in the setPreferredBusArrangement() callback
+        Changing it at other times can result in undefined behaviour.
+
+        The host will negotiate with the plugin over its bus configuration by making calls
+        to setPreferredBusArrangement().
     */
     AudioBusArrangement busArrangement;
 

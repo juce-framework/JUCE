@@ -593,7 +593,7 @@ int AudioProcessor::AudioBusArrangement::getChannelIndexInProcessBlockBuffer (bo
     jassert (busIndex < ioBus.size());
 
     for (int i = 0; i < ioBus.size() && i < busIndex; ++i)
-        channelIndex += ioBus.getReference (i).channels.size();
+        channelIndex += ioBus.getReference(i).channels.size();
 
     return channelIndex;
 }
