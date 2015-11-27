@@ -27,10 +27,10 @@ public:
     MultiOutSynth()
     {
         // The base class constructor will already add a main stereo output bus
-        // If you want to add your own main channel then simply call:
-        // busArrangement.outputBuses.clear();
+        // If you want to add your own main channel then simply call clear the
+        // output buses (busArrangement.outputBuses.clear()) and then add your own
 
-        // Add Output buses for all MIDI channels but disable them by default
+        // Add additional output buses but disable these by default
         for (int busNr = 1; busNr < maxMidiChannel; ++busNr)
             busArrangement.outputBuses.add (AudioProcessorBus (String ("Output #") += String (busNr + 1), AudioChannelSet()));
 
