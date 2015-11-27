@@ -442,7 +442,7 @@ bool AudioProcessor::setPreferredBusArrangement (bool isInput, int busIndex, con
 
         // find a compatible channel configuration on the opposite bus which is the closest match
         // to the current number of channels on that bus
-        unsigned int distance = INT_MAX;
+        int distance = std::numeric_limits<int>::max();
         int bestConfiguration = -1;
 
         for (int i = 0; i < numChannelConfigs; ++i)
@@ -451,7 +451,7 @@ bool AudioProcessor::setPreferredBusArrangement (bool isInput, int busIndex, con
             if (channelConfigs[i][dir] == mainBusNumChannels)
             {
                 const int configChannels = channelConfigs[i][dir^1];
-                const unsigned int channelDifference = std::abs (configChannels - mainBusOppositeChannels);
+                const int channelDifference = std::abs (configChannels - mainBusOppositeChannels);
 
                 if (channelDifference < distance)
                 {
@@ -459,7 +459,8 @@ bool AudioProcessor::setPreferredBusArrangement (bool isInput, int busIndex, con
                     bestConfiguration = configChannels;
 
                     // we can exit if we found a perfect match
-                    if (distance == 0) break;
+                    if (distance == 0)
+                        break;
                 }
             }
         }
