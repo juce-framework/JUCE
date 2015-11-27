@@ -885,6 +885,17 @@
       </Filter>
       <Filter Name="juce_audio_processors">
         <Filter Name="processors">
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPlayHead.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPluginInstance.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.cpp">

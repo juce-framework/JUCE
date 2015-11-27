@@ -154,9 +154,6 @@ namespace
         flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (project.getCompanyEmail()));
         flags.set ("JucePlugin_ManufacturerCode",            valueToCharLiteral (getPluginManufacturerCode (project)));
         flags.set ("JucePlugin_PluginCode",                  valueToCharLiteral (getPluginCode (project)));
-        flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
-        flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false)));
-        flags.set ("JucePlugin_PreferredChannelConfigurations", getPluginChannelConfigs (project).toString());
         flags.set ("JucePlugin_IsSynth",                     valueToBool (getPluginIsSynth (project)));
         flags.set ("JucePlugin_WantsMidiInput",              valueToBool (getPluginWantsMidiInput (project)));
         flags.set ("JucePlugin_ProducesMidiOutput",          valueToBool (getPluginProducesMidiOut (project)));
@@ -184,6 +181,17 @@ namespace
         flags.set ("JucePlugin_AAXCategory",                 getPluginAAXCategory (project).toString());
         flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (getPluginAAXBypassDisabled (project)));
         flags.set ("JucePlugin_AAXDisableMultiMono",         valueToBool (getPluginAAXMultiMonoDisabled (project)));
+
+        {
+            String plugInChannelConfig = getPluginChannelConfigs (project).toString();
+
+            if (plugInChannelConfig.isNotEmpty())
+            {
+                flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (plugInChannelConfig, true)));
+                flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (plugInChannelConfig, false)));
+                flags.set ("JucePlugin_PreferredChannelConfigurations", plugInChannelConfig);
+            }
+        }
 
         MemoryOutputStream mem;
 

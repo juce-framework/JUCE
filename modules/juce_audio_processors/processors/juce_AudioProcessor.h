@@ -133,6 +133,7 @@ public:
         processBlock() method to send out an asynchronous message. You could also use
         the AsyncUpdater class in a similar way.
     */
+
     virtual void processBlock (AudioBuffer<float>& buffer,
                                MidiBuffer& midiMessages) = 0;
 
@@ -162,6 +163,10 @@ public:
         Also note that the buffer may have more channels than are strictly necessary,
         but you should only read/write from the ones that your filter is supposed to
         be using.
+
+        If your plugin uses buses, then you should use AudioBusArrangement::getBusBuffer()
+        or AudioBusArrangement::getChannelIndexInProcessBlockBuffer() to find out which
+        of the input and output channels correspond to which of the buses.
 
         The number of samples in these buffers is NOT guaranteed to be the same for every
         callback, and may be more or less than the estimated value given to prepareToPlay().
@@ -211,6 +216,79 @@ public:
     */
     virtual void processBlockBypassed (AudioBuffer<double>& buffer,
                                        MidiBuffer& midiMessages);
+
+    //==============================================================================
+    /** Describes the layout and properties of an audio bus.
+        Effectively a bus description is a named set of channel types.
+        @see AudioChannelSet
+    */
+    struct AudioProcessorBus
+    {
+        /** Creates a bus from a name and set of channel types. */
+        AudioProcessorBus (const String& busName, const AudioChannelSet& channelTypes);
+
+        /** The bus's name. */
+        String name;
+
+        /** The set of channel types that the bus contains. */
+        AudioChannelSet channels;
+    };
+
+    //==============================================================================
+    /**
+        Represents a set of input and output buses for an AudioProcessor.
+    */
+    struct AudioBusArrangement
+    {
+        /** Returns the position of a bus's channels within the processBlock buffer.
+            This can be called in processBlock to figure out which channel of the master AudioSampleBuffer
+            maps onto a specific bus's channel.
+        */
+        int getChannelIndexInProcessBlockBuffer (bool isInput, int busIndex, int channelIndex) const noexcept;
+
+        /** Returns an AudioBuffer containing the
+            This can be called in processBlock to get a buffer containing a sub-group of the master AudioSampleBuffer
+            which contains a specific bus's channels.
+        */
+        template <typename FloatType>
+        AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer, bool isInput, int busIndex) const
+        {
+            const Array<AudioProcessorBus>& bus = isInput ? inputBuses : outputBuses;
+
+            const int busNumChannels = bus.getReference (busIndex).channels.size();
+            const int channelOffset = getChannelIndexInProcessBlockBuffer (isInput, busIndex, 0);
+
+            return AudioBuffer<FloatType> (processBlockBuffer.getArrayOfWritePointers() + channelOffset,
+                                           busNumChannels, processBlockBuffer.getNumSamples());
+        }
+
+        int getTotalNumInputChannels() const noexcept;
+        int getTotalNumOutputChannels() const noexcept;
+
+        /** An array containing the list of input buses that this processor supports. */
+        Array<AudioProcessorBus> inputBuses;
+
+        /** An array containing the list of output buses that this processor supports. */
+        Array<AudioProcessorBus> outputBuses;
+    };
+
+    /** The processor's bus arrangement.
+        Your plugin can modify this when the plugin is not active.
+        The host may change it by calling setPreferredBusArrangement().
+    */
+    AudioBusArrangement busArrangement;
+
+    //==============================================================================
+    /** Called by the host, this attempts to change the plugin's channel layout on a particular bus.
+        The base class implementation will perform some basic sanity-checking and then apply the
+        changes to the processor's busArrangement value.
+        You may override it and return false if you want to make your plugin smarter about refusing
+        certain layouts that you don't want to support. Your plug-in may also respond to this call by
+        changing the channel layout of other buses, for example, if your plug-in requires the same
+        number of input and output channels.
+        @returns false if there is no way for the processor to support the given format on the specified bus.
+    */
+    virtual bool setPreferredBusArrangement (bool isInputBus, int busIndex, const AudioChannelSet& preferredSet);
 
     //==============================================================================
     /** Returns true if the Audio processor supports double precision floating point processing.
@@ -330,20 +408,20 @@ public:
         The processor might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
-    virtual const String getInputChannelName (int channelIndex) const = 0;
+    virtual const String getInputChannelName (int channelIndex) const;
 
     /** Returns the name of one of the processor's output channels.
 
         The processor might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
-    virtual const String getOutputChannelName (int channelIndex) const = 0;
+    virtual const String getOutputChannelName (int channelIndex) const;
 
     /** Returns true if the specified channel is part of a stereo pair with its neighbour. */
-    virtual bool isInputChannelStereoPair (int index) const = 0;
+    virtual bool isInputChannelStereoPair (int index) const;
 
     /** Returns true if the specified channel is part of a stereo pair with its neighbour. */
-    virtual bool isOutputChannelStereoPair (int index) const = 0;
+    virtual bool isOutputChannelStereoPair (int index) const;
 
     /** This returns the number of samples delay that the filter imposes on the audio
         passing through it.
@@ -856,6 +934,8 @@ private:
    #endif
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
+
+    void applyCurrentBusConfiguration();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
