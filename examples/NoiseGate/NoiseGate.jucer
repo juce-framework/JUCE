@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="kmYCMo" name="NoiseGate" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.roli.NoiseGate" includeBinaryInAppConfig="1"
-              buildVST="0" buildVST3="0" buildAU="1" buildRTAS="0" buildAAX="0"
+              buildVST="0" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="Noise Gate" pluginDesc="Noise Gate" pluginManufacturer="ROLI Ltd."
               pluginManufacturerCode="ROLI" pluginCode="Nois" pluginChannelConfigs=""
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"

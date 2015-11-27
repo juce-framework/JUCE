@@ -766,8 +766,18 @@ class JuceVST3Component : public Vst::IComponent,
 public:
     JuceVST3Component (Vst::IHostApplication* h)
       : refCount (1),
-        host (h)
+        host (h),
+        isMidiInputBusEnabled (false),
+        isMidiOutputBusEnabled (false)
     {
+       #if JucePlugin_WantsMidiInput
+        isMidiInputBusEnabled = true;
+       #endif
+
+       #if JucePlugin_ProducesMidiOutput
+        isMidiOutputBusEnabled = true;
+       #endif
+
         pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_VST3);
         comPluginInstance = new JuceAudioProcessor (pluginInstance);
 
@@ -1322,27 +1332,28 @@ public:
 
         if (type == Vst::kEvent)
         {
-           #if JucePlugin_WantsMidiInput
             if (dir == Vst::kInput)
-                return 1;
-           #endif
+                return isMidiInputBusEnabled ? 1 : 0;
 
-           #if JucePlugin_ProducesMidiOutput
             if (dir == Vst::kOutput)
-                return 1;
-           #endif
+                return isMidiOutputBusEnabled ? 1 : 0;
         }
 
         return 0;
     }
 
-    const AudioProcessor::AudioProcessorBus* getAudioBus (Vst::BusDirection dir, Steinberg::int32 index) const noexcept
+    static const AudioProcessor::AudioProcessorBus* getAudioBus (AudioProcessor::AudioBusArrangement& busArrangement,
+                                                                 Vst::BusDirection dir, Steinberg::int32 index) noexcept
     {
-        const Array<AudioProcessor::AudioProcessorBus>& buses
-                = dir == Vst::kInput ? pluginInstance->busArrangement.inputBuses
-                                     : pluginInstance->busArrangement.outputBuses;
+        const Array<AudioProcessor::AudioProcessorBus>& buses = dir == Vst::kInput ? busArrangement.inputBuses
+                                                                                   : busArrangement.outputBuses;
 
         return isPositiveAndBelow (index, buses.size()) ? &buses.getReference (index) : nullptr;
+    }
+
+    const AudioProcessor::AudioProcessorBus* getAudioBus (Vst::BusDirection dir, Steinberg::int32 index) const noexcept
+    {
+        return getAudioBus (pluginInstance->busArrangement, dir, index);
     }
 
     tresult PLUGIN_API getBusInfo (Vst::MediaType type, Vst::BusDirection dir,
@@ -1394,15 +1405,45 @@ public:
         return kResultFalse;
     }
 
-    tresult PLUGIN_API activateBus (Vst::MediaType type, Vst::BusDirection dir,
-                                    Steinberg::int32 index, TBool state) override
+    tresult PLUGIN_API activateBus (Vst::MediaType type, Vst::BusDirection dir, Steinberg::int32 index, TBool state) override
     {
-        if (state)
-            return kResultTrue;
+        if (type == Vst::kEvent)
+        {
+            if (index != 0)
+                return kResultFalse;
 
-        JUCE_COMPILER_WARNING("What to do if they disable a bus..?")
-        jassertfalse;
+            if (dir == Vst::kInput)
+                isMidiInputBusEnabled = state;
+            else
+                isMidiOutputBusEnabled = state;
+
+            return kResultTrue;
+        }
+
+        if (const AudioProcessor::AudioProcessorBus* bus = getAudioBus (dir, index))
+        {
+            if (state == (bus->channels.size() > 0))
+                return kResultTrue;
+
+            AudioChannelSet newChannels;
+
+            if (state)
+                if (const AudioProcessor::AudioProcessorBus* lastBusState = getAudioBus (lastEnabledBusStates, dir, index))
+                    newChannels = lastBusState->channels;
+
+            pluginInstance->setPreferredBusArrangement (dir == Vst::kInput, index, newChannels);
+            return kResultTrue;
+        }
+
         return kResultFalse;
+    }
+
+    static void copyEnabledBuses (Array<AudioProcessor::AudioProcessorBus>& copies,
+                                  const Array<AudioProcessor::AudioProcessorBus>& source)
+    {
+        for (int i = 0; i < source.size(); ++i)
+            if (copies.size() < i || source.getReference(i).channels.size() > 0)
+                copies.set (i, source.getReference(i));
     }
 
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
@@ -1416,6 +1457,9 @@ public:
 
         preparePlugin (getPluginInstance().getSampleRate(),
                        getPluginInstance().getBlockSize());
+
+        copyEnabledBuses (lastEnabledBusStates.inputBuses, pluginInstance->busArrangement.inputBuses);
+        copyEnabledBuses (lastEnabledBusStates.outputBuses, pluginInstance->busArrangement.outputBuses);
 
         return kResultTrue;
     }
@@ -1612,6 +1656,9 @@ private:
     MidiBuffer midiBuffer;
     Array<float*> channelListFloat;
     Array<double*> channelListDouble;
+
+    AudioProcessor::AudioBusArrangement lastEnabledBusStates;
+    bool isMidiInputBusEnabled, isMidiOutputBusEnabled;
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
