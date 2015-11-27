@@ -122,8 +122,7 @@ struct AudioProcessorHolder
 
 //==============================================================================
 class JuceAU   : public AudioProcessorHolder,
-                 public AUBase,
-                 public AUMIDIBase,
+                 public MusicDeviceBase,
                  public AudioProcessorListener,
                  public AudioPlayHead,
                  public ComponentListener
@@ -131,8 +130,7 @@ class JuceAU   : public AudioProcessorHolder,
 public:
     JuceAU (AudioUnit component)
         : AudioProcessorHolder(),
-          AUBase (component, (UInt32) getNumEnabledBuses (true), (UInt32) getNumEnabledBuses (false)),
-          AUMIDIBase (this),
+          MusicDeviceBase (component, (UInt32) getNumEnabledBuses (true), (UInt32) getNumEnabledBuses (false)),
           isBypassed (false),
           hasDynamicInBuses (false), hasDynamicOutBuses (false)
     {
@@ -193,7 +191,7 @@ public:
             return err;
         }
 
-        if ((err = AUBase::Initialize()) != noErr)
+        if ((err = MusicDeviceBase::Initialize()) != noErr)
             return err;
 
         prepareToPlay();
@@ -202,7 +200,7 @@ public:
 
     void Cleanup() override
     {
-        AUBase::Cleanup();
+        MusicDeviceBase::Cleanup();
 
         if (juceFilter != nullptr)
             juceFilter->releaseResources();
@@ -221,7 +219,7 @@ public:
         if (juceFilter != nullptr)
             juceFilter->reset();
 
-        return AUBase::Reset (inScope, inElement);
+        return MusicDeviceBase::Reset (inScope, inElement);
     }
 
     //==============================================================================
@@ -267,7 +265,7 @@ public:
                 break;
         }
 
-        return AUBase::ComponentEntryDispatch (params, effect);
+        return MusicDeviceBase::ComponentEntryDispatch (params, effect);
     }
 
     //==============================================================================
@@ -284,16 +282,57 @@ public:
         if ((err = scopeToDirection (scope, isInput)) != noErr)
             return err;
 
-        if ((isInput && (! hasDynamicInBuses)) || ((! isInput) && (! hasDynamicOutBuses)))
-            return kAudioUnitErr_PropertyNotWritable;
+        if (count != GetScope (scope).GetNumberOfElements())
+        {
+            if ((isInput && (! hasDynamicInBuses)) || ((! isInput) && (! hasDynamicOutBuses)))
+                return kAudioUnitErr_PropertyNotWritable;
 
-        // Similar as with the stream format, we don't really tell the AudioProcessor about
-        // the bus count change until Initialize is called. We only generally test if
-        // this bus count can work.
-        if (static_cast<int> (count) >= getBusCount (isInput))
-            return kAudioUnitErr_FormatNotSupported;
+            // Similar as with the stream format, we don't really tell the AudioProcessor about
+            // the bus count change until Initialize is called. We only generally test if
+            // this bus count can work.
+            if (static_cast<int> (count) > getBusCount (isInput))
+                return kAudioUnitErr_FormatNotSupported;
 
-        return AUBase::SetBusCount (scope, count);
+            // we need to already create the underlying elements so that we can change their formats
+            if ((err = MusicDeviceBase::SetBusCount (scope, count)) != noErr)
+                return err;
+
+            // however we do need to update the format tag: we need to do the same thing in SetFormat, for example
+            const int currentNumBus = getNumEnabledBuses (isInput);
+            const int requestedNumBus = static_cast<int> (count);
+
+            if (currentNumBus < requestedNumBus)
+            {
+                for (int busNr = currentNumBus; busNr < requestedNumBus; ++busNr)
+                {
+                    const AudioChannelSet& set = getDefaultLayoutForBus (isInput, busNr);
+
+                    // TODO: this is very similar to syncWithAudioProcessor function
+                    if (AUIOElement* element = GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, (UInt32) busNr))
+                    {
+                        getCurrentLayout (isInput, busNr) = ChannelSetToCALayoutTag (set);
+
+                        element->SetName ((CFStringRef) juceStringToNS (getFilterBus (isInput).getReference (busNr).name));
+
+                        CAStreamBasicDescription streamDescription;
+                        streamDescription.mSampleRate = getSampleRate();
+
+                        streamDescription.SetCanonical ((UInt32) set.size(), false);
+                        if ((err = element->SetStreamFormat (streamDescription)) != noErr)
+                            return err;
+                    }
+                }
+            }
+            else
+            {
+                AudioChannelLayoutTag nulltag = ChannelSetToCALayoutTag (AudioChannelSet());
+
+                for (int busNr = requestedNumBus; busNr < currentNumBus; ++busNr)
+                    getCurrentLayout (isInput, busNr) = nulltag;
+            }
+        }
+
+        return MusicDeviceBase::SetBusCount (scope, count);
     }
 
     UInt32 SupportedNumChannels (const AUChannelInfo** outInfo) override
@@ -374,7 +413,7 @@ public:
             }
         }
 
-        return AUBase::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
+        return MusicDeviceBase::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
     }
 
     ComponentResult GetProperty (AudioUnitPropertyID inID,
@@ -483,7 +522,7 @@ public:
             }
         }
 
-        return AUBase::GetProperty (inID, inScope, inElement, outData);
+        return MusicDeviceBase::GetProperty (inID, inScope, inElement, outData);
     }
 
     ComponentResult SetProperty (AudioUnitPropertyID inID,
@@ -535,13 +574,13 @@ public:
             }
         }
 
-        return AUBase::SetProperty (inID, inScope, inElement, inData, inDataSize);
+        return MusicDeviceBase::SetProperty (inID, inScope, inElement, inData, inDataSize);
     }
 
     //==============================================================================
     ComponentResult SaveState (CFPropertyListRef* outData) override
     {
-        ComponentResult err = AUBase::SaveState (outData);
+        ComponentResult err = MusicDeviceBase::SaveState (outData);
 
         if (err != noErr)
             return err;
@@ -572,7 +611,7 @@ public:
             // Remove the data entry from the state to prevent the superclass loading the parameters
             CFMutableDictionaryRef copyWithoutData = CFDictionaryCreateMutableCopy (nullptr, 0, (CFDictionaryRef) inData);
             CFDictionaryRemoveValue (copyWithoutData, CFSTR (kAUPresetDataKey));
-            ComponentResult err = AUBase::RestoreState (copyWithoutData);
+            ComponentResult err = MusicDeviceBase::RestoreState (copyWithoutData);
             CFRelease (copyWithoutData);
 
             if (err != noErr)
@@ -718,7 +757,7 @@ public:
             if (juceFilter->isMetaParameter (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
-            AUBase::FillInParameterName (outParameterInfo, name.toCFString(), true);
+            MusicDeviceBase::FillInParameterName (outParameterInfo, name.toCFString(), true);
 
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
@@ -744,7 +783,7 @@ public:
             return noErr;
         }
 
-        return AUBase::GetParameter (inID, inScope, inElement, outValue);
+        return MusicDeviceBase::GetParameter (inID, inScope, inElement, outValue);
     }
 
     ComponentResult SetParameter (AudioUnitParameterID inID,
@@ -759,7 +798,7 @@ public:
             return noErr;
         }
 
-        return AUBase::SetParameter (inID, inScope, inElement, inValue, inBufferOffsetInFrames);
+        return MusicDeviceBase::SetParameter (inID, inScope, inElement, inValue, inBufferOffsetInFrames);
     }
 
     // No idea what this method actually does or what it should return. Current Apple docs say nothing about it.
@@ -918,7 +957,7 @@ public:
         bool success = juceFilter->setPreferredBusArrangement (isInput, busNr, AudioChannelSet::discreteChannels (newNumChannels));
         restoreBusArrangement (originalArr);
 
-        if (success && AUBase::ValidFormat (scope, element, format))
+        if (success && MusicDeviceBase::ValidFormat (scope, element, format))
             return true;
 
         return false;
@@ -934,26 +973,21 @@ public:
         if ((err = elementToBusIdx (scope, element, isInput, busNr)) != noErr)
             return err;
 
-        const AudioProcessor::AudioBusArrangement originalArr = juceFilter->busArrangement;
         AudioChannelLayoutTag& currentTag = getCurrentLayout (isInput, busNr);
 
         const int newNumChannels = static_cast<int> (format.NumberChannels());
         const int oldNumChannels = getNumChannels (isInput, busNr);
 
         // predict channel layout
-        AudioChannelSet set = getChannelSet (isInput, busNr);
+        AudioChannelSet set = (newNumChannels != oldNumChannels) ? getDefaultLayoutForChannelNumAndBus (isInput, busNr, newNumChannels)
+                                                                 : getChannelSet (isInput, busNr);
 
-        // try setting the canonical format first
-        if (newNumChannels != oldNumChannels)
-            if (! juceFilter->setPreferredBusArrangement (isInput, busNr, (set = AudioChannelSet::canonicalChannelSet (newNumChannels))))
-                if (! juceFilter->setPreferredBusArrangement (isInput, busNr, (set = AudioChannelSet::discreteChannels (newNumChannels))))
-                    err = kAudioUnitErr_FormatNotSupported;
+        // try setting the canonical format first TODO: change to default format below
+        if (set == AudioChannelSet())
+            return kAudioUnitErr_FormatNotSupported;
 
-        if (err == noErr && ((err = AUBase::ChangeStreamFormat (scope, element, old, format)) == noErr))
+        if (err == noErr && ((err = MusicDeviceBase::ChangeStreamFormat (scope, element, old, format)) == noErr))
             currentTag = ChannelSetToCALayoutTag (set);
-
-        if (newNumChannels != oldNumChannels)
-            restoreBusArrangement (originalArr);
 
         return err;
     }
@@ -1004,6 +1038,12 @@ public:
                 }
             }
 
+            {
+                const ScopedLock sl (incomingMidiLock);
+                midiEvents.clear();
+                incomingEvents.swapWith (midiEvents);
+            }
+
             juceFilter->processBlock (buffer, midiEvents);
 
             // copy output back
@@ -1012,6 +1052,9 @@ public:
                 for (unsigned int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
                 {
                     AUOutputElement* output = GetOutput (busIdx);
+
+                    if (output->WillAllocateBuffer())
+                        output->PrepareBuffer (nFrames);
 
                     const AudioBufferList& outBuffer = output->GetBufferList();
                     const unsigned int numChannels = output->GetStreamFormat().mChannelsPerFrame;
@@ -1037,6 +1080,7 @@ public:
         return noErr;
     }
 
+    // TODO: this is currently not used -> we need to re-enable the features in here!!
     OSStatus ProcessBufferLists (AudioUnitRenderActionFlags& ioActionFlags,
                                  const AudioBufferList& inBuffer,
                                  AudioBufferList& outBuffer,
@@ -1613,14 +1657,30 @@ private:
 
     struct PlugInSupportedLayouts
     {
-        Array<SupportedBusLayouts>& getSupportedLayouts (bool isInput) noexcept        { return isInput ? inputLayouts : outputLayouts; }
-        SupportedBusLayouts& getSupportedBusLayouts (bool isInput, int busNr) noexcept { return getSupportedLayouts (isInput).getReference (busNr); }
+        Array<SupportedBusLayouts>&       getSupportedLayouts (bool isInput) noexcept              { return isInput ? inputLayouts : outputLayouts; }
+        const Array<SupportedBusLayouts>& getSupportedLayouts (bool isInput) const noexcept        { return isInput ? inputLayouts : outputLayouts; }
+        SupportedBusLayouts&       getSupportedBusLayouts (bool isInput, int busNr) noexcept       { return getSupportedLayouts (isInput).getReference (busNr); }
+        const SupportedBusLayouts& getSupportedBusLayouts (bool isInput, int busNr) const noexcept { return getSupportedLayouts (isInput).getReference (busNr); }
         void clear(int inputCount, int outputCount)               { inputLayouts.clear(); inputLayouts.resize (inputCount); outputLayouts.clear(); outputLayouts.resize (outputCount);  }
 
         Array<SupportedBusLayouts> inputLayouts, outputLayouts;
     };
 
     PlugInSupportedLayouts supportedLayouts;
+
+    //==============================================================================
+    AudioChannelSet getDefaultLayoutForChannelNumAndBus (bool isInput, int busIdx, int channelNum) const noexcept
+    {
+        if (const AudioChannelSet* set = supportedLayouts.getSupportedBusLayouts (isInput, busIdx).getDefaultLayoutForChannelNum (channelNum))
+            return *set;
+
+        return AudioChannelSet::canonicalChannelSet (channelNum);
+    }
+
+    const AudioChannelSet& getDefaultLayoutForBus (bool isInput, int busIdx) const noexcept
+    {
+        return supportedLayouts.getSupportedBusLayouts (isInput, busIdx).getDefault();
+    }
 
     //==============================================================================
     bool busIgnoresLayoutForChannelNum (bool isInput, int busNr, int channelNum)
@@ -1765,10 +1825,10 @@ private:
     {
         OSStatus err = noErr;
 
-        if ((err =  AUBase::SetBusCount (kAudioUnitScope_Input,  static_cast<UInt32> (getNumEnabledBuses (true)))) != noErr)
+        if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Input,  static_cast<UInt32> (getNumEnabledBuses (true)))) != noErr)
             return err;
 
-        if ((err =  AUBase::SetBusCount (kAudioUnitScope_Output, static_cast<UInt32> (getNumEnabledBuses (false)))) != noErr)
+        if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Output, static_cast<UInt32> (getNumEnabledBuses (false)))) != noErr)
             return err;
 
         addSupportedLayoutTags();
@@ -1816,8 +1876,9 @@ private:
             const int numChannels = static_cast<int> (element->GetStreamFormat().NumberChannels());
 
             AudioChannelLayoutTag currentLayoutTag = isInput ? currentInputLayout[busNr] : currentOutputLayout[busNr];
+            const int tagNumChannels = currentLayoutTag & 0xffff;
 
-            if (numChannels != (currentLayoutTag & 0xffff))
+            if (numChannels != tagNumChannels)
                 return kAudioUnitErr_FormatNotSupported;
 
             if (juceFilter->setPreferredBusArrangement (isInput, busNr, CALayoutTagToChannelSet(currentLayoutTag)))

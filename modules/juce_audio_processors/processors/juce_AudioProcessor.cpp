@@ -53,7 +53,9 @@ AudioProcessor::AudioProcessor()
 
     if (numChannelConfigs > 0)
     {
+       #if ! JucePlugin_IsSynth
         busArrangement.inputBuses.add  (AudioProcessorBus ("Input",    AudioChannelSet::canonicalChannelSet (channelConfigs[0][0])));
+       #endif
         busArrangement.outputBuses.add (AudioProcessorBus ("Output",   AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
     }
 }

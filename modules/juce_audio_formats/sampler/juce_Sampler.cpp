@@ -152,6 +152,9 @@ void SamplerVoice::controllerMoved (const int /*controllerNumber*/,
 //==============================================================================
 void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
 {
+    if (outputBuffer.getNumChannels() == 0)
+        return;
+
     if (const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().get()))
     {
         const float* const inL = playingSound->data->getReadPointer (0);
