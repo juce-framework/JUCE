@@ -153,6 +153,7 @@ public:
     //==============================================================================
     bool operator== (const AudioChannelSet&) const noexcept;
     bool operator!= (const AudioChannelSet&) const noexcept;
+    bool operator<  (const AudioChannelSet&) const noexcept;
 
 private:
     BigInteger channels;

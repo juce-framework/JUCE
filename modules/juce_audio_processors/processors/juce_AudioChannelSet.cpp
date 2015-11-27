@@ -26,6 +26,7 @@ AudioChannelSet::AudioChannelSet (uint32 c) : channels (c) {}
 
 bool AudioChannelSet::operator== (const AudioChannelSet& other) const noexcept  { return channels == other.channels; }
 bool AudioChannelSet::operator!= (const AudioChannelSet& other) const noexcept  { return channels != other.channels; }
+bool AudioChannelSet::operator<  (const AudioChannelSet& other) const noexcept  { return channels <  other.channels; }
 
 const char* AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type) noexcept
 {

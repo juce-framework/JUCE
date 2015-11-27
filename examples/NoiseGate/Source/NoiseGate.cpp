@@ -18,6 +18,7 @@ NoiseGate::NoiseGate()
     addParameter (threshold = new AudioParameterFloat ("threshold", "Threshold", 0.0f, 1.0f, 0.5f));
     addParameter (alpha  = new AudioParameterFloat ("alpha",  "Alpha",   0.0f, 1.0f, 0.8f));
 
+    // add single side-chain bus
     busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain",  AudioChannelSet::stereo()));
 }
 
@@ -87,12 +88,13 @@ void NoiseGate::changeProgramName (int /*index*/, const String& /*newName*/)
 bool NoiseGate::setPreferredBusArrangement (bool isInputBus, int busIndex, const AudioChannelSet& preferred)
 {
     const int numChannels = preferred.size();
-    
-    // disallow disabling buses
+    const bool isMainBus = (busIndex == 0);
+
+    // do not allow disabling channels
     if (numChannels == 0) return false;
 
-    // set the same number of channels on the opposite bus
-    if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
+    // always have the same channel layout on both input and output on the main bus
+    if (isMainBus && (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred)))
         return false;
 
     return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
