@@ -18,10 +18,7 @@ NoiseGate::NoiseGate()
     addParameter (threshold = new AudioParameterFloat ("threshold", "Threshold", 0.0f, 1.0f, 0.5f));
     addParameter (alpha  = new AudioParameterFloat ("alpha",  "Alpha",   0.0f, 1.0f, 0.8f));
 
-    busArrangement.inputBuses.clear();
-  //  busArrangement.outputBuses.clear();
-
-   // busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain",  AudioChannelSet::stereo()));
+    busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain",  AudioChannelSet::stereo()));
 }
 
 NoiseGate::~NoiseGate()
@@ -89,11 +86,14 @@ void NoiseGate::changeProgramName (int /*index*/, const String& /*newName*/)
 //==============================================================================
 bool NoiseGate::setPreferredBusArrangement (bool isInputBus, int busIndex, const AudioChannelSet& preferred)
 {
-    //const bool isMainBus = (busIndex ==  0);
+    const int numChannels = preferred.size();
+    
+    // disallow disabling buses
+    if (numChannels == 0) return false;
 
-    // always force input and output bus to match their formats
-    //if (isMainBus && (! AudioProcessor::setPreferredBusArrangement (! isInputBus, 0, preferred)))
-      //  return false;
+    // set the same number of channels on the opposite bus
+    if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
+        return false;
 
     return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
 }
@@ -122,9 +122,8 @@ void NoiseGate::processBlock (AudioSampleBuffer& buffer, MidiBuffer&)
     for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-   // AudioSampleBuffer mainInputOutput = busArrangement.getBusBuffer (buffer, true, 0);
-     AudioSampleBuffer mainInputOutput = busArrangement.getBusBuffer (buffer, false, 0);
-   // AudioSampleBuffer sideChainInput  = busArrangement.getBusBuffer (buffer, true, 1);
+    AudioSampleBuffer mainInputOutput = busArrangement.getBusBuffer (buffer, true, 0);
+    AudioSampleBuffer sideChainInput  = busArrangement.getBusBuffer (buffer, true, 1);
 
     float alphaCopy = *alpha;
     float thresholdCopy = *threshold;
@@ -132,10 +131,10 @@ void NoiseGate::processBlock (AudioSampleBuffer& buffer, MidiBuffer&)
     for (int j = 0; j < buffer.getNumSamples(); ++j)
     {
         float mixedSamples = 0.0f;
-      //  for (int i = 0; i < sideChainInput.getNumChannels(); ++i)
-      //      mixedSamples += sideChainInput.getReadPointer (i) [j];
+        for (int i = 0; i < sideChainInput.getNumChannels(); ++i)
+            mixedSamples += sideChainInput.getReadPointer (i) [j];
 
-      //  mixedSamples /= static_cast<float> (sideChainInput.getNumChannels());
+        mixedSamples /= static_cast<float> (sideChainInput.getNumChannels());
         lowPassCoeff = (alphaCopy * lowPassCoeff) + ((1.0f - alphaCopy) * mixedSamples);
 
         if (lowPassCoeff >= thresholdCopy)
