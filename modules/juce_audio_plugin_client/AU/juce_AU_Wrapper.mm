@@ -162,7 +162,8 @@ public:
 
         CreateElements();
 
-        jassert (syncAudioUnitWithProcessor () == noErr);
+        if (syncAudioUnitWithProcessor () != noErr)
+            jassertfalse;
     }
 
     ~JuceAU()
