@@ -261,7 +261,6 @@ public:
             case kMusicDeviceMIDIEventSelect:
             case kMusicDeviceSysExSelect:
                 return AUMIDIBase::ComponentEntryDispatch (params, effect);
-
             default:
                 break;
         }
@@ -1788,7 +1787,6 @@ private:
     OSStatus syncProcessorWithAudioUnit()
     {
         OSStatus err;
-
         const int numInputElements  = static_cast<int> (GetScope(kAudioUnitScope_Input). GetNumberOfElements());
         const int numOutputElements = static_cast<int> (GetScope(kAudioUnitScope_Output).GetNumberOfElements());
 
