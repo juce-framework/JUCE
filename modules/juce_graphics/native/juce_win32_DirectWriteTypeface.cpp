@@ -98,6 +98,18 @@ public:
                 if (directWriteFactory != nullptr)
                     directWriteFactory->GetSystemFontCollection (systemFonts.resetAndGetPointerAddress());
             }
+
+            if (d2dFactory != nullptr)
+            {
+                D2D1_RENDER_TARGET_PROPERTIES d2dRTProp = D2D1::RenderTargetProperties (D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+                                                                                        D2D1::PixelFormat (DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                                                                           D2D1_ALPHA_MODE_IGNORE),
+                                                                                        0, 0,
+                                                                                        D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
+                                                                                        D2D1_FEATURE_LEVEL_DEFAULT);
+
+                d2dFactory->CreateDCRenderTarget (&d2dRTProp, directWriteRenderTarget.resetAndGetPointerAddress());
+            }
         }
     }
 
@@ -106,11 +118,13 @@ public:
         d2dFactory = nullptr;  // (need to make sure these are released before deleting the DynamicLibrary objects)
         directWriteFactory = nullptr;
         systemFonts = nullptr;
+        directWriteRenderTarget = nullptr;
     }
 
     ComSmartPtr<ID2D1Factory> d2dFactory;
     ComSmartPtr<IDWriteFactory> directWriteFactory;
     ComSmartPtr<IDWriteFontCollection> systemFonts;
+    ComSmartPtr<ID2D1DCRenderTarget> directWriteRenderTarget;
 
 private:
     DynamicLibrary direct2dDll, directWriteDll;

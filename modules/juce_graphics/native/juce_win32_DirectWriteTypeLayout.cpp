@@ -358,29 +358,19 @@ namespace DirectWriteTypeLayout
         return true;
     }
 
-    void createLayout (TextLayout& layout, const AttributedString& text, IDWriteFactory& directWriteFactory,
-                       ID2D1Factory& direct2dFactory, IDWriteFontCollection& fontCollection)
+    void createLayout (TextLayout& layout, const AttributedString& text,
+                       IDWriteFactory& directWriteFactory,
+                       IDWriteFontCollection& fontCollection,
+                       ID2D1DCRenderTarget& renderTarget)
     {
-        // To add color to text, we need to create a D2D render target
-        // Since we are not actually rendering to a D2D context we create a temporary GDI render target
-
-        D2D1_RENDER_TARGET_PROPERTIES d2dRTProp = D2D1::RenderTargetProperties (D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                                                                                D2D1::PixelFormat (DXGI_FORMAT_B8G8R8A8_UNORM,
-                                                                                                   D2D1_ALPHA_MODE_IGNORE),
-                                                                                0, 0,
-                                                                                D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
-                                                                                D2D1_FEATURE_LEVEL_DEFAULT);
-        ComSmartPtr<ID2D1DCRenderTarget> renderTarget;
-        HRESULT hr = direct2dFactory.CreateDCRenderTarget (&d2dRTProp, renderTarget.resetAndGetPointerAddress());
-
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
 
-        if (! setupLayout (text, layout.getWidth(), layout.getHeight(), *renderTarget,
+        if (! setupLayout (text, layout.getWidth(), layout.getHeight(), renderTarget,
                            directWriteFactory, fontCollection, dwTextLayout))
             return;
 
         UINT32 actualLineCount = 0;
-        hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
+        HRESULT hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
 
         layout.ensureStorageAllocated (actualLineCount);
 
@@ -448,8 +438,11 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
 
     if (factories->d2dFactory != nullptr && factories->systemFonts != nullptr)
     {
-        DirectWriteTypeLayout::createLayout (*this, text, *factories->directWriteFactory,
-                                             *factories->d2dFactory, *factories->systemFonts);
+        DirectWriteTypeLayout::createLayout (*this, text,
+                                             *factories->directWriteFactory,
+                                             *factories->systemFonts,
+                                             *factories->directWriteRenderTarget);
+
         return true;
     }
    #else
