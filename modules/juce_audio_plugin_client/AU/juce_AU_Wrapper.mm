@@ -992,318 +992,196 @@ public:
             result = GetInput (i)->PullInput(ioActionFlags, inTimeStamp, i, nFrames);
 
 
-        if (result == noErr)
+        if (result != noErr)
+            return result;
+
+        // copy inputs into buffer space
         {
-            // copy inputs into buffer space
+            int idx = 0, scratchIdx = 0;
+            unsigned int busIdx;
+            float** scratchBuffers = bufferSpace.getArrayOfWritePointers();
+
+            for (busIdx = 0; busIdx < numInputBuses; ++busIdx)
             {
-                int idx = 0, scratchIdx = 0;
-                unsigned int busIdx;
-                float** scratchBuffers = bufferSpace.getArrayOfWritePointers();
+                AUInputElement* input = GetInput (busIdx);
+                const AudioBufferList& inBuffer = input->GetBufferList();
+                const unsigned int numChannels = input->GetStreamFormat().mChannelsPerFrame;
 
-                for (busIdx = 0; busIdx < numInputBuses; ++busIdx)
+                if (inBuffer.mNumberBuffers == 1 && numChannels > 1)
                 {
-                    AUInputElement* input = GetInput (busIdx);
-                    const AudioBufferList& inBuffer = input->GetBufferList();
-                    const unsigned int numChannels = input->GetStreamFormat().mChannelsPerFrame;
+                    // de-interleave
+                    float** tmpMemory = &scratchBuffers[scratchIdx];
+                    scratchIdx += numChannels;
 
-                    if (inBuffer.mNumberBuffers == 1 && numChannels > 1)
-                    {
-                        // de-interleave
-                        float** tmpMemory = &scratchBuffers[scratchIdx];
-                        scratchIdx += numChannels;
+                    for (unsigned int ch = 0; ch < numChannels; ++ch)
+                        channels [idx++] = tmpMemory [ch];
 
+                    const float* src = static_cast<float*> (inBuffer.mBuffers[0].mData);
+
+                    for (unsigned int i = 0; i < nFrames; ++i)
                         for (unsigned int ch = 0; ch < numChannels; ++ch)
-                            channels [idx++] = tmpMemory [ch];
-
-                        const float* src = static_cast<float*> (inBuffer.mBuffers[0].mData);
-
-                        for (unsigned int i = 0; i < nFrames; ++i)
-                            for (unsigned int ch = 0; ch < numChannels; ++ch)
-                                tmpMemory [ch][i] = *src++;
-                    }
-                    else
-                    {
-                        for (unsigned int chIdx = 0; chIdx < numChannels; ++chIdx)
-                            channels[idx++] = static_cast<float*> (inBuffer.mBuffers[chIdx].mData);
-                    }
+                            tmpMemory [ch][i] = *src++;
                 }
-
-                // allocate the remaining output buffers
-                for (; busIdx < numOutputBuses; ++busIdx)
+                else
                 {
-                    AUOutputElement* output = GetOutput (busIdx);
-                    const unsigned int outNumChannels = output->GetStreamFormat().mChannelsPerFrame;
-
-                    if (output->WillAllocateBuffer())
-                        output->PrepareBuffer (nFrames);
-
-                    const AudioBufferList& outBuffer = output->GetBufferList();
-
-                    if (outBuffer.mNumberBuffers == 1 && outNumChannels > 1)
-                    {
-                        // the output will need to be de-interleaved so assign output to temporary memory
-                        for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
-                            channels [idx++] = scratchBuffers[scratchIdx++];
-                    }
-                    else
-                    {
-                        // render directly into the output buffers
-                        for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
-                            channels[idx++] = static_cast<float*> (outBuffer.mBuffers[chIdx].mData);
-                    }
+                    for (unsigned int chIdx = 0; chIdx < numChannels; ++chIdx)
+                        channels[idx++] = static_cast<float*> (inBuffer.mBuffers[chIdx].mData);
                 }
             }
 
+            // allocate the remaining output buffers
+            for (; busIdx < numOutputBuses; ++busIdx)
+            {
+                AUOutputElement* output = GetOutput (busIdx);
+                const unsigned int outNumChannels = output->GetStreamFormat().mChannelsPerFrame;
+
+                if (output->WillAllocateBuffer())
+                    output->PrepareBuffer (nFrames);
+
+                const AudioBufferList& outBuffer = output->GetBufferList();
+
+                if (outBuffer.mNumberBuffers == 1 && outNumChannels > 1)
+                {
+                    // the output will need to be de-interleaved so assign output to temporary memory
+                    for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
+                        channels [idx++] = scratchBuffers[scratchIdx++];
+                }
+                else
+                {
+                    // render directly into the output buffers
+                    for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
+                        channels[idx++] = static_cast<float*> (outBuffer.mBuffers[chIdx].mData);
+                }
+            }
+        }
+
+        {
+            const ScopedLock sl (incomingMidiLock);
+            midiEvents.clear();
+            incomingEvents.swapWith (midiEvents);
+        }
+
+        {
+            const ScopedLock sl (juceFilter->getCallbackLock());
             AudioSampleBuffer buffer (channels, bufferSpace.getNumChannels(), (int) nFrames);
 
+            if (juceFilter->isSuspended())
             {
-                const ScopedLock sl (incomingMidiLock);
-                midiEvents.clear();
-                incomingEvents.swapWith (midiEvents);
+                for (int j = 0; j < buffer.getNumChannels(); ++j)
+                    zeromem (channels [j], sizeof (float) * nFrames);
             }
-
-            juceFilter->processBlock (buffer, midiEvents);
-
-            // copy output back
+            else if (isBypassed)
             {
-                int idx = 0;
-                for (unsigned int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
-                {
-                    AUOutputElement* output = GetOutput (busIdx);
-                    AUInputElement*  input  = (busIdx < numInputBuses) ? GetInput (busIdx) : nullptr;
-
-                    const unsigned int outNumChannels = output->GetStreamFormat().mChannelsPerFrame;
-                    const unsigned int inNumChannels = input != nullptr ? GetInput (busIdx)->GetStreamFormat().mChannelsPerFrame : 0;
-                    bool inputWasInterleaved = (inNumChannels > 1 && (input != nullptr ? input->GetBufferList().mNumberBuffers == 1 : false));
-
-                    if (output->WillAllocateBuffer() && busIdx < numInputBuses)
-                    {
-                        // avoid copy if we can
-                        if (outNumChannels == inNumChannels && outNumChannels > 0 && (! inputWasInterleaved))
-                        {
-                            output->SetBufferList (input->GetBufferList());
-                            continue;
-                        }
-
-                        output->PrepareBuffer (nFrames);
-                    }
-
-                    const AudioBufferList& outBuffer = output->GetBufferList();
-
-                    if (outBuffer.mNumberBuffers == 1 && outNumChannels > 1)
-                    {
-                        float* dst = static_cast<float*> (outBuffer.mBuffers[0].mData);
-                        const float** src = buffer.getArrayOfReadPointers() + idx;
-                        idx += outNumChannels;
-
-                        for (unsigned int i = 0; i < nFrames; ++i)
-                            for (unsigned int ch = 0; ch < outNumChannels; ++ch)
-                                *dst++ = src[ch][i];
-                    }
-                    else
-                    {
-                        // if this bus has no corresponding input and is not interleaved
-                        // then we already rendered this directly to the correct ouput.
-                        // We don't need to do anything in this case
-                        if (busIdx >= numInputBuses)
-                            continue;
-
-                        for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
-                        {
-                            const ::AudioBuffer *dstBuffer = &outBuffer.mBuffers[chIdx];
-                            const float* src = buffer.getReadPointer (idx++);
-                            std::copy (src, src + nFrames, (float*) dstBuffer->mData);
-                        }
-                    }
-                }
+                juceFilter->processBlockBypassed (buffer, midiEvents);
+            }
+            else
+            {
+                juceFilter->processBlock (buffer, midiEvents);
             }
         }
 
-        return noErr;
-    }
-
-    // TODO: this is currently not used -> we need to re-enable the features in here!!
-    OSStatus ProcessBufferLists (AudioUnitRenderActionFlags& ioActionFlags,
-                                 const AudioBufferList& inBuffer,
-                                 AudioBufferList& outBuffer,
-                                 UInt32 numSamples) override
-    {
-        if (juceFilter != nullptr)
+        // copy output back
         {
-            jassert (prepared);
-
-            int numOutChans = 0;
-            int nextSpareBufferChan = 0;
-            bool needToReinterleave = false;
-            const int numIn = juceFilter->getNumInputChannels();
-            const int numOut = juceFilter->getNumOutputChannels();
-
-            for (unsigned int i = 0; i < outBuffer.mNumberBuffers; ++i)
+            int idx = 0;
+            for (unsigned int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
             {
-                ::AudioBuffer& buf = outBuffer.mBuffers[i];
+                AUOutputElement* output = GetOutput (busIdx);
+                AUInputElement*  input  = (busIdx < numInputBuses) ? GetInput (busIdx) : nullptr;
 
-                if (buf.mNumberChannels == 1)
+                const unsigned int outNumChannels = output->GetStreamFormat().mChannelsPerFrame;
+                const unsigned int inNumChannels = input != nullptr ? GetInput (busIdx)->GetStreamFormat().mChannelsPerFrame : 0;
+                bool inputWasInterleaved = (inNumChannels > 1 && (input != nullptr ? input->GetBufferList().mNumberBuffers == 1 : false));
+
+                if (output->WillAllocateBuffer() && busIdx < numInputBuses)
                 {
-                    channels [numOutChans++] = (float*) buf.mData;
+                    // avoid copy if we can
+                    if (outNumChannels == inNumChannels && outNumChannels > 0 && (! inputWasInterleaved))
+                    {
+                        output->SetBufferList (input->GetBufferList());
+                        continue;
+                    }
+
+                    output->PrepareBuffer (nFrames);
+                }
+
+                const AudioBufferList& outBuffer = output->GetBufferList();
+
+                if (outBuffer.mNumberBuffers == 1 && outNumChannels > 1)
+                {
+                    float* dst = static_cast<float*> (outBuffer.mBuffers[0].mData);
+                    float** src = &channels[idx];
+                    idx += outNumChannels;
+
+                    for (unsigned int i = 0; i < nFrames; ++i)
+                        for (unsigned int ch = 0; ch < outNumChannels; ++ch)
+                            *dst++ = src[ch][i];
                 }
                 else
                 {
-                    needToReinterleave = true;
+                    // if this bus has no corresponding input and is not interleaved
+                    // then we already rendered this directly to the correct ouput.
+                    // We don't need to do anything in this case
+                    if (busIdx >= numInputBuses)
+                        continue;
 
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
-                        channels [numOutChans++] = bufferSpace.getWritePointer (nextSpareBufferChan++);
-                }
-
-                if (numOutChans >= numOut)
-                    break;
-            }
-
-            int numInChans = 0;
-
-            for (unsigned int i = 0; i < inBuffer.mNumberBuffers; ++i)
-            {
-                const ::AudioBuffer& buf = inBuffer.mBuffers[i];
-
-                if (buf.mNumberChannels == 1)
-                {
-                    if (numInChans < numOutChans)
-                        memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
-                    else
-                        channels [numInChans] = (float*) buf.mData;
-
-                    ++numInChans;
-                }
-                else
-                {
-                    // need to de-interleave..
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numInChans < numIn; ++subChan)
+                    for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
                     {
-                        float* dest;
-
-                        if (numInChans < numOutChans)
-                        {
-                            dest = channels [numInChans++];
-                        }
-                        else
-                        {
-                            dest = bufferSpace.getWritePointer (nextSpareBufferChan++);
-                            channels [numInChans++] = dest;
-                        }
-
-                        const float* src = ((const float*) buf.mData) + subChan;
-
-                        for (int j = (int) numSamples; --j >= 0;)
-                        {
-                            *dest++ = *src;
-                            src += buf.mNumberChannels;
-                        }
-                    }
-                }
-
-                if (numInChans >= numIn)
-                    break;
-            }
-
-            {
-                const ScopedLock sl (incomingMidiLock);
-                midiEvents.clear();
-                incomingEvents.swapWith (midiEvents);
-            }
-
-            {
-                AudioSampleBuffer buffer (channels, jmax (numIn, numOut), (int) numSamples);
-
-                const ScopedLock sl (juceFilter->getCallbackLock());
-
-                if (juceFilter->isSuspended())
-                {
-                    for (int j = 0; j < numOut; ++j)
-                        zeromem (channels [j], sizeof (float) * numSamples);
-                }
-                else if (isBypassed)
-                {
-                    juceFilter->processBlockBypassed (buffer, midiEvents);
-                }
-                else
-                {
-                    juceFilter->processBlock (buffer, midiEvents);
-                }
-            }
-
-            if (! midiEvents.isEmpty())
-            {
-               #if JucePlugin_ProducesMidiOutput
-                if (midiCallback.midiOutputCallback != nullptr)
-                {
-                    UInt32 numPackets = 0;
-                    size_t dataSize = 0;
-
-                    const juce::uint8* midiEventData;
-                    int midiEventSize, midiEventPosition;
-
-                    for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
-                    {
-                        jassert (isPositiveAndBelow (midiEventPosition, (int) numSamples));
-                        dataSize += (size_t) midiEventSize;
-                        ++numPackets;
-                    }
-
-                    MIDIPacket* p;
-                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
-                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
-
-                    HeapBlock<MIDIPacketList> packetList;
-                    packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
-                    packetList->numPackets = numPackets;
-
-                    p = packetList->packet;
-
-                    for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
-                    {
-                        p->timeStamp = (MIDITimeStamp) midiEventPosition;
-                        p->length = (UInt16) midiEventSize;
-                        memcpy (p->data, midiEventData, (size_t) midiEventSize);
-                        p = MIDIPacketNext (p);
-                    }
-
-                    midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
-                }
-               #endif
-
-                midiEvents.clear();
-            }
-
-            if (needToReinterleave)
-            {
-                nextSpareBufferChan = 0;
-
-                for (unsigned int i = 0; i < outBuffer.mNumberBuffers; ++i)
-                {
-                    ::AudioBuffer& buf = outBuffer.mBuffers[i];
-
-                    if (buf.mNumberChannels > 1)
-                    {
-                        for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
-                        {
-                            const float* src = bufferSpace.getReadPointer (nextSpareBufferChan++);
-                            float* dest = ((float*) buf.mData) + subChan;
-
-                            for (int j = (int) numSamples; --j >= 0;)
-                            {
-                                *dest = *src++;
-                                dest += buf.mNumberChannels;
-                            }
-                        }
+                        const ::AudioBuffer *dstBuffer = &outBuffer.mBuffers[chIdx];
+                        const float* src = channels[idx++];
+                        std::copy (src, src + nFrames, (float*) dstBuffer->mData);
                     }
                 }
             }
-
-           #if ! JucePlugin_SilenceInProducesSilenceOut
-            ioActionFlags &= (AudioUnitRenderActionFlags) ~kAudioUnitRenderAction_OutputIsSilence;
-           #else
-            ignoreUnused (ioActionFlags);
-           #endif
         }
+
+        if (! midiEvents.isEmpty())
+        {
+           #if JucePlugin_ProducesMidiOutput
+            if (midiCallback.midiOutputCallback != nullptr)
+            {
+                UInt32 numPackets = 0;
+                size_t dataSize = 0;
+
+                const juce::uint8* midiEventData;
+                int midiEventSize, midiEventPosition;
+
+                for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+                {
+                    jassert (isPositiveAndBelow (midiEventPosition, (int) numSamples));
+                    dataSize += (size_t) midiEventSize;
+                    ++numPackets;
+                }
+
+                MIDIPacket* p;
+                const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
+                const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
+
+                HeapBlock<MIDIPacketList> packetList;
+                packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
+                packetList->numPackets = numPackets;
+
+                p = packetList->packet;
+
+                for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+                {
+                    p->timeStamp = (MIDITimeStamp) midiEventPosition;
+                    p->length = (UInt16) midiEventSize;
+                    memcpy (p->data, midiEventData, (size_t) midiEventSize);
+                    p = MIDIPacketNext (p);
+                }
+
+                midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
+            }
+           #endif
+
+            midiEvents.clear();
+        }
+
+       #if ! JucePlugin_SilenceInProducesSilenceOut
+        ioActionFlags &= (AudioUnitRenderActionFlags) ~kAudioUnitRenderAction_OutputIsSilence;
+       #else
+        ignoreUnused (ioActionFlags);
+       #endif
 
         return noErr;
     }
