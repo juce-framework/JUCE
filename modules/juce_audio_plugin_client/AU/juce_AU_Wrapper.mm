@@ -233,7 +233,7 @@ public:
                                               getSampleRate(),
                                               (int) GetMaxFramesPerSlice());
 
-            bufferSpace.setSize (juceFilter->getNumInputChannels() + juceFilter->getNumOutputChannels(),
+            bufferSpace.setSize (jmax (findTotalNumChannels (true), findTotalNumChannels (false)),
                                  (int) GetMaxFramesPerSlice() + 32);
 
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
@@ -991,16 +991,16 @@ public:
         for (unsigned int i = 0; result == noErr && i < numInputBuses; ++i)
             result = GetInput (i)->PullInput(ioActionFlags, inTimeStamp, i, nFrames);
 
-        AudioSampleBuffer buffer (bufferSpace.getArrayOfWritePointers(), bufferSpace.getNumChannels(), (int) nFrames);
 
         if (result == noErr)
         {
-            buffer.clear();
-
             // copy inputs into buffer space
             {
-                int idx = 0;
-                for (unsigned int busIdx = 0; busIdx < numInputBuses; ++busIdx)
+                int idx = 0, scratchIdx = 0;
+                unsigned int busIdx;
+                float** scratchBuffers = bufferSpace.getArrayOfWritePointers();
+
+                for (busIdx = 0; busIdx < numInputBuses; ++busIdx)
                 {
                     AUInputElement* input = GetInput (busIdx);
                     const AudioBufferList& inBuffer = input->GetBufferList();
@@ -1008,19 +1008,53 @@ public:
 
                     if (inBuffer.mNumberBuffers == 1 && numChannels > 1)
                     {
-                        // TODO implement interleaved audio
-                        jassertfalse;
+                        // de-interleave
+                        float** tmpMemory = &scratchBuffers[scratchIdx];
+                        scratchIdx += numChannels;
+
+                        for (unsigned int ch = 0; ch < numChannels; ++ch)
+                            channels [idx++] = tmpMemory [ch];
+
+                        const float* src = static_cast<float*> (inBuffer.mBuffers[0].mData);
+
+                        for (unsigned int i = 0; i < nFrames; ++i)
+                            for (unsigned int ch = 0; ch < numChannels; ++ch)
+                                tmpMemory [ch][i] = *src++;
                     }
                     else
                     {
                         for (unsigned int chIdx = 0; chIdx < numChannels; ++chIdx)
-                        {
-                            const ::AudioBuffer *srcBuffer = &inBuffer.mBuffers[chIdx];
-                            buffer.copyFrom (idx++, 0, (float*) srcBuffer->mData, (int) nFrames);
-                        }
+                            channels[idx++] = static_cast<float*> (inBuffer.mBuffers[chIdx].mData);
+                    }
+                }
+
+                // allocate the remaining output buffers
+                for (; busIdx < numOutputBuses; ++busIdx)
+                {
+                    AUOutputElement* output = GetOutput (busIdx);
+                    const unsigned int outNumChannels = output->GetStreamFormat().mChannelsPerFrame;
+
+                    if (output->WillAllocateBuffer())
+                        output->PrepareBuffer (nFrames);
+
+                    const AudioBufferList& outBuffer = output->GetBufferList();
+
+                    if (outBuffer.mNumberBuffers == 1 && outNumChannels > 1)
+                    {
+                        // the output will need to be de-interleaved so assign output to temporary memory
+                        for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
+                            channels [idx++] = scratchBuffers[scratchIdx++];
+                    }
+                    else
+                    {
+                        // render directly into the output buffers
+                        for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
+                            channels[idx++] = static_cast<float*> (outBuffer.mBuffers[chIdx].mData);
                     }
                 }
             }
+
+            AudioSampleBuffer buffer (channels, bufferSpace.getNumChannels(), (int) nFrames);
 
             {
                 const ScopedLock sl (incomingMidiLock);
@@ -1036,21 +1070,45 @@ public:
                 for (unsigned int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
                 {
                     AUOutputElement* output = GetOutput (busIdx);
+                    AUInputElement*  input  = (busIdx < numInputBuses) ? GetInput (busIdx) : nullptr;
 
-                    if (output->WillAllocateBuffer())
+                    const unsigned int outNumChannels = output->GetStreamFormat().mChannelsPerFrame;
+                    const unsigned int inNumChannels = input != nullptr ? GetInput (busIdx)->GetStreamFormat().mChannelsPerFrame : 0;
+                    bool inputWasInterleaved = (inNumChannels > 1 && (input != nullptr ? input->GetBufferList().mNumberBuffers == 1 : false));
+
+                    if (output->WillAllocateBuffer() && busIdx < numInputBuses)
+                    {
+                        // avoid copy if we can
+                        if (outNumChannels == inNumChannels && outNumChannels > 0 && (! inputWasInterleaved))
+                        {
+                            output->SetBufferList (input->GetBufferList());
+                            continue;
+                        }
+
                         output->PrepareBuffer (nFrames);
+                    }
 
                     const AudioBufferList& outBuffer = output->GetBufferList();
-                    const unsigned int numChannels = output->GetStreamFormat().mChannelsPerFrame;
 
-                    if (outBuffer.mNumberBuffers == 1 && numChannels > 1)
+                    if (outBuffer.mNumberBuffers == 1 && outNumChannels > 1)
                     {
-                        // TODO implement interleaved audio
-                        jassertfalse;
+                        float* dst = static_cast<float*> (outBuffer.mBuffers[0].mData);
+                        const float** src = buffer.getArrayOfReadPointers() + idx;
+                        idx += outNumChannels;
+
+                        for (unsigned int i = 0; i < nFrames; ++i)
+                            for (unsigned int ch = 0; ch < outNumChannels; ++ch)
+                                *dst++ = src[ch][i];
                     }
                     else
                     {
-                        for (unsigned int chIdx = 0; chIdx < numChannels; ++chIdx)
+                        // if this bus has no corresponding input and is not interleaved
+                        // then we already rendered this directly to the correct ouput.
+                        // We don't need to do anything in this case
+                        if (busIdx >= numInputBuses)
+                            continue;
+
+                        for (unsigned int chIdx = 0; chIdx < outNumChannels; ++chIdx)
                         {
                             const ::AudioBuffer *dstBuffer = &outBuffer.mBuffers[chIdx];
                             const float* src = buffer.getReadPointer (idx++);
