@@ -10,7 +10,7 @@
               pluginAUExportPrefix="MultiOutSynthAU" pluginRTASCategory=""
               aaxIdentifier="com.ROLI.MultiOutSynth" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
               jucerVersion="4.0.2" companyName="ROLI Ltd." companyWebsite="www.roli.com"
-              companyEmail="info@juce.com">
+              companyEmail="info@juce.com" pluginIsMidiEffectPlugin="0">
   <MAINGROUP id="uGSDhi" name="MultiOutSynth">
     <GROUP id="{78464AFF-72EB-5BDD-4FD3-6C8C6CF5DFA3}" name="Source">
       <GROUP id="{A6DFE970-77F1-27E9-9B49-A42BC96FECDB}" name="BinaryData">
