@@ -366,7 +366,7 @@ public:
 
                     break;
 
-               #if JucePlugin_ProducesMidiOutput
+               #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
                     outDataSize = sizeof (CFArrayRef);
                     outWritable = false;
@@ -449,7 +449,7 @@ public:
 
                     break;
 
-               #if JucePlugin_ProducesMidiOutput
+               #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
                 {
                     CFStringRef strs[1];
@@ -519,7 +519,7 @@ public:
         {
             switch (inID)
             {
-               #if JucePlugin_ProducesMidiOutput
+               #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallback:
                     if (inDataSize < sizeof (AUMIDIOutputCallbackStruct))
                         return kAudioUnitErr_InvalidPropertyValue;
@@ -1135,7 +1135,7 @@ public:
 
         if (! midiEvents.isEmpty())
         {
-           #if JucePlugin_ProducesMidiOutput
+           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             if (midiCallback.midiOutputCallback != nullptr)
             {
                 UInt32 numPackets = 0;
@@ -1146,7 +1146,7 @@ public:
 
                 for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
                 {
-                    jassert (isPositiveAndBelow (midiEventPosition, (int) numSamples));
+                    jassert (isPositiveAndBelow (midiEventPosition, (int) nFrames));
                     dataSize += (size_t) midiEventSize;
                     ++numPackets;
                 }
@@ -1192,7 +1192,7 @@ public:
     //==============================================================================
     OSStatus HandleMidiEvent (UInt8 nStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
     {
-       #if JucePlugin_WantsMidiInput
+       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
         const juce::uint8 data[] = { (juce::uint8) (nStatus | inChannel),
                                      (juce::uint8) inData1,
                                      (juce::uint8) inData2 };
@@ -1209,7 +1209,7 @@ public:
 
     OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
     {
-       #if JucePlugin_WantsMidiInput
+       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
         const ScopedLock sl (incomingMidiLock);
         incomingEvents.addEvent (inData, (int) inLength, 0);
         return noErr;
@@ -1766,11 +1766,13 @@ private:
     OSStatus syncAudioUnitWithProcessor()
     {
         OSStatus err = noErr;
+        const int enabledInputs  = getNumEnabledBuses (true);
+        const int enabledOutputs = getNumEnabledBuses (false);
 
-        if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Input,  static_cast<UInt32> (getNumEnabledBuses (true)))) != noErr)
+        if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Input,  static_cast<UInt32> (enabledInputs))) != noErr)
             return err;
 
-        if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Output, static_cast<UInt32> (getNumEnabledBuses (false)))) != noErr)
+        if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Output, static_cast<UInt32> (enabledOutputs))) != noErr)
             return err;
 
         addSupportedLayoutTags();
@@ -1780,6 +1782,12 @@ private:
 
         for (int i = 0; i < juceFilter->busArrangement.outputBuses.size(); ++i)
             if ((err = syncAudioUnitWithChannelSet (false, i, getChannelSet (false, i))) != noErr) return err;
+
+        // if you are hitting this assertion then your plug-in allows disabling/enabling buses (i.e. you
+        // do not return false in setPreferredBusArrangement when the number of channels is zero), however,
+        // AudioUnits require at least the main bus to be enabled by default in this case. Please assign
+        // a non-zero number of channels to your main input or output bus in the constructor of your AudioProcessor
+        jassert ((! hasDynamicInBuses && ! hasDynamicOutBuses) || (enabledInputs > 0) || (enabledOutputs > 0));
 
         return noErr;
     }
@@ -2571,7 +2579,7 @@ private:
         return ComponentEntryPoint<Class>::Dispatch (params, obj); \
     }
 
-#if JucePlugin_ProducesMidiOutput || JucePlugin_WantsMidiInput
+#if JucePlugin_ProducesMidiOutput || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
  #define FACTORY_BASE_CLASS AUMIDIEffectFactory
 #else
  #define FACTORY_BASE_CLASS AUBaseFactory

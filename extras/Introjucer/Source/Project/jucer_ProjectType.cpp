@@ -212,6 +212,7 @@ public:
         setValueIfVoid (getPluginIsSynth (project),                false);
         setValueIfVoid (getPluginWantsMidiInput (project),         false);
         setValueIfVoid (getPluginProducesMidiOut (project),        false);
+        setValueIfVoid (getPluginIsMidiEffectPlugin (project),     false);
         setValueIfVoid (getPluginSilenceInProducesSilenceOut (project), false);
         setValueIfVoid (getPluginEditorNeedsKeyFocus (project),    false);
         setValueIfVoid (getPluginAUExportPrefix (project),         sanitisedProjectName + "AU");
@@ -260,6 +261,9 @@ public:
 
         props.add (new BooleanPropertyComponent (getPluginProducesMidiOut (project), "Plugin Midi Output", "Plugin produces midi output"),
                    "Enable this if your plugin is going to produce midi messages.");
+
+        props.add (new BooleanPropertyComponent (getPluginIsMidiEffectPlugin (project), "Midi Effect Plugin", "Plugin is a midi effect plugin"),
+                   "Enable this if your plugin only processes midi and no audio.");
 
         props.add (new BooleanPropertyComponent (getPluginSilenceInProducesSilenceOut (project), "Silence", "Silence in produces silence out"),
                    "Enable this if your plugin has no tail - i.e. if passing a silent buffer to it will always result in a silent buffer being produced.");
