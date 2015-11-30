@@ -305,24 +305,8 @@ public:
             if (currentNumBus < requestedNumBus)
             {
                 for (int busNr = currentNumBus; busNr < requestedNumBus; ++busNr)
-                {
-                    const AudioChannelSet& set = getDefaultLayoutForBus (isInput, busNr);
-
-                    // TODO: this is very similar to syncWithAudioProcessor function
-                    if (AUIOElement* element = GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, (UInt32) busNr))
-                    {
-                        getCurrentLayout (isInput, busNr) = ChannelSetToCALayoutTag (set);
-
-                        element->SetName ((CFStringRef) juceStringToNS (getFilterBus (isInput).getReference (busNr).name));
-
-                        CAStreamBasicDescription streamDescription;
-                        streamDescription.mSampleRate = getSampleRate();
-
-                        streamDescription.SetCanonical ((UInt32) set.size(), false);
-                        if ((err = element->SetStreamFormat (streamDescription)) != noErr)
-                            return err;
-                    }
-                }
+                    if ((err = syncAudioUnitWithChannelSet (isInput, busNr, getDefaultLayoutForBus (isInput, busNr))) != noErr)
+                        return err;
             }
             else
             {
@@ -983,7 +967,6 @@ public:
         AudioChannelSet set = (newNumChannels != oldNumChannels) ? getDefaultLayoutForChannelNumAndBus (isInput, busNr, newNumChannels)
                                                                  : getChannelSet (isInput, busNr);
 
-        // try setting the canonical format first TODO: change to default format below
         if (set == AudioChannelSet())
             return kAudioUnitErr_FormatNotSupported;
 
@@ -1747,6 +1730,29 @@ private:
         if (layouts.busIgnoresLayout)
             set = AudioChannelSet::discreteChannels (set.size());
 
+        const bool mainBusHasInputs  = hasInputs (0);
+        const bool mainBusHasOutputs = hasOutputs (0);
+
+        if (set == AudioChannelSet() && busIdx != 0 && (mainBusHasInputs || mainBusHasOutputs))
+        {
+            // the AudioProcessor does not give us any default layout
+            // for an aux bus. Use the same number of channels as the
+            // default layout on the main bus as a sensible default for
+            // the aux bus
+
+            const bool useInput = mainBusHasInputs && mainBusHasOutputs ? isInput : mainBusHasInputs;
+            const int dfltNumChannels = supportedLayouts.getSupportedBusLayouts (useInput, 0).getDefault().size();
+
+            for (int i = 0; i < layouts.supportedLayouts.size(); ++i)
+            {
+                if (layouts.supportedLayouts.getReference (i).size() == dfltNumChannels)
+                {
+                    layouts.defaultLayoutIndex = i;
+                    return;
+                }
+            }
+        }
+
         layouts.updateDefaultLayout (set);
     }
 
@@ -1835,10 +1841,10 @@ private:
         addSupportedLayoutTags();
 
         for (int i = 0; i < juceFilter->busArrangement.inputBuses.size(); ++i)
-            if ((err = syncAudioUnitWithProcessorForBus (true, i)) != noErr) return err;
+            if ((err = syncAudioUnitWithChannelSet (true, i,  getChannelSet (true,  i))) != noErr) return err;
 
         for (int i = 0; i < juceFilter->busArrangement.outputBuses.size(); ++i)
-            if ((err = syncAudioUnitWithProcessorForBus (false, i)) != noErr) return err;
+            if ((err = syncAudioUnitWithChannelSet (false, i, getChannelSet (false, i))) != noErr) return err;
 
         return noErr;
     }
@@ -1891,13 +1897,9 @@ private:
         return kAudioUnitErr_FormatNotSupported;
     }
 
-    OSStatus syncAudioUnitWithProcessorForBus (bool isInput, int busNr)
+    OSStatus syncAudioUnitWithChannelSet (bool isInput, int busNr, const AudioChannelSet& channelSet)
     {
-        const AudioProcessor::AudioProcessorBus& bus = isInput ? juceFilter->busArrangement.inputBuses. getReference (busNr)
-                                                               : juceFilter->busArrangement.outputBuses.getReference (busNr);
-        Array<AudioChannelLayoutTag>& currentLayout = isInput ? currentInputLayout : currentOutputLayout;
-
-        const int numChannels = bus.channels.size();
+        const int numChannels = channelSet.size();
 
         // is this bus activated?
         if (numChannels == 0)
@@ -1905,9 +1907,9 @@ private:
 
         if (AUIOElement* element = GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, (UInt32) busNr))
         {
-            currentLayout.getReference (busNr) = ChannelSetToCALayoutTag (bus.channels);
+            getCurrentLayout (isInput, busNr) = ChannelSetToCALayoutTag (channelSet);
 
-            element->SetName ((CFStringRef) juceStringToNS (bus.name));
+            element->SetName ((CFStringRef) juceStringToNS (getFilterBus (isInput).getReference (busNr).name));
 
             CAStreamBasicDescription streamDescription;
             streamDescription.mSampleRate = getSampleRate();
