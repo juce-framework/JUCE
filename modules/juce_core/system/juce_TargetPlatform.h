@@ -55,15 +55,9 @@
   #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
   #define Component CarbonDummyCompName
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
+  #include "../native/juce_mac_ClangBugWorkaround.h"
   #undef Point
   #undef Component
-
-  #if JUCE_PROJUCER_LIVE_BUILD
-   // This hack is a workaround for a bug (?) in Apple's 10.11 SDK headers
-   // which cause some configurations of Clang to throw out an error..
-   #undef CF_OPTIONS
-   #define CF_OPTIONS(_type, _name) _type _name; enum
-  #endif
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1
