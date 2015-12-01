@@ -71,7 +71,7 @@ private:
     {
         LogoDrawComponent()   : logoPath (MainAppWindow::getJUCELogoPath()), elapsed (0.0f)
         {
-            startTimerHz (60); // try to repaint at 60 fps
+            startTimerHz (30); // repaint at 30 fps
         }
 
         void paint (Graphics& g) override
@@ -107,7 +107,7 @@ private:
         void timerCallback() override
         {
             repaint();
-            elapsed += 0.01f;
+            elapsed += 0.02f;
         }
 
         Path logoPath;
