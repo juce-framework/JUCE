@@ -83,6 +83,9 @@ public:
     /** Returns the standard height used for items in the panel. */
     int getItemHeight() const noexcept      { return itemHeight; }
 
+    /** Returns the ListBox that's being used to show the midi inputs, or nullptr if there isn't one. */
+    ListBox* getMidiInputSelectorListBox() const noexcept;
+
     //==============================================================================
     /** @internal */
     void resized() override;
