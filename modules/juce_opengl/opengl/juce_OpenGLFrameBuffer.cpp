@@ -274,12 +274,12 @@ bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
     return true;
 }
 
-GLuint OpenGLFrameBuffer::getFrameBufferID() const
+GLuint OpenGLFrameBuffer::getFrameBufferID() const noexcept
 {
     return pimpl != nullptr ? pimpl->frameBufferID : 0;
 }
 
-GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
+GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget() noexcept
 {
     GLint fb;
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, &fb);
