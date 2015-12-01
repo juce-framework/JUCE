@@ -44,6 +44,10 @@ public:
     */
     AudioChannelSet() noexcept  {}
 
+    /** Creates a zero-channel set which can be used to indicate that a
+        bus is disabled. */
+    static AudioChannelSet disabled();
+
     /** Creates a one-channel mono set. */
     static AudioChannelSet mono();
 
@@ -143,6 +147,9 @@ public:
 
     /** Returns the number of channels in the set. */
     int size() const noexcept;
+
+    /** Returns the number of channels in the set. */
+    bool isDisabled() const noexcept                    { return size() == 0; }
 
     /** Returns an array of all the types in this channel set. */
     Array<ChannelType> getChannelTypes() const;

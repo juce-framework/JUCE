@@ -32,7 +32,7 @@ public:
 
         // Add additional output buses but disable these by default
         for (int busNr = 1; busNr < maxMidiChannel; ++busNr)
-            busArrangement.outputBuses.add (AudioProcessorBus (String ("Output #") += String (busNr + 1), AudioChannelSet()));
+            busArrangement.outputBuses.add (AudioProcessorBus (String ("Output #") += String (busNr + 1), AudioChannelSet::disabled()));
 
 
         // initialize other stuff (not related to buses)
@@ -59,7 +59,7 @@ public:
         const bool isMainBus = (busIndex == 0);
 
         // do not allow disabling the main output bus
-        if (isMainBus && numChannels == 0) return false;
+        if (isMainBus && preferred.isDisabled()) return false;
 
         // only support mono or stereo (or disabling) buses
         if (numChannels > 2) return false;

@@ -73,6 +73,7 @@ void AudioChannelSet::addChannel (ChannelType newChannel)
     channels.setBit (bit);
 }
 
+AudioChannelSet AudioChannelSet::disabled()           { return AudioChannelSet(); }
 AudioChannelSet AudioChannelSet::mono()               { return AudioChannelSet (1u << centre); }
 AudioChannelSet AudioChannelSet::stereo()             { return AudioChannelSet ((1u << left) | (1u << right)); }
 AudioChannelSet AudioChannelSet::quadraphonic()       { return AudioChannelSet ((1u << left) | (1u << right) | (1u << sideLeft) | (1u << sideRight)); }
