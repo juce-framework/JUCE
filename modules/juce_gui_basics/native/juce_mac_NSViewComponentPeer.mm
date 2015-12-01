@@ -261,7 +261,9 @@ public:
         else
         {
             [window setFrame: [window frameRectForContentRect: flippedScreenRect (r)]
-                     display: true];
+                     display: false];
+
+            [view setNeedsDisplay: true];
         }
     }
 
