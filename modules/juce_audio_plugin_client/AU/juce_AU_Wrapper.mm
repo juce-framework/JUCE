@@ -131,8 +131,8 @@ class JuceAU   : public AudioProcessorHolder,
 public:
     JuceAU (AudioUnit component)
         : AudioProcessorHolder(),
-          MusicDeviceBase (component, (UInt32) PlugInBusUtilities (*juceFilter).getNumEnabledBuses (true),
-                                      (UInt32) PlugInBusUtilities (*juceFilter).getNumEnabledBuses (false)),
+          MusicDeviceBase (component, (UInt32) PluginBusUtilities (*juceFilter).getNumEnabledBuses (true),
+                                      (UInt32) PluginBusUtilities (*juceFilter).getNumEnabledBuses (false)),
           isBypassed (false),
           busUtils (*juceFilter)
     {
@@ -1530,7 +1530,7 @@ private:
     CriticalSection incomingMidiLock;
     AUMIDIOutputCallbackStruct midiCallback;
     AudioTimeStamp lastTimeStamp;
-    PlugInBusUtilities busUtils;
+    PluginBusUtilities busUtils;
 
     //==============================================================================
     Array<AUChannelInfo> channelInfo;
@@ -1856,7 +1856,7 @@ private:
 
     bool toggleBus (bool isInput, int busIdx)
     {
-        const PlugInBusUtilities::SupportedBusLayouts& layouts = busUtils.getSupportedBusLayouts (isInput, busIdx);
+        const PluginBusUtilities::SupportedBusLayouts& layouts = busUtils.getSupportedBusLayouts (isInput, busIdx);
 
         if (! layouts.canBeDisabled)
             return false;
@@ -2042,9 +2042,11 @@ private:
     //==============================================================================
     void addSupportedLayoutTagsForBus (bool isInput, int busNum, Array<AudioChannelLayoutTag>& tags)
     {
-        const PlugInBusUtilities::SupportedBusLayouts& layouts = busUtils.getSupportedBusLayouts (isInput, busNum);
-        for (int i = 0; i < layouts.supportedLayouts.size(); ++i)
-            tags.add (ChannelSetToCALayoutTag (layouts.supportedLayouts.getReference (i)));
+        const PluginBusUtilities::SupportedBusLayouts& layouts = busUtils.getSupportedBusLayouts (isInput, busNum);
+
+        if (! layouts.busIgnoresLayout)
+            for (int i = 0; i < layouts.supportedLayouts.size(); ++i)
+                tags.add (ChannelSetToCALayoutTag (layouts.supportedLayouts.getReference (i)));
     }
 
     void addSupportedLayoutTagsForDirection (bool isInput)

@@ -25,14 +25,14 @@
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
 
-class PlugInBusUtilities
+class PluginBusUtilities
 {
 public:
     //==============================================================================
     typedef Array<AudioProcessor::AudioProcessorBus> AudioBusArray;
 
     //==============================================================================
-    PlugInBusUtilities (AudioProcessor& plugin)
+    PluginBusUtilities (AudioProcessor& plugin)
         : juceFilter (plugin),
           dynamicInBuses (false),
           dynamicOutBuses (false)
@@ -76,7 +76,7 @@ public:
         }
 
         int defaultLayoutIndex;
-        bool busIgnoresLayout, canBeDisabled;
+        bool busIgnoresLayout, canBeDisabled, isEnabledByDefault;
         SortedSet<AudioChannelSet> supportedLayouts;
     };
 
@@ -191,21 +191,20 @@ private:
 
         for (int i = 1; i <= maxNumChannels; ++i)
         {
-            if (!busIgnoresLayoutForChannelNum (isInput, busNr, i))
+            const bool ignoresLayoutForChannel = busIgnoresLayoutForChannelNum (isInput, busNr, i);
+
+            Array<AudioChannelSet> sets = layoutListCompatibleWithChannelCount (i);
+            for (int j = 0; j < sets.size(); ++j)
             {
-                Array<AudioChannelSet> sets = layoutListCompatibleWithChannelCount (i);
-                for (int j = 0; j < sets.size(); ++j)
+                const AudioChannelSet& layout = sets.getReference (j);
+                if (juceFilter.setPreferredBusArrangement (isInput, busNr, layout))
                 {
-                    const AudioChannelSet& layout = sets.getReference (j);
-                    if (juceFilter.setPreferredBusArrangement (isInput, busNr, layout))
-                    {
+                    if (! ignoresLayoutForChannel)
                         layouts.busIgnoresLayout = false;
-                        layouts.supportedLayouts.add (layout);
-                    }
+
+                    layouts.supportedLayouts.add (layout);
                 }
             }
-            else
-                layouts.supportedLayouts.add (AudioChannelSet::discreteChannels (i));
         }
 
         // You cannot add a bus in your processor wich does not support any layouts! It must at least support one.
@@ -222,37 +221,47 @@ private:
 
     void updateDefaultLayout (bool isInput, int busIdx)
     {
-        AudioChannelSet set = getChannelSet (isInput, busIdx);
         SupportedBusLayouts& layouts = getSupportedBusLayouts (isInput, busIdx);
+        AudioChannelSet set = getChannelSet (isInput, busIdx);
 
-        if (layouts.busIgnoresLayout)
-            set = AudioChannelSet::discreteChannels (set.size());
+        if ((layouts.isEnabledByDefault = (set.size() > 0)))
+            layouts.supportedLayouts.add (set);
 
-        const bool mainBusHasInputs  = hasInputs (0);
-        const bool mainBusHasOutputs = hasOutputs (0);
+        // If you hit this assertion then you are disabling the main bus by default
+        // which is unsupported
+        jassert (layouts.isEnabledByDefault || busIdx >= 0);
 
-        if (set == AudioChannelSet() && busIdx != 0 && (mainBusHasInputs || mainBusHasOutputs))
+        if (set == AudioChannelSet())
         {
-            // the AudioProcessor does not give us any default layout
-            // for an aux bus. Use the same number of channels as the
-            // default layout on the main bus as a sensible default for
-            // the aux bus
+            const bool mainBusHasInputs  = hasInputs (0);
+            const bool mainBusHasOutputs = hasOutputs (0);
 
-            const bool useInput = mainBusHasInputs && mainBusHasOutputs ? isInput : mainBusHasInputs;
-            const AudioChannelSet& dfltLayout = getSupportedBusLayouts (useInput, 0).getDefault();
-
-            if ((layouts.defaultLayoutIndex = layouts.supportedLayouts.indexOf (dfltLayout)) >= 0)
-                return;
-
-            // no exact match: try at least to match the number of channels
-            for (int i = 0; i < layouts.supportedLayouts.size(); ++i)
+            if (busIdx != 0 && (mainBusHasInputs || mainBusHasOutputs))
             {
-                if (layouts.supportedLayouts.getReference (i).size() == dfltLayout.size())
-                {
-                    layouts.defaultLayoutIndex = i;
+                // the AudioProcessor does not give us any default layout
+                // for an aux bus. Use the same number of channels as the
+                // default layout on the main bus as a sensible default for
+                // the aux bus
+
+                const bool useInput = mainBusHasInputs && mainBusHasOutputs ? isInput : mainBusHasInputs;
+                const AudioChannelSet& dfltLayout = getSupportedBusLayouts (useInput, 0).getDefault();
+
+                if ((layouts.defaultLayoutIndex = layouts.supportedLayouts.indexOf (dfltLayout)) >= 0)
                     return;
+
+                // no exact match: try at least to match the number of channels
+                for (int i = 0; i < layouts.supportedLayouts.size(); ++i)
+                {
+                    if (layouts.supportedLayouts.getReference (i).size() == dfltLayout.size())
+                    {
+                        layouts.defaultLayoutIndex = i;
+                        return;
+                    }
                 }
             }
+
+            if (layouts.busIgnoresLayout)
+                set = AudioChannelSet::discreteChannels (set.size());
         }
 
         layouts.updateDefaultLayout (set);
