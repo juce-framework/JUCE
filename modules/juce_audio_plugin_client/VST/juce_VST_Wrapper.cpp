@@ -564,12 +564,6 @@ public:
                 resume();
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
-
-           #if JUCE_WINDOWS
-            if (GetThreadPriority (GetCurrentThread()) <= THREAD_PRIORITY_NORMAL
-                  && GetThreadPriority (GetCurrentThread()) >= THREAD_PRIORITY_LOWEST)
-                filter->setNonRealtime (true);
-           #endif
         }
 
        #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
