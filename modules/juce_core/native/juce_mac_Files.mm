@@ -277,12 +277,7 @@ String File::getVersion() const
 //==============================================================================
 static NSString* getFileLink (const String& path)
 {
-   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     return [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (path) error: nil];
-   #else
-    // (the cast here avoids a deprecation warning)
-    return [((id) [NSFileManager defaultManager]) pathContentOfSymbolicLinkAtPath: juceStringToNS (path)];
-   #endif
 }
 
 bool File::isSymbolicLink() const
@@ -462,13 +457,7 @@ OSType File::getMacOSType() const
 {
     JUCE_AUTORELEASEPOOL
     {
-       #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
         NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (getFullPathName()) error: nil];
-       #else
-        // (the cast here avoids a deprecation warning)
-        NSDictionary* fileDict = [((id) [NSFileManager defaultManager]) fileAttributesAtPath: juceStringToNS (getFullPathName()) traverseLink: NO];
-       #endif
-
         return [fileDict fileHFSTypeCode];
     }
 }

@@ -405,19 +405,7 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, const bool replaceEx
 {
     if (replaceExistingContents)
     {
-      #if JUCE_IOS
         CGContextSetBlendMode (context, kCGBlendModeCopy);
-      #elif MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
-        CGContextClearRect (context, cgRect);
-      #else
-       #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-        if (CGContextDrawLinearGradient == 0) // (just a way of checking whether we're running in 10.5 or later)
-            CGContextClearRect (context, cgRect);
-        else
-       #endif
-            CGContextSetBlendMode (context, kCGBlendModeCopy);
-      #endif
-
         fillCGRect (cgRect, false);
         CGContextSetBlendMode (context, kCGBlendModeNormal);
     }
@@ -500,15 +488,15 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
       #if JUCE_IOS
         CGContextDrawTiledImage (context, imageRect, image);
       #else
-       #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
         // There's a bug in CGContextDrawTiledImage that makes it incredibly slow
         // if it's doing a transformation - it's quicker to just draw lots of images manually
         if (&CGContextDrawTiledImage != 0 && transform.isOnlyTranslation())
-            CGContextDrawTiledImage (context, imageRect, image);
-        else
-       #endif
         {
-            // Fallback to manually doing a tiled fill on 10.4
+            CGContextDrawTiledImage (context, imageRect, image);
+        }
+        else
+        {
+            // Fallback to manually doing a tiled fill
             CGRect clip = CGRectIntegral (CGContextGetClipBoundingBox (context));
 
             int x = 0, y = 0;

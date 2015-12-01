@@ -131,12 +131,12 @@
     #define JUCE_INTEL 1
   #endif
 
-  #if JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
-    #error "Building for OSX 10.3 is no longer supported!"
+  #if JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+    #error "Building for OSX 10.4 is no longer supported!"
   #endif
 
-  #if JUCE_MAC && ! defined (MAC_OS_X_VERSION_10_5)
-    #error "To build with 10.4 compatibility, use a 10.5 or 10.6 SDK and set the deployment target to 10.4"
+  #if JUCE_MAC && ! defined (MAC_OS_X_VERSION_10_6)
+    #error "To build with 10.5 compatibility, use a later SDK and set the deployment target to 10.5"
   #endif
 #endif
 
