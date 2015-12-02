@@ -72,6 +72,8 @@ public:
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
     {
+        ignoreUnused (samplesPerBlock);
+
         for (int midiChannel = 0; midiChannel < maxMidiChannel; ++midiChannel)
             synth[midiChannel]->setCurrentPlaybackSampleRate (sampleRate);
     }
@@ -111,8 +113,8 @@ public:
     void changeProgramName (int , const String& ) override { }
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override {}
-    void setStateInformation (const void* data, int sizeInBytes) override {}
+    void getStateInformation (MemoryBlock&) override {}
+    void setStateInformation (const void*, int) override {}
 
 private:
     //==============================================================================
