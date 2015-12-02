@@ -299,7 +299,7 @@ public:
         method call. Until that point, the number of channels will be unknown.
     */
     int getNumInputChannels(int elementIndex = 0) const noexcept { return numChannelsPerInputElement[elementIndex]; }
-    
+
     /** Returns the number of output channels that the filter will be sending the host.
         By default, the number of channels sent through the main output element is returned.
         Specify another output element index to get its number of channels.
@@ -320,7 +320,7 @@ public:
         method call. Until that point, the number of channels will be unknown.
      */
     const Array<int>& getNumChannelsPerInputElement() const noexcept { return numChannelsPerInputElement; }
-    
+
     /** Returns the number of output channels that the filter will be sending the host
         through each output element.
 
@@ -336,15 +336,15 @@ public:
         method call. Until that point, the number of channels will be unknown.
      */
     int getNumInputChannelsTotal(bool onlyActive) const noexcept;
-    
+
     /** Returns the total number of output channels that the filter will be sending the host
         through all output elements.
-     
+
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
      */
     int getNumOutputChannelsTotal() const noexcept;
-    
+
     /** Returns a string containing a whitespace-separated list of speaker types
         corresponding to each input channel.
         For example in a 5.1 arrangement, the string may be "L R C Lfe Ls Rs"
@@ -828,7 +828,7 @@ public:
 
     /** This can be called to find out the activation status of an input element. */
     bool getInputElementActive (int elementIndex) const noexcept { return inputElementsActive[elementIndex]; }
-    
+
     /** Convenience method which returns true iff there are at least two input elements and the second input element is active. */
     bool isSideChainActive() const noexcept { return inputElementsActive.size() >= 2 && getInputElementActive(1); }
 
@@ -898,6 +898,9 @@ private:
     Array<int> numChannelsPerInputElement, numChannelsPerOutputElement;
     Array<bool> inputElementsActive;
     int blockSize, latencySamples;
+   #if JUCE_DEBUG
+    bool textRecursionCheck;
+   #endif
     bool suspended, nonRealtime;
     ProcessingPrecision processingPrecision;
     CriticalSection callbackLock, listenerLock;

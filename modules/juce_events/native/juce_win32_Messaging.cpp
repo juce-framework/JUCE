@@ -38,15 +38,16 @@ namespace WindowsMessageHelpers
 
     void dispatchMessageFromLParam (LPARAM lParam)
     {
-        MessageManager::MessageBase* const message = reinterpret_cast<MessageManager::MessageBase*> (lParam);
-
-        JUCE_TRY
+        if (MessageManager::MessageBase* const message = reinterpret_cast<MessageManager::MessageBase*> (lParam))
         {
-            message->messageCallback();
-        }
-        JUCE_CATCH_EXCEPTION
+            JUCE_TRY
+            {
+                message->messageCallback();
+            }
+            JUCE_CATCH_EXCEPTION
 
-        message->decReferenceCount();
+            message->decReferenceCount();
+        }
     }
 
     //==============================================================================
@@ -64,22 +65,27 @@ namespace WindowsMessageHelpers
 
             if (message == broadcastId)
             {
-                const ScopedPointer<String> messageString ((String*) lParam);
-                MessageManager::getInstance()->deliverBroadcastMessage (*messageString);
+                if (String* const m = reinterpret_cast<String*> (lParam))
+                {
+                    const ScopedPointer<String> messageString (m);
+                    MessageManager::getInstance()->deliverBroadcastMessage (*m);
+                }
+
                 return 0;
             }
 
             if (message == WM_COPYDATA)
             {
-                const COPYDATASTRUCT* const data = reinterpret_cast<const COPYDATASTRUCT*> (lParam);
-
-                if (data->dwData == broadcastId)
+                if (const COPYDATASTRUCT* const data = reinterpret_cast<const COPYDATASTRUCT*> (lParam))
                 {
-                    const String messageString (CharPointer_UTF32 ((const CharPointer_UTF32::CharType*) data->lpData),
-                                                data->cbData / sizeof (CharPointer_UTF32::CharType));
+                    if (data->dwData == broadcastId)
+                    {
+                        const String messageString (CharPointer_UTF32 ((const CharPointer_UTF32::CharType*) data->lpData),
+                                                    data->cbData / sizeof (CharPointer_UTF32::CharType));
 
-                    PostMessage (juce_messageWindowHandle, broadcastId, 0, (LPARAM) new String (messageString));
-                    return 0;
+                        PostMessage (juce_messageWindowHandle, broadcastId, 0, (LPARAM) new String (messageString));
+                        return 0;
+                    }
                 }
             }
         }

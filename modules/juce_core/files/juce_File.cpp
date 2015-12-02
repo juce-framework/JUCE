@@ -911,7 +911,7 @@ bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExist
     }
 
     return true;
-   #elif JUCE_WINDOWS
+   #elif JUCE_MSVC
     return CreateSymbolicLink (linkFileToCreate.getFullPathName().toWideCharPointer(),
                                fullPath.toWideCharPointer(),
                                isDirectory() ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0) != FALSE;

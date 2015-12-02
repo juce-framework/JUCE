@@ -242,22 +242,31 @@ public:
             File javaSourceFile (javaSourceFolder.getChildFile ("JuceAppActivity.java"));
             StringArray javaSourceLines (StringArray::fromLines (javaSourceFile.loadFileAsString()));
 
-            MemoryOutputStream newFile;
-
-            for (int i = 0; i < javaSourceLines.size(); ++i)
             {
-                const String& line = javaSourceLines[i];
+                MemoryOutputStream newFile;
 
-                if (line.contains ("$$JuceAndroidMidiImports$$"))
-                    newFile << juceMidiImports;
-                else if (line.contains ("$$JuceAndroidMidiCode$$"))
-                    newFile << juceMidiCode;
-                else
-                    newFile << line.replace ("JuceAppActivity", className)
-                                   .replace ("package com.juce;", "package " + package + ";") << newLine;
+                for (int i = 0; i < javaSourceLines.size(); ++i)
+                {
+                    const String& line = javaSourceLines[i];
+
+                    if (line.contains ("$$JuceAndroidMidiImports$$"))
+                        newFile << juceMidiImports;
+                    else if (line.contains ("$$JuceAndroidMidiCode$$"))
+                        newFile << juceMidiCode;
+                    else
+                        newFile << line.replace ("JuceAppActivity", className)
+                                       .replace ("package com.juce;", "package " + package + ";") << newLine;
+                }
+
+                javaSourceLines = StringArray::fromLines (newFile.toString());
             }
 
-            overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
+            while (javaSourceLines.size() > 2
+                    && javaSourceLines[javaSourceLines.size() - 1].trim().isEmpty()
+                    && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
+                javaSourceLines.remove (javaSourceLines.size() - 1);
+
+            overwriteFileIfDifferentOrThrow (javaDestFile, javaSourceLines.joinIntoString (newLine));
         }
     }
 

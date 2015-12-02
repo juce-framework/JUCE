@@ -234,14 +234,7 @@ namespace VSTHelpers
         const String vstFolder (exporter.getVSTPathValue (isVST3).toString());
 
         if (vstFolder.isNotEmpty())
-        {
-            RelativePath path (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (vstFolder, RelativePath::projectFolder)));
-
-            if (exporter.isVisualStudio())
-                exporter.extraSearchPaths.add (path.toWindowsStyle());
-            else if (exporter.isLinux() || exporter.isXcode())
-                exporter.extraSearchPaths.insert (0, path.toUnixStyle());
-        }
+            exporter.addToExtraSearchPaths (RelativePath (vstFolder, RelativePath::projectFolder), 0);
     }
 
     static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
@@ -263,15 +256,7 @@ namespace VSTHelpers
         Project::Item group (Project::Item::createGroup (const_cast<ProjectExporter&> (exporter).getProject(),
                                                          "Juce VST Wrapper", "__jucevstfiles"));
 
-        RelativePath juceWrapperFolder (exporter.getProject().getGeneratedCodeFolder(),
-                                        exporter.getTargetFolder(), RelativePath::buildTargetFolder);
-
         addVSTFolderToPath (exporter, isVST3);
-
-        if (exporter.isWindows())
-            exporter.extraSearchPaths.add (juceWrapperFolder.toWindowsStyle());
-        else if (exporter.isLinux())
-            exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
 
         if (exporter.isVisualStudio())
         {
