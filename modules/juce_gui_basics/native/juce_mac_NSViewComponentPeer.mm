@@ -245,24 +245,21 @@ public:
         fullScreen = isNowFullScreen;
 
         NSRect r = makeNSRect (newBounds);
+        NSSize oldViewSize = [view frame].size;
 
         if (isSharedWindow)
         {
             r.origin.y = [[view superview] frame].size.height - (r.origin.y + r.size.height);
-
-            if ([view frame].size.width != r.size.width
-                 || [view frame].size.height != r.size.height)
-            {
-                [view setNeedsDisplay: true];
-            }
-
             [view setFrame: r];
         }
         else
         {
             [window setFrame: [window frameRectForContentRect: flippedScreenRect (r)]
-                     display: true];
+                     display: false];
         }
+
+        if (oldViewSize.width != r.size.width || oldViewSize.height != r.size.height)
+            [view setNeedsDisplay: true];
     }
 
     Rectangle<int> getBounds (const bool global) const

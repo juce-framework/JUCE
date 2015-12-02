@@ -1560,7 +1560,6 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("random",    Math_random);           setMethod ("randInt",   Math_randInt);
             setMethod ("min",       Math_min);              setMethod ("max",       Math_max);
             setMethod ("range",     Math_range);            setMethod ("sign",      Math_sign);
-            setMethod ("PI",        Math_pi);               setMethod ("E",         Math_e);
             setMethod ("toDegrees", Math_toDegrees);        setMethod ("toRadians", Math_toRadians);
             setMethod ("sin",       Math_sin);              setMethod ("asin",      Math_asin);
             setMethod ("sinh",      Math_sinh);             setMethod ("asinh",     Math_asinh);
@@ -1572,10 +1571,11 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("exp",       Math_exp);              setMethod ("pow",       Math_pow);
             setMethod ("sqr",       Math_sqr);              setMethod ("sqrt",      Math_sqrt);
             setMethod ("ceil",      Math_ceil);             setMethod ("floor",     Math_floor);
+
+            setProperty ("PI", double_Pi);
+            setProperty ("E", exp (1.0));
         }
 
-        static var Math_pi        (Args)   { return double_Pi; }
-        static var Math_e         (Args)   { return exp (1.0); }
         static var Math_random    (Args)   { return Random::getSystemRandom().nextDouble(); }
         static var Math_randInt   (Args a) { return Random::getSystemRandom().nextInt (Range<int> (getInt (a, 0), getInt (a, 1))); }
         static var Math_abs       (Args a) { return isInt (a, 0) ? var (std::abs   (getInt (a, 0))) : var (std::abs   (getDouble (a, 0))); }
