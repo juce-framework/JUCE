@@ -330,14 +330,6 @@ void MessageManager::doPlatformSpecificInitialisation()
 {
     if (appDelegate == nil)
         appDelegate = new AppDelegate();
-
-   #if ! (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-    // This launches a dummy thread, which forces Cocoa to initialise NSThreads correctly (needed prior to 10.5)
-    if (! [NSThread isMultiThreaded])
-        [NSThread detachNewThreadSelector: @selector (dummyMethod)
-                                 toTarget: appDelegate->delegate
-                               withObject: nil];
-   #endif
 }
 
 void MessageManager::doPlatformSpecificShutdown()

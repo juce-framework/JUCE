@@ -307,27 +307,10 @@ public:
 
     void setAlpha (float newAlpha) override
     {
-        if (! isSharedWindow)
-        {
-            [window setAlphaValue: (CGFloat) newAlpha];
-        }
-        else
-        {
-           #if defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
+        if (isSharedWindow)
             [view setAlphaValue: (CGFloat) newAlpha];
-           #else
-            if ([view respondsToSelector: @selector (setAlphaValue:)])
-            {
-                // PITA dynamic invocation for 10.4 builds..
-                NSInvocation* inv = [NSInvocation invocationWithMethodSignature: [view methodSignatureForSelector: @selector (setAlphaValue:)]];
-                [inv setSelector: @selector (setAlphaValue:)];
-                [inv setTarget: view];
-                CGFloat cgNewAlpha = (CGFloat) newAlpha;
-                [inv setArgument: &cgNewAlpha atIndex: 2];
-                [inv invoke];
-            }
-           #endif
-        }
+        else
+            [window setAlphaValue: (CGFloat) newAlpha];
     }
 
     void setMinimised (bool shouldBeMinimised) override
@@ -781,16 +764,6 @@ public:
         updateModifiers (ev);
         handleModifierKeysChange();
     }
-
-   #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-    bool redirectPerformKeyEquivalent (NSEvent* ev)
-    {
-        if ([ev type] == NSKeyDown)   return redirectKeyDown (ev);
-        if ([ev type] == NSKeyUp)     return redirectKeyUp (ev);
-
-        return false;
-    }
-   #endif
 
     void drawRect (NSRect r)
     {
@@ -1475,10 +1448,6 @@ struct JuceNSViewClass   : public ObjCClass <NSView>
         addMethod (@selector (resignFirstResponder),          resignFirstResponder,       "c@:");
         addMethod (@selector (acceptsFirstResponder),         acceptsFirstResponder,      "c@:");
 
-       #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-        addMethod (@selector (performKeyEquivalent:),         performKeyEquivalent,       "c@:@");
-       #endif
-
         addMethod (@selector (draggingEntered:),              draggingEntered,            @encode (NSDragOperation), "@:@");
         addMethod (@selector (draggingUpdated:),              draggingUpdated,            @encode (NSDragOperation), "@:@");
         addMethod (@selector (draggingEnded:),                draggingEnded,              "v@:@");
@@ -1705,18 +1674,6 @@ private:
         if (NSViewComponentPeer* const owner = getOwner (self))
             owner->redirectModKeyChange (ev);
     }
-
-    #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-    static BOOL performKeyEquivalent (id self, SEL, NSEvent* ev)
-    {
-        if (NSViewComponentPeer* const owner = getOwner (self))
-            if (owner->redirectPerformKeyEquivalent (ev))
-                return true;
-
-        objc_super s = { self, [NSView class] };
-        return getMsgSendSuperFn() (&s, @selector (performKeyEquivalent:), ev) != nil;
-    }
-    #endif
 
     static BOOL becomeFirstResponder (id self, SEL)
     {

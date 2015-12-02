@@ -1195,3 +1195,8 @@ void AudioDeviceSelectorComponent::buttonClicked (Button* btn)
     if (bluetoothButton == btn)
         BluetoothMidiDevicePairingDialogue::open();
 }
+
+ListBox* AudioDeviceSelectorComponent::getMidiInputSelectorListBox() const noexcept
+{
+    return midiInputsList;
+}

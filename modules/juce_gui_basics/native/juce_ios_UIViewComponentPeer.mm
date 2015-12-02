@@ -759,6 +759,16 @@ void UIViewComponentPeer::setIcon (const Image& /*newIcon*/)
 }
 
 //==============================================================================
+static float getMaximumTouchForce (UITouch* touch) noexcept
+{
+   #if defined (__IPHONE_9_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
+    if ([touch respondsToSelector: @selector (maximumPossibleForce)])
+        return (float) touch.maximumPossibleForce;
+   #endif
+
+    return 0.0f;
+}
+
 void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, const bool isUp, bool isCancel)
 {
     NSArray* touches = [[event touchesForView: view] allObjects];
@@ -766,12 +776,9 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
     for (unsigned int i = 0; i < [touches count]; ++i)
     {
         UITouch* touch = [touches objectAtIndex: i];
+        const float maximumForce = getMaximumTouchForce (touch);
 
-       #if defined (__IPHONE_9_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
-        if ([touch phase] == UITouchPhaseStationary && touch.maximumPossibleForce <= 0)
-       #else
-        if ([touch phase] == UITouchPhaseStationary)
-       #endif
+        if ([touch phase] == UITouchPhaseStationary && maximumForce <= 0)
             continue;
 
         CGPoint p = [touch locationInView: view];
@@ -816,13 +823,9 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             modsToSend = currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
-        float pressure = MouseInputSource::invalidPressure;
-
-       #if defined (__IPHONE_9_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
-        if (touch.maximumPossibleForce > 0)
-            // NB: other devices return 0 or 1.0 if pressure is unknown, so we'll clip our value to a believable range:
-            pressure = jlimit (0.0001f, 0.9999f, (float) (touch.force / touch.maximumPossibleForce));
-       #endif
+        // NB: some devices return 0 or 1.0 if pressure is unknown, so we'll clip our value to a believable range:
+        float pressure = maximumForce > 0 ? jlimit (0.0001f, 0.9999f, (float) (touch.force / maximumForce))
+                                          : MouseInputSource::invalidPressure;
 
         handleMouseEvent (touchIndex, pos, modsToSend, pressure, time);
 

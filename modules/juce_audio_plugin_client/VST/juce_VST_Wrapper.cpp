@@ -25,8 +25,8 @@
 // Your project must contain an AppConfig.h file with your project-specific settings in it,
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
-
 #include "../utility/juce_CheckSettingMacros.h"
+#include "../../juce_core/native/juce_mac_ClangBugWorkaround.h"
 
 #if JucePlugin_Build_VST
 
@@ -573,16 +573,6 @@ public:
                 resume();
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
-
-			// Bugfix: The following commented out code was probably written to handle hosts in which the previous check doesn't work.
-			// Unfortunately in Samplitude audio rendering threads can run in normal priority, resulting in reporting non-realtime mode incorrectly.
-			/*
-           #if JUCE_WINDOWS
-            if (GetThreadPriority (GetCurrentThread()) <= THREAD_PRIORITY_NORMAL
-                  && GetThreadPriority (GetCurrentThread()) >= THREAD_PRIORITY_LOWEST)
-                filter->setNonRealtime (true);
-           #endif
-		    */
         }
 
        #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput

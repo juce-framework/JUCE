@@ -198,7 +198,7 @@ public:
     void fillPath (const Path& p, const AffineTransform& transform)
     {
         currentState->createBrush();
-        ComSmartPtr <ID2D1Geometry> geometry (pathToPathGeometry (p, transform.followedBy (currentState->transform)));
+        ComSmartPtr<ID2D1Geometry> geometry (pathToPathGeometry (p, transform.followedBy (currentState->transform)));
 
         if (renderingTarget != nullptr)
             renderingTarget->FillGeometry (geometry, currentState->currentBrush);
@@ -220,7 +220,7 @@ public:
         bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 
         {
-            ComSmartPtr <ID2D1Bitmap> tempBitmap;
+            ComSmartPtr<ID2D1Bitmap> tempBitmap;
             renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, tempBitmap.resetAndGetPointerAddress());
             if (tempBitmap != nullptr)
                 renderingTarget->DrawBitmap (tempBitmap);
@@ -286,7 +286,7 @@ public:
     {
         renderingTarget->SetTransform (transformToMatrix (currentState->transform));
 
-        DirectWriteTypeLayout::drawToD2DContext (text, area, renderingTarget, factories->directWriteFactory,
+        DirectWriteTypeLayout::drawToD2DContext (text, area, *renderingTarget, factories->directWriteFactory,
                                                  factories->d2dFactory, factories->systemFonts);
 
         renderingTarget->SetTransform (D2D1::IdentityMatrix());
@@ -654,38 +654,38 @@ public:
         Font font;
         float fontHeightToEmSizeFactor;
         IDWriteFontFace* currentFontFace;
-        ComSmartPtr <IDWriteFontFace> localFontFace;
+        ComSmartPtr<IDWriteFontFace> localFontFace;
 
         FillType fillType;
 
         Image image;
-        ComSmartPtr <ID2D1Bitmap> bitmap; // xxx needs a better name - what is this for??
+        ComSmartPtr<ID2D1Bitmap> bitmap; // xxx needs a better name - what is this for??
 
         Rectangle<int> clipRect;
         bool clipsRect, shouldClipRect;
 
-        ComSmartPtr <ID2D1Geometry> complexClipGeometry;
+        ComSmartPtr<ID2D1Geometry> complexClipGeometry;
         D2D1_LAYER_PARAMETERS complexClipLayerParams;
-        ComSmartPtr <ID2D1Layer> complexClipLayer;
+        ComSmartPtr<ID2D1Layer> complexClipLayer;
         bool clipsComplex, shouldClipComplex;
 
-        ComSmartPtr <ID2D1Geometry> rectListGeometry;
+        ComSmartPtr<ID2D1Geometry> rectListGeometry;
         D2D1_LAYER_PARAMETERS rectListLayerParams;
-        ComSmartPtr <ID2D1Layer> rectListLayer;
+        ComSmartPtr<ID2D1Layer> rectListLayer;
         bool clipsRectList, shouldClipRectList;
 
         Image maskImage;
         D2D1_LAYER_PARAMETERS imageMaskLayerParams;
-        ComSmartPtr <ID2D1Layer> bitmapMaskLayer;
-        ComSmartPtr <ID2D1Bitmap> maskBitmap;
-        ComSmartPtr <ID2D1BitmapBrush> bitmapMaskBrush;
+        ComSmartPtr<ID2D1Layer> bitmapMaskLayer;
+        ComSmartPtr<ID2D1Bitmap> maskBitmap;
+        ComSmartPtr<ID2D1BitmapBrush> bitmapMaskBrush;
         bool clipsBitmap, shouldClipBitmap;
 
         ID2D1Brush* currentBrush;
-        ComSmartPtr <ID2D1BitmapBrush> bitmapBrush;
-        ComSmartPtr <ID2D1LinearGradientBrush> linearGradient;
-        ComSmartPtr <ID2D1RadialGradientBrush> radialGradient;
-        ComSmartPtr <ID2D1GradientStopCollection> gradientStops;
+        ComSmartPtr<ID2D1BitmapBrush> bitmapBrush;
+        ComSmartPtr<ID2D1LinearGradientBrush> linearGradient;
+        ComSmartPtr<ID2D1RadialGradientBrush> radialGradient;
+        ComSmartPtr<ID2D1GradientStopCollection> gradientStops;
 
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
@@ -695,8 +695,8 @@ public:
 private:
     SharedResourcePointer<Direct2DFactories> factories;
     HWND hwnd;
-    ComSmartPtr <ID2D1HwndRenderTarget> renderingTarget;
-    ComSmartPtr <ID2D1SolidColorBrush> colourBrush;
+    ComSmartPtr<ID2D1HwndRenderTarget> renderingTarget;
+    ComSmartPtr<ID2D1SolidColorBrush> colourBrush;
     Rectangle<int> bounds;
 
     SavedState* currentState;
@@ -734,7 +734,7 @@ private:
         ID2D1PathGeometry* p = nullptr;
         factories->d2dFactory->CreatePathGeometry (&p);
 
-        ComSmartPtr <ID2D1GeometrySink> sink;
+        ComSmartPtr<ID2D1GeometrySink> sink;
         HRESULT hr = p->Open (sink.resetAndGetPointerAddress()); // xxx handle error
         sink->SetFillMode (D2D1_FILL_MODE_WINDING);
 
@@ -812,7 +812,7 @@ private:
         ID2D1PathGeometry* p = nullptr;
         factories->d2dFactory->CreatePathGeometry (&p);
 
-        ComSmartPtr <ID2D1GeometrySink> sink;
+        ComSmartPtr<ID2D1GeometrySink> sink;
         HRESULT hr = p->Open (sink.resetAndGetPointerAddress());
         sink->SetFillMode (D2D1_FILL_MODE_WINDING); // xxx need to check Path::isUsingNonZeroWinding()
 

@@ -888,7 +888,7 @@ void Thread::killThread()
 
 void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 {
-   #if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+   #if JUCE_IOS || JUCE_MAC
     JUCE_AUTORELEASEPOOL
     {
         [[NSThread currentThread] setName: juceStringToNS (name)];

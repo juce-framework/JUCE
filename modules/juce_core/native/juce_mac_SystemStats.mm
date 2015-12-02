@@ -84,11 +84,7 @@ void CPUInformation::initialise() noexcept
     hasAVX   = (c & (1u << 28)) != 0;
    #endif
 
-   #if JUCE_IOS || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
-   #else
-    numCpus = (int) MPProcessors();
-   #endif
 }
 
 #if JUCE_MAC
