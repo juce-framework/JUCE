@@ -1349,11 +1349,11 @@ public:
         return 0;
     }
 
-    static AudioProcessor::AudioProcessorBus* getAudioBus (AudioProcessor::AudioBusArrangement& busArrangement,
+    static const AudioProcessor::AudioProcessorBus* getAudioBus (AudioProcessor::AudioBusArrangement& busArrangement,
                                                                  Vst::BusDirection dir, Steinberg::int32 index) noexcept
     {
-        Array<AudioProcessor::AudioProcessorBus>& buses = dir == Vst::kInput ? busArrangement.inputBuses
-                                                                             : busArrangement.outputBuses;
+        const Array<AudioProcessor::AudioProcessorBus>& buses = dir == Vst::kInput ? busArrangement.inputBuses
+                                                                                   : busArrangement.outputBuses;
 
         return isPositiveAndBelow (index, static_cast<Steinberg::int32> (buses.size())) ? &buses.getReference (index) : nullptr;
     }
@@ -1368,7 +1368,6 @@ public:
     {
         if (type == Vst::kAudio)
         {
-
             if (const AudioProcessor::AudioProcessorBus* bus = getAudioBus (lastEnabledBusStates, dir, index))
             {
                 info.mediaType = Vst::kAudio;
@@ -1437,7 +1436,7 @@ public:
             AudioChannelSet newChannels;
 
             if (state)
-                if (AudioProcessor::AudioProcessorBus* lastBusState = getAudioBus (lastEnabledBusStates, dir, index))
+                if (const AudioProcessor::AudioProcessorBus* lastBusState = getAudioBus (lastEnabledBusStates, dir, index))
                     newChannels = lastBusState->channels;
 
             if (pluginInstance->setPreferredBusArrangement (dir == Vst::kInput, index, newChannels))
