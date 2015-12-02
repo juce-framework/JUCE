@@ -134,7 +134,7 @@ public:
           MusicDeviceBase (component, (UInt32) PluginBusUtilities (*juceFilter).getNumEnabledBuses (true),
                                       (UInt32) PluginBusUtilities (*juceFilter).getNumEnabledBuses (false)),
           isBypassed (false),
-          busUtils (*juceFilter)
+          busUtils (*juceFilter, true)
     {
         if (activePlugins.size() + activeUIs.size() == 0)
         {

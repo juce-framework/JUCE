@@ -32,10 +32,11 @@ public:
     typedef Array<AudioProcessor::AudioProcessorBus> AudioBusArray;
 
     //==============================================================================
-    PluginBusUtilities (AudioProcessor& plugin)
+    PluginBusUtilities (AudioProcessor& plugin, bool markDiscreteLayoutsAsSupported = false)
         : juceFilter (plugin),
           dynamicInBuses (false),
-          dynamicOutBuses (false)
+          dynamicOutBuses (false),
+          addDiscreteLayouts (markDiscreteLayoutsAsSupported)
     {
     }
 
@@ -163,7 +164,7 @@ private:
     //==============================================================================
     AudioProcessor& juceFilter;
     Array<SupportedBusLayouts> inputLayouts, outputLayouts;
-    bool dynamicInBuses, dynamicOutBuses;
+    bool dynamicInBuses, dynamicOutBuses, addDiscreteLayouts;
 
     //==============================================================================
     bool busIgnoresLayoutForChannelNum (bool isInput, int busNr, int channelNum)
@@ -193,7 +194,7 @@ private:
         {
             const bool ignoresLayoutForChannel = busIgnoresLayoutForChannelNum (isInput, busNr, i);
 
-            Array<AudioChannelSet> sets = layoutListCompatibleWithChannelCount (i);
+            Array<AudioChannelSet> sets = layoutListCompatibleWithChannelCount (addDiscreteLayouts, i);
             for (int j = 0; j < sets.size(); ++j)
             {
                 const AudioChannelSet& layout = sets.getReference (j);
@@ -267,12 +268,14 @@ private:
         layouts.updateDefaultLayout (set);
     }
 
-    static Array<AudioChannelSet> layoutListCompatibleWithChannelCount (const int channelCount) noexcept
+    static Array<AudioChannelSet> layoutListCompatibleWithChannelCount (bool addDiscrete, const int channelCount) noexcept
     {
         jassert (channelCount > 0);
 
         Array<AudioChannelSet> sets;
-        sets.add (AudioChannelSet::discreteChannels (channelCount));
+
+        if (addDiscrete)
+            sets.add (AudioChannelSet::discreteChannels (channelCount));
 
         switch (channelCount)
         {
