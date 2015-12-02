@@ -140,13 +140,15 @@ public:
 
     void findAllCompatibleLayouts ()
     {
-        clear (getBusCount (true), getBusCount (false));
-        AudioProcessor::AudioBusArrangement originalArr = juceFilter.busArrangement;
+        {
+            ScopedBusRestorer restorer (*this);
 
-        for (int i = 0; i < getBusCount (true);  ++i) findAllCompatibleLayoutsForBus (true,  i);
-        for (int i = 0; i < getBusCount (false); ++i) findAllCompatibleLayoutsForBus (false, i);
+            clear (getBusCount (true), getBusCount (false));
+            AudioProcessor::AudioBusArrangement originalArr = juceFilter.busArrangement;
 
-        restoreBusArrangement (originalArr);
+            for (int i = 0; i < getBusCount (true);  ++i) findAllCompatibleLayoutsForBus (true,  i);
+            for (int i = 0; i < getBusCount (false); ++i) findAllCompatibleLayoutsForBus (false, i);
+        }
 
         // find the defaults
         for (int i = 0; i < getBusCount (true); ++i)
@@ -160,7 +162,34 @@ public:
         dynamicOutBuses = doesPlugInHaveDynamicBuses (false);
     }
 
+    //==============================================================================
+    // Helper class which restores the original arrangement when it leaves scope
+    class ScopedBusRestorer
+    {
+    public:
+        ScopedBusRestorer (PluginBusUtilities& bUtils)
+            : busUtils (bUtils),
+              originalArr (bUtils.juceFilter.busArrangement),
+              shouldRestore (true)
+        {}
+
+        ~ScopedBusRestorer()
+        {
+            if (shouldRestore)
+                busUtils.restoreBusArrangement (originalArr);
+        }
+
+        void release() noexcept      { shouldRestore = false; }
+
+    private:
+        PluginBusUtilities& busUtils;
+        const AudioProcessor::AudioBusArrangement originalArr;
+        bool shouldRestore;
+    };
+
 private:
+    friend class ScopedBusRestorer;
+
     //==============================================================================
     AudioProcessor& juceFilter;
     Array<SupportedBusLayouts> inputLayouts, outputLayouts;

@@ -1440,9 +1440,8 @@ public:
                 if (AudioProcessor::AudioProcessorBus* lastBusState = getAudioBus (lastEnabledBusStates, dir, index))
                     newChannels = lastBusState->channels;
 
-            pluginInstance->setPreferredBusArrangement (dir == Vst::kInput, index, newChannels);
-
-            return kResultTrue;
+            if (pluginInstance->setPreferredBusArrangement (dir == Vst::kInput, index, newChannels))
+                return kResultTrue;
         }
 
         return kResultFalse;
@@ -1469,11 +1468,17 @@ public:
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
                                            Vst::SpeakerArrangement* outputs, Steinberg::int32 numOuts) override
     {
+        PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
+
         for (int i = 0; i < numIns; ++i)
-            pluginInstance->setPreferredBusArrangement (true, i, getChannelSetForSpeakerArrangement (inputs[i]));
+            if (! pluginInstance->setPreferredBusArrangement (true, i, getChannelSetForSpeakerArrangement (inputs[i])))
+                return kInvalidArgument;
 
         for (int i = 0; i < numOuts; ++i)
-            pluginInstance->setPreferredBusArrangement (false, i, getChannelSetForSpeakerArrangement (outputs[i]));
+            if (! pluginInstance->setPreferredBusArrangement (false, i, getChannelSetForSpeakerArrangement (outputs[i])))
+                return kInvalidArgument;
+
+        restorer.release();
 
         preparePlugin (getPluginInstance().getSampleRate(),
                        getPluginInstance().getBlockSize());

@@ -185,19 +185,17 @@ public:
     ComponentResult Initialize() override
     {
         ComponentResult err;
-
-        const AudioProcessor::AudioBusArrangement originalArr = juceFilter->busArrangement;
+        PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
 
         if ((err = syncProcessorWithAudioUnit()) != noErr)
-        {
-            busUtils.restoreBusArrangement(originalArr);
             return err;
-        }
 
         if ((err = MusicDeviceBase::Initialize()) != noErr)
             return err;
 
         prepareToPlay();
+        restorer.release();
+
         return noErr;
     }
 
@@ -696,10 +694,9 @@ public:
                 return kAudioUnitErr_InvalidPropertyValue;
 
             // check if the new layout could be potentially set
-            const AudioProcessor::AudioBusArrangement originalArr = juceFilter->busArrangement;
+            PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
 
             bool success = juceFilter->setPreferredBusArrangement (isInput, busNr, newChannelSet);
-            busUtils.restoreBusArrangement (originalArr);
 
             if (!success)
                 return kAudioUnitErr_FormatNotSupported;
@@ -937,13 +934,10 @@ public:
             return false;
 
         const int newNumChannels = static_cast<int> (format.NumberChannels());
-        const AudioProcessor::AudioBusArrangement originalArr = juceFilter->busArrangement;
+        PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
 
-
-        bool success = juceFilter->setPreferredBusArrangement (isInput, busNr, AudioChannelSet::discreteChannels (newNumChannels));
-        busUtils.restoreBusArrangement (originalArr);
-
-        if (success && MusicDeviceBase::ValidFormat (scope, element, format))
+        if (juceFilter->setPreferredBusArrangement (isInput, busNr, AudioChannelSet::discreteChannels (newNumChannels))
+         && MusicDeviceBase::ValidFormat (scope, element, format))
             return true;
 
         return false;
@@ -1686,7 +1680,7 @@ private:
         channelInfo.clear();
 
         const AudioProcessor::AudioBusArrangement& arr = juceFilter->busArrangement;
-        AudioProcessor::AudioBusArrangement originalArr = arr;
+        PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
 
         const bool hasMainInputBus  = (busUtils.getNumEnabledBuses (true)  > 0);
         const bool hasMainOutputBus = (busUtils.getNumEnabledBuses (false) > 0);
@@ -1820,8 +1814,6 @@ private:
                     channelInfo.add (info);
             }
         }
-
-        busUtils.restoreBusArrangement (originalArr);
     }
 
     //==============================================================================
