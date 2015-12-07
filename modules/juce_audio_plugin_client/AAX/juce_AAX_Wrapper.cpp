@@ -98,6 +98,8 @@
  #pragma comment(lib, JucePlugin_AAXLibs_path JUCE_AAX_LIB_PATH JUCE_AAX_LIB JUCE_AAX_LIB_SUFFIX ".lib")
 #endif
 
+#undef check
+
 using juce::Component;
 
 const int32_t juceChunkType = 'juce';

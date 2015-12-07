@@ -114,7 +114,6 @@
 #endif
 
 // undef symbols that are sometimes set by misguided 3rd-party headers..
-#undef check
 #undef TYPE_BOOL
 #undef max
 #undef min

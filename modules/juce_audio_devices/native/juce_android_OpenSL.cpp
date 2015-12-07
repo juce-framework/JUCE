@@ -22,6 +22,8 @@
   ==============================================================================
 */
 
+#undef check
+
 const char* const openSLTypeName = "Android OpenSL";
 
 bool isOpenSLAvailable()
