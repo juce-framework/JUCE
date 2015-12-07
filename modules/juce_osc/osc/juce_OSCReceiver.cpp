@@ -114,7 +114,7 @@ namespace
             if (input.getNumBytesRemaining() < 4)
                 throw OSCFormatError ("OSC input stream exhausted while reading blob");
 
-            const int64 blobDataSize = input.readIntBigEndian();
+            const size_t blobDataSize = input.readIntBigEndian();
 
             if (input.getNumBytesRemaining() < (blobDataSize + 3) % 4)
                 throw OSCFormatError ("OSC input stream exhausted before reaching end of blob");
