@@ -258,27 +258,27 @@ private:
   template <typename Type>
   struct WindowsInterlockedHelpersBase<Type, 4>
   {
-      static inline Type exchange(volatile Type* value, Type other) noexcept
+      static inline Type exchange (volatile Type* value, Type other) noexcept
       {
           return castFrom (juce_InterlockedExchange (reinterpret_cast<volatile long*> (value), castTo (other)));
       }
 
-      static inline Type add(volatile Type* value, Type other) noexcept
+      static inline Type add (volatile Type* value, Type other) noexcept
       {
           return castFrom (juce_InterlockedExchangeAdd (reinterpret_cast<volatile long*> (value), castTo (other)) + castTo (other));
       }
 
-      static inline Type inc(volatile Type* value) noexcept
+      static inline Type inc (volatile Type* value) noexcept
       {
           return castFrom (juce_InterlockedIncrement (reinterpret_cast<volatile long*> (value)));
       }
 
-      static inline Type dec(volatile Type* value) noexcept
+      static inline Type dec (volatile Type* value) noexcept
       {
           return castFrom (juce_InterlockedDecrement (reinterpret_cast<volatile long*> (value)));
       }
 
-      static inline Type cmp(volatile Type* value, Type other, Type comparand) noexcept
+      static inline Type cmp (volatile Type* value, Type other, Type comparand) noexcept
       {
           return castFrom (juce_InterlockedCompareExchange (reinterpret_cast<volatile long*> (value), castTo (other), castTo (comparand)));
       }
@@ -290,27 +290,27 @@ private:
   template <typename Type>
   struct WindowsInterlockedHelpersBase<Type, 8>
   {
-      static inline Type exchange(volatile Type* value, Type other) noexcept
+      static inline Type exchange (volatile Type* value, Type other) noexcept
       {
           return castFrom (juce_InterlockedExchange64 (reinterpret_cast<volatile __int64*> (value), castTo (other)));
       }
 
-      static inline Type add(volatile Type* value, Type other) noexcept
+      static inline Type add (volatile Type* value, Type other) noexcept
       {
           return castFrom (juce_InterlockedExchangeAdd64 (reinterpret_cast<volatile __int64*> (value), castTo (other)) + castTo (other));
       }
 
-      static inline Type inc(volatile Type* value) noexcept
+      static inline Type inc (volatile Type* value) noexcept
       {
           return castFrom (juce_InterlockedIncrement64 (reinterpret_cast<volatile __int64*> (value)));
       }
 
-      static inline Type dec(volatile Type* value) noexcept
+      static inline Type dec (volatile Type* value) noexcept
       {
           return castFrom (juce_InterlockedDecrement64 (reinterpret_cast<volatile __int64*> (value)));
       }
 
-      static inline Type cmp(volatile Type* value, Type other, Type comparand) noexcept
+      static inline Type cmp (volatile Type* value, Type other, Type comparand) noexcept
       {
           return castFrom (juce_InterlockedCompareExchange64 (reinterpret_cast<volatile __int64*> (value), castTo (other), castTo (comparand)));
       }
