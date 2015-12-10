@@ -215,7 +215,7 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
     @param valueToConstrain     the value to try to return
     @returns    the closest value to valueToConstrain which lies between lowerLimit
                 and upperLimit (inclusive)
-    @see jlimit0To, jmin, jmax
+    @see jmin, jmax, jmap
 */
 template <typename Type>
 Type jlimit (const Type lowerLimit,
