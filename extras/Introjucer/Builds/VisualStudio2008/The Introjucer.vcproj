@@ -967,6 +967,7 @@
           <File RelativePath="..\..\..\..\modules\juce_core\containers\juce_ElementComparator.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\containers\juce_HashMap.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\containers\juce_LinkedListPointer.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\containers\juce_ListenerList.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -1622,6 +1623,7 @@
               <Tool Name="VCCLCompilerTool"/>
             </FileConfiguration>
           </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Files.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Network.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Strings.mm"/>
@@ -1984,7 +1986,6 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_events\broadcasters\juce_ChangeBroadcaster.h"/>
           <File RelativePath="..\..\..\..\modules\juce_events\broadcasters\juce_ChangeListener.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_events\broadcasters\juce_ListenerList.h"/>
         </Filter>
         <Filter Name="interprocess">
           <File RelativePath="..\..\..\..\modules\juce_events\interprocess\juce_ConnectedChildProcess.cpp">
