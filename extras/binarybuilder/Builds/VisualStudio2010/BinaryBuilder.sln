@@ -1,6 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{A2F28A47-6FDF-69FA-BF0B-93EA87C6A63D}") = "BinaryBuilder", "BinaryBuilder.vcproj", "{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{A2F28A47-6FDF-69FA-BF0B-93EA87C6A63D}") = "BinaryBuilder", "BinaryBuilder.vcxproj", "{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

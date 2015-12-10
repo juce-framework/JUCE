@@ -1,6 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{B40FC5AD-41E3-CB0C-5754-CA2E7CC2920B}") = "juce_dll", "juce_dll.vcproj", "{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{B40FC5AD-41E3-CB0C-5754-CA2E7CC2920B}") = "juce_dll", "juce_dll.vcxproj", "{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
