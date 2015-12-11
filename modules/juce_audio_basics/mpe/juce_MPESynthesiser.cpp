@@ -189,6 +189,10 @@ MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceF
     // - Re-use the oldest notes first
     // - Protect the lowest & topmost notes, even if sustained, but not if they've been released.
 
+
+    // apparently you are trying to render audio without having any voices...
+    jassert (voices.size() > 0);
+
     // These are the voices we want to protect (ie: only steal if unavoidable)
     MPESynthesiserVoice* low = nullptr; // Lowest sounding note, might be sustained, but NOT in release phase
     MPESynthesiserVoice* top = nullptr; // Highest sounding note, might be sustained, but NOT in release phase
@@ -279,6 +283,7 @@ MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceF
 void MPESynthesiser::addVoice (MPESynthesiserVoice* const newVoice)
 {
     const ScopedLock sl (voicesLock);
+    newVoice->setCurrentSampleRate (getSampleRate());
     voices.add (newVoice);
 }
 
@@ -309,7 +314,7 @@ void MPESynthesiser::reduceNumVoices (const int newNumVoices)
 
     while (voices.size() > newNumVoices)
     {
-        if (MPESynthesiserVoice* voice = findVoiceToSteal())
+        if (MPESynthesiserVoice* voice = findFreeVoice (MPENote(), true))
             voices.removeObject (voice);
         else
             voices.remove (0); // if there's no voice to steal, kill the oldest voice

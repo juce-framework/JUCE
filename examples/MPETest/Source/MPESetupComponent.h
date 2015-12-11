@@ -65,7 +65,6 @@ public:
         initialiseComboBoxWithConsecutiveIntegers (noteChannels, noteChannelsLabel, 1, 15, defaultNoteChannels);
         initialiseComboBoxWithConsecutiveIntegers (masterPitchbendRange, masterPitchbendRangeLabel, 0, 96, defaultMasterPitchbendRange);
         initialiseComboBoxWithConsecutiveIntegers (notePitchbendRange, notePitchbendRangeLabel, 0, 96, defaultNotePitchbendRange);
-
         notePitchbendRange.addListener (this);
 
         initialiseButton (addZoneButton);
@@ -73,7 +72,8 @@ public:
         initialiseButton (omniModeEnabledToggle);
         initialiseButton (voiceStealingEnabledToggle);
 
-        initialiseComboBoxWithConsecutiveIntegers (numberOfVoices, numberOfVoicesLabel, 0, 21, 15);
+        initialiseComboBoxWithConsecutiveIntegers (numberOfVoices, numberOfVoicesLabel, 1, 20, 15);
+        numberOfVoices.addListener (this);
     }
 
     //==========================================================================

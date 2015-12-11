@@ -259,10 +259,12 @@ protected:
     /** Searches through the voices to find one that's not currently playing, and
         which can play the given MPE note.
 
-        Returns nullptr if all voices are busy and stealing isn't enabled.
+        If all voices are active and stealIfNoneAvailable is false, this returns
+        a nullptr. If all voices are active and stealIfNoneAvailable is true,
+        this will call findVoiceToSteal() to find a voice.
 
-        To implement a custom note-stealing algorithm, you can either override this
-        method, or (preferably) override findVoiceToSteal().
+        If you need to find a free voice for something else than playing a note
+        (e.g. for deleting it), you can pass an invalid (default-constructed) MPENote.
     */
     virtual MPESynthesiserVoice* findFreeVoice (MPENote noteToFindVoiceFor,
                                                 bool stealIfNoneAvailable) const;
@@ -276,7 +278,8 @@ protected:
 
         If you pass a valid MPENote for the optional argument, then the note number
         of that note will be taken into account for finding the ideal voice to steal.
-        Otherwise, this part of the algorithm will be ignored.
+        If you pass an invalid (default-constructed) MPENote instead, this part of
+        the algorithm will be ignored.
     */
     virtual MPESynthesiserVoice* findVoiceToSteal (MPENote noteToStealVoiceFor = MPENote()) const;
 
