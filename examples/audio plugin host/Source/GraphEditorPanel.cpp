@@ -508,9 +508,8 @@ public:
         setName (f->getProcessor()->getName());
 
         {
-            double x, y;
-            graph.getNodePosition (filterID, x, y);
-            setCentreRelative ((float) x, (float) y);
+            Point<double> p = graph.getNodePosition (filterID);
+            setCentreRelative ((float) p.x, (float) p.y);
         }
 
         if (numIns != numInputs || numOuts != numOutputs)

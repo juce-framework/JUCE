@@ -479,7 +479,7 @@ public:
     Handle resHandle;
     CFBundleRef bundleRef;
     FSSpec parentDirFSSpec;
-    short resFileId;
+    ResFileRefNum resFileId;
 
     bool open()
     {

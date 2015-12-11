@@ -56,8 +56,8 @@ public:
 
     void removeIllegalConnections();
 
-    void setNodePosition (const int nodeId, double x, double y);
-    void getNodePosition (const int nodeId, double& x, double& y) const;
+    void setNodePosition (uint32 nodeId, double x, double y);
+    Point<double> getNodePosition (uint32 nodeId) const;
 
     //==============================================================================
     int getNumConnections() const noexcept;

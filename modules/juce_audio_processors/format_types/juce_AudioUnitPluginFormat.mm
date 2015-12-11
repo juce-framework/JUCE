@@ -209,7 +209,7 @@ namespace AudioUnitFormatHelpers
                 if (manuString != 0 && CFGetTypeID (manuString) == CFStringGetTypeID())
                     manufacturer = String::fromCFString ((CFStringRef) manuString);
 
-                const short resFileId = CFBundleOpenBundleResourceMap (bundleRef);
+                const ResFileRefNum resFileId = CFBundleOpenBundleResourceMap (bundleRef);
                 UseResFile (resFileId);
 
                 const OSType thngType = stringToOSType ("thng");
@@ -540,7 +540,7 @@ public:
                     for (AudioUnitElement j = 0; j < numOutputBusChannels; ++j)
                     {
                         abl->mBuffers[j].mNumberChannels = 1;
-                        abl->mBuffers[j].mDataByteSize = sizeof (float) * (size_t) numSamples;
+                        abl->mBuffers[j].mDataByteSize = (UInt32) (sizeof (float) * (size_t) numSamples);
                         abl->mBuffers[j].mData = buffer.getWritePointer ((int) (i * numOutputBusChannels + j));
                     }
                 }
@@ -855,7 +855,7 @@ public:
                 AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
                                       0, ids, &paramListSize);
 
-                for (int i = 0; i < numParams; ++i)
+                for (size_t i = 0; i < numParams; ++i)
                 {
                     AudioUnitParameterInfo info;
                     UInt32 sz = sizeof (info);
