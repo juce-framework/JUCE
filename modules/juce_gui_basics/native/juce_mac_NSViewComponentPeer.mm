@@ -661,6 +661,10 @@ public:
         (void) ev;
     }
 
+    void redirectCopy  (NSObject*) { handleKeyPress (KeyPress ('c', ModifierKeys (ModifierKeys::commandModifier), 'c')); }
+    void redirectPaste (NSObject*) { handleKeyPress (KeyPress ('v', ModifierKeys (ModifierKeys::commandModifier), 'v')); }
+    void redirectCut   (NSObject*) { handleKeyPress (KeyPress ('x', ModifierKeys (ModifierKeys::commandModifier), 'x')); }
+
     void sendMouseEvent (NSEvent* ev)
     {
         updateModifiers (ev);
@@ -1458,6 +1462,10 @@ struct JuceNSViewClass   : public ObjCClass <NSView>
         addMethod (@selector (performDragOperation:),         performDragOperation,       "c@:@");
         addMethod (@selector (concludeDragOperation:),        concludeDragOperation,      "v@:@");
 
+        addMethod (@selector (paste:),                        paste,                      "v@:@");
+        addMethod (@selector (copy:),                         copy,                       "v@:@");
+        addMethod (@selector (cut:),                          cut,                        "v@:@");
+
         addProtocol (@protocol (NSTextInput));
 
         registerClass();
@@ -1503,6 +1511,9 @@ private:
     static void mouseExited    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseExit  (ev); }
     static void scrollWheel    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseWheel (ev); }
     static void magnify        (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMagnify    (ev); }
+    static void copy           (id self, SEL, NSObject* s)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectCopy       (s);  }
+    static void paste          (id self, SEL, NSObject* s)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectPaste      (s);  }
+    static void cut            (id self, SEL, NSObject* s)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectCut        (s);  }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)        { return YES; }
 
