@@ -1122,24 +1122,24 @@ private:
     OSStatus getMusicalTimeLocation (UInt32* outDeltaSampleOffsetToNextBeat, Float32* outTimeSig_Numerator,
                                      UInt32* outTimeSig_Denominator, Float64* outCurrentMeasureDownBeat) const
     {
-        AudioPlayHead* const ph = getPlayHead();
-        AudioPlayHead::CurrentPositionInfo result;
+        if (AudioPlayHead* const ph = getPlayHead())
+        {
+            AudioPlayHead::CurrentPositionInfo result;
 
-        if (ph != nullptr && ph->getCurrentPosition (result))
-        {
-            setIfNotNull (outTimeSig_Numerator,   (UInt32) result.timeSigNumerator);
-            setIfNotNull (outTimeSig_Denominator, (UInt32) result.timeSigDenominator);
-            setIfNotNull (outDeltaSampleOffsetToNextBeat, (UInt32) 0); //xxx
-            setIfNotNull (outCurrentMeasureDownBeat, result.ppqPositionOfLastBarStart); //xxx wrong
-        }
-        else
-        {
-            setIfNotNull (outDeltaSampleOffsetToNextBeat, (UInt32) 0);
-            setIfNotNull (outTimeSig_Numerator, (UInt32) 4);
-            setIfNotNull (outTimeSig_Denominator, (UInt32) 4);
-            setIfNotNull (outCurrentMeasureDownBeat, 0);
+            if (ph->getCurrentPosition (result))
+            {
+                setIfNotNull (outDeltaSampleOffsetToNextBeat, (UInt32) 0); //xxx
+                setIfNotNull (outTimeSig_Numerator,   (UInt32) result.timeSigNumerator);
+                setIfNotNull (outTimeSig_Denominator, (UInt32) result.timeSigDenominator);
+                setIfNotNull (outCurrentMeasureDownBeat, result.ppqPositionOfLastBarStart); //xxx wrong
+                return noErr;
+            }
         }
 
+        setIfNotNull (outDeltaSampleOffsetToNextBeat, (UInt32) 0);
+        setIfNotNull (outTimeSig_Numerator, (UInt32) 4);
+        setIfNotNull (outTimeSig_Denominator, (UInt32) 4);
+        setIfNotNull (outCurrentMeasureDownBeat, 0);
         return noErr;
     }
 
@@ -1147,34 +1147,34 @@ private:
                                 Float64* outCurrentSampleInTimeLine, Boolean* outIsCycling,
                                 Float64* outCycleStartBeat, Float64* outCycleEndBeat)
     {
-        AudioPlayHead* const ph = getPlayHead();
-        AudioPlayHead::CurrentPositionInfo result;
-
-        if (ph != nullptr && ph->getCurrentPosition (result))
+        if (AudioPlayHead* const ph = getPlayHead())
         {
-            setIfNotNull (outIsPlaying, result.isPlaying);
+            AudioPlayHead::CurrentPositionInfo result;
 
-            if (outTransportStateChanged != nullptr)
+            if (ph->getCurrentPosition (result))
             {
-                *outTransportStateChanged = result.isPlaying != wasPlaying;
-                wasPlaying = result.isPlaying;
+                setIfNotNull (outIsPlaying, result.isPlaying);
+
+                if (outTransportStateChanged != nullptr)
+                {
+                    *outTransportStateChanged = result.isPlaying != wasPlaying;
+                    wasPlaying = result.isPlaying;
+                }
+
+                setIfNotNull (outCurrentSampleInTimeLine, result.timeInSamples);
+                setIfNotNull (outIsCycling, result.isLooping);
+                setIfNotNull (outCycleStartBeat, result.ppqLoopStart);
+                setIfNotNull (outCycleEndBeat, result.ppqLoopEnd);
+                return noErr;
             }
-
-            setIfNotNull (outCurrentSampleInTimeLine, result.timeInSamples);
-            setIfNotNull (outIsCycling, false);
-            setIfNotNull (outCycleStartBeat, 0);
-            setIfNotNull (outCycleEndBeat, 0);
-        }
-        else
-        {
-            setIfNotNull (outIsPlaying, false);
-            setIfNotNull (outTransportStateChanged, false);
-            setIfNotNull (outCurrentSampleInTimeLine, 0);
-            setIfNotNull (outIsCycling, false);
-            setIfNotNull (outCycleStartBeat, 0);
-            setIfNotNull (outCycleEndBeat, 0);
         }
 
+        setIfNotNull (outIsPlaying, false);
+        setIfNotNull (outTransportStateChanged, false);
+        setIfNotNull (outCurrentSampleInTimeLine, 0);
+        setIfNotNull (outIsCycling, false);
+        setIfNotNull (outCycleStartBeat, 0.0);
+        setIfNotNull (outCycleEndBeat, 0.0);
         return noErr;
     }
 
@@ -1188,7 +1188,7 @@ private:
     }
 
     static OSStatus renderMidiOutputCallback (void* hostRef, const AudioTimeStamp*, UInt32 /*midiOutNum*/,
-                                              const struct MIDIPacketList* pktlist)
+                                              const MIDIPacketList* pktlist)
     {
         return static_cast<AudioUnitPluginInstance*> (hostRef)->renderMidiOutput (pktlist);
     }
