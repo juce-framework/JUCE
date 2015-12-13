@@ -107,8 +107,8 @@ public:
     const Colour textColour;
     const bool isActive, isSeparator, isTicked, usesColour;
     ScopedPointer<Drawable> iconDrawable;
-    ReferenceCountedObjectPtr <CustomComponent> customComp;
-    ScopedPointer <PopupMenu> subMenu;
+    ReferenceCountedObjectPtr<CustomComponent> customComp;
+    ScopedPointer<PopupMenu> subMenu;
     ApplicationCommandManager* const commandManager;
 
 private:

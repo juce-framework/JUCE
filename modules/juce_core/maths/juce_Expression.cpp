@@ -397,7 +397,7 @@ struct Expression::Helpers
             JUCE_DECLARE_NON_COPYABLE (SymbolRenamingVisitor)
         };
 
-        SymbolTerm* getSymbol() const  { return static_cast <SymbolTerm*> (left.get()); }
+        SymbolTerm* getSymbol() const  { return static_cast<SymbolTerm*> (left.get()); }
 
         JUCE_DECLARE_NON_COPYABLE (DotOperator)
     };
@@ -958,13 +958,13 @@ Expression& Expression::operator= (const Expression& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Expression::Expression (Expression&& other) noexcept
-    : term (static_cast <ReferenceCountedObjectPtr<Term>&&> (other.term))
+    : term (static_cast<ReferenceCountedObjectPtr<Term>&&> (other.term))
 {
 }
 
 Expression& Expression::operator= (Expression&& other) noexcept
 {
-    term = static_cast <ReferenceCountedObjectPtr<Term>&&> (other.term);
+    term = static_cast<ReferenceCountedObjectPtr<Term>&&> (other.term);
     return *this;
 }
 #endif

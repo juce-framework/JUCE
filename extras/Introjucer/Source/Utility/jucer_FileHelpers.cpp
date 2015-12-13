@@ -34,7 +34,7 @@ namespace FileHelpers
         int64 t = 0;
 
         for (size_t i = 0; i < numBytes; ++i)
-            t = t * 65599 + static_cast <const uint8*> (data)[i];
+            t = t * 65599 + static_cast<const uint8*> (data)[i];
 
         return t;
     }
@@ -44,7 +44,7 @@ namespace FileHelpers
         int64 t = 0;
 
         const int bufferSize = 4096;
-        HeapBlock <uint8> buffer;
+        HeapBlock<uint8> buffer;
         buffer.malloc (bufferSize);
 
         for (;;)
@@ -63,7 +63,7 @@ namespace FileHelpers
 
     int64 calculateFileHashCode (const File& file)
     {
-        ScopedPointer <FileInputStream> stream (file.createInputStream());
+        ScopedPointer<FileInputStream> stream (file.createInputStream());
         return stream != nullptr ? calculateStreamHashCode (*stream) : 0;
     }
 

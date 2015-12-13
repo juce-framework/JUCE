@@ -44,7 +44,7 @@ public:
 
     ComponentType* getComponent() const
     {
-        ComponentType* const c = dynamic_cast <ComponentType*> (layout.getComponent (componentIndex));
+        ComponentType* const c = dynamic_cast<ComponentType*> (layout.getComponent (componentIndex));
         jassert (c != nullptr);
         return c;
     }
@@ -67,7 +67,7 @@ protected:
             ed->showLayout();
 
         if (layout.getSelectedSet().getNumSelected() == 0)
-            if (ComponentType* const c = dynamic_cast <ComponentType*> (layout.getComponent (componentIndex)))
+            if (ComponentType* const c = dynamic_cast<ComponentType*> (layout.getComponent (componentIndex)))
                 layout.getSelectedSet().selectOnly (getComponent());
     }
 

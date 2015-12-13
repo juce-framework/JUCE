@@ -391,7 +391,7 @@ public:
 
     static Component* getComp (Component* current)
     {
-        return dynamic_cast <TextEditor*> (current) != nullptr
+        return dynamic_cast<TextEditor*> (current) != nullptr
                  ? current->getParentComponent() : current;
     }
 };

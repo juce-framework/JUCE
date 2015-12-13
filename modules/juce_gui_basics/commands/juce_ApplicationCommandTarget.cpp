@@ -78,7 +78,7 @@ bool ApplicationCommandTarget::tryToInvoke (const InvocationInfo& info, const bo
 
 ApplicationCommandTarget* ApplicationCommandTarget::findFirstTargetParentComponent()
 {
-    if (Component* const c = dynamic_cast <Component*> (this))
+    if (Component* const c = dynamic_cast<Component*> (this))
         return c->findParentComponentOfClass<ApplicationCommandTarget>();
 
     return nullptr;

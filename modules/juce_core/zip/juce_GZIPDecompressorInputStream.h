@@ -92,7 +92,7 @@ private:
     bool isEof;
     int activeBufferSize;
     int64 originalSourcePos, currentPos;
-    HeapBlock <uint8> buffer;
+    HeapBlock<uint8> buffer;
 
     class GZIPDecompressHelper;
     friend struct ContainerDeletePolicy<GZIPDecompressHelper>;

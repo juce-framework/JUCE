@@ -421,7 +421,7 @@ public:
 
     JuceCustomUIView* getView() const
     {
-        return dynamic_cast <JuceCustomUIView*> (fOurPlugInView);
+        return dynamic_cast<JuceCustomUIView*> (fOurPlugInView);
     }
 
     void GetViewRect (Rect* size) override
@@ -478,11 +478,11 @@ public:
         if (MIDILogIn() == noErr)
         {
            #if JucePlugin_WantsMidiInput
-            if (CEffectType* const type = dynamic_cast <CEffectType*> (this->GetProcessType()))
+            if (CEffectType* const type = dynamic_cast<CEffectType*> (this->GetProcessType()))
             {
                 char nodeName [64];
                 type->GetProcessTypeName (63, nodeName);
-                p2cstrcpy (nodeName, reinterpret_cast <unsigned char*> (nodeName));
+                p2cstrcpy (nodeName, reinterpret_cast<unsigned char*> (nodeName));
 
                 midiBufferNode = new CEffectMIDIOtherBufferedNode (&mMIDIWorld,
                                                                    8192,

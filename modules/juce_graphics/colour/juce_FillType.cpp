@@ -67,7 +67,7 @@ FillType& FillType::operator= (const FillType& other)
 FillType::FillType (FillType&& other) noexcept
     : colour (other.colour),
       gradient (other.gradient.release()),
-      image (static_cast <Image&&> (other.image)),
+      image (static_cast<Image&&> (other.image)),
       transform (other.transform)
 {
 }
@@ -78,7 +78,7 @@ FillType& FillType::operator= (FillType&& other) noexcept
 
     colour = other.colour;
     gradient = other.gradient.release();
-    image = static_cast <Image&&> (other.image);
+    image = static_cast<Image&&> (other.image);
     transform = other.transform;
     return *this;
 }

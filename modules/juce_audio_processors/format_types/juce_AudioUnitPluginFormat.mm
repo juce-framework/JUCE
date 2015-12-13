@@ -909,7 +909,7 @@ private:
     CriticalSection lock;
     bool wantsMidiMessages, producesMidiMessages, wasPlaying, prepared;
 
-    HeapBlock <AudioBufferList> outputBufferList;
+    HeapBlock<AudioBufferList> outputBufferList;
     AudioTimeStamp timeStamp;
     AudioSampleBuffer* currentBuffer;
     AudioUnitElement numInputBusChannels, numOutputBusChannels, numInputBusses, numOutputBusses;
@@ -1389,7 +1389,7 @@ private:
              && AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                           0, &dataSize, &isWritable) == noErr)
         {
-            HeapBlock <AudioUnitCocoaViewInfo> info;
+            HeapBlock<AudioUnitCocoaViewInfo> info;
             info.calloc (dataSize, 1);
 
             if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,

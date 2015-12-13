@@ -93,7 +93,7 @@ public:
             else
             {
                 for (int i = getNumChildComponents(); --i >= 0;)
-                    ScopedPointer<DraggerOverlayComp> deleter (dynamic_cast <DraggerOverlayComp*> (getChildComponent (i)));
+                    ScopedPointer<DraggerOverlayComp> deleter (dynamic_cast<DraggerOverlayComp*> (getChildComponent (i)));
             }
         }
     }
@@ -183,7 +183,7 @@ void EditingPanelBase::visibilityChanged()
         {
             resized();
 
-            if (JucerDocumentEditor* const cdh = dynamic_cast <JucerDocumentEditor*> (p->getParentComponent()))
+            if (JucerDocumentEditor* const cdh = dynamic_cast<JucerDocumentEditor*> (p->getParentComponent()))
                 cdh->setViewportToLastPos (viewport, *this);
 
             resized();
@@ -192,7 +192,7 @@ void EditingPanelBase::visibilityChanged()
     else
     {
         if (Component* p = getParentComponent())
-            if (JucerDocumentEditor* const cdh = dynamic_cast <JucerDocumentEditor*> (p->getParentComponent()))
+            if (JucerDocumentEditor* const cdh = dynamic_cast<JucerDocumentEditor*> (p->getParentComponent()))
                 cdh->storeLastViewportPos (viewport, *this);
     }
 

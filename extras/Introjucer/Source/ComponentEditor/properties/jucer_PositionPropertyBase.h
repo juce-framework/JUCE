@@ -340,8 +340,8 @@ public:
 
         if (component->findParentComponentOfClass<ComponentLayoutEditor>() != 0)
             parentArea.setSize (component->getParentWidth(), component->getParentHeight());
-        else if (dynamic_cast <PaintRoutineEditor*> (component->getParentComponent()) != 0)
-            parentArea = dynamic_cast <PaintRoutineEditor*> (component->getParentComponent())->getComponentArea();
+        else if (PaintRoutineEditor* pre = dynamic_cast<PaintRoutineEditor*> (component->getParentComponent()))
+            parentArea = pre->getComponentArea();
         else
             jassertfalse;
 

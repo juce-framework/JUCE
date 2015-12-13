@@ -109,7 +109,7 @@ private:
 
     ToolbarItemComponent* getToolbarItemComponent() const noexcept
     {
-        return dynamic_cast <ToolbarItemComponent*> (getParentComponent());
+        return dynamic_cast<ToolbarItemComponent*> (getParentComponent());
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemDragAndDropOverlayComponent)
@@ -141,7 +141,7 @@ ToolbarItemComponent::~ToolbarItemComponent()
 
 Toolbar* ToolbarItemComponent::getToolbar() const
 {
-    return dynamic_cast <Toolbar*> (getParentComponent());
+    return dynamic_cast<Toolbar*> (getParentComponent());
 }
 
 bool ToolbarItemComponent::isToolbarVertical() const

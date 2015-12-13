@@ -48,7 +48,7 @@ public:
     {
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
 
-        Slider* const s = dynamic_cast <Slider*> (comp);
+        Slider* const s = dynamic_cast<Slider*> (comp);
         e->setAttribute ("min", s->getMinimum());
         e->setAttribute ("max", s->getMaximum());
         e->setAttribute ("int", s->getInterval());
@@ -67,7 +67,7 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        Slider* const s = dynamic_cast <Slider*> (comp);
+        Slider* const s = dynamic_cast<Slider*> (comp);
 
         s->setRange (xml.getDoubleAttribute ("min", 0.0),
                      xml.getDoubleAttribute ("max", 10.0),
@@ -94,7 +94,7 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        Slider* const s = dynamic_cast <Slider*> (component);
+        Slider* const s = dynamic_cast<Slider*> (component);
 
         String r;
         r << memberVariableName << "->setRange ("
@@ -145,7 +145,7 @@ public:
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
-        Slider* s = dynamic_cast <Slider*> (component);
+        Slider* s = dynamic_cast<Slider*> (component);
         jassert (s != 0);
 
         props.add (new SliderRangeProperty (s, document, "minimum", 0));
@@ -226,7 +226,7 @@ private:
                                                   Slider::ThreeValueVertical };
 
             for (int i = 0; i < numElementsInArray (types); ++i)
-                if (types [i] == dynamic_cast <Slider*> (component)->getSliderStyle())
+                if (types [i] == dynamic_cast<Slider*> (component)->getSliderStyle())
                     return i;
 
             return -1;
@@ -502,7 +502,7 @@ private:
 
         String getText() const override
         {
-            Slider* s = dynamic_cast <Slider*> (component);
+            Slider* s = dynamic_cast<Slider*> (component);
             jassert (s != nullptr);
 
             switch (rangeParam)
@@ -573,7 +573,7 @@ private:
 
         String getText() const override
         {
-            Slider* s = dynamic_cast <Slider*> (component);
+            Slider* s = dynamic_cast<Slider*> (component);
             jassert (s != 0);
 
             return String (s->getSkewFactor());

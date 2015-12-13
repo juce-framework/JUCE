@@ -44,7 +44,7 @@ public:
 
     RelativePositionedRectangle getPosition()
     {
-        ColouredElement* e = dynamic_cast <ColouredElement*> (owner);
+        ColouredElement* e = dynamic_cast<ColouredElement*> (owner);
 
         if (isStroke)
             return isStart ? e->getStrokeType().fill.gradPos1
@@ -56,7 +56,7 @@ public:
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        ColouredElement* e = dynamic_cast <ColouredElement*> (owner);
+        ColouredElement* e = dynamic_cast<ColouredElement*> (owner);
 
         if (isStroke)
         {
@@ -86,7 +86,7 @@ public:
     {
         PointComponent::updatePosition();
 
-        ColouredElement* e = dynamic_cast <ColouredElement*> (owner);
+        ColouredElement* e = dynamic_cast<ColouredElement*> (owner);
 
         JucerFillType f (isStroke ? e->getStrokeType().fill
                                   : e->getFillType());

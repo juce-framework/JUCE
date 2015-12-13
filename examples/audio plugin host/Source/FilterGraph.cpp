@@ -267,7 +267,7 @@ void FilterGraph::setLastDocumentOpened (const File& file)
 //==============================================================================
 static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcept
 {
-    AudioPluginInstance* plugin = dynamic_cast <AudioPluginInstance*> (node->getProcessor());
+    AudioPluginInstance* plugin = dynamic_cast<AudioPluginInstance*> (node->getProcessor());
 
     if (plugin == nullptr)
     {

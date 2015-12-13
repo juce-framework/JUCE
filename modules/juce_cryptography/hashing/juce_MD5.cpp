@@ -56,12 +56,12 @@ public:
             transform (buffer);
 
             for (i = spaceLeft; i + 64 <= dataSize; i += 64)
-                transform (static_cast <const char*> (data) + i);
+                transform (static_cast<const char*> (data) + i);
 
             bufferPos = 0;
         }
 
-        memcpy (buffer + bufferPos, static_cast <const char*> (data) + i, dataSize - i);
+        memcpy (buffer + bufferPos, static_cast<const char*> (data) + i, dataSize - i);
     }
 
     void transform (const void* bufferToTransform) noexcept

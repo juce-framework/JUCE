@@ -158,7 +158,7 @@ int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
                 maxBytesToRead -= bytesAvailable;
                 bytesRead += bytesAvailable;
                 position += bytesAvailable;
-                destBuffer = static_cast <char*> (destBuffer) + bytesAvailable;
+                destBuffer = static_cast<char*> (destBuffer) + bytesAvailable;
             }
 
             const int64 oldLastReadPos = lastReadPos;

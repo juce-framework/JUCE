@@ -69,7 +69,7 @@ public:
     {
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 
-        //TextButton* const tb = dynamic_cast <TextButton*> (component);
+        //TextButton* const tb = dynamic_cast<TextButton*> (component);
         //TextButton defaultButton (String::empty);
 
         String s;

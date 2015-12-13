@@ -395,7 +395,7 @@ private:
 
         for (ConstConfigIterator config (*this); config.next();)
         {
-            const XcodeBuildConfiguration& xcodeConfig = dynamic_cast <const XcodeBuildConfiguration&> (*config);
+            const XcodeBuildConfiguration& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
             addProjectConfig (config->getName(), getProjectSettings (xcodeConfig));
             addTargetConfig  (config->getName(), getTargetSettings (xcodeConfig));
         }

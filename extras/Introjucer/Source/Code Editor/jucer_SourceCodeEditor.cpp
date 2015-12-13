@@ -159,7 +159,7 @@ SourceCodeEditor::~SourceCodeEditor()
 
     getAppSettings().appearance.settings.removeListener (this);
 
-    if (SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument()))
+    if (SourceCodeDocument* doc = dynamic_cast<SourceCodeDocument*> (getDocument()))
         doc->updateLastState (*editor);
 }
 

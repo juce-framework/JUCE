@@ -79,7 +79,7 @@ NamedValueSet& NamedValueSet::operator= (const NamedValueSet& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 NamedValueSet::NamedValueSet (NamedValueSet&& other) noexcept
-    : values (static_cast <Array<NamedValue>&&> (other.values))
+    : values (static_cast<Array<NamedValue>&&> (other.values))
 {
 }
 

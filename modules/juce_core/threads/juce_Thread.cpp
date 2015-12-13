@@ -57,7 +57,7 @@ struct CurrentThreadHolder   : public ReferenceCountedObject
 {
     CurrentThreadHolder() noexcept {}
 
-    typedef ReferenceCountedObjectPtr <CurrentThreadHolder> Ptr;
+    typedef ReferenceCountedObjectPtr<CurrentThreadHolder> Ptr;
     ThreadLocalValue<Thread*> value;
 
     JUCE_DECLARE_NON_COPYABLE (CurrentThreadHolder)
@@ -110,7 +110,7 @@ void Thread::threadEntryPoint()
 // used to wrap the incoming call from the platform-specific code
 void JUCE_API juce_threadEntryPoint (void* userData)
 {
-    static_cast <Thread*> (userData)->threadEntryPoint();
+    static_cast<Thread*> (userData)->threadEntryPoint();
 }
 
 //==============================================================================

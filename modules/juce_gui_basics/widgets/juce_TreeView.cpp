@@ -416,7 +416,7 @@ public:
 
     ContentComponent* getContentComp() const noexcept
     {
-        return static_cast <ContentComponent*> (getViewedComponent());
+        return static_cast<ContentComponent*> (getViewedComponent());
     }
 
     bool keyPressed (const KeyPress& key) override
@@ -490,7 +490,7 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
 
 void TreeView::deleteRootItem()
 {
-    const ScopedPointer <TreeViewItem> deleter (rootItem);
+    const ScopedPointer<TreeViewItem> deleter (rootItem);
     setRootItem (nullptr);
 }
 

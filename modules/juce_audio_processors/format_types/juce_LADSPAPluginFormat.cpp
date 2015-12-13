@@ -451,7 +451,7 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes)
     {
-        const float* p = static_cast <const float*> (data);
+        const float* p = static_cast<const float*> (data);
 
         for (int i = 0; i < getNumParameters(); ++i)
             setParameter (i, p[i]);

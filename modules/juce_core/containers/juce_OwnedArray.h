@@ -74,7 +74,7 @@ public:
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     OwnedArray (OwnedArray&& other) noexcept
-        : data (static_cast <ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data)),
+        : data (static_cast<ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data)),
           numUsed (other.numUsed)
     {
         other.numUsed = 0;
@@ -85,7 +85,7 @@ public:
         const ScopedLockType lock (getLock());
         deleteAllObjects();
 
-        data = static_cast <ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data);
+        data = static_cast<ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data);
         numUsed = other.numUsed;
         other.numUsed = 0;
         return *this;
@@ -239,7 +239,7 @@ public:
 
         for (; e != end_; ++e)
             if (objectToLookFor == *e)
-                return static_cast <int> (e - data.elements.getData());
+                return static_cast<int> (e - data.elements.getData());
 
         return -1;
     }

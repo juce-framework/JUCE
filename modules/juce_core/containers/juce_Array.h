@@ -365,7 +365,7 @@ public:
 
         for (; e != end_; ++e)
             if (elementToLookFor == *e)
-                return static_cast <int> (e - data.elements.getData());
+                return static_cast<int> (e - data.elements.getData());
 
         return -1;
     }

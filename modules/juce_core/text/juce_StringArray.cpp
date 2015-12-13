@@ -37,7 +37,7 @@ StringArray::StringArray (const StringArray& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 StringArray::StringArray (StringArray&& other) noexcept
-    : strings (static_cast <Array <String>&&> (other.strings))
+    : strings (static_cast<Array <String>&&> (other.strings))
 {
 }
 #endif
@@ -81,7 +81,7 @@ StringArray& StringArray::operator= (const StringArray& other)
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 StringArray& StringArray::operator= (StringArray&& other) noexcept
 {
-    strings = static_cast <Array<String>&&> (other.strings);
+    strings = static_cast<Array<String>&&> (other.strings);
     return *this;
 }
 #endif

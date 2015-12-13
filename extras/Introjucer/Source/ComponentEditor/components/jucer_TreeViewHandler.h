@@ -39,7 +39,7 @@ public:
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
-        TreeView* const t = dynamic_cast <TreeView*> (comp);
+        TreeView* const t = dynamic_cast<TreeView*> (comp);
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
 
         e->setAttribute ("rootVisible", t->isRootItemVisible());
@@ -54,7 +54,7 @@ public:
             return false;
 
         TreeView defaultTreeView;
-        TreeView* const t = dynamic_cast <TreeView*> (comp);
+        TreeView* const t = dynamic_cast<TreeView*> (comp);
 
         t->setRootItemVisible (xml.getBoolAttribute ("rootVisible", defaultTreeView.isRootItemVisible()));
         t->setDefaultOpenness (xml.getBoolAttribute ("openByDefault", defaultTreeView.areItemsOpenByDefault()));
@@ -65,7 +65,7 @@ public:
     void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
-        TreeView* const t = dynamic_cast <TreeView*> (component);
+        TreeView* const t = dynamic_cast<TreeView*> (component);
 
         props.add (new TreeViewRootItemProperty (t, document));
         props.add (new TreeViewRootOpennessProperty (t, document));
@@ -81,7 +81,7 @@ public:
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
     {
         TreeView defaultTreeView;
-        TreeView* const t = dynamic_cast <TreeView*> (component);
+        TreeView* const t = dynamic_cast<TreeView*> (component);
 
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 

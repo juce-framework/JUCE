@@ -149,7 +149,7 @@ public:
     /** Calls a member function on each listener in the list, with no parameters. */
     void call (void (ListenerClass::*callbackFunction) ())
     {
-        callChecked (static_cast <const DummyBailOutChecker&> (DummyBailOutChecker()), callbackFunction);
+        callChecked (static_cast<const DummyBailOutChecker&> (DummyBailOutChecker()), callbackFunction);
     }
 
     /** Calls a member function on each listener in the list, with no parameters and a bail-out-checker.

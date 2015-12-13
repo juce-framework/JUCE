@@ -191,7 +191,7 @@ void NamedPipe::close()
 
         char buffer[1] = { 0 };
         ssize_t done = ::write (pimpl->pipeIn, buffer, 1);
-        (void) done;
+        ignoreUnused (done);
 
         ScopedWriteLock sl (lock);
         pimpl = nullptr;
@@ -224,11 +224,11 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, boo
 int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMilliseconds)
 {
     ScopedReadLock sl (lock);
-    return pimpl != nullptr ? pimpl->read (static_cast <char*> (destBuffer), maxBytesToRead, timeOutMilliseconds) : -1;
+    return pimpl != nullptr ? pimpl->read (static_cast<char*> (destBuffer), maxBytesToRead, timeOutMilliseconds) : -1;
 }
 
 int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOutMilliseconds)
 {
     ScopedReadLock sl (lock);
-    return pimpl != nullptr ? pimpl->write (static_cast <const char*> (sourceBuffer), numBytesToWrite, timeOutMilliseconds) : -1;
+    return pimpl != nullptr ? pimpl->write (static_cast<const char*> (sourceBuffer), numBytesToWrite, timeOutMilliseconds) : -1;
 }

@@ -3020,7 +3020,7 @@ public:
             }
 
             const int numToCopy = jmin (decodedEnd - decodedStart, numSamples);
-            float* const* const dst = reinterpret_cast <float**> (destSamples);
+            float* const* const dst = reinterpret_cast<float**> (destSamples);
             memcpy (dst[0] + startOffsetInDestBuffer, decoded0 + decodedStart, sizeof (float) * (size_t) numToCopy);
 
             if (numDestChannels > 1 && dst[1] != nullptr)

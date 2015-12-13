@@ -388,7 +388,7 @@ private:
         if (callback != nullptr)
         {
             if ((numActiveInChans + numActiveOutChans) > 0)
-                callback->audioDeviceIOCallback (const_cast <const float**> (inChans.getData()), numActiveInChans,
+                callback->audioDeviceIOCallback (const_cast<const float**> (inChans.getData()), numActiveInChans,
                                                  outChans, numActiveOutChans, numSamples);
         }
         else
@@ -437,7 +437,7 @@ private:
 
     static void portConnectCallback (jack_port_id_t, jack_port_id_t, int, void* arg)
     {
-        if (JackAudioIODevice* device = static_cast <JackAudioIODevice*> (arg))
+        if (JackAudioIODevice* device = static_cast<JackAudioIODevice*> (arg))
             device->updateActivePorts();
     }
 
@@ -470,7 +470,7 @@ private:
     AudioIODeviceCallback* callback;
     CriticalSection callbackLock;
 
-    HeapBlock <float*> inChans, outChans;
+    HeapBlock<float*> inChans, outChans;
     int totalNumberOfInputChannels;
     int totalNumberOfOutputChannels;
     Array<void*> inputPorts, outputPorts;
@@ -557,7 +557,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        if (JackAudioIODevice* d = dynamic_cast <JackAudioIODevice*> (device))
+        if (JackAudioIODevice* d = dynamic_cast<JackAudioIODevice*> (device))
             return asInput ? inputIds.indexOf (d->inputId)
                            : outputIds.indexOf (d->outputId);
 

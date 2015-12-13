@@ -120,7 +120,7 @@ public:
 private:
     //==============================================================================
     PropertiesFile::Options options;
-    ScopedPointer <PropertiesFile> userProps, commonProps;
+    ScopedPointer<PropertiesFile> userProps, commonProps;
     int commonSettingsAreReadOnly;
 
     void openFiles();

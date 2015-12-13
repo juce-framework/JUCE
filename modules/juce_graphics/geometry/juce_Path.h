@@ -315,8 +315,8 @@ public:
     template <typename ValueType>
     void addRectangle (const Rectangle<ValueType>& rectangle)
     {
-        addRectangle (static_cast <float> (rectangle.getX()), static_cast <float> (rectangle.getY()),
-                      static_cast <float> (rectangle.getWidth()), static_cast <float> (rectangle.getHeight()));
+        addRectangle (static_cast<float> (rectangle.getX()), static_cast<float> (rectangle.getY()),
+                      static_cast<float> (rectangle.getWidth()), static_cast<float> (rectangle.getHeight()));
     }
 
     /** Adds a rectangle with rounded corners to the path.
@@ -350,8 +350,8 @@ public:
     template <typename ValueType>
     void addRoundedRectangle (const Rectangle<ValueType>& rectangle, float cornerSizeX, float cornerSizeY)
     {
-        addRoundedRectangle (static_cast <float> (rectangle.getX()), static_cast <float> (rectangle.getY()),
-                             static_cast <float> (rectangle.getWidth()), static_cast <float> (rectangle.getHeight()),
+        addRoundedRectangle (static_cast<float> (rectangle.getX()), static_cast<float> (rectangle.getY()),
+                             static_cast<float> (rectangle.getWidth()), static_cast<float> (rectangle.getHeight()),
                              cornerSizeX, cornerSizeY);
     }
 

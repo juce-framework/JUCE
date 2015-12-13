@@ -178,7 +178,7 @@ private:
     template <typename PointerType>
     inline PointerType* negateValue (PointerType* n) noexcept
     {
-        return reinterpret_cast <PointerType*> (-reinterpret_cast <pointer_sized_int> (n));
+        return reinterpret_cast<PointerType*> (-reinterpret_cast<pointer_sized_int> (n));
     }
 };
 

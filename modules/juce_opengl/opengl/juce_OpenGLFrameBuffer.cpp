@@ -162,7 +162,7 @@ public:
 
 private:
     const int width, height;
-    HeapBlock <PixelARGB> data;
+    HeapBlock<PixelARGB> data;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
 };

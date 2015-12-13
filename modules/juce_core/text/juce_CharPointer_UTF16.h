@@ -46,7 +46,7 @@ public:
    #endif
 
     inline explicit CharPointer_UTF16 (const CharType* const rawPointer) noexcept
-        : data (const_cast <CharType*> (rawPointer))
+        : data (const_cast<CharType*> (rawPointer))
     {
     }
 
@@ -63,7 +63,7 @@ public:
 
     inline CharPointer_UTF16 operator= (const CharType* text) noexcept
     {
-        data = const_cast <CharType*> (text);
+        data = const_cast<CharType*> (text);
         return *this;
     }
 
@@ -471,7 +471,7 @@ public:
     /** Atomically swaps this pointer for a new value, returning the previous value. */
     CharPointer_UTF16 atomicSwap (const CharPointer_UTF16 newValue)
     {
-        return CharPointer_UTF16 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
+        return CharPointer_UTF16 (reinterpret_cast<Atomic<CharType*>&> (data).exchange (newValue.data));
     }
 
     /** These values are the byte-order-mark (BOM) values for a UTF-16 stream. */

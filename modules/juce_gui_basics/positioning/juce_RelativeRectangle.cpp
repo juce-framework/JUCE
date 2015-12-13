@@ -244,7 +244,7 @@ void RelativeRectangle::applyToComponent (Component& component) const
 {
     if (isDynamic())
     {
-        RelativeRectangleComponentPositioner* current = dynamic_cast <RelativeRectangleComponentPositioner*> (component.getPositioner());
+        RelativeRectangleComponentPositioner* current = dynamic_cast<RelativeRectangleComponentPositioner*> (component.getPositioner());
 
         if (current == nullptr || ! current->isUsingRectangle (*this))
         {

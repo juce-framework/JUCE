@@ -65,7 +65,7 @@ namespace WindowsFileHelpers
         path.copyToUTF16 (pathCopy, numBytes);
 
         if (PathStripToRoot (pathCopy))
-            path = static_cast <const WCHAR*> (pathCopy);
+            path = static_cast<const WCHAR*> (pathCopy);
 
         return path;
     }

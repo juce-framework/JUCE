@@ -60,10 +60,10 @@ namespace
     template <typename RectangleType>
     static NSRect makeNSRect (const RectangleType& r) noexcept
     {
-        return NSMakeRect (static_cast <CGFloat> (r.getX()),
-                           static_cast <CGFloat> (r.getY()),
-                           static_cast <CGFloat> (r.getWidth()),
-                           static_cast <CGFloat> (r.getHeight()));
+        return NSMakeRect (static_cast<CGFloat> (r.getX()),
+                           static_cast<CGFloat> (r.getY()),
+                           static_cast<CGFloat> (r.getWidth()),
+                           static_cast<CGFloat> (r.getHeight()));
     }
 
     // These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
@@ -162,7 +162,7 @@ struct ObjCClass
     {
         void* v = nullptr;
         object_getInstanceVariable (self, name, &v);
-        return static_cast <Type> (v);
+        return static_cast<Type> (v);
     }
 
     Class cls;

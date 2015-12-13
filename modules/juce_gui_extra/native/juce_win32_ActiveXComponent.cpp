@@ -136,7 +136,7 @@ namespace ActiveXHelpers
             if (type == IID_IOleInPlaceSite)
             {
                 inplaceSite->AddRef();
-                *result = static_cast <IOleInPlaceSite*> (inplaceSite);
+                *result = static_cast<IOleInPlaceSite*> (inplaceSite);
                 return S_OK;
             }
 

@@ -226,7 +226,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
     if (howMany > 0 && ! isEof)
     {
         int numRead = 0;
-        uint8* d = static_cast <uint8*> (destBuffer);
+        uint8* d = static_cast<uint8*> (destBuffer);
 
         while (! helper->error)
         {

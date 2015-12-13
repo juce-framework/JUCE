@@ -56,7 +56,7 @@ PaintRoutineEditor::~PaintRoutineEditor()
 void PaintRoutineEditor::removeAllElementComps()
 {
     for (int i = getNumChildComponents(); --i >= 0;)
-        if (PaintElement* const e = dynamic_cast <PaintElement*> (getChildComponent (i)))
+        if (PaintElement* const e = dynamic_cast<PaintElement*> (getChildComponent (i)))
             removeChildComponent (e);
 }
 
@@ -109,7 +109,7 @@ void PaintRoutineEditor::updateChildBounds()
     const Rectangle<int> clip (getComponentArea());
 
     for (int i = 0; i < getNumChildComponents(); ++i)
-        if (PaintElement* const e = dynamic_cast <PaintElement*> (getChildComponent (i)))
+        if (PaintElement* const e = dynamic_cast<PaintElement*> (getChildComponent (i)))
             e->updateBounds (clip);
 }
 
@@ -153,7 +153,7 @@ void PaintRoutineEditor::visibilityChanged()
 void PaintRoutineEditor::refreshAllElements()
 {
     for (int i = getNumChildComponents(); --i >= 0;)
-        if (PaintElement* const e = dynamic_cast <PaintElement*> (getChildComponent (i)))
+        if (PaintElement* const e = dynamic_cast<PaintElement*> (getChildComponent (i)))
             if (! graphics.containsElement (e))
                 removeChildComponent (e);
 
@@ -241,7 +241,7 @@ void PaintRoutineEditor::mouseUp (const MouseEvent& e)
 void PaintRoutineEditor::findLassoItemsInArea (Array <PaintElement*>& results, const Rectangle<int>& lasso)
 {
     for (int i = 0; i < getNumChildComponents(); ++i)
-        if (PaintElement* const e = dynamic_cast <PaintElement*> (getChildComponent (i)))
+        if (PaintElement* const e = dynamic_cast<PaintElement*> (getChildComponent (i)))
             if (e->getBounds().expanded (-e->borderThickness).intersects (lasso))
                 results.add (e);
 }

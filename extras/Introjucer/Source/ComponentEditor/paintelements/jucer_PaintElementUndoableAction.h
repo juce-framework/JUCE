@@ -51,26 +51,26 @@ public:
         if (containerGroups.size() > 0)
         {
             PaintElementGroup* group = 0;
-            group = dynamic_cast <PaintElementGroup*> (routine.getElement (containerGroups.getFirst()));
+            group = dynamic_cast<PaintElementGroup*> (routine.getElement (containerGroups.getFirst()));
 
             if (group == 0)
                 return 0;
 
             for (int i = 1; i < containerGroups.size(); ++i)
             {
-                group = dynamic_cast <PaintElementGroup*> (group->getElement (containerGroups.getUnchecked(i)));
+                group = dynamic_cast<PaintElementGroup*> (group->getElement (containerGroups.getUnchecked(i)));
 
                 if (group == 0)
                     return 0;
             }
 
-            ElementType* const e = dynamic_cast <ElementType*> (group->getElement (elementIndex));
+            ElementType* const e = dynamic_cast<ElementType*> (group->getElement (elementIndex));
             jassert (e != 0);
             return e;
         }
         else
         {
-            ElementType* const e = dynamic_cast <ElementType*> (routine.getElement (elementIndex));
+            ElementType* const e = dynamic_cast<ElementType*> (routine.getElement (elementIndex));
             jassert (e != 0);
             return e;
         }
@@ -95,7 +95,7 @@ protected:
             docHolder->showGraphics (&routine);
 
         if (routine.getSelectedElements().getNumSelected() == 0)
-            if (ElementType* const e = dynamic_cast <ElementType*> (routine.getElement (elementIndex)))
+            if (ElementType* const e = dynamic_cast<ElementType*> (routine.getElement (elementIndex)))
                 routine.getSelectedElements().selectOnly (e);
     }
 
@@ -104,7 +104,7 @@ private:
     {
         for (int i = pr->getNumElements(); --i >= 0;)
         {
-            PaintElementGroup* const pg = dynamic_cast <PaintElementGroup*> (pr->getElement (i));
+            PaintElementGroup* const pg = dynamic_cast<PaintElementGroup*> (pr->getElement (i));
 
             if (pg != 0 && pg->containsElement (element))
             {
@@ -122,7 +122,7 @@ private:
         {
             for (int i = group->getNumElements(); --i >= 0;)
             {
-                PaintElementGroup* pg = dynamic_cast <PaintElementGroup*> (group->getElement (i));
+                PaintElementGroup* pg = dynamic_cast<PaintElementGroup*> (group->getElement (i));
 
                 if (pg != 0 && pg->containsElement (element))
                 {

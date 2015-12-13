@@ -102,7 +102,7 @@ private:
     float subPathCloseX, subPathCloseY;
     const bool isIdentityTransform;
 
-    HeapBlock <float> stackBase;
+    HeapBlock<float> stackBase;
     float* stackPos;
     size_t index, stackSize;
 

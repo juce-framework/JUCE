@@ -36,7 +36,7 @@ public:
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
-        ComboBox* const c = dynamic_cast <ComboBox*> (comp);
+        ComboBox* const c = dynamic_cast<ComboBox*> (comp);
         jassert (c != nullptr);
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
@@ -57,7 +57,7 @@ public:
 
         ComboBox defaultBox (String::empty);
 
-        ComboBox* const c = dynamic_cast <ComboBox*> (comp);
+        ComboBox* const c = dynamic_cast<ComboBox*> (comp);
         jassert (c != nullptr);
 
         c->setEditableText (xml.getBoolAttribute ("editable", defaultBox.isTextEditable()));
@@ -75,7 +75,7 @@ public:
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
-        ComboBox* const c = dynamic_cast <ComboBox*> (component);
+        ComboBox* const c = dynamic_cast<ComboBox*> (component);
         jassert (c != nullptr);
 
         props.add (new ComboItemsProperty (c, document));
@@ -94,7 +94,7 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        ComboBox* const c = dynamic_cast <ComboBox*> (component);
+        ComboBox* const c = dynamic_cast<ComboBox*> (component);
         jassert (c != nullptr);
 
         String s;

@@ -45,7 +45,7 @@ public:
     typedef char CharType;
 
     inline explicit CharPointer_ASCII (const CharType* const rawPointer) noexcept
-        : data (const_cast <CharType*> (rawPointer))
+        : data (const_cast<CharType*> (rawPointer))
     {
     }
 
@@ -62,7 +62,7 @@ public:
 
     inline CharPointer_ASCII operator= (const CharType* text) noexcept
     {
-        data = const_cast <CharType*> (text);
+        data = const_cast<CharType*> (text);
         return *this;
     }
 

@@ -202,7 +202,7 @@ private:
     friend class QuitMessage;
     friend class MessageManagerLock;
 
-    ScopedPointer <ActionBroadcaster> broadcaster;
+    ScopedPointer<ActionBroadcaster> broadcaster;
     bool quitMessagePosted, quitMessageReceived;
     Thread::ThreadID messageThreadId;
     Thread::ThreadID volatile threadWithLock;

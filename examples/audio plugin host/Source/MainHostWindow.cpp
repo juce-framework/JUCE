@@ -545,7 +545,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 
 GraphDocumentComponent* MainHostWindow::getGraphEditor() const
 {
-    return dynamic_cast <GraphDocumentComponent*> (getContentComponent());
+    return dynamic_cast<GraphDocumentComponent*> (getContentComponent());
 }
 
 bool MainHostWindow::isDoublePrecisionProcessing()

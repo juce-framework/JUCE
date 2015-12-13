@@ -98,7 +98,7 @@ public:
 
         if (opacity > 0)
         {
-            if (dynamic_cast <const DrawableImage*> (getDrawable()) != 0)
+            if (dynamic_cast<const DrawableImage*> (getDrawable()) != 0)
             {
                 const String imageVariable ("cachedImage_" + resourceName.replace ("::", "_") + "_" + String (code.getUniqueSuffix()));
 
@@ -288,7 +288,7 @@ public:
     {
         if (const Drawable* const image = getDrawable())
         {
-            if (PaintRoutineEditor* ed = dynamic_cast <PaintRoutineEditor*> (getParentComponent()))
+            if (PaintRoutineEditor* ed = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
             {
                 const Rectangle<int> parentArea (ed->getComponentArea());
 

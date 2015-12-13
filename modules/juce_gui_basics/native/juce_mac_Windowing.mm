@@ -330,7 +330,7 @@ public:
 
     static void displayReconfigurationCallBack (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void*)
     {
-        const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
+        const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
     juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback)

@@ -50,7 +50,7 @@ public:
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
-        TestComponent* const tc = dynamic_cast <TestComponent*> (comp);
+        TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
         e->setAttribute ("sourceFile", tc->getFilename());
@@ -61,7 +61,7 @@ public:
 
     bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
     {
-        TestComponent* const tc = dynamic_cast <TestComponent*> (comp);
+        TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
 
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -74,7 +74,7 @@ public:
 
     String getClassName (Component* comp) const
     {
-        TestComponent* const tc = dynamic_cast <TestComponent*> (comp);
+        TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
 
         String jucerCompClassName;
 
@@ -89,7 +89,7 @@ public:
 
     void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
-        TestComponent* const tc = dynamic_cast <TestComponent*> (component);
+        TestComponent* const tc = dynamic_cast<TestComponent*> (component);
 
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
@@ -107,7 +107,7 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        TestComponent* const tc = dynamic_cast <TestComponent*> (component);
+        TestComponent* const tc = dynamic_cast<TestComponent*> (component);
 
         code.includeFilesH.add (tc->getFilename().replace (".cpp", ".h"));
     }

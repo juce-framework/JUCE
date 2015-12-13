@@ -94,23 +94,23 @@ AttributedString& AttributedString::operator= (const AttributedString& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 AttributedString::AttributedString (AttributedString&& other) noexcept
-    : text (static_cast <String&&> (other.text)),
+    : text (static_cast<String&&> (other.text)),
       lineSpacing (other.lineSpacing),
       justification (other.justification),
       wordWrap (other.wordWrap),
       readingDirection (other.readingDirection),
-      attributes (static_cast <OwnedArray<Attribute>&&> (other.attributes))
+      attributes (static_cast<OwnedArray<Attribute>&&> (other.attributes))
 {
 }
 
 AttributedString& AttributedString::operator= (AttributedString&& other) noexcept
 {
-    text = static_cast <String&&> (other.text);
+    text = static_cast<String&&> (other.text);
     lineSpacing = other.lineSpacing;
     justification = other.justification;
     wordWrap = other.wordWrap;
     readingDirection = other.readingDirection;
-    attributes = static_cast <OwnedArray<Attribute>&&> (other.attributes);
+    attributes = static_cast<OwnedArray<Attribute>&&> (other.attributes);
     return *this;
 }
 #endif
