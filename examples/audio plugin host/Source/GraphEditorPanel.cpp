@@ -322,7 +322,7 @@ public:
         deleteAllChildren();
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         originalPos = localPointToGlobal (Point<int>());
 
@@ -384,7 +384,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (! e.mods.isPopupMenu())
         {
@@ -401,7 +401,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         if (e.mouseWasClicked() && e.getNumberOfClicks() == 2)
         {
@@ -415,7 +415,7 @@ public:
         }
     }
 
-    bool hitTest (int x, int y)
+    bool hitTest (int x, int y) override
     {
         for (int i = getNumChildComponents(); --i >= 0;)
             if (getChildComponent(i)->getBounds().contains (x, y))
@@ -424,7 +424,7 @@ public:
         return x >= 3 && x < getWidth() - 6 && y >= pinSize && y < getHeight() - pinSize;
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colours::lightgrey);
 
@@ -443,7 +443,7 @@ public:
         g.drawRect (x, y, w, h);
     }
 
-    void resized()
+    void resized() override
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {

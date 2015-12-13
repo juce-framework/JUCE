@@ -329,7 +329,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     if (instance == nullptr)
         return;
 
-    AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, xml.getIntAttribute ("uid")));
+    AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, (uint32) xml.getIntAttribute ("uid")));
 
     if (const XmlElement* const state = xml.getChildByName ("STATE"))
     {
