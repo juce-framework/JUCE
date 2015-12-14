@@ -85,6 +85,16 @@ public:
     */
     void setZoneLayout (MPEZoneLayout newLayout);
 
+    /** Returns true if the given MIDI channel (1-16) is a note channel in any
+        of the MPEInstrument's MPE zones; false otherwise.
+    */
+    bool isNoteChannel (int midiChannel) const noexcept;
+
+    /** Returns true if the given MIDI channel (1-16) is a master channel in any
+        of the MPEInstrument's MPE zones; false otherwise.
+    */
+    bool isMasterChannel (int midiChannel) const noexcept;
+
     /** Sets the instrument to Omni Mode.
         As a side effect, this will discard all currently playing notes,
         and call noteReleased for all of them.
@@ -366,8 +376,6 @@ private:
     void handleTimbreLSB (int midiChannel, int value) noexcept;
     void handleSustainOrSostenuto (int midiChannel, bool isDown, bool isSostenuto);
 
-    bool isNoteChannel (int midiChannel) const noexcept;
-    bool isMasterChannel (int midiChannel) const noexcept;
     MPENote* getNotePtr (int midiChannel, int midiNoteNumber) const noexcept;
     MPENote* getNotePtr (int midiChannel, TrackingMode) const noexcept;
     MPENote* getLastNotePlayedPtr (int midiChannel) const noexcept;
