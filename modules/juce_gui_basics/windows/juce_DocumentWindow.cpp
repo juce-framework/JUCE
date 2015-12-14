@@ -188,15 +188,6 @@ void DocumentWindow::paint (Graphics& g)
 {
     ResizableWindow::paint (g);
 
-    if (resizableBorder == nullptr)
-    {
-        RectangleList<int> border (getLocalBounds());
-        border.subtract (getBorderThickness().subtractedFrom (getLocalBounds()));
-
-        g.setColour (getBackgroundColour().overlaidWith (Colour (0x80000000)));
-        g.fillRectList (border);
-    }
-
     const Rectangle<int> titleBarArea (getTitleBarArea());
     g.reduceClipRegion (titleBarArea);
     g.setOrigin (titleBarArea.getPosition());
