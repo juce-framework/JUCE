@@ -64,13 +64,9 @@ public:
 
         const File targetFolder (getTargetFolder());
 
-       #if JUCE_WINDOWS
-		// on Windows, we have to surround the path with extra quotes, otherwise Android Studio
-		// will choke if there are any space characters in the path.
+        // we have to surround the path with extra quotes, otherwise Android Studio
+        // will choke if there are any space characters in the path.
         return androidStudioExecutable.startAsProcess ("\"" + targetFolder.getFullPathName() + "\"");
-       #else
-		return androidStudioExecutable.startAsProcess(targetFolder.getFullPathName());
-       #endif
     }
 
     void createExporterProperties (PropertyListBuilder& props) override
