@@ -243,6 +243,9 @@ private:
     Obviously be careful not to create one of these and leave it lying around, or
     your app will grind to a halt!
 
+    MessageManagerLocks are re-entrant, so can be safely nested if the current thread
+    already has the lock.
+
     Another caveat is that using this in conjunction with other CriticalSections
     can create lots of interesting ways of producing a deadlock! In particular, if
     your message thread calls stopThread() for a thread that uses these locks,

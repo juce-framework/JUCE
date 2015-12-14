@@ -50,6 +50,8 @@ public:
     /** Called when you should render the next openGL frame.
         Note that this callback will be made on a background thread, not the message
         thread, so make sure that your implementation is thread-safe.
+        If the context is attached to a component in order to do component rendering,
+        then the MessageManager may be locked when this callback is made.
         For information about how to trigger a render callback, see
         OpenGLContext::triggerRepaint() and OpenGLContext::setContinuousRepainting().
     */
