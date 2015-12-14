@@ -79,10 +79,16 @@ public:
 
         props.add (new TextPropertyComponent (getNDKPlatformVersionValue(), "NDK Platform Version", 32, false),
                    "The value to use for android$user.ndk.platformVersion in Gradle");
+
+        props.add (new TextPropertyComponent (getBuildToolsVersionValue(), "Build Tools Version", 32, false),
+                   "The version of build tools use for build tools in Gradle");
     }
 
-    Value getNDKPlatformVersionValue() { return getSetting (Ids::androidNdkPlatformVersion); }
+    Value getNDKPlatformVersionValue()         { return getSetting (Ids::androidNdkPlatformVersion); }
     String getNDKPlatformVersionString() const { return settings [Ids::androidNdkPlatformVersion]; }
+
+    Value getBuildToolsVersionValue()          { return getSetting (Ids::buildToolsVersion); }
+    String getBuildToolsVersionString() const  { return settings [Ids::buildToolsVersion]; }
 
     void removeOldFiles (const File& targetFolder) const
     {
@@ -344,13 +350,16 @@ private:
         writeXmlOrThrow (*manifest, folder.getChildFile ("app/src/main/AndroidManifest.xml"), "utf-8", 100, true);
     }
 
-    String createModelDotAndroid (const String& indent, const String& minimumSDKVersion, const String& bundleIdentifier) const
+    String createModelDotAndroid (const String& indent,
+                                  const String& minimumSDKVersion,
+                                  const String& buildToolsVersion,
+                                  const String& bundleIdentifier) const
     {
         String result;
 
         result << "android {" << newLine
                << indent << "compileSdkVersion = " << minimumSDKVersion << newLine
-               << indent << "buildToolsVersion = \"" << "23.0.1" << "\"" << newLine
+               << indent << "buildToolsVersion = \"" << buildToolsVersion << "\"" << newLine
                << indent << "defaultConfig.with {" << newLine
                << indent << indent << "applicationId = \"" << bundleIdentifier.toLowerCase() << "\"" << newLine
                << indent << indent << "minSdkVersion.apiLevel = " << minimumSDKVersion << newLine
@@ -621,10 +630,18 @@ private:
         const String minimumSDKVersion = getMinimumSDKVersionString();
         const String bundleIdentifier  = project.getBundleIdentifier().toString();
 
+        String buildToolsVersion = getBuildToolsVersionString();
+
+        if (buildToolsVersion.isEmpty())
+            buildToolsVersion = "23.0.1";
+
         memoryOutputStream << "apply plugin: 'com.android.model.application'" << newLine
                            << newLine
                            << "model {" << newLine
-                           << CodeHelpers::indent (createModelDotAndroid (indent, minimumSDKVersion, bundleIdentifier), indent.length(), true)
+                           << CodeHelpers::indent (createModelDotAndroid (indent,
+                                                                          minimumSDKVersion,
+                                                                          buildToolsVersion,
+                                                                          bundleIdentifier), indent.length(), true)
                            << newLine
                            << CodeHelpers::indent (createModelDotCompileOptions (indent), indent.length(), true)
                            << newLine
