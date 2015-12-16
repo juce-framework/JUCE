@@ -90,8 +90,8 @@ static Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
 
 
 //==============================================================================
-static Steinberg::Vst::SpeakerArrangement getArrangementForBus (Steinberg::Vst::IAudioProcessor* processor,
-                                                                bool isInput, int busIndex)
+static inline Steinberg::Vst::SpeakerArrangement getArrangementForBus (Steinberg::Vst::IAudioProcessor* processor,
+                                                                       bool isInput, int busIndex)
 {
     Steinberg::Vst::SpeakerArrangement arrangement = Steinberg::Vst::SpeakerArr::kEmpty;
 
@@ -105,7 +105,7 @@ static Steinberg::Vst::SpeakerArrangement getArrangementForBus (Steinberg::Vst::
 /** For the sake of simplicity, there can only be 1 arrangement type per channel count.
     i.e.: 4 channels == k31Cine OR k40Cine
 */
-static Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numChannels) noexcept
+static inline Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numChannels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
@@ -135,6 +135,91 @@ static Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numC
     juce::BigInteger bi;
     bi.setRange (0, jmin (numChannels, (int) (sizeof (Steinberg::Vst::SpeakerArrangement) * 8)), true);
     return (Steinberg::Vst::SpeakerArrangement) bi.toInt64();
+}
+
+static inline Steinberg::Vst::Speaker getSpeakerType (AudioChannelSet::ChannelType type) noexcept
+{
+    using namespace Steinberg::Vst;
+
+    switch (type)
+    {
+        case AudioChannelSet::ChannelType::left:              return kSpeakerL;
+        case AudioChannelSet::ChannelType::right:             return kSpeakerR;
+        case AudioChannelSet::ChannelType::centre:            return kSpeakerC;
+        case AudioChannelSet::ChannelType::subbass:           return kSpeakerLfe;
+        case AudioChannelSet::ChannelType::surroundLeft:      return kSpeakerLs;
+        case AudioChannelSet::ChannelType::surroundRight:     return kSpeakerRs;
+        case AudioChannelSet::ChannelType::centreLeft:        return kSpeakerLc;
+        case AudioChannelSet::ChannelType::centreRight:       return kSpeakerRc;
+        case AudioChannelSet::ChannelType::surround:          return kSpeakerS;
+        case AudioChannelSet::ChannelType::sideLeft:          return kSpeakerSl;
+        case AudioChannelSet::ChannelType::sideRight:         return kSpeakerSr;
+        case AudioChannelSet::ChannelType::topMiddle:         return kSpeakerTm;
+        case AudioChannelSet::ChannelType::topFrontLeft:      return kSpeakerTfl;
+        case AudioChannelSet::ChannelType::topFrontCentre:    return kSpeakerTfc;
+        case AudioChannelSet::ChannelType::topFrontRight:     return kSpeakerTfr;
+        case AudioChannelSet::ChannelType::topRearLeft:       return kSpeakerTrl;
+        case AudioChannelSet::ChannelType::topRearCentre:     return kSpeakerTrc;
+        case AudioChannelSet::ChannelType::topRearRight:      return kSpeakerTrr;
+        case AudioChannelSet::ChannelType::subbass2:          return kSpeakerLfe2;
+        default: break;
+    }
+
+    return 0;
+}
+
+static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speaker type) noexcept
+{
+    using namespace Steinberg::Vst;
+
+    switch (type)
+    {
+        case kSpeakerL:     return AudioChannelSet::ChannelType::left;
+        case kSpeakerR:     return AudioChannelSet::ChannelType::right;
+        case kSpeakerC:     return AudioChannelSet::ChannelType::centre;
+        case kSpeakerLfe:   return AudioChannelSet::ChannelType::subbass;
+        case kSpeakerLs:    return AudioChannelSet::ChannelType::surroundLeft;
+        case kSpeakerRs:    return AudioChannelSet::ChannelType::surroundRight;
+        case kSpeakerLc:    return AudioChannelSet::ChannelType::centreLeft;
+        case kSpeakerRc:    return AudioChannelSet::ChannelType::centreRight;
+        case kSpeakerS:     return AudioChannelSet::ChannelType::surround;
+        case kSpeakerSl:    return AudioChannelSet::ChannelType::sideLeft;
+        case kSpeakerSr:    return AudioChannelSet::ChannelType::sideRight;
+        case kSpeakerTm:    return AudioChannelSet::ChannelType::topMiddle;
+        case kSpeakerTfl:   return AudioChannelSet::ChannelType::topFrontLeft;
+        case kSpeakerTfc:   return AudioChannelSet::ChannelType::topFrontCentre;
+        case kSpeakerTfr:   return AudioChannelSet::ChannelType::topFrontRight;
+        case kSpeakerTrl:   return AudioChannelSet::ChannelType::topRearLeft;
+        case kSpeakerTrc:   return AudioChannelSet::ChannelType::topRearCentre;
+        case kSpeakerTrr:   return AudioChannelSet::ChannelType::topRearRight;
+        case kSpeakerLfe2:  return AudioChannelSet::ChannelType::subbass2;
+        default: break;
+    }
+
+    return AudioChannelSet::ChannelType::unknown;
+}
+
+static inline Steinberg::Vst::SpeakerArrangement getSpeakerArrangement (const AudioChannelSet& channels) noexcept
+{
+    Steinberg::Vst::SpeakerArrangement result = 0;
+
+    Array<AudioChannelSet::ChannelType> types (channels.getChannelTypes());
+
+    for (int i = 0; i < types.size(); ++i)
+        result |= getSpeakerType (types.getReference(i));
+
+    return result;
+}
+
+static inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
+{
+    AudioChannelSet result;
+
+    for (Steinberg::Vst::Speaker speaker = 1; speaker <= Steinberg::Vst::kSpeakerRcs; speaker <<= 1)
+        if ((arr & speaker) != 0)
+            result.addChannel (getChannelType (speaker));
+
+    return result;
 }
 
 //==============================================================================

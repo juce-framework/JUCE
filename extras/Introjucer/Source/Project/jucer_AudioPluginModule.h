@@ -45,6 +45,7 @@ namespace
     inline Value getPluginIsSynth (Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
     inline Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
     inline Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
+    inline Value getPluginIsMidiEffectPlugin (Project& project)          { return project.getProjectValue ("pluginIsMidiEffectPlugin"); }
     inline Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
     inline Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
     inline Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
@@ -89,9 +90,10 @@ namespace
 
         if (s.isEmpty())
         {
-            if (getPluginIsSynth (project).getValue())              s = "aumu";
-            else if (getPluginWantsMidiInput (project).getValue())  s = "aumf";
-            else                                                    s = "aufx";
+            if      (getPluginIsMidiEffectPlugin (project).getValue()) s = "aumi";
+            else if (getPluginIsSynth (project).getValue())            s = "aumu";
+            else if (getPluginWantsMidiInput (project).getValue())     s = "aumf";
+            else                                                       s = "aufx";
         }
 
         return s;
@@ -154,12 +156,10 @@ namespace
         flags.set ("JucePlugin_ManufacturerEmail",           valueToStringLiteral (project.getCompanyEmail()));
         flags.set ("JucePlugin_ManufacturerCode",            valueToCharLiteral (getPluginManufacturerCode (project)));
         flags.set ("JucePlugin_PluginCode",                  valueToCharLiteral (getPluginCode (project)));
-        flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
-        flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false)));
-        flags.set ("JucePlugin_PreferredChannelConfigurations", getPluginChannelConfigs (project).toString());
         flags.set ("JucePlugin_IsSynth",                     valueToBool (getPluginIsSynth (project)));
         flags.set ("JucePlugin_WantsMidiInput",              valueToBool (getPluginWantsMidiInput (project)));
         flags.set ("JucePlugin_ProducesMidiOutput",          valueToBool (getPluginProducesMidiOut (project)));
+        flags.set ("JucePlugin_IsMidiEffect",                valueToBool (getPluginIsMidiEffectPlugin (project)));
         flags.set ("JucePlugin_SilenceInProducesSilenceOut", valueToBool (getPluginSilenceInProducesSilenceOut (project)));
         flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
         flags.set ("JucePlugin_Version",                     project.getVersionString());
@@ -184,6 +184,17 @@ namespace
         flags.set ("JucePlugin_AAXCategory",                 getPluginAAXCategory (project).toString());
         flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (getPluginAAXBypassDisabled (project)));
         flags.set ("JucePlugin_AAXDisableMultiMono",         valueToBool (getPluginAAXMultiMonoDisabled (project)));
+
+        {
+            String plugInChannelConfig = getPluginChannelConfigs (project).toString();
+
+            if (plugInChannelConfig.isNotEmpty())
+            {
+                flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (plugInChannelConfig, true)));
+                flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (plugInChannelConfig, false)));
+                flags.set ("JucePlugin_PreferredChannelConfigurations", plugInChannelConfig);
+            }
+        }
 
         MemoryOutputStream mem;
 

@@ -45,6 +45,9 @@
  #pragma clang diagnostic ignored "-Wshadow"
  #pragma clang diagnostic ignored "-Wdeprecated-register"
  #pragma clang diagnostic ignored "-Wunused-function"
+ #pragma clang diagnostic ignored "-Wsign-conversion"
+ #pragma clang diagnostic ignored "-Wsign-compare"
+ #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
 #endif
 
 /*  These files come with the Steinberg VST3 SDK - to get them, you'll need to

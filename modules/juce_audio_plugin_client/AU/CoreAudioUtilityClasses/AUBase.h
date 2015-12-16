@@ -803,14 +803,18 @@ private:
 														UInt32							inNumberFrames,
 														AudioBufferList &				ioData)
 	{
-		if (ioData.mBuffers[0].mData == NULL || (theOutput->WillAllocateBuffer() && Outputs().GetNumberOfElements() > 1))
-			// will render into cache buffer
-			theOutput->PrepareBuffer(inNumberFrames);
-		else
-			// will render into caller's buffer
-			theOutput->SetBufferList(ioData);
+        if (theOutput != NULL)
+        {
+            if (ioData.mBuffers[0].mData == NULL || (theOutput->WillAllocateBuffer() && Outputs().GetNumberOfElements() > 1))
+                // will render into cache buffer
+                theOutput->PrepareBuffer(inNumberFrames);
+            else
+                // will render into caller's buffer
+                theOutput->SetBufferList(ioData);
+        }
+
 		OSStatus result = RenderBus(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames);
-		if (result == noErr) {
+		if (result == noErr && theOutput != NULL) {
 			if (ioData.mBuffers[0].mData == NULL) {
 				theOutput->CopyBufferListTo(ioData);
 				AUTRACE(kCATrace_AUBaseDoRenderBus, mComponentInstance, inNumberFrames, (intptr_t)theOutput->GetBufferList().mBuffers[0].mData, 0, *(UInt32 *)ioData.mBuffers[0].mData);

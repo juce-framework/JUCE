@@ -485,11 +485,11 @@ public:
             return;
         }
 
-        numIns = f->getProcessor()->getNumInputChannels();
+        numIns = f->getProcessor()->getMainBusNumInputChannels();
         if (f->getProcessor()->acceptsMidi())
             ++numIns;
 
-        numOuts = f->getProcessor()->getNumOutputChannels();
+        numOuts = f->getProcessor()->getMainBusNumOutputChannels();
         if (f->getProcessor()->producesMidi())
             ++numOuts;
 
@@ -520,13 +520,13 @@ public:
             deleteAllChildren();
 
             int i;
-            for (i = 0; i < f->getProcessor()->getNumInputChannels(); ++i)
+            for (i = 0; i < f->getProcessor()->getMainBusNumInputChannels(); ++i)
                 addAndMakeVisible (new PinComponent (graph, filterID, i, true));
 
             if (f->getProcessor()->acceptsMidi())
                 addAndMakeVisible (new PinComponent (graph, filterID, FilterGraph::midiChannelNumber, true));
 
-            for (i = 0; i < f->getProcessor()->getNumOutputChannels(); ++i)
+            for (i = 0; i < f->getProcessor()->getMainBusNumOutputChannels(); ++i)
                 addAndMakeVisible (new PinComponent (graph, filterID, i, false));
 
             if (f->getProcessor()->producesMidi())
