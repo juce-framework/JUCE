@@ -39,8 +39,9 @@ MPEInstrument::MPEInstrument() noexcept
     pressureDimension.value = &MPENote::pressure;
     timbreDimension.value = &MPENote::timbre;
 
-    omniMode.isEnabled = false;
-    omniMode.pitchbendRange = 2;
+    legacyMode.isEnabled = false;
+    legacyMode.pitchbendRange = 2;
+    legacyMode.channelRange = Range<int> (1, 17);
 }
 
 MPEInstrument::~MPEInstrument()
@@ -58,24 +59,53 @@ void MPEInstrument::setZoneLayout (MPEZoneLayout newLayout)
     releaseAllNotes();
 
     const ScopedLock sl (lock);
-    omniMode.isEnabled = false;
+    legacyMode.isEnabled = false;
     zoneLayout = newLayout;
 }
 
 //==============================================================================
-void MPEInstrument::enableOmniMode (int pitchbendRange)
+void MPEInstrument::enableLegacyMode (int pitchbendRange, Range<int> channelRange)
 {
     releaseAllNotes();
 
     const ScopedLock sl (lock);
-    omniMode.isEnabled = true;
-    omniMode.pitchbendRange = pitchbendRange;
+    legacyMode.isEnabled = true;
+    legacyMode.pitchbendRange = pitchbendRange;
+    legacyMode.channelRange = channelRange;
     zoneLayout.clearAllZones();
 }
 
-bool MPEInstrument::isOmniModeEnabled() const noexcept
+bool MPEInstrument::isLegacyModeEnabled() const noexcept
 {
-    return omniMode.isEnabled;
+    return legacyMode.isEnabled;
+}
+
+Range<int> MPEInstrument::getLegacyModeChannelRange() const noexcept
+{
+    return legacyMode.channelRange;
+}
+
+void MPEInstrument::setLegacyModeChannelRange (Range<int> channelRange)
+{
+    jassert (Range<int>(1, 17).contains (channelRange));
+
+    releaseAllNotes();
+    const ScopedLock sl (lock);
+    legacyMode.channelRange = channelRange;
+}
+
+int MPEInstrument::getLegacyModePitchbendRange() const noexcept
+{
+    return legacyMode.pitchbendRange;
+}
+
+void MPEInstrument::setLegacyModePitchbendRange (int pitchbendRange)
+{
+    jassert (pitchbendRange >= 0 && pitchbendRange <= 96);
+
+    releaseAllNotes();
+    const ScopedLock sl (lock);
+    legacyMode.pitchbendRange = pitchbendRange;
 }
 
 //==============================================================================
@@ -187,7 +217,10 @@ void MPEInstrument::processMidiControllerMessage (const MidiMessage& message)
 //==============================================================================
 void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
 {
-    if (omniMode.isEnabled)
+    // in MPE mode, "all notes off" is per-zone and expected on the master channel;
+    // in legacy mode, "all notes off" is per MIDI channel (within the channel range used).
+
+    if (legacyMode.isEnabled && legacyMode.channelRange.contains (message.getChannel()))
     {
         for (int i = notes.size(); --i >= 0;)
         {
@@ -267,7 +300,7 @@ void MPEInstrument::noteOn (int midiChannel,
                             int midiNoteNumber,
                             MPEValue midiNoteOnVelocity)
 {
-    if (! isNoteChannel (midiChannel) && ! omniMode.isEnabled)
+    if (! isNoteChannel (midiChannel))
         return;
 
     MPENote newNote (midiChannel,
@@ -299,7 +332,7 @@ void MPEInstrument::noteOff (int midiChannel,
                              int midiNoteNumber,
                              MPEValue midiNoteOffVelocity)
 {
-    if (notes.empty() || (! isNoteChannel (midiChannel) && ! omniMode.isEnabled))
+    if (notes.empty() || ! isNoteChannel (midiChannel))
         return;
 
     const ScopedLock sl (lock);
@@ -357,7 +390,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
     {
         updateDimensionMaster (*zone, dimension, value);
     }
-    else if (isNoteChannel (midiChannel) || omniMode.isEnabled)
+    else if (isNoteChannel (midiChannel))
     {
         if (dimension.trackingMode == allNotesOnChannel)
         {
@@ -429,9 +462,9 @@ void MPEInstrument::callListenersDimensionChanged (MPENote& note, MPEDimension& 
 //==============================================================================
 void MPEInstrument::updateNoteTotalPitchbend (MPENote& note)
 {
-    if (omniMode.isEnabled)
+    if (legacyMode.isEnabled)
     {
-        note.totalPitchbendInSemitones = note.pitchbend.asSignedFloat() * omniMode.pitchbendRange;
+        note.totalPitchbendInSemitones = note.pitchbend.asSignedFloat() * legacyMode.pitchbendRange;
     }
     else
     {
@@ -465,18 +498,19 @@ void MPEInstrument::sostenutoPedal (int midiChannel, bool isDown)
 //==============================================================================
 void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool isSostenuto)
 {
+    // in MPE mode, sustain/sostenuto is per-zone and expected on the master channel;
+    // in legacy mode, sustain/sostenuto is per MIDI channel (within the channel range used).
+
     MPEZone* affectedZone = zoneLayout.getZoneByMasterChannel (midiChannel);
 
-    if (affectedZone == nullptr && ! omniMode.isEnabled)
+    if (legacyMode.isEnabled ? (! legacyMode.channelRange.contains (midiChannel)) : (affectedZone == nullptr))
         return;
 
     for (int i = notes.size(); --i >= 0;)
     {
         MPENote& note = notes.getReference (i);
 
-        if ((omniMode.isEnabled
-             || note.midiChannel == midiChannel)
-             || affectedZone->isUsingChannel (note.midiChannel))
+        if (legacyMode.isEnabled ? (note.midiChannel == midiChannel) : affectedZone->isUsingChannel (note.midiChannel))
         {
             if (note.keyState == MPENote::keyDown && isDown)
                 note.keyState = MPENote::keyDownAndSustained;
@@ -499,7 +533,7 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
 
     if (! isSostenuto)
     {
-        if (omniMode.isEnabled)
+        if (legacyMode.isEnabled)
             isNoteChannelSustained[midiChannel - 1] = isDown;
         else
             for (int i = affectedZone->getFirstNoteChannel(); i <= affectedZone->getLastNoteChannel(); ++i)
@@ -510,11 +544,17 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
 //==============================================================================
 bool MPEInstrument::isNoteChannel (int midiChannel) const noexcept
 {
+    if (legacyMode.isEnabled)
+        return legacyMode.channelRange.contains (midiChannel);
+
     return zoneLayout.getZoneByNoteChannel (midiChannel) != nullptr;
 }
 
 bool MPEInstrument::isMasterChannel (int midiChannel) const noexcept
 {
+    if (legacyMode.isEnabled)
+        return false;
+
     return zoneLayout.getZoneByMasterChannel (midiChannel) != nullptr;
 }
 
@@ -1672,10 +1712,10 @@ public:
             expectEquals (test.getNumPlayingNotes(), 0);
         }
 
-        beginTest ("MIDI all notes off (omni mode)");
+        beginTest ("MIDI all notes off (legacy mode)");
         {
             UnitTestInstrument test;
-            test.enableOmniMode();
+            test.enableLegacyMode();
             test.noteOn (3, 60, MPEValue::from7BitInt (100));
             test.noteOn (4, 61, MPEValue::from7BitInt (100));
             test.noteOn (15, 62, MPEValue::from7BitInt (100));
@@ -1719,27 +1759,48 @@ public:
             expectNote (test.getMostRecentNote (3), 100, 33, 4444, 55, MPENote::keyDown);
         }
 
-        beginTest ("Omni mode");
+        beginTest ("Legacy mode");
         {
             {
                 // basic check
                 MPEInstrument test;
-                expect (! test.isOmniModeEnabled());
+                expect (! test.isLegacyModeEnabled());
 
                 test.setZoneLayout (testLayout);
-                expect (! test.isOmniModeEnabled());
+                expect (! test.isLegacyModeEnabled());
 
-                test.enableOmniMode();
-                expect (test.isOmniModeEnabled());
+                test.enableLegacyMode();
+                expect (test.isLegacyModeEnabled());
 
                 test.setZoneLayout (testLayout);
-                expect (! test.isOmniModeEnabled());
+                expect (! test.isLegacyModeEnabled());
+            }
+            {
+                // constructor w/o default arguments
+                 MPEInstrument test;
+                test.enableLegacyMode (0, Range<int> (1, 11));
+                expectEquals (test.getLegacyModePitchbendRange(), 0);
+                expect (test.getLegacyModeChannelRange() == Range<int> (1, 11));
+            }
+            {
+                // getters and setters
+                MPEInstrument test;
+                test.enableLegacyMode();
+
+                expectEquals (test.getLegacyModePitchbendRange(), 2);
+                expect (test.getLegacyModeChannelRange() == Range<int> (1, 17));
+
+                test.setLegacyModePitchbendRange (96);
+                expectEquals (test.getLegacyModePitchbendRange(), 96);
+
+                test.setLegacyModeChannelRange (Range<int> (10, 12));
+                expect (test.getLegacyModeChannelRange() == Range<int> (10, 12));
             }
             {
                 // note on should trigger notes on all 16 channels
 
                 UnitTestInstrument test;
-                test.enableOmniMode();
+                test.enableLegacyMode();
 
                 test.noteOn (1,  60, MPEValue::from7BitInt (100));
                 test.noteOn (2,  60, MPEValue::from7BitInt (100));
@@ -1758,7 +1819,7 @@ public:
                 expectNote (test.getNote (15, 60), 100, 100, 8192, 77, MPENote::keyDown);
                 expectNote (test.getNote (16, 60), 100, 100, 8192, 64, MPENote::keyDown);
 
-                // note off should work in omni mode
+                // note off should work in legacy mode
 
                 test.noteOff (15, 60, MPEValue::from7BitInt (0));
                 test.noteOff (1,  60, MPEValue::from7BitInt (0));
@@ -1767,10 +1828,31 @@ public:
                 expectEquals (test.getNumPlayingNotes(), 0);
             }
             {
-                // tracking mode in omni mode
+                // legacy mode w/ custom channel range: note on should trigger notes only within range
+
+                UnitTestInstrument test;
+                test.enableLegacyMode (2, Range<int> (3, 8));  // channels 3-7
+
+                test.noteOn (1,  60, MPEValue::from7BitInt (100));
+                test.noteOn (2,  60, MPEValue::from7BitInt (100));
+                test.noteOn (3, 60, MPEValue::from7BitInt (100));   // should trigger
+                test.noteOn (4, 60, MPEValue::from7BitInt (100));   // should trigger
+                test.noteOn (6, 60, MPEValue::from7BitInt (100));   // should trigger
+                test.noteOn (7, 60, MPEValue::from7BitInt (100));   // should trigger
+                test.noteOn (8, 60, MPEValue::from7BitInt (100));
+                test.noteOn (16, 60, MPEValue::from7BitInt (100));
+
+                expectEquals (test.getNumPlayingNotes(), 4);
+                expectNote (test.getNote (3, 60), 100, 100, 8192, 64, MPENote::keyDown);
+                expectNote (test.getNote (4, 60), 100, 100, 8192, 64, MPENote::keyDown);
+                expectNote (test.getNote (6, 60), 100, 100, 8192, 64, MPENote::keyDown);
+                expectNote (test.getNote (7, 60), 100, 100, 8192, 64, MPENote::keyDown);
+            }
+            {
+                // tracking mode in legacy mode
                 {
                     UnitTestInstrument test;
-                    test.enableOmniMode();
+                    test.enableLegacyMode();
 
                     test.setPitchbendTrackingMode (MPEInstrument::lastNotePlayedOnChannel);
                     test.noteOn (1,  60, MPEValue::from7BitInt (100));
@@ -1783,7 +1865,7 @@ public:
                 }
                 {
                     UnitTestInstrument test;
-                    test.enableOmniMode();
+                    test.enableLegacyMode();
 
                     test.setPitchbendTrackingMode (MPEInstrument::lowestNoteOnChannel);
                     test.noteOn (1,  60, MPEValue::from7BitInt (100));
@@ -1796,7 +1878,7 @@ public:
                 }
                 {
                     UnitTestInstrument test;
-                    test.enableOmniMode();
+                    test.enableLegacyMode();
 
                     test.setPitchbendTrackingMode (MPEInstrument::highestNoteOnChannel);
                     test.noteOn (1,  60, MPEValue::from7BitInt (100));
@@ -1809,7 +1891,7 @@ public:
                 }
                 {
                     UnitTestInstrument test;
-                    test.enableOmniMode();
+                    test.enableLegacyMode();
 
                     test.setPitchbendTrackingMode (MPEInstrument::allNotesOnChannel);
                     test.noteOn (1,  60, MPEValue::from7BitInt (100));
@@ -1822,18 +1904,18 @@ public:
                 }
             }
             {
-                // custom pitchbend range in omni mode.
+                // custom pitchbend range in legacy mode.
                 UnitTestInstrument test;
-                test.enableOmniMode (11);
+                test.enableLegacyMode (11);
 
                 test.pitchbend (1, MPEValue::from14BitInt (4096));
                 test.noteOn (1, 60, MPEValue::from7BitInt (100));
                 expectDoubleWithinRelativeError (test.getMostRecentNote (1).totalPitchbendInSemitones, -5.5, 0.01);
             }
             {
-                // sustain pedal should be per channel in omni mode.
+                // sustain pedal should be per channel in legacy mode.
                 UnitTestInstrument test;
-                test.enableOmniMode();
+                test.enableLegacyMode();
 
                 test.sustainPedal (1, true);
                 test.noteOn (2,  61, MPEValue::from7BitInt (100));
@@ -1846,11 +1928,17 @@ public:
 
                 test.sustainPedal (1, false);
                 expectEquals (test.getNumPlayingNotes(), 0);
+
+                test.noteOn (2,  61, MPEValue::from7BitInt (100));
+                test.sustainPedal (1, true);
+                test.noteOff (2,  61, MPEValue::from7BitInt (100));
+                expectEquals (test.getNumPlayingNotes(), 0);
+
             }
             {
-                // sostenuto pedal should be per channel in omni mode.
+                // sostenuto pedal should be per channel in legacy mode.
                 UnitTestInstrument test;
-                test.enableOmniMode();
+                test.enableLegacyMode();
 
                 test.noteOn (1, 60, MPEValue::from7BitInt (100));
                 test.sostenutoPedal (1, true);
@@ -1863,6 +1951,11 @@ public:
 
                 test.sostenutoPedal (1, false);
                 expectEquals (test.getNumPlayingNotes(), 0);
+
+                test.noteOn (2,  61, MPEValue::from7BitInt (100));
+                test.sostenutoPedal (1, true);
+                test.noteOff (2,  61, MPEValue::from7BitInt (100));
+                expectEquals (test.getNumPlayingNotes(), 0);
             }
             {
                 // all notes released when switching layout
@@ -1871,7 +1964,7 @@ public:
                 test.noteOn (3,  60, MPEValue::from7BitInt (100));
                 expectEquals (test.getNumPlayingNotes(), 1);
 
-                test.enableOmniMode();
+                test.enableLegacyMode();
                 expectEquals (test.getNumPlayingNotes(), 0);
                 test.noteOn (3,  60, MPEValue::from7BitInt (100));
                 expectEquals (test.getNumPlayingNotes(), 1);

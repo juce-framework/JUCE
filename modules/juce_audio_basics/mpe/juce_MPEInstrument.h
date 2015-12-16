@@ -61,7 +61,7 @@ public:
         This will construct an MPE instrument with initially no MPE zones.
 
         In order to process incoming MIDI, call setZoneLayout, define the layout
-        via MIDI RPN messages, or set the instrument to omni mode.
+        via MIDI RPN messages, or set the instrument to legacy mode.
     */
     MPEInstrument() noexcept;
 
@@ -72,7 +72,7 @@ public:
     /** Returns the current zone layout of the instrument.
         This happens by value, to enforce thread-safety and class invariants.
 
-        Note: If the instrument is in Omni mode, the return value of this
+        Note: If the instrument is in legacy mode, the return value of this
         method is unspecified.
     */
     MPEZoneLayout getZoneLayout() const noexcept;
@@ -81,37 +81,22 @@ public:
         As a side effect, this will discard all currently playing notes,
         and call noteReleased for all of them.
 
-        This will also disable Omni Mode in case it was enabled previously.
+        This will also disable legacy mode in case it was enabled previously.
     */
     void setZoneLayout (MPEZoneLayout newLayout);
 
     /** Returns true if the given MIDI channel (1-16) is a note channel in any
         of the MPEInstrument's MPE zones; false otherwise.
+        When in legacy mode, this will return true if the given channel is
+        contained in the current legacy mode channel range; false otherwise.
     */
     bool isNoteChannel (int midiChannel) const noexcept;
 
     /** Returns true if the given MIDI channel (1-16) is a master channel in any
         of the MPEInstrument's MPE zones; false otherwise.
+        When in legacy mode, this will always return false.
     */
     bool isMasterChannel (int midiChannel) const noexcept;
-
-    /** Sets the instrument to Omni Mode.
-        As a side effect, this will discard all currently playing notes,
-        and call noteReleased for all of them.
-
-        This special zone layout mode is for backwards compatibility with
-        non-MPE MIDI devices. In this mode, the instrument will ignore the
-        current zone layout. It will instead treat all 16 MIDI channels as note
-        channels, with no master channel.
-
-        @param pitchbendRange   The pitchbend range in semitones that should be
-                                used while the instrument is in Omni mode. Must
-                                be between 0 and 96, otherwise behaviour is undefined.
-    */
-    void enableOmniMode (int pitchbendRange = 2);
-
-    /** Returns true if the instrument is in Omni mode, false otherwise. */
-    bool isOmniModeEnabled() const noexcept;
 
     //==========================================================================
     /** The MPE note tracking mode. In case there is more than one note playing
@@ -300,6 +285,44 @@ public:
     /** Removes a listener. */
     void removeListener (Listener* const listenerToRemove) noexcept;
 
+    //==========================================================================
+    /** Puts the instrument into legacy mode.
+        As a side effect, this will discard all currently playing notes,
+        and call noteReleased for all of them.
+
+        This special zone layout mode is for backwards compatibility with
+        non-MPE MIDI devices. In this mode, the instrument will ignore the
+        current MPE zone layout. It will instead take a range of MIDI channels
+        (default: all channels 1-16) and treat them as note channels, with no
+        master channel. MIDI channels outside of this range will be ignored.
+
+        @param pitchbendRange   The note pitchbend range in semitones to use when in legacy mode.
+                                Must be between 0 and 96, otherwise behaviour is undefined.
+                                The default pitchbend range in legacy mode is +/- 2 semitones.
+
+        @param channelRange     The range of MIDI channels to use for notes when in legacy mode.
+                                The default is to use all MIDI channels (1-16).
+
+        To get out of legacy mode, set a new MPE zone layout using setZoneLayout.
+    */
+    void enableLegacyMode (int pitchbendRange = 2,
+                           Range<int> channelRange = Range<int> (1, 17));
+
+    /** Returns true if the instrument is in legacy mode, false otherwise. */
+    bool isLegacyModeEnabled() const noexcept;
+
+    /** Returns the range of MIDI channels (1-16) to be used for notes when in legacy mode. */
+    Range<int> getLegacyModeChannelRange() const noexcept;
+
+    /** Re-sets the range of MIDI channels (1-16) to be used for notes when in legacy mode. */
+    void setLegacyModeChannelRange (Range<int> channelRange);
+
+    /** Returns the pitchbend range in semitones (0-96) to be used for notes when in legacy mode. */
+    int getLegacyModePitchbendRange() const noexcept;
+
+    /** Re-sets the pitchbend range in semitones (0-96) to be used for notes when in legacy mode. */
+    void setLegacyModePitchbendRange (int pitchbendRange);
+
 protected:
     //==========================================================================
     /** This method defines what initial pitchbend value should be used for newly
@@ -341,9 +364,10 @@ private:
     uint8 lastTimbreLowerBitReceivedOnChannel[16];
     bool isNoteChannelSustained[16];
 
-    struct OmniMode
+    struct LegacyMode
     {
         bool isEnabled;
+        Range<int> channelRange;
         int pitchbendRange;
     };
 
@@ -356,7 +380,7 @@ private:
         MPEValue& getValue (MPENote& note) noexcept   { return note.*(value); }
     };
 
-    OmniMode omniMode;
+    LegacyMode legacyMode;
     MPEDimension pitchbendDimension, pressureDimension, timbreDimension;
 
     void updateDimension (int midiChannel, MPEDimension&, MPEValue);

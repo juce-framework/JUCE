@@ -69,15 +69,9 @@ public:
 
     /** Re-sets the synthesiser's internal MPE zone layout to the one passed in.
         As a side effect, this will discard all currently playing notes,
-        call noteReleased for all of them, and disable Omni mode (if previously enabled).
+        call noteReleased for all of them, and disable legacy mode (if previously enabled).
     */
     void setZoneLayout (MPEZoneLayout newLayout);
-
-    /** Sets the synthesiser to Omni mode. */
-    void enableOmniMode (int pitchbendRange = 2);
-
-    /** Returns true if the synthesiser is currently in Omni mode. */
-    bool isOmniModeEnabled() const noexcept;
 
     //==========================================================================
     /** Tells the synthesiser what the sample rate is for the audio it's being
@@ -135,6 +129,35 @@ public:
         decrease this value for your synth.
     */
     void setMinimumRenderingSubdivisionSize (int numSamples) noexcept;
+
+    //==========================================================================
+    /** Puts the synthesiser into legacy mode.
+
+        @param pitchbendRange   The note pitchbend range in semitones to use when in legacy mode.
+                                Must be between 0 and 96, otherwise behaviour is undefined.
+                                The default pitchbend range in legacy mode is +/- 2 semitones.
+        @param channelRange     The range of MIDI channels to use for notes when in legacy mode.
+                                The default is to use all MIDI channels (1-16).
+
+        To get out of legacy mode, set a new MPE zone layout using setZoneLayout.
+    */
+    void enableLegacyMode (int pitchbendRange = 2,
+                           Range<int> channelRange = Range<int> (1, 17));
+
+    /** Returns true if the instrument is in legacy mode, false otherwise. */
+    bool isLegacyModeEnabled() const noexcept;
+
+    /** Returns the range of MIDI channels (1-16) to be used for notes when in legacy mode. */
+    Range<int> getLegacyModeChannelRange() const noexcept;
+
+    /** Re-sets the range of MIDI channels (1-16) to be used for notes when in legacy mode. */
+    void setLegacyModeChannelRange (Range<int> channelRange);
+
+    /** Returns the pitchbend range in semitones (0-96) to be used for notes when in legacy mode. */
+    int getLegacyModePitchbendRange() const noexcept;
+
+    /** Re-sets the pitchbend range in semitones (0-96) to be used for notes when in legacy mode. */
+    void setLegacyModePitchbendRange (int pitchbendRange);
 
 protected:
     //==========================================================================

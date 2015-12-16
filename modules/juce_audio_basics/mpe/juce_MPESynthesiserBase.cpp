@@ -50,14 +50,35 @@ void MPESynthesiserBase::setZoneLayout (MPEZoneLayout newLayout)
     instrument->setZoneLayout (newLayout);
 }
 
-void MPESynthesiserBase::enableOmniMode (int pitchbendRange)
+//==============================================================================
+void MPESynthesiserBase::enableLegacyMode (int pitchbendRange, Range<int> channelRange)
 {
-    instrument->enableOmniMode (pitchbendRange);
+    instrument->enableLegacyMode (pitchbendRange, channelRange);
 }
 
-bool MPESynthesiserBase::isOmniModeEnabled() const noexcept
+bool MPESynthesiserBase::isLegacyModeEnabled() const noexcept
 {
-    return instrument->isOmniModeEnabled();
+    return instrument->isLegacyModeEnabled();
+}
+
+Range<int> MPESynthesiserBase::getLegacyModeChannelRange() const noexcept
+{
+    return instrument->getLegacyModeChannelRange();
+}
+
+void MPESynthesiserBase::setLegacyModeChannelRange (Range<int> channelRange)
+{
+    instrument->setLegacyModeChannelRange (channelRange);
+}
+
+int MPESynthesiserBase::getLegacyModePitchbendRange() const noexcept
+{
+    return instrument->getLegacyModePitchbendRange();
+}
+
+void MPESynthesiserBase::setLegacyModePitchbendRange (int pitchbendRange)
+{
+    instrument->setLegacyModePitchbendRange (pitchbendRange);
 }
 
 //==============================================================================
