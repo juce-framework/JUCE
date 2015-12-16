@@ -841,9 +841,9 @@ public:
 
         if (audioUnit != nullptr)
         {
-            UInt32 dummy = 0, paramListSize = 0;
-            AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
-                                  0, &dummy, &paramListSize);
+            UInt32 paramListSize = 0;
+            AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
+                                      0, &paramListSize, nullptr);
 
             if (paramListSize > 0)
             {
