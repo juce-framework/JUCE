@@ -1348,6 +1348,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_FakeMouseMoveGenerator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeModuleHeaders.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeSystemHeaders.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginBusUtilities.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginHostType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_WindowsHooks.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h"/>

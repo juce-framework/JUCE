@@ -1788,6 +1788,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeSystemHeaders.h">
       <Filter>Juce Modules\juce_audio_plugin_client\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginBusUtilities.h">
+      <Filter>Juce Modules\juce_audio_plugin_client\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginHostType.h">
       <Filter>Juce Modules\juce_audio_plugin_client\utility</Filter>
     </ClInclude>
