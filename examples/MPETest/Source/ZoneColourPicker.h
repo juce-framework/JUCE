@@ -32,14 +32,14 @@ class ZoneColourPicker
 public:
     //==========================================================================
     ZoneColourPicker()
-        : omniModeEnabled (false)
+        : legacyModeEnabled (false)
     {
     }
 
     //==========================================================================
     Colour getColourForMidiChannel (int midiChannel) const noexcept
     {
-        if (omniModeEnabled)
+        if (legacyModeEnabled)
             return Colours::white;
 
         if (zoneLayout.getNumZones() == 0)
@@ -57,7 +57,7 @@ public:
     //==========================================================================
     Colour getColourForZoneIndex (int zoneIndex) const noexcept
     {
-        if (omniModeEnabled)
+        if (legacyModeEnabled)
             return Colours::white;
 
         if (zoneIndex >= zoneLayout.getNumZones())
@@ -79,14 +79,14 @@ public:
 
     //==========================================================================
     void setZoneLayout (MPEZoneLayout layout) noexcept       { zoneLayout = layout; }
-    void setOmniModeEnabled (bool shouldBeEnabled) noexcept  { omniModeEnabled = shouldBeEnabled; }
+    void setLegacyModeEnabled (bool shouldBeEnabled) noexcept  { legacyModeEnabled = shouldBeEnabled; }
 
 private:
     //==========================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZoneColourPicker)
 
     MPEZoneLayout zoneLayout;
-    bool omniModeEnabled;
+    bool legacyModeEnabled;
 };
 
 
