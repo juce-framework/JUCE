@@ -26,26 +26,6 @@ const String FILTERCLASSNAME::getName() const
     return JucePlugin_Name;
 }
 
-const String FILTERCLASSNAME::getInputChannelName (int channelIndex, int elementIndex) const
-{
-    return String (channelIndex + 1);
-}
-
-const String FILTERCLASSNAME::getOutputChannelName (int channelIndex, int elementIndex) const
-{
-    return String (channelIndex + 1);
-}
-
-bool FILTERCLASSNAME::isInputChannelStereoPair (int channelIndex, int elementIndex) const
-{
-    return true;
-}
-
-bool FILTERCLASSNAME::isOutputChannelStereoPair (int channelIndex, int elementIndex) const
-{
-    return true;
-}
-
 bool FILTERCLASSNAME::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput

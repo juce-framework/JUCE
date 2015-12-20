@@ -1450,14 +1450,14 @@ OSStatus			AUBase::DoRender(		AudioUnitRenderActionFlags &	ioActionFlags,
 		}
 		ca_require (!UsesFixedBlockSize() || inFramesToProcess == GetMaxFramesPerSlice(), ParamErr);
 
-		AUOutputElement *output = GetOutput(inBusNumber);	// will throw if non-existant
-		if (output->GetStreamFormat().NumberChannelStreams() != ioData.mNumberBuffers) {
+        AUOutputElement *output = GetScope(kAudioUnitScope_Output).GetNumberOfElements() > 0 ? GetOutput(inBusNumber) : NULL;	// will throw if non-existant
+		if (output != NULL && output->GetStreamFormat().NumberChannelStreams() != ioData.mNumberBuffers) {
 			DebugMessageN4("%s:%d ioData.mNumberBuffers=%u, output->GetStreamFormat().NumberChannelStreams()=%u; kAudio_ParamError",
 				__FILE__, __LINE__, (unsigned)ioData.mNumberBuffers, (unsigned)output->GetStreamFormat().NumberChannelStreams());
 			goto ParamErr;
 		}
 
-		unsigned expectedBufferByteSize = inFramesToProcess * output->GetStreamFormat().mBytesPerFrame;
+        unsigned expectedBufferByteSize = output != NULL ? inFramesToProcess * output->GetStreamFormat().mBytesPerFrame : 0;
 		for (unsigned ibuf = 0; ibuf < ioData.mNumberBuffers; ++ibuf) {
 			AudioBuffer &buf = ioData.mBuffers[ibuf];
 			if (buf.mData != NULL) {

@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{2378A678-1EB9-3DB6-FCAF-F7173539081A}") = "GainPlugIn", "GainPlugIn.vcxproj", "{28138F54-0965-B643-EE96-62B3343E48BA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28138F54-0965-B643-EE96-62B3343E48BA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{28138F54-0965-B643-EE96-62B3343E48BA}.Debug|Win32.Build.0 = Debug|Win32
+		{28138F54-0965-B643-EE96-62B3343E48BA}.Release|Win32.ActiveCfg = Release|Win32
+		{28138F54-0965-B643-EE96-62B3343E48BA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

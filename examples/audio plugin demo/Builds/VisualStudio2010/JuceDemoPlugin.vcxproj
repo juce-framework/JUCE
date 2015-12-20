@@ -340,6 +340,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\sampler\juce_Sampler.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1348,6 +1351,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginHostType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_WindowsHooks.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPluginInstance.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.h"/>

@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{98E35EA1-4B70-60BA-B741-D868DBFF76E9}") = "NoiseGate", "NoiseGate.vcxproj", "{A82B4611-255A-47F5-D745-E5FFE5E70463}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A82B4611-255A-47F5-D745-E5FFE5E70463}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A82B4611-255A-47F5-D745-E5FFE5E70463}.Debug|Win32.Build.0 = Debug|Win32
+		{A82B4611-255A-47F5-D745-E5FFE5E70463}.Release|Win32.ActiveCfg = Release|Win32
+		{A82B4611-255A-47F5-D745-E5FFE5E70463}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

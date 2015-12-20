@@ -836,7 +836,8 @@ public:
         JUCE_VST_LOG ("Initialising VST: " + module->pluginName + " (" + getVersion() + ")");
         initialised = true;
 
-        setPlayConfigDetails (1, effect->numInputs, 1, effect->numOutputs, initialSampleRate, initialBlockSize);
+        setPlayConfigDetails (effect->numInputs, effect->numOutputs,
+                              initialSampleRate, initialBlockSize);
 
         dispatch (effIdentify, 0, 0, 0, 0);
 
@@ -848,8 +849,9 @@ public:
 
         dispatch (effOpen, 0, 0, 0, 0);
 
-        setPlayConfigDetails (1, effect->numInputs, 1, effect->numOutputs, getSampleRate(), getBlockSize());
-        
+        setPlayConfigDetails (effect->numInputs, effect->numOutputs,
+                              getSampleRate(), getBlockSize());
+
         if (getNumPrograms() > 1)
             setCurrentProgram (0);
         else
@@ -910,7 +912,7 @@ public:
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected) override
     {
-        setPlayConfigDetails (1, effect->numInputs, 1, effect->numOutputs, rate, samplesPerBlockExpected);
+        setPlayConfigDetails (effect->numInputs, effect->numOutputs, rate, samplesPerBlockExpected);
 
         vstHostTime.tempo = 120.0;
         vstHostTime.timeSigNumerator = 4;

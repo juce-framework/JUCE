@@ -117,6 +117,7 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
+#include "../utility/juce_PluginBusUtilities.h"
 
 #ifdef _MSC_VER
  #pragma pack (pop)
@@ -278,16 +279,8 @@ public:
     JuceVSTWrapper (audioMasterCallback audioMasterCB, AudioProcessor* const af)
        : AudioEffectX (audioMasterCB, af->getNumPrograms(), af->getNumParameters()),
          filter (af),
+         busUtils (*filter, false),
          chunkMemoryTime (0),
-         speakerIn (kSpeakerArrEmpty),
-         speakerOut (kSpeakerArrEmpty),
-        #if JucePlugin_AcceptsSideChain
-         numInElems (2),
-        #else
-         numInElems (1),
-        #endif
-         numInChans (JucePlugin_MaxNumInputChannels),
-         numOutChans (JucePlugin_MaxNumOutputChannels),
          isProcessing (false),
          isBypassed (false),
          hasShutdown (false),
@@ -301,9 +294,16 @@ public:
         #endif
          hostWindow (0)
     {
-        filter->setPlayConfigDetails (numInElems, numInChans, 1, numOutChans, 0, 0);
-        for (int i = 0; i < numInElems; ++i)
-            filter->setInputElementActive (i, true);
+        busUtils.findAllCompatibleLayouts();
+
+        // VST-2 does not support disabling buses: so always enable all of them
+        if (busUtils.hasDynamicInBuses() || busUtils.hasDynamicOutBuses())
+            busUtils.enableAllBuses();
+
+        const int totalNumInChannels  = busUtils.findTotalNumChannels(true);
+        const int totalNumOutChannels = busUtils.findTotalNumChannels(false);
+
+        filter->setRateAndBufferSizeDetails (0, 0);
         filter->setPlayHead (this);
         filter->addListener (this);
 
@@ -312,8 +312,8 @@ public:
 
         setUniqueID ((int) (JucePlugin_VSTUniqueID));
 
-        setNumInputs (numInChans * numInElems);
-        setNumOutputs (numOutChans);
+        setNumInputs  (totalNumInChannels);
+        setNumOutputs (totalNumOutChannels);
 
         canProcessReplacing (true);
         canDoubleReplacing (filter->supportsDoublePrecisionProcessing());
@@ -467,49 +467,6 @@ public:
         return 0;
     }
 
-    bool getInputProperties (VstInt32 index, VstPinProperties* properties) override
-    {
-        if (filter == nullptr || index >= numInChans * numInElems)
-            return false;
-
-        const int elem = (int) index / numInChans;
-        const int chan = (int) index % numInChans;
-        setPinProperties (*properties, filter->getInputChannelName (chan, elem),
-                          speakerIn, filter->isInputChannelStereoPair (chan, elem));
-        return true;
-    }
-
-    bool getOutputProperties (VstInt32 index, VstPinProperties* properties) override
-    {
-        if (filter == nullptr || index >= JucePlugin_MaxNumOutputChannels)
-            return false;
-
-        setPinProperties (*properties, filter->getOutputChannelName ((int) index),
-                          speakerOut, filter->isOutputChannelStereoPair ((int) index));
-        return true;
-    }
-
-    static void setPinProperties (VstPinProperties& properties, const String& name,
-                                  VstSpeakerArrangementType type, const bool isPair)
-    {
-        name.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
-        name.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
-
-        if (type != kSpeakerArrEmpty)
-        {
-            properties.flags = kVstPinUseSpeaker;
-            properties.arrangementType = type;
-        }
-        else
-        {
-            properties.flags = kVstPinIsActive;
-            properties.arrangementType = 0;
-
-            if (isPair)
-                properties.flags |= kVstPinIsStereo;
-        }
-    }
-
     bool setBypass (bool b) override
     {
         isBypassed = b;
@@ -534,26 +491,6 @@ public:
         (void) events;
         return 0;
        #endif
-    }
-
-    void process (float** inputs, float** outputs, VstInt32 numSamples)
-    {
-        VstTempBuffers<float>& tmpBuffers = floatTempBuffers;
-
-        const int numIn = numInChans * numInElems;
-        const int numOut = numOutChans;
-
-        tmpBuffers.processTempBuffer.setSize (numIn, numSamples, false, false, true);
-
-        for (int i = numIn; --i >= 0;)
-            tmpBuffers.processTempBuffer.copyFrom (i, 0, outputs[i], numSamples);
-
-        processReplacing (inputs, outputs, numSamples);
-
-        AudioSampleBuffer dest (outputs, numOut, numSamples);
-
-        for (int i = jmin (numIn, numOut); --i >= 0;)
-            dest.addFrom (i, 0, tmpBuffers.processTempBuffer, i, 0, numSamples);
     }
 
     template <typename FloatType>
@@ -582,10 +519,10 @@ public:
         jassert (activePlugins.contains (this));
 
         {
-            const ScopedLock sl (filter->getCallbackLock());
+            const int numIn  = filter->getTotalNumInputChannels();
+            const int numOut = filter->getTotalNumOutputChannels();
 
-            const int numIn = numInChans * numInElems;
-            const int numOut = numOutChans;
+            const ScopedLock sl (filter->getCallbackLock());
 
             if (filter->isSuspended())
             {
@@ -723,8 +660,15 @@ public:
         if (filter != nullptr)
         {
             isProcessing = true;
-            floatTempBuffers.channels.calloc ((size_t) (numInChans * numInElems + numOutChans));
-            doubleTempBuffers.channels.calloc ((size_t) (numInChans * numInElems + numOutChans));
+
+            const int numInChans  = filter->busArrangement.getTotalNumInputChannels();
+            const int numOutChans = filter->busArrangement.getTotalNumOutputChannels();
+
+            setNumInputs (numInChans);
+            setNumOutputs (numOutChans);
+
+            floatTempBuffers.channels.calloc ((size_t) (numInChans + numOutChans));
+            doubleTempBuffers.channels.calloc ((size_t) (numInChans + numOutChans));
 
             double rate = getSampleRate();
             jassert (rate > 0);
@@ -737,8 +681,7 @@ public:
             firstProcessCallback = true;
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
-            filter->setPlayConfigDetails (numInElems, numInChans, 1, numOutChans, rate, currentBlockSize);
-            filter->setInputElementActive(0, true);
+            filter->setRateAndBufferSizeDetails (rate, currentBlockSize);
 
             deleteTempChannels();
 
@@ -975,96 +918,296 @@ public:
         return filter != nullptr && filter->isParameterAutomatable ((int) index);
     }
 
-    struct ChannelConfigComparator
-    {
-        static int compareElements (const short* const first, const short* const second) noexcept
-        {
-            if (first[0] < second[0])  return -1;
-            if (first[0] > second[0])  return 1;
-            if (first[1] < second[1])  return -1;
-            if (first[1] > second[1])  return 1;
-            return 0;
-        }
-    };
-
     bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
                                 VstSpeakerArrangement* pluginOutput) override
     {
-        short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
+        if ((busUtils.getBusCount (true)  == 0 || busUtils.busIgnoresLayout(true, 0))
+         && (busUtils.getBusCount (false) == 0 || busUtils.busIgnoresLayout(false, 0)))
+            return false;
 
-        Array<short*> channelConfigsSorted;
-        ChannelConfigComparator comp;
+        if (pluginInput != nullptr && filter->busArrangement.inputBuses.size() == 0)
+            return false;
 
-        for (int i = 0; i < numElementsInArray (channelConfigs); ++i)
-            channelConfigsSorted.addSorted (comp, channelConfigs[i]);
+        if (pluginOutput != nullptr && filter->busArrangement.outputBuses.size() == 0)
+            return false;
 
-        for (int i = channelConfigsSorted.size(); --i >= 0;)
+        PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
+
+        if (pluginInput != nullptr)
         {
-            const short* const config = channelConfigsSorted.getUnchecked(i);
-            bool inCountMatches  = (config[0] == pluginInput->numChannels);
-            bool outCountMatches = (config[1] == pluginOutput->numChannels);
+            AudioChannelSet newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput);
 
-            if (inCountMatches && outCountMatches)
+            if (busUtils.getChannelSet (true, 0) != newType)
+                if (! filter->setPreferredBusArrangement (true, 0, newType))
+                    return false;
+        }
+
+        if (pluginOutput != nullptr)
+        {
+            AudioChannelSet newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput);
+
+            if (busUtils.getChannelSet (false, 0) != newType)
+                if (! filter->setPreferredBusArrangement (false, 0, newType))
+                    return false;
+        }
+
+        busRestorer.release();
+
+        const int totalNumInChannels = busUtils.findTotalNumChannels(true);
+        const int totalNumOutChannels = busUtils.findTotalNumChannels(false);
+
+        filter->setRateAndBufferSizeDetails(0, 0);
+        setNumInputs (totalNumInChannels);
+        setNumOutputs(totalNumOutChannels);
+
+        ioChanged();
+
+        return true;
+    }
+
+    bool getSpeakerArrangement (VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) override
+    {
+        *pluginInput = 0;
+        *pluginOutput = 0;
+
+        if ((busUtils.getBusCount (true)  == 0 || busUtils.busIgnoresLayout(true, 0))
+         && (busUtils.getBusCount (false) == 0 || busUtils.busIgnoresLayout(false, 0)))
+            return false;
+
+        if (! AudioEffectX::allocateArrangement (pluginInput, busUtils.getNumChannels (true, 0)))
+            return false;
+
+        if (! AudioEffectX::allocateArrangement (pluginOutput, busUtils.getNumChannels (false, 0)))
+        {
+            AudioEffectX::deallocateArrangement (pluginInput);
+            *pluginInput = 0;
+            return false;
+        }
+
+        SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (true, 0),  **pluginInput);
+        SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (false, 0), **pluginOutput);
+
+        return true;
+    }
+
+    bool getInputProperties (VstInt32 index, VstPinProperties* properties) override
+    {
+        return filter != nullptr
+                && getPinProperties (*properties, true, (int) index);
+    }
+
+    bool getOutputProperties (VstInt32 index, VstPinProperties* properties) override
+    {
+        return filter != nullptr
+                && getPinProperties (*properties, false, (int) index);
+    }
+
+    bool getPinProperties (VstPinProperties& properties, bool direction, int index) const
+    {
+        // index refers to the absolute index when combining all channels of every bus
+        const int n = busUtils.getBusCount(direction);
+        int busIdx;
+        for (busIdx = 0; busIdx < n; ++busIdx)
+        {
+            const int numChans = busUtils.getNumChannels(direction, busIdx);
+            if (index < numChans)
+                break;
+
+            index -= numChans;
+        }
+
+        if (busIdx >= n)
+            return false;
+
+        const AudioProcessor::AudioProcessorBus& busInfo = busUtils.getFilterBus (direction).getReference (busIdx);
+
+        busInfo.name.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
+        busInfo.name.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
+
+        VstInt32 type = SpeakerMappings::channelSetToVstArrangementType (busInfo.channels);
+
+        if (type != kSpeakerArrEmpty)
+        {
+            properties.flags = kVstPinUseSpeaker | kVstPinIsActive;
+            properties.arrangementType = type;
+        }
+        else
+        {
+            properties.flags = 0;
+            properties.arrangementType = 0;
+        }
+
+        if (busInfo.channels.size() == 2)
+            properties.flags |= kVstPinIsStereo;
+
+        return true;
+    }
+
+    //==============================================================================
+    struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give easier access to items in the namespace)
+    {
+        struct Mapping
+        {
+            VstInt32 vst2;
+            ChannelType channels[13];
+
+            bool matches (const Array<ChannelType>& chans) const noexcept
             {
-                speakerIn  = (VstSpeakerArrangementType) pluginInput->type;
-                speakerOut = (VstSpeakerArrangementType) pluginOutput->type;
-                numInChans  = pluginInput->numChannels;
-                numOutChans = pluginOutput->numChannels;
+                const int n = sizeof (channels) / sizeof (ChannelType);
 
-                filter->setPlayConfigDetails (numInElems, numInChans, 1, numOutChans,
-                                              filter->getSampleRate(),
-                                              filter->getBlockSize());
-                filter->setInputElementActive(0, true);
+                for (int i = 0; i < n; ++i)
+                {
+                    if (channels[i] == unknown)  return (i == chans.size());
+                    if (i == chans.size())       return (channels[i] == unknown);
 
-                filter->setInputSpeakerArrangement (getSpeakerArrangementString (speakerIn));
-                filter->setOutputSpeakerArrangement (getSpeakerArrangementString (speakerOut));
+                    if (channels[i] != chans.getUnchecked(i))
+                        return false;
+                }
+
                 return true;
+            }
+        };
+
+        static AudioChannelSet vstArrangementTypeToChannelSet (const VstSpeakerArrangement& arr)
+        {
+            for (const Mapping* m = getMappings(); m->vst2 != kSpeakerArrEmpty; ++m)
+            {
+                if (m->vst2 == arr.type)
+                {
+                    AudioChannelSet s;
+
+                    for (int i = 0; m->channels[i] != 0; ++i)
+                        s.addChannel (m->channels[i]);
+
+                    return s;
+                }
+            }
+
+            return AudioChannelSet::discreteChannels (arr.numChannels);
+        }
+
+        static VstInt32 channelSetToVstArrangementType (AudioChannelSet channels)
+        {
+            Array<AudioChannelSet::ChannelType> chans (channels.getChannelTypes());
+
+            for (const Mapping* m = getMappings(); m->vst2 != kSpeakerArrEmpty; ++m)
+                if (m->matches (chans))
+                    return m->vst2;
+
+            return kSpeakerArrEmpty;
+        }
+
+        static void channelSetToVstArrangement (const AudioChannelSet& channels, VstSpeakerArrangement& result)
+        {
+            result.type = channelSetToVstArrangementType (channels);
+            result.numChannels = channels.size();
+
+            for (int i = 0; i < result.numChannels; ++i)
+            {
+                VstSpeakerProperties& speaker = result.speakers[i];
+
+                zeromem (&speaker, sizeof (VstSpeakerProperties));
+                speaker.type = getSpeakerType (channels.getTypeOfChannel (i));
             }
         }
 
-        filter->setInputSpeakerArrangement (String::empty);
-        filter->setOutputSpeakerArrangement (String::empty);
-        return false;
-    }
-
-    static const char* getSpeakerArrangementString (VstSpeakerArrangementType type) noexcept
-    {
-        switch (type)
+        static const Mapping* getMappings() noexcept
         {
-            case kSpeakerArrMono:           return "M";
-            case kSpeakerArrStereo:         return "L R";
-            case kSpeakerArrStereoSurround: return "Ls Rs";
-            case kSpeakerArrStereoCenter:   return "Lc Rc";
-            case kSpeakerArrStereoSide:     return "Sl Sr";
-            case kSpeakerArrStereoCLfe:     return "C Lfe";
-            case kSpeakerArr30Cine:         return "L R C";
-            case kSpeakerArr30Music:        return "L R S";
-            case kSpeakerArr31Cine:         return "L R C Lfe";
-            case kSpeakerArr31Music:        return "L R Lfe S";
-            case kSpeakerArr40Cine:         return "L R C S";
-            case kSpeakerArr40Music:        return "L R Ls Rs";
-            case kSpeakerArr41Cine:         return "L R C Lfe S";
-            case kSpeakerArr41Music:        return "L R Lfe Ls Rs";
-            case kSpeakerArr50:             return "L R C Ls Rs" ;
-            case kSpeakerArr51:             return "L R C Lfe Ls Rs";
-            case kSpeakerArr60Cine:         return "L R C Ls Rs Cs";
-            case kSpeakerArr60Music:        return "L R Ls Rs Sl Sr ";
-            case kSpeakerArr61Cine:         return "L R C Lfe Ls Rs Cs";
-            case kSpeakerArr61Music:        return "L R Lfe Ls Rs Sl Sr";
-            case kSpeakerArr70Cine:         return "L R C Ls Rs Lc Rc ";
-            case kSpeakerArr70Music:        return "L R C Ls Rs Sl Sr";
-            case kSpeakerArr71Cine:         return "L R C Lfe Ls Rs Lc Rc";
-            case kSpeakerArr71Music:        return "L R C Lfe Ls Rs Sl Sr";
-            case kSpeakerArr80Cine:         return "L R C Ls Rs Lc Rc Cs";
-            case kSpeakerArr80Music:        return "L R C Ls Rs Cs Sl Sr";
-            case kSpeakerArr81Cine:         return "L R C Lfe Ls Rs Lc Rc Cs";
-            case kSpeakerArr81Music:        return "L R C Lfe Ls Rs Cs Sl Sr" ;
-            case kSpeakerArr102:            return "L R C Lfe Ls Rs Tfl Tfc Tfr Trl Trr Lfe2";
-            default:                        break;
+            static const Mapping mappings[] =
+            {
+                { kSpeakerArrMono,           { centre, unknown } },
+                { kSpeakerArrStereo,         { left, right, unknown } },
+                { kSpeakerArrStereoSurround, { surroundLeft, surroundRight, unknown } },
+                { kSpeakerArrStereoCenter,   { centreLeft, centreRight, unknown } },
+                { kSpeakerArrStereoSide,     { sideLeft, sideRight, unknown } },
+                { kSpeakerArrStereoCLfe,     { centre, subbass, unknown } },
+                { kSpeakerArr30Cine,         { left, right, centre, unknown } },
+                { kSpeakerArr30Music,        { left, right, surround, unknown } },
+                { kSpeakerArr31Cine,         { left, right, centre, subbass, unknown } },
+                { kSpeakerArr31Music,        { left, right, subbass, surround, unknown } },
+                { kSpeakerArr40Cine,         { left, right, centre, surround, unknown } },
+                { kSpeakerArr40Music,        { left, right, surroundLeft, surroundRight, unknown } },
+                { kSpeakerArr41Cine,         { left, right, centre, subbass, surround, unknown } },
+                { kSpeakerArr41Music,        { left, right, subbass, surroundLeft, surroundRight, unknown } },
+                { kSpeakerArr50,             { left, right, centre, surroundLeft, surroundRight, unknown } },
+                { kSpeakerArr51,             { left, right, centre, subbass, surroundLeft, surroundRight, unknown } },
+                { kSpeakerArr60Cine,         { left, right, centre, surroundLeft, surroundRight, surround, unknown } },
+                { kSpeakerArr60Music,        { left, right, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
+                { kSpeakerArr61Cine,         { left, right, centre, subbass, surroundLeft, surroundRight, surround, unknown } },
+                { kSpeakerArr61Music,        { left, right, subbass, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
+                { kSpeakerArr70Cine,         { left, right, centre, surroundLeft, surroundRight, topFrontLeft, topFrontRight, unknown } },
+                { kSpeakerArr70Music,        { left, right, centre, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
+                { kSpeakerArr71Cine,         { left, right, centre, subbass, surroundLeft, surroundRight, topFrontLeft, topFrontRight, unknown } },
+                { kSpeakerArr71Music,        { left, right, centre, subbass, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
+                { kSpeakerArr80Cine,         { left, right, centre, surroundLeft, surroundRight, topFrontLeft, topFrontRight, surround, unknown } },
+                { kSpeakerArr80Music,        { left, right, centre, surroundLeft, surroundRight, surround, sideLeft, sideRight, unknown } },
+                { kSpeakerArr81Cine,         { left, right, centre, subbass, surroundLeft, surroundRight, topFrontLeft, topFrontRight, surround, unknown } },
+                { kSpeakerArr81Music,        { left, right, centre, subbass, surroundLeft, surroundRight, surround, sideLeft, sideRight, unknown } },
+                { kSpeakerArr102,            { left, right, centre, subbass, surroundLeft, surroundRight, topFrontLeft, topFrontCentre, topFrontRight, topRearLeft, topRearRight, subbass2, unknown } },
+                { kSpeakerArrEmpty,          { unknown } }
+            };
+
+            return mappings;
         }
 
-        return nullptr;
-    }
+        static inline VstInt32 getSpeakerType (AudioChannelSet::ChannelType type) noexcept
+        {
+            switch (type)
+            {
+            case AudioChannelSet::ChannelType::left:              return kSpeakerL;
+            case AudioChannelSet::ChannelType::right:             return kSpeakerR;
+            case AudioChannelSet::ChannelType::centre:            return kSpeakerC;
+            case AudioChannelSet::ChannelType::subbass:           return kSpeakerLfe;
+            case AudioChannelSet::ChannelType::surroundLeft:      return kSpeakerLs;
+            case AudioChannelSet::ChannelType::surroundRight:     return kSpeakerRs;
+            case AudioChannelSet::ChannelType::centreLeft:        return kSpeakerLc;
+            case AudioChannelSet::ChannelType::centreRight:       return kSpeakerRc;
+            case AudioChannelSet::ChannelType::surround:          return kSpeakerS;
+            case AudioChannelSet::ChannelType::sideLeft:          return kSpeakerSl;
+            case AudioChannelSet::ChannelType::sideRight:         return kSpeakerSr;
+            case AudioChannelSet::ChannelType::topMiddle:         return kSpeakerTm;
+            case AudioChannelSet::ChannelType::topFrontLeft:      return kSpeakerTfl;
+            case AudioChannelSet::ChannelType::topFrontCentre:    return kSpeakerTfc;
+            case AudioChannelSet::ChannelType::topFrontRight:     return kSpeakerTfr;
+            case AudioChannelSet::ChannelType::topRearLeft:       return kSpeakerTrl;
+            case AudioChannelSet::ChannelType::topRearCentre:     return kSpeakerTrc;
+            case AudioChannelSet::ChannelType::topRearRight:      return kSpeakerTrr;
+            case AudioChannelSet::ChannelType::subbass2:          return kSpeakerLfe2;
+            default: break;
+            }
+
+            return 0;
+        }
+
+        static inline AudioChannelSet::ChannelType getChannelType (VstInt32 type) noexcept
+        {
+            switch (type)
+            {
+            case kSpeakerL:     return AudioChannelSet::ChannelType::left;
+            case kSpeakerR:     return AudioChannelSet::ChannelType::right;
+            case kSpeakerC:     return AudioChannelSet::ChannelType::centre;
+            case kSpeakerLfe:   return AudioChannelSet::ChannelType::subbass;
+            case kSpeakerLs:    return AudioChannelSet::ChannelType::surroundLeft;
+            case kSpeakerRs:    return AudioChannelSet::ChannelType::surroundRight;
+            case kSpeakerLc:    return AudioChannelSet::ChannelType::centreLeft;
+            case kSpeakerRc:    return AudioChannelSet::ChannelType::centreRight;
+            case kSpeakerS:     return AudioChannelSet::ChannelType::surround;
+            case kSpeakerSl:    return AudioChannelSet::ChannelType::sideLeft;
+            case kSpeakerSr:    return AudioChannelSet::ChannelType::sideRight;
+            case kSpeakerTm:    return AudioChannelSet::ChannelType::topMiddle;
+            case kSpeakerTfl:   return AudioChannelSet::ChannelType::topFrontLeft;
+            case kSpeakerTfc:   return AudioChannelSet::ChannelType::topFrontCentre;
+            case kSpeakerTfr:   return AudioChannelSet::ChannelType::topFrontRight;
+            case kSpeakerTrl:   return AudioChannelSet::ChannelType::topRearLeft;
+            case kSpeakerTrc:   return AudioChannelSet::ChannelType::topRearCentre;
+            case kSpeakerTrr:   return AudioChannelSet::ChannelType::topRearRight;
+            case kSpeakerLfe2:  return AudioChannelSet::ChannelType::subbass2;
+            default: break;
+            }
+
+            return AudioChannelSet::ChannelType::unknown;
+        }
+    };
 
     //==============================================================================
     VstInt32 getChunk (void** data, bool onlyStoreCurrentProgramData) override
@@ -1518,14 +1661,13 @@ public:
     //==============================================================================
 private:
     AudioProcessor* filter;
+    PluginBusUtilities busUtils;
     juce::MemoryBlock chunkMemory;
     juce::uint32 chunkMemoryTime;
     ScopedPointer<EditorCompWrapper> editorComp;
     ERect editorSize;
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
-    VstSpeakerArrangementType speakerIn, speakerOut;
-    int numInElems, numInChans, numOutChans;
     bool isProcessing, isBypassed, hasShutdown, isInSizeWindow, firstProcessCallback;
     bool shouldDeleteEditor, useNSView;
     VstTempBuffers<float> floatTempBuffers;
@@ -1594,7 +1736,7 @@ private:
 
         if (filter != nullptr)
         {
-            int numChannels = filter->getTotalNumInputChannels (false) + filter->getNumOutputChannels();
+            int numChannels = filter->getTotalNumInputChannels() + filter->getTotalNumOutputChannels();
             tmpBuffers.tempChannels.insertMultiple (0, nullptr, numChannels);
         }
     }
@@ -1605,6 +1747,7 @@ private:
         deleteTempChannels (doubleTempBuffers);
     }
 
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)
 };
 

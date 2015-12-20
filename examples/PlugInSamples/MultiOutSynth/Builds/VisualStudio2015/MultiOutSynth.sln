@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{80288378-1A13-20F0-EB93-F8BE29E3E901}") = "MultiOutSynth", "MultiOutSynth.vcxproj", "{3F007C72-050D-1DD7-96B9-3053D78EBCBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F007C72-050D-1DD7-96B9-3053D78EBCBC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3F007C72-050D-1DD7-96B9-3053D78EBCBC}.Debug|Win32.Build.0 = Debug|Win32
+		{3F007C72-050D-1DD7-96B9-3053D78EBCBC}.Release|Win32.ActiveCfg = Release|Win32
+		{3F007C72-050D-1DD7-96B9-3053D78EBCBC}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

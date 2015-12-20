@@ -37,11 +37,6 @@ public:
     //==============================================================================
     const String getName() const override;
 
-    const String getInputChannelName (int channelIndex, int elementIndex) const override;
-    const String getOutputChannelName (int channelIndex, int elementIndex) const override;
-    bool isInputChannelStereoPair (int channelIndex, int elementIndex) const override;
-    bool isOutputChannelStereoPair (int channelIndex, int elementIndex) const override;
-
     bool acceptsMidi() const override;
     bool producesMidi() const override;
     bool silenceInProducesSilenceOut() const override;

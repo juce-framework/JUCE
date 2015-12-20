@@ -138,14 +138,12 @@ static int getNumSingleDirectionBussesFor (Vst::IComponent* component,
                                          checkInputs ? Vst::kInput : Vst::kOutput);
 }
 
-/** Gives the number of channels for each bus for a particular type of bus direction and media type */
-static Array<int> getNumSingleDirectionChannelsForEachBusFor (Vst::IComponent* component,
-                                                              bool checkInputs,
-                                                              bool checkAudioChannels)
+/** Gives the total number of channels for a particular type of bus direction and media type */
+static int getNumSingleDirectionChannelsFor (Vst::IComponent* component,
+                                             bool checkInputs,
+                                             bool checkAudioChannels)
 {
     jassert (component != nullptr);
-
-    Array<int> result;
 
     const Vst::BusDirections direction  = checkInputs ? Vst::kInput : Vst::kOutput;
     const Vst::MediaTypes mediaType     = checkAudioChannels ? Vst::kAudio : Vst::kEvent;
@@ -157,23 +155,10 @@ static Array<int> getNumSingleDirectionChannelsForEachBusFor (Vst::IComponent* c
     {
         Vst::BusInfo busInfo;
         warnOnFailure (component->getBusInfo (mediaType, direction, i, busInfo));
-        result.add((int) busInfo.channelCount);
+        numChannels += (int) busInfo.channelCount;
     }
 
-    return result;
-}
-
-/** Gives the total number of channels for a particular type of bus direction and media type */
-static int getNumSingleDirectionChannelsFor (Vst::IComponent* component,
-                                             bool checkInputs,
-                                             bool checkAudioChannels)
-{
-    int result = 0;
-    Array<int> channelsPerBus = getNumSingleDirectionChannelsForEachBusFor(component, checkInputs, checkAudioChannels);
-    for (int i = 0; i < channelsPerBus.size(); ++i) {
-        result += channelsPerBus[i];
-    }
-    return result;
+    return numChannels;
 }
 
 static void setStateForAllBussesOfType (Vst::IComponent* component,
@@ -1750,7 +1735,9 @@ public:
         }
 
         // Needed for having the same sample rate in processBlock(); some plugins need this!
-        setPlayConfigDetails (getNumSingleDirectionChannelsForEachBusFor (component, true, true), getNumSingleDirectionChannelsForEachBusFor (component, false, true), newSampleRate, estimatedSamplesPerBlock);
+        setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
+                              getNumSingleDirectionChannelsFor (component, false, true),
+                              newSampleRate, estimatedSamplesPerBlock);
 
         setStateForAllBusses (true);
 
@@ -2393,8 +2380,8 @@ private:
         numInputAudioBusses = getNumSingleDirectionBussesFor (component, true, true);
         numOutputAudioBusses = getNumSingleDirectionBussesFor (component, false, true);
 
-        setPlayConfigDetails (getNumSingleDirectionChannelsForEachBusFor (component, true, true),
-                              getNumSingleDirectionChannelsForEachBusFor (component, false, true),
+        setPlayConfigDetails (getNumSingleDirectionChannelsFor (component, true, true),
+                              getNumSingleDirectionChannelsFor (component, false, true),
                               setup.sampleRate, (int) setup.maxSamplesPerBlock);
     }
 

@@ -51,18 +51,6 @@
  #error "You need to define the JucePlugin_WantsMidiInput value!"
 #endif
 
-#ifndef JucePlugin_MaxNumInputChannels
- #error "You need to define the JucePlugin_MaxNumInputChannels value!"
-#endif
-
-#ifndef JucePlugin_MaxNumOutputChannels
- #error "You need to define the JucePlugin_MaxNumOutputChannels value!"
-#endif
-
-#ifndef JucePlugin_PreferredChannelConfigurations
- #error "You need to define the JucePlugin_PreferredChannelConfigurations value!"
-#endif
-
 #ifdef JucePlugin_Latency
  #error "JucePlugin_Latency is now deprecated - instead, call the AudioProcessor::setLatencySamples() method if your plugin has a non-zero delay"
 #endif

@@ -311,10 +311,6 @@ public:
         void processBlock (AudioBuffer<double>&, MidiBuffer&) override;
         bool supportsDoublePrecisionProcessing() const override;
 
-        const String getInputChannelName (int channelIndex, int elementIndex) const override;
-        const String getOutputChannelName (int channelIndex, int elementIndex) const override;
-        bool isInputChannelStereoPair (int channelIndex, int elementIndex) const override;
-        bool isOutputChannelStereoPair (int channelIndex, int elementIndex) const override;
         bool silenceInProducesSilenceOut() const override;
         double getTailLengthSeconds() const override;
         bool acceptsMidi() const override;
@@ -357,11 +353,6 @@ public:
     void reset() override;
     void setNonRealtime (bool) noexcept override;
     void setPlayHead (AudioPlayHead*) override;
-
-    const String getInputChannelName (int, int) const override;
-    const String getOutputChannelName (int, int) const override;
-    bool isInputChannelStereoPair (int channelIndex, int elementIndex) const override;
-    bool isOutputChannelStereoPair (int channelIndex, int elementIndex) const override;
 
     bool silenceInProducesSilenceOut() const override;
     double getTailLengthSeconds() const override;
