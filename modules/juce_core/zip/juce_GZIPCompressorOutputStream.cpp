@@ -85,7 +85,7 @@ private:
 
         if (streamIsValid)
         {
-            stream.next_in   = const_cast <uint8*> (data);
+            stream.next_in   = const_cast<uint8*> (data);
             stream.next_out  = buffer;
             stream.avail_in  = (z_uInt) dataSize;
             stream.avail_out = (z_uInt) sizeof (buffer);
@@ -144,7 +144,7 @@ bool GZIPCompressorOutputStream::write (const void* destBuffer, size_t howMany)
 {
     jassert (destBuffer != nullptr && (ssize_t) howMany >= 0);
 
-    return helper->write (static_cast <const uint8*> (destBuffer), howMany, *destStream);
+    return helper->write (static_cast<const uint8*> (destBuffer), howMany, *destStream);
 }
 
 int64 GZIPCompressorOutputStream::getPosition()

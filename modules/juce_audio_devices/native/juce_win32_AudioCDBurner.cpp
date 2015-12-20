@@ -367,7 +367,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
 
     hr = pimpl->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
 
-    HeapBlock <byte> buffer (bytesPerBlock);
+    HeapBlock<byte> buffer (bytesPerBlock);
     AudioSampleBuffer sourceBuffer (2, samplesPerBlock);
     int samplesDone = 0;
 

@@ -116,7 +116,7 @@ public:
     static void CALLBACK midiInCallback (HMIDIIN, UINT uMsg, DWORD_PTR dwInstance,
                                          DWORD_PTR midiMessage, DWORD_PTR timeStamp)
     {
-        MidiInCollector* const collector = reinterpret_cast <MidiInCollector*> (dwInstance);
+        MidiInCollector* const collector = reinterpret_cast<MidiInCollector*> (dwInstance);
 
         if (activeMidiCollectors.contains (collector))
         {
@@ -270,8 +270,8 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
         }
     }
 
-    ScopedPointer <MidiInput> in (new MidiInput (name));
-    ScopedPointer <MidiInCollector> collector (new MidiInCollector (in, *callback));
+    ScopedPointer<MidiInput> in (new MidiInput (name));
+    ScopedPointer<MidiInCollector> collector (new MidiInCollector (in, *callback));
 
     HMIDIIN h;
     MMRESULT err = midiInOpen (&h, deviceId,

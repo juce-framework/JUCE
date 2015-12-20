@@ -97,7 +97,7 @@ public:
             return true;
 
         for (int i = subElements.size(); --i >= 0;)
-            if (PaintElementGroup* pg = dynamic_cast <PaintElementGroup*> (subElements.getUnchecked(i)))
+            if (PaintElementGroup* pg = dynamic_cast<PaintElementGroup*> (subElements.getUnchecked(i)))
                 if (pg->containsElement (element))
                     return true;
 

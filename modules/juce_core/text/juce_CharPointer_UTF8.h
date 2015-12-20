@@ -41,7 +41,7 @@ public:
     typedef char CharType;
 
     inline explicit CharPointer_UTF8 (const CharType* const rawPointer) noexcept
-        : data (const_cast <CharType*> (rawPointer))
+        : data (const_cast<CharType*> (rawPointer))
     {
     }
 
@@ -58,7 +58,7 @@ public:
 
     inline CharPointer_UTF8 operator= (const CharType* text) noexcept
     {
-        data = const_cast <CharType*> (text);
+        data = const_cast<CharType*> (text);
         return *this;
     }
 
@@ -542,7 +542,7 @@ public:
     /** Atomically swaps this pointer for a new value, returning the previous value. */
     CharPointer_UTF8 atomicSwap (const CharPointer_UTF8 newValue)
     {
-        return CharPointer_UTF8 (reinterpret_cast <Atomic<CharType*>&> (data).exchange (newValue.data));
+        return CharPointer_UTF8 (reinterpret_cast<Atomic<CharType*>&> (data).exchange (newValue.data));
     }
 
     /** These values are the byte-order mark (BOM) values for a UTF-8 stream. */

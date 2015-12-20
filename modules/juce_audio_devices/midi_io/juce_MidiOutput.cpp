@@ -40,6 +40,16 @@ MidiOutput::MidiOutput(const String& midiName)
 {
 }
 
+void MidiOutput::sendBlockOfMessagesNow (const MidiBuffer& buffer)
+{
+    MidiBuffer::Iterator i (buffer);
+    MidiMessage message;
+    int samplePosition; // Note: not actually used, so no need to initialise.
+
+    while (i.getNextEvent (message, samplePosition))
+        sendMessageNow (message);
+}
+
 void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
                                       const double millisecondCounterToStartAt,
                                       double samplesPerSecondForBuffer)

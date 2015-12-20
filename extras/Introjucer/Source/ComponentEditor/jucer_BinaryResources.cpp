@@ -187,7 +187,7 @@ void BinaryResources::remove (const int i)
 
 const Drawable* BinaryResources::getDrawable (const String& name) const
 {
-    if (BinaryResources::BinaryResource* const res = const_cast <BinaryResources::BinaryResource*> (getResource (name)))
+    if (BinaryResources::BinaryResource* const res = const_cast<BinaryResources::BinaryResource*> (getResource (name)))
     {
         if (res->drawable == nullptr && res->data.getSize() > 0)
             res->drawable = Drawable::createFromImageData (res->data.getData(),

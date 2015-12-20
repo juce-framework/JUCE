@@ -181,8 +181,8 @@ private:
     WeakReference<InterprocessConnection>::Master masterReference;
     friend class WeakReference<InterprocessConnection>;
     CriticalSection pipeAndSocketLock;
-    ScopedPointer <StreamingSocket> socket;
-    ScopedPointer <NamedPipe> pipe;
+    ScopedPointer<StreamingSocket> socket;
+    ScopedPointer<NamedPipe> pipe;
     bool callbackConnectionState;
     const bool useMessageThread;
     const uint32 magicMessageHeader;

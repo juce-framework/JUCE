@@ -100,7 +100,7 @@ private:
     KnownPluginList::SortMethod pluginSortMethod;
 
     class PluginListWindow;
-    ScopedPointer <PluginListWindow> pluginListWindow;
+    ScopedPointer<PluginListWindow> pluginListWindow;
 
     void showAudioSettings();
 

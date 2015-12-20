@@ -51,7 +51,7 @@ public:
     void pushMidiData (const void* inputData, int numBytes, double time,
                        UserDataType* input, CallbackType& callback)
     {
-        const uint8* d = static_cast <const uint8*> (inputData);
+        const uint8* d = static_cast<const uint8*> (inputData);
 
         while (numBytes > 0)
         {

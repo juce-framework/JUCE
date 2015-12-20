@@ -40,7 +40,7 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
       updateBoundsReentrant (false)
 {
     for (int i = 0; i < other.getNumChildComponents(); ++i)
-        if (const Drawable* const d = dynamic_cast <const Drawable*> (other.getChildComponent(i)))
+        if (const Drawable* const d = dynamic_cast<const Drawable*> (other.getChildComponent(i)))
             addAndMakeVisible (d->createCopy());
 }
 
@@ -60,7 +60,7 @@ Rectangle<float> DrawableComposite::getDrawableBounds() const
     Rectangle<float> r;
 
     for (int i = getNumChildComponents(); --i >= 0;)
-        if (const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i)))
+        if (const Drawable* const d = dynamic_cast<const Drawable*> (getChildComponent(i)))
             r = r.getUnion (d->isTransformed() ? d->getDrawableBounds().transformedBy (d->getTransform())
                                                : d->getDrawableBounds());
 
@@ -314,7 +314,7 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
 
     for (int i = 0; i < getNumChildComponents(); ++i)
     {
-        const Drawable* const d = dynamic_cast <const Drawable*> (getChildComponent(i));
+        const Drawable* const d = dynamic_cast<const Drawable*> (getChildComponent(i));
         jassert (d != nullptr); // You can't save a mix of Drawables and normal components!
 
         childList.addChild (d->createValueTree (imageProvider), -1, nullptr);

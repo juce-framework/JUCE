@@ -478,7 +478,7 @@ public:
 
         if (svgFileStream != nullptr)
         {
-            svgDrawable = dynamic_cast <DrawableComposite*> (Drawable::createFromImageDataStream (*svgFileStream));
+            svgDrawable = dynamic_cast<DrawableComposite*> (Drawable::createFromImageDataStream (*svgFileStream));
 
             if (svgDrawable != nullptr)
             {

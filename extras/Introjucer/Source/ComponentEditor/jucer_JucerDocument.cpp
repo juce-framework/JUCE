@@ -555,7 +555,7 @@ bool JucerDocument::flushChangesToDocuments()
 
     OpenDocumentManager& odm = IntrojucerApp::getApp().openDocumentManager;
 
-    if (SourceCodeDocument* header = dynamic_cast <SourceCodeDocument*> (odm.openFile (nullptr, getHeaderFile())))
+    if (SourceCodeDocument* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, getHeaderFile())))
     {
         String existingHeader (header->getCodeDocument().getAllContent());
         String existingCpp (cpp->getCodeDocument().getAllContent());
@@ -733,9 +733,9 @@ public:
 
             OpenDocumentManager& odm = IntrojucerApp::getApp().openDocumentManager;
 
-            if (SourceCodeDocument* cpp = dynamic_cast <SourceCodeDocument*> (odm.openFile (nullptr, cppFile)))
+            if (SourceCodeDocument* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, cppFile)))
             {
-                if (SourceCodeDocument* header = dynamic_cast <SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
+                if (SourceCodeDocument* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
                 {
                     ScopedPointer<JucerDocument> jucerDoc (new ComponentDocument (cpp));
 

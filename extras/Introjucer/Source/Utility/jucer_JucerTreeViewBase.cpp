@@ -215,7 +215,7 @@ void JucerTreeViewBase::handlePopupMenuResult (int)
 ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const
 {
     for (Component* c = getOwnerView(); c != nullptr; c = c->getParentComponent())
-        if (ProjectContentComponent* pcc = dynamic_cast <ProjectContentComponent*> (c))
+        if (ProjectContentComponent* pcc = dynamic_cast<ProjectContentComponent*> (c))
             return pcc;
 
     return nullptr;

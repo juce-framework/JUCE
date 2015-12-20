@@ -137,7 +137,7 @@ void MultiDocumentPanel::addWindow (Component* component)
     dw->setName (component->getName());
 
     const var bkg (component->getProperties() ["mdiDocumentBkg_"]);
-    dw->setBackgroundColour (bkg.isVoid() ? backgroundColour : Colour ((uint32) static_cast <int> (bkg)));
+    dw->setBackgroundColour (bkg.isVoid() ? backgroundColour : Colour ((uint32) static_cast<int> (bkg)));
 
     int x = 4;
 
@@ -161,7 +161,7 @@ bool MultiDocumentPanel::addDocument (Component* const component,
 {
     // If you try passing a full DocumentWindow or ResizableWindow in here, you'll end up
     // with a frame-within-a-frame! Just pass in the bare content component.
-    jassert (dynamic_cast <ResizableWindow*> (component) == nullptr);
+    jassert (dynamic_cast<ResizableWindow*> (component) == nullptr);
 
     if (component == nullptr || (maximumNumDocuments > 0 && components.size() >= maximumNumDocuments))
         return false;
@@ -239,7 +239,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                if (MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)))
+                if (MultiDocumentPanelWindow* const dw = dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)))
                 {
                     if (dw->getContentComponent() == component)
                     {
@@ -258,7 +258,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             {
                 for (int i = getNumChildComponents(); --i >= 0;)
                 {
-                    ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)));
+                    ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)));
 
                     if (dw != nullptr)
                         dw->clearContentComponent();
@@ -325,7 +325,7 @@ Component* MultiDocumentPanel::getActiveDocument() const noexcept
     if (mode == FloatingWindows)
     {
         for (int i = getNumChildComponents(); --i >= 0;)
-            if (MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)))
+            if (MultiDocumentPanelWindow* const dw = dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)))
                 if (dw->isActiveWindow())
                     return dw->getContentComponent();
     }
@@ -397,7 +397,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)));
+                ScopedPointer<MultiDocumentPanelWindow> dw (dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)));
 
                 if (dw != nullptr)
                 {
@@ -417,7 +417,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
             Component* const c = tempComps.getUnchecked(i);
 
             addDocument (c,
-                         Colour ((uint32) static_cast <int> (c->getProperties().getWithDefault ("mdiDocumentBkg_", (int) Colours::white.getARGB()))),
+                         Colour ((uint32) static_cast<int> (c->getProperties().getWithDefault ("mdiDocumentBkg_", (int) Colours::white.getARGB()))),
                          MultiDocHelpers::shouldDeleteComp (c));
         }
     }
@@ -455,7 +455,7 @@ Component* MultiDocumentPanel::getContainerComp (Component* c) const
     if (mode == FloatingWindows)
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
-            if (MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)))
+            if (MultiDocumentPanelWindow* const dw = dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)))
                 if (dw->getContentComponent() == c)
                     return dw;
     }
@@ -468,7 +468,7 @@ void MultiDocumentPanel::componentNameChanged (Component&)
     if (mode == FloatingWindows)
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
-            if (MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)))
+            if (MultiDocumentPanelWindow* const dw = dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)))
                 dw->setName (dw->getContentComponent()->getName());
     }
     else if (tabComponent != nullptr)
@@ -487,7 +487,7 @@ void MultiDocumentPanel::updateOrder()
         components.clear();
 
         for (int i = 0; i < getNumChildComponents(); ++i)
-            if (MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i)))
+            if (MultiDocumentPanelWindow* const dw = dynamic_cast<MultiDocumentPanelWindow*> (getChildComponent (i)))
                 components.add (dw->getContentComponent());
     }
     else

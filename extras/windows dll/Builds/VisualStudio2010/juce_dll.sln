@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{B40FC5AD-41E3-CB0C-5754-CA2E7CC2920B}") = "juce_dll", "juce_dll.vcxproj", "{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Debug|Win32.Build.0 = Debug|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Release|Win32.ActiveCfg = Release|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

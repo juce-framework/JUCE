@@ -256,7 +256,7 @@ static void registerRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    ScopedPointer <XmlElement> xml (XmlDocument::parse (file));
+    ScopedPointer<XmlElement> xml (XmlDocument::parse (file));
 
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");

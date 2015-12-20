@@ -45,7 +45,7 @@ public:
 
     void setValue (const var& newValue)
     {
-        const var remappedVal (mappings [static_cast <int> (newValue) - 1]);
+        const var remappedVal (mappings [static_cast<int> (newValue) - 1]);
 
         if (! remappedVal.equalsWithSameType (sourceValue))
             sourceValue = remappedVal;

@@ -491,7 +491,7 @@ private:
                 {
                     if (juce::Component* focused = juce::Component::getCurrentlyFocusedComponent())
                     {
-                        if (juce::NSViewComponentPeer* peer = dynamic_cast <juce::NSViewComponentPeer*> (focused->getPeer()))
+                        if (juce::NSViewComponentPeer* peer = dynamic_cast<juce::NSViewComponentPeer*> (focused->getPeer()))
                         {
                             if ([e type] == NSKeyDown)
                                 peer->redirectKeyDown (e);

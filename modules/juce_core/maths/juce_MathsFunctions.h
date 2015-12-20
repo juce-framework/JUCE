@@ -215,7 +215,7 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
     @param valueToConstrain     the value to try to return
     @returns    the closest value to valueToConstrain which lies between lowerLimit
                 and upperLimit (inclusive)
-    @see jlimit0To, jmin, jmax
+    @see jmin, jmax, jmap
 */
 template <typename Type>
 Type jlimit (const Type lowerLimit,
@@ -245,7 +245,7 @@ template <>
 inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
-    return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
+    return static_cast<unsigned int> (valueToTest) < static_cast<unsigned int> (upperLimit);
 }
 
 /** Returns true if a value is at least zero, and also less than or equal to a specified upper limit.
@@ -264,7 +264,7 @@ template <>
 inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
-    return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
+    return static_cast<unsigned int> (valueToTest) <= static_cast<unsigned int> (upperLimit);
 }
 
 //==============================================================================

@@ -101,8 +101,8 @@ public:
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
-        props.add (new GenericCompClassProperty (dynamic_cast <GenericComponent*> (component), document));
-        props.add (new GenericCompParamsProperty (dynamic_cast <GenericComponent*> (component), document));
+        props.add (new GenericCompClassProperty (dynamic_cast<GenericComponent*> (component), document));
+        props.add (new GenericCompParamsProperty (dynamic_cast<GenericComponent*> (component), document));
     }
 
     String getClassName (Component* comp) const

@@ -126,7 +126,7 @@ public:
         colours that it added.
         When calling this, the ColourGradient must have at least 2 colour stops specified.
     */
-    int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const;
+    int createLookupTable (const AffineTransform& transform, HeapBlock<PixelARGB>& resultLookupTable) const;
 
     /** Creates a set of interpolated premultiplied ARGB values.
         This will fill an array of a user-specified size with the gradient, interpolating to fit.

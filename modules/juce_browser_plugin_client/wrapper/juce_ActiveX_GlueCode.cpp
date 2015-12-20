@@ -318,7 +318,7 @@ public:
         DISPID id = 0;
         if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
-            HeapBlock <VARIANT> params;
+            HeapBlock<VARIANT> params;
             params.calloc (args.numArguments + 1);
 
             for (int i = 0; i < args.numArguments; ++i)
@@ -548,7 +548,7 @@ static String getExeVersion (const String& exeFileName, const String& fieldName)
 
     if (size > 0)
     {
-        HeapBlock <char> exeInfo;
+        HeapBlock<char> exeInfo;
         exeInfo.calloc (size);
 
         if (GetFileVersionInfo (exeFileName.toUTF16(), 0, size, exeInfo))

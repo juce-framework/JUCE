@@ -178,7 +178,7 @@ String SystemStats::getCpuVendor()
 
     SystemStatsHelpers::doCPUID (dummy, vendor[0], vendor[2], vendor[1], 0);
 
-    return String (reinterpret_cast <const char*> (vendor), 12);
+    return String (reinterpret_cast<const char*> (vendor), 12);
    #else
     return String();
    #endif

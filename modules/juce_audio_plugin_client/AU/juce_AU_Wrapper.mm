@@ -719,8 +719,6 @@ public:
         info.editOriginTime = 0;
         info.ppqPositionOfLastBarStart = 0;
         info.isRecording = false;
-        info.ppqLoopStart = 0;
-        info.ppqLoopEnd = 0;
 
         switch (lastTimeStamp.mSMPTETime.mType)
         {
@@ -730,8 +728,6 @@ public:
             case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30; break;
             case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997; break;
             case kSMPTETimeType2997Drop:    info.frameRate = AudioPlayHead::fps2997drop; break;
-            //case kSMPTETimeType60:
-            //case kSMPTETimeType5994:
             default:                        info.frameRate = AudioPlayHead::fpsUnknown; break;
         }
 
@@ -754,7 +750,7 @@ public:
             info.ppqPositionOfLastBarStart = outCurrentMeasureDownBeat;
         }
 
-        double outCurrentSampleInTimeLine, outCycleStartBeat, outCycleEndBeat;
+        double outCurrentSampleInTimeLine, outCycleStartBeat = 0, outCycleEndBeat = 0;
         Boolean playing = false, looping = false, playchanged;
 
         if (CallHostTransportState (&playing,
@@ -772,6 +768,8 @@ public:
         info.timeInSamples = (int64) (outCurrentSampleInTimeLine + 0.5);
         info.timeInSeconds = info.timeInSamples / getSampleRate();
         info.isLooping = looping;
+        info.ppqLoopStart = outCycleStartBeat;
+        info.ppqLoopEnd = outCycleEndBeat;
 
         return true;
     }

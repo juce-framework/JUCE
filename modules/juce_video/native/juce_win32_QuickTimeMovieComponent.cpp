@@ -389,7 +389,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
     props[prop].propValueAddress = &dr;
     ++prop;
 
-    FileInputStream* const fin = dynamic_cast <FileInputStream*> (input);
+    FileInputStream* const fin = dynamic_cast<FileInputStream*> (input);
 
     if (fin != nullptr)
     {
@@ -452,7 +452,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
 bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
                                          const bool isControllerVisible)
 {
-    const bool ok = loadMovie (static_cast <InputStream*> (movieFile_.createInputStream()), isControllerVisible);
+    const bool ok = loadMovie (static_cast<InputStream*> (movieFile_.createInputStream()), isControllerVisible);
     movieFile = movieFile_;
     return ok;
 }
@@ -460,7 +460,7 @@ bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
 bool QuickTimeMovieComponent::loadMovie (const URL& movieURL,
                                          const bool isControllerVisible)
 {
-    return loadMovie (static_cast <InputStream*> (movieURL.createInputStream (false)), isControllerVisible);
+    return loadMovie (static_cast<InputStream*> (movieURL.createInputStream (false)), isControllerVisible);
 }
 
 void QuickTimeMovieComponent::goToStart()

@@ -281,7 +281,7 @@ public:
         while (e != endPointer)
         {
             if (objectToLookFor == *e)
-                return static_cast <int> (e - data.elements.getData());
+                return static_cast<int> (e - data.elements.getData());
 
             ++e;
         }

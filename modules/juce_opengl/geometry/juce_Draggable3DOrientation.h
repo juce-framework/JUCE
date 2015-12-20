@@ -33,8 +33,8 @@
 class Draggable3DOrientation
 {
 public:
-    typedef Vector3D<GLfloat> VectorType;
-    typedef Quaternion<GLfloat> QuaternionType;
+    typedef Vector3D<float> VectorType;
+    typedef Quaternion<float> QuaternionType;
 
     /** Creates a Draggable3DOrientation, initially set up to be aligned along the X axis. */
     Draggable3DOrientation (float objectRadius = 0.5f) noexcept
@@ -44,7 +44,7 @@ public:
     }
 
     /** Creates a Draggable3DOrientation from a user-supplied quaternion. */
-    Draggable3DOrientation (const Quaternion<GLfloat>& quaternionToUse,
+    Draggable3DOrientation (const Quaternion<float>& quaternionToUse,
                             float objectRadius = 0.5f) noexcept
         : radius (jmax (0.1f, objectRadius)),
           quaternion (quaternionToUse)
@@ -102,7 +102,7 @@ public:
     /** Returns the matrix that should be used to apply the current orientation.
         @see applyToOpenGLMatrix
     */
-    Matrix3D<GLfloat> getRotationMatrix() const noexcept
+    Matrix3D<float> getRotationMatrix() const noexcept
     {
         return quaternion.getRotationMatrix();
     }
@@ -133,8 +133,8 @@ private:
 
     VectorType projectOnSphere (const Point<float> pos) const noexcept
     {
-        const GLfloat radiusSquared = radius * radius;
-        const GLfloat xySquared = pos.x * pos.x + pos.y * pos.y;
+        const float radiusSquared = radius * radius;
+        const float xySquared = pos.x * pos.x + pos.y * pos.y;
 
         return VectorType (pos.x, pos.y,
                            xySquared < radiusSquared * 0.5f ? std::sqrt (radiusSquared - xySquared)
@@ -148,7 +148,7 @@ private:
         if (rotationAxis.lengthIsBelowEpsilon())
             rotationAxis = VectorType::xAxis();
 
-        const GLfloat d = jlimit (-1.0f, 1.0f, (from - to).length() / (2.0f * radius));
+        const float d = jlimit (-1.0f, 1.0f, (from - to).length() / (2.0f * radius));
 
         return QuaternionType::fromAngle (2.0f * std::asin (d), rotationAxis);
     }

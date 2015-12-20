@@ -93,7 +93,7 @@ public:
             you'd like the dialog to automatically delete the component when the dialog
             has terminated.
         */
-        OptionalScopedPointer <Component> content;
+        OptionalScopedPointer<Component> content;
 
         /** If this is not a nullptr, it indicates a component that you'd like to position this
             dialog box in front of. See the DocumentWindow::centreAroundComponent() method for

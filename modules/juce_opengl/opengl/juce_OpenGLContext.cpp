@@ -914,7 +914,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
             static const OverlayShaderProgram& select (OpenGLContext& context)
             {
                 static const char programValueID[] = "juceGLComponentOverlayShader";
-                OverlayShaderProgram* program = static_cast <OverlayShaderProgram*> (context.getAssociatedObject (programValueID));
+                OverlayShaderProgram* program = static_cast<OverlayShaderProgram*> (context.getAssociatedObject (programValueID));
 
                 if (program == nullptr)
                 {

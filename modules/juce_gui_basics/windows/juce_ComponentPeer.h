@@ -269,6 +269,11 @@ public:
     */
     bool handleKeyPress (int keyCode, juce_wchar textCharacter);
 
+    /** Called when a key is pressed.
+        Returns true if the keystroke was used.
+    */
+    bool handleKeyPress (const KeyPress& key);
+
     /** Called whenever a key is pressed or released.
         Returns true if the keystroke was used.
     */

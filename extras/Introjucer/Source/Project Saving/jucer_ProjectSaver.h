@@ -278,7 +278,7 @@ private:
 
     void writeMainProjectFile()
     {
-        ScopedPointer <XmlElement> xml (project.getProjectRoot().createXml());
+        ScopedPointer<XmlElement> xml (project.getProjectRoot().createXml());
         jassert (xml != nullptr);
 
         if (xml != nullptr)

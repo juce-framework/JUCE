@@ -78,7 +78,7 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        GroupComponent* const g = dynamic_cast <GroupComponent*> (component);
+        GroupComponent* const g = dynamic_cast<GroupComponent*> (component);
 
         String s;
 

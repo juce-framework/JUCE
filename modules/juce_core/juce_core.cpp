@@ -114,6 +114,8 @@
  #include <android/log.h>
 #endif
 
+#undef check
+
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION
  JUCE_COMPILER_WARNING ("Please re-save your Introjucer project with the latest Introjucer version to avoid this warning")

@@ -325,7 +325,7 @@ String RolloverHelpComp::findTip (Component* c)
 {
     while (c != nullptr)
     {
-        if (TooltipClient* const tc = dynamic_cast <TooltipClient*> (c))
+        if (TooltipClient* const tc = dynamic_cast<TooltipClient*> (c))
         {
             const String tip (tc->getTooltip());
 

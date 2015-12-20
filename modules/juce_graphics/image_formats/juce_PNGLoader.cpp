@@ -63,6 +63,7 @@ namespace pnglibNamespace
    #pragma clang diagnostic ignored "-Wsign-conversion"
   #endif
 
+  #undef check
   using std::abs;
   #define NO_DUMMY_DECL
   #define PNGLCONF_H 1

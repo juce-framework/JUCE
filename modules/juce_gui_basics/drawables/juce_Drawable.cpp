@@ -42,7 +42,7 @@ Drawable::~Drawable()
 //==============================================================================
 void Drawable::draw (Graphics& g, float opacity, const AffineTransform& transform) const
 {
-    const_cast <Drawable*> (this)->nonConstDraw (g, opacity, transform);
+    const_cast<Drawable*> (this)->nonConstDraw (g, opacity, transform);
 }
 
 void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform)
@@ -83,7 +83,7 @@ void Drawable::drawWithin (Graphics& g, const Rectangle<float>& destArea,
 //==============================================================================
 DrawableComposite* Drawable::getParent() const
 {
-    return dynamic_cast <DrawableComposite*> (getParentComponent());
+    return dynamic_cast<DrawableComposite*> (getParentComponent());
 }
 
 void Drawable::transformContextToCorrectOrigin (Graphics& g)
@@ -150,11 +150,11 @@ Drawable* Drawable::createFromImageData (const void* data, const size_t numBytes
         const String asString (String::createStringFromData (data, (int) numBytes));
 
         XmlDocument doc (asString);
-        ScopedPointer <XmlElement> outer (doc.getDocumentElement (true));
+        ScopedPointer<XmlElement> outer (doc.getDocumentElement (true));
 
         if (outer != nullptr && outer->hasTagName ("svg"))
         {
-            ScopedPointer <XmlElement> svg (doc.getDocumentElement());
+            ScopedPointer<XmlElement> svg (doc.getDocumentElement());
 
             if (svg != nullptr)
                 result = Drawable::createFromSVG (*svg);
@@ -202,7 +202,7 @@ public:
 
     void updateComponentFromState (Component* component, const ValueTree& state)
     {
-        DrawableClass* const d = dynamic_cast <DrawableClass*> (component);
+        DrawableClass* const d = dynamic_cast<DrawableClass*> (component);
         jassert (d != nullptr);
         d->refreshFromValueTree (state, *this->getBuilder());
     }
@@ -224,7 +224,7 @@ Drawable* Drawable::createFromValueTree (const ValueTree& tree, ComponentBuilder
     registerDrawableTypeHandlers (builder);
 
     ScopedPointer<Component> comp (builder.createComponent());
-    Drawable* const d = dynamic_cast<Drawable*> (static_cast <Component*> (comp));
+    Drawable* const d = dynamic_cast<Drawable*> (static_cast<Component*> (comp));
 
     if (d != nullptr)
         comp.release();

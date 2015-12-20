@@ -29,6 +29,7 @@
 //==============================================================================
 #if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
 
+#include "../../juce_core/native/juce_mac_ClangBugWorkaround.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"

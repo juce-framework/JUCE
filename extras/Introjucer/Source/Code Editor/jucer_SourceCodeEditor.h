@@ -104,7 +104,7 @@ public:
 
             MemoryBlock mb;
             if (file.loadFileAsData (mb)
-                 && seemsToBeText (static_cast <const char*> (mb.getData()), (int) mb.getSize())
+                 && seemsToBeText (static_cast<const char*> (mb.getData()), (int) mb.getSize())
                  && ! file.hasFileExtension ("svg"))
                 return true;
 

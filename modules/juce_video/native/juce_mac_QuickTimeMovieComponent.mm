@@ -51,7 +51,7 @@ private:
 };
 
 //==============================================================================
-#define theMovie (static_cast <QTMovie*> (movie))
+#define theMovie (static_cast<QTMovie*> (movie))
 
 //==============================================================================
 QuickTimeMovieComponent::QuickTimeMovieComponent()
@@ -86,7 +86,7 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
 
     QTMovie* movie = nil;
 
-    if (FileInputStream* const fin = dynamic_cast <FileInputStream*> (movieStream))
+    if (FileInputStream* const fin = dynamic_cast<FileInputStream*> (movieStream))
     {
         movieFile = fin->getFile();
         movie = [QTMovie movieWithFile: juceStringToNS (movieFile.getFullPathName())

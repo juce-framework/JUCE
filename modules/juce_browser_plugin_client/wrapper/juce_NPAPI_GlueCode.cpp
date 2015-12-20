@@ -1154,9 +1154,7 @@ NPError NPP_SetValue (NPP npp, NPNVariable variable, void* value)
 //==============================================================================
 static NPP getInstance (const BrowserPluginComponent* bpc)
 {
-    BrowserPluginHolderComponent* holder = dynamic_cast <BrowserPluginHolderComponent*> (bpc->getParentComponent());
-
-    if (holder != nullptr)
+    if (BrowserPluginHolderComponent* holder = dynamic_cast<BrowserPluginHolderComponent*> (bpc->getParentComponent()))
         return holder->npp;
 
     return currentlyInitialisingNPP;

@@ -322,7 +322,7 @@ public:
         deleteAllChildren();
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         originalPos = localPointToGlobal (Point<int>());
 
@@ -384,7 +384,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (! e.mods.isPopupMenu())
         {
@@ -401,7 +401,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
         if (e.mouseWasClicked() && e.getNumberOfClicks() == 2)
         {
@@ -415,7 +415,7 @@ public:
         }
     }
 
-    bool hitTest (int x, int y)
+    bool hitTest (int x, int y) override
     {
         for (int i = getNumChildComponents(); --i >= 0;)
             if (getChildComponent(i)->getBounds().contains (x, y))
@@ -424,7 +424,7 @@ public:
         return x >= 3 && x < getWidth() - 6 && y >= pinSize && y < getHeight() - pinSize;
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colours::lightgrey);
 
@@ -443,11 +443,11 @@ public:
         g.drawRect (x, y, w, h);
     }
 
-    void resized()
+    void resized() override
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            if (PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i)))
+            if (PinComponent* const pc = dynamic_cast<PinComponent*> (getChildComponent(i)))
             {
                 const int total = pc->isInput ? numIns : numOuts;
                 const int index = pc->index == FilterGraph::midiChannelNumber ? (total - 1) : pc->index;
@@ -463,7 +463,7 @@ public:
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            if (PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i)))
+            if (PinComponent* const pc = dynamic_cast<PinComponent*> (getChildComponent(i)))
             {
                 if (pc->index == index && isInput == pc->isInput)
                 {
@@ -508,9 +508,8 @@ public:
         setName (f->getProcessor()->getName());
 
         {
-            double x, y;
-            graph.getNodePosition (filterID, x, y);
-            setCentreRelative ((float) x, (float) y);
+            Point<double> p = graph.getNodePosition (filterID);
+            setCentreRelative ((float) p.x, (float) p.y);
         }
 
         if (numIns != numInputs || numOuts != numOutputs)
@@ -840,7 +839,7 @@ FilterComponent* GraphEditorPanel::getComponentForFilter (const uint32 filterID)
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
+        if (FilterComponent* const fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
             if (fc->filterID == filterID)
                 return fc;
     }
@@ -852,7 +851,7 @@ ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProc
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (ConnectorComponent* const c = dynamic_cast <ConnectorComponent*> (getChildComponent (i)))
+        if (ConnectorComponent* const c = dynamic_cast<ConnectorComponent*> (getChildComponent (i)))
             if (c->sourceFilterID == conn.sourceNodeId
                  && c->destFilterID == conn.destNodeId
                  && c->sourceFilterChannel == conn.sourceChannelIndex
@@ -867,10 +866,10 @@ PinComponent* GraphEditorPanel::findPinAt (const int x, const int y) const
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (FilterComponent* fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
+        if (FilterComponent* fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
         {
-            if (PinComponent* pin = dynamic_cast <PinComponent*> (fc->getComponentAt (x - fc->getX(),
-                                                                                      y - fc->getY())))
+            if (PinComponent* pin = dynamic_cast<PinComponent*> (fc->getComponentAt (x - fc->getX(),
+                                                                                     y - fc->getY())))
                 return pin;
         }
     }
@@ -892,13 +891,13 @@ void GraphEditorPanel::updateComponents()
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
+        if (FilterComponent* const fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
             fc->update();
     }
 
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        ConnectorComponent* const cc = dynamic_cast <ConnectorComponent*> (getChildComponent (i));
+        ConnectorComponent* const cc = dynamic_cast<ConnectorComponent*> (getChildComponent (i));
 
         if (cc != nullptr && cc != draggingConnector)
         {
@@ -945,7 +944,7 @@ void GraphEditorPanel::beginConnectorDrag (const uint32 sourceFilterID, const in
                                            const uint32 destFilterID, const int destFilterChannel,
                                            const MouseEvent& e)
 {
-    draggingConnector = dynamic_cast <ConnectorComponent*> (e.originalComponent);
+    draggingConnector = dynamic_cast<ConnectorComponent*> (e.originalComponent);
 
     if (draggingConnector == nullptr)
         draggingConnector = new ConnectorComponent (graph);
@@ -1064,7 +1063,7 @@ public:
     void timerCallback()
     {
         Component* const underMouse = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
-        TooltipClient* const ttc = dynamic_cast <TooltipClient*> (underMouse);
+        TooltipClient* const ttc = dynamic_cast<TooltipClient*> (underMouse);
 
         String newTip;
 

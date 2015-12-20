@@ -120,28 +120,22 @@ void FilterGraph::removeIllegalConnections()
         changed();
 }
 
-void FilterGraph::setNodePosition (const int nodeId, double x, double y)
+void FilterGraph::setNodePosition (const uint32 nodeId, double x, double y)
 {
-    const AudioProcessorGraph::Node::Ptr n (graph.getNodeForId (nodeId));
-
-    if (n != nullptr)
+    if (AudioProcessorGraph::Node::Ptr n = graph.getNodeForId (nodeId))
     {
         n->properties.set ("x", jlimit (0.0, 1.0, x));
         n->properties.set ("y", jlimit (0.0, 1.0, y));
     }
 }
 
-void FilterGraph::getNodePosition (const int nodeId, double& x, double& y) const
+Point<double> FilterGraph::getNodePosition (const uint32 nodeId) const
 {
-    x = y = 0;
+    if (AudioProcessorGraph::Node::Ptr n = graph.getNodeForId (nodeId))
+        return Point<double> (static_cast<double> (n->properties ["x"]),
+                              static_cast<double> (n->properties ["y"]));
 
-    const AudioProcessorGraph::Node::Ptr n (graph.getNodeForId (nodeId));
-
-    if (n != nullptr)
-    {
-        x = (double) n->properties ["x"];
-        y = (double) n->properties ["y"];
-    }
+    return Point<double>();
 }
 
 //==============================================================================
@@ -273,7 +267,7 @@ void FilterGraph::setLastDocumentOpened (const File& file)
 //==============================================================================
 static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcept
 {
-    AudioPluginInstance* plugin = dynamic_cast <AudioPluginInstance*> (node->getProcessor());
+    AudioPluginInstance* plugin = dynamic_cast<AudioPluginInstance*> (node->getProcessor());
 
     if (plugin == nullptr)
     {
@@ -335,7 +329,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     if (instance == nullptr)
         return;
 
-    AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, xml.getIntAttribute ("uid")));
+    AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, (uint32) xml.getIntAttribute ("uid")));
 
     if (const XmlElement* const state = xml.getChildByName ("STATE"))
     {

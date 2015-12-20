@@ -642,7 +642,7 @@ public:
 
         if (num > 1)
         {
-            HeapBlock <XmlElement*> elems ((size_t) num);
+            HeapBlock<XmlElement*> elems ((size_t) num);
             getChildElementsAsArray (elems);
             sortArray (comparator, (XmlElement**) elems, 0, num - 1, retainOrderOfEquivalentItems);
             reorderChildElements (elems, num);

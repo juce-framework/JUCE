@@ -39,7 +39,7 @@ public:
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
-        Viewport* const v = dynamic_cast <Viewport*> (comp);
+        Viewport* const v = dynamic_cast<Viewport*> (comp);
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
 
         e->setAttribute ("vscroll", v->isVerticalScrollBarShown());
@@ -60,7 +60,7 @@ public:
             return false;
 
         Viewport defaultViewport;
-        Viewport* const v = dynamic_cast <Viewport*> (comp);
+        Viewport* const v = dynamic_cast<Viewport*> (comp);
         v->setScrollBarsShown (xml.getBoolAttribute ("vscroll", defaultViewport.isVerticalScrollBarShown()),
                                xml.getBoolAttribute ("hscroll", defaultViewport.isHorizontalScrollBarShown()));
 
@@ -78,7 +78,7 @@ public:
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
-        Viewport* const v = dynamic_cast <Viewport*> (component);
+        Viewport* const v = dynamic_cast<Viewport*> (component);
 
         props.add (new ViewportScrollbarShownProperty (v, document, true));
         props.add (new ViewportScrollbarShownProperty (v, document, false));
@@ -105,7 +105,7 @@ public:
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
     {
         Viewport defaultViewport;
-        Viewport* const v = dynamic_cast <Viewport*> (component);
+        Viewport* const v = dynamic_cast<Viewport*> (component);
 
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 

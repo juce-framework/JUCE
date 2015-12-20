@@ -147,20 +147,20 @@ static void checkGLError (const char* file, const int line)
  #define JUCE_CHECK_OPENGL_ERROR ;
 #endif
 
-static void clearGLError()
+static void clearGLError() noexcept
 {
     while (glGetError() != GL_NO_ERROR) {}
 }
 
 struct OpenGLTargetSaver
 {
-    OpenGLTargetSaver (const OpenGLContext& c)
+    OpenGLTargetSaver (const OpenGLContext& c) noexcept
         : context (c), oldFramebuffer (OpenGLFrameBuffer::getCurrentFrameBufferTarget())
     {
         glGetIntegerv (GL_VIEWPORT, oldViewport);
     }
 
-    ~OpenGLTargetSaver()
+    ~OpenGLTargetSaver() noexcept
     {
         context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, oldFramebuffer);
         glViewport (oldViewport[0], oldViewport[1], oldViewport[2], oldViewport[3]);

@@ -287,7 +287,7 @@ private:
             int indexToRemove = Random::getSystemRandom().nextInt (balls.size());
 
             if (isUsingPool)
-                pool.removeJob (dynamic_cast <DemoThreadPoolJob*> (balls [indexToRemove]), true, 4000);
+                pool.removeJob (dynamic_cast<DemoThreadPoolJob*> (balls [indexToRemove]), true, 4000);
 
             balls.remove (indexToRemove);
         }

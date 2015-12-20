@@ -96,7 +96,7 @@ private:
 
     static void runLoopSourceCallback (void* info)
     {
-        static_cast <MessageQueue*> (info)->runLoopCallback();
+        static_cast<MessageQueue*> (info)->runLoopCallback();
     }
 };
 

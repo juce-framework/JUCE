@@ -60,7 +60,7 @@ namespace
 
     inline String getPluginRTASCategoryCode (Project& project)
     {
-        if (static_cast <bool> (getPluginIsSynth (project).getValue()))
+        if (static_cast<bool> (getPluginIsSynth (project).getValue()))
             return "ePlugInCategory_SWGenerators";
 
         String s (getPluginRTASCategory (project).toString());

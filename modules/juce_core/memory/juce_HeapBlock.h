@@ -33,10 +33,10 @@
 namespace HeapBlockHelper
 {
     template <bool shouldThrow>
-    struct ThrowOnFail          { static void check (void*) {} };
+    struct ThrowOnFail          { static void checkPointer (void*) {} };
 
     template<>
-    struct ThrowOnFail<true>    { static void check (void* data) { if (data == nullptr) throw std::bad_alloc(); } };
+    struct ThrowOnFail<true>    { static void checkPointer (void* data) { if (data == nullptr) throw std::bad_alloc(); } };
 }
 #endif
 
@@ -298,7 +298,7 @@ private:
        #if JUCE_EXCEPTIONS_DISABLED
         jassert (data != nullptr); // without exceptions, you'll need to find a better way to handle this failure case.
        #else
-        HeapBlockHelper::ThrowOnFail<throwOnFailure>::check (data);
+        HeapBlockHelper::ThrowOnFail<throwOnFailure>::checkPointer (data);
        #endif
     }
 

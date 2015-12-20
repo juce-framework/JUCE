@@ -1226,7 +1226,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        if (DSoundAudioIODevice* const d = dynamic_cast <DSoundAudioIODevice*> (device))
+        if (DSoundAudioIODevice* const d = dynamic_cast<DSoundAudioIODevice*> (device))
             return asInput ? d->inputDeviceIndex
                            : d->outputDeviceIndex;
 

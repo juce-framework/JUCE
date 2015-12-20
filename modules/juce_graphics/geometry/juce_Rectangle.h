@@ -578,8 +578,8 @@ public:
     */
     Point<ValueType> getRelativePoint (double relativeX, double relativeY) const noexcept
     {
-        return Point<ValueType> (pos.x + static_cast <ValueType> (w * relativeX),
-                                 pos.y + static_cast <ValueType> (h * relativeY));
+        return Point<ValueType> (pos.x + static_cast<ValueType> (w * relativeX),
+                                 pos.y + static_cast<ValueType> (h * relativeY));
     }
 
     /** Returns true if any part of another rectangle overlaps this one. */

@@ -36,7 +36,7 @@
 */
 #define JUCE_MAJOR_VERSION      4
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        2
+#define JUCE_BUILDNUMBER        3
 
 /** Current Juce version number.
 
@@ -114,7 +114,6 @@
 #endif
 
 // undef symbols that are sometimes set by misguided 3rd-party headers..
-#undef check
 #undef TYPE_BOOL
 #undef max
 #undef min

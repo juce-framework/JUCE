@@ -83,7 +83,7 @@ public:
             Project::Item child (item.getChild (rowNumber));
 
             if (existingComponentToUpdate == nullptr
-                 || dynamic_cast <FileOptionComponent*> (existing.get())->item != child)
+                 || dynamic_cast<FileOptionComponent*> (existing.get())->item != child)
             {
                 existing = nullptr;
                 existing = new FileOptionComponent (child);

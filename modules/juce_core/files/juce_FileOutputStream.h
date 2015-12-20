@@ -101,7 +101,7 @@ private:
     Result status;
     int64 currentPosition;
     size_t bufferSize, bytesInBuffer;
-    HeapBlock <char> buffer;
+    HeapBlock<char> buffer;
 
     void openHandle();
     void closeHandle();
