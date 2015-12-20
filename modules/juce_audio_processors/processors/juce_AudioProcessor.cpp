@@ -31,7 +31,6 @@ void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::Wrapp
 
 AudioProcessor::AudioProcessor()
     : wrapperType (wrapperTypeBeingCreated.get()),
-      m_isInitialized (false),
       playHead (nullptr),
       sampleRate (0),
       blockSize (0),

@@ -859,8 +859,6 @@ public:
     WrapperType wrapperType;
 
 
-    bool m_isInitialized;
-
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
