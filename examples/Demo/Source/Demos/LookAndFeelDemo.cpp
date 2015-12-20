@@ -212,7 +212,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V3
 
         if (slider.isHorizontal())
         {
-            const float iy = x + width * 0.5f - sliderRadius * 0.5f;
+            const float iy = y + height * 0.5f - sliderRadius * 0.5f;
             Rectangle<float> r (x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius);
             const float onW = r.getWidth() * ((float) slider.valueToProportionOfLength (slider.getValue()));
 

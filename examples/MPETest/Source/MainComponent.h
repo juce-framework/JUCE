@@ -145,14 +145,14 @@ private:
         colourPicker.setZoneLayout (zoneLayout);
     }
 
-    void omniModeChanged (bool omniModeShouldBeEnabled, int pitchbendRange) override
+    void legacyModeChanged (bool legacyModeShouldBeEnabled, int pitchbendRange, Range<int> channelRange) override
     {
-        colourPicker.setOmniModeEnabled (omniModeShouldBeEnabled);
+        colourPicker.setLegacyModeEnabled (legacyModeShouldBeEnabled);
 
-        if (omniModeShouldBeEnabled)
+        if (legacyModeShouldBeEnabled)
         {
-            synth.enableOmniMode (pitchbendRange);
-            visualiserInstrument.enableOmniMode (pitchbendRange);
+            synth.enableLegacyMode (pitchbendRange, channelRange);
+            visualiserInstrument.enableLegacyMode (pitchbendRange, channelRange);
         }
         else
         {

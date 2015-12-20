@@ -41,8 +41,8 @@ public:
     {
         paintBackground (g);
 
-        if (omniModeEnabled)
-            paintOmniMode (g);
+        if (legacyModeEnabled)
+            paintLegacyMode (g);
         else
             paintZones (g);
     }
@@ -60,13 +60,11 @@ public:
         repaint();
     }
 
-    void omniModeChanged (bool omniModeShouldBeEnabled, int pitchbendRange) override
+    void legacyModeChanged (bool legacyModeShouldBeEnabled, int pitchbendRange, Range<int> channelRange) override
     {
-        if (omniModeEnabled == omniModeShouldBeEnabled && omniModePitchbendRange == pitchbendRange)
-            return;
-
-        omniModeEnabled = omniModeShouldBeEnabled;
-        omniModePitchbendRange = pitchbendRange;
+        legacyModeEnabled = legacyModeShouldBeEnabled;
+        legacyModePitchbendRange = pitchbendRange;
+        legacyModeChannelRange = channelRange;
         repaint();
     }
 
@@ -119,15 +117,21 @@ private:
     }
 
     //==========================================================================
-    void paintOmniMode (Graphics& g)
+    void paintLegacyMode (Graphics& g)
     {
-        Rectangle<int> zoneRect = getLocalBounds();
+        int startChannel = legacyModeChannelRange.getStart() - 1;
+        int numChannels = legacyModeChannelRange.getEnd() - startChannel - 1;
+
+
+        Rectangle<int> zoneRect (int (getChannelRectangleWidth() * startChannel), 0,
+                                 int (getChannelRectangleWidth() * numChannels), getHeight());
+
         zoneRect.removeFromTop (20);
 
         g.setColour (Colours::white);
         g.drawRect (zoneRect, 3);
-        g.drawText ("OMNI", zoneRect.reduced (4, 4), Justification::topLeft, false);
-        g.drawText ("<>" + String (omniModePitchbendRange), zoneRect.reduced (4, 4), Justification::bottomLeft, false);
+        g.drawText ("LGCY", zoneRect.reduced (4, 4), Justification::topLeft, false);
+        g.drawText ("<>" + String (legacyModePitchbendRange), zoneRect.reduced (4, 4), Justification::bottomLeft, false);
     }
 
     //==========================================================================
@@ -140,8 +144,9 @@ private:
     MPEZoneLayout zoneLayout;
     const ZoneColourPicker& colourPicker;
 
-	bool omniModeEnabled = false;
-	int omniModePitchbendRange = 48;
+	bool legacyModeEnabled = false;
+	int legacyModePitchbendRange = 48;
+    Range<int> legacyModeChannelRange = { 1, 17 };
     const int numMidiChannels = 16;
 };
 

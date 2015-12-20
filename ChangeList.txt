@@ -3,6 +3,10 @@
 
 This file just lists the more notable headline features. For more detailed info about minor changes and bugfixes, please see the git log.
 
+Version 4.1
+  - Added multi-bus support for audio plug-in clients
+  - Added support for MIDI effect plug-ins (AU and AAX).
+
 Version 4.0.3
   - Added MPE (Multidimensional Polyphonic Expression) classes
   - Added full support for generating and parsing Midi RPN/NRPN messages

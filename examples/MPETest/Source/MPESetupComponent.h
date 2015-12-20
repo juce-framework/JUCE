@@ -40,7 +40,7 @@ public:
         virtual ~Listener() {}
         virtual void zoneAdded (MPEZone newZone) = 0;
         virtual void allZonesCleared() = 0;
-        virtual void omniModeChanged (bool omniModeEnabled, int pitchbendRange) = 0;
+        virtual void legacyModeChanged (bool legacyModeEnabled, int pitchbendRange, Range<int> channelRange) = 0;
         virtual void voiceStealingEnabledChanged (bool voiceStealingEnabled) = 0;
         virtual void numberOfVoicesChanged (int numberOfVoices) = 0;
     };
@@ -56,7 +56,10 @@ public:
           notePitchbendRangeLabel (String::empty, "Note pitchbend range (semitones):"),
           addZoneButton ("Add this zone"),
           clearAllZonesButton ("Clear all zones"),
-          omniModeEnabledToggle ("Enable Omni Mode"),
+          legacyStartChannelLabel (String::empty, "First channel:"),
+          legacyEndChannelLabel (String::empty, "Last channel:"),
+          legacyPitchbendRangeLabel (String::empty, "Pitchbend range (semitones):"),
+          legacyModeEnabledToggle ("Enable Legacy Mode"),
           voiceStealingEnabledToggle ("Enable synth voice stealing"),
           numberOfVoicesLabel (String::empty, "Number of synth voices")
     {
@@ -65,11 +68,14 @@ public:
         initialiseComboBoxWithConsecutiveIntegers (noteChannels, noteChannelsLabel, 1, 15, defaultNoteChannels);
         initialiseComboBoxWithConsecutiveIntegers (masterPitchbendRange, masterPitchbendRangeLabel, 0, 96, defaultMasterPitchbendRange);
         initialiseComboBoxWithConsecutiveIntegers (notePitchbendRange, notePitchbendRangeLabel, 0, 96, defaultNotePitchbendRange);
-        notePitchbendRange.addListener (this);
+
+        initialiseComboBoxWithConsecutiveIntegers (legacyStartChannel, legacyStartChannelLabel, 1, 16, 1, false);
+        initialiseComboBoxWithConsecutiveIntegers (legacyEndChannel, legacyEndChannelLabel, 1, 16, 16, false);
+        initialiseComboBoxWithConsecutiveIntegers (legacyPitchbendRange, legacyPitchbendRangeLabel, 0, 96, 2, false);
 
         initialiseButton (addZoneButton);
         initialiseButton (clearAllZonesButton);
-        initialiseButton (omniModeEnabledToggle);
+        initialiseButton (legacyModeEnabledToggle);
         initialiseButton (voiceStealingEnabledToggle);
 
         initialiseComboBoxWithConsecutiveIntegers (numberOfVoices, numberOfVoicesLabel, 1, 20, 15);
@@ -88,9 +94,13 @@ public:
         r.removeFromTop (hspace);
         noteChannels.setBounds (r.removeFromTop (h));
         r.removeFromTop (hspace);
-        masterPitchbendRange.setBounds (r.removeFromTop (h));
-        r.removeFromTop (hspace);
         notePitchbendRange.setBounds (r.removeFromTop (h));
+        r.removeFromTop (hspace);
+        masterPitchbendRange.setBounds (r.removeFromTop (h));
+
+        legacyStartChannel.setBounds (masterChannel.getBounds());
+        legacyEndChannel.setBounds (noteChannels.getBounds());
+        legacyPitchbendRange.setBounds (notePitchbendRange.getBounds());
 
         r.removeFromTop (hbigspace);
 
@@ -104,7 +114,7 @@ public:
 
         int toggleLeft = proportionOfWidth (0.25f);
 
-        omniModeEnabledToggle.setBounds (r.removeFromTop (h).withLeft (toggleLeft));
+        legacyModeEnabledToggle.setBounds (r.removeFromTop (h).withLeft (toggleLeft));
         r.removeFromTop (hspace);
         voiceStealingEnabledToggle.setBounds (r.removeFromTop (h).withLeft (toggleLeft));
         r.removeFromTop (hspace);
@@ -114,15 +124,21 @@ public:
 private:
     //==========================================================================
     void initialiseComboBoxWithConsecutiveIntegers (ComboBox& comboBox, Label& labelToAttach,
-                                                    int firstValue, int numValues, int valueToSelect)
+                                                    int firstValue, int numValues, int valueToSelect,
+                                                    bool makeVisible = true)
     {
-        addAndMakeVisible (comboBox);
-
         for (int i = 0; i < numValues; ++i)
             comboBox.addItem (String (i + firstValue), i + 1);
 
         comboBox.setSelectedId (valueToSelect - firstValue + 1);
         labelToAttach.attachToComponent (&comboBox, true);
+
+        if (makeVisible)
+            addAndMakeVisible (comboBox);
+        else
+            addChildComponent (comboBox);
+
+        comboBox.addListener (this);
     }
 
     //==========================================================================
@@ -139,8 +155,8 @@ private:
             addZoneButtonClicked();
         else if (button == &clearAllZonesButton)
             clearAllZonesButtonClicked();
-        else if (button == &omniModeEnabledToggle)
-            omniModeEnabledToggleClicked();
+        else if (button == &legacyModeEnabledToggle)
+            legacyModeEnabledToggleClicked();
         else if (button == &voiceStealingEnabledToggle)
             voiceStealingEnabledToggleClicked();
     }
@@ -148,7 +164,7 @@ private:
     //==========================================================================
     void addZoneButtonClicked()
     {
-        if (selectedZoneParametersValid())
+        if (areMPEParametersValid())
         {
             MPEZone newZone (masterChannel.getText().getIntValue(),
                                         noteChannels.getText().getIntValue(),
@@ -160,7 +176,7 @@ private:
         }
         else
         {
-            handleInvalidNrOfNoteChannels();
+            handleInvalidMPEParameters();
         }
     }
 
@@ -172,19 +188,32 @@ private:
     }
 
     //==========================================================================
-    void omniModeEnabledToggleClicked()
+    void legacyModeEnabledToggleClicked()
     {
-        bool omniModeEnabled = omniModeEnabledToggle.getToggleState();
+        bool legacyModeEnabled = legacyModeEnabledToggle.getToggleState();
 
-        masterChannel.setEnabled (! omniModeEnabled);
-        noteChannels.setEnabled (! omniModeEnabled);
-        masterPitchbendRange.setEnabled (! omniModeEnabled);
-        addZoneButton.setEnabled (! omniModeEnabled);
-        clearAllZonesButton.setEnabled (! omniModeEnabled);
+        masterChannel.setVisible (! legacyModeEnabled);
+        noteChannels.setVisible (! legacyModeEnabled);
+        notePitchbendRange.setVisible (! legacyModeEnabled);
+        masterPitchbendRange.setVisible (! legacyModeEnabled);
+        addZoneButton.setVisible (! legacyModeEnabled);
+        clearAllZonesButton.setVisible (! legacyModeEnabled);
 
-        listeners.call (&MPESetupComponent::Listener::omniModeChanged,
-                        omniModeEnabledToggle.getToggleState(),
-                        notePitchbendRange.getText().getIntValue());
+        legacyStartChannel.setVisible (legacyModeEnabled);
+        legacyEndChannel.setVisible (legacyModeEnabled);
+        legacyPitchbendRange.setVisible (legacyModeEnabled);
+
+        if (areLegacyModeParametersValid())
+        {
+            listeners.call (&MPESetupComponent::Listener::legacyModeChanged,
+                            legacyModeEnabledToggle.getToggleState(),
+                            legacyPitchbendRange.getText().getIntValue(),
+                            getLegacyModeChannelRange());
+        }
+        else
+        {
+            handleInvalidLegacyModeParameters();
+        }
     }
 
     //==========================================================================
@@ -198,9 +227,16 @@ private:
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override
     {
         if (comboBoxThatHasChanged == &numberOfVoices)
+        {
             numberOfVoicesChanged();
-        else if (comboBoxThatHasChanged == &notePitchbendRange && omniModeEnabledToggle.getToggleState() == true)
-            omniModePitchbendRangeChanged();
+        }
+        else if (legacyModeEnabledToggle.getToggleState() == true)
+        {
+            if (comboBoxThatHasChanged == &legacyPitchbendRange)
+                legacyModePitchbendRangeChanged();
+            else if (comboBoxThatHasChanged == &legacyStartChannel || comboBoxThatHasChanged == &legacyEndChannel)
+                legacyModeChannelRangeChanged();
+        }
     }
 
     //==========================================================================
@@ -210,29 +246,66 @@ private:
                         numberOfVoices.getText().getIntValue());
     }
 
-    void omniModePitchbendRangeChanged()
+    void legacyModePitchbendRangeChanged()
     {
-        jassert (omniModeEnabledToggle.getToggleState() == true);
+        jassert (legacyModeEnabledToggle.getToggleState() == true);
 
-        listeners.call (&MPESetupComponent::Listener::omniModeChanged, true,
-                        notePitchbendRange.getText().getIntValue());
+        listeners.call (&MPESetupComponent::Listener::legacyModeChanged, true,
+                        legacyPitchbendRange.getText().getIntValue(),
+                        getLegacyModeChannelRange());
+    }
+
+    void legacyModeChannelRangeChanged()
+    {
+        jassert (legacyModeEnabledToggle.getToggleState() == true);
+
+        if (areLegacyModeParametersValid())
+        {
+            listeners.call (&MPESetupComponent::Listener::legacyModeChanged, true,
+                            legacyPitchbendRange.getText().getIntValue(),
+                            getLegacyModeChannelRange());
+        }
+        else
+        {
+            handleInvalidLegacyModeParameters();
+        }
     }
 
     //==========================================================================
-    bool selectedZoneParametersValid() const
+    bool areMPEParametersValid() const
     {
         int maxPossibleNumNoteChannels = 16 - masterChannel.getText().getIntValue();
         return noteChannels.getText().getIntValue() <= maxPossibleNumNoteChannels;
     }
 
-    //==========================================================================
-    void handleInvalidNrOfNoteChannels() const
+    void handleInvalidMPEParameters() const
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                           "Invalid zone layout",
                                           "Cannot create MPE zone:\n"
                                           "Invalid zone parameters selected!",
                                           "Got it");
+    }
+
+    bool areLegacyModeParametersValid() const
+    {
+        return legacyStartChannel.getText().getIntValue() <= legacyEndChannel.getText().getIntValue();
+    }
+
+    void handleInvalidLegacyModeParameters() const
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "Invalid legacy mode channel layout",
+                                          "Cannot set legacy mode start/end channel:\n"
+                                          "The end channel must not be less than the start channel!",
+                                          "Got it");
+    }
+
+    //==========================================================================
+    Range<int> getLegacyModeChannelRange() const
+    {
+        return Range<int> (legacyStartChannel.getText().getIntValue(),
+                           legacyEndChannel.getText().getIntValue() + 1);
     }
 
     //==========================================================================
@@ -242,7 +315,10 @@ private:
     Label masterChannelLabel, noteChannelsLabel, masterPitchbendRangeLabel, notePitchbendRangeLabel;
     TextButton addZoneButton, clearAllZonesButton;
 
-    ToggleButton omniModeEnabledToggle, voiceStealingEnabledToggle;
+    ComboBox legacyStartChannel, legacyEndChannel, legacyPitchbendRange;
+    Label legacyStartChannelLabel, legacyEndChannelLabel, legacyPitchbendRangeLabel;
+
+    ToggleButton legacyModeEnabledToggle, voiceStealingEnabledToggle;
     ComboBox numberOfVoices;
     Label numberOfVoicesLabel;
 
