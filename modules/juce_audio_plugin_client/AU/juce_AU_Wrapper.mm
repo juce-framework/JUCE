@@ -938,7 +938,7 @@ public:
 
             addPropertyListeners();
 
-            bufferSpace.setSize (juceFilter->getNumInputChannelsTotal(false) + juceFilter->getNumOutputChannelsTotal(),
+            bufferSpace.setSize (juceFilter->getTotalNumInputChannels (false) + juceFilter->getTotalNumOutputChannels(),
                                  (int) GetMaxFramesPerSlice() + 32);
 
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
@@ -948,8 +948,8 @@ public:
             incomingEvents.ensureSize (2048);
             incomingEvents.clear();
 
-            channels.calloc ((size_t) jmax (juceFilter->getNumInputChannelsTotal(false),
-                                            juceFilter->getNumOutputChannelsTotal()) + 4);
+            channels.calloc ((size_t) jmax (juceFilter->getTotalNumInputChannels (false),
+                                            juceFilter->getTotalNumOutputChannels()) + 4);
 
             prepared = true;
         }
@@ -990,8 +990,8 @@ public:
             int nextSpareBufferChan = 0;
             bool needToReinterleave = false;
 
-            const int numIn = juceFilter->getNumInputChannelsTotal(true);
-            const int numOut = juceFilter->getNumOutputChannelsTotal();
+            const int numIn = juceFilter->getTotalNumInputChannels (true);
+            const int numOut = juceFilter->getTotalNumOutputChannels();
 
             for (int outputElementIndex = 0; outputElementIndex < numOutputElements && numOutChans < numOut; ++outputElementIndex)
             {
@@ -1085,7 +1085,7 @@ public:
                     for (int j = 0; j < numOut; ++j)
                         zeromem (channels [j], sizeof (float) * numSamples);
                 }
-               #if !JucePlugin_IsSynth
+               #if ! JucePlugin_IsSynth
                 else if (ShouldBypassEffect())
                 {
                     juceFilter->processBlockBypassed (buffer, midiEvents);
@@ -1136,6 +1136,7 @@ public:
                     midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
                 }
                #endif
+
                 midiEvents.clear();
             }
 

@@ -1595,7 +1595,7 @@ public:
             const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
             const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
-            if ((pluginInstance->getNumInputChannelsTotal (true) + pluginInstance->getNumOutputChannels()) > 0
+            if ((pluginInstance->getTotalNumInputChannels (true) + pluginInstance->getNumOutputChannels()) > 0
                  && (numInputChans + numOutputChans) == 0)
                 return kResultFalse;
         }
@@ -1772,7 +1772,7 @@ private:
             }
         }
 
-        jassert (numInputChans == pluginInstance->getNumInputChannelsTotal (true));
+        jassert (numInputChans == pluginInstance->getTotalNumInputChannels (true));
 
         FloatType** outChannelBuffers =
             data.outputs  != nullptr ? getPointerForAudioBus<FloatType> (data.outputs[0]) : nullptr;

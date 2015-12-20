@@ -1594,7 +1594,7 @@ private:
 
         if (filter != nullptr)
         {
-            int numChannels = filter->getNumInputChannelsTotal (false) + filter->getNumOutputChannels();
+            int numChannels = filter->getTotalNumInputChannels (false) + filter->getNumOutputChannels();
             tmpBuffers.tempChannels.insertMultiple (0, nullptr, numChannels);
         }
     }

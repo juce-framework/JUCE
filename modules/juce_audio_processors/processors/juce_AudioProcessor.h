@@ -25,6 +25,7 @@
 #ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
 #define JUCE_AUDIOPROCESSOR_H_INCLUDED
 
+
 //==============================================================================
 /**
     Base class for audio processing filters or plugins.
@@ -288,8 +289,6 @@ public:
 
     //==============================================================================
     /** Returns the number of input channels that the host will be sending the filter.
-        By default, the number of channels sent through the main input element is returned.
-        Specify another input element index to get its number of channels.
 
         If writing a plugin, your configuration macros should specify the number of
         channels that your filter would prefer to have, and this method lets
@@ -335,7 +334,7 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
      */
-    int getNumInputChannelsTotal(bool onlyActive) const noexcept;
+    int getTotalNumInputChannels (bool onlyActive) const noexcept;
 
     /** Returns the total number of output channels that the filter will be sending the host
         through all output elements.
@@ -343,7 +342,7 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
      */
-    int getNumOutputChannelsTotal() const noexcept;
+    int getTotalNumOutputChannels() const noexcept;
 
     /** Returns a string containing a whitespace-separated list of speaker types
         corresponding to each input channel.
