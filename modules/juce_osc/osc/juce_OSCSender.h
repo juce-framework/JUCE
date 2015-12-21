@@ -95,7 +95,7 @@ public:
         This overrides the address and port that was originally set for this sender.
         @param  targetIPAddress   The IP address to send to
         @param  targetPortNumber  The target port number
-        @param  message           The OSC message to send.
+        @param  bundle            The OSC bundle to send.
         @returns true if the operation was successful.
     */
     bool sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
