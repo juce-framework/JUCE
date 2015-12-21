@@ -1002,6 +1002,10 @@ private:
 
             event.mEventType = kAudioUnitEvent_PropertyChange;
             AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+
+            // Add a listener for parameter list changes
+            event.mArgument.mProperty.mPropertyID = kAudioUnitProperty_ParameterList;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
         }
     }
 
@@ -1032,7 +1036,11 @@ private:
                 break;
 
             default:
-                sendAllParametersChangedEvents();
+                if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_ParameterList)
+                    updateHostDisplay();
+                else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_PresentPreset)
+                    sendAllParametersChangedEvents();
+
                 break;
         }
     }
