@@ -469,7 +469,7 @@ public:
             }
         }
 
-        return String::empty;
+        return String();
     }
    #endif
 #else
@@ -1024,7 +1024,7 @@ public:
                 return String (pinProps.label, sizeof (pinProps.label));
         }
 
-        return String::empty;
+        return String();
     }
 
     bool isInputChannelStereoPair (int index) const override
@@ -1048,7 +1048,7 @@ public:
                 return String (pinProps.label, sizeof (pinProps.label));
         }
 
-        return String::empty;
+        return String();
     }
 
     bool isOutputChannelStereoPair (int index) const override
@@ -1750,7 +1750,7 @@ private:
     String getTextForOpcode (const int index, const AEffectOpcodes opcode) const
     {
         if (effect == nullptr)
-            return String::empty;
+            return String();
 
         jassert (index >= 0 && index < effect->numParams);
         char nm [256] = { 0 };
@@ -1775,7 +1775,7 @@ private:
             if (index >= 0 && programNames[index].isEmpty())
             {
                 while (programNames.size() < index)
-                    programNames.add (String::empty);
+                    programNames.add (String());
 
                 programNames.set (index, progName);
             }

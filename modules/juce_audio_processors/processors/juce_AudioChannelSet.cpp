@@ -32,32 +32,32 @@ const char* AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType ty
 {
     switch (type)
     {
-        case left:           return "Left";
-        case right:          return "Right";
-        case centre:         return "Centre";
-        case subbass:        return "Subbass";
-        case surroundLeft:   return "Left Surround";
-        case surroundRight:  return "Right Surround";
-        case centreLeft:     return "Centre Left";
-        case centreRight:    return "Centre Right";
-        case surround:       return "Surround";
-        case sideLeft:       return "Side Left";
-        case sideRight:      return "Side Right";
-        case topMiddle:      return "Top Middle";
-        case topFrontLeft:   return "Top Front Left";
-        case topFrontCentre: return "Top Front Centre";
-        case topFrontRight:  return "Top Front Right";
-        case topRearLeft:    return "Top Rear Left";
-        case topRearCentre:  return "Top Rear Centre";
-        case topRearRight:   return "Top Rear Right";
-        case wideLeft:       return "Wide Left";
-        case wideRight:      return "Wide Right";
-        case subbass2:       return "Subbass 2";
-        case ambisonicW:     return "Ambisonic W";
-        case ambisonicX:     return "Ambisonic X";
-        case ambisonicY:     return "Ambisonic Y";
-        case ambisonicZ:     return "Ambisonic Z";
-        default:        break;
+        case left:           return NEEDS_TRANS("Left");
+        case right:          return NEEDS_TRANS("Right");
+        case centre:         return NEEDS_TRANS("Centre");
+        case subbass:        return NEEDS_TRANS("Subbass");
+        case surroundLeft:   return NEEDS_TRANS("Left Surround");
+        case surroundRight:  return NEEDS_TRANS("Right Surround");
+        case centreLeft:     return NEEDS_TRANS("Centre Left");
+        case centreRight:    return NEEDS_TRANS("Centre Right");
+        case surround:       return NEEDS_TRANS("Surround");
+        case sideLeft:       return NEEDS_TRANS("Side Left");
+        case sideRight:      return NEEDS_TRANS("Side Right");
+        case topMiddle:      return NEEDS_TRANS("Top Middle");
+        case topFrontLeft:   return NEEDS_TRANS("Top Front Left");
+        case topFrontCentre: return NEEDS_TRANS("Top Front Centre");
+        case topFrontRight:  return NEEDS_TRANS("Top Front Right");
+        case topRearLeft:    return NEEDS_TRANS("Top Rear Left");
+        case topRearCentre:  return NEEDS_TRANS("Top Rear Centre");
+        case topRearRight:   return NEEDS_TRANS("Top Rear Right");
+        case wideLeft:       return NEEDS_TRANS("Wide Left");
+        case wideRight:      return NEEDS_TRANS("Wide Right");
+        case subbass2:       return NEEDS_TRANS("Subbass 2");
+        case ambisonicW:     return NEEDS_TRANS("Ambisonic W");
+        case ambisonicX:     return NEEDS_TRANS("Ambisonic X");
+        case ambisonicY:     return NEEDS_TRANS("Ambisonic Y");
+        case ambisonicZ:     return NEEDS_TRANS("Ambisonic Z");
+        default:             break;
     }
 
     return "Unknown";

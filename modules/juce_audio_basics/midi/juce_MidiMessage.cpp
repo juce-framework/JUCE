@@ -982,7 +982,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
         return s;
     }
 
-    return String::empty;
+    return String();
 }
 
 double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept

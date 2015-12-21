@@ -1675,7 +1675,7 @@ public:
     //==============================================================================
     const String getName() const override
     {
-        return module != nullptr ? module->name : String::empty;
+        return module != nullptr ? module->name : String();
     }
 
     void repopulateArrangements()
@@ -1837,7 +1837,7 @@ public:
                 return toString (busInfo.name);
         }
 
-        return String::empty;
+        return String();
     }
 
     const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, true, true); }
@@ -1941,7 +1941,7 @@ public:
             return toString (result);
         }
 
-        return String::empty;
+        return String();
     }
 
     void setParameter (int parameterIndex, float newValue) override

@@ -45,7 +45,7 @@ public:
     {
         // OpenSL has piss-poor support for determining latency, so the only way I can find to
         // get a number for this is by asking the AudioTrack/AudioRecord classes..
-        AndroidAudioIODevice javaDevice (String::empty);
+        AndroidAudioIODevice javaDevice (deviceName);
 
         // this is a total guess about how to calculate the latency, but seems to vaguely agree
         // with the devices I've tested.. YMMV

@@ -70,14 +70,37 @@ public:
 
     //==========================================================================
     /** Sends an OSC message to the target.
-
         @param  message   The OSC message to send.
-
         @returns true if the operation was successful.
     */
     bool send (const OSCMessage& message);
 
-    //==========================================================================
+    /** Send an OSC bundle to the target.
+        @param  bundle    The OSC bundle to send.
+        @returns true if the operation was successful.
+    */
+    bool send (const OSCBundle& bundle);
+
+    /** Sends an OSC message to a specific IP address and port.
+        This overrides the address and port that was originally set for this sender.
+        @param  targetIPAddress   The IP address to send to
+        @param  targetPortNumber  The target port number
+        @param  message           The OSC message to send.
+        @returns true if the operation was successful.
+    */
+    bool sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
+                          const OSCMessage& message);
+
+    /** Sends an OSC bundle to a specific IP address and port.
+        This overrides the address and port that was originally set for this sender.
+        @param  targetIPAddress   The IP address to send to
+        @param  targetPortNumber  The target port number
+        @param  bundle            The OSC bundle to send.
+        @returns true if the operation was successful.
+    */
+    bool sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
+                          const OSCBundle& bundle);
+
    #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Creates a new OSC message with the specified address pattern and list
         of arguments, and sends it to the target.
@@ -88,16 +111,20 @@ public:
     */
     template <typename... Args>
     bool send (const OSCAddressPattern& address, Args&&... args);
-   #endif
 
-    //==========================================================================
-    /** Send an OSC bundle to the target.
+    /** Creates a new OSC message with the specified address pattern and list
+        of arguments, and sends it to the target.
 
-        @param  bundle          The OSC bundle to send.
-
-        @returns true if the operation was successful.
+        @param  targetIPAddress   The IP address to send to
+        @param  targetPortNumber  The target port number
+        @param  address  The OSC address pattern of the message
+                         (you can use a string literal here).
+        @param  args     The list of arguments for the message.
     */
-    bool send (const OSCBundle& bundle);
+    template <typename... Args>
+    bool sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
+                          const OSCAddressPattern& address, Args&&... args);
+   #endif
 
 private:
     //==========================================================================
@@ -116,6 +143,13 @@ private:
  bool OSCSender::send (const OSCAddressPattern& address, Args&&... args)
  {
      return send (OSCMessage (address, std::forward<Args> (args)...));
+ }
+
+ template <typename... Args>
+ bool OSCSender::sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
+                                  const OSCAddressPattern& address, Args&&... args)
+ {
+     return sendToIPAddress (targetIPAddress, targetPortNumber, OSCMessage (address, std::forward<Args> (args)...));
  }
 #endif // JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 

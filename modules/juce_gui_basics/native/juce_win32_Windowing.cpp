@@ -2757,7 +2757,7 @@ private:
             reset();
 
             if (TextInputTarget* const target = owner.findCurrentTextInputTarget())
-                target->insertTextAtCaret (String::empty);
+                target->insertTextAtCaret (String());
         }
 
         void handleEndComposition (ComponentPeer& owner, HWND hWnd)
@@ -2768,7 +2768,7 @@ private:
                 if (TextInputTarget* const target = owner.findCurrentTextInputTarget())
                 {
                     target->setHighlightedRegion (compositionRange);
-                    target->insertTextAtCaret (String::empty);
+                    target->insertTextAtCaret (String());
                     compositionRange.setLength (0);
 
                     target->setHighlightedRegion (Range<int>::emptyRange (compositionRange.getEnd()));
@@ -2843,7 +2843,7 @@ private:
                 return String (buffer);
             }
 
-            return String::empty;
+            return String();
         }
 
         int getCompositionCaretPos (HIMC hImc, LPARAM lParam, const String& currentIMEString) const

@@ -821,10 +821,10 @@ namespace StringHelpers
         char* end = buffer + numElementsInArray (buffer);
         char* start = NumberToStringConverters::numberToString (end, number);
 
-       #if (JUCE_STRING_UTF_TYPE == 8)
+       #if JUCE_STRING_UTF_TYPE == 8
         str.appendCharPointer (String::CharPointerType (start), String::CharPointerType (end));
        #else
-        str.appendCharPointer (String::CharPointer_ASCII (start), String::CharPointer_ASCII (end));
+        str.appendCharPointer (CharPointer_ASCII (start), CharPointer_ASCII (end));
        #endif
 
         return str;

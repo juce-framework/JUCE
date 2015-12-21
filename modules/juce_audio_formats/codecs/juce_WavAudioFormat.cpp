@@ -845,7 +845,7 @@ namespace WavFileHelpers
 
         static MemoryBlock createFrom (const StringPairArray& values)
         {
-            const String ISRC (values.getValue (WavAudioFormat::ISRC, String::empty));
+            const String ISRC (values.getValue (WavAudioFormat::ISRC, String()));
             MemoryOutputStream xml;
 
             if (ISRC.isNotEmpty())
