@@ -1189,7 +1189,7 @@ struct AAXClasses
                 if (layout == AudioChannelSet::disabled())
                 {
                     layout = busUtils.getDefaultLayoutForBus (false, busIdx);
-                    busUtils.juceFilter.setPreferredBusArrangement (false, busIdx, layout);
+                    busUtils.processor.setPreferredBusArrangement (false, busIdx, layout);
                 }
             }
 
@@ -1197,10 +1197,10 @@ struct AAXClasses
             bool success = true;
 
             if (numInputBuses > 0)
-                success = busUtils.juceFilter.setPreferredBusArrangement (true, 0, inputLayout);
+                success = busUtils.processor.setPreferredBusArrangement (true, 0, inputLayout);
 
             if (success)
-                success = busUtils.juceFilter.setPreferredBusArrangement (false, 0, outputLayout);
+                success = busUtils.processor.setPreferredBusArrangement (false, 0, outputLayout);
 
             // was the above successful
             if (success && (numInputBuses == 0 || busUtils.getChannelSet (true,  0) == inputLayout)
@@ -1218,10 +1218,10 @@ struct AAXClasses
             bool hasSidechain = false;
 
             if (const AudioChannelSet* set = busUtils.getSupportedBusLayouts (true, 1).getDefaultLayoutForChannelNum (1))
-                hasSidechain = busUtils.juceFilter.setPreferredBusArrangement (true, 1, *set);
+                hasSidechain = busUtils.processor.setPreferredBusArrangement (true, 1, *set);
 
             if (! hasSidechain)
-                success = busUtils.juceFilter.setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
+                success = busUtils.processor.setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
 
             // AAX requires your processor's first sidechain to be either mono or that
             // it can be disabled
@@ -1230,7 +1230,7 @@ struct AAXClasses
             // disable all other input buses
             for (int busIdx = 2; busIdx < numInputBuses; ++busIdx)
             {
-                success = busUtils.juceFilter.setPreferredBusArrangement (true, busIdx, AudioChannelSet::disabled());
+                success = busUtils.processor.setPreferredBusArrangement (true, busIdx, AudioChannelSet::disabled());
 
                 // AAX can only have a single side-chain input. Therefore, your processor must either
                 // only have a single side-chain input or allow disabling all other side-chains
@@ -1245,10 +1245,10 @@ struct AAXClasses
 
                 // restore the old layout
                 if (busUtils.getBusCount(true) > 0)
-                    busUtils.juceFilter.setPreferredBusArrangement (true,  0, inputLayout);
+                    busUtils.processor.setPreferredBusArrangement (true,  0, inputLayout);
 
                 if (busUtils.getBusCount (false) > 0)
-                    busUtils.juceFilter.setPreferredBusArrangement (false, 0, outputLayout);
+                    busUtils.processor.setPreferredBusArrangement (false, 0, outputLayout);
             }
         }
 
@@ -1329,7 +1329,7 @@ struct AAXClasses
                 AAX_EStemFormat auxFormat  = getFormatForAudioChannelSet (outBusLayout, busUtils.busIgnoresLayout (false,  busIdx));
                 if (auxFormat != AAX_eStemFormat_INT32_MAX && auxFormat != AAX_eStemFormat_None)
                 {
-                    const String& name = busUtils.juceFilter.busArrangement.outputBuses.getReference (busIdx).name;
+                    const String& name = busUtils.processor.busArrangement.outputBuses.getReference (busIdx).name;
                     check (desc.AddAuxOutputStem (0, static_cast<int32_t> (auxFormat), name.toRawUTF8()));
                 }
             }
@@ -1391,10 +1391,10 @@ struct AAXClasses
                 bool success = true;
 
                 if (numIns > 0)
-                    success = busUtils.juceFilter.setPreferredBusArrangement (true, 0, inLayouts.getReference (inIdx));
+                    success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayouts.getReference (inIdx));
 
                 if (numOuts > 0 && success)
-                    success = busUtils.juceFilter.setPreferredBusArrangement (false, 0, outLayouts.getReference (outIdx));
+                    success = busUtils.processor.setPreferredBusArrangement (false, 0, outLayouts.getReference (outIdx));
 
                 // We should never hit this assertion: PluginBusUtilities reported this as supported.
                 // Please report this as a bug!
