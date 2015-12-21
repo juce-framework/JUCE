@@ -21,19 +21,16 @@
 
   ==============================================================================
 */
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
 
-class PluginBusUtilities
+
+struct PluginBusUtilities
 {
-public:
     //==============================================================================
     typedef Array<AudioProcessor::AudioProcessorBus> AudioBusArray;
 
     //==============================================================================
     PluginBusUtilities (AudioProcessor& plugin, bool markDiscreteLayoutsAsSupported)
-        : juceFilter (plugin),
+        : processor (plugin),
           dynamicInBuses (false),
           dynamicOutBuses (false),
           addDiscreteLayouts (markDiscreteLayoutsAsSupported)
@@ -81,8 +78,8 @@ public:
     };
 
     //==============================================================================
-    AudioBusArray&       getFilterBus (bool inputBus) noexcept         { return inputBus ? juceFilter.busArrangement.inputBuses : juceFilter.busArrangement.outputBuses; }
-    const AudioBusArray& getFilterBus (bool inputBus) const noexcept   { return inputBus ? juceFilter.busArrangement.inputBuses : juceFilter.busArrangement.outputBuses; }
+    AudioBusArray&       getFilterBus (bool inputBus) noexcept         { return inputBus ? processor.busArrangement.inputBuses : processor.busArrangement.outputBuses; }
+    const AudioBusArray& getFilterBus (bool inputBus) const noexcept   { return inputBus ? processor.busArrangement.inputBuses : processor.busArrangement.outputBuses; }
     int getBusCount (bool inputBus) const noexcept                     { return getFilterBus (inputBus).size(); }
     AudioChannelSet getChannelSet (bool inputBus, int bus) noexcept    { return getFilterBus (inputBus).getReference (bus).channels; }
     int getNumChannels (bool inp, int bus) const noexcept              { return isPositiveAndBelow (bus, getBusCount (inp)) ? getFilterBus (inp).getReference (bus).channels.size() : 0; }
@@ -112,10 +109,10 @@ public:
         jassert (original.outputBuses.size() == numOutputBuses);
 
         for (int busNr = 0; busNr < numInputBuses;  ++busNr)
-            juceFilter.setPreferredBusArrangement (true,  busNr, original.inputBuses.getReference  (busNr).channels);
+            processor.setPreferredBusArrangement (true,  busNr, original.inputBuses.getReference  (busNr).channels);
 
         for (int busNr = 0; busNr < numOutputBuses; ++busNr)
-            juceFilter.setPreferredBusArrangement (false, busNr, original.outputBuses.getReference (busNr).channels);
+            processor.setPreferredBusArrangement (false, busNr, original.outputBuses.getReference (busNr).channels);
     }
 
     //==============================================================================
@@ -177,11 +174,11 @@ public:
     {
         for (int busIdx = 1; busIdx < getBusCount (true); ++busIdx)
             if (getChannelSet (true, busIdx) == AudioChannelSet::disabled())
-                juceFilter.setPreferredBusArrangement (true, busIdx, getDefaultLayoutForBus (true, busIdx));
+                processor.setPreferredBusArrangement (true, busIdx, getDefaultLayoutForBus (true, busIdx));
 
         for (int busIdx = 1; busIdx < getBusCount (false); ++busIdx)
             if (getChannelSet (false, busIdx) == AudioChannelSet::disabled())
-                juceFilter.setPreferredBusArrangement (false, busIdx, getDefaultLayoutForBus (false, busIdx));
+                processor.setPreferredBusArrangement (false, busIdx, getDefaultLayoutForBus (false, busIdx));
     }
 
     //==============================================================================
@@ -191,7 +188,7 @@ public:
     public:
         ScopedBusRestorer (PluginBusUtilities& bUtils)
             : busUtils (bUtils),
-              originalArr (bUtils.juceFilter.busArrangement),
+              originalArr (bUtils.processor.busArrangement),
               shouldRestore (true)
         {}
 
@@ -212,7 +209,7 @@ public:
     };
 
     //==============================================================================
-    AudioProcessor& juceFilter;
+    AudioProcessor& processor;
 
 private:
     friend class ScopedBusRestorer;
@@ -231,7 +228,7 @@ private:
         for (int i = 0; i < channelNum; ++i)
             set.addChannel (static_cast<AudioChannelSet::ChannelType> (SupportedBusLayouts::pseudoChannelBitNum + i));
 
-        return juceFilter.setPreferredBusArrangement (isInput, busNr, set);
+        return processor.setPreferredBusArrangement (isInput, busNr, set);
     }
 
     void findAllCompatibleLayoutsForBus (bool isInput, int busNr)
@@ -242,7 +239,7 @@ private:
         layouts.supportedLayouts.clear();
 
         // check if the plug-in bus can be disabled
-        layouts.canBeDisabled = juceFilter.setPreferredBusArrangement (isInput, busNr, AudioChannelSet());
+        layouts.canBeDisabled = processor.setPreferredBusArrangement (isInput, busNr, AudioChannelSet());
         layouts.busIgnoresLayout = true;
 
         for (int i = 1; i <= maxNumChannels; ++i)
@@ -255,7 +252,7 @@ private:
             {
                 const AudioChannelSet& layout = sets.getReference (j);
 
-                if (juceFilter.setPreferredBusArrangement (isInput, busNr, layout))
+                if (processor.setPreferredBusArrangement (isInput, busNr, layout))
                 {
                     if (! ignoresLayoutForChannel)
                         layouts.busIgnoresLayout = false;
@@ -370,4 +367,6 @@ private:
 
         return sets;
     }
+
+    JUCE_DECLARE_NON_COPYABLE (PluginBusUtilities)
 };
