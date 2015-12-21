@@ -26,6 +26,7 @@
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
 
+#include "../../juce_core/native/juce_mac_ClangBugWorkaround.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_AAX && (JUCE_INCLUDED_AAX_IN_MM || defined (_WIN32) || defined (_WIN64))
