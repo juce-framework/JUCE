@@ -134,7 +134,7 @@
     }
 
     // now we can turn the whole thing into a text document..
-    String myXmlDoc = animalsList.createDocument (String::empty);
+    String myXmlDoc = animalsList.createDocument (String());
     @endcode
 
     @see XmlDocument

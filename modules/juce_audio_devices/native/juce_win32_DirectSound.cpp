@@ -354,7 +354,7 @@ public:
                                         hr = pOutputBuffer->Play (0, 0, 1 /* DSBPLAY_LOOPING */);
 
                                         if (SUCCEEDED (hr))
-                                            return String::empty;
+                                            return String();
                                     }
                                 }
                             }
@@ -597,7 +597,7 @@ public:
                 hr = pInputBuffer->Start (1 /* DSCBSTART_LOOPING */);
 
                 if (SUCCEEDED (hr))
-                    return String::empty;
+                    return String();
             }
         }
 

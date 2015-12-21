@@ -136,13 +136,13 @@ public:
         If testResult is true, a pass is logged; if it's false, a failure is logged.
         If the failure message is specified, it will be written to the log if the test fails.
     */
-    void expect (bool testResult, const String& failureMessage = String::empty);
+    void expect (bool testResult, const String& failureMessage = String());
 
     /** Compares two values, and if they don't match, prints out a message containing the
         expected and actual result values.
     */
     template <class ValueType>
-    void expectEquals (ValueType actual, ValueType expected, String failureMessage = String::empty)
+    void expectEquals (ValueType actual, ValueType expected, String failureMessage = String())
     {
         const bool result = (actual == expected);
 
