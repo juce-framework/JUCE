@@ -545,7 +545,7 @@ void CoreGraphicsContext::drawLine (const Line<float>& line)
     {
         Path p;
         p.addLineSegment (line, 1.0f);
-        fillPath (p, AffineTransform::identity);
+        fillPath (p, AffineTransform());
     }
 }
 

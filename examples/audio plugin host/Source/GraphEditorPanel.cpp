@@ -757,7 +757,7 @@ public:
                            -arrowL, -arrowW,
                            arrowL, 0.0f);
 
-        arrow.applyTransform (AffineTransform::identity
+        arrow.applyTransform (AffineTransform()
                                 .rotated (float_Pi * 0.5f - (float) atan2 (x2 - x1, y2 - y1))
                                 .translated ((x1 + x2) * 0.5f,
                                              (y1 + y2) * 0.5f));

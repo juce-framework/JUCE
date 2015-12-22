@@ -2044,7 +2044,7 @@ public:
             {
                 Path p;
                 p.addRectangle (r);
-                clipToPath (p, AffineTransform::identity);
+                clipToPath (p, AffineTransform());
             }
         }
 
@@ -2074,7 +2074,7 @@ public:
             }
             else
             {
-                clipToPath (r.toPath(), AffineTransform::identity);
+                clipToPath (r.toPath(), AffineTransform());
             }
         }
 
@@ -2112,7 +2112,7 @@ public:
                 p.applyTransform (transform.complexTransform);
                 p.addRectangle (clip->getClipBounds().toFloat());
                 p.setUsingNonZeroWinding (false);
-                clip = clip->clipToPath (p, AffineTransform::identity);
+                clip = clip->clipToPath (p, AffineTransform());
             }
         }
 
@@ -2205,7 +2205,7 @@ public:
     {
         Path p;
         p.addRectangle (r);
-        fillPath (p, AffineTransform::identity);
+        fillPath (p, AffineTransform());
     }
 
     void fillRect (const Rectangle<int>& r, const bool replaceContents)
@@ -2258,7 +2258,7 @@ public:
             }
             else
             {
-                fillPath (list.toPath(), AffineTransform::identity);
+                fillPath (list.toPath(), AffineTransform());
             }
         }
     }
@@ -2298,7 +2298,7 @@ public:
     {
         Path p;
         p.addLineSegment (line, 1.0f);
-        fillPath (p, AffineTransform::identity);
+        fillPath (p, AffineTransform());
     }
 
     void drawImage (const Image& sourceImage, const AffineTransform& trans)
@@ -2394,7 +2394,7 @@ public:
                     // If our translation doesn't involve any distortion, we can speed it up..
                     g2.point1.applyTransform (t);
                     g2.point2.applyTransform (t);
-                    t = AffineTransform::identity;
+                    t = AffineTransform();
                 }
 
                 shapeToFill->fillAllWithGradient (getThis(), g2, t, isIdentity);

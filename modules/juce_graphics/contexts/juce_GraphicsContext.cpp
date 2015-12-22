@@ -394,9 +394,15 @@ void Graphics::fillAll (Colour colourToUse) const
 
 
 //==============================================================================
+void Graphics::fillPath (const Path& path) const
+{
+    if (! (context.isClipEmpty() || path.isEmpty()))
+        context.fillPath (path, AffineTransform());
+}
+
 void Graphics::fillPath (const Path& path, const AffineTransform& transform) const
 {
-    if ((! context.isClipEmpty()) && ! path.isEmpty())
+    if (! (context.isClipEmpty() || path.isEmpty()))
         context.fillPath (path, transform);
 }
 

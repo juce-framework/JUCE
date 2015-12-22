@@ -1359,7 +1359,7 @@ bool Component::isTransformed() const noexcept
 
 AffineTransform Component::getTransform() const
 {
-    return affineTransform != nullptr ? *affineTransform : AffineTransform::identity;
+    return affineTransform != nullptr ? *affineTransform : AffineTransform();
 }
 
 //==============================================================================

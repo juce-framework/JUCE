@@ -148,7 +148,7 @@ void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
                                                           content.getX(),     content.getBottom(), resolved[2].x, resolved[2].y));
 
     if (t.isSingularity())
-        t = AffineTransform::identity;
+        t = AffineTransform();
 
     setTransform (t);
 }

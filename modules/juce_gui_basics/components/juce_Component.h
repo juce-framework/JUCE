@@ -574,7 +574,7 @@ public:
         Currently, transforms are not supported for desktop windows, so the transform will be ignored if you
         put a component on the desktop.
 
-        To remove a component's transform, simply pass AffineTransform::identity as the parameter to this method.
+        To remove a component's transform, simply pass AffineTransform() as the parameter to this method.
     */
     void setTransform (const AffineTransform& transform);
 
