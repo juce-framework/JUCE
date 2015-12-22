@@ -1100,6 +1100,7 @@ void AudioDeviceManager::playSound (PositionableAudioSource* audioSource, bool d
             {
                 transport = new AudioTransportSource();
                 transport->setSource (audioSource);
+                deleteWhenFinished = true;
             }
         }
 
