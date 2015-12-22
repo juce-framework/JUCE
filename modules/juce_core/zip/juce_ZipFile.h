@@ -181,14 +181,14 @@ public:
 
         Create a ZipFile::Builder object, and call its addFile() method to add some files,
         then you can write it to a stream with write().
-
-        Currently this just stores the files with no compression.. That will be added
-        soon!
     */
-    class Builder
+    class JUCE_API  Builder
     {
     public:
+        /** Creates an empty builder object. */
         Builder();
+
+        /** Destructor. */
         ~Builder();
 
         /** Adds a file while should be added to the archive.
