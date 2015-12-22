@@ -2266,7 +2266,13 @@ public:
     void fillPath (const Path& path, const AffineTransform& t)
     {
         if (clip != nullptr)
-            fillShape (new EdgeTableRegionType (clip->getClipBounds(), path, transform.getTransformWith (t)), false);
+        {
+            const AffineTransform trans (transform.getTransformWith (t));
+            const Rectangle<int> clipRect (clip->getClipBounds());
+
+            if (path.getBoundsTransformed (trans).getSmallestIntegerContainer().intersects (clipRect))
+                fillShape (new EdgeTableRegionType (clipRect, path, trans), false);
+        }
     }
 
     void fillEdgeTable (const EdgeTable& edgeTable, const float x, const int y)
