@@ -126,8 +126,8 @@ public:
         The stream that is passed-in must be capable of being repositioned so
         that all the formats can have a go at opening it.
 
-        If none of the registered formats can open the stream, it'll return 0. If it
-        returns a reader, it's the caller's responsibility to delete the reader.
+        If none of the registered formats can open the stream, it'll return nullptr.
+        If it returns a reader, it's the caller's responsibility to delete the reader.
     */
     AudioFormatReader* createReaderFor (InputStream* audioFileStream);
 
