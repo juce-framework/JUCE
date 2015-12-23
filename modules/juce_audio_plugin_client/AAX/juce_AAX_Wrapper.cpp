@@ -111,7 +111,7 @@ struct AAXClasses
 {
     static void check (AAX_Result result)
     {
-        jassert (result == AAX_SUCCESS); (void) result;
+        jassert (result == AAX_SUCCESS); ignoreUnused (result);
     }
 
     static int getParamIndexFromID (AAX_CParamID paramID) noexcept
@@ -900,8 +900,7 @@ struct AAXClasses
 
             midiBuffer.clear();
 
-            (void) midiNodeIn;
-            (void) midiNodesOut;
+            ignoreUnused (midiNodeIn, midiNodesOut);
 
            #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
             {
@@ -969,8 +968,6 @@ struct AAXClasses
                     }
                 }
             }
-           #else
-            (void) midiNodesOut;
            #endif
         }
 

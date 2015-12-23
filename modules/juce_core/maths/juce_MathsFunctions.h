@@ -299,7 +299,7 @@ void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexc
 template <typename Type, int N>
 int numElementsInArray (Type (&array)[N])
 {
-    (void) array; // (required to avoid a spurious warning in MS compilers)
+    ignoreUnused (array);
     (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
     return N;
 }

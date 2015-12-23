@@ -40,7 +40,7 @@ public:
         if (factories->d2dFactory != nullptr)
         {
             HRESULT hr = factories->d2dFactory->CreateHwndRenderTarget (props, propsHwnd, renderingTarget.resetAndGetPointerAddress());
-            jassert (SUCCEEDED (hr)); (void) hr;
+            jassert (SUCCEEDED (hr)); ignoreUnused (hr);
             hr = renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), colourBrush.resetAndGetPointerAddress());
         }
     }

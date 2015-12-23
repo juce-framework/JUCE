@@ -23,8 +23,8 @@
 */
 
 AppleRemoteDevice::AppleRemoteDevice()
-    : device (0),
-      queue (0),
+    : device (nullptr),
+      queue (nullptr),
       remoteId (0)
 {
 }
@@ -73,13 +73,13 @@ namespace
                                                                    CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID),
                                                                    device);
 
-                (void) hr;
+                ignoreUnused (hr);
 
                 (*cfPlugInInterface)->Release (cfPlugInInterface);
             }
         }
 
-        return *device != 0;
+        return *device != nullptr;
     }
 
     void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*)
@@ -91,7 +91,7 @@ namespace
 
 bool AppleRemoteDevice::start (const bool inExclusiveMode)
 {
-    if (queue != 0)
+    if (queue != nullptr)
         return true;
 
     stop();
@@ -114,25 +114,25 @@ bool AppleRemoteDevice::start (const bool inExclusiveMode)
 
 void AppleRemoteDevice::stop()
 {
-    if (queue != 0)
+    if (queue != nullptr)
     {
         (*(IOHIDQueueInterface**) queue)->stop ((IOHIDQueueInterface**) queue);
         (*(IOHIDQueueInterface**) queue)->dispose ((IOHIDQueueInterface**) queue);
         (*(IOHIDQueueInterface**) queue)->Release ((IOHIDQueueInterface**) queue);
-        queue = 0;
+        queue = nullptr;
     }
 
-    if (device != 0)
+    if (device != nullptr)
     {
         (*(IOHIDDeviceInterface**) device)->close ((IOHIDDeviceInterface**) device);
         (*(IOHIDDeviceInterface**) device)->Release ((IOHIDDeviceInterface**) device);
-        device = 0;
+        device = nullptr;
     }
 }
 
 bool AppleRemoteDevice::isActive() const
 {
-    return queue != 0;
+    return queue != nullptr;
 }
 
 bool AppleRemoteDevice::open (const bool openInExclusiveMode)
@@ -229,7 +229,6 @@ void AppleRemoteDevice::handleCallbackInternal()
     }
 
     cookies [numCookies++] = 0;
-    //DBG (String::toHexString ((uint8*) cookies, numCookies, 1) + " "  + String (totalValues));
 
     static const char buttonPatterns[] =
     {

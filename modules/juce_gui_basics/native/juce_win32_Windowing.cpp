@@ -1691,7 +1691,7 @@ private:
 
     void setCurrentRenderingEngine (int index) override
     {
-        (void) index;
+        ignoreUnused (index);
 
        #if JUCE_DIRECT2D
         if (getAvailableRenderingEngines().size() > 1)

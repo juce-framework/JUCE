@@ -1206,6 +1206,6 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
     }
    #endif
 
-    (void) text;
+    ignoreUnused (text);
     return false;
 }

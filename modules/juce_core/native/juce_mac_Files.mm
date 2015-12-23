@@ -404,7 +404,7 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
             filenameAsURL = [NSURL fileURLWithPath: fileNameAsNS];
 
       #if JUCE_IOS
-        (void) parameters;
+        ignoreUnused (parameters);
         return [[UIApplication sharedApplication] openURL: filenameAsURL];
       #else
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];

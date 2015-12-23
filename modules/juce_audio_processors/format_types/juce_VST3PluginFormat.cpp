@@ -455,7 +455,7 @@ public:
 
     tresult PLUGIN_API requestOpenEditor (FIDString name) override
     {
-        (void) name;
+        ignoreUnused (name);
         jassertfalse;
         return kResultFalse;
     }
@@ -2015,8 +2015,7 @@ public:
     /** @note Not applicable to VST3 */
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override
     {
-        (void) data;
-        (void) sizeInBytes;
+        ignoreUnused (data, sizeInBytes);
     }
 
     //==============================================================================

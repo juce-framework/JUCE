@@ -523,8 +523,8 @@ public:
     template <class ElementComparator>
     int addSorted (ElementComparator& comparator, ObjectClass* const newObject) noexcept
     {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
+        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
+                                   // avoids getting warning messages about the parameter being unused
         const ScopedLockType lock (getLock());
         const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
         insert (index, newObject);
@@ -546,7 +546,7 @@ public:
     template <typename ElementComparator>
     int indexOfSorted (ElementComparator& comparator, const ObjectClass* const objectToLookFor) const noexcept
     {
-        (void) comparator;
+        ignoreUnused (comparator);
         const ScopedLockType lock (getLock());
         int s = 0, e = numUsed;
 
@@ -854,8 +854,8 @@ public:
     void sort (ElementComparator& comparator,
                bool retainOrderOfEquivalentItems = false) const noexcept
     {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
+        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
+                                   // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
         sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);

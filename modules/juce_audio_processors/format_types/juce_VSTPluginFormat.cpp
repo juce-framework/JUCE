@@ -2158,7 +2158,7 @@ public:
     //==============================================================================
     void mouseDown (const MouseEvent& e) override
     {
-        (void) e;
+        ignoreUnused (e);
 
        #if JUCE_LINUX
         if (pluginWindow == 0)

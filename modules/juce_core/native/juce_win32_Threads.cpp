@@ -154,7 +154,7 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
     __except (EXCEPTION_CONTINUE_EXECUTION)
     {}
    #else
-    (void) name;
+    ignoreUnused (name);
    #endif
 }
 

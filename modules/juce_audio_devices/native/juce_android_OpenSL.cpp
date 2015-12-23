@@ -552,7 +552,7 @@ private:
 
         static void staticCallback (SLAndroidSimpleBufferQueueItf queue, void* context) noexcept
         {
-            jassert (queue == static_cast<Player*> (context)->playerBufferQueue); (void) queue;
+            jassert (queue == static_cast<Player*> (context)->playerBufferQueue); ignoreUnused (queue);
             static_cast<Player*> (context)->bufferList.bufferReturned();
         }
 
@@ -687,7 +687,7 @@ private:
 
         static void staticCallback (SLAndroidSimpleBufferQueueItf queue, void* context) noexcept
         {
-            jassert (queue == static_cast<Recorder*> (context)->recorderBufferQueue); (void) queue;
+            jassert (queue == static_cast<Recorder*> (context)->recorderBufferQueue); ignoreUnused (queue);
             static_cast<Recorder*> (context)->bufferList.bufferReturned();
         }
 

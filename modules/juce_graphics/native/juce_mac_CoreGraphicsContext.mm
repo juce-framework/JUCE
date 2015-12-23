@@ -656,7 +656,7 @@ bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Re
     CoreTextTypeLayout::drawToCGContext (text, area, context, (float) flipHeight);
     return true;
    #else
-    (void) text; (void) area;
+    ignoreUnused (text, area);
     return false;
    #endif
 }
