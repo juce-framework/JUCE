@@ -276,7 +276,7 @@ public:
     class NativeContext;
    #endif
 
-private:
+public:
     class CachedImage;
     class Attachment;
     NativeContext* nativeContext;
