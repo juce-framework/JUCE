@@ -1,7 +1,6 @@
 
 #pragma once
 
-
 class DummyView:public Component{
 public:
     void paint(Graphics& g) override{
