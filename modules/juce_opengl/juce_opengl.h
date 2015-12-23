@@ -146,6 +146,7 @@ class OpenGLShaderProgram;
 #include "opengl/juce_OpenGLShaderProgram.h"
 #include "opengl/juce_OpenGLTexture.h"
 #include "utils/juce_OpenGLAppComponent.h"
+#include "utils/GlSubView.h"
 
 }
 
