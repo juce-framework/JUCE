@@ -47,6 +47,9 @@ public:
         or it will fail.
     */
     bool initialise (OpenGLContext& context, int width, int height);
+    
+    bool initialise (OpenGLContext& context, int width, int height,bool wantsDepth,bool wantsStencil);
+
 
     /** Tries to allocates a buffer containing a copy of a given image.
         Note that a valid openGL context must be selected when you call this method,
