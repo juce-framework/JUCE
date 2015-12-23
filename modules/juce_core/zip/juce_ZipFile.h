@@ -191,8 +191,8 @@ public:
         /** Destructor. */
         ~Builder();
 
-        /** Adds a file while should be added to the archive.
-            The file isn't read immediately, all the files will be read later when the writeToStream()
+        /** Adds a file to the list of items which will be added to the archive.
+            The file isn't read immediately: the files will be read later when the writeToStream()
             method is called.
 
             The compressionLevel can be between 0 (no compression), and 9 (maximum compression).
@@ -202,7 +202,7 @@ public:
         void addFile (const File& fileToAdd, int compressionLevel,
                       const String& storedPathName = String());
 
-        /** Adds a file while should be added to the archive.
+        /** Adds a stream to the list of items which will be added to the archive.
 
             @param streamToRead this stream isn't read immediately - a pointer to the stream is
                                 stored, then used later when the writeToStream() method is called, and
