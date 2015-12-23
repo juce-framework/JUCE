@@ -815,8 +815,8 @@ public:
         }
 
         desc.version = getVersion();
-        desc.numInputChannels = getNumInputChannels();
-        desc.numOutputChannels = getNumOutputChannels();
+        desc.numInputChannels = getTotalNumInputChannels();
+        desc.numOutputChannels = getTotalNumOutputChannels();
         desc.isInstrument = (effect != nullptr && (effect->flags & effFlagsIsSynth) != 0);
     }
 
@@ -1017,7 +1017,7 @@ public:
     //==============================================================================
     const String getInputChannelName (int index) const override
     {
-        if (index >= 0 && index < getNumInputChannels())
+        if (isValidChannel (index, true))
         {
             VstPinProperties pinProps;
             if (dispatch (effGetInputProperties, index, 0, &pinProps, 0.0f) != 0)
@@ -1029,7 +1029,7 @@ public:
 
     bool isInputChannelStereoPair (int index) const override
     {
-        if (index < 0 || index >= getNumInputChannels())
+        if (! isValidChannel (index, true))
             return false;
 
         VstPinProperties pinProps;
@@ -1041,7 +1041,7 @@ public:
 
     const String getOutputChannelName (int index) const override
     {
-        if (index >= 0 && index < getNumOutputChannels())
+        if (isValidChannel (index, false))
         {
             VstPinProperties pinProps;
             if (dispatch (effGetOutputProperties, index, 0, &pinProps, 0.0f) != 0)
@@ -1053,7 +1053,7 @@ public:
 
     bool isOutputChannelStereoPair (int index) const override
     {
-        if (index < 0 || index >= getNumOutputChannels())
+        if (! isValidChannel (index, false))
             return false;
 
         VstPinProperties pinProps;
@@ -1063,9 +1063,10 @@ public:
         return true;
     }
 
-    bool isValidChannel (int index, bool isInput) const
+    bool isValidChannel (int index, bool isInput) const noexcept
     {
-        return isPositiveAndBelow (index, isInput ? getNumInputChannels() : getNumOutputChannels());
+        return isPositiveAndBelow (index, isInput ? getTotalNumInputChannels()
+                                                  : getTotalNumOutputChannels());
     }
 
     //==============================================================================
@@ -1686,7 +1687,7 @@ private:
         else
         {
             // Not initialised, so just bypass..
-            for (int i = 0; i < getNumOutputChannels(); ++i)
+            for (int i = getTotalNumOutputChannels(); --i >= 0;)
                 buffer.clear (i, 0, buffer.getNumSamples());
         }
 

@@ -1665,8 +1665,8 @@ public:
         createPluginDescription (description, module->file,
                                  company, module->name,
                                  *info, info2, infoW,
-                                 getNumInputChannels(),
-                                 getNumOutputChannels());
+                                 getTotalNumInputChannels(),
+                                 getTotalNumOutputChannels());
     }
 
     void* getPlatformSpecificData() override   { return component; }
@@ -1808,7 +1808,7 @@ public:
 
         updateTimingInformation (data, getSampleRate());
 
-        for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
+        for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
         associateTo (data, buffer);
@@ -1845,18 +1845,14 @@ public:
 
     bool isInputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumInputChannels())
-            return false;
-
-        return getBusInfo (true, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumInputChannels())
+                 && getBusInfo (true, true).channelCount == 2;
     }
 
     bool isOutputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumOutputChannels())
-            return false;
-
-        return getBusInfo (false, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumOutputChannels())
+                 && getBusInfo (false, true).channelCount == 2;
     }
 
     bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }

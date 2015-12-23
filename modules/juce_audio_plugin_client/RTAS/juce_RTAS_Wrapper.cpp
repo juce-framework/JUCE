@@ -498,8 +498,8 @@ public:
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
         midiEvents.ensureSize (2048);
 
-        channels.calloc (jmax (juceFilter->getNumInputChannels(),
-                               juceFilter->getNumOutputChannels()));
+        channels.calloc (jmax (juceFilter->getTotalNumInputChannels(),
+                               juceFilter->getTotalNumOutputChannels()));
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
@@ -539,14 +539,14 @@ public:
 
        #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
-        (void) numMidiEventsComingIn;
+        ignoreUnused (numMidiEventsComingIn);
        #endif
 
         {
             const ScopedLock sl (juceFilter->getCallbackLock());
 
-            const int numIn = juceFilter->getNumInputChannels();
-            const int numOut = juceFilter->getNumOutputChannels();
+            const int numIn  = juceFilter->getTotalNumInputChannels();
+            const int numOut = juceFilter->getTotalNumOutputChannels();
             const int totalChans = jmax (numIn, numOut);
 
             if (juceFilter->isSuspended())
