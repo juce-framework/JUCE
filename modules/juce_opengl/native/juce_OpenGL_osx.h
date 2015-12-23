@@ -238,7 +238,7 @@ public:
 };
 
 //==============================================================================
-bool OpenGLHelpers::isContextActive()
+inline bool OpenGLHelpers::isContextActive()
 {
     return CGLGetCurrentContext() != 0;
 }
