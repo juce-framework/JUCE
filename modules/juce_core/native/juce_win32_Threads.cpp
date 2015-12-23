@@ -314,27 +314,17 @@ bool juce_isRunningInWine()
 bool DynamicLibrary::open (const String& name)
 {
     close();
-
-    JUCE_TRY
-    {
-        handle = LoadLibrary (name.toWideCharPointer());
-    }
-    JUCE_CATCH_ALL
-
+    handle = LoadLibrary (name.toWideCharPointer());
     return handle != nullptr;
 }
 
 void DynamicLibrary::close()
 {
-    JUCE_TRY
+    if (handle != nullptr)
     {
-        if (handle != nullptr)
-        {
-            FreeLibrary ((HMODULE) handle);
-            handle = nullptr;
-        }
+        FreeLibrary ((HMODULE) handle);
+        handle = nullptr;
     }
-    JUCE_CATCH_ALL
 }
 
 void* DynamicLibrary::getFunction (const String& functionName) noexcept

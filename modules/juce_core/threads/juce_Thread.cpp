@@ -86,22 +86,25 @@ void Thread::threadEntryPoint()
     const CurrentThreadHolder::Ptr currentThreadHolder (getCurrentThreadHolder());
     currentThreadHolder->value = this;
 
-    JUCE_TRY
+    if (threadName.isNotEmpty())
+        setCurrentThreadName (threadName);
+
+    if (startSuspensionEvent.wait (10000))
     {
-        if (threadName.isNotEmpty())
-            setCurrentThreadName (threadName);
+        jassert (getCurrentThreadId() == threadId);
 
-        if (startSuspensionEvent.wait (10000))
+        if (affinityMask != 0)
+            setCurrentThreadAffinityMask (affinityMask);
+
+        try
         {
-            jassert (getCurrentThreadId() == threadId);
-
-            if (affinityMask != 0)
-                setCurrentThreadAffinityMask (affinityMask);
-
             run();
         }
+        catch (...)
+        {
+            jassertfalse; // Your run() method mustn't throw any exceptions!
+        }
     }
-    JUCE_CATCH_ALL_ASSERT
 
     currentThreadHolder->value.releaseCurrentThreadStorage();
     closeThreadHandle();

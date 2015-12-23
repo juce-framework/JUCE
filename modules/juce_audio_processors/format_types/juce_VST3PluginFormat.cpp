@@ -1754,19 +1754,15 @@ public:
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
-        JUCE_TRY
-        {
-            isActive = false;
+        isActive = false;
 
-            setStateForAllBusses (false);
+        setStateForAllBusses (false);
 
-            if (processor != nullptr)
-                warnOnFailure (processor->setProcessing (false));
+        if (processor != nullptr)
+            warnOnFailure (processor->setProcessing (false));
 
-            if (component != nullptr)
-                warnOnFailure (component->setActive (false));
-        }
-        JUCE_CATCH_ALL_ASSERT
+        if (component != nullptr)
+            warnOnFailure (component->setActive (false));
     }
 
     bool supportsDoublePrecisionProcessing() const override

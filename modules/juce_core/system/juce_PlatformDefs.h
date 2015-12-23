@@ -252,40 +252,6 @@
 
 
 //==============================================================================
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-
-  #define JUCE_TRY try
-
-  #define JUCE_CATCH_ALL            catch (...) {}
-  #define JUCE_CATCH_ALL_ASSERT     catch (...) { jassertfalse; }
-
-  #if ! JUCE_MODULE_AVAILABLE_juce_gui_basics
-    #define JUCE_CATCH_EXCEPTION    JUCE_CATCH_ALL
-  #else
-    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplicationBase
-        object so they can be logged by the application if it wants to.
-    */
-    #define JUCE_CATCH_EXCEPTION \
-      catch (const std::exception& e)  \
-      { \
-          juce::JUCEApplicationBase::sendUnhandledException (&e, __FILE__, __LINE__); \
-      } \
-      catch (...) \
-      { \
-          juce::JUCEApplicationBase::sendUnhandledException (nullptr, __FILE__, __LINE__); \
-      }
-  #endif
-
-#else
-
-  #define JUCE_TRY
-  #define JUCE_CATCH_EXCEPTION
-  #define JUCE_CATCH_ALL
-  #define JUCE_CATCH_ALL_ASSERT
-
-#endif
-
-//==============================================================================
 #if JUCE_DEBUG || DOXYGEN
   /** A platform-independent way of forcing an inline function.
       Use the syntax: @code

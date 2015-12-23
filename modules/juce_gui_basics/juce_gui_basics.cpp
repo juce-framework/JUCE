@@ -40,10 +40,6 @@
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_gui_basics.h"
 
-#if JUCE_MODULE_AVAILABLE_juce_opengl
- #include "../juce_opengl/juce_opengl.h"
-#endif
-
 //==============================================================================
 #if JUCE_MAC
  #import <WebKit/WebKit.h>

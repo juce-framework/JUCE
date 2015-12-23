@@ -182,11 +182,9 @@ namespace DSoundLogging
         }
     }
 
-    #define CATCH JUCE_CATCH_EXCEPTION
     #define JUCE_DS_LOG(a)        DSoundLogging::logMessage(a);
     #define JUCE_DS_LOG_ERROR(a)  DSoundLogging::logError(a, __LINE__);
    #else
-    #define CATCH JUCE_CATCH_ALL
     #define JUCE_DS_LOG(a)
     #define JUCE_DS_LOG_ERROR(a)
    #endif

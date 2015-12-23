@@ -1129,19 +1129,16 @@ public:
         JUCE_DECLARE_NON_COPYABLE (JuceDropTarget)
     };
 
-   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     static bool offerKeyMessageToJUCEWindow (MSG& m)
     {
         if (m.message == WM_KEYDOWN || m.message == WM_KEYUP)
             if (Component::getCurrentlyFocusedComponent() != nullptr)
                 if (HWNDComponentPeer* h = getOwnerOfWindow (m.hwnd))
-                    if (m.message == WM_KEYDOWN ? h->doKeyDown (m.wParam)
-                                                : h->doKeyUp (m.wParam))
-                        return true;
+                    return m.message == WM_KEYDOWN ? h->doKeyDown (m.wParam)
+                                                   : h->doKeyUp (m.wParam);
 
         return false;
     }
-   #endif
 
 private:
     HWND hwnd, parentToAddTo;
@@ -3021,9 +3018,8 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
     return HWNDComponentPeer::isKeyDown (k);
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+// (This internal function is used by the plugin client module)
 bool offerKeyMessageToJUCEWindow (MSG& m)   { return HWNDComponentPeer::offerKeyMessageToJUCEWindow (m); }
-#endif
 
 //==============================================================================
 bool JUCE_CALLTYPE Process::isForegroundProcess()

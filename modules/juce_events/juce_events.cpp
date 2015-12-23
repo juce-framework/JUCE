@@ -38,10 +38,6 @@
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_events.h"
 
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS && JUCE_MODULE_AVAILABLE_juce_gui_basics
- #include "../juce_gui_basics/juce_gui_basics.h"
-#endif
-
 //==============================================================================
 #if JUCE_MAC
  #import <IOKit/IOKitLib.h>
