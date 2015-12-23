@@ -111,7 +111,7 @@
 //==============================================================================
 #if JUCE_DEBUG || DOXYGEN
   /** Writes a string to the standard error stream.
-      Note that as well as a single string, you can use this to write multiple items 
+      Note that as well as a single string, you can use this to write multiple items
       as a stream, e.g.
       @code
         DBG ("foo = " << foo << "bar = " << bar);

@@ -259,14 +259,9 @@ void JUCE_CALLTYPE Process::setPriority (ProcessPriority prior)
     }
 }
 
-JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
+JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
 {
     return IsDebuggerPresent() != FALSE;
-}
-
-bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
-{
-    return juce_isRunningUnderDebugger();
 }
 
 static void* currentModuleHandle = nullptr;

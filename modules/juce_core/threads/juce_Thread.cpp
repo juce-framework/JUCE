@@ -269,6 +269,12 @@ void SpinLock::enter() const noexcept
 }
 
 //==============================================================================
+bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
+{
+    return juce_isRunningUnderDebugger();
+}
+
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class AtomicTests  : public UnitTest
