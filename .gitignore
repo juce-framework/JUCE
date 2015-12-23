@@ -16,6 +16,13 @@
 *.d
 *.sdf
 *.opensdf
+*.obj
+*.tlog
+*.exe
+*.log
+*.ipdb
+*.iobj
+
 xcuserdata
 *.xccheckout
 contents.xcworkspacedata
@@ -47,5 +54,4 @@ profile
 **/CodeBlocks/obj
 **/CodeBlocks/*.depend
 **/CodeBlocks/*.layout
-**/Builds/AndroidStudio
 doxygen/doc
