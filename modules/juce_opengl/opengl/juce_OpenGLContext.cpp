@@ -236,6 +236,10 @@ public:
         {
             if (isUpdating)
             {
+                #if JUCE_OPENGL3
+                if (vertexArrayObject != 0)
+                    glBindVertexArray (vertexArrayObject);
+                #endif
                 paintComponent();
                 mmLock = nullptr;
                 lastMMLockReleaseTime = Time::getMillisecondCounter();
