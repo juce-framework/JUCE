@@ -860,33 +860,41 @@ struct AAXClasses
             const int numIns  = pluginInstance->getTotalNumInputChannels();
             const int numOuts = pluginInstance->getTotalNumOutputChannels();
 
-            const int mainNumIns = numIns > 0 ? pluginInstance->busArrangement.inputBuses.getReference (0).channels.size() : 0;
-            const int sidechain = busUtils.getNumEnabledBuses (true) >= 2 ? sideChainBufferIdx : -1;
-
-            if (numOuts >= numIns)
+            if (pluginInstance->isSuspended())
             {
-                for (int i = 0; i < numIns; ++i)
-                    memcpy (outputs[i], getAudioBufferForInput (inputs, sidechain, mainNumIns, i), (size_t) bufferSize * sizeof (float));
-
-                process (outputs, numOuts, bufferSize, bypass, midiNodeIn, midiNodesOut);
+                for (int i = 0; i < numOuts; ++i)
+                    FloatVectorOperations::clear (outputs[i], bufferSize);
             }
             else
             {
-                if (channelList.size() <= numIns)
-                    channelList.insertMultiple (-1, nullptr, 1 + numIns - channelList.size());
+                const int mainNumIns = numIns > 0 ? pluginInstance->busArrangement.inputBuses.getReference (0).channels.size() : 0;
+                const int sidechain = busUtils.getNumEnabledBuses (true) >= 2 ? sideChainBufferIdx : -1;
 
-                float** channels = channelList.getRawDataPointer();
-
-                for (int i = 0; i < numOuts; ++i)
+                if (numOuts >= numIns)
                 {
-                    memcpy (outputs[i], getAudioBufferForInput (inputs, sidechain, mainNumIns, i), (size_t) bufferSize * sizeof (float));
-                    channels[i] = outputs[i];
+                    for (int i = 0; i < numIns; ++i)
+                        memcpy (outputs[i], getAudioBufferForInput (inputs, sidechain, mainNumIns, i), (size_t) bufferSize * sizeof (float));
+
+                    process (outputs, numOuts, bufferSize, bypass, midiNodeIn, midiNodesOut);
                 }
+                else
+                {
+                    if (channelList.size() <= numIns)
+                        channelList.insertMultiple (-1, nullptr, 1 + numIns - channelList.size());
 
-                for (int i = numOuts; i < numIns; ++i)
-                    channels[i] = const_cast<float*> (getAudioBufferForInput (inputs, sidechain, mainNumIns, i));
+                    float** channels = channelList.getRawDataPointer();
 
-                process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodesOut);
+                    for (int i = 0; i < numOuts; ++i)
+                    {
+                        memcpy (outputs[i], getAudioBufferForInput (inputs, sidechain, mainNumIns, i), (size_t) bufferSize * sizeof (float));
+                        channels[i] = outputs[i];
+                    }
+
+                    for (int i = numOuts; i < numIns; ++i)
+                        channels[i] = const_cast<float*> (getAudioBufferForInput (inputs, sidechain, mainNumIns, i));
+
+                    process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodesOut);
+                }
             }
         }
 
@@ -1160,7 +1168,10 @@ struct AAXClasses
         {
             const JUCEAlgorithmContext& i = **iter;
 
-            int sideChainBufferIdx = static_cast<int> (i.pluginInstance->parameters.supportsSidechain() && i.sideChainBuffers != nullptr ? *i.sideChainBuffers : static_cast<int32_t> (-1));
+            int sideChainBufferIdx = i.pluginInstance->parameters.supportsSidechain() && i.sideChainBuffers != nullptr
+                                         ? static_cast<int> (*i.sideChainBuffers)
+                                         : -1;
+
             i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels, sideChainBufferIdx,
                                                   *(i.bufferSize), *(i.bypass) != 0,
                                                   getMidiNodeIn(i), getMidiNodeOut(i));
