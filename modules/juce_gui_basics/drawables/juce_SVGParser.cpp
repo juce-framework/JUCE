@@ -570,6 +570,34 @@ private:
             dp->setStrokeType (getStrokeFor (xml));
         }
 
+        const String strokeDashArray (getStyleAttribute (xml, "stroke-dasharray"));
+
+        if (strokeDashArray.isNotEmpty())
+        {
+            Array<float> dashLengths;
+            int charIdx = 0;
+            while (1)
+            {
+                const int commaPos = strokeDashArray.indexOfChar (charIdx, ',');
+                if (commaPos == -1)
+                    break;
+                dashLengths.add (strokeDashArray.substring (charIdx, commaPos).getFloatValue());
+                charIdx = commaPos + 1;
+            }
+            dashLengths.add (strokeDashArray.substring (charIdx).getFloatValue());
+
+            // Work-around for JUCE's lacking support for zero dash-lengths,
+            // which SVGs use for dotted lines.
+            for (int i = 0; i < dashLengths.size(); ++i)
+                if (dashLengths[i] == 0)
+                {
+                    dashLengths.set (i, 0.001);
+                    dashLengths.getReference ((i + (i % 2 == 0 ? 1 : -1)) % dashLengths.size()) -= dashLengths[i];
+                }
+
+            dp->setDashLengths (dashLengths);
+        }
+
         return dp;
     }
 
