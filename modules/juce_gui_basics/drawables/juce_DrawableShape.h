@@ -114,6 +114,8 @@ public:
     */
     void setStrokeType (const PathStrokeType& newStrokeType);
 
+    void setDashLengths (const Array<float>& newDashLengths);
+
     /** Changes the stroke thickness.
         This is a shortcut for calling setStrokeType.
     */
@@ -121,6 +123,8 @@ public:
 
     /** Returns the current outline style. */
     const PathStrokeType& getStrokeType() const noexcept            { return strokeType; }
+
+    const Array<float>& getDashLengths() const noexcept { return dashLengths; };
 
     //==============================================================================
     /** @internal */
@@ -165,6 +169,7 @@ protected:
 
     //==============================================================================
     PathStrokeType strokeType;
+    Array<float> dashLengths;
     Path path, strokePath;
 
 private:
