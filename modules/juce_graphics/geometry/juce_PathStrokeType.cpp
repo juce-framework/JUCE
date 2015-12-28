@@ -695,7 +695,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
                 if (isSolid && ! first)
                     newDestPath.lineTo (it.x2, it.y2);
 
-                createStrokedPath (destPath, newDestPath, AffineTransform::identity, extraAccuracy);
+                createStrokedPath (destPath, newDestPath, AffineTransform(), extraAccuracy);
                 return;
             }
 

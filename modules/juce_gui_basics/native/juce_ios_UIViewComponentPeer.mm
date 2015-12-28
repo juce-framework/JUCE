@@ -317,15 +317,14 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 - (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation
                                  duration: (NSTimeInterval) duration
 {
-    (void) toInterfaceOrientation;
-    (void) duration;
+    ignoreUnused (toInterfaceOrientation, duration);
 
     [UIView setAnimationsEnabled: NO]; // disable this because it goes the wrong way and looks like crap.
 }
 
 - (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation
 {
-    (void) fromInterfaceOrientation;
+    ignoreUnused (fromInterfaceOrientation);
     sendScreenBoundsUpdate (self);
     [UIView setAnimationsEnabled: YES];
 }
@@ -347,13 +346,13 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 
 - (void) viewWillAppear: (BOOL) animated
 {
-    (void) animated;
+    ignoreUnused (animated);
     [self viewDidLoad];
 }
 
 - (void) viewDidAppear: (BOOL) animated
 {
-    (void) animated;
+    ignoreUnused (animated);
     [self viewDidLoad];
 }
 
@@ -405,7 +404,7 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
 {
-    (void) touches;
+    ignoreUnused (touches);
 
     if (owner != nullptr)
         owner->handleTouches (event, true, false, false);
@@ -413,7 +412,7 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 
 - (void) touchesMoved: (NSSet*) touches withEvent: (UIEvent*) event
 {
-    (void) touches;
+    ignoreUnused (touches);
 
     if (owner != nullptr)
         owner->handleTouches (event, false, false, false);
@@ -421,7 +420,7 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 
 - (void) touchesEnded: (NSSet*) touches withEvent: (UIEvent*) event
 {
-    (void) touches;
+    ignoreUnused (touches);
 
     if (owner != nullptr)
         owner->handleTouches (event, false, true, false);
@@ -459,7 +458,7 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text
 {
-    (void) textView;
+    ignoreUnused (textView);
     return owner->textViewReplaceCharacters (Range<int> ((int) range.location, (int) (range.location + range.length)),
                                              nsStringToJuce (text));
 }

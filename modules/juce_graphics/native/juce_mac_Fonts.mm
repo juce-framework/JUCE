@@ -571,7 +571,7 @@ public:
 
         ascent = ctAscent / ctTotalHeight;
         unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
-        pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+        pathTransform = AffineTransform::scale (unitsToHeightScaleFactor);
 
         fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
 
@@ -847,7 +847,7 @@ public:
 
             fontHeightToPointsFactor = referenceFontSize / (nsFontAscent + nsFontDescent);
 
-            pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+            pathTransform = AffineTransform::scale (unitsToHeightScaleFactor);
         }
     }
 
@@ -1206,6 +1206,6 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
     }
    #endif
 
-    (void) text;
+    ignoreUnused (text);
     return false;
 }

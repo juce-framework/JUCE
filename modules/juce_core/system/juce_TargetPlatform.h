@@ -43,6 +43,15 @@
 */
 
 //==============================================================================
+#ifdef JUCE_APP_CONFIG_HEADER
+ #include JUCE_APP_CONFIG_HEADER
+#else
+ // Your project must contain an AppConfig.h file with your project-specific settings in it,
+ // and your header search path must make it accessible to the module's files.
+ #include "AppConfig.h"
+#endif
+
+//==============================================================================
 #if (defined (_WIN32) || defined (_WIN64))
   #define       JUCE_WIN32 1
   #define       JUCE_WINDOWS 1

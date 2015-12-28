@@ -110,7 +110,7 @@ private:
         if (cp.start (processArgs))
         {
             const String childOutput (cp.readAllProcessOutput());
-            DBG (childOutput); (void) childOutput;
+            DBG (childOutput); ignoreUnused (childOutput);
 
             cp.waitForProcessToFinish (10000);
             return tempMP3.getFile().getSize() > 0;

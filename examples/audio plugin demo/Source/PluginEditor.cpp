@@ -43,7 +43,7 @@ public:
     {
         const float newValue = param.getValue();
 
-        if (newValue != (float) Slider::getValue())
+        if (newValue != (float) Slider::getValue() && ! isMouseButtonDown())
             Slider::setValue (newValue);
     }
 

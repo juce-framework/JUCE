@@ -454,7 +454,7 @@ public:
 
     VstIntPtr vendorSpecific (VstInt32 lArg, VstIntPtr lArg2, void* ptrArg, float floatArg) override
     {
-        (void) lArg; (void) lArg2; (void) ptrArg; (void) floatArg;
+        ignoreUnused (lArg, lArg2, ptrArg, floatArg);
 
        #if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
         if ((lArg == 'stCA' || lArg == 'stCa') && lArg2 == 'FUID' && ptrArg != nullptr)
@@ -488,7 +488,7 @@ public:
         VSTMidiEventList::addEventsToMidiBuffer (events, midiEvents);
         return 1;
        #else
-        (void) events;
+        ignoreUnused (events);
         return 0;
        #endif
     }

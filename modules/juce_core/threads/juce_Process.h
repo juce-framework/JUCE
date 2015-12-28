@@ -98,7 +98,7 @@ public:
 
     //==============================================================================
     /** Returns true if this process is being hosted by a debugger. */
-    static bool JUCE_CALLTYPE isRunningUnderDebugger();
+    static bool JUCE_CALLTYPE isRunningUnderDebugger() noexcept;
 
 
     //==============================================================================

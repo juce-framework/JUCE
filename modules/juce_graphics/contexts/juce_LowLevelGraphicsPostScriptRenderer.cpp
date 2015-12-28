@@ -355,13 +355,13 @@ void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<float>& r)
     {
         Path p;
         p.addRectangle (r);
-        fillPath (p, AffineTransform::identity);
+        fillPath (p, AffineTransform());
     }
 }
 
 void LowLevelGraphicsPostScriptRenderer::fillRectList (const RectangleList<float>& list)
 {
-    fillPath (list.toPath(), AffineTransform::identity);
+    fillPath (list.toPath(), AffineTransform());
 }
 
 //==============================================================================
@@ -510,7 +510,7 @@ void LowLevelGraphicsPostScriptRenderer::drawLine (const Line <float>& line)
 {
     Path p;
     p.addLineSegment (line, 1.0f);
-    fillPath (p, AffineTransform::identity);
+    fillPath (p, AffineTransform());
 }
 
 //==============================================================================

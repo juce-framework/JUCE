@@ -52,11 +52,6 @@ JUCE_API void JUCE_CALLTYPE Process::setPriority (const ProcessPriority prior)
     pthread_setschedparam (pthread_self(), policy, &param);
 }
 
-JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
-{
-    return juce_isRunningUnderDebugger();
-}
-
 static bool swapUserAndEffectiveUser()
 {
     int result1 = setreuid (geteuid(), getuid());

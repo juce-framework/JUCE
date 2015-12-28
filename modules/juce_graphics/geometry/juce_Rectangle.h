@@ -914,8 +914,8 @@ private:
     Point<ValueType> pos;
     ValueType w, h;
 
-    static int parseIntAfterSpace (StringRef s) noexcept
-        { return s.text.findEndOfWhitespace().getIntValue32(); }
+    static ValueType parseIntAfterSpace (StringRef s) noexcept
+        { return static_cast<ValueType> (s.text.findEndOfWhitespace().getIntValue32()); }
 
     void copyWithRounding (Rectangle<int>& result) const noexcept    { result = getSmallestIntegerContainer(); }
     void copyWithRounding (Rectangle<float>& result) const noexcept  { result = toFloat(); }

@@ -54,7 +54,7 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserve
     }
    #endif
 
-    (void) reserved;
+    ignoreUnused (reserved);
     return TRUE;
 }
 

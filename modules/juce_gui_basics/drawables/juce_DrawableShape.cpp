@@ -178,7 +178,7 @@ void DrawableShape::pathChanged()
 void DrawableShape::strokeChanged()
 {
     strokePath.clear();
-    strokeType.createStrokedPath (strokePath, path, AffineTransform::identity, 4.0f);
+    strokeType.createStrokedPath (strokePath, path, AffineTransform(), 4.0f);
 
     setBoundsToEnclose (getDrawableBounds());
     repaint();
@@ -224,7 +224,7 @@ DrawableShape::RelativeFillType::RelativeFillType (const FillType& fill_)
         gradientPoint3 = Point<float> (g.point1.x + g.point2.y - g.point1.y,
                                        g.point1.y + g.point1.x - g.point2.x)
                             .transformedBy (fill.transform);
-        fill.transform = AffineTransform::identity;
+        fill.transform = AffineTransform();
     }
 }
 
@@ -375,7 +375,7 @@ bool DrawableShape::RelativeFillType::readFrom (const ValueTree& v, ComponentBui
         if (imageProvider != nullptr)
             im = imageProvider->getImageForIdentifier (v [FillAndStrokeState::imageId]);
 
-        fill.setTiledImage (im, AffineTransform::identity);
+        fill.setTiledImage (im, AffineTransform());
         fill.setOpacity ((float) v.getProperty (FillAndStrokeState::imageOpacity, 1.0f));
         return true;
     }

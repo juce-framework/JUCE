@@ -72,7 +72,7 @@ public:
     static void createAttribs (NSOpenGLPixelFormatAttribute* attribs, OpenGLVersion version,
                                const OpenGLPixelFormat& pixFormat, bool shouldUseMultisampling)
     {
-        (void) version;
+        ignoreUnused (version);
         int numAttribs = 0;
 
        #if JUCE_OPENGL3

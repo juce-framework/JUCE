@@ -1014,7 +1014,7 @@ public:
     {
         const int headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
         const struct fxBank* bank = (const struct fxBank*) (data + (8 + headerLen));
-        const int version = static_cast<int> (htonl (bank->version)); (void) version;
+        const int version = static_cast<int> (htonl (bank->version)); ignoreUnused (version);
 
         jassert ('VstW' == htonl (*(juce::int32*) data));
         jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs

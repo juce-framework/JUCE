@@ -433,7 +433,7 @@ public:
         memcpy (buffer + 18, info.md5sum, 16);
 
         const bool seekOk = output->setPosition (4);
-        (void) seekOk;
+        ignoreUnused (seekOk);
 
         // if this fails, you've given it an output stream that can't seek! It needs
         // to be able to seek back to write the header

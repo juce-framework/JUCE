@@ -658,7 +658,7 @@ public:
         if (invScale > 0.0f)
             handleMagnifyGesture (0, getMousePos (ev, view), getMouseTime (ev), 1.0f / invScale);
        #endif
-        (void) ev;
+        ignoreUnused (ev);
     }
 
     void redirectCopy  (NSObject*) { handleKeyPress (KeyPress ('c', ModifierKeys (ModifierKeys::commandModifier), 'c')); }
@@ -1998,7 +1998,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
         SetSystemUIMode (kUIModeNormal, 0);
     }
    #else
-    (void) kioskComp; (void) shouldBeEnabled; (void) allowMenusAndBars;
+    ignoreUnused (kioskComp, shouldBeEnabled, allowMenusAndBars);
 
     // If you're targeting OSes earlier than 10.6 and want to use this feature,
     // you'll need to enable JUCE_SUPPORT_CARBON.
