@@ -22,11 +22,7 @@
   ==============================================================================
 */
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
-
-#include "../../juce_core/native/juce_mac_ClangBugWorkaround.h"
+#include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_AAX && (JUCE_INCLUDED_AAX_IN_MM || defined (_WIN32) || defined (_WIN64))
@@ -1362,8 +1358,8 @@ struct AAXClasses
         descriptor.AddCategory (JucePlugin_AAXCategory);
 
        #ifdef JucePlugin_AAXPageTableFile
-        // optional page table setting - define this macro in your AppConfig.h if you
-        // want to set this value - see Avid documentation for details about its format.
+        // optional page table setting - define this macro in your project if you want
+        // to set this value - see Avid documentation for details about its format.
         descriptor.AddResourceInfo (AAX_eResourceType_PageTable, JucePlugin_AAXPageTableFile);
        #endif
 
