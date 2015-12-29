@@ -768,6 +768,16 @@ static float getMaximumTouchForce (UITouch* touch) noexcept
     return 0.0f;
 }
 
+static float getTouchForce (UITouch* touch) noexcept
+{
+   #if defined (__IPHONE_9_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
+    if ([touch respondsToSelector: @selector (force)])
+        return (float) touch.force;
+   #endif
+
+    return 0.0f;
+}
+
 void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, const bool isUp, bool isCancel)
 {
     NSArray* touches = [[event touchesForView: view] allObjects];
@@ -823,7 +833,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         }
 
         // NB: some devices return 0 or 1.0 if pressure is unknown, so we'll clip our value to a believable range:
-        float pressure = maximumForce > 0 ? jlimit (0.0001f, 0.9999f, (float) (touch.force / maximumForce))
+        float pressure = maximumForce > 0 ? jlimit (0.0001f, 0.9999f, getTouchForce (touch) / maximumForce)
                                           : MouseInputSource::invalidPressure;
 
         handleMouseEvent (touchIndex, pos, modsToSend, pressure, time);
