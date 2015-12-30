@@ -32,6 +32,7 @@ DrawableShape::DrawableShape()
 DrawableShape::DrawableShape (const DrawableShape& other)
     : Drawable (other),
       strokeType (other.strokeType),
+      dashLengths (other.dashLengths),
       mainFill (other.mainFill),
       strokeFill (other.strokeFill)
 {
