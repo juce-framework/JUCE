@@ -1721,7 +1721,7 @@ private:
         return (dw & SIGNATURE_MASK) == MI_WP_SIGNATURE;
     }
 
-    void doMouseMove (Point<float> position)
+    void doMouseMove (Point<float> position, bool isMouseDownEvent)
     {
         // this will be handled by WM_TOUCH
         if (isTouchEvent())
@@ -1730,7 +1730,13 @@ private:
         if (! isMouseOver)
         {
             isMouseOver = true;
-            ModifierKeys::getCurrentModifiersRealtime(); // (This avoids a rare stuck-button problem when focus is lost unexpectedly)
+
+            // This avoids a rare stuck-button problem when focus is lost unexpectedly, but must
+            // not be called as part of a move, in case it's actually a mouse-drag from another
+            // app which ends up here when we get focus before the mouse is released..
+            if (isMouseDownEvent)
+                ModifierKeys::getCurrentModifiersRealtime();
+
             updateKeyModifiers();
 
             TRACKMOUSEEVENT tme;
@@ -1770,7 +1776,7 @@ private:
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
 
-        doMouseMove (position);
+        doMouseMove (position, true);
 
         if (isValidPeer (this))
         {
@@ -2447,7 +2453,7 @@ private:
                 return 1;
 
             //==============================================================================
-            case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam)); return 0;
+            case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;
             case WM_MOUSELEAVE:         doMouseExit(); return 0;
 
             case WM_LBUTTONDOWN:
