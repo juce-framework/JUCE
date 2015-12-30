@@ -27,12 +27,7 @@
 
 #if JucePlugin_Build_AAX && (JUCE_INCLUDED_AAX_IN_MM || defined (_WIN32) || defined (_WIN64))
 
-#ifdef _MSC_VER
- #include <windows.h>
-#else
- #include <Cocoa/Cocoa.h>
-#endif
-
+#include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_PluginBusUtilities.h"
 #undef Component
