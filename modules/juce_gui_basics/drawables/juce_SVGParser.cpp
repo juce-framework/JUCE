@@ -30,6 +30,7 @@ public:
     struct SharedDefinitions
     {
         HashMap <String, Path> clipPaths;
+        HashMap <String, const XmlElement*> defs;
     };
 
     //==============================================================================
@@ -388,6 +389,7 @@ private:
         if (tag == "a")             return parseLinkElement (xml);
         if (tag == "style"  )       parseCSSStyle (xml);
         else if (tag == "clipPath") parseClipPath (xml);
+        else if (tag == "defs")     parseDefs (xml);
 
         return nullptr;
     }
@@ -402,6 +404,17 @@ private:
         else if (tag == "line")     parseLine (xml, path);
         else if (tag == "polyline") parsePolygon (xml, true, path);
         else if (tag == "polygon")  parsePolygon (xml, false, path);
+        else if (tag == "use")
+        {
+            const String link = xml->getStringAttribute ("xlink:href");
+            const String prefix = "#";
+            if (!link.startsWith (prefix))
+                return false;
+            const String linkedId = link.substring (prefix.length());
+            const XmlElement* elem = sharedDefs->defs[linkedId];
+            if (elem != nullptr)
+                return parsePathElement (xml.parent->getChild (elem), path);
+        }
         else
             return false;
         return true;
@@ -1094,6 +1107,13 @@ private:
              | (align.containsIgnoreCase ("yMin")  ? RectanglePlacement::yTop
                                                    : (align.containsIgnoreCase ("yMax") ? RectanglePlacement::yBottom
                                                                                         : RectanglePlacement::yMid));
+    }
+
+    //==============================================================================
+    void parseDefs (const XmlPath& xml)
+    {
+        forEachXmlChildElement (*xml, e)
+            sharedDefs->defs.set (e->getStringAttribute ("id"), e);
     }
 
     //==============================================================================
