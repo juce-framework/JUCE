@@ -24,6 +24,7 @@
 
 DrawableShape::DrawableShape()
     : strokeType (0.0f),
+      hasClipPath (false),
       mainFill (Colours::black),
       strokeFill (Colours::black)
 {
@@ -33,6 +34,8 @@ DrawableShape::DrawableShape (const DrawableShape& other)
     : Drawable (other),
       strokeType (other.strokeType),
       dashLengths (other.dashLengths),
+      clipPath (other.clipPath),
+      hasClipPath (other.hasClipPath),
       mainFill (other.mainFill),
       strokeFill (other.strokeFill)
 {
@@ -142,6 +145,12 @@ void DrawableShape::setDashLengths (const Array<float>& newDashLengths)
     }
 }
 
+void DrawableShape::setClipPath (const Path& path)
+{
+    hasClipPath = true;
+    clipPath = path;
+}
+
 void DrawableShape::setStrokeThickness (const float newThickness)
 {
     setStrokeType (PathStrokeType (newThickness, strokeType.getJointStyle(), strokeType.getEndStyle()));
@@ -169,6 +178,9 @@ void DrawableShape::writeTo (FillAndStrokeState& state, ComponentBuilder::ImageP
 void DrawableShape::paint (Graphics& g)
 {
     transformContextToCorrectOrigin (g);
+
+    if (hasClipPath)
+        g.reduceClipRegion (clipPath);
 
     g.setFillType (mainFill.fill);
     g.fillPath (path);

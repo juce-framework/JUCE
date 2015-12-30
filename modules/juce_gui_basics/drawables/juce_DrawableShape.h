@@ -116,6 +116,8 @@ public:
 
     void setDashLengths (const Array<float>& newDashLengths);
 
+    void setClipPath (const Path&);
+
     /** Changes the stroke thickness.
         This is a shortcut for calling setStrokeType.
     */
@@ -170,7 +172,8 @@ protected:
     //==============================================================================
     PathStrokeType strokeType;
     Array<float> dashLengths;
-    Path path, strokePath;
+    Path path, strokePath, clipPath;
+    bool hasClipPath;
 
 private:
     class RelativePositioner;
