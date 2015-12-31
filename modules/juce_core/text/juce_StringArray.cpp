@@ -245,6 +245,22 @@ void StringArray::removeString (StringRef stringToRemove, const bool ignoreCase)
     }
 }
 
+void StringArray::removeAllOccurrencesOfString (StringRef stringToRemove, const bool ignoreCase)
+{
+    if (ignoreCase)
+    {
+        for (int i = size(); --i >= 0;)
+            if (strings.getReference(i).equalsIgnoreCase (stringToRemove))
+                strings.remove (i);
+    }
+    else
+    {
+        for (int i = size(); --i >= 0;)
+            if (stringToRemove == strings.getReference (i))
+                strings.remove (i);
+    }
+}
+
 void StringArray::removeRange (int startIndex, int numberToRemove)
 {
     strings.removeRange (startIndex, numberToRemove);

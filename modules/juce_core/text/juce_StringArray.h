@@ -304,9 +304,17 @@ public:
     /** Finds a string in the array and removes it.
         This will remove the first occurrence of the given string from the array. The
         comparison may be case-insensitive depending on the ignoreCase parameter.
+        @see removeAllOccurrencesOfString
     */
     void removeString (StringRef stringToRemove,
                        bool ignoreCase = false);
+
+    /** Finds a string in the array and removes every instance of it.
+        The comparison may be case-insensitive depending on the ignoreCase parameter.
+        @see removeString
+     */
+    void removeAllOccurrencesOfString (StringRef stringToRemove,
+                                       bool ignoreCase = false);
 
     /** Removes a range of elements from the array.
 
