@@ -248,7 +248,7 @@ void FFT::performRealOnlyInverseTransform (float* d) const noexcept
 
     if (scratchSize < maxFFTScratchSpaceToAlloca)
     {
-        performRealOnlyForwardTransform (static_cast<Complex*> (alloca (scratchSize)), d);
+        performRealOnlyInverseTransform (static_cast<Complex*> (alloca (scratchSize)), d);
     }
     else
     {
