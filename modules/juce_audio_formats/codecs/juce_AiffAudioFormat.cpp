@@ -1003,7 +1003,7 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
                                                      const StringPairArray& metadataValues,
                                                      int /*qualityOptionIndex*/)
 {
-    if (getPossibleBitDepths().contains (bitsPerSample))
+    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
         return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels, (unsigned int) bitsPerSample, metadataValues);
 
     return nullptr;

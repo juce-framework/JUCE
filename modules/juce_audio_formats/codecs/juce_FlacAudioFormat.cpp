@@ -536,7 +536,7 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
                                                      const StringPairArray& /*metadataValues*/,
                                                      int qualityOptionIndex)
 {
-    if (getPossibleBitDepths().contains (bitsPerSample))
+    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
     {
         ScopedPointer<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels,
                                                      (uint32) bitsPerSample, qualityOptionIndex));
