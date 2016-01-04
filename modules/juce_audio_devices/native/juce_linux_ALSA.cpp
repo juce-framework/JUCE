@@ -993,7 +993,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        if (ALSAAudioIODevice* d = dynamic_cast <ALSAAudioIODevice*> (device))
+        if (ALSAAudioIODevice* d = dynamic_cast<ALSAAudioIODevice*> (device))
             return asInput ? inputIds.indexOf (d->inputId)
                            : outputIds.indexOf (d->outputId);
 

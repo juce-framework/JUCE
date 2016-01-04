@@ -393,13 +393,13 @@ private:
 
         static void interruptionListenerCallback (void* client, UInt32 interruptionType)
         {
-            const Array <iOSAudioIODevice*>& activeDevices = static_cast <AudioSessionHolder*> (client)->activeDevices;
+            const Array<iOSAudioIODevice*>& activeDevices = static_cast<AudioSessionHolder*> (client)->activeDevices;
 
             for (int i = activeDevices.size(); --i >= 0;)
                 activeDevices.getUnchecked(i)->interruptionListener (interruptionType);
         }
 
-        Array <iOSAudioIODevice*> activeDevices;
+        Array<iOSAudioIODevice*> activeDevices;
     };
 
     static AudioSessionHolder& getSessionHolder()

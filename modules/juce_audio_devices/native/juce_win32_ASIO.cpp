@@ -67,7 +67,7 @@ namespace ASIODebugging
    #else
     static void dummyLog() {}
     #define JUCE_ASIO_LOG(msg)               ASIODebugging::dummyLog()
-    #define JUCE_ASIO_LOG_ERROR(msg, errNum) (void) errNum; ASIODebugging::dummyLog()
+    #define JUCE_ASIO_LOG_ERROR(msg, errNum) ignoreUnused (errNum); ASIODebugging::dummyLog()
    #endif
 }
 
@@ -690,31 +690,24 @@ public:
         JUCE_ASIO_LOG ("showing control panel");
 
         bool done = false;
+        insideControlPanelModalLoop = true;
 
-        JUCE_TRY
+        const uint32 started = Time::getMillisecondCounter();
+
+        if (asioObject != nullptr)
         {
-            // are there are devices that need to be closed before showing their control panel?
-            // close();
-            insideControlPanelModalLoop = true;
+            asioObject->controlPanel();
 
-            const uint32 started = Time::getMillisecondCounter();
+            const int spent = (int) Time::getMillisecondCounter() - (int) started;
 
-            if (asioObject != nullptr)
+            JUCE_ASIO_LOG ("spent: " + String (spent));
+
+            if (spent > 300)
             {
-                asioObject->controlPanel();
-
-                const int spent = (int) Time::getMillisecondCounter() - (int) started;
-
-                JUCE_ASIO_LOG ("spent: " + String (spent));
-
-                if (spent > 300)
-                {
-                    shouldUsePreferredSize = true;
-                    done = true;
-                }
+                shouldUsePreferredSize = true;
+                done = true;
             }
         }
-        JUCE_CATCH_ALL
 
         insideControlPanelModalLoop = false;
         return done;
@@ -785,7 +778,7 @@ private:
     HeapBlock<ASIOSampleFormat> inputFormat, outputFormat;
 
     WaitableEvent event1;
-    HeapBlock <float> tempBuffer;
+    HeapBlock<float> tempBuffer;
     int volatile bufferIndex, numActiveInputChans, numActiveOutputChans;
 
     bool deviceIsOpen, isStarted, buffersCreated;

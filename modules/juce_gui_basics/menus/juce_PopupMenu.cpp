@@ -107,8 +107,8 @@ public:
     const Colour textColour;
     const bool isActive, isSeparator, isTicked, usesColour;
     ScopedPointer<Drawable> iconDrawable;
-    ReferenceCountedObjectPtr <CustomComponent> customComp;
-    ScopedPointer <PopupMenu> subMenu;
+    ReferenceCountedObjectPtr<CustomComponent> customComp;
+    ScopedPointer<PopupMenu> subMenu;
     ApplicationCommandManager* const commandManager;
 
 private:
@@ -1544,7 +1544,7 @@ int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentM
         if (userCallback == nullptr && canBeModal)
             return window->runModalLoop();
        #else
-        (void) canBeModal;
+        ignoreUnused (canBeModal);
         jassert (! (userCallback == nullptr && canBeModal));
        #endif
     }

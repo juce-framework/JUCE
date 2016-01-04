@@ -44,6 +44,6 @@ MessageListener::~MessageListener()
 
 void MessageListener::postMessage (Message* const message) const
 {
-    message->recipient = const_cast <MessageListener*> (this);
+    message->recipient = const_cast<MessageListener*> (this);
     message->post();
 }

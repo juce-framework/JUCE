@@ -224,11 +224,7 @@ struct CameraDevice::Pimpl
     {
         const Time now (Time::getCurrentTime());
 
-       #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
         NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: QTSampleBufferHostTimeAttribute];
-       #else
-        NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: nsStringLiteral ("hostTime")];
-       #endif
 
         int64 presentationTime = (hosttime != nil)
                 ? ((int64) AudioConvertHostTimeToNanos ([hosttime unsignedLongLongValue]) / 1000000 + 40)

@@ -249,8 +249,7 @@ private:
             {
                 // this is the item they chose in the drop-down list..
                 const int optionIndexChosen = w.getComboBoxComponent ("option")->getSelectedItemIndex();
-                (void) optionIndexChosen; // (just avoids a compiler warning about unused variables)
-
+                ignoreUnused (optionIndexChosen);
 
                 // this is the text they entered..
                 String text = w.getTextEditorContents ("text");

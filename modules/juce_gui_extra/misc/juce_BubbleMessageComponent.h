@@ -106,11 +106,11 @@ public:
 
     //==============================================================================
     /** @internal */
-    void getContentSize (int& w, int& h);
+    void getContentSize (int& w, int& h) override;
     /** @internal */
-    void paintContent (Graphics& g, int w, int h);
+    void paintContent (Graphics& g, int w, int h) override;
     /** @internal */
-    void timerCallback();
+    void timerCallback() override;
 
 private:
     //==============================================================================
@@ -120,9 +120,7 @@ private:
     bool deleteAfterUse;
 
     void createLayout (const AttributedString&);
-    void init (int numMillisecondsBeforeRemoving,
-               bool removeWhenMouseClicked,
-               bool deleteSelfAfterUse);
+    void init (int, bool, bool);
     void hide (bool fadeOut);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleMessageComponent)

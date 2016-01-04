@@ -63,7 +63,7 @@ public:
         @see drawWithin
     */
     void draw (Graphics& g, float opacity,
-               const AffineTransform& transform = AffineTransform::identity) const;
+               const AffineTransform& transform = AffineTransform()) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
 

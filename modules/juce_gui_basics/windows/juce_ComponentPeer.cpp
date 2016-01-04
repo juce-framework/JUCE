@@ -177,11 +177,16 @@ Component* ComponentPeer::getTargetForKeyPress()
 bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textCharacter)
 {
     ModifierKeys::updateCurrentModifiers();
-    bool keyWasUsed = false;
 
-    const KeyPress keyInfo (keyCode,
-                            ModifierKeys::getCurrentModifiers().withoutMouseButtons(),
-                            textCharacter);
+    return handleKeyPress (KeyPress (keyCode,
+                                     ModifierKeys::getCurrentModifiers().withoutMouseButtons(),
+                                     textCharacter));
+}
+
+
+bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
+{
+    bool keyWasUsed = false;
 
     for (Component* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
     {
@@ -588,4 +593,4 @@ void ComponentPeer::setRepresentedFile (const File&)
 
 //==============================================================================
 int ComponentPeer::getCurrentRenderingEngine() const            { return 0; }
-void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); (void) index; }
+void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); ignoreUnused (index); }

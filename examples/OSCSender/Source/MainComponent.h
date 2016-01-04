@@ -43,10 +43,8 @@ private:
     {
         if (slider == &rotaryKnob)
         {
-            float valueToSend = (float) rotaryKnob.getValue();
-
             // create and send an OSC message with an address and a float value:
-            if (! sender.send ("/juce/rotaryknob", valueToSend))
+            if (! sender.send ("/juce/rotaryknob", (float) rotaryKnob.getValue()))
                 showConnectionErrorMessage ("Error: could not send OSC message.");
         }
     }

@@ -82,7 +82,7 @@ protected:
 
 private:
     //==============================================================================
-    ScopedPointer <StreamingSocket> socket;
+    ScopedPointer<StreamingSocket> socket;
 
     void run() override;
 

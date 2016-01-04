@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if defined (JUCE_AUDIO_BASICS_H_INCLUDED) && ! JUCE_AMALGAMATED_INCLUDE
+#ifdef JUCE_AUDIO_BASICS_H_INCLUDED
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -31,9 +31,6 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
 #include "juce_audio_basics.h"
 
 #if JUCE_MINGW && ! defined (__SSE2__)
@@ -89,6 +86,16 @@ namespace juce
 #include "midi/juce_MidiKeyboardState.cpp"
 #include "midi/juce_MidiMessage.cpp"
 #include "midi/juce_MidiMessageSequence.cpp"
+#include "midi/juce_MidiRPN.cpp"
+#include "mpe/juce_MPEValue.cpp"
+#include "mpe/juce_MPENote.cpp"
+#include "mpe/juce_MPEZone.cpp"
+#include "mpe/juce_MPEZoneLayout.cpp"
+#include "mpe/juce_MPEInstrument.cpp"
+#include "mpe/juce_MPEMessages.cpp"
+#include "mpe/juce_MPESynthesiserBase.cpp"
+#include "mpe/juce_MPESynthesiserVoice.cpp"
+#include "mpe/juce_MPESynthesiser.cpp"
 #include "sources/juce_BufferingAudioSource.cpp"
 #include "sources/juce_ChannelRemappingAudioSource.cpp"
 #include "sources/juce_IIRFilterAudioSource.cpp"

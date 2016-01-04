@@ -97,7 +97,7 @@ public:
             return false;
 
         ImageButton* const ib = (ImageButton*) comp;
-        ComponentLayout& l = const_cast <ComponentLayout&> (*layout);
+        ComponentLayout& l = const_cast<ComponentLayout&> (*layout);
 
         setImageKeepProportions (l, ib, xml.getBoolAttribute ("keepProportions", true), false);
 
@@ -120,7 +120,7 @@ public:
     {
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 
-        ImageButton* const ib = dynamic_cast <ImageButton*> (component);
+        ImageButton* const ib = dynamic_cast<ImageButton*> (component);
 
         String s;
 

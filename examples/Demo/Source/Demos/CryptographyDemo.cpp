@@ -131,84 +131,72 @@ public:
         hashEntryBox.setColour (TextEditor::backgroundColourId, Colours::white.withAlpha (0.5f));
 
         hashEntryBox.setReturnKeyStartsNewLine (true);
-        hashEntryBox.setText ("Type some text in this box and the resulting MD5 and SHA hashes will update below");
+        hashEntryBox.setText ("Type some text in this box and the resulting MD5, SHA and Whirlpool hashes will update below");
         hashEntryBox.addListener (this);
 
         hashLabel1.setText ("Text to Hash:", dontSendNotification);
         hashLabel2.setText ("MD5 Result:", dontSendNotification);
         hashLabel3.setText ("SHA Result:", dontSendNotification);
+        hashLabel4.setText ("Whirlpool Result:", dontSendNotification);
 
         hashLabel1.attachToComponent (&hashEntryBox, true);
         hashLabel2.attachToComponent (&md5Result, true);
         hashLabel3.attachToComponent (&shaResult, true);
+        hashLabel4.attachToComponent (&whirlpoolResult, true);
 
         addAndMakeVisible (md5Result);
         addAndMakeVisible (shaResult);
+        addAndMakeVisible (whirlpoolResult);
 
         updateHashes();
     }
 
     void updateHashes()
     {
-        updateMD5Result();
-        updateSHA256Result();
+        String text = hashEntryBox.getText();
+        updateMD5Result (text.toUTF8());
+        updateSHA256Result (text.toUTF8());
+        updateWhirlpoolResult (text.toUTF8());
     }
 
-    void updateMD5Result()
+    void updateMD5Result (CharPointer_UTF8 text)
     {
-        const MD5 md5 (hashEntryBox.getText().toUTF8());
-
-        md5Result.setText (md5.toHexString(), dontSendNotification);
+        md5Result.setText (MD5 (text).toHexString(), dontSendNotification);
     }
 
-    void updateSHA256Result()
+    void updateSHA256Result (CharPointer_UTF8 text)
     {
-        const SHA256 sha (hashEntryBox.getText().toUTF8());
+        shaResult.setText (SHA256 (text).toHexString(), dontSendNotification);
+    }
 
-        shaResult.setText (sha.toHexString(), dontSendNotification);
+    void updateWhirlpoolResult (CharPointer_UTF8 text)
+    {
+        whirlpoolResult.setText (Whirlpool (text).toHexString(), dontSendNotification);
     }
 
     void resized() override
     {
         Rectangle<int> area (getLocalBounds());
         hashGroup.setBounds (area);
-        area.removeFromLeft (80);
+        area.removeFromLeft (120);
         area.removeFromTop (10);
         area.reduce (5, 5);
-        shaResult.setBounds (area.removeFromBottom (34).reduced (5));
-        md5Result.setBounds (area.removeFromBottom (34).reduced (5));
+        whirlpoolResult.setBounds (area.removeFromBottom (34));
+        shaResult.setBounds (area.removeFromBottom (34));
+        md5Result.setBounds (area.removeFromBottom (34));
         hashEntryBox.setBounds (area.reduced (5));
     }
 
 private:
     GroupComponent hashGroup;
     TextEditor hashEntryBox;
-    Label md5Result, shaResult;
-    Label hashLabel1, hashLabel2, hashLabel3;
+    Label md5Result, shaResult, whirlpoolResult;
+    Label hashLabel1, hashLabel2, hashLabel3, hashLabel4;
 
-    void textEditorTextChanged (TextEditor& editor) override
-    {
-        if (&editor == &hashEntryBox)
-            updateHashes();
-    }
-
-    void textEditorReturnKeyPressed (TextEditor& editor) override
-    {
-        if (&editor == &hashEntryBox)
-            updateHashes();
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor& editor) override
-    {
-        if (&editor == &hashEntryBox)
-            updateHashes();
-    }
-
-    void textEditorFocusLost (TextEditor& editor) override
-    {
-        if (&editor == &hashEntryBox)
-            updateHashes();
-    }
+    void textEditorTextChanged (TextEditor&) override        { updateHashes(); }
+    void textEditorReturnKeyPressed (TextEditor&) override   { updateHashes(); }
+    void textEditorEscapeKeyPressed (TextEditor&) override   { updateHashes(); }
+    void textEditorFocusLost (TextEditor&) override          { updateHashes(); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashesComponent)
 };

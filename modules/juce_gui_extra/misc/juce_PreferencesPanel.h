@@ -136,7 +136,7 @@ public:
 private:
     //==============================================================================
     String currentPageName;
-    ScopedPointer <Component> currentPage;
+    ScopedPointer<Component> currentPage;
     OwnedArray<DrawableButton> buttons;
     int buttonSize;
 

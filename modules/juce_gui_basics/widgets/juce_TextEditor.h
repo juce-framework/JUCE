@@ -328,7 +328,7 @@ public:
         @param newText                  the text to add
         @param sendTextChangeMessage    if true, this will cause a change message to
                                         be sent to all the listeners.
-        @see insertText
+        @see insertTextAtCaret
     */
     void setText (const String& newText,
                   bool sendTextChangeMessage = true);

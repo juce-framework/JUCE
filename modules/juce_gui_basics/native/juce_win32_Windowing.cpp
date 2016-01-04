@@ -1129,19 +1129,16 @@ public:
         JUCE_DECLARE_NON_COPYABLE (JuceDropTarget)
     };
 
-   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     static bool offerKeyMessageToJUCEWindow (MSG& m)
     {
         if (m.message == WM_KEYDOWN || m.message == WM_KEYUP)
             if (Component::getCurrentlyFocusedComponent() != nullptr)
                 if (HWNDComponentPeer* h = getOwnerOfWindow (m.hwnd))
-                    if (m.message == WM_KEYDOWN ? h->doKeyDown (m.wParam)
-                                                : h->doKeyUp (m.wParam))
-                        return true;
+                    return m.message == WM_KEYDOWN ? h->doKeyDown (m.wParam)
+                                                   : h->doKeyUp (m.wParam);
 
         return false;
     }
-   #endif
 
 private:
     HWND hwnd, parentToAddTo;
@@ -1694,7 +1691,7 @@ private:
 
     void setCurrentRenderingEngine (int index) override
     {
-        (void) index;
+        ignoreUnused (index);
 
        #if JUCE_DIRECT2D
         if (getAvailableRenderingEngines().size() > 1)
@@ -1724,7 +1721,7 @@ private:
         return (dw & SIGNATURE_MASK) == MI_WP_SIGNATURE;
     }
 
-    void doMouseMove (Point<float> position)
+    void doMouseMove (Point<float> position, bool isMouseDownEvent)
     {
         // this will be handled by WM_TOUCH
         if (isTouchEvent())
@@ -1733,7 +1730,13 @@ private:
         if (! isMouseOver)
         {
             isMouseOver = true;
-            ModifierKeys::getCurrentModifiersRealtime(); // (This avoids a rare stuck-button problem when focus is lost unexpectedly)
+
+            // This avoids a rare stuck-button problem when focus is lost unexpectedly, but must
+            // not be called as part of a move, in case it's actually a mouse-drag from another
+            // app which ends up here when we get focus before the mouse is released..
+            if (isMouseDownEvent)
+                ModifierKeys::getCurrentModifiersRealtime();
+
             updateKeyModifiers();
 
             TRACKMOUSEEVENT tme;
@@ -1773,7 +1776,7 @@ private:
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
 
-        doMouseMove (position);
+        doMouseMove (position, true);
 
         if (isValidPeer (this))
         {
@@ -2450,7 +2453,7 @@ private:
                 return 1;
 
             //==============================================================================
-            case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam)); return 0;
+            case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;
             case WM_MOUSELEAVE:         doMouseExit(); return 0;
 
             case WM_LBUTTONDOWN:
@@ -2757,7 +2760,7 @@ private:
             reset();
 
             if (TextInputTarget* const target = owner.findCurrentTextInputTarget())
-                target->insertTextAtCaret (String::empty);
+                target->insertTextAtCaret (String());
         }
 
         void handleEndComposition (ComponentPeer& owner, HWND hWnd)
@@ -2768,7 +2771,7 @@ private:
                 if (TextInputTarget* const target = owner.findCurrentTextInputTarget())
                 {
                     target->setHighlightedRegion (compositionRange);
-                    target->insertTextAtCaret (String::empty);
+                    target->insertTextAtCaret (String());
                     compositionRange.setLength (0);
 
                     target->setHighlightedRegion (Range<int>::emptyRange (compositionRange.getEnd()));
@@ -2843,7 +2846,7 @@ private:
                 return String (buffer);
             }
 
-            return String::empty;
+            return String();
         }
 
         int getCompositionCaretPos (HIMC hImc, LPARAM lParam, const String& currentIMEString) const
@@ -3021,9 +3024,8 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
     return HWNDComponentPeer::isKeyDown (k);
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+// (This internal function is used by the plugin client module)
 bool offerKeyMessageToJUCEWindow (MSG& m)   { return HWNDComponentPeer::offerKeyMessageToJUCEWindow (m); }
-#endif
 
 //==============================================================================
 bool JUCE_CALLTYPE Process::isForegroundProcess()

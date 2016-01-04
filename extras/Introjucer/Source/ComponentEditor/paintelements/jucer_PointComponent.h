@@ -43,9 +43,9 @@ public:
     virtual RelativePositionedRectangle getPosition() = 0;
     virtual void setPosition (const RelativePositionedRectangle& newPos) = 0;
 
-    virtual void updatePosition()
+    void updatePosition() override
     {
-        if (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != 0)
+        if (dynamic_cast<PaintRoutineEditor*> (getParentComponent()) != nullptr)
         {
             const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
             const Rectangle<int> r (getPosition().getRectangle (area, owner->getDocument()->getComponentLayout()));
@@ -55,7 +55,7 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colours::white);
         g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 2.0f);
@@ -65,14 +65,14 @@ public:
     }
 
     //==============================================================================
-    void mouseDown (const MouseEvent&)
+    void mouseDown (const MouseEvent&) override
     {
         const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
         dragX = getX() + getWidth() / 2 - area.getX();
         dragY = getY() + getHeight() / 2 - area.getY();
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
         int x = dragX + e.getDistanceFromDragStartX();
@@ -99,7 +99,7 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent&)
+    void mouseUp (const MouseEvent&) override
     {
     }
 

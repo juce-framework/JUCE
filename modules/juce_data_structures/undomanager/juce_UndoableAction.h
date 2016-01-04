@@ -92,7 +92,7 @@ public:
 
         If it's not possible to merge the two actions, the method should return zero.
     */
-    virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { (void) nextAction; return nullptr; }
+    virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { ignoreUnused (nextAction); return nullptr; }
 };
 
 

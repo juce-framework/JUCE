@@ -46,7 +46,7 @@ class JUCE_API  Typeface  : public ReferenceCountedObject
 public:
     //==============================================================================
     /** A handy typedef for a pointer to a typeface. */
-    typedef ReferenceCountedObjectPtr <Typeface> Ptr;
+    typedef ReferenceCountedObjectPtr<Typeface> Ptr;
 
     //==============================================================================
     /** Returns the font family of the typeface.

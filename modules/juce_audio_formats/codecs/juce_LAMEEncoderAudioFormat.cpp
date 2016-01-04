@@ -110,7 +110,7 @@ private:
         if (cp.start (processArgs))
         {
             const String childOutput (cp.readAllProcessOutput());
-            DBG (childOutput); (void) childOutput;
+            DBG (childOutput); ignoreUnused (childOutput);
 
             cp.waitForProcessToFinish (10000);
             return tempMP3.getFile().getSize() > 0;
@@ -205,6 +205,9 @@ AudioFormatWriter* LAMEEncoderAudioFormat::createWriterFor (OutputStream* stream
                                                             const StringPairArray& metadataValues,
                                                             int qualityOptionIndex)
 {
+    if (streamToWriteTo == nullptr)
+        return nullptr;
+
     int vbr = 4;
     int cbr = 0;
 

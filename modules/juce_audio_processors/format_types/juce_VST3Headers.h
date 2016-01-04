@@ -45,6 +45,9 @@
  #pragma clang diagnostic ignored "-Wshadow"
  #pragma clang diagnostic ignored "-Wdeprecated-register"
  #pragma clang diagnostic ignored "-Wunused-function"
+ #pragma clang diagnostic ignored "-Wsign-conversion"
+ #pragma clang diagnostic ignored "-Wsign-compare"
+ #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
 #endif
 
 /*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
@@ -79,6 +82,8 @@
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
  #include <public.sdk/source/common/memorystream.h>
 #else
+ #define Point CarbonDummyPointName // The VST headers include some system headers that need
+                                    // to match the name our hacky Carbon workaround used.
  #include <base/source/baseiids.cpp>
  #include <base/source/fatomic.cpp>
  #include <base/source/fbuffer.cpp>
@@ -104,6 +109,7 @@
  #include <public.sdk/source/vst/vstcomponentbase.cpp>
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
+ #undef Point
 
 //==============================================================================
 namespace Steinberg

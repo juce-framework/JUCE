@@ -260,7 +260,7 @@ public:
     */
     template <class Convertible>
     ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<Convertible>& other) noexcept
-        : referencedObject (static_cast <ReferencedType*> (other.get()))
+        : referencedObject (static_cast<ReferencedType*> (other.get()))
     {
         incIfNotNull (referencedObject);
     }

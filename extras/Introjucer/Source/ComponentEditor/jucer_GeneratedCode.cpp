@@ -118,7 +118,7 @@ String GeneratedCode::getCallbackDeclarations() const
     {
         CallbackMethod* const cm = callbacks.getUnchecked(i);
 
-        s << cm->returnType << " " << cm->prototype << ";\n";
+        s << cm->returnType << " " << cm->prototype << " override;\n";
     }
 
     return s;

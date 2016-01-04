@@ -328,7 +328,7 @@ private:
 
         void modalStateFinished (int returnValue)
         {
-            function (returnValue, static_cast <ComponentType*> (comp.get()));
+            function (returnValue, static_cast<ComponentType*> (comp.get()));
         }
 
     private:
@@ -349,7 +349,7 @@ private:
 
         void modalStateFinished (int returnValue)
         {
-            function (returnValue, static_cast <ComponentType*> (comp.get()), param1);
+            function (returnValue, static_cast<ComponentType*> (comp.get()), param1);
         }
 
     private:

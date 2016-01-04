@@ -43,6 +43,15 @@
 */
 
 //==============================================================================
+#ifdef JUCE_APP_CONFIG_HEADER
+ #include JUCE_APP_CONFIG_HEADER
+#else
+ // Your project must contain an AppConfig.h file with your project-specific settings in it,
+ // and your header search path must make it accessible to the module's files.
+ #include "AppConfig.h"
+#endif
+
+//==============================================================================
 #if (defined (_WIN32) || defined (_WIN64))
   #define       JUCE_WIN32 1
   #define       JUCE_WINDOWS 1
@@ -55,15 +64,9 @@
   #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
   #define Component CarbonDummyCompName
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
+  #include "../native/juce_mac_ClangBugWorkaround.h"
   #undef Point
   #undef Component
-
-  #if JUCE_PROJUCER_LIVE_BUILD
-   // This hack is a workaround for a bug (?) in Apple's 10.11 SDK headers
-   // which cause some configurations of Clang to throw out an error..
-   #undef CF_OPTIONS
-   #define CF_OPTIONS(_type, _name) _type _name; enum
-  #endif
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1
@@ -137,12 +140,12 @@
     #define JUCE_INTEL 1
   #endif
 
-  #if JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
-    #error "Building for OSX 10.3 is no longer supported!"
+  #if JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+    #error "Building for OSX 10.4 is no longer supported!"
   #endif
 
-  #if JUCE_MAC && ! defined (MAC_OS_X_VERSION_10_5)
-    #error "To build with 10.4 compatibility, use a 10.5 or 10.6 SDK and set the deployment target to 10.4"
+  #if JUCE_MAC && ! defined (MAC_OS_X_VERSION_10_6)
+    #error "To build with 10.5 compatibility, use a later SDK and set the deployment target to 10.5"
   #endif
 #endif
 

@@ -71,7 +71,7 @@ public:
     virtual bool isLooping() const = 0;
 
     /** Tells the source whether you'd like it to play in a loop. */
-    virtual void setLooping (bool shouldLoop)       { (void) shouldLoop; }
+    virtual void setLooping (bool shouldLoop)       { ignoreUnused (shouldLoop); }
 };
 
 

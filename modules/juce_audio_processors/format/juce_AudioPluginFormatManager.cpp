@@ -33,19 +33,19 @@ void AudioPluginFormatManager::addDefaultFormats()
     for (int i = formats.size(); --i >= 0;)
     {
        #if JUCE_PLUGINHOST_VST
-        jassert (dynamic_cast <VSTPluginFormat*> (formats[i]) == nullptr);
+        jassert (dynamic_cast<VSTPluginFormat*> (formats[i]) == nullptr);
        #endif
 
        #if JUCE_PLUGINHOST_VST3
-        jassert (dynamic_cast <VST3PluginFormat*> (formats[i]) == nullptr);
+        jassert (dynamic_cast<VST3PluginFormat*> (formats[i]) == nullptr);
        #endif
 
        #if JUCE_PLUGINHOST_AU && JUCE_MAC
-        jassert (dynamic_cast <AudioUnitPluginFormat*> (formats[i]) == nullptr);
+        jassert (dynamic_cast<AudioUnitPluginFormat*> (formats[i]) == nullptr);
        #endif
 
        #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
-        jassert (dynamic_cast <LADSPAPluginFormat*> (formats[i]) == nullptr);
+        jassert (dynamic_cast<LADSPAPluginFormat*> (formats[i]) == nullptr);
        #endif
     }
    #endif

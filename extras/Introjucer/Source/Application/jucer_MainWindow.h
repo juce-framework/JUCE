@@ -76,7 +76,7 @@ public:
     bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                StringArray& files, bool& canMoveFiles) override;
 private:
-    ScopedPointer <Project> currentProject;
+    ScopedPointer<Project> currentProject;
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();

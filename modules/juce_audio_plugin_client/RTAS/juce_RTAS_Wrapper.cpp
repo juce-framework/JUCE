@@ -22,10 +22,7 @@
   ==============================================================================
 */
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
-
+#include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_RTAS
@@ -421,7 +418,7 @@ public:
 
     JuceCustomUIView* getView() const
     {
-        return dynamic_cast <JuceCustomUIView*> (fOurPlugInView);
+        return dynamic_cast<JuceCustomUIView*> (fOurPlugInView);
     }
 
     void GetViewRect (Rect* size) override
@@ -478,11 +475,11 @@ public:
         if (MIDILogIn() == noErr)
         {
            #if JucePlugin_WantsMidiInput
-            if (CEffectType* const type = dynamic_cast <CEffectType*> (this->GetProcessType()))
+            if (CEffectType* const type = dynamic_cast<CEffectType*> (this->GetProcessType()))
             {
                 char nodeName [64];
                 type->GetProcessTypeName (63, nodeName);
-                p2cstrcpy (nodeName, reinterpret_cast <unsigned char*> (nodeName));
+                p2cstrcpy (nodeName, reinterpret_cast<unsigned char*> (nodeName));
 
                 midiBufferNode = new CEffectMIDIOtherBufferedNode (&mMIDIWorld,
                                                                    8192,
@@ -498,8 +495,8 @@ public:
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
         midiEvents.ensureSize (2048);
 
-        channels.calloc (jmax (juceFilter->getNumInputChannels(),
-                               juceFilter->getNumOutputChannels()));
+        channels.calloc (jmax (juceFilter->getTotalNumInputChannels(),
+                               juceFilter->getTotalNumOutputChannels()));
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
@@ -539,14 +536,14 @@ public:
 
        #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
-        (void) numMidiEventsComingIn;
+        ignoreUnused (numMidiEventsComingIn);
        #endif
 
         {
             const ScopedLock sl (juceFilter->getCallbackLock());
 
-            const int numIn = juceFilter->getNumInputChannels();
-            const int numOut = juceFilter->getNumOutputChannels();
+            const int numIn  = juceFilter->getTotalNumInputChannels();
+            const int numOut = juceFilter->getTotalNumOutputChannels();
             const int totalChans = jmax (numIn, numOut);
 
             if (juceFilter->isSuspended())

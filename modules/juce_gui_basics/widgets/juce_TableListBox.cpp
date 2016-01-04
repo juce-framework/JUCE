@@ -470,7 +470,7 @@ var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)         
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {
-    (void) existingComponentToUpdate;
+    ignoreUnused (existingComponentToUpdate);
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code that recycles the components
     return nullptr;
 }

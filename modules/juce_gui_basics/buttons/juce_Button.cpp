@@ -244,7 +244,7 @@ void Button::turnOffOtherButtonsInGroup (const NotificationType notification)
 
                 if (c != this)
                 {
-                    if (Button* const b = dynamic_cast <Button*> (c))
+                    if (Button* const b = dynamic_cast<Button*> (c))
                     {
                         if (b->getRadioGroupId() == radioGroupId)
                         {

@@ -964,7 +964,7 @@ const uint8 mainJuceLogo[] = { 110,109,104,98,101,67,226,177,185,67,98,216,179,8
     path->setAttribute ("d", pathString);
 
     ScopedPointer<Drawable> d (Drawable::createFromSVG (svg));
-    DrawablePath* dp = dynamic_cast <DrawablePath*> (d->getChildComponent(0));
+    DrawablePath* dp = dynamic_cast<DrawablePath*> (d->getChildComponent(0));
     jassert (dp != nullptr);
     Path p (dp->getPath());
 

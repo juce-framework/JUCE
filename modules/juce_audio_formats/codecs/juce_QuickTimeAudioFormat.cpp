@@ -142,7 +142,7 @@ public:
             if (err != noErr)
                 return;
 
-            HeapBlock <AudioChannelLayout> qt_audio_channel_layout;
+            HeapBlock<AudioChannelLayout> qt_audio_channel_layout;
             qt_audio_channel_layout.calloc (output_layout_size, 1);
 
             MovieAudioExtractionGetProperty (extractor,
@@ -322,8 +322,8 @@ private:
     Thread::ThreadID lastThreadId;
     MovieAudioExtractionRef extractor;
     AudioStreamBasicDescription inputStreamDesc;
-    HeapBlock <AudioBufferList> bufferList;
-    HeapBlock <char> dataBuffer;
+    HeapBlock<AudioBufferList> bufferList;
+    HeapBlock<char> dataBuffer;
     Handle dataHandle;
 
     //==============================================================================

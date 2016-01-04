@@ -307,54 +307,6 @@ private:
     };
 
     //==============================================================================
-    class LinearSmoothedValue
-    {
-    public:
-        LinearSmoothedValue() noexcept
-            : currentValue (0), target (0), step (0), countdown (0), stepsToTarget (0)
-        {
-        }
-
-        void reset (double sampleRate, double fadeLengthSeconds) noexcept
-        {
-            jassert (sampleRate > 0 && fadeLengthSeconds >= 0);
-            stepsToTarget = (int) std::floor (fadeLengthSeconds * sampleRate);
-            currentValue = target;
-            countdown = 0;
-        }
-
-        void setValue (float newValue) noexcept
-        {
-            if (target != newValue)
-            {
-                target = newValue;
-                countdown = stepsToTarget;
-
-                if (countdown <= 0)
-                    currentValue = target;
-                else
-                    step = (target - currentValue) / (float) countdown;
-            }
-        }
-
-        float getNextValue() noexcept
-        {
-            if (countdown <= 0)
-                return target;
-
-            --countdown;
-            currentValue += step;
-            return currentValue;
-        }
-
-    private:
-        float currentValue, target, step;
-        int countdown, stepsToTarget;
-
-        JUCE_DECLARE_NON_COPYABLE (LinearSmoothedValue)
-    };
-
-    //==============================================================================
     enum { numCombs = 8, numAllPasses = 4, numChannels = 2 };
 
     Parameters parameters;
@@ -363,7 +315,7 @@ private:
     CombFilter comb [numChannels][numCombs];
     AllPassFilter allPass [numChannels][numAllPasses];
 
-    LinearSmoothedValue damping, feedback, dryGain, wetGain1, wetGain2;
+    LinearSmoothedValue<float> damping, feedback, dryGain, wetGain1, wetGain2;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb)
 };

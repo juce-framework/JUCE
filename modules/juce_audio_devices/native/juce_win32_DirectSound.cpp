@@ -182,11 +182,9 @@ namespace DSoundLogging
         }
     }
 
-    #define CATCH JUCE_CATCH_EXCEPTION
     #define JUCE_DS_LOG(a)        DSoundLogging::logMessage(a);
     #define JUCE_DS_LOG_ERROR(a)  DSoundLogging::logError(a, __LINE__);
    #else
-    #define CATCH JUCE_CATCH_ALL
     #define JUCE_DS_LOG(a)
     #define JUCE_DS_LOG_ERROR(a)
    #endif
@@ -251,7 +249,7 @@ public:
         {
             JUCE_DS_LOG ("closing output: " + name);
             HRESULT hr = pOutputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr); (void) hr;
+            JUCE_DS_LOG_ERROR (hr); ignoreUnused (hr);
 
             pOutputBuffer->Release();
             pOutputBuffer = nullptr;
@@ -354,7 +352,7 @@ public:
                                         hr = pOutputBuffer->Play (0, 0, 1 /* DSBPLAY_LOOPING */);
 
                                         if (SUCCEEDED (hr))
-                                            return String::empty;
+                                            return String();
                                     }
                                 }
                             }
@@ -534,7 +532,7 @@ public:
         {
             JUCE_DS_LOG ("closing input: " + name);
             HRESULT hr = pInputBuffer->Stop();
-            JUCE_DS_LOG_ERROR (hr); (void) hr;
+            JUCE_DS_LOG_ERROR (hr); ignoreUnused (hr);
 
             pInputBuffer->Release();
             pInputBuffer = nullptr;
@@ -597,7 +595,7 @@ public:
                 hr = pInputBuffer->Start (1 /* DSCBSTART_LOOPING */);
 
                 if (SUCCEEDED (hr))
-                    return String::empty;
+                    return String();
             }
         }
 
@@ -1226,7 +1224,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        if (DSoundAudioIODevice* const d = dynamic_cast <DSoundAudioIODevice*> (device))
+        if (DSoundAudioIODevice* const d = dynamic_cast<DSoundAudioIODevice*> (device))
             return asInput ? d->inputDeviceIndex
                            : d->outputDeviceIndex;
 

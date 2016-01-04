@@ -22,9 +22,7 @@
   ==============================================================================
 */
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
+#include "../../juce_core/system/juce_TargetPlatform.h"
 
 //==============================================================================
 #if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
@@ -33,6 +31,7 @@
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
+#include "../utility/juce_PluginBusUtilities.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
@@ -640,7 +639,7 @@ private:
 
     private:
         //==============================================================================
-        class ContentWrapperComponent : public juce::Component
+        class ContentWrapperComponent  : public juce::Component
         {
         public:
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
@@ -692,11 +691,12 @@ private:
                 {
                     const int w = pluginEditor->getWidth();
                     const int h = pluginEditor->getHeight();
+                    const PluginHostType host (getHostType());
 
                    #if JUCE_WINDOWS
                     setSize (w, h);
                    #else
-                    if (owner.macHostWindow != nullptr && ! getHostType().isWavelab())
+                    if (owner.macHostWindow != nullptr && ! (host.isWavelab() || host.isReaper()))
                         juce::setNativeHostWindowSizeVST (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
@@ -705,7 +705,11 @@ private:
                         ViewRect newSize (0, 0, w, h);
                         owner.plugFrame->resizeView (&owner, &newSize);
 
-                        if (getHostType().isWavelab())
+                       #if JUCE_MAC
+                        if (host.isWavelab() || host.isReaper())
+                       #else
+                        if (host.isWavelab())
+                       #endif
                             setBounds (0, 0, w, h);
                     }
                 }
@@ -761,13 +765,25 @@ class JuceVST3Component : public Vst::IComponent,
 public:
     JuceVST3Component (Vst::IHostApplication* h)
       : refCount (1),
+        pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3)),
         host (h),
-        audioInputs  (Vst::kAudio, Vst::kInput),
-        audioOutputs (Vst::kAudio, Vst::kOutput),
-        eventInputs  (Vst::kEvent, Vst::kInput),
-        eventOutputs (Vst::kEvent, Vst::kOutput)
+        isMidiInputBusEnabled (false),
+        isMidiOutputBusEnabled (false),
+        busUtils (*pluginInstance, false)
     {
-        pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_VST3);
+       #if JucePlugin_WantsMidiInput
+        isMidiInputBusEnabled = true;
+       #endif
+
+       #if JucePlugin_ProducesMidiOutput
+        isMidiOutputBusEnabled = true;
+       #endif
+
+        busUtils.findAllCompatibleLayouts();
+
+        copyEnabledBuses (lastEnabledBusStates.inputBuses,  pluginInstance->busArrangement.inputBuses,  Vst::kInput);
+        copyEnabledBuses (lastEnabledBusStates.outputBuses, pluginInstance->busArrangement.outputBuses, Vst::kOutput);
+
         comPluginInstance = new JuceAudioProcessor (pluginInstance);
 
         zerostruct (processContext);
@@ -787,11 +803,6 @@ public:
         if (pluginInstance != nullptr)
             if (pluginInstance->getPlayHead() == this)
                 pluginInstance->setPlayHead (nullptr);
-
-        audioInputs.removeAll();
-        audioOutputs.removeAll();
-        eventInputs.removeAll();
-        eventOutputs.removeAll();
     }
 
     //==============================================================================
@@ -829,26 +840,7 @@ public:
         if (host != hostContext)
             host.loadFrom (hostContext);
 
-       #if JucePlugin_MaxNumInputChannels > 0
-        addAudioBusTo (audioInputs, TRANS("Audio Input"),
-                       getArrangementForNumChannels (JucePlugin_MaxNumInputChannels));
-       #endif
-
-       #if JucePlugin_MaxNumOutputChannels > 0
-        addAudioBusTo (audioOutputs, TRANS("Audio Output"),
-                       getArrangementForNumChannels (JucePlugin_MaxNumOutputChannels));
-       #endif
-
-       #if JucePlugin_WantsMidiInput
-        addEventBusTo (eventInputs, TRANS("MIDI Input"));
-       #endif
-
-       #if JucePlugin_ProducesMidiOutput
-        addEventBusTo (eventOutputs, TRANS("MIDI Output"));
-       #endif
-
         processContext.sampleRate = processSetup.sampleRate;
-
         preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock);
 
         return kResultTrue;
@@ -895,56 +887,13 @@ public:
         return kResultTrue;
     }
 
-    //==============================================================================
     tresult PLUGIN_API getControllerClassId (TUID classID) override
     {
         memcpy (classID, JuceVST3EditController::iid, sizeof (TUID));
         return kResultTrue;
     }
 
-    Steinberg::int32 PLUGIN_API getBusCount (Vst::MediaType type, Vst::BusDirection dir) override
-    {
-        if (Vst::BusList* const busList = getBusListFor (type, dir))
-            return busList->total();
-
-        return 0;
-    }
-
-    tresult PLUGIN_API getBusInfo (Vst::MediaType type, Vst::BusDirection dir,
-                                   Steinberg::int32 index, Vst::BusInfo& info) override
-    {
-        if (Vst::BusList* const busList = getBusListFor (type, dir))
-        {
-            if (Vst::Bus* const bus = (Vst::Bus*) busList->at (index))
-            {
-                info.mediaType = type;
-                info.direction = dir;
-
-                if (bus->getInfo (info))
-                    return kResultTrue;
-            }
-        }
-
-        zerostruct (info);
-        return kResultFalse;
-    }
-
-    tresult PLUGIN_API activateBus (Vst::MediaType type, Vst::BusDirection dir,
-                                    Steinberg::int32 index, TBool state) override
-    {
-        if (Vst::BusList* const busList = getBusListFor (type, dir))
-        {
-            if (Vst::Bus* const bus = (Vst::Bus*) busList->at (index))
-            {
-                bus->setActive (state);
-                return kResultTrue;
-            }
-        }
-
-        jassertfalse;
-        return kResultFalse;
-    }
-
+    //==============================================================================
     tresult PLUGIN_API setActive (TBool state) override
     {
         if (! state)
@@ -1039,7 +988,7 @@ public:
                 uint64 privateDataSize;
 
                 std::memcpy (&privateDataSize,
-                             buffer + (size - jucePrivDataIdentifierSize - sizeof (uint64)),
+                             buffer + ((size_t) size - jucePrivDataIdentifierSize - sizeof (uint64)),
                              sizeof (uint64));
 
                 privateDataSize = ByteOrder::swapIfBigEndian (privateDataSize);
@@ -1062,7 +1011,7 @@ public:
     {
         const int headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
         const struct fxBank* bank = (const struct fxBank*) (data + (8 + headerLen));
-        const int version = static_cast<int> (htonl (bank->version)); (void) version;
+        const int version = static_cast<int> (htonl (bank->version)); ignoreUnused (version);
 
         jassert ('VstW' == htonl (*(juce::int32*) data));
         jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
@@ -1331,9 +1280,7 @@ public:
     tresult PLUGIN_API setUnitProgramData (Steinberg::int32, Steinberg::int32, IBStream*) override                              { return kNotImplemented; }
     Vst::UnitID PLUGIN_API getSelectedUnit() override                                                                           { return Vst::kRootUnitId; }
 
-    tresult PLUGIN_API getUnitByBus (Vst::MediaType, Vst::BusDirection,
-                                     Steinberg::int32, Steinberg::int32,
-                                     Vst::UnitID& unitId) override
+    tresult PLUGIN_API getUnitByBus (Vst::MediaType, Vst::BusDirection, Steinberg::int32, Steinberg::int32, Vst::UnitID& unitId) override
     {
         zerostruct (unitId);
         return kNotImplemented;
@@ -1382,70 +1329,178 @@ public:
     }
 
     //==============================================================================
-    static tresult setBusArrangementFor (Vst::BusList& list,
-                                         Vst::SpeakerArrangement* arrangement,
-                                         Steinberg::int32 numBusses)
+    Steinberg::int32 PLUGIN_API getBusCount (Vst::MediaType type, Vst::BusDirection dir) override
     {
-        if (arrangement != nullptr && numBusses == 1) //Should only be 1 bus per BusList
+        if (type == Vst::kAudio)
+            return (dir == Vst::kInput ? pluginInstance->busArrangement.inputBuses
+                                       : pluginInstance->busArrangement.outputBuses).size();
+
+        if (type == Vst::kEvent)
         {
-            Steinberg::int32 counter = 0;
+            if (dir == Vst::kInput)
+                return isMidiInputBusEnabled ? 1 : 0;
 
-            FOREACH_CAST (IPtr<Vst::Bus>, Vst::AudioBus, bus, list)
+            if (dir == Vst::kOutput)
+                return isMidiOutputBusEnabled ? 1 : 0;
+        }
+
+        return 0;
+    }
+
+    static const AudioProcessor::AudioProcessorBus* getAudioBus (AudioProcessor::AudioBusArrangement& busArrangement,
+                                                                 Vst::BusDirection dir, Steinberg::int32 index) noexcept
+    {
+        const Array<AudioProcessor::AudioProcessorBus>& buses = dir == Vst::kInput ? busArrangement.inputBuses
+                                                                                   : busArrangement.outputBuses;
+
+        return isPositiveAndBelow (index, static_cast<Steinberg::int32> (buses.size())) ? &buses.getReference (index) : nullptr;
+    }
+
+    const AudioProcessor::AudioProcessorBus* getAudioBus (Vst::BusDirection dir, Steinberg::int32 index) const noexcept
+    {
+        return getAudioBus (pluginInstance->busArrangement, dir, index);
+    }
+
+    tresult PLUGIN_API getBusInfo (Vst::MediaType type, Vst::BusDirection dir,
+                                   Steinberg::int32 index, Vst::BusInfo& info) override
+    {
+        if (type == Vst::kAudio)
+        {
+            if (const AudioProcessor::AudioProcessorBus* bus = getAudioBus (lastEnabledBusStates, dir, index))
             {
-                if (counter < numBusses)
-                    bus->setArrangement (arrangement[counter]);
-
-                counter++;
+                info.mediaType = Vst::kAudio;
+                info.direction = dir;
+                info.channelCount = bus->channels.size();
+                toString128 (info.name, bus->name);
+                info.busType = index == 0 ? Vst::kMain : Vst::kAux;
+                info.flags = busUtils.getSupportedBusLayouts (dir == Vst::kInput, index).isEnabledByDefault ? Vst::BusInfo::kDefaultActive : 0;
+                return kResultTrue;
             }
-            ENDFOR
+        }
+
+        if (type == Vst::kEvent)
+        {
+            info.flags = Vst::BusInfo::kDefaultActive;
+
+           #if JucePlugin_WantsMidiInput
+            if (dir == Vst::kInput)
+            {
+                info.mediaType = Vst::kEvent;
+                info.direction = dir;
+                info.channelCount = 0;
+                toString128 (info.name, TRANS("MIDI Input"));
+                info.busType = Vst::kMain;
+                return kResultTrue;
+            }
+           #endif
+
+           #if JucePlugin_ProducesMidiOutput
+            if (dir == Vst::kOutput)
+            {
+                info.mediaType = Vst::kEvent;
+                info.direction = dir;
+                info.channelCount = 0;
+                toString128 (info.name, TRANS("MIDI Output"));
+                info.busType = Vst::kMain;
+                return kResultTrue;
+            }
+           #endif
+        }
+
+        zerostruct (info);
+        return kResultFalse;
+    }
+
+    tresult PLUGIN_API activateBus (Vst::MediaType type, Vst::BusDirection dir, Steinberg::int32 index, TBool state) override
+    {
+        if (type == Vst::kEvent)
+        {
+            if (index != 0)
+                return kResultFalse;
+
+            if (dir == Vst::kInput)
+                isMidiInputBusEnabled = (state != 0);
+            else
+                isMidiOutputBusEnabled = (state != 0);
 
             return kResultTrue;
+        }
+
+        if (type == Vst::kAudio)
+        {
+            if (const AudioProcessor::AudioProcessorBus* bus = getAudioBus (dir, index))
+            {
+                if (state == (bus->channels.size() > 0))
+                    return kResultTrue;
+
+                AudioChannelSet newChannels;
+
+                if (state)
+                    if (const AudioProcessor::AudioProcessorBus* lastBusState = getAudioBus (lastEnabledBusStates, dir, index))
+                        newChannels = lastBusState->channels;
+
+                if (pluginInstance->setPreferredBusArrangement (dir == Vst::kInput, index, newChannels))
+                    return kResultTrue;
+            }
         }
 
         return kResultFalse;
     }
 
+    void copyEnabledBuses (Array<AudioProcessor::AudioProcessorBus>& copies,
+                           const Array<AudioProcessor::AudioProcessorBus>& source,
+                           Vst::BusDirection dir)
+    {
+        for (int i = 0; i < source.size(); ++i)
+        {
+            AudioProcessor::AudioProcessorBus bus = source.getReference (i);
+
+            if (bus.channels.size() == 0 && i < copies.size())
+                bus = AudioProcessor::AudioProcessorBus (bus.name, copies.getReference (i).channels);
+
+            if (bus.channels.size() == 0)
+                bus = AudioProcessor::AudioProcessorBus (bus.name, busUtils.getDefaultLayoutForBus (dir == Vst::kInput, i));
+
+            copies.set (i, bus);
+        }
+    }
+
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
                                            Vst::SpeakerArrangement* outputs, Steinberg::int32 numOuts) override
     {
-        (void) inputs; (void) outputs;
+        PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
 
-       #if JucePlugin_MaxNumInputChannels > 0
-        if (setBusArrangementFor (audioInputs, inputs, numIns) != kResultTrue)
-            return kResultFalse;
-       #else
-        if (numIns != 0)
-            return kResultFalse;
-       #endif
+        for (int i = 0; i < numIns; ++i)
+            if (! pluginInstance->setPreferredBusArrangement (true, i, getChannelSetForSpeakerArrangement (inputs[i])))
+                return kInvalidArgument;
 
-       #if JucePlugin_MaxNumOutputChannels > 0
-        if (setBusArrangementFor (audioOutputs, outputs, numOuts) != kResultTrue)
-            return kResultFalse;
-       #else
-        if (numOuts != 0)
-            return kResultFalse;
-       #endif
+        for (int i = 0; i < numOuts; ++i)
+            if (! pluginInstance->setPreferredBusArrangement (false, i, getChannelSetForSpeakerArrangement (outputs[i])))
+                return kInvalidArgument;
+
+        restorer.release();
 
         preparePlugin (getPluginInstance().getSampleRate(),
                        getPluginInstance().getBlockSize());
+
+        copyEnabledBuses (lastEnabledBusStates.inputBuses,  pluginInstance->busArrangement.inputBuses,  Vst::kInput);
+        copyEnabledBuses (lastEnabledBusStates.outputBuses, pluginInstance->busArrangement.outputBuses, Vst::kOutput);
 
         return kResultTrue;
     }
 
     tresult PLUGIN_API getBusArrangement (Vst::BusDirection dir, Steinberg::int32 index, Vst::SpeakerArrangement& arr) override
     {
-        if (Vst::BusList* const busList = getBusListFor (Vst::kAudio, dir))
+        if (const AudioProcessor::AudioProcessorBus* bus = getAudioBus (lastEnabledBusStates, dir, index))
         {
-            if (Vst::AudioBus* const audioBus = FCast<Vst::AudioBus> (busList->at (index)))
-            {
-                arr = audioBus->getArrangement();
-                return kResultTrue;
-            }
+            arr = getSpeakerArrangement (bus->channels);
+            return kResultTrue;
         }
 
         return kResultFalse;
     }
 
+    //==============================================================================
     tresult PLUGIN_API canProcessSampleSize (Steinberg::int32 symbolicSampleSize) override
     {
         return (symbolicSampleSize == Vst::kSample32
@@ -1574,8 +1629,8 @@ public:
             const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
             const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
 
-            if ((pluginInstance->getNumInputChannels() + pluginInstance->getNumOutputChannels()) > 0
-                && (numInputChans + numOutputChans) == 0)
+            if ((pluginInstance->getTotalNumInputChannels() + pluginInstance->getTotalNumOutputChannels()) > 0
+                 && (numInputChans + numOutputChans) == 0)
                 return kResultFalse;
         }
 
@@ -1623,10 +1678,13 @@ private:
     Vst::ProcessContext processContext;
     Vst::ProcessSetup processSetup;
 
-    Vst::BusList audioInputs, audioOutputs, eventInputs, eventOutputs;
     MidiBuffer midiBuffer;
     Array<float*> channelListFloat;
     Array<double*> channelListDouble;
+
+    AudioProcessor::AudioBusArrangement lastEnabledBusStates;
+    bool isMidiInputBusEnabled, isMidiOutputBusEnabled;
+    PluginBusUtilities busUtils;
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
@@ -1638,11 +1696,49 @@ private:
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
     {
-        const int totalChans = prepareChannelLists (channelList,  data);
+        int totalInputChans = 0;
+
+        const int plugInInputChannels  = pluginInstance->getTotalNumInputChannels();
+        const int plugInOutputChannels = pluginInstance->getTotalNumOutputChannels();
+
+        if (data.inputs != nullptr)
+        {
+            for (int bus = 0; bus < data.numInputs && totalInputChans < plugInInputChannels; ++bus)
+            {
+                if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
+                {
+                    const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
+
+                    for (int i = 0; i < numChans; ++i)
+                        channelList.set (totalInputChans++, busChannels[i]);
+                }
+            }
+        }
+
+        int totalOutputChans = 0;
+
+        if (data.outputs != nullptr)
+        {
+            for (int bus = 0; bus < data.numOutputs && totalOutputChans < plugInOutputChannels; ++bus)
+            {
+                if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
+                {
+                    const int numChans = jmin ((int) data.outputs[bus].numChannels, plugInOutputChannels - totalOutputChans);
+
+                    for (int i = 0; i < numChans; ++i)
+                    {
+                        if (totalOutputChans >= totalInputChans)
+                            channelList.set (totalOutputChans, busChannels[i]);
+
+                        ++totalOutputChans;
+                    }
+                }
+            }
+        }
 
         AudioBuffer<FloatType> buffer;
 
-        if (totalChans != 0)
+        if (int totalChans = jmax (totalOutputChans, totalInputChans))
             buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
 
         {
@@ -1659,57 +1755,47 @@ private:
             }
             else
             {
-                if (isBypassed())
-                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
-                else
-                    pluginInstance->processBlock (buffer, midiBuffer);
+                if (totalInputChans == pluginInstance->getTotalNumInputChannels()
+                 && totalOutputChans == pluginInstance->getTotalNumOutputChannels())
+                {
+                    if (isBypassed())
+                        pluginInstance->processBlockBypassed (buffer, midiBuffer);
+                    else
+                        pluginInstance->processBlock (buffer, midiBuffer);
+                }
             }
         }
 
         if (data.outputs != nullptr)
         {
-            for (int i = 0; i < data.numOutputs; ++i)
-                FloatVectorOperations::copy (getPointerForAudioBus<FloatType> (data.outputs[0])[i],
-                                             buffer.getReadPointer (i), (int) data.numSamples);
+            int outChanIndex = 0;
+
+            for (int bus = 0; bus < data.numOutputs; ++bus)
+            {
+                if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
+                {
+                    const int numChans = (int) data.outputs[bus].numChannels;
+
+                    for (int i = 0; i < numChans; ++i)
+                    {
+                        if (outChanIndex < totalInputChans)
+                            FloatVectorOperations::copy (busChannels[i], buffer.getReadPointer (outChanIndex), (int) data.numSamples);
+                        else if (outChanIndex >= totalOutputChans)
+                            FloatVectorOperations::clear (busChannels[i], (int) data.numSamples);
+
+                        ++outChanIndex;
+                    }
+                }
+            }
         }
-
-        // clear extra busses..
-        if (data.outputs != nullptr)
-            for (int i = 1; i < data.numOutputs; ++i)
-                for (int f = 0; f < data.outputs[i].numChannels; ++f)
-                    FloatVectorOperations::clear (getPointerForAudioBus<FloatType> (data.outputs[i])[f], (int) data.numSamples);
-    }
-
-    //==============================================================================
-    void addBusTo (Vst::BusList& busList, Vst::Bus* newBus)
-    {
-        busList.append (IPtr<Vst::Bus> (newBus, false));
-    }
-
-    void addAudioBusTo (Vst::BusList& busList, const juce::String& name, Vst::SpeakerArrangement arr)
-    {
-        addBusTo (busList, new Vst::AudioBus (toString (name), Vst::kMain, Vst::BusInfo::kDefaultActive, arr));
-    }
-
-    void addEventBusTo (Vst::BusList& busList, const juce::String& name)
-    {
-        addBusTo (busList, new Vst::EventBus (toString (name), Vst::kMain, Vst::BusInfo::kDefaultActive, 16));
-    }
-
-    Vst::BusList* getBusListFor (Vst::MediaType type, Vst::BusDirection dir)
-    {
-        if (type == Vst::kAudio)  return dir == Vst::kInput ? &audioInputs : &audioOutputs;
-        if (type == Vst::kEvent)  return dir == Vst::kInput ? &eventInputs : &eventOutputs;
-
-        return nullptr;
     }
 
     //==============================================================================
     template <typename FloatType>
     void allocateChannelLists (Array<FloatType*>& channelList)
     {
-        channelList.clear();
-        channelList.insertMultiple (0, nullptr, jmax (JucePlugin_MaxNumInputChannels, JucePlugin_MaxNumOutputChannels) + 1);
+        channelList.clearQuick();
+        channelList.insertMultiple (0, nullptr, 128);
     }
 
     template <typename FloatType>
@@ -1718,60 +1804,18 @@ private:
         return AudioBusPointerHelper<FloatType>::impl (data);
     }
 
-    template <typename FloatType>
-    static int prepareChannelLists (Array<FloatType*>& channelList, Vst::ProcessData& data) noexcept
-    {
-        int totalChans = 0;
-        FloatType** inChannelBuffers =
-            data.inputs != nullptr ? getPointerForAudioBus<FloatType> (data.inputs[0]) : nullptr;
-
-        FloatType** outChannelBuffers =
-            data.outputs  != nullptr ? getPointerForAudioBus<FloatType> (data.outputs[0]) : nullptr;
-
-        const int numInputChans  = (data.inputs  != nullptr && inChannelBuffers != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
-        const int numOutputChans = (data.outputs != nullptr && outChannelBuffers != nullptr) ? (int) data.outputs[0].numChannels : 0;
-
-        for (int idx = 0; totalChans < numInputChans; ++idx)
-        {
-            channelList.set (totalChans, inChannelBuffers[idx]);
-            ++totalChans;
-        }
-
-        // note that the loop bounds are correct: as VST-3 is always process replacing
-        // we already know the output channel buffers of the first numInputChans channels
-        for (int idx = 0; totalChans < numOutputChans; ++idx)
-        {
-            channelList.set (totalChans, outChannelBuffers[idx]);
-            ++totalChans;
-        }
-
-        return totalChans;
-    }
-
     //==============================================================================
     enum InternalParameters
     {
         paramPreset = 'prst'
     };
 
-    static int getNumChannels (Vst::BusList& busList)
-    {
-        Vst::BusInfo info;
-        info.channelCount = 0;
-
-        if (Vst::Bus* bus = busList.first())
-            bus->getInfo (info);
-
-        return (int) info.channelCount;
-    }
-
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        getPluginInstance().setPlayConfigDetails (getNumChannels (audioInputs),
-                                                  getNumChannels (audioOutputs),
-                                                  sampleRate, bufferSize);
+        AudioProcessor& p = getPluginInstance();
 
-        getPluginInstance().prepareToPlay (sampleRate, bufferSize);
+        p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
+        p.prepareToPlay (sampleRate, bufferSize);
     }
 
     //==============================================================================

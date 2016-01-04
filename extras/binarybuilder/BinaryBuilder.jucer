@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceLinkage="amalg_template" juceFolder="../../../juce" jucerVersion="4.0.1"
+              juceLinkage="amalg_template" juceFolder="../../../juce" jucerVersion="4.1.0"
               version="1.0.0" buildVST="1" buildRTAS="0" buildAU="1" pluginName="BinaryBuilder"
               pluginDesc="BinaryBuilder" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
               pluginCode="Abcd" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
@@ -22,18 +22,6 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"
-                       winWarningLevel="4" generateManifest="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"
-                       winWarningLevel="4" generateManifest="1"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-      </MODULEPATHS>
-    </VS2008>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BinaryBuilder"
@@ -45,6 +33,17 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
+    <VS2010 targetFolder="Builds/VisualStudio2010">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="BinaryBuilder"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="BinaryBuilder"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2010>
   </EXPORTFORMATS>
   <MAINGROUP id="TTBP5JihO" name="BinaryBuilder">
     <GROUP id="noYkBuTg" name="Source">

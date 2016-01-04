@@ -156,7 +156,7 @@ private:
             else
                 getComponent()->removeColour (colourId);
 
-            if (TextEditor* const te = dynamic_cast <TextEditor*> (getComponent()))
+            if (TextEditor* const te = dynamic_cast<TextEditor*> (getComponent()))
                 te->applyFontToAllText (te->getFont());
 
             changed();

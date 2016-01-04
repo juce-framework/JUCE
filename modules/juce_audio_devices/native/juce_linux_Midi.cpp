@@ -136,7 +136,7 @@ private:
                 HeapBlock<pollfd> pfd ((size_t) numPfds);
                 snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
 
-                HeapBlock <uint8> buffer (maxEventSize);
+                HeapBlock<uint8> buffer (maxEventSize);
 
                 while (! threadShouldExit())
                 {

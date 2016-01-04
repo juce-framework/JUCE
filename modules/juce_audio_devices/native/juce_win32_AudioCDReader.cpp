@@ -1027,7 +1027,7 @@ AudioCDReader::AudioCDReader (void* handle_)
 AudioCDReader::~AudioCDReader()
 {
     using namespace CDReaderHelpers;
-    CDDeviceWrapper* const device = static_cast <CDDeviceWrapper*> (handle);
+    CDDeviceWrapper* const device = static_cast<CDDeviceWrapper*> (handle);
     delete device;
 }
 
@@ -1035,7 +1035,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
                                  int64 startSampleInFile, int numSamples)
 {
     using namespace CDReaderHelpers;
-    CDDeviceWrapper* const device = static_cast <CDDeviceWrapper*> (handle);
+    CDDeviceWrapper* const device = static_cast<CDDeviceWrapper*> (handle);
 
     bool ok = true;
 
@@ -1131,7 +1131,7 @@ bool AudioCDReader::isCDStillPresent() const
 {
     using namespace CDReaderHelpers;
     TOC toc = { 0 };
-    return static_cast <CDDeviceWrapper*> (handle)->deviceHandle.readTOC (&toc);
+    return static_cast<CDDeviceWrapper*> (handle)->deviceHandle.readTOC (&toc);
 }
 
 void AudioCDReader::refreshTrackLengths()
@@ -1142,7 +1142,7 @@ void AudioCDReader::refreshTrackLengths()
 
     TOC toc = { 0 };
 
-    if (static_cast <CDDeviceWrapper*> (handle)->deviceHandle.readTOC (&toc))
+    if (static_cast<CDDeviceWrapper*> (handle)->deviceHandle.readTOC (&toc))
     {
         int numTracks = 1 + toc.lastTrack - toc.firstTrack;
 
@@ -1174,7 +1174,7 @@ int AudioCDReader::getLastIndex() const
 int AudioCDReader::getIndexAt (int samplePos)
 {
     using namespace CDReaderHelpers;
-    CDDeviceWrapper* const device = static_cast <CDDeviceWrapper*> (handle);
+    CDDeviceWrapper* const device = static_cast<CDDeviceWrapper*> (handle);
 
     const int frameNeeded = samplePos / samplesPerFrame;
 
@@ -1255,7 +1255,7 @@ Array<int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 
     if (needToScan)
     {
-        CDDeviceWrapper* const device = static_cast <CDDeviceWrapper*> (handle);
+        CDDeviceWrapper* const device = static_cast<CDDeviceWrapper*> (handle);
 
         int pos = trackStart;
         int last = -1;
@@ -1305,5 +1305,5 @@ Array<int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 void AudioCDReader::ejectDisk()
 {
     using namespace CDReaderHelpers;
-    static_cast <CDDeviceWrapper*> (handle)->deviceHandle.openDrawer (true);
+    static_cast<CDDeviceWrapper*> (handle)->deviceHandle.openDrawer (true);
 }

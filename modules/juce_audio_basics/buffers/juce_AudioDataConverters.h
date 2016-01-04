@@ -99,7 +99,7 @@ public:
     class Int8
     {
     public:
-        inline Int8 (void* d) noexcept  : data (static_cast <int8*> (d))  {}
+        inline Int8 (void* d) noexcept  : data (static_cast<int8*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -124,7 +124,7 @@ public:
     class UInt8
     {
     public:
-        inline UInt8 (void* d) noexcept  : data (static_cast <uint8*> (d))  {}
+        inline UInt8 (void* d) noexcept  : data (static_cast<uint8*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -149,7 +149,7 @@ public:
     class Int16
     {
     public:
-        inline Int16 (void* d) noexcept  : data (static_cast <uint16*> (d))  {}
+        inline Int16 (void* d) noexcept  : data (static_cast<uint16*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -174,7 +174,7 @@ public:
     class Int24
     {
     public:
-        inline Int24 (void* d) noexcept  : data (static_cast <char*> (d))  {}
+        inline Int24 (void* d) noexcept  : data (static_cast<char*> (d))  {}
 
         inline void advance() noexcept                          { data += 3; }
         inline void skip (int numSamples) noexcept              { data += 3 * numSamples; }
@@ -199,7 +199,7 @@ public:
     class Int32
     {
     public:
-        inline Int32 (void* d) noexcept  : data (static_cast <uint32*> (d))  {}
+        inline Int32 (void* d) noexcept  : data (static_cast<uint32*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -245,7 +245,7 @@ public:
     class Float32
     {
     public:
-        inline Float32 (void* d) noexcept  : data (static_cast <float*> (d))  {}
+        inline Float32 (void* d) noexcept  : data (static_cast<float*> (d))  {}
 
         inline void advance() noexcept                          { ++data; }
         inline void skip (int numSamples) noexcept              { data += numSamples; }
@@ -318,7 +318,7 @@ public:
     {
     public:
         typedef const void VoidType;
-        static inline void* toVoidPtr (VoidType* v) noexcept { return const_cast <void*> (v); }
+        static inline void* toVoidPtr (VoidType* v) noexcept { return const_cast<void*> (v); }
         enum { isConst = 1 };
     };
   #endif

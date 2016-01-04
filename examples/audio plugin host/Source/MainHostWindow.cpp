@@ -31,7 +31,7 @@
 class MainHostWindow::PluginListWindow  : public DocumentWindow
 {
 public:
-    PluginListWindow (MainHostWindow& owner_, AudioPluginFormatManager& formatManager)
+    PluginListWindow (MainHostWindow& owner_, AudioPluginFormatManager& pluginFormatManager)
         : DocumentWindow ("Available Plugins", Colours::white,
                           DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           owner (owner_)
@@ -39,7 +39,7 @@ public:
         const File deadMansPedalFile (getAppProperties().getUserSettings()
                                         ->getFile().getSiblingFile ("RecentlyCrashedPluginsList"));
 
-        setContentOwned (new PluginListComponent (formatManager,
+        setContentOwned (new PluginListComponent (pluginFormatManager,
                                                   owner.knownPluginList,
                                                   deadMansPedalFile,
                                                   getAppProperties().getUserSettings()), true);
@@ -545,7 +545,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 
 GraphDocumentComponent* MainHostWindow::getGraphEditor() const
 {
-    return dynamic_cast <GraphDocumentComponent*> (getContentComponent());
+    return dynamic_cast<GraphDocumentComponent*> (getContentComponent());
 }
 
 bool MainHostWindow::isDoublePrecisionProcessing()

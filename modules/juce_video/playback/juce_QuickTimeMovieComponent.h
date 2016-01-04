@@ -25,8 +25,6 @@
 #ifndef JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
 #define JUCE_QUICKTIMEMOVIECOMPONENT_H_INCLUDED
 
-// (NB: This stuff mustn't go inside the "#if QUICKTIME" block, or it'll break the
-// amalgamated build)
 #ifndef DOXYGEN
  #if JUCE_WINDOWS
   typedef ActiveXControlComponent QTCompBaseClass;

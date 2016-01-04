@@ -151,7 +151,7 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
     // use them to open a file!
     jassert (getNumKnownFormats() > 0);
 
-    ScopedPointer <InputStream> in (audioFileStream);
+    ScopedPointer<InputStream> in (audioFileStream);
 
     if (in != nullptr)
     {

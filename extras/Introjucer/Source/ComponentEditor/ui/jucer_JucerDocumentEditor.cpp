@@ -360,14 +360,14 @@ void JucerDocumentEditor::refreshPropertiesPanel() const
 {
     for (int i = tabbedComponent.getNumTabs(); --i >= 0;)
     {
-        if (ComponentLayoutPanel* layoutPanel = dynamic_cast <ComponentLayoutPanel*> (tabbedComponent.getTabContentComponent (i)))
+        if (ComponentLayoutPanel* layoutPanel = dynamic_cast<ComponentLayoutPanel*> (tabbedComponent.getTabContentComponent (i)))
         {
             if (layoutPanel->isVisible())
                 layoutPanel->updatePropertiesList();
         }
         else
         {
-            if (PaintRoutinePanel* pr = dynamic_cast <PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (i)))
+            if (PaintRoutinePanel* pr = dynamic_cast<PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (i)))
                 if (pr->isVisible())
                     pr->updatePropertiesList();
         }
@@ -380,7 +380,7 @@ void JucerDocumentEditor::updateTabs()
 
     for (int i = tabbedComponent.getNumTabs(); --i >= 0;)
     {
-        if (dynamic_cast <PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (i)) != 0
+        if (dynamic_cast<PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (i)) != 0
              && ! paintRoutineNames.contains (tabbedComponent.getTabNames() [i]))
         {
             tabbedComponent.removeTab (i);
@@ -394,7 +394,7 @@ void JucerDocumentEditor::updateTabs()
             int index, numPaintRoutinesSeen = 0;
             for (index = 1; index < tabbedComponent.getNumTabs(); ++index)
             {
-                if (dynamic_cast <PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (index)) != nullptr)
+                if (dynamic_cast<PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (index)) != nullptr)
                 {
                     if (++numPaintRoutinesSeen == i)
                     {
@@ -440,7 +440,7 @@ ApplicationCommandTarget* JucerDocumentEditor::getNextCommandTarget()
 
 ComponentLayout* JucerDocumentEditor::getCurrentLayout() const
 {
-    if (ComponentLayoutPanel* panel = dynamic_cast <ComponentLayoutPanel*> (tabbedComponent.getCurrentContentComponent()))
+    if (ComponentLayoutPanel* panel = dynamic_cast<ComponentLayoutPanel*> (tabbedComponent.getCurrentContentComponent()))
         return &(panel->layout);
 
     return nullptr;
@@ -448,7 +448,7 @@ ComponentLayout* JucerDocumentEditor::getCurrentLayout() const
 
 PaintRoutine* JucerDocumentEditor::getCurrentPaintRoutine() const
 {
-    if (PaintRoutinePanel* panel = dynamic_cast <PaintRoutinePanel*> (tabbedComponent.getCurrentContentComponent()))
+    if (PaintRoutinePanel* panel = dynamic_cast<PaintRoutinePanel*> (tabbedComponent.getCurrentContentComponent()))
         return &(panel->getPaintRoutine());
 
     return nullptr;
@@ -460,7 +460,7 @@ void JucerDocumentEditor::showLayout()
     {
         for (int i = 0; i < tabbedComponent.getNumTabs(); ++i)
         {
-            if (dynamic_cast <ComponentLayoutPanel*> (tabbedComponent.getTabContentComponent (i)) != nullptr)
+            if (dynamic_cast<ComponentLayoutPanel*> (tabbedComponent.getTabContentComponent (i)) != nullptr)
             {
                 tabbedComponent.setCurrentTabIndex (i);
                 break;
@@ -475,7 +475,7 @@ void JucerDocumentEditor::showGraphics (PaintRoutine* routine)
     {
         for (int i = 0; i < tabbedComponent.getNumTabs(); ++i)
         {
-            if (PaintRoutinePanel* pr = dynamic_cast <PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (i)))
+            if (PaintRoutinePanel* pr = dynamic_cast<PaintRoutinePanel*> (tabbedComponent.getTabContentComponent (i)))
             {
                 if (routine == &(pr->getPaintRoutine()) || routine == nullptr)
                 {
@@ -506,13 +506,13 @@ void JucerDocumentEditor::setZoom (double scale)
 {
     scale = jlimit (1.0 / 4.0, 32.0, scale);
 
-    if (EditingPanelBase* panel = dynamic_cast <EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
+    if (EditingPanelBase* panel = dynamic_cast<EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
         panel->setZoom (scale);
 }
 
 double JucerDocumentEditor::getZoom() const
 {
-    if (EditingPanelBase* panel = dynamic_cast <EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
+    if (EditingPanelBase* panel = dynamic_cast<EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
         return panel->getZoom();
 
     return 1.0;
@@ -528,7 +528,7 @@ static double snapToIntegerZoom (double zoom)
 
 void JucerDocumentEditor::addElement (const int index)
 {
-    if (PaintRoutinePanel* const panel = dynamic_cast <PaintRoutinePanel*> (tabbedComponent.getCurrentContentComponent()))
+    if (PaintRoutinePanel* const panel = dynamic_cast<PaintRoutinePanel*> (tabbedComponent.getCurrentContentComponent()))
     {
         PaintRoutine* const currentPaintRoutine = & (panel->getPaintRoutine());
         const Rectangle<int> area (panel->getComponentArea());
@@ -566,7 +566,7 @@ void JucerDocumentEditor::addComponent (const int index)
 {
     showLayout();
 
-    if (ComponentLayoutPanel* const panel = dynamic_cast <ComponentLayoutPanel*> (tabbedComponent.getCurrentContentComponent()))
+    if (ComponentLayoutPanel* const panel = dynamic_cast<ComponentLayoutPanel*> (tabbedComponent.getCurrentContentComponent()))
     {
         const Rectangle<int> area (panel->getComponentArea());
 
@@ -934,7 +934,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
         case JucerCommandIDs::zoomNormal:  setZoom (1.0); break;
 
         case JucerCommandIDs::spaceBarDrag:
-            if (EditingPanelBase* panel = dynamic_cast <EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
+            if (EditingPanelBase* panel = dynamic_cast<EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
                 panel->dragKeyHeldDown (info.isKeyDown);
 
             break;
@@ -958,7 +958,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
             break;
 
         case JucerCommandIDs::bringBackLostItems:
-            if (EditingPanelBase* panel = dynamic_cast <EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
+            if (EditingPanelBase* panel = dynamic_cast<EditingPanelBase*> (tabbedComponent.getCurrentContentComponent()))
             {
                 int w = panel->getComponentArea().getWidth();
                 int h = panel->getComponentArea().getHeight();

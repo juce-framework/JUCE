@@ -93,7 +93,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
                               SynthesiserSound* s,
                               const int /*currentPitchWheelPosition*/)
 {
-    if (const SamplerSound* const sound = dynamic_cast <const SamplerSound*> (s))
+    if (const SamplerSound* const sound = dynamic_cast<const SamplerSound*> (s))
     {
         pitchRatio = pow (2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
                         * sound->sourceSampleRate / getSampleRate();
@@ -152,7 +152,7 @@ void SamplerVoice::controllerMoved (const int /*controllerNumber*/,
 //==============================================================================
 void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
 {
-    if (const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().get()))
+    if (const SamplerSound* const playingSound = static_cast<SamplerSound*> (getCurrentlyPlayingSound().get()))
     {
         const float* const inL = playingSound->data->getReadPointer (0);
         const float* const inR = playingSound->data->getNumChannels() > 1

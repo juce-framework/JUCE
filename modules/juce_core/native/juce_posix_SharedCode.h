@@ -680,7 +680,7 @@ void juce_runSystemCommand (const String&);
 void juce_runSystemCommand (const String& command)
 {
     int result = system (command.toUTF8());
-    (void) result;
+    ignoreUnused (result);
 }
 
 String juce_getOutputFromCommand (const String&);
@@ -888,7 +888,7 @@ void Thread::killThread()
 
 void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 {
-   #if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+   #if JUCE_IOS || JUCE_MAC
     JUCE_AUTORELEASEPOOL
     {
         [[NSThread currentThread] setName: juceStringToNS (name)];
@@ -1286,7 +1286,7 @@ private:
                                   THREAD_TIME_CONSTRAINT_POLICY_COUNT) == KERN_SUCCESS;
 
        #else
-        (void) periodMs;
+        ignoreUnused (periodMs);
         struct sched_param param;
         param.sched_priority = sched_get_priority_max (SCHED_RR);
         return pthread_setschedparam (thread, SCHED_RR, &param) == 0;

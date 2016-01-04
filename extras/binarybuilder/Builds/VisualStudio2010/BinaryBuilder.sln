@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{A2F28A47-6FDF-69FA-BF0B-93EA87C6A63D}") = "BinaryBuilder", "BinaryBuilder.vcxproj", "{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Debug|Win32.Build.0 = Debug|Win32
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Release|Win32.ActiveCfg = Release|Win32
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

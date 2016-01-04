@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{0AF08323-B2B4-9072-85EA-9912BAE418A5}") = "MPETest", "MPETest.vcxproj", "{160A79F2-5429-4B16-BB1A-9F5761EFACD4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{160A79F2-5429-4B16-BB1A-9F5761EFACD4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{160A79F2-5429-4B16-BB1A-9F5761EFACD4}.Debug|Win32.Build.0 = Debug|Win32
+		{160A79F2-5429-4B16-BB1A-9F5761EFACD4}.Release|Win32.ActiveCfg = Release|Win32
+		{160A79F2-5429-4B16-BB1A-9F5761EFACD4}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

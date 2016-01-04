@@ -87,10 +87,11 @@ public:
     /** Returns the name of this device. */
     const String& getName() const noexcept                      { return name; }
 
-    /** Makes this device output a midi message.
-        @see MidiMessage
-    */
+    /** Sends out a MIDI message immediately. */
     void sendMessageNow (const MidiMessage& message);
+
+    /** Sends out a sequence of MIDI messages immediately. */
+    void sendBlockOfMessagesNow (const MidiBuffer& buffer);
 
     //==============================================================================
     /** This lets you supply a block of messages that will be sent out at some point

@@ -57,7 +57,7 @@ struct CurrentThreadHolder   : public ReferenceCountedObject
 {
     CurrentThreadHolder() noexcept {}
 
-    typedef ReferenceCountedObjectPtr <CurrentThreadHolder> Ptr;
+    typedef ReferenceCountedObjectPtr<CurrentThreadHolder> Ptr;
     ThreadLocalValue<Thread*> value;
 
     JUCE_DECLARE_NON_COPYABLE (CurrentThreadHolder)
@@ -86,22 +86,25 @@ void Thread::threadEntryPoint()
     const CurrentThreadHolder::Ptr currentThreadHolder (getCurrentThreadHolder());
     currentThreadHolder->value = this;
 
-    JUCE_TRY
+    if (threadName.isNotEmpty())
+        setCurrentThreadName (threadName);
+
+    if (startSuspensionEvent.wait (10000))
     {
-        if (threadName.isNotEmpty())
-            setCurrentThreadName (threadName);
+        jassert (getCurrentThreadId() == threadId);
 
-        if (startSuspensionEvent.wait (10000))
+        if (affinityMask != 0)
+            setCurrentThreadAffinityMask (affinityMask);
+
+        try
         {
-            jassert (getCurrentThreadId() == threadId);
-
-            if (affinityMask != 0)
-                setCurrentThreadAffinityMask (affinityMask);
-
             run();
         }
+        catch (...)
+        {
+            jassertfalse; // Your run() method mustn't throw any exceptions!
+        }
     }
-    JUCE_CATCH_ALL_ASSERT
 
     currentThreadHolder->value.releaseCurrentThreadStorage();
     closeThreadHandle();
@@ -110,7 +113,7 @@ void Thread::threadEntryPoint()
 // used to wrap the incoming call from the platform-specific code
 void JUCE_API juce_threadEntryPoint (void* userData)
 {
-    static_cast <Thread*> (userData)->threadEntryPoint();
+    static_cast<Thread*> (userData)->threadEntryPoint();
 }
 
 //==============================================================================
@@ -263,6 +266,12 @@ void SpinLock::enter() const noexcept
         while (! tryEnter())
             Thread::yield();
     }
+}
+
+//==============================================================================
+bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
+{
+    return juce_isRunningUnderDebugger();
 }
 
 //==============================================================================

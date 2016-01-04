@@ -433,7 +433,7 @@ String CodeDocument::Position::getLineText() const
     if (const CodeDocumentLine* const l = owner->lines [line])
         return l->line;
 
-    return String::empty;
+    return String();
 }
 
 void CodeDocument::Position::setPositionMaintained (const bool isMaintained)
@@ -482,7 +482,7 @@ String CodeDocument::getAllContent() const
 String CodeDocument::getTextBetween (const Position& start, const Position& end) const
 {
     if (end.getPosition() <= start.getPosition())
-        return String::empty;
+        return String();
 
     const int startLine = start.getLineNumber();
     const int endLine = end.getLineNumber();
@@ -492,7 +492,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
         if (CodeDocumentLine* const line = lines [startLine])
             return line->line.substring (start.getIndexInLine(), end.getIndexInLine());
 
-        return String::empty;
+        return String();
     }
 
     MemoryOutputStream mo;
@@ -537,7 +537,7 @@ String CodeDocument::getLine (const int lineIndex) const noexcept
     if (const CodeDocumentLine* const line = lines [lineIndex])
         return line->line;
 
-    return String::empty;
+    return String();
 }
 
 int CodeDocument::getMaximumLineLength() noexcept
@@ -634,7 +634,7 @@ void CodeDocument::setNewLineCharacters (const String& newChars) noexcept
 
 void CodeDocument::newTransaction()
 {
-    undoManager.beginNewTransaction (String::empty);
+    undoManager.beginNewTransaction (String());
 }
 
 void CodeDocument::undo()

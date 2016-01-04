@@ -70,7 +70,7 @@ struct RegistryKeyWrapper
 
         return key.key != 0
                 && RegSetValueEx (key.key, key.wideCharValueName, 0, type,
-                                  reinterpret_cast <const BYTE*> (data),
+                                  reinterpret_cast<const BYTE*> (data),
                                   (DWORD) dataSize) == ERROR_SUCCESS;
     }
 
@@ -107,7 +107,7 @@ struct RegistryKeyWrapper
         MemoryBlock buffer;
         switch (getBinaryValue (regValuePath, buffer, wow64Flags))
         {
-            case REG_SZ:    return static_cast <const WCHAR*> (buffer.getData());
+            case REG_SZ:    return static_cast<const WCHAR*> (buffer.getData());
             case REG_DWORD: return String ((int) *reinterpret_cast<const DWORD*> (buffer.getData()));
             default:        break;
         }

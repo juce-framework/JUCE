@@ -821,10 +821,10 @@ namespace StringHelpers
         char* end = buffer + numElementsInArray (buffer);
         char* start = NumberToStringConverters::numberToString (end, number);
 
-       #if (JUCE_STRING_UTF_TYPE == 8)
+       #if JUCE_STRING_UTF_TYPE == 8
         str.appendCharPointer (String::CharPointerType (start), String::CharPointerType (end));
        #else
-        str.appendCharPointer (String::CharPointer_ASCII (start), String::CharPointer_ASCII (end));
+        str.appendCharPointer (CharPointer_ASCII (start), CharPointer_ASCII (end));
        #endif
 
         return str;
@@ -1948,7 +1948,7 @@ String String::toHexString (const void* const d, const int size, const int group
 
     String s (PreallocationBytes (sizeof (CharPointerType::CharType) * (size_t) numChars));
 
-    const unsigned char* data = static_cast <const unsigned char*> (d);
+    const unsigned char* data = static_cast<const unsigned char*> (d);
     CharPointerType dest (s.text);
 
     for (int i = 0; i < size; ++i)

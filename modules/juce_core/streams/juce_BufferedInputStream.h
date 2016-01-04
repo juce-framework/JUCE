@@ -83,7 +83,7 @@ private:
     OptionalScopedPointer<InputStream> source;
     int bufferSize;
     int64 position, lastReadPos, bufferStart, bufferOverlap;
-    HeapBlock <char> buffer;
+    HeapBlock<char> buffer;
     void ensureBuffered();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferedInputStream)

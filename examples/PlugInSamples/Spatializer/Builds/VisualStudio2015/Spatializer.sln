@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{5EB4FAE9-3A0A-1E23-BE50-1E03DBF9545D}") = "Spatializer", "Spatializer.vcxproj", "{5688C574-BDEA-F1FF-7716-E727FF891687}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5688C574-BDEA-F1FF-7716-E727FF891687}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5688C574-BDEA-F1FF-7716-E727FF891687}.Debug|Win32.Build.0 = Debug|Win32
+		{5688C574-BDEA-F1FF-7716-E727FF891687}.Release|Win32.ActiveCfg = Release|Win32
+		{5688C574-BDEA-F1FF-7716-E727FF891687}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

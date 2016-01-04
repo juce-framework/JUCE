@@ -22,6 +22,8 @@
   ==============================================================================
 */
 
+#undef check
+
 const char* const openSLTypeName = "Android OpenSL";
 
 bool isOpenSLAvailable()
@@ -43,7 +45,7 @@ public:
     {
         // OpenSL has piss-poor support for determining latency, so the only way I can find to
         // get a number for this is by asking the AudioTrack/AudioRecord classes..
-        AndroidAudioIODevice javaDevice (String::empty);
+        AndroidAudioIODevice javaDevice (deviceName);
 
         // this is a total guess about how to calculate the latency, but seems to vaguely agree
         // with the devices I've tested.. YMMV
@@ -550,7 +552,7 @@ private:
 
         static void staticCallback (SLAndroidSimpleBufferQueueItf queue, void* context) noexcept
         {
-            jassert (queue == static_cast<Player*> (context)->playerBufferQueue); (void) queue;
+            jassert (queue == static_cast<Player*> (context)->playerBufferQueue); ignoreUnused (queue);
             static_cast<Player*> (context)->bufferList.bufferReturned();
         }
 
@@ -685,7 +687,7 @@ private:
 
         static void staticCallback (SLAndroidSimpleBufferQueueItf queue, void* context) noexcept
         {
-            jassert (queue == static_cast<Recorder*> (context)->recorderBufferQueue); (void) queue;
+            jassert (queue == static_cast<Recorder*> (context)->recorderBufferQueue); ignoreUnused (queue);
             static_cast<Recorder*> (context)->bufferList.bufferReturned();
         }
 

@@ -239,7 +239,7 @@ void MessageManager::runDispatchLoop()
             {
                 // An AppKit exception will kill the app, but at least this provides a chance to log it.,
                 std::runtime_error ex (std::string ("NSException: ") + [[e name] UTF8String] + ", Reason:" + [[e reason] UTF8String]);
-                JUCEApplication::sendUnhandledException (&ex, __FILE__, __LINE__);
+                JUCEApplicationBase::sendUnhandledException (&ex, __FILE__, __LINE__);
             }
             @finally
             {
@@ -330,14 +330,6 @@ void MessageManager::doPlatformSpecificInitialisation()
 {
     if (appDelegate == nil)
         appDelegate = new AppDelegate();
-
-   #if ! (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-    // This launches a dummy thread, which forces Cocoa to initialise NSThreads correctly (needed prior to 10.5)
-    if (! [NSThread isMultiThreaded])
-        [NSThread detachNewThreadSelector: @selector (dummyMethod)
-                                 toTarget: appDelegate->delegate
-                               withObject: nil];
-   #endif
 }
 
 void MessageManager::doPlatformSpecificShutdown()

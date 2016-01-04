@@ -57,13 +57,13 @@ File& File::operator= (const File& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 File::File (File&& other) noexcept
-    : fullPath (static_cast <String&&> (other.fullPath))
+    : fullPath (static_cast<String&&> (other.fullPath))
 {
 }
 
 File& File::operator= (File&& other) noexcept
 {
-    fullPath = static_cast <String&&> (other.fullPath);
+    fullPath = static_cast<String&&> (other.fullPath);
     return *this;
 }
 #endif
@@ -911,7 +911,7 @@ bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExist
     }
 
     return true;
-   #elif JUCE_WINDOWS
+   #elif JUCE_MSVC
     return CreateSymbolicLink (linkFileToCreate.getFullPathName().toWideCharPointer(),
                                fullPath.toWideCharPointer(),
                                isDirectory() ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0) != FALSE;

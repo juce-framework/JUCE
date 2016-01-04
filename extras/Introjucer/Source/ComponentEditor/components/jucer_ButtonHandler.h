@@ -38,7 +38,7 @@ public:
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
-        Button* const b = dynamic_cast <Button*> (component);
+        Button* const b = dynamic_cast<Button*> (component);
 
         props.add (new ButtonTextProperty (b, document));
 
@@ -54,7 +54,7 @@ public:
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
-        Button* const b = dynamic_cast <Button*> (comp);
+        Button* const b = dynamic_cast<Button*> (comp);
 
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
         e->setAttribute ("buttonText", b->getButtonText());
@@ -67,7 +67,7 @@ public:
 
     bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
     {
-        Button* const b = dynamic_cast <Button*> (comp);
+        Button* const b = dynamic_cast<Button*> (comp);
 
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -89,7 +89,7 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        Button* const b = dynamic_cast <Button*> (component);
+        Button* const b = dynamic_cast<Button*> (component);
 
         if (b->getButtonText() != b->getName())
         {

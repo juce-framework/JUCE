@@ -240,7 +240,7 @@ void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
     // In case we have more outputs than inputs, we'll clear any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
-    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
+    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
         buffer.clear (i, 0, numSamples);
 
     // Now ask the host for the current time so we can store it to be displayed later...
@@ -253,7 +253,7 @@ void JuceDemoPluginAudioProcessor::applyGain (AudioBuffer<FloatType>& buffer, Au
     ignoreUnused (delayBuffer);
     const float gainLevel = *gainParam;
 
-    for (int channel = 0; channel < getNumInputChannels(); ++channel)
+    for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
         buffer.applyGain (channel, 0, buffer.getNumSamples(), gainLevel);
 }
 
@@ -265,7 +265,7 @@ void JuceDemoPluginAudioProcessor::applyDelay (AudioBuffer<FloatType>& buffer, A
 
     int delayPos = 0;
 
-    for (int channel = 0; channel < getNumInputChannels(); ++channel)
+    for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
     {
         FloatType* const channelData = buffer.getWritePointer (channel);
         FloatType* const delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));

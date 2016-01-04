@@ -26,7 +26,7 @@ namespace DirectShowHelpers
 {
     bool checkDShowAvailability()
     {
-        ComSmartPtr <IGraphBuilder> graph;
+        ComSmartPtr<IGraphBuilder> graph;
         return SUCCEEDED (graph.CoCreateInstance (CLSID_FilterGraph));
     }
 
@@ -37,8 +37,8 @@ namespace DirectShowHelpers
         VideoRenderer() {}
         virtual ~VideoRenderer() {}
 
-        virtual HRESULT create (ComSmartPtr <IGraphBuilder>& graphBuilder,
-                                ComSmartPtr <IBaseFilter>& baseFilter, HWND hwnd) = 0;
+        virtual HRESULT create (ComSmartPtr<IGraphBuilder>& graphBuilder,
+                                ComSmartPtr<IBaseFilter>& baseFilter, HWND hwnd) = 0;
 
         virtual void setVideoWindow (HWND hwnd) = 0;
         virtual void setVideoPosition (HWND hwnd, long videoWidth, long videoHeight) = 0;
@@ -53,10 +53,10 @@ namespace DirectShowHelpers
     public:
         VMR7() {}
 
-        HRESULT create (ComSmartPtr <IGraphBuilder>& graphBuilder,
-                        ComSmartPtr <IBaseFilter>& baseFilter, HWND hwnd)
+        HRESULT create (ComSmartPtr<IGraphBuilder>& graphBuilder,
+                        ComSmartPtr<IBaseFilter>& baseFilter, HWND hwnd)
         {
-            ComSmartPtr <IVMRFilterConfig> filterConfig;
+            ComSmartPtr<IVMRFilterConfig> filterConfig;
 
             HRESULT hr = baseFilter.CoCreateInstance (CLSID_VideoMixingRenderer);
 
@@ -101,7 +101,7 @@ namespace DirectShowHelpers
         }
 
     private:
-        ComSmartPtr <IVMRWindowlessControl> windowlessControl;
+        ComSmartPtr<IVMRWindowlessControl> windowlessControl;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VMR7)
     };
@@ -114,10 +114,10 @@ namespace DirectShowHelpers
     public:
         EVR() {}
 
-        HRESULT create (ComSmartPtr <IGraphBuilder>& graphBuilder,
-                        ComSmartPtr <IBaseFilter>& baseFilter, HWND hwnd)
+        HRESULT create (ComSmartPtr<IGraphBuilder>& graphBuilder,
+                        ComSmartPtr<IBaseFilter>& baseFilter, HWND hwnd)
         {
-            ComSmartPtr <IMFGetService> getService;
+            ComSmartPtr<IMFGetService> getService;
 
             HRESULT hr = baseFilter.CoCreateInstance (CLSID_EnhancedVideoRenderer);
 
@@ -163,7 +163,7 @@ namespace DirectShowHelpers
         }
 
     private:
-        ComSmartPtr <IMFVideoDisplayControl> videoDisplayControl;
+        ComSmartPtr<IMFVideoDisplayControl> videoDisplayControl;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EVR)
     };
@@ -512,14 +512,14 @@ private:
 
     VideoRendererType type;
 
-    ComSmartPtr <IGraphBuilder> graphBuilder;
-    ComSmartPtr <IMediaControl> mediaControl;
-    ComSmartPtr <IMediaPosition> mediaPosition;
-    ComSmartPtr <IMediaEventEx> mediaEvent;
-    ComSmartPtr <IBasicAudio> basicAudio;
-    ComSmartPtr <IBaseFilter> baseFilter;
+    ComSmartPtr<IGraphBuilder> graphBuilder;
+    ComSmartPtr<IMediaControl> mediaControl;
+    ComSmartPtr<IMediaPosition> mediaPosition;
+    ComSmartPtr<IMediaEventEx> mediaEvent;
+    ComSmartPtr<IBasicAudio> basicAudio;
+    ComSmartPtr<IBaseFilter> baseFilter;
 
-    ScopedPointer <DirectShowHelpers::VideoRenderer> videoRenderer;
+    ScopedPointer<DirectShowHelpers::VideoRenderer> videoRenderer;
 
     bool needToUpdateViewport, needToRecreateNativeWindow;
 
@@ -688,7 +688,7 @@ private:
 
     bool isRendererConnected()
     {
-        ComSmartPtr <IEnumPins> enumPins;
+        ComSmartPtr<IEnumPins> enumPins;
 
         HRESULT hr = baseFilter->EnumPins (enumPins.resetAndGetPointerAddress());
 

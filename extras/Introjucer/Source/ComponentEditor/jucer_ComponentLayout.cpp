@@ -418,7 +418,7 @@ Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int 
 {
     jassert (comp != nullptr);
 
-    if (PaintElement* const pe = dynamic_cast <PaintElement*> (comp))
+    if (PaintElement* const pe = dynamic_cast<PaintElement*> (comp))
     {
         int64 compId;
 
@@ -436,7 +436,7 @@ Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int 
 
 void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDimension, Component* compToBeRelativeTo)
 {
-    PaintElement* const pe = dynamic_cast <PaintElement*> (comp);
+    PaintElement* const pe = dynamic_cast<PaintElement*> (comp);
 
     jassert (comp != nullptr);
     jassert (pe != nullptr || components.contains (comp));
@@ -453,7 +453,7 @@ void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDime
 
         if (pe != nullptr)
         {
-            oldBounds = pe->getCurrentBounds (dynamic_cast <PaintRoutineEditor*> (pe->getParentComponent())->getComponentArea());
+            oldBounds = pe->getCurrentBounds (dynamic_cast<PaintRoutineEditor*> (pe->getParentComponent())->getComponentArea());
             pos = pe->getPosition();
         }
         else
@@ -469,7 +469,7 @@ void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDime
         if (pe != nullptr)
         {
             pe->setPosition (pos, true);
-            pe->setCurrentBounds (oldBounds, dynamic_cast <PaintRoutineEditor*> (pe->getParentComponent())->getComponentArea(), true);
+            pe->setCurrentBounds (oldBounds, dynamic_cast<PaintRoutineEditor*> (pe->getParentComponent())->getComponentArea(), true);
         }
         else
         {

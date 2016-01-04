@@ -815,11 +815,13 @@ void FloatVectorOperations::abs (float* dest, const float* src, int num) noexcep
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vabs ((float*) src, 1, dest, 1, (vDSP_Length) num);
    #else
-    union {float f; uint32 i;} signMask;
+    union { float f; uint32 i; } signMask;
     signMask.i = 0x7fffffffUL;
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.f);)
+
+    ignoreUnused (signMask);
    #endif
 }
 
@@ -834,6 +836,8 @@ void FloatVectorOperations::abs (double* dest, const double* src, int num) noexc
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.d);)
+
+    ignoreUnused (signMask);
    #endif
 }
 
@@ -1001,7 +1005,7 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
     if (FloatVectorHelpers::isSSE2Available())
         _MM_SET_FLUSH_ZERO_MODE (shouldEnable ? _MM_FLUSH_ZERO_ON : _MM_FLUSH_ZERO_OFF);
    #endif
-    (void) shouldEnable;
+    ignoreUnused (shouldEnable);
 }
 
 //==============================================================================

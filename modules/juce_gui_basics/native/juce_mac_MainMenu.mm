@@ -87,28 +87,6 @@ public:
     void updateTopLevelMenu (NSMenuItem* parentItem, const PopupMenu& menuToCopy,
                              const String& name, const int menuId, const int tag)
     {
-       #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-        static bool is10_4 = (SystemStats::getOperatingSystemType() == SystemStats::MacOSX_10_4);
-
-        if (is10_4)
-        {
-            [parentItem setTag: tag];
-            NSMenu* menu = [parentItem submenu];
-
-            [menu setTitle: juceStringToNS (name)];
-
-            while ([menu numberOfItems] > 0)
-                [menu removeItemAtIndex: 0];
-
-            for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
-                addMenuItem (iter, menu, menuId, tag);
-
-            [menu setAutoenablesItems: false];
-            [menu update];
-            return;
-        }
-       #endif
-
         // Note: This method used to update the contents of the existing menu in-place, but that caused
         // weird side-effects which messed-up keyboard focus when switching between windows. By creating
         // a new menu and replacing the old one with it, that problem seems to be avoided..
@@ -513,7 +491,7 @@ private:
                 {
                     if (juce::Component* focused = juce::Component::getCurrentlyFocusedComponent())
                     {
-                        if (juce::NSViewComponentPeer* peer = dynamic_cast <juce::NSViewComponentPeer*> (focused->getPeer()))
+                        if (juce::NSViewComponentPeer* peer = dynamic_cast<juce::NSViewComponentPeer*> (focused->getPeer()))
                         {
                             if ([e type] == NSKeyDown)
                                 peer->redirectKeyDown (e);

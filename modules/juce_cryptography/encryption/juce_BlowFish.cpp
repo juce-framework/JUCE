@@ -181,7 +181,7 @@ BlowFish::BlowFish (const void* const keyData, const int keyBytes)
 
         for (int k = 0; k < 4; ++k)
         {
-            d = (d << 8) | static_cast <const uint8*> (keyData)[j];
+            d = (d << 8) | static_cast<const uint8*> (keyData)[j];
 
             if (++j >= keyBytes)
                 j = 0;

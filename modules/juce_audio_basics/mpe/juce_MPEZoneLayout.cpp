@@ -1,0 +1,346 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2015 - ROLI Ltd.
+
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
+
+   Details of these licenses can be found at: www.gnu.org/licenses
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+   ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.juce.com for more information.
+
+  ==============================================================================
+*/
+
+MPEZoneLayout::MPEZoneLayout() noexcept
+{
+}
+
+//==============================================================================
+bool MPEZoneLayout::addZone (MPEZone newZone)
+{
+    bool noOtherZonesModified = true;
+
+    for (int i = zones.size(); --i >= 0;)
+    {
+        MPEZone& zone = zones.getReference (i);
+
+        if (zone.overlapsWith (newZone))
+        {
+            if (! zone.truncateToFit (newZone))
+                zones.removeRange (i, 1);
+                // can't use zones.remove (i) because that requires a default c'tor :-(
+
+            noOtherZonesModified = false;
+        }
+    }
+
+    zones.add (newZone);
+    return noOtherZonesModified;
+}
+
+//==============================================================================
+int MPEZoneLayout::getNumZones() const noexcept
+{
+    return zones.size();
+}
+
+MPEZone* MPEZoneLayout::getZoneByIndex (int index) const noexcept
+{
+    if (zones.size() < index)
+        return nullptr;
+
+    return &(zones.getReference (index));
+}
+
+void MPEZoneLayout::clearAllZones()
+{
+    zones.clear();
+}
+
+//==============================================================================
+void MPEZoneLayout::processNextMidiEvent (const MidiMessage& message)
+{
+    if (! message.isController())
+        return;
+
+    MidiRPNMessage rpn;
+
+    if (rpnDetector.parseControllerMessage (message.getChannel(),
+                                            message.getControllerNumber(),
+                                            message.getControllerValue(),
+                                            rpn))
+    {
+        processRpnMessage (rpn);
+    }
+}
+
+void MPEZoneLayout::processRpnMessage (MidiRPNMessage rpn)
+{
+    if (rpn.parameterNumber == MPEMessages::zoneLayoutMessagesRpnNumber)
+        processZoneLayoutRpnMessage (rpn);
+    else if (rpn.parameterNumber == 0)
+        processPitchbendRangeRpnMessage (rpn);
+}
+
+void MPEZoneLayout::processZoneLayoutRpnMessage (MidiRPNMessage rpn)
+{
+    if (rpn.value < 16)
+        addZone (MPEZone (rpn.channel - 1, rpn.value));
+    else
+        clearAllZones();
+}
+
+//==============================================================================
+void MPEZoneLayout::processPitchbendRangeRpnMessage (MidiRPNMessage rpn)
+{
+    if (MPEZone* zone = getZoneByFirstNoteChannel (rpn.channel))
+    {
+        zone->setPerNotePitchbendRange (rpn.value);
+        return;
+    }
+
+    if (MPEZone* zone = getZoneByMasterChannel (rpn.channel))
+        zone->setMasterPitchbendRange (rpn.value);
+}
+
+//==============================================================================
+void MPEZoneLayout::processNextMidiBuffer (const MidiBuffer& buffer)
+{
+    MidiBuffer::Iterator iter (buffer);
+    MidiMessage message;
+    int samplePosition; // not actually used, so no need to initialise.
+
+    while (iter.getNextEvent (message, samplePosition))
+        processNextMidiEvent (message);
+}
+
+//==============================================================================
+MPEZone* MPEZoneLayout::getZoneByChannel (int channel) const noexcept
+{
+    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+        if (zone->isUsingChannel (channel))
+            return zone;
+
+    return nullptr;
+}
+
+MPEZone* MPEZoneLayout::getZoneByMasterChannel (int channel) const noexcept
+{
+    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+        if (zone->getMasterChannel() == channel)
+            return zone;
+
+    return nullptr;
+}
+
+MPEZone* MPEZoneLayout::getZoneByFirstNoteChannel (int channel) const noexcept
+{
+    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+        if (zone->getFirstNoteChannel() == channel)
+            return zone;
+
+    return nullptr;
+}
+
+MPEZone* MPEZoneLayout::getZoneByNoteChannel (int channel) const noexcept
+{
+    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+        if (zone->isUsingChannelAsNoteChannel (channel))
+            return zone;
+
+    return nullptr;
+}
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+
+class MPEZoneLayoutTests  : public UnitTest
+{
+public:
+    MPEZoneLayoutTests() : UnitTest ("MPEZoneLayout class") {}
+
+    void runTest() override
+    {
+        beginTest ("initialisation");
+        {
+            MPEZoneLayout layout;
+            expectEquals (layout.getNumZones(), 0);
+        }
+
+        beginTest ("adding zones");
+        {
+            MPEZoneLayout layout;
+
+            expect (layout.addZone (MPEZone (1, 7)));
+
+            expectEquals (layout.getNumZones(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 7);
+
+            expect (layout.addZone (MPEZone (9, 7)));
+
+            expectEquals (layout.getNumZones(), 2);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 7);
+            expectEquals (layout.getZoneByIndex (1)->getMasterChannel(), 9);
+            expectEquals (layout.getZoneByIndex (1)->getNumNoteChannels(), 7);
+
+            expect (! layout.addZone (MPEZone (5, 3)));
+
+            expectEquals (layout.getNumZones(), 3);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 3);
+            expectEquals (layout.getZoneByIndex (1)->getMasterChannel(), 9);
+            expectEquals (layout.getZoneByIndex (1)->getNumNoteChannels(), 7);
+            expectEquals (layout.getZoneByIndex (2)->getMasterChannel(), 5);
+            expectEquals (layout.getZoneByIndex (2)->getNumNoteChannels(), 3);
+
+            expect (! layout.addZone (MPEZone (5, 4)));
+
+            expectEquals (layout.getNumZones(), 2);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 3);
+            expectEquals (layout.getZoneByIndex (1)->getMasterChannel(), 5);
+            expectEquals (layout.getZoneByIndex (1)->getNumNoteChannels(), 4);
+
+            expect (! layout.addZone (MPEZone (6, 4)));
+
+            expectEquals (layout.getNumZones(), 2);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 3);
+            expectEquals (layout.getZoneByIndex (1)->getMasterChannel(), 6);
+            expectEquals (layout.getZoneByIndex (1)->getNumNoteChannels(), 4);
+        }
+
+        beginTest ("querying zones");
+        {
+            MPEZoneLayout layout;
+
+            layout.addZone (MPEZone (2, 5));
+            layout.addZone (MPEZone (9, 4));
+
+            expect (layout.getZoneByMasterChannel (1)  == nullptr);
+            expect (layout.getZoneByMasterChannel (2)  != nullptr);
+            expect (layout.getZoneByMasterChannel (3)  == nullptr);
+            expect (layout.getZoneByMasterChannel (8)  == nullptr);
+            expect (layout.getZoneByMasterChannel (9)  != nullptr);
+            expect (layout.getZoneByMasterChannel (10) == nullptr);
+
+            expectEquals (layout.getZoneByMasterChannel (2)->getNumNoteChannels(), 5);
+            expectEquals (layout.getZoneByMasterChannel (9)->getNumNoteChannels(), 4);
+
+            expect (layout.getZoneByFirstNoteChannel (2)  == nullptr);
+            expect (layout.getZoneByFirstNoteChannel (3)  != nullptr);
+            expect (layout.getZoneByFirstNoteChannel (4)  == nullptr);
+            expect (layout.getZoneByFirstNoteChannel (9)  == nullptr);
+            expect (layout.getZoneByFirstNoteChannel (10) != nullptr);
+            expect (layout.getZoneByFirstNoteChannel (11) == nullptr);
+
+            expectEquals (layout.getZoneByFirstNoteChannel (3)->getNumNoteChannels(), 5);
+            expectEquals (layout.getZoneByFirstNoteChannel (10)->getNumNoteChannels(), 4);
+
+            expect (layout.getZoneByNoteChannel (2)  == nullptr);
+            expect (layout.getZoneByNoteChannel (3)  != nullptr);
+            expect (layout.getZoneByNoteChannel (4)  != nullptr);
+            expect (layout.getZoneByNoteChannel (6)  != nullptr);
+            expect (layout.getZoneByNoteChannel (7)  != nullptr);
+            expect (layout.getZoneByNoteChannel (8)  == nullptr);
+            expect (layout.getZoneByNoteChannel (9)  == nullptr);
+            expect (layout.getZoneByNoteChannel (10) != nullptr);
+            expect (layout.getZoneByNoteChannel (11) != nullptr);
+            expect (layout.getZoneByNoteChannel (12) != nullptr);
+            expect (layout.getZoneByNoteChannel (13) != nullptr);
+            expect (layout.getZoneByNoteChannel (14) == nullptr);
+
+            expectEquals (layout.getZoneByNoteChannel (5)->getNumNoteChannels(), 5);
+            expectEquals (layout.getZoneByNoteChannel (13)->getNumNoteChannels(), 4);
+        }
+
+        beginTest ("clear all zones");
+        {
+            MPEZoneLayout layout;
+
+            expect (layout.addZone (MPEZone (1, 7)));
+            expect (layout.addZone (MPEZone (10, 2)));
+            layout.clearAllZones();
+
+            expectEquals (layout.getNumZones(), 0);
+        }
+
+        beginTest ("process MIDI buffers");
+        {
+            MPEZoneLayout layout;
+            MidiBuffer buffer;
+
+            buffer = MPEMessages::addZone (MPEZone (1, 7));
+            layout.processNextMidiBuffer (buffer);
+
+            expectEquals (layout.getNumZones(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 7);
+
+            buffer = MPEMessages::addZone (MPEZone (9, 7));
+            layout.processNextMidiBuffer (buffer);
+
+            expectEquals (layout.getNumZones(), 2);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 7);
+            expectEquals (layout.getZoneByIndex (1)->getMasterChannel(), 9);
+            expectEquals (layout.getZoneByIndex (1)->getNumNoteChannels(), 7);
+
+            MPEZone zone (1, 10);
+
+            buffer = MPEMessages::addZone (zone);
+            layout.processNextMidiBuffer (buffer);
+
+            expectEquals (layout.getNumZones(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 10);
+
+            zone.setPerNotePitchbendRange (33);
+            zone.setMasterPitchbendRange (44);
+
+            buffer = MPEMessages::masterPitchbendRange (zone);
+            buffer.addEvents (MPEMessages::perNotePitchbendRange (zone), 0, -1, 0);
+
+            layout.processNextMidiBuffer (buffer);
+
+            expectEquals (layout.getZoneByIndex (0)->getPerNotePitchbendRange(), 33);
+            expectEquals (layout.getZoneByIndex (0)->getMasterPitchbendRange(), 44);
+        }
+
+        beginTest ("process individual MIDI messages");
+        {
+            MPEZoneLayout layout;
+
+            layout.processNextMidiEvent (MidiMessage (0x80, 0x59, 0xd0));  // unrelated note-off msg
+            layout.processNextMidiEvent (MidiMessage (0xb1, 0x64, 0x06));  // RPN part 1
+            layout.processNextMidiEvent (MidiMessage (0xb1, 0x65, 0x00));  // RPN part 2
+            layout.processNextMidiEvent (MidiMessage (0xb8, 0x0b, 0x66));  // unrelated CC msg
+            layout.processNextMidiEvent (MidiMessage (0xb1, 0x06, 0x03));  // RPN part 3
+            layout.processNextMidiEvent (MidiMessage (0x90, 0x60, 0x00));  // unrelated note-on msg
+
+            expectEquals (layout.getNumZones(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getMasterChannel(), 1);
+            expectEquals (layout.getZoneByIndex (0)->getNumNoteChannels(), 3);
+        }
+    }
+};
+
+static MPEZoneLayoutTests MPEZoneLayoutUnitTests;
+
+
+#endif // JUCE_UNIT_TESTS

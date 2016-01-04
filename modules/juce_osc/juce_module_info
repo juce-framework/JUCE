@@ -1,7 +1,7 @@
 {
   "id":             "juce_osc",
   "name":           "JUCE OSC classes",
-  "version":        "4.0.2",
+  "version":        "4.1.0",
   "description":    "Open Sound Control implementation",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",

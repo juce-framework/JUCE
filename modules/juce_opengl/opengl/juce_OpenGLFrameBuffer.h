@@ -95,10 +95,10 @@ public:
     void releaseAsRenderingTarget();
 
     /** Returns the ID of this framebuffer, or 0 if it isn't initialised. */
-    GLuint getFrameBufferID() const;
+    GLuint getFrameBufferID() const noexcept;
 
     /** Returns the current frame buffer ID for the current context. */
-    static GLuint getCurrentFrameBufferTarget();
+    static GLuint getCurrentFrameBufferTarget() noexcept;
 
     /** Clears the framebuffer with the specified colour. */
     void clear (Colour colour);

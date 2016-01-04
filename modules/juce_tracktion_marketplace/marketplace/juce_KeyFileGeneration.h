@@ -35,7 +35,7 @@ public:
 
         The returned value is a block of text containing an RSA-encoded block, followed
         by some human-readable details. If you pass this block of text to
-        OnlineUnlockStatus::applyKeyFile(), it will decrpyt it, and if the
+        OnlineUnlockStatus::applyKeyFile(), it will decrypt it, and if the
         key matches and the machine numbers match, it will unlock that machine.
 
         Typically the way you'd use this on a server would be to build a small executable

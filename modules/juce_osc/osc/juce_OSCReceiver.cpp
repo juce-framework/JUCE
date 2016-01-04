@@ -114,14 +114,14 @@ namespace
             if (input.getNumBytesRemaining() < 4)
                 throw OSCFormatError ("OSC input stream exhausted while reading blob");
 
-            const int64 blobDataSize = input.readIntBigEndian();
+            const size_t blobDataSize = (size_t) input.readIntBigEndian();
 
-            if (input.getNumBytesRemaining() < (blobDataSize + 3) % 4)
+            if ((size_t) input.getNumBytesRemaining() < (blobDataSize + 3) % 4)
                 throw OSCFormatError ("OSC input stream exhausted before reaching end of blob");
 
             MemoryBlock blob;
 
-            const size_t bytesRead = input.readIntoMemoryBlock (blob, blobDataSize);
+            const size_t bytesRead = input.readIntoMemoryBlock (blob, (ssize_t) blobDataSize);
             readPaddingZeros (bytesRead);
 
             return blob;
@@ -416,7 +416,7 @@ struct OSCReceiver::Pimpl   : private Thread,
         catch (OSCFormatError)
         {
             if (formatErrorHandler != nullptr)
-                formatErrorHandler (data, dataSize);
+                formatErrorHandler (data, (int) dataSize);
         }
     }
 

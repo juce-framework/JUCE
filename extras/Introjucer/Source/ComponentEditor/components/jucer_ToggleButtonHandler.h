@@ -70,7 +70,7 @@ public:
     {
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 
-        ToggleButton* const tb = dynamic_cast <ToggleButton*> (component);
+        ToggleButton* const tb = dynamic_cast<ToggleButton*> (component);
 
         String s;
 

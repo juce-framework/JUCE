@@ -186,7 +186,7 @@ namespace JPEGHelpers
 
     static void jpegWriteTerminate (j_compress_ptr cinfo)
     {
-        JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
+        JuceJpegDest* const dest = static_cast<JuceJpegDest*> (cinfo->dest);
 
         const size_t numToWrite = jpegBufferSize - dest->free_in_buffer;
         dest->output->write (dest->buffer, numToWrite);
@@ -194,11 +194,11 @@ namespace JPEGHelpers
 
     static boolean jpegWriteFlush (j_compress_ptr cinfo)
     {
-        JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
+        JuceJpegDest* const dest = static_cast<JuceJpegDest*> (cinfo->dest);
 
         const int numToWrite = jpegBufferSize;
 
-        dest->next_output_byte = reinterpret_cast <JOCTET*> (dest->buffer);
+        dest->next_output_byte = reinterpret_cast<JOCTET*> (dest->buffer);
         dest->free_in_buffer = jpegBufferSize;
 
         return (boolean) dest->output->write (dest->buffer, (size_t) numToWrite);
@@ -271,7 +271,7 @@ Image JPEGImageFormat::decodeImage (InputStream& in)
         jpegDecompStruct.src->resync_to_restart = jpeg_resync_to_restart;
         jpegDecompStruct.src->term_source       = dummyCallback1;
 
-        jpegDecompStruct.src->next_input_byte   = static_cast <const unsigned char*> (mb.getData());
+        jpegDecompStruct.src->next_input_byte   = static_cast<const unsigned char*> (mb.getData());
         jpegDecompStruct.src->bytes_in_buffer   = mb.getDataSize();
 
         jpeg_read_header (&jpegDecompStruct, TRUE);
@@ -363,7 +363,7 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     jpegCompStruct.dest = &dest;
 
     dest.output = &out;
-    HeapBlock <char> tempBuffer (jpegBufferSize);
+    HeapBlock<char> tempBuffer (jpegBufferSize);
     dest.buffer = tempBuffer;
     dest.next_output_byte = (JOCTET*) dest.buffer;
     dest.free_in_buffer = jpegBufferSize;

@@ -531,7 +531,7 @@ public:
                     }
                     else if (type == chunkName ("INST"))
                     {
-                        HeapBlock <InstChunk> inst;
+                        HeapBlock<InstChunk> inst;
                         inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                         input->read (inst, (int) length);
                         inst->copyTo (metadataValues);
@@ -715,7 +715,7 @@ private:
         using namespace AiffFileHelpers;
 
         const bool couldSeekOk = output->setPosition (headerPosition);
-        (void) couldSeekOk;
+        ignoreUnused (couldSeekOk);
 
         // if this fails, you've given it an output stream that can't seek! It needs
         // to be able to seek back to write the header
@@ -972,7 +972,7 @@ bool AiffAudioFormat::canHandleFile (const File& f)
 
 AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, const bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer <AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
+    ScopedPointer<AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
 
     if (w->sampleRate > 0 && w->numChannels > 0)
         return w.release();
@@ -1003,7 +1003,7 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
                                                      const StringPairArray& metadataValues,
                                                      int /*qualityOptionIndex*/)
 {
-    if (getPossibleBitDepths().contains (bitsPerSample))
+    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
         return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels, (unsigned int) bitsPerSample, metadataValues);
 
     return nullptr;

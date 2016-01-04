@@ -74,8 +74,7 @@ public:
                                             int numBytesSoFar,
                                             double timestamp)
     {
-        // (this bit is just to avoid compiler warnings about unused variables)
-        (void) source; (void) messageData; (void) numBytesSoFar; (void) timestamp;
+        ignoreUnused (source, messageData, numBytesSoFar, timestamp);
     }
 };
 

@@ -1,0 +1,170 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2015 - ROLI Ltd.
+
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
+
+   Details of these licenses can be found at: www.gnu.org/licenses
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+   ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.juce.com for more information.
+
+  ==============================================================================
+*/
+
+MPEValue::MPEValue() noexcept  : normalisedValue (8192)
+{
+}
+
+MPEValue::MPEValue (int value)  : normalisedValue (value)
+{
+}
+
+//==============================================================================
+MPEValue MPEValue::from7BitInt (int value) noexcept
+{
+    jassert (value >= 0 && value <= 127);
+
+    const int valueAs14Bit = value <= 64 ? value << 7 : int (jmap<float> (float (value - 64), 0.0f, 63.0f, 0.0f, 8191.0f)) + 8192;
+    return MPEValue (valueAs14Bit);
+}
+
+MPEValue MPEValue::from14BitInt (int value) noexcept
+{
+    jassert (value >= 0 && value <= 16383);
+    return MPEValue (value);
+}
+
+//==============================================================================
+MPEValue MPEValue::minValue() noexcept      { return MPEValue::from7BitInt (0); }
+MPEValue MPEValue::centreValue() noexcept   { return MPEValue::from7BitInt (64); }
+MPEValue MPEValue::maxValue() noexcept      { return MPEValue::from7BitInt (127); }
+
+int MPEValue::as7BitInt() const noexcept
+{
+    return normalisedValue >> 7;
+}
+
+int MPEValue::as14BitInt() const noexcept
+{
+    return normalisedValue;
+}
+
+//==============================================================================
+float MPEValue::asSignedFloat() const noexcept
+{
+    return (normalisedValue < 8192)
+           ? jmap<float> (float (normalisedValue), 0.0f, 8192.0f, -1.0f, 0.0f)
+           : jmap<float> (float (normalisedValue), 8192.0f, 16383.0f, 0.0f, 1.0f);
+}
+
+float MPEValue::asUnsignedFloat() const noexcept
+{
+    return jmap<float> (float (normalisedValue), 0.0f, 16383.0f, 0.0f, 1.0f);
+}
+
+//==============================================================================
+bool MPEValue::operator== (const MPEValue& other) const noexcept
+{
+    return normalisedValue == other.normalisedValue;
+}
+
+bool MPEValue::operator!= (const MPEValue& other) const noexcept
+{
+    return ! operator== (other);
+}
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class MPEValueTests  : public UnitTest
+{
+public:
+    MPEValueTests() : UnitTest ("MPEValue class") {}
+
+    void runTest() override
+    {
+        beginTest ("comparison operator");
+        {
+            MPEValue value1 = MPEValue::from7BitInt (7);
+            MPEValue value2 = MPEValue::from7BitInt (7);
+            MPEValue value3 = MPEValue::from7BitInt (8);
+
+            expect (value1 == value1);
+            expect (value1 == value2);
+            expect (value1 != value3);
+        }
+
+        beginTest ("special values");
+        {
+            expectEquals (MPEValue::minValue().as7BitInt(), 0);
+            expectEquals (MPEValue::minValue().as14BitInt(), 0);
+
+            expectEquals (MPEValue::centreValue().as7BitInt(), 64);
+            expectEquals (MPEValue::centreValue().as14BitInt(), 8192);
+
+            expectEquals (MPEValue::maxValue().as7BitInt(), 127);
+            expectEquals (MPEValue::maxValue().as14BitInt(), 16383);
+        }
+
+        beginTest ("zero/minimum value");
+        {
+            expectValuesConsistent (MPEValue::from7BitInt (0),  0, 0, -1.0f, 0.0f);
+            expectValuesConsistent (MPEValue::from14BitInt (0), 0, 0, -1.0f, 0.0f);
+        }
+
+        beginTest ("maximum value");
+        {
+            expectValuesConsistent (MPEValue::from7BitInt (127),    127, 16383, 1.0f, 1.0f);
+            expectValuesConsistent (MPEValue::from14BitInt (16383), 127, 16383, 1.0f, 1.0f);
+        }
+
+        beginTest ("centre value");
+        {
+            expectValuesConsistent (MPEValue::from7BitInt (64),    64, 8192, 0.0f, 0.5f);
+            expectValuesConsistent (MPEValue::from14BitInt (8192), 64, 8192, 0.0f, 0.5f);
+        }
+
+        beginTest ("value halfway between min and centre");
+        {
+            expectValuesConsistent (MPEValue::from7BitInt (32),    32, 4096, -0.5f, 0.25f);
+            expectValuesConsistent (MPEValue::from14BitInt (4096), 32, 4096, -0.5f, 0.25f);
+        }
+    }
+
+private:
+    //==========================================================================
+    void expectValuesConsistent (MPEValue value,
+                                 int expectedValueAs7BitInt,
+                                 int expectedValueAs14BitInt,
+                                 float expectedValueAsSignedFloat,
+                                 float expectedValueAsUnsignedFloat)
+    {
+        expectEquals (value.as7BitInt(), expectedValueAs7BitInt);
+        expectEquals (value.as14BitInt(), expectedValueAs14BitInt);
+        expectFloatWithinRelativeError (value.asSignedFloat(), expectedValueAsSignedFloat, 0.0001f);
+        expectFloatWithinRelativeError (value.asUnsignedFloat(), expectedValueAsUnsignedFloat, 0.0001f);
+    }
+
+    //==========================================================================
+    void expectFloatWithinRelativeError (float actualValue, float expectedValue, float maxRelativeError)
+    {
+        const float maxAbsoluteError = jmax (1.0f, std::fabs (expectedValue)) * maxRelativeError;
+        expect (std::fabs (expectedValue - actualValue) < maxAbsoluteError);
+    }
+};
+
+static MPEValueTests MPEValueUnitTests;
+
+#endif // JUCE_UNIT_TESTS

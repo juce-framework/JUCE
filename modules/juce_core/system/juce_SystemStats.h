@@ -64,6 +64,7 @@ public:
         MacOSX_10_8     = MacOSX | 8,
         MacOSX_10_9     = MacOSX | 9,
         MacOSX_10_10    = MacOSX | 10,
+        MacOSX_10_11    = MacOSX | 11,
 
         Win2000         = Windows | 1,
         WinXP           = Windows | 2,

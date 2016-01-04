@@ -32,10 +32,10 @@ class MessageQueue
 public:
     MessageQueue()
     {
-       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 && ! JUCE_IOS
-        runLoop = CFRunLoopGetMain();
-       #else
+       #if JUCE_IOS
         runLoop = CFRunLoopGetCurrent();
+       #else
+        runLoop = CFRunLoopGetMain();
        #endif
 
         CFRunLoopSourceContext sourceContext;
@@ -96,7 +96,7 @@ private:
 
     static void runLoopSourceCallback (void* info)
     {
-        static_cast <MessageQueue*> (info)->runLoopCallback();
+        static_cast<MessageQueue*> (info)->runLoopCallback();
     }
 };
 

@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="rysVAr" name="OSCSender" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.OSCSender" includeBinaryInAppConfig="1"
-              jucerVersion="4.0.1">
+              jucerVersion="4.1.0">
   <MAINGROUP id="knnZZJ" name="OSCSender">
     <GROUP id="{F2A0007A-4D24-4DD6-DEC8-6428F36CE45D}" name="Source">
       <FILE id="ORaBHU" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
@@ -58,6 +58,43 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
+    <XCODE_IPHONE targetFolder="Builds/iOS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
+                       targetName="OSCSender"/>
+        <CONFIGURATION name="Release" iosCompatibility="default" isDebug="0" optimisation="3"
+                       targetName="OSCSender"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
+    </XCODE_IPHONE>
+    <ANDROIDSTUDIO androidVersionCode="1" androidActivityClass="com.yourcompany.oscsender.OSCSender"
+                   androidMinimumSDK="10" androidInternetNeeded="1" androidBluetoothNeeded="1"
+                   androidKeyStore="${user.home}/.android/debug.keystore" androidKeyStorePass="android"
+                   androidKeyAlias="androiddebugkey" androidKeyAliasPass="android"
+                   androidCpp11="1" targetFolder="Builds/AndroidStudio" androidSDKPath=""
+                   androidNDKPath="">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
+                       optimisation="1" targetName="OSCSender"/>
+        <CONFIGURATION name="Release" androidArchitectures="armeabi armeabi-v7a x86"
+                       isDebug="0" optimisation="3" targetName="OSCSender"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
+    </ANDROIDSTUDIO>
   </EXPORTFORMATS>
   <MODULES>
     <MODULES id="juce_core" showAllCode="1" useLocalCopy="0"/>
@@ -68,4 +105,7 @@
     <MODULES id="juce_osc" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
   <JUCEOPTIONS/>
+  <LIVE_SETTINGS>
+    <OSX enableCxx11="1"/>
+  </LIVE_SETTINGS>
 </JUCERPROJECT>

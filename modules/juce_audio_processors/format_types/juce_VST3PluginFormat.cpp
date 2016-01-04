@@ -455,7 +455,7 @@ public:
 
     tresult PLUGIN_API requestOpenEditor (FIDString name) override
     {
-        (void) name;
+        ignoreUnused (name);
         jassertfalse;
         return kResultFalse;
     }
@@ -1665,8 +1665,8 @@ public:
         createPluginDescription (description, module->file,
                                  company, module->name,
                                  *info, info2, infoW,
-                                 getNumInputChannels(),
-                                 getNumOutputChannels());
+                                 getTotalNumInputChannels(),
+                                 getTotalNumOutputChannels());
     }
 
     void* getPlatformSpecificData() override   { return component; }
@@ -1675,7 +1675,7 @@ public:
     //==============================================================================
     const String getName() const override
     {
-        return module != nullptr ? module->name : String::empty;
+        return module != nullptr ? module->name : String();
     }
 
     void repopulateArrangements()
@@ -1754,19 +1754,15 @@ public:
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
-        JUCE_TRY
-        {
-            isActive = false;
+        isActive = false;
 
-            setStateForAllBusses (false);
+        setStateForAllBusses (false);
 
-            if (processor != nullptr)
-                warnOnFailure (processor->setProcessing (false));
+        if (processor != nullptr)
+            warnOnFailure (processor->setProcessing (false));
 
-            if (component != nullptr)
-                warnOnFailure (component->setActive (false));
-        }
-        JUCE_CATCH_ALL_ASSERT
+        if (component != nullptr)
+            warnOnFailure (component->setActive (false));
     }
 
     bool supportsDoublePrecisionProcessing() const override
@@ -1808,7 +1804,7 @@ public:
 
         updateTimingInformation (data, getSampleRate());
 
-        for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
+        for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
         associateTo (data, buffer);
@@ -1837,7 +1833,7 @@ public:
                 return toString (busInfo.name);
         }
 
-        return String::empty;
+        return String();
     }
 
     const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, true, true); }
@@ -1845,18 +1841,14 @@ public:
 
     bool isInputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumInputChannels())
-            return false;
-
-        return getBusInfo (true, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumInputChannels())
+                 && getBusInfo (true, true).channelCount == 2;
     }
 
     bool isOutputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumOutputChannels())
-            return false;
-
-        return getBusInfo (false, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumOutputChannels())
+                 && getBusInfo (false, true).channelCount == 2;
     }
 
     bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
@@ -1941,7 +1933,7 @@ public:
             return toString (result);
         }
 
-        return String::empty;
+        return String();
     }
 
     void setParameter (int parameterIndex, float newValue) override
@@ -2023,8 +2015,7 @@ public:
     /** @note Not applicable to VST3 */
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override
     {
-        (void) data;
-        (void) sizeInBytes;
+        ignoreUnused (data, sizeInBytes);
     }
 
     //==============================================================================

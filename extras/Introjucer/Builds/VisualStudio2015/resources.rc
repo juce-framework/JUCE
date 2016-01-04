@@ -7,7 +7,7 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  4,0,2,0
+FILEVERSION  4,1,0,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -15,9 +15,9 @@ BEGIN
     BEGIN
       VALUE "CompanyName",  "ROLI Ltd.\0"
       VALUE "FileDescription",  "The Introjucer\0"
-      VALUE "FileVersion",  "4.0.2\0"
+      VALUE "FileVersion",  "4.1.0\0"
       VALUE "ProductName",  "The Introjucer\0"
-      VALUE "ProductVersion",  "4.0.2\0"
+      VALUE "ProductVersion",  "4.1.0\0"
     END
   END
 

@@ -208,7 +208,7 @@ public:
                    pathSize * 0.5f,
                    clipPathAngle.getValue());
 
-        g.reduceClipRegion (p, AffineTransform::identity);
+        g.reduceClipRegion (p, AffineTransform());
     }
 
     void clipToImage (Graphics& g)
@@ -384,7 +384,7 @@ public:
 
         PathStrokeType stroke (0.5f + 10.0f * thickness.getValue());
         g.setColour (Colours::purple.withAlpha (getAlpha()));
-        g.strokePath (p, stroke, AffineTransform::identity);
+        g.strokePath (p, stroke, AffineTransform());
     }
 
     SlowerBouncingNumber points[2 + 4 * 8], thickness;
@@ -478,7 +478,7 @@ public:
 
         if (svgFileStream != nullptr)
         {
-            svgDrawable = dynamic_cast <DrawableComposite*> (Drawable::createFromImageDataStream (*svgFileStream));
+            svgDrawable = dynamic_cast<DrawableComposite*> (Drawable::createFromImageDataStream (*svgFileStream));
 
             if (svgDrawable != nullptr)
             {

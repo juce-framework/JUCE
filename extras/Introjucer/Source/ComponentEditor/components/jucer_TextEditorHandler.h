@@ -83,7 +83,7 @@ public:
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
-        TextEditor* const t = dynamic_cast <TextEditor*> (component);
+        TextEditor* const t = dynamic_cast<TextEditor*> (component);
         jassert (t != nullptr);
 
         props.add (new TextEditorInitialTextProperty (t, document));
@@ -105,7 +105,7 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        TextEditor* const te = dynamic_cast <TextEditor*> (component);
+        TextEditor* const te = dynamic_cast<TextEditor*> (component);
         jassert (te != 0);
 
         String s;
