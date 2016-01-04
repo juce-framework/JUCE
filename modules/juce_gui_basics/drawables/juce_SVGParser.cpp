@@ -158,7 +158,16 @@ public:
                         lastCommandChar = 'l';
                     }
                     else
+                    {
+                        if (path.getCurrentPosition() == p1)
+                        {
+                            // Work around for dots in the path which aren't handled well.
+                            // SVGs saved by Adobe Illustrator may include dots (small filled circles)
+                            // coded this way.
+                            p1.x += 0.001;
+                        }
                         path.lineTo (p1);
+                    }
 
                     last2 = last;
                     last = p1;
