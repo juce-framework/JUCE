@@ -302,7 +302,7 @@ public:
     void remove (int index);
 
     /** Finds a string in the array and removes it.
-        This will remove all occurrences of the given string from the array. 
+        This will remove all occurrences of the given string from the array.
         The comparison may be case-insensitive depending on the ignoreCase parameter.
     */
     void removeString (StringRef stringToRemove,
