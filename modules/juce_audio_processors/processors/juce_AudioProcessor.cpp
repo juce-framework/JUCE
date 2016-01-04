@@ -42,7 +42,7 @@ AudioProcessor::AudioProcessor()
       nonRealtime (false),
       processingPrecision (singlePrecision)
 {
-  #if ! JucePlugin_IsMidiEffect
+//  #if ! JucePlugin_IsMidiEffect
    #ifdef JucePlugin_PreferredChannelConfigurations
     const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
    #else
@@ -57,7 +57,7 @@ AudioProcessor::AudioProcessor()
        #endif
         busArrangement.outputBuses.add (AudioProcessorBus ("Output",   AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
     }
-  #endif
+//  #endif
 
     updateSpeakerFormatStrings();
 }
