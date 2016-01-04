@@ -205,6 +205,9 @@ AudioFormatWriter* LAMEEncoderAudioFormat::createWriterFor (OutputStream* stream
                                                             const StringPairArray& metadataValues,
                                                             int qualityOptionIndex)
 {
+    if (streamToWriteTo == nullptr)
+        return nullptr;
+
     int vbr = 4;
     int cbr = 0;
 

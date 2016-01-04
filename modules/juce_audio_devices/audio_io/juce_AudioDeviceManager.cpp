@@ -86,6 +86,65 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackHandler)
 };
 
+//==============================================================================
+// This is an AudioTransportSource which will own it's assigned source
+struct AudioSourceOwningTransportSource  : public AudioTransportSource
+{
+    AudioSourceOwningTransportSource (PositionableAudioSource* s)  : source (s)
+    {
+        AudioTransportSource::setSource (s);
+    }
+
+    ~AudioSourceOwningTransportSource()
+    {
+        setSource (nullptr);
+    }
+
+private:
+    ScopedPointer<PositionableAudioSource> source;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourceOwningTransportSource)
+};
+
+//==============================================================================
+// An AudioSourcePlayer which will remove itself from the AudioDeviceManager's
+// callback list once it finishes playing its source
+struct AutoRemovingSourcePlayer  : public AudioSourcePlayer,
+                                   private Timer
+{
+    AutoRemovingSourcePlayer (AudioDeviceManager& dm, AudioTransportSource* ts, bool ownSource)
+        : manager (dm), transportSource (ts, ownSource)
+    {
+        jassert (ts != nullptr);
+        manager.addAudioCallback (this);
+        AudioSourcePlayer::setSource (transportSource);
+        startTimerHz (10);
+    }
+
+    ~AutoRemovingSourcePlayer()
+    {
+        setSource (nullptr);
+        manager.removeAudioCallback (this);
+    }
+
+    void timerCallback() override
+    {
+        if (! transportSource->isPlaying())
+            delete this;
+    }
+
+    void audioDeviceStopped() override
+    {
+        AudioSourcePlayer::audioDeviceStopped();
+        setSource (nullptr);
+    }
+
+private:
+    AudioDeviceManager& manager;
+    OptionalScopedPointer<AudioTransportSource> transportSource;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutoRemovingSourcePlayer)
+};
 
 //==============================================================================
 AudioDeviceManager::AudioDeviceManager()
@@ -103,8 +162,11 @@ AudioDeviceManager::~AudioDeviceManager()
 {
     currentAudioDevice = nullptr;
     defaultMidiOutput = nullptr;
-}
 
+    for (int i = 0; i < callbacks.size(); ++i)
+        if (AutoRemovingSourcePlayer* p = dynamic_cast<AutoRemovingSourcePlayer*> (callbacks.getUnchecked(i)))
+            delete p;
+}
 
 //==============================================================================
 void AudioDeviceManager::createDeviceTypesIfNeeded()
@@ -925,66 +987,6 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
         sendChangeMessage();
     }
 }
-
-//==============================================================================
-// This is an AudioTransportSource which will own it's assigned source
-struct AudioSourceOwningTransportSource  : public AudioTransportSource
-{
-    AudioSourceOwningTransportSource (PositionableAudioSource* s)  : source (s)
-    {
-        AudioTransportSource::setSource (s);
-    }
-
-    ~AudioSourceOwningTransportSource()
-    {
-        setSource (nullptr);
-    }
-
-private:
-    ScopedPointer<PositionableAudioSource> source;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourceOwningTransportSource)
-};
-
-//==============================================================================
-// An AudioSourcePlayer which will remove itself from the AudioDeviceManager's
-// callback list once it finishes playing its source
-struct AutoRemovingSourcePlayer  : public AudioSourcePlayer,
-                                   private Timer
-{
-    AutoRemovingSourcePlayer (AudioDeviceManager& dm, AudioTransportSource* ts, bool ownSource)
-        : manager (dm), transportSource (ts, ownSource)
-    {
-        jassert (ts != nullptr);
-        manager.addAudioCallback (this);
-        AudioSourcePlayer::setSource (transportSource);
-        startTimerHz (10);
-    }
-
-    ~AutoRemovingSourcePlayer()
-    {
-        setSource (nullptr);
-        manager.removeAudioCallback (this);
-    }
-
-    void timerCallback() override
-    {
-        if (! transportSource->isPlaying())
-            delete this;
-    }
-
-    void audioDeviceStopped() override
-    {
-        AudioSourcePlayer::audioDeviceStopped();
-        setSource (nullptr);
-    }
-
-private:
-    AudioDeviceManager& manager;
-    OptionalScopedPointer<AudioTransportSource> transportSource;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutoRemovingSourcePlayer)
-};
 
 //==============================================================================
 // An AudioSource which simply outputs a buffer

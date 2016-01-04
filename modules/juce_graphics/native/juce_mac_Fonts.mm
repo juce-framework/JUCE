@@ -229,7 +229,7 @@ namespace CoreTextTypeLayout
 
         for (int i = 0; i < numCharacterAttributes; ++i)
         {
-            const AttributedString::Attribute& attr = *text.getAttribute (i);
+            const AttributedString::Attribute& attr = text.getAttribute (i);
             const int rangeStart = attr.range.getStart();
 
             if (rangeStart >= attribStringLen)
@@ -237,42 +237,40 @@ namespace CoreTextTypeLayout
 
             CFRange range = CFRangeMake (rangeStart, jmin (attr.range.getEnd(), (int) attribStringLen) - rangeStart);
 
-            if (const Font* const f = attr.getFont())
+            if (CTFontRef ctFontRef = getOrCreateFont (attr.font))
             {
-                if (CTFontRef ctFontRef = getOrCreateFont (*f))
+                ctFontRef = getFontWithPointSize (ctFontRef, attr.font.getHeight() * getHeightToPointsFactor (ctFontRef));
+
+                CFAttributedStringSetAttribute (attribString, range, kCTFontAttributeName, ctFontRef);
+
+                float extraKerning = attr.font.getExtraKerningFactor();
+
+                if (extraKerning != 0.0f)
                 {
-                    ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
+                    extraKerning *= attr.font.getHeight();
 
-                    CFAttributedStringSetAttribute (attribString, range, kCTFontAttributeName, ctFontRef);
-
-                    float extraKerning = f->getExtraKerningFactor();
-
-                    if (extraKerning != 0.0f)
-                    {
-                        extraKerning *= f->getHeight();
-
-                        CFNumberRef numberRef = CFNumberCreate (0, kCFNumberFloatType, &extraKerning);
-                        CFAttributedStringSetAttribute (attribString, range, kCTKernAttributeName, numberRef);
-                        CFRelease (numberRef);
-                    }
-
-                    CFRelease (ctFontRef);
+                    CFNumberRef numberRef = CFNumberCreate (0, kCFNumberFloatType, &extraKerning);
+                    CFAttributedStringSetAttribute (attribString, range, kCTKernAttributeName, numberRef);
+                    CFRelease (numberRef);
                 }
+
+                CFRelease (ctFontRef);
             }
 
-            if (const Colour* const col = attr.getColour())
             {
+                const Colour col (attr.colour);
+
                #if JUCE_IOS
-                const CGFloat components[] = { col->getFloatRed(),
-                                               col->getFloatGreen(),
-                                               col->getFloatBlue(),
-                                               col->getFloatAlpha() };
+                const CGFloat components[] = { col.getFloatRed(),
+                                               col.getFloatGreen(),
+                                               col.getFloatBlue(),
+                                               col.getFloatAlpha() };
                 CGColorRef colour = CGColorCreate (rgbColourSpace, components);
                #else
-                CGColorRef colour = CGColorCreateGenericRGB (col->getFloatRed(),
-                                                             col->getFloatGreen(),
-                                                             col->getFloatBlue(),
-                                                             col->getFloatAlpha());
+                CGColorRef colour = CGColorCreateGenericRGB (col.getFloatRed(),
+                                                             col.getFloatGreen(),
+                                                             col.getFloatBlue(),
+                                                             col.getFloatAlpha());
                #endif
 
                 CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, colour);
@@ -449,7 +447,7 @@ namespace CoreTextTypeLayout
                 CFDictionaryRef runAttributes = CTRunGetAttributes (run);
 
                 CTFontRef ctRunFont;
-                if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void **) &ctRunFont))
+                if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void**) &ctRunFont))
                 {
                     CFStringRef cfsFontName = CTFontCopyPostScriptName (ctRunFont);
                     CTFontRef ctFontRef = CTFontCreateWithName (cfsFontName, referenceFontSize, nullptr);
@@ -1176,17 +1174,16 @@ static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 
     for (int i = 0; i < numCharacterAttributes; ++i)
     {
-        if (const Font* const f = text.getAttribute (i)->getFont())
+        Typeface* t = text.getAttribute(i).font.getTypeface();
+
+        if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (t))
         {
-            if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (f->getTypeface()))
-            {
-                if (tf->isMemoryFont)
-                    return false;
-            }
-            else if (dynamic_cast<CustomTypeface*> (f->getTypeface()) != nullptr)
-            {
+            if (tf->isMemoryFont)
                 return false;
-            }
+        }
+        else if (dynamic_cast<CustomTypeface*> (t) != nullptr)
+        {
+            return false;
         }
     }
 

@@ -59,7 +59,7 @@ public:
         const int numSamples = buffer.getNumSamples();
 
         // get note duration
-        const int noteDuration = static_cast<int> (std::ceilf (rate * 0.25f * (0.1f + (1.0f - (*speed)))));
+        const int noteDuration = static_cast<int> (std::ceil (rate * 0.25f * (0.1f + (1.0f - (*speed)))));
 
         MidiMessage msg;
         int ignore;

@@ -262,9 +262,21 @@ public:
     }
 
     //==============================================================================
-    bool BusCountWritable (AudioUnitScope) override
+    bool BusCountWritable (AudioUnitScope scope) override
     {
-        return busUtils.hasDynamicInBuses() || busUtils.hasDynamicOutBuses();
+        bool isInput;
+
+        if (scopeToDirection (scope, isInput) != noErr)
+            return false;
+
+       #if JucePlugin_IsMidiEffect
+        return false;
+       #elif JucePlugin_IsSynth
+        if (isInput) return busUtils.hasDynamicInBuses();
+       #endif
+
+        return isInput ? (busUtils.getBusCount (true)  > 1 && busUtils.hasDynamicInBuses())
+                       : (busUtils.getBusCount (false) > 1 && busUtils.hasDynamicOutBuses());
     }
 
     OSStatus SetBusCount (AudioUnitScope scope, UInt32 count) override
