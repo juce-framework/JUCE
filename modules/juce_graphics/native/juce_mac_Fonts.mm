@@ -219,10 +219,13 @@ namespace CoreTextTypeLayout
         CGColorSpaceRef rgbColourSpace = CGColorSpaceCreateDeviceRGB();
        #endif
 
-        CFStringRef cfText = text.getText().toCFString();
         CFMutableAttributedStringRef attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
-        CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
-        CFRelease (cfText);
+
+        if (CFStringRef cfText = text.getText().toCFString())
+        {
+            CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
+            CFRelease (cfText);
+        }
 
         const int numCharacterAttributes = text.getNumAttributes();
         const CFIndex attribStringLen = CFAttributedStringGetLength (attribString);
