@@ -165,10 +165,16 @@ public:
     */
     int getLowestVisibleKey() const noexcept                        { return (int) firstKey; }
 
-    /** Returns the length of the black notes.
+    /** Sets the length of the black notes as a proportion of the white note length. */
+    void setBlackNoteLengthProportion (float ratio) noexcept;
+
+    /** Returns the length of the black notes as a proportion of the white note length. */
+    float getBlackNoteLengthProportion() const noexcept             { return blackNoteLengthRatio; }
+
+    /** Returns the absolute length of the black notes.
         This will be their vertical or horizontal length, depending on the keyboard's orientation.
     */
-    int getBlackNoteLength() const noexcept                         { return blackNoteLength; }
+    int getBlackNoteLength() const noexcept;
 
     /** If set to true, then scroll buttons will appear at either end of the keyboard
         if there are too many notes to fit them all in the component at once.
@@ -375,7 +381,8 @@ private:
     friend class MidiKeyboardUpDownButton;
 
     MidiKeyboardState& state;
-    int xOffset, blackNoteLength;
+    float blackNoteLengthRatio;
+    int xOffset;
     float keyWidth;
     Orientation orientation;
 
