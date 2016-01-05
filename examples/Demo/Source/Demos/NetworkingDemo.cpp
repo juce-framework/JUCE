@@ -28,6 +28,7 @@
 //==============================================================================
 class NetworkingDemo   : public Component,
                          private Button::Listener,
+                         private TextEditor::Listener,
                          private Thread
 {
 public:
@@ -38,18 +39,14 @@ public:
         setOpaque (true);
 
         addAndMakeVisible (urlBox);
-        urlBox.setText ("http://www.google.com");
+        urlBox.setText ("https://www.google.com");
+        urlBox.addListener (this);
 
         addAndMakeVisible (fetchButton);
         fetchButton.setButtonText ("Download URL Contents");
         fetchButton.addListener (this);
 
         addAndMakeVisible (resultsBox);
-    }
-
-    ~NetworkingDemo()
-    {
-        fetchButton.removeListener (this);
     }
 
     void paint (Graphics& g) override
@@ -112,6 +109,11 @@ private:
     {
         if (button == &fetchButton)
             startThread();
+    }
+
+    void textEditorReturnKeyPressed (TextEditor&) override
+    {
+        fetchButton.triggerClick();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NetworkingDemo)
