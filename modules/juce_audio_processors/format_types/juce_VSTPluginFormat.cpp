@@ -701,6 +701,11 @@ private:
 static const int defaultVSTSampleRateValue = 44100;
 static const int defaultVSTBlockSizeValue = 512;
 
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4996) // warning about overriding deprecated methods
+#endif
+
 //==============================================================================
 //==============================================================================
 class VSTPluginInstance     : public AudioPluginInstance,
@@ -2680,6 +2685,10 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginWindow)
 };
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
 
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
