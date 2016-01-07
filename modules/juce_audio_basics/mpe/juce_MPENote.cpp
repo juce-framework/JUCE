@@ -71,7 +71,7 @@ MPENote::MPENote() noexcept
 //==============================================================================
 bool MPENote::isValid() const noexcept
 {
-    return midiChannel > 0 && midiChannel <= 16 && initialNote >= 0 && initialNote <= 127;
+    return midiChannel > 0 && midiChannel <= 16 && initialNote < 128;
 }
 
 //==============================================================================
