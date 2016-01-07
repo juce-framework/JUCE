@@ -123,14 +123,17 @@ void MPEZoneLayout::processPitchbendRangeRpnMessage (MidiRPNMessage rpn)
         {
             zone->setPerNotePitchbendRange (rpn.value);
             listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
+            return;
         }
     }
-    else if (MPEZone* zone = getZoneByMasterChannel (rpn.channel))
+
+    if (MPEZone* zone = getZoneByMasterChannel (rpn.channel))
     {
         if (zone->getMasterPitchbendRange() != rpn.value)
         {
             zone->setMasterPitchbendRange (rpn.value);
             listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
+            return;
         }
     }
 }
