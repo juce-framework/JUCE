@@ -915,7 +915,7 @@ public:
 
     VstPlugCategory getVstCategory() const noexcept     { return (VstPlugCategory) dispatch (effGetPlugCategory, 0, 0, 0, 0); }
 
-    int pluginCanDo (const char* text) const     { return dispatch (effCanDo, 0, 0, (void*) text,  0); }
+    int pluginCanDo (const char* text) const     { return (int) dispatch (effCanDo, 0, 0, (void*) text,  0); }
 
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected) override
