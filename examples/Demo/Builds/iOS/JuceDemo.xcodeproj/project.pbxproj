@@ -8,6 +8,8 @@
 
 		E16EA7E816B50766F3AE4F88 = {isa = PBXBuildFile; fileRef = 8D7BDA5CDDCCD2F7BE67037A; };
 		BB7001D6FD448E6C0AAE4F30 = {isa = PBXBuildFile; fileRef = 8452076B5EAE822DD445458F; };
+		5CA55A61B4ECF6BE53DB459A = {isa = PBXBuildFile; fileRef = ED6ADC3F084F9F3B6177B0C8; };
+		3A285384585A5F664BB4C652 = {isa = PBXBuildFile; fileRef = A078E4C69AFA4FAE8DCC66BD; };
 		213167931DD11DF54592222E = {isa = PBXBuildFile; fileRef = 5FAB9E7F62B84DBAA98A0004; };
 		D8AC2AB9573F991BFDFB431E = {isa = PBXBuildFile; fileRef = 37CB4A819F38E7AF9C77A8CB; };
 		4E306BFA283851066E0DA96E = {isa = PBXBuildFile; fileRef = EACCBFA17F4D07ECE058EEBB; };
@@ -715,6 +717,7 @@
 		9EB305226A801CB7012884F0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_freetype_Fonts.cpp"; path = "../../../../modules/juce_graphics/native/juce_freetype_Fonts.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9F75FFB61C74FEECE61A7138 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MultithreadingDemo.cpp; path = ../../Source/Demos/MultithreadingDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		A04410519258755461444678 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AlertWindow.h"; path = "../../../../modules/juce_gui_basics/windows/juce_AlertWindow.h"; sourceTree = "SOURCE_ROOT"; };
+		A078E4C69AFA4FAE8DCC66BD = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		A1244D54910A10100ECF8EE2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DirectoryContentsDisplayComponent.cpp"; path = "../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsDisplayComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A166FEC488A2EE5290FF0722 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_HyperlinkButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_HyperlinkButton.h"; sourceTree = "SOURCE_ROOT"; };
 		A169179FE554C215416FCD7C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Typeface.h"; path = "../../../../modules/juce_graphics/fonts/juce_Typeface.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1004,6 +1007,7 @@
 		ECAB8BD2816B0BEFCD9F6961 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AsyncUpdater.h"; path = "../../../../modules/juce_events/broadcasters/juce_AsyncUpdater.h"; sourceTree = "SOURCE_ROOT"; };
 		ED3DE86815324354C48631D0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_XMLCodeTokeniser.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_XMLCodeTokeniser.h"; sourceTree = "SOURCE_ROOT"; };
 		ED6224ABC715AAB68661F4D4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_box2d.cpp"; path = "../../../../modules/juce_box2d/juce_box2d.cpp"; sourceTree = "SOURCE_ROOT"; };
+		ED6ADC3F084F9F3B6177B0C8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		ED80E9909586DD64BDE03A70 = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = portmeirion.jpg; path = ../../Resources/portmeirion.jpg; sourceTree = "SOURCE_ROOT"; };
 		EE7001BD5206A8D8EA2D125B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RectangleList.h"; path = "../../../../modules/juce_graphics/geometry/juce_RectangleList.h"; sourceTree = "SOURCE_ROOT"; };
 		EEA020419EF58E90C10AAE26 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ResizableWindow.h"; path = "../../../../modules/juce_gui_basics/windows/juce_ResizableWindow.h"; sourceTree = "SOURCE_ROOT"; };
@@ -2282,6 +2286,8 @@
 		9439CB46EE08D16AAA26A203 = {isa = PBXGroup; children = (
 					8D7BDA5CDDCCD2F7BE67037A,
 					8452076B5EAE822DD445458F,
+					ED6ADC3F084F9F3B6177B0C8,
+					A078E4C69AFA4FAE8DCC66BD,
 					5FAB9E7F62B84DBAA98A0004,
 					37CB4A819F38E7AF9C77A8CB,
 					EACCBFA17F4D07ECE058EEBB,
@@ -2448,6 +2454,8 @@
 		62864F0322651D6B1B57BBA6 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
 					E16EA7E816B50766F3AE4F88,
 					BB7001D6FD448E6C0AAE4F30,
+					5CA55A61B4ECF6BE53DB459A,
+					3A285384585A5F664BB4C652,
 					213167931DD11DF54592222E,
 					D8AC2AB9573F991BFDFB431E,
 					4E306BFA283851066E0DA96E,
