@@ -1338,6 +1338,27 @@ private:
         return false;
     }
 
+    bool supportsMPE() const override
+    {
+        UInt32 dataSize = 0;
+        Boolean isWritable = false;
+
+        if (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_SupportsMPE,
+                                      kAudioUnitScope_Global, 0, &dataSize, &isWritable) == noErr
+            && dataSize == sizeof (UInt32))
+        {
+            UInt32 result = 0;
+
+            if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SupportsMPE,
+                                      kAudioUnitScope_Global, 0, &result, &dataSize) == noErr)
+            {
+                return result > 0;
+            }
+        }
+
+        return false;
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance)
 };
 

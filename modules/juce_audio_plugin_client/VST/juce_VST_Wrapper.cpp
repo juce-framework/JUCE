@@ -417,12 +417,13 @@ public:
             return 1;
         }
 
+        // This tells Wavelab to use the UI thread to invoke open/close,
+        // like all other hosts do.
         if (strcmp (text, "openCloseAnyThread") == 0)
-        {
-            // This tells Wavelab to use the UI thread to invoke open/close,
-            // like all other hosts do.
             return -1;
-        }
+
+        if (strcmp (text, "MPE") == 0)
+            return filter->supportsMPE() ? 1 : 0;
 
        #if JUCE_MAC
         if (strcmp (text, "hasCockosViewAsConfig") == 0)
