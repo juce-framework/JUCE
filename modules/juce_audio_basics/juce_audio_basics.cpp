@@ -37,7 +37,7 @@
  #define JUCE_USE_SSE_INTRINSICS 0
 #endif
 
-#if JUCE_MINGW
+#if JUCE_MINGW && ! defined (alloca)
  #define alloca __builtin_alloca
 #endif
 
