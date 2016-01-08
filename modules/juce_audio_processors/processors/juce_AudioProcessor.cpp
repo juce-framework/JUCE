@@ -121,7 +121,7 @@ void AudioProcessor::setPlayConfigDetails (const int newNumIns,
 
 void AudioProcessor::setRateAndBufferSizeDetails (double newSampleRate, int newBlockSize) noexcept
 {
-	currentSampleRate = newSampleRate;
+    currentSampleRate = newSampleRate;
     blockSize = newBlockSize;
 }
 
