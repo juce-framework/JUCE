@@ -900,13 +900,13 @@ public:
         if (effect == nullptr)
             return 0.0;
 
-        const double currentSampleRate = getSampleRate();
+        const double sampleRate = getSampleRate();
 
-        if (currentSampleRate <= 0)
+        if (sampleRate <= 0)
             return 0.0;
 
         VstIntPtr samples = dispatch (effGetTailSize, 0, 0, 0, 0);
-        return samples / currentSampleRate;
+        return samples / sampleRate;
     }
 
     bool acceptsMidi() const override    { return wantsMidiMessages; }
