@@ -2014,7 +2014,6 @@
 					0FFEF043CA89142B18C79ABE,
 					92ABB8016546F41128399E9D, ); name = Source; sourceTree = "<group>"; };
 		EA0BCC969703B2D179089E55 = {isa = XCBuildConfiguration; buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2038,7 +2037,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.introjucer;
 				SDKROOT_ppc = macosx10.5; }; name = Debug; };
 		B159CF4275B8A90122629FF4 = {isa = XCBuildConfiguration; buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2075,6 +2073,7 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "Introjucer";
 				WARNING_CFLAGS = -Wreorder;
 				ZERO_LINK = NO; }; name = Debug; };
