@@ -609,7 +609,7 @@ private:
         if (! iOS) // (NB: on iOS this causes error ITMS-90032 during publishing)
             addPlistDictionaryKey (dict, "CFBundleIconFile", iconFile.exists() ? iconFile.getFileName() : String());
 
-        addPlistDictionaryKey (dict, "CFBundleIdentifier",          project.getBundleIdentifier().toString());
+        addPlistDictionaryKey (dict, "CFBundleIdentifier",          "$(PRODUCT_BUNDLE_IDENTIFIER)");
         addPlistDictionaryKey (dict, "CFBundleName",                projectName);
         addPlistDictionaryKey (dict, "CFBundlePackageType",         xcodePackageType);
         addPlistDictionaryKey (dict, "CFBundleSignature",           xcodeBundleSignature);
@@ -790,8 +790,12 @@ private:
         }
 
         if (config.isDebug())
-             if (config.getMacArchitecture() == osxArch_Default || config.getMacArchitecture().isEmpty())
-                 s.add ("ONLY_ACTIVE_ARCH = YES");
+        {
+            s.add ("ENABLE_TESTABILITY = YES");
+
+            if (config.getMacArchitecture() == osxArch_Default || config.getMacArchitecture().isEmpty())
+                s.add ("ONLY_ACTIVE_ARCH = YES");
+        }
 
         if (iOS)
         {
@@ -816,6 +820,8 @@ private:
     StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
     {
         StringArray s;
+
+        s.add ("PRODUCT_BUNDLE_IDENTIFIER = " + project.getBundleIdentifier().toString());
 
         const String arch (config.getMacArchitecture());
         if (arch == osxArch_Native)                s.add ("ARCHS = \"$(NATIVE_ARCH_ACTUAL)\"");
