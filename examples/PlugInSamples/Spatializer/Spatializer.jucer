@@ -9,7 +9,7 @@
               pluginIsMidiEffectPlugin="0" pluginSilenceInIsSilenceOut="1"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="SpatializerAU"
               pluginRTASCategory="" aaxIdentifier="com.ROLI.Spatializer" pluginAAXCategory="AAX_ePlugInCategory_SoundField"
-              jucerVersion="4.0.2" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              jucerVersion="4.1.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
               companyEmail="info@juce.com">
   <MAINGROUP id="thFyrP" name="Spatializer">
     <GROUP id="{9705FE92-3084-C118-7559-BCCD1F2E91EB}" name="Source">

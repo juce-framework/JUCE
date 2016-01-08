@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.yourcompany.OSCSender</string>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleName</key>
     <string>OSCSender</string>
     <key>CFBundlePackageType</key>

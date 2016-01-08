@@ -2035,6 +2035,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
+				PRODUCT_BUNDLE_IDENTIFIER = com.roli.introjucer;
 				SDKROOT_ppc = macosx10.5; }; name = Debug; };
 		B159CF4275B8A90122629FF4 = {isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
@@ -2059,10 +2060,12 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
+				PRODUCT_BUNDLE_IDENTIFIER = com.roli.introjucer;
 				SDKROOT_ppc = macosx10.5; }; name = Release; };
 		C42924A24AB55E6A940423EA = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
