@@ -556,6 +556,14 @@ private:
         }
     }
 
+    static bool parseUrl (const String& str, String& url)
+    {
+        if (!str.startsWithIgnoreCase ("url"))
+            return false;
+        url = str.fromFirstOccurrenceOf ("#", false, false).upToLastOccurrenceOf (")", false, false).trim();
+        return true;
+    }
+
     //==============================================================================
     Drawable* parseShape (const XmlPath& xml, Path& path,
                           const bool shouldParseTransform = true) const
@@ -626,12 +634,10 @@ private:
 
         if (clipPathAttr.isNotEmpty())
         {
-            const String prefix ("url(#"), suffix (")");
-            if (clipPathAttr.startsWith (prefix) && clipPathAttr.endsWith (suffix))
+            String id;
+            if (parseUrl (clipPathAttr, id))
             {
-                const String clipPathName =
-                    clipPathAttr.substring (prefix.length(), clipPathAttr.length() - suffix.length());
-                const Path path = sharedDefs->clipPaths[clipPathName];
+                const Path path = sharedDefs->clipPaths[id];
                 if (!path.isEmpty())
                     dp->setClipPath (path);
             }
@@ -832,11 +838,9 @@ private:
         if (fillOpacity.isNotEmpty())
             opacity *= (jlimit (0.0f, 1.0f, fillOpacity.getFloatValue()));
 
-        if (fill.startsWithIgnoreCase ("url"))
+        String id;
+        if (parseUrl (fill, id))
         {
-            const String id (fill.fromFirstOccurrenceOf ("#", false, false)
-                                 .upToLastOccurrenceOf (")", false, false).trim());
-
             FillType result;
             GetFillTypeOp op = { this, &result, &path, opacity };
 
