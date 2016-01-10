@@ -25,18 +25,9 @@
 class SVGState
 {
 public:
-    // SVG has shared definitions which are referenced by ids which must be unique in the Xml.
-    // Individual SVGStates of the same SVG file reference the same SharedDefinitions structure.
-    struct SharedDefinitions
-    {
-        HashMap <String, Path> clipPaths;
-        HashMap <String, const XmlElement*> defs;
-    };
-
     //==============================================================================
-    SVGState (const XmlElement* const topLevel, SharedDefinitions* defs)
+    SVGState (const XmlElement* const topLevel)
         : topLevelXml (topLevel, nullptr),
-          sharedDefs (defs),
           elementX (0), elementY (0),
           width (512), height (512),
           viewBoxW (0), viewBoxH (0)
@@ -359,7 +350,6 @@ public:
 private:
     //==============================================================================
     const XmlPath topLevelXml;
-    SharedDefinitions* sharedDefs;
     float elementX, elementY, width, height, viewBoxW, viewBoxH;
     AffineTransform transform;
     String cssStyleText;
@@ -397,13 +387,22 @@ private:
         if (tag == "switch")        return parseSwitch (xml);
         if (tag == "a")             return parseLinkElement (xml);
         if (tag == "style"  )       parseCSSStyle (xml);
-        else if (tag == "clipPath") parseClipPath (xml);
-        else if (tag == "defs")     parseDefs (xml);
 
         return nullptr;
     }
 
-    bool parsePathElement (const XmlPath& xml, Path& path)
+    struct UsePathOp
+    {
+        const SVGState* state;
+        Path* dest;
+
+        void operator() (const XmlPath& xml)
+        {
+            state->parsePathElement (xml, *dest);
+        }
+    };
+
+    bool parsePathElement (const XmlPath& xml, Path& path) const
     {
         const String tag (xml->getTagNameWithoutNamespace());
         if      (tag == "path")     parsePath (xml, path);
@@ -420,9 +419,9 @@ private:
             if (!link.startsWith (prefix))
                 return false;
             const String linkedId = link.substring (prefix.length());
-            const XmlElement* elem = sharedDefs->defs[linkedId];
-            if (elem != nullptr)
-                return parsePathElement (xml.parent->getChild (elem), path);
+
+            UsePathOp op = { this, &path };
+            findElementForId (topLevelXml, linkedId, op);
         }
         else
             return false;
@@ -565,6 +564,26 @@ private:
     }
 
     //==============================================================================
+    Path parseClipPath (const XmlPath& xml) const
+    {
+        Path path;
+        forEachXmlChildElement (*xml, e)
+            parsePathElement (xml.getChild (e), path);
+        return path;
+    }
+
+    struct GetClipPathOp
+    {
+        const SVGState* state;
+        Path* dest;
+
+        void operator() (const XmlPath& xml)
+        {
+            if (xml->hasTagNameIgnoringNamespace ("clipPath"))
+                *dest = state->parseClipPath (xml);
+        }
+    };
+
     Drawable* parseShape (const XmlPath& xml, Path& path,
                           const bool shouldParseTransform = true) const
     {
@@ -637,8 +656,9 @@ private:
             String id;
             if (parseUrl (clipPathAttr, id))
             {
-                const Path path = sharedDefs->clipPaths[id];
-                if (!path.isEmpty())
+                Path path;
+                GetClipPathOp op = { this, &path };
+                if (findElementForId (topLevelXml, id, op))
                     dp->setClipPath (path);
             }
         }
@@ -1123,26 +1143,6 @@ private:
     }
 
     //==============================================================================
-    void parseDefs (const XmlPath& xml)
-    {
-        forEachXmlChildElement (*xml, e)
-            sharedDefs->defs.set (e->getStringAttribute ("id"), e);
-    }
-
-    //==============================================================================
-    void parseClipPath (const XmlPath& xml)
-    {
-        const String identifier = xml->getStringAttribute ("id");
-
-        Path path;
-
-        forEachXmlChildElement (*xml, e)
-            parsePathElement (xml.getChild (e), path);
-
-        sharedDefs->clipPaths.set (identifier, path);
-    }
-
-    //==============================================================================
     static bool isIdentifierChar (const juce_wchar c)
     {
         return CharacterFunctions::isLetter (c) || c == '-';
@@ -1453,15 +1453,13 @@ private:
 //==============================================================================
 Drawable* Drawable::createFromSVG (const XmlElement& svgDocument)
 {
-    SVGState::SharedDefinitions defs;
-    SVGState state (&svgDocument, &defs);
+    SVGState state (&svgDocument);
     return state.parseSVGElement (SVGState::XmlPath (&svgDocument, nullptr));
 }
 
 Path Drawable::parseSVGPath (const String& svgPath)
 {
-    SVGState::SharedDefinitions defs;
-    SVGState state (nullptr, &defs);
+    SVGState state (nullptr);
     Path p;
     state.parsePathString (p, svgPath);
     return p;
