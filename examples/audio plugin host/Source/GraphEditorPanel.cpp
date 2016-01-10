@@ -227,19 +227,24 @@ public:
         {
             String tip;
 
-            if (index_ == FilterGraph::midiChannelNumber)
+            if (index == FilterGraph::midiChannelNumber)
             {
-                tip = isInput ? "MIDI Input" : "MIDI Output";
+                tip = isInput ? "MIDI Input"
+                              : "MIDI Output";
             }
             else
             {
-                if (isInput)
-                    tip = node->getProcessor()->getInputChannelName (index_);
-                else
-                    tip = node->getProcessor()->getOutputChannelName (index_);
+                const AudioProcessor::AudioBusArrangement& busArrangement = node->getProcessor()->busArrangement;
+
+                const Array<AudioProcessor::AudioProcessorBus>& buses = isInput ? busArrangement.inputBuses
+                                                                                : busArrangement.outputBuses;
+
+                if (buses.size() > 0)
+                    tip = AudioChannelSet::getChannelTypeName (buses.getReference(0).channels.getTypeOfChannel (index));
 
                 if (tip.isEmpty())
-                    tip = (isInput ? "Input " : "Output ") + String (index_ + 1);
+                    tip = (isInput ? "Input "
+                                   : "Output ") + String (index + 1);
             }
 
             setTooltip (tip);

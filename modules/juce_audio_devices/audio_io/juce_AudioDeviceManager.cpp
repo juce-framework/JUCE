@@ -129,7 +129,7 @@ struct AutoRemovingSourcePlayer  : public AudioSourcePlayer,
 
     void timerCallback() override
     {
-        if (! transportSource->isPlaying())
+        if (getCurrentSource() == nullptr || ! transportSource->isPlaying())
             delete this;
     }
 

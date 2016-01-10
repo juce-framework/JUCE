@@ -1576,6 +1576,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginWindow)
 };
 
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4996) // warning about overriding deprecated methods
+#endif
+
 //==============================================================================
 class VST3PluginInstance : public AudioPluginInstance
 {
@@ -2450,6 +2455,10 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginInstance)
 };
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
 
 };
 

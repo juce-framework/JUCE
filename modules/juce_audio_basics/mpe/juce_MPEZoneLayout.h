@@ -47,6 +47,16 @@ public:
     */
     MPEZoneLayout() noexcept;
 
+    /** Copy constuctor.
+        This will not copy the listeners registered to the MPEZoneLayout.
+    */
+    MPEZoneLayout (const MPEZoneLayout& other);
+
+    /** Copy assignment operator.
+        This will not copy the listeners registered to the MPEZoneLayout.
+    */
+    MPEZoneLayout& operator= (const MPEZoneLayout& other);
+
     /** Adds a new MPE zone to the layout.
 
         @param newZone  The zone to add.
@@ -115,10 +125,38 @@ public:
     */
     MPEZone* getZoneByNoteChannel (int midiChannel) const noexcept;
 
+    //==========================================================================
+    /** Listener class. Derive from this class to allow your class to be
+        notified about changes to the zone layout.
+    */
+    class Listener
+    {
+    public:
+        /** Constructor. */
+        Listener();
+
+        /** Destructor. */
+        virtual ~Listener();
+
+        /** Implement this callback to be notified about any changes to this
+            MPEZoneLayout. Will be called whenever a zone is added, zones are
+            removed, or any zone's master or note pitchbend ranges change.
+        */
+        virtual void zoneLayoutChanged (const MPEZoneLayout& layout) = 0;
+    };
+
+    //==========================================================================
+    /** Adds a listener. */
+    void addListener (Listener* const listenerToAdd) noexcept;
+
+    /** Removes a listener. */
+    void removeListener (Listener* const listenerToRemove) noexcept;
+
 private:
     //==========================================================================
     Array<MPEZone> zones;
     MidiRPNDetector rpnDetector;
+    ListenerList<Listener> listeners;
 
     void processRpnMessage (MidiRPNMessage);
     void processZoneLayoutRpnMessage (MidiRPNMessage);

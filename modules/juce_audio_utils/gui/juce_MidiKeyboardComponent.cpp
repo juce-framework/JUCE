@@ -59,8 +59,8 @@ private:
 //==============================================================================
 MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation o)
     : state (s),
+      blackNoteLengthRatio (0.7f),
       xOffset (0),
-      blackNoteLength (1),
       keyWidth (16.0f),
       orientation (o),
       midiChannel (1),
@@ -239,6 +239,8 @@ Rectangle<int> MidiKeyboardComponent::getRectangleForKey (const int note) const
 
     if (MidiMessage::isMidiNoteBlack (note))
     {
+        const int blackNoteLength = getBlackNoteLength();
+
         switch (orientation)
         {
             case horizontalKeyboard:            return Rectangle<int> (x, 0, w, blackNoteLength);
@@ -299,6 +301,8 @@ int MidiKeyboardComponent::xyToNote (Point<int> pos, float& mousePositionVelocit
 
 int MidiKeyboardComponent::remappedXYToNote (Point<int> pos, float& mousePositionVelocity) const
 {
+    const int blackNoteLength = getBlackNoteLength();
+
     if (pos.getY() < blackNoteLength)
     {
         for (int octaveStart = 12 * (rangeStart / 12); octaveStart <= rangeEnd; octaveStart += 12)
@@ -577,6 +581,23 @@ void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
     g.fillPath (path, path.getTransformToScaleToFit (1.0f, 1.0f, w - 2.0f, h - 2.0f, true));
 }
 
+void MidiKeyboardComponent::setBlackNoteLengthProportion (float ratio) noexcept
+{
+    jassert (ratio >= 0.0f && ratio <= 1.0f);
+    if (blackNoteLengthRatio != ratio)
+    {
+        blackNoteLengthRatio = ratio;
+        resized();
+    }
+}
+
+int MidiKeyboardComponent::getBlackNoteLength() const noexcept
+{
+    const int whiteNoteLength = orientation == horizontalKeyboard ? getHeight() : getWidth();
+
+    return roundToInt (whiteNoteLength * blackNoteLengthRatio);
+}
+
 void MidiKeyboardComponent::resized()
 {
     int w = getWidth();
@@ -586,8 +607,6 @@ void MidiKeyboardComponent::resized()
     {
         if (orientation != horizontalKeyboard)
             std::swap (w, h);
-
-        blackNoteLength = roundToInt (h * 0.7f);
 
         int kx2, kw2;
         getKeyPos (rangeEnd, kx2, kw2);

@@ -86,6 +86,9 @@
 #include <FicProcessTokens.h>
 #include <ExternalVersionDefines.h>
 
+#undef Point
+#undef Component
+
 //==============================================================================
 #ifdef _MSC_VER
  #pragma pack (push, 8)

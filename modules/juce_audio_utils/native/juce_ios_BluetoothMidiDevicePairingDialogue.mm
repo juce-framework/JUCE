@@ -36,7 +36,7 @@
 //==============================================================================
 @interface BluetoothSelectorView : NSObject
 
-@property CABTMIDICentralViewController *central;
+@property (nonatomic, retain) CABTMIDICentralViewController *central;
 - (UIView*) getView;
 
 @end

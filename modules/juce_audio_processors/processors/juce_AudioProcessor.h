@@ -465,6 +465,9 @@ public:
     /** Returns true if the processor produces midi messages. */
     virtual bool producesMidi() const = 0;
 
+    /** Returns true if the processor supports MPE. */
+    virtual bool supportsMPE() const                            { return false; }
+
     //==============================================================================
     /** This returns a critical section that will automatically be locked while the host
         is calling the processBlock() method.

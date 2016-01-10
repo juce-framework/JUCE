@@ -614,7 +614,7 @@ private:
     friend class MenuBarComponent;
 
     OwnedArray<Item> items;
-    LookAndFeel* lookAndFeel;
+    WeakReference<LookAndFeel> lookAndFeel;
 
     Component* createWindow (const Options&, ApplicationCommandManager**) const;
     int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
