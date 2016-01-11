@@ -35,7 +35,7 @@ public:
             getActivityClassPathValue() = createDefaultClassName();
 
         if (getMinimumSDKVersionString().isEmpty())
-            getMinimumSDKVersionValue() = 10;
+            getMinimumSDKVersionValue() = 23;
 
         if (getInternetNeededValue().toString().isEmpty())
             getInternetNeededValue() = true;
