@@ -1478,6 +1478,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("contains", contains);
             setMethod ("remove",   remove);
             setMethod ("join",     join);
+            setMethod ("push",     push);
         }
 
         static Identifier getClassName()   { static const Identifier i ("Array"); return i; }
@@ -1507,6 +1508,16 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                     strings.add (array->getReference(i).toString());
 
             return strings.joinIntoString (getString (a, 0));
+        }
+        
+        static var push (Args a)
+        {
+            if (Array<var>* array = a.thisObject.getArray()) {
+                array->add (get (a, 0));
+                return array->size(); //MDN specs new size is return value of push
+            }
+
+            return var::undefined();
         }
     };
 
