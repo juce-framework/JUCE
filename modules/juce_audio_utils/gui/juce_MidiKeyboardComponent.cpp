@@ -983,10 +983,10 @@ void StickyMidiKeyboardComponent::mouseUpOnKey (__unused int midiNoteNumber, con
        touchesBegan/touchesMoved event. */
     if (keyDownCount == 1)
     {
-        if (stuckKeys.contains (oldNoteDown)) {
-            stuckKeys.removeValue(oldNoteDown);
+        if (stuckKeys.getBitRangeAsInt(oldNoteDown,1) != 0) {
+            stuckKeys.clearBit(oldNoteDown);
         } else {
-            stuckKeys.add(oldNoteDown);
+            stuckKeys.setBit(oldNoteDown);
         }
     }
 }
@@ -994,7 +994,7 @@ void StickyMidiKeyboardComponent::mouseUpOnKey (__unused int midiNoteNumber, con
 void StickyMidiKeyboardComponent::mouseDownStartedOnKey (int midiNoteNumber, float velocity)
 {
     /* No need to set the key state if key is already stuck from before */
-    if (! stuckKeys.contains (midiNoteNumber))
+    if (stuckKeys.getBitRangeAsInt(midiNoteNumber,1) == 0)
         MidiKeyboardComponent::mouseDownStartedOnKey (midiNoteNumber, velocity);
 }
 
@@ -1002,6 +1002,6 @@ void StickyMidiKeyboardComponent::mouseDownFinishedOnKey (int midiNoteNumber, fl
 {
     /* Only release the key if it isn't stuck. Note the logic assumes we get here after
        mouseUpOnKey has been called to correctly set or remove stuck keys. */
-    if (! stuckKeys.contains (midiNoteNumber))
+    if (stuckKeys.getBitRangeAsInt(midiNoteNumber,1) == 0)
         MidiKeyboardComponent::mouseDownFinishedOnKey(midiNoteNumber, velocity);
 }
