@@ -691,7 +691,7 @@ public class JuceAppActivity   extends Activity
                                                   int format, int width, int height);
     }
 
-    public NativeSurfaceView createNativeSurfaceView(long nativeSurfacePtr)
+    public NativeSurfaceView createNativeSurfaceView (long nativeSurfacePtr)
     {
         return new NativeSurfaceView (this, nativeSurfacePtr);
     }
@@ -1041,23 +1041,24 @@ public class JuceAppActivity   extends Activity
             return null;
 
         java.lang.reflect.Method method;
-        try {
+
+        try
+        {
             method = obj.getClass().getMethod ("getProperty", String.class);
-        } catch (SecurityException e) {
-            return null;
-        } catch (NoSuchMethodException e) {
-            return null;
         }
+        catch (SecurityException e)     { return null; }
+        catch (NoSuchMethodException e) { return null; }
 
         if (method == null)
             return null;
 
-        try {
+        try
+        {
             return (String) method.invoke (obj, property);
-        } catch (java.lang.IllegalArgumentException e) {
-        } catch (java.lang.IllegalAccessException e) {
-        } catch (java.lang.reflect.InvocationTargetException e) {
         }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
 
         return null;
     }
@@ -1093,5 +1094,4 @@ public class JuceAppActivity   extends Activity
     {
         return new JuceThread(host);
     }
-
 }

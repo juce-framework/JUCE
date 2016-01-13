@@ -3311,6 +3311,8 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
         kioskModeComp->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
+void Desktop::allowedOrientationsChanged() {}
+
 //==============================================================================
 struct MonitorInfo
 {

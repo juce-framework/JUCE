@@ -729,6 +729,38 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 }
 
 //==============================================================================
+static jint getAndroidOrientationFlag (int orientations) noexcept
+{
+    enum
+    {
+        SCREEN_ORIENTATION_LANDSCAPE          = 0,
+        SCREEN_ORIENTATION_PORTRAIT           = 1,
+        SCREEN_ORIENTATION_USER               = 2,
+        SCREEN_ORIENTATION_REVERSE_LANDSCAPE  = 8,
+        SCREEN_ORIENTATION_REVERSE_PORTRAIT   = 9,
+        SCREEN_ORIENTATION_USER_LANDSCAPE     = 11,
+        SCREEN_ORIENTATION_USER_PORTRAIT      = 12,
+    };
+
+    switch (orientations)
+    {
+        case Desktop::upright:                                          return (jint) SCREEN_ORIENTATION_PORTRAIT;
+        case Desktop::upsideDown:                                       return (jint) SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+        case Desktop::upright + Desktop::upsideDown:                    return (jint) SCREEN_ORIENTATION_USER_PORTRAIT;
+        case Desktop::rotatedAntiClockwise:                             return (jint) SCREEN_ORIENTATION_LANDSCAPE;
+        case Desktop::rotatedClockwise:                                 return (jint) SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+        case Desktop::rotatedClockwise + Desktop::rotatedAntiClockwise: return (jint) SCREEN_ORIENTATION_USER_LANDSCAPE;
+        default:                                                        return (jint) SCREEN_ORIENTATION_USER;
+    }
+}
+
+void Desktop::allowedOrientationsChanged()
+{
+    android.activity.callVoidMethod (JuceAppActivity.setRequestedOrientation,
+                                     getAndroidOrientationFlag (allowedOrientations));
+}
+
+//==============================================================================
 bool juce_areThereAnyAlwaysOnTopWindows()
 {
     return false;
@@ -764,7 +796,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
 //==============================================================================
 Image juce_createIconForFile (const File& file)
 {
-    return Image::null;
+    return Image();
 }
 
 //==============================================================================

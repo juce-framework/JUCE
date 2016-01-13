@@ -2006,6 +2006,8 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
    #endif
 }
 
+void Desktop::allowedOrientationsChanged() {}
+
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 {
