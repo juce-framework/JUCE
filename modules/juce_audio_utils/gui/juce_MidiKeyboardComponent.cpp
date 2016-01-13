@@ -932,7 +932,6 @@ bool MidiKeyboardComponent::keyStateChanged (const bool /*isKeyDown*/)
             }
         }
     }
-
     return keyPressUsed;
 }
 
@@ -952,12 +951,32 @@ StickyMidiKeyboardComponent::StickyMidiKeyboardComponent (MidiKeyboardState& s,
                                                           const Orientation o)
 : MidiKeyboardComponent(s, o)
 {
-    /* Empty */
+    // restores current state to stucked keys
+    for (int i = 128; --i >= 0;)
+        if (s.isNoteOn(1, i))
+            stuckKeys.setBit(i);
+        else
+            stuckKeys.clearBit(i);
 }
 
 StickyMidiKeyboardComponent::~StickyMidiKeyboardComponent()
 {
     /* Empty */
+}
+
+BigInteger StickyMidiKeyboardComponent::getStickyKeys()
+{
+    return stuckKeys;
+}
+
+void StickyMidiKeyboardComponent::setStickyKeys(BigInteger stickyKeysState, float velocity)
+{
+    stuckKeys = stickyKeysState;
+    for (int i = 128; --i >= 0;)
+        if (stuckKeys[i])
+            MidiKeyboardComponent::mouseDownStartedOnKey(i, velocity);
+        else
+            MidiKeyboardComponent::mouseDownFinishedOnKey(i, velocity);
 }
 
 void StickyMidiKeyboardComponent::mouseUpOnKey (__unused int midiNoteNumber, const MouseEvent& e)

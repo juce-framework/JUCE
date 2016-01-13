@@ -451,10 +451,14 @@ public:
      */
     StickyMidiKeyboardComponent (MidiKeyboardState& state,
                                  Orientation orientation);
-    
     /** Destructor. */
     ~StickyMidiKeyboardComponent();
     
+    /** Sets the stuck keys array based on provided element.
+     @param velocity - velocity to set to all restored keys.
+     */
+    void setStickyKeys(BigInteger stickyKeysState, float velocity);
+
 protected:
     //==============================================================================
     virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e) override;
@@ -463,6 +467,8 @@ protected:
 
 private:
     //==============================================================================
+    /** Returns current stucked keys as a long bit array */
+    BigInteger getStickyKeys();
     BigInteger stuckKeys = BigInteger();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StickyMidiKeyboardComponent)
