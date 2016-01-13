@@ -295,7 +295,7 @@ private:
     {
         MemoryOutputStream memoryOutputStream;
 
-        memoryOutputStream << "distributionUrl=https\\://services.gradle.org/distributions/gradle-2.6-all.zip";
+        memoryOutputStream << "distributionUrl=https\\://services.gradle.org/distributions/gradle-2.9-all.zip";
 
         overwriteFileIfDifferentOrThrow (folder.getChildFile ("gradle/wrapper/gradle-wrapper.properties"), memoryOutputStream);
     }
@@ -306,16 +306,14 @@ private:
 
         const String indent = getIndentationString();
 
-        // this is needed to make sure the correct version of
-        // the gradle build tools is available
-        // otherwise, the user will get an error about
-        // com.android.tools.something not being available
+        // this is needed to make sure the correct version of the gradle build tools is available.
+        // needs to be kept up to date!
         memoryOutputStream << "buildscript {" << newLine
                            << indent << "repositories {" << newLine
                            << indent << indent << "jcenter()" << newLine
                            << indent << "}" << newLine
                            << indent << "dependencies {" << newLine
-                           << indent << indent << "classpath 'com.android.tools.build:gradle-experimental:0.3.0-alpha7'" << newLine
+                           << indent << indent << "classpath 'com.android.tools.build:gradle-experimental:0.6.0-alpha3'" << newLine
                            << indent << "}" << newLine
                            << "}" << newLine
                            << newLine
@@ -366,18 +364,6 @@ private:
         return result;
     }
 
-    String createModelDotCompileOptions (const String& indent) const
-    {
-        String result;
-
-        result << "compileOptions.with {" << newLine
-               << indent << "sourceCompatibility = JavaVersion.VERSION_1_7" << newLine
-               << indent << indent << "targetCompatibility = JavaVersion.VERSION_1_7" << newLine
-               << "}" << newLine;
-
-        return result;
-    }
-
     String createModelDotAndroidSources (const String& indent) const
     {
         String result;
@@ -410,6 +396,11 @@ private:
 
         if (isCPP11Enabled())
             result.add ("\"-std=gnu++11\"");
+
+        StringArray extraFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), " ", ""));
+
+        for (int i = 0; i < extraFlags.size(); ++i)
+            result.add (String ("\"") + extraFlags[i] + "\"");
 
         // preprocessor definitions
 
@@ -493,7 +484,7 @@ private:
             StringArray cppFlags (getCPPFlags());
 
             for (int i = 0; i < cppFlags.size(); ++i)
-                result << indent << "cppFlags += " << cppFlags[i] << newLine;
+                result << indent << "cppFlags.add(" << cppFlags[i] << ")" << newLine;
         }
 
         // libraries
@@ -501,7 +492,7 @@ private:
         {
             StringArray libraries (getLDLibs());
 
-            result << indent << "ldLibs += [";
+            result << indent << "ldLibs.addAll(";
 
             for (int i = 0; i < libraries.size(); ++i)
             {
@@ -511,7 +502,7 @@ private:
                     result << ", ";
             }
 
-            result << "]" << newLine;
+            result << ")" << newLine;
         }
 
         result << "}" << newLine;
@@ -519,44 +510,38 @@ private:
         return result;
     }
 
-    String getGradleCPPFlags (const String& indent, const ConstConfigIterator& config) const
+    String getModelDotAndroidDotBuildTypesFlags (const String& indent, const ConstConfigIterator& config) const
     {
-        String result;
-        StringArray rootFlags;
-        StringArray ndkFlags;
+        const String configName (config->getName());
+
+        // there appears to be an issue with build types that have a name other than
+        // "debug" or "release". Apparently this is hard coded in Android Studio ...
+
+        if (configName != "Debug" && configName != "Release")
+            throw SaveError ("Build configurations other than Debug and Release are not yet support for Android Studio");
+
+        StringArray rootFlags;  // model.android.buildTypes.debug/release { ... }
+        StringArray ndkFlags;   // model.android.buildTypes.debug/release.ndk.with { ... }
 
         if (config->isDebug())
         {
             ndkFlags.add ("debuggable = true");
-            ndkFlags.add ("cppFlags += \"-g\"");
-            ndkFlags.add ("cppFlags += \"-DDEBUG=1\"");
-            ndkFlags.add ("cppFlags += \"-D_DEBUG=1\"");
+            ndkFlags.add ("cppFlags.add(\"-g\")");
+            ndkFlags.add ("cppFlags.add(\"-DDEBUG=1\")");
+            ndkFlags.add ("cppFlags.add(\"-D_DEBUG=1\")");
         }
         else
         {
             rootFlags.add ("minifyEnabled = true");
-            rootFlags.add ("proguardFiles += 'proguard-android-optimize.txt'");
 
-            ndkFlags.add ("cppFlags += \"-DNDEBUG=1\"");
+            ndkFlags.add ("cppFlags.add(\"-DNDEBUG=1\")");
         }
 
-        {
-            StringArray extraFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), " ", ""));
+        ndkFlags.add ("cppFlags.add(\"-O" + config->getGCCOptimisationFlag() + "\")");
 
-            for (int i = 0; extraFlags.size(); ++i)
-                ndkFlags.add (String ("cppFlags += \"") + extraFlags[i] + "\"");
-        }
+        String result;
 
-        // there appears to be an issue with build types that have a name other than
-        // "debug" or "release". Apparently this is hard coded in Android Studio ...
-        {
-            const String configName (config->getName());
-
-            if (configName != "Debug" && configName != "Release")
-                throw SaveError ("Build configurations other than Debug and Release are not yet support for Android Studio");
-
-            result << configName.toLowerCase() << " {" << newLine;
-        }
+        result << configName.toLowerCase() << " {" << newLine;
 
         for (int i = 0; i < rootFlags.size(); ++i)
             result << indent << rootFlags[i] << newLine;
@@ -579,7 +564,7 @@ private:
         result << "android.buildTypes {" << newLine;
 
         for (ConstConfigIterator config (*this); config.next();)
-            result << CodeHelpers::indent (getGradleCPPFlags (indent, config), indent.length(), true);
+            result << CodeHelpers::indent (getModelDotAndroidDotBuildTypesFlags (indent, config), indent.length(), true);
 
         result << "}";
 
@@ -609,7 +594,7 @@ private:
                 continue;
 
             result << indent << "create(\"" << architecture << "\") {" << newLine
-                   << indent << indent << "ndk.abiFilters += \"" << architecture << "\"" << newLine
+                   << indent << indent << "ndk.abiFilters.add(\"" << architecture << "\")" << newLine
                    << indent << "}" << newLine;
         }
 
@@ -639,11 +624,9 @@ private:
                                                                           buildToolsVersion,
                                                                           bundleIdentifier), indent.length(), true)
                            << newLine
-                           << CodeHelpers::indent (createModelDotCompileOptions (indent), indent.length(), true)
+                           << CodeHelpers::indent (createModelDotAndroidNDK (indent), indent.length(), true)
                            << newLine
                            << CodeHelpers::indent (createModelDotAndroidSources (indent), indent.length(), true)
-                           << newLine
-                           << CodeHelpers::indent (createModelDotAndroidNDK (indent), indent.length(), true)
                            << newLine
                            << CodeHelpers::indent (createModelDotAndroidDotBuildTypes (indent), indent.length(), true)
                            << newLine
