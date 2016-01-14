@@ -402,21 +402,6 @@ private:
         for (int i = 0; i < extraFlags.size(); ++i)
             result.add (String ("\"") + extraFlags[i] + "\"");
 
-        // preprocessor definitions
-
-        {
-            StringPairArray preprocessorDefinitions = getAllPreprocessorDefs();
-            preprocessorDefinitions.set ("JUCE_ANDROID", "1");
-            preprocessorDefinitions.set ("JUCE_ANDROID_API_VERSION", getMinimumSDKVersionString());
-            preprocessorDefinitions.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
-            preprocessorDefinitions.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\\\"" + getActivityClassPath().replaceCharacter('.', '/') + "\\\"");
-
-            const StringArray& keys = preprocessorDefinitions.getAllKeys();
-
-            for (int i = 0; i < keys.size(); ++i)
-                result.add (String ("\"-D") + keys[i] + String ("=") + preprocessorDefinitions[keys[i]] + "\"");
-        }
-
         // include paths
 
         result.add ("\"-I${project.rootDir}/app\".toString()");
@@ -535,6 +520,19 @@ private:
             rootFlags.add ("minifyEnabled = true");
 
             ndkFlags.add ("cppFlags.add(\"-DNDEBUG=1\")");
+        }
+
+        {
+            StringPairArray preprocessorDefinitions = config->getAllPreprocessorDefs();
+            preprocessorDefinitions.set ("JUCE_ANDROID", "1");
+            preprocessorDefinitions.set ("JUCE_ANDROID_API_VERSION", getMinimumSDKVersionString());
+            preprocessorDefinitions.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
+            preprocessorDefinitions.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\\\"" + getActivityClassPath().replaceCharacter('.', '/') + "\\\"");
+
+            const StringArray& keys = preprocessorDefinitions.getAllKeys();
+
+            for (int i = 0; i < keys.size(); ++i)
+                ndkFlags.add (String ("cppFlags.add(\"-D") + keys[i] + String ("=") + preprocessorDefinitions[keys[i]] + "\")");
         }
 
         ndkFlags.add ("cppFlags.add(\"-O" + config->getGCCOptimisationFlag() + "\")");
