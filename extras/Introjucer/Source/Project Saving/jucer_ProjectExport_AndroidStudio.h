@@ -518,7 +518,7 @@ private:
         else
         {
             rootFlags.add ("minifyEnabled = true");
-
+            rootFlags.add ("signingConfig = $(\"android.signingConfigs.releaseConfig\")");
             ndkFlags.add ("cppFlags.add(\"-DNDEBUG=1\")");
         }
 
@@ -564,7 +564,24 @@ private:
         for (ConstConfigIterator config (*this); config.next();)
             result << CodeHelpers::indent (getModelDotAndroidDotBuildTypesFlags (indent, config), indent.length(), true);
 
-        result << "}";
+        result << "}" << newLine;
+
+        return result;
+    }
+
+    String createModelDotAndroidDotSigningConfigs (const String& indent) const
+    {
+        String result;
+
+        result << "android.signingConfigs {" << newLine
+               << indent << "create(\"releaseConfig\") {" << newLine
+               << indent << indent << "storeFile = new File(\"" << sanitisePath (getKeyStoreString()) << "\")" << newLine
+               << indent << indent << "storePassword = \"" << getKeyStorePassString() << "\"" << newLine
+               << indent << indent << "keyAlias = \"" << getKeyAliasString() << "\"" << newLine
+               << indent << indent << "keyPassword = \"" << getKeyAliasPassString() << "\"" << newLine
+               << indent << indent << "storeType = \"jks\"" << newLine
+               << indent << "}" << newLine
+               << "}" << newLine;
 
         return result;
     }
@@ -627,6 +644,8 @@ private:
                            << CodeHelpers::indent (createModelDotAndroidSources (indent), indent.length(), true)
                            << newLine
                            << CodeHelpers::indent (createModelDotAndroidDotBuildTypes (indent), indent.length(), true)
+                           << newLine
+                           << CodeHelpers::indent (createModelDotAndroidDotSigningConfigs (indent), indent.length(), true)
                            << newLine
                            << CodeHelpers::indent (createModelDotAndroidDotProductFlavors (indent), indent.length(), true)
                            << "}";
