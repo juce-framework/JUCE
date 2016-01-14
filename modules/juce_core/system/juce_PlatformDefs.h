@@ -109,7 +109,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_DEBUG || DOXYGEN
+#if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || DOXYGEN
   /** Writes a string to the standard error stream.
       Note that as well as a single string, you can use this to write multiple items
       as a stream, e.g.
