@@ -32,7 +32,7 @@ void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::Wrapp
 AudioProcessor::AudioProcessor()
     : wrapperType (wrapperTypeBeingCreated.get()),
       playHead (nullptr),
-      sampleRate (0),
+      currentSampleRate (0),
       blockSize (0),
       latencySamples (0),
      #if JUCE_DEBUG
@@ -121,7 +121,7 @@ void AudioProcessor::setPlayConfigDetails (const int newNumIns,
 
 void AudioProcessor::setRateAndBufferSizeDetails (double newSampleRate, int newBlockSize) noexcept
 {
-    sampleRate = newSampleRate;
+    currentSampleRate = newSampleRate;
     blockSize = newBlockSize;
 }
 

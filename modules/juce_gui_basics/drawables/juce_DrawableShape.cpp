@@ -205,7 +205,8 @@ void DrawableShape::strokeChanged()
     if (dashLengths.empty())
         strokeType.createStrokedPath (strokePath, path, AffineTransform(), extraAccuracy);
     else
-        strokeType.createDashedStroke (strokePath, path, dashLengths.getRawDataPointer(), dashLengths.size(), AffineTransform(), extraAccuracy);
+        strokeType.createDashedStroke (strokePath, path, dashLengths.getRawDataPointer(),
+                                       dashLengths.size(), AffineTransform(), extraAccuracy);
 
     setBoundsToEnclose (getDrawableBounds());
     repaint();

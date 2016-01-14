@@ -1308,6 +1308,10 @@ struct AAXClasses
         properties->AddProperty (AAX_eProperty_Constraint_MultiMonoSupport, true);
        #endif
 
+       #if JucePlugin_AAXDisableDynamicProcessing
+        properties->AddProperty (AAX_eProperty_Constraint_AlwaysProcess, true);
+       #endif
+
         if (enableAuxBusesForCurrentFormat (busUtils, inputLayout, outputLayout))
         {
             check (desc.AddSideChainIn (JUCEAlgorithmIDs::sideChainBuffers));

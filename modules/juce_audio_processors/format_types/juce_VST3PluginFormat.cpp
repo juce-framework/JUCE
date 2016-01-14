@@ -1873,10 +1873,10 @@ public:
     {
         if (processor != nullptr)
         {
-            const double currentSampleRate = getSampleRate();
+            const double sampleRate = getSampleRate();
 
-            if (currentSampleRate > 0.0)
-                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / currentSampleRate;
+            if (sampleRate > 0.0)
+                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / sampleRate;
         }
 
         return 0.0;

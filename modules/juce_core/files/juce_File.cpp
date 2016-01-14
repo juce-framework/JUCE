@@ -70,8 +70,24 @@ File& File::operator= (File&& other) noexcept
 
 const File File::nonexistent;
 
-
 //==============================================================================
+static String removeEllipsis (const String& path)
+{
+    StringArray toks;
+    toks.addTokens (path, File::separatorString, StringRef());
+
+    for (int i = 1; i < toks.size(); ++i)
+    {
+        if (toks[i] == ".." && toks[i - 1] != "..")
+        {
+            toks.removeRange (i - 1, 2);
+            i = jmax (0, i - 2);
+        }
+    }
+
+    return toks.joinIntoString (File::separatorString);
+}
+
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
@@ -80,6 +96,9 @@ String File::parseAbsolutePath (const String& p)
 #if JUCE_WINDOWS
     // Windows..
     String path (p.replaceCharacter ('/', '\\'));
+
+    if (path.contains ("\\..\\"))
+        path = removeEllipsis (path);
 
     if (path.startsWithChar (separator))
     {
@@ -119,6 +138,9 @@ String File::parseAbsolutePath (const String& p)
     jassert ((! p.containsChar ('\\')) || (p.indexOfChar ('/') >= 0 && p.indexOfChar ('/') < p.indexOfChar ('\\')));
 
     String path (p);
+
+    if (path.contains ("/../"))
+        path = removeEllipsis (path);
 
     if (path.startsWithChar ('~'))
     {

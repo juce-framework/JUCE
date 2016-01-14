@@ -666,9 +666,6 @@ void PathStrokeType::createDashedStroke (Path& destPath,
     if (thickness <= 0)
         return;
 
-    // this should really be an even number..
-    jassert ((numDashLengths & 1) == 0);
-
     Path newDestPath;
     PathFlatteningIterator it (sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
 

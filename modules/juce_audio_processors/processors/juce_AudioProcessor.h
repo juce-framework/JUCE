@@ -423,7 +423,7 @@ public:
         This can be called from your processBlock() method - it's not guaranteed
         to be valid at any other time, and may return 0 if it's unknown.
     */
-    double getSampleRate() const noexcept                       { return sampleRate; }
+    double getSampleRate() const noexcept                       { return currentSampleRate; }
 
     /** Returns the current typical block size that is being used.
 
@@ -971,7 +971,7 @@ protected:
 private:
     Array<AudioProcessorListener*> listeners;
     Component::SafePointer<AudioProcessorEditor> activeEditor;
-    double sampleRate;
+    double currentSampleRate;
     int blockSize, latencySamples;
    #if JUCE_DEBUG
     bool textRecursionCheck;

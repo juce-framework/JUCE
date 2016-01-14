@@ -143,25 +143,25 @@ static inline Steinberg::Vst::Speaker getSpeakerType (AudioChannelSet::ChannelTy
 
     switch (type)
     {
-        case AudioChannelSet::ChannelType::left:              return kSpeakerL;
-        case AudioChannelSet::ChannelType::right:             return kSpeakerR;
-        case AudioChannelSet::ChannelType::centre:            return kSpeakerC;
-        case AudioChannelSet::ChannelType::subbass:           return kSpeakerLfe;
-        case AudioChannelSet::ChannelType::surroundLeft:      return kSpeakerLs;
-        case AudioChannelSet::ChannelType::surroundRight:     return kSpeakerRs;
-        case AudioChannelSet::ChannelType::centreLeft:        return kSpeakerLc;
-        case AudioChannelSet::ChannelType::centreRight:       return kSpeakerRc;
-        case AudioChannelSet::ChannelType::surround:          return kSpeakerS;
-        case AudioChannelSet::ChannelType::sideLeft:          return kSpeakerSl;
-        case AudioChannelSet::ChannelType::sideRight:         return kSpeakerSr;
-        case AudioChannelSet::ChannelType::topMiddle:         return kSpeakerTm;
-        case AudioChannelSet::ChannelType::topFrontLeft:      return kSpeakerTfl;
-        case AudioChannelSet::ChannelType::topFrontCentre:    return kSpeakerTfc;
-        case AudioChannelSet::ChannelType::topFrontRight:     return kSpeakerTfr;
-        case AudioChannelSet::ChannelType::topRearLeft:       return kSpeakerTrl;
-        case AudioChannelSet::ChannelType::topRearCentre:     return kSpeakerTrc;
-        case AudioChannelSet::ChannelType::topRearRight:      return kSpeakerTrr;
-        case AudioChannelSet::ChannelType::subbass2:          return kSpeakerLfe2;
+        case AudioChannelSet::left:              return kSpeakerL;
+        case AudioChannelSet::right:             return kSpeakerR;
+        case AudioChannelSet::centre:            return kSpeakerC;
+        case AudioChannelSet::subbass:           return kSpeakerLfe;
+        case AudioChannelSet::surroundLeft:      return kSpeakerLs;
+        case AudioChannelSet::surroundRight:     return kSpeakerRs;
+        case AudioChannelSet::centreLeft:        return kSpeakerLc;
+        case AudioChannelSet::centreRight:       return kSpeakerRc;
+        case AudioChannelSet::surround:          return kSpeakerS;
+        case AudioChannelSet::sideLeft:          return kSpeakerSl;
+        case AudioChannelSet::sideRight:         return kSpeakerSr;
+        case AudioChannelSet::topMiddle:         return kSpeakerTm;
+        case AudioChannelSet::topFrontLeft:      return kSpeakerTfl;
+        case AudioChannelSet::topFrontCentre:    return kSpeakerTfc;
+        case AudioChannelSet::topFrontRight:     return kSpeakerTfr;
+        case AudioChannelSet::topRearLeft:       return kSpeakerTrl;
+        case AudioChannelSet::topRearCentre:     return kSpeakerTrc;
+        case AudioChannelSet::topRearRight:      return kSpeakerTrr;
+        case AudioChannelSet::subbass2:          return kSpeakerLfe2;
         default: break;
     }
 
@@ -174,29 +174,29 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
 
     switch (type)
     {
-        case kSpeakerL:     return AudioChannelSet::ChannelType::left;
-        case kSpeakerR:     return AudioChannelSet::ChannelType::right;
-        case kSpeakerC:     return AudioChannelSet::ChannelType::centre;
-        case kSpeakerLfe:   return AudioChannelSet::ChannelType::subbass;
-        case kSpeakerLs:    return AudioChannelSet::ChannelType::surroundLeft;
-        case kSpeakerRs:    return AudioChannelSet::ChannelType::surroundRight;
-        case kSpeakerLc:    return AudioChannelSet::ChannelType::centreLeft;
-        case kSpeakerRc:    return AudioChannelSet::ChannelType::centreRight;
-        case kSpeakerS:     return AudioChannelSet::ChannelType::surround;
-        case kSpeakerSl:    return AudioChannelSet::ChannelType::sideLeft;
-        case kSpeakerSr:    return AudioChannelSet::ChannelType::sideRight;
-        case kSpeakerTm:    return AudioChannelSet::ChannelType::topMiddle;
-        case kSpeakerTfl:   return AudioChannelSet::ChannelType::topFrontLeft;
-        case kSpeakerTfc:   return AudioChannelSet::ChannelType::topFrontCentre;
-        case kSpeakerTfr:   return AudioChannelSet::ChannelType::topFrontRight;
-        case kSpeakerTrl:   return AudioChannelSet::ChannelType::topRearLeft;
-        case kSpeakerTrc:   return AudioChannelSet::ChannelType::topRearCentre;
-        case kSpeakerTrr:   return AudioChannelSet::ChannelType::topRearRight;
-        case kSpeakerLfe2:  return AudioChannelSet::ChannelType::subbass2;
+        case kSpeakerL:     return AudioChannelSet::left;
+        case kSpeakerR:     return AudioChannelSet::right;
+        case kSpeakerC:     return AudioChannelSet::centre;
+        case kSpeakerLfe:   return AudioChannelSet::subbass;
+        case kSpeakerLs:    return AudioChannelSet::surroundLeft;
+        case kSpeakerRs:    return AudioChannelSet::surroundRight;
+        case kSpeakerLc:    return AudioChannelSet::centreLeft;
+        case kSpeakerRc:    return AudioChannelSet::centreRight;
+        case kSpeakerS:     return AudioChannelSet::surround;
+        case kSpeakerSl:    return AudioChannelSet::sideLeft;
+        case kSpeakerSr:    return AudioChannelSet::sideRight;
+        case kSpeakerTm:    return AudioChannelSet::topMiddle;
+        case kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
+        case kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
+        case kSpeakerTfr:   return AudioChannelSet::topFrontRight;
+        case kSpeakerTrl:   return AudioChannelSet::topRearLeft;
+        case kSpeakerTrc:   return AudioChannelSet::topRearCentre;
+        case kSpeakerTrr:   return AudioChannelSet::topRearRight;
+        case kSpeakerLfe2:  return AudioChannelSet::subbass2;
         default: break;
     }
 
-    return AudioChannelSet::ChannelType::unknown;
+    return AudioChannelSet::unknown;
 }
 
 static inline Steinberg::Vst::SpeakerArrangement getSpeakerArrangement (const AudioChannelSet& channels) noexcept
