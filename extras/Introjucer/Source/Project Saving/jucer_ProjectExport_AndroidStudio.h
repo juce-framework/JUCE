@@ -395,7 +395,7 @@ private:
         result.add ("\"-frtti\"");
 
         if (isCPP11Enabled())
-            result.add ("\"-std=gnu++11\"");
+            result.add ("\"-std=c++11\"");
 
         StringArray extraFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), " ", ""));
 
@@ -452,8 +452,9 @@ private:
 
         result << "android.ndk {" << newLine
                << indent << "moduleName = \"juce_jni\"" << newLine
-               << indent << "stl = \"gnustl_static\"" << newLine
-               << indent << "toolchainVersion = 4.9" << newLine;
+               << indent << "stl = \"c++_static\"" << newLine
+               << indent << "toolchain = \"clang\"" << newLine
+               << indent << "toolchainVersion = 3.6" << newLine;
 
         if (platformVersion.isNotEmpty())
             result << indent << "platformVersion = " << getNDKPlatformVersionString() << newLine;
