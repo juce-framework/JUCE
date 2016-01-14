@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.Build;
 import android.os.Process;
 import android.os.ParcelUuid;
+import android.os.Environment;
 import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
@@ -916,6 +917,17 @@ public class JuceAppActivity   extends Activity
         return isRegion ? locale.getDisplayCountry  (java.util.Locale.US)
                         : locale.getDisplayLanguage (java.util.Locale.US);
     }
+
+    private static final String getFileLocation (String type)
+    {
+        return Environment.getExternalStoragePublicDirectory (type).getAbsolutePath();
+    }
+
+    public static final String getDocumentsFolder()  { return getFileLocation (Environment.DIRECTORY_DOCUMENTS); }
+    public static final String getPicturesFolder()   { return getFileLocation (Environment.DIRECTORY_PICTURES); }
+    public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
+    public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
+    public static final String getDownloadsFolder()  { return getFileLocation (Environment.DIRECTORY_DOWNLOADS); }
 
     //==============================================================================
     private final class SingleMediaScanner  implements MediaScannerConnectionClient
