@@ -702,7 +702,7 @@ private:
 
     void applyClipPath (Drawable& target, const XmlPath& xmlPath) const
     {
-        if (xmlPath->hasTagNameIgnoringNamespace ("clippath"))
+        if (xmlPath->hasTagNameIgnoringNamespace ("clipPath"))
         {
             // TODO: implement clipping..
             ignoreUnused (target);
