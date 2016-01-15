@@ -133,6 +133,7 @@ public class JuceAppActivity   extends Activity
         super.onCreate (savedInstanceState);
 
         isScreenSaverEnabled = true;
+        getActionBar().hide();
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
 

@@ -201,7 +201,8 @@
                    androidMinimumSDK="23" androidInternetNeeded="1" androidKeyStore="${user.home}/.android/debug.keystore"
                    androidKeyStorePass="android" androidKeyAlias="androiddebugkey"
                    androidKeyAliasPass="android" androidCpp11="1" targetFolder="Builds/AndroidStudio"
-                   androidSDKPath="" androidNDKPath="" androidBluetoothNeeded="1">
+                   androidSDKPath="" androidNDKPath="" androidBluetoothNeeded="1"
+                   bigIcon="BvyE0d">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
                        targetName="JuceDemo"/>
