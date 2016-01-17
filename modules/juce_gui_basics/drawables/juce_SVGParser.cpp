@@ -618,7 +618,7 @@ private:
 
         const String strokeDashArray (getStyleAttribute (xml, "stroke-dasharray"));
 
-        if (strokeDashArray.isNotEmpty())
+        if (strokeDashArray.isNotEmpty() && ! strokeDashArray.equalsIgnoreCase ("null"))
             parseDashArray (strokeDashArray.getCharPointer(), *dp);
 
         parseClipPath (xml, *dp);
