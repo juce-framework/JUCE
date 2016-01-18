@@ -160,6 +160,12 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_WINDOWS
+
+ #if JUCE_MINGW
+  } // namespace juce
+  using namespace juce;
+ #endif // JUCE_MINGW
+ 
  #include "../juce_core/native/juce_win32_ComSmartPtr.h"
  #include "../juce_events/native/juce_win32_HiddenMessageWindow.h"
 

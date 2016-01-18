@@ -1407,6 +1407,7 @@ private:
         }
     };
 
+    // non-compliant msvc quirk [PL]
     template <>
     struct ASIOCallbackFunctions <sizeof(currentASIODev) / sizeof(currentASIODev[0])>
     {

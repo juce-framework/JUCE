@@ -96,20 +96,30 @@ bool check (HRESULT hr)
 }
 
 #if JUCE_MINGW
+
+ template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return CLSID(); } };
+
  #define JUCE_COMCLASS(name, guid) \
     struct name; \
     template<> struct UUIDGetter<name>   { static CLSID get() { return uuidFromString (guid); } }; \
     struct name
 
- struct PROPERTYKEY
- {
-    GUID fmtid;
-    DWORD pid;
- };
+ #define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown
+ #define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
 
  WINOLEAPI PropVariantClear (PROPVARIANT*);
+
+ #include <mmdeviceapi.h>
+ #include <audioclient.h>
+ #include <audiopolicy.h>
+ #include <audioengineendpoint.h>
+ #include <avrt.h>
+
 #else
  #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
+
+ #define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown
+ #define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
 #endif
 
 #ifndef KSDATAFORMAT_SUBTYPE_PCM
@@ -117,8 +127,7 @@ bool check (HRESULT hr)
  #define KSDATAFORMAT_SUBTYPE_IEEE_FLOAT  uuidFromString ("00000003-0000-0010-8000-00aa00389b71")
 #endif
 
-#define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown
-#define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
+#if JUCE_MSVC
 
 enum EDataFlow
 {
@@ -299,6 +308,8 @@ JUCE_IUNKNOWNCLASS (IAudioSessionControl, "F4B1A599-7266-4319-A8CA-E70ACB11E8CD"
 #undef JUCE_COMCALL
 #undef JUCE_COMCLASS
 #undef JUCE_IUNKNOWNCLASS
+
+#endif // JUCE_MSVC
 
 //==============================================================================
 namespace WasapiClasses

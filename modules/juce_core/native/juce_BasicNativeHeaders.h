@@ -103,6 +103,14 @@
  #include <ctime>
  #include <wininet.h>
  #include <nb30.h>
+
+ #if JUCE_MINGW
+  // must get early or poops out below
+  #include <winsock2.h>
+  // http://comments.gmane.org/gmane.comp.gnu.mingw.w64.general/5571
+  // http://comments.gmane.org/gmane.comp.gnu.mingw.w64.general/5323
+ #endif
+
  #include <iphlpapi.h>
  #include <mapi.h>
  #include <float.h>
