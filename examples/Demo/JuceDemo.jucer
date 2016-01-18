@@ -198,10 +198,11 @@
       </MODULEPATHS>
     </ANDROID>
     <ANDROIDSTUDIO androidVersionCode="1" androidActivityClass="com.yourcompany.jucedemo.JuceDemo"
-                   androidMinimumSDK="10" androidInternetNeeded="1" androidKeyStore="${user.home}/.android/debug.keystore"
+                   androidMinimumSDK="23" androidInternetNeeded="1" androidKeyStore="${user.home}/.android/debug.keystore"
                    androidKeyStorePass="android" androidKeyAlias="androiddebugkey"
                    androidKeyAliasPass="android" androidCpp11="1" targetFolder="Builds/AndroidStudio"
-                   androidSDKPath="" androidNDKPath="" androidBluetoothNeeded="1">
+                   androidSDKPath="" androidNDKPath="" androidBluetoothNeeded="1"
+                   bigIcon="BvyE0d">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
                        targetName="JuceDemo"/>

@@ -628,7 +628,7 @@ private:
         const String strokeDashArray (getStyleAttribute (xml, "stroke-dasharray"));
 
         if (strokeDashArray.isNotEmpty())
-            parseDashArray (strokeDashArray.getCharPointer(), *dp);
+            parseDashArray (strokeDashArray, *dp);
 
         parseClipPath (xml, *dp);
 
@@ -644,11 +644,14 @@ private:
         return false;
     }
 
-    void parseDashArray (String::CharPointerType t, DrawablePath& dp) const
+    void parseDashArray (const String& dashList, DrawablePath& dp) const
     {
+        if (dashList.equalsIgnoreCase ("null") || dashList.equalsIgnoreCase ("none"))
+            return;
+
         Array<float> dashLengths;
 
-        for (;;)
+        for (String::CharPointerType t = dashList.getCharPointer();;)
         {
             float value;
             if (! parseCoord (t, value, true, true))
@@ -662,24 +665,30 @@ private:
                 ++t;
         }
 
-        float* const dashes = dashLengths.getRawDataPointer();
-
-        for (int i = 0; i < dashLengths.size(); ++i)
+        if (dashLengths.size() > 0)
         {
-            if (dashes[i] <= 0)  // SVG uses zero-length dashes to mean a dotted line
+            float* const dashes = dashLengths.getRawDataPointer();
+
+            for (int i = 0; i < dashLengths.size(); ++i)
             {
-                const float nonZeroLength = 0.001f;
-                dashes[i] = nonZeroLength;
+                if (dashes[i] <= 0)  // SVG uses zero-length dashes to mean a dotted line
+                {
+                    if (dashLengths.size() == 1)
+                        return;
 
-                const int pairedIndex = i ^ 1;
+                    const float nonZeroLength = 0.001f;
+                    dashes[i] = nonZeroLength;
 
-                if (isPositiveAndBelow (pairedIndex, dashLengths.size())
-                      && dashes[pairedIndex] > nonZeroLength)
-                    dashes[pairedIndex] -= nonZeroLength;
+                    const int pairedIndex = i ^ 1;
+
+                    if (isPositiveAndBelow (pairedIndex, dashLengths.size())
+                          && dashes[pairedIndex] > nonZeroLength)
+                        dashes[pairedIndex] -= nonZeroLength;
+                }
             }
-        }
 
-        dp.setDashLengths (dashLengths);
+            dp.setDashLengths (dashLengths);
+        }
     }
 
     void parseClipPath (const XmlPath& xml, DrawableShape& d) const

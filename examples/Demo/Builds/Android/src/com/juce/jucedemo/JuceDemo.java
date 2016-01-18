@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.Build;
 import android.os.Process;
 import android.os.ParcelUuid;
+import android.os.Environment;
 import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
@@ -212,6 +213,7 @@ public class JuceDemo   extends Activity
         super.onCreate (savedInstanceState);
 
         isScreenSaverEnabled = true;
+        getActionBar().hide();
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
 
@@ -771,7 +773,7 @@ public class JuceDemo   extends Activity
                                                   int format, int width, int height);
     }
 
-    public NativeSurfaceView createNativeSurfaceView(long nativeSurfacePtr)
+    public NativeSurfaceView createNativeSurfaceView (long nativeSurfacePtr)
     {
         return new NativeSurfaceView (this, nativeSurfacePtr);
     }
@@ -997,6 +999,17 @@ public class JuceDemo   extends Activity
                         : locale.getDisplayLanguage (java.util.Locale.US);
     }
 
+    private static final String getFileLocation (String type)
+    {
+        return Environment.getExternalStoragePublicDirectory (type).getAbsolutePath();
+    }
+
+    public static final String getDocumentsFolder()  { return getFileLocation (Environment.DIRECTORY_DOCUMENTS); }
+    public static final String getPicturesFolder()   { return getFileLocation (Environment.DIRECTORY_PICTURES); }
+    public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
+    public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
+    public static final String getDownloadsFolder()  { return getFileLocation (Environment.DIRECTORY_DOWNLOADS); }
+
     //==============================================================================
     private final class SingleMediaScanner  implements MediaScannerConnectionClient
     {
@@ -1121,23 +1134,24 @@ public class JuceDemo   extends Activity
             return null;
 
         java.lang.reflect.Method method;
-        try {
+
+        try
+        {
             method = obj.getClass().getMethod ("getProperty", String.class);
-        } catch (SecurityException e) {
-            return null;
-        } catch (NoSuchMethodException e) {
-            return null;
         }
+        catch (SecurityException e)     { return null; }
+        catch (NoSuchMethodException e) { return null; }
 
         if (method == null)
             return null;
 
-        try {
+        try
+        {
             return (String) method.invoke (obj, property);
-        } catch (java.lang.IllegalArgumentException e) {
-        } catch (java.lang.IllegalAccessException e) {
-        } catch (java.lang.reflect.InvocationTargetException e) {
         }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
 
         return null;
     }
@@ -1173,5 +1187,4 @@ public class JuceDemo   extends Activity
     {
         return new JuceThread(host);
     }
-
 }

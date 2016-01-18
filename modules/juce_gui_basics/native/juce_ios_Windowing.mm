@@ -238,7 +238,7 @@ private:
         if (text != nil)
             [alert addAction: [UIAlertAction actionWithTitle: text
                                                        style: UIAlertActionStyleDefault
-                                                     handler: ^(UIAlertAction* action) { this->buttonClicked (index); }]];
+                                                     handler: ^(UIAlertAction*) { this->buttonClicked (index); }]];
     }
    #else
     UIAlertView* alert;

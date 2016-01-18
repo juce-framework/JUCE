@@ -3746,6 +3746,8 @@ void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* 
         comp->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
+void Desktop::allowedOrientationsChanged() {}
+
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
 {

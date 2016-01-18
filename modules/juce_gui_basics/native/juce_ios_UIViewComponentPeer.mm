@@ -1023,6 +1023,8 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
     }
 }
 
+void Desktop::allowedOrientationsChanged() {}
+
 //==============================================================================
 void UIViewComponentPeer::repaint (const Rectangle<int>& area)
 {
