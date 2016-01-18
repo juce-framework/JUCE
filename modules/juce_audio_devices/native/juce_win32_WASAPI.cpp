@@ -112,6 +112,11 @@ bool check (HRESULT hr)
  #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
 #endif
 
+#if JUCE_MINGW && defined (KSDATAFORMAT_SUBTYPE_PCM)
+ #undef KSDATAFORMAT_SUBTYPE_PCM
+ #undef KSDATAFORMAT_SUBTYPE_IEEE_FLOAT
+#endif
+
 #ifndef KSDATAFORMAT_SUBTYPE_PCM
  #define KSDATAFORMAT_SUBTYPE_PCM         uuidFromString ("00000001-0000-0010-8000-00aa00389b71")
  #define KSDATAFORMAT_SUBTYPE_IEEE_FLOAT  uuidFromString ("00000003-0000-0010-8000-00aa00389b71")

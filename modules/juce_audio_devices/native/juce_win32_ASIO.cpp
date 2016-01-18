@@ -1407,18 +1407,18 @@ private:
         }
     };
 
-    template <>
-    struct ASIOCallbackFunctions <sizeof(currentASIODev) / sizeof(currentASIODev[0])>
-    {
-        static void setCallbacksForDevice (ASIOCallbacks&, ASIOAudioIODevice*) noexcept {}
-    };
-
     void setCallbackFunctions() noexcept
     {
         ASIOCallbackFunctions<0>::setCallbacksForDevice (callbacks, this);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ASIOAudioIODevice)
+};
+
+template <>
+struct ASIOAudioIODevice::ASIOCallbackFunctions <sizeof(currentASIODev) / sizeof(currentASIODev[0])>
+{
+    static void setCallbacksForDevice (ASIOCallbacks&, ASIOAudioIODevice*) noexcept {}
 };
 
 //==============================================================================
