@@ -4198,8 +4198,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       const String& button2Text)
 {
     // TODO: This causes infinite recursion in case LookAndFeel is set to use native windows
-    return AlertWindow::showOkCancelBox (iconType, title, message, String::empty, String::empty,
-                                         associatedComponent, callback, button1Text, button2Text);
+    return AlertWindow::showOkCancelBox (iconType, title, message, button1Text, button2Text,
+                                         associatedComponent, callback);
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
