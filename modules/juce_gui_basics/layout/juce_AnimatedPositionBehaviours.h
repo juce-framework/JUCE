@@ -145,7 +145,7 @@ namespace AnimatedPositionBehaviours
     private:
         double targetSnapPosition;
     };
-};
+}
 
 
 #endif   // JUCE_ANIMATEDPOSITIONBEHAVIOURS_H_INCLUDED
