@@ -350,13 +350,14 @@ public:
         {
             isRunning = false;
 
-            setAudioSessionActive (false);
-
             if (audioUnit != 0)
             {
+                AudioOutputUnitStart (audioUnit);
                 AudioComponentInstanceDispose (audioUnit);
                 audioUnit = 0;
             }
+
+            setAudioSessionActive (false);
         }
     }
 
