@@ -92,7 +92,8 @@
     USE_FUNCTION (glMapBufferRange,          void*,(GLenum p1,GLintptr p2,GLsizeiptr p3,GLbitfield p4),(p1,p2,p3,p4))\
     USE_FUNCTION (glVertexAttribDivisor,     void, (GLuint p1,GLuint p2),(p1,p2))\
     USE_FUNCTION (glRenderbufferStorageMultisample,  void, (GLenum p1,GLsizei p2,GLenum p3,GLsizei p4,GLsizei p5),(p1,p2,p3,p4,p5))\
-    USE_FUNCTION (glBlitFramebuffer, void, (GLint p1,GLint p2,GLint p3,GLint p4,GLint p5,GLint p6,GLint p7,GLint p8, GLbitfield p9, GLenum p10),(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10))
+    USE_FUNCTION (glBlitFramebuffer, void, (GLint p1,GLint p2,GLint p3,GLint p4,GLint p5,GLint p6,GLint p7,GLint p8, GLbitfield p9, GLenum p10),(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10))\
+	USE_FUNCTION (glDisablei, void, (GLenum p1, GLuint p2),(p1,p2))
 
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded
