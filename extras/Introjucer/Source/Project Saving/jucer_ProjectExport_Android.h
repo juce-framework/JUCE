@@ -50,6 +50,9 @@ public:
         if (getCPP11EnabledValue().getValue().isVoid())     getCPP11EnabledValue()  = true;
 
         initialiseDependencyPathValues();
+
+        if (getScreenOrientationValue().toString().isEmpty())
+            getScreenOrientationValue() = "unspecified";
     }
 
     bool canLaunchProject() override                     { return false; }
@@ -69,6 +72,8 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
+        addScreenOrientationProperty (props);
+
         props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
 
@@ -125,6 +130,32 @@ public:
                    "The key.alias password, used when signing the package.");
     }
 
+    enum ScreenOrientation
+    {
+        unspecified = 1,
+        portrait    = 2,
+        landscape   = 3
+    };
+
+    void addScreenOrientationProperty (PropertyListBuilder& props)
+    {
+        static const char* orientations[] = { "Unspecified",
+                                              "Portrait",
+                                              "Landscape",
+                                              nullptr };
+
+        static const char* orientationValues[] = { "unspecified",
+                                                   "portrait",
+                                                   "landscape",
+                                                   0 };
+
+        props.add (new ChoicePropertyComponent (getScreenOrientationValue(),
+                                                "Screen orientation",
+                                                StringArray (orientations),
+                                                Array<var> (orientationValues)),
+                                                "The screen orientation that this app should use");
+    }
+
     Value  getActivityClassPathValue()              { return getSetting (Ids::androidActivityClass); }
     String getActivityClassPath() const             { return settings [Ids::androidActivityClass]; }
     Value  getActivitySubClassPathValue()           { return getSetting (Ids::androidActivitySubClassName); }
@@ -169,6 +200,9 @@ public:
 
     Value getCPP11EnabledValue()                    { return getSetting (Ids::androidCpp11); }
     bool isCPP11Enabled() const                     { return settings [Ids::androidCpp11]; }
+
+    Value getScreenOrientationValue()               { return getSetting (Ids::androidScreenOrientation); }
+    String getScreenOrientationString() const       { return settings [Ids::androidScreenOrientation]; }
 
     //==============================================================================
     String createDefaultClassName() const
@@ -461,6 +495,7 @@ public:
         act->setAttribute ("android:name", getActivitySubClassName());
         act->setAttribute ("android:label", "@string/app_name");
         act->setAttribute ("android:configChanges", "keyboardHidden|orientation");
+        act->setAttribute ("android:screenOrientation", getScreenOrientationString());
 
         XmlElement* intent = act->createNewChildElement ("intent-filter");
         intent->createNewChildElement ("action")->setAttribute ("android:name", "android.intent.action.MAIN");
