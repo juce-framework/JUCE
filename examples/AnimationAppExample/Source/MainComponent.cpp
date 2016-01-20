@@ -62,7 +62,7 @@ public:
         g.strokePath (spinePath, PathStrokeType (4.0f));
     }
 
-    void resized()
+    void resized() override
     {
         // This is called when the MainContentComponent is resized.
         // If you add any child components, this is where you should
