@@ -451,8 +451,17 @@ namespace RTASHelpers
             {
                 exporter.xcodeCanUseDwarf = false;
 
-                exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
-                exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
+                for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+                {
+                    const String libName (
+                        config->getValue (Ids::cppLibType) == "libc++"
+                        ? "libPluginLibrary libcpp.a"
+                        : "libPluginLibrary.a");
+                    if (config->isDebug())
+                        exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/" + libName));
+                    else
+                        exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/" + libName));
+                }
             }
 
             writePluginCharacteristicsFile (projectSaver);
@@ -551,8 +560,17 @@ namespace AAXHelpers
             }
             else
             {
-                exporter.xcodeExtraLibrariesDebug.add   (aaxLibsFolder.getChildFile ("Debug/libAAXLibrary.a"));
-                exporter.xcodeExtraLibrariesRelease.add (aaxLibsFolder.getChildFile ("Release/libAAXLibrary.a"));
+                for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+                {
+                    const String libName (
+                        config->getValue (Ids::cppLibType) == "libc++"
+                        ? "libAAXLibrary_libcpp.a"
+                        : "libAAXLibrary.a");
+                    if (config->isDebug())
+                        exporter.xcodeExtraLibrariesDebug.add   (aaxLibsFolder.getChildFile ("Debug/" + libName));
+                    else
+                        exporter.xcodeExtraLibrariesRelease.add (aaxLibsFolder.getChildFile ("Release/" + libName));
+                }
             }
 
             writePluginCharacteristicsFile (projectSaver);
