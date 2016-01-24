@@ -150,6 +150,7 @@ enum MissingOpenGLDefinitions
     GL_DRAW_FRAMEBUFFER             = 0x8CA9,
     GL_GEOMETRY_SHADER              = 0x8DD9,
 	GL_PROGRAM_POINT_SIZE			= 0x8642,
+	GL_DEPTH32F_STENCIL8            = 0x8CAD,
    #endif
 
    #if JUCE_ANDROID
