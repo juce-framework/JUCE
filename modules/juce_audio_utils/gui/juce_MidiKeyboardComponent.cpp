@@ -722,14 +722,14 @@ void MidiKeyboardComponent::updateNoteUnderMouse (const MouseEvent& e, bool isDo
     updateNoteUnderMouse (e.getEventRelativeTo (this).getPosition(), isDown, e.source.getIndex());
 }
 
-void MidiKeyboardComponent::mouseDownStartedOnKey (int midiNoteNumber, float velocity)
+void MidiKeyboardComponent::mouseDownStartedOnKey (int midiNoteNumber, float eventVelocity)
 {
-    state.noteOn (midiChannel, midiNoteNumber, velocity);
+    state.noteOn (midiChannel, midiNoteNumber, eventVelocity);
 }
 
-void MidiKeyboardComponent::mouseDownFinishedOnKey(int midiNoteNumber, float velocity)
+void MidiKeyboardComponent::mouseDownFinishedOnKey (int midiNoteNumber, float eventVelocity)
 {
-    state.noteOff (midiChannel, midiNoteNumber, velocity);
+    state.noteOff (midiChannel, midiNoteNumber, eventVelocity);
 }
 
 void MidiKeyboardComponent::updateNoteUnderMouse (Point<int> pos, bool isDown, int fingerNum)

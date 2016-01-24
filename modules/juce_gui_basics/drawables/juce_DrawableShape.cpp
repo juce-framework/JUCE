@@ -145,10 +145,10 @@ void DrawableShape::setDashLengths (const Array<float>& newDashLengths)
     }
 }
 
-void DrawableShape::setClipPath (const Path& path)
+void DrawableShape::setClipPath (const Path& p)
 {
     hasClipPath = true;
-    clipPath = path;
+    clipPath = p;
 }
 
 void DrawableShape::setStrokeThickness (const float newThickness)
