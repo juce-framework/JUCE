@@ -43,7 +43,7 @@ public:
     */
     OpenGLPixelFormat (int bitsPerRGBComponent = 8,
                        int alphaBits = 8,
-                       int depthBufferBits = 24,
+                       int depthBufferBits = 32,
                        int stencilBufferBits = 0) noexcept;
 
     bool operator== (const OpenGLPixelFormat&) const noexcept;
