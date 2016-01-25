@@ -451,17 +451,8 @@ namespace RTASHelpers
             {
                 exporter.xcodeCanUseDwarf = false;
 
-                for (ProjectExporter::ConfigIterator config (exporter); config.next();)
-                {
-                    const String libName (
-                        config->getValue (Ids::cppLibType) == "libc++"
-                        ? "libPluginLibrary libcpp.a"
-                        : "libPluginLibrary.a");
-                    if (config->isDebug())
-                        exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/" + libName));
-                    else
-                        exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/" + libName));
-                }
+                exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
+                exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
             }
 
             writePluginCharacteristicsFile (projectSaver);
@@ -560,17 +551,8 @@ namespace AAXHelpers
             }
             else
             {
-                for (ProjectExporter::ConfigIterator config (exporter); config.next();)
-                {
-                    const String libName (
-                        config->getValue (Ids::cppLibType) == "libc++"
-                        ? "libAAXLibrary_libcpp.a"
-                        : "libAAXLibrary.a");
-                    if (config->isDebug())
-                        exporter.xcodeExtraLibrariesDebug.add   (aaxLibsFolder.getChildFile ("Debug/" + libName));
-                    else
-                        exporter.xcodeExtraLibrariesRelease.add (aaxLibsFolder.getChildFile ("Release/" + libName));
-                }
+                exporter.xcodeExtraLibrariesDebug.add   (aaxLibsFolder.getChildFile ("Debug/libAAXLibrary.a"));
+                exporter.xcodeExtraLibrariesRelease.add (aaxLibsFolder.getChildFile ("Release/libAAXLibrary.a"));
             }
 
             writePluginCharacteristicsFile (projectSaver);

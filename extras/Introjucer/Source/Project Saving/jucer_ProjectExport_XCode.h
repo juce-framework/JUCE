@@ -723,7 +723,7 @@ private:
         if (library.substring (0, 3) == "lib")
             library = library.substring (3);
 
-        return "-l" + library.upToLastOccurrenceOf (".", false, false).replace (" ", "\\\\ ");
+        return "-l" + library.upToLastOccurrenceOf (".", false, false);
     }
 
     void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths) const
