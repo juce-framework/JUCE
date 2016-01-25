@@ -964,21 +964,6 @@ StickyMidiKeyboardComponent::~StickyMidiKeyboardComponent()
     /* Empty */
 }
 
-BigInteger StickyMidiKeyboardComponent::getStickyKeys()
-{
-    return stuckKeys;
-}
-
-void StickyMidiKeyboardComponent::setStickyKeys(BigInteger stickyKeysState, float velocity)
-{
-    stuckKeys = stickyKeysState;
-    for (int i = 128; --i >= 0;)
-        if (stuckKeys[i])
-            MidiKeyboardComponent::mouseDownStartedOnKey(i, velocity);
-        else
-            MidiKeyboardComponent::mouseDownFinishedOnKey(i, velocity);
-}
-
 void StickyMidiKeyboardComponent::mouseUpOnKey (__unused int midiNoteNumber, const MouseEvent& e)
 {
     /** Note: We don't use the midiNoteNumber figured out by the caller by examining
