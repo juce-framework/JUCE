@@ -65,7 +65,7 @@ public:
             jassert (context.extensions.glIsRenderbuffer (depthOrStencilBuffer));
 
             context.extensions.glRenderbufferStorage (GL_RENDERBUFFER,
-                                      (wantsDepthBuffer && wantsStencilBuffer) ? GL_DEPTH32F_STENCIL8
+                                      (wantsDepthBuffer && wantsStencilBuffer) ? GL_DEPTH24_STENCIL8
                                                                               #if JUCE_OPENGL_ES
                                                                                : GL_DEPTH_COMPONENT16,
                                                                               #else
