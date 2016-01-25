@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include <CoreFoundation/CoreFoundation.h>
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
@@ -85,9 +86,6 @@
 #include <CPluginControl_OnOff.h>
 #include <FicProcessTokens.h>
 #include <ExternalVersionDefines.h>
-
-#undef Point
-#undef Component
 
 //==============================================================================
 #ifdef _MSC_VER

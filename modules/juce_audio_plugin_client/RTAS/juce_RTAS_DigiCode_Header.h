@@ -64,8 +64,6 @@
   #define PLUGIN_SDK_DIRECTMIDI     1
   #define DIGI_PASCAL
 
-  #define Point CarbonDummyPointName
-  #define Component CarbonDummyCompName
   #include <MacAlwaysInclude.h>
 
 #endif
