@@ -449,8 +449,6 @@ public:
                         return noErr;
                     }
 
-                    break;
-
                #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
                 {
