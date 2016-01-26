@@ -120,15 +120,20 @@ static String getAllSystemInfo()
       << "User language:    " << SystemStats::getUserLanguage() << newLine
       << "Display language: " << SystemStats::getDisplayLanguage() << newLine
       << newLine
-      << "Number of CPUs: " << SystemStats::getNumCpus() << newLine
-      << "Memory size:    " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
-      << "CPU vendor:     " << SystemStats::getCpuVendor() << newLine
-      << "CPU speed:      " << SystemStats::getCpuSpeedInMegaherz() << " MHz" << newLine
-      << "CPU has MMX:    " << (SystemStats::hasMMX()   ? "yes" : "no") << newLine
-      << "CPU has SSE:    " << (SystemStats::hasSSE()   ? "yes" : "no") << newLine
-      << "CPU has SSE2:   " << (SystemStats::hasSSE2()  ? "yes" : "no") << newLine
-      << "CPU has SSE3:   " << (SystemStats::hasSSE3()  ? "yes" : "no") << newLine
-      << "CPU has 3DNOW:  " << (SystemStats::has3DNow() ? "yes" : "no") << newLine
+      << "Number of CPUs:  " << SystemStats::getNumCpus() << newLine
+      << "Memory size:     " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
+      << "CPU vendor:      " << SystemStats::getCpuVendor() << newLine
+      << "CPU speed:       " << SystemStats::getCpuSpeedInMegaherz() << " MHz" << newLine
+      << "CPU has MMX:     " << (SystemStats::hasMMX()    ? "yes" : "no") << newLine
+      << "CPU has SSE:     " << (SystemStats::hasSSE()    ? "yes" : "no") << newLine
+      << "CPU has SSE2:    " << (SystemStats::hasSSE2()   ? "yes" : "no") << newLine
+      << "CPU has SSE3:    " << (SystemStats::hasSSE3()   ? "yes" : "no") << newLine
+      << "CPU has SSSE3:   " << (SystemStats::hasSSSE3()  ? "yes" : "no") << newLine
+      << "CPU has SSE4.1:  " << (SystemStats::hasSSE41()  ? "yes" : "no") << newLine
+      << "CPU has SSE4.2:  " << (SystemStats::hasSSE42()  ? "yes" : "no") << newLine
+      << "CPU has 3DNOW:   " << (SystemStats::has3DNow()  ? "yes" : "no") << newLine
+      << "CPU has AVX:     " << (SystemStats::hasAVX()    ? "yes" : "no") << newLine
+      << "CPU has AVX2:    " << (SystemStats::hasAVX2()   ? "yes" : "no") << newLine
       << newLine
       << "Current working directory:  " << File::getCurrentWorkingDirectory().getFullPathName() << newLine
       << "Current application file:   " << File::getSpecialLocation (File::currentApplicationFile).getFullPathName() << newLine

@@ -68,7 +68,8 @@ struct CPUInformation
     CPUInformation() noexcept
         : numCpus (0), hasMMX (false), hasSSE (false),
           hasSSE2 (false), hasSSE3 (false), has3DNow (false),
-          hasSSSE3 (false), hasAVX (false)
+          hasSSSE3 (false), hasSSE41 (false), hasSSE42 (false),
+          hasAVX (false), hasAVX2 (false)
     {
         initialise();
     }
@@ -76,7 +77,7 @@ struct CPUInformation
     void initialise() noexcept;
 
     int numCpus;
-    bool hasMMX, hasSSE, hasSSE2, hasSSE3, has3DNow, hasSSSE3, hasAVX;
+    bool hasMMX, hasSSE, hasSSE2, hasSSE3, has3DNow, hasSSSE3, hasSSE41, hasSSE42, hasAVX, hasAVX2;
 };
 
 static const CPUInformation& getCPUInformation() noexcept
@@ -92,7 +93,10 @@ bool SystemStats::hasSSE() noexcept           { return getCPUInformation().hasSS
 bool SystemStats::hasSSE2() noexcept          { return getCPUInformation().hasSSE2; }
 bool SystemStats::hasSSE3() noexcept          { return getCPUInformation().hasSSE3; }
 bool SystemStats::hasSSSE3() noexcept         { return getCPUInformation().hasSSSE3; }
+bool SystemStats::hasSSE41() noexcept         { return getCPUInformation().hasSSE41; }
+bool SystemStats::hasSSE42() noexcept         { return getCPUInformation().hasSSE42; }
 bool SystemStats::hasAVX() noexcept           { return getCPUInformation().hasAVX; }
+bool SystemStats::hasAVX2() noexcept          { return getCPUInformation().hasAVX2; }
 
 
 //==============================================================================
