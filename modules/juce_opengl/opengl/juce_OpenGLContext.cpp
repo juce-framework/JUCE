@@ -468,7 +468,9 @@ public:
         nativeContext->setSwapInterval (1);
 
        #if ! JUCE_OPENGL_ES
+        JUCE_CHECK_OPENGL_ERROR
         shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
+        clearGLError();
        #endif
 
         if (context.renderer != nullptr)
