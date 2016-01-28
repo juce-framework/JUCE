@@ -840,7 +840,7 @@ private:
         bufferGranularity = 0;
         long newPreferredSize = 0;
 
-        if (asioObject->getBufferSize (&minBufferSize, &maxBufferSize, &newPreferredBufferSize, &bufferGranularity) == ASE_OK)
+        if (asioObject->getBufferSize (&minBufferSize, &maxBufferSize, &newPreferredSize, &bufferGranularity) == ASE_OK)
         {
             if (preferredBufferSize != 0 && newPreferredSize != 0 && newPreferredSize != preferredBufferSize)
                 shouldUsePreferredSize = true;
