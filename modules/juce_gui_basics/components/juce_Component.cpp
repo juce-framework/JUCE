@@ -2969,14 +2969,18 @@ bool Component::isMouseButtonDown() const
     return false;
 }
 
-bool Component::isMouseOverOrDragging() const
+bool Component::isMouseOverOrDragging (const bool includeChildren) const
 {
     const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
     for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-        if (mi->getComponentUnderMouse() == this
+    {
+        Component* const c = mi->getComponentUnderMouse();
+
+        if ((c == this || (includeChildren && isParentOf (c)))
               && (mi->isMouse() || mi->isDragging()))
             return true;
+    }
 
     return false;
 }
