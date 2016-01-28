@@ -30,7 +30,6 @@
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_PluginBusUtilities.h"
-#undef Component
 
 #ifdef __clang__
  #pragma clang diagnostic push
@@ -92,8 +91,6 @@
 #endif
 
 #undef check
-
-using juce::Component;
 
 const int32_t juceChunkType = 'juce';
 
@@ -381,7 +378,7 @@ struct AAXClasses
         }
 
     private:
-        struct ContentWrapperComponent  : public juce::Component
+        struct ContentWrapperComponent  : public Component
         {
             ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor& plugin)
                 : owner (gui)

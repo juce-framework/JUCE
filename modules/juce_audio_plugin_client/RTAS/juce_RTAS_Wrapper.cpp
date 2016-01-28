@@ -86,9 +86,6 @@
 #include <FicProcessTokens.h>
 #include <ExternalVersionDefines.h>
 
-#undef Point
-#undef Component
-
 //==============================================================================
 #ifdef _MSC_VER
  #pragma pack (push, 8)
@@ -122,7 +119,6 @@
  #pragma comment(lib, PT_LIB_PATH "RTASClientLib.lib")
 #endif
 
-#undef Component
 #undef MemoryBlock
 
 //==============================================================================
@@ -133,8 +129,8 @@
   extern void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow);
  #endif
 #else
-  extern void* attachSubWindow (void* hostWindowRef, juce::Component* comp);
-  extern void removeSubWindow (void* nsWindow, juce::Component* comp);
+  extern void* attachSubWindow (void* hostWindowRef, Component* comp);
+  extern void removeSubWindow (void* nsWindow, Component* comp);
   extern void forwardCurrentKeyEventToHostWindow();
 #endif
 
@@ -240,7 +236,7 @@ public:
 
         void timerCallback() override
         {
-            if (! juce::Component::isMouseButtonDownAnywhere())
+            if (! Component::isMouseButtonDownAnywhere())
             {
                 stopTimer();
 
@@ -290,7 +286,7 @@ public:
     private:
         AudioProcessor* const filter;
         JucePlugInProcess* const process;
-        ScopedPointer<juce::Component> wrapper;
+        ScopedPointer<Component> wrapper;
         ScopedPointer<AudioProcessorEditor> editorComp;
 
         void deleteEditorComp()
@@ -301,7 +297,7 @@ public:
                 {
                     PopupMenu::dismissAllActiveMenus();
 
-                    if (juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent())
+                    if (Component* const modalComponent = Component::getCurrentlyModalComponent())
                         modalComponent->exitModalState (0);
 
                     filter->editorBeingDeleted (editorComp);
@@ -315,7 +311,7 @@ public:
         //==============================================================================
         // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
-        class EditorCompWrapper  : public juce::Component
+        class EditorCompWrapper  : public Component
                                  #if ! JUCE_MAC
                                    , public FocusChangeListener
                                  #endif
@@ -368,7 +364,7 @@ public:
 
             void resized() override
             {
-                if (juce::Component* const ed = getEditor())
+                if (Component* const ed = getEditor())
                     ed->setBounds (getLocalBounds());
 
                 repaint();
@@ -384,7 +380,7 @@ public:
             }
            #endif
 
-            void childBoundsChanged (juce::Component* child) override
+            void childBoundsChanged (Component* child) override
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
@@ -413,7 +409,7 @@ public:
             JuceCustomUIView* const owner;
             int titleW, titleH;
 
-            juce::Component* getEditor() const        { return getChildComponent (0); }
+            Component* getEditor() const        { return getChildComponent (0); }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
         };

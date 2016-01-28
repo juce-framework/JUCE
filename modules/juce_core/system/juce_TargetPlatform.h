@@ -61,12 +61,8 @@
 #elif defined (LINUX) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
-  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
-  #define Component CarbonDummyCompName
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
   #include "../native/juce_mac_ClangBugWorkaround.h"
-  #undef Point
-  #undef Component
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1
