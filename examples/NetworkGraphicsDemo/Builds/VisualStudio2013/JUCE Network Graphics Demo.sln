@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2013
+Project("{73E9ECAB-81CE-7E67-D1B1-93FD2249F2CD}") = "JUCE Network Graphics Demo", "JUCE Network Graphics Demo.vcxproj", "{C8D7908E-D9F5-61FF-49C7-33D353A636D0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C8D7908E-D9F5-61FF-49C7-33D353A636D0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C8D7908E-D9F5-61FF-49C7-33D353A636D0}.Debug|Win32.Build.0 = Debug|Win32
+		{C8D7908E-D9F5-61FF-49C7-33D353A636D0}.Release|Win32.ActiveCfg = Release|Win32
+		{C8D7908E-D9F5-61FF-49C7-33D353A636D0}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
