@@ -449,6 +449,10 @@ struct AAXClasses
             ScopedPointer<AudioProcessorEditor> pluginEditor;
             JuceAAX_GUI& owner;
 
+           #if JUCE_WINDOWS
+            WindowsHooks hooks;
+           #endif
+
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
 
