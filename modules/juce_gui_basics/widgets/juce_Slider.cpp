@@ -869,7 +869,7 @@ public:
                     if (parentForPopupDisplay != nullptr)
                         parentForPopupDisplay->addChildComponent (popup);
                     else
-                        popup->addToDesktop (0);
+                        popup->addToDesktop (ComponentPeer::windowIsTemporary);
 
                     popup->setVisible (true);
                 }
