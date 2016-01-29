@@ -37,11 +37,7 @@
 
 #if JUCE_MAC
  #if JUCE_QUICKTIME
-  #define Point CarbonDummyPointName
-  #define Component CarbonDummyCompName
   #import <QTKit/QTKit.h>
-  #undef Point
-  #undef Component
  #endif
 
 //==============================================================================

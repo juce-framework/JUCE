@@ -36,14 +36,10 @@
 
 //==============================================================================
 #if JUCE_MAC
- #define Point CarbonDummyPointName
- #define Component CarbonDummyCompName
  #if JUCE_QUICKTIME
   #import <QTKit/QTKit.h>
  #endif
  #include <AudioToolbox/AudioToolbox.h>
- #undef Component
- #undef Point
 
 #elif JUCE_IOS
  #import <AudioToolbox/AudioToolbox.h>
