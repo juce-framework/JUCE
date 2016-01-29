@@ -29,6 +29,7 @@
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
+#include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_PluginBusUtilities.h"
 
 #ifdef __clang__
@@ -39,7 +40,7 @@
 
 #ifdef _MSC_VER
  #pragma warning (push)
- #pragma warning (disable : 4127)
+ #pragma warning (disable : 4127 4512)
 #endif
 
 #include "AAX_Exports.cpp"
