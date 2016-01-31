@@ -79,7 +79,7 @@
                    androidKeyStore="${user.home}/.android/debug.keystore" androidKeyStorePass="android"
                    androidKeyAlias="androiddebugkey" androidKeyAliasPass="android"
                    androidCpp11="1" targetFolder="Builds/AndroidStudio" androidSDKPath=""
-                   androidNDKPath="">
+                   androidNDKPath="" androidScreenOrientation="unspecified">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="OSCSender"/>

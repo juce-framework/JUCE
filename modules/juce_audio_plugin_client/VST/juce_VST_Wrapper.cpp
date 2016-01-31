@@ -283,8 +283,21 @@ public:
         if (busUtils.hasDynamicInBuses() || busUtils.hasDynamicOutBuses())
             busUtils.enableAllBuses();
 
-        const int totalNumInChannels  = busUtils.findTotalNumChannels(true);
-        const int totalNumOutChannels = busUtils.findTotalNumChannels(false);
+        int maxNumInChannels  = busUtils.getBusCount (true)  > 0 ? busUtils.getSupportedBusLayouts (true,  0).maxNumberOfChannels() : 0;
+        int maxNumOutChannels = busUtils.getBusCount (false) > 0 ? busUtils.getSupportedBusLayouts (false, 0).maxNumberOfChannels() : 0;
+
+        // try setting the number of channels
+        if (maxNumInChannels > 0)
+            filter->setPreferredBusArrangement (true,  0, busUtils.getDefaultLayoutForChannelNumAndBus (true,  0, maxNumInChannels));
+
+        if (maxNumOutChannels > 0)
+            filter->setPreferredBusArrangement (false, 0, busUtils.getDefaultLayoutForChannelNumAndBus (false, 0, maxNumOutChannels));
+
+        resetAuxChannelsToDefaultLayout (true);
+        resetAuxChannelsToDefaultLayout (false);
+
+        const int totalNumInChannels  = busUtils.findTotalNumChannels (true);
+        const int totalNumOutChannels = busUtils.findTotalNumChannels (false);
 
         filter->setRateAndBufferSizeDetails (0, 0);
         filter->setPlayHead (this);
@@ -503,8 +516,8 @@ public:
         jassert (activePlugins.contains (this));
 
         {
-            const int numIn  = filter->getTotalNumInputChannels();
-            const int numOut = filter->getTotalNumOutputChannels();
+            const int numIn  = cEffect.numInputs;
+            const int numOut = cEffect.numOutputs;
 
             const ScopedLock sl (filter->getCallbackLock());
 
@@ -905,10 +918,6 @@ public:
     bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
                                 VstSpeakerArrangement* pluginOutput) override
     {
-        if ((busUtils.getBusCount (true)  == 0 || busUtils.busIgnoresLayout(true, 0))
-         && (busUtils.getBusCount (false) == 0 || busUtils.busIgnoresLayout(false, 0)))
-            return false;
-
         if (pluginInput != nullptr && filter->busArrangement.inputBuses.size() == 0)
             return false;
 
@@ -917,22 +926,60 @@ public:
 
         PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
 
-        if (pluginInput != nullptr)
+        resetAuxChannelsToDefaultLayout (true);
+        resetAuxChannelsToDefaultLayout (false);
+
+        if (pluginInput != nullptr && pluginInput->numChannels >= 0)
         {
-            AudioChannelSet newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput);
+            AudioChannelSet newType;
+
+           // subtract the number of channels which are used by the aux channels
+            int mainNumChannels = pluginInput->numChannels - busUtils.findTotalNumChannels (true, 1);
+
+            if (mainNumChannels < 0)
+                return false;
+
+            if (mainNumChannels == pluginInput->numChannels)
+                newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput);
+            else
+                newType = AudioChannelSet::canonicalChannelSet(mainNumChannels);
 
             if (busUtils.getChannelSet (true, 0) != newType)
                 if (! filter->setPreferredBusArrangement (true, 0, newType))
                     return false;
         }
 
-        if (pluginOutput != nullptr)
+        if (pluginOutput != nullptr && pluginOutput->numChannels >= 0)
         {
-            AudioChannelSet newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput);
+            AudioChannelSet newType;
+
+            // subtract the number of channels which are used by the aux channels
+            int mainNumChannels = pluginOutput->numChannels - busUtils.findTotalNumChannels (false, 1);
+
+            if (mainNumChannels < 0)
+                return false;
+
+            if (mainNumChannels == pluginOutput->numChannels)
+                newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput);
+            else
+                newType = AudioChannelSet::canonicalChannelSet(mainNumChannels);
+
+            AudioChannelSet oldOutputLayout = busUtils.getChannelSet (false, 0);
+            AudioChannelSet oldInputLayout  = busUtils.getChannelSet (true, 0);
 
             if (busUtils.getChannelSet (false, 0) != newType)
                 if (! filter->setPreferredBusArrangement (false, 0, newType))
                     return false;
+
+            // did this change the input layout? If yes, change it back
+            if (oldInputLayout != busUtils.getChannelSet (true, 0)
+             && (busUtils.getBusCount (true) > 1 || busUtils.getBusCount (false) > 1))
+            {
+                bool success = filter->setPreferredBusArrangement (false, 0, oldOutputLayout);
+
+                jassert (success);
+                ignoreUnused (success);
+            }
         }
 
         busRestorer.release();
@@ -954,22 +1001,35 @@ public:
         *pluginInput = 0;
         *pluginOutput = 0;
 
-        if ((busUtils.getBusCount (true)  == 0 || busUtils.busIgnoresLayout(true, 0))
-         && (busUtils.getBusCount (false) == 0 || busUtils.busIgnoresLayout(false, 0)))
+        if (! AudioEffectX::allocateArrangement (pluginInput, busUtils.findTotalNumChannels (true)))
             return false;
 
-        if (! AudioEffectX::allocateArrangement (pluginInput, busUtils.getNumChannels (true, 0)))
-            return false;
-
-        if (! AudioEffectX::allocateArrangement (pluginOutput, busUtils.getNumChannels (false, 0)))
+        if (! AudioEffectX::allocateArrangement (pluginOutput, busUtils.findTotalNumChannels (false)))
         {
             AudioEffectX::deallocateArrangement (pluginInput);
             *pluginInput = 0;
             return false;
         }
 
-        SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (true, 0),  **pluginInput);
-        SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (false, 0), **pluginOutput);
+        if (busUtils.getBusCount (true) > 1)
+        {
+            AudioChannelSet layout = AudioChannelSet::canonicalChannelSet (busUtils.findTotalNumChannels(true));
+            SpeakerMappings::channelSetToVstArrangement (layout,  **pluginInput);
+        }
+        else
+        {
+            SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (true, 0),  **pluginInput);
+        }
+
+        if (busUtils.getBusCount (false) > 1)
+        {
+            AudioChannelSet layout = AudioChannelSet::canonicalChannelSet (busUtils.findTotalNumChannels(false));
+            SpeakerMappings::channelSetToVstArrangement (layout,  **pluginOutput);
+        }
+        else
+        {
+            SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (false, 0), **pluginOutput);
+        }
 
         return true;
     }
@@ -1537,6 +1597,8 @@ public:
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
            #endif
+
+             ignoreUnused (fakeMouseGenerator);
         }
 
         ~EditorCompWrapper()
@@ -1723,6 +1785,22 @@ private:
     {
         deleteTempChannels (floatTempBuffers);
         deleteTempChannels (doubleTempBuffers);
+    }
+
+    //==============================================================================
+    void resetAuxChannelsToDefaultLayout (bool isInput) const
+    {
+        // set side-chain and aux channels to their default layout
+        for (int busIdx = 1; busIdx < busUtils.getBusCount (isInput); ++busIdx)
+        {
+            bool success = filter->setPreferredBusArrangement (isInput, busIdx, busUtils.getDefaultLayoutForBus (isInput, busIdx));
+
+            // VST 2 only supports a static channel layout on aux/sidechain channels
+            // You must at least support the default layout regardless of the layout of the main bus.
+            // If this is a problem for your plug-in, then consider using VST-3.
+            jassert (success);
+            ignoreUnused (success);
+        }
     }
 
     //==============================================================================

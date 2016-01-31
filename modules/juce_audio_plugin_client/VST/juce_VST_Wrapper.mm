@@ -34,9 +34,6 @@
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 
-#undef Component
-#undef Point
-
 //==============================================================================
 namespace juce
 {

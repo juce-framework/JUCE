@@ -42,12 +42,8 @@
   #import <MobileCoreServices/MobileCoreServices.h>
   #include <sys/fcntl.h>
  #else
-  #define Point CarbonDummyPointName
-  #define Component CarbonDummyCompName
   #import <Cocoa/Cocoa.h>
   #import <CoreAudio/HostTime.h>
-  #undef Point
-  #undef Component
   #include <sys/dir.h>
  #endif
 

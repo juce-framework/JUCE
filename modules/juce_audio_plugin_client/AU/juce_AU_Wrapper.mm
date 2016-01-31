@@ -48,22 +48,7 @@
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
 #include <CoreMIDI/MIDIServices.h>
-
-#if JUCE_SUPPORT_CARBON
- #define Point CarbonDummyPointName
- #define Component CarbonDummyCompName
-#endif
-
-/*
-    Got an include error here?
-
-    You probably need to install Apple's AU classes - see the
-    juce website for more info on how to get them:
-    http://www.juce.com/forum/topic/aus-xcode
-*/
 #include "CoreAudioUtilityClasses/MusicDeviceBase.h"
-#undef Point
-#undef Component
 
 /** The BUILD_AU_CARBON_UI flag lets you specify whether old-school carbon hosts are supported as
     well as ones that can open a cocoa view. If this is enabled, you'll need to also add the AUCarbonBase
@@ -78,10 +63,7 @@
 #endif
 
 #if BUILD_AU_CARBON_UI
- #undef Button
- #define Point CarbonDummyPointName
  #include "CoreAudioUtilityClasses/AUCarbonViewBase.h"
- #undef Point
 #endif
 
 #ifdef __clang__

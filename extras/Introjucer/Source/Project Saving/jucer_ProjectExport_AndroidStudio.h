@@ -523,6 +523,14 @@ private:
             ndkFlags.add ("cppFlags.add(\"-DNDEBUG=1\")");
         }
 
+        const StringArray& headerSearchPaths = config->getHeaderSearchPaths();
+        for (int i = 0; i < headerSearchPaths.size(); ++i)
+            ndkFlags.add ("cppFlags.add(\"-I" + sanitisePath (headerSearchPaths[i]) + "\".toString())");
+
+        const StringArray& librarySearchPaths = config->getLibrarySearchPaths();
+        for (int i = 0; i < librarySearchPaths.size(); ++i)
+            ndkFlags.add ("cppFlags.add(\"-L" + sanitisePath (librarySearchPaths[i]) + "\".toString())");
+
         {
             StringPairArray preprocessorDefinitions = config->getAllPreprocessorDefs();
             preprocessorDefinitions.set ("JUCE_ANDROID", "1");

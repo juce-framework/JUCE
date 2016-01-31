@@ -29,8 +29,8 @@
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
+#include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_PluginBusUtilities.h"
-#undef Component
 
 #ifdef __clang__
  #pragma clang diagnostic push
@@ -40,7 +40,7 @@
 
 #ifdef _MSC_VER
  #pragma warning (push)
- #pragma warning (disable : 4127)
+ #pragma warning (disable : 4127 4512)
 #endif
 
 #include "AAX_Exports.cpp"
@@ -92,8 +92,6 @@
 #endif
 
 #undef check
-
-using juce::Component;
 
 const int32_t juceChunkType = 'juce';
 
@@ -381,7 +379,7 @@ struct AAXClasses
         }
 
     private:
-        struct ContentWrapperComponent  : public juce::Component
+        struct ContentWrapperComponent  : public Component
         {
             ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor& plugin)
                 : owner (gui)
@@ -448,6 +446,10 @@ struct AAXClasses
 
             ScopedPointer<AudioProcessorEditor> pluginEditor;
             JuceAAX_GUI& owner;
+
+           #if JUCE_WINDOWS
+            WindowsHooks hooks;
+           #endif
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };

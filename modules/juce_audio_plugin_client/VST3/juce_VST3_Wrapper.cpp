@@ -51,9 +51,6 @@
  #endif
 #endif
 
-#undef Point
-#undef Component
-
 namespace juce
 {
 
@@ -639,7 +636,7 @@ private:
 
     private:
         //==============================================================================
-        class ContentWrapperComponent  : public juce::Component
+        class ContentWrapperComponent  : public Component
         {
         public:
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
