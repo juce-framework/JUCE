@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-#include <CoreFoundation/CoreFoundation.h>
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
