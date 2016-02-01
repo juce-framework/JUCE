@@ -147,6 +147,12 @@ public:
     /** Returns the straight-line distance between this point and another one. */
     ValueType getDistanceFrom (Point other) const noexcept          { return juce_hypot (x - other.x, y - other.y); }
 
+    /** Returns the square of the straight-line distance between this point and the origin. */
+    ValueType getDistanceSquaredFromOrigin() const noexcept         { return x * x + y * y; }
+
+    /** Returns the square of the straight-line distance between this point and another one. */
+    ValueType getDistanceSquaredFrom (Point other) const noexcept   { return (*this - other).getDistanceSquaredFromOrigin(); }
+
     /** Returns the angle from this point to another one.
 
         The return value is the number of radians clockwise from the 12 o'clock direction,

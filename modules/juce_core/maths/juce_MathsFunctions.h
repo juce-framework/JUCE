@@ -324,9 +324,9 @@ template <>
 inline float juce_hypot (float a, float b) noexcept
 {
    #if JUCE_MSVC
-    return (_hypotf (a, b));
+    return _hypotf (a, b);
    #else
-    return (hypotf (a, b));
+    return hypotf (a, b);
    #endif
 }
 #endif
