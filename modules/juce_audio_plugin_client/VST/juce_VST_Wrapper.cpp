@@ -110,7 +110,6 @@
 
 class JuceVSTWrapper;
 static bool recursionCheck = false;
-static juce::uint32 lastMasterIdleCall = 0;
 
 namespace juce
 {
@@ -1313,25 +1312,6 @@ public:
         if (hostWindow != 0)
             checkWindowVisibilityVST (hostWindow, editorComp, useNSView);
        #endif
-
-        tryMasterIdle();
-    }
-
-    void tryMasterIdle()
-    {
-        if (Component::isMouseButtonDownAnywhere() && ! recursionCheck)
-        {
-            const juce::uint32 now = juce::Time::getMillisecondCounter();
-
-            if (now > lastMasterIdleCall + 20 && editorComp != nullptr)
-            {
-                lastMasterIdleCall = now;
-
-                recursionCheck = true;
-                masterIdle();
-                recursionCheck = false;
-            }
-        }
     }
 
     void doIdleCallback()
@@ -1340,7 +1320,7 @@ public:
         if (MessageManager::getInstance()->isThisTheMessageThread()
              && ! recursionCheck)
         {
-            recursionCheck = true;
+            ScopedValueSetter<bool> svs (recursionCheck, true, false);
 
             JUCE_AUTORELEASEPOOL
             {
@@ -1349,8 +1329,6 @@ public:
                 for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
                     if (ComponentPeer* p = ComponentPeer::getPeer(i))
                         p->performAnyPendingRepaintsNow();
-
-                recursionCheck = false;
             }
         }
     }
@@ -1386,7 +1364,7 @@ public:
             PopupMenu::dismissAllActiveMenus();
 
             jassert (! recursionCheck);
-            recursionCheck = true;
+            ScopedValueSetter<bool> svs (recursionCheck, true, false);
 
             if (editorComp != nullptr)
             {
@@ -1397,7 +1375,6 @@ public:
                     if (canDeleteLaterIfModal)
                     {
                         shouldDeleteEditor = true;
-                        recursionCheck = false;
                         return;
                     }
                 }
@@ -1422,8 +1399,6 @@ public:
            #if JUCE_LINUX
             hostWindow = 0;
            #endif
-
-            recursionCheck = false;
         }
     }
 
@@ -1579,8 +1554,7 @@ public:
     //==============================================================================
     // A component to hold the AudioProcessorEditor, and cope with some housekeeping
     // chores when it changes or repaints.
-    class EditorCompWrapper  : public Component,
-                               public AsyncUpdater
+    class EditorCompWrapper  : public Component
     {
     public:
         EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor* editor)
@@ -1608,15 +1582,6 @@ public:
         }
 
         void paint (Graphics&) override {}
-
-        void paintOverChildren (Graphics&) override
-        {
-            // this causes an async call to masterIdle() to help
-            // creaky old DAWs like Nuendo repaint themselves while we're
-            // repainting. Otherwise they just seem to give up and sit there
-            // waiting.
-            triggerAsyncUpdate();
-        }
 
        #if JUCE_MAC
         bool keyPressed (const KeyPress&) override
@@ -1669,11 +1634,6 @@ public:
                 wrapper.resizeHostWindow (cw, ch);  // (doing this a second time seems to be necessary in tracktion)
                #endif
             }
-        }
-
-        void handleAsyncUpdate() override
-        {
-            wrapper.tryMasterIdle();
         }
 
        #if JUCE_WINDOWS
