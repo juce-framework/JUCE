@@ -233,11 +233,8 @@ public:
     class Listener
     {
     public:
-        /** Constructor. */
-        Listener();
-
         /** Destructor. */
-        virtual ~Listener();
+        virtual ~Listener() {}
 
         /** Implement this callback to be informed whenever a new expressive
             MIDI note is triggered.

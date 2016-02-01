@@ -132,11 +132,8 @@ public:
     class Listener
     {
     public:
-        /** Constructor. */
-        Listener();
-
         /** Destructor. */
-        virtual ~Listener();
+        virtual ~Listener() {}
 
         /** Implement this callback to be notified about any changes to this
             MPEZoneLayout. Will be called whenever a zone is added, zones are
