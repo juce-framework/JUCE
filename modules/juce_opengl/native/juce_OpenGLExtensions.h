@@ -25,11 +25,6 @@
 #ifndef JUCE_OPENGLEXTENSIONS_H_INCLUDED
 #define JUCE_OPENGLEXTENSIONS_H_INCLUDED
 
-#if JUCE_MAC && (JUCE_PPC || ((! defined (MAC_OS_X_VERSION_10_6)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6))
- #define JUCE_EXT(func) func ## EXT
-#else
- #define JUCE_EXT(func) func
-#endif
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
     @see OpenGLExtensionFunctions
