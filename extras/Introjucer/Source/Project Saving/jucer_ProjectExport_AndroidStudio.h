@@ -295,7 +295,7 @@ private:
     {
         MemoryOutputStream memoryOutputStream;
 
-        memoryOutputStream << "distributionUrl=https\\://services.gradle.org/distributions/gradle-2.9-all.zip";
+        memoryOutputStream << "distributionUrl=https\\://services.gradle.org/distributions/gradle-2.10-all.zip";
 
         overwriteFileIfDifferentOrThrow (folder.getChildFile ("gradle/wrapper/gradle-wrapper.properties"), memoryOutputStream);
     }
@@ -313,7 +313,7 @@ private:
                            << indent << indent << "jcenter()" << newLine
                            << indent << "}" << newLine
                            << indent << "dependencies {" << newLine
-                           << indent << indent << "classpath 'com.android.tools.build:gradle-experimental:0.6.0-alpha3'" << newLine
+                           << indent << indent << "classpath 'com.android.tools.build:gradle-experimental:0.6.0-alpha5'" << newLine
                            << indent << "}" << newLine
                            << "}" << newLine
                            << newLine
