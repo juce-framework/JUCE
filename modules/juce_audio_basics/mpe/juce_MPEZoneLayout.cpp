@@ -197,14 +197,6 @@ void MPEZoneLayout::removeListener (Listener* const listenerToRemove) noexcept
     listeners.remove (listenerToRemove);
 }
 
-MPEZoneLayout::Listener::Listener()
-{
-}
-
-MPEZoneLayout::Listener::~Listener()
-{
-}
-
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

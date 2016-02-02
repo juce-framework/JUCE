@@ -317,6 +317,14 @@ public:
         changing the channel layout of other buses, for example, if your plug-in requires the same
         number of input and output channels.
 
+        For most basic plug-ins, which do not require side-chains, aux buses or detailed audio
+        channel layout information, it is easier to specify the acceptable channel configurations
+        via the "PlugIn Channel Configurations" field in the Introjucer. In this case, you should
+        not override this method.
+
+        If, on the other hand, you decide to override this method then you need to make sure that
+        "PlugIn Channel Configurations" field in the Introjucer is empty.
+
         Note, that you must not do any heavy allocations or calculations in this callback as it may
         be called several hundred times during initialization. If you require any layout specific
         allocations then defer these to prepareToPlay callback.

@@ -135,14 +135,6 @@ void MPEInstrument::removeListener (Listener* const listenerToRemove) noexcept
     listeners.remove (listenerToRemove);
 }
 
-MPEInstrument::Listener::Listener()
-{
-}
-
-MPEInstrument::Listener::~Listener()
-{
-}
-
 //==============================================================================
 void MPEInstrument::processNextMidiEvent (const MidiMessage& message)
 {

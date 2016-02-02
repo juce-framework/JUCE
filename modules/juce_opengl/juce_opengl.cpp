@@ -79,22 +79,28 @@ void OpenGLExtensionFunctions::initialise()
    #if JUCE_WINDOWS || JUCE_LINUX
     #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams) \
         name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
-    #define JUCE_INIT_GL_FUNCTION_EXT(name, returnType, params, callparams) \
+    JUCE_GL_BASE_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    #undef JUCE_INIT_GL_FUNCTION
+
+    #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams) \
         name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name); \
         if (name == nullptr) \
             name = (type_ ## name) OpenGLHelpers::getExtensionFunction (JUCE_STRINGIFY (name ## EXT));
-
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION, JUCE_INIT_GL_FUNCTION_EXT)
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
     #undef JUCE_INIT_GL_FUNCTION
-    #undef JUCE_INIT_GL_FUNCTION_EXT
    #endif
 }
 
 #if JUCE_OPENGL_ES
  #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams) \
-    returnType OpenGLExtensionFunctions::name params { return ::name callparams; }
+    returnType OpenGLExtensionFunctions::name params noexcept { return ::name callparams; }
 
- JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+ JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+ JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+#if JUCE_OPENGL3
+ JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+#endif
+
  #undef JUCE_DECLARE_GL_FUNCTION
 #endif
 

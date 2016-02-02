@@ -230,14 +230,11 @@ public:
         Therefore you should never do heavy work such as graphics rendering etc.
         inside those callbacks.
     */
-    class Listener
+    class JUCE_API  Listener
     {
     public:
-        /** Constructor. */
-        Listener();
-
         /** Destructor. */
-        virtual ~Listener();
+        virtual ~Listener() {}
 
         /** Implement this callback to be informed whenever a new expressive
             MIDI note is triggered.
@@ -280,10 +277,10 @@ public:
 
     //==========================================================================
     /** Adds a listener. */
-    void addListener (Listener* const listenerToAdd) noexcept;
+    void addListener (Listener* listenerToAdd) noexcept;
 
     /** Removes a listener. */
-    void removeListener (Listener* const listenerToRemove) noexcept;
+    void removeListener (Listener* listenerToRemove) noexcept;
 
     //==========================================================================
     /** Puts the instrument into legacy mode.
