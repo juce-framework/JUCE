@@ -429,6 +429,8 @@ private:
     bool kioskModeReentrant;
 
     int allowedOrientations;
+    void allowedOrientationsChanged();
+
     float masterScaleFactor;
 
     ComponentAnimator animator;

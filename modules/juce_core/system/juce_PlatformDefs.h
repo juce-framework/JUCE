@@ -55,9 +55,9 @@
 // Debugging and assertion macros
 
 #if JUCE_LOG_ASSERTIONS || JUCE_DEBUG
- #define juce_LogCurrentAssertion    juce::logAssertion (__FILE__, __LINE__);
+ #define JUCE_LOG_CURRENT_ASSERTION    juce::logAssertion (__FILE__, __LINE__);
 #else
- #define juce_LogCurrentAssertion
+ #define JUCE_LOG_CURRENT_ASSERTION
 #endif
 
 //==============================================================================
@@ -67,20 +67,20 @@
       crash or not, depending on the platform.
       @see jassert()
   */
-  #define juce_breakDebugger        { ::kill (0, SIGTRAP); }
+  #define JUCE_BREAK_IN_DEBUGGER        { ::kill (0, SIGTRAP); }
 #elif JUCE_USE_MSVC_INTRINSICS
   #ifndef __INTEL_COMPILER
     #pragma intrinsic (__debugbreak)
   #endif
-  #define juce_breakDebugger        { __debugbreak(); }
+  #define JUCE_BREAK_IN_DEBUGGER        { __debugbreak(); }
 #elif JUCE_GCC || JUCE_MAC
   #if JUCE_NO_INLINE_ASM
-   #define juce_breakDebugger       { }
+   #define JUCE_BREAK_IN_DEBUGGER       { }
   #else
-   #define juce_breakDebugger       { asm ("int $3"); }
+   #define JUCE_BREAK_IN_DEBUGGER       { asm ("int $3"); }
   #endif
 #else
-  #define juce_breakDebugger        { __asm int 3 }
+  #define JUCE_BREAK_IN_DEBUGGER        { __asm int 3 }
 #endif
 
 #if JUCE_CLANG && defined (__has_feature) && ! defined (JUCE_ANALYZER_NORETURN)
@@ -96,7 +96,7 @@
 
 //==============================================================================
 #if JUCE_MSVC && ! DOXYGEN
- #define MACRO_WITH_FORCED_SEMICOLON(x) \
+ #define JUCE_BLOCK_WITH_FORCED_SEMICOLON(x) \
    __pragma(warning(push)) \
    __pragma(warning(disable:4127)) \
    do { x } while (false) \
@@ -105,23 +105,29 @@
  /** This is the good old C++ trick for creating a macro that forces the user to put
     a semicolon after it when they use it.
  */
- #define MACRO_WITH_FORCED_SEMICOLON(x) do { x } while (false)
+ #define JUCE_BLOCK_WITH_FORCED_SEMICOLON(x) do { x } while (false)
 #endif
 
 //==============================================================================
-#if JUCE_DEBUG || DOXYGEN
+#if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || DOXYGEN
   /** Writes a string to the standard error stream.
-      This is only compiled in a debug build.
+      Note that as well as a single string, you can use this to write multiple items
+      as a stream, e.g.
+      @code
+        DBG ("foo = " << foo << "bar = " << bar);
+      @endcode
+      The macro is only enabled in a debug build, so be careful not to use it with expressions
+      that have important side-effects!
       @see Logger::outputDebugString
   */
-  #define DBG(dbgtext)              MACRO_WITH_FORCED_SEMICOLON (juce::String tempDbgBuf; tempDbgBuf << dbgtext; juce::Logger::outputDebugString (tempDbgBuf);)
+  #define DBG(textToWrite)          JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::String tempDbgBuf; tempDbgBuf << textToWrite; juce::Logger::outputDebugString (tempDbgBuf);)
 
   //==============================================================================
   /** This will always cause an assertion failure.
       It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).
       @see jassert
   */
-  #define jassertfalse              MACRO_WITH_FORCED_SEMICOLON (juce_LogCurrentAssertion; if (juce::juce_isRunningUnderDebugger()) juce_breakDebugger; JUCE_ANALYZER_NORETURN)
+  #define jassertfalse              JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION; if (juce::juce_isRunningUnderDebugger()) JUCE_BREAK_IN_DEBUGGER; JUCE_ANALYZER_NORETURN)
 
   //==============================================================================
   /** Platform-independent assertion macro.
@@ -131,19 +137,19 @@
       correct behaviour of your program!
       @see jassertfalse
   */
-  #define jassert(expression)       MACRO_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
+  #define jassert(expression)       JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
 
 #else
   //==============================================================================
   // If debugging is disabled, these dummy debug and assertion macros are used..
 
-  #define DBG(dbgtext)
-  #define jassertfalse              MACRO_WITH_FORCED_SEMICOLON (juce_LogCurrentAssertion)
+  #define DBG(textToWrite)
+  #define jassertfalse              JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION)
 
   #if JUCE_LOG_ASSERTIONS
-   #define jassert(expression)      MACRO_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
+   #define jassert(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
   #else
-   #define jassert(a)               MACRO_WITH_FORCED_SEMICOLON ( ; )
+   #define jassert(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON ( ; )
   #endif
 
 #endif
@@ -250,40 +256,6 @@
  #define JUCE_COMPILER_WARNING(message)  _Pragma(JUCE_STRINGIFY (JUCE_WARNING_HELPER (message)))
 #endif
 
-
-//==============================================================================
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-
-  #define JUCE_TRY try
-
-  #define JUCE_CATCH_ALL            catch (...) {}
-  #define JUCE_CATCH_ALL_ASSERT     catch (...) { jassertfalse; }
-
-  #if ! JUCE_MODULE_AVAILABLE_juce_gui_basics
-    #define JUCE_CATCH_EXCEPTION    JUCE_CATCH_ALL
-  #else
-    /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplicationBase
-        object so they can be logged by the application if it wants to.
-    */
-    #define JUCE_CATCH_EXCEPTION \
-      catch (const std::exception& e)  \
-      { \
-          juce::JUCEApplicationBase::sendUnhandledException (&e, __FILE__, __LINE__); \
-      } \
-      catch (...) \
-      { \
-          juce::JUCEApplicationBase::sendUnhandledException (nullptr, __FILE__, __LINE__); \
-      }
-  #endif
-
-#else
-
-  #define JUCE_TRY
-  #define JUCE_CATCH_EXCEPTION
-  #define JUCE_CATCH_ALL
-  #define JUCE_CATCH_ALL_ASSERT
-
-#endif
 
 //==============================================================================
 #if JUCE_DEBUG || DOXYGEN

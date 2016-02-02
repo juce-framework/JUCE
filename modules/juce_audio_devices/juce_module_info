@@ -22,7 +22,7 @@
                       "native/*" ],
 
   "OSXFrameworks":  "CoreAudio CoreMIDI DiscRecording",
-  "iOSFrameworks":  "AudioToolbox CoreMIDI",
+  "iOSFrameworks":  "AudioToolbox CoreMIDI CoreAudio AVFoundation",
   "LinuxLibs":      "asound",
   "mingwLibs":      "winmm"
 }

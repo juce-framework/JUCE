@@ -111,7 +111,7 @@ void DrawableImage::recalculateCoordinates (Expression::Scope* scope)
                                                               bl.x, bl.y));
 
         if (t.isSingularity())
-            t = AffineTransform::identity;
+            t = AffineTransform();
 
         setTransform (t);
     }

@@ -29,25 +29,7 @@
 #ifndef JUCE_CORE_H_INCLUDED
 #define JUCE_CORE_H_INCLUDED
 
-#ifndef JUCE_MODULE_AVAILABLE_juce_core
- /* If you fail to make sure that all your compile units are building JUCE with the same set of
-    option flags, then there's a risk that different compile units will treat the classes as having
-    different memory layouts, leading to very nasty memory corruption errors when they all get
-    linked together. That's why it's best to always include the Introjucer-generated AppConfig.h
-    file before any juce headers.
-
-    Note that if you do have an AppConfig.h file and hit this warning, it means that it doesn't
-    contain the JUCE_MODULE_AVAILABLE_xxx flags, which are necessary for some inter-module
-    functionality to work correctly. In that case, you should either rebuild your AppConfig.h with
-    the latest introjucer, or fix it manually to contain these flags.
- */
- #ifdef _MSC_VER
-  #pragma message ("Have you included your AppConfig.h file before including the JUCE headers?")
- #else
-  #warning "Have you included your AppConfig.h file before including the JUCE headers?"
- #endif
-#endif
-
+//==============================================================================
 #ifdef _MSC_VER
  #pragma warning (push)
  // Disable warnings for long class names, padding, and undefined preprocessor definitions.
@@ -57,7 +39,6 @@
  #endif
 #endif
 
-//==============================================================================
 #include "system/juce_TargetPlatform.h"
 
 //=============================================================================
@@ -168,7 +149,7 @@ class FileOutputStream;
 class XmlElement;
 class JSONFormatter;
 
-extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
+extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
 extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
 
 #include "memory/juce_Memory.h"

@@ -457,7 +457,7 @@ void LookAndFeel_V3::drawLinearSliderBackground (Graphics& g, int x, int y, int 
 void LookAndFeel_V3::drawPopupMenuBackground (Graphics& g, int width, int height)
 {
     g.fillAll (findColour (PopupMenu::backgroundColourId));
-    (void) width; (void) height;
+    ignoreUnused (width, height);
 
    #if ! JUCE_MAC
     g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.6f));

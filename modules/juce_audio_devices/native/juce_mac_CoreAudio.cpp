@@ -31,6 +31,12 @@
 #ifdef __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wnonnull" // aovid some spurious 10.11 SDK warnings
+
+ // The AudioHardwareService stuff was deprecated in 10.11 but there's no replacement yet,
+ // so we'll have to silence the warnings here and revisit it in a future OS version..
+ #if defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_11
+  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+ #endif
 #endif
 
 //==============================================================================

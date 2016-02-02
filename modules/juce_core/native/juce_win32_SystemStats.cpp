@@ -107,7 +107,13 @@ void CPUInformation::initialise() noexcept
     hasSSE3  = (info[2] & (1 <<  0)) != 0;
     hasAVX   = (info[2] & (1 << 28)) != 0;
     hasSSSE3 = (info[2] & (1 <<  9)) != 0;
+    hasSSE41 = (info[2] & (1 << 19)) != 0;
+    hasSSE42 = (info[2] & (1 << 20)) != 0;
     has3DNow = (info[1] & (1 << 31)) != 0;
+
+    callCPUID (info, 7);
+
+    hasAVX2 = (info[1] & (1 << 5)) != 0;
 
     SYSTEM_INFO systemInfo;
     GetNativeSystemInfo (&systemInfo);
@@ -275,7 +281,7 @@ public:
 
        #if JUCE_WIN32_TIMER_PERIOD > 0
         const MMRESULT res = timeBeginPeriod (JUCE_WIN32_TIMER_PERIOD);
-        (void) res;
+        ignoreUnused (res);
         jassert (res == TIMERR_NOERROR);
        #endif
 

@@ -22,12 +22,8 @@
   ==============================================================================
 */
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
-
+#include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
-#include "../../juce_core/native/juce_mac_ClangBugWorkaround.h"
 
 #if JucePlugin_Build_AU
 
@@ -52,22 +48,7 @@
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
 #include <CoreMIDI/MIDIServices.h>
-
-#if JUCE_SUPPORT_CARBON
- #define Point CarbonDummyPointName
- #define Component CarbonDummyCompName
-#endif
-
-/*
-    Got an include error here?
-
-    You probably need to install Apple's AU classes - see the
-    juce website for more info on how to get them:
-    http://www.juce.com/forum/topic/aus-xcode
-*/
 #include "CoreAudioUtilityClasses/MusicDeviceBase.h"
-#undef Point
-#undef Component
 
 /** The BUILD_AU_CARBON_UI flag lets you specify whether old-school carbon hosts are supported as
     well as ones that can open a cocoa view. If this is enabled, you'll need to also add the AUCarbonBase
@@ -82,10 +63,7 @@
 #endif
 
 #if BUILD_AU_CARBON_UI
- #undef Button
- #define Point CarbonDummyPointName
  #include "CoreAudioUtilityClasses/AUCarbonViewBase.h"
- #undef Point
 #endif
 
 #ifdef __clang__
@@ -266,9 +244,21 @@ public:
     }
 
     //==============================================================================
-    bool BusCountWritable (AudioUnitScope) override
+    bool BusCountWritable (AudioUnitScope scope) override
     {
-        return busUtils.hasDynamicInBuses() || busUtils.hasDynamicOutBuses();
+        bool isInput;
+
+        if (scopeToDirection (scope, isInput) != noErr)
+            return false;
+
+       #if JucePlugin_IsMidiEffect
+        return false;
+       #elif JucePlugin_IsSynth
+        if (isInput) return busUtils.hasDynamicInBuses();
+       #endif
+
+        return isInput ? (busUtils.getBusCount (true)  > 1 && busUtils.hasDynamicInBuses())
+                       : (busUtils.getBusCount (false) > 1 && busUtils.hasDynamicOutBuses());
     }
 
     OSStatus SetBusCount (AudioUnitScope scope, UInt32 count) override
@@ -382,6 +372,11 @@ public:
                     outWritable = true;
                     return noErr;
 
+                case kAudioUnitProperty_SupportsMPE:
+                    outDataSize = sizeof (UInt32);
+                    outWritable = false;
+                    return noErr;
+
                 default: break;
             }
         }
@@ -413,6 +408,10 @@ public:
 
                 case kAudioUnitProperty_BypassEffect:
                     *(UInt32*) outData = isBypassed ? 1 : 0;
+                    return noErr;
+
+                case kAudioUnitProperty_SupportsMPE:
+                    *(UInt32*) outData = (juceFilter != nullptr && juceFilter->supportsMPE()) ? 1 : 0;
                     return noErr;
 
                 case kAudioUnitProperty_CocoaUI:

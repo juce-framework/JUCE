@@ -981,7 +981,7 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
     if (preserveProportions)
     {
         if (w <= 0 || h <= 0 || boundsRect.isEmpty())
-            return AffineTransform::identity;
+            return AffineTransform();
 
         float newW, newH;
         const float srcRatio = boundsRect.getHeight() / boundsRect.getWidth();
@@ -1030,7 +1030,7 @@ bool Path::contains (const float x, const float y, const float tolerance) const
          || y <= bounds.pathYMin || y >= bounds.pathYMax)
         return false;
 
-    PathFlatteningIterator i (*this, AffineTransform::identity, tolerance);
+    PathFlatteningIterator i (*this, AffineTransform(), tolerance);
 
     int positiveCrossings = 0;
     int negativeCrossings = 0;
@@ -1062,7 +1062,7 @@ bool Path::contains (const Point<float> point, const float tolerance) const
 
 bool Path::intersectsLine (const Line<float>& line, const float tolerance)
 {
-    PathFlatteningIterator i (*this, AffineTransform::identity, tolerance);
+    PathFlatteningIterator i (*this, AffineTransform(), tolerance);
     Point<float> intersection;
 
     while (i.next())
@@ -1085,7 +1085,7 @@ Line<float> Path::getClippedLine (const Line<float>& line, const bool keepSectio
     }
     else
     {
-        PathFlatteningIterator i (*this, AffineTransform::identity);
+        PathFlatteningIterator i (*this, AffineTransform());
         Point<float> intersection;
 
         while (i.next())

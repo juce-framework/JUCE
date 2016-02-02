@@ -609,7 +609,7 @@ private:
         if (! iOS) // (NB: on iOS this causes error ITMS-90032 during publishing)
             addPlistDictionaryKey (dict, "CFBundleIconFile", iconFile.exists() ? iconFile.getFileName() : String());
 
-        addPlistDictionaryKey (dict, "CFBundleIdentifier",          project.getBundleIdentifier().toString());
+        addPlistDictionaryKey (dict, "CFBundleIdentifier",          "$(PRODUCT_BUNDLE_IDENTIFIER)");
         addPlistDictionaryKey (dict, "CFBundleName",                projectName);
         addPlistDictionaryKey (dict, "CFBundlePackageType",         xcodePackageType);
         addPlistDictionaryKey (dict, "CFBundleSignature",           xcodeBundleSignature);
@@ -790,8 +790,12 @@ private:
         }
 
         if (config.isDebug())
-             if (config.getMacArchitecture() == osxArch_Default || config.getMacArchitecture().isEmpty())
-                 s.add ("ONLY_ACTIVE_ARCH = YES");
+        {
+            s.add ("ENABLE_TESTABILITY = YES");
+
+            if (config.getMacArchitecture() == osxArch_Default || config.getMacArchitecture().isEmpty())
+                s.add ("ONLY_ACTIVE_ARCH = YES");
+        }
 
         if (iOS)
         {
@@ -816,6 +820,8 @@ private:
     StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
     {
         StringArray s;
+
+        s.add ("PRODUCT_BUNDLE_IDENTIFIER = " + project.getBundleIdentifier().toString());
 
         const String arch (config.getMacArchitecture());
         if (arch == osxArch_Native)                s.add ("ARCHS = \"$(NATIVE_ARCH_ACTUAL)\"");
@@ -1364,25 +1370,26 @@ private:
     {
         AppIconType types[] =
         {
-            { "iphone", "29x29",   "Icon-Small.png",             "1x", 29  },
-            { "iphone", "29x29",   "Icon-Small@2x.png",          "2x", 58  },
-            { "iphone", "29x29",   "Icon-Small@3x.png",          "3x", 87  },
-            { "iphone", "40x40",   "Icon-Spotlight-40@2x.png",   "2x", 80  },
-            { "iphone", "40x40",   "Icon-Spotlight-40@3x.png",   "3x", 120 },
-            { "iphone", "57x57",   "Icon.png",                   "1x", 57  },
-            { "iphone", "57x57",   "Icon@2x.png",                "2x", 114 },
-            { "iphone", "60x60",   "Icon-60@2x.png",             "2x", 120 },
-            { "iphone", "60x60",   "Icon-@3x.png",               "3x", 180 },
-            { "ipad",   "29x29",   "Icon-Small-1.png",           "1x", 29  },
-            { "ipad",   "29x29",   "Icon-Small@2x-1.png",        "2x", 58  },
-            { "ipad",   "40x40",   "Icon-Spotlight-40.png",      "1x", 40  },
-            { "ipad",   "40x40",   "Icon-Spotlight-40@2x-1.png", "2x", 80  },
-            { "ipad",   "50x50",   "Icon-Small-50.png",          "1x", 50  },
-            { "ipad",   "50x50",   "Icon-Small-50@2x.png",       "2x", 100 },
-            { "ipad",   "72x72",   "Icon-72.png",                "1x", 72  },
-            { "ipad",   "72x72",   "Icon-72@2x.png",             "2x", 144 },
-            { "ipad",   "76x76",   "Icon-76.png",                "1x", 76  },
-            { "ipad",   "76x76",   "Icon-76@2x.png",             "2x", 152 }
+            { "iphone", "29x29",     "Icon-29.png",                "1x", 29  },
+            { "iphone", "29x29",     "Icon-29@2x.png",             "2x", 58  },
+            { "iphone", "29x29",     "Icon-29@3x.png",             "3x", 87  },
+            { "iphone", "40x40",     "Icon-Spotlight-40@2x.png",   "2x", 80  },
+            { "iphone", "40x40",     "Icon-Spotlight-40@3x.png",   "3x", 120 },
+            { "iphone", "57x57",     "Icon.png",                   "1x", 57  },
+            { "iphone", "57x57",     "Icon@2x.png",                "2x", 114 },
+            { "iphone", "60x60",     "Icon-60@2x.png",             "2x", 120 },
+            { "iphone", "60x60",     "Icon-@3x.png",               "3x", 180 },
+            { "ipad",   "29x29",     "Icon-Small-1.png",           "1x", 29  },
+            { "ipad",   "29x29",     "Icon-Small@2x-1.png",        "2x", 58  },
+            { "ipad",   "40x40",     "Icon-Spotlight-40.png",      "1x", 40  },
+            { "ipad",   "40x40",     "Icon-Spotlight-40@2x-1.png", "2x", 80  },
+            { "ipad",   "50x50",     "Icon-Small-50.png",          "1x", 50  },
+            { "ipad",   "50x50",     "Icon-Small-50@2x.png",       "2x", 100 },
+            { "ipad",   "72x72",     "Icon-72.png",                "1x", 72  },
+            { "ipad",   "72x72",     "Icon-72@2x.png",             "2x", 144 },
+            { "ipad",   "76x76",     "Icon-76.png",                "1x", 76  },
+            { "ipad",   "76x76",     "Icon-76@2x.png",             "2x", 152 },
+            { "ipad",   "83.5x83.5", "Icon-83.5@2x.png",           "2x", 167 }
         };
 
         return Array<AppIconType> (types, numElementsInArray (types));

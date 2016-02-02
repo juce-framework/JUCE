@@ -25,36 +25,17 @@
 #ifndef JUCE_OPENGLEXTENSIONS_H_INCLUDED
 #define JUCE_OPENGLEXTENSIONS_H_INCLUDED
 
-#if JUCE_MAC && (JUCE_PPC || ((! defined (MAC_OS_X_VERSION_10_6)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6))
- #define JUCE_EXT(func) func ## EXT
-#else
- #define JUCE_EXT(func) func
-#endif
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
     @see OpenGLExtensionFunctions
 */
-#define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION) \
+#define JUCE_GL_BASE_FUNCTIONS(USE_FUNCTION) \
     USE_FUNCTION (glActiveTexture,          void, (GLenum p1), (p1))\
     USE_FUNCTION (glBindBuffer,             void, (GLenum p1, GLuint p2), (p1, p2))\
     USE_FUNCTION (glDeleteBuffers,          void, (GLsizei p1, const GLuint* p2), (p1, p2))\
     USE_FUNCTION (glGenBuffers,             void, (GLsizei p1, GLuint* p2), (p1, p2))\
     USE_FUNCTION (glBufferData,             void, (GLenum p1, GLsizeiptr p2, const GLvoid* p3, GLenum p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glBufferSubData,          void, (GLenum p1, GLintptr p2, GLsizeiptr p3, const GLvoid* p4), (p1, p2, p3, p4))\
-    EXT_FUNCTION (glIsRenderbuffer,         GLboolean, (GLuint p1), (p1))\
-    EXT_FUNCTION (glBindRenderbuffer,       void, (GLenum p1, GLuint p2), (p1, p2))\
-    EXT_FUNCTION (glDeleteRenderbuffers,    void, (GLsizei p1, const GLuint* p2), (p1, p2))\
-    EXT_FUNCTION (glGenRenderbuffers,       void, (GLsizei p1, GLuint* p2), (p1, p2))\
-    EXT_FUNCTION (glRenderbufferStorage,    void, (GLenum p1, GLenum p2, GLsizei p3, GLsizei p4), (p1, p2, p3, p4))\
-    EXT_FUNCTION (glGetRenderbufferParameteriv,  void, (GLenum p1, GLenum p2, GLint* p3), (p1, p2, p3))\
-    EXT_FUNCTION (glIsFramebuffer,          GLboolean, (GLuint p1), (p1))\
-    EXT_FUNCTION (glBindFramebuffer,        void, (GLenum p1, GLuint p2), (p1, p2))\
-    EXT_FUNCTION (glDeleteFramebuffers,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
-    EXT_FUNCTION (glGenFramebuffers,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
-    EXT_FUNCTION (glCheckFramebufferStatus, GLenum, (GLenum p1), (p1))\
-    EXT_FUNCTION (glFramebufferTexture2D,   void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4, GLint p5), (p1, p2, p3, p4, p5))\
-    EXT_FUNCTION (glFramebufferRenderbuffer,  void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4), (p1, p2, p3, p4))\
-    EXT_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glCreateProgram,          GLuint, (), ())\
     USE_FUNCTION (glDeleteProgram,          void, (GLuint p1), (p1))\
     USE_FUNCTION (glCreateShader,           GLuint, (GLenum p1), (p1))\
@@ -84,6 +65,33 @@
     USE_FUNCTION (glUniformMatrix3fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glUniformMatrix4fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))
 
+/** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
+    @see OpenGLExtensionFunctions
+*/
+#define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION) \
+    USE_FUNCTION (glIsRenderbuffer,         GLboolean, (GLuint p1), (p1))\
+    USE_FUNCTION (glBindRenderbuffer,       void, (GLenum p1, GLuint p2), (p1, p2))\
+    USE_FUNCTION (glDeleteRenderbuffers,    void, (GLsizei p1, const GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glGenRenderbuffers,       void, (GLsizei p1, GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glRenderbufferStorage,    void, (GLenum p1, GLenum p2, GLsizei p3, GLsizei p4), (p1, p2, p3, p4))\
+    USE_FUNCTION (glGetRenderbufferParameteriv,  void, (GLenum p1, GLenum p2, GLint* p3), (p1, p2, p3))\
+    USE_FUNCTION (glIsFramebuffer,          GLboolean, (GLuint p1), (p1))\
+    USE_FUNCTION (glBindFramebuffer,        void, (GLenum p1, GLuint p2), (p1, p2))\
+    USE_FUNCTION (glDeleteFramebuffers,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glGenFramebuffers,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glCheckFramebufferStatus, GLenum, (GLenum p1), (p1))\
+    USE_FUNCTION (glFramebufferTexture2D,   void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4, GLint p5), (p1, p2, p3, p4, p5))\
+    USE_FUNCTION (glFramebufferRenderbuffer,  void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4), (p1, p2, p3, p4))\
+    USE_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))
+
+/** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
+    @see OpenGLExtensionFunctions
+*/
+#define JUCE_GL_VERTEXBUFFER_FUNCTIONS(USE_FUNCTION) \
+    USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glBindVertexArray,        void, (GLuint p1), (p1))
+
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded
     for a specific GL context, or simply call-through to the appropriate OS function where available.
@@ -101,24 +109,45 @@ struct OpenGLExtensionFunctions
     //==============================================================================
    #if JUCE_WINDOWS
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    #if JUCE_OPENGL3
+     JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    #endif
+
     //==============================================================================
    #elif JUCE_LINUX
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (*type_ ## name) params; type_ ## name name;
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    #if JUCE_OPENGL3
+     JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    #endif
+
     //==============================================================================
    #elif JUCE_OPENGL_ES
-    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      static returnType name params;
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      static returnType name params noexcept;
+    JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+
     //==============================================================================
    #else
-    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params { return ::name callparams; }
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params noexcept { return ::name callparams; }
+    JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+
+    #ifndef GL3_PROTOTYPES
+     #undef JUCE_DECLARE_GL_FUNCTION
+     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)     inline static returnType name params noexcept { return ::name ## EXT callparams; }
+    #endif
+     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+
     #if JUCE_OPENGL3
-     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
-    #else
-     #define JUCE_DECLARE_GL_FUNCTION_EXT(name, returnType, params, callparams)  inline static returnType name params { return ::name ## EXT callparams; }
-     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION_EXT)
-     #undef JUCE_DECLARE_GL_FUNCTION_EXT
+     #ifndef GL3_PROTOTYPES
+      #undef JUCE_DECLARE_GL_FUNCTION
+      #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)    inline static returnType name params noexcept { return ::name ## APPLE callparams; }
+     #endif
+     JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
     #endif
    #endif
 

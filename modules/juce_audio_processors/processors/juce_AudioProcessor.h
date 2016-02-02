@@ -317,6 +317,14 @@ public:
         changing the channel layout of other buses, for example, if your plug-in requires the same
         number of input and output channels.
 
+        For most basic plug-ins, which do not require side-chains, aux buses or detailed audio
+        channel layout information, it is easier to specify the acceptable channel configurations
+        via the "PlugIn Channel Configurations" field in the Introjucer. In this case, you should
+        not override this method.
+
+        If, on the other hand, you decide to override this method then you need to make sure that
+        "PlugIn Channel Configurations" field in the Introjucer is empty.
+
         Note, that you must not do any heavy allocations or calculations in this callback as it may
         be called several hundred times during initialization. If you require any layout specific
         allocations then defer these to prepareToPlay callback.
@@ -423,7 +431,7 @@ public:
         This can be called from your processBlock() method - it's not guaranteed
         to be valid at any other time, and may return 0 if it's unknown.
     */
-    double getSampleRate() const noexcept                       { return sampleRate; }
+    double getSampleRate() const noexcept                       { return currentSampleRate; }
 
     /** Returns the current typical block size that is being used.
 
@@ -464,6 +472,9 @@ public:
 
     /** Returns true if the processor produces midi messages. */
     virtual bool producesMidi() const = 0;
+
+    /** Returns true if the processor supports MPE. */
+    virtual bool supportsMPE() const                            { return false; }
 
     //==============================================================================
     /** This returns a critical section that will automatically be locked while the host
@@ -968,7 +979,7 @@ protected:
 private:
     Array<AudioProcessorListener*> listeners;
     Component::SafePointer<AudioProcessorEditor> activeEditor;
-    double sampleRate;
+    double currentSampleRate;
     int blockSize, latencySamples;
    #if JUCE_DEBUG
     bool textRecursionCheck;

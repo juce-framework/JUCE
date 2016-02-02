@@ -279,7 +279,7 @@ public:
     {
        #if JUCE_OPENGL3
         if (vertexArrayObject != 0)
-            glBindVertexArray (vertexArrayObject);
+            context.extensions.glBindVertexArray (vertexArrayObject);
        #endif
     }
 
@@ -454,21 +454,24 @@ public:
         context.makeActive();
        #endif
 
+        context.extensions.initialise();
+
        #if JUCE_OPENGL3
         if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
         {
-            glGenVertexArrays (1, &vertexArrayObject);
+            context.extensions.glGenVertexArrays (1, &vertexArrayObject);
             bindVertexArray();
         }
        #endif
 
         glViewport (0, 0, component.getWidth(), component.getHeight());
 
-        context.extensions.initialise();
         nativeContext->setSwapInterval (1);
 
        #if ! JUCE_OPENGL_ES
+        JUCE_CHECK_OPENGL_ERROR
         shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
+        clearGLError();
        #endif
 
         if (context.renderer != nullptr)
@@ -482,7 +485,7 @@ public:
 
        #if JUCE_OPENGL3
         if (vertexArrayObject != 0)
-            glDeleteVertexArrays (1, &vertexArrayObject);
+            context.extensions.glDeleteVertexArrays (1, &vertexArrayObject);
        #endif
 
         associatedObjectNames.clear();

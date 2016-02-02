@@ -455,7 +455,7 @@ public:
 
     tresult PLUGIN_API requestOpenEditor (FIDString name) override
     {
-        (void) name;
+        ignoreUnused (name);
         jassertfalse;
         return kResultFalse;
     }
@@ -1576,6 +1576,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginWindow)
 };
 
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4996) // warning about overriding deprecated methods
+#endif
+
 //==============================================================================
 class VST3PluginInstance : public AudioPluginInstance
 {
@@ -1665,8 +1670,8 @@ public:
         createPluginDescription (description, module->file,
                                  company, module->name,
                                  *info, info2, infoW,
-                                 getNumInputChannels(),
-                                 getNumOutputChannels());
+                                 getTotalNumInputChannels(),
+                                 getTotalNumOutputChannels());
     }
 
     void* getPlatformSpecificData() override   { return component; }
@@ -1754,19 +1759,15 @@ public:
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
-        JUCE_TRY
-        {
-            isActive = false;
+        isActive = false;
 
-            setStateForAllBusses (false);
+        setStateForAllBusses (false);
 
-            if (processor != nullptr)
-                warnOnFailure (processor->setProcessing (false));
+        if (processor != nullptr)
+            warnOnFailure (processor->setProcessing (false));
 
-            if (component != nullptr)
-                warnOnFailure (component->setActive (false));
-        }
-        JUCE_CATCH_ALL_ASSERT
+        if (component != nullptr)
+            warnOnFailure (component->setActive (false));
     }
 
     bool supportsDoublePrecisionProcessing() const override
@@ -1808,7 +1809,7 @@ public:
 
         updateTimingInformation (data, getSampleRate());
 
-        for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
+        for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
         associateTo (data, buffer);
@@ -1845,18 +1846,14 @@ public:
 
     bool isInputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumInputChannels())
-            return false;
-
-        return getBusInfo (true, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumInputChannels())
+                 && getBusInfo (true, true).channelCount == 2;
     }
 
     bool isOutputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumOutputChannels())
-            return false;
-
-        return getBusInfo (false, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumOutputChannels())
+                 && getBusInfo (false, true).channelCount == 2;
     }
 
     bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
@@ -1876,10 +1873,10 @@ public:
     {
         if (processor != nullptr)
         {
-            const double currentSampleRate = getSampleRate();
+            const double sampleRate = getSampleRate();
 
-            if (currentSampleRate > 0.0)
-                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / currentSampleRate;
+            if (sampleRate > 0.0)
+                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / sampleRate;
         }
 
         return 0.0;
@@ -2023,8 +2020,7 @@ public:
     /** @note Not applicable to VST3 */
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override
     {
-        (void) data;
-        (void) sizeInBytes;
+        ignoreUnused (data, sizeInBytes);
     }
 
     //==============================================================================
@@ -2459,6 +2455,10 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginInstance)
 };
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
 
 };
 

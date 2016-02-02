@@ -601,7 +601,7 @@ private:
         else
        #endif
         {
-            (void) modal; // (to avoid an unused variable warning)
+            ignoreUnused (modal);
 
             alertBox->enterModalState (true, callback, true);
             alertBox.release();

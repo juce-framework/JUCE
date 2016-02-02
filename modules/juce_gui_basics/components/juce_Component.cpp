@@ -1359,7 +1359,7 @@ bool Component::isTransformed() const noexcept
 
 AffineTransform Component::getTransform() const
 {
-    return affineTransform != nullptr ? *affineTransform : AffineTransform::identity;
+    return affineTransform != nullptr ? *affineTransform : AffineTransform();
 }
 
 //==============================================================================
@@ -1721,50 +1721,46 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus,
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    // Check for an attempt to make a component modal when it already is!
-    // This can cause nasty problems..
-    jassert (! flags.currentlyModalFlag);
-
     if (! isCurrentlyModal())
     {
-        ModalComponentManager* const mcm = ModalComponentManager::getInstance();
-        mcm->startModal (this, deleteWhenDismissed);
-        mcm->attachCallback (this, callback);
+        ModalComponentManager& mcm = *ModalComponentManager::getInstance();
+        mcm.startModal (this, deleteWhenDismissed);
+        mcm.attachCallback (this, callback);
 
-        flags.currentlyModalFlag = true;
         setVisible (true);
 
         if (shouldTakeKeyboardFocus)
             grabKeyboardFocus();
     }
+    else
+    {
+        // Probably a bad idea to try to make a component modal twice!
+        jassertfalse;
+    }
 }
 
 void Component::exitModalState (const int returnValue)
 {
-    if (flags.currentlyModalFlag)
+    if (isCurrentlyModal())
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            ModalComponentManager::getInstance()->endModal (this, returnValue);
-            flags.currentlyModalFlag = false;
-
-            ModalComponentManager::getInstance()->bringModalComponentsToFront();
+            ModalComponentManager& mcm = *ModalComponentManager::getInstance();
+            mcm.endModal (this, returnValue);
+            mcm.bringModalComponentsToFront();
         }
         else
         {
-            class ExitModalStateMessage   : public CallbackMessage
+            struct ExitModalStateMessage   : public CallbackMessage
             {
-            public:
-                ExitModalStateMessage (Component* const c, const int res)
-                    : target (c), result (res)   {}
+                ExitModalStateMessage (Component* c, int res)  : target (c), result (res)  {}
 
                 void messageCallback() override
                 {
-                    if (target.get() != nullptr) // (get() required for VS2003 bug)
-                        target->exitModalState (result);
+                    if (Component* c = target)
+                        c->exitModalState (result);
                 }
 
-            private:
                 WeakReference<Component> target;
                 int result;
             };
@@ -1776,8 +1772,7 @@ void Component::exitModalState (const int returnValue)
 
 bool Component::isCurrentlyModal() const noexcept
 {
-    return flags.currentlyModalFlag
-            && getCurrentlyModalComponent() == this;
+    return getCurrentlyModalComponent() == this;
 }
 
 bool Component::isCurrentlyBlockedByAnotherModalComponent() const
@@ -2969,14 +2964,18 @@ bool Component::isMouseButtonDown() const
     return false;
 }
 
-bool Component::isMouseOverOrDragging() const
+bool Component::isMouseOverOrDragging (const bool includeChildren) const
 {
     const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
 
     for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-        if (mi->getComponentUnderMouse() == this
+    {
+        Component* const c = mi->getComponentUnderMouse();
+
+        if ((c == this || (includeChildren && isParentOf (c)))
               && (mi->isMouse() || mi->isDragging()))
             return true;
+    }
 
     return false;
 }

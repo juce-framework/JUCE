@@ -43,6 +43,15 @@
 */
 
 //==============================================================================
+#ifdef JUCE_APP_CONFIG_HEADER
+ #include JUCE_APP_CONFIG_HEADER
+#else
+ // Your project must contain an AppConfig.h file with your project-specific settings in it,
+ // and your header search path must make it accessible to the module's files.
+ #include "AppConfig.h"
+#endif
+
+//==============================================================================
 #if (defined (_WIN32) || defined (_WIN64))
   #define       JUCE_WIN32 1
   #define       JUCE_WINDOWS 1
@@ -52,12 +61,8 @@
 #elif defined (LINUX) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
-  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
-  #define Component CarbonDummyCompName
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
   #include "../native/juce_mac_ClangBugWorkaround.h"
-  #undef Point
-  #undef Component
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1

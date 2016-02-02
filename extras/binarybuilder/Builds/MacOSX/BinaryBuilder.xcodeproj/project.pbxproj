@@ -495,6 +495,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rawmaterialsoftware.binarybuilder;
 				SDKROOT_ppc = macosx10.5; }; name = Debug; };
 		145C0C90E41D8DECE4DD66AD = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
@@ -516,10 +517,12 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rawmaterialsoftware.binarybuilder;
 				SDKROOT_ppc = macosx10.5; }; name = Release; };
 		D9552CAECBA3D7D5725848E5 = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;

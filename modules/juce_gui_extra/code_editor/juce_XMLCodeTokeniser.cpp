@@ -52,7 +52,7 @@ CodeEditorComponent::ColourScheme XmlTokeniser::getDefaultColourScheme()
         cs.set (types[i].name, Colour (types[i].colour));
 
     return cs;
-};
+}
 
 template <typename Iterator>
 static void skipToEndOfXmlDTD (Iterator& source) noexcept

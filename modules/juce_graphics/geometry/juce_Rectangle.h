@@ -774,7 +774,7 @@ public:
 
     /** Returns the smallest integer-aligned rectangle that completely contains this one.
         This is only relevent for floating-point rectangles, of course.
-        @see toFloat()
+        @see toFloat(), toNearestInt()
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
@@ -784,6 +784,17 @@ public:
         const int y2 = ceilAsInt  (pos.y + h);
 
         return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+    }
+
+    /** Casts this rectangle to a Rectangle<int>.
+        This uses roundToInt for rounding the bounds (if this rectangle uses floating point)
+        or just returns a copy (if this rectangle uses integers as well).
+        @see getSmallestIntegerContainer()
+    */
+    Rectangle<int> toNearestInt() const noexcept
+    {
+        return Rectangle<int> (roundToInt (pos.x), roundToInt (pos.y),
+                               roundToInt (w),     roundToInt (h));
     }
 
     /** Casts this rectangle to a Rectangle<float>.
@@ -914,8 +925,8 @@ private:
     Point<ValueType> pos;
     ValueType w, h;
 
-    static int parseIntAfterSpace (StringRef s) noexcept
-        { return s.text.findEndOfWhitespace().getIntValue32(); }
+    static ValueType parseIntAfterSpace (StringRef s) noexcept
+        { return static_cast<ValueType> (s.text.findEndOfWhitespace().getIntValue32()); }
 
     void copyWithRounding (Rectangle<int>& result) const noexcept    { result = getSmallestIntegerContainer(); }
     void copyWithRounding (Rectangle<float>& result) const noexcept  { result = toFloat(); }

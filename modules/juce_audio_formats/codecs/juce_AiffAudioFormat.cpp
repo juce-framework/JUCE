@@ -715,7 +715,7 @@ private:
         using namespace AiffFileHelpers;
 
         const bool couldSeekOk = output->setPosition (headerPosition);
-        (void) couldSeekOk;
+        ignoreUnused (couldSeekOk);
 
         // if this fails, you've given it an output stream that can't seek! It needs
         // to be able to seek back to write the header
@@ -1003,7 +1003,7 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
                                                      const StringPairArray& metadataValues,
                                                      int /*qualityOptionIndex*/)
 {
-    if (getPossibleBitDepths().contains (bitsPerSample))
+    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
         return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels, (unsigned int) bitsPerSample, metadataValues);
 
     return nullptr;

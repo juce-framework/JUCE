@@ -269,11 +269,12 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
         return true;
 
     // This is a bit of a bodge to deal with libc++ headers with no extension..
-    char fileStart[64] = { 0 };
+    char fileStart[128] = { 0 };
     FileInputStream fin (file);
     fin.read (fileStart, sizeof (fileStart) - 4);
 
-    return String (fileStart).trimStart().startsWith ("// -*- C++ -*-");
+    return CharPointer_UTF8::isValidString (fileStart, sizeof (fileStart))
+             && String (fileStart).trimStart().startsWith ("// -*- C++ -*-");
 }
 
 //==============================================================================

@@ -144,6 +144,20 @@ bool MPEZone::truncateToFit (MPEZone other) noexcept
     return true;
 }
 
+//==========================================================================
+bool MPEZone::operator== (const MPEZone& other) const noexcept
+{
+    return masterChannel         == other.masterChannel
+        && numNoteChannels       == other.numNoteChannels
+        && perNotePitchbendRange == other.perNotePitchbendRange
+        && masterPitchbendRange  == other.masterPitchbendRange;
+}
+
+bool MPEZone::operator!= (const MPEZone& other) const noexcept
+{
+    return ! operator== (other);
+}
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

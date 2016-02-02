@@ -70,8 +70,24 @@ File& File::operator= (File&& other) noexcept
 
 const File File::nonexistent;
 
-
 //==============================================================================
+static String removeEllipsis (const String& path)
+{
+    StringArray toks;
+    toks.addTokens (path, File::separatorString, StringRef());
+
+    for (int i = 1; i < toks.size(); ++i)
+    {
+        if (toks[i] == ".." && toks[i - 1] != "..")
+        {
+            toks.removeRange (i - 1, 2);
+            i = jmax (0, i - 2);
+        }
+    }
+
+    return toks.joinIntoString (File::separatorString);
+}
+
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
@@ -80,6 +96,9 @@ String File::parseAbsolutePath (const String& p)
 #if JUCE_WINDOWS
     // Windows..
     String path (p.replaceCharacter ('/', '\\'));
+
+    if (path.contains ("\\..\\"))
+        path = removeEllipsis (path);
 
     if (path.startsWithChar (separator))
     {
@@ -119,6 +138,9 @@ String File::parseAbsolutePath (const String& p)
     jassert ((! p.containsChar ('\\')) || (p.indexOfChar ('/') >= 0 && p.indexOfChar ('/') < p.indexOfChar ('\\')));
 
     String path (p);
+
+    if (path.contains ("/../"))
+        path = removeEllipsis (path);
 
     if (path.startsWithChar ('~'))
     {
@@ -357,27 +379,26 @@ bool File::isAbsolutePath (StringRef path)
 
 File File::getChildFile (StringRef relativePath) const
 {
-    if (isAbsolutePath (relativePath))
-        return File (String (relativePath.text));
+    String::CharPointerType r = relativePath.text;
 
-    if (relativePath[0] != '.')
-        return File (addTrailingSeparator (fullPath) + relativePath);
+    if (isAbsolutePath (r))
+        return File (String (r));
+
+   #if JUCE_WINDOWS
+    if (r.indexOf ((juce_wchar) '/') >= 0)
+        return getChildFile (String (r).replaceCharacter ('/', '\\'));
+   #endif
 
     String path (fullPath);
 
-    // It's relative, so remove any ../ or ./ bits at the start..
-   #if JUCE_WINDOWS
-    if (relativePath.text.indexOf ((juce_wchar) '/') >= 0)
-        return getChildFile (String (relativePath.text).replaceCharacter ('/', '\\'));
-   #endif
-
-    while (relativePath[0] == '.')
+    while (*r == '.')
     {
-        const juce_wchar secondChar = relativePath[1];
+        ++r;
+        const juce_wchar secondChar = r.getAndAdvance();
 
-        if (secondChar == '.')
+        if (secondChar == '.') // remove "../"
         {
-            const juce_wchar thirdChar = relativePath[2];
+            const juce_wchar thirdChar = r.getAndAdvance();
 
             if (thirdChar == 0 || thirdChar == separator)
             {
@@ -385,16 +406,18 @@ File File::getChildFile (StringRef relativePath) const
                 if (lastSlash >= 0)
                     path = path.substring (0, lastSlash);
 
-                relativePath = relativePath.text + (thirdChar == 0 ? 2 : 3);
+                while (*r == separator) // ignore duplicate slashes
+                    ++r;
             }
             else
             {
                 break;
             }
         }
-        else if (secondChar == separator)
+        else if (secondChar == separator)  // remove "./"
         {
-            relativePath = relativePath.text + 2;
+            while (*r == separator) // ignore duplicate slashes
+                ++r;
         }
         else
         {
@@ -402,7 +425,9 @@ File File::getChildFile (StringRef relativePath) const
         }
     }
 
-    return File (addTrailingSeparator (path) + relativePath);
+    path = addTrailingSeparator (path);
+    path.appendCharPointer (r);
+    return File (path);
 }
 
 File File::getSiblingFile (StringRef fileName) const

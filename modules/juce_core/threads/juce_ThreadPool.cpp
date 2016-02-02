@@ -336,11 +336,14 @@ bool ThreadPool::runNextJob (ThreadPoolThread& thread)
         ThreadPoolJob::JobStatus result = ThreadPoolJob::jobHasFinished;
         thread.currentJob = job;
 
-        JUCE_TRY
+        try
         {
             result = job->runJob();
         }
-        JUCE_CATCH_ALL_ASSERT
+        catch (...)
+        {
+            jassertfalse; // Your runJob() method mustn't throw any exceptions!
+        }
 
         thread.currentJob = nullptr;
 

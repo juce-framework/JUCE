@@ -248,7 +248,7 @@ public:
         setAlwaysOnTop (true);
 
         setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
-                                          : menu.lookAndFeel);
+                                          : menu.lookAndFeel.get());
 
         setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
@@ -1234,7 +1234,6 @@ private:
 
 //==============================================================================
 PopupMenu::PopupMenu()
-    : lookAndFeel (nullptr)
 {
 }
 
@@ -1544,7 +1543,7 @@ int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentM
         if (userCallback == nullptr && canBeModal)
             return window->runModalLoop();
        #else
-        (void) canBeModal;
+        ignoreUnused (canBeModal);
         jassert (! (userCallback == nullptr && canBeModal));
        #endif
     }

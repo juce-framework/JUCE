@@ -44,7 +44,6 @@ struct Atoms
         pid                             = getCreating ("_NET_WM_PID");
         windowType                      = getIfExists ("_NET_WM_WINDOW_TYPE");
         windowState                     = getIfExists ("_NET_WM_STATE");
-        compositingManager              = getCreating ("_NET_WM_CM_S0");
 
         XdndAware                       = getCreating ("XdndAware");
         XdndEnter                       = getCreating ("XdndEnter");
@@ -66,20 +65,11 @@ struct Atoms
         allowedMimeTypes[2]             = getCreating ("text/plain");
         allowedMimeTypes[3]             = getCreating ("text/uri-list");
 
-        externalAllowedFileMimeTypes[0] = getCreating ("text/uri-list");
-        externalAllowedTextMimeTypes[0] = getCreating ("text/plain");
-
         allowedActions[0]               = getCreating ("XdndActionMove");
         allowedActions[1]               = XdndActionCopy;
         allowedActions[2]               = getCreating ("XdndActionLink");
         allowedActions[3]               = getCreating ("XdndActionAsk");
         allowedActions[4]               = XdndActionPrivate;
-    }
-
-    static const Atoms& get()
-    {
-        static Atoms atoms;
-        return atoms;
     }
 
     enum ProtocolItems
@@ -90,14 +80,12 @@ struct Atoms
     };
 
     Atom protocols, protocolList[3], changeState, state, userTime,
-         activeWin, pid, windowType, windowState, compositingManager,
+         activeWin, pid, windowType, windowState,
          XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
          XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
          XdndActionDescription, XdndActionCopy, XdndActionPrivate,
          allowedActions[5],
-         allowedMimeTypes[4],
-         externalAllowedFileMimeTypes[1],
-         externalAllowedTextMimeTypes[1];
+         allowedMimeTypes[4];
 
     static const unsigned long DndVersion;
 
@@ -231,41 +219,42 @@ namespace XSHMHelpers
                     XShmSegmentInfo segmentInfo;
                     zerostruct (segmentInfo);
 
-                    XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                      24, ZPixmap, 0, &segmentInfo, 50, 50);
-
-                    if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
-                                                     (size_t) (xImage->bytes_per_line * xImage->height),
-                                                     IPC_CREAT | 0777)) >= 0)
+                    if (XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
+                                                          24, ZPixmap, 0, &segmentInfo, 50, 50))
                     {
-                        segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
-
-                        if (segmentInfo.shmaddr != (void*) -1)
+                        if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
+                                                         (size_t) (xImage->bytes_per_line * xImage->height),
+                                                         IPC_CREAT | 0777)) >= 0)
                         {
-                            segmentInfo.readOnly = False;
-                            xImage->data = segmentInfo.shmaddr;
-                            XSync (display, False);
+                            segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
 
-                            if (XShmAttach (display, &segmentInfo) != 0)
+                            if (segmentInfo.shmaddr != (void*) -1)
                             {
+                                segmentInfo.readOnly = False;
+                                xImage->data = segmentInfo.shmaddr;
                                 XSync (display, False);
-                                XShmDetach (display, &segmentInfo);
 
-                                isAvailable = true;
+                                if (XShmAttach (display, &segmentInfo) != 0)
+                                {
+                                    XSync (display, False);
+                                    XShmDetach (display, &segmentInfo);
+
+                                    isAvailable = true;
+                                }
                             }
+
+                            XFlush (display);
+                            XDestroyImage (xImage);
+
+                            shmdt (segmentInfo.shmaddr);
                         }
 
-                        XFlush (display);
-                        XDestroyImage (xImage);
+                        shmctl (segmentInfo.shmid, IPC_RMID, 0);
 
-                        shmdt (segmentInfo.shmaddr);
+                        XSetErrorHandler (oldHandler);
+                        if (trappedErrorCode != 0)
+                            isAvailable = false;
                     }
-
-                    shmctl (segmentInfo.shmid, IPC_RMID, 0);
-
-                    XSetErrorHandler (oldHandler);
-                    if (trappedErrorCode != 0)
-                        isAvailable = false;
                 }
             }
         }
@@ -326,9 +315,10 @@ namespace XRender
         return xRenderQueryVersion != nullptr;
     }
 
-    static bool hasCompositingWindowManager()
+    static bool hasCompositingWindowManager() noexcept
     {
-        return display != nullptr && XGetSelectionOwner (display, Atoms::get().compositingManager) != 0;
+        return display != nullptr
+                && XGetSelectionOwner (display, Atoms::getCreating ("_NET_WM_CM_S0")) != 0;
     }
 
     static XRenderPictFormat* findPictureFormat()
@@ -404,12 +394,10 @@ namespace Visuals
             desiredMask |= VisualBitsPerRGBMask;
         }
 
-        XVisualInfo* xvinfos = XGetVisualInfo (display,
-                                               desiredMask,
-                                               &desiredVisual,
-                                               &numVisuals);
-
-        if (xvinfos != nullptr)
+        if (XVisualInfo* xvinfos = XGetVisualInfo (display,
+                                                   desiredMask,
+                                                   &desiredVisual,
+                                                   &numVisuals))
         {
             for (int i = 0; i < numVisuals; i++)
             {
@@ -438,9 +426,7 @@ namespace Visuals
                #if JUCE_USE_XRENDER
                 if (XRender::isAvailable())
                 {
-                    XRenderPictFormat* pictFormat = XRender::findPictureFormat();
-
-                    if (pictFormat != 0)
+                    if (XRenderPictFormat* pictFormat = XRender::findPictureFormat())
                     {
                         int numVisuals = 0;
                         XVisualInfo desiredVisual;
@@ -448,10 +434,9 @@ namespace Visuals
                         desiredVisual.depth = 32;
                         desiredVisual.bits_per_rgb = 8;
 
-                        XVisualInfo* xvinfos = XGetVisualInfo (display,
-                                                               VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
-                                                               &desiredVisual, &numVisuals);
-                        if (xvinfos != nullptr)
+                        if (XVisualInfo* xvinfos = XGetVisualInfo (display,
+                                                                   VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
+                                                                   &desiredVisual, &numVisuals))
                         {
                             for (int i = 0; i < numVisuals; ++i)
                             {
@@ -1611,7 +1596,7 @@ public:
                 clientMsg.window = windowH;
                 clientMsg.type = ClientMessage;
                 clientMsg.format = 32;
-                clientMsg.message_type = Atoms::get().windowState;
+                clientMsg.message_type = atoms.windowState;
                 clientMsg.data.l[0] = 0;  // Remove
                 clientMsg.data.l[1] = (long) fs;
                 clientMsg.data.l[2] = 0;
@@ -1703,7 +1688,7 @@ public:
             clientMsg.window = windowH;
             clientMsg.type = ClientMessage;
             clientMsg.format = 32;
-            clientMsg.message_type = Atoms::get().changeState;
+            clientMsg.message_type = atoms.changeState;
             clientMsg.data.l[0] = IconicState;
 
             ScopedXLock xlock;
@@ -1718,7 +1703,6 @@ public:
     bool isMinimised() const override
     {
         ScopedXLock xlock;
-        const Atoms& atoms = Atoms::get();
         GetXProperty prop (windowH, atoms.state, 0, 64, false, atoms.state);
 
         return prop.success
@@ -1853,7 +1837,7 @@ public:
             ev.xclient.type = ClientMessage;
             ev.xclient.serial = 0;
             ev.xclient.send_event = True;
-            ev.xclient.message_type = Atoms::get().activeWin;
+            ev.xclient.message_type = atoms.activeWin;
             ev.xclient.window = windowH;
             ev.xclient.format = 32;
             ev.xclient.data.l[0] = 2;
@@ -2412,8 +2396,6 @@ public:
 
     void handleClientMessageEvent (XClientMessageEvent& clientMsg, XEvent& event)
     {
-        const Atoms& atoms = Atoms::get();
-
         if (clientMsg.message_type == atoms.protocols && clientMsg.format == 32)
         {
             const Atom atom = (Atom) clientMsg.data.l[0];
@@ -2684,6 +2666,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
 
+    const Atoms atoms;
     ScopedPointer<LinuxRepaintManager> repainter;
 
     friend class LinuxRepaintManager;
@@ -2917,7 +2900,7 @@ private:
 
         netHints[1] = Atoms::getIfExists ("_KDE_NET_WM_WINDOW_TYPE_OVERRIDE");
 
-        xchangeProperty (windowH, Atoms::get().windowType, XA_ATOM, 32, &netHints, 2);
+        xchangeProperty (windowH, atoms.windowType, XA_ATOM, 32, &netHints, 2);
 
         int numHints = 0;
 
@@ -2928,7 +2911,7 @@ private:
             netHints [numHints++] = Atoms::getIfExists ("_NET_WM_STATE_ABOVE");
 
         if (numHints > 0)
-            xchangeProperty (windowH, Atoms::get().windowState, XA_ATOM, 32, &netHints, numHints);
+            xchangeProperty (windowH, atoms.windowState, XA_ATOM, 32, &netHints, numHints);
     }
 
     void createWindow (Window parentToAddTo)
@@ -3007,8 +2990,6 @@ private:
 
         setTitle (component.getName());
 
-        const Atoms& atoms = Atoms::get();
-
         // Associate the PID, allowing to be shut down when something goes wrong
         unsigned long pid = (unsigned long) getpid();
         xchangeProperty (windowH, atoms.pid, XA_CARDINAL, 32, &pid, 1);
@@ -3072,7 +3053,7 @@ private:
 
     long getUserTime() const
     {
-        GetXProperty prop (windowH, Atoms::get().userTime, 0, 65536, false, XA_CARDINAL);
+        GetXProperty prop (windowH, atoms.userTime, 0, 65536, false, XA_CARDINAL);
         return prop.success ? *(long*) prop.data : 0;
     }
 
@@ -3129,10 +3110,14 @@ private:
     //==============================================================================
     struct DragState
     {
-        DragState() noexcept
+        DragState()
            : isText (false), dragging (false), expectingStatus (false),
              canDrop (false), targetWindow (None), xdndVersion (-1)
         {
+            if (isText)
+                allowedTypes.add (Atoms::getCreating ("text/plain"));
+            else
+                allowedTypes.add (Atoms::getCreating ("text/uri-list"));
         }
 
         bool isText;
@@ -3143,21 +3128,7 @@ private:
         int xdndVersion;       // negotiated version with target
         Rectangle<int> silentRect;
         String textOrFiles;
-
-        const Atom* getMimeTypes() const noexcept   { return isText ? Atoms::get().externalAllowedTextMimeTypes
-                                                                    : Atoms::get().externalAllowedFileMimeTypes; }
-
-        int getNumMimeTypes() const noexcept { return isText ? numElementsInArray (Atoms::get().externalAllowedTextMimeTypes)
-                                                             : numElementsInArray (Atoms::get().externalAllowedFileMimeTypes); }
-
-        bool matchesTarget (Atom targetType) const
-        {
-            for (int i = getNumMimeTypes(); --i >= 0;)
-                if (getMimeTypes()[i] == targetType)
-                    return true;
-
-            return false;
-        }
+        Array<Atom> allowedTypes;
     };
 
     //==============================================================================
@@ -3205,7 +3176,7 @@ private:
         XClientMessageEvent msg;
         zerostruct (msg);
 
-        msg.message_type = Atoms::get().XdndDrop;
+        msg.message_type = atoms.XdndDrop;
         msg.data.l[2] = CurrentTime;
 
         sendExternalDragAndDropMessage (msg, targetWindow);
@@ -3216,15 +3187,11 @@ private:
         XClientMessageEvent msg;
         zerostruct (msg);
 
-        msg.message_type = Atoms::get().XdndEnter;
+        msg.message_type = atoms.XdndEnter;
+        msg.data.l[1] = (dragState.xdndVersion << 24);
 
-        const Atom* mimeTypes  = dragState.getMimeTypes();
-        const int numMimeTypes = dragState.getNumMimeTypes();
-
-        msg.data.l[1] = (dragState.xdndVersion << 24) | (numMimeTypes > 3);
-        msg.data.l[2] = numMimeTypes > 0 ? (long) mimeTypes[0] : 0;
-        msg.data.l[3] = numMimeTypes > 1 ? (long) mimeTypes[1] : 0;
-        msg.data.l[4] = numMimeTypes > 2 ? (long) mimeTypes[2] : 0;
+        for (int i = 0; i < 3; ++i)
+            msg.data.l[i + 2] = (long) dragState.allowedTypes[i];
 
         sendExternalDragAndDropMessage (msg, targetWindow);
     }
@@ -3234,7 +3201,7 @@ private:
         XClientMessageEvent msg;
         zerostruct (msg);
 
-        msg.message_type = Atoms::get().XdndPosition;
+        msg.message_type = atoms.XdndPosition;
 
         Point<int> mousePos (Desktop::getInstance().getMousePosition());
 
@@ -3245,7 +3212,7 @@ private:
         msg.data.l[1] = 0;
         msg.data.l[2] = (mousePos.x << 16) | mousePos.y;
         msg.data.l[3] = CurrentTime;
-        msg.data.l[4] = (long) Atoms::get().XdndActionCopy; // this is all JUCE currently supports
+        msg.data.l[4] = (long) atoms.XdndActionCopy; // this is all JUCE currently supports
 
         dragState.expectingStatus = sendExternalDragAndDropMessage (msg, targetWindow);
     }
@@ -3255,7 +3222,7 @@ private:
         XClientMessageEvent msg;
         zerostruct (msg);
 
-        msg.message_type = Atoms::get().XdndStatus;
+        msg.message_type = atoms.XdndStatus;
         msg.data.l[1] = (acceptDrop ? 1 : 0) | 2; // 2 indicates that we want to receive position messages
         msg.data.l[4] = (long) dropAction;
 
@@ -3267,7 +3234,7 @@ private:
         XClientMessageEvent msg;
         zerostruct (msg);
 
-        msg.message_type = Atoms::get().XdndLeave;
+        msg.message_type = atoms.XdndLeave;
         sendExternalDragAndDropMessage (msg, targetWindow);
     }
 
@@ -3276,7 +3243,7 @@ private:
         XClientMessageEvent msg;
         zerostruct (msg);
 
-        msg.message_type = Atoms::get().XdndFinished;
+        msg.message_type = atoms.XdndFinished;
         sendDragAndDropMessage (msg);
     }
 
@@ -3298,7 +3265,7 @@ private:
         s.xselection.property = None;
         s.xselection.time = evt.xselectionrequest.time;
 
-        if (dragState.matchesTarget (targetType))
+        if (dragState.allowedTypes.contains (targetType))
         {
             s.xselection.property = evt.xselectionrequest.property;
 
@@ -3321,8 +3288,8 @@ private:
             dragState.silentRect = Rectangle<int>();
 
             if ((clientMsg.data.l[1] & 1) != 0
-                 && ((Atom) clientMsg.data.l[4] == Atoms::get().XdndActionCopy
-                      || (Atom) clientMsg.data.l[4] == Atoms::get().XdndActionPrivate))
+                 && ((Atom) clientMsg.data.l[4] == atoms.XdndActionCopy
+                      || (Atom) clientMsg.data.l[4] == atoms.XdndActionPrivate))
             {
                 if ((clientMsg.data.l[1] & 2) == 0) // target requests silent rectangle
                     dragState.silentRect.setBounds ((int) clientMsg.data.l[2] >> 16,
@@ -3366,7 +3333,7 @@ private:
             if (targetWindow == None)
                 return;
 
-            GetXProperty prop (targetWindow, Atoms::get().XdndAware,
+            GetXProperty prop (targetWindow, atoms.XdndAware,
                                0, 2, false, AnyPropertyType);
 
             if (prop.success
@@ -3401,7 +3368,6 @@ private:
                             (int) clientMsg.data.l[2] & 0xffff);
         dropPos -= bounds.getPosition();
 
-        const Atoms& atoms = Atoms::get();
         Atom targetAction = atoms.XdndActionCopy;
 
         for (int i = numElementsInArray (atoms.allowedActions); --i >= 0;)
@@ -3471,7 +3437,7 @@ private:
         if ((clientMsg.data.l[1] & 1) != 0)
         {
             ScopedXLock xlock;
-            GetXProperty prop (dragAndDropSourceWindow, Atoms::get().XdndTypeList, 0, 0x8000000L, false, XA_ATOM);
+            GetXProperty prop (dragAndDropSourceWindow, atoms.XdndTypeList, 0, 0x8000000L, false, XA_ATOM);
 
             if (prop.success
                  && prop.actualType == XA_ATOM
@@ -3499,7 +3465,6 @@ private:
             }
         }
 
-        const Atoms& atoms = Atoms::get();
         for (int i = 0; i < srcMimeTypeAtomList.size() && dragAndDropCurrentMimeType == 0; ++i)
             for (int j = 0; j < numElementsInArray (atoms.allowedMimeTypes); ++j)
                 if (srcMimeTypeAtomList[i] == atoms.allowedMimeTypes[j])
@@ -3563,7 +3528,7 @@ private:
         {
             ScopedXLock xlock;
             XConvertSelection (display,
-                               Atoms::get().XdndSelection,
+                               atoms.XdndSelection,
                                dragAndDropCurrentMimeType,
                                Atoms::getCreating ("JXSelectionWindowProperty"),
                                windowH,
@@ -3571,18 +3536,18 @@ private:
         }
     }
 
-    static bool isWindowDnDAware (Window w)
+    bool isWindowDnDAware (Window w) const
     {
         int numProperties = 0;
-        Atom* const atoms = XListProperties (display, w, &numProperties);
+        Atom* const properties = XListProperties (display, w, &numProperties);
 
         bool dndAwarePropFound = false;
         for (int i = 0; i < numProperties; ++i)
-            if (atoms[i] == Atoms::get().XdndAware)
+            if (properties[i] == atoms.XdndAware)
                 dndAwarePropFound = true;
 
-        if (atoms != nullptr)
-            XFree (atoms);
+        if (properties != nullptr)
+            XFree (properties);
 
         return dndAwarePropFound;
     }
@@ -3622,13 +3587,12 @@ private:
             // No other method of changing the pointer seems to work, this call is needed from this very context
             XChangeActivePointerGrab (display, pointerGrabMask, (Cursor) createDraggingHandCursor(), CurrentTime);
 
-            const Atoms& atoms = Atoms::get();
             XSetSelectionOwner (display, atoms.XdndSelection, windowH, CurrentTime);
 
             // save the available types to XdndTypeList
             xchangeProperty (windowH, atoms.XdndTypeList, XA_ATOM, 32,
-                             dragState.getMimeTypes(),
-                             dragState.getNumMimeTypes());
+                             dragState.allowedTypes.getRawDataPointer(),
+                             dragState.allowedTypes.size());
 
             dragState.dragging = true;
             handleExternalDragMotionNotify();
@@ -3745,6 +3709,8 @@ void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* 
     if (enableOrDisable)
         comp->setBounds (getDisplays().getMainDisplay().totalArea);
 }
+
+void Desktop::allowedOrientationsChanged() {}
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)

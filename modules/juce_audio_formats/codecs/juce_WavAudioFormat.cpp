@@ -1606,7 +1606,7 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sa
                                                     unsigned int numChannels, int bitsPerSample,
                                                     const StringPairArray& metadataValues, int /*qualityOptionIndex*/)
 {
-    if (getPossibleBitDepths().contains (bitsPerSample))
+    if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
         return new WavAudioFormatWriter (out, sampleRate, (unsigned int) numChannels,
                                          (unsigned int) bitsPerSample, metadataValues);
 

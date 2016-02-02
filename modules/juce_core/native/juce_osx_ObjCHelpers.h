@@ -115,14 +115,14 @@ struct ObjCClass
     void addIvar (const char* name)
     {
         BOOL b = class_addIvar (cls, name, sizeof (Type), (uint8_t) rint (log2 (sizeof (Type))), @encode (Type));
-        jassert (b); (void) b;
+        jassert (b); ignoreUnused (b);
     }
 
     template <typename FunctionType>
     void addMethod (SEL selector, FunctionType callbackFn, const char* signature)
     {
         BOOL b = class_addMethod (cls, selector, (IMP) callbackFn, signature);
-        jassert (b); (void) b;
+        jassert (b); ignoreUnused (b);
     }
 
     template <typename FunctionType>
@@ -146,7 +146,7 @@ struct ObjCClass
     void addProtocol (Protocol* protocol)
     {
         BOOL b = class_addProtocol (cls, protocol);
-        jassert (b); (void) b;
+        jassert (b); ignoreUnused (b);
     }
 
    #if JUCE_MAC

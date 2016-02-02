@@ -374,18 +374,21 @@ static const unsigned char temp_binary_data_4[] =
 "\r\n"
 "void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)\r\n"
 "{\r\n"
+"    const int totalNumInputChannels  = getTotalNumInputChannels();\r\n"
+"    const int totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
+"\r\n"
 "    // In case we have more outputs than inputs, this code clears any output\r\n"
 "    // channels that didn't contain input data, (because these aren't\r\n"
 "    // guaranteed to be empty - they may contain garbage).\r\n"
-"    // I've added this to avoid people getting screaming feedback\r\n"
-"    // when they first compile the plugin, but obviously you don't need to\r\n"
-"    // this code if your algorithm already fills all the output channels.\r\n"
-"    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)\r\n"
+"    // This is here to avoid people getting screaming feedback\r\n"
+"    // when they first compile a plugin, but obviously you don't need to keep\r\n"
+"    // this code if your algorithm always overwrites all the output channels.\r\n"
+"    for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)\r\n"
 "        buffer.clear (i, 0, buffer.getNumSamples());\r\n"
 "\r\n"
 "    // This is the place where you'd normally do the guts of your plugin's\r\n"
 "    // audio processing...\r\n"
-"    for (int channel = 0; channel < getNumInputChannels(); ++channel)\r\n"
+"    for (int channel = 0; channel < totalNumInputChannels; ++channel)\r\n"
 "    {\r\n"
 "        float* channelData = buffer.getWritePointer (channel);\r\n"
 "\r\n"
@@ -3813,7 +3816,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3189; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1180; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4216; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 4359; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2188; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2161; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2141; return jucer_ComponentTemplate_h;

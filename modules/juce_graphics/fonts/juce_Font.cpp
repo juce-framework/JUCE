@@ -159,9 +159,7 @@ void Typeface::setTypefaceCacheSize (int numFontsToCache)
     TypefaceCache::getInstance()->setSize (numFontsToCache);
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_opengl
-extern void clearOpenGLGlyphCache();
-#endif
+void (*clearOpenGLGlyphCache)() = nullptr;
 
 void Typeface::clearTypefaceCache()
 {
@@ -169,9 +167,8 @@ void Typeface::clearTypefaceCache()
 
     RenderingHelpers::SoftwareRendererSavedState::clearGlyphCache();
 
-   #if JUCE_MODULE_AVAILABLE_juce_opengl
-    clearOpenGLGlyphCache();
-   #endif
+    if (clearOpenGLGlyphCache != nullptr)
+        clearOpenGLGlyphCache();
 }
 
 //==============================================================================

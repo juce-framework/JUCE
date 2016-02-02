@@ -680,7 +680,7 @@ void juce_runSystemCommand (const String&);
 void juce_runSystemCommand (const String& command)
 {
     int result = system (command.toUTF8());
-    (void) result;
+    ignoreUnused (result);
 }
 
 String juce_getOutputFromCommand (const String&);
@@ -1286,7 +1286,7 @@ private:
                                   THREAD_TIME_CONSTRAINT_POLICY_COUNT) == KERN_SUCCESS;
 
        #else
-        (void) periodMs;
+        ignoreUnused (periodMs);
         struct sched_param param;
         param.sched_priority = sched_get_priority_max (SCHED_RR);
         return pthread_setschedparam (thread, SCHED_RR, &param) == 0;

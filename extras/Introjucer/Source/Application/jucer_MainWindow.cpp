@@ -280,10 +280,17 @@ void MainWindow::updateTitle (const String& documentName)
     String name (IntrojucerApp::getApp().getApplicationName());
 
     if (currentProject != nullptr)
-        name << " - " << currentProject->getDocumentTitle();
+    {
+        String projectName (currentProject->getDocumentTitle());
+
+        if (currentProject->getFile().getFileNameWithoutExtension() != projectName)
+            projectName = currentProject->getFile().getFileName();
+
+        name << "  -  " << projectName;
+    }
 
     if (documentName.isNotEmpty())
-        name << " - " << documentName;
+        name << "  -  " << documentName;
 
     setName (name);
 }

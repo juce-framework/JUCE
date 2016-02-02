@@ -49,7 +49,7 @@ public:
           totalEventCount (0)
     {
         int ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
-        (void) ret; jassert (ret == 0);
+        ignoreUnused (ret); jassert (ret == 0);
     }
 
     ~InternalMessageQueue()
@@ -75,7 +75,7 @@ public:
             ScopedUnlock ul (lock);
             const unsigned char x = 0xff;
             ssize_t bytesWritten = write (fd[0], &x, 1);
-            (void) bytesWritten;
+            ignoreUnused (bytesWritten);
         }
     }
 
@@ -187,7 +187,7 @@ private:
             const ScopedUnlock ul (lock);
             unsigned char x;
             ssize_t numBytes = read (fd[1], &x, 1);
-            (void) numBytes;
+            ignoreUnused (numBytes);
         }
 
         return queue.removeAndReturn (0);
@@ -235,7 +235,7 @@ namespace LinuxErrorHandling
 
     int errorHandler (Display* display, XErrorEvent* event)
     {
-        (void) display; (void) event;
+        ignoreUnused (display, event);
 
        #if JUCE_DEBUG_XERRORS
         char errorStr[64] = { 0 };

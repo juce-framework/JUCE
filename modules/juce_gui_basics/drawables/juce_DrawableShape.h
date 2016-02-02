@@ -122,6 +122,12 @@ public:
     /** Returns the current outline style. */
     const PathStrokeType& getStrokeType() const noexcept            { return strokeType; }
 
+    /** Provides a set of dash lengths to use for stroking the path. */
+    void setDashLengths (const Array<float>& newDashLengths);
+
+    /** Returns the set of dash lengths that the path is using. */
+    const Array<float>& getDashLengths() const noexcept             { return dashLengths; };
+
     //==============================================================================
     /** @internal */
     class FillAndStrokeState  : public  Drawable::ValueTreeWrapperBase
@@ -165,6 +171,7 @@ protected:
 
     //==============================================================================
     PathStrokeType strokeType;
+    Array<float> dashLengths;
     Path path, strokePath;
 
 private:

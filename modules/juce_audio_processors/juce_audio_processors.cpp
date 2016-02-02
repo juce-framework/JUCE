@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if defined (JUCE_AUDIO_PROCESSORS_H_INCLUDED) && ! JUCE_AMALGAMATED_INCLUDE
+#ifdef JUCE_AUDIO_PROCESSORS_H_INCLUDED
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -30,10 +30,6 @@
  */
  #error "Incorrect use of JUCE cpp file"
 #endif
-
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
 
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_audio_processors.h"
@@ -44,11 +40,7 @@
  #if JUCE_SUPPORT_CARBON \
       && ((JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU) \
            || ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6))
-  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
-  #define Component CarbonDummyCompName
   #include <Carbon/Carbon.h>
-  #undef Point
-  #undef Component
  #endif
 #endif
 
