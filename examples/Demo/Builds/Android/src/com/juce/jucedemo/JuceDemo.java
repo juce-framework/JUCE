@@ -970,7 +970,7 @@ public class JuceDemo   extends Activity
         super.onCreate (savedInstanceState);
 
         isScreenSaverEnabled = true;
-        getActionBar().hide();
+        hideActionBar();
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
 
@@ -1011,6 +1011,49 @@ public class JuceDemo   extends Activity
     {
         launchApp (getApplicationInfo().publicSourceDir,
                    getApplicationInfo().dataDir);
+    }
+
+    private void hideActionBar()
+    {
+        // get "getActionBar" method
+        java.lang.reflect.Method getActionBarMethod = null;
+        try
+        {
+            getActionBarMethod = this.getClass().getMethod ("getActionBar");
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (getActionBarMethod == null) return;
+
+        // invoke "getActionBar" method
+        Object actionBar = null;
+        try
+        {
+            actionBar = getActionBarMethod.invoke (this);
+        }
+        catch (java.lang.IllegalArgumentException e) { return; }
+        catch (java.lang.IllegalAccessException e) { return; }
+        catch (java.lang.reflect.InvocationTargetException e) { return; }
+        if (actionBar == null) return;
+
+        // get "hide" method
+        java.lang.reflect.Method actionBarHideMethod = null;
+        try
+        {
+            actionBarHideMethod = actionBar.getClass().getMethod ("hide");
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (actionBarHideMethod == null) return;
+
+        // invoke "hide" method
+        try
+        {
+            actionBarHideMethod.invoke (actionBar);
+        }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
     }
 
     //==============================================================================
@@ -1761,7 +1804,7 @@ public class JuceDemo   extends Activity
         return Environment.getExternalStoragePublicDirectory (type).getAbsolutePath();
     }
 
-    public static final String getDocumentsFolder()  { return getFileLocation (Environment.DIRECTORY_DOCUMENTS); }
+    public static final String getDocumentsFolder()  { return Environment.getDataDirectory().getAbsolutePath(); }
     public static final String getPicturesFolder()   { return getFileLocation (Environment.DIRECTORY_PICTURES); }
     public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
     public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
