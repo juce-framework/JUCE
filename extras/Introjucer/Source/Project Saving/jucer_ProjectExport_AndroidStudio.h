@@ -518,7 +518,6 @@ private:
         }
         else
         {
-            rootFlags.add ("minifyEnabled = true");
             rootFlags.add ("signingConfig = $(\"android.signingConfigs.releaseConfig\")");
             ndkFlags.add ("cppFlags.add(\"-DNDEBUG=1\")");
         }
