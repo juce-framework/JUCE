@@ -120,6 +120,9 @@ struct OpenGLExtensionFunctions
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (*type_ ## name) params; type_ ## name name;
     JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    #if JUCE_OPENGL3
+     JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+    #endif
 
     //==============================================================================
    #elif JUCE_OPENGL_ES
