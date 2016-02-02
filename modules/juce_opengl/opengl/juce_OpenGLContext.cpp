@@ -454,6 +454,8 @@ public:
         context.makeActive();
        #endif
 
+        context.extensions.initialise();
+
        #if JUCE_OPENGL3
         if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
         {
@@ -464,7 +466,6 @@ public:
 
         glViewport (0, 0, component.getWidth(), component.getHeight());
 
-        context.extensions.initialise();
         nativeContext->setSwapInterval (1);
 
        #if ! JUCE_OPENGL_ES

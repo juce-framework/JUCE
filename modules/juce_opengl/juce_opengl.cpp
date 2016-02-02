@@ -79,6 +79,7 @@ void OpenGLExtensionFunctions::initialise()
    #if JUCE_WINDOWS || JUCE_LINUX
     #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams) \
         name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+
     JUCE_GL_BASE_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
     #undef JUCE_INIT_GL_FUNCTION
 
@@ -86,7 +87,12 @@ void OpenGLExtensionFunctions::initialise()
         name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name); \
         if (name == nullptr) \
             name = (type_ ## name) OpenGLHelpers::getExtensionFunction (JUCE_STRINGIFY (name ## EXT));
+
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    #if JUCE_OPENGL3
+     JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    #endif
+
     #undef JUCE_INIT_GL_FUNCTION
    #endif
 }
@@ -107,7 +113,7 @@ void OpenGLExtensionFunctions::initialise()
 #undef JUCE_GL_EXTENSION_FUNCTIONS
 
 #if JUCE_DEBUG && ! defined (JUCE_CHECK_OPENGL_ERROR)
-static const char* getGLErrorMessage (const GLenum e)
+static const char* getGLErrorMessage (const GLenum e) noexcept
 {
     switch (e)
     {
