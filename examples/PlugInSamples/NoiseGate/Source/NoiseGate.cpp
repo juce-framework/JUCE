@@ -22,7 +22,7 @@ public:
 
         // add single side-chain bus
         busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain In",  AudioChannelSet::stereo()));
-		busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out", AudioChannelSet::stereo()));
+        busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out", AudioChannelSet::stereo()));
     }
 
     ~NoiseGate() {}
@@ -35,8 +35,8 @@ public:
         // do not allow disabling channels
         if (numChannels == 0) return false;
 
-		// only allow stereo on the side-chain bus
-		if (busIndex == 1 && numChannels != 2) return false;
+        // only allow stereo on the side-chain bus
+        if (busIndex == 1 && numChannels != 2) return false;
 
         // always have the same channel layout on both input and output on the main bus
         if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
