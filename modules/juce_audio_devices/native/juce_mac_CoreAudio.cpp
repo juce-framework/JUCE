@@ -1702,17 +1702,8 @@ private:
             owner.notify();
         }
 
-        void audioDeviceAboutToStart (AudioIODevice* d) override
-        {
-            if (owner.callback)
-                owner.callback->audioDeviceAboutToStart(d);
-        }
-        
-        void audioDeviceStopped() override
-        {
-            if (owner.callback)
-                owner.callback->audioDeviceStopped();
-        }
+        void audioDeviceAboutToStart (AudioIODevice*) override {}
+        void audioDeviceStopped() override {}
 
         void audioDeviceError (const String& errorMessage) override
         {
