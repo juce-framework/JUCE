@@ -414,6 +414,8 @@ StreamingSocket::StreamingSocket (const String& host, int portNum, int h)
       connected (true),
       isListener (false)
 {
+    jassert (portNum <= 65535);
+
     SocketHelpers::initSockets();
     SocketHelpers::resetSocketOptions (h, false, false);
 }
@@ -455,6 +457,8 @@ bool StreamingSocket::bindToPort (const int port)
 
 bool StreamingSocket::bindToPort (const int port, const String& addr)
 {
+    jassert (port <= 65535);
+
     return SocketHelpers::bindSocket (handle, port, addr);
 }
 
@@ -467,6 +471,8 @@ bool StreamingSocket::connect (const String& remoteHostName,
                                const int remotePortNumber,
                                const int timeOutMillisecs)
 {
+    jassert (remotePortNumber <= 65535);
+
     if (isListener)
     {
         jassertfalse;    // a listener socket can't connect to another one!
@@ -505,6 +511,8 @@ void StreamingSocket::close()
 //==============================================================================
 bool StreamingSocket::createListener (const int newPortNumber, const String& localHostName)
 {
+    jassert (newPortNumber <= 65535);
+
     if (connected)
         close();
 
@@ -614,6 +622,8 @@ bool DatagramSocket::bindToPort (const int port)
 
 bool DatagramSocket::bindToPort (const int port, const String& addr)
 {
+    jassert (port <= 65535);
+
     if (handle < 0)
         return false;
 
@@ -673,6 +683,8 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
 int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,
                            const void* sourceBuffer, int numBytesToWrite)
 {
+    jassert (remotePortNumber <= 65535);
+
     if (handle < 0)
         return -1;
 
