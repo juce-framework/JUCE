@@ -589,7 +589,7 @@ struct OpenGLDemoClasses
         OpenGLDemo()
             : doBackgroundDrawing (false),
               scale (0.5f), rotationSpeed (0.0f), rotation (0.0f),
-              textureToUse (nullptr)
+              textureToUse (nullptr), lastTexture (nullptr)
         {
             if (MainAppWindow* mw = MainAppWindow::getMainAppWindow())
                 mw->setRenderingEngine (0);
@@ -624,6 +624,9 @@ struct OpenGLDemoClasses
             // When the context is about to close, you must use this callback to delete
             // any GPU resources while the context is still current.
             freeAllContextObjects();
+
+            if (lastTexture != nullptr)
+                setTexture (lastTexture);
         }
 
         void freeAllContextObjects()
@@ -719,7 +722,7 @@ struct OpenGLDemoClasses
 
         void setTexture (DemoTexture* t)
         {
-            textureToUse = t;
+            lastTexture = textureToUse = t;
         }
 
         void setShaderProgram (const String& vertexShader, const String& fragmentShader)
@@ -789,7 +792,7 @@ struct OpenGLDemoClasses
         ScopedPointer<Uniforms> uniforms;
 
         OpenGLTexture texture;
-        DemoTexture* textureToUse;
+        DemoTexture* textureToUse, *lastTexture;
 
         String newVertexShader, newFragmentShader;
 
