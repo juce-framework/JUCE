@@ -374,7 +374,10 @@ public:
         pa.mSelector = kAudioDevicePropertySafetyOffset;
         AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &safetyOffset);
 
-        return (int) (latency + streamLatency + safetyOffset);
+        if (scope == kAudioObjectPropertyScopeOutput)
+            return (int) (latency + streamLatency + safetyOffset);
+        else
+            return (int) (latency + streamLatency - safetyOffset);
     }
 
     int getBitDepthFromDevice (AudioObjectPropertyScope scope) const
