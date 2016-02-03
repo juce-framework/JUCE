@@ -787,8 +787,8 @@ public:
     }
 
     /** Casts this rectangle to a Rectangle<int>.
-        This uses roundToInt for rounding the bounds (if this rectangle uses floating point)
-        or just returns a copy (if this rectangle uses integers as well).
+        This uses roundToInt to snap x, y, width and height to the nearest integer (losing precision).
+        If the rectangle already uses integers, this will simply return a copy.
         @see getSmallestIntegerContainer()
     */
     Rectangle<int> toNearestInt() const noexcept
