@@ -31,7 +31,8 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+
 #include "juce_audio_processors.h"
 #include "../juce_gui_extra/juce_gui_extra.h"
 

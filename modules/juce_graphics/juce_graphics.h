@@ -108,6 +108,11 @@ class LowLevelGraphicsContext;
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
 
+#if JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS && JUCE_MAC
+ #include "native/juce_mac_CoreGraphicsHelpers.h"
+ #include "native/juce_mac_CoreGraphicsContext.h"
+#endif
+
 }
 
 #endif   // JUCE_GRAPHICS_H_INCLUDED

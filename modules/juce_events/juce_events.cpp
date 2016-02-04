@@ -31,7 +31,11 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
+
 #include "juce_events.h"
 
 //==============================================================================
@@ -69,17 +73,14 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MAC
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "native/juce_osx_MessageQueue.h"
  #include "native/juce_mac_MessageManager.mm"
 
 #elif JUCE_IOS
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "native/juce_osx_MessageQueue.h"
  #include "native/juce_ios_MessageManager.mm"
 
 #elif JUCE_WINDOWS
- #include "native/juce_win32_HiddenMessageWindow.h"
  #include "native/juce_win32_Messaging.cpp"
 
 #elif JUCE_LINUX
@@ -87,7 +88,6 @@ namespace juce
  #include "native/juce_linux_Messaging.cpp"
 
 #elif JUCE_ANDROID
- #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_android_Messaging.cpp"
 
 #endif

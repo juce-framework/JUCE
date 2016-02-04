@@ -33,7 +33,13 @@
 
 #define NS_FORMAT_FUNCTION(F,A) // To avoid spurious warnings from GCC
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
+#define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+
 #include "juce_gui_basics.h"
 
 //==============================================================================
@@ -256,9 +262,6 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #endif
 
 #if JUCE_MAC || JUCE_IOS
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
- #include "../juce_graphics/native/juce_mac_CoreGraphicsContext.h"
 
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"
@@ -273,8 +276,6 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #include "native/juce_mac_FileChooser.mm"
 
 #elif JUCE_WINDOWS
- #include "../juce_core/native/juce_win32_ComSmartPtr.h"
- #include "../juce_events/native/juce_win32_HiddenMessageWindow.h"
  #include "native/juce_win32_Windowing.cpp"
  #include "native/juce_win32_DragAndDrop.cpp"
  #include "native/juce_win32_FileChooser.cpp"
@@ -285,7 +286,6 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID
- #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_android_Windowing.cpp"
  #include "native/juce_android_FileChooser.cpp"
 
