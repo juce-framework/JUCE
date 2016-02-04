@@ -207,7 +207,7 @@ static void logNSError (NSError* e)
 class iOSAudioIODevice  : public AudioIODevice
 {
 public:
-    iOSAudioIODevice (const String& deviceName)  : AudioIODevice (deviceName, "Audio")
+    iOSAudioIODevice (const String& deviceName)  : AudioIODevice (deviceName, "iOS Audio")
     {
         sessionHolder->activeDevices.add (this);
         updateSampleRateAndAudioInput();
