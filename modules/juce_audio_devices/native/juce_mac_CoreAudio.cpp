@@ -364,20 +364,12 @@ public:
         pa.mScope = scope;
         AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &latency);
 
-        UInt32 streamLatency = 0;
-        size = sizeof (streamLatency);
-        pa.mSelector = kAudioStreamPropertyLatency;
-        AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &streamLatency);
-        
         UInt32 safetyOffset = 0;
         size = sizeof (safetyOffset);
         pa.mSelector = kAudioDevicePropertySafetyOffset;
         AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &safetyOffset);
 
-        if (scope == kAudioObjectPropertyScopeOutput)
-            return (int) (latency + streamLatency + safetyOffset);
-        else
-            return (int) (latency + streamLatency - safetyOffset);
+        return (int) (latency + safetyOffset);
     }
 
     int getBitDepthFromDevice (AudioObjectPropertyScope scope) const
@@ -1332,7 +1324,7 @@ public:
         for (int i = 0; i < devices.size(); ++i)
             lat = jmax (lat, devices.getUnchecked(i)->device->getOutputLatencyInSamples());
 
-        return lat + currentBufferSize;
+        return lat + currentBufferSize * 2;
     }
 
     int getInputLatencyInSamples() override
@@ -1342,7 +1334,7 @@ public:
         for (int i = 0; i < devices.size(); ++i)
             lat = jmax (lat, devices.getUnchecked(i)->device->getInputLatencyInSamples());
 
-        return lat + currentBufferSize;
+        return lat + currentBufferSize * 2;
     }
 
     void start (AudioIODeviceCallback* newCallback) override
