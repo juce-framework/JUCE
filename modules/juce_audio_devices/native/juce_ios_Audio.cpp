@@ -24,6 +24,8 @@
 
 class iOSAudioIODevice;
 
+static const char* const iOSAudioDeviceName = "iOS Audio";
+
 //==================================================================================================
 struct AudioSessionHolder
 {
@@ -207,7 +209,8 @@ static void logNSError (NSError* e)
 class iOSAudioIODevice  : public AudioIODevice
 {
 public:
-    iOSAudioIODevice (const String& deviceName)  : AudioIODevice (deviceName, "Audio")
+    iOSAudioIODevice (const String& deviceName)
+        : AudioIODevice (deviceName, iOSAudioDeviceName)
     {
         sessionHolder->activeDevices.add (this);
         updateSampleRateAndAudioInput();
@@ -713,10 +716,10 @@ private:
 class iOSAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-    iOSAudioIODeviceType()  : AudioIODeviceType ("iOS Audio") {}
+    iOSAudioIODeviceType()  : AudioIODeviceType (iOSAudioDeviceName) {}
 
     void scanForDevices() {}
-    StringArray getDeviceNames (bool /*wantInputNames*/) const       { return StringArray ("iOS Audio"); }
+    StringArray getDeviceNames (bool /*wantInputNames*/) const       { return StringArray (iOSAudioDeviceName); }
     int getDefaultDeviceIndex (bool /*forInput*/) const              { return 0; }
     int getIndexOfDevice (AudioIODevice* d, bool /*asInput*/) const  { return d != nullptr ? 0 : -1; }
     bool hasSeparateInputsAndOutputs() const                         { return false; }
