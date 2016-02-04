@@ -93,7 +93,7 @@ public:
         @param deviceName   the name of the device, as returned by getDeviceNames()
         @param forInput     whether or not this is an input device
      */
-    virtual int64 getDeviceId (String /*deviceName*/, bool /*forInput*/) const { return -1; }
+    virtual int64 getDeviceId (String deviceName, bool forInput) const;
 
     /** Returns the name of the default device.
 
