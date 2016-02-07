@@ -63,6 +63,11 @@ static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, vo
     updateEditorCompBoundsVST ((Component*) user);
     return noErr;
 }
+
+static bool shouldManuallyCloseHostWindow()
+{
+    return getHostType().isCubase7orLater() || getHostType().isRenoise();
+}
 #endif
 
 //==============================================================================
@@ -84,7 +89,7 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
         {
             NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: parentWindowOrView];
 
-            if (getHostType().isCubase7orLater())
+            if (shouldManuallyCloseHostWindow())
             {
                 [hostWindow setReleasedWhenClosed: NO];
             }
@@ -209,7 +214,7 @@ void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSVi
             comp->removeFromDesktop();
             [pluginView release];
 
-            if (getHostType().isCubase7orLater())
+            if (shouldManuallyCloseHostWindow())
                 [hostWindow close];
             else
                 [hostWindow release];

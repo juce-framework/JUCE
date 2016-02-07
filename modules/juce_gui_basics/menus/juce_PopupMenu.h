@@ -189,7 +189,20 @@ public:
                           Colour itemTextColour,
                           bool isEnabled = true,
                           bool isTicked = false,
-                          const Image& iconToUse = Image::null);
+                          const Image& iconToUse = Image());
+
+    /** Appends a text item with a special colour.
+
+        This is the same as addItem(), but specifies a colour to use for the
+        text, which will override the default colours that are used by the
+        current look-and-feel. See addItem() for a description of the parameters.
+    */
+    void addColouredItem (int itemResultID,
+                          const String& itemText,
+                          Colour itemTextColour,
+                          bool isEnabled,
+                          bool isTicked,
+                          Drawable* iconToUse);
 
     /** Appends a custom menu item.
 

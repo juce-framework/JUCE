@@ -168,7 +168,7 @@
       </MODULEPATHS>
     </VS2015>
     <ANDROID targetFolder="Builds/Android" androidActivityClass="com.juce.jucedemo.JuceDemo"
-             androidSDKPath="" androidNDKPath="" androidMinimumSDK="10" androidInternetNeeded="1"
+             androidSDKPath="" androidNDKPath="" androidMinimumSDK="23" androidInternetNeeded="1"
              androidKeyStore="${user.home}/.android/debug.keystore" androidKeyStorePass="android"
              androidKeyAlias="androiddebugkey" androidKeyAliasPass="android"
              androidMicNeeded="1" bigIcon="xycKOk" androidCpp11="1" smallIcon="BvyE0d"

@@ -29,7 +29,6 @@
 #ifndef JUCE_BASICNATIVEHEADERS_H_INCLUDED
 #define JUCE_BASICNATIVEHEADERS_H_INCLUDED
 
-#include "../system/juce_TargetPlatform.h"
 #undef T
 
 //==============================================================================

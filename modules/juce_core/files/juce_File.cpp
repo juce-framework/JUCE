@@ -369,11 +369,13 @@ int64 File::hashCode64() const  { return fullPath.hashCode64(); }
 //==============================================================================
 bool File::isAbsolutePath (StringRef path)
 {
-    return path.text[0] == separator
+    const juce_wchar firstChar = *(path.text);
+
+    return firstChar == separator
            #if JUCE_WINDOWS
-            || (path.isNotEmpty() && path.text[1] == ':');
+            || (firstChar != 0 && path.text[1] == ':');
            #else
-            || path.text[0] == '~';
+            || firstChar == '~';
            #endif
 }
 
@@ -393,14 +395,14 @@ File File::getChildFile (StringRef relativePath) const
 
     while (*r == '.')
     {
-        ++r;
-        const juce_wchar secondChar = r.getAndAdvance();
+        String::CharPointerType lastPos = r;
+        const juce_wchar secondChar = *++r;
 
         if (secondChar == '.') // remove "../"
         {
-            const juce_wchar thirdChar = r.getAndAdvance();
+            const juce_wchar thirdChar = *++r;
 
-            if (thirdChar == 0 || thirdChar == separator)
+            if (thirdChar == separator || thirdChar == 0)
             {
                 const int lastSlash = path.lastIndexOfChar (separator);
                 if (lastSlash >= 0)
@@ -411,16 +413,18 @@ File File::getChildFile (StringRef relativePath) const
             }
             else
             {
+                r = lastPos;
                 break;
             }
         }
-        else if (secondChar == separator)  // remove "./"
+        else if (secondChar == separator || secondChar == 0)  // remove "./"
         {
             while (*r == separator) // ignore duplicate slashes
                 ++r;
         }
         else
         {
+            r = lastPos;
             break;
         }
     }
@@ -1044,6 +1048,17 @@ public:
         expect (! tempFile.withFileExtension ("h").hasFileExtension ("bar;foo;xx"));
         expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
         expect (tempFile.hasWriteAccess());
+
+        expect (home.getChildFile (".") == home);
+        expect (home.getChildFile ("..") == home.getParentDirectory());
+        expect (home.getChildFile (".xyz").getFileName() == ".xyz");
+        expect (home.getChildFile ("..xyz").getFileName() == "..xyz");
+        expect (home.getChildFile ("...xyz").getFileName() == "...xyz");
+        expect (home.getChildFile ("./xyz") == home.getChildFile ("xyz"));
+        expect (home.getChildFile ("././xyz") == home.getChildFile ("xyz"));
+        expect (home.getChildFile ("../xyz") == home.getParentDirectory().getChildFile ("xyz"));
+        expect (home.getChildFile (".././xyz") == home.getParentDirectory().getChildFile ("xyz"));
+        expect (home.getChildFile ("./../xyz") == home.getParentDirectory().getChildFile ("xyz"));
 
         {
             FileOutputStream fo (tempFile);

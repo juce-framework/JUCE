@@ -394,6 +394,11 @@ public:
     /** True if the OS supports semitransparent windows */
     static bool canUseSemiTransparentWindows() noexcept;
 
+   #if JUCE_MAC
+    /** OSX-specific function to check for the "dark" title-bar and menu mode. */
+    static bool isOSXDarkModeActive();
+   #endif
+
 private:
     //==============================================================================
     static Desktop* instance;

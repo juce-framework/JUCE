@@ -21,7 +21,8 @@ public:
         addParameter (alpha  = new AudioParameterFloat ("alpha",  "Alpha",   0.0f, 1.0f, 0.8f));
 
         // add single side-chain bus
-        busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain",  AudioChannelSet::stereo()));
+        busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain In",  AudioChannelSet::stereo()));
+        busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out", AudioChannelSet::stereo()));
     }
 
     ~NoiseGate() {}
@@ -30,13 +31,15 @@ public:
     bool setPreferredBusArrangement (bool isInputBus, int busIndex, const AudioChannelSet& preferred) override
     {
         const int numChannels = preferred.size();
-        const bool isMainBus = (busIndex == 0);
 
         // do not allow disabling channels
         if (numChannels == 0) return false;
 
+        // only allow stereo on the side-chain bus
+        if (busIndex == 1 && numChannels != 2) return false;
+
         // always have the same channel layout on both input and output on the main bus
-        if (isMainBus && (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred)))
+        if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
             return false;
 
         return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);

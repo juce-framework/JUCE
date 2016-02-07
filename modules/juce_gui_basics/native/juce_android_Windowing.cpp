@@ -200,7 +200,7 @@ public:
 
     void setBounds (const Rectangle<int>& userRect, bool isNowFullScreen) override
     {
-        Rectangle<int> r = userRect * scale;
+        Rectangle<int> r = (userRect.toFloat() * scale).toNearestInt();
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -232,10 +232,10 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
-                               view.callIntMethod (ComponentPeerView.getTop),
-                               view.callIntMethod (ComponentPeerView.getWidth),
-                               view.callIntMethod (ComponentPeerView.getHeight)) / scale;
+        return (Rectangle<float> (view.callIntMethod (ComponentPeerView.getLeft),
+                                  view.callIntMethod (ComponentPeerView.getTop),
+                                  view.callIntMethod (ComponentPeerView.getWidth),
+                                  view.callIntMethod (ComponentPeerView.getHeight)) / scale).toNearestInt();
     }
 
     void handleScreenSizeChange() override

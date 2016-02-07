@@ -433,10 +433,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
 String SystemClipboard::getTextFromClipboard()
 {
-    NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
-
-    return text == nil ? String()
-                       : nsStringToJuce (text);
+    return nsStringToJuce ([[NSPasteboard generalPasteboard] stringForType: NSStringPboardType]);
 }
 
 void Process::setDockIconVisible (bool isVisible)
@@ -448,4 +445,10 @@ void Process::setDockIconVisible (bool isVisible)
     ignoreUnused (isVisible);
     jassertfalse; // sorry, not available in 10.5!
    #endif
+}
+
+bool Desktop::isOSXDarkModeActive()
+{
+    return [[[NSUserDefaults standardUserDefaults] stringForKey: nsStringLiteral ("AppleInterfaceStyle")]
+                isEqualToString: nsStringLiteral ("Dark")];
 }

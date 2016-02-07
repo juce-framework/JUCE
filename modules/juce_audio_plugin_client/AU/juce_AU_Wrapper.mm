@@ -71,12 +71,12 @@
 #endif
 
 #define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 #include "../utility/juce_PluginBusUtilities.h"
-#include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 
 //==============================================================================
 static Array<void*> activePlugins, activeUIs;

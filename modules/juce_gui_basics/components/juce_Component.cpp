@@ -401,7 +401,7 @@ struct Component::ComponentHelpers
 
     static bool clipObscuredRegions (const Component& comp, Graphics& g, const Rectangle<int> clipRect, Point<int> delta)
     {
-        bool nothingChanged = true;
+        bool wasClipped = false;
 
         for (int i = comp.childComponentList.size(); --i >= 0;)
         {
@@ -416,19 +416,19 @@ struct Component::ComponentHelpers
                     if (child.isOpaque() && child.componentTransparency == 0)
                     {
                         g.excludeClipRegion (newClip + delta);
-                        nothingChanged = false;
+                        wasClipped = true;
                     }
                     else
                     {
                         const Point<int> childPos (child.getPosition());
                         if (clipObscuredRegions (child, g, newClip - childPos, childPos + delta))
-                            nothingChanged = false;
+                            wasClipped = true;
                     }
                 }
             }
         }
 
-        return nothingChanged;
+        return wasClipped;
     }
 
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
@@ -1961,7 +1961,7 @@ void Component::paintComponentAndChildren (Graphics& g)
     {
         g.saveState();
 
-        if (ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, Point<int>()) || ! g.isClipEmpty())
+        if (! (ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, Point<int>()) && g.isClipEmpty()))
             paint (g);
 
         g.restoreState();
