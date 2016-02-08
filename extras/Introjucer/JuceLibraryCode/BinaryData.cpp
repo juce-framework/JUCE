@@ -325,11 +325,6 @@ static const unsigned char temp_binary_data_4[] =
 "   #endif\r\n"
 "}\r\n"
 "\r\n"
-"bool FILTERCLASSNAME::silenceInProducesSilenceOut() const\r\n"
-"{\r\n"
-"    return false;\r\n"
-"}\r\n"
-"\r\n"
 "double FILTERCLASSNAME::getTailLengthSeconds() const\r\n"
 "{\r\n"
 "    return 0.0;\r\n"
@@ -473,7 +468,6 @@ static const unsigned char temp_binary_data_5[] =
 "\r\n"
 "    bool acceptsMidi() const override;\r\n"
 "    bool producesMidi() const override;\r\n"
-"    bool silenceInProducesSilenceOut() const override;\r\n"
 "    double getTailLengthSeconds() const override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
@@ -3816,8 +3810,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3189; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1180; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1012; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4359; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2188; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 4273; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2132; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2161; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2141; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;

@@ -461,9 +461,6 @@ public:
     */
     void setLatencySamples (int newLatency);
 
-    /** Returns true if a silent input always produces a silent output. */
-    virtual bool silenceInProducesSilenceOut() const = 0;
-
     /** Returns the length of the filter's tail, in seconds. */
     virtual double getTailLengthSeconds() const = 0;
 
@@ -918,7 +915,7 @@ public:
     WrapperType wrapperType;
 
     //==============================================================================
-#ifndef DOXYGEN
+   #ifndef DOXYGEN
     /** Deprecated: use getTotalNumInputChannels instead. */
     JUCE_DEPRECATED_WITH_BODY (int getNumInputChannels()  const noexcept, { return getTotalNumInputChannels(); })
     JUCE_DEPRECATED_WITH_BODY (int getNumOutputChannels() const noexcept, { return getTotalNumOutputChannels(); })
@@ -945,7 +942,7 @@ public:
         the constructor. */
     JUCE_DEPRECATED (virtual bool isInputChannelStereoPair  (int index) const);
     JUCE_DEPRECATED (virtual bool isOutputChannelStereoPair (int index) const);
-#endif
+   #endif
 
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
@@ -1001,6 +998,9 @@ private:
     AudioProcessorListener* getListenerLocked (int) const noexcept;
     void disableNonMainBuses (bool isInput);
     void updateSpeakerFormatStrings();
+
+    // This method is no longer used - you can delete it from your AudioProcessor classes.
+    JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; });
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };

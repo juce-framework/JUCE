@@ -44,11 +44,6 @@ bool FILTERCLASSNAME::producesMidi() const
    #endif
 }
 
-bool FILTERCLASSNAME::silenceInProducesSilenceOut() const
-{
-    return false;
-}
-
 double FILTERCLASSNAME::getTailLengthSeconds() const
 {
     return 0.0;

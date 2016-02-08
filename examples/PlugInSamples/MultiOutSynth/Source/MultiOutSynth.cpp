@@ -101,7 +101,6 @@ public:
     const String getName() const override               { return "Gain PlugIn"; }
     bool acceptsMidi() const override                   { return false; }
     bool producesMidi() const override                  { return false; }
-    bool silenceInProducesSilenceOut() const override   { return true; }
     double getTailLengthSeconds() const override        { return 0; }
     int getNumPrograms() override                          { return 1; }
     int getCurrentProgram() override                       { return 0; }

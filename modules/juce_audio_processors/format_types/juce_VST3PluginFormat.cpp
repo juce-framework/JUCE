@@ -1860,14 +1860,6 @@ public:
     bool producesMidi() const override   { return getBusInfo (false, false).channelCount > 0; }
 
     //==============================================================================
-    bool silenceInProducesSilenceOut() const override
-    {
-        if (processor != nullptr)
-            return processor->getTailSamples() == Vst::kNoTail;
-
-        return true;
-    }
-
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */
     double getTailLengthSeconds() const override
     {

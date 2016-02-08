@@ -237,9 +237,6 @@
 #ifndef  JucePlugin_IsMidiEffect
  #define JucePlugin_IsMidiEffect           0
 #endif
-#ifndef  JucePlugin_SilenceInProducesSilenceOut
- #define JucePlugin_SilenceInProducesSilenceOut  0
-#endif
 #ifndef  JucePlugin_EditorRequiresKeyboardFocus
  #define JucePlugin_EditorRequiresKeyboardFocus  1
 #endif

@@ -60,10 +60,6 @@
  #error "JucePlugin_Latency is now deprecated - instead, call the AudioProcessor::setLatencySamples() method if your plugin has a non-zero delay"
 #endif
 
-#ifndef JucePlugin_SilenceInProducesSilenceOut
- #error "You need to define the JucePlugin_SilenceInProducesSilenceOut value!"
-#endif
-
 #ifndef JucePlugin_EditorRequiresKeyboardFocus
  #error "You need to define the JucePlugin_EditorRequiresKeyboardFocus value!"
 #endif

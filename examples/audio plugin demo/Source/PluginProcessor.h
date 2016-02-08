@@ -59,7 +59,6 @@ public:
     bool acceptsMidi() const override                                           { return true; }
     bool producesMidi() const override                                          { return true; }
 
-    bool silenceInProducesSilenceOut() const override                           { return false; }
     double getTailLengthSeconds() const override                                { return 0.0; }
 
     //==============================================================================

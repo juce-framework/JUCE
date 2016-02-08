@@ -958,7 +958,7 @@ public:
     }
 
     //==============================================================================
-    ComponentResult Render (AudioUnitRenderActionFlags &ioActionFlags,
+    ComponentResult Render (AudioUnitRenderActionFlags& ioActionFlags,
                             const AudioTimeStamp& inTimeStamp,
                             const UInt32 nFrames) override
     {
@@ -970,7 +970,7 @@ public:
         for (unsigned int i = 0; i < numInputBuses; ++i)
         {
             AudioUnitRenderActionFlags flags = ioActionFlags;
-            AUInputElement* input  = GetInput (i);
+            AUInputElement* input = GetInput (i);
 
             OSStatus result = input->PullInput (flags, inTimeStamp, i, nFrames);
 
@@ -1168,12 +1168,6 @@ public:
 
             midiEvents.clear();
         }
-
-       #if ! JucePlugin_SilenceInProducesSilenceOut
-        ioActionFlags &= (AudioUnitRenderActionFlags) ~kAudioUnitRenderAction_OutputIsSilence;
-       #else
-        ignoreUnused (ioActionFlags);
-       #endif
 
         return noErr;
     }
