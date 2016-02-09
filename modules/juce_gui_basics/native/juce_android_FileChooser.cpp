@@ -31,6 +31,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool isSaveDialogue,
                                       bool warnAboutOverwritingExistingFiles,
                                       bool selectMultipleFiles,
+                                      bool /*treatFilePackagesAsDirs*/,
                                       FilePreviewComponent* extraInfoComponent)
 {
     // TODO
