@@ -149,6 +149,45 @@ void JUCE_CALLTYPE Process::terminate()
    #endif
 }
 
+
+#if JUCE_MAC || JUCE_LINUX
+bool Process::setMaxNumberOfFileHandles (int newMaxNumber) noexcept
+{
+    rlimit lim;
+    if (getrlimit (RLIMIT_NOFILE, &lim) == 0)
+    {
+        if (newMaxNumber <= 0 && lim.rlim_cur == RLIM_INFINITY && lim.rlim_max == RLIM_INFINITY)
+            return true;
+
+        if (lim.rlim_cur >= (rlim_t) newMaxNumber)
+            return true;
+    }
+
+    lim.rlim_cur = lim.rlim_max = newMaxNumber <= 0 ? RLIM_INFINITY : (rlim_t) newMaxNumber;
+    return setrlimit (RLIMIT_NOFILE, &lim) == 0;
+}
+
+struct MaxNumFileHandlesInitialiser
+{
+    MaxNumFileHandlesInitialiser() noexcept
+    {
+       #ifndef JUCE_PREFERRED_MAX_FILE_HANDLES
+        enum { JUCE_PREFERRED_MAX_FILE_HANDLES = 8192 };
+       #endif
+
+        // Try to give our app a decent number of file handles by default
+        if (! Process::setMaxNumberOfFileHandles (0))
+        {
+            for (int num = JUCE_PREFERRED_MAX_FILE_HANDLES; num > 256; num -= 1024)
+                if (Process::setMaxNumberOfFileHandles (num))
+                    break;
+        }
+    }
+};
+
+static MaxNumFileHandlesInitialiser maxNumFileHandlesInitialiser;
+#endif
+
 //==============================================================================
 const juce_wchar File::separator = '/';
 const String File::separatorString ("/");
