@@ -404,7 +404,7 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 
 bool File::deleteFile() const
 {
-    if (! exists())
+    if (! exists() && ! isSymbolicLink())
         return true;
 
     if (isDirectory())
