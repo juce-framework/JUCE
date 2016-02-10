@@ -725,6 +725,7 @@ private:
             Path path;
             forEachXmlChildElement (*xmlPath, e)
                 parsePathElement (xmlPath.getChild (e), path);
+            path.applyTransform (transform);
             target.setClipPath (path);
         }
     }
