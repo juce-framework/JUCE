@@ -28,15 +28,11 @@
 //==============================================================================
 /**
  */
-class SurroundProcessor  : public AudioProcessor, public ChannelClickListener
+class SurroundProcessor  : public AudioProcessor,
+                           public ChannelClickListener
 {
 public:
-
-    //==============================================================================
-    SurroundProcessor()
-    {
-    }
-
+    SurroundProcessor() {}
     ~SurroundProcessor() {}
 
     //==============================================================================
@@ -54,14 +50,14 @@ public:
     {
         buffer.clear();
 
-        const int fillSamples
-            = jmin (static_cast<int> (std::ceil (getSampleRate())) - sampleOffset, buffer.getNumSamples());
+        const int fillSamples = jmin (static_cast<int> (std::ceil (getSampleRate())) - sampleOffset,
+                                      buffer.getNumSamples());
 
-        float* channelBuffer = buffer.getWritePointer (channelClicked);
-        const float freq = 440.f / static_cast<float> (getSampleRate());
+        float* const channelBuffer = buffer.getWritePointer (channelClicked);
+        const float freq = (float) (440.0 / getSampleRate());
 
         for (int i = 0; i < fillSamples; ++i)
-            channelBuffer[i] = std::sin (2.0f * static_cast<float> (M_PI) * freq * static_cast<float> (sampleOffset++));
+            channelBuffer[i] = std::sin (2.0f * float_Pi * freq * static_cast<float> (sampleOffset++));
     }
 
     //==============================================================================
