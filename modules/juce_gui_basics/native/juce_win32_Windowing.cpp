@@ -1539,7 +1539,7 @@ private:
         DeleteObject (rgn);
         EndPaint (hwnd, &paintStruct);
 
-       #ifndef JUCE_GCC
+       #if JUCE_MSVC
         _fpreset(); // because some graphics cards can unmask FP exceptions
        #endif
 

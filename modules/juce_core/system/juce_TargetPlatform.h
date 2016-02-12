@@ -39,7 +39,7 @@
     - Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
     - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
     - Either JUCE_INTEL or JUCE_PPC
-    - Either JUCE_GCC or JUCE_MSVC
+    - Either JUCE_GCC or JUCE_CLANG or JUCE_MSVC
 */
 
 //==============================================================================
@@ -179,7 +179,6 @@
 
 #ifdef __clang__
  #define JUCE_CLANG 1
- #define JUCE_GCC 1
 #elif defined (__GNUC__)
   #define JUCE_GCC 1
 #elif defined (_MSC_VER)

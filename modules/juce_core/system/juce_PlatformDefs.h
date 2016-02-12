@@ -290,7 +290,7 @@
 #elif JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
  #define JUCE_DEPRECATED(functionDef)                   __declspec(deprecated) functionDef
  #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   __declspec(deprecated) functionDef body
-#elif JUCE_GCC && ! JUCE_NO_DEPRECATION_WARNINGS
+#elif (JUCE_GCC || JUCE_CLANG) && ! JUCE_NO_DEPRECATION_WARNINGS
  #define JUCE_DEPRECATED(functionDef)                   functionDef __attribute__ ((deprecated))
  #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef __attribute__ ((deprecated)) body
 #else
@@ -308,7 +308,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_GCC
+#if JUCE_GCC || JUCE_CLANG
  #define JUCE_PACKED __attribute__((packed))
 #elif ! DOXYGEN
  #define JUCE_PACKED
