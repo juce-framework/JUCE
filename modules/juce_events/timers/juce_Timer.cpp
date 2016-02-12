@@ -92,6 +92,9 @@ public:
 
     void callTimers()
     {
+        // avoid getting stuck in a loop if a timer callback repeatedly takes too long
+        const uint32 timeout = Time::getMillisecondCounter() + 100;
+
         const LockType::ScopedLockType sl (lock);
 
         while (firstTimer != nullptr && firstTimer->timerCountdownMs <= 0)
@@ -109,6 +112,9 @@ public:
                 t->timerCallback();
             }
             JUCE_CATCH_EXCEPTION
+
+            if (Time::getMillisecondCounter() > timeout)
+                break;
         }
 
         callbackArrived.signal();
