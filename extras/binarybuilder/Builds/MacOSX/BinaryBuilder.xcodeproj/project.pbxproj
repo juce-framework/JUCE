@@ -42,6 +42,7 @@
 		31CA33ED0082255CC0849423 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_FileInputSource.h"; path = "../../../../modules/juce_core/streams/juce_FileInputSource.h"; sourceTree = "SOURCE_ROOT"; };
 		33A39DE96B690694A19AD8C4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Socket.h"; path = "../../../../modules/juce_core/network/juce_Socket.h"; sourceTree = "SOURCE_ROOT"; };
 		3456971F540274F9AB31C7BF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SharedResourcePointer.h"; path = "../../../../modules/juce_core/memory/juce_SharedResourcePointer.h"; sourceTree = "SOURCE_ROOT"; };
+		37892D6496C086CB058CBDBE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		39CD0F6C4B430CB7857FCCB6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Variant.h"; path = "../../../../modules/juce_core/containers/juce_Variant.h"; sourceTree = "SOURCE_ROOT"; };
 		39ED61F0DADF05D9388872D8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_NamedValueSet.h"; path = "../../../../modules/juce_core/containers/juce_NamedValueSet.h"; sourceTree = "SOURCE_ROOT"; };
 		3CC375E8CCC0987FAE0B40BE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ThreadPool.h"; path = "../../../../modules/juce_core/threads/juce_ThreadPool.h"; sourceTree = "SOURCE_ROOT"; };
@@ -256,7 +257,8 @@
 					7BB10044C06DFCCCB324A456,
 					A7DE490D33B954B41BFE9EAB,
 					7AE1D8A76F034A1301E67787,
-					22F1E16DF7F08080FA90C783, ); name = maths; sourceTree = "<group>"; };
+					22F1E16DF7F08080FA90C783,
+					37892D6496C086CB058CBDBE, ); name = maths; sourceTree = "<group>"; };
 		0A23F8FA8C7451D75FABC96F = {isa = PBXGroup; children = (
 					ECA68CE64EC790E2EED4D86E,
 					BD88E5FB088ED71A23952819,

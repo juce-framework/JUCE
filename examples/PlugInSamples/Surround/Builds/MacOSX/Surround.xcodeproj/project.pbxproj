@@ -504,6 +504,7 @@
 		723F0D8EA22ED6781CE9F8A5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TooltipClient.h"; path = "../../../../../modules/juce_gui_basics/mouse/juce_TooltipClient.h"; sourceTree = "SOURCE_ROOT"; };
 		731D166A94A169F40BB0C638 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AUOutputBase.cpp; path = "../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/AUOutputBase.cpp"; sourceTree = "SOURCE_ROOT"; };
 		73F08CF0C5DA76EF64A292A4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_WindowsMediaAudioFormat.cpp"; path = "../../../../../modules/juce_audio_formats/codecs/juce_WindowsMediaAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
+		741EB6D93443EAF22F90D25D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		745CC0B64BB09F40A77FCD36 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ThreadWithProgressWindow.cpp"; path = "../../../../../modules/juce_gui_basics/windows/juce_ThreadWithProgressWindow.cpp"; sourceTree = "SOURCE_ROOT"; };
 		75172ED3C50EC5E798EE0FD9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MidiMessageSequence.cpp"; path = "../../../../../modules/juce_audio_basics/midi/juce_MidiMessageSequence.cpp"; sourceTree = "SOURCE_ROOT"; };
 		75D5ACB2D8B96170CEC33B10 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ComponentPeer.cpp"; path = "../../../../../modules/juce_gui_basics/windows/juce_ComponentPeer.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1334,7 +1335,8 @@
 					62E334B65CC222E9990860B5,
 					A63DA17D6F3A6015EE7BA412,
 					2BF2B581B23323A9C9748DB0,
-					A6294577F75BAB1F17306F70, ); name = maths; sourceTree = "<group>"; };
+					A6294577F75BAB1F17306F70,
+					741EB6D93443EAF22F90D25D, ); name = maths; sourceTree = "<group>"; };
 		FA816A068DC55049D3EB43A7 = {isa = PBXGroup; children = (
 					9C374B02CB52B626D6985C65,
 					1D446F680857EBC807F10AA7,

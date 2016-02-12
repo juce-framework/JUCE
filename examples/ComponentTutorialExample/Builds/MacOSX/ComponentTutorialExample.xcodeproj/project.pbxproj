@@ -163,6 +163,7 @@
 		40503EE739CFE126592D4874 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CodeDocument.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CodeDocument.h"; sourceTree = "SOURCE_ROOT"; };
 		408593E7A015C37B1A8CCBC9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ListBox.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_ListBox.h"; sourceTree = "SOURCE_ROOT"; };
 		40FF72766C3C2DFF691063DC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ConnectedChildProcess.cpp"; path = "../../../../modules/juce_events/interprocess/juce_ConnectedChildProcess.cpp"; sourceTree = "SOURCE_ROOT"; };
+		411B25C5CBD8F8D3A944A90B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		41B2962E2D6D62E82D740909 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MarkerList.h"; path = "../../../../modules/juce_gui_basics/positioning/juce_MarkerList.h"; sourceTree = "SOURCE_ROOT"; };
 		41B6B68A857645A4B014E126 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SelectedItemSet.h"; path = "../../../../modules/juce_gui_basics/mouse/juce_SelectedItemSet.h"; sourceTree = "SOURCE_ROOT"; };
 		42E8523B865B22592A7E3F0D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_BubbleComponent.cpp"; path = "../../../../modules/juce_gui_basics/misc/juce_BubbleComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -720,7 +721,8 @@
 					5091C75EBE7358C51951F60A,
 					4D2B08451DACC0440FC48EF4,
 					C0267C31BFB99FEF6F462FD6,
-					A49B802763CCE16871D76B0C, ); name = maths; sourceTree = "<group>"; };
+					A49B802763CCE16871D76B0C,
+					411B25C5CBD8F8D3A944A90B, ); name = maths; sourceTree = "<group>"; };
 		A38380539F845E3E78B1BF08 = {isa = PBXGroup; children = (
 					397AA679D9FFCC027D7D162A,
 					86A81310640DFCD57EB71BA7,

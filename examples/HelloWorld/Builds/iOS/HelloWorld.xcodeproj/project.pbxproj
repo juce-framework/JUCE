@@ -533,6 +533,7 @@
 		C64E52A86F2984D4A5F82EF8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RelativeTime.h"; path = "../../../../modules/juce_core/time/juce_RelativeTime.h"; sourceTree = "SOURCE_ROOT"; };
 		C6A1B4D93C11BA29F36801E1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_BorderSize.h"; path = "../../../../modules/juce_graphics/geometry/juce_BorderSize.h"; sourceTree = "SOURCE_ROOT"; };
 		C6BCFCD2732C7153C33B6168 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_Fonts.mm"; path = "../../../../modules/juce_graphics/native/juce_mac_Fonts.mm"; sourceTree = "SOURCE_ROOT"; };
+		C6CA0624B45EC3D866BC0D79 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		C71BB293CEF65605741E0CDA = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RectanglePlacement.h"; path = "../../../../modules/juce_graphics/placement/juce_RectanglePlacement.h"; sourceTree = "SOURCE_ROOT"; };
 		C743089A221B553DA6B45F65 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CharPointer_UTF16.h"; path = "../../../../modules/juce_core/text/juce_CharPointer_UTF16.h"; sourceTree = "SOURCE_ROOT"; };
 		C75917573F92864DA80C9A11 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DocumentWindow.h"; path = "../../../../modules/juce_gui_basics/windows/juce_DocumentWindow.h"; sourceTree = "SOURCE_ROOT"; };
@@ -716,7 +717,8 @@
 					0B62C1B2DFE2EE1C8E1EB5B6,
 					26341A8D55A799AC0ED8B33F,
 					38E5FF4A3CBEA8C42D9F14CD,
-					F83EC8D59072A524F5DA56B0, ); name = maths; sourceTree = "<group>"; };
+					F83EC8D59072A524F5DA56B0,
+					C6CA0624B45EC3D866BC0D79, ); name = maths; sourceTree = "<group>"; };
 		283F53CC2F8E672B54F90A31 = {isa = PBXGroup; children = (
 					60DDA3B2D06C918647F0F2FF,
 					AA75E89A148ADF8C55671CA0,

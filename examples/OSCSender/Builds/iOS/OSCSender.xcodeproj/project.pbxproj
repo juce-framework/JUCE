@@ -217,6 +217,7 @@
 		54D6721139580A36CE2D0A5E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_GroupComponent.cpp"; path = "../../../../modules/juce_gui_basics/layout/juce_GroupComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5536E5B6A109E3A6A5279D0E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ButtonPropertyComponent.cpp"; path = "../../../../modules/juce_gui_basics/properties/juce_ButtonPropertyComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5579A809BAAEC707977D7515 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Thread.h"; path = "../../../../modules/juce_core/threads/juce_Thread.h"; sourceTree = "SOURCE_ROOT"; };
+		56171D5E50C275618ED8E595 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		56ACA5E2124B635579CF7615 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_LinkedListPointer.h"; path = "../../../../modules/juce_core/containers/juce_LinkedListPointer.h"; sourceTree = "SOURCE_ROOT"; };
 		572DD86F800699B320C50718 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DocumentWindow.h"; path = "../../../../modules/juce_gui_basics/windows/juce_DocumentWindow.h"; sourceTree = "SOURCE_ROOT"; };
 		5786605F1BC2DCBC066F122D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Logger.cpp"; path = "../../../../modules/juce_core/logging/juce_Logger.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -680,7 +681,8 @@
 					953B8119D4983047502355C3,
 					0625FE8FB912E392F2710EAF,
 					1CC3CC3615F549A3714403FB,
-					7088CCB58F437B0DE9524E00, ); name = maths; sourceTree = "<group>"; };
+					7088CCB58F437B0DE9524E00,
+					56171D5E50C275618ED8E595, ); name = maths; sourceTree = "<group>"; };
 		3BB2F8CF52A119966C680F2C = {isa = PBXGroup; children = (
 					8754500BE079EAC8F32D6EDF,
 					4AFFB00C50E5188C6173F81A,

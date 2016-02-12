@@ -174,6 +174,7 @@
 		1FEF9A01DC5486A9FA1CDF04 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioThumbnailCache.cpp"; path = "../../../../modules/juce_audio_utils/gui/juce_AudioThumbnailCache.cpp"; sourceTree = "SOURCE_ROOT"; };
 		201270E933BAEFC855FF02FF = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_PathStrokeType.cpp"; path = "../../../../modules/juce_graphics/geometry/juce_PathStrokeType.cpp"; sourceTree = "SOURCE_ROOT"; };
 		20193027F5E90E62F44027B0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Whirlpool.cpp"; path = "../../../../modules/juce_cryptography/hashing/juce_Whirlpool.cpp"; sourceTree = "SOURCE_ROOT"; };
+		20802D1854C7E66EBFCF2992 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		208B3803558F7BECB0A0AA42 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InterprocessConnection.h"; path = "../../../../modules/juce_events/interprocess/juce_InterprocessConnection.h"; sourceTree = "SOURCE_ROOT"; };
 		210B445861AC2BD744D97F6D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CharPointer_UTF32.h"; path = "../../../../modules/juce_core/text/juce_CharPointer_UTF32.h"; sourceTree = "SOURCE_ROOT"; };
 		21463097F39306018F8C1FC9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_FFT.h"; path = "../../../../modules/juce_audio_basics/effects/juce_FFT.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1289,7 +1290,8 @@
 					30D2B2F180671715D1CFAD5E,
 					EA8A250986871A036D42DB94,
 					4E451FB3A0D657682324CEED,
-					52058B3A331BFA856932EEED, ); name = maths; sourceTree = "<group>"; };
+					52058B3A331BFA856932EEED,
+					20802D1854C7E66EBFCF2992, ); name = maths; sourceTree = "<group>"; };
 		167969AC10CCB46C3FB57BD8 = {isa = PBXGroup; children = (
 					FF7509FDC5B23104C7AF1665,
 					42DA53757E1591ED0395C94E,

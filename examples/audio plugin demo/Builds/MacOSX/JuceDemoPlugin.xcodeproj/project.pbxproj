@@ -403,6 +403,7 @@
 		5DEDE32EB91BFE882FF0F428 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MPEValue.h"; path = "../../../../modules/juce_audio_basics/mpe/juce_MPEValue.h"; sourceTree = "SOURCE_ROOT"; };
 		5E354B48397B1478736E6F0D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_mac_CoreAudio.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_mac_CoreAudio.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5E69C0346462512B115AE7BD = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ios_Audio.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_ios_Audio.cpp"; sourceTree = "SOURCE_ROOT"; };
+		5EA18059A01A0717DEB3A2B1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		5EA72D1F22006B0CC17B081E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FileChooserDialogBox.cpp"; path = "../../../../modules/juce_gui_basics/filebrowser/juce_FileChooserDialogBox.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5EB55A7484EFAF1FE8C5BADD = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DrawablePath.cpp"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawablePath.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5EE4BB25075E3ACDCFCE14D2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Rectangle.h"; path = "../../../../modules/juce_graphics/geometry/juce_Rectangle.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1326,7 +1327,8 @@
 					6F3D3E06535036A4B1779FDD,
 					FC86721DEC71B944CA1E6713,
 					266658E487644AA71E02E85E,
-					DCC99A76773B6C721B867379, ); name = maths; sourceTree = "<group>"; };
+					DCC99A76773B6C721B867379,
+					5EA18059A01A0717DEB3A2B1, ); name = maths; sourceTree = "<group>"; };
 		4EA6FCA85C8A43A74F1ADAC4 = {isa = PBXGroup; children = (
 					45C2C296C9A745B292F49C65,
 					EA906B8480C7585912B627B1,

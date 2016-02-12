@@ -800,6 +800,7 @@
 		C312F13030052FE4290459A4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CustomTypeface.cpp"; path = "../../../../../modules/juce_graphics/fonts/juce_CustomTypeface.cpp"; sourceTree = "SOURCE_ROOT"; };
 		C34154A75199D0615ADE1730 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_module_info"; path = "../../../../../modules/juce_audio_plugin_client/juce_module_info"; sourceTree = "SOURCE_ROOT"; };
 		C3791087C5BBAEE2288BE370 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ComponentBuilder.cpp"; path = "../../../../../modules/juce_gui_basics/layout/juce_ComponentBuilder.cpp"; sourceTree = "SOURCE_ROOT"; };
+		C39BE441D12E81E42CD3EB58 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		C3A8780130D9F4203C993F7A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_GraphicsContext.h"; path = "../../../../../modules/juce_graphics/contexts/juce_GraphicsContext.h"; sourceTree = "SOURCE_ROOT"; };
 		C3B5B38EF696231652756D32 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Threads.cpp"; path = "../../../../../modules/juce_core/native/juce_win32_Threads.cpp"; sourceTree = "SOURCE_ROOT"; };
 		C3D43F992D8AAA5EF9D23288 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_VST_Wrapper.mm"; path = "../../../../../modules/juce_audio_plugin_client/VST/juce_VST_Wrapper.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -1332,7 +1333,8 @@
 					7E75A68F5AFF795C7D82FC14,
 					3189E9672D8CDD691EE21D9C,
 					DCF492D1976FAA8E7CA19078,
-					CF784B2EB47D53C5A7CA824F, ); name = maths; sourceTree = "<group>"; };
+					CF784B2EB47D53C5A7CA824F,
+					C39BE441D12E81E42CD3EB58, ); name = maths; sourceTree = "<group>"; };
 		6165153DC247F59C97067473 = {isa = PBXGroup; children = (
 					B8D091C1997C32CDCE65DD2F,
 					A9FB6C224EB01F7400C82868,

@@ -382,6 +382,7 @@
 		61596F68A47C4BEA8F9A4D68 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DrawableText.h"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawableText.h"; sourceTree = "SOURCE_ROOT"; };
 		619377E030188B909977D85B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioCDReader.h"; path = "../../../../modules/juce_audio_devices/audio_cd/juce_AudioCDReader.h"; sourceTree = "SOURCE_ROOT"; };
 		61C1B6B3336D774EAE4994F9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DocumentWindow.cpp"; path = "../../../../modules/juce_gui_basics/windows/juce_DocumentWindow.cpp"; sourceTree = "SOURCE_ROOT"; };
+		61EFB1120837C4B54493568E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		623C7B6BD0B564F60F1F4012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ApplicationProperties.h"; path = "../../../../modules/juce_data_structures/app_properties/juce_ApplicationProperties.h"; sourceTree = "SOURCE_ROOT"; };
 		62935FD655DDDCE70536555F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ApplicationCommandTarget.cpp"; path = "../../../../modules/juce_gui_basics/commands/juce_ApplicationCommandTarget.cpp"; sourceTree = "SOURCE_ROOT"; };
 		62ABA7CF7D0CE2D7B3F7BFCD = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MidiOutput.cpp"; path = "../../../../modules/juce_audio_devices/midi_io/juce_MidiOutput.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1237,7 +1238,8 @@
 					5D998A4BC436D82C3A6E8606,
 					41F9BAD0BC589CC46CFEF495,
 					0F0458EF50C559CFF42DDC67,
-					C0AC297D17FA68BBAB417A64, ); name = maths; sourceTree = "<group>"; };
+					C0AC297D17FA68BBAB417A64,
+					61EFB1120837C4B54493568E, ); name = maths; sourceTree = "<group>"; };
 		EDEB768592E2E04E19CBBB39 = {isa = PBXGroup; children = (
 					F2DFFAA96667B5897702E4B6,
 					5989B7979A4446D163FD7E13,

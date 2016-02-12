@@ -314,4 +314,13 @@
  #define JUCE_PACKED
 #endif
 
+//==============================================================================
+#if JUCE_GCC || DOXYGEN
+ /** This can be appended to a function declaration to tell gcc to disable associative
+     math optimisations which break some floating point algorithms. */
+ #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS   __attribute__((__optimize__("no-associative-math")))
+#else
+ #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS
+#endif
+
 #endif   // JUCE_PLATFORMDEFS_H_INCLUDED

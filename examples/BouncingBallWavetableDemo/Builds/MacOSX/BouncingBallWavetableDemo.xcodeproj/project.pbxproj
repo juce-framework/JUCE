@@ -393,6 +393,7 @@
 		6A8E842FF4F50ADFE6AD9524 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioSampleBuffer.h"; path = "../../../../modules/juce_audio_basics/buffers/juce_AudioSampleBuffer.h"; sourceTree = "SOURCE_ROOT"; };
 		6ACD3CA8C578B1EC389BE107 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Random.h"; path = "../../../../modules/juce_core/maths/juce_Random.h"; sourceTree = "SOURCE_ROOT"; };
 		6ADC2E97F0FFAA6CB06C745B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_PluginDescription.h"; path = "../../../../modules/juce_audio_processors/processors/juce_PluginDescription.h"; sourceTree = "SOURCE_ROOT"; };
+		6B15512AEEB4AB5E5E09F994 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		6B1BD09BC949C1AD48616C8C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_BigInteger.cpp"; path = "../../../../modules/juce_core/maths/juce_BigInteger.cpp"; sourceTree = "SOURCE_ROOT"; };
 		6C7A7AC9D001A5AB42EC961C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedComponentImage.h"; path = "../../../../modules/juce_gui_basics/components/juce_CachedComponentImage.h"; sourceTree = "SOURCE_ROOT"; };
 		6C91AA3DDFE505E36E1A4F72 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_OpenSL.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_android_OpenSL.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1239,7 +1240,8 @@
 					7CAC1C8C340016DF909AC580,
 					521D2F17C8A091D4C4584585,
 					6ACD3CA8C578B1EC389BE107,
-					78CC8AA5D000EE6343BC6BF9, ); name = maths; sourceTree = "<group>"; };
+					78CC8AA5D000EE6343BC6BF9,
+					6B15512AEEB4AB5E5E09F994, ); name = maths; sourceTree = "<group>"; };
 		3100ED647F4BA624B037C54A = {isa = PBXGroup; children = (
 					3498DB8C752D761B5DCF25A6,
 					748C996CECF9E467CEB3B217,
