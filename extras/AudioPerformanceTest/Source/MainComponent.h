@@ -30,7 +30,7 @@
 #define MAINCOMPONENT_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
-
+#include <mutex>
 
 //==============================================================================
 class MainContentComponent   : public AudioAppComponent,
@@ -75,7 +75,7 @@ public:
         const double startTimeMs = getPreciseTimeMs();
 
         AudioBuffer<float>& outputAudio = *bufferToFill.buffer;
-        int bufferSize = outputAudio.getNumSamples();
+        std::size_t bufferSize = (std::size_t) outputAudio.getNumSamples();
         initialiseBuffers (bufferToFill, bufferSize);
 
         for (int ch = 0; ch < outputAudio.getNumChannels(); ++ch)
@@ -121,7 +121,7 @@ public:
     //==========================================================================
     void resized() override
     {
-        loopIterationsSlider.setBounds (getLocalBounds().withSizeKeepingCentre (proportionOfWidth (0.9), 50));
+        loopIterationsSlider.setBounds (getLocalBounds().withSizeKeepingCentre (proportionOfWidth (0.9f), 50));
     }
 
 private:
@@ -146,7 +146,7 @@ private:
     }
 
     //==========================================================================
-    void initialiseBuffers (const AudioSourceChannelInfo& bufferToFill, int bufferSize)
+    void initialiseBuffers (const AudioSourceChannelInfo& bufferToFill, std::size_t bufferSize)
     {
         if (bufferSize != a.size())
         {
@@ -168,7 +168,7 @@ private:
     }
 
     //==========================================================================
-    void crunchSomeNumbers (float* outBuffer, int bufferSize, int numIterations) noexcept
+    void crunchSomeNumbers (float* outBuffer, std::size_t bufferSize, int numIterations) noexcept
     {
         jassert (a.size() == bufferSize && b.size() == bufferSize && c.size() == bufferSize);
 
@@ -243,7 +243,7 @@ private:
     //==========================================================================
     void updateNumLoopIterationsPerCallback()
     {
-        numLoopIterationsPerCallback = loopIterationsSlider.getValue();
+        numLoopIterationsPerCallback = (int) loopIterationsSlider.getValue();
     }
 
     //==========================================================================

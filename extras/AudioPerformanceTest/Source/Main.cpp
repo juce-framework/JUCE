@@ -43,7 +43,7 @@ public:
     bool moreThanOneInstanceAllowed() override       { return true; }
 
     //==============================================================================
-    void initialise (const String& commandLine) override
+    void initialise (const String&) override
     {
         mainWindow = new MainWindow (getApplicationName());
     }
