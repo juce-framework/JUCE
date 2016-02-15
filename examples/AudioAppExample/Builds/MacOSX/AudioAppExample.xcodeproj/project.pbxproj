@@ -212,6 +212,7 @@
 		303FE5650303C9D52133FDB9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AbstractFifo.h"; path = "../../../../modules/juce_core/containers/juce_AbstractFifo.h"; sourceTree = "SOURCE_ROOT"; };
 		30E959B23AA2EBA0CB11D121 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_module_info"; path = "../../../../modules/juce_audio_processors/juce_module_info"; sourceTree = "SOURCE_ROOT"; };
 		3126074952DF6879C42AF9A0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_IIRFilterAudioSource.cpp"; path = "../../../../modules/juce_audio_basics/sources/juce_IIRFilterAudioSource.cpp"; sourceTree = "SOURCE_ROOT"; };
+		315DDEAAB7818AE4F369C230 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		319336062D169304F2BEDDD2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ColourGradient.cpp"; path = "../../../../modules/juce_graphics/colour/juce_ColourGradient.cpp"; sourceTree = "SOURCE_ROOT"; };
 		31BC85796D2F77677D4977C8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_PluginListComponent.cpp"; path = "../../../../modules/juce_audio_processors/scanning/juce_PluginListComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		31C5DA5DD3FE3C167B4C6527 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_GraphicsContext.cpp"; path = "../../../../modules/juce_graphics/contexts/juce_GraphicsContext.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1275,7 +1276,8 @@
 					5CC1850C4E76C0825DF9F9A2,
 					1399DD492AC9998A6513E251,
 					A311FDC490ED65A08E3B8B61,
-					E88B889CB23D7A61B31FA1E9, ); name = maths; sourceTree = "<group>"; };
+					E88B889CB23D7A61B31FA1E9,
+					315DDEAAB7818AE4F369C230, ); name = maths; sourceTree = "<group>"; };
 		9C56D83D3BDD05DEF239F71C = {isa = PBXGroup; children = (
 					FE069E74A6308FF79DF3DC29,
 					2651FD678A14B0751CB5D020,

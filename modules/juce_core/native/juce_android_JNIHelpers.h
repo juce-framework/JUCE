@@ -293,7 +293,7 @@ extern AndroidSystem android;
  METHOD (audioManagerGetProperty, "audioManagerGetProperty", "(Ljava/lang/String;)Ljava/lang/String;") \
  METHOD (setCurrentThreadPriority, "setCurrentThreadPriority", "(I)I") \
  METHOD (hasSystemFeature,         "hasSystemFeature", "(Ljava/lang/String;)Z" ) \
- METHOD (createNewThread,          "createNewThread", "(J)Ljava/lang/Thread;") \
+ METHOD (createNewThread,          "createNewThread", "(JLjava/lang/String;J)Ljava/lang/Thread;") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS

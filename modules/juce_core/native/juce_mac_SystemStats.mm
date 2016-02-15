@@ -92,21 +92,6 @@ void CPUInformation::initialise() noexcept
     numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
 }
 
-#if JUCE_MAC
-struct RLimitInitialiser
-{
-    RLimitInitialiser()
-    {
-        rlimit lim;
-        getrlimit (RLIMIT_NOFILE, &lim);
-        lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
-        setrlimit (RLIMIT_NOFILE, &lim);
-    }
-};
-
-static RLimitInitialiser rLimitInitialiser;
-#endif
-
 //==============================================================================
 #if ! JUCE_IOS
 static String getOSXVersion()

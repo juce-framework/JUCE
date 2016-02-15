@@ -287,8 +287,14 @@ public:
         {
             PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
 
-            maxNumInChannels  = jmin (busUtils.getBusCount (true)  > 0 ? busUtils.getSupportedBusLayouts (true,  0).maxNumberOfChannels() : 0, hostOnlySupportsStereo() ? 2 : 8);
-            maxNumOutChannels = jmin (busUtils.getBusCount (false) > 0 ? busUtils.getSupportedBusLayouts (false, 0).maxNumberOfChannels() : 0, hostOnlySupportsStereo() ? 2 : 8);
+            maxNumInChannels  = busUtils.getBusCount (true)  > 0 ? busUtils.getSupportedBusLayouts (true,  0).maxNumberOfChannels() : 0;
+            maxNumOutChannels = busUtils.getBusCount (false) > 0 ? busUtils.getSupportedBusLayouts (false, 0).maxNumberOfChannels() : 0;
+
+            if (hostOnlySupportsStereo())
+            {
+                maxNumInChannels  = jmin (maxNumInChannels,  2);
+                maxNumOutChannels = jmin (maxNumOutChannels, 2);
+            }
 
             // try setting the number of channels
             if (maxNumInChannels > 0)
@@ -302,6 +308,10 @@ public:
 
             maxNumInChannels = busUtils.findTotalNumChannels (true);
             maxNumOutChannels = busUtils.findTotalNumChannels (false);
+
+            if ((busUtils.getBusCount (true)  > 0 && busUtils.getDefaultLayoutForBus (true, 0) .size() > maxNumInChannels)
+             || (busUtils.getBusCount (false) > 0 && busUtils.getDefaultLayoutForBus (false, 0).size() > maxNumOutChannels))
+                busRestorer.release();
         }
 
         filter->setRateAndBufferSizeDetails (0, 0);
@@ -1067,8 +1077,13 @@ public:
 
         const AudioProcessor::AudioProcessorBus& busInfo = busUtils.getFilterBus (direction).getReference (busIdx);
 
-        busInfo.name.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
-        busInfo.name.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
+        String channelName = busInfo.name;
+
+        channelName +=
+            String (" ") + AudioChannelSet::getAbbreviatedChannelTypeName (busInfo.channels.getTypeOfChannel(index));
+
+        channelName.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
+        channelName.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
 
         properties.flags = kVstPinUseSpeaker | kVstPinIsActive;
         properties.arrangementType = SpeakerMappings::channelSetToVstArrangementType (busInfo.channels);
@@ -1767,7 +1782,7 @@ private:
         const PluginHostType host (getHostType ());
 
         // there are probably more hosts that need listing here
-        return host.isAbletonLive() || host.isReaper();
+        return host.isAbletonLive();
     }
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)

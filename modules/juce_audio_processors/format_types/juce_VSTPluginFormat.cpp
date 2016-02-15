@@ -890,11 +890,6 @@ public:
         return uid;
     }
 
-    bool silenceInProducesSilenceOut() const override
-    {
-        return effect == nullptr || (effect->flags & effFlagsNoSoundInStop) != 0;
-    }
-
     double getTailLengthSeconds() const override
     {
         if (effect == nullptr)

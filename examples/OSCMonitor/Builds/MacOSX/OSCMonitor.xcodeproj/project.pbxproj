@@ -230,6 +230,7 @@
 		34FF146BAA928F94CC4333C1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CodeTokeniser.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CodeTokeniser.h"; sourceTree = "SOURCE_ROOT"; };
 		3549DE9F591020FB503F36C2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ToolbarItemComponent.cpp"; path = "../../../../modules/juce_gui_basics/widgets/juce_ToolbarItemComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		35BF7EA4D9297B11F5682DA8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_PerformanceCounter.cpp"; path = "../../../../modules/juce_core/time/juce_PerformanceCounter.cpp"; sourceTree = "SOURCE_ROOT"; };
+		3640E214F8BEDF8E89FC914D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		3692F9744F63568BB55C5832 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AiffAudioFormat.cpp"; path = "../../../../modules/juce_audio_formats/codecs/juce_AiffAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
 		36C332EE21CA0C2C9082724A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_LAMEEncoderAudioFormat.h"; path = "../../../../modules/juce_audio_formats/codecs/juce_LAMEEncoderAudioFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		3743ABD992FD0399280ACC84 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ComponentBoundsConstrainer.h"; path = "../../../../modules/juce_gui_basics/layout/juce_ComponentBoundsConstrainer.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1241,7 +1242,8 @@
 					1E805AE9C0B42D966358C6D5,
 					424EFE12D38CCC7118C09C98,
 					6973C70B3664F6D63CD86D75,
-					7AB7C52E9663FFAC21F1EA8E, ); name = maths; sourceTree = "<group>"; };
+					7AB7C52E9663FFAC21F1EA8E,
+					3640E214F8BEDF8E89FC914D, ); name = maths; sourceTree = "<group>"; };
 		454032F31E0706030E582E8A = {isa = PBXGroup; children = (
 					94706AE83DC007EF8E7DC00F,
 					EB5B64960B581F8E9CCE293C,

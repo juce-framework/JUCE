@@ -144,6 +144,15 @@ public:
     static void setDockIconVisible (bool isVisible);
    #endif
 
+   #if JUCE_MAC || JUCE_LINUX || DOXYGEN
+    //==============================================================================
+    /** UNIX ONLY - Attempts to use setrlimit to change the maximum number of file
+        handles that the app can open. Pass 0 or less as the parameter to mean
+        'infinite'. Returns true if it succeeds.
+    */
+    static bool setMaxNumberOfFileHandles (int maxNumberOfFiles) noexcept;
+   #endif
+
 private:
     Process();
     JUCE_DECLARE_NON_COPYABLE (Process)

@@ -178,6 +178,7 @@
 		1C2C37C2DCE9A2B9E69E7C3F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DropShadowEffect.h"; path = "../../../../../modules/juce_graphics/effects/juce_DropShadowEffect.h"; sourceTree = "SOURCE_ROOT"; };
 		1C48FBF0E1C771B662761C25 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Line.h"; path = "../../../../../modules/juce_graphics/geometry/juce_Line.h"; sourceTree = "SOURCE_ROOT"; };
 		1C674E8633C9D7C14C2A1D98 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TopLevelWindow.cpp"; path = "../../../../../modules/juce_gui_basics/windows/juce_TopLevelWindow.cpp"; sourceTree = "SOURCE_ROOT"; };
+		1C6DBFCD7ED0CC51E849FD3F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		1C7FF524BBD0810430CF06D2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ElementComparator.h"; path = "../../../../../modules/juce_core/containers/juce_ElementComparator.h"; sourceTree = "SOURCE_ROOT"; };
 		1C8E428921E2E5D05BF033E8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ContainerDeletePolicy.h"; path = "../../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h"; sourceTree = "SOURCE_ROOT"; };
 		1D33BF5B060F2D4CF05AB88E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioProcessor.h"; path = "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1332,7 +1333,8 @@
 					EEF0BC764D4CBA4BD1B4FBE6,
 					1E6EEC0D5E5554F99D3A8CFD,
 					E1749AB50AA3B62DD375E289,
-					00F9E4426F088AB1162FFFF1, ); name = maths; sourceTree = "<group>"; };
+					00F9E4426F088AB1162FFFF1,
+					1C6DBFCD7ED0CC51E849FD3F, ); name = maths; sourceTree = "<group>"; };
 		49F35F6DCAD57E910918B3C7 = {isa = PBXGroup; children = (
 					CC41AC554B5D05714FCBB88B,
 					431A24F749CE6A59E72C3BE8,

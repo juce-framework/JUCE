@@ -214,7 +214,6 @@ public:
         setValueIfVoid (getPluginWantsMidiInput (project),         false);
         setValueIfVoid (getPluginProducesMidiOut (project),        false);
         setValueIfVoid (getPluginIsMidiEffectPlugin (project),     false);
-        setValueIfVoid (getPluginSilenceInProducesSilenceOut (project), false);
         setValueIfVoid (getPluginEditorNeedsKeyFocus (project),    false);
         setValueIfVoid (getPluginAUExportPrefix (project),         sanitisedProjectName + "AU");
         setValueIfVoid (getPluginRTASCategory (project),           String::empty);
@@ -268,9 +267,6 @@ public:
 
         props.add (new BooleanPropertyComponent (getPluginIsMidiEffectPlugin (project), "Midi Effect Plugin", "Plugin is a midi effect plugin"),
                    "Enable this if your plugin only processes midi and no audio.");
-
-        props.add (new BooleanPropertyComponent (getPluginSilenceInProducesSilenceOut (project), "Silence", "Silence in produces silence out"),
-                   "Enable this if your plugin has no tail - i.e. if passing a silent buffer to it will always result in a silent buffer being produced.");
 
         props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus (project), "Key Focus", "Plugin editor requires keyboard focus"),
                    "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");

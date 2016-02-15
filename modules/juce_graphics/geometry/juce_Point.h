@@ -155,8 +155,10 @@ public:
 
     /** Returns the angle from this point to another one.
 
-        The return value is the number of radians clockwise from the 12 o'clock direction,
-        where this point is the centre and the other point is on the circumference.
+        Taking this point to be the centre of a circle, and the other point being a position on
+        the circumference, the return value is the number of radians clockwise from the 12 o'clock
+        direction.
+        So 12 o'clock = 0, 3 o'clock = Pi/2, 6 o'clock = Pi, 9 o'clock = -Pi/2
     */
     FloatType getAngleToPoint (Point other) const noexcept
     {
@@ -232,6 +234,10 @@ public:
     ValueType x; /**< The point's X coordinate. */
     ValueType y; /**< The point's Y coordinate. */
 };
+
+/** Multiplies the point's coordinates by a scalar value. */
+template <typename ValueType>
+Point<ValueType> operator* (ValueType value, Point<ValueType> p) noexcept       { return p * value; }
 
 
 #endif   // JUCE_POINT_H_INCLUDED

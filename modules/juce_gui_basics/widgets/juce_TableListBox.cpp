@@ -38,19 +38,28 @@ public:
 
             const TableHeaderComponent& headerComp = owner.getHeader();
             const int numColumns = headerComp.getNumColumns (true);
+            const Rectangle<int> clipBounds (g.getClipBounds());
 
             for (int i = 0; i < numColumns; ++i)
             {
                 if (columnComponents[i] == nullptr)
                 {
-                    const int columnId = headerComp.getColumnIdOfIndex (i, true);
                     const Rectangle<int> columnRect (headerComp.getColumnPosition(i).withHeight (getHeight()));
 
-                    Graphics::ScopedSaveState ss (g);
+                    if (columnRect.getX() >= clipBounds.getRight())
+                        break;
 
-                    g.reduceClipRegion (columnRect);
-                    g.setOrigin (columnRect.getX(), 0);
-                    tableModel->paintCell (g, row, columnId, columnRect.getWidth(), columnRect.getHeight(), isSelected);
+                    if (columnRect.getRight() > clipBounds.getX())
+                    {
+                        Graphics::ScopedSaveState ss (g);
+
+                        if (g.reduceClipRegion (columnRect))
+                        {
+                            g.setOrigin (columnRect.getX(), 0);
+                            tableModel->paintCell (g, row, headerComp.getColumnIdOfIndex (i, true),
+                                                   columnRect.getWidth(), columnRect.getHeight(), isSelected);
+                        }
+                    }
                 }
             }
         }

@@ -84,10 +84,8 @@ struct AndroidThreadData
 
 void JUCE_API juce_threadEntryPoint (void*);
 
-extern "C" void* threadEntryProc (void*);
-extern "C" void* threadEntryProc (void* userData)
+void* threadEntryProc (AndroidThreadData* priv)
 {
-    ScopedPointer<AndroidThreadData> priv (reinterpret_cast<AndroidThreadData*> (userData));
     priv->tId = (Thread::ThreadID) pthread_self();
     priv->eventSet.signal();
     priv->eventGet.wait (-1);
@@ -100,12 +98,10 @@ extern "C" void* threadEntryProc (void* userData)
 JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024JuceThread), runThread,
                    void, (JNIEnv* env, jobject device, jlong host))
 {
-    // Java may create a Midi thread which JUCE doesn't know about and this callback may be
-    // received on this thread. Java will have already created a JNI Env for this new thread,
-    // which we need to tell Juce about
+    // This thread does not have a JNIEnv assigned to it yet. So assign it now.
     setEnv (env);
 
-    if (Thread* thread = reinterpret_cast<Thread*> (host))
+    if (AndroidThreadData* thread = reinterpret_cast<AndroidThreadData*> (host))
         threadEntryProc (thread);
 }
 
@@ -114,8 +110,11 @@ void Thread::launchThread()
     threadHandle = 0;
 
     ScopedPointer<AndroidThreadData> threadPrivateData = new AndroidThreadData (this);
+    const LocalRef<jstring> jName (javaString (threadName));
 
-    jobject juceNewThread = android.activity.callObjectMethod (JuceAppActivity.createNewThread, (jlong) threadPrivateData.get());
+    jobject juceNewThread = android.activity.callObjectMethod (JuceAppActivity.createNewThread,
+                                                               (jlong) threadPrivateData.get(),
+                                                               jName.get(), (jlong) threadStackSize);
 
     if (jobject juceThread = getEnv()->NewGlobalRef (juceNewThread))
     {

@@ -52,10 +52,23 @@ AudioProcessor::AudioProcessor()
 
     if (numChannelConfigs > 0)
     {
+        int defaultLayoutIdx = 0;
+
+        // prefer stereo if available
+        for (int i = 0; i < numChannelConfigs; ++i)
+        {
+            if (channelConfigs[i][0] == 2 || channelConfigs[i][1] == 2)
+            {
+                defaultLayoutIdx = i;
+                break;
+            }
+        }
+
        #if ! JucePlugin_IsSynth
-        busArrangement.inputBuses.add  (AudioProcessorBus ("Input",    AudioChannelSet::canonicalChannelSet (channelConfigs[0][0])));
+        busArrangement.inputBuses.add  (AudioProcessorBus ("Input",    AudioChannelSet::canonicalChannelSet (channelConfigs[defaultLayoutIdx][0])));
        #endif
-        busArrangement.outputBuses.add (AudioProcessorBus ("Output",   AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
+
+        busArrangement.outputBuses.add (AudioProcessorBus ("Output",   AudioChannelSet::canonicalChannelSet (channelConfigs[defaultLayoutIdx][1])));
     }
   #endif
 
