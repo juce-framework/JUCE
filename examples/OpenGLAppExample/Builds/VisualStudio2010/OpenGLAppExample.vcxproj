@@ -1751,8 +1751,6 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\FragmentShader.glsl"/>
-    <None Include="..\..\Source\VertexShader.glsl"/>
     <None Include="..\..\Source\Resources\teapot.obj"/>
     <None Include="..\..\..\..\modules\juce_audio_basics\juce_module_info"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\juce_module_info"/>
