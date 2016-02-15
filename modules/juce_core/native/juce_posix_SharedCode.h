@@ -898,13 +898,25 @@ void Thread::launchThread()
 {
     threadHandle = 0;
     pthread_t handle = 0;
+    pthread_attr_t attr;
+    pthread_attr_t* attrPtr = nullptr;
 
-    if (pthread_create (&handle, 0, threadEntryProc, this) == 0)
+    if (pthread_attr_init (&attr) == 0)
+    {
+        attrPtr = &attr;
+
+        pthread_attr_setstacksize (attrPtr, threadStackSize);
+    }
+
+    if (pthread_create (&handle, attrPtr, threadEntryProc, this) == 0)
     {
         pthread_detach (handle);
         threadHandle = (void*) handle;
         threadId = (ThreadID) threadHandle;
     }
+
+    if (attrPtr != nullptr)
+        pthread_attr_destroy (attrPtr);
 }
 
 void Thread::closeThreadHandle()
