@@ -408,15 +408,15 @@ public:
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (e.mouseWasClicked() && e.getNumberOfClicks() == 2)
+        if (e.mouseWasDraggedSinceMouseDown())
+        {
+            graph.setChangedFlag (true);
+        }
+        else if (e.getNumberOfClicks() == 2)
         {
             if (const AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
                 if (PluginWindow* const w = PluginWindow::getWindowFor (f, PluginWindow::Normal))
                     w->toFront (true);
-        }
-        else if (! e.mouseWasClicked())
-        {
-            graph.setChangedFlag (true);
         }
     }
 
@@ -699,7 +699,11 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if ((! dragging) && ! e.mouseWasClicked())
+        if (dragging)
+        {
+            getGraphPanel()->dragConnector (e);
+        }
+        else if (e.mouseWasDraggedSinceMouseDown())
         {
             dragging = true;
 
@@ -714,10 +718,6 @@ public:
                                                  isNearerSource ? destFilterID : 0,
                                                  destFilterChannel,
                                                  e);
-        }
-        else if (dragging)
-        {
-            getGraphPanel()->dragConnector (e);
         }
     }
 
