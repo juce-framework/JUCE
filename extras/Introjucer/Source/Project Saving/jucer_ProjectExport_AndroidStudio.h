@@ -313,7 +313,7 @@ private:
                            << indent << indent << "jcenter()" << newLine
                            << indent << "}" << newLine
                            << indent << "dependencies {" << newLine
-                           << indent << indent << "classpath 'com.android.tools.build:gradle-experimental:0.6.0-alpha5'" << newLine
+                           << indent << indent << "classpath 'com.android.tools.build:gradle-experimental:0.6.0-beta5'" << newLine
                            << indent << "}" << newLine
                            << "}" << newLine
                            << newLine
