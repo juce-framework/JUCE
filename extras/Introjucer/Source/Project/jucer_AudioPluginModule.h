@@ -276,9 +276,6 @@ namespace VSTHelpers
 
             if (exporter.isVisualStudio())
             {
-                if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
-                    exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
-
                 RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
                                                                                                       RelativePath::projectFolder)
                                                                                           .getChildFile ("juce_audio_plugin_client")

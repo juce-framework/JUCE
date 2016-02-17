@@ -296,7 +296,7 @@ void PaintElement::mouseDrag (const MouseEvent& e)
 
         if (selected && ! dragging)
         {
-            dragging = ! e.mouseWasClicked();
+            dragging = e.mouseWasDraggedSinceMouseDown();
 
             if (dragging)
                 owner->startDragging (area);

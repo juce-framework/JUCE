@@ -153,7 +153,10 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (isEnabled() && owner.getModel() != nullptr && ! (e.mouseWasClicked() || isDragging))
+        if (isEnabled()
+             && owner.getModel() != nullptr
+             && e.mouseWasDraggedSinceMouseDown()
+             && ! isDragging)
         {
             SparseSet<int> rowsToDrag;
 

@@ -64,7 +64,7 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (! (isDragging || e.mouseWasClicked()))
+        if (e.mouseWasDraggedSinceMouseDown() && ! isDragging)
         {
             isDragging = true;
 

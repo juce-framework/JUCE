@@ -79,9 +79,14 @@ MouseEvent MouseEvent::withNewPosition (Point<int> newPosition) const noexcept
 }
 
 //==============================================================================
+bool MouseEvent::mouseWasDraggedSinceMouseDown() const noexcept
+{
+    return wasMovedSinceMouseDown != 0;
+}
+
 bool MouseEvent::mouseWasClicked() const noexcept
 {
-    return wasMovedSinceMouseDown == 0;
+    return ! mouseWasDraggedSinceMouseDown();
 }
 
 int MouseEvent::getLengthOfMousePress() const noexcept

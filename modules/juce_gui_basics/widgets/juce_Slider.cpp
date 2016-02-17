@@ -693,7 +693,7 @@ public:
             while (angle < 0.0)
                 angle += double_Pi * 2.0;
 
-            if (rotaryParams.stopAtEnd && ! e.mouseWasClicked())
+            if (rotaryParams.stopAtEnd && e.mouseWasDraggedSinceMouseDown())
             {
                 if (std::abs (angle - lastAngle) > double_Pi)
                 {
@@ -883,7 +883,7 @@ public:
             {
                 if (style == IncDecButtons && ! incDecDragged)
                 {
-                    if (e.getDistanceFromDragStart() < 10 || e.mouseWasClicked())
+                    if (e.getDistanceFromDragStart() < 10 || ! e.mouseWasDraggedSinceMouseDown())
                         return;
 
                     incDecDragged = true;

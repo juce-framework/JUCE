@@ -904,6 +904,27 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
 void OpenGLContext::setImageCacheSize (size_t newSize) noexcept     { imageCacheMaxSize = newSize; }
 size_t OpenGLContext::getImageCacheSize() const noexcept            { return imageCacheMaxSize; }
 
+//==============================================================================
+struct DepthTestDisabler
+{
+    DepthTestDisabler() noexcept
+    {
+        glGetBooleanv (GL_DEPTH_TEST, &wasEnabled);
+
+        if (wasEnabled)
+            glDisable (GL_DEPTH_TEST);
+    }
+
+    ~DepthTestDisabler() noexcept
+    {
+        if (wasEnabled)
+            glEnable (GL_DEPTH_TEST);
+    }
+
+    GLboolean wasEnabled;
+};
+
+//==============================================================================
 void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                                  const Rectangle<int>& anchorPosAndTextureSize,
                                  const int contextWidth, const int contextHeight,
@@ -915,6 +936,8 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
     JUCE_CHECK_OPENGL_ERROR
     glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable (GL_BLEND);
+
+    DepthTestDisabler depthDisabler;
 
     if (areShadersAvailable())
     {

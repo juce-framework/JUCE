@@ -442,19 +442,24 @@ static int getMonthNumberForCompileDate (const String& m) noexcept
         if (m.equalsIgnoreCase (shortMonthNames[i]))
             return i;
 
-    // If you hit this because your compiler has a non-standard __DATE__ format,
-    // let me know so we can add support for it!
+    // If you hit this because your compiler has an unusual __DATE__
+    // format, let us know so we can add support for it!
     jassertfalse;
     return 0;
 }
 
 Time Time::getCompilationDate()
 {
-    StringArray dateTokens;
+    StringArray dateTokens, timeTokens;
+
     dateTokens.addTokens (__DATE__, true);
     dateTokens.removeEmptyStrings (true);
 
+    timeTokens.addTokens (__TIME__, ":", StringRef());
+
     return Time (dateTokens[2].getIntValue(),
                  getMonthNumberForCompileDate (dateTokens[0]),
-                 dateTokens[1].getIntValue(), 12, 0);
+                 dateTokens[1].getIntValue(),
+                 timeTokens[0].getIntValue(),
+                 timeTokens[1].getIntValue());
 }

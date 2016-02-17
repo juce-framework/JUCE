@@ -38,6 +38,10 @@
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
 
+#ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
+ #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
+#endif
+
 #if JUCE_VST3_CAN_REPLACE_VST2
  #if JUCE_MSVC
   #pragma warning (push)
@@ -477,9 +481,11 @@ private:
                 parameters.addParameter (new BypassParam (*pluginInstance, numParameters));
             }
 
-            // We need to account for the bypass parameter in the numParameters passed to
-            // the next function
+           #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
+            // (NB: the +1 is to account for the bypass parameter)
             initialiseMidiControllerMappings (pluginInstance->getNumParameters() + 1);
+           #endif
+
             audioProcessorChanged (pluginInstance);
         }
     }
@@ -1566,11 +1572,13 @@ public:
                     const int id = (int) paramQueue->getParameterId();
 
                     if (isPositiveAndBelow (id, pluginInstance->getNumParameters()))
-                        pluginInstance->setParameter (id, (float) value);
+                        pluginInstance->setParameter (id, static_cast<float> (value));
                     else if (id == vstBypassParameterId)
                         setBypassed (static_cast<float> (value) != 0.0f);
+                   #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
                     else
                         addParameterChangeToMidiBuffer (offsetSamples, id, value);
+                   #endif
                 }
             }
         }

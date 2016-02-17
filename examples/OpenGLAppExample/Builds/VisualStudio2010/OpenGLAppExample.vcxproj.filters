@@ -5,9 +5,6 @@
     <Filter Include="OpenGLAppExample">
       <UniqueIdentifier>{2C84AFEA-39C5-45BB-67B0-D0028AFD3304}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OpenGLAppExample\Shaders">
-      <UniqueIdentifier>{66A1AF91-A77F-473F-6845-129C256B37A7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="OpenGLAppExample\Source">
       <UniqueIdentifier>{A8EE5285-360D-2B24-CFF2-504431E3E613}</UniqueIdentifier>
     </Filter>
@@ -2990,12 +2987,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\FragmentShader.glsl">
-      <Filter>OpenGLAppExample\Shaders</Filter>
-    </None>
-    <None Include="..\..\Source\VertexShader.glsl">
-      <Filter>OpenGLAppExample\Shaders</Filter>
-    </None>
     <None Include="..\..\Source\Resources\teapot.obj">
       <Filter>OpenGLAppExample\Source\Resources</Filter>
     </None>

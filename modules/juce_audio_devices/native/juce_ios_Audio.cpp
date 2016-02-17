@@ -467,7 +467,7 @@ public:
                 AudioOutputUnitStart (audioUnit);
             }
 
-            if (callback)
+            if (callback != nullptr)
                 callback->audioDeviceAboutToStart (this);
         }
     }
@@ -596,18 +596,19 @@ private:
         auto session = [AVAudioSession sharedInstance];
         sampleRate = session.sampleRate;
         audioInputIsAvailable = session.isInputAvailable;
-        JUCE_IOS_AUDIO_LOG ("AVAudioSession: sampleRate: " << sampleRate << "Hz, audioInputAvailable: " << (int) audioInputIsAvailable);
+        actualBufferSize = roundToInt (sampleRate * session.IOBufferDuration);
+
+        JUCE_IOS_AUDIO_LOG ("AVAudioSession: sampleRate: " << sampleRate
+                             << "Hz, audioInputAvailable: " << (int) audioInputIsAvailable);
     }
 
     void updateCurrentBufferSize()
     {
-        auto session = [AVAudioSession sharedInstance];
-        NSTimeInterval bufferDuration = sampleRate > 0 ? (NSTimeInterval) (preferredBufferSize / sampleRate) : 0.0;
-        JUCE_NSERROR_CHECK ([session setPreferredIOBufferDuration: bufferDuration
-                                                            error: &error]);
+        NSTimeInterval bufferDuration = sampleRate > 0 ? (NSTimeInterval) ((preferredBufferSize + 1) / sampleRate) : 0.0;
 
-        bufferDuration = session.IOBufferDuration;
-        actualBufferSize = roundToInt (sampleRate * bufferDuration);
+        JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setPreferredIOBufferDuration: bufferDuration
+                                                                                    error: &error]);
+        updateSampleRateAndAudioInput();
     }
 
     //==================================================================================================
