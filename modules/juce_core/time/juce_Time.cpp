@@ -136,17 +136,23 @@ namespace TimeHelpers
         typedef CharPointer_UTF32 StringType;
        #endif
 
+       #ifdef JUCE_MSVC
+        if (tm->tm_year < -1900 || tm->tm_year > 8099)
+            return String();   // Visual Studio's library can only handle 0 -> 9999 AD
+        #endif
+
         for (size_t bufferSize = 256; ; bufferSize += 256)
         {
             HeapBlock<StringType::CharType> buffer (bufferSize);
 
-           #if JUCE_ANDROID
-            const size_t numChars = strftime (buffer, bufferSize - 1, format.toUTF8(), tm);
-           #elif JUCE_WINDOWS
-            const size_t numChars = wcsftime (buffer, bufferSize - 1, format.toWideCharPointer(), tm);
-           #else
-            const size_t numChars = wcsftime (buffer, bufferSize - 1, format.toUTF32(), tm);
-           #endif
+            const size_t numChars =
+                           #if JUCE_ANDROID
+                            strftime (buffer, bufferSize - 1, format.toUTF8(), tm);
+                           #elif JUCE_WINDOWS
+                            wcsftime (buffer, bufferSize - 1, format.toWideCharPointer(), tm);
+                           #else
+                            wcsftime (buffer, bufferSize - 1, format.toUTF32(), tm);
+                           #endif
 
             if (numChars > 0 || format.isEmpty())
                 return String (StringType (buffer),
