@@ -347,12 +347,9 @@ public:
         bindVertexArray();
 
         const Rectangle<int> cacheBounds (cachedImageFrameBuffer.getWidth(), cachedImageFrameBuffer.getHeight());
-        GLboolean depthTestWasEnabled;
-        glGetBooleanv (GL_DEPTH_TEST, &depthTestWasEnabled);
         glDisable (GL_DEPTH_TEST);
         context.copyTexture (cacheBounds, cacheBounds, cacheBounds.getWidth(), cacheBounds.getHeight(), false);
-        if (depthTestWasEnabled)
-            glEnable (GL_DEPTH_TEST);
+        glEnable (GL_DEPTH_TEST);
         glBindTexture (GL_TEXTURE_2D, 0);
         JUCE_CHECK_OPENGL_ERROR
     }
