@@ -457,15 +457,14 @@ String Time::getUTCOffsetString (bool includeSemiColon) const
 
 String Time::toISO8601 (bool includeDividerCharacters) const
 {
-    return String::formatted (includeDividerCharacters ? "%04d-%02d-%02dT%02d:%02d:%02d:%03d"
-                                                       : "%04d%02d%02dT%02d%02d%02d%03d",
+    return String::formatted (includeDividerCharacters ? "%04d-%02d-%02dT%02d:%02d:%02.03f"
+                                                       : "%04d%02d%02dT%02d%02d%02.03f",
                               getYear(),
                               getMonth() + 1,
                               getDayOfMonth(),
                               getHours(),
                               getMinutes(),
-                              getSeconds(),
-                              getMilliseconds())
+                              getSeconds() + getMilliseconds() / 1000.0)
             + getUTCOffsetString (includeDividerCharacters);
 }
 
@@ -506,7 +505,7 @@ Time Time::fromISO8601 (StringRef iso) noexcept
     if (day < 0)
         return Time();
 
-    int hours = 0, minutes = 0, seconds = 0, milliseconds = 0;
+    int hours = 0, minutes = 0, milliseconds = 0;
 
     if (*t == 'T')
     {
@@ -519,21 +518,13 @@ Time Time::fromISO8601 (StringRef iso) noexcept
         if (minutes < 0)
             return Time();
 
-        seconds = parseFixedSizeIntAndSkip (t, 2, ':');
-        if (seconds < 0)
-            return Time();
-
-        milliseconds = jmax (0, parseFixedSizeIntAndSkip (t, 3, 0));
+        milliseconds = (int) (1000.0 * CharacterFunctions::readDoubleValue (t));
     }
 
-    Time result (year, month - 1, day, hours, minutes, seconds, milliseconds, false);
+    const juce_wchar nextChar = t.getAndAdvance();
 
-    const bool negative = *t == '-';
-
-    if (negative || *t == '+')
+    if (nextChar == '-' || nextChar == '+')
     {
-        ++t;
-
         const int offsetHours = parseFixedSizeIntAndSkip (t, 2, ':');
         if (offsetHours < 0)
             return Time();
@@ -543,9 +534,15 @@ Time Time::fromISO8601 (StringRef iso) noexcept
             return Time();
 
         const int offsetMs = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
-        result.millisSinceEpoch += negative ? offsetMs : -offsetMs; // NB: this seems backwards but is correct!
+        milliseconds += nextChar == '-' ? offsetMs : -offsetMs; // NB: this seems backwards but is correct!
+    }
+    else if (nextChar != 0 && nextChar != 'Z')
+    {
+        return Time();
     }
 
+    Time result (year, month - 1, day, hours, minutes, 0, 0, false);
+    result.millisSinceEpoch += milliseconds;
     return result;
 }
 
@@ -646,29 +643,22 @@ public:
         expect (Time::getCurrentTime() > t);
 
         expect (t.getTimeZone().isNotEmpty());
-        expect (t.getUTCOffsetString (true) == "Z" || t.getUTCOffsetString (true).length() == 6);
+        expect (t.getUTCOffsetString (true)  == "Z" || t.getUTCOffsetString (true).length() == 6);
         expect (t.getUTCOffsetString (false) == "Z" || t.getUTCOffsetString (false).length() == 5);
-
-        DBG (t.getUTCOffsetSeconds());
-        DBG (t.getUTCOffsetString (true));
-
-        DBG (t.toISO8601 (true));
-        DBG (Time::fromISO8601 (t.toISO8601 (true)).toISO8601 (true));
-        DBG (t.toISO8601 (false));
 
         expect (Time::fromISO8601 (t.toISO8601 (true)) == t);
         expect (Time::fromISO8601 (t.toISO8601 (false)) == t);
 
         expect (Time::fromISO8601 ("2016-02-16") == Time (2016, 1, 16, 0, 0, 0, 0, false));
-        expect (Time::fromISO8601 ("20160216") == Time (2016, 1, 16, 0, 0, 0, 0, false));
+        expect (Time::fromISO8601 ("20160216Z") == Time (2016, 1, 16, 0, 0, 0, 0, false));
         expect (Time::fromISO8601 ("2016-02-16T15:03:57+00:00") == Time (2016, 1, 16, 15, 3, 57, 0, false));
         expect (Time::fromISO8601 ("20160216T150357+0000") == Time (2016, 1, 16, 15, 3, 57, 0, false));
-        expect (Time::fromISO8601 ("2016-02-16T15:03:57:999+00:00") == Time (2016, 1, 16, 15, 3, 57, 999, false));
-        expect (Time::fromISO8601 ("20160216T150357999+0000") == Time (2016, 1, 16, 15, 3, 57, 999, false));
-        expect (Time::fromISO8601 ("2016-02-16T15:03:57:999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
-        expect (Time::fromISO8601 ("20160216T150357999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
-        expect (Time::fromISO8601 ("2016-02-16T15:03:57:999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
-        expect (Time::fromISO8601 ("20160216T150357999-0230") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999+00:00") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999+0000") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999-0230") == Time (2016, 1, 16, 17, 33, 57, 999, false));
     }
 };
 
