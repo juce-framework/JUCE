@@ -95,14 +95,10 @@ public:
         g.fillAll (Colours::white);
     }
 
-    void sliderValueChanged (Slider* slider) override
-    {
-        const OwnedArray<AudioProcessorParameter>& params = getAudioProcessor()->getParameters();
-
-        int paramIndex = paramSliders.indexOf (slider);
-        if (paramIndex >= 0 && paramIndex < params.size())
-            params[paramIndex]->setValueNotifyingHost ((float) slider->getValue());
-    }
+    //==============================================================================
+    void sliderValueChanged (Slider* slider) override    { getParemeterForSlider (slider)->setValueNotifyingHost ((float) slider->getValue()); }
+    void sliderDragStarted (Slider* slider) override     { getParemeterForSlider (slider)->beginChangeGesture(); }
+    void sliderDragEnded (Slider* slider) override       { getParemeterForSlider (slider)->endChangeGesture(); }
 
 private:
     void timerCallback() override
@@ -116,6 +112,18 @@ private:
                     paramSliders[i]->setValue (param->getValue());
             }
         }
+    }
+
+    AudioProcessorParameter* getParemeterForSlider (Slider* slider)
+    {
+
+        const OwnedArray<AudioProcessorParameter>& params = getAudioProcessor()->getParameters();
+
+        int paramIndex = paramSliders.indexOf (slider);
+        if (paramIndex >= 0 && paramIndex < params.size())
+            return params[paramIndex];
+
+        return nullptr;
     }
 
     Label noParameterLabel;
