@@ -55,6 +55,7 @@ WaitableEvent::WaitableEvent (const bool useManualReset) noexcept
     pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
    #endif
     pthread_mutex_init (&mutex, &atts);
+    pthread_mutexattr_destroy (&atts);
 }
 
 WaitableEvent::~WaitableEvent() noexcept
