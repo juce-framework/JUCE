@@ -435,7 +435,7 @@ Result File::createDirectoryInternal (const String& fileName) const
     return getResultForReturnValue (mkdir (fileName.toUTF8(), 0777));
 }
 
-//=====================================================================
+//==============================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     if (handle != 0 && lseek (getFD (handle), pos, SEEK_SET) == pos)

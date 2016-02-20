@@ -112,7 +112,7 @@ public:
     */
     void getChannelAsPath (Path& result, const Range<float>* levels, int numLevels, int nextSample);
 
-    //==========================================================================
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
 

@@ -81,7 +81,7 @@
  #define JUCE_OPENGL3 1
 #endif
 
-//=============================================================================
+//==============================================================================
 /** This macro is a helper for use in GLSL shader code which needs to compile on both OpenGL 2.1 and OpenGL 3.0.
     It's mandatory in OpenGL 3.0 to specify the GLSL version.
 */
@@ -95,7 +95,7 @@
  #define JUCE_GLSL_VERSION ""
 #endif
 
-//=============================================================================
+//==============================================================================
 #if JUCE_OPENGL_ES || defined (DOXYGEN)
  /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
      Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
@@ -120,7 +120,7 @@
  #define JUCE_LOWP
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

@@ -368,7 +368,7 @@ public:
     int minBufferSizeOut, minBufferSizeIn;
 
 private:
-    //==================================================================================================
+    //==============================================================================
     CriticalSection callbackLock;
     AudioIODeviceCallback* callback;
     jint sampleRate;

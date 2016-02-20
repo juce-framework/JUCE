@@ -127,7 +127,7 @@ struct JUCE_API  MPEZone
     bool operator!= (const MPEZone& other) const noexcept;
 
 private:
-    //==========================================================================
+    //==============================================================================
     int masterChannel;
     int numNoteChannels;
     int perNotePitchbendRange;

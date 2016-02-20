@@ -28,7 +28,7 @@
 #include "../juce_gui_basics/juce_gui_basics.h"
 
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_WEB_BROWSER
     This lets you disable the WebBrowserComponent class (Mac and Windows).
     If you're not using any embedded web-pages, turning this off may reduce your code size.
@@ -47,7 +47,7 @@
  #endif
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

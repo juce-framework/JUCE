@@ -25,7 +25,7 @@
 #ifndef JUCE_CRYPTOGRAPHY_H_INCLUDED
 #define JUCE_CRYPTOGRAPHY_H_INCLUDED
 
-//=============================================================================
+//==============================================================================
 #include "../juce_core/juce_core.h"
 
 namespace juce

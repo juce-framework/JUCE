@@ -26,7 +26,7 @@ class iOSAudioIODevice;
 
 static const char* const iOSAudioDeviceName = "iOS Audio";
 
-//==================================================================================================
+//==============================================================================
 struct AudioSessionHolder
 {
     AudioSessionHolder();
@@ -76,7 +76,7 @@ bool getNotificationValueForKey (NSNotification* notification, NSString* key, NS
 
 } // juce namespace
 
-//==================================================================================================
+//==============================================================================
 @interface iOSAudioSessionNative  : NSObject
 {
 @private
@@ -180,7 +180,7 @@ bool getNotificationValueForKey (NSNotification* notification, NSString* key, NS
 
 @end
 
-//==================================================================================================
+//==============================================================================
 namespace juce {
 
 #ifndef JUCE_IOS_AUDIO_LOGGING
@@ -205,7 +205,7 @@ static void logNSError (NSError* e)
 #define JUCE_NSERROR_CHECK(X)     { NSError* error = nil; X; logNSError (error); }
 
 
-//==================================================================================================
+//==============================================================================
 class iOSAudioIODevice  : public AudioIODevice
 {
 public:
@@ -473,7 +473,7 @@ public:
     }
 
 private:
-    //==================================================================================================
+    //==============================================================================
     SharedResourcePointer<AudioSessionHolder> sessionHolder;
     CriticalSection callbackLock;
     NSTimeInterval sampleRate = 0;
@@ -509,7 +509,7 @@ private:
         }
     }
 
-    //==================================================================================================
+    //==============================================================================
     OSStatus process (AudioUnitRenderActionFlags* flags, const AudioTimeStamp* time,
                       const UInt32 numFrames, AudioBufferList* data)
     {
@@ -611,7 +611,7 @@ private:
         updateSampleRateAndAudioInput();
     }
 
-    //==================================================================================================
+    //==============================================================================
     static OSStatus processStatic (void* client, AudioUnitRenderActionFlags* flags, const AudioTimeStamp* time,
                                    UInt32 /*busNumber*/, UInt32 numFrames, AudioBufferList* data)
     {
@@ -619,7 +619,7 @@ private:
         return static_cast<iOSAudioIODevice*> (client)->process (flags, time, numFrames, data);
     }
 
-    //==================================================================================================
+    //==============================================================================
     void resetFormat (const int numChannels) noexcept
     {
         zerostruct (format);
@@ -743,7 +743,7 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_iOSAudio()
     return new iOSAudioIODeviceType();
 }
 
-//==================================================================================================
+//==============================================================================
 AudioSessionHolder::AudioSessionHolder()    { nativeSession = [[iOSAudioSessionNative alloc] init: this]; }
 AudioSessionHolder::~AudioSessionHolder()   { [nativeSession release]; }
 

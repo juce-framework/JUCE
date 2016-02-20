@@ -47,7 +47,7 @@
 struct JUCE_API  MPESynthesiserBase   : public MPEInstrument::Listener
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Constructor. */
     MPESynthesiserBase();
 
@@ -61,7 +61,7 @@ public:
     */
     MPESynthesiserBase (MPEInstrument* instrument);
 
-    //==========================================================================
+    //==============================================================================
     /** Returns the synthesiser's internal MPE zone layout.
         This happens by value, to enforce thread-safety and class invariants.
     */
@@ -73,7 +73,7 @@ public:
     */
     void setZoneLayout (MPEZoneLayout newLayout);
 
-    //==========================================================================
+    //==============================================================================
     /** Tells the synthesiser what the sample rate is for the audio it's being
         used to render.
     */
@@ -84,7 +84,7 @@ public:
     */
     double getSampleRate() const noexcept          { return sampleRate; }
 
-    //==========================================================================
+    //==============================================================================
     /** Creates the next block of audio output.
 
         Call this to make sound. This will chop up the AudioBuffer into subBlock
@@ -99,7 +99,7 @@ public:
                           int startSample,
                           int numSamples);
 
-    //==========================================================================
+    //==============================================================================
     /** Handle incoming MIDI events (called from renderNextBlock).
 
         The default implementation provided here simply forwards everything
@@ -113,7 +113,7 @@ public:
     */
     virtual void handleMidiEvent (const MidiMessage&);
 
-    //==========================================================================
+    //==============================================================================
     /** Sets a minimum limit on the size to which audio sub-blocks will be divided when rendering.
 
         When rendering, the audio blocks that are passed into renderNextBlock() will be split up
@@ -130,7 +130,7 @@ public:
     */
     void setMinimumRenderingSubdivisionSize (int numSamples) noexcept;
 
-    //==========================================================================
+    //==============================================================================
     /** Puts the synthesiser into legacy mode.
 
         @param pitchbendRange   The note pitchbend range in semitones to use when in legacy mode.
@@ -160,7 +160,7 @@ public:
     void setLegacyModePitchbendRange (int pitchbendRange);
 
 protected:
-    //==========================================================================
+    //==============================================================================
     /** Implement this method to render your audio inside.
         @see renderNextBlock
     */
@@ -176,14 +176,14 @@ protected:
                                      int /*numSamples*/) {}
 
 protected:
-    //==========================================================================
+    //==============================================================================
     /** @internal */
     ScopedPointer<MPEInstrument> instrument;
     /** @internal */
     CriticalSection renderAudioLock;
 
 private:
-    //==========================================================================
+    //==============================================================================
     double sampleRate;
     int minimumSubBlockSize;
 

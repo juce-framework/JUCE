@@ -144,7 +144,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void expectValuesConsistent (MPEValue value,
                                  int expectedValueAs7BitInt,
                                  int expectedValueAs14BitInt,
@@ -157,7 +157,7 @@ private:
         expectFloatWithinRelativeError (value.asUnsignedFloat(), expectedValueAsUnsignedFloat, 0.0001f);
     }
 
-    //==========================================================================
+    //==============================================================================
     void expectFloatWithinRelativeError (float actualValue, float expectedValue, float maxRelativeError)
     {
         const float maxAbsoluteError = jmax (1.0f, std::fabs (expectedValue)) * maxRelativeError;
