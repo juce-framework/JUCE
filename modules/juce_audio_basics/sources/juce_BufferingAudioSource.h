@@ -46,7 +46,7 @@ public:
         @param source                   the input source to read from
         @param backgroundThread         a background thread that will be used for the
                                         background read-ahead. This object must not be deleted
-                                        until after any BufferedAudioSources that are using it
+                                        until after any BufferingAudioSources that are using it
                                         have been deleted!
         @param deleteSourceWhenDeleted  if true, then the input source object will
                                         be deleted when this object is deleted
