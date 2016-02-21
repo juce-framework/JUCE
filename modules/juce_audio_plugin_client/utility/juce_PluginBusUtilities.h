@@ -364,6 +364,7 @@ private:
                 break;
             case 6:
                 sets.add (AudioChannelSet::hexagonal());
+                sets.add (AudioChannelSet::create5point1());
                 sets.add (AudioChannelSet::create6point0());
                 break;
             case 7:

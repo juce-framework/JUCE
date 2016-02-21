@@ -531,6 +531,8 @@ public:
             usingCoreGraphics = index > 0;
             [view setNeedsDisplay: true];
         }
+       #else
+        ignoreUnused (index);
        #endif
     }
 

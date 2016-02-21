@@ -39,7 +39,7 @@ template <typename FloatType>
 class StatisticsAccumulator
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Constructs a new StatisticsAccumulator. */
     StatisticsAccumulator() noexcept
         : count (0),
@@ -47,7 +47,7 @@ public:
           maximum (-std::numeric_limits<FloatType>::infinity())
     {}
 
-    //==========================================================================
+    //==============================================================================
     /** Add a new value to the accumulator.
         This will update all running statistics accordingly.
     */
@@ -68,7 +68,7 @@ public:
     */
     void reset() noexcept               { *this = StatisticsAccumulator<FloatType>(); }
 
-    //==========================================================================
+    //==============================================================================
     /** Returns the average (arithmetic mean) of all previously added values.
         If no values have been added yet, this will return zero.
     */
@@ -118,7 +118,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     struct KahanSum
     {
         KahanSum() noexcept : sum(), error() {}
@@ -135,7 +135,7 @@ private:
         FloatType sum, error;
     };
 
-    //==========================================================================
+    //==============================================================================
     size_t count;
     KahanSum sum, sumSquares;
     FloatType minimum, maximum;

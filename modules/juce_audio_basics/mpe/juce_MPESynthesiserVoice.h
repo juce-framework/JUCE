@@ -37,7 +37,7 @@
 class JUCE_API  MPESynthesiserVoice
 {
 public:
-    //========================================================================
+    //==============================================================================
     /** Constructor. */
     MPESynthesiserVoice();
 
@@ -160,7 +160,7 @@ public:
     bool wasStartedBefore (const MPESynthesiserVoice& other) const noexcept;
 
 protected:
-    //==========================================================================
+    //==============================================================================
     /** Resets the state of this voice after a sound has finished playing.
 
         The subclass must call this when it finishes playing a note and becomes available
@@ -175,12 +175,12 @@ protected:
     */
     void clearCurrentNote() noexcept;
 
-    //==========================================================================
+    //==============================================================================
     double currentSampleRate;
     MPENote currentlyPlayingNote;
 
 private:
-    //==========================================================================
+    //==============================================================================
     friend class MPESynthesiser;
     uint32 noteStartTime;
 

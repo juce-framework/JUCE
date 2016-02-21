@@ -190,7 +190,7 @@ namespace DirectWriteTypeLayout
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomDirectWriteTextRenderer)
     };
 
-    //==================================================================================================
+    //==============================================================================
     static float getFontHeightToEmSizeFactor (IDWriteFont& dwFont)
     {
         ComSmartPtr<IDWriteFontFace> dwFontFace;

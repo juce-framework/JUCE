@@ -162,7 +162,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void testMidiBuffer (MidiBuffer& buffer, const uint8* expectedBytes, int expectedBytesSize)
     {
         uint8 actualBytes[128] = { 0 };
@@ -171,7 +171,7 @@ private:
         expectEquals (std::memcmp (actualBytes, expectedBytes, (std::size_t) expectedBytesSize), 0);
     }
 
-    //==========================================================================
+    //==============================================================================
     void extractRawBinaryData (const MidiBuffer& midiBuffer, const uint8* bufferToCopyTo, std::size_t maxBytes)
     {
         std::size_t pos = 0;

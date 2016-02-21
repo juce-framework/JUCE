@@ -354,8 +354,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
 
             if (node->properties[getOpenProp (type)])
             {
-                AudioProcessor* const processor = node->getProcessor();
-                jassert (processor != nullptr);
+                jassert (node->getProcessor() != nullptr);
 
                 if (PluginWindow* const w = PluginWindow::getWindowFor (node, type))
                     w->toFront (true);

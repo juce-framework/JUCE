@@ -28,7 +28,7 @@
 #include "../juce_core/juce_core.h"
 #include "../juce_events/juce_events.h"
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_USE_COREIMAGE_LOADER
 
     On OSX, enabling this flag means that the CoreImage codecs will be used to load
@@ -60,7 +60,7 @@
  #define USE_COREGRAPHICS_RENDERING 1
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

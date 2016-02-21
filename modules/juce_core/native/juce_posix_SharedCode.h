@@ -55,6 +55,7 @@ WaitableEvent::WaitableEvent (const bool useManualReset) noexcept
     pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
    #endif
     pthread_mutex_init (&mutex, &atts);
+    pthread_mutexattr_destroy (&atts);
 }
 
 WaitableEvent::~WaitableEvent() noexcept
@@ -434,7 +435,7 @@ Result File::createDirectoryInternal (const String& fileName) const
     return getResultForReturnValue (mkdir (fileName.toUTF8(), 0777));
 }
 
-//=====================================================================
+//==============================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     if (handle != 0 && lseek (getFD (handle), pos, SEEK_SET) == pos)
@@ -1058,7 +1059,8 @@ public:
 
         // Looks like you're trying to launch a non-existent exe or a folder (perhaps on OSX
         // you're trying to launch the .app folder rather than the actual binary inside it?)
-        jassert (File::getCurrentWorkingDirectory().getChildFile (exe).existsAsFile());
+        jassert (File::getCurrentWorkingDirectory().getChildFile (exe).existsAsFile()
+                  || ! exe.containsChar (File::separator));
 
         int pipeHandles[2] = { 0 };
 

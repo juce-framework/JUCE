@@ -2497,7 +2497,7 @@ public:
         return currentScaleFactor;
     }
 
-    //===============================================================================
+    //==============================================================================
     void addOpenGLRepaintListener (Component* dummy)
     {
         if (dummy != nullptr)

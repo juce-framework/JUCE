@@ -25,7 +25,7 @@
 #ifndef JUCE_DATA_STRUCTURES_H_INCLUDED
 #define JUCE_DATA_STRUCTURES_H_INCLUDED
 
-//=============================================================================
+//==============================================================================
 #include "../juce_events/juce_events.h"
 
 namespace juce

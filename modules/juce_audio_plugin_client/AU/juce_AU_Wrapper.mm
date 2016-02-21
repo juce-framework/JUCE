@@ -1100,34 +1100,45 @@ public:
                 const unsigned int numInChannels  = (input != nullptr  ? input ->GetStreamFormat().mChannelsPerFrame : 0);
                 const unsigned int numOutChannels = (output != nullptr ? output->GetStreamFormat().mChannelsPerFrame : 0);
 
-                if (numOutChannels > 0 && numInChannels >= numOutChannels)
+                if (numInChannels >= numOutChannels)
                 {
-                    // the input buffers were used. We must copy the output
-                    if (output->WillAllocateBuffer())
-                        output->PrepareBuffer (nFrames);
-
-                    const AudioBufferList& outBuffer = output->GetBufferList();
-                    const bool isOutputInterleaved = (numOutChannels > 1) && (outBuffer.mNumberBuffers == 1);
-
-                    for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
+                    if (numOutChannels > 0)
                     {
-                        int mappedOutChIdx = outputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
+                        // the input buffers were used. We must copy the output
+                        if (output->WillAllocateBuffer())
+                            output->PrepareBuffer (nFrames);
 
-                        float* outData = static_cast<float*> (outBuffer.mBuffers[isOutputInterleaved ? 0 : mappedOutChIdx].mData);
-                        const float* buffer = static_cast<float*> (channels [idx++]);
+                        const AudioBufferList& outBuffer = output->GetBufferList();
+                        const bool isOutputInterleaved = (numOutChannels > 1) && (outBuffer.mNumberBuffers == 1);
 
-                        if (isOutputInterleaved)
+                        for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
                         {
-                            for (unsigned int i = 0; i < nFrames; ++i)
+                            int mappedOutChIdx = outputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
+
+                            float* outData = static_cast<float*> (outBuffer.mBuffers[isOutputInterleaved ? 0 : mappedOutChIdx].mData);
+                            float* buffer = static_cast<float*> (channels [idx]);
+
+                            if (isOutputInterleaved)
                             {
-                                outData [mappedOutChIdx] = buffer[i];
-                                outData += numOutChannels;
+                                for (unsigned int i = 0; i < nFrames; ++i)
+                                {
+                                    outData [mappedOutChIdx] = buffer[i];
+                                    outData += numOutChannels;
+                                }
                             }
+                            else
+                                std::copy (buffer, buffer + nFrames, outData);
+
+                            zeromem (buffer, sizeof(float) * nFrames);
+                            idx++;
                         }
-                        else
-                            std::copy (buffer, buffer + nFrames, outData);
+                        idx += numInChannels - numOutChannels;
                     }
-                    idx += numInChannels - numOutChannels;
+                    else
+                    {
+                        for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
+                            zeromem (channels [chIdx], sizeof(float) * nFrames);
+                    }
                 }
             }
         }

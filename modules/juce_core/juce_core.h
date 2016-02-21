@@ -41,7 +41,7 @@
 
 #include "system/juce_TargetPlatform.h"
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_FORCE_DEBUG
 
     Normally, JUCE_DEBUG is set to 1 or 0 based on compiler and project settings,
@@ -51,7 +51,7 @@
  //#define JUCE_FORCE_DEBUG 0
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_LOG_ASSERTIONS
 
     If this flag is enabled, the jassert and jassertfalse macros will always use Logger::writeToLog()
@@ -71,7 +71,7 @@
  #endif
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_CHECK_MEMORY_LEAKS
 
     Enables a memory-leak check for certain objects when the app terminates. See the LeakedObjectDetector
@@ -81,7 +81,7 @@
  #define JUCE_CHECK_MEMORY_LEAKS 1
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
 
     In a Visual C++  build, this can be used to stop the required system libs being
@@ -130,8 +130,8 @@
  #define JUCE_STRING_UTF_TYPE 8
 #endif
 
-//=============================================================================
-//=============================================================================
+//==============================================================================
+//==============================================================================
 
 #if JUCE_CORE_INCLUDE_NATIVE_HEADERS
  #include "native/juce_BasicNativeHeaders.h"

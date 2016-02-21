@@ -531,8 +531,8 @@ public:
         jassert (activePlugins.contains (this));
 
         {
-            const int numIn  = cEffect.numInputs;
-            const int numOut = cEffect.numOutputs;
+            const int numIn  = filter->getTotalNumInputChannels();
+            const int numOut = filter->getTotalNumOutputChannels();
 
             const ScopedLock sl (filter->getCallbackLock());
 
@@ -576,7 +576,7 @@ public:
                     tmpBuffers.channels[i] = inputs[i];
 
                 {
-                    const int numChannels = jmax (filter->getTotalNumInputChannels(), filter->getTotalNumOutputChannels());
+                    const int numChannels = jmax (numIn, numOut);
                     AudioBuffer<FloatType> chans (tmpBuffers.channels, numChannels, numSamples);
 
                     if (isBypassed)

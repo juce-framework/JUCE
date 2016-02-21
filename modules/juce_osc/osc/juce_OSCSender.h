@@ -36,14 +36,14 @@
 class JUCE_API  OSCSender
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Constructs a new OSCSender. */
     OSCSender();
 
     /** Destructor. */
     ~OSCSender();
 
-    //==========================================================================
+    //==============================================================================
     /** Connects to a datagram socket and prepares the socket for sending OSC
         packets to the specified target.
 
@@ -60,7 +60,7 @@ public:
     */
     bool connect (const String& targetHostName, int targetPortNumber);
 
-    //==========================================================================
+    //==============================================================================
     /** Disconnects from the currently used UDP port.
         @returns true if the disconnection was successful; false otherwise.
 
@@ -68,7 +68,7 @@ public:
     */
     bool disconnect();
 
-    //==========================================================================
+    //==============================================================================
     /** Sends an OSC message to the target.
         @param  message   The OSC message to send.
         @returns true if the operation was successful.
@@ -127,7 +127,7 @@ public:
    #endif
 
 private:
-    //==========================================================================
+    //==============================================================================
     struct Pimpl;
     friend struct Pimpl;
     friend struct ContainerDeletePolicy<Pimpl>;
@@ -137,7 +137,7 @@ private:
 };
 
 
-//==========================================================================
+//==============================================================================
 #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
  template <typename... Args>
  bool OSCSender::send (const OSCAddressPattern& address, Args&&... args)
