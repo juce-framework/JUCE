@@ -274,7 +274,7 @@ private:
     Point<int> viewportPosToCompPos (Point<int>) const;
 
     void updateVisibleArea();
-    void deleteContentComp();
+    void deleteOrRemoveContentComp();
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // If you get an error here, it's because this method's parameters have changed! See the new definition above..
