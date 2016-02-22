@@ -1596,19 +1596,22 @@ private:
     OSStatus syncProcessorWithAudioUnit()
     {
         OSStatus err;
+        const int numInputBuses  = busUtils.getBusCount (true);
+        const int numOutputBuses = busUtils.getBusCount (false);
+
         const int numInputElements  = static_cast<int> (GetScope(kAudioUnitScope_Input). GetNumberOfElements());
         const int numOutputElements = static_cast<int> (GetScope(kAudioUnitScope_Output).GetNumberOfElements());
 
         inputLayoutMap. clear();
         outputLayoutMap.clear();
 
-        inputLayoutMap. resize (numInputElements);
-        outputLayoutMap.resize (numOutputElements);
+        inputLayoutMap. resize (numInputBuses);
+        outputLayoutMap.resize (numOutputBuses);
 
-        for (int i = 0; i < numInputElements; ++i)
+        for (int i = 0; i < numInputBuses; ++i)
             if ((err = syncProcessorWithAudioUnitForBus (true, i)) != noErr) return err;
 
-        for (int i = 0; i < numOutputElements; ++i)
+        for (int i = 0; i < numOutputBuses; ++i)
             if ((err = syncProcessorWithAudioUnitForBus (false, i)) != noErr) return err;
 
         if (numInputElements != busUtils.getNumEnabledBuses (true) || numOutputElements != busUtils.getNumEnabledBuses (false))
@@ -1627,32 +1630,29 @@ private:
     //==============================================================================
     OSStatus syncProcessorWithAudioUnitForBus (bool isInput, int busNr)
     {
-        if (const AUIOElement* element = GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, (UInt32) busNr))
-        {
-            const int numChannels = static_cast<int> (element->GetStreamFormat().NumberChannels());
+        jassert (isPositiveAndBelow (busNr, busUtils.getBusCount (isInput)));
 
-            AudioChannelLayoutTag currentLayoutTag = isInput ? currentInputLayout[busNr] : currentOutputLayout[busNr];
-            const int tagNumChannels = currentLayoutTag & 0xffff;
+        const int numAUElements  = static_cast<int> (GetScope(isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output).GetNumberOfElements());
+        const AUIOElement* element = (busNr < numAUElements ? GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, (UInt32) busNr) : nullptr);
+        const int numChannels = (element != nullptr ? static_cast<int> (element->GetStreamFormat().NumberChannels()) : 0);
 
-            if (numChannels != tagNumChannels)
-                return kAudioUnitErr_FormatNotSupported;
+        AudioChannelLayoutTag currentLayoutTag = isInput ? currentInputLayout[busNr] : currentOutputLayout[busNr];
+        const int tagNumChannels = currentLayoutTag & 0xffff;
 
-            const AudioChannelSet channelFormat = CALayoutTagToChannelSet(currentLayoutTag);
+        if (numChannels != tagNumChannels)
+            return kAudioUnitErr_FormatNotSupported;
 
-            if (! juceFilter->setPreferredBusArrangement (isInput, busNr, channelFormat))
-                return kAudioUnitErr_FormatNotSupported;
+        const AudioChannelSet channelFormat = CALayoutTagToChannelSet(currentLayoutTag);
 
-            Array<int>& layoutMap = (isInput ? inputLayoutMap : outputLayoutMap).getReference (busNr);
+        if (! juceFilter->setPreferredBusArrangement (isInput, busNr, channelFormat))
+            return kAudioUnitErr_FormatNotSupported;
 
-            for (int i = 0; i < numChannels; ++i)
-                layoutMap.add (auChannelIndexToJuce (i, channelFormat));
+        Array<int>& layoutMap = (isInput ? inputLayoutMap : outputLayoutMap).getReference (busNr);
 
-            return noErr;
-        }
-        else
-            jassertfalse;
+        for (int i = 0; i < numChannels; ++i)
+            layoutMap.add (auChannelIndexToJuce (i, channelFormat));
 
-        return kAudioUnitErr_FormatNotSupported;
+        return noErr;
     }
 
     OSStatus syncAudioUnitWithChannelSet (bool isInput, int busNr, const AudioChannelSet& channelSet)
@@ -2064,6 +2064,7 @@ private:
     {
         switch (tag)
         {
+            case kAudioChannelLayoutTag_Unknown:                return AudioChannelSet::disabled();
             case kAudioChannelLayoutTag_Mono:                   return AudioChannelSet::mono();
             case kAudioChannelLayoutTag_Stereo:
             case kAudioChannelLayoutTag_StereoHeadphones:
@@ -2114,6 +2115,7 @@ private:
         if (set == AudioChannelSet::create7point1())      return kAudioChannelLayoutTag_MPEG_7_1_C;
         if (set == AudioChannelSet::createFront7point0()) return kAudioChannelLayoutTag_AudioUnit_7_0_Front;
         if (set == AudioChannelSet::createFront7point1()) return kAudioChannelLayoutTag_AudioUnit_7_1_Front;
+        if (set == AudioChannelSet::disabled())           return kAudioChannelLayoutTag_Unknown;
 
         return static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | set.size());
     }
