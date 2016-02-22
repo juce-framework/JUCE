@@ -96,9 +96,23 @@ public:
     }
 
     //==============================================================================
-    void sliderValueChanged (Slider* slider) override    { getParemeterForSlider (slider)->setValueNotifyingHost ((float) slider->getValue()); }
-    void sliderDragStarted (Slider* slider) override     { getParemeterForSlider (slider)->beginChangeGesture(); }
-    void sliderDragEnded (Slider* slider) override       { getParemeterForSlider (slider)->endChangeGesture(); }
+    void sliderValueChanged (Slider* slider) override
+    {
+        if (AudioProcessorParameter* param = getParameterForSlider (slider))
+            param->setValueNotifyingHost ((float) slider->getValue());
+    }
+
+    void sliderDragStarted (Slider* slider) override
+    {
+        if (AudioProcessorParameter* param = getParameterForSlider (slider))
+            param->beginChangeGesture();
+    }
+
+    void sliderDragEnded (Slider* slider) override
+    {
+        if (AudioProcessorParameter* param = getParameterForSlider (slider))
+            param->endChangeGesture();
+    }
 
 private:
     void timerCallback() override
@@ -114,16 +128,10 @@ private:
         }
     }
 
-    AudioProcessorParameter* getParemeterForSlider (Slider* slider)
+    AudioProcessorParameter* getParameterForSlider (Slider* slider)
     {
-
         const OwnedArray<AudioProcessorParameter>& params = getAudioProcessor()->getParameters();
-
-        int paramIndex = paramSliders.indexOf (slider);
-        if (paramIndex >= 0 && paramIndex < params.size())
-            return params[paramIndex];
-
-        return nullptr;
+        return params[paramSliders.indexOf (slider)];
     }
 
     Label noParameterLabel;
