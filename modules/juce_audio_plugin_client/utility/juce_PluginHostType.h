@@ -107,6 +107,7 @@ public:
     bool isWavelab() const noexcept           { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelab8 || type == SteinbergWavelabGeneric; }
     bool isWavelabLegacy() const noexcept     { return type == SteinbergWavelab5 || type == SteinbergWavelab6; }
     bool isRenoise() const noexcept           { return type == Renoise; }
+    bool isProTools() const noexcept          { return type == DigidesignProTools; }
 
     //==============================================================================
     const char* getHostDescription() const noexcept
