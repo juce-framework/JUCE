@@ -129,8 +129,8 @@
   extern void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow);
  #endif
 #else
-  extern void* attachSubWindow (void* hostWindowRef, Component* comp);
-  extern void removeSubWindow (void* nsWindow, Component* comp);
+  extern void* attachSubWindow (void* hostWindowRef, juce::Component* comp);
+  extern void removeSubWindow (void* nsWindow, juce::Component* comp);
   extern void forwardCurrentKeyEventToHostWindow();
 #endif
 
@@ -236,7 +236,7 @@ public:
 
         void timerCallback() override
         {
-            if (! Component::isMouseButtonDownAnywhere())
+            if (! juce::Component::isMouseButtonDownAnywhere())
             {
                 stopTimer();
 
@@ -286,7 +286,7 @@ public:
     private:
         AudioProcessor* const filter;
         JucePlugInProcess* const process;
-        ScopedPointer<Component> wrapper;
+        ScopedPointer<juce::Component> wrapper;
         ScopedPointer<AudioProcessorEditor> editorComp;
 
         void deleteEditorComp()
@@ -297,7 +297,7 @@ public:
                 {
                     PopupMenu::dismissAllActiveMenus();
 
-                    if (Component* const modalComponent = Component::getCurrentlyModalComponent())
+                    if (juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent())
                         modalComponent->exitModalState (0);
 
                     filter->editorBeingDeleted (editorComp);
@@ -311,14 +311,14 @@ public:
         //==============================================================================
         // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
-        class EditorCompWrapper  : public Component
+        class EditorCompWrapper  : public juce::Component
                                  #if ! JUCE_MAC
                                    , public FocusChangeListener
                                  #endif
         {
         public:
             EditorCompWrapper (void* const hostWindow_,
-                               Component* const editorComp,
+                               juce::Component* const editorComp,
                                JuceCustomUIView* const owner_)
                 : hostWindow (hostWindow_),
                   owner (owner_),
@@ -364,7 +364,7 @@ public:
 
             void resized() override
             {
-                if (Component* const ed = getEditor())
+                if (juce::Component* const ed = getEditor())
                     ed->setBounds (getLocalBounds());
 
                 repaint();
@@ -380,7 +380,7 @@ public:
             }
            #endif
 
-            void childBoundsChanged (Component* child) override
+            void childBoundsChanged (juce::Component* child) override
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
@@ -409,7 +409,7 @@ public:
             JuceCustomUIView* const owner;
             int titleW, titleH;
 
-            Component* getEditor() const        { return getChildComponent (0); }
+            juce::Component* getEditor() const        { return getChildComponent (0); }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
         };
