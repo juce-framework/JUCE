@@ -859,18 +859,14 @@ public:
 
     void repaint (const Rectangle<int>& area) override
     {
-        Rectangle<float> r ((float) area.getX(), [view frame].size.height - (float) area.getBottom(),
-                            (float) area.getWidth(), (float) area.getHeight());
-
-        if (insideDrawRect || areAnyWindowsInLiveResize())
-        {
-            deferredRepaints.add (r);
-            triggerAsyncUpdate();
-        }
-        else
-        {
-            [view setNeedsDisplayInRect: makeNSRect (r)];
-        }
+        // In 10.11 changes were made to the way the OS handles repaint regions, and it seems that it can
+        // no longer be trusted to coalesce all the regions, or to even remember them all without losing
+        // a few when there's a lot of activity.
+        // As a work around for this, we use a RectangleList to do our own coalescing of regions before
+        // asynchronously asking the OS to repaint them.
+        deferredRepaints.add ((float) area.getX(), (float) ([view frame].size.height - area.getBottom()),
+                              (float) area.getWidth(), (float) area.getHeight());
+        triggerAsyncUpdate();
     }
 
     void invokePaint (LowLevelGraphicsContext& context)
