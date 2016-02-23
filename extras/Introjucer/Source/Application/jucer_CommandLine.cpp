@@ -436,17 +436,24 @@ namespace
     }
 
     //==============================================================================
-    static File findSimilarlyNamedHeader (const Array<File>& allFiles, const String& name)
+    static File findSimilarlyNamedHeader (const Array<File>& allFiles, const String& name, const File& sourceFile)
     {
+        File result;
+
         for (int i = 0; i < allFiles.size(); ++i)
         {
             const File& f = allFiles.getReference(i);
 
-            if (f.getFileName().equalsIgnoreCase (name))
-                return f;
+            if (f.getFileName().equalsIgnoreCase (name) && f != sourceFile)
+            {
+                if (result.exists())
+                    return File(); // multiple possible results, so don't change it!
+
+                result = f;
+            }
         }
 
-        return File();
+        return result;
     }
 
     static void fixIncludes (const File& file, const Array<File>& allFiles)
@@ -472,7 +479,7 @@ namespace
 
                 if (! target.exists())
                 {
-                    File header = findSimilarlyNamedHeader (allFiles, target.getFileName());
+                    File header = findSimilarlyNamedHeader (allFiles, target.getFileName(), file);
 
                     if (header.exists())
                     {
