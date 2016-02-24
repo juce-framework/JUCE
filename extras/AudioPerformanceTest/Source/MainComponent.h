@@ -129,7 +129,7 @@ private:
     void initGui()
     {
         loopIterationsSlider.setSliderStyle (Slider::LinearBar);
-        loopIterationsSlider.setRange (0, 30000, 1000);
+        loopIterationsSlider.setRange (0, 30000, 250);
         loopIterationsSlider.setValue (15000);
         loopIterationsSlider.setColour (Slider::thumbColourId, Colours::white);
         loopIterationsSlider.setColour (Slider::textBoxTextColourId, Colours::grey);
