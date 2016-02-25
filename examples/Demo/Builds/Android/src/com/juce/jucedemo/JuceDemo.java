@@ -30,13 +30,12 @@ import android.content.DialogInterface;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Handler;
-import android.os.Build;
-import android.os.Process;
 import android.os.ParcelUuid;
 import android.os.Environment;
 import android.view.*;
@@ -50,19 +49,16 @@ import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import java.lang.Runnable;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.TimerTask;
+import java.util.*;
 import java.io.*;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import android.media.AudioManager;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
-
+import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
+import android.Manifest;
 
 import android.media.midi.*;
 import android.bluetooth.*;
@@ -78,6 +74,88 @@ public class JuceDemo   extends Activity
         System.loadLibrary ("juce_jni");
     }
 
+    //==============================================================================
+    public boolean isPermissionDeclaredInManifest (int permissionID)
+    {
+        String permissionToCheck = getAndroidPermissionName(permissionID);
+
+        try
+        {
+            PackageInfo info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
+
+            if (info.requestedPermissions != null)
+                for (String permission : info.requestedPermissions)
+                    if (permission.equals (permissionToCheck))
+                        return true;
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            Log.d ("JUCE", "isPermissionDeclaredInManifest: PackageManager.NameNotFoundException = " + e.toString());
+        }
+
+        Log.d ("JUCE", "isPermissionDeclaredInManifest: could not find requested permission " + permissionToCheck);
+        return false;
+    }
+
+    //==============================================================================
+    // these have to match the values of enum PermissionID in C++ class RuntimePermissions:
+    private static final int JUCE_PERMISSIONS_RECORD_AUDIO = 1;
+    private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI= 2;
+
+    private static String getAndroidPermissionName (int permissionID)
+    {
+        switch (permissionID)
+        {
+            case JUCE_PERMISSIONS_RECORD_AUDIO:     return Manifest.permission.RECORD_AUDIO;
+            case JUCE_PERMISSIONS_BLUETOOTH_MIDI:   return Manifest.permission.ACCESS_COARSE_LOCATION;
+        }
+
+        // unknown permission ID!
+        assert false;
+        return new String();
+    }
+
+    public boolean isPermissionGranted (int permissionID)
+    {
+        return ContextCompat.checkSelfPermission (this, getAndroidPermissionName (permissionID)) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private Map<Integer, Long> permissionCallbackPtrMap;
+
+    public void requestRuntimePermission (int permissionID, long ptrToCallback)
+    {
+        permissionCallbackPtrMap.put (permissionID, ptrToCallback);
+
+        String permissionName = getAndroidPermissionName (permissionID);
+
+        if (ContextCompat.checkSelfPermission (this, permissionName) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions (this, new String[]{permissionName}, permissionID);
+        }
+    }
+
+    private native void androidRuntimePermissionsCallback (boolean permissionWasGranted, long ptrToCallback);
+
+    @Override
+    public void onRequestPermissionsResult (int permissionID, String permissions[], int[] grantResults)
+    {
+        boolean permissionsGranted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+
+        if (! permissionsGranted)
+            Log.d ("JUCE", "onRequestPermissionsResult: runtime permission was DENIED: " + getAndroidPermissionName (permissionID));
+
+        Long ptrToCallback = permissionCallbackPtrMap.get (permissionID);
+        permissionCallbackPtrMap.remove (permissionID);
+
+        if (ptrToCallback == null)
+        {
+            // something went wrong: we don't have a valid callback pointer to call!
+            assert false;
+            return;
+        }
+
+        androidRuntimePermissionsCallback (permissionsGranted, ptrToCallback);
+    }
     //==============================================================================
     public static class MidiPortID extends Object
     {
@@ -975,6 +1053,8 @@ public class JuceDemo   extends Activity
         setContentView (viewHolder);
 
         setVolumeControlStream (AudioManager.STREAM_MUSIC);
+
+        permissionCallbackPtrMap = new HashMap<Integer, Long>();
     }
 
     @Override
