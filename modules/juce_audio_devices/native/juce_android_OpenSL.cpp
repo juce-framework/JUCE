@@ -145,12 +145,32 @@ public:
               << ", sampleRate = " << sampleRate);
 
         if (numInputChannels > 0)
-            recorder = engine.createRecorder (numInputChannels,  sampleRate,
-                                              audioBuffersToEnqueue, actualBufferSize);
+        {
+            if (! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
+            {
+                // If you hit this assert, you probably forgot to get RuntimePermissions::recordAudio
+                // before trying to open an audio input device. This is not going to work!
+                jassertfalse;
+                lastError = "Error opening OpenSL input device: the app was not granted android.permission.RECORD_AUDIO";
+            }
+            else
+            {
+                recorder = engine.createRecorder (numInputChannels,  sampleRate,
+                                                  audioBuffersToEnqueue, actualBufferSize);
+
+                if (recorder == nullptr)
+                    lastError = "Error opening OpenSL input device: creating Recorder failed.";
+            }
+        }
 
         if (numOutputChannels > 0)
-            player   = engine.createPlayer   (numOutputChannels, sampleRate,
-                                              audioBuffersToEnqueue, actualBufferSize);
+        {
+            player = engine.createPlayer   (numOutputChannels, sampleRate,
+                                            audioBuffersToEnqueue, actualBufferSize);
+
+            if (player == nullptr)
+                lastError = "Error opening OpenSL input device: creating Player failed.";
+        }
 
         // pre-fill buffers
         for (int i = 0; i < audioBuffersToEnqueue; ++i)

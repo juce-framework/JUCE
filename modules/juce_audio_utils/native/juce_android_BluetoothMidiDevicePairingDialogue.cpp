@@ -427,6 +427,15 @@ private:
 //==============================================================================
 bool BluetoothMidiDevicePairingDialogue::open()
 {
+    if (! RuntimePermissions::isGranted (RuntimePermissions::bluetoothMidi))
+    {
+        // If you hit this assert, you probably forgot to get RuntimePermissions::bluetoothMidi.
+        // This is not going to work, boo! The pairing dialogue won't be able to scan for or
+        // find any devices, it will just display an empty list, so don't bother opening it.
+        jassertfalse;
+        return false;
+    }
+
     BluetoothMidiSelectorOverlay* overlay = new BluetoothMidiSelectorOverlay;
     return true;
 }

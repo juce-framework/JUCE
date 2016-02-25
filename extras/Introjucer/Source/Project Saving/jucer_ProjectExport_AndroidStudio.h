@@ -626,6 +626,17 @@ private:
         return result;
     }
 
+    String createDependencies (const String& indent) const
+    {
+        String result;
+
+        result << "dependencies {" << newLine
+               << indent << "compile \"com.android.support:support-v4:+\"" << newLine  // needed for ContextCompat and ActivityCompat
+               << "}" << newLine;
+
+        return result;
+    }
+
     void writeBuildDotGradleApp (const File& folder) const
     {
         MemoryOutputStream memoryOutputStream;
@@ -656,7 +667,8 @@ private:
                            << CodeHelpers::indent (createModelDotAndroidDotSigningConfigs (indent), indent.length(), true)
                            << newLine
                            << CodeHelpers::indent (createModelDotAndroidDotProductFlavors (indent), indent.length(), true)
-                           << "}";
+                           << "}" << newLine << newLine
+                           << createDependencies (indent);
 
         overwriteFileIfDifferentOrThrow (folder.getChildFile ("app/build.gradle"), memoryOutputStream);
     }
