@@ -260,11 +260,9 @@ namespace CoreTextTypeLayout
 
         CFMutableAttributedStringRef attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
 
-        if (CFStringRef cfText = text.getText().toCFString())
-        {
-            CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
-            CFRelease (cfText);
-        }
+        CFStringRef cfText = text.getText().toCFString();
+        CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
+        CFRelease (cfText);
 
         const int numCharacterAttributes = text.getNumAttributes();
         const CFIndex attribStringLen = CFAttributedStringGetLength (attribString);
