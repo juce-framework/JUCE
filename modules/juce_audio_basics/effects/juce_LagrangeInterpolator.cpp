@@ -129,7 +129,7 @@ int LagrangeInterpolator::process (const double actualRatio, const float* in,
             }
 
             pos -= actualRatio;
-            *out++ = LagrangeHelpers::valueAtOffset (lastInputSamples, 1.0f - (float) pos);
+            *out++ = LagrangeHelpers::valueAtOffset (lastInputSamples, jmax (0.0f, 1.0f - (float) pos));
         }
     }
 
