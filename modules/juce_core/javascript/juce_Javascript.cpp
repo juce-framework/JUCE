@@ -1079,7 +1079,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (matchIf (TokenTypes::while_))           return parseDoOrWhileLoop (false);
             if (matchIf (TokenTypes::do_))              return parseDoOrWhileLoop (true);
             if (matchIf (TokenTypes::for_))             return parseForLoop();
-            if (matchIf (TokenTypes::return_))          return new ReturnStatement (location, matchIf (TokenTypes::semicolon) ? new Expression (location) : parseExpression());
+            if (matchIf (TokenTypes::return_))          return parseReturn();
             if (matchIf (TokenTypes::break_))           return new BreakStatement (location);
             if (matchIf (TokenTypes::continue_))        return new ContinueStatement (location);
             if (matchIf (TokenTypes::function))         return parseFunction();
@@ -1109,6 +1109,16 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             s->trueBranch = parseStatement();
             s->falseBranch = matchIf (TokenTypes::else_) ? parseStatement() : new Statement (location);
             return s.release();
+        }
+
+        Statement* parseReturn()
+        {
+            if (matchIf (TokenTypes::semicolon))
+                return new ReturnStatement (location, new Expression (location));
+
+            ReturnStatement* r = new ReturnStatement (location, parseExpression());
+            matchIf (TokenTypes::semicolon);
+            return r;
         }
 
         Statement* parseVar()
