@@ -24,21 +24,21 @@
 
 
 /**
-    Interpolator for resampling a stream of floats using 4-point lagrange interpolation.
+    Interpolator for resampling a stream of floats using Catmull-Rom interpolation.
 
     Note that the resampler is stateful, so when there's a break in the continuity
     of the input stream you're feeding it, you should call reset() before feeding
     it any new data. And like with any other stateful filter, if you're resampling
-    multiple channels, make sure each one uses its own LagrangeInterpolator
+    multiple channels, make sure each one uses its own CatmullRomInterpolator
     object.
 
-    @see CatmullRomInterpolator
+    @see LagrangeInterpolator
 */
-class JUCE_API  LagrangeInterpolator
+class JUCE_API  CatmullRomInterpolator
 {
 public:
-    LagrangeInterpolator() noexcept;
-    ~LagrangeInterpolator() noexcept;
+    CatmullRomInterpolator() noexcept;
+    ~CatmullRomInterpolator() noexcept;
 
     /** Resets the state of the interpolator.
         Call this when there's a break in the continuity of the input data stream.
@@ -85,5 +85,5 @@ private:
     float lastInputSamples[5];
     double subSamplePos;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LagrangeInterpolator)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CatmullRomInterpolator)
 };
