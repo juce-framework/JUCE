@@ -33,7 +33,7 @@
 #ifndef FLAC__PRIVATE__METADATA_H
 #define FLAC__PRIVATE__METADATA_H
 
-#include "FLAC/metadata.h"
+#include "../../../metadata.h"
 
 /* WATCHOUT: all malloc()ed data in the block is free()ed; this may not
  * be a consistent state (e.g. PICTURE) or equivalent to the initial

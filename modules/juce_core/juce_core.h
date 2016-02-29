@@ -242,6 +242,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "maths/juce_BigInteger.h"
 #include "maths/juce_Expression.h"
 #include "maths/juce_Random.h"
+#include "misc/juce_RuntimePermissions.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
 #include "system/juce_SystemStats.h"

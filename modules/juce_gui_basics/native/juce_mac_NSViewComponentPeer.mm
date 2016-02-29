@@ -59,7 +59,8 @@ static NSRect flippedScreenRect (NSRect r) noexcept
 }
 
 //==============================================================================
-class NSViewComponentPeer  : public ComponentPeer
+class NSViewComponentPeer  : public ComponentPeer,
+                             private AsyncUpdater
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -773,6 +774,7 @@ public:
         handleModifierKeysChange();
     }
 
+    //==============================================================================
     void drawRect (NSRect r)
     {
         if (r.size.width < 1.0f || r.size.height < 1.0f)
@@ -795,10 +797,7 @@ public:
         if (usingCoreGraphics)
         {
             CoreGraphicsContext context (cg, (float) [view frame].size.height, displayScale);
-
-            insideDrawRect = true;
-            handlePaint (context);
-            insideDrawRect = false;
+            invokePaint (context);
         }
         else
        #endif
@@ -829,9 +828,7 @@ public:
                     if (intScale != 1)
                         context->addTransform (AffineTransform::scale (displayScale));
 
-                    insideDrawRect = true;
-                    handlePaint (*context);
-                    insideDrawRect = false;
+                    invokePaint (*context);
                 }
 
                 CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
@@ -843,6 +840,58 @@ public:
         }
     }
 
+    void handleAsyncUpdate() override
+    {
+        // When windows are being resized, artificially throttling high-frequency repaints helps
+        // to stop the event queue getting clogged, and keeps everything working smoothly
+        if (areAnyWindowsInLiveResize()
+              && Time::getCurrentTime() < lastRepaintTime + RelativeTime::milliseconds (1000 / 30))
+        {
+            triggerAsyncUpdate();
+            return;
+        }
+
+        for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
+            [view setNeedsDisplayInRect: makeNSRect (*i)];
+
+        deferredRepaints.clear();
+    }
+
+    void repaint (const Rectangle<int>& area) override
+    {
+        // In 10.11 changes were made to the way the OS handles repaint regions, and it seems that it can
+        // no longer be trusted to coalesce all the regions, or to even remember them all without losing
+        // a few when there's a lot of activity.
+        // As a work around for this, we use a RectangleList to do our own coalescing of regions before
+        // asynchronously asking the OS to repaint them.
+        deferredRepaints.add ((float) area.getX(), (float) ([view frame].size.height - area.getBottom()),
+                              (float) area.getWidth(), (float) area.getHeight());
+        triggerAsyncUpdate();
+    }
+
+    void invokePaint (LowLevelGraphicsContext& context)
+    {
+        lastRepaintTime = Time::getCurrentTime();
+        insideDrawRect = true;
+        handlePaint (context);
+        insideDrawRect = false;
+    }
+
+    void performAnyPendingRepaintsNow() override
+    {
+        [view displayIfNeeded];
+    }
+
+    static bool areAnyWindowsInLiveResize() noexcept
+    {
+        for (NSWindow* w in [NSApp windows])
+            if ([w inLiveResize])
+                return true;
+
+        return false;
+    }
+
+    //==============================================================================
     bool sendModalInputAttemptIfBlocked()
     {
         if (Component* modal = Component::getCurrentlyModalComponent())
@@ -1232,49 +1281,15 @@ public:
     void textInputRequired (Point<int>, TextInputTarget&) override {}
 
     //==============================================================================
-    void repaint (const Rectangle<int>& area) override
-    {
-        if (insideDrawRect)
-        {
-            class AsyncRepaintMessage  : public CallbackMessage
-            {
-            public:
-                AsyncRepaintMessage (NSViewComponentPeer* const p, const Rectangle<int>& r)
-                    : peer (p), rect (r)
-                {}
-
-                void messageCallback() override
-                {
-                    if (ComponentPeer::isValidPeer (peer))
-                        peer->repaint (rect);
-                }
-
-            private:
-                NSViewComponentPeer* const peer;
-                const Rectangle<int> rect;
-            };
-
-            (new AsyncRepaintMessage (this, area))->post();
-        }
-        else
-        {
-            [view setNeedsDisplayInRect: NSMakeRect ((CGFloat) area.getX(), [view frame].size.height - (CGFloat) area.getBottom(),
-                                                     (CGFloat) area.getWidth(), (CGFloat) area.getHeight())];
-        }
-    }
-
-    void performAnyPendingRepaintsNow() override
-    {
-        [view displayIfNeeded];
-    }
-
-    //==============================================================================
     NSWindow* window;
     NSView* view;
     bool isSharedWindow, fullScreen, insideDrawRect;
     bool usingCoreGraphics, isZooming, textWasInserted;
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter;
+
+    RectangleList<float> deferredRepaints;
+    Time lastRepaintTime;
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
@@ -1375,24 +1390,22 @@ private:
 
         for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
         {
-            ComponentPeer* const peer = ComponentPeer::getPeer (i);
-            NSView* const compView = (NSView*) peer->getNativeHandle();
-
-            if ([compView window] == w)
+            if (NSViewComponentPeer* peer = dynamic_cast<NSViewComponentPeer*> (ComponentPeer::getPeer (i)))
             {
-                if (isKey)
+                if ([peer->view window] == w)
                 {
-                    if (compView == [w firstResponder])
-                        return false;
-                }
-                else
-                {
-                    NSViewComponentPeer* nsViewPeer = dynamic_cast<NSViewComponentPeer*> (peer);
-
-                    if ((nsViewPeer == nullptr || ! nsViewPeer->isSharedWindow)
-                            ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
-                            : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
-                        return false;
+                    if (isKey)
+                    {
+                        if (peer->view == [w firstResponder])
+                            return false;
+                    }
+                    else
+                    {
+                        if (peer->isSharedWindow
+                               ? NSPointInRect ([peer->view convertPoint: [e locationInWindow] fromView: nil], [peer->view bounds])
+                               : NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height)))
+                            return false;
+                    }
                 }
             }
         }

@@ -2910,11 +2910,11 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
     FileSearchPath paths;
-    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath",
                                           programFiles + "\\Steinberg\\VstPlugins"));
     paths.removeNonExistentPaths();
 
-    paths.add (WindowsRegistry::getValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath",
                                           programFiles + "\\VstPlugins"));
     return paths;
    #endif

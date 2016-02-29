@@ -80,7 +80,7 @@ public:
         String filename;
 
         /** The file's original size. */
-        unsigned int uncompressedSize;
+        int64 uncompressedSize;
 
         /** The last time the file was modified. */
         Time fileTime;

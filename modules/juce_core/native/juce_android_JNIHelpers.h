@@ -294,6 +294,9 @@ extern AndroidSystem android;
  METHOD (setCurrentThreadPriority, "setCurrentThreadPriority", "(I)I") \
  METHOD (hasSystemFeature,         "hasSystemFeature", "(Ljava/lang/String;)Z" ) \
  METHOD (createNewThread,          "createNewThread", "(JLjava/lang/String;J)Ljava/lang/Thread;") \
+ METHOD (requestRuntimePermission, "requestRuntimePermission", "(IJ)V" ) \
+ METHOD (isPermissionGranted,     "isPermissionGranted", "(I)Z" ) \
+ METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS

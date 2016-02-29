@@ -144,6 +144,7 @@ namespace juce
 #include "maths/juce_Expression.cpp"
 #include "maths/juce_Random.cpp"
 #include "memory/juce_MemoryBlock.cpp"
+#include "misc/juce_RuntimePermissions.cpp"
 #include "misc/juce_Result.cpp"
 #include "misc/juce_Uuid.cpp"
 #include "network/juce_MACAddress.cpp"
@@ -228,6 +229,7 @@ namespace juce
 #include "native/juce_android_Network.cpp"
 #include "native/juce_android_SystemStats.cpp"
 #include "native/juce_android_Threads.cpp"
+#include "native/juce_android_RuntimePermissions.cpp"
 
 #endif
 
