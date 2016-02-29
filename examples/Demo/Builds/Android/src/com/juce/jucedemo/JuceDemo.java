@@ -100,7 +100,7 @@ public class JuceDemo   extends Activity
     //==============================================================================
     // these have to match the values of enum PermissionID in C++ class RuntimePermissions:
     private static final int JUCE_PERMISSIONS_RECORD_AUDIO = 1;
-    private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI= 2;
+    private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI = 2;
 
     private static String getAndroidPermissionName (int permissionID)
     {
@@ -124,13 +124,18 @@ public class JuceDemo   extends Activity
 
     public void requestRuntimePermission (int permissionID, long ptrToCallback)
     {
-        permissionCallbackPtrMap.put (permissionID, ptrToCallback);
-
         String permissionName = getAndroidPermissionName (permissionID);
 
         if (ContextCompat.checkSelfPermission (this, permissionName) != PackageManager.PERMISSION_GRANTED)
         {
+            // remember callbackPtr, request permissions, and let onRequestPermissionResult call callback asynchronously
+            permissionCallbackPtrMap.put (permissionID, ptrToCallback);
             ActivityCompat.requestPermissions (this, new String[]{permissionName}, permissionID);
+        }
+        else
+        {
+            // permissions were already granted before, we can call callback directly
+            androidRuntimePermissionsCallback (true, ptrToCallback);
         }
     }
 
@@ -146,16 +151,9 @@ public class JuceDemo   extends Activity
 
         Long ptrToCallback = permissionCallbackPtrMap.get (permissionID);
         permissionCallbackPtrMap.remove (permissionID);
-
-        if (ptrToCallback == null)
-        {
-            // something went wrong: we don't have a valid callback pointer to call!
-            assert false;
-            return;
-        }
-
         androidRuntimePermissionsCallback (permissionsGranted, ptrToCallback);
     }
+
     //==============================================================================
     public static class MidiPortID extends Object
     {
