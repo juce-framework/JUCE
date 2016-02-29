@@ -413,6 +413,17 @@ private:
 
     bool parsePathElement (const XmlPath& xml, Path& path) const
     {
+        if (!parsePathPrimitive (xml, path))
+            return false;
+
+        if (xml->hasAttribute ("transform"))
+            path.applyTransform (parseTransform (xml->getStringAttribute ("transform")));
+
+        return true;
+    }
+
+    bool parsePathPrimitive (const XmlPath& xml, Path& path) const
+    {
         const String tag (xml->getTagNameWithoutNamespace());
 
         if (tag == "path")      { parsePath (xml, path);           return true; }
@@ -588,17 +599,8 @@ private:
     }
 
     //==============================================================================
-    Drawable* parseShape (const XmlPath& xml, Path& path,
-                          const bool shouldParseTransform = true) const
+    Drawable* parseShape (const XmlPath& xml, Path& path) const
     {
-        if (shouldParseTransform && xml->hasAttribute ("transform"))
-        {
-            SVGState newState (*this);
-            newState.addTransform (xml);
-
-            return newState.parseShape (xml, path, false);
-        }
-
         DrawablePath* dp = new DrawablePath();
         setCommonAttributes (*dp, xml);
         dp->setFill (Colours::transparentBlack);
