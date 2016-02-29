@@ -964,7 +964,7 @@ StickyMidiKeyboardComponent::~StickyMidiKeyboardComponent()
     /* Empty */
 }
 
-void StickyMidiKeyboardComponent::mouseUpOnKey (__unused int midiNoteNumber, const MouseEvent& e)
+void StickyMidiKeyboardComponent::mouseUpOnKey (int /**midiNoteNumber*/, const MouseEvent& e)
 {
     /** Note: We don't use the midiNoteNumber figured out by the caller by examining
      the mouse event location. Instead, we are interested in what note was under
