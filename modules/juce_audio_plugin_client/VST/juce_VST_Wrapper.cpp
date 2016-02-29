@@ -674,25 +674,20 @@ public:
         {
             isProcessing = true;
 
-            floatTempBuffers.channels.calloc ((size_t) (cEffect.numInputs + cEffect.numOutputs));
+            floatTempBuffers .channels.calloc ((size_t) (cEffect.numInputs + cEffect.numOutputs));
             doubleTempBuffers.channels.calloc ((size_t) (cEffect.numInputs + cEffect.numOutputs));
 
-            double rate = getSampleRate();
-            jassert (rate > 0);
-            if (rate <= 0.0)
-                rate = 44100.0;
-
+            const double currentRate = getSampleRate();
             const int currentBlockSize = getBlockSize();
-            jassert (currentBlockSize > 0);
 
             firstProcessCallback = true;
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
-            filter->setRateAndBufferSizeDetails (rate, currentBlockSize);
+            filter->setRateAndBufferSizeDetails (currentRate, currentBlockSize);
 
             deleteTempChannels();
 
-            filter->prepareToPlay (rate, currentBlockSize);
+            filter->prepareToPlay (currentRate, currentBlockSize);
 
             midiEvents.ensureSize (2048);
             midiEvents.clear();
@@ -1475,7 +1470,7 @@ public:
             {
                 editorSize.left = 0;
                 editorSize.top = 0;
-                editorSize.right = (VstInt16) editorComp->getWidth();
+                editorSize.right  = (VstInt16) editorComp->getWidth();
                 editorSize.bottom = (VstInt16) editorComp->getHeight();
 
                 *((ERect**) ptr) = &editorSize;
