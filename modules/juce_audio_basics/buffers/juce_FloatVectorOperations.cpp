@@ -29,17 +29,6 @@ namespace FloatVectorHelpers
     #define JUCE_INCREMENT_DEST             dest += (16 / sizeof (*dest));
 
    #if JUCE_USE_SSE_INTRINSICS
-    static bool sse2Present = false;
-
-    static bool isSSE2Available() noexcept
-    {
-        if (sse2Present)
-            return true;
-
-        sse2Present = SystemStats::hasSSE2();
-        return sse2Present;
-    }
-
     inline static bool isAligned (const void* p) noexcept
     {
         return (((pointer_sized_int) p) & 15) == 0;
@@ -113,7 +102,6 @@ namespace FloatVectorHelpers
 
     #define JUCE_BEGIN_VEC_OP \
         typedef FloatVectorHelpers::ModeType<sizeof(*dest)>::Mode Mode; \
-        if (FloatVectorHelpers::isSSE2Available()) \
         { \
             const int numLongOps = num / Mode::numParallel;
 
@@ -372,11 +360,7 @@ namespace FloatVectorHelpers
         {
             int numLongOps = num / Mode::numParallel;
 
-           #if JUCE_USE_SSE_INTRINSICS
-            if (numLongOps > 1 && isSSE2Available())
-           #else
             if (numLongOps > 1)
-           #endif
             {
                 ParallelType val;
 
@@ -446,11 +430,7 @@ namespace FloatVectorHelpers
         {
             int numLongOps = num / Mode::numParallel;
 
-           #if JUCE_USE_SSE_INTRINSICS
-            if (numLongOps > 1 && isSSE2Available())
-           #else
             if (numLongOps > 1)
-           #endif
             {
                 ParallelType mn, mx;
 
@@ -1002,10 +982,17 @@ double JUCE_CALLTYPE FloatVectorOperations::findMaximum (const double* src, int 
 void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnable) noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
-    if (FloatVectorHelpers::isSSE2Available())
-        _MM_SET_FLUSH_ZERO_MODE (shouldEnable ? _MM_FLUSH_ZERO_ON : _MM_FLUSH_ZERO_OFF);
+    _MM_SET_FLUSH_ZERO_MODE (shouldEnable ? _MM_FLUSH_ZERO_ON : _MM_FLUSH_ZERO_OFF);
    #endif
     ignoreUnused (shouldEnable);
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noexcept
+{
+   #if JUCE_USE_SSE_INTRINSICS
+    const int mxcsr = _mm_getcsr();
+    _mm_setcsr (mxcsr | 0x8040); // add the DAZ and FZ bits
+   #endif
 }
 
 //==============================================================================
