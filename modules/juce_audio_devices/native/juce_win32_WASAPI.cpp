@@ -32,7 +32,7 @@ namespace WasapiClasses
 
 void logFailure (HRESULT hr)
 {
-    (void) hr;
+    ignoreUnused (hr);
     jassert (hr != (HRESULT) 0x800401f0); // If you hit this, it means you're trying to call from
                                           // a thread which hasn't been initialised with CoInitialize().
 
@@ -110,6 +110,11 @@ bool check (HRESULT hr)
  WINOLEAPI PropVariantClear (PROPVARIANT*);
 #else
  #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
+#endif
+
+#if JUCE_MINGW && defined (KSDATAFORMAT_SUBTYPE_PCM)
+ #undef KSDATAFORMAT_SUBTYPE_PCM
+ #undef KSDATAFORMAT_SUBTYPE_IEEE_FLOAT
 #endif
 
 #ifndef KSDATAFORMAT_SUBTYPE_PCM

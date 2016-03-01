@@ -159,7 +159,7 @@ private:
 };
 
 
-//==================================================================================
+//==============================================================================
 #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
  template <typename Arg1, typename... Args>
  OSCMessage::OSCMessage (const OSCAddressPattern& ap, Arg1&& arg1, Args&&... args)

@@ -225,8 +225,8 @@ public:
         desc.category = getCategory();
         desc.manufacturerName = plugin != nullptr ? String (plugin->Maker) : String();
         desc.version = getVersion();
-        desc.numInputChannels  = getNumInputChannels();
-        desc.numOutputChannels = getNumOutputChannels();
+        desc.numInputChannels  = getTotalNumInputChannels();
+        desc.numOutputChannels = getTotalNumOutputChannels();
         desc.isInstrument = false;
     }
 
@@ -252,7 +252,6 @@ public:
     bool acceptsMidi() const                  { return false; }
     bool producesMidi() const                 { return false; }
 
-    bool silenceInProducesSilenceOut() const  { return plugin == nullptr; } // ..any way to get a proper answer for these?
     double getTailLengthSeconds() const       { return 0.0; }
 
     //==============================================================================
@@ -327,16 +326,16 @@ public:
             jassertfalse; // no callback to use?
         }
 
-        for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
+        for (int i = getTotalNumInputChannels(), e = getTotalNumOutputChannels(); i < e; ++i)
             buffer.clear (i, 0, numSamples);
     }
 
-    bool isInputChannelStereoPair (int index) const    { return isPositiveAndBelow (index, getNumInputChannels()); }
-    bool isOutputChannelStereoPair (int index) const   { return isPositiveAndBelow (index, getNumInputChannels()); }
+    bool isInputChannelStereoPair (int index) const    { return isPositiveAndBelow (index, getTotalNumInputChannels()); }
+    bool isOutputChannelStereoPair (int index) const   { return isPositiveAndBelow (index, getTotalNumOutputChannels()); }
 
     const String getInputChannelName (const int index) const
     {
-        if (isPositiveAndBelow (index, getNumInputChannels()))
+        if (isPositiveAndBelow (index, getTotalNumInputChannels()))
             return String (plugin->PortNames [inputs [index]]).trim();
 
         return String();
@@ -344,7 +343,7 @@ public:
 
     const String getOutputChannelName (const int index) const
     {
-        if (isPositiveAndBelow (index, getNumInputChannels()))
+        if (isPositiveAndBelow (index, getTotalNumInputChannels()))
             return String (plugin->PortNames [outputs [index]]).trim();
 
         return String();

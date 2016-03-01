@@ -957,6 +957,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/memory/juce_Atomic.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1489,6 +1493,14 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../../../modules/juce_core/misc/juce_RuntimePermissions.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/misc/juce_RuntimePermissions.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../../../modules/juce_core/misc/juce_Uuid.cpp">
       <Option compile="0"/>
       <Option link="0"/>
@@ -1514,6 +1526,10 @@
       <Option link="0"/>
     </Unit>
     <Unit filename="../../../../modules/juce_core/native/juce_android_Network.cpp">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../../../modules/juce_core/native/juce_android_RuntimePermissions.cpp">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

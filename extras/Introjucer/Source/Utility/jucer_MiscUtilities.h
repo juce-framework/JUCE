@@ -178,6 +178,12 @@ public:
         owner = nullptr;
     }
 
+    bool escapeKeyPressed() override
+    {
+        closeButtonPressed();
+        return true;
+    }
+
 private:
     String windowPosProperty;
     ScopedPointer<Component>& owner;

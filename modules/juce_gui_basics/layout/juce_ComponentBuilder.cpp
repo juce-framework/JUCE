@@ -88,7 +88,7 @@ namespace ComponentBuilderHelpers
     }
 }
 
-//=============================================================================
+//==============================================================================
 const Identifier ComponentBuilder::idProperty ("id");
 
 ComponentBuilder::ComponentBuilder()

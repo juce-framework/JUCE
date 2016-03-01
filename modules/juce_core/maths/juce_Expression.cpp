@@ -427,7 +427,7 @@ struct Expression::Helpers
 
         TermPtr createTermToEvaluateInput (const Scope& scope, const Term* t, double overallTarget, Term* topLevelTerm) const
         {
-            (void) t;
+            ignoreUnused (t);
             jassert (t == input);
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);

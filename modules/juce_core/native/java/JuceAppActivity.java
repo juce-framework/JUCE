@@ -30,14 +30,14 @@ import android.content.DialogInterface;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Handler;
-import android.os.Build;
-import android.os.Process;
 import android.os.ParcelUuid;
+import android.os.Environment;
 import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
@@ -49,19 +49,16 @@ import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import java.lang.Runnable;
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.TimerTask;
+import java.util.*;
 import java.io.*;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import android.media.AudioManager;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
-
+import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
+import android.Manifest;
 $$JuceAndroidMidiImports$$ // If you get an error here, you need to re-save your project with the introjucer!
 
 
@@ -73,6 +70,73 @@ public class JuceAppActivity   extends Activity
     {
         System.loadLibrary ("juce_jni");
     }
+
+    //==============================================================================
+    public boolean isPermissionDeclaredInManifest (int permissionID)
+    {
+        String permissionToCheck = getAndroidPermissionName(permissionID);
+
+        try
+        {
+            PackageInfo info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
+
+            if (info.requestedPermissions != null)
+                for (String permission : info.requestedPermissions)
+                    if (permission.equals (permissionToCheck))
+                        return true;
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            Log.d ("JUCE", "isPermissionDeclaredInManifest: PackageManager.NameNotFoundException = " + e.toString());
+        }
+
+        Log.d ("JUCE", "isPermissionDeclaredInManifest: could not find requested permission " + permissionToCheck);
+        return false;
+    }
+
+    //==============================================================================
+    // these have to match the values of enum PermissionID in C++ class RuntimePermissions:
+    private static final int JUCE_PERMISSIONS_RECORD_AUDIO = 1;
+    private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI = 2;
+
+    private static String getAndroidPermissionName (int permissionID)
+    {
+        switch (permissionID)
+        {
+            case JUCE_PERMISSIONS_RECORD_AUDIO:     return Manifest.permission.RECORD_AUDIO;
+            case JUCE_PERMISSIONS_BLUETOOTH_MIDI:   return Manifest.permission.ACCESS_COARSE_LOCATION;
+        }
+
+        // unknown permission ID!
+        assert false;
+        return new String();
+    }
+
+    public boolean isPermissionGranted (int permissionID)
+    {
+        return ContextCompat.checkSelfPermission (this, getAndroidPermissionName (permissionID)) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private Map<Integer, Long> permissionCallbackPtrMap;
+
+    public void requestRuntimePermission (int permissionID, long ptrToCallback)
+    {
+        String permissionName = getAndroidPermissionName (permissionID);
+
+        if (ContextCompat.checkSelfPermission (this, permissionName) != PackageManager.PERMISSION_GRANTED)
+        {
+            // remember callbackPtr, request permissions, and let onRequestPermissionResult call callback asynchronously
+            permissionCallbackPtrMap.put (permissionID, ptrToCallback);
+            ActivityCompat.requestPermissions (this, new String[]{permissionName}, permissionID);
+        }
+        else
+        {
+            // permissions were already granted before, we can call callback directly
+            androidRuntimePermissionsCallback (true, ptrToCallback);
+        }
+    }
+
+    $$JuceAndroidRuntimePermissionsCode$$ // If you get an error here, you need to re-save your project with the introjucer!
 
     //==============================================================================
     public static class MidiPortID extends Object
@@ -132,10 +196,13 @@ public class JuceAppActivity   extends Activity
         super.onCreate (savedInstanceState);
 
         isScreenSaverEnabled = true;
+        hideActionBar();
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
 
         setVolumeControlStream (AudioManager.STREAM_MUSIC);
+
+        permissionCallbackPtrMap = new HashMap<Integer, Long>();
     }
 
     @Override
@@ -172,6 +239,49 @@ public class JuceAppActivity   extends Activity
     {
         launchApp (getApplicationInfo().publicSourceDir,
                    getApplicationInfo().dataDir);
+    }
+
+    private void hideActionBar()
+    {
+        // get "getActionBar" method
+        java.lang.reflect.Method getActionBarMethod = null;
+        try
+        {
+            getActionBarMethod = this.getClass().getMethod ("getActionBar");
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (getActionBarMethod == null) return;
+
+        // invoke "getActionBar" method
+        Object actionBar = null;
+        try
+        {
+            actionBar = getActionBarMethod.invoke (this);
+        }
+        catch (java.lang.IllegalArgumentException e) { return; }
+        catch (java.lang.IllegalAccessException e) { return; }
+        catch (java.lang.reflect.InvocationTargetException e) { return; }
+        if (actionBar == null) return;
+
+        // get "hide" method
+        java.lang.reflect.Method actionBarHideMethod = null;
+        try
+        {
+            actionBarHideMethod = actionBar.getClass().getMethod ("hide");
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (actionBarHideMethod == null) return;
+
+        // invoke "hide" method
+        try
+        {
+            actionBarHideMethod.invoke (actionBar);
+        }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
     }
 
     //==============================================================================
@@ -691,7 +801,7 @@ public class JuceAppActivity   extends Activity
                                                   int format, int width, int height);
     }
 
-    public NativeSurfaceView createNativeSurfaceView(long nativeSurfacePtr)
+    public NativeSurfaceView createNativeSurfaceView (long nativeSurfacePtr)
     {
         return new NativeSurfaceView (this, nativeSurfacePtr);
     }
@@ -917,6 +1027,17 @@ public class JuceAppActivity   extends Activity
                         : locale.getDisplayLanguage (java.util.Locale.US);
     }
 
+    private static final String getFileLocation (String type)
+    {
+        return Environment.getExternalStoragePublicDirectory (type).getAbsolutePath();
+    }
+
+    public static final String getDocumentsFolder()  { return Environment.getDataDirectory().getAbsolutePath(); }
+    public static final String getPicturesFolder()   { return getFileLocation (Environment.DIRECTORY_PICTURES); }
+    public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
+    public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
+    public static final String getDownloadsFolder()  { return getFileLocation (Environment.DIRECTORY_DOWNLOADS); }
+
     //==============================================================================
     private final class SingleMediaScanner  implements MediaScannerConnectionClient
     {
@@ -1041,23 +1162,24 @@ public class JuceAppActivity   extends Activity
             return null;
 
         java.lang.reflect.Method method;
-        try {
+
+        try
+        {
             method = obj.getClass().getMethod ("getProperty", String.class);
-        } catch (SecurityException e) {
-            return null;
-        } catch (NoSuchMethodException e) {
-            return null;
         }
+        catch (SecurityException e)     { return null; }
+        catch (NoSuchMethodException e) { return null; }
 
         if (method == null)
             return null;
 
-        try {
+        try
+        {
             return (String) method.invoke (obj, property);
-        } catch (java.lang.IllegalArgumentException e) {
-        } catch (java.lang.IllegalAccessException e) {
-        } catch (java.lang.reflect.InvocationTargetException e) {
         }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
 
         return null;
     }
@@ -1075,8 +1197,9 @@ public class JuceAppActivity   extends Activity
 
     private static class JuceThread extends Thread
     {
-        public JuceThread (long host)
+        public JuceThread (long host, String threadName, long threadStackSize)
         {
+            super (null, null, threadName, threadStackSize);
             _this = host;
         }
 
@@ -1089,9 +1212,8 @@ public class JuceAppActivity   extends Activity
         private long _this;
     }
 
-    public final Thread createNewThread(long host)
+    public final Thread createNewThread(long host, String threadName, long threadStackSize)
     {
-        return new JuceThread(host);
+        return new JuceThread(host, threadName, threadStackSize);
     }
-
 }

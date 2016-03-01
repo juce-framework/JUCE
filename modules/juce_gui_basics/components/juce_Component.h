@@ -544,9 +544,8 @@ public:
 
     /** Changes the position of the component's centre.
 
-        Leaves the position unchanged, but positions its centre relative to its
-        parent's size. E.g. setCentreRelative (0.5f, 0.5f) would place it centrally in
-        its parent.
+        Leaves the size unchanged, but positions its centre relative to its parent's size.
+        E.g. setCentreRelative (0.5f, 0.5f) would place it centrally in its parent.
     */
     void setCentreRelative (float x, float y);
 
@@ -574,7 +573,7 @@ public:
         Currently, transforms are not supported for desktop windows, so the transform will be ignored if you
         put a component on the desktop.
 
-        To remove a component's transform, simply pass AffineTransform::identity as the parameter to this method.
+        To remove a component's transform, simply pass AffineTransform() as the parameter to this method.
     */
     void setTransform (const AffineTransform& transform);
 
@@ -1768,7 +1767,7 @@ public:
         This is a handy equivalent to (isMouseOver() || isMouseButtonDown()).
         @see isMouseOver, isMouseButtonDown, isMouseButtonDownAnywhere
     */
-    bool isMouseOverOrDragging() const;
+    bool isMouseOverOrDragging (bool includeChildren = false) const;
 
     /** Returns true if a mouse button is currently down.
 
@@ -2277,7 +2276,6 @@ private:
         bool bufferToImageFlag          : 1;
         bool bringToFrontOnClickFlag    : 1;
         bool repaintOnMouseActivityFlag : 1;
-        bool currentlyModalFlag         : 1;
         bool isDisabledFlag             : 1;
         bool childCompFocusedFlag       : 1;
         bool dontClipGraphicsFlag       : 1;

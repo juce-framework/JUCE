@@ -84,6 +84,7 @@ Button::Button (const String& name)
     connectedEdgeFlags (0),
     commandID(),
     buttonState (buttonNormal),
+    lastStatePainted (buttonNormal),
     lastToggleState (false),
     clickTogglesState (false),
     needsToRelease (false),
@@ -430,6 +431,7 @@ void Button::paint (Graphics& g)
     }
 
     paintButton (g, isOver(), isDown());
+    lastStatePainted = buttonState;
 }
 
 //==============================================================================
@@ -457,7 +459,12 @@ void Button::mouseUp (const MouseEvent& e)
     updateState (isMouseOver(), false);
 
     if (wasDown && wasOver && ! triggerOnMouseDown)
+    {
+        if (lastStatePainted != buttonDown)
+            flashButtonState();
+
         internalClickCallback (e.mods);
+    }
 }
 
 void Button::mouseDrag (const MouseEvent&)

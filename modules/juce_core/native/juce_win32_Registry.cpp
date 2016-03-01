@@ -31,13 +31,7 @@ struct RegistryKeyWrapper
     RegistryKeyWrapper (String name, const bool createForWriting, const DWORD wow64Flags)
         : key (0), wideCharValueName (nullptr)
     {
-        HKEY rootKey = 0;
-
-        if (name.startsWithIgnoreCase ("HKEY_CURRENT_USER\\"))        rootKey = HKEY_CURRENT_USER;
-        else if (name.startsWithIgnoreCase ("HKEY_LOCAL_MACHINE\\"))  rootKey = HKEY_LOCAL_MACHINE;
-        else if (name.startsWithIgnoreCase ("HKEY_CLASSES_ROOT\\"))   rootKey = HKEY_CLASSES_ROOT;
-
-        if (rootKey != 0)
+        if (HKEY rootKey = getRootKey (name))
         {
             name = name.substring (name.indexOfChar ('\\') + 1);
 
@@ -61,6 +55,21 @@ struct RegistryKeyWrapper
     {
         if (key != 0)
             RegCloseKey (key);
+    }
+
+    static HKEY getRootKey (const String& name) noexcept
+    {
+        if (name.startsWithIgnoreCase ("HKEY_CURRENT_USER\\"))  return HKEY_CURRENT_USER;
+        if (name.startsWithIgnoreCase ("HKCU\\"))               return HKEY_CURRENT_USER;
+        if (name.startsWithIgnoreCase ("HKEY_LOCAL_MACHINE\\")) return HKEY_LOCAL_MACHINE;
+        if (name.startsWithIgnoreCase ("HKLM\\"))               return HKEY_LOCAL_MACHINE;
+        if (name.startsWithIgnoreCase ("HKEY_CLASSES_ROOT\\"))  return HKEY_CLASSES_ROOT;
+        if (name.startsWithIgnoreCase ("HKCR\\"))               return HKEY_CLASSES_ROOT;
+        if (name.startsWithIgnoreCase ("HKEY_USERS\\"))         return HKEY_USERS;
+        if (name.startsWithIgnoreCase ("HKU\\"))                return HKEY_USERS;
+
+        jassertfalse; // The name starts with an unknown root key (or maybe an old Win9x type)
+        return 0;
     }
 
     static bool setValue (const String& regValuePath, const DWORD type,

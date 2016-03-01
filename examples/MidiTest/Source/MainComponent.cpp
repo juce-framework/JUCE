@@ -251,7 +251,9 @@ void MainContentComponent::resized()
 void MainContentComponent::buttonClicked (Button* buttonThatWasClicked)
 {
     if (buttonThatWasClicked == &pairButton)
-        BluetoothMidiDevicePairingDialogue::open();
+        RuntimePermissions::request (
+            RuntimePermissions::bluetoothMidi,
+            [] (bool wasGranted) { if (wasGranted) BluetoothMidiDevicePairingDialogue::open(); } );
 }
 
 //==============================================================================

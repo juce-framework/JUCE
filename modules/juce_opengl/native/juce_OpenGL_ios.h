@@ -240,7 +240,7 @@ private:
         glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBufferHandle);
 
         bool ok = [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: glLayer];
-        jassert (ok); (void) ok;
+        jassert (ok); ignoreUnused (ok);
 
         GLint width, height;
         glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);

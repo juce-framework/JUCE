@@ -58,7 +58,7 @@ static void callCPUID (int result[4], int infoType)
     __try
    #endif
     {
-       #if JUCE_GCC
+       #if JUCE_GCC || JUCE_CLANG
         __asm__ __volatile__ ("cpuid" : "=a" (result[0]), "=b" (result[1]), "=c" (result[2]),"=d" (result[3]) : "a" (infoType));
        #else
         __asm
@@ -107,7 +107,13 @@ void CPUInformation::initialise() noexcept
     hasSSE3  = (info[2] & (1 <<  0)) != 0;
     hasAVX   = (info[2] & (1 << 28)) != 0;
     hasSSSE3 = (info[2] & (1 <<  9)) != 0;
+    hasSSE41 = (info[2] & (1 << 19)) != 0;
+    hasSSE42 = (info[2] & (1 << 20)) != 0;
     has3DNow = (info[1] & (1 << 31)) != 0;
+
+    callCPUID (info, 7);
+
+    hasAVX2 = (info[1] & (1 << 5)) != 0;
 
     SYSTEM_INFO systemInfo;
     GetNativeSystemInfo (&systemInfo);
@@ -275,7 +281,7 @@ public:
 
        #if JUCE_WIN32_TIMER_PERIOD > 0
         const MMRESULT res = timeBeginPeriod (JUCE_WIN32_TIMER_PERIOD);
-        (void) res;
+        ignoreUnused (res);
         jassert (res == TIMERR_NOERROR);
        #endif
 
@@ -325,7 +331,7 @@ static int64 juce_getClockCycleCounter() noexcept
     // MS intrinsics version...
     return (int64) __rdtsc();
 
-   #elif JUCE_GCC
+   #elif JUCE_GCC || JUCE_CLANG
     // GNU inline asm version...
     unsigned int hi = 0, lo = 0;
 

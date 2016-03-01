@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if defined (JUCE_EVENTS_H_INCLUDED) && ! JUCE_AMALGAMATED_INCLUDE
+#ifdef JUCE_EVENTS_H_INCLUDED
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -31,16 +31,12 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_events.h"
-
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS && JUCE_MODULE_AVAILABLE_juce_gui_basics
- #include "../juce_gui_basics/juce_gui_basics.h"
-#endif
 
 //==============================================================================
 #if JUCE_MAC
@@ -77,17 +73,14 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MAC
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "native/juce_osx_MessageQueue.h"
  #include "native/juce_mac_MessageManager.mm"
 
 #elif JUCE_IOS
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "native/juce_osx_MessageQueue.h"
  #include "native/juce_ios_MessageManager.mm"
 
 #elif JUCE_WINDOWS
- #include "native/juce_win32_HiddenMessageWindow.h"
  #include "native/juce_win32_Messaging.cpp"
 
 #elif JUCE_LINUX
@@ -95,7 +88,6 @@ namespace juce
  #include "native/juce_linux_Messaging.cpp"
 
 #elif JUCE_ANDROID
- #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_android_Messaging.cpp"
 
 #endif

@@ -420,13 +420,7 @@ public:
     /** Compares this string with another one. */
     int compareIgnoreCase (const CharPointer_UTF8 other) const noexcept
     {
-       #if JUCE_MINGW || (JUCE_WINDOWS && JUCE_CLANG)
         return CharacterFunctions::compareIgnoreCase (*this, other);
-       #elif JUCE_WINDOWS
-        return stricmp (data, other.data);
-       #else
-        return strcasecmp (data, other.data);
-       #endif
     }
 
     /** Compares this string with another one, up to a specified number of characters. */
@@ -525,6 +519,9 @@ public:
                                        || *CharPointer_UTF8 (dataToTest - 1) > 0x10ffff))
                         return false;
                 }
+
+                if (numExtraValues == 0)
+                    return false;
 
                 maxBytesToRead -= numExtraValues;
                 if (maxBytesToRead < 0)

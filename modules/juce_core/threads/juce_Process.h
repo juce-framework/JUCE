@@ -98,7 +98,7 @@ public:
 
     //==============================================================================
     /** Returns true if this process is being hosted by a debugger. */
-    static bool JUCE_CALLTYPE isRunningUnderDebugger();
+    static bool JUCE_CALLTYPE isRunningUnderDebugger() noexcept;
 
 
     //==============================================================================
@@ -142,6 +142,15 @@ public:
     //==============================================================================
     /** OSX ONLY - Shows or hides the OSX dock icon for this app. */
     static void setDockIconVisible (bool isVisible);
+   #endif
+
+   #if JUCE_MAC || JUCE_LINUX || DOXYGEN
+    //==============================================================================
+    /** UNIX ONLY - Attempts to use setrlimit to change the maximum number of file
+        handles that the app can open. Pass 0 or less as the parameter to mean
+        'infinite'. Returns true if it succeeds.
+    */
+    static bool setMaxNumberOfFileHandles (int maxNumberOfFiles) noexcept;
    #endif
 
 private:

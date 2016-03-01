@@ -158,7 +158,7 @@ public:
     /** Returns the length of the path.
         @see getPointAlongPath
     */
-    float getLength (const AffineTransform& transform = AffineTransform::identity) const;
+    float getLength (const AffineTransform& transform = AffineTransform()) const;
 
     /** Returns a point that is the specified distance along the path.
         If the distance is greater than the total length of the path, this will return the
@@ -166,7 +166,7 @@ public:
         @see getLength
     */
     Point<float> getPointAlongPath (float distanceFromStart,
-                                    const AffineTransform& transform = AffineTransform::identity) const;
+                                    const AffineTransform& transform = AffineTransform()) const;
 
     /** Finds the point along the path which is nearest to a given position.
         This sets pointOnPath to the nearest point, and returns the distance of this point from the start
@@ -174,7 +174,7 @@ public:
     */
     float getNearestPoint (const Point<float> targetPoint,
                            Point<float>& pointOnPath,
-                           const AffineTransform& transform = AffineTransform::identity) const;
+                           const AffineTransform& transform = AffineTransform()) const;
 
     //==============================================================================
     /** Removes all lines and curves, resetting the path completely. */

@@ -169,7 +169,7 @@ void AudioCDReader::refreshTrackLengths()
     {
         XmlDocument doc (toc);
         const char* error = CDReaderHelpers::getTrackOffsets (doc, trackStartSamples);
-        (void) error; // could be logged..
+        ignoreUnused (error); // could be logged..
 
         lengthInSamples = trackStartSamples.getLast() - trackStartSamples.getFirst();
     }

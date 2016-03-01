@@ -54,7 +54,7 @@ Viewport::Viewport (const String& name)
 
 Viewport::~Viewport()
 {
-    deleteContentComp();
+    deleteOrRemoveContentComp();
 }
 
 //==============================================================================
@@ -62,20 +62,24 @@ void Viewport::visibleAreaChanged (const Rectangle<int>&) {}
 void Viewport::viewedComponentChanged (Component*) {}
 
 //==============================================================================
-void Viewport::deleteContentComp()
+void Viewport::deleteOrRemoveContentComp()
 {
     if (contentComp != nullptr)
+    {
         contentComp->removeComponentListener (this);
 
-    if (deleteContent)
-    {
-        // This sets the content comp to a null pointer before deleting the old one, in case
-        // anything tries to use the old one while it's in mid-deletion..
-        ScopedPointer<Component> oldCompDeleter (contentComp);
-    }
-    else
-    {
-        contentComp = nullptr;
+        if (deleteContent)
+        {
+            // This sets the content comp to a null pointer before deleting the old one, in case
+            // anything tries to use the old one while it's in mid-deletion..
+            ScopedPointer<Component> oldCompDeleter (contentComp);
+            contentComp = nullptr;
+        }
+        else
+        {
+            contentHolder.removeChildComponent (contentComp);
+            contentComp = nullptr;
+        }
     }
 }
 
@@ -83,7 +87,7 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
 {
     if (contentComp.get() != newViewedComponent)
     {
-        deleteContentComp();
+        deleteOrRemoveContentComp();
         contentComp = newViewedComponent;
         deleteContent = deleteComponentWhenNoLongerNeeded;
 
@@ -179,7 +183,10 @@ void Viewport::componentMovedOrResized (Component&, bool, bool)
 void Viewport::lookAndFeelChanged()
 {
     if (! customScrollBarThickness)
+    {
         scrollBarThickness = getLookAndFeel().getDefaultScrollbarWidth();
+        resized();
+    }
 }
 
 void Viewport::resized()

@@ -28,7 +28,7 @@ public:
 
     void valueChanged() override
     {
-        param.setValue ((float) Slider::getValue());
+        param.setValueNotifyingHost ((float) Slider::getValue());
     }
 
     void timerCallback() override       { updateSliderPos(); }
@@ -43,7 +43,7 @@ public:
     {
         const float newValue = param.getValue();
 
-        if (newValue != (float) Slider::getValue())
+        if (newValue != (float) Slider::getValue() && ! isMouseButtonDown())
             Slider::setValue (newValue);
     }
 

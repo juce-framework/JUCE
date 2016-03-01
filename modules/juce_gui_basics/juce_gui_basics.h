@@ -28,7 +28,7 @@
 #include "../juce_graphics/juce_graphics.h"
 #include "../juce_data_structures/juce_data_structures.h"
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_ENABLE_REPAINT_DEBUGGING
     If this option is turned on, each area of the screen that gets repainted will
     flash in a random colour, so that you can see exactly which bits of your
@@ -80,7 +80,7 @@
  #define JUCE_USE_XCURSOR 1
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

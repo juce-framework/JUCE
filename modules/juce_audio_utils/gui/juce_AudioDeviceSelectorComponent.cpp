@@ -1113,15 +1113,18 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
         if (AudioIODeviceType* const type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1])
         {
             audioDeviceSettingsComp = nullptr;
-
             deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
-
             updateAllControls(); // needed in case the type hasn't actually changed
         }
     }
     else if (comboBoxThatHasChanged == midiOutputSelector)
     {
-        deviceManager.setDefaultMidiOutput (midiOutputSelector->getText());
+        String midiDeviceName (midiOutputSelector->getText());
+
+        if (midiDeviceName == getNoDeviceString())
+            midiDeviceName = String();
+
+        deviceManager.setDefaultMidiOutput (midiDeviceName);
     }
 }
 

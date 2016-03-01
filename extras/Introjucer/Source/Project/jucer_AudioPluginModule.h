@@ -46,7 +46,6 @@ namespace
     inline Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
     inline Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
     inline Value getPluginIsMidiEffectPlugin (Project& project)          { return project.getProjectValue ("pluginIsMidiEffectPlugin"); }
-    inline Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
     inline Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
     inline Value getPluginVSTCategory (Project& project)                 { return project.getProjectValue ("pluginVSTCategory"); }
     inline Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
@@ -160,7 +159,6 @@ namespace
         flags.set ("JucePlugin_WantsMidiInput",              valueToBool (getPluginWantsMidiInput (project)));
         flags.set ("JucePlugin_ProducesMidiOutput",          valueToBool (getPluginProducesMidiOut (project)));
         flags.set ("JucePlugin_IsMidiEffect",                valueToBool (getPluginIsMidiEffectPlugin (project)));
-        flags.set ("JucePlugin_SilenceInProducesSilenceOut", valueToBool (getPluginSilenceInProducesSilenceOut (project)));
         flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
         flags.set ("JucePlugin_Version",                     project.getVersionString());
         flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
@@ -238,7 +236,12 @@ namespace
 //==============================================================================
 namespace VSTHelpers
 {
-    static void addVSTFolderToPath (ProjectExporter& exporter, bool isVST3)
+    inline bool isExporterSupported (ProjectExporter& exporter)
+    {
+        return ! exporter.isAndroid();
+    }
+
+    inline void addVSTFolderToPath (ProjectExporter& exporter, bool isVST3)
     {
         const String vstFolder (exporter.getVSTPathValue (isVST3).toString());
 
@@ -246,7 +249,7 @@ namespace VSTHelpers
             exporter.addToExtraSearchPaths (RelativePath (vstFolder, RelativePath::projectFolder), 0);
     }
 
-    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
+    inline void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
         const String vstFormat (isVST3 ? "VST3" : "VST");
 
@@ -255,64 +258,67 @@ namespace VSTHelpers
                    "If you're building a " + vstFormat + ", this must be the folder containing the " + vstFormat + " SDK. This should be an absolute path.");
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, bool isVST3)
+    inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, bool isVST3)
     {
-        fixMissingXcodePostBuildScript (exporter);
-        writePluginCharacteristicsFile (projectSaver);
-
-        exporter.makefileTargetSuffix = ".so";
-
-        Project::Item group (Project::Item::createGroup (const_cast<ProjectExporter&> (exporter).getProject(),
-                                                         "Juce VST Wrapper", "__jucevstfiles"));
-
-        addVSTFolderToPath (exporter, isVST3);
-
-        if (exporter.isVisualStudio())
+        if (isExporterSupported (exporter))
         {
-            if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
-                exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
+            fixMissingXcodePostBuildScript (exporter);
+            writePluginCharacteristicsFile (projectSaver);
 
-            RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
-                                                                                                  RelativePath::projectFolder)
-                                                                                      .getChildFile ("juce_audio_plugin_client")
-                                                                                      .getChildFile ("VST3")));
+            exporter.makefileTargetSuffix = ".so";
 
-            for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+            Project::Item group (Project::Item::createGroup (const_cast<ProjectExporter&> (exporter).getProject(),
+                                                             "Juce VST Wrapper", "__jucevstfiles"));
+
+            addVSTFolderToPath (exporter, isVST3);
+
+            if (exporter.isVisualStudio())
             {
-                if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
-                    config->getValue (Ids::useRuntimeLibDLL) = true;
+                RelativePath modulePath (exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (exporter.getPathForModuleString ("juce_audio_plugin_client"),
+                                                                                                      RelativePath::projectFolder)
+                                                                                          .getChildFile ("juce_audio_plugin_client")
+                                                                                          .getChildFile ("VST3")));
 
-                if (isVST3)
-                    if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                        config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+                {
+                    if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
+                        config->getValue (Ids::useRuntimeLibDLL) = true;
+
+                    if (isVST3)
+                        if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
+                            config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                }
             }
-        }
 
-        if (exporter.isLinux())
-            exporter.makefileExtraLinkerFlags.add ("-Wl,--no-undefined");
+            if (exporter.isLinux())
+                exporter.makefileExtraLinkerFlags.add ("-Wl,--no-undefined");
+        }
     }
 
-    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
+    inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props, bool isVST3)
     {
-        fixMissingXcodePostBuildScript (exporter);
-        createVSTPathEditor (exporter, props, isVST3);
+        if (isExporterSupported (exporter))
+        {
+            fixMissingXcodePostBuildScript (exporter);
+            createVSTPathEditor (exporter, props, isVST3);
+        }
     }
 }
 
 //==============================================================================
 namespace RTASHelpers
 {
-    static RelativePath getRTASRelativeFolderPath (ProjectExporter& exporter)
+    inline RelativePath getRTASRelativeFolderPath (ProjectExporter& exporter)
     {
         return RelativePath (exporter.getRTASPathValue().toString(), RelativePath::projectFolder);
     }
 
-    static bool isExporterSupported (ProjectExporter& exporter)
+    inline bool isExporterSupported (ProjectExporter& exporter)
     {
         return exporter.isVisualStudio() || exporter.isXcode();
     }
 
-    static void addExtraSearchPaths (ProjectExporter& exporter)
+    inline void addExtraSearchPaths (ProjectExporter& exporter)
     {
         RelativePath rtasFolder (getRTASRelativeFolderPath (exporter));
 
@@ -393,7 +399,7 @@ namespace RTASHelpers
         }
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         if (isExporterSupported (exporter))
         {
@@ -448,7 +454,7 @@ namespace RTASHelpers
         }
     }
 
-    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
+    inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
     {
         if (isExporterSupported (exporter))
         {
@@ -464,7 +470,7 @@ namespace RTASHelpers
 //==============================================================================
 namespace AUHelpers
 {
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         writePluginCharacteristicsFile (projectSaver);
 
@@ -500,17 +506,17 @@ namespace AUHelpers
 //==============================================================================
 namespace AAXHelpers
 {
-    static RelativePath getAAXRelativeFolderPath (ProjectExporter& exporter)
+    inline RelativePath getAAXRelativeFolderPath (ProjectExporter& exporter)
     {
         return RelativePath (exporter.getAAXPathValue().toString(), RelativePath::projectFolder);
     }
 
-    static bool isExporterSupported (ProjectExporter& exporter)
+    inline bool isExporterSupported (ProjectExporter& exporter)
     {
         return exporter.isVisualStudio() || exporter.isXcode();
     }
 
-    static void addExtraSearchPaths (ProjectExporter& exporter)
+    inline void addExtraSearchPaths (ProjectExporter& exporter)
     {
         const RelativePath aaxFolder (getAAXRelativeFolderPath (exporter));
 
@@ -519,7 +525,7 @@ namespace AAXHelpers
         exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces").getChildFile ("ACF"));
     }
 
-    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         if (isExporterSupported (exporter))
         {
@@ -548,7 +554,7 @@ namespace AAXHelpers
         }
     }
 
-    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
+    inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
     {
         if (isExporterSupported (exporter))
         {

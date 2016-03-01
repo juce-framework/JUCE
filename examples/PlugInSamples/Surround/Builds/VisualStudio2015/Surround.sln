@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{F9FF67DA-4C83-1DEF-FCA5-8D74F96886D5}") = "Surround", "Surround.vcxproj", "{01DA4F69-1E8D-E195-1DB6-491234B0D5E3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01DA4F69-1E8D-E195-1DB6-491234B0D5E3}.Debug|x64.ActiveCfg = Debug|x64
+		{01DA4F69-1E8D-E195-1DB6-491234B0D5E3}.Debug|x64.Build.0 = Debug|x64
+		{01DA4F69-1E8D-E195-1DB6-491234B0D5E3}.Release|x64.ActiveCfg = Release|x64
+		{01DA4F69-1E8D-E195-1DB6-491234B0D5E3}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -50,14 +50,17 @@ void AudioParameterFloat::setValue (float newValue)                      { value
 float AudioParameterFloat::getDefaultValue() const                       { return range.convertTo0to1 (defaultValue); }
 int AudioParameterFloat::getNumSteps() const                             { return AudioProcessorParameterWithID::getNumSteps(); }
 float AudioParameterFloat::getValueForText (const String& text) const    { return range.convertTo0to1 (text.getFloatValue()); }
-String AudioParameterFloat::getText (float v, int length) const          { return String (range.convertFrom0to1 (v), 2).substring (0, length); }
+
+String AudioParameterFloat::getText (float v, int length) const
+{
+    String asText (range.convertFrom0to1 (v), 2);
+    return length > 0 ? asText.substring (0, length) : asText;
+}
 
 AudioParameterFloat& AudioParameterFloat::operator= (float newValue)
 {
-    const float normalisedValue = range.convertTo0to1 (newValue);
-
-    if (value != normalisedValue)
-        setValueNotifyingHost (normalisedValue);
+    if (value != newValue)
+        setValueNotifyingHost (range.convertTo0to1 (newValue));
 
     return *this;
 }
@@ -87,10 +90,8 @@ String AudioParameterInt::getText (float v, int /*length*/) const        { retur
 
 AudioParameterInt& AudioParameterInt::operator= (int newValue)
 {
-    const float normalisedValue = convertTo0to1 (newValue);
-
-    if (value != normalisedValue)
-        setValueNotifyingHost (normalisedValue);
+    if (get() != newValue)
+        setValueNotifyingHost (convertTo0to1 (newValue));
 
     return *this;
 }
@@ -115,10 +116,8 @@ String AudioParameterBool::getText (float v, int /*length*/) const       { retur
 
 AudioParameterBool& AudioParameterBool::operator= (bool newValue)
 {
-    const float normalisedValue = newValue ? 1.0f : 0.0f;
-
-    if (value != normalisedValue)
-        setValueNotifyingHost (normalisedValue);
+    if (get() != newValue)
+        setValueNotifyingHost (newValue ? 1.0f : 0.0f);
 
     return *this;
 }
@@ -148,10 +147,8 @@ String AudioParameterChoice::getText (float v, int /*length*/) const     { retur
 
 AudioParameterChoice& AudioParameterChoice::operator= (int newValue)
 {
-    const float normalisedValue = convertTo0to1 (newValue);
-
-    if (value != normalisedValue)
-        setValueNotifyingHost (normalisedValue);
+    if (getIndex() != newValue)
+        setValueNotifyingHost (convertTo0to1 (newValue));
 
     return *this;
 }

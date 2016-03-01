@@ -126,6 +126,9 @@ public:
     /** Returns the length of the line. */
     ValueType getLength() const noexcept                                    { return start.getDistanceFrom (end); }
 
+    /** Returns the length of the line. */
+    ValueType getLengthSquared() const noexcept                             { return start.getDistanceSquaredFrom (end); }
+
     /** Returns true if the line's start and end x coordinates are the same. */
     bool isVertical() const noexcept                                        { return start.x == end.x; }
 

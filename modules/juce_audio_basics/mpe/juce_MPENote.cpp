@@ -71,7 +71,7 @@ MPENote::MPENote() noexcept
 //==============================================================================
 bool MPENote::isValid() const noexcept
 {
-    return midiChannel > 0 && midiChannel <= 16 && initialNote >= 0 && initialNote <= 127;
+    return midiChannel > 0 && midiChannel <= 16 && initialNote < 128;
 }
 
 //==============================================================================
@@ -103,7 +103,7 @@ class MPENoteTests : public UnitTest
 public:
     MPENoteTests() : UnitTest ("MPENote class") {}
 
-    //==========================================================================
+    //==============================================================================
     void runTest() override
     {
         beginTest ("getFrequencyInHertz");
@@ -116,7 +116,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void expectEqualsWithinOneCent (double frequencyInHertzActual,
                                     double frequencyInHertzExpected)
     {

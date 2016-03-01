@@ -213,7 +213,6 @@ public:
         setValueIfVoid (getPluginWantsMidiInput (project),         false);
         setValueIfVoid (getPluginProducesMidiOut (project),        false);
         setValueIfVoid (getPluginIsMidiEffectPlugin (project),     false);
-        setValueIfVoid (getPluginSilenceInProducesSilenceOut (project), false);
         setValueIfVoid (getPluginEditorNeedsKeyFocus (project),    false);
         setValueIfVoid (getPluginAUExportPrefix (project),         sanitisedProjectName + "AU");
         setValueIfVoid (getPluginRTASCategory (project),           String::empty);
@@ -247,11 +246,11 @@ public:
         props.add (new TextPropertyComponent (getPluginCode (project), "Plugin Code", 4, false),
                    "A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
 
-        props.add (new TextPropertyComponent (getPluginChannelConfigs (project), "Plugin Channel Configurations (deprecated)", 1024, false),
-                   "This property is deprecated in favour of dynamically probing the channel configurations. Leave this field empty unless "
-                   "you are compiling legacy code. The list is a comma-separated set "
-                   "list in the form { numIns, numOuts }, and each pair indicates a valid plug-in configuration. For example, {1, 1}, {2, 2} means "
-                   "that the plugin can be used either with 1 input and 1 output, or with 2 inputs and 2 outputs.");
+        props.add (new TextPropertyComponent (getPluginChannelConfigs (project), "Plugin Channel Configurations", 1024, false),
+                   "This list is a comma-separated set list in the form {numIns, numOuts} and each pair indicates a valid plug-in "
+                   "configuration. For example {1, 1}, {2, 2} means that the plugin can be used either with 1 input and 1 output, "
+                   "or with 2 inputs and 2 outputs. If your plug-in requires side-chains, aux output buses etc., then you must leave "
+                   "this field empty and override the setPreferredBusArrangement method in your AudioProcessor.");
 
         props.add (new BooleanPropertyComponent (getPluginIsSynth (project), "Plugin is a Synth", "Is a Synth"),
                    "Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
@@ -264,9 +263,6 @@ public:
 
         props.add (new BooleanPropertyComponent (getPluginIsMidiEffectPlugin (project), "Midi Effect Plugin", "Plugin is a midi effect plugin"),
                    "Enable this if your plugin only processes midi and no audio.");
-
-        props.add (new BooleanPropertyComponent (getPluginSilenceInProducesSilenceOut (project), "Silence", "Silence in produces silence out"),
-                   "Enable this if your plugin has no tail - i.e. if passing a silent buffer to it will always result in a silent buffer being produced.");
 
         props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus (project), "Key Focus", "Plugin editor requires keyboard focus"),
                    "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");

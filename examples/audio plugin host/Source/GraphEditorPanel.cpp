@@ -227,19 +227,24 @@ public:
         {
             String tip;
 
-            if (index_ == FilterGraph::midiChannelNumber)
+            if (index == FilterGraph::midiChannelNumber)
             {
-                tip = isInput ? "MIDI Input" : "MIDI Output";
+                tip = isInput ? "MIDI Input"
+                              : "MIDI Output";
             }
             else
             {
-                if (isInput)
-                    tip = node->getProcessor()->getInputChannelName (index_);
-                else
-                    tip = node->getProcessor()->getOutputChannelName (index_);
+                const AudioProcessor::AudioBusArrangement& busArrangement = node->getProcessor()->busArrangement;
+
+                const Array<AudioProcessor::AudioProcessorBus>& buses = isInput ? busArrangement.inputBuses
+                                                                                : busArrangement.outputBuses;
+
+                if (buses.size() > 0)
+                    tip = AudioChannelSet::getChannelTypeName (buses.getReference(0).channels.getTypeOfChannel (index));
 
                 if (tip.isEmpty())
-                    tip = (isInput ? "Input " : "Output ") + String (index_ + 1);
+                    tip = (isInput ? "Input "
+                                   : "Output ") + String (index + 1);
             }
 
             setTooltip (tip);
@@ -403,15 +408,15 @@ public:
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (e.mouseWasClicked() && e.getNumberOfClicks() == 2)
+        if (e.mouseWasDraggedSinceMouseDown())
+        {
+            graph.setChangedFlag (true);
+        }
+        else if (e.getNumberOfClicks() == 2)
         {
             if (const AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
                 if (PluginWindow* const w = PluginWindow::getWindowFor (f, PluginWindow::Normal))
                     w->toFront (true);
-        }
-        else if (! e.mouseWasClicked())
-        {
-            graph.setChangedFlag (true);
         }
     }
 
@@ -694,7 +699,11 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if ((! dragging) && ! e.mouseWasClicked())
+        if (dragging)
+        {
+            getGraphPanel()->dragConnector (e);
+        }
+        else if (e.mouseWasDraggedSinceMouseDown())
         {
             dragging = true;
 
@@ -709,10 +718,6 @@ public:
                                                  isNearerSource ? destFilterID : 0,
                                                  destFilterChannel,
                                                  e);
-        }
-        else if (dragging)
-        {
-            getGraphPanel()->dragConnector (e);
         }
     }
 
@@ -757,7 +762,7 @@ public:
                            -arrowL, -arrowW,
                            arrowL, 0.0f);
 
-        arrow.applyTransform (AffineTransform::identity
+        arrow.applyTransform (AffineTransform()
                                 .rotated (float_Pi * 0.5f - (float) atan2 (x2 - x1, y2 - y1))
                                 .translated ((x1 + x2) * 0.5f,
                                              (y1 + y2) * 0.5f));

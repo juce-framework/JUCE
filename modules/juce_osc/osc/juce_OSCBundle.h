@@ -63,7 +63,7 @@ public:
     class Element
     {
     public:
-        //==========================================================================
+        //==============================================================================
         /** Constructs an OSCBundle Element from an OSCMessage. */
         Element (OSCMessage message);
 
@@ -93,7 +93,7 @@ public:
         const OSCBundle& getBundle() const;
 
     private:
-        //==========================================================================
+        //==============================================================================
         ScopedPointer<OSCMessage> message;
         ScopedPointer<OSCBundle> bundle;
     };

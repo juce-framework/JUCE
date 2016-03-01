@@ -27,15 +27,11 @@
 } // (juce namespace)
 
 #if ! JUCE_WINDOWS
- #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
- #define Component CarbonDummyCompName
  #include <QuickTime/Movies.h>
  #include <QuickTime/QTML.h>
  #include <QuickTime/QuickTimeComponents.h>
  #include <QuickTime/MediaHandlers.h>
  #include <QuickTime/ImageCodec.h>
- #undef Point
- #undef Component
 #else
  #if JUCE_MSVC
   #pragma warning (push)

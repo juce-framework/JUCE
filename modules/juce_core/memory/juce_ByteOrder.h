@@ -157,7 +157,7 @@ inline uint32 ByteOrder::swap (uint32 n) noexcept
 {
    #if JUCE_MAC || JUCE_IOS
     return OSSwapInt32 (n);
-   #elif JUCE_GCC && JUCE_INTEL && ! JUCE_NO_INLINE_ASM
+   #elif (JUCE_GCC  || JUCE_CLANG) && JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     asm("bswap %%eax" : "=a"(n) : "a"(n));
     return n;
    #elif JUCE_USE_MSVC_INTRINSICS

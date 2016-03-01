@@ -1613,7 +1613,7 @@ private:
         headerParsed = sideParsed = dataParsed = isFreeFormat = wasFreeFormat = false;
         lastFrameSize = -1;
         needToSyncBitStream = true;
-        frameSize = sideInfoSize = dataSize = frameSize = bitIndex = 0;
+        frameSize = sideInfoSize = dataSize = bitIndex = 0;
         lastFrameSizeNoPadding = bufferSpaceIndex = 0;
         bufferPointer = bufferSpace[bufferSpaceIndex] + 512;
         synthBo = 1;

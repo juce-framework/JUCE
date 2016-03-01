@@ -32,7 +32,7 @@ void JUCE_CALLTYPE AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::Wrapp
 AudioProcessor::AudioProcessor()
     : wrapperType (wrapperTypeBeingCreated.get()),
       playHead (nullptr),
-      sampleRate (0),
+      currentSampleRate (0),
       blockSize (0),
       latencySamples (0),
      #if JUCE_DEBUG
@@ -42,23 +42,25 @@ AudioProcessor::AudioProcessor()
       nonRealtime (false),
       processingPrecision (singlePrecision)
 {
-  #if ! JucePlugin_IsMidiEffect
    #ifdef JucePlugin_PreferredChannelConfigurations
     const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
    #else
     const short channelConfigs[][2] = { {2, 2} };
    #endif
-    int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelConfigs);
 
-    if (numChannelConfigs > 0)
-    {
-       #if ! JucePlugin_IsSynth
-        busArrangement.inputBuses.add  (AudioProcessorBus ("Input",    AudioChannelSet::canonicalChannelSet (channelConfigs[0][0])));
-       #endif
-        busArrangement.outputBuses.add (AudioProcessorBus ("Output",   AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
-    }
+ #if ! JucePlugin_IsMidiEffect
+   #if ! JucePlugin_IsSynth
+    busArrangement.inputBuses.add  (AudioProcessorBus ("Input",  AudioChannelSet::canonicalChannelSet (channelConfigs[0][0])));
+   #endif
+    busArrangement.outputBuses.add (AudioProcessorBus ("Output", AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
+
+  #ifdef JucePlugin_PreferredChannelConfigurations
+   #if ! JucePlugin_IsSynth
+    AudioProcessor::setPreferredBusArrangement (true,  0, AudioChannelSet::stereo());
+   #endif
+    AudioProcessor::setPreferredBusArrangement (false, 0, AudioChannelSet::stereo());
   #endif
-
+ #endif
     updateSpeakerFormatStrings();
 }
 
@@ -121,7 +123,7 @@ void AudioProcessor::setPlayConfigDetails (const int newNumIns,
 
 void AudioProcessor::setRateAndBufferSizeDetails (double newSampleRate, int newBlockSize) noexcept
 {
-    sampleRate = newSampleRate;
+    currentSampleRate = newSampleRate;
     blockSize = newBlockSize;
 }
 
@@ -401,47 +403,28 @@ bool AudioProcessor::supportsDoublePrecisionProcessing() const
 }
 
 //==============================================================================
-const String AudioProcessor::getInputChannelName (int channelIndex) const
+static String getChannelName (const Array<AudioProcessor::AudioProcessorBus>& buses, int index)
 {
-    // this is deprecated! Assume the user wants the name of the channel index in the first input bus
-    if (busArrangement.outputBuses.size() > 0)
-        return AudioChannelSet::getChannelTypeName (busArrangement.inputBuses.getReference(0)
-                                                      .channels.getTypeOfChannel (channelIndex));
-
-    return String();
+    return buses.size() > 0 ? AudioChannelSet::getChannelTypeName (buses.getReference(0).channels.getTypeOfChannel (index))
+                            : String();
 }
 
-const String AudioProcessor::getOutputChannelName (int channelIndex) const
+const String AudioProcessor::getInputChannelName (int index) const   { return getChannelName (busArrangement.inputBuses, index); }
+const String AudioProcessor::getOutputChannelName (int index) const  { return getChannelName (busArrangement.outputBuses, index); }
+
+static bool isStereoPair (const Array<AudioProcessor::AudioProcessorBus>& buses, int index)
 {
-    // this is deprecated! Assume the user wants the name of the channel index in the first output bus
-    if (busArrangement.outputBuses.size() > 0)
-        return AudioChannelSet::getChannelTypeName (busArrangement.outputBuses.getReference(0)
-                                                      .channels.getTypeOfChannel (channelIndex));
-
-    return String();
-}
-
-bool AudioProcessor::isInputChannelStereoPair (int index) const
-{
-    const Array<AudioProcessorBus>& buses = busArrangement.inputBuses;
-
     return index < 2
             && buses.size() > 0
             && buses.getReference(0).channels == AudioChannelSet::stereo();
 }
 
-bool AudioProcessor::isOutputChannelStereoPair (int index) const
-{
-    const Array<AudioProcessorBus>& buses = busArrangement.outputBuses;
+bool AudioProcessor::isInputChannelStereoPair  (int index) const    { return isStereoPair (busArrangement.inputBuses, index); }
+bool AudioProcessor::isOutputChannelStereoPair (int index) const    { return isStereoPair (busArrangement.outputBuses, index); }
 
-    return index < 2
-            && buses.size() > 0
-            && buses.getReference(0).channels == AudioChannelSet::stereo();
-}
-
+//==============================================================================
 bool AudioProcessor::setPreferredBusArrangement (bool isInput, int busIndex, const AudioChannelSet& preferredSet)
 {
-
     const int oldNumInputs  = getTotalNumInputChannels();
     const int oldNumOutputs = getTotalNumOutputChannels();
 
