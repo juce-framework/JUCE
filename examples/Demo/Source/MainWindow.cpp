@@ -561,7 +561,7 @@ AudioDeviceManager& MainAppWindow::getSharedAudioDeviceManager()
 
         RuntimePermissions::request (
             RuntimePermissions::recordAudio,
-            [&] (bool wasGranted) {
+            [] (bool wasGranted) {
                 int numInputChannels = wasGranted ? 2 : 0;
                 sharedAudioDeviceManager->initialise (numInputChannels, 2, nullptr, true, String(), nullptr);
             }
