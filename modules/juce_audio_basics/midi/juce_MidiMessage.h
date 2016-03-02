@@ -126,6 +126,12 @@ public:
     int getRawDataSize() const noexcept                 { return size; }
 
     //==============================================================================
+    /** Returns a human-readable description of the midi message as a string,
+        for example "Note On C#3 Velocity 120 Channel 1".
+    */
+    String getDescription() const;
+
+    //==============================================================================
     /** Returns the timestamp associated with this message.
 
         The exact meaning of this time and its units will vary, as messages are used in
