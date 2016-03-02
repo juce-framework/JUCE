@@ -137,6 +137,14 @@ public:
         /** A command manager to use to automatically invoke the command, or nullptr if none is specified. */
         ApplicationCommandManager* commandManager;
 
+        /** An optional string describing the shortcut key for this item.
+            This is only used for displaying at the right-hand edge of a menu item - the
+            menu won't attempt to actually catch or process the key. If you supply a
+            commandManager parameter then the menu will attempt to fill-in this field
+            automatically.
+        */
+        String shortcutKeyDescription;
+
         /** A colour to use to draw the menu text.
             By default this is transparent black, which means that the LookAndFeel should choose the colour.
         */

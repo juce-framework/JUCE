@@ -82,7 +82,7 @@ struct ItemComponent  : public Component
 
         parent.addAndMakeVisible (this);
 
-        shortcutKeyDescription = getShortcutKeyDescription();
+        updateShortcutKeyDescription();
 
         int itemW = 80;
         int itemH = 16;
@@ -118,7 +118,7 @@ struct ItemComponent  : public Component
                                                 item.isTicked,
                                                 hasSubMenu (item),
                                                 item.text,
-                                                shortcutKeyDescription,
+                                                item.shortcutKeyDescription,
                                                 item.image,
                                                 getColour (item));
     }
@@ -145,14 +145,13 @@ struct ItemComponent  : public Component
     }
 
     PopupMenu::Item item;
-    String shortcutKeyDescription;
 
 private:
     // NB: we use a copy of the one from the item info in case we're using our own section comp
     ReferenceCountedObjectPtr<CustomComponent> customComp;
     bool isHighlighted;
 
-    String getShortcutKeyDescription() const
+    void updateShortcutKeyDescription()
     {
         if (item.commandManager != nullptr && item.itemID != 0)
         {
@@ -173,16 +172,14 @@ private:
                     shortcutKey << key;
             }
 
-            return shortcutKey.trim();
+            item.shortcutKeyDescription = shortcutKey.trim();
         }
-
-        return String();
     }
 
     String getTextForMeasurement() const
     {
-        return shortcutKeyDescription.isNotEmpty() ? item.text + "   " + shortcutKeyDescription
-                                                   : item.text;
+        return item.shortcutKeyDescription.isNotEmpty() ? item.text + "   " + item.shortcutKeyDescription
+                                                        : item.text;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent)
@@ -1245,6 +1242,7 @@ PopupMenu::Item::Item (const Item& other)
     image (other.image != nullptr ? other.image->createCopy() : nullptr),
     customComponent (other.customComponent),
     commandManager (other.commandManager),
+    shortcutKeyDescription (other.shortcutKeyDescription),
     colour (other.colour),
     isEnabled (other.isEnabled),
     isTicked (other.isTicked),
@@ -1261,6 +1259,7 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     image = (other.image != nullptr ? other.image->createCopy() : nullptr);
     customComponent = other.customComponent;
     commandManager = other.commandManager;
+    shortcutKeyDescription = other.shortcutKeyDescription;
     colour = other.colour;
     isEnabled = other.isEnabled;
     isTicked = other.isTicked;
