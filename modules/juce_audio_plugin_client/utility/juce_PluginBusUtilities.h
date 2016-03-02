@@ -27,6 +27,8 @@ struct PluginBusUtilities
 {
     //==============================================================================
     typedef Array<AudioProcessor::AudioProcessorBus> AudioBusArray;
+    
+    PluginBusUtilities& operator=(const PluginBusUtilities&) = delete; // To avoid "assignment operator could not be generated" compiler warning
 
     //==============================================================================
     PluginBusUtilities (AudioProcessor& plugin, bool markDiscreteLayoutsAsSupported)
