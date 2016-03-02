@@ -990,7 +990,7 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
 void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
-    const int mxcsr = _mm_getcsr();
+    const unsigned int mxcsr = _mm_getcsr();
     _mm_setcsr (mxcsr | 0x8040); // add the DAZ and FZ bits
    #endif
 }

@@ -60,7 +60,7 @@ private:
         const int day       = date & 31;
         const int hours     = time >> 11;
         const int minutes   = (time >> 5) & 63;
-        const int seconds   = (time & 31) << 1;
+        const int seconds   = (int) ((time & 31) << 1);
 
         return Time (year, month, day, hours, minutes, seconds);
     }
