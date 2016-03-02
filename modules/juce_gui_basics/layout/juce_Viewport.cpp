@@ -187,7 +187,6 @@ typedef AnimatedPosition<AnimatedPositionBehaviours::ContinuousWithMomentum> Vie
 struct Viewport::DragToScrollListener   : private MouseListener,
                                           private ViewportDragPosition::Listener
 {
-public:
     DragToScrollListener (Viewport& v)
         : viewport (v), numTouches (0), isDragging (false)
     {
@@ -245,6 +244,8 @@ public:
             offsetY.endDrag();
             isDragging = false;
         }
+
+        jassert (numTouches >= 0);
     }
 
     Viewport& viewport;
