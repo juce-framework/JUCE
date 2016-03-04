@@ -99,7 +99,7 @@ public:
             textTarget = textTarget.removeFromBottom (textTarget.getHeight() * 0.3f);
         }
 
-        g.setColour (Colours::white);
+        g.setColour (findColour (mainBackgroundColourId).contrasting());
         g.drawText (name, textTarget, Justification::centred, true);
     }
 

@@ -30,7 +30,7 @@
 /**
     The base class for a type of plugin format, such as VST, AudioUnit, LADSPA, etc.
 
-    @see AudioFormatManager
+    @see AudioPluginFormatManager
 */
 class JUCE_API  AudioPluginFormat
 {

@@ -58,7 +58,7 @@ static void callCPUID (int result[4], int infoType)
     __try
    #endif
     {
-       #if JUCE_GCC
+       #if JUCE_GCC || JUCE_CLANG
         __asm__ __volatile__ ("cpuid" : "=a" (result[0]), "=b" (result[1]), "=c" (result[2]),"=d" (result[3]) : "a" (infoType));
        #else
         __asm
@@ -331,7 +331,7 @@ static int64 juce_getClockCycleCounter() noexcept
     // MS intrinsics version...
     return (int64) __rdtsc();
 
-   #elif JUCE_GCC
+   #elif JUCE_GCC || JUCE_CLANG
     // GNU inline asm version...
     unsigned int hi = 0, lo = 0;
 

@@ -445,6 +445,25 @@ private:
 };
 
 //==============================================================================
+Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
+{
+    HWND hwnd = (HWND) nativeWindowHandle;
+
+    RECT r = getWindowRect (hwnd);
+    const int w = r.right - r.left;
+    const int h = r.bottom - r.top;
+
+    WindowsBitmapImage* nativeBitmap = new WindowsBitmapImage (Image::RGB, w, h, true);
+    Image bitmap (nativeBitmap);
+
+    HDC dc = GetDC (hwnd);
+    BitBlt (nativeBitmap->hdc, 0, 0, w, h, dc, 0, 0, SRCCOPY);
+    ReleaseDC (hwnd, dc);
+
+    return SoftwareImageType().convert (bitmap);
+}
+
+//==============================================================================
 namespace IconConverters
 {
     Image createImageFromHBITMAP (HBITMAP bitmap)
@@ -1539,7 +1558,7 @@ private:
         DeleteObject (rgn);
         EndPaint (hwnd, &paintStruct);
 
-       #ifndef JUCE_GCC
+       #if JUCE_MSVC
         _fpreset(); // because some graphics cards can unmask FP exceptions
        #endif
 

@@ -42,23 +42,25 @@ AudioProcessor::AudioProcessor()
       nonRealtime (false),
       processingPrecision (singlePrecision)
 {
-  #if ! JucePlugin_IsMidiEffect
    #ifdef JucePlugin_PreferredChannelConfigurations
     const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
    #else
     const short channelConfigs[][2] = { {2, 2} };
    #endif
-    int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelConfigs);
 
-    if (numChannelConfigs > 0)
-    {
-       #if ! JucePlugin_IsSynth
-        busArrangement.inputBuses.add  (AudioProcessorBus ("Input",    AudioChannelSet::canonicalChannelSet (channelConfigs[0][0])));
-       #endif
-        busArrangement.outputBuses.add (AudioProcessorBus ("Output",   AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
-    }
+ #if ! JucePlugin_IsMidiEffect
+   #if ! JucePlugin_IsSynth
+    busArrangement.inputBuses.add  (AudioProcessorBus ("Input",  AudioChannelSet::canonicalChannelSet (channelConfigs[0][0])));
+   #endif
+    busArrangement.outputBuses.add (AudioProcessorBus ("Output", AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
+
+  #ifdef JucePlugin_PreferredChannelConfigurations
+   #if ! JucePlugin_IsSynth
+    AudioProcessor::setPreferredBusArrangement (true,  0, AudioChannelSet::stereo());
+   #endif
+    AudioProcessor::setPreferredBusArrangement (false, 0, AudioChannelSet::stereo());
   #endif
-
+ #endif
     updateSpeakerFormatStrings();
 }
 

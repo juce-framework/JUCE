@@ -31,7 +31,10 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+
 #include "juce_audio_formats.h"
 
 //==============================================================================
@@ -81,12 +84,7 @@ namespace juce
 {
 
 #if JUCE_ANDROID
- #include "../juce_core/native/juce_android_JNIHelpers.h"
  #undef JUCE_QUICKTIME
-#endif
-
-#if JUCE_WINDOWS
- #include "../juce_core/native/juce_win32_ComSmartPtr.h"
 #endif
 
 #include "format/juce_AudioFormat.cpp"

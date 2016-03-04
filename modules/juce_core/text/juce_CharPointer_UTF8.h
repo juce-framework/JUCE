@@ -520,6 +520,9 @@ public:
                         return false;
                 }
 
+                if (numExtraValues == 0)
+                    return false;
+
                 maxBytesToRead -= numExtraValues;
                 if (maxBytesToRead < 0)
                     return false;

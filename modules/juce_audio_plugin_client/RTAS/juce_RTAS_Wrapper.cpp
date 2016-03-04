@@ -123,8 +123,8 @@
 
 //==============================================================================
 #if JUCE_WINDOWS
-  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
-  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
+  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, Component* comp);
+  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, Component* comp);
  #if ! JucePlugin_EditorRequiresKeyboardFocus
   extern void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow);
  #endif
@@ -371,7 +371,7 @@ public:
             }
 
            #if JUCE_WINDOWS
-            void globalFocusChanged (juce::Component*) override
+            void globalFocusChanged (Component*) override
             {
                #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
@@ -662,9 +662,9 @@ public:
    #if JUCE_WINDOWS
     Boolean HandleKeystroke (EventRecord* e) override
     {
-        if (juce::Component* modalComp = juce::Component::getCurrentlyModalComponent())
+        if (Component* modalComp = Component::getCurrentlyModalComponent())
         {
-            if (juce::Component* focused = modalComp->getCurrentlyFocusedComponent())
+            if (Component* focused = modalComp->getCurrentlyFocusedComponent())
             {
                 switch (e->message & charCodeMask)
                 {

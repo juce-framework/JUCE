@@ -252,7 +252,6 @@ public:
     bool acceptsMidi() const                  { return false; }
     bool producesMidi() const                 { return false; }
 
-    bool silenceInProducesSilenceOut() const  { return plugin == nullptr; } // ..any way to get a proper answer for these?
     double getTailLengthSeconds() const       { return 0.0; }
 
     //==============================================================================

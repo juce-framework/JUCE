@@ -145,10 +145,10 @@ public:
     };
 
     /** Returns the name of a given channel type. For example, this method may return "Surround Left". */
-    static const char* getChannelTypeName (ChannelType) noexcept;
+    static String getChannelTypeName (ChannelType);
 
     /** Returns the abbreviated name of a channel type. For example, this method may return "Ls". */
-    static const char* getAbbreviatedChannelTypeName (ChannelType) noexcept;
+    static String getAbbreviatedChannelTypeName (ChannelType);
 
     //==============================================================================
     /** Adds a channel to the set. */

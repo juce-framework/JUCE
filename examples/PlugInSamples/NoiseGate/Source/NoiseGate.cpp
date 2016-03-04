@@ -1,12 +1,26 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-    NoiseGate.cpp
-    Created: 23 Nov 2015 3:08:33pm
-    Author:  Fabian Renn
+ This file is part of the JUCE library.
+ Copyright (c) 2015 - ROLI Ltd.
 
-  ==============================================================================
-*/
+ Permission is granted to use this software under the terms of either:
+ a) the GPL v2 (or any later version)
+ b) the Affero GPL v3
+
+ Details of these licenses can be found at: www.gnu.org/licenses
+
+ JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+ ------------------------------------------------------------------------------
+
+ To release a closed-source product which uses JUCE, commercial licenses are
+ available: visit www.juce.com for more information.
+
+ ==============================================================================
+ */
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "../../GenericEditor.h"
@@ -22,7 +36,7 @@ public:
 
         // add single side-chain bus
         busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain In",  AudioChannelSet::stereo()));
-		busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out", AudioChannelSet::stereo()));
+        busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out", AudioChannelSet::stereo()));
     }
 
     ~NoiseGate() {}
@@ -35,8 +49,8 @@ public:
         // do not allow disabling channels
         if (numChannels == 0) return false;
 
-		// only allow stereo on the side-chain bus
-		if (busIndex == 1 && numChannels != 2) return false;
+        // only allow stereo on the side-chain bus
+        if (busIndex == 1 && numChannels != 2) return false;
 
         // always have the same channel layout on both input and output on the main bus
         if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
@@ -87,7 +101,6 @@ public:
     const String getName() const override                    { return "NoiseGate"; }
     bool acceptsMidi() const override                        { return false; }
     bool producesMidi() const override                       { return false; }
-    bool silenceInProducesSilenceOut() const override        { return true; }
     double getTailLengthSeconds() const override             { return 0.0; }
     int getNumPrograms() override                            { return 1; }
     int getCurrentProgram() override                         { return 0; }

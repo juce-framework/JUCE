@@ -29,7 +29,7 @@
 #include "../juce_audio_basics/juce_audio_basics.h"
 #include "../juce_audio_formats/juce_audio_formats.h"
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_ASIO
     Enables ASIO audio devices (MS Windows only).
     Turning this on means that you'll need to have the Steinberg ASIO SDK installed
@@ -90,7 +90,7 @@
  #endif
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_USE_CDREADER
     Enables the AudioCDReader class (on supported platforms).
 */
@@ -105,7 +105,7 @@
  #define JUCE_USE_CDBURNER 0
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

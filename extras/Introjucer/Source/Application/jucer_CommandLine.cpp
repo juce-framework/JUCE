@@ -30,16 +30,20 @@
 //==============================================================================
 namespace
 {
+    static const char* getLineEnding()  { return "\r\n"; }
+
+    struct CommandLineError
+    {
+        CommandLineError (const String& s) : message (s) {}
+
+        String message;
+    };
+
     static void hideDockIcon()
     {
        #if JUCE_MAC
         Process::setDockIconVisible (false);
        #endif
-    }
-
-    static File getFile (const String& filename)
-    {
-        return File::getCurrentWorkingDirectory().getChildFile (filename.unquoted());
     }
 
     static bool matchArgument (const String& arg, const String& possible)
@@ -49,70 +53,101 @@ namespace
             || arg == "--" + possible;
     }
 
-    static bool checkArgumentCount (const StringArray& args, int minNumArgs)
+    static void checkArgumentCount (const StringArray& args, int minNumArgs)
     {
         if (args.size() < minNumArgs)
-        {
-            std::cout << "Not enough arguments!" << std::endl;
-            return false;
-        }
+            throw CommandLineError ("Not enough arguments!");
+    }
 
-        return true;
+    static File getFile (const String& filename)
+    {
+        return File::getCurrentWorkingDirectory().getChildFile (filename.unquoted());
+    }
+
+    static File getDirectoryCheckingForExistence (const String& filename)
+    {
+        File f = getFile (filename);
+
+        if (! f.isDirectory())
+            throw CommandLineError ("Could not find folder: " + f.getFullPathName());
+
+        return f;
+    }
+
+    static File getFileCheckingForExistence (const String& filename)
+    {
+        File f = getFile (filename);
+
+        if (! f.exists())
+            throw CommandLineError ("Could not find file: " + f.getFullPathName());
+
+        return f;
+    }
+
+    static Array<File> findAllSourceFiles (const File& folder)
+    {
+        Array<File> files;
+
+        for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m", File::findFiles); di.next();)
+            files.add (di.getFile());
+
+        return files;
+    }
+
+    static String joinLinesIntoSourceFile (StringArray& lines)
+    {
+        while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
+            lines.remove (lines.size() - 1);
+
+        return lines.joinIntoString (getLineEnding()) + getLineEnding();
+    }
+
+    static void replaceFile (const File& file, const String& newText, const String& message)
+    {
+        std::cout << message << file.getFullPathName() << std::endl;
+
+        TemporaryFile temp (file);
+
+        if (! temp.getFile().replaceWithText (newText, false, false))
+            throw CommandLineError ("!!! ERROR Couldn't write to temp file!");
+
+        if (! temp.overwriteTargetFileWithTemporary())
+            throw CommandLineError ("!!! ERROR Couldn't write to file!");
     }
 
     //==============================================================================
     struct LoadedProject
     {
-        LoadedProject()
-        {
-            hideDockIcon();
-        }
-
-        int load (const File& projectFile)
+        LoadedProject (const String& fileToLoad)
         {
             hideDockIcon();
 
-            if (! projectFile.exists())
-            {
-                std::cout << "The file " << projectFile.getFullPathName() << " doesn't exist!" << std::endl;
-                return 1;
-            }
+            File projectFile = getFileCheckingForExistence (fileToLoad);
 
             if (! projectFile.hasFileExtension (Project::projectFileExtension))
-            {
-                std::cout << projectFile.getFullPathName() << " isn't a valid jucer project file!" << std::endl;
-                return 1;
-            }
+                throw CommandLineError (projectFile.getFullPathName() + " isn't a valid jucer project file!");
 
             project = new Project (projectFile);
 
             if (! project->loadFrom (projectFile, true))
             {
                 project = nullptr;
-                std::cout << "Failed to load the project file: " << projectFile.getFullPathName() << std::endl;
-                return 1;
+                throw CommandLineError ("Failed to load the project file: " + projectFile.getFullPathName());
             }
-
-            return 0;
         }
 
-        int save (bool justSaveResources)
+        void save (bool justSaveResources)
         {
             if (project != nullptr)
             {
                 Result error (justSaveResources ? project->saveResourcesOnly (project->getFile())
                                                 : project->saveProject (project->getFile(), true));
 
-                if (error.failed())
-                {
-                    std::cout << "Error when saving: " << error.getErrorMessage() << std::endl;
-                    return 1;
-                }
-
                 project = nullptr;
-            }
 
-            return 0;
+                if (error.failed())
+                    throw CommandLineError ("Error when saving: " + error.getErrorMessage());
+            }
         }
 
         ScopedPointer<Project> project;
@@ -122,59 +157,37 @@ namespace
     /* Running a command-line of the form "introjucer --resave foobar.jucer" will try to load
        that project and re-export all of its targets.
     */
-    static int resaveProject (const StringArray& args, bool justSaveResources)
+    static void resaveProject (const StringArray& args, bool justSaveResources)
     {
-        if (! checkArgumentCount (args, 2))
-            return 1;
-
-        LoadedProject proj;
-
-        int res = proj.load (getFile (args[1]));
-
-        if (res != 0)
-            return res;
+        checkArgumentCount (args, 2);
+        LoadedProject proj (args[1]);
 
         std::cout << (justSaveResources ? "Re-saving project resources: "
                                         : "Re-saving file: ")
                   << proj.project->getFile().getFullPathName() << std::endl;
 
-        return proj.save (justSaveResources);
+        proj.save (justSaveResources);
     }
 
     //==============================================================================
-    static int setVersion (const StringArray& args)
+    static void setVersion (const StringArray& args)
     {
-        if (! checkArgumentCount (args, 3))
-            return 1;
-
-        LoadedProject proj;
-
-        int res = proj.load (getFile (args[2]));
-
-        if (res != 0)
-            return res;
+        checkArgumentCount (args, 3);
+        LoadedProject proj (args[2]);
 
         String version (args[1].trim());
 
         std::cout << "Setting project version: " << version << std::endl;
 
         proj.project->getVersionValue() = version;
-
-        return proj.save (false);
+        proj.save (false);
     }
 
     //==============================================================================
-    static int bumpVersion (const StringArray& args)
+    static void bumpVersion (const StringArray& args)
     {
-        if (! checkArgumentCount (args, 2))
-            return 1;
-
-        LoadedProject proj;
-
-        int res = proj.load (getFile (args[1]));
-
-        if (res != 0)
-            return res;
+        checkArgumentCount (args, 2);
+        LoadedProject proj (args[1]);
 
         String version = proj.project->getVersionString();
 
@@ -184,29 +197,18 @@ namespace
         std::cout << "Bumping project version to: " << version << std::endl;
 
         proj.project->getVersionValue() = version;
-
-        return proj.save (false);
+        proj.save (false);
     }
 
-    static int gitTag (const StringArray& args)
+    static void gitTag (const StringArray& args)
     {
-        if (! checkArgumentCount (args, 2))
-            return 1;
-
-        LoadedProject proj;
-
-        int res = proj.load (getFile (args[1]));
-
-        if (res != 0)
-            return res;
+        checkArgumentCount (args, 2);
+        LoadedProject proj (args[1]);
 
         String version (proj.project->getVersionValue().toString());
 
         if (version.trim().isEmpty())
-        {
-            std::cout << "Cannot read version number from project!" << std::endl;
-            return 1;
-        }
+            throw CommandLineError ("Cannot read version number from project!");
 
         StringArray command;
         command.add ("git");
@@ -221,29 +223,21 @@ namespace
         ChildProcess c;
 
         if (! c.start (command, 0))
-        {
-            std::cout << "Cannot run git!" << std::endl;
-            return 1;
-        }
+            throw CommandLineError ("Cannot run git!");
 
         c.waitForProcessToFinish (10000);
-        return (int) c.getExitCode();
+
+        if (c.getExitCode() != 0)
+            throw CommandLineError ("git command failed!");
     }
 
     //==============================================================================
-    static int showStatus (const StringArray& args)
+    static void showStatus (const StringArray& args)
     {
         hideDockIcon();
+        checkArgumentCount (args, 2);
 
-        if (! checkArgumentCount (args, 2))
-            return 1;
-
-        LoadedProject proj;
-
-        int res = proj.load (getFile (args[1]));
-
-        if (res != 0)
-            return res;
+        LoadedProject proj (args[1]);
 
         std::cout << "Project file: " << proj.project->getFile().getFullPathName() << std::endl
                   << "Name: " << proj.project->getTitle() << std::endl
@@ -251,16 +245,13 @@ namespace
 
         EnabledModuleList& modules = proj.project->getModules();
 
-        const int numModules = modules.getNumModules();
-        if (numModules > 0)
+        if (int numModules = modules.getNumModules())
         {
             std::cout << "Modules:" << std::endl;
 
             for (int i = 0; i < numModules; ++i)
                 std::cout << "  " << modules.getModuleID (i) << std::endl;
         }
-
-        return 0;
     }
 
     //==============================================================================
@@ -269,7 +260,7 @@ namespace
         return module.getID() + ".jucemodule";
     }
 
-    static int zipModule (const File& targetFolder, const File& moduleFolder)
+    static void zipModule (const File& targetFolder, const File& moduleFolder)
     {
         jassert (targetFolder.isDirectory());
 
@@ -277,10 +268,7 @@ namespace
         LibraryModule module (moduleFolder.getChildFile (ModuleDescription::getManifestFileName()));
 
         if (! module.isValid())
-        {
-            std::cout << moduleFolder.getFullPathName() << " is not a valid module folder!" << std::endl;
-            return 1;
-        }
+            throw CommandLineError (moduleFolder.getFullPathName() + " is not a valid module folder!");
 
         const File targetFile (targetFolder.getChildFile (getModulePackageName (module)));
 
@@ -304,28 +292,18 @@ namespace
         ok = ok && temp.overwriteTargetFileWithTemporary();
 
         if (! ok)
-        {
-            std::cout << "Failed to write to the target file: " << targetFile.getFullPathName() << std::endl;
-            return 1;
-        }
-
-        return 0;
+            throw CommandLineError ("Failed to write to the target file: " + targetFile.getFullPathName());
     }
 
-    static int buildModules (const StringArray& args, const bool buildAllWithIndex)
+    static void buildModules (const StringArray& args, const bool buildAllWithIndex)
     {
         hideDockIcon();
-
-        if (! checkArgumentCount (args, 3))
-            return 1;
+        checkArgumentCount (args, 3);
 
         const File targetFolder (getFile (args[1]));
 
         if (! targetFolder.isDirectory())
-        {
-            std::cout << "The first argument must be the directory to put the result." << std::endl;
-            return 1;
-        }
+            throw CommandLineError ("The first argument must be the directory to put the result.");
 
         if (buildAllWithIndex)
         {
@@ -339,10 +317,7 @@ namespace
 
                 if (module.isValid())
                 {
-                    const int result = zipModule (targetFolder, i.getFile());
-
-                    if (result != 0)
-                        return result;
+                    zipModule (targetFolder, i.getFile());
 
                     var moduleInfo (new DynamicObject());
                     moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
@@ -358,15 +333,8 @@ namespace
         else
         {
             for (int i = 2; i < args.size(); ++i)
-            {
-                const int result = zipModule (targetFolder, getFile (args[i]));
-
-                if (result != 0)
-                    return result;
-            }
+                zipModule (targetFolder, getFile (args[i]));
         }
-
-        return 0;
     }
 
     //==============================================================================
@@ -376,12 +344,12 @@ namespace
         bool fixDividerComments;
     };
 
-    static bool cleanWhitespace (const File& file, CleanupOptions options)
+    static void cleanWhitespace (const File& file, CleanupOptions options)
     {
         const String content (file.loadFileAsString());
 
         if (content.contains ("%%") && content.contains ("//["))
-            return true; // ignore introjucer GUI template files
+            return; // ignore introjucer GUI template files
 
         StringArray lines;
         lines.addLines (content);
@@ -429,79 +397,124 @@ namespace
         }
 
         if (options.removeTabs && ! anyTabsRemoved)
-            return true;
+            return;
 
-        while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
-            lines.remove (lines.size() - 1);
+        const String newText = joinLinesIntoSourceFile (lines);
 
-        const char* lineEnding = "\r\n";
-        const String newText (lines.joinIntoString (lineEnding) + lineEnding);
-
-        if (newText == content || newText == content + lineEnding)
-            return true;
-
-        std::cout << (options.removeTabs ? "Removing tabs in: "
-                                         : "Cleaning file: ") << file.getFullPathName() << std::endl;
-
-        TemporaryFile temp (file);
-
-        if (! temp.getFile().replaceWithText (newText, false, false))
-        {
-            std::cout << "!!! ERROR Couldn't write to temp file!" << std::endl << std::endl;
-            return false;
-        }
-        
-        if (! temp.overwriteTargetFileWithTemporary())
-        {
-            std::cout << "!!! ERROR Couldn't write to file!" << std::endl << std::endl;
-            return false;
-        }
-
-        return true;
+        if (newText != content && newText != content + getLineEnding())
+            replaceFile (file, newText, options.removeTabs ? "Removing tabs in: "
+                                                           : "Cleaning file: ");
     }
 
-    static int scanFilesForCleanup (const StringArray& args, CleanupOptions options)
+    static void scanFilesForCleanup (const StringArray& args, CleanupOptions options)
     {
-        if (! checkArgumentCount (args, 2))
-            return 1;
+        checkArgumentCount (args, 2);
 
-        const File targetFolder (getFile (args[1]));
+        const File target (getFileCheckingForExistence (args[1]));
 
-        if (! targetFolder.exists())
-        {
-            std::cout << "Could not find folder: " << args[1] << std::endl;
-            return 1;
-        }
+        Array<File> files;
 
-        if (targetFolder.isDirectory())
-        {
-            for (DirectoryIterator di (targetFolder, true, "*.cpp;*.h;*.hpp;*.c;*.cc;*.mm;*.m", File::findFiles); di.next();)
-                if (! cleanWhitespace (di.getFile(), options))
-                    return 1;
-        }
+        if (target.isDirectory())
+            files = findAllSourceFiles (target);
         else
-        {
-            if (! cleanWhitespace (targetFolder, options))
-                return 1;
-        }
+            files.add (target);
 
-        return 0;
+        for (int i = 0; i < files.size(); ++i)
+            cleanWhitespace (files.getReference(i), options);
     }
 
-    static int cleanWhitespace (const StringArray& args, bool replaceTabs)
+    static void cleanWhitespace (const StringArray& args, bool replaceTabs)
     {
         CleanupOptions options = { replaceTabs, false };
-        return scanFilesForCleanup (args, options);
+        scanFilesForCleanup (args, options);
     }
 
-    static int tidyDividerComments (const StringArray& args)
+    static void tidyDividerComments (const StringArray& args)
     {
         CleanupOptions options = { false, true };
-        return scanFilesForCleanup (args, options);
+        scanFilesForCleanup (args, options);
     }
 
     //==============================================================================
-    static int showHelp()
+    static File findSimilarlyNamedHeader (const Array<File>& allFiles, const String& name, const File& sourceFile)
+    {
+        File result;
+
+        for (int i = 0; i < allFiles.size(); ++i)
+        {
+            const File& f = allFiles.getReference(i);
+
+            if (f.getFileName().equalsIgnoreCase (name) && f != sourceFile)
+            {
+                if (result.exists())
+                    return File(); // multiple possible results, so don't change it!
+
+                result = f;
+            }
+        }
+
+        return result;
+    }
+
+    static void fixIncludes (const File& file, const Array<File>& allFiles)
+    {
+        const String content (file.loadFileAsString());
+
+        StringArray lines;
+        lines.addLines (content);
+        bool hasChanged = false;
+
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            String line = lines[i];
+
+            if (line.trimStart().startsWith ("#include \""))
+            {
+                const String includedFile (line.fromFirstOccurrenceOf ("\"", true, false)
+                                               .upToLastOccurrenceOf ("\"", true, false)
+                                               .trim()
+                                               .unquoted());
+
+                const File target (file.getSiblingFile (includedFile));
+
+                if (! target.exists())
+                {
+                    File header = findSimilarlyNamedHeader (allFiles, target.getFileName(), file);
+
+                    if (header.exists())
+                    {
+                        lines.set (i, line.upToFirstOccurrenceOf ("#include \"", true, false)
+                                        + header.getRelativePathFrom (file.getParentDirectory())
+                                            .replaceCharacter ('\\', '/')
+                                        + "\"");
+                        hasChanged = true;
+                    }
+                }
+            }
+        }
+
+        if (hasChanged)
+        {
+            const String newText = joinLinesIntoSourceFile (lines);
+
+            if (newText != content && newText != content + getLineEnding())
+                replaceFile (file, newText, "Fixing includes in: ");
+        }
+    }
+
+    static void fixRelativeIncludePaths (const StringArray& args)
+    {
+        checkArgumentCount (args, 2);
+        const File target (getDirectoryCheckingForExistence (args[1]));
+
+        Array<File> files = findAllSourceFiles (target);
+
+        for (int i = 0; i < files.size(); ++i)
+            fixIncludes (files.getReference(i), files);
+    }
+
+    //==============================================================================
+    static void showHelp()
     {
         hideDockIcon();
 
@@ -536,16 +549,17 @@ namespace
                   << "    Zips all modules in a given folder and creates an index for them." << std::endl
                   << std::endl
                   << " " << appName << " --trim-whitespace target_folder" << std::endl
-                  << "    Scans the given folder for C/C++ source files, and trims any trailing whitespace from their lines, as well as normalising their line-endings to CR-LF." << std::endl
+                  << "    Scans the given folder for C/C++ source files (recursively), and trims any trailing whitespace from their lines, as well as normalising their line-endings to CR-LF." << std::endl
                   << std::endl
                   << " " << appName << " --remove-tabs target_folder" << std::endl
-                  << "    Scans the given folder for C/C++ source files, and replaces any tab characters with 4 spaces." << std::endl
+                  << "    Scans the given folder for C/C++ source files (recursively), and replaces any tab characters with 4 spaces." << std::endl
                   << std::endl
                   << " " << appName << " --tidy-divider-comments target_folder" << std::endl
-                  << "    Scans the given folder for C/C++ source files, and normalises any juce-style comment division lines (i.e. any lines that look like //===== or //------- or /////////// will be replaced)." << std::endl
+                  << "    Scans the given folder for C/C++ source files (recursively), and normalises any juce-style comment division lines (i.e. any lines that look like //===== or //------- or /////////// will be replaced)." << std::endl
+                  << std::endl
+                  << " " << appName << " --fix-broken-include-paths target_folder" << std::endl
+                  << "    Scans the given folder for C/C++ source files (recursively). Where a file contains an #include of one of the other filenames, it changes it to use the optimum relative path. Helpful for auto-fixing includes when re-arranging files and folders in a project." << std::endl
                   << std::endl;
-
-        return 0;
     }
 }
 
@@ -558,19 +572,28 @@ int performCommandLine (const String& commandLine)
 
     String command (args[0]);
 
-    if (matchArgument (command, "help"))                    return showHelp();
-    if (matchArgument (command, "h"))                       return showHelp();
-    if (matchArgument (command, "resave"))                  return resaveProject (args, false);
-    if (matchArgument (command, "resave-resources"))        return resaveProject (args, true);
-    if (matchArgument (command, "set-version"))             return setVersion (args);
-    if (matchArgument (command, "bump-version"))            return bumpVersion (args);
-    if (matchArgument (command, "git-tag-version"))         return gitTag (args);
-    if (matchArgument (command, "buildmodule"))             return buildModules (args, false);
-    if (matchArgument (command, "buildallmodules"))         return buildModules (args, true);
-    if (matchArgument (command, "status"))                  return showStatus (args);
-    if (matchArgument (command, "trim-whitespace"))         return cleanWhitespace (args, false);
-    if (matchArgument (command, "remove-tabs"))             return cleanWhitespace (args, true);
-    if (matchArgument (command, "tidy-divider-comments"))   return tidyDividerComments (args);
+    try
+    {
+        if (matchArgument (command, "help"))                     { showHelp(); return 0; }
+        if (matchArgument (command, "h"))                        { showHelp(); return 0; }
+        if (matchArgument (command, "resave"))                   { resaveProject (args, false); return 0; }
+        if (matchArgument (command, "resave-resources"))         { resaveProject (args, true); return 0; }
+        if (matchArgument (command, "set-version"))              { setVersion (args); return 0; }
+        if (matchArgument (command, "bump-version"))             { bumpVersion (args); return 0; }
+        if (matchArgument (command, "git-tag-version"))          { gitTag (args); return 0; }
+        if (matchArgument (command, "buildmodule"))              { buildModules (args, false); return 0; }
+        if (matchArgument (command, "buildallmodules"))          { buildModules (args, true); return 0; }
+        if (matchArgument (command, "status"))                   { showStatus (args); return 0; }
+        if (matchArgument (command, "trim-whitespace"))          { cleanWhitespace (args, false); return 0; }
+        if (matchArgument (command, "remove-tabs"))              { cleanWhitespace (args, true); return 0; }
+        if (matchArgument (command, "tidy-divider-comments"))    { tidyDividerComments (args); return 0; }
+        if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args); return 0; }
+    }
+    catch (const CommandLineError& error)
+    {
+        std::cout << error.message << std::endl << std::endl;
+        return 1;
+    }
 
     return commandLineNotPerformed;
 }

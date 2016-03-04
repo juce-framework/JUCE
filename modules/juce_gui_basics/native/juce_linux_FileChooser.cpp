@@ -157,6 +157,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title, const File& file, const String& filters,
                                       bool isDirectory, bool /* selectsFiles */,
                                       bool isSave, bool /* warnAboutOverwritingExistingFiles */,
+                                      bool /*treatFilePackagesAsDirs*/,
                                       bool selectMultipleFiles, FilePreviewComponent*)
 {
     const File previousWorkingDirectory (File::getCurrentWorkingDirectory());

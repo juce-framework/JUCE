@@ -24,14 +24,14 @@
 
 namespace
 {
-    //==========================================================================
+    //==============================================================================
     template <typename CharPointerType>
     class OSCPatternMatcherImpl
     {
         typedef CharPointerType CharPtr;
 
     public:
-        //==========================================================================
+        //==============================================================================
         static bool match (CharPtr pattern, CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
             if (pattern == patternEnd)
@@ -50,13 +50,13 @@ namespace
         }
 
     private:
-        //==========================================================================
+        //==============================================================================
         static bool matchTerminator (CharPtr target, CharPtr targetEnd)
         {
             return target == targetEnd;
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchChar (juce_wchar c, CharPtr pattern, CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
             if (target == targetEnd || c != target.getAndAdvance())
@@ -65,7 +65,7 @@ namespace
             return match (pattern, patternEnd, target, targetEnd);
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchAnyChar (CharPtr pattern, CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
             if (target == targetEnd)
@@ -74,7 +74,7 @@ namespace
             return match (pattern, patternEnd, ++target, targetEnd);
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchAnyOrNoChars (CharPtr pattern, CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
             if (target == targetEnd)
@@ -86,7 +86,7 @@ namespace
             return matchAnyOrNoChars (pattern, patternEnd, ++target, targetEnd);
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchInsideStringSet (CharPtr pattern, CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
             if (pattern == patternEnd)
@@ -123,7 +123,7 @@ namespace
             return false;
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchStringSet (const StringArray& set, CharPtr pattern,
                                     CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
@@ -138,7 +138,7 @@ namespace
             return false;
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchInsideCharSet (CharPtr pattern, CharPtr patternEnd,
                                         CharPtr target, CharPtr targetEnd)
         {
@@ -180,7 +180,7 @@ namespace
             return false;
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchCharSet (const Array<juce_wchar>& set, bool setIsNegated,
                                   CharPtr pattern, CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
@@ -194,7 +194,7 @@ namespace
                                 : matchCharSetNotNegated (set, pattern, patternEnd, target, targetEnd);
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchCharSetNegated (const Array<juce_wchar>& set, CharPtr pattern,
                                          CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
@@ -205,7 +205,7 @@ namespace
             return match (pattern, patternEnd, target + 1, targetEnd);
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool matchCharSetNotNegated (const Array<juce_wchar>& set, CharPtr pattern,
                                             CharPtr patternEnd, CharPtr target, CharPtr targetEnd)
         {
@@ -217,7 +217,7 @@ namespace
             return false;
         }
 
-        //==========================================================================
+        //==============================================================================
         static bool addCharRangeToSet (Array<juce_wchar>& set, CharPtr pattern,
                                        CharPtr /*patternEnd*/, CharPtr target, CharPtr targetEnd)
         {

@@ -28,7 +28,7 @@ public:
 
     void valueChanged() override
     {
-        param.setValue ((float) Slider::getValue());
+        param.setValueNotifyingHost ((float) Slider::getValue());
     }
 
     void timerCallback() override       { updateSliderPos(); }

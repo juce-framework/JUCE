@@ -144,7 +144,7 @@ bool MPEZone::truncateToFit (MPEZone other) noexcept
     return true;
 }
 
-//==========================================================================
+//==============================================================================
 bool MPEZone::operator== (const MPEZone& other) const noexcept
 {
     return masterChannel         == other.masterChannel
@@ -284,7 +284,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void testOverlapsWith (int masterChannelFirst, int numNoteChannelsFirst,
                            int masterChannelSecond, int numNoteChannelsSecond,
                            bool expectedRetVal)
@@ -296,7 +296,7 @@ private:
         expect (second.overlapsWith (first) == expectedRetVal);
     }
 
-    //==========================================================================
+    //==============================================================================
     void testTruncateToFit (int masterChannelFirst, int numNoteChannelsFirst,
                             int masterChannelSecond, int numNoteChannelsSecond,
                             bool expectedRetVal,

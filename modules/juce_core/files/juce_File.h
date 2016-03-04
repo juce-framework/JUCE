@@ -48,7 +48,7 @@ public:
     //==============================================================================
     /** Creates an (invalid) file object.
 
-        The file is initially set to an empty path, so getFullPath() will return
+        The file is initially set to an empty path, so getFullPathName() will return
         an empty string, and comparing the file to File::nonexistent will return
         true.
 

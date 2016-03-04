@@ -993,9 +993,9 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
 class AudioSampleBufferSource  : public PositionableAudioSource
 {
 public:
-    AudioSampleBufferSource (AudioSampleBuffer* audioBuffer, bool ownBuffer)
+    AudioSampleBufferSource (AudioSampleBuffer* audioBuffer, bool ownBuffer, bool playOnAllChannels)
         : buffer (audioBuffer, ownBuffer),
-          position (0), looping (false)
+          position (0), looping (false), playAcrossAllChannels (playOnAllChannels)
     {}
 
     //==============================================================================
@@ -1029,8 +1029,11 @@ public:
 
         if (samplesToCopy > 0)
         {
-            const int maxInChannels = buffer->getNumChannels();
-            const int maxOutChannels = jmin (bufferToFill.buffer->getNumChannels(), jmax (maxInChannels, 2));
+            int maxInChannels = buffer->getNumChannels();
+            int maxOutChannels = bufferToFill.buffer->getNumChannels();
+
+            if (! playAcrossAllChannels)
+                maxOutChannels = jmin (maxOutChannels, maxInChannels);
 
             for (int i = 0; i < maxOutChannels; ++i)
                 bufferToFill.buffer->copyFrom (i, bufferToFill.startSample, *buffer,
@@ -1047,7 +1050,7 @@ private:
     //==============================================================================
     OptionalScopedPointer<AudioSampleBuffer> buffer;
     int position;
-    bool looping;
+    bool looping, playAcrossAllChannels;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSampleBufferSource)
 };
@@ -1080,10 +1083,10 @@ void AudioDeviceManager::playSound (AudioFormatReader* reader, bool deleteWhenFi
         playSound (new AudioFormatReaderSource (reader, deleteWhenFinished), true);
 }
 
-void AudioDeviceManager::playSound (AudioSampleBuffer* buffer, bool deleteWhenFinished)
+void AudioDeviceManager::playSound (AudioSampleBuffer* buffer, bool deleteWhenFinished, bool playOnAllOutputChannels)
 {
     if (buffer != nullptr)
-        playSound (new AudioSampleBufferSource (buffer, deleteWhenFinished), true);
+        playSound (new AudioSampleBufferSource (buffer, deleteWhenFinished, playOnAllOutputChannels), true);
 }
 
 void AudioDeviceManager::playSound (PositionableAudioSource* audioSource, bool deleteWhenFinished)
@@ -1134,7 +1137,7 @@ void AudioDeviceManager::playTestSound()
     newSound->applyGainRamp (0, 0, soundLength / 10, 0.0f, 1.0f);
     newSound->applyGainRamp (0, soundLength - soundLength / 4, soundLength / 4, 1.0f, 0.0f);
 
-    playSound (newSound, true);
+    playSound (newSound, true, true);
 }
 
 //==============================================================================

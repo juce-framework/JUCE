@@ -109,7 +109,8 @@ static unsigned int __stdcall threadEntryProc (void* userData)
 void Thread::launchThread()
 {
     unsigned int newThreadId;
-    threadHandle = (void*) _beginthreadex (0, 0, &threadEntryProc, this, 0, &newThreadId);
+    threadHandle = (void*) _beginthreadex (0, (unsigned int) threadStackSize,
+                                           &threadEntryProc, this, 0, &newThreadId);
     threadId = (ThreadID) (pointer_sized_int) newThreadId;
 }
 

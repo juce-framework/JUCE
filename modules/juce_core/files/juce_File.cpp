@@ -1048,7 +1048,7 @@ public:
         expect (! tempFile.withFileExtension ("h").hasFileExtension ("bar;foo;xx"));
         expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
         expect (tempFile.hasWriteAccess());
-        
+
         expect (home.getChildFile (".") == home);
         expect (home.getChildFile ("..") == home.getParentDirectory());
         expect (home.getChildFile (".xyz").getFileName() == ".xyz");

@@ -79,9 +79,17 @@ public:
         jassert (processor != nullptr); // Your createPluginFilter() function must return a valid object!
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
 
-        processor->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
-                                         JucePlugin_MaxNumOutputChannels,
-                                         44100, 512);
+        // try to disable sidechain and aux buses
+        const int numInBuses  = processor->busArrangement.inputBuses.size();
+        const int numOutBuses = processor->busArrangement.inputBuses.size();
+
+        for (int busIdx = 1; busIdx < numInBuses; ++busIdx)
+            processor->setPreferredBusArrangement (true, busIdx, AudioChannelSet::disabled());
+
+        for (int busIdx = 1; busIdx < numOutBuses; ++busIdx)
+            processor->setPreferredBusArrangement (false, busIdx, AudioChannelSet::disabled());
+
+        processor->setRateAndBufferSizeDetails(44100, 512);
     }
 
     virtual void deletePlugin()

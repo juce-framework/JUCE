@@ -36,7 +36,7 @@
     own compatible web-server back-end.
 */
 
-//=============================================================================
+//==============================================================================
 #include "../juce_cryptography/juce_cryptography.h"
 #include "../juce_data_structures/juce_data_structures.h"
 

@@ -331,6 +331,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.cpp">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_CatmullRomInterpolator.cpp">
+      <Filter>Juce Modules\juce_audio_basics\effects</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_FFT.cpp">
       <Filter>Juce Modules\juce_audio_basics\effects</Filter>
     </ClCompile>
@@ -802,6 +805,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Result.cpp">
       <Filter>Juce Modules\juce_core\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_RuntimePermissions.cpp">
+      <Filter>Juce Modules\juce_core\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.cpp">
       <Filter>Juce Modules\juce_core\misc</Filter>
     </ClCompile>
@@ -812,6 +818,9 @@
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Network.cpp">
+      <Filter>Juce Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_RuntimePermissions.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_SystemStats.cpp">
@@ -1626,6 +1635,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.h">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_CatmullRomInterpolator.h">
+      <Filter>Juce Modules\juce_audio_basics\effects</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Decibels.h">
       <Filter>Juce Modules\juce_audio_basics\effects</Filter>
     </ClInclude>
@@ -1998,6 +2010,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Range.h">
       <Filter>Juce Modules\juce_core\maths</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_StatisticsAccumulator.h">
+      <Filter>Juce Modules\juce_core\maths</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Atomic.h">
       <Filter>Juce Modules\juce_core\memory</Filter>
     </ClInclude>
@@ -2254,6 +2269,9 @@
       <Filter>Juce Modules\juce_core\unit_tests</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Result.h">
+      <Filter>Juce Modules\juce_core\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_RuntimePermissions.h">
       <Filter>Juce Modules\juce_core\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.h">

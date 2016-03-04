@@ -252,19 +252,22 @@ public:
             File javaSourceFolder (coreModule->getFolder().getChildFile ("native")
                                                           .getChildFile ("java"));
 
-            String juceMidiCode, juceMidiImports;
+            String juceMidiCode, juceMidiImports, juceRuntimePermissionsCode;
 
             juceMidiImports << newLine;
 
             if (getMinimumSDKVersionString().getIntValue() >= 23)
             {
                 File javaAndroidMidi (javaSourceFolder.getChildFile ("AndroidMidi.java"));
+                File javaRuntimePermissions (javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java"));
 
                 juceMidiImports << "import android.media.midi.*;" << newLine
                                 << "import android.bluetooth.*;" << newLine
                                 << "import android.bluetooth.le.*;" << newLine;
 
                 juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
+
+                juceRuntimePermissionsCode = javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
             }
             else
             {
@@ -287,6 +290,8 @@ public:
                         newFile << juceMidiImports;
                     else if (line.contains ("$$JuceAndroidMidiCode$$"))
                         newFile << juceMidiCode;
+                    else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
+                        newFile << juceRuntimePermissionsCode;
                     else
                         newFile << line.replace ("JuceAppActivity", className)
                                        .replace ("package com.juce;", "package " + package + ";") << newLine;
@@ -494,7 +499,7 @@ public:
         XmlElement* act = app->createNewChildElement ("activity");
         act->setAttribute ("android:name", getActivitySubClassName());
         act->setAttribute ("android:label", "@string/app_name");
-        act->setAttribute ("android:configChanges", "keyboardHidden|orientation");
+        act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
         act->setAttribute ("android:screenOrientation", getScreenOrientationString());
 
         XmlElement* intent = act->createNewChildElement ("intent-filter");

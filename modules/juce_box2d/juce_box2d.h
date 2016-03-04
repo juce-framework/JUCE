@@ -25,7 +25,7 @@
 #ifndef JUCE_BOX2D_H_INCLUDED
 #define JUCE_BOX2D_H_INCLUDED
 
-//=============================================================================
+//==============================================================================
 #include "../juce_graphics/juce_graphics.h"
 
 #include "box2d/Box2D.h"

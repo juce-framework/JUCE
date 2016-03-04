@@ -37,7 +37,7 @@
 class JUCE_API  MPEValue
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Default constructor. Constructs an MPEValue corresponding
         to the centre value.
     */
@@ -87,7 +87,7 @@ public:
     bool operator!= (const MPEValue& other) const noexcept;
 
 private:
-    //==========================================================================
+    //==============================================================================
     MPEValue (int normalisedValue);
     int normalisedValue;
 };

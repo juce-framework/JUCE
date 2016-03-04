@@ -31,7 +31,11 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+
 #include "juce_opengl.h"
 
 //==============================================================================
@@ -193,8 +197,6 @@ private:
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 
  #if JUCE_MAC
   #include "native/juce_OpenGL_osx.h"
@@ -209,7 +211,6 @@ private:
  #include "native/juce_OpenGL_linux.h"
 
 #elif JUCE_ANDROID
- #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_OpenGL_android.h"
 
 #endif

@@ -49,35 +49,37 @@ void BubbleComponent::setAllowedPlacement (const int newPlacement)
     allowablePlacements = newPlacement;
 }
 
-void BubbleComponent::setPosition (Component* componentToPointTo)
+//==============================================================================
+void BubbleComponent::setPosition (Component* componentToPointTo, int distanceFromTarget, int arrowLength)
 {
     jassert (componentToPointTo != nullptr);
 
+    Rectangle<int> target;
+
     if (Component* p = getParentComponent())
-        setPosition (p->getLocalArea (componentToPointTo, componentToPointTo->getLocalBounds()));
+        target = p->getLocalArea (componentToPointTo, componentToPointTo->getLocalBounds());
     else
-        setPosition (componentToPointTo->getScreenBounds());
+        target = componentToPointTo->getScreenBounds();
+
+    setPosition (target, distanceFromTarget, arrowLength);
 }
 
-void BubbleComponent::setPosition (Point<int> pos)
+void BubbleComponent::setPosition (Point<int> arrowTipPos, int arrowLength)
 {
-    setPosition (Rectangle<int> (pos.x, pos.y, 1, 1));
+    setPosition (Rectangle<int> (arrowTipPos.x, arrowTipPos.y, 1, 1), arrowLength, arrowLength);
 }
 
-//==============================================================================
-void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
+void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
+                                   int distanceFromTarget, int arrowLength)
 {
-    const int edgeSpace = 15;
-    const int arrowLength = 10;
-
     {
         int contentW = 150, contentH = 30;
         getContentSize (contentW, contentH);
-        content.setBounds (edgeSpace, edgeSpace, contentW, contentH);
+        content.setBounds (distanceFromTarget, distanceFromTarget, contentW, contentH);
     }
 
-    const int totalW = content.getWidth()  + edgeSpace * 2;
-    const int totalH = content.getHeight() + edgeSpace * 2;
+    const int totalW = content.getWidth()  + distanceFromTarget * 2;
+    const int totalH = content.getHeight() + distanceFromTarget * 2;
 
     const Rectangle<int> availableSpace (getParentComponent() != nullptr ? getParentComponent()->getLocalBounds()
                                                                          : getParentMonitorArea());
