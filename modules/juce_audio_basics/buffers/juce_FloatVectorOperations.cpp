@@ -568,7 +568,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double amount, int 
                               const Mode::ParallelType amountToAdd = Mode::load1 (amount);)
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float* src, float amount, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, float amount, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vsadd (src, 1, &amount, dest, 1, (vDSP_Length) num);
@@ -579,7 +579,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float* src, float am
    #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double* src, double amount, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, const double* src, double amount, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vsaddD (src, 1, &amount, dest, 1, (vDSP_Length) num);

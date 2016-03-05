@@ -66,10 +66,10 @@ public:
     static void JUCE_CALLTYPE add (double* dest, double amountToAdd, int numValues) noexcept;
 
     /** Adds a fixed value to each source value and stores it in the destination array. */
-    static void JUCE_CALLTYPE add (float* dest, float* src, float amount, int numValues) noexcept;
+    static void JUCE_CALLTYPE add (float* dest, const float* src, float amount, int numValues) noexcept;
 
     /** Adds a fixed value to each source value and stores it in the destination array. */
-    static void JUCE_CALLTYPE add (double* dest, double* src, double amount, int numValues) noexcept;
+    static void JUCE_CALLTYPE add (double* dest, const double* src, double amount, int numValues) noexcept;
 
     /** Adds the source values to the destination values. */
     static void JUCE_CALLTYPE add (float* dest, const float* src, int numValues) noexcept;
