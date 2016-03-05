@@ -123,6 +123,9 @@ public:
     /** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legal hex digit. */
     static int getHexDigitValue (juce_wchar digit) noexcept;
 
+    /** Converts a byte of Windows 1252 codepage to unicode. */
+    static juce_wchar getUnicodeCharFromWindows1252Codepage (uint8 windows1252Char) noexcept;
+
     //==============================================================================
     /** Parses a character string to read a floating-point number.
         Note that this will advance the pointer that is passed in, leaving it at
