@@ -571,7 +571,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double amount, int 
 void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, float amount, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsadd (src, 1, &amount, dest, 1, (vDSP_Length) num);
+    vDSP_vsadd ((float*) src, 1, &amount, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] + amount, Mode::add (am, s),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
@@ -582,7 +582,7 @@ void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, fl
 void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, const double* src, double amount, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsaddD (src, 1, &amount, dest, 1, (vDSP_Length) num);
+    vDSP_vsaddD ((double*) src, 1, &amount, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] + amount, Mode::add (am, s),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
