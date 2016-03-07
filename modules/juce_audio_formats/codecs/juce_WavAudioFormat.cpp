@@ -659,7 +659,7 @@ namespace WavFileHelpers
 
         static String getStringFromData (const MemoryBlock& mb)
         {
-            return CharPointer_UTF8::isValidString ((const char*) mb.getData(), mb.getSize())
+            return CharPointer_UTF8::isValidString ((const char*) mb.getData(), (int) mb.getSize())
                      ? mb.toString()
                      : getStringFromWindows1252Codepage ((const uint8*) mb.getData(), mb.getSize());
         }
