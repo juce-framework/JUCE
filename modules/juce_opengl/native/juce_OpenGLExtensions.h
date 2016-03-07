@@ -99,9 +99,9 @@
     @see OpenGLExtensionFunctions
 */
 #define JUCE_GL_VERTEXBUFFER_FUNCTIONS(USE_FUNCTION) \
-    USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
-    USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
-    USE_FUNCTION (glBindVertexArray,        void, (GLuint p1), (p1))
+    //USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
+    //USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
+    //USE_FUNCTION (glBindVertexArray,        void, (GLuint p1), (p1))
 
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded
