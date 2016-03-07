@@ -135,6 +135,20 @@ AudioChannelSet::ChannelType AudioChannelSet::getTypeOfChannel (int index) const
     return static_cast<ChannelType> (bit);
 }
 
+int AudioChannelSet::getChannelIndexForType (AudioChannelSet::ChannelType type) const noexcept
+{
+    int idx = 0;
+    for (int bit = channels.findNextSetBit (0); bit >= 0; bit = channels.findNextSetBit (bit + 1))
+    {
+        if (static_cast<ChannelType> (bit) == type)
+            return idx;
+
+        idx++;
+    }
+
+    return -1;
+}
+
 Array<AudioChannelSet::ChannelType> AudioChannelSet::getChannelTypes() const
 {
     Array<ChannelType> result;
