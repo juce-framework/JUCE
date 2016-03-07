@@ -1147,8 +1147,9 @@
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_ObjectTypes.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.h"/>
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h"/>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidBase.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidStudio.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidAnt.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>

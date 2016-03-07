@@ -429,11 +429,15 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_Android.h">
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidBase.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidStudio.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidAnt.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

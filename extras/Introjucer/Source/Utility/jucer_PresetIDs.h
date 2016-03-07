@@ -143,7 +143,6 @@ namespace Ids
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
-    DECLARE_ID (androidCpp11);
     DECLARE_ID (androidMicNeeded);
     DECLARE_ID (androidBluetoothNeeded);
     DECLARE_ID (androidMinimumSDK);
@@ -158,6 +157,10 @@ namespace Ids
     DECLARE_ID (androidNdkPlatformVersion);
     DECLARE_ID (androidScreenOrientation);
     DECLARE_ID (buildToolsVersion);
+    DECLARE_ID (gradleVersion);
+    DECLARE_ID (gradleWrapperVersion);
+    DECLARE_ID (gradleToolchain);
+    DECLARE_ID (gradleToolchainVersion);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

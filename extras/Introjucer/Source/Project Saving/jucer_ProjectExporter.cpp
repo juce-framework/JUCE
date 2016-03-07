@@ -29,8 +29,9 @@
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_MSVC.h"
 #include "jucer_ProjectExport_XCode.h"
-#include "jucer_ProjectExport_Android.h"
+#include "jucer_ProjectExport_AndroidBase.h"
 #include "jucer_ProjectExport_AndroidStudio.h"
+#include "jucer_ProjectExport_AndroidAnt.h"
 #include "jucer_ProjectExport_CodeBlocks.h"
 
 //==============================================================================
