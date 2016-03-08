@@ -57,30 +57,9 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX = true, bool scrollY = true);
 
-void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer);
-void showSVGPathDataToolWindow (ScopedPointer<Component>& ownerPointer);
-
 bool cancelAnyModalComponents();
-bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo&);
 
 StringArray getCleanedStringArray (StringArray);
-
-//==============================================================================
-class RolloverHelpComp   : public Component,
-                           private Timer
-{
-public:
-    RolloverHelpComp();
-
-    void paint (Graphics&) override;
-    void timerCallback() override;
-
-private:
-    Component* lastComp;
-    String lastTip;
-
-    static String findTip (Component*);
-};
 
 //==============================================================================
 class PropertyListBuilder

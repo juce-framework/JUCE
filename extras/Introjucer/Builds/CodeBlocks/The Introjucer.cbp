@@ -579,7 +579,15 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Utility/jucer_SVGPathDataComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_TranslationTool.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_UTF8Component.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

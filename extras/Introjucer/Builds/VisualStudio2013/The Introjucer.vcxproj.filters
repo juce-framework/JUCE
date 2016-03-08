@@ -1689,7 +1689,13 @@
     <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_SVGPathDataComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_TranslationTool.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_UTF8Component.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">

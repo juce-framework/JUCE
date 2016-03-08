@@ -1174,7 +1174,9 @@
     <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_SlidingPanelComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h"/>
+    <ClInclude Include="..\..\Source\Utility\jucer_SVGPathDataComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_TranslationTool.h"/>
+    <ClInclude Include="..\..\Source\Utility\jucer_UTF8Component.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h"/>
     <ClInclude Include="..\..\Source\Wizards\jucer_NewFileWizard.h"/>
     <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizard.h"/>

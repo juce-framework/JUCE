@@ -741,6 +741,38 @@ void ProjectContentComponent::showTranslationTool()
 }
 
 //==============================================================================
+struct AsyncCommandRetrier  : public Timer
+{
+    AsyncCommandRetrier (const ApplicationCommandTarget::InvocationInfo& i)  : info (i)
+    {
+        info.originatingComponent = nullptr;
+        startTimer (500);
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+        IntrojucerApp::getCommandManager().invoke (info, true);
+        delete this;
+    }
+
+    ApplicationCommandTarget::InvocationInfo info;
+
+    JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier)
+};
+
+bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
+{
+    if (ModalComponentManager::getInstance()->cancelAllModalComponents())
+    {
+        new AsyncCommandRetrier (info);
+        return true;
+    }
+
+    return false;
+}
+
+//==============================================================================
 ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 {
     return findFirstTargetParentComponent();

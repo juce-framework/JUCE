@@ -31,6 +31,8 @@
 #include "../Project/jucer_Module.h"
 #include "jucer_AutoUpdater.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
+#include "../Utility/jucer_UTF8Component.h"
+#include "../Utility/jucer_SVGPathDataComponent.h"
 
 void createGUIEditorMenu (PopupMenu&);
 void handleGUIEditorMenuCommand (int);
@@ -211,9 +213,8 @@ public:
     }
 
     //==============================================================================
-    class MainMenuModel  : public MenuBarModel
+    struct MainMenuModel  : public MenuBarModel
     {
-    public:
         MainMenuModel()
         {
             setApplicationCommandManagerToWatch (&getCommandManager());
@@ -453,8 +454,8 @@ public:
             case CommandIDs::open:                      askUserToOpenFile(); break;
             case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
             case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
-            case CommandIDs::showUTF8Tool:              showUTF8ToolWindow (utf8Window); break;
-            case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow (svgPathWindow); break;
+            case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
+            case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
 
             case CommandIDs::showGlobalPreferences:     AppearanceSettings::showGlobalPreferences (globalPreferencesWindow); break;
             default:                                    return JUCEApplication::perform (info);
@@ -494,6 +495,29 @@ public:
     virtual bool closeAllMainWindows()
     {
         return mainWindowList.askAllWindowsToClose();
+    }
+
+    //==============================================================================
+    void showUTF8ToolWindow()
+    {
+        if (utf8Window != nullptr)
+            utf8Window->toFront (true);
+        else
+            new FloatingToolWindow ("UTF-8 String Literal Converter",
+                                    "utf8WindowPos",
+                                    new UTF8Component(), utf8Window,
+                                    500, 500, 300, 300, 1000, 1000);
+    }
+
+    void showSVGPathDataToolWindow()
+    {
+        if (svgPathWindow != nullptr)
+            svgPathWindow->toFront (true);
+        else
+            new FloatingToolWindow ("SVG Path Converter",
+                                    "svgPathWindowPos",
+                                    new SVGPathDataComponent(), svgPathWindow,
+                                    500, 500, 300, 300, 1000, 1000);
     }
 
     //==============================================================================
