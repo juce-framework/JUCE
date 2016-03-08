@@ -1171,8 +1171,11 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_TreeItemTypes.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h"/>
+    <ClInclude Include="..\..\Source\Utility\jucer_ColourPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_Colours.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h"/>
+    <ClInclude Include="..\..\Source\Utility\jucer_FilePathPropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\Utility\jucer_FloatingToolWindow.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_Icons.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_MiscUtilities.h"/>

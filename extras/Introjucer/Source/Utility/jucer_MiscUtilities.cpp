@@ -275,4 +275,3 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
     return CharPointer_UTF8::isValidString (fileStart, sizeof (fileStart))
              && String (fileStart).trimStart().startsWith ("// -*- C++ -*-");
 }
-

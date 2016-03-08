@@ -1662,10 +1662,19 @@
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_ColourPropertyComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_Colours.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_FilePathPropertyComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_FloatingToolWindow.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">

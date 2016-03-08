@@ -433,12 +433,18 @@
             file="Source/Utility/jucer_CodeHelpers.cpp"/>
       <FILE id="BBRteob" name="jucer_CodeHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_CodeHelpers.h"/>
+      <FILE id="Y54InR" name="jucer_ColourPropertyComponent.h" compile="0"
+            resource="0" file="Source/Utility/jucer_ColourPropertyComponent.h"/>
       <FILE id="wQtNWXb" name="jucer_Colours.h" compile="0" resource="0"
             file="Source/Utility/jucer_Colours.h"/>
       <FILE id="MQYSse6" name="jucer_FileHelpers.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_FileHelpers.cpp"/>
       <FILE id="NeLXzRp" name="jucer_FileHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_FileHelpers.h"/>
+      <FILE id="RR4BRd" name="jucer_FilePathPropertyComponent.h" compile="0"
+            resource="0" file="Source/Utility/jucer_FilePathPropertyComponent.h"/>
+      <FILE id="m6ie6u" name="jucer_FloatingToolWindow.h" compile="0" resource="0"
+            file="Source/Utility/jucer_FloatingToolWindow.h"/>
       <FILE id="f6iMAs" name="jucer_Icons.cpp" compile="1" resource="0" file="Source/Utility/jucer_Icons.cpp"/>
       <FILE id="EtL6vF" name="jucer_Icons.h" compile="0" resource="0" file="Source/Utility/jucer_Icons.h"/>
       <FILE id="4fxv0YC" name="jucer_JucerTreeViewBase.cpp" compile="1" resource="0"

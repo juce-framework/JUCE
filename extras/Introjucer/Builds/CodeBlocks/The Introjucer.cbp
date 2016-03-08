@@ -537,12 +537,24 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Utility/jucer_ColourPropertyComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_Colours.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/Utility/jucer_FileHelpers.cpp"/>
     <Unit filename="../../Source/Utility/jucer_FileHelpers.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_FilePathPropertyComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_FloatingToolWindow.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

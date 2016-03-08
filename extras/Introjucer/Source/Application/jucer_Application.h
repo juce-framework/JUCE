@@ -33,6 +33,7 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Utility/jucer_UTF8Component.h"
 #include "../Utility/jucer_SVGPathDataComponent.h"
+#include "../Utility/jucer_FloatingToolWindow.h"
 
 void createGUIEditorMenu (PopupMenu&);
 void handleGUIEditorMenuCommand (int);

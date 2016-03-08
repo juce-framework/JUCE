@@ -24,8 +24,8 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_GlobalPreferences.h"
-
-
+#include "../Utility/jucer_FloatingToolWindow.h"
+#include "../Utility/jucer_ColourPropertyComponent.h"
 
 
 //==============================================================================
@@ -337,17 +337,13 @@ struct AppearanceEditor
 void AppearanceSettings::showGlobalPreferences (ScopedPointer<Component>& ownerPointer)
 {
     if (ownerPointer != nullptr)
-    {
         ownerPointer->toFront (true);
-    }
     else
-    {
         new FloatingToolWindow ("Global Preferences",
                                 "globalPreferencesEditorPos",
                                 new GlobalPreferencesComponent,
                                 ownerPointer,
                                 500, 500, 500, 500, 500, 500);
-    }
 }
 
 //==============================================================================

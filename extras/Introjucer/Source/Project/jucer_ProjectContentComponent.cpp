@@ -27,6 +27,7 @@
 #include "../Application/jucer_MainWindow.h"
 #include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
+#include "../Utility/jucer_FilePathPropertyComponent.h"
 #include "jucer_TreeItemTypes.h"
 
 
