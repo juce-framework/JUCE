@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "jucer_ProjectExporter.h"
 #include "jucer_ProjectSaver.h"
 

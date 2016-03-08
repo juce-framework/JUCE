@@ -168,6 +168,7 @@
     <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_Icons.cpp"/>
+    <ClCompile Include="..\..\Source\Utility\jucer_IntrojucerLookAndFeel.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_MiscUtilities.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_SlidingPanelComponent.cpp"/>
@@ -1177,6 +1178,7 @@
     <ClInclude Include="..\..\Source\Utility\jucer_FilePathPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_FloatingToolWindow.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_Icons.h"/>
+    <ClInclude Include="..\..\Source\Utility\jucer_IntrojucerLookAndFeel.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_MiscUtilities.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_PresetIDs.h"/>

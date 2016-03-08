@@ -563,6 +563,11 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Utility/jucer_IntrojucerLookAndFeel.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_IntrojucerLookAndFeel.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_JucerTreeViewBase.cpp"/>
     <Unit filename="../../Source/Utility/jucer_JucerTreeViewBase.h">
       <Option compile="0"/>

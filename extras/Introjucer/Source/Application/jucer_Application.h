@@ -25,7 +25,6 @@
 #ifndef JUCER_APPLICATION_H_INCLUDED
 #define JUCER_APPLICATION_H_INCLUDED
 
-#include "../jucer_Headers.h"
 #include "jucer_MainWindow.h"
 #include "jucer_CommandLine.h"
 #include "../Project/jucer_Module.h"
@@ -34,6 +33,7 @@
 #include "../Utility/jucer_UTF8Component.h"
 #include "../Utility/jucer_SVGPathDataComponent.h"
 #include "../Utility/jucer_FloatingToolWindow.h"
+#include "../Utility/jucer_IntrojucerLookAndFeel.h"
 
 void createGUIEditorMenu (PopupMenu&);
 void handleGUIEditorMenuCommand (int);

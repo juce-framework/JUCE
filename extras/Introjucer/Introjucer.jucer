@@ -447,6 +447,10 @@
             file="Source/Utility/jucer_FloatingToolWindow.h"/>
       <FILE id="f6iMAs" name="jucer_Icons.cpp" compile="1" resource="0" file="Source/Utility/jucer_Icons.cpp"/>
       <FILE id="EtL6vF" name="jucer_Icons.h" compile="0" resource="0" file="Source/Utility/jucer_Icons.h"/>
+      <FILE id="Gr8H5k" name="jucer_IntrojucerLookAndFeel.cpp" compile="1"
+            resource="0" file="Source/Utility/jucer_IntrojucerLookAndFeel.cpp"/>
+      <FILE id="tMFqT7" name="jucer_IntrojucerLookAndFeel.h" compile="0"
+            resource="0" file="Source/Utility/jucer_IntrojucerLookAndFeel.h"/>
       <FILE id="4fxv0YC" name="jucer_JucerTreeViewBase.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_JucerTreeViewBase.cpp"/>
       <FILE id="F0vVVSX" name="jucer_JucerTreeViewBase.h" compile="0" resource="0"
