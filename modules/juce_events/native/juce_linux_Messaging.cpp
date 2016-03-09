@@ -357,11 +357,16 @@ void MessageManager::doPlatformSpecificShutdown()
 
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
-    if (LinuxErrorHandling::errorOccurred)
-        return false;
+    if (! LinuxErrorHandling::errorOccurred)
+    {
+        if (InternalMessageQueue* queue = InternalMessageQueue::getInstanceWithoutCreating())
+        {
+            queue->postMessage (message);
+            return true;
+        }
+    }
 
-    InternalMessageQueue::getInstanceWithoutCreating()->postMessage (message);
-    return true;
+    return false;
 }
 
 void MessageManager::broadcastMessage (const String& /* value */)
@@ -384,16 +389,16 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
             break;
         }
 
-        InternalMessageQueue* const queue = InternalMessageQueue::getInstanceWithoutCreating();
-        jassert (queue != nullptr);
+        if (InternalMessageQueue* queue = InternalMessageQueue::getInstanceWithoutCreating())
+        {
+            if (queue->dispatchNextEvent())
+                return true;
 
-        if (queue->dispatchNextEvent())
-            return true;
+            if (returnIfNoPendingMessages)
+                break;
 
-        if (returnIfNoPendingMessages)
-            break;
-
-        queue->sleepUntilEvent (2000);
+            queue->sleepUntilEvent (2000);
+        }
     }
 
     return false;
