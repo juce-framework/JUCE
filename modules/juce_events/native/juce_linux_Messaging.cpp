@@ -360,6 +360,8 @@ bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* cons
     if (LinuxErrorHandling::errorOccurred)
         return false;
 
+    if (!InternalMessageQueue::getInstanceWithoutCreating())	return false;
+    
     InternalMessageQueue::getInstanceWithoutCreating()->postMessage (message);
     return true;
 }
