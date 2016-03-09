@@ -146,7 +146,7 @@ public:
         static const char* orientationValues[] = { "unspecified", "portrait", "landscape", nullptr };
 
         props.add (new ChoicePropertyComponent (getScreenOrientationValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
-                   "The screen orientation that this app should use");
+                   "The screen orientations that this app should support");
 
         props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
