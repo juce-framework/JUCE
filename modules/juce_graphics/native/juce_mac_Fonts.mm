@@ -245,9 +245,9 @@ namespace CoreTextTypeLayout
     {
         switch (text.getReadingDirection())
         {
-            case AttributedString::ReadingDirection::rightToLeft:   return kCTWritingDirectionRightToLeft;
-            case AttributedString::ReadingDirection::leftToRight:   return kCTWritingDirectionLeftToRight;
-            default:                                                return kCTWritingDirectionNatural;
+            case AttributedString::rightToLeft:   return kCTWritingDirectionRightToLeft;
+            case AttributedString::leftToRight:   return kCTWritingDirectionLeftToRight;
+            default:                              return kCTWritingDirectionNatural;
         }
     }
 
