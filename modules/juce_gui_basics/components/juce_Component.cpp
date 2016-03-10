@@ -438,6 +438,15 @@ struct Component::ComponentHelpers
 
         return Desktop::getInstance().getDisplays().getMainDisplay().userArea;
     }
+
+    static void releaseAllCachedImageResources (Component& c)
+    {
+        if (CachedComponentImage* cached = c.getCachedComponentImage())
+            cached->releaseResources();
+
+        for (int i = c.getNumChildComponents(); --i >= 0;)
+            releaseAllCachedImageResources (*c.getChildComponent (i));
+    }
 };
 
 //==============================================================================
@@ -528,8 +537,7 @@ void Component::setVisible (bool shouldBeVisible)
 
         if (! shouldBeVisible)
         {
-            if (cachedImage != nullptr)
-                cachedImage->releaseResources();
+            ComponentHelpers::releaseAllCachedImageResources (*this);
 
             if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
             {
@@ -813,7 +821,7 @@ public:
 
     bool invalidateAll() override                            { validArea.clear(); return true; }
     bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
-    void releaseResources() override                         { image = Image::null; }
+    void releaseResources() override                         { image = Image(); }
 
 private:
     Image image;
@@ -1547,8 +1555,7 @@ Component* Component::removeChildComponent (const int index, bool sendParentEven
         childComponentList.remove (index);
         child->parentComponent = nullptr;
 
-        if (child->cachedImage != nullptr)
-            child->cachedImage->releaseResources();
+        ComponentHelpers::releaseAllCachedImageResources (*child);
 
         // (NB: there are obscure situations where child->isShowing() = false, but it still has the focus)
         if (currentlyFocusedComponent == child || child->isParentOf (currentlyFocusedComponent))
