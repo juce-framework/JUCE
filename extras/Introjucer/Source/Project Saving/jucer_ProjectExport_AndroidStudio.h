@@ -429,7 +429,8 @@ private:
         template <typename GradleType, typename... Args>
         void add (Args... args)
         {
-            children.add (new GradleType (std::forward<Args> (args)...));
+            children.add (new GradleType (args...));
+            // Note: can't use std::forward because it doesn't compile for OS X 10.8
         }
 
         void addChildObject (GradleObject* objectToAdd) noexcept
@@ -604,7 +605,8 @@ private:
 
     void addNdkCppFlags (GradleObject* ndk) const
     {
-        StringArray cppFlags { "-fsigned-char", "-fexceptions", "-frtti", "-std=c++11" };
+        const char* alwaysUsedFlags[] = { "-fsigned-char", "-fexceptions", "-frtti", "-std=c++11", nullptr };
+        StringArray cppFlags (alwaysUsedFlags);
 
         cppFlags.mergeArray (StringArray::fromTokens (getExtraCompilerFlagsString(), " ", ""));
 
@@ -622,7 +624,8 @@ private:
 
     void addNdkHeaderIncludePaths (GradleObject* ndk) const
     {
-        StringArray includePaths { "${project.rootDir}/app", "${ext.juceRootDir}", "${ext.juceModuleDir}" };
+        const char* basicJucePaths[] = { "${project.rootDir}/app", "${ext.juceRootDir}", "${ext.juceModuleDir}", nullptr };
+        StringArray includePaths (basicJucePaths);
 
         auto cppFiles = getAllIncludedCppFiles();
 
@@ -664,7 +667,9 @@ private:
     }
     void addNdkLibraries (GradleObject* ndk) const
     {
-        StringArray libs {"android", "EGL", "GLESv2", "log"};
+        const char* requiredAndroidLibs[] = { "android", "EGL", "GLESv2", "log", nullptr };
+        StringArray libs (requiredAndroidLibs);
+
         libs.addArray (StringArray::fromTokens(getExternalLibrariesString(), ";", ""));
 
         for (const auto& lib : libs)
