@@ -20,7 +20,7 @@
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                        osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
-                       osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="default"/>
+                       osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="default"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
