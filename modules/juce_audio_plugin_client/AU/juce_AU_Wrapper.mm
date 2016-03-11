@@ -1117,7 +1117,6 @@ public:
                             else
                                 std::copy (buffer, buffer + nFrames, outData);
 
-                            zeromem (buffer, sizeof(float) * nFrames);
                             idx++;
                         }
                         idx += numInChannels - numOutChannels;
