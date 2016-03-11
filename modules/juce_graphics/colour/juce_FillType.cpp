@@ -104,7 +104,7 @@ bool FillType::operator!= (const FillType& other) const
 void FillType::setColour (Colour newColour) noexcept
 {
     gradient = nullptr;
-    image = Image::null;
+    image = Image();
     colour = newColour;
 }
 
@@ -116,7 +116,7 @@ void FillType::setGradient (const ColourGradient& newGradient)
     }
     else
     {
-        image = Image::null;
+        image = Image();
         gradient = new ColourGradient (newGradient);
         colour = Colours::black;
     }

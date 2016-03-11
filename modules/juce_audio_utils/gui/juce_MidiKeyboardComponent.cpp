@@ -270,6 +270,13 @@ int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
     return x;
 }
 
+int MidiKeyboardComponent::getTotalKeyboardWidth() const noexcept
+{
+    int x, w;
+    getKeyPos (rangeEnd, x, w);
+    return x + w;
+}
+
 int MidiKeyboardComponent::getNoteAtPosition (Point<int> p)
 {
     float v;

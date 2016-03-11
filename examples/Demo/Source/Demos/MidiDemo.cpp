@@ -24,32 +24,6 @@
 
 #include "../JuceDemoHeader.h"
 
-static String getMidiMessageDescription (const MidiMessage& m)
-{
-    if (m.isNoteOn())           return "Note on "  + MidiMessage::getMidiNoteName (m.getNoteNumber(), true, true, 3);
-    if (m.isNoteOff())          return "Note off " + MidiMessage::getMidiNoteName (m.getNoteNumber(), true, true, 3);
-    if (m.isProgramChange())    return "Program change " + String (m.getProgramChangeNumber());
-    if (m.isPitchWheel())       return "Pitch wheel " + String (m.getPitchWheelValue());
-    if (m.isAftertouch())       return "After touch " + MidiMessage::getMidiNoteName (m.getNoteNumber(), true, true, 3) +  ": " + String (m.getAfterTouchValue());
-    if (m.isChannelPressure())  return "Channel pressure " + String (m.getChannelPressureValue());
-    if (m.isAllNotesOff())      return "All notes off";
-    if (m.isAllSoundOff())      return "All sound off";
-    if (m.isMetaEvent())        return "Meta event";
-
-    if (m.isController())
-    {
-        String name (MidiMessage::getControllerName (m.getControllerNumber()));
-
-        if (name.isEmpty())
-            name = "[" + String (m.getControllerNumber()) + "]";
-
-        return "Controler " + name + ": " + String (m.getControllerValue());
-    }
-
-    return String::toHexString (m.getRawData(), m.getRawDataSize());
-}
-
-//==============================================================================
 /** Simple list box that just displays a StringArray. */
 class MidiLogListBoxModel   : public ListBoxModel
 {
@@ -77,7 +51,7 @@ public:
                                            ((int) (time / 3600.0)) % 24,
                                            ((int) (time / 60.0)) % 60,
                                            ((int) time) % 60)
-                            + "  -  " + getMidiMessageDescription (message),
+                            + "  -  " + message.getDescription(),
                         Rectangle<int> (width, height).reduced (4, 0),
                         Justification::centredLeft, true);
         }

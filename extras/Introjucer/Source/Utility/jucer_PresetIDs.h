@@ -80,6 +80,8 @@ namespace Ids
     DECLARE_ID (systemHeaderPath);
     DECLARE_ID (libraryPath);
     DECLARE_ID (customXcodeFlags);
+    DECLARE_ID (customXcassetsFolder);
+    DECLARE_ID (customXcodeResourceFolders);
     DECLARE_ID (cppLanguageStandard);
     DECLARE_ID (cppLibType);
     DECLARE_ID (codeSigningIdentity);
@@ -143,7 +145,6 @@ namespace Ids
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
-    DECLARE_ID (androidCpp11);
     DECLARE_ID (androidMicNeeded);
     DECLARE_ID (androidBluetoothNeeded);
     DECLARE_ID (androidMinimumSDK);
@@ -157,7 +158,16 @@ namespace Ids
     DECLARE_ID (androidSharedLibraries);
     DECLARE_ID (androidNdkPlatformVersion);
     DECLARE_ID (androidScreenOrientation);
+    DECLARE_ID (iosScreenOrientation);
+    DECLARE_ID (iosInAppPurchases);
+    DECLARE_ID (iosBackgroundAudio);
+    DECLARE_ID (iosBackgroundBle);
+    DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (buildToolsVersion);
+    DECLARE_ID (gradleVersion);
+    DECLARE_ID (gradleWrapperVersion);
+    DECLARE_ID (gradleToolchain);
+    DECLARE_ID (gradleToolchainVersion);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

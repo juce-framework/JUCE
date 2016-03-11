@@ -100,8 +100,9 @@ public:
     /** Returns the current number of MPE zones. */
     int getNumZones() const noexcept;
 
-    /** Returns a pointer to the MPE zone at the given index,
-        or nullptr if there is no such zone.
+    /** Returns a pointer to the MPE zone at the given index, or nullptr if there
+        is no such zone. Zones are sorted by insertion order (most recently added
+        zone last).
     */
     MPEZone* getZoneByIndex (int index) const noexcept;
 

@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_Module.h"
 #include "jucer_CommandLine.h"

@@ -353,7 +353,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 //==============================================================================
 Image juce_createIconForFile (const File&)
 {
-    return Image::null;
+    return Image();
 }
 
 //==============================================================================

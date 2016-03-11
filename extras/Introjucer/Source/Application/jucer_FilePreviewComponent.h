@@ -25,6 +25,8 @@
 #ifndef JUCER_FILEPREVIEWCOMPONENT_H_INCLUDED
 #define JUCER_FILEPREVIEWCOMPONENT_H_INCLUDED
 
+#include "../Utility/jucer_IntrojucerLookAndFeel.h"
+
 
 //==============================================================================
 /**

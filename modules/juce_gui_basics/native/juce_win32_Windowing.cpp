@@ -531,7 +531,7 @@ namespace IconConverters
             }
         }
 
-        return Image::null;
+        return Image();
     }
 
     HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)
@@ -1186,7 +1186,7 @@ private:
         void timerCallback() override
         {
             stopTimer();
-            image = Image::null;
+            image = Image();
         }
 
     private:

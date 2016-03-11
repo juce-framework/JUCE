@@ -209,6 +209,9 @@ public:
     */
     int getKeyStartPosition (int midiNoteNumber) const;
 
+    /** Returns the total width needed to fit all the keys in the available range. */
+    int getTotalKeyboardWidth() const noexcept;
+
     /** Returns the key at a given coordinate. */
     int getNoteAtPosition (Point<int> position);
 

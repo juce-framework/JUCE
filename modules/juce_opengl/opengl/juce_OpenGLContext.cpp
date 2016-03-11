@@ -150,7 +150,10 @@ public:
         return false;
     }
 
-    void releaseResources() override {}
+    void releaseResources() override
+    {
+        stop();
+    }
 
     void triggerRepaint()
     {
@@ -237,6 +240,10 @@ public:
             if (isUpdating)
             {
                 paintComponent();
+
+                if (! hasInitialised)
+                    return false;
+
                 mmLock = nullptr;
                 lastMMLockReleaseTime = Time::getMillisecondCounter();
             }

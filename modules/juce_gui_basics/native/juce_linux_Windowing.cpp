@@ -2568,7 +2568,7 @@ private:
             else if (Time::getApproximateMillisecondCounter() > lastTimeImageUsed + 3000)
             {
                 stopTimer();
-                image = Image::null;
+                image = Image();
             }
         }
 
@@ -4080,7 +4080,7 @@ void MouseCursor::showInAllWindows() const
 //==============================================================================
 Image juce_createIconForFile (const File& /* file */)
 {
-    return Image::null;
+    return Image();
 }
 
 //==============================================================================

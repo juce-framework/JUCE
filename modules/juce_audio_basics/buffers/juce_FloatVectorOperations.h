@@ -66,10 +66,10 @@ public:
     static void JUCE_CALLTYPE add (double* dest, double amountToAdd, int numValues) noexcept;
 
     /** Adds a fixed value to each source value and stores it in the destination array. */
-    static void JUCE_CALLTYPE add (float* dest, float* src, float amount, int numValues) noexcept;
+    static void JUCE_CALLTYPE add (float* dest, const float* src, float amount, int numValues) noexcept;
 
     /** Adds a fixed value to each source value and stores it in the destination array. */
-    static void JUCE_CALLTYPE add (double* dest, double* src, double amount, int numValues) noexcept;
+    static void JUCE_CALLTYPE add (double* dest, const double* src, double amount, int numValues) noexcept;
 
     /** Adds the source values to the destination values. */
     static void JUCE_CALLTYPE add (float* dest, const float* src, int numValues) noexcept;
@@ -198,6 +198,12 @@ public:
         Effectively, this is a wrapper around a call to _MM_SET_FLUSH_ZERO_MODE
     */
     static void JUCE_CALLTYPE enableFlushToZeroMode (bool shouldEnable) noexcept;
+
+    /** On Intel CPUs, this method enables the SSE flush-to-zero and denormalised-are-zero modes.
+        This effectively sets the DAZ and FZ bits of the MXCSR register. It's a convenient thing to
+        call before audio processing code where you really want to avoid denormalisation performance hits.
+    */
+    static void JUCE_CALLTYPE disableDenormalisedNumberSupport() noexcept;
 };
 
 

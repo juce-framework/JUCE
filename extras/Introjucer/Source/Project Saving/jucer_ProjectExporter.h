@@ -25,7 +25,6 @@
 #ifndef JUCER_PROJECTEXPORTER_H_INCLUDED
 #define JUCER_PROJECTEXPORTER_H_INCLUDED
 
-#include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
 #include "../Application/jucer_GlobalPreferences.h"

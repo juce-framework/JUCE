@@ -23,32 +23,6 @@
 */
 
 #include "../jucer_Headers.h"
-#include "../Application/jucer_Application.h"
-
-namespace
-{
-    bool keyFoundAndNotSequentialDuplicate (XmlElement* xml, const String& key)
-    {
-        forEachXmlChildElementWithTagName (*xml, element, "key")
-        {
-            if (element->getAllSubText().trim().equalsIgnoreCase (key))
-            {
-                if (element->getNextElement() != nullptr && element->getNextElement()->hasTagName ("key"))
-                {
-                    // found broken plist format (sequential duplicate), fix by removing
-                    xml->removeChildElement (element, true);
-                    return false;
-                }
-
-                // key found (not sequential duplicate)
-                return true;
-            }
-        }
-
-         // key not found
-        return false;
-    }
-}
 
 //==============================================================================
 String createAlphaNumericUID()
@@ -208,31 +182,56 @@ StringArray getCleanedStringArray (StringArray s)
     return s;
 }
 
+//==============================================================================
+static bool keyFoundAndNotSequentialDuplicate (XmlElement* xml, const String& key)
+{
+    forEachXmlChildElementWithTagName (*xml, element, "key")
+    {
+        if (element->getAllSubText().trim().equalsIgnoreCase (key))
+        {
+            if (element->getNextElement() != nullptr && element->getNextElement()->hasTagName ("key"))
+            {
+                // found broken plist format (sequential duplicate), fix by removing
+                xml->removeChildElement (element, true);
+                return false;
+            }
+
+            // key found (not sequential duplicate)
+            return true;
+        }
+    }
+
+     // key not found
+    return false;
+}
+
+static bool addKeyIfNotFound (XmlElement* xml, const String& key)
+{
+    if (! keyFoundAndNotSequentialDuplicate (xml, key))
+    {
+        xml->createNewChildElement ("key")->addTextElement (key);
+        return true;
+    }
+
+    return false;
+}
+
 void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
 {
-    if (keyFoundAndNotSequentialDuplicate (xml, key))
-        return;
-
-    xml->createNewChildElement ("key")->addTextElement (key);
-    xml->createNewChildElement ("string")->addTextElement (value);
+    if (addKeyIfNotFound (xml, key))
+        xml->createNewChildElement ("string")->addTextElement (value);
 }
 
 void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, const bool value)
 {
-    if (keyFoundAndNotSequentialDuplicate (xml, key))
-        return;
-
-    xml->createNewChildElement ("key")->addTextElement (key);
-    xml->createNewChildElement (value ? "true" : "false");
+    if (addKeyIfNotFound (xml, key))
+        xml->createNewChildElement (value ? "true" : "false");
 }
 
 void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value)
 {
-    if (keyFoundAndNotSequentialDuplicate (xml, key))
-        return;
-
-    xml->createNewChildElement ("key")->addTextElement (key);
-    xml->createNewChildElement ("integer")->addTextElement (String (value));
+    if (addKeyIfNotFound (xml, key))
+        xml->createNewChildElement ("integer")->addTextElement (String (value));
 }
 
 //==============================================================================
@@ -275,300 +274,4 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 
     return CharPointer_UTF8::isValidString (fileStart, sizeof (fileStart))
              && String (fileStart).trimStart().startsWith ("// -*- C++ -*-");
-}
-
-//==============================================================================
-RolloverHelpComp::RolloverHelpComp()
-    : lastComp (nullptr)
-{
-    setInterceptsMouseClicks (false, false);
-    startTimer (150);
-}
-
-void RolloverHelpComp::paint (Graphics& g)
-{
-    AttributedString s;
-    s.setJustification (Justification::centredLeft);
-    s.append (lastTip, Font (14.0f), findColour (mainBackgroundColourId).contrasting (0.7f));
-
-    TextLayout tl;
-    tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
-    if (tl.getNumLines() > 3)
-        tl.createLayout (s, getWidth() - 10.0f);
-
-    tl.draw (g, getLocalBounds().toFloat());
-}
-
-void RolloverHelpComp::timerCallback()
-{
-    Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
-
-    if (newComp != nullptr
-         && (newComp->getTopLevelComponent() != getTopLevelComponent()
-              || newComp->isCurrentlyBlockedByAnotherModalComponent()))
-        newComp = nullptr;
-
-    if (newComp != lastComp)
-    {
-        lastComp = newComp;
-
-        String newTip (findTip (newComp));
-
-        if (newTip != lastTip)
-        {
-            lastTip = newTip;
-            repaint();
-        }
-    }
-}
-
-String RolloverHelpComp::findTip (Component* c)
-{
-    while (c != nullptr)
-    {
-        if (TooltipClient* const tc = dynamic_cast<TooltipClient*> (c))
-        {
-            const String tip (tc->getTooltip());
-
-            if (tip.isNotEmpty())
-                return tip;
-        }
-
-        c = c->getParentComponent();
-    }
-
-    return String::empty;
-}
-
-//==============================================================================
-class UTF8Component  : public Component,
-                       private TextEditorListener
-{
-public:
-    UTF8Component()
-        : desc (String::empty,
-                "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, "
-                "ready to cut-and-paste into your source-code...")
-    {
-        desc.setJustificationType (Justification::centred);
-        desc.setColour (Label::textColourId, Colours::white);
-        addAndMakeVisible (desc);
-
-        const Colour bkgd (Colours::white.withAlpha (0.6f));
-
-        userText.setMultiLine (true, true);
-        userText.setReturnKeyStartsNewLine (true);
-        userText.setColour (TextEditor::backgroundColourId, bkgd);
-        addAndMakeVisible (userText);
-        userText.addListener (this);
-
-        resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
-        resultText.setMultiLine (true, true);
-        resultText.setColour (TextEditor::backgroundColourId, bkgd);
-        resultText.setReadOnly (true);
-        resultText.setSelectAllWhenFocused (true);
-        addAndMakeVisible (resultText);
-
-        userText.setText (getLastText());
-    }
-
-    void textEditorTextChanged (TextEditor&)
-    {
-        update();
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor&)
-    {
-        getTopLevelComponent()->exitModalState (0);
-    }
-
-    void update()
-    {
-        getLastText() = userText.getText();
-        resultText.setText (CodeHelpers::stringLiteral (getLastText(), 100), false);
-    }
-
-    void resized()
-    {
-        Rectangle<int> r (getLocalBounds().reduced (8));
-        desc.setBounds (r.removeFromTop (44));
-        r.removeFromTop (8);
-        userText.setBounds (r.removeFromTop (r.getHeight() / 2));
-        r.removeFromTop (8);
-        resultText.setBounds (r);
-    }
-
-private:
-    Label desc;
-    TextEditor userText, resultText;
-
-    String& getLastText()
-    {
-        static String t;
-        return t;
-    }
-};
-
-void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer)
-{
-    if (ownerPointer != nullptr)
-    {
-        ownerPointer->toFront (true);
-    }
-    else
-    {
-        new FloatingToolWindow ("UTF-8 String Literal Converter",
-                                "utf8WindowPos",
-                                new UTF8Component(), ownerPointer,
-                                500, 500,
-                                300, 300, 1000, 1000);
-    }
-}
-
-//==============================================================================
-class SVGPathDataComponent  : public Component,
-                              private TextEditorListener
-{
-public:
-    SVGPathDataComponent()
-        : desc (String::empty,
-                "Paste an SVG path string into the top box, and it'll be converted to some C++ "
-                "code that will load it as a Path object..")
-    {
-        desc.setJustificationType (Justification::centred);
-        desc.setColour (Label::textColourId, Colours::white);
-        addAndMakeVisible (desc);
-
-        const Colour bkgd (Colours::white.withAlpha (0.6f));
-
-        userText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
-        userText.setMultiLine (true, true);
-        userText.setReturnKeyStartsNewLine (true);
-        userText.setColour (TextEditor::backgroundColourId, bkgd);
-        addAndMakeVisible (userText);
-        userText.addListener (this);
-
-        resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
-        resultText.setMultiLine (true, true);
-        resultText.setColour (TextEditor::backgroundColourId, bkgd);
-        resultText.setReadOnly (true);
-        resultText.setSelectAllWhenFocused (true);
-        addAndMakeVisible (resultText);
-
-        userText.setText (getLastText());
-    }
-
-    void textEditorTextChanged (TextEditor&)
-    {
-        update();
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor&)
-    {
-        getTopLevelComponent()->exitModalState (0);
-    }
-
-    void update()
-    {
-        getLastText() = userText.getText();
-
-        path = Drawable::parseSVGPath (getLastText().trim().unquoted().trim());
-
-        String result = "No path generated.. Not a valid SVG path string?";
-
-        if (! path.isEmpty())
-        {
-            MemoryOutputStream data;
-            path.writePathToStream (data);
-
-            MemoryOutputStream out;
-
-            out << "static const unsigned char pathData[] = ";
-            CodeHelpers::writeDataAsCppLiteral (data.getMemoryBlock(), out, false, true);
-            out << newLine
-                << newLine
-                << "Path path;" << newLine
-                << "path.loadPathFromData (pathData, sizeof (pathData));" << newLine;
-
-            result = out.toString();
-        }
-
-        resultText.setText (result, false);
-        repaint (previewPathArea);
-    }
-
-    void resized()
-    {
-        Rectangle<int> r (getLocalBounds().reduced (8));
-        desc.setBounds (r.removeFromTop (44));
-        r.removeFromTop (8);
-        userText.setBounds (r.removeFromTop (r.getHeight() / 2));
-        r.removeFromTop (8);
-        previewPathArea = r.removeFromRight (r.getHeight());
-        resultText.setBounds (r);
-    }
-
-    void paint (Graphics& g)
-    {
-        g.setColour (Colours::white);
-        g.fillPath (path, path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
-    }
-
-private:
-    Label desc;
-    TextEditor userText, resultText;
-    Rectangle<int> previewPathArea;
-    Path path;
-
-    String& getLastText()
-    {
-        static String t;
-        return t;
-    }
-};
-
-void showSVGPathDataToolWindow (ScopedPointer<Component>& ownerPointer)
-{
-    if (ownerPointer != nullptr)
-        ownerPointer->toFront (true);
-    else
-        new FloatingToolWindow ("SVG Path Converter",
-                                "svgPathWindowPos",
-                                new SVGPathDataComponent(), ownerPointer,
-                                500, 500,
-                                300, 300, 1000, 1000);
-}
-
-//==============================================================================
-class AsyncCommandRetrier  : public Timer
-{
-public:
-    AsyncCommandRetrier (const ApplicationCommandTarget::InvocationInfo& inf)
-        : info (inf)
-    {
-        info.originatingComponent = nullptr;
-        startTimer (500);
-    }
-
-    void timerCallback() override
-    {
-        stopTimer();
-        IntrojucerApp::getCommandManager().invoke (info, true);
-        delete this;
-    }
-
-    ApplicationCommandTarget::InvocationInfo info;
-
-    JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier)
-};
-
-bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
-{
-    if (ModalComponentManager::getInstance()->cancelAllModalComponents())
-    {
-        new AsyncCommandRetrier (info);
-        return true;
-    }
-
-    return false;
 }
