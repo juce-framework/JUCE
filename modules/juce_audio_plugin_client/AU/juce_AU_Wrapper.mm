@@ -1134,11 +1134,6 @@ public:
                         }
                         idx += numInChannels - numOutChannels;
                     }
-                    else
-                    {
-                        for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
-                            zeromem (channels [chIdx], sizeof(float) * nFrames);
-                    }
                 }
             }
         }
