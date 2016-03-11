@@ -1006,34 +1006,19 @@ public:
 
                     for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
                     {
-                        int mappedInChIdx  = numInChannels > 0 ? inputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)] : 0;
                         int mappedOutChIdx = outputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
 
                         const bool isOutputInterleaved = (numOutChannels > 1) && (outBuffer.mNumberBuffers == 1);
-                        float* outData = isOutputInterleaved ? scratchBuffers[scratchIdx++] : static_cast<float*> (outBuffer.mBuffers[mappedOutChIdx].mData);
-
-                        if (chIdx < numInChannels)
-                        {
-                            const AudioBufferList& inBuffer = input->GetBufferList();
-                            const bool isInputInterleaved = (numInChannels > 1) && (inBuffer.mNumberBuffers == 1);
-                            const float* inData = static_cast<float*> (inBuffer.mBuffers[isInputInterleaved ? 0 : mappedInChIdx].mData);
-
-                            if (isInputInterleaved)
-                            {
-                                for (unsigned int i = 0; i < nFrames; ++i)
-                                {
-                                    outData [i] = inData[mappedInChIdx];
-                                    inData += numInChannels;
-                                }
-                            }
-                            else
-                                std::copy (inData, inData + nFrames, outData);
-                        }
-
-                        channels[idx++] = outData;
+                        channels[idx + chIdx] = isOutputInterleaved ? scratchBuffers[scratchIdx++] : static_cast<float*> (outBuffer.mBuffers[mappedOutChIdx].mData);
                     }
                 }
                 else
+                {
+                    for (unsigned int chIdx = 0; chIdx < numInChannels; ++chIdx)
+                        channels[idx + chIdx] = scratchBuffers[scratchIdx++];
+                }
+
+                if (numInChannels > 0)
                 {
                     const AudioBufferList& inBuffer = input->GetBufferList();
                     const bool isInputInterleaved = (numInChannels > 1) && (inBuffer.mNumberBuffers == 1);
@@ -1042,8 +1027,7 @@ public:
                     {
                         int mappedInChIdx = inputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
 
-                        float* buffer = scratchBuffers[scratchIdx++];
-
+                        float* buffer = channels[idx + chIdx];
                         if (isInputInterleaved)
                         {
                             const float* inData = static_cast<float*> (inBuffer.mBuffers[0].mData);
@@ -1058,10 +1042,10 @@ public:
                             const float* inData = static_cast<float*> (inBuffer.mBuffers[mappedInChIdx].mData);
                             std::copy (inData, inData + nFrames, buffer);
                         }
-
-                        channels[idx++] = buffer;
                     }
                 }
+
+                idx += std::max (numInChannels, numOutChannels);
             }
 
             jassert (idx == bufferSpace.getNumChannels());
