@@ -997,7 +997,7 @@ public:
                 const unsigned int numInChannels  = (input != nullptr  ? input ->GetStreamFormat().mChannelsPerFrame : 0);
                 const unsigned int numOutChannels = (output != nullptr ? output->GetStreamFormat().mChannelsPerFrame : 0);
 
-                if (numOutChannels > numInChannels)
+                if (numOutChannels > 0)
                 {
                     if (output->WillAllocateBuffer())
                         output->PrepareBuffer (nFrames);
@@ -1012,12 +1012,11 @@ public:
                         channels[idx + chIdx] = isOutputInterleaved ? scratchBuffers[scratchIdx++] : static_cast<float*> (outBuffer.mBuffers[mappedOutChIdx].mData);
                     }
                 }
-                else
-                {
-                    for (unsigned int chIdx = 0; chIdx < numInChannels; ++chIdx)
-                        channels[idx + chIdx] = scratchBuffers[scratchIdx++];
-                }
 
+                for (unsigned int chIdx = numOutChannels; chIdx < numInChannels; ++chIdx)
+                    channels[idx + chIdx] = scratchBuffers[scratchIdx++];
+
+                // Copy input into buffers.
                 if (numInChannels > 0)
                 {
                     const AudioBufferList& inBuffer = input->GetBufferList();
@@ -1088,40 +1087,37 @@ public:
                 const unsigned int numInChannels  = (input != nullptr  ? input ->GetStreamFormat().mChannelsPerFrame : 0);
                 const unsigned int numOutChannels = (output != nullptr ? output->GetStreamFormat().mChannelsPerFrame : 0);
 
-                if (numInChannels >= numOutChannels)
+                if (numOutChannels > 0)
                 {
-                    if (numOutChannels > 0)
+                    const AudioBufferList& outBuffer = output->GetBufferList();
+                    const bool isOutputInterleaved = (numOutChannels > 1) && (outBuffer.mNumberBuffers == 1);
+
+                    if (isOutputInterleaved)
                     {
-                        // the input buffers were used. We must copy the output
-                        if (output->WillAllocateBuffer())
-                            output->PrepareBuffer (nFrames);
-
-                        const AudioBufferList& outBuffer = output->GetBufferList();
-                        const bool isOutputInterleaved = (numOutChannels > 1) && (outBuffer.mNumberBuffers == 1);
-
                         for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
                         {
                             int mappedOutChIdx = outputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
 
-                            float* outData = static_cast<float*> (outBuffer.mBuffers[isOutputInterleaved ? 0 : mappedOutChIdx].mData);
+                            float* outData = static_cast<float*> (outBuffer.mBuffers[0].mData);
                             float* buffer = static_cast<float*> (channels [idx]);
 
-                            if (isOutputInterleaved)
+                            for (unsigned int i = 0; i < nFrames; ++i)
                             {
-                                for (unsigned int i = 0; i < nFrames; ++i)
-                                {
-                                    outData [mappedOutChIdx] = buffer[i];
-                                    outData += numOutChannels;
-                                }
+                                outData [mappedOutChIdx] = buffer[i];
+                                outData += numOutChannels;
                             }
-                            else
-                                std::copy (buffer, buffer + nFrames, outData);
 
                             idx++;
                         }
-                        idx += numInChannels - numOutChannels;
+                    }
+                    else
+                    {
+                        // Non interleaved mode renders directly into output buffers - no copying necessary.
+                        idx += numOutChannels;
                     }
                 }
+                if (numInChannels > numOutChannels)
+                    idx += numInChannels - numOutChannels;
             }
         }
 
