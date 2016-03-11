@@ -1042,8 +1042,7 @@ public:
                     {
                         int mappedInChIdx = inputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
 
-                        float* buffer = isInputInterleaved ? scratchBuffers[scratchIdx++]
-                                                           : static_cast<float*> (inBuffer.mBuffers[mappedInChIdx].mData);
+                        float* buffer = scratchBuffers[scratchIdx++];
 
                         if (isInputInterleaved)
                         {
@@ -1053,6 +1052,11 @@ public:
                                 buffer [i] = inData [mappedInChIdx];
                                 inData += numInChannels;
                             }
+                        }
+                        else
+                        {
+                            const float* inData = static_cast<float*> (inBuffer.mBuffers[mappedInChIdx].mData);
+                            std::copy (inData, inData + nFrames, buffer);
                         }
 
                         channels[idx++] = buffer;
