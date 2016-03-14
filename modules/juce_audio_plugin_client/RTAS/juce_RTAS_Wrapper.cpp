@@ -93,6 +93,7 @@
 #endif
 
 #include "../utility/juce_IncludeModuleHeaders.h"
+#include "../utility/juce_PluginBusUtilities.h"
 
 #ifdef _MSC_VER
  #pragma pack (pop)
@@ -461,7 +462,16 @@ public:
         SFicPlugInStemFormats stems;
         GetProcessType()->GetStemFormats (&stems);
 
-        juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs, sampleRate, maxBlockSize);
+        juceFilter->setPreferredBusArrangement (true, 0, AudioChannelSet::canonicalChannelSet (fNumInputs));
+        juceFilter->setPreferredBusArrangement (false, 0, AudioChannelSet::canonicalChannelSet (fNumOutputs));
+
+        if (juceFilter->busArrangement.inputBuses.size() > 1)
+        {
+            // Side chain bus starts turned off and may be turned on in ConnectInput.
+            juceFilter->setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
+        }
+
+        juceFilter->setRateAndBufferSizeDetails (sampleRate, maxBlockSize);
 
         AddControl (new CPluginControl_OnOff ('bypa', "Master Bypass\nMastrByp\nMByp\nByp", false, true));
         DefineMasterBypassControlIndex (bypassControlIndex);
@@ -595,6 +605,31 @@ public:
 
             midiEvents.clear();
         }
+    }
+
+    //==============================================================================
+    ComponentResult ConnectInput (long portNum, long connection) override
+    {
+        ComponentResult ret = CEffectProcessRTAS::ConnectInput (portNum, connection);
+
+        if (portNum == fNumInputs && ret == noErr)
+        {
+            // Side chain connected
+            juceFilter->setPreferredBusArrangement (true, 1, AudioChannelSet::mono());
+        }
+        return ret;
+    }
+
+    ComponentResult DisconnectInput (long portNum) override
+    {
+        ComponentResult ret = CEffectProcessRTAS::DisconnectInput(portNum);
+
+        if (portNum == fNumInputs && ret == noErr)
+        {
+            // Side chain disconnected
+            juceFilter->setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
+        }
+        return ret;
     }
 
     //==============================================================================
@@ -883,27 +918,60 @@ public:
     //==============================================================================
     void CreateEffectTypes()
     {
-        const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        const int numConfigs = numElementsInArray (channelConfigs);
+        ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
+        PluginBusUtilities busUtils (*plugin, false);
 
-        // You need to actually add some configurations to the JucePlugin_PreferredChannelConfigurations
-        // value in your JucePluginCharacteristics.h file..
-        jassert (numConfigs > 0);
+        busUtils.findAllCompatibleLayouts();
 
-        for (int i = 0; i < numConfigs; ++i)
+        SortedSet<AudioChannelSet> inLayouts =  busUtils.getSupportedBusLayouts (true,  0).supportedLayouts;
+        SortedSet<AudioChannelSet> outLayouts = busUtils.getSupportedBusLayouts (false, 0).supportedLayouts;
+
+        const int numIns  = inLayouts. size();
+        const int numOuts = outLayouts.size();
+
+        int configIndex = 0;
+
+        for (int inIdx = 0; inIdx < jmax (numIns, 1); ++inIdx)
         {
-            if (channelConfigs[i][0] <= 8 && channelConfigs[i][1] <= 8)
+            for (int outIdx = 0; outIdx < jmax (numOuts, 1); ++outIdx)
             {
+                AudioChannelSet inLayout  = numIns  > 0 ? busUtils.getChannelSet (true,  0) : AudioChannelSet();
+                AudioChannelSet outLayout = numOuts > 0 ? busUtils.getChannelSet (false, 0) : AudioChannelSet();
+
+                if (inLayout.size() > 8 || outLayout.size() > 8)
+                {
+                    // These channel layouts are not supported in RTAS.
+                    continue;
+                }
+
+                // Try setting this input and output layouts combo.
+                if (numIns > 0)
+                {
+                    const bool success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayouts.getReference (inIdx));
+                    jassert (success);
+                }
+                if (numOuts > 0)
+                {
+                    const bool success = busUtils.processor.setPreferredBusArrangement (false, 0, inLayouts.getReference (outIdx));
+                    jassert (success);
+                }
+
+                if (numIns > 0 && numOuts > 0 && (inLayout != inLayouts.getReference (inIdx) || (outLayout != outLayouts.getReference (outIdx))))
+                {
+                    // The input and output layouts we tried do not work together.
+                    continue;
+                }
+
                 CEffectType* const type
-                    = new CEffectTypeRTAS ('jcaa' + i,
+                    = new CEffectTypeRTAS ('jcaa' + (configIndex++),
                                            JucePlugin_RTASProductId,
                                            JucePlugin_RTASCategory);
 
                 type->DefineTypeNames (createRTASName().toRawUTF8());
                 type->DefineSampleRateSupport (eSupports48kAnd96kAnd192k);
 
-                type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),
-                                         getFormatForChans (channelConfigs [i][1] != 0 ? channelConfigs [i][1] : channelConfigs [i][0]));
+                type->DefineStemFormats (getFormatForChans (inLayout.size() > 0 ? inLayout.size() : outLayout.size()),
+                                         getFormatForChans (outLayout.size() > 0 ? outLayout.size() : inLayout.size()));
 
                #if ! JucePlugin_RTASDisableBypass
                 type->AddGestalt (pluginGestalt_CanBypass);
@@ -912,6 +980,15 @@ public:
                #if JucePlugin_RTASDisableMultiMono
                 type->AddGestalt (pluginGestalt_DoesntSupportMultiMono);
                #endif
+
+                if (busUtils.getBusCount (true) > 1)
+                {
+                    // Note that the AAX wrapper has some more complicated checks for this.
+                    // We (SR) don't require those for our needs, but if merging into main JUCE
+                    // one may want to consider doing checks similar to those in the AAX wrapper
+                    // and possibly sharing the checks code.
+                    type->AddGestalt (pluginGestalt_SideChainInput);
+                }
 
                 type->AddGestalt (pluginGestalt_SupportsVariableQuanta);
                 type->AttachEffectProcessCreator (createNewProcess);
