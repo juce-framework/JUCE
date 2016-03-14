@@ -56,8 +56,11 @@ public:
 
         initialiseDependencyPathValues();
 
-        if (getScreenOrientationValue().toString().isEmpty())
-            getScreenOrientationValue() = "portraitlandscape";
+        if (iOS)
+        {
+            if (getScreenOrientationValue().toString().isEmpty())
+                getScreenOrientationValue() = "portraitlandscape";
+        }
     }
 
     static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
