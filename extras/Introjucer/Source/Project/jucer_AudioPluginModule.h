@@ -43,7 +43,6 @@ namespace
     inline Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
     inline Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
     inline Value getPluginIsSynth (Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
-    inline Value getPluginAcceptsSideChain (Project& project)            { return project.getProjectValue ("pluginAcceptsSideChain"); }
     inline Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
     inline Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
     inline Value getPluginIsMidiEffectPlugin (Project& project)          { return project.getProjectValue ("pluginIsMidiEffectPlugin"); }
@@ -157,7 +156,6 @@ namespace
         flags.set ("JucePlugin_ManufacturerCode",            valueToCharLiteral (getPluginManufacturerCode (project)));
         flags.set ("JucePlugin_PluginCode",                  valueToCharLiteral (getPluginCode (project)));
         flags.set ("JucePlugin_IsSynth",                     valueToBool (getPluginIsSynth (project)));
-        flags.set ("JucePlugin_AcceptsSideChain",            valueToBool (getPluginAcceptsSideChain (project)));
         flags.set ("JucePlugin_WantsMidiInput",              valueToBool (getPluginWantsMidiInput (project)));
         flags.set ("JucePlugin_ProducesMidiOutput",          valueToBool (getPluginProducesMidiOut (project)));
         flags.set ("JucePlugin_IsMidiEffect",                valueToBool (getPluginIsMidiEffectPlugin (project)));
