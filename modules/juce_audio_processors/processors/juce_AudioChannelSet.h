@@ -46,65 +46,65 @@ public:
 
     /** Creates a zero-channel set which can be used to indicate that a
         bus is disabled. */
-    static AudioChannelSet disabled();
+    static AudioChannelSet JUCE_CALLTYPE disabled();
 
     /** Creates a one-channel mono set. */
-    static AudioChannelSet mono();
+    static AudioChannelSet JUCE_CALLTYPE mono();
 
     /** Creates a set containing a left and right channel. */
-    static AudioChannelSet stereo();
+    static AudioChannelSet JUCE_CALLTYPE stereo();
 
     /** Creates a set containing a left, right and centre channels. */
-    static AudioChannelSet createLCR();
+    static AudioChannelSet JUCE_CALLTYPE createLCR();
 
     /** Creates a set containing a left, right, centre and surround channels. */
-    static AudioChannelSet createLCRS();
+    static AudioChannelSet JUCE_CALLTYPE createLCRS();
 
     /** Creates a set for quadraphonic surround setup. */
-    static AudioChannelSet quadraphonic();
+    static AudioChannelSet JUCE_CALLTYPE quadraphonic();
 
     /** Creates a set for pentagonal surround setup. */
-    static AudioChannelSet pentagonal();
+    static AudioChannelSet JUCE_CALLTYPE pentagonal();
 
     /** Creates a set for hexagonal surround setup. */
-    static AudioChannelSet hexagonal();
+    static AudioChannelSet JUCE_CALLTYPE hexagonal();
 
     /** Creates a set for octagonal surround setup. */
-    static AudioChannelSet octagonal();
+    static AudioChannelSet JUCE_CALLTYPE octagonal();
 
     /** Creates a set for ambisonic surround setups. */
-    static AudioChannelSet ambisonic();
+    static AudioChannelSet JUCE_CALLTYPE ambisonic();
 
     /** Creates a set for a 5.0 surround setup. */
-    static AudioChannelSet create5point0();
+    static AudioChannelSet JUCE_CALLTYPE create5point0();
 
     /** Creates a set for a 5.1 surround setup. */
-    static AudioChannelSet create5point1();
+    static AudioChannelSet JUCE_CALLTYPE create5point1();
 
     /** Creates a set for a 6.0 surround setup. */
-    static AudioChannelSet create6point0();
+    static AudioChannelSet JUCE_CALLTYPE create6point0();
 
     /** Creates a set for a 6.1 surround setup. */
-    static AudioChannelSet create6point1();
+    static AudioChannelSet JUCE_CALLTYPE create6point1();
 
     /** Creates a set for a 7.0 surround setup. */
-    static AudioChannelSet create7point0();
+    static AudioChannelSet JUCE_CALLTYPE create7point0();
 
     /** Creates a set for a 7.1 surround setup. */
-    static AudioChannelSet create7point1();
+    static AudioChannelSet JUCE_CALLTYPE create7point1();
 
     /** Creates a set for a 7.0 surround setup (with side instead of rear speakers). */
-    static AudioChannelSet createFront7point0();
+    static AudioChannelSet JUCE_CALLTYPE createFront7point0();
 
     /** Creates a set for a 7.1 surround setup (with side instead of rear speakers). */
-    static AudioChannelSet createFront7point1();
+    static AudioChannelSet JUCE_CALLTYPE createFront7point1();
 
     /** Creates a set of untyped discrete channels. */
-    static AudioChannelSet discreteChannels (int numChannels);
+    static AudioChannelSet JUCE_CALLTYPE discreteChannels (int numChannels);
 
     /** Create a canonical channel set for a given number of channels.
         For example, numChannels = 1 will return mono, numChannels = 2 will return stereo, etc. */
-    static AudioChannelSet canonicalChannelSet (int numChannels);
+    static AudioChannelSet JUCE_CALLTYPE canonicalChannelSet (int numChannels);
 
     //==============================================================================
     /** Represents different audio channel types. */
@@ -145,10 +145,10 @@ public:
     };
 
     /** Returns the name of a given channel type. For example, this method may return "Surround Left". */
-    static String getChannelTypeName (ChannelType);
+    static String JUCE_CALLTYPE getChannelTypeName (ChannelType);
 
     /** Returns the abbreviated name of a channel type. For example, this method may return "Ls". */
-    static String getAbbreviatedChannelTypeName (ChannelType);
+    static String JUCE_CALLTYPE getAbbreviatedChannelTypeName (ChannelType);
 
     //==============================================================================
     /** Adds a channel to the set. */
