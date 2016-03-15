@@ -935,25 +935,25 @@ public:
         {
             for (int outIdx = 0; outIdx < jmax (numOuts, 1); ++outIdx)
             {
-                AudioChannelSet inLayout  = numIns  > 0 ? busUtils.getChannelSet (true,  0) : AudioChannelSet();
-                AudioChannelSet outLayout = numOuts > 0 ? busUtils.getChannelSet (false, 0) : AudioChannelSet();
-
-                if (inLayout.size() > 8 || outLayout.size() > 8)
-                {
-                    // These channel layouts are not supported in RTAS.
-                    continue;
-                }
-
                 // Try setting this input and output layouts combo.
                 if (numIns > 0)
                 {
                     const bool success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayouts.getReference (inIdx));
                     jassert (success);
-                }
+                }	
                 if (numOuts > 0)
                 {
                     const bool success = busUtils.processor.setPreferredBusArrangement (false, 0, inLayouts.getReference (outIdx));
                     jassert (success);
+                }
+
+                AudioChannelSet inLayout  = numIns  > 0 ? busUtils.getChannelSet (true,  0) : AudioChannelSet();
+                AudioChannelSet outLayout = numOuts > 0 ? busUtils.getChannelSet (false, 0) : AudioChannelSet();
+                
+                if (inLayout.size() > 8 || outLayout.size() > 8)
+                {
+                    // These channel layouts are not supported in RTAS.
+                    continue;
                 }
 
                 if (numIns > 0 && numOuts > 0 && (inLayout != inLayouts.getReference (inIdx) || (outLayout != outLayouts.getReference (outIdx))))
