@@ -426,12 +426,26 @@ private:
     {
         GradleObject (const String& nm) : name (nm) {}
 
+       #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
         template <typename GradleType, typename... Args>
         void add (Args... args)
         {
             children.add (new GradleType (args...));
             // Note: can't use std::forward because it doesn't compile for OS X 10.8
         }
+       #else // Remove this workaround once we drop VS2012 support!
+        template <typename GradleType, typename Arg1>
+        void add (Arg1 arg1)
+        {
+            children.add (new GradleType (arg1));
+        }
+
+        template <typename GradleType, typename Arg1, typename Arg2>
+        void add (Arg1 arg1, Arg2 arg2)
+        {
+            children.add (new GradleType (arg1, arg2));
+        }
+       #endif
 
         void addChildObject (GradleObject* objectToAdd) noexcept
         {

@@ -919,7 +919,7 @@ private:
                 }
             };
 
-            GetFillTypeOp op = { this, &path, opacity };
+            GetFillTypeOp op = { this, &path, opacity, FillType() };
 
             if (topLevelXml.applyOperationToChildWithID (urlID, op))
                 return op.fillType;
