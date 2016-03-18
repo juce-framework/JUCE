@@ -44,9 +44,9 @@ int OSCMessage::size() const noexcept
     return arguments.size();
 }
 
-bool OSCMessage::empty() const noexcept
+bool OSCMessage::isEmpty() const noexcept
 {
-    return arguments.empty();
+    return arguments.isEmpty();
 }
 
 OSCArgument& OSCMessage::operator[] (const int i) const noexcept
