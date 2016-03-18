@@ -1,5 +1,3 @@
-    private native void androidRuntimePermissionsCallback (boolean permissionWasGranted, long ptrToCallback);
-
     @Override
     public void onRequestPermissionsResult (int permissionID, String permissions[], int[] grantResults)
     {
