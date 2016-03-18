@@ -26,8 +26,6 @@
   ==============================================================================
 */
 
-#include <memory>
-
 namespace
 {
     void handleAndroidCallback (bool permissionWasGranted, RuntimePermissions::Callback* callbackPtr)
