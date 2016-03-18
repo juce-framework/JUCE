@@ -760,10 +760,12 @@ private:
     void addIosBackgroundModes (XmlElement* dict) const
     {
         StringArray iosBackgroundModes;
+
         if (isBackgroundAudioEnabled())     iosBackgroundModes.add ("audio");
         if (isBackgroundBleEnabled())       iosBackgroundModes.add ("bluetooth-central");
 
-        addArrayToPlist (dict, "UIBackgroundModes", iosBackgroundModes);
+        if (! iosBackgroundModes.isEmpty())
+            addArrayToPlist (dict, "UIBackgroundModes", iosBackgroundModes);
     }
 
     static void addArrayToPlist (XmlElement* dict, String arrayKey, const StringArray& arrayElements)
