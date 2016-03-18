@@ -149,6 +149,12 @@ public:
         return numUsed;
     }
 
+    /** Returns true if the array is empty, false otherwise. */
+    inline bool isEmpty() const noexcept
+    {
+        return size() == 0;
+    }
+
     /** Returns a pointer to the object at this index in the array.
 
         If the index is out-of-range, this will return a null pointer, (and
