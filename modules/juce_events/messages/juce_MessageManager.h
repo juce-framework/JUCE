@@ -32,8 +32,7 @@ class ActionBroadcaster;
 
 
 //==============================================================================
-/** See MessageManager::callFunctionOnMessageThread() for use of this function type
-*/
+/** See MessageManager::callFunctionOnMessageThread() for use of this function type. */
 typedef void* (MessageCallbackFunction) (void* userData);
 
 

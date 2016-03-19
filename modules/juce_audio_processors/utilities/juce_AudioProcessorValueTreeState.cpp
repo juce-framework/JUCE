@@ -258,21 +258,21 @@ void AudioProcessorValueTreeState::updateParameterConnectionsToChildTrees()
     }
 }
 
-void AudioProcessorValueTreeState::valueTreePropertyChanged (ValueTree&, const Identifier& property)
+void AudioProcessorValueTreeState::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
-    if (property == idPropertyID)
+    if (property == idPropertyID && tree.hasType (valueType) && tree.getParent() == state)
         updateParameterConnectionsToChildTrees();
 }
 
-void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, ValueTree&)
+void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, ValueTree& tree)
 {
-    if (parent == state)
+    if (parent == state && tree.hasType (valueType))
         updateParameterConnectionsToChildTrees();
 }
 
-void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree& parent, ValueTree&, int)
+void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree& parent, ValueTree& tree, int)
 {
-    if (parent == state)
+    if (parent == state && tree.hasType (valueType))
         updateParameterConnectionsToChildTrees();
 }
 

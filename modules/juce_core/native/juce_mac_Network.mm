@@ -64,10 +64,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
                                                       const StringArray& filesToAttach)
 {
   #if JUCE_IOS
-    (void) targetEmailAddress;
-    (void) emailSubject;
-    (void) bodyText;
-    (void) filesToAttach;
+    ignoreUnused (targetEmailAddress, emailSubject, bodyText, filesToAttach);
 
     //xxx probably need to use MFMailComposeViewController
     jassertfalse;
@@ -234,7 +231,7 @@ public:
 
     void didFailWithError (NSError* error)
     {
-        DBG (nsStringToJuce ([error description])); (void) error;
+        DBG (nsStringToJuce ([error description])); ignoreUnused (error);
         hasFailed = true;
         initialised = true;
         signalThreadShouldExit();

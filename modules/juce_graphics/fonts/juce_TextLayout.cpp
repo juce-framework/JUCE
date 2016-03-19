@@ -287,29 +287,6 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
 //==============================================================================
 namespace TextLayoutHelpers
 {
-    struct FontAndColour
-    {
-        FontAndColour (const Font* f) noexcept   : font (f), colour (0xff000000) {}
-
-        const Font* font;
-        Colour colour;
-
-        bool operator!= (const FontAndColour& other) const noexcept
-        {
-            return (font != other.font && *font != *other.font) || colour != other.colour;
-        }
-    };
-
-    struct RunAttribute
-    {
-        RunAttribute (const FontAndColour& fc, const Range<int> r) noexcept
-            : fontAndColour (fc), range (r)
-        {}
-
-        FontAndColour fontAndColour;
-        Range<int> range;
-    };
-
     struct Token
     {
         Token (const String& t, const Font& f, Colour c, const bool whitespace)
@@ -337,7 +314,6 @@ namespace TextLayoutHelpers
 
         void createLayout (const AttributedString& text, TextLayout& layout)
         {
-            tokens.ensureStorageAllocated (64);
             layout.ensureStorageAllocated (totalLines);
 
             addTextRuns (text);
@@ -465,10 +441,8 @@ namespace TextLayoutHelpers
             return CharacterFunctions::isWhitespace (c) ? 2 : 1;
         }
 
-        void appendText (const AttributedString& text, const Range<int> stringRange,
-                         const Font& font, Colour colour)
+        void appendText (const String& stringText, const Font& font, Colour colour)
         {
-            const String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));
             String::CharPointerType t (stringText.getCharPointer());
             String currentString;
             int lastCharType = 0;
@@ -551,48 +525,15 @@ namespace TextLayoutHelpers
 
         void addTextRuns (const AttributedString& text)
         {
-            Font defaultFont;
-            Array<RunAttribute> runAttributes;
+            const int numAttributes = text.getNumAttributes();
+            tokens.ensureStorageAllocated (jmax (64, numAttributes));
 
+            for (int i = 0; i < numAttributes; ++i)
             {
-                const int stringLength = text.getText().length();
-                int rangeStart = 0;
-                FontAndColour lastFontAndColour (&defaultFont);
+                const AttributedString::Attribute& attr = text.getAttribute (i);
 
-                // Iterate through every character in the string
-                for (int i = 0; i < stringLength; ++i)
-                {
-                    FontAndColour newFontAndColour (&defaultFont);
-                    const int numCharacterAttributes = text.getNumAttributes();
-
-                    for (int j = 0; j < numCharacterAttributes; ++j)
-                    {
-                        const AttributedString::Attribute& attr = *text.getAttribute (j);
-
-                        if (attr.range.contains (i))
-                        {
-                            if (const Font* f = attr.getFont())      newFontAndColour.font   = f;
-                            if (const Colour* c = attr.getColour())  newFontAndColour.colour = *c;
-                        }
-                    }
-
-                    if (i > 0 && newFontAndColour != lastFontAndColour)
-                    {
-                        runAttributes.add (RunAttribute (lastFontAndColour, Range<int> (rangeStart, i)));
-                        rangeStart = i;
-                    }
-
-                    lastFontAndColour = newFontAndColour;
-                }
-
-                if (rangeStart < stringLength)
-                    runAttributes.add (RunAttribute (lastFontAndColour, Range<int> (rangeStart, stringLength)));
-            }
-
-            for (int i = 0; i < runAttributes.size(); ++i)
-            {
-                const RunAttribute& r = runAttributes.getReference(i);
-                appendText (text, r.range, *(r.fontAndColour.font), r.fontAndColour.colour);
+                appendText (text.getText().substring (attr.range.getStart(), attr.range.getEnd()),
+                            attr.font, attr.colour);
             }
         }
 

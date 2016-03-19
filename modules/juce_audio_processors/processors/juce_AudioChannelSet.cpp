@@ -28,8 +28,11 @@ bool AudioChannelSet::operator== (const AudioChannelSet& other) const noexcept  
 bool AudioChannelSet::operator!= (const AudioChannelSet& other) const noexcept  { return channels != other.channels; }
 bool AudioChannelSet::operator<  (const AudioChannelSet& other) const noexcept  { return channels <  other.channels; }
 
-const char* AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type) noexcept
+String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
 {
+    if (type >= discreteChannel0)
+        return String ("Discrete ") + String (type - discreteChannel0 + 1);
+
     switch (type)
     {
         case left:           return NEEDS_TRANS("Left");
@@ -63,8 +66,11 @@ const char* AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType ty
     return "Unknown";
 }
 
-const char* AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelType type) noexcept
+String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelType type)
 {
+    if (type >= discreteChannel0)
+        return String (type - discreteChannel0 + 1);
+
     switch (type)
     {
         case left:           return "L";
@@ -151,17 +157,17 @@ AudioChannelSet AudioChannelSet::mono()               { return AudioChannelSet (
 AudioChannelSet AudioChannelSet::stereo()             { return AudioChannelSet ((1u << left) | (1u << right)); }
 AudioChannelSet AudioChannelSet::createLCR()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre)); }
 AudioChannelSet AudioChannelSet::createLCRS()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::quadraphonic()       { return AudioChannelSet ((1u << left) | (1u << right) | (1u << sideLeft) | (1u << sideRight)); }
-AudioChannelSet AudioChannelSet::pentagonal()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << sideLeft) | (1u << sideRight) | (1u << centre)); }
-AudioChannelSet AudioChannelSet::hexagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << sideLeft) | (1u << sideRight) | (1u << centre) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::octagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << sideLeft) | (1u << sideRight) | (1u << centre) | (1u << surround) | (1u << wideLeft) | (1u << wideRight)); }
+AudioChannelSet AudioChannelSet::quadraphonic()       { return AudioChannelSet ((1u << left) | (1u << right) | (1u << surroundLeft) | (1u << surroundRight)); }
+AudioChannelSet AudioChannelSet::pentagonal()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << surroundLeft) | (1u << surroundRight) | (1u << centre)); }
+AudioChannelSet AudioChannelSet::hexagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << surroundLeft) | (1u << surroundRight) | (1u << centre) | (1u << surround)); }
+AudioChannelSet AudioChannelSet::octagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << surroundLeft) | (1u << surroundRight) | (1u << centre) | (1u << surround) | (1u << wideLeft) | (1u << wideRight)); }
 AudioChannelSet AudioChannelSet::ambisonic()          { return AudioChannelSet ((1u << ambisonicW) | (1u << ambisonicX) | (1u << ambisonicY) | (1u << ambisonicZ)); }
-AudioChannelSet AudioChannelSet::create5point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surroundLeft) | (1u << surroundRight)); }
-AudioChannelSet AudioChannelSet::create5point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << surroundLeft)  | (1u << surroundRight)); }
-AudioChannelSet AudioChannelSet::create6point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::create6point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass)  | (1u << surroundLeft)  | (1u << surroundRight) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::create7point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << topRearLeft) | (1u << topRearRight)); }
-AudioChannelSet AudioChannelSet::create7point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << topRearLeft) | (1u << topRearRight)); }
+AudioChannelSet AudioChannelSet::create5point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << sideLeft) | (1u << sideRight)); }
+AudioChannelSet AudioChannelSet::create5point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << sideLeft)  | (1u << sideRight)); }
+AudioChannelSet AudioChannelSet::create6point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << sideLeft)  | (1u << sideRight) | (1u << surround)); }
+AudioChannelSet AudioChannelSet::create6point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass)  | (1u << sideLeft)  | (1u << sideRight) | (1u << surround)); }
+AudioChannelSet AudioChannelSet::create7point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << sideLeft)  | (1u << sideRight) | (1u << surroundLeft) | (1u << surroundRight)); }
+AudioChannelSet AudioChannelSet::create7point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << sideLeft)  | (1u << sideRight) | (1u << surroundLeft) | (1u << surroundRight)); }
 AudioChannelSet AudioChannelSet::createFront7point0() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << centreLeft) | (1u << centreRight)); }
 AudioChannelSet AudioChannelSet::createFront7point1() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << surroundLeft)  | (1u << surroundRight) | (1u << centreLeft) | (1u << centreRight)); }
 

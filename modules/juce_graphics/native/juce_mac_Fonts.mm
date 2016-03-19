@@ -213,14 +213,54 @@ namespace CoreTextTypeLayout
     }
 
     //==============================================================================
+    static CTTextAlignment getTextAlignment (const AttributedString& text)
+    {
+        switch (text.getJustification().getOnlyHorizontalFlags())
+        {
+           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
+            case Justification::right:                  return kCTTextAlignmentRight;
+            case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
+            case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
+            default:                                    return kCTTextAlignmentLeft;
+           #else
+            case Justification::right:                  return kCTRightTextAlignment;
+            case Justification::horizontallyCentred:    return kCTCenterTextAlignment;
+            case Justification::horizontallyJustified:  return kCTJustifiedTextAlignment;
+            default:                                    return kCTLeftTextAlignment;
+           #endif
+        }
+    }
+
+    static CTLineBreakMode getLineBreakMode (const AttributedString& text)
+    {
+        switch (text.getWordWrap())
+        {
+            case AttributedString::none:        return kCTLineBreakByClipping;
+            case AttributedString::byChar:      return kCTLineBreakByCharWrapping;
+            default:                            return kCTLineBreakByWordWrapping;
+        }
+    }
+
+    static CTWritingDirection getWritingDirection (const AttributedString& text)
+    {
+        switch (text.getReadingDirection())
+        {
+            case AttributedString::ReadingDirection::rightToLeft:   return kCTWritingDirectionRightToLeft;
+            case AttributedString::ReadingDirection::leftToRight:   return kCTWritingDirectionLeftToRight;
+            default:                                                return kCTWritingDirectionNatural;
+        }
+    }
+
+    //==============================================================================
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
        #if JUCE_IOS
         CGColorSpaceRef rgbColourSpace = CGColorSpaceCreateDeviceRGB();
        #endif
 
-        CFStringRef cfText = text.getText().toCFString();
         CFMutableAttributedStringRef attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
+
+        CFStringRef cfText = text.getText().toCFString();
         CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
         CFRelease (cfText);
 
@@ -229,7 +269,7 @@ namespace CoreTextTypeLayout
 
         for (int i = 0; i < numCharacterAttributes; ++i)
         {
-            const AttributedString::Attribute& attr = *text.getAttribute (i);
+            const AttributedString::Attribute& attr = text.getAttribute (i);
             const int rangeStart = attr.range.getStart();
 
             if (rangeStart >= attribStringLen)
@@ -237,42 +277,40 @@ namespace CoreTextTypeLayout
 
             CFRange range = CFRangeMake (rangeStart, jmin (attr.range.getEnd(), (int) attribStringLen) - rangeStart);
 
-            if (const Font* const f = attr.getFont())
+            if (CTFontRef ctFontRef = getOrCreateFont (attr.font))
             {
-                if (CTFontRef ctFontRef = getOrCreateFont (*f))
+                ctFontRef = getFontWithPointSize (ctFontRef, attr.font.getHeight() * getHeightToPointsFactor (ctFontRef));
+
+                CFAttributedStringSetAttribute (attribString, range, kCTFontAttributeName, ctFontRef);
+
+                float extraKerning = attr.font.getExtraKerningFactor();
+
+                if (extraKerning != 0.0f)
                 {
-                    ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
+                    extraKerning *= attr.font.getHeight();
 
-                    CFAttributedStringSetAttribute (attribString, range, kCTFontAttributeName, ctFontRef);
-
-                    float extraKerning = f->getExtraKerningFactor();
-
-                    if (extraKerning != 0.0f)
-                    {
-                        extraKerning *= f->getHeight();
-
-                        CFNumberRef numberRef = CFNumberCreate (0, kCFNumberFloatType, &extraKerning);
-                        CFAttributedStringSetAttribute (attribString, range, kCTKernAttributeName, numberRef);
-                        CFRelease (numberRef);
-                    }
-
-                    CFRelease (ctFontRef);
+                    CFNumberRef numberRef = CFNumberCreate (0, kCFNumberFloatType, &extraKerning);
+                    CFAttributedStringSetAttribute (attribString, range, kCTKernAttributeName, numberRef);
+                    CFRelease (numberRef);
                 }
+
+                CFRelease (ctFontRef);
             }
 
-            if (const Colour* const col = attr.getColour())
             {
+                const Colour col (attr.colour);
+
                #if JUCE_IOS
-                const CGFloat components[] = { col->getFloatRed(),
-                                               col->getFloatGreen(),
-                                               col->getFloatBlue(),
-                                               col->getFloatAlpha() };
+                const CGFloat components[] = { col.getFloatRed(),
+                                               col.getFloatGreen(),
+                                               col.getFloatBlue(),
+                                               col.getFloatAlpha() };
                 CGColorRef colour = CGColorCreate (rgbColourSpace, components);
                #else
-                CGColorRef colour = CGColorCreateGenericRGB (col->getFloatRed(),
-                                                             col->getFloatGreen(),
-                                                             col->getFloatBlue(),
-                                                             col->getFloatAlpha());
+                CGColorRef colour = CGColorCreateGenericRGB (col.getFloatRed(),
+                                                             col.getFloatGreen(),
+                                                             col.getFloatBlue(),
+                                                             col.getFloatAlpha());
                #endif
 
                 CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, colour);
@@ -281,42 +319,16 @@ namespace CoreTextTypeLayout
         }
 
         // Paragraph Attributes
-       #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-        CTTextAlignment ctTextAlignment = kCTTextAlignmentLeft;
-       #else
-        CTTextAlignment ctTextAlignment = kCTLeftTextAlignment;
-       #endif
-
-        CTLineBreakMode ctLineBreakMode = kCTLineBreakByWordWrapping;
+        CTTextAlignment ctTextAlignment = getTextAlignment (text);
+        CTLineBreakMode ctLineBreakMode = getLineBreakMode (text);
+        CTWritingDirection ctWritingDirection = getWritingDirection (text);
         const CGFloat ctLineSpacing = text.getLineSpacing();
-
-        switch (text.getJustification().getOnlyHorizontalFlags())
-        {
-            case Justification::left:                   break;
-           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-            case Justification::right:                  ctTextAlignment = kCTTextAlignmentRight; break;
-            case Justification::horizontallyCentred:    ctTextAlignment = kCTTextAlignmentCenter; break;
-            case Justification::horizontallyJustified:  ctTextAlignment = kCTTextAlignmentJustified; break;
-           #else
-            case Justification::right:                  ctTextAlignment = kCTRightTextAlignment; break;
-            case Justification::horizontallyCentred:    ctTextAlignment = kCTCenterTextAlignment; break;
-            case Justification::horizontallyJustified:  ctTextAlignment = kCTJustifiedTextAlignment; break;
-           #endif
-            default:                                    jassertfalse; break; // Illegal justification flags
-        }
-
-        switch (text.getWordWrap())
-        {
-            case AttributedString::byWord:      break;
-            case AttributedString::none:        ctLineBreakMode = kCTLineBreakByClipping; break;
-            case AttributedString::byChar:      ctLineBreakMode = kCTLineBreakByCharWrapping; break;
-            default: break;
-        }
 
         CTParagraphStyleSetting settings[] =
         {
             { kCTParagraphStyleSpecifierAlignment,              sizeof (CTTextAlignment), &ctTextAlignment },
             { kCTParagraphStyleSpecifierLineBreakMode,          sizeof (CTLineBreakMode), &ctLineBreakMode },
+            { kCTParagraphStyleSpecifierBaseWritingDirection,   sizeof (CTWritingDirection), &ctWritingDirection},
 
            #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
             { kCTParagraphStyleSpecifierLineSpacingAdjustment,  sizeof (CGFloat),         &ctLineSpacing }
@@ -449,7 +461,7 @@ namespace CoreTextTypeLayout
                 CFDictionaryRef runAttributes = CTRunGetAttributes (run);
 
                 CTFontRef ctRunFont;
-                if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void **) &ctRunFont))
+                if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void**) &ctRunFont))
                 {
                     CFStringRef cfsFontName = CTFontCopyPostScriptName (ctRunFont);
                     CTFontRef ctFontRef = CTFontCreateWithName (cfsFontName, referenceFontSize, nullptr);
@@ -571,7 +583,7 @@ public:
 
         ascent = ctAscent / ctTotalHeight;
         unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
-        pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+        pathTransform = AffineTransform::scale (unitsToHeightScaleFactor);
 
         fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
 
@@ -847,7 +859,7 @@ public:
 
             fontHeightToPointsFactor = referenceFontSize / (nsFontAscent + nsFontDescent);
 
-            pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+            pathTransform = AffineTransform::scale (unitsToHeightScaleFactor);
         }
     }
 
@@ -1176,17 +1188,16 @@ static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 
     for (int i = 0; i < numCharacterAttributes; ++i)
     {
-        if (const Font* const f = text.getAttribute (i)->getFont())
+        Typeface* t = text.getAttribute(i).font.getTypeface();
+
+        if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (t))
         {
-            if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (f->getTypeface()))
-            {
-                if (tf->isMemoryFont)
-                    return false;
-            }
-            else if (dynamic_cast<CustomTypeface*> (f->getTypeface()) != nullptr)
-            {
+            if (tf->isMemoryFont)
                 return false;
-            }
+        }
+        else if (dynamic_cast<CustomTypeface*> (t) != nullptr)
+        {
+            return false;
         }
     }
 
@@ -1206,6 +1217,6 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
     }
    #endif
 
-    (void) text;
+    ignoreUnused (text);
     return false;
 }

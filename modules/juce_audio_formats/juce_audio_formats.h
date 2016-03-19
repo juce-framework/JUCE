@@ -27,7 +27,7 @@
 
 #include "../juce_audio_basics/juce_audio_basics.h"
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_USE_FLAC
     Enables the FLAC audio codec classes (available on all platforms).
     If your app doesn't need to read FLAC files, you might want to disable this to
@@ -81,7 +81,7 @@
  #define JUCE_USE_WINDOWS_MEDIA_FORMAT 0
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

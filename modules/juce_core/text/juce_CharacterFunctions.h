@@ -391,18 +391,28 @@ public:
         dest.writeNull();
     }
 
+    /** Compares two characters. */
+    static inline int compare (juce_wchar char1, juce_wchar char2) noexcept
+    {
+        if (int diff = static_cast<int> (char1) - static_cast<int> (char2))
+            return diff < 0 ? -1 : 1;
+
+        return 0;
+    }
+
     /** Compares two null-terminated character strings. */
     template <typename CharPointerType1, typename CharPointerType2>
     static int compare (CharPointerType1 s1, CharPointerType2 s2) noexcept
     {
         for (;;)
         {
-            const int c1 = (int) s1.getAndAdvance();
-            const int c2 = (int) s2.getAndAdvance();
-            const int diff = c1 - c2;
+            const juce_wchar c1 = s1.getAndAdvance();
 
-            if (diff != 0)  return diff < 0 ? -1 : 1;
-            if (c1 == 0)    break;
+            if (int diff = compare (c1, s2.getAndAdvance()))
+                return diff;
+
+            if (c1 == 0)
+                break;
         }
 
         return 0;
@@ -414,15 +424,22 @@ public:
     {
         while (--maxChars >= 0)
         {
-            const int c1 = (int) s1.getAndAdvance();
-            const int c2 = (int) s2.getAndAdvance();
-            const int diff = c1 - c2;
+            const juce_wchar c1 = s1.getAndAdvance();
 
-            if (diff != 0)  return diff < 0 ? -1 : 1;
-            if (c1 == 0)    break;
+            if (int diff = compare (c1, s2.getAndAdvance()))
+                return diff;
+
+            if (c1 == 0)
+                break;
         }
 
         return 0;
+    }
+
+    /** Compares two characters, using a case-independant match. */
+    static inline int compareIgnoreCase (juce_wchar char1, juce_wchar char2) noexcept
+    {
+        return char1 != char2 ? compare (toUpperCase (char1), toUpperCase (char2)) : 0;
     }
 
     /** Compares two null-terminated character strings, using a case-independant match. */
@@ -431,14 +448,13 @@ public:
     {
         for (;;)
         {
-            const int c1 = (int) s1.toUpperCase();
-            const int c2 = (int) s2.toUpperCase();
-            const int diff = c1 - c2;
+            const juce_wchar c1 = s1.getAndAdvance();
 
-            if (diff != 0)  return diff < 0 ? -1 : 1;
-            if (c1 == 0)    break;
+            if (int diff = compareIgnoreCase (c1, s2.getAndAdvance()))
+                return diff;
 
-             ++s1; ++s2;
+            if (c1 == 0)
+                break;
         }
 
         return 0;
@@ -450,14 +466,13 @@ public:
     {
         while (--maxChars >= 0)
         {
-            const int c1 = (int) s1.toUpperCase();
-            const int c2 = (int) s2.toUpperCase();
-            const int diff = c1 - c2;
+            const juce_wchar c1 = s1.getAndAdvance();
 
-            if (diff != 0)  return diff < 0 ? -1 : 1;
-            if (c1 == 0)    break;
+            if (int diff = compareIgnoreCase (c1, s2.getAndAdvance()))
+                return diff;
 
-             ++s1; ++s2;
+            if (c1 == 0)
+                break;
         }
 
         return 0;

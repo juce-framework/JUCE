@@ -36,7 +36,7 @@
 //==============================================================================
 @interface BluetoothSelectorView : NSObject
 
-@property CABTMIDICentralViewController *central;
+@property (nonatomic, retain) CABTMIDICentralViewController *central;
 - (UIView*) getView;
 
 @end
@@ -112,27 +112,26 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BluetoothMidiSelectorOverlay)
 };
 
-#endif // JUCE_MODULE_AVAILABLE_juce_gui_extra && ! TARGET_IPHONE_SIMULATOR
-
-//==============================================================================
 bool BluetoothMidiDevicePairingDialogue::open()
 {
-   #if JUCE_MODULE_AVAILABLE_juce_gui_extra && ! TARGET_IPHONE_SIMULATOR
     if (isAvailable())
     {
         new BluetoothMidiSelectorOverlay();
         return true;
     }
-   #endif
 
     return false;
 }
 
 bool BluetoothMidiDevicePairingDialogue::isAvailable()
 {
-   #if JUCE_MODULE_AVAILABLE_juce_gui_extra && ! TARGET_IPHONE_SIMULATOR
     return NSClassFromString ([NSString stringWithUTF8String: "CABTMIDICentralViewController"]) != nil;
-   #else
-    return false;
-   #endif
 }
+
+//==============================================================================
+#else
+
+bool BluetoothMidiDevicePairingDialogue::open()         { return false; }
+bool BluetoothMidiDevicePairingDialogue::isAvailable()  { return false; }
+
+#endif

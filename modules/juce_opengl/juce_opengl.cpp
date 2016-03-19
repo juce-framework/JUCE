@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if defined (JUCE_OPENGL_H_INCLUDED) && ! JUCE_AMALGAMATED_INCLUDE
+#ifdef JUCE_OPENGL_H_INCLUDED
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -31,11 +31,11 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_opengl.h"
 
 //==============================================================================
@@ -83,29 +83,41 @@ void OpenGLExtensionFunctions::initialise()
    #if JUCE_WINDOWS || JUCE_LINUX
     #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams) \
         name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
-    #define JUCE_INIT_GL_FUNCTION_EXT(name, returnType, params, callparams) \
+
+    JUCE_GL_BASE_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    #undef JUCE_INIT_GL_FUNCTION
+
+    #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams) \
         name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name); \
         if (name == nullptr) \
             name = (type_ ## name) OpenGLHelpers::getExtensionFunction (JUCE_STRINGIFY (name ## EXT));
 
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION, JUCE_INIT_GL_FUNCTION_EXT)
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    #if JUCE_OPENGL3
+     JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    #endif
+
     #undef JUCE_INIT_GL_FUNCTION
-    #undef JUCE_INIT_GL_FUNCTION_EXT
    #endif
 }
 
 #if JUCE_OPENGL_ES
  #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams) \
-    returnType OpenGLExtensionFunctions::name params { return ::name callparams; }
+    returnType OpenGLExtensionFunctions::name params noexcept { return ::name callparams; }
 
- JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
+ JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+ JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+#if JUCE_OPENGL3
+ JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+#endif
+
  #undef JUCE_DECLARE_GL_FUNCTION
 #endif
 
 #undef JUCE_GL_EXTENSION_FUNCTIONS
 
 #if JUCE_DEBUG && ! defined (JUCE_CHECK_OPENGL_ERROR)
-static const char* getGLErrorMessage (const GLenum e)
+static const char* getGLErrorMessage (const GLenum e) noexcept
 {
     switch (e)
     {
@@ -185,8 +197,6 @@ private:
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 
  #if JUCE_MAC
   #include "native/juce_OpenGL_osx.h"
@@ -201,7 +211,6 @@ private:
  #include "native/juce_OpenGL_linux.h"
 
 #elif JUCE_ANDROID
- #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_OpenGL_android.h"
 
 #endif

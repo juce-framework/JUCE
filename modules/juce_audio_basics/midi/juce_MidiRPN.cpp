@@ -331,7 +331,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void expectContainsRPN (const MidiBuffer& midiBuffer,
                             int channel,
                             int parameterNumber,
@@ -343,7 +343,7 @@ private:
         expectContainsRPN (midiBuffer, expected);
     }
 
-    //==========================================================================
+    //==============================================================================
     void expectContainsRPN (const MidiBuffer& midiBuffer, MidiRPNMessage expected)
     {
         MidiBuffer::Iterator iter (midiBuffer);

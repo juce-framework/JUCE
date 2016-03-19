@@ -31,6 +31,11 @@
  #error "You need to enable at least one plugin format!"
 #endif
 
+#ifdef JUCE_CHECKSETTINGMACROS_H
+ #error "This header should never be included twice! Otherwise something is wrong."
+#endif
+#define JUCE_CHECKSETTINGMACROS_H
+
 #ifndef JucePlugin_IsSynth
  #error "You need to define the JucePlugin_IsSynth value!"
 #endif
@@ -53,10 +58,6 @@
 
 #ifdef JucePlugin_Latency
  #error "JucePlugin_Latency is now deprecated - instead, call the AudioProcessor::setLatencySamples() method if your plugin has a non-zero delay"
-#endif
-
-#ifndef JucePlugin_SilenceInProducesSilenceOut
- #error "You need to define the JucePlugin_SilenceInProducesSilenceOut value!"
 #endif
 
 #ifndef JucePlugin_EditorRequiresKeyboardFocus

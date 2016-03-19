@@ -43,7 +43,7 @@ namespace
         /** Returns the number of bytes of data that have been written to the stream. */
         size_t getDataSize() const noexcept     { return output.getDataSize(); }
 
-        //==========================================================================
+        //==============================================================================
         bool writeInt32 (int32 value)
         {
             return output.writeIntBigEndian (value);
@@ -126,7 +126,7 @@ namespace
             }
         }
 
-        //==========================================================================
+        //==============================================================================
         bool writeMessage (const OSCMessage& msg)
         {
             if (! writeAddressPattern (msg.getAddressPattern()))
@@ -162,7 +162,7 @@ namespace
             return true;
         }
 
-        //==========================================================================
+        //==============================================================================
         bool writeBundleElement (const OSCBundle::Element& element)
         {
             const int64 startPos = output.getPosition();
@@ -204,7 +204,7 @@ struct OSCSender::Pimpl
     Pimpl() noexcept : targetPortNumber (0) {}
     ~Pimpl() noexcept { disconnect(); }
 
-    //==========================================================================
+    //==============================================================================
     bool connect (const String& newTargetHost, int newTargetPort)
     {
         if (! disconnect())
@@ -227,7 +227,7 @@ struct OSCSender::Pimpl
         return true;
     }
 
-    //==========================================================================
+    //==============================================================================
     bool send (const OSCMessage& message, const String& hostName, int portNumber)
     {
         OSCOutputStream outStream;
@@ -246,7 +246,7 @@ struct OSCSender::Pimpl
     bool send (const OSCBundle& bundle)     { return send (bundle,  targetHostName, targetPortNumber); }
 
 private:
-    //==========================================================================
+    //==============================================================================
     bool sendOutputStream (OSCOutputStream& outStream, const String& hostName, int portNumber)
     {
         if (socket != nullptr)
@@ -265,7 +265,7 @@ private:
         return false;
     }
 
-    //==========================================================================
+    //==============================================================================
     ScopedPointer<DatagramSocket> socket;
     String targetHostName;
     int targetPortNumber;

@@ -26,7 +26,7 @@
 #define JUCE_MIDIRPNDETECTOR_H_INCLUDED
 
 
-//==========================================================================
+//==============================================================================
 /** Represents a MIDI RPN (registered parameter number) or NRPN (non-registered
     parameter number) message.
 */
@@ -77,7 +77,7 @@ public:
     */
     void reset() noexcept;
 
-    //==========================================================================
+    //==============================================================================
     /** Takes the next in a stream of incoming MIDI CC messages and returns true
         if it forms the last of a sequence that makes an RPN or NPRN.
 
@@ -91,7 +91,7 @@ public:
                                  MidiRPNMessage& result) noexcept;
 
 private:
-    //==========================================================================
+    //==============================================================================
     struct ChannelState
     {
         ChannelState() noexcept;
@@ -104,7 +104,7 @@ private:
         bool isNRPN;
     };
 
-    //==========================================================================
+    //==============================================================================
     ChannelState states[16];
 
     JUCE_LEAK_DETECTOR (MidiRPNDetector)
@@ -120,11 +120,11 @@ private:
 class JUCE_API  MidiRPNGenerator
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Generates a MIDI sequence representing the given RPN or NRPN message. */
     static MidiBuffer generate (MidiRPNMessage message);
 
-    //==========================================================================
+    //==============================================================================
     /** Generates a MIDI sequence representing an RPN or NRPN message with the
         given parameters.
 

@@ -483,8 +483,12 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
                                                           const StringPairArray& metadataValues,
                                                           int qualityOptionIndex)
 {
+    if (out == nullptr)
+        return nullptr;
+
     ScopedPointer<OggWriter> w (new OggWriter (out, sampleRate, numChannels,
-                                               (unsigned int) bitsPerSample, qualityOptionIndex, metadataValues));
+                                               (unsigned int) bitsPerSample,
+                                               qualityOptionIndex, metadataValues));
 
     return w->ok ? w.release() : nullptr;
 }

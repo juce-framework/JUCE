@@ -554,11 +554,11 @@ public:
         */
         LengthAndCharacterRestriction (int maxNumChars, const String& allowedCharacters);
 
+        String filterNewText (TextEditor&, const String&) override;
+
     private:
         String allowedCharacters;
         int maxLength;
-
-        String filterNewText (TextEditor&, const String&) override;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LengthAndCharacterRestriction)
     };

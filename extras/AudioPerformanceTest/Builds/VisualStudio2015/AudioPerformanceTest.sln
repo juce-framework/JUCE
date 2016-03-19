@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{8F15A9F5-4FD4-7BCA-941E-83FD72FB9668}") = "AudioPerformanceTest", "AudioPerformanceTest.vcxproj", "{DD9D09AA-8915-4497-3B88-5D337FA5B703}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD9D09AA-8915-4497-3B88-5D337FA5B703}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DD9D09AA-8915-4497-3B88-5D337FA5B703}.Debug|Win32.Build.0 = Debug|Win32
+		{DD9D09AA-8915-4497-3B88-5D337FA5B703}.Release|Win32.ActiveCfg = Release|Win32
+		{DD9D09AA-8915-4497-3B88-5D337FA5B703}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -45,7 +45,7 @@
 class JUCE_API  OSCAddress
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Constructs a new OSCAddress from a String.
         @throw OSCFormatError if the string is not a valid OSC address.
     */
@@ -95,7 +95,7 @@ private:
 class JUCE_API  OSCAddressPattern
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Constructs a new OSCAddressPattern from a String.
         @throw OSCFormatError if the string is not a valid OSC address pattern.
     */
@@ -140,7 +140,7 @@ public:
 
 
 private:
-    //==========================================================================
+    //==============================================================================
     StringArray oscSymbols;
     String asString;
     bool wasInitialisedWithWildcards;

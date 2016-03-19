@@ -58,10 +58,17 @@ Image ImageType::convert (const Image& source) const
     Image newImage (create (src.pixelFormat, src.width, src.height, false));
     Image::BitmapData dest (newImage, Image::BitmapData::writeOnly);
 
-    jassert (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat);
-
-    for (int y = 0; y < dest.height; ++y)
-        memcpy (dest.getLinePointer (y), src.getLinePointer (y), (size_t) dest.lineStride);
+    if (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat)
+    {
+        for (int y = 0; y < dest.height; ++y)
+            memcpy (dest.getLinePointer (y), src.getLinePointer (y), (size_t) dest.lineStride);
+    }
+    else
+    {
+        for (int y = 0; y < dest.height; ++y)
+            for (int x = 0; x < dest.width; ++x)
+                dest.setPixelColour (x, y, src.getPixelColour (x, y));
+    }
 
     return newImage;
 }

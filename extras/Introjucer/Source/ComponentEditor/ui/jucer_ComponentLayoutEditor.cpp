@@ -298,7 +298,7 @@ void ComponentLayoutEditor::mouseUp (const MouseEvent& e)
     lassoComp.endLasso();
     removeChildComponent (&lassoComp);
 
-    if (e.mouseWasClicked() && ! e.mods.isAnyModifierKeyDown())
+    if (! (e.mouseWasDraggedSinceMouseDown() || e.mods.isAnyModifierKeyDown()))
         layout.getSelectedSet().deselectAll();
 }
 

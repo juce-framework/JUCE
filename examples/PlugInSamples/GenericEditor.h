@@ -1,12 +1,26 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-    GenericEditor.h
-    Created: 23 Nov 2015 3:08:33pm
-    Author:  Fabian Renn
+ This file is part of the JUCE library.
+ Copyright (c) 2015 - ROLI Ltd.
 
-  ==============================================================================
-*/
+ Permission is granted to use this software under the terms of either:
+ a) the GPL v2 (or any later version)
+ b) the Affero GPL v3
+
+ Details of these licenses can be found at: www.gnu.org/licenses
+
+ JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+ ------------------------------------------------------------------------------
+
+ To release a closed-source product which uses JUCE, commercial licenses are
+ available: visit www.juce.com for more information.
+
+ ==============================================================================
+ */
 
 class GenericEditor : public AudioProcessorEditor,
                       public SliderListener,
@@ -81,13 +95,23 @@ public:
         g.fillAll (Colours::white);
     }
 
+    //==============================================================================
     void sliderValueChanged (Slider* slider) override
     {
-        const OwnedArray<AudioProcessorParameter>& params = getAudioProcessor()->getParameters();
+        if (AudioProcessorParameter* param = getParameterForSlider (slider))
+            param->setValueNotifyingHost ((float) slider->getValue());
+    }
 
-        int paramIndex = paramSliders.indexOf (slider);
-        if (paramIndex >= 0 && paramIndex < params.size())
-            params[paramIndex]->setValueNotifyingHost ((float) slider->getValue());
+    void sliderDragStarted (Slider* slider) override
+    {
+        if (AudioProcessorParameter* param = getParameterForSlider (slider))
+            param->beginChangeGesture();
+    }
+
+    void sliderDragEnded (Slider* slider) override
+    {
+        if (AudioProcessorParameter* param = getParameterForSlider (slider))
+            param->endChangeGesture();
     }
 
 private:
@@ -102,6 +126,12 @@ private:
                     paramSliders[i]->setValue (param->getValue());
             }
         }
+    }
+
+    AudioProcessorParameter* getParameterForSlider (Slider* slider)
+    {
+        const OwnedArray<AudioProcessorParameter>& params = getAudioProcessor()->getParameters();
+        return params[paramSliders.indexOf (slider)];
     }
 
     Label noParameterLabel;

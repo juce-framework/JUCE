@@ -72,6 +72,15 @@ struct PluginBusUtilities
             return nullptr;
         }
 
+        int maxNumberOfChannels() const noexcept
+        {
+            int maxChannels = 0;
+            for (int i = 0; i < supportedLayouts.size(); ++i)
+                maxChannels = jmax (maxChannels, supportedLayouts.getReference (i).size());
+
+            return maxChannels;
+        }
+
         int defaultLayoutIndex;
         bool busIgnoresLayout, canBeDisabled, isEnabledByDefault;
         SortedSet<AudioChannelSet> supportedLayouts;
@@ -88,12 +97,12 @@ struct PluginBusUtilities
     bool hasOutputs (int bus) const noexcept                           { return isBusEnabled (false, bus); }
     int getNumEnabledBuses (bool inputBus) const noexcept              { int i; for (i = 0; i < getBusCount (inputBus); ++i) if (! isBusEnabled (inputBus, i)) break; return i; }
 
-    int findTotalNumChannels (bool isInput) const noexcept
+    int findTotalNumChannels (bool isInput, int busOffset = 0) const noexcept
     {
         int total = 0;
         const AudioBusArray& ioBuses = getFilterBus (isInput);
 
-        for (int i = 0; i < ioBuses.size(); ++i)
+        for (int i = busOffset; i < ioBuses.size(); ++i)
             total += ioBuses.getReference (i).channels.size();
 
         return total;
@@ -341,7 +350,11 @@ private:
             case 2:
                 sets.add (AudioChannelSet::stereo());
                 break;
+            case 3:
+                sets.add (AudioChannelSet::createLCR());
+                break;
             case 4:
+                sets.add (AudioChannelSet::createLCRS());
                 sets.add (AudioChannelSet::quadraphonic());
                 sets.add (AudioChannelSet::ambisonic());
                 break;
@@ -351,6 +364,7 @@ private:
                 break;
             case 6:
                 sets.add (AudioChannelSet::hexagonal());
+                sets.add (AudioChannelSet::create5point1());
                 sets.add (AudioChannelSet::create6point0());
                 break;
             case 7:

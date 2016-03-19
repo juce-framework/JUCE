@@ -28,55 +28,64 @@
 
 namespace TimeHelpers
 {
-    static struct tm millisToLocal (const int64 millis) noexcept
+    static std::tm millisToLocal (int64 millis) noexcept
     {
-        struct tm result;
-        const int64 seconds = millis / 1000;
+       #if JUCE_WINDOWS && JUCE_MINGW
+        time_t now = (time_t) (millis / 1000);
+        return *localtime (&now);
 
-        if (seconds < 86400LL || seconds >= 2145916800LL)
-        {
-            // use extended maths for dates beyond 1970 to 2037..
-            const int timeZoneAdjustment = 31536000 - (int) (Time (1971, 0, 1, 0, 0).toMilliseconds() / 1000);
-            const int64 jdm = seconds + timeZoneAdjustment + 210866803200LL;
+       #elif JUCE_WINDOWS
+        std::tm result;
+        millis /= 1000;
 
-            const int days = (int) (jdm / 86400LL);
-            const int a = 32044 + days;
-            const int b = (4 * a + 3) / 146097;
-            const int c = a - (b * 146097) / 4;
-            const int d = (4 * c + 3) / 1461;
-            const int e = c - (d * 1461) / 4;
-            const int m = (5 * e + 2) / 153;
-
-            result.tm_mday  = e - (153 * m + 2) / 5 + 1;
-            result.tm_mon   = m + 2 - 12 * (m / 10);
-            result.tm_year  = b * 100 + d - 6700 + (m / 10);
-            result.tm_wday  = (days + 1) % 7;
-            result.tm_yday  = -1;
-
-            int t = (int) (jdm % 86400LL);
-            result.tm_hour  = t / 3600;
-            t %= 3600;
-            result.tm_min   = t / 60;
-            result.tm_sec   = t % 60;
-            result.tm_isdst = -1;
-        }
-        else
-        {
-            time_t now = static_cast<time_t> (seconds);
-
-           #if JUCE_WINDOWS && JUCE_MINGW
-            return *localtime (&now);
-           #elif JUCE_WINDOWS
-            if (now >= 0 && now <= 0x793406fff)
-                localtime_s (&result, &now);
-            else
-                zerostruct (result);
-           #else
-            localtime_r (&now, &result); // more thread-safe
-           #endif
-        }
+        if (_localtime64_s (&result, &millis) != 0)
+            zerostruct (result);
 
         return result;
+
+       #else
+        std::tm result;
+        time_t now = (time_t) (millis / 1000);
+
+        if (localtime_r (&now, &result) == nullptr)
+            zerostruct (result);
+
+        return result;
+       #endif
+    }
+
+    static std::tm millisToUTC (int64 millis) noexcept
+    {
+       #if JUCE_WINDOWS && JUCE_MINGW
+        time_t now = (time_t) (millis / 1000);
+        return *gmtime (&now);
+
+       #elif JUCE_WINDOWS
+        std::tm result;
+        millis /= 1000;
+
+        if (_gmtime64_s (&result, &millis) != 0)
+            zerostruct (result);
+
+        return result;
+
+       #else
+        std::tm result;
+        time_t now = (time_t) (millis / 1000);
+
+        if (gmtime_r (&now, &result) == nullptr)
+            zerostruct (result);
+
+        return result;
+       #endif
+    }
+
+    static int getUTCOffsetSeconds (const int64 millis) noexcept
+    {
+        std::tm utc = millisToUTC (millis);
+        utc.tm_isdst = -1;  // Treat this UTC time as local to find the offset
+
+        return (int) ((millis / 1000) - (int64) mktime (&utc));
     }
 
     static int extendedModulo (const int64 value, const int modulo) noexcept
@@ -85,7 +94,7 @@ namespace TimeHelpers
                                  : (value - ((value / modulo) + 1) * modulo));
     }
 
-    static inline String formatString (const String& format, const struct tm* const tm)
+    static inline String formatString (const String& format, const std::tm* const tm)
     {
        #if JUCE_ANDROID
         typedef CharPointer_UTF8  StringType;
@@ -95,17 +104,23 @@ namespace TimeHelpers
         typedef CharPointer_UTF32 StringType;
        #endif
 
+       #ifdef JUCE_MSVC
+        if (tm->tm_year < -1900 || tm->tm_year > 8099)
+            return String();   // Visual Studio's library can only handle 0 -> 9999 AD
+        #endif
+
         for (size_t bufferSize = 256; ; bufferSize += 256)
         {
             HeapBlock<StringType::CharType> buffer (bufferSize);
 
-           #if JUCE_ANDROID
-            const size_t numChars = strftime (buffer, bufferSize - 1, format.toUTF8(), tm);
-           #elif JUCE_WINDOWS
-            const size_t numChars = wcsftime (buffer, bufferSize - 1, format.toWideCharPointer(), tm);
-           #else
-            const size_t numChars = wcsftime (buffer, bufferSize - 1, format.toUTF32(), tm);
-           #endif
+            const size_t numChars =
+                           #if JUCE_ANDROID
+                            strftime (buffer, bufferSize - 1, format.toUTF8(), tm);
+                           #elif JUCE_WINDOWS
+                            wcsftime (buffer, bufferSize - 1, format.toWideCharPointer(), tm);
+                           #else
+                            wcsftime (buffer, bufferSize - 1, format.toUTF32(), tm);
+                           #endif
 
             if (numChars > 0 || format.isEmpty())
                 return String (StringType (buffer),
@@ -113,22 +128,70 @@ namespace TimeHelpers
         }
     }
 
+    //==============================================================================
+    static inline bool isLeapYear (int year) noexcept
+    {
+        return (year % 400 == 0) || ((year % 100 != 0) && (year % 4 == 0));
+    }
+
+    static inline int daysFromJan1 (int year, int month) noexcept
+    {
+        const short dayOfYear[] = { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335,
+                                    0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+
+        return dayOfYear [(isLeapYear (year) ? 12 : 0) + month];
+    }
+
+    static inline int64 daysFromYear0 (int year) noexcept
+    {
+        return 365 * (year - 1) + (year / 400) - (year / 100) + (year / 4);
+    }
+
+    static inline int64 daysFrom1970 (int year) noexcept
+    {
+        return daysFromYear0 (year) - daysFromYear0 (1970);
+    }
+
+    static inline int64 daysFrom1970 (int year, int month) noexcept
+    {
+        if (month > 11)
+        {
+            year += month / 12;
+            month %= 12;
+        }
+        else if (month < 0)
+        {
+            const int numYears = (11 - month) / 12;
+            year -= numYears;
+            month += 12 * numYears;
+        }
+
+        return daysFrom1970 (year) + daysFromJan1 (year, month);
+    }
+
+    // There's no posix function that does a UTC version of mktime,
+    // so annoyingly we need to implement this manually..
+    static inline int64 mktime_utc (const std::tm& t) noexcept
+    {
+        return 24 * 3600 * (daysFrom1970 (t.tm_year + 1900, t.tm_mon) + (t.tm_mday - 1))
+                + 3600 * t.tm_hour
+                + 60 * t.tm_min
+                + t.tm_sec;
+    }
+
     static uint32 lastMSCounterValue = 0;
 }
 
 //==============================================================================
-Time::Time() noexcept
-    : millisSinceEpoch (0)
+Time::Time() noexcept  : millisSinceEpoch (0)
 {
 }
 
-Time::Time (const Time& other) noexcept
-    : millisSinceEpoch (other.millisSinceEpoch)
+Time::Time (const Time& other) noexcept  : millisSinceEpoch (other.millisSinceEpoch)
 {
 }
 
-Time::Time (const int64 ms) noexcept
-    : millisSinceEpoch (ms)
+Time::Time (const int64 ms) noexcept  : millisSinceEpoch (ms)
 {
 }
 
@@ -141,41 +204,26 @@ Time::Time (const int year,
             const int milliseconds,
             const bool useLocalTime) noexcept
 {
-    jassert (year > 100); // year must be a 4-digit version
+    std::tm t;
+    t.tm_year   = year - 1900;
+    t.tm_mon    = month;
+    t.tm_mday   = day;
+    t.tm_hour   = hours;
+    t.tm_min    = minutes;
+    t.tm_sec    = seconds;
+    t.tm_isdst  = -1;
 
-    if (year < 1971 || year >= 2038 || ! useLocalTime)
+    const int64 time = useLocalTime ? (int64) mktime (&t)
+                                    : TimeHelpers::mktime_utc (t);
+
+    if (time >= 0)
     {
-        // use extended maths for dates beyond 1970 to 2037..
-        const int timeZoneAdjustment = useLocalTime ? (31536000 - (int) (Time (1971, 0, 1, 0, 0).toMilliseconds() / 1000))
-                                                    : 0;
-        const int a = (13 - month) / 12;
-        const int y = year + 4800 - a;
-        const int jd = day + (153 * (month + 12 * a - 2) + 2) / 5
-                           + (y * 365) + (y /  4) - (y / 100) + (y / 400)
-                           - 32045;
-
-        const int64 s = ((int64) jd) * 86400LL - 210866803200LL;
-
-        millisSinceEpoch = 1000 * (s + (hours * 3600 + minutes * 60 + seconds - timeZoneAdjustment))
-                             + milliseconds;
+        millisSinceEpoch = 1000 * time + milliseconds;
     }
     else
     {
-        struct tm t;
-        t.tm_year   = year - 1900;
-        t.tm_mon    = month;
-        t.tm_mday   = day;
-        t.tm_hour   = hours;
-        t.tm_min    = minutes;
-        t.tm_sec    = seconds;
-        t.tm_isdst  = -1;
-
-        millisSinceEpoch = 1000 * (int64) mktime (&t);
-
-        if (millisSinceEpoch < 0)
-            millisSinceEpoch = 0;
-        else
-            millisSinceEpoch += milliseconds;
+        jassertfalse; // trying to create a date that is beyond the range that mktime supports!
+        millisSinceEpoch = 0;
     }
 }
 
@@ -315,7 +363,7 @@ String Time::toString (const bool includeDate,
 
 String Time::formatted (const String& format) const
 {
-    struct tm t (TimeHelpers::millisToLocal (millisSinceEpoch));
+    std::tm t (TimeHelpers::millisToLocal (millisSinceEpoch));
     return TimeHelpers::formatString (format, &t);
 }
 
@@ -388,6 +436,117 @@ String Time::getTimeZone() const noexcept
     return zone[0].substring (0, 3);
 }
 
+int Time::getUTCOffsetSeconds() const noexcept
+{
+    return TimeHelpers::getUTCOffsetSeconds (millisSinceEpoch);
+}
+
+String Time::getUTCOffsetString (bool includeSemiColon) const
+{
+    if (int seconds = getUTCOffsetSeconds())
+    {
+        const int minutes = seconds / 60;
+
+        return String::formatted (includeSemiColon ? "%+03d:%02d"
+                                                   : "%+03d%02d",
+                                  minutes / 60,
+                                  minutes % 60);
+    }
+
+    return "Z";
+}
+
+String Time::toISO8601 (bool includeDividerCharacters) const
+{
+    return String::formatted (includeDividerCharacters ? "%04d-%02d-%02dT%02d:%02d:%02.03f"
+                                                       : "%04d%02d%02dT%02d%02d%02.03f",
+                              getYear(),
+                              getMonth() + 1,
+                              getDayOfMonth(),
+                              getHours(),
+                              getMinutes(),
+                              getSeconds() + getMilliseconds() / 1000.0)
+            + getUTCOffsetString (includeDividerCharacters);
+}
+
+static int parseFixedSizeIntAndSkip (String::CharPointerType& t, int numChars, char charToSkip) noexcept
+{
+    int n = 0;
+
+    for (int i = numChars; --i >= 0;)
+    {
+        const int digit = (int) (*t - '0');
+
+        if (! isPositiveAndBelow (digit, 10))
+            return -1;
+
+        ++t;
+        n = n * 10 + digit;
+    }
+
+    if (charToSkip != 0 && *t == (juce_wchar) charToSkip)
+        ++t;
+
+    return n;
+}
+
+Time Time::fromISO8601 (StringRef iso) noexcept
+{
+    String::CharPointerType t = iso.text;
+
+    const int year = parseFixedSizeIntAndSkip (t, 4, '-');
+    if (year < 0)
+        return Time();
+
+    const int month = parseFixedSizeIntAndSkip (t, 2, '-');
+    if (month < 0)
+        return Time();
+
+    const int day = parseFixedSizeIntAndSkip (t, 2, 0);
+    if (day < 0)
+        return Time();
+
+    int hours = 0, minutes = 0, milliseconds = 0;
+
+    if (*t == 'T')
+    {
+        ++t;
+        hours = parseFixedSizeIntAndSkip (t, 2, ':');
+        if (hours < 0)
+            return Time();
+
+        minutes = parseFixedSizeIntAndSkip (t, 2, ':');
+        if (minutes < 0)
+            return Time();
+
+        milliseconds = (int) (1000.0 * CharacterFunctions::readDoubleValue (t));
+    }
+
+    const juce_wchar nextChar = t.getAndAdvance();
+
+    if (nextChar == '-' || nextChar == '+')
+    {
+        const int offsetHours = parseFixedSizeIntAndSkip (t, 2, ':');
+        if (offsetHours < 0)
+            return Time();
+
+        const int offsetMinutes = parseFixedSizeIntAndSkip (t, 2, 0);
+        if (offsetMinutes < 0)
+            return Time();
+
+        const int offsetMs = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
+        milliseconds += nextChar == '-' ? offsetMs : -offsetMs; // NB: this seems backwards but is correct!
+    }
+    else if (nextChar != 0 && nextChar != 'Z')
+    {
+        return Time();
+    }
+
+    Time result (year, month - 1, day, hours, minutes, 0, 0, false);
+    result.millisSinceEpoch += milliseconds;
+    return result;
+}
+
 String Time::getMonthName (const bool threeLetterVersion) const
 {
     return getMonthName (getMonth(), threeLetterVersion);
@@ -442,19 +601,76 @@ static int getMonthNumberForCompileDate (const String& m) noexcept
         if (m.equalsIgnoreCase (shortMonthNames[i]))
             return i;
 
-    // If you hit this because your compiler has a non-standard __DATE__ format,
-    // let me know so we can add support for it!
+    // If you hit this because your compiler has an unusual __DATE__
+    // format, let us know so we can add support for it!
     jassertfalse;
     return 0;
 }
 
 Time Time::getCompilationDate()
 {
-    StringArray dateTokens;
+    StringArray dateTokens, timeTokens;
+
     dateTokens.addTokens (__DATE__, true);
     dateTokens.removeEmptyStrings (true);
 
+    timeTokens.addTokens (__TIME__, ":", StringRef());
+
     return Time (dateTokens[2].getIntValue(),
                  getMonthNumberForCompileDate (dateTokens[0]),
-                 dateTokens[1].getIntValue(), 12, 0);
+                 dateTokens[1].getIntValue(),
+                 timeTokens[0].getIntValue(),
+                 timeTokens[1].getIntValue());
 }
+
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class TimeTests  : public UnitTest
+{
+public:
+    TimeTests() : UnitTest ("Time") {}
+
+    void runTest() override
+    {
+        beginTest ("Time");
+
+        Time t = Time::getCurrentTime();
+        expect (t > Time());
+
+        Thread::sleep (15);
+        expect (Time::getCurrentTime() > t);
+
+        expect (t.getTimeZone().isNotEmpty());
+        expect (t.getUTCOffsetString (true)  == "Z" || t.getUTCOffsetString (true).length() == 6);
+        expect (t.getUTCOffsetString (false) == "Z" || t.getUTCOffsetString (false).length() == 5);
+
+        expect (Time::fromISO8601 (t.toISO8601 (true)) == t);
+        expect (Time::fromISO8601 (t.toISO8601 (false)) == t);
+
+        expect (Time::fromISO8601 ("2016-02-16") == Time (2016, 1, 16, 0, 0, 0, 0, false));
+        expect (Time::fromISO8601 ("20160216Z") == Time (2016, 1, 16, 0, 0, 0, 0, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57+00:00") == Time (2016, 1, 16, 15, 3, 57, 0, false));
+        expect (Time::fromISO8601 ("20160216T150357+0000") == Time (2016, 1, 16, 15, 3, 57, 0, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999+00:00") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999+0000") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999-0230") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+
+        expect (Time (1982, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (1983, 1, 1, 12, 0, 0, 0, true));
+        expect (Time (1970, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (1971, 1, 1, 12, 0, 0, 0, true));
+        expect (Time (2038, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (2039, 1, 1, 12, 0, 0, 0, true));
+
+        expect (Time (1982, 1, 1, 12, 0, 0, 0, false) + RelativeTime::days (365) == Time (1983, 1, 1, 12, 0, 0, 0, false));
+        expect (Time (1970, 1, 1, 12, 0, 0, 0, false) + RelativeTime::days (365) == Time (1971, 1, 1, 12, 0, 0, 0, false));
+        expect (Time (2038, 1, 1, 12, 0, 0, 0, false) + RelativeTime::days (365) == Time (2039, 1, 1, 12, 0, 0, 0, false));
+    }
+};
+
+static TimeTests timeTests;
+
+#endif

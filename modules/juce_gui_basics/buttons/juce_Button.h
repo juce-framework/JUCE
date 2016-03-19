@@ -478,7 +478,7 @@ private:
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
     int radioGroupId, connectedEdgeFlags;
     CommandID commandID;
-    ButtonState buttonState;
+    ButtonState buttonState, lastStatePainted;
 
     Value isOn;
     bool lastToggleState;

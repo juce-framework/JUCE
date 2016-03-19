@@ -29,25 +29,7 @@
 #ifndef JUCE_CORE_H_INCLUDED
 #define JUCE_CORE_H_INCLUDED
 
-#ifndef JUCE_MODULE_AVAILABLE_juce_core
- /* If you fail to make sure that all your compile units are building JUCE with the same set of
-    option flags, then there's a risk that different compile units will treat the classes as having
-    different memory layouts, leading to very nasty memory corruption errors when they all get
-    linked together. That's why it's best to always include the Introjucer-generated AppConfig.h
-    file before any juce headers.
-
-    Note that if you do have an AppConfig.h file and hit this warning, it means that it doesn't
-    contain the JUCE_MODULE_AVAILABLE_xxx flags, which are necessary for some inter-module
-    functionality to work correctly. In that case, you should either rebuild your AppConfig.h with
-    the latest introjucer, or fix it manually to contain these flags.
- */
- #ifdef _MSC_VER
-  #pragma message ("Have you included your AppConfig.h file before including the JUCE headers?")
- #else
-  #warning "Have you included your AppConfig.h file before including the JUCE headers?"
- #endif
-#endif
-
+//==============================================================================
 #ifdef _MSC_VER
  #pragma warning (push)
  // Disable warnings for long class names, padding, and undefined preprocessor definitions.
@@ -57,10 +39,9 @@
  #endif
 #endif
 
-//==============================================================================
 #include "system/juce_TargetPlatform.h"
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_FORCE_DEBUG
 
     Normally, JUCE_DEBUG is set to 1 or 0 based on compiler and project settings,
@@ -70,7 +51,7 @@
  //#define JUCE_FORCE_DEBUG 0
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_LOG_ASSERTIONS
 
     If this flag is enabled, the jassert and jassertfalse macros will always use Logger::writeToLog()
@@ -90,7 +71,7 @@
  #endif
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_CHECK_MEMORY_LEAKS
 
     Enables a memory-leak check for certain objects when the app terminates. See the LeakedObjectDetector
@@ -100,7 +81,7 @@
  #define JUCE_CHECK_MEMORY_LEAKS 1
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
 
     In a Visual C++  build, this can be used to stop the required system libs being
@@ -149,8 +130,12 @@
  #define JUCE_STRING_UTF_TYPE 8
 #endif
 
-//=============================================================================
-//=============================================================================
+//==============================================================================
+//==============================================================================
+
+#if JUCE_CORE_INCLUDE_NATIVE_HEADERS
+ #include "native/juce_BasicNativeHeaders.h"
+#endif
 
 #include "system/juce_StandardHeader.h"
 
@@ -168,7 +153,7 @@ class FileOutputStream;
 class XmlElement;
 class JSONFormatter;
 
-extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
+extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
 extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
 
 #include "memory/juce_Memory.h"
@@ -207,6 +192,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "threads/juce_CriticalSection.h"
 #include "maths/juce_Range.h"
 #include "maths/juce_NormalisableRange.h"
+#include "maths/juce_StatisticsAccumulator.h"
 #include "containers/juce_ElementComparator.h"
 #include "containers/juce_ArrayAllocationBase.h"
 #include "containers/juce_Array.h"
@@ -256,6 +242,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "maths/juce_BigInteger.h"
 #include "maths/juce_Expression.h"
 #include "maths/juce_Random.h"
+#include "misc/juce_RuntimePermissions.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
 #include "system/juce_SystemStats.h"
@@ -287,6 +274,19 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "zip/juce_ZipFile.h"
 #include "containers/juce_PropertySet.h"
 #include "memory/juce_SharedResourcePointer.h"
+
+#if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
+ #include "native/juce_osx_ObjCHelpers.h"
+#endif
+
+#if JUCE_CORE_INCLUDE_COM_SMART_PTR && JUCE_WINDOWS
+ #include "native/juce_win32_ComSmartPtr.h"
+#endif
+
+#if JUCE_CORE_INCLUDE_JNI_HELPERS && JUCE_ANDROID
+ #include "native/juce_android_JNIHelpers.h"
+#endif
+
 
 #ifndef DOXYGEN
  /*

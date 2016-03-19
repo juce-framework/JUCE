@@ -593,4 +593,4 @@ void ComponentPeer::setRepresentedFile (const File&)
 
 //==============================================================================
 int ComponentPeer::getCurrentRenderingEngine() const            { return 0; }
-void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); (void) index; }
+void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); ignoreUnused (index); }

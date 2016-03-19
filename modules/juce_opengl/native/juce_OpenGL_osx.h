@@ -72,7 +72,7 @@ public:
     static void createAttribs (NSOpenGLPixelFormatAttribute* attribs, OpenGLVersion version,
                                const OpenGLPixelFormat& pixFormat, bool shouldUseMultisampling)
     {
-        (void) version;
+        ignoreUnused (version);
         int numAttribs = 0;
 
        #if JUCE_OPENGL3
@@ -157,9 +157,37 @@ public:
 
     void swapBuffers()
     {
+        double now = Time::getMillisecondCounterHiRes();
         [renderContext flushBuffer];
 
-        sleepIfRenderingTooFast();
+        if (minSwapTimeMs > 0)
+        {
+            // When our window is entirely occluded by other windows, flushBuffer
+            // fails to wait for the swap interval, so the render loop spins at full
+            // speed, burning CPU. This hack detects when things are going too fast
+            // and sleeps if necessary.
+
+            const double swapTime = Time::getMillisecondCounterHiRes() - now;
+            const int frameTime = (int) (now - lastSwapTime);
+
+            if (swapTime < 0.5 && frameTime < minSwapTimeMs - 3)
+            {
+                if (underrunCounter > 3)
+                {
+                    Thread::sleep (2 * (minSwapTimeMs - frameTime));
+                    now = Time::getMillisecondCounterHiRes();
+                }
+                else
+                    ++underrunCounter;
+            }
+            else
+            {
+                if (underrunCounter > 0)
+                    --underrunCounter;
+            }
+        }
+
+        lastSwapTime = now;
     }
 
     void updateWindowPosition (const Rectangle<int>&) {}
@@ -180,33 +208,6 @@ public:
                     forParameter: NSOpenGLCPSwapInterval];
 
         return numFrames;
-    }
-
-    void sleepIfRenderingTooFast()
-    {
-        // When our window is entirely occluded by other windows, the system
-        // fails to correctly implement the swap interval time, so the render
-        // loop spins at full speed, burning CPU. This hack detects when things
-        // are going too fast and slows things down if necessary.
-
-        if (minSwapTimeMs > 0)
-        {
-            const double now = Time::getMillisecondCounterHiRes();
-            const int elapsed = (int) (now - lastSwapTime);
-            lastSwapTime = now;
-
-            if (isPositiveAndBelow (elapsed, minSwapTimeMs - 3))
-            {
-                if (underrunCounter > 3)
-                    Thread::sleep (minSwapTimeMs - elapsed);
-                else
-                    ++underrunCounter;
-            }
-            else
-            {
-                underrunCounter = 0;
-            }
-        }
     }
 
     NSOpenGLContext* renderContext;

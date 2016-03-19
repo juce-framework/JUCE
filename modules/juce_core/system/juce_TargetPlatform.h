@@ -39,8 +39,17 @@
     - Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
     - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
     - Either JUCE_INTEL or JUCE_PPC
-    - Either JUCE_GCC or JUCE_MSVC
+    - Either JUCE_GCC or JUCE_CLANG or JUCE_MSVC
 */
+
+//==============================================================================
+#ifdef JUCE_APP_CONFIG_HEADER
+ #include JUCE_APP_CONFIG_HEADER
+#else
+ // Your project must contain an AppConfig.h file with your project-specific settings in it,
+ // and your header search path must make it accessible to the module's files.
+ #include "AppConfig.h"
+#endif
 
 //==============================================================================
 #if (defined (_WIN32) || defined (_WIN64))
@@ -52,12 +61,8 @@
 #elif defined (LINUX) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
-  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
-  #define Component CarbonDummyCompName
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
   #include "../native/juce_mac_ClangBugWorkaround.h"
-  #undef Point
-  #undef Component
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1
@@ -174,7 +179,6 @@
 
 #ifdef __clang__
  #define JUCE_CLANG 1
- #define JUCE_GCC 1
 #elif defined (__GNUC__)
   #define JUCE_GCC 1
 #elif defined (_MSC_VER)

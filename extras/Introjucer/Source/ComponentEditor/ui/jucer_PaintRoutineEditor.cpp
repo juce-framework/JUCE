@@ -231,7 +231,7 @@ void PaintRoutineEditor::mouseUp (const MouseEvent& e)
 {
     lassoComp.endLasso();
 
-    if (e.mouseWasClicked() && ! e.mods.isAnyModifierKeyDown())
+    if (! (e.mouseWasDraggedSinceMouseDown() || e.mods.isAnyModifierKeyDown()))
     {
         graphics.getSelectedElements().deselectAll();
         graphics.getSelectedPoints().deselectAll();

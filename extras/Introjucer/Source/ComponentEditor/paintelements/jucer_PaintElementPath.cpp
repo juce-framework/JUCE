@@ -1565,7 +1565,7 @@ void PathPointComponent::mouseDrag (const MouseEvent& e)
     if (! e.mods.isPopupMenu())
     {
         if (selected && ! dragging)
-            dragging = ! e.mouseWasClicked();
+            dragging = e.mouseWasDraggedSinceMouseDown();
 
         if (dragging)
         {

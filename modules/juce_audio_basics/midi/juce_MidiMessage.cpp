@@ -371,7 +371,7 @@ int MidiMessage::getNoteNumber() const noexcept
 
 void MidiMessage::setNoteNumber (const int newNoteNumber) noexcept
 {
-    if (isNoteOnOrOff())
+    if (isNoteOnOrOff() || isAftertouch())
         getData()[1] = (uint8) (newNoteNumber & 127);
 }
 

@@ -25,6 +25,8 @@
 CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* const parent)
     : arrowSize (16.0f), content (c), dismissalMouseClicksAreAlwaysConsumed (false)
 {
+    mGap = 4.5f;
+    mCornerSize = 9.0;
     addAndMakeVisible (content);
 
     if (parent != nullptr)
@@ -44,6 +46,32 @@ CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* con
     }
 }
 
+CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* const parent,float gap, float cornerSize,LookAndFeel *laf)
+ : arrowSize (16.0f), content (c), dismissalMouseClicksAreAlwaysConsumed (false)
+{
+    mGap = gap;
+    mCornerSize = cornerSize;
+    setLookAndFeel(laf);
+    addAndMakeVisible (content);
+    
+    if (parent != nullptr)
+    {
+        parent->addChildComponent (this);
+        updatePosition (area, parent->getLocalBounds());
+        setVisible (true);
+    }
+    else
+    {
+        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+        
+        updatePosition (area, Desktop::getInstance().getDisplays()
+                        .getDisplayContaining (area.getCentre()).userArea);
+        
+        addToDesktop (ComponentPeer::windowIsTemporary);
+    }
+}
+
+
 CallOutBox::~CallOutBox()
 {
 }
@@ -55,6 +83,14 @@ class CallOutBoxCallback  : public ModalComponentManager::Callback,
 public:
     CallOutBoxCallback (Component* c, const Rectangle<int>& area, Component* parent)
         : content (c), callout (*c, area, parent)
+    {
+        callout.setVisible (true);
+        callout.enterModalState (true, this);
+        startTimer (200);
+    }
+    
+    CallOutBoxCallback (Component* c, const Rectangle<int>& area, Component* parent,float gap,float cornerSize,LookAndFeel* laf)
+    : content (c), callout (*c, area, parent,gap,cornerSize,laf)
     {
         callout.setVisible (true);
         callout.enterModalState (true, this);
@@ -80,6 +116,13 @@ CallOutBox& CallOutBox::launchAsynchronously (Component* content, const Rectangl
     jassert (content != nullptr); // must be a valid content component!
 
     return (new CallOutBoxCallback (content, area, parent))->callout;
+}
+
+CallOutBox& CallOutBox::launchAsynchronously (Component* content, const Rectangle<int>& area, Component* parent,float gap,float cornerSize,LookAndFeel* laf)
+{
+    jassert (content != nullptr); // must be a valid content component!
+    
+    return (new CallOutBoxCallback (content, area, parent,gap,cornerSize,laf))->callout;
 }
 
 //==============================================================================
@@ -233,10 +276,10 @@ void CallOutBox::refreshPath()
     background = Image::null;
     outline.clear();
 
-    const float gap = 4.5f;
+    const float gap = mGap;
 
     outline.addBubble (content.getBounds().toFloat().expanded (gap, gap),
                        getLocalBounds().toFloat(),
                        targetPoint - getPosition().toFloat(),
-                       9.0f, arrowSize * 0.7f);
+                       mCornerSize, arrowSize * 0.7f);
 }

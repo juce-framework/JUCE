@@ -22,14 +22,11 @@
   ==============================================================================
 */
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
+#include "../../juce_core/system/juce_TargetPlatform.h"
 
 //==============================================================================
 #if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
 
-#include "../../juce_core/native/juce_mac_ClangBugWorkaround.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
@@ -39,6 +36,10 @@
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
+#endif
+
+#ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
+ #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
 #endif
 
 #if JUCE_VST3_CAN_REPLACE_VST2
@@ -53,9 +54,6 @@
   #pragma warning (pop)
  #endif
 #endif
-
-#undef Point
-#undef Component
 
 namespace juce
 {
@@ -483,9 +481,11 @@ private:
                 parameters.addParameter (new BypassParam (*pluginInstance, numParameters));
             }
 
-            // We need to account for the bypass parameter in the numParameters passed to
-            // the next function
+           #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
+            // (NB: the +1 is to account for the bypass parameter)
             initialiseMidiControllerMappings (pluginInstance->getNumParameters() + 1);
+           #endif
+
             audioProcessorChanged (pluginInstance);
         }
     }
@@ -642,7 +642,7 @@ private:
 
     private:
         //==============================================================================
-        class ContentWrapperComponent  : public juce::Component
+        class ContentWrapperComponent  : public Component
         {
         public:
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
@@ -1014,7 +1014,7 @@ public:
     {
         const int headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
         const struct fxBank* bank = (const struct fxBank*) (data + (8 + headerLen));
-        const int version = static_cast<int> (htonl (bank->version)); (void) version;
+        const int version = static_cast<int> (htonl (bank->version)); ignoreUnused (version);
 
         jassert ('VstW' == htonl (*(juce::int32*) data));
         jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
@@ -1572,11 +1572,13 @@ public:
                     const int id = (int) paramQueue->getParameterId();
 
                     if (isPositiveAndBelow (id, pluginInstance->getNumParameters()))
-                        pluginInstance->setParameter (id, (float) value);
+                        pluginInstance->setParameter (id, static_cast<float> (value));
                     else if (id == vstBypassParameterId)
                         setBypassed (static_cast<float> (value) != 0.0f);
+                   #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
                     else
                         addParameterChangeToMidiBuffer (offsetSamples, id, value);
+                   #endif
                 }
             }
         }
