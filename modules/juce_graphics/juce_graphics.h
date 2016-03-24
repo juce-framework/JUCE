@@ -28,7 +28,7 @@
 #include "../juce_core/juce_core.h"
 #include "../juce_events/juce_events.h"
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_USE_COREIMAGE_LOADER
 
     On OSX, enabling this flag means that the CoreImage codecs will be used to load
@@ -60,7 +60,7 @@
  #define USE_COREGRAPHICS_RENDERING 1
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 
@@ -107,6 +107,11 @@ class LowLevelGraphicsContext;
 #include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
+
+#if JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS && (JUCE_MAC || JUCE_IOS)
+ #include "native/juce_mac_CoreGraphicsHelpers.h"
+ #include "native/juce_mac_CoreGraphicsContext.h"
+#endif
 
 }
 

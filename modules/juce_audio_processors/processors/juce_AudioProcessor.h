@@ -317,6 +317,14 @@ public:
         changing the channel layout of other buses, for example, if your plug-in requires the same
         number of input and output channels.
 
+        For most basic plug-ins, which do not require side-chains, aux buses or detailed audio
+        channel layout information, it is easier to specify the acceptable channel configurations
+        via the "PlugIn Channel Configurations" field in the Introjucer. In this case, you should
+        not override this method.
+
+        If, on the other hand, you decide to override this method then you need to make sure that
+        "PlugIn Channel Configurations" field in the Introjucer is empty.
+
         Note, that you must not do any heavy allocations or calculations in this callback as it may
         be called several hundred times during initialization. If you require any layout specific
         allocations then defer these to prepareToPlay callback.
@@ -452,9 +460,6 @@ public:
         later if the value changes.
     */
     void setLatencySamples (int newLatency);
-
-    /** Returns true if a silent input always produces a silent output. */
-    virtual bool silenceInProducesSilenceOut() const = 0;
 
     /** Returns the length of the filter's tail, in seconds. */
     virtual double getTailLengthSeconds() const = 0;
@@ -876,7 +881,7 @@ public:
 
     //==============================================================================
     /** This is called by the processor to specify its details before being played. Use this
-        version of the function if you are not interested in any sidechain or aux buses
+        version of the function if you are not interested in any sidechain and/or aux buses
         and do not care about the layout of channels. Otherwise use setRateAndBufferSizeDetails.*/
     void setPlayConfigDetails (int numIns, int numOuts, double sampleRate, int blockSize);
 
@@ -910,7 +915,7 @@ public:
     WrapperType wrapperType;
 
     //==============================================================================
-#ifndef DOXYGEN
+   #ifndef DOXYGEN
     /** Deprecated: use getTotalNumInputChannels instead. */
     JUCE_DEPRECATED_WITH_BODY (int getNumInputChannels()  const noexcept, { return getTotalNumInputChannels(); })
     JUCE_DEPRECATED_WITH_BODY (int getNumOutputChannels() const noexcept, { return getTotalNumOutputChannels(); })
@@ -937,7 +942,7 @@ public:
         the constructor. */
     JUCE_DEPRECATED (virtual bool isInputChannelStereoPair  (int index) const);
     JUCE_DEPRECATED (virtual bool isOutputChannelStereoPair (int index) const);
-#endif
+   #endif
 
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
@@ -993,6 +998,9 @@ private:
     AudioProcessorListener* getListenerLocked (int) const noexcept;
     void disableNonMainBuses (bool isInput);
     void updateSpeakerFormatStrings();
+
+    // This method is no longer used - you can delete it from your AudioProcessor classes.
+    JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; });
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };

@@ -50,6 +50,7 @@
 
 
 //==============================================================================
+#include <memory>
 #include <vector>  // included before platform defs to provide a definition of _LIBCPP_VERSION
 
 #include "juce_CompilerSupport.h"

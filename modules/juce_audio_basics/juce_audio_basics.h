@@ -27,7 +27,7 @@
 
 #include "../juce_core/juce_core.h"
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 
@@ -40,6 +40,7 @@ namespace juce
 #include "effects/juce_Decibels.h"
 #include "effects/juce_IIRFilter.h"
 #include "effects/juce_LagrangeInterpolator.h"
+#include "effects/juce_CatmullRomInterpolator.h"
 #include "effects/juce_FFT.h"
 #include "effects/juce_LinearSmoothedValue.h"
 #include "effects/juce_Reverb.h"

@@ -25,7 +25,6 @@
 #ifndef JUCER_PROJECT_H_INCLUDED
 #define JUCER_PROJECT_H_INCLUDED
 
-#include "../jucer_Headers.h"
 class ProjectExporter;
 class ProjectType;
 class LibraryModule;

@@ -34,6 +34,7 @@ MPEZoneLayout::MPEZoneLayout (const MPEZoneLayout& other)
 MPEZoneLayout& MPEZoneLayout::operator= (const MPEZoneLayout& other)
 {
     zones = other.zones;
+    listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
     return *this;
 }
 
@@ -195,14 +196,6 @@ void MPEZoneLayout::addListener (Listener* const listenerToAdd) noexcept
 void MPEZoneLayout::removeListener (Listener* const listenerToRemove) noexcept
 {
     listeners.remove (listenerToRemove);
-}
-
-MPEZoneLayout::Listener::Listener()
-{
-}
-
-MPEZoneLayout::Listener::~Listener()
-{
 }
 
 //==============================================================================

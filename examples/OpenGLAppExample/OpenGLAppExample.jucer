@@ -4,12 +4,6 @@
               bundleIdentifier="com.yourcompany.OpenGLAppExample" includeBinaryInAppConfig="1"
               jucerVersion="4.1.0">
   <MAINGROUP id="amjEXL" name="OpenGLAppExample">
-    <GROUP id="{F5EA45A1-E25D-1821-14F8-EBCFBA9B2B81}" name="Shaders">
-      <FILE id="D3dDWc" name="FragmentShader.glsl" compile="1" resource="0"
-            file="Source/FragmentShader.glsl"/>
-      <FILE id="l2YQJq" name="VertexShader.glsl" compile="1" resource="0"
-            file="Source/VertexShader.glsl"/>
-    </GROUP>
     <GROUP id="{28FE2D12-A88D-07E2-72CF-CD04014CF225}" name="Source">
       <GROUP id="{666960E2-D311-806A-1FE7-A27057939840}" name="Resources">
         <FILE id="TK8Cyp" name="teapot.obj" compile="0" resource="1" file="Source/Resources/teapot.obj"/>

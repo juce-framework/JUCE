@@ -524,7 +524,7 @@ public:
     */
     void consolidate()
     {
-        for (int i = 0; i < getNumRectangles() - 1; ++i)
+        for (int i = 0; i < rects.size() - 1; ++i)
         {
             RectangleType& r = rects.getReference (i);
             const ValueType rx1 = r.getX();

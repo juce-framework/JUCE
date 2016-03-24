@@ -22,14 +22,16 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "jucer_ProjectExporter.h"
 #include "jucer_ProjectSaver.h"
 
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_MSVC.h"
 #include "jucer_ProjectExport_XCode.h"
-#include "jucer_ProjectExport_Android.h"
+#include "jucer_ProjectExport_AndroidBase.h"
 #include "jucer_ProjectExport_AndroidStudio.h"
+#include "jucer_ProjectExport_AndroidAnt.h"
 #include "jucer_ProjectExport_CodeBlocks.h"
 
 //==============================================================================
@@ -693,7 +695,7 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
                    "The name of this configuration.");
 
     props.add (new BooleanPropertyComponent (isDebugValue(), "Debug mode", "Debugging enabled"),
-               "If enabled, this means that the configuration should be built with debug synbols.");
+               "If enabled, this means that the configuration should be built with debug symbols.");
 
     props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false),
                "The filename to use for the destination binary executable file. If you don't add a suffix to this name, "

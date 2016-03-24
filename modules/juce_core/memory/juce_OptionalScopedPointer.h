@@ -180,6 +180,12 @@ private:
     //==============================================================================
     ScopedPointer<ObjectType> object;
     bool shouldDelete;
+
+    // This is here to avoid people accidentally taking a second owned copy of
+    // a scoped pointer, which is almost certainly not what you intended to do!
+    // If you hit a problem with this, you probably meant to say
+    //  myPointer.setOwned (myScopedPointer.release())
+    void setOwned (const ScopedPointer<ObjectType>&) JUCE_DELETED_FUNCTION;
 };
 
 

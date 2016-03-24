@@ -31,7 +31,8 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+
 #include "juce_audio_processors.h"
 #include "../juce_gui_extra/juce_gui_extra.h"
 
@@ -40,11 +41,7 @@
  #if JUCE_SUPPORT_CARBON \
       && ((JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU) \
            || ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6))
-  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
-  #define Component CarbonDummyCompName
   #include <Carbon/Carbon.h>
-  #undef Point
-  #undef Component
  #endif
 #endif
 

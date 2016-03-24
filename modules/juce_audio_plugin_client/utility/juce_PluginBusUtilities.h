@@ -350,7 +350,11 @@ private:
             case 2:
                 sets.add (AudioChannelSet::stereo());
                 break;
+            case 3:
+                sets.add (AudioChannelSet::createLCR());
+                break;
             case 4:
+                sets.add (AudioChannelSet::createLCRS());
                 sets.add (AudioChannelSet::quadraphonic());
                 sets.add (AudioChannelSet::ambisonic());
                 break;
@@ -360,6 +364,7 @@ private:
                 break;
             case 6:
                 sets.add (AudioChannelSet::hexagonal());
+                sets.add (AudioChannelSet::create5point1());
                 sets.add (AudioChannelSet::create6point0());
                 break;
             case 7:

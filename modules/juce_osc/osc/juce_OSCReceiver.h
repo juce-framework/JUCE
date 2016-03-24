@@ -37,14 +37,14 @@
 class JUCE_API  OSCReceiver
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Constructs a new OSCReceiver. */
     OSCReceiver();
 
     /** Destructor. */
     ~OSCReceiver();
 
-    //==========================================================================
+    //==============================================================================
     /** Connects to the specified UDP port using a datagram socket,
         and starts listening to OSC packets arriving on this port.
 
@@ -52,14 +52,14 @@ public:
     */
     bool connect (int portNumber);
 
-    //==========================================================================
+    //==============================================================================
     /** Disconnects from the currently used UDP port.
         @returns true if the disconnection was successful; false otherwise.
     */
     bool disconnect();
 
 
-    //==========================================================================
+    //==============================================================================
     /** Use this struct as the template parameter for Listener and
         ListenerWithOSCAddress to receive incoming OSC data on the message thread.
         This should be used by OSC callbacks that are not realtime-critical, but
@@ -79,7 +79,7 @@ public:
     */
     struct JUCE_API  RealtimeCallback {};
 
-    //==========================================================================
+    //==============================================================================
     /** A class for receiving OSC data from an OSCReceiver.
 
         The template argument CallbackType determines how the callback will be called
@@ -109,7 +109,7 @@ public:
         virtual void oscBundleReceived (const OSCBundle& /*bundle*/) {}
     };
 
-    //==========================================================================
+    //==============================================================================
     /** A class for receiving only those OSC messages from an OSCReceiver that match a
         given OSC address.
 
@@ -143,7 +143,7 @@ public:
         virtual void oscMessageReceived (const OSCMessage& message) = 0;
     };
 
-    //==========================================================================
+    //==============================================================================
     /** Adds a listener that listens to OSC messages and bundles.
         This listener will be called on the application's message loop.
     */
@@ -203,7 +203,7 @@ public:
     void registerFormatErrorHandler (FormatErrorHandler handler);
 
 private:
-    //==========================================================================
+    //==============================================================================
     struct Pimpl;
     friend struct Pimpl;
     friend struct ContainerDeletePolicy<Pimpl>;

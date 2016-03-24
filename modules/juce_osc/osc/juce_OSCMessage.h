@@ -86,7 +86,7 @@ public:
     int size() const noexcept;
 
     /** Returns true if the OSCMessage contains no OSCArgument objects; false otherwise. */
-    bool empty() const noexcept;
+    bool isEmpty() const noexcept;
 
     /** Returns a reference to the OSCArgument at index i in the OSCMessage object.
         This method does not check the range and results in undefined behavour
@@ -159,7 +159,7 @@ private:
 };
 
 
-//==================================================================================
+//==============================================================================
 #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
  template <typename Arg1, typename... Args>
  OSCMessage::OSCMessage (const OSCAddressPattern& ap, Arg1&& arg1, Args&&... args)

@@ -70,6 +70,77 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroupComponent)
 };
 
+//==============================================================================
+class RolloverHelpComp   : public Component,
+                           private Timer
+{
+public:
+    RolloverHelpComp()  : lastComp (nullptr)
+    {
+        setInterceptsMouseClicks (false, false);
+        startTimer (150);
+    }
+
+    void paint (Graphics& g) override
+    {
+        AttributedString s;
+        s.setJustification (Justification::centredLeft);
+        s.append (lastTip, Font (14.0f), findColour (mainBackgroundColourId).contrasting (0.7f));
+
+        TextLayout tl;
+        tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
+        if (tl.getNumLines() > 3)
+            tl.createLayout (s, getWidth() - 10.0f);
+
+        tl.draw (g, getLocalBounds().toFloat());
+    }
+
+private:
+    Component* lastComp;
+    String lastTip;
+
+    void timerCallback() override
+    {
+        Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
+
+        if (newComp != nullptr
+             && (newComp->getTopLevelComponent() != getTopLevelComponent()
+                  || newComp->isCurrentlyBlockedByAnotherModalComponent()))
+            newComp = nullptr;
+
+        if (newComp != lastComp)
+        {
+            lastComp = newComp;
+
+            String newTip (findTip (newComp));
+
+            if (newTip != lastTip)
+            {
+                lastTip = newTip;
+                repaint();
+            }
+        }
+    }
+
+    static String findTip (Component* c)
+    {
+        while (c != nullptr)
+        {
+            if (TooltipClient* tc = dynamic_cast<TooltipClient*> (c))
+            {
+                const String tip (tc->getTooltip());
+
+                if (tip.isNotEmpty())
+                    return tip;
+            }
+
+            c = c->getParentComponent();
+        }
+
+        return String();
+    }
+};
+
 
 //==============================================================================
 class ConfigTreeItemBase  : public JucerTreeViewBase,
@@ -134,9 +205,8 @@ public:
 
 private:
     //==============================================================================
-    class PropertyPanelViewport  : public Component
+    struct PropertyPanelViewport  : public Component
     {
-    public:
         PropertyPanelViewport (Component* content)
         {
             addAndMakeVisible (viewport);
@@ -159,7 +229,6 @@ private:
         Viewport viewport;
         RolloverHelpComp rolloverHelp;
 
-    private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyPanelViewport)
     };
 };

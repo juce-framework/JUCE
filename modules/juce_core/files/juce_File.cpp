@@ -369,62 +369,69 @@ int64 File::hashCode64() const  { return fullPath.hashCode64(); }
 //==============================================================================
 bool File::isAbsolutePath (StringRef path)
 {
-    return path.text[0] == separator
+    const juce_wchar firstChar = *(path.text);
+
+    return firstChar == separator
            #if JUCE_WINDOWS
-            || (path.isNotEmpty() && path.text[1] == ':');
+            || (firstChar != 0 && path.text[1] == ':');
            #else
-            || path.text[0] == '~';
+            || firstChar == '~';
            #endif
 }
 
 File File::getChildFile (StringRef relativePath) const
 {
-    if (isAbsolutePath (relativePath))
-        return File (String (relativePath.text));
+    String::CharPointerType r = relativePath.text;
 
-    if (relativePath[0] != '.')
-        return File (addTrailingSeparator (fullPath) + relativePath);
+    if (isAbsolutePath (r))
+        return File (String (r));
+
+   #if JUCE_WINDOWS
+    if (r.indexOf ((juce_wchar) '/') >= 0)
+        return getChildFile (String (r).replaceCharacter ('/', '\\'));
+   #endif
 
     String path (fullPath);
 
-    // It's relative, so remove any ../ or ./ bits at the start..
-   #if JUCE_WINDOWS
-    if (relativePath.text.indexOf ((juce_wchar) '/') >= 0)
-        return getChildFile (String (relativePath.text).replaceCharacter ('/', '\\'));
-   #endif
-
-    while (relativePath[0] == '.')
+    while (*r == '.')
     {
-        const juce_wchar secondChar = relativePath[1];
+        String::CharPointerType lastPos = r;
+        const juce_wchar secondChar = *++r;
 
-        if (secondChar == '.')
+        if (secondChar == '.') // remove "../"
         {
-            const juce_wchar thirdChar = relativePath[2];
+            const juce_wchar thirdChar = *++r;
 
-            if (thirdChar == 0 || thirdChar == separator)
+            if (thirdChar == separator || thirdChar == 0)
             {
                 const int lastSlash = path.lastIndexOfChar (separator);
                 if (lastSlash >= 0)
                     path = path.substring (0, lastSlash);
 
-                relativePath = relativePath.text + (thirdChar == 0 ? 2 : 3);
+                while (*r == separator) // ignore duplicate slashes
+                    ++r;
             }
             else
             {
+                r = lastPos;
                 break;
             }
         }
-        else if (secondChar == separator)
+        else if (secondChar == separator || secondChar == 0)  // remove "./"
         {
-            relativePath = relativePath.text + 2;
+            while (*r == separator) // ignore duplicate slashes
+                ++r;
         }
         else
         {
+            r = lastPos;
             break;
         }
     }
 
-    return File (addTrailingSeparator (path) + relativePath);
+    path = addTrailingSeparator (path);
+    path.appendCharPointer (r);
+    return File (path);
 }
 
 File File::getSiblingFile (StringRef fileName) const
@@ -1041,6 +1048,17 @@ public:
         expect (! tempFile.withFileExtension ("h").hasFileExtension ("bar;foo;xx"));
         expect (tempFile.getSiblingFile ("foo").isAChildOf (temp));
         expect (tempFile.hasWriteAccess());
+
+        expect (home.getChildFile (".") == home);
+        expect (home.getChildFile ("..") == home.getParentDirectory());
+        expect (home.getChildFile (".xyz").getFileName() == ".xyz");
+        expect (home.getChildFile ("..xyz").getFileName() == "..xyz");
+        expect (home.getChildFile ("...xyz").getFileName() == "...xyz");
+        expect (home.getChildFile ("./xyz") == home.getChildFile ("xyz"));
+        expect (home.getChildFile ("././xyz") == home.getChildFile ("xyz"));
+        expect (home.getChildFile ("../xyz") == home.getParentDirectory().getChildFile ("xyz"));
+        expect (home.getChildFile (".././xyz") == home.getParentDirectory().getChildFile ("xyz"));
+        expect (home.getChildFile ("./../xyz") == home.getParentDirectory().getChildFile ("xyz"));
 
         {
             FileOutputStream fo (tempFile);

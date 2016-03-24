@@ -49,7 +49,7 @@ public:
     {
     }
 
-    //==========================================================================
+    //==============================================================================
     /** Reset to a new sample rate and ramp length. */
     void reset (double sampleRate, double rampLengthInSeconds) noexcept
     {
@@ -59,7 +59,6 @@ public:
         countdown = 0;
     }
 
-    //==========================================================================
     /** Set a new target value. */
     void setValue (FloatType newValue) noexcept
     {
@@ -75,7 +74,6 @@ public:
         }
     }
 
-    //==========================================================================
     /** Compute the next value. */
     FloatType getNextValue() noexcept
     {
@@ -87,8 +85,20 @@ public:
         return currentValue;
     }
 
+    /** Returns true if the current value is currently being interpolated. */
+    bool isSmoothing() const noexcept
+    {
+        return countdown > 0;
+    }
+
+    /** Returns the target value towards which the smoothed value is currently moving. */
+    FloatType getTargetValue() const noexcept
+    {
+        return target;
+    }
+
 private:
-    //==========================================================================
+    //==============================================================================
     FloatType currentValue, target, step;
     int countdown, stepsToTarget;
 };

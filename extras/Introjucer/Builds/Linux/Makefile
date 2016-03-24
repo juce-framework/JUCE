@@ -88,6 +88,7 @@ OBJECTS := \
   $(OBJDIR)/jucer_CodeHelpers_c317179c.o \
   $(OBJDIR)/jucer_FileHelpers_f98ed0ad.o \
   $(OBJDIR)/jucer_Icons_9db2f51e.o \
+  $(OBJDIR)/jucer_IntrojucerLookAndFeel_d578c909.o \
   $(OBJDIR)/jucer_JucerTreeViewBase_d043309d.o \
   $(OBJDIR)/jucer_MiscUtilities_25b68c82.o \
   $(OBJDIR)/jucer_SlidingPanelComponent_9aa7a2ab.o \
@@ -313,6 +314,11 @@ $(OBJDIR)/jucer_FileHelpers_f98ed0ad.o: ../../Source/Utility/jucer_FileHelpers.c
 $(OBJDIR)/jucer_Icons_9db2f51e.o: ../../Source/Utility/jucer_Icons.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_Icons.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_IntrojucerLookAndFeel_d578c909.o: ../../Source/Utility/jucer_IntrojucerLookAndFeel.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_IntrojucerLookAndFeel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_JucerTreeViewBase_d043309d.o: ../../Source/Utility/jucer_JucerTreeViewBase.cpp

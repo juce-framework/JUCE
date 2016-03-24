@@ -863,7 +863,7 @@ Image juce_loadWithCoreImage (InputStream& input)
         }
     }
 
-    return Image::null;
+    return Image();
 }
 #endif
 

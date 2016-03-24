@@ -22,11 +22,13 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "jucer_ProjectContentComponent.h"
 #include "jucer_Module.h"
 #include "../Application/jucer_MainWindow.h"
 #include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
+#include "../Utility/jucer_FilePathPropertyComponent.h"
 #include "jucer_TreeItemTypes.h"
 
 
@@ -738,6 +740,38 @@ void ProjectContentComponent::showTranslationTool()
                                 600, 700,
                                 600, 400, 10000, 10000);
     }
+}
+
+//==============================================================================
+struct AsyncCommandRetrier  : public Timer
+{
+    AsyncCommandRetrier (const ApplicationCommandTarget::InvocationInfo& i)  : info (i)
+    {
+        info.originatingComponent = nullptr;
+        startTimer (500);
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+        IntrojucerApp::getCommandManager().invoke (info, true);
+        delete this;
+    }
+
+    ApplicationCommandTarget::InvocationInfo info;
+
+    JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier)
+};
+
+bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
+{
+    if (ModalComponentManager::getInstance()->cancelAllModalComponents())
+    {
+        new AsyncCommandRetrier (info);
+        return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

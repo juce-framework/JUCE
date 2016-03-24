@@ -112,19 +112,28 @@ struct CoreAudioFormatMetatdata
     };
 
     //==============================================================================
-    struct UserDefinedChunk
+    static StringPairArray parseUserDefinedChunk (InputStream& input, int64 size)
     {
-        UserDefinedChunk (InputStream& input, int64 size)
-        {
-            // a user defined chunk contains 16 bytes of a UUID first
-            uuid[1] = input.readInt64BigEndian();
-            uuid[0] = input.readInt64BigEndian();
+        StringPairArray infoStrings;
+        const int64 originalPosition = input.getPosition();
 
-            input.skipNextBytes (size - 16);
+        uint8 uuid[16];
+        input.read (uuid, sizeof (uuid));
+
+        if (memcmp (uuid, "\x29\x81\x92\x73\xB5\xBF\x4A\xEF\xB7\x8D\x62\xD1\xEF\x90\xBB\x2C", 16) == 0)
+        {
+            const uint32 numEntries = (uint32) input.readIntBigEndian();
+
+            for (uint32 i = 0; i < numEntries && input.getPosition() < originalPosition + size; ++i)
+            {
+                String keyName = input.readString();
+                infoStrings.set (keyName, input.readString());
+            }
         }
 
-        int64 uuid[2];
-    };
+        input.setPosition (originalPosition + size);
+        return infoStrings;
+    }
 
     //==============================================================================
     static StringPairArray parseMidiChunk (InputStream& input, int64 size)
@@ -288,7 +297,7 @@ struct CoreAudioFormatMetatdata
                 }
                 else if (chunkHeader.chunkType == chunkName ("uuid"))
                 {
-                    UserDefinedChunk userDefinedChunk (input, chunkHeader.chunkSize);
+                    metadataValues.addArray (parseUserDefinedChunk (input, chunkHeader.chunkSize));
                 }
                 else if (chunkHeader.chunkType == chunkName ("data"))
                 {

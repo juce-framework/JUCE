@@ -60,25 +60,32 @@ public:
 
         After creating one of these, use one of the browseFor... methods to display it.
 
-        @param dialogBoxTitle           a text string to display in the dialog box to
-                                        tell the user what's going on
-        @param initialFileOrDirectory   the file or directory that should be selected when
-                                        the dialog box opens. If this parameter is set to
-                                        File::nonexistent, a sensible default directory
-                                        will be used instead.
-        @param filePatternsAllowed      a set of file patterns to specify which files can be
-                                        selected - each pattern should be separated by a
-                                        comma or semi-colon, e.g. "*" or "*.jpg;*.gif". An
-                                        empty string means that all files are allowed
-        @param useOSNativeDialogBox     if true, then a native dialog box will be used if
-                                        possible; if false, then a Juce-based browser dialog
-                                        box will always be used
+        @param dialogBoxTitle                 a text string to display in the dialog box to
+                                              tell the user what's going on
+        @param initialFileOrDirectory         the file or directory that should be selected
+                                              when the dialog box opens. If this parameter is
+                                              set to File::nonexistent, a sensible default
+                                              directory will be used instead.
+        @param filePatternsAllowed            a set of file patterns to specify which files
+                                              can be selected - each pattern should be
+                                              separated by a comma or semi-colon, e.g. "*" or
+                                              "*.jpg;*.gif". An empty string means that all
+                                              files are allowed
+        @param useOSNativeDialogBox           if true, then a native dialog box will be used
+                                              if possible; if false, then a Juce-based
+                                              browser dialog box will always be used
+        @param treatFilePackagesAsDirectories if true, then the file chooser will allow the
+                                              selection of files inside packages when
+                                              invoked on OS X and when using native dialog
+                                              boxes.
+
         @see browseForFileToOpen, browseForFileToSave, browseForDirectory
     */
     FileChooser (const String& dialogBoxTitle,
                  const File& initialFileOrDirectory = File::nonexistent,
                  const String& filePatternsAllowed = String::empty,
-                 bool useOSNativeDialogBox = true);
+                 bool useOSNativeDialogBox = true,
+                 bool treatFilePackagesAsDirectories = false);
 
     /** Destructor. */
     ~FileChooser();
@@ -183,11 +190,12 @@ private:
     const File startingFile;
     Array<File> results;
     const bool useNativeDialogBox;
+    const bool treatFilePackagesAsDirs;
 
     static void showPlatformDialog (Array<File>& results, const String& title, const File& file,
                                     const String& filters, bool selectsDirectories, bool selectsFiles,
                                     bool isSave, bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
-                                    FilePreviewComponent* previewComponent);
+                                    bool treatFilePackagesAsDirs, FilePreviewComponent* previewComponent);
     static bool isPlatformDialogAvailable();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooser)

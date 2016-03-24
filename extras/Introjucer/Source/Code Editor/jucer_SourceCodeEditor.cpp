@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "jucer_SourceCodeEditor.h"
 #include "../Application/jucer_Application.h"
 #include "../Application/jucer_OpenDocumentManager.h"

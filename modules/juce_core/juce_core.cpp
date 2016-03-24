@@ -35,7 +35,10 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+
 #include "juce_core.h"
 
 #include <locale>
@@ -80,6 +83,7 @@
  #if JUCE_LINUX
   #include <langinfo.h>
   #include <ifaddrs.h>
+  #include <sys/resource.h>
 
   #if JUCE_USE_CURL
    #include <curl/curl.h>
@@ -140,6 +144,7 @@ namespace juce
 #include "maths/juce_Expression.cpp"
 #include "maths/juce_Random.cpp"
 #include "memory/juce_MemoryBlock.cpp"
+#include "misc/juce_RuntimePermissions.cpp"
 #include "misc/juce_Result.cpp"
 #include "misc/juce_Uuid.cpp"
 #include "network/juce_MACAddress.cpp"
@@ -180,10 +185,6 @@ namespace juce
 #include "files/juce_WildcardFileFilter.cpp"
 
 //==============================================================================
-#if JUCE_MAC || JUCE_IOS
-#include "native/juce_osx_ObjCHelpers.h"
-#endif
-
 #if JUCE_ANDROID
 #include "native/juce_android_JNIHelpers.h"
 #endif
@@ -203,7 +204,6 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_WINDOWS
-#include "native/juce_win32_ComSmartPtr.h"
 #include "native/juce_win32_Files.cpp"
 #include "native/juce_win32_Network.cpp"
 #include "native/juce_win32_Registry.cpp"
@@ -229,6 +229,7 @@ namespace juce
 #include "native/juce_android_Network.cpp"
 #include "native/juce_android_SystemStats.cpp"
 #include "native/juce_android_Threads.cpp"
+#include "native/juce_android_RuntimePermissions.cpp"
 
 #endif
 

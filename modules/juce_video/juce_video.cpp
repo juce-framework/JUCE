@@ -31,17 +31,16 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+
 #include "../juce_gui_extra/juce_gui_extra.h"
 #include "juce_video.h"
 
 #if JUCE_MAC
  #if JUCE_QUICKTIME
-  #define Point CarbonDummyPointName
-  #define Component CarbonDummyCompName
   #import <QTKit/QTKit.h>
-  #undef Point
-  #undef Component
  #endif
 
 //==============================================================================
@@ -102,8 +101,6 @@ namespace juce
 {
 
 #if JUCE_MAC || JUCE_IOS
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
-
  #if JUCE_USE_CAMERA
   #include "native/juce_mac_CameraDevice.mm"
  #endif
@@ -113,7 +110,6 @@ namespace juce
  #endif
 
 #elif JUCE_WINDOWS
- #include "../juce_core/native/juce_win32_ComSmartPtr.h"
 
  #if JUCE_USE_CAMERA
   #include "native/juce_win32_CameraDevice.cpp"

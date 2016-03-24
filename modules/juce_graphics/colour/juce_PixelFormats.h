@@ -108,7 +108,7 @@ public:
     forcedinline uint8 getGreen() const noexcept      { return components.g; }
     forcedinline uint8 getBlue() const noexcept       { return components.b; }
 
-   #if JUCE_GCC && ! JUCE_CLANG
+   #if JUCE_GCC
     // NB these are here as a workaround because GCC refuses to bind to packed values.
     forcedinline uint8& getAlpha() noexcept           { return comps [indexA]; }
     forcedinline uint8& getRed() noexcept             { return comps [indexR]; }

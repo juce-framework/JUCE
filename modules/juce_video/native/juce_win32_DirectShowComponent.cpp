@@ -30,7 +30,7 @@ namespace DirectShowHelpers
         return SUCCEEDED (graph.CoCreateInstance (CLSID_FilterGraph));
     }
 
-    //======================================================================
+    //==============================================================================
     class VideoRenderer
     {
     public:
@@ -47,7 +47,7 @@ namespace DirectShowHelpers
         virtual HRESULT getVideoSize (long& videoWidth, long& videoHeight) = 0;
     };
 
-    //======================================================================
+    //==============================================================================
     class VMR7  : public VideoRenderer
     {
     public:
@@ -107,7 +107,7 @@ namespace DirectShowHelpers
     };
 
 
-    //======================================================================
+    //==============================================================================
 #if JUCE_MEDIAFOUNDATION
     class EVR : public VideoRenderer
     {
@@ -171,7 +171,7 @@ namespace DirectShowHelpers
 }
 
 
-//======================================================================
+//==============================================================================
 class DirectShowComponent::DirectShowContext    : public AsyncUpdater
 {
 public:
@@ -206,7 +206,7 @@ public:
         CoUninitialize();
     }
 
-    //======================================================================
+    //==============================================================================
     void updateWindowPosition (const Rectangle<int>& newBounds)
     {
         nativeWindow->setWindowPosition (newBounds);
@@ -217,7 +217,7 @@ public:
         nativeWindow->showWindow (shouldBeVisible);
     }
 
-    //======================================================================
+    //==============================================================================
     void repaint()
     {
         if (hasVideo)
@@ -236,7 +236,7 @@ public:
             videoRenderer->displayModeChanged();
     }
 
-    //======================================================================
+    //==============================================================================
     void peerChanged()
     {
         deleteNativeWindow();
@@ -288,7 +288,7 @@ public:
         triggerAsyncUpdate();
     }
 
-    //======================================================================
+    //==============================================================================
     bool loadFile (const String& fileOrURLPath)
     {
         jassert (state == uninitializedState);
@@ -432,7 +432,7 @@ public:
         }
     }
 
-    //======================================================================
+    //==============================================================================
     void run()
     {
         mediaControl->Run();
@@ -451,7 +451,7 @@ public:
         state = pausedState;
     }
 
-    //======================================================================
+    //==============================================================================
     bool isInitialised() const noexcept  { return state != uninitializedState; }
     bool isRunning() const noexcept      { return state == runningState; }
     bool isPaused() const noexcept       { return state == pausedState; }
@@ -460,7 +460,7 @@ public:
     int getVideoWidth() const noexcept   { return (int) videoWidth; }
     int getVideoHeight() const noexcept  { return (int) videoHeight; }
 
-    //======================================================================
+    //==============================================================================
     double getDuration() const
     {
         REFTIME duration;
@@ -475,7 +475,7 @@ public:
         return seconds;
     }
 
-    //======================================================================
+    //==============================================================================
     void setSpeed (const float newSpeed)        { mediaPosition->put_Rate (newSpeed); }
     void setPosition (const double seconds)     { mediaPosition->put_CurrentPosition (seconds); }
     void setVolume (const float newVolume)      { basicAudio->put_Volume (convertToDShowVolume (newVolume)); }
@@ -497,7 +497,7 @@ public:
     }
 
 private:
-    //======================================================================
+    //==============================================================================
     enum { graphEventID = WM_APP + 0x43f0 };
 
     DirectShowComponent& component;
@@ -523,7 +523,7 @@ private:
 
     bool needToUpdateViewport, needToRecreateNativeWindow;
 
-    //======================================================================
+    //==============================================================================
     class NativeWindowClass   : private DeletedAtShutdown
     {
     public:
@@ -585,7 +585,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE (NativeWindowClass)
     };
 
-    //======================================================================
+    //==============================================================================
     class NativeWindow
     {
     public:
@@ -646,7 +646,7 @@ private:
 
     ScopedPointer<NativeWindow> nativeWindow;
 
-    //======================================================================
+    //==============================================================================
     bool createNativeWindow()
     {
         jassert (nativeWindow == nullptr);
@@ -727,7 +727,7 @@ private:
 juce_ImplementSingleton_SingleThreaded (DirectShowComponent::DirectShowContext::NativeWindowClass)
 
 
-//======================================================================
+//==============================================================================
 class DirectShowComponent::DirectShowComponentWatcher   : public ComponentMovementWatcher
 {
 public:
@@ -762,7 +762,7 @@ private:
 };
 
 
-//======================================================================
+//==============================================================================
 DirectShowComponent::DirectShowComponent (VideoRendererType type)
     : videoLoaded (false),
       looping (false)
@@ -811,7 +811,7 @@ void DirectShowComponent::paint (Graphics& g)
         g.fillAll (Colours::grey);
 }
 
-//======================================================================
+//==============================================================================
 bool DirectShowComponent::loadMovie (const String& fileOrURLPath)
 {
     closeMovie();
@@ -846,7 +846,7 @@ void DirectShowComponent::closeMovie()
     videoPath.clear();
 }
 
-//======================================================================
+//==============================================================================
 File DirectShowComponent::getCurrentMoviePath() const           { return videoPath; }
 bool DirectShowComponent::isMovieOpen() const                   { return videoLoaded; }
 double DirectShowComponent::getMovieDuration() const            { return videoLoaded ? context->getDuration() : 0.0; }
@@ -859,7 +859,7 @@ void DirectShowComponent::getMovieNormalSize (int &width, int &height) const
     height = context->getVideoHeight();
 }
 
-//======================================================================
+//==============================================================================
 void DirectShowComponent::setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
                                                            RectanglePlacement placement)
 {
@@ -874,7 +874,7 @@ void DirectShowComponent::setBoundsWithCorrectAspectRatio (const Rectangle<int>&
         setBounds (spaceToFitWithin);
 }
 
-//======================================================================
+//==============================================================================
 void DirectShowComponent::play()
 {
     if (videoLoaded)

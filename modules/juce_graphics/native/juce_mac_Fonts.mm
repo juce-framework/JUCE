@@ -213,6 +213,45 @@ namespace CoreTextTypeLayout
     }
 
     //==============================================================================
+    static CTTextAlignment getTextAlignment (const AttributedString& text)
+    {
+        switch (text.getJustification().getOnlyHorizontalFlags())
+        {
+           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
+            case Justification::right:                  return kCTTextAlignmentRight;
+            case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
+            case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
+            default:                                    return kCTTextAlignmentLeft;
+           #else
+            case Justification::right:                  return kCTRightTextAlignment;
+            case Justification::horizontallyCentred:    return kCTCenterTextAlignment;
+            case Justification::horizontallyJustified:  return kCTJustifiedTextAlignment;
+            default:                                    return kCTLeftTextAlignment;
+           #endif
+        }
+    }
+
+    static CTLineBreakMode getLineBreakMode (const AttributedString& text)
+    {
+        switch (text.getWordWrap())
+        {
+            case AttributedString::none:        return kCTLineBreakByClipping;
+            case AttributedString::byChar:      return kCTLineBreakByCharWrapping;
+            default:                            return kCTLineBreakByWordWrapping;
+        }
+    }
+
+    static CTWritingDirection getWritingDirection (const AttributedString& text)
+    {
+        switch (text.getReadingDirection())
+        {
+            case AttributedString::rightToLeft:   return kCTWritingDirectionRightToLeft;
+            case AttributedString::leftToRight:   return kCTWritingDirectionLeftToRight;
+            default:                              return kCTWritingDirectionNatural;
+        }
+    }
+
+    //==============================================================================
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
        #if JUCE_IOS
@@ -221,11 +260,9 @@ namespace CoreTextTypeLayout
 
         CFMutableAttributedStringRef attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
 
-        if (CFStringRef cfText = text.getText().toCFString())
-        {
-            CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
-            CFRelease (cfText);
-        }
+        CFStringRef cfText = text.getText().toCFString();
+        CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
+        CFRelease (cfText);
 
         const int numCharacterAttributes = text.getNumAttributes();
         const CFIndex attribStringLen = CFAttributedStringGetLength (attribString);
@@ -282,42 +319,16 @@ namespace CoreTextTypeLayout
         }
 
         // Paragraph Attributes
-       #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-        CTTextAlignment ctTextAlignment = kCTTextAlignmentLeft;
-       #else
-        CTTextAlignment ctTextAlignment = kCTLeftTextAlignment;
-       #endif
-
-        CTLineBreakMode ctLineBreakMode = kCTLineBreakByWordWrapping;
+        CTTextAlignment ctTextAlignment = getTextAlignment (text);
+        CTLineBreakMode ctLineBreakMode = getLineBreakMode (text);
+        CTWritingDirection ctWritingDirection = getWritingDirection (text);
         const CGFloat ctLineSpacing = text.getLineSpacing();
-
-        switch (text.getJustification().getOnlyHorizontalFlags())
-        {
-            case Justification::left:                   break;
-           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-            case Justification::right:                  ctTextAlignment = kCTTextAlignmentRight; break;
-            case Justification::horizontallyCentred:    ctTextAlignment = kCTTextAlignmentCenter; break;
-            case Justification::horizontallyJustified:  ctTextAlignment = kCTTextAlignmentJustified; break;
-           #else
-            case Justification::right:                  ctTextAlignment = kCTRightTextAlignment; break;
-            case Justification::horizontallyCentred:    ctTextAlignment = kCTCenterTextAlignment; break;
-            case Justification::horizontallyJustified:  ctTextAlignment = kCTJustifiedTextAlignment; break;
-           #endif
-            default:                                    jassertfalse; break; // Illegal justification flags
-        }
-
-        switch (text.getWordWrap())
-        {
-            case AttributedString::byWord:      break;
-            case AttributedString::none:        ctLineBreakMode = kCTLineBreakByClipping; break;
-            case AttributedString::byChar:      ctLineBreakMode = kCTLineBreakByCharWrapping; break;
-            default: break;
-        }
 
         CTParagraphStyleSetting settings[] =
         {
             { kCTParagraphStyleSpecifierAlignment,              sizeof (CTTextAlignment), &ctTextAlignment },
             { kCTParagraphStyleSpecifierLineBreakMode,          sizeof (CTLineBreakMode), &ctLineBreakMode },
+            { kCTParagraphStyleSpecifierBaseWritingDirection,   sizeof (CTWritingDirection), &ctWritingDirection},
 
            #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
             { kCTParagraphStyleSpecifierLineSpacingAdjustment,  sizeof (CGFloat),         &ctLineSpacing }

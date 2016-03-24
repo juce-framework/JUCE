@@ -31,7 +31,12 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+
 #include "juce_graphics.h"
 
 //==============================================================================
@@ -39,6 +44,12 @@
  #import <QuartzCore/QuartzCore.h>
 
 #elif JUCE_WINDOWS
+  // get rid of some warnings in Window's own headers
+ #ifdef JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable : 4458)
+ #endif
+
  #if JUCE_MINGW && JUCE_USE_DIRECTWRITE
   #warning "DirectWrite not currently implemented with mingw..."
   #undef JUCE_USE_DIRECTWRITE
@@ -55,6 +66,10 @@
 
  #if JUCE_MINGW
   #include <malloc.h>
+ #endif
+
+ #ifdef JUCE_MSVC
+  #pragma warning (pop)
  #endif
 
 #elif JUCE_IOS
@@ -127,13 +142,10 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
- #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "native/juce_mac_CoreGraphicsHelpers.h"
  #include "native/juce_mac_Fonts.mm"
  #include "native/juce_mac_CoreGraphicsContext.mm"
 
 #elif JUCE_WINDOWS
- #include "../juce_core/native/juce_win32_ComSmartPtr.h"
  #include "native/juce_win32_DirectWriteTypeface.cpp"
  #include "native/juce_win32_DirectWriteTypeLayout.cpp"
  #include "native/juce_win32_Fonts.cpp"
@@ -145,7 +157,6 @@ namespace juce
  #include "native/juce_linux_Fonts.cpp"
 
 #elif JUCE_ANDROID
- #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_android_GraphicsContext.cpp"
  #include "native/juce_android_Fonts.cpp"
 

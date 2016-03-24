@@ -387,11 +387,6 @@ public:
     void* getPlatformSpecificData() override             { return audioUnit; }
     const String getName() const override                { return pluginName; }
 
-    bool silenceInProducesSilenceOut() const override
-    {
-        return getTailLengthSeconds() <= 0;
-    }
-
     double getTailLengthSeconds() const override
     {
         Float64 tail = 0;

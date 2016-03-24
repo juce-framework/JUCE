@@ -62,8 +62,8 @@ public:
 
     void createExporterProperties (PropertyListBuilder& properties) override
     {
-        static const char* cppStandardNames[]  = { "C++03", "C++11", nullptr };
-        static const char* cppStandardValues[] = { "-std=c++03", "-std=c++11", nullptr };
+        static const char* cppStandardNames[]  = { "C++03",       "C++11",       "C++14",        nullptr };
+        static const char* cppStandardValues[] = { "-std=c++03",  "-std=c++11",  "-std=c++14",   nullptr };
 
         properties.add (new ChoicePropertyComponent (getCppStandardValue(),
                                                      "C++ standard to use",

@@ -103,7 +103,7 @@ class MPENoteTests : public UnitTest
 public:
     MPENoteTests() : UnitTest ("MPENote class") {}
 
-    //==========================================================================
+    //==============================================================================
     void runTest() override
     {
         beginTest ("getFrequencyInHertz");
@@ -116,7 +116,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void expectEqualsWithinOneCent (double frequencyInHertzActual,
                                     double frequencyInHertzExpected)
     {

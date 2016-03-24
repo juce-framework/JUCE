@@ -64,13 +64,13 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (! (isDragging || e.mouseWasClicked()))
+        if (e.mouseWasDraggedSinceMouseDown() && ! isDragging)
         {
             isDragging = true;
 
             if (DragAndDropContainer* const dnd = DragAndDropContainer::findParentDragContainerFor (this))
             {
-                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image::null, true);
+                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image(), true);
 
                 if (ToolbarItemComponent* const tc = getToolbarItemComponent())
                 {

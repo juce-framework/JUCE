@@ -241,6 +241,17 @@ public:
     ScrollBar* getHorizontalScrollBar() noexcept                { return &horizontalScrollBar; }
 
 
+    /** Enables or disables drag-to-scroll functionality in the viewport. */
+    void setScrollOnDragEnabled (bool shouldScrollOnDrag);
+
+    /** Returns true if drag-to-scroll functionality is enabled. */
+    bool isScrollOnDragEnabled() const noexcept;
+
+    /** Returns true if the user is currently dragging-to-scroll.
+        @see setScrollOnDragEnabled
+    */
+    bool isCurrentlyScrollingOnDrag() const noexcept;
+
     //==============================================================================
     /** @internal */
     void resized() override;
@@ -271,10 +282,15 @@ private:
     Component contentHolder;
     ScrollBar verticalScrollBar, horizontalScrollBar;
 
+    struct DragToScrollListener;
+    friend struct DragToScrollListener;
+    friend struct ContainerDeletePolicy<DragToScrollListener>;
+    ScopedPointer<DragToScrollListener> dragToScrollListener;
+
     Point<int> viewportPosToCompPos (Point<int>) const;
 
     void updateVisibleArea();
-    void deleteContentComp();
+    void deleteOrRemoveContentComp();
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // If you get an error here, it's because this method's parameters have changed! See the new definition above..
