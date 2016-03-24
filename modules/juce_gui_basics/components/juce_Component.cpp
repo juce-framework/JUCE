@@ -792,7 +792,7 @@ public:
             validArea.clear();
         }
 
-        if (! validArea.containsRectangle (compBounds))
+        if (! validArea.containsRectangle (imageBounds))
         {
             Graphics imG (image);
             LowLevelGraphicsContext& lg = imG.getInternalContext();
