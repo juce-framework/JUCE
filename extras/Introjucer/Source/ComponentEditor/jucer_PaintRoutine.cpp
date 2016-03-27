@@ -127,10 +127,10 @@ PaintElement* PaintRoutine::addElementFromXml (const XmlElement& xml, const int 
 {
     selectedPoints.deselectAll();
 
-    if (undoable)
+    if (undoable && document != nullptr)
     {
         AddXmlElementAction* action = new AddXmlElementAction (*this, new XmlElement (xml));
-        perform (action, "Add new element");
+        document->getUndoManager().perform (action, "Add new element");
 
         return elements [action->indexAdded];
     }

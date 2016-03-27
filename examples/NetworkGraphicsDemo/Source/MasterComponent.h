@@ -387,7 +387,7 @@ private:
 
     void newClientOSCMessageReceived (const OSCMessage& message)
     {
-        if (message.empty() || ! message[0].isString())
+        if (message.isEmpty() || ! message[0].isString())
             return;
 
         StringArray tokens = StringArray::fromTokens (message[0].getString(), ":", "");

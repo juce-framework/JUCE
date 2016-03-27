@@ -136,6 +136,8 @@ public class JuceAppActivity   extends Activity
         }
     }
 
+    private native void androidRuntimePermissionsCallback (boolean permissionWasGranted, long ptrToCallback);
+
     $$JuceAndroidRuntimePermissionsCode$$ // If you get an error here, you need to re-save your project with the introjucer!
 
     //==============================================================================

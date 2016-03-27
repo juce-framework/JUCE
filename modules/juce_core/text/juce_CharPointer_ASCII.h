@@ -215,12 +215,6 @@ public:
         CharacterFunctions::copyAll (*this, src);
     }
 
-    /** Copies a source string to this pointer, advancing this pointer as it goes. */
-    void writeAll (const CharPointer_ASCII src) noexcept
-    {
-        strcpy (data, src.data);
-    }
-
     /** Copies a source string to this pointer, advancing this pointer as it goes.
         The maxDestBytes parameter specifies the maximum number of bytes that can be written
         to the destination buffer before stopping.

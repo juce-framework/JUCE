@@ -324,7 +324,7 @@ void MPEInstrument::noteOff (int midiChannel,
                              int midiNoteNumber,
                              MPEValue midiNoteOffVelocity)
 {
-    if (notes.empty() || ! isNoteChannel (midiChannel))
+    if (notes.isEmpty() || ! isNoteChannel (midiChannel))
         return;
 
     const ScopedLock sl (lock);
@@ -375,7 +375,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
 {
     dimension.lastValueReceivedOnChannel[midiChannel - 1] = value;
 
-    if (notes.empty())
+    if (notes.isEmpty())
         return;
 
     if (MPEZone* zone = zoneLayout.getZoneByMasterChannel (midiChannel))

@@ -103,7 +103,7 @@ public:
     int size() const noexcept                                    { return elements.size(); }
 
     /** Returns true if the bundle contains no elements; false otherwise. */
-    bool empty() const noexcept                                  { return elements.empty(); }
+    bool isEmpty() const noexcept                                { return elements.isEmpty(); }
 
     /** Returns a reference to the OSCBundle element at index i in this bundle.
         This method does not check the range and results in undefined behavour

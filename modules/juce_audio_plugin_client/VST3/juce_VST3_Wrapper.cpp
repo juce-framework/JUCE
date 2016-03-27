@@ -258,7 +258,7 @@ public:
             info.stepCount = 1;
             info.defaultNormalizedValue = 0.0f;
             info.unitId = Vst::kRootUnitId;
-            info.flags = Vst::ParameterInfo::kIsBypass;
+            info.flags = Vst::ParameterInfo::kIsBypass | Vst::ParameterInfo::kCanAutomate;
         }
 
         virtual ~BypassParam() {}
