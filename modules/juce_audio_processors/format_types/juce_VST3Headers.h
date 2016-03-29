@@ -47,6 +47,9 @@
  #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
 #endif
 
+#undef DEVELOPMENT
+#define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
+
 /*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
     visit the Steinberg website and agree to whatever is currently required to
     get them.
