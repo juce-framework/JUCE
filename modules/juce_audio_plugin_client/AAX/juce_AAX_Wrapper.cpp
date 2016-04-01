@@ -1222,7 +1222,7 @@ struct AAXClasses
         {
             const JUCEAlgorithmContext& i = **iter;
 
-            int sideChainBufferIdx = i.pluginInstance->parameters.supportsSidechain() && i.sideChainBuffers != nullptr
+            int sideChainBufferIdx = i.pluginInstance->parameters.supportsSidechain() && i.sideChainBuffers != nullptr && *i.sideChainBuffers > 0
                                          ? static_cast<int> (*i.sideChainBuffers)
                                          : -1;
 
