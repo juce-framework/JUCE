@@ -127,9 +127,9 @@ private:
         double factor = 1.0;
 
         // To avoid contamination of our data by large integers, multiplication
-        // is applied gently, by a factor of 10 at a time.
+        // is applied gently, by a factor of 100 at a time.
         for (int i = 0; i < numberOfDilutions; ++i)
-            factor *= 10.0;
+            factor *= 100.0;
 
         return factor;
     }
