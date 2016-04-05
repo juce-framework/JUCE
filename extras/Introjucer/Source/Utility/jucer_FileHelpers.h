@@ -54,13 +54,19 @@ namespace FileHelpers
 }
 
 //==============================================================================
-class FileModificationDetector
+const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx;swift;s;asm";
+const char* const headerFileExtensions          = "h;hpp;hxx;hh;inl";
+const char* const cOrCppFileExtensions          = "cpp;cc;cxx;c";
+const char* const cppFileExtensions             = "cpp;cc;cxx";
+const char* const objCFileExtensions            = "mm;m";
+const char* const asmFileExtensions             = "s;S;asm";
+const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;swift;s;S;asm;h;hpp;hxx;hh;inl";
+const char* const fileTypesToCompileByDefault   = "cpp;mm;c;m;cc;cxx;swift;s;S;asm;r";
+
+//==============================================================================
+struct FileModificationDetector
 {
-public:
-    FileModificationDetector (const File& f)
-        : file (f)
-    {
-    }
+    FileModificationDetector (const File& f)  : file (f) {}
 
     const File& getFile() const                     { return file; }
     void fileHasBeenRenamed (const File& newFile)   { file = newFile; }

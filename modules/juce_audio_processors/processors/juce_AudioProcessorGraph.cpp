@@ -1126,6 +1126,15 @@ bool AudioProcessorGraph::removeNode (const uint32 nodeId)
     return false;
 }
 
+bool AudioProcessorGraph::removeNode (Node* node)
+{
+    if (node != nullptr)
+        return removeNode (node->nodeId);
+
+    jassertfalse;
+    return false;
+}
+
 //==============================================================================
 const AudioProcessorGraph::Connection* AudioProcessorGraph::getConnectionBetween (const uint32 sourceNodeId,
                                                                                   const int sourceChannelIndex,

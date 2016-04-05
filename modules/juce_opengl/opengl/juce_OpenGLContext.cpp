@@ -150,7 +150,10 @@ public:
         return false;
     }
 
-    void releaseResources() override {}
+    void releaseResources() override
+    {
+        stop();
+    }
 
     void triggerRepaint()
     {
@@ -241,6 +244,10 @@ public:
                     glBindVertexArray (vertexArrayObject);
                 #endif
                 paintComponent();
+
+                if (! hasInitialised)
+                    return false;
+
                 mmLock = nullptr;
                 lastMMLockReleaseTime = Time::getMillisecondCounter();
             }

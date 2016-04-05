@@ -179,11 +179,10 @@ protected:
     //==============================================================================
     /** @internal */
     ScopedPointer<MPEInstrument> instrument;
-    /** @internal */
-    CriticalSection renderAudioLock;
 
 private:
     //==============================================================================
+    CriticalSection noteStateLock;
     double sampleRate;
     int minimumSubBlockSize;
 

@@ -136,15 +136,16 @@ namespace TimeHelpers
 
     static inline int daysFromJan1 (int year, int month) noexcept
     {
-        const short dayOfYear[] = { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335,
-                                    0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+        const short dayOfYear[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334,
+                                    0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 };
 
         return dayOfYear [(isLeapYear (year) ? 12 : 0) + month];
     }
 
     static inline int64 daysFromYear0 (int year) noexcept
     {
-        return 365 * (year - 1) + (year / 400) - (year / 100) + (year / 4);
+        --year;
+        return 365 * year + (year / 400) - (year / 100) + (year / 4);
     }
 
     static inline int64 daysFrom1970 (int year) noexcept
@@ -213,18 +214,9 @@ Time::Time (const int year,
     t.tm_sec    = seconds;
     t.tm_isdst  = -1;
 
-    const int64 time = useLocalTime ? (int64) mktime (&t)
-                                    : TimeHelpers::mktime_utc (t);
-
-    if (time >= 0)
-    {
-        millisSinceEpoch = 1000 * time + milliseconds;
-    }
-    else
-    {
-        jassertfalse; // trying to create a date that is beyond the range that mktime supports!
-        millisSinceEpoch = 0;
-    }
+    millisSinceEpoch = 1000 * (useLocalTime ? (int64) mktime (&t)
+                                            : TimeHelpers::mktime_utc (t))
+                         + milliseconds;
 }
 
 Time::~Time() noexcept
@@ -458,8 +450,8 @@ String Time::getUTCOffsetString (bool includeSemiColon) const
 
 String Time::toISO8601 (bool includeDividerCharacters) const
 {
-    return String::formatted (includeDividerCharacters ? "%04d-%02d-%02dT%02d:%02d:%02.03f"
-                                                       : "%04d%02d%02dT%02d%02d%02.03f",
+    return String::formatted (includeDividerCharacters ? "%04d-%02d-%02dT%02d:%02d:%06.03f"
+                                                       : "%04d%02d%02dT%02d%02d%06.03f",
                               getYear(),
                               getMonth() + 1,
                               getDayOfMonth(),
@@ -542,9 +534,7 @@ Time Time::fromISO8601 (StringRef iso) noexcept
         return Time();
     }
 
-    Time result (year, month - 1, day, hours, minutes, 0, 0, false);
-    result.millisSinceEpoch += milliseconds;
-    return result;
+    return Time (year, month - 1, day, hours, minutes, 0, milliseconds, false);
 }
 
 String Time::getMonthName (const bool threeLetterVersion) const
@@ -660,6 +650,14 @@ public:
         expect (Time::fromISO8601 ("20160216T150357.999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
         expect (Time::fromISO8601 ("2016-02-16T15:03:57.999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
         expect (Time::fromISO8601 ("20160216T150357.999-0230") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+
+        expect (Time (1970,  0,  1,  0,  0,  0, 0, false) == Time (0));
+        expect (Time (2106,  1,  7,  6, 28, 15, 0, false) == Time (4294967295000));
+        expect (Time (2007, 10,  7,  1,  7, 20, 0, false) == Time (1194397640000));
+        expect (Time (2038,  0, 19,  3, 14,  7, 0, false) == Time (2147483647000));
+        expect (Time (2016,  2,  7, 11, 20,  8, 0, false) == Time (1457349608000));
+        expect (Time (1969, 11, 31, 23, 59, 59, 0, false) == Time (-1000));
+        expect (Time (1901, 11, 13, 20, 45, 53, 0, false) == Time (-2147483647000));
 
         expect (Time (1982, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (1983, 1, 1, 12, 0, 0, 0, true));
         expect (Time (1970, 1, 1, 12, 0, 0, 0, true) + RelativeTime::days (365) == Time (1971, 1, 1, 12, 0, 0, 0, true));

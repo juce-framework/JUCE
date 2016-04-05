@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "jucer_Application.h"
 
 START_JUCE_APPLICATION (IntrojucerApp)

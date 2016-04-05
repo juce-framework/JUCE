@@ -482,6 +482,17 @@ namespace FloatVectorHelpers
 }
 
 //==============================================================================
+namespace
+{
+   #if JUCE_USE_VDSP_FRAMEWORK
+    // This casts away constness to account for slightly different vDSP function signatures
+    // in OSX 10.8 SDK and below. Can be safely removed once those SDKs are obsolete.
+    template <typename ValueType>
+    ValueType* osx108sdkCompatibilityCast (const ValueType* arg) noexcept { return const_cast<ValueType*> (arg); }
+   #endif
+}
+
+//==============================================================================
 void JUCE_CALLTYPE FloatVectorOperations::clear (float* dest, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
@@ -568,10 +579,10 @@ void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double amount, int 
                               const Mode::ParallelType amountToAdd = Mode::load1 (amount);)
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float* src, float amount, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, const float* src, float amount, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsadd (src, 1, &amount, dest, 1, (vDSP_Length) num);
+    vDSP_vsadd (osx108sdkCompatibilityCast (src), 1, &amount, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] + amount, Mode::add (am, s),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
@@ -579,10 +590,10 @@ void JUCE_CALLTYPE FloatVectorOperations::add (float* dest, float* src, float am
    #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, double* src, double amount, int num) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::add (double* dest, const double* src, double amount, int num) noexcept
 {
    #if JUCE_USE_VDSP_FRAMEWORK
-    vDSP_vsaddD (src, 1, &amount, dest, 1, (vDSP_Length) num);
+    vDSP_vsaddD (osx108sdkCompatibilityCast (src), 1, &amount, dest, 1, (vDSP_Length) num);
    #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] + amount, Mode::add (am, s),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
@@ -990,7 +1001,7 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
 void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noexcept
 {
    #if JUCE_USE_SSE_INTRINSICS
-    const int mxcsr = _mm_getcsr();
+    const unsigned int mxcsr = _mm_getcsr();
     _mm_setcsr (mxcsr | 0x8040); // add the DAZ and FZ bits
    #endif
 }

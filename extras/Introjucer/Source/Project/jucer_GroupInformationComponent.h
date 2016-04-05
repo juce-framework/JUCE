@@ -25,7 +25,6 @@
 #ifndef JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED
 #define JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED
 
-#include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 
 

@@ -104,6 +104,71 @@ public:
     /** Resets the menu, removing all its items. */
     void clear();
 
+    /** Describes a popup menu item. */
+    struct JUCE_API  Item
+    {
+        /** Creates a null item.
+            You'll need to set some fields after creating an Item before you
+            can add it to a PopupMenu
+        */
+        Item() noexcept;
+
+        /** Creates a copy of an item. */
+        Item (const Item&);
+
+        /** Creates a copy of an item. */
+        Item& operator= (const Item&);
+
+        /** The menu item's name. */
+        String text;
+
+        /** The menu item's ID. This can not be 0 if you want the item to be triggerable! */
+        int itemID;
+
+        /** A sub-menu, or nullptr if there isn't one. */
+        ScopedPointer<PopupMenu> subMenu;
+
+        /** A drawable to use as an icon, or nullptr if there isn't one. */
+        ScopedPointer<Drawable> image;
+
+        /** A custom component for the item to display, or nullptr if there isn't one. */
+        ReferenceCountedObjectPtr<CustomComponent> customComponent;
+
+        /** A command manager to use to automatically invoke the command, or nullptr if none is specified. */
+        ApplicationCommandManager* commandManager;
+
+        /** An optional string describing the shortcut key for this item.
+            This is only used for displaying at the right-hand edge of a menu item - the
+            menu won't attempt to actually catch or process the key. If you supply a
+            commandManager parameter then the menu will attempt to fill-in this field
+            automatically.
+        */
+        String shortcutKeyDescription;
+
+        /** A colour to use to draw the menu text.
+            By default this is transparent black, which means that the LookAndFeel should choose the colour.
+        */
+        Colour colour;
+
+        /** True if this menu item is enabled. */
+        bool isEnabled;
+
+        /** True if this menu item should have a tick mark next to it. */
+        bool isTicked;
+
+        /** True if this menu item is a separator line. */
+        bool isSeparator;
+
+        /** True if this menu item is a section header. */
+        bool isSectionHeader;
+    };
+
+    /** Adds an item to the menu.
+        You can call this method for full control over the item that is added, or use the other
+        addItem helper methods if you want to pass arguments rather than creating an Item object.
+    */
+    void addItem (const Item& newItem);
+
     /** Appends a new text item for this menu to show.
 
         @param itemResultID     the number that will be returned from the show() method
@@ -274,7 +339,6 @@ public:
                      int itemResultID = 0);
 
     /** Appends a separator to the menu, to help break it up into sections.
-
         The menu class is smart enough not to display separators at the top or bottom
         of the menu, and it will replace mutliple adjacent separators with a single
         one, so your code can be quite free and easy about adding these, and it'll
@@ -283,14 +347,12 @@ public:
     void addSeparator();
 
     /** Adds a non-clickable text item to the menu.
-
         This is a bold-font items which can be used as a header to separate the items
         into named groups.
     */
     void addSectionHeader (const String& title);
 
     /** Returns the number of items that the menu currently contains.
-
         (This doesn't count separators).
     */
     int getNumItems() const noexcept;
@@ -486,21 +548,10 @@ public:
         */
         bool next();
 
-        /** Adds an item to the target menu which has all the properties of this item. */
-        void addItemTo (PopupMenu& targetMenu);
-
-        //==============================================================================
-        String itemName;
-        const PopupMenu* subMenu;
-        int itemId;
-        bool isSeparator;
-        bool isTicked;
-        bool isEnabled;
-        bool isCustomComponent;
-        bool isSectionHeader;
-        const Colour* customColour;
-        const Drawable* icon;
-        ApplicationCommandManager* commandManager;
+        /** Returns a reference to the description of the current item.
+            It is only valid to call this after next() has returned true!
+        */
+        const Item& getItem() const noexcept;
 
     private:
         //==============================================================================
@@ -621,7 +672,6 @@ public:
 
 private:
     //==============================================================================
-    JUCE_PUBLIC_IN_DLL_BUILD (class Item)
     JUCE_PUBLIC_IN_DLL_BUILD (struct HelperClasses)
     friend struct HelperClasses;
     friend class MenuBarComponent;

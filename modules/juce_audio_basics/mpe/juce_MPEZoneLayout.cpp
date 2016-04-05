@@ -34,6 +34,7 @@ MPEZoneLayout::MPEZoneLayout (const MPEZoneLayout& other)
 MPEZoneLayout& MPEZoneLayout::operator= (const MPEZoneLayout& other)
 {
     zones = other.zones;
+    listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
     return *this;
 }
 

@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_Module.h"
 #include "jucer_CommandLine.h"
@@ -514,6 +515,79 @@ namespace
     }
 
     //==============================================================================
+    static String getStringConcatenationExpression (Random& rng, int start, int length)
+    {
+        jassert (length > 0);
+
+        if (length == 1)
+            return "s" + String (start);
+
+        int breakPos = jlimit (1, length - 1, (length / 3) + rng.nextInt (length / 3));
+
+        return "(" + getStringConcatenationExpression (rng, start, breakPos)
+                + " + " + getStringConcatenationExpression (rng, start + breakPos, length - breakPos) + ")";
+    }
+
+    static void generateObfuscatedStringCode (const StringArray& args)
+    {
+        checkArgumentCount (args, 2);
+        const String originalText (args[1]);
+
+        struct Section
+        {
+            String text;
+            int position, index;
+
+            void writeGenerator (MemoryOutputStream& out) const
+            {
+                String name ("s" + String (index));
+
+                out << "    String " << name << ";  " << name;
+
+                for (int i = 0; i < text.length(); ++i)
+                    out << " << '" << String::charToString (text[i]) << "'";
+
+                out << ";" << newLine;
+            }
+        };
+
+        Array<Section> sections;
+        String text = originalText;
+        Random rng;
+
+        while (text.isNotEmpty())
+        {
+            int pos = jmax (0, text.length() - (1 + rng.nextInt (6)));
+            Section s = { text.substring (pos), pos, 0 };
+            sections.insert (0, s);
+            text = text.substring (0, pos);
+        }
+
+        for (int i = 0; i < sections.size(); ++i)
+            sections.getReference(i).index = i;
+
+        for (int i = 0; i < sections.size(); ++i)
+            sections.swap (i, rng.nextInt (sections.size()));
+
+        MemoryOutputStream out;
+
+        out << "String createString()" << newLine
+            << "{" << newLine;
+
+        for (int i = 0; i < sections.size(); ++i)
+            sections.getReference(i).writeGenerator (out);
+
+        out << newLine
+            << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << newLine
+            << newLine
+            << "    jassert (result == " << originalText.quoted() << ");" << newLine
+            << "    return result;" << newLine
+            << "}" << newLine;
+
+        std::cout << out.toString() << std::endl;
+    }
+
+    //==============================================================================
     static void showHelp()
     {
         hideDockIcon();
@@ -559,6 +633,9 @@ namespace
                   << std::endl
                   << " " << appName << " --fix-broken-include-paths target_folder" << std::endl
                   << "    Scans the given folder for C/C++ source files (recursively). Where a file contains an #include of one of the other filenames, it changes it to use the optimum relative path. Helpful for auto-fixing includes when re-arranging files and folders in a project." << std::endl
+                  << std::endl
+                  << " " << appName << " --obfuscated-string-code string_to_obfuscate" << std::endl
+                  << "    Generates a C++ function which returns the given string, but in an obfuscated way." << std::endl
                   << std::endl;
     }
 }
@@ -588,6 +665,7 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "remove-tabs"))              { cleanWhitespace (args, true); return 0; }
         if (matchArgument (command, "tidy-divider-comments"))    { tidyDividerComments (args); return 0; }
         if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args); return 0; }
+        if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args); return 0; }
     }
     catch (const CommandLineError& error)
     {

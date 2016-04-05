@@ -22,9 +22,8 @@
   ==============================================================================
 */
 
-class SliderHandler  : public ComponentTypeHandler
+struct SliderHandler  : public ComponentTypeHandler
 {
-public:
     SliderHandler()
         : ComponentTypeHandler ("Slider", "Slider", typeid (Slider), 150, 24)
     {
@@ -39,16 +38,16 @@ public:
         registerColour (Slider::textBoxOutlineColourId, "textbox outln", "textboxoutline");
     }
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new Slider ("new slider");
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
 
-        Slider* const s = dynamic_cast<Slider*> (comp);
+        Slider* s = dynamic_cast<Slider*> (comp);
         e->setAttribute ("min", s->getMinimum());
         e->setAttribute ("max", s->getMaximum());
         e->setAttribute ("int", s->getInterval());
@@ -58,11 +57,12 @@ public:
         e->setAttribute ("textBoxWidth", s->getTextBoxWidth());
         e->setAttribute ("textBoxHeight", s->getTextBoxHeight());
         e->setAttribute ("skewFactor", s->getSkewFactor());
+        e->setAttribute ("needsCallback", needsSliderListener (s));
 
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -82,15 +82,17 @@ public:
 
         s->setSkewFactor (xml.getDoubleAttribute ("skewFactor", 1.0));
 
+        setNeedsSliderListener (s, xml.getBoolAttribute ("needsCallback", true));
+
         return true;
     }
 
-    String getCreationParameters (GeneratedCode&, Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component) override
     {
         return quotedString (component->getName(), false);
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
@@ -108,7 +110,7 @@ public:
           << ", " << s->getTextBoxWidth() << ", " << s->getTextBoxHeight() << ");\n"
           << getColourIntialisationCode (component, memberVariableName);
 
-        if (needsCallback (component))
+        if (needsSliderListener (component))
             r << memberVariableName << "->addListener (this);\n";
 
         if (s->getSkewFactor() != 1.0)
@@ -118,11 +120,11 @@ public:
         code.constructorCode += r;
     }
 
-    void fillInGeneratedCode (Component* component, GeneratedCode& code)
+    void fillInGeneratedCode (Component* component, GeneratedCode& code) override
     {
         ComponentTypeHandler::fillInGeneratedCode (component, code);
 
-        if (needsCallback (component))
+        if (needsSliderListener (component))
         {
             String& callback = code.getCallbackCode ("public SliderListener",
                                                      "void",
@@ -141,7 +143,7 @@ public:
         }
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props) override
     {
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
@@ -157,22 +159,27 @@ public:
         props.add (new SliderTextboxSizeProperty (s, document, true));
         props.add (new SliderTextboxSizeProperty (s, document, false));
         props.add (new SliderSkewProperty (s, document));
+        props.add (new SliderCallbackProperty (s, document));
 
         addColourProperties (component, document, props);
     }
 
-    static bool needsCallback (Component*)
+    static bool needsSliderListener (Component* slider)
     {
-        return true; //xxx should be a property
+        return slider->getProperties().getWithDefault ("generateListenerCallback", true);
+    }
+
+    static void setNeedsSliderListener (Component* slider, bool shouldDoCallback)
+    {
+        slider->getProperties().set ("generateListenerCallback", shouldDoCallback);
     }
 
 private:
     //==============================================================================
-    class SliderTypeProperty  : public ComponentChoiceProperty <Slider>
+    struct SliderTypeProperty  : public ComponentChoiceProperty<Slider>
     {
-    public:
         SliderTypeProperty (Slider* slider, JucerDocument& doc)
-            : ComponentChoiceProperty <Slider> ("type", slider, doc)
+            : ComponentChoiceProperty<Slider> ("type", slider, doc)
         {
             choices.add ("Linear Horizontal");
             choices.add ("Linear Vertical");
@@ -188,7 +195,7 @@ private:
             choices.add ("Three Value Vertical");
         }
 
-        void setIndex (int newIndex)
+        void setIndex (int newIndex) override
         {
             const Slider::SliderStyle types[] = { Slider::LinearHorizontal,
                                                   Slider::LinearVertical,
@@ -210,7 +217,7 @@ private:
             }
         }
 
-        int getIndex() const
+        int getIndex() const override
         {
             const Slider::SliderStyle types[] = { Slider::LinearHorizontal,
                                                   Slider::LinearVertical,
@@ -233,17 +240,16 @@ private:
         }
 
     private:
-        class SliderTypeChangeAction  : public ComponentUndoableAction <Slider>
+        struct SliderTypeChangeAction  : public ComponentUndoableAction<Slider>
         {
-        public:
-            SliderTypeChangeAction (Slider* const comp, ComponentLayout& l, const Slider::SliderStyle newState_)
-                : ComponentUndoableAction <Slider> (comp, l),
+            SliderTypeChangeAction (Slider* comp, ComponentLayout& l, Slider::SliderStyle newState_)
+                : ComponentUndoableAction<Slider> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getSliderStyle();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 getComponent()->setSliderStyle (newState);
@@ -251,7 +257,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 getComponent()->setSliderStyle (oldState);
@@ -264,11 +270,10 @@ private:
     };
 
     //==============================================================================
-    class SliderTextboxProperty  : public ComponentChoiceProperty <Slider>
+    struct SliderTextboxProperty  : public ComponentChoiceProperty<Slider>
     {
-    public:
         SliderTextboxProperty (Slider* slider, JucerDocument& doc)
-            : ComponentChoiceProperty <Slider> ("text position", slider, doc)
+            : ComponentChoiceProperty<Slider> ("text position", slider, doc)
         {
             choices.add ("No text box");
             choices.add ("Text box on left");
@@ -277,7 +282,7 @@ private:
             choices.add ("Text box below");
         }
 
-        void setIndex (int newIndex)
+        void setIndex (int newIndex) override
         {
             const Slider::TextEntryBoxPosition types[] = { Slider::NoTextBox,
                                                            Slider::TextBoxLeft,
@@ -292,7 +297,7 @@ private:
             }
         }
 
-        int getIndex() const
+        int getIndex() const override
         {
             const Slider::TextEntryBoxPosition types[] = { Slider::NoTextBox,
                                                            Slider::TextBoxLeft,
@@ -308,17 +313,16 @@ private:
         }
 
     private:
-        class SliderTextBoxChangeAction  : public ComponentUndoableAction <Slider>
+        struct SliderTextBoxChangeAction  : public ComponentUndoableAction<Slider>
         {
-        public:
-            SliderTextBoxChangeAction (Slider* const comp, ComponentLayout& l, const Slider::TextEntryBoxPosition newState_)
-                : ComponentUndoableAction <Slider> (comp, l),
+            SliderTextBoxChangeAction (Slider* comp, ComponentLayout& l, Slider::TextEntryBoxPosition newState_)
+                : ComponentUndoableAction<Slider> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->getTextBoxPosition();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 getComponent()->setTextBoxStyle (newState,
@@ -329,7 +333,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 getComponent()->setTextBoxStyle (oldState,
@@ -345,37 +349,35 @@ private:
     };
 
     //==============================================================================
-    class SliderTextboxEditableProperty  : public ComponentBooleanProperty <Slider>
+    struct SliderTextboxEditableProperty  : public ComponentBooleanProperty<Slider>
     {
-    public:
         SliderTextboxEditableProperty (Slider* slider, JucerDocument& doc)
-            : ComponentBooleanProperty <Slider> ("text box mode", "Editable", "Editable", slider, doc)
+            : ComponentBooleanProperty<Slider> ("text box mode", "Editable", "Editable", slider, doc)
         {
         }
 
-        void setState (bool newState)
+        void setState (bool newState) override
         {
             document.perform (new SliderEditableChangeAction (component, *document.getComponentLayout(), newState),
                               "Change Slider editability");
         }
 
-        bool getState() const
+        bool getState() const override
         {
             return component->isTextBoxEditable();
         }
 
     private:
-        class SliderEditableChangeAction  : public ComponentUndoableAction <Slider>
+        struct SliderEditableChangeAction  : public ComponentUndoableAction<Slider>
         {
-        public:
-            SliderEditableChangeAction (Slider* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <Slider> (comp, l),
+            SliderEditableChangeAction (Slider* const comp, ComponentLayout& l, bool newState_)
+                : ComponentUndoableAction<Slider> (comp, l),
                   newState (newState_)
             {
                 oldState = comp->isTextBoxEditable();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 getComponent()->setTextBoxIsEditable (newState);
@@ -383,7 +385,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 getComponent()->setTextBoxIsEditable (oldState);
@@ -396,12 +398,57 @@ private:
     };
 
     //==============================================================================
-    class SliderTextboxSizeProperty  : public ComponentTextProperty <Slider>
+    struct SliderCallbackProperty  : public ComponentBooleanProperty<Slider>
     {
-    public:
-        SliderTextboxSizeProperty (Slider* slider, JucerDocument& doc, const bool isWidth_)
-            : ComponentTextProperty <Slider> (isWidth_ ? "text box width" : "text box height",
-                                              12, false, slider, doc),
+        SliderCallbackProperty (Slider* s, JucerDocument& doc)
+            : ComponentBooleanProperty<Slider> ("callback", "Generate SliderListener",
+                                                "Generate SliderListener", s, doc)
+        {
+        }
+
+        void setState (bool newState) override
+        {
+            document.perform (new SliderCallbackChangeAction (component, *document.getComponentLayout(), newState),
+                              "Change button callback");
+        }
+
+        bool getState() const override       { return needsSliderListener (component); }
+
+        struct SliderCallbackChangeAction  : public ComponentUndoableAction<Slider>
+        {
+            SliderCallbackChangeAction (Slider* comp, ComponentLayout& l, bool newState_)
+                : ComponentUndoableAction<Slider> (comp, l),
+                  newState (newState_)
+            {
+                oldState = needsSliderListener (comp);
+            }
+
+            bool perform() override
+            {
+                showCorrectTab();
+                setNeedsSliderListener (getComponent(), newState);
+                changed();
+                return true;
+            }
+
+            bool undo() override
+            {
+                showCorrectTab();
+                setNeedsSliderListener (getComponent(), oldState);
+                changed();
+                return true;
+            }
+
+            bool newState, oldState;
+        };
+    };
+
+    //==============================================================================
+    struct SliderTextboxSizeProperty  : public ComponentTextProperty<Slider>
+    {
+        SliderTextboxSizeProperty (Slider* slider, JucerDocument& doc, bool isWidth_)
+            : ComponentTextProperty<Slider> (isWidth_ ? "text box width" : "text box height",
+                                             12, false, slider, doc),
               isWidth (isWidth_)
         {
         }
@@ -421,11 +468,10 @@ private:
     private:
         const bool isWidth;
 
-        class SliderBoxSizeChangeAction  : public ComponentUndoableAction <Slider>
+        struct SliderBoxSizeChangeAction  : public ComponentUndoableAction<Slider>
         {
-        public:
-            SliderBoxSizeChangeAction (Slider* const comp, ComponentLayout& l, const bool isWidth_, int newSize_)
-                : ComponentUndoableAction <Slider> (comp, l),
+            SliderBoxSizeChangeAction (Slider* const comp, ComponentLayout& l, bool isWidth_, int newSize_)
+                : ComponentUndoableAction<Slider> (comp, l),
                   isWidth (isWidth_),
                   newSize (newSize_)
             {
@@ -433,7 +479,7 @@ private:
                                   : comp->getTextBoxHeight();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 Slider& c = *getComponent();
@@ -452,7 +498,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 Slider& c = *getComponent();
@@ -477,12 +523,11 @@ private:
     };
 
     //==============================================================================
-    class SliderRangeProperty  : public ComponentTextProperty <Slider>
+    struct SliderRangeProperty  : public ComponentTextProperty<Slider>
     {
-    public:
         SliderRangeProperty (Slider* slider, JucerDocument& doc,
-                             const String& name, const int rangeParam_)
-            : ComponentTextProperty <Slider> (name, 15, false, slider, doc),
+                             const String& name, int rangeParam_)
+            : ComponentTextProperty<Slider> (name, 15, false, slider, doc),
               rangeParam (rangeParam_)
         {
         }
@@ -519,11 +564,10 @@ private:
     private:
         const int rangeParam;
 
-        class SliderRangeChangeAction  : public ComponentUndoableAction <Slider>
+        struct SliderRangeChangeAction  : public ComponentUndoableAction<Slider>
         {
-        public:
-            SliderRangeChangeAction (Slider* const comp, ComponentLayout& l, const double newState_[3])
-                : ComponentUndoableAction <Slider> (comp, l)
+            SliderRangeChangeAction (Slider* comp, ComponentLayout& l, const double newState_[3])
+                : ComponentUndoableAction<Slider> (comp, l)
             {
                 newState [0] = newState_ [0];
                 newState [1] = newState_ [1];
@@ -534,7 +578,7 @@ private:
                 oldState [2] = comp->getInterval();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 getComponent()->setRange (newState[0], newState[1], newState[2]);
@@ -542,7 +586,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 getComponent()->setRange (oldState[0], oldState[1], oldState[2]);
@@ -555,11 +599,10 @@ private:
     };
 
     //==============================================================================
-    class SliderSkewProperty  : public ComponentTextProperty <Slider>
+    struct SliderSkewProperty  : public ComponentTextProperty<Slider>
     {
-    public:
         SliderSkewProperty (Slider* slider, JucerDocument& doc)
-            : ComponentTextProperty <Slider> ("skew factor", 12, false, slider, doc)
+            : ComponentTextProperty<Slider> ("skew factor", 12, false, slider, doc)
         {
         }
 
@@ -579,18 +622,16 @@ private:
             return String (s->getSkewFactor());
         }
 
-    private:
-        class SliderSkewChangeAction  : public ComponentUndoableAction <Slider>
+        struct SliderSkewChangeAction  : public ComponentUndoableAction<Slider>
         {
-        public:
-            SliderSkewChangeAction (Slider* const comp, ComponentLayout& l, const double newValue_)
-                : ComponentUndoableAction <Slider> (comp, l)
+            SliderSkewChangeAction (Slider* comp, ComponentLayout& l, double newValue_)
+                : ComponentUndoableAction<Slider> (comp, l)
             {
                 newValue = newValue_;
                 oldValue = comp->getSkewFactor();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 getComponent()->setSkewFactor (newValue);
@@ -598,7 +639,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 getComponent()->setSkewFactor (oldValue);

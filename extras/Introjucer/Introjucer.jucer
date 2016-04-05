@@ -20,7 +20,7 @@
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
                        osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
-                       osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="default"/>
+                       osxSDK="default" osxCompatibility="10.8 SDK" osxArchitecture="default"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -364,10 +364,12 @@
             file="Source/ComponentEditor/jucer_UtilityFunctions.h"/>
     </GROUP>
     <GROUP id="{579C9644-D5C2-8469-9439-F91C81337531}" name="Project Saving">
-      <FILE id="TtXohM" name="jucer_ProjectExport_Android.h" compile="0"
-            resource="0" file="Source/Project Saving/jucer_ProjectExport_Android.h"/>
+      <FILE id="TtXohM" name="jucer_ProjectExport_AndroidBase.h" compile="0"
+            resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidBase.h"/>
       <FILE id="AhU3qX" name="jucer_ProjectExport_AndroidStudio.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidStudio.h"/>
+      <FILE id="dfcn8d" name="jucer_ProjectExport_AndroidAnt.h" compile="0"
+            resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidAnt.h"/>
       <FILE id="EkBkj1" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_CodeBlocks.h"/>
       <FILE id="mVXrLi" name="jucer_ProjectExport_Make.h" compile="0" resource="0"
@@ -433,14 +435,24 @@
             file="Source/Utility/jucer_CodeHelpers.cpp"/>
       <FILE id="BBRteob" name="jucer_CodeHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_CodeHelpers.h"/>
+      <FILE id="Y54InR" name="jucer_ColourPropertyComponent.h" compile="0"
+            resource="0" file="Source/Utility/jucer_ColourPropertyComponent.h"/>
       <FILE id="wQtNWXb" name="jucer_Colours.h" compile="0" resource="0"
             file="Source/Utility/jucer_Colours.h"/>
       <FILE id="MQYSse6" name="jucer_FileHelpers.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_FileHelpers.cpp"/>
       <FILE id="NeLXzRp" name="jucer_FileHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_FileHelpers.h"/>
+      <FILE id="RR4BRd" name="jucer_FilePathPropertyComponent.h" compile="0"
+            resource="0" file="Source/Utility/jucer_FilePathPropertyComponent.h"/>
+      <FILE id="m6ie6u" name="jucer_FloatingToolWindow.h" compile="0" resource="0"
+            file="Source/Utility/jucer_FloatingToolWindow.h"/>
       <FILE id="f6iMAs" name="jucer_Icons.cpp" compile="1" resource="0" file="Source/Utility/jucer_Icons.cpp"/>
       <FILE id="EtL6vF" name="jucer_Icons.h" compile="0" resource="0" file="Source/Utility/jucer_Icons.h"/>
+      <FILE id="Gr8H5k" name="jucer_IntrojucerLookAndFeel.cpp" compile="1"
+            resource="0" file="Source/Utility/jucer_IntrojucerLookAndFeel.cpp"/>
+      <FILE id="tMFqT7" name="jucer_IntrojucerLookAndFeel.h" compile="0"
+            resource="0" file="Source/Utility/jucer_IntrojucerLookAndFeel.h"/>
       <FILE id="4fxv0YC" name="jucer_JucerTreeViewBase.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_JucerTreeViewBase.cpp"/>
       <FILE id="F0vVVSX" name="jucer_JucerTreeViewBase.h" compile="0" resource="0"
@@ -461,8 +473,12 @@
             file="Source/Utility/jucer_StoredSettings.cpp"/>
       <FILE id="BkswLvF" name="jucer_StoredSettings.h" compile="0" resource="0"
             file="Source/Utility/jucer_StoredSettings.h"/>
+      <FILE id="BVRyTX" name="jucer_SVGPathDataComponent.h" compile="0" resource="0"
+            file="Source/Utility/jucer_SVGPathDataComponent.h"/>
       <FILE id="l75UWh" name="jucer_TranslationTool.h" compile="0" resource="0"
             file="Source/Utility/jucer_TranslationTool.h"/>
+      <FILE id="eqYYbn" name="jucer_UTF8Component.h" compile="0" resource="0"
+            file="Source/Utility/jucer_UTF8Component.h"/>
       <FILE id="lZ9s99o" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_ValueSourceHelpers.h"/>
     </GROUP>

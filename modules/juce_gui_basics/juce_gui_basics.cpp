@@ -48,11 +48,7 @@
  #import <IOKit/pwr_mgt/IOPMLib.h>
 
  #if JUCE_SUPPORT_CARBON
-  #define Point CarbonDummyPointName
-  #define Component CarbonDummyCompName
   #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
-  #undef Point
-  #undef Component
  #endif
 
 //==============================================================================

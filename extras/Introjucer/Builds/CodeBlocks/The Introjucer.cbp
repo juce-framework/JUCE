@@ -429,11 +429,15 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
-    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_Android.h">
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidBase.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
     <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidStudio.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Project Saving/jucer_ProjectExport_AndroidAnt.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -537,6 +541,10 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Utility/jucer_ColourPropertyComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_Colours.h">
       <Option compile="0"/>
       <Option link="0"/>
@@ -546,8 +554,21 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Utility/jucer_FilePathPropertyComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_FloatingToolWindow.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_Icons.cpp"/>
     <Unit filename="../../Source/Utility/jucer_Icons.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_IntrojucerLookAndFeel.cpp"/>
+    <Unit filename="../../Source/Utility/jucer_IntrojucerLookAndFeel.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
@@ -579,7 +600,15 @@
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>
+    <Unit filename="../../Source/Utility/jucer_SVGPathDataComponent.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
     <Unit filename="../../Source/Utility/jucer_TranslationTool.h">
+      <Option compile="0"/>
+      <Option link="0"/>
+    </Unit>
+    <Unit filename="../../Source/Utility/jucer_UTF8Component.h">
       <Option compile="0"/>
       <Option link="0"/>
     </Unit>

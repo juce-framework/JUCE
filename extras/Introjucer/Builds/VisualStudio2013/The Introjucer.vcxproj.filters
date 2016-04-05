@@ -367,6 +367,9 @@
     <ClCompile Include="..\..\Source\Utility\jucer_Icons.cpp">
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_IntrojucerLookAndFeel.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp">
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
@@ -1587,10 +1590,13 @@
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h">
       <Filter>The Introjucer\ComponentEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidBase.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidStudio.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_AndroidAnt.h">
       <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h">
@@ -1662,13 +1668,25 @@
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_ColourPropertyComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_Colours.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_FilePathPropertyComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_FloatingToolWindow.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_IntrojucerLookAndFeel.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h">
@@ -1689,7 +1707,13 @@
     <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_SVGPathDataComponent.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_TranslationTool.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_UTF8Component.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">

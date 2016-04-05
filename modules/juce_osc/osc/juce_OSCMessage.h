@@ -86,7 +86,7 @@ public:
     int size() const noexcept;
 
     /** Returns true if the OSCMessage contains no OSCArgument objects; false otherwise. */
-    bool empty() const noexcept;
+    bool isEmpty() const noexcept;
 
     /** Returns a reference to the OSCArgument at index i in the OSCMessage object.
         This method does not check the range and results in undefined behavour

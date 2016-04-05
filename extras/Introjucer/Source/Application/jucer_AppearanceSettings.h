@@ -77,25 +77,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings)
 };
 
-//==============================================================================
-class IntrojucerLookAndFeel   : public LookAndFeel_V3
-{
-public:
-    IntrojucerLookAndFeel();
-
-    void fillWithBackgroundTexture (Graphics&);
-    static void fillWithBackgroundTexture (Component&, Graphics&);
-
-    void drawTabButton (TabBarButton& button, Graphics&, bool isMouseOver, bool isMouseDown) override;
-    void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) override {}
-    int getTabButtonBestWidth (TabBarButton&, int tabDepth) override;
-    void drawConcertinaPanelHeader (Graphics&, const juce::Rectangle<int>&, bool, bool, ConcertinaPanel&, Component&) override;
-    static Colour getTabBackgroundColour (TabBarButton&);
-
-private:
-    Image backgroundTexture;
-    Colour backgroundTextureBaseColour;
-};
 
 
 #endif   // JUCER_APPEARANCESETTINGS_H_INCLUDED

@@ -166,6 +166,10 @@ public:
     /** Returns the type of one of the channels in the set, by index. */
     ChannelType getTypeOfChannel (int channelIndex) const noexcept;
 
+    /** Returns the index for a particular channel-type.
+        Will return -1 if the this set does not contain a channel of this type. */
+    int getChannelIndexForType (ChannelType type) const noexcept;
+
     /** Returns a string containing a whitespace-separated list of speaker types
         corresponding to each channel. For example in a 5.1 arrangement,
         the string may be "L R C Lfe Ls Rs". If the speaker arrangement is unknown,

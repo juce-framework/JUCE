@@ -223,7 +223,7 @@ public:
     }
 
     /** Returns true if the array is empty, false otherwise. */
-    inline bool empty() const noexcept
+    inline bool isEmpty() const noexcept
     {
         return size() == 0;
     }
