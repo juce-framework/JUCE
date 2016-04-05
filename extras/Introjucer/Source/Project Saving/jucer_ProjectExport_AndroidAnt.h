@@ -153,7 +153,7 @@ private:
     String getToolchainVersion() const
     {
         String v (getNDKToolchainVersionString());
-        return v.isNotEmpty() ? v : "4.8";
+        return v.isNotEmpty() ? v : "4.9";
     }
 
 

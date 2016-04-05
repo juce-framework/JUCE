@@ -73,7 +73,7 @@ public:
             getGradleVersionValue() = "2.10";
 
         if (getGradleWrapperVersionString().isEmpty())
-            getGradleWrapperVersionValue() = "0.6.0-beta5";
+            getGradleWrapperVersionValue() = "0.7.0-alpha4";
 
         if (getGradleToolchainString().isEmpty())
             getGradleToolchainValue() = "clang";

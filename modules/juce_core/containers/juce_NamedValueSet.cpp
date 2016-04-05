@@ -39,7 +39,7 @@ struct NamedValueSet::NamedValue
     {
     }
 
-    NamedValue (Identifier&& n, var&& v)
+    NamedValue (Identifier&& n, var&& v) noexcept
         : name (static_cast<Identifier&&> (n)),
           value (static_cast<var&&> (v))
     {
@@ -112,6 +112,11 @@ bool NamedValueSet::operator!= (const NamedValueSet& other) const
 int NamedValueSet::size() const noexcept
 {
     return values.size();
+}
+
+bool NamedValueSet::isEmpty() const noexcept
+{
+    return values.isEmpty();
 }
 
 const var& NamedValueSet::operator[] (const Identifier& name) const noexcept
