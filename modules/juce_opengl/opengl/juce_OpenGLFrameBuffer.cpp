@@ -322,6 +322,15 @@ void OpenGLFrameBuffer::makeCurrentAndClear()
     }
 }
 
+void OpenGLFrameBuffer::makeCurrentAndClear(Colour colour) {
+  if (makeCurrentRenderingTarget())
+  {
+    glClearColor(colour.getFloatRed(), colour.getFloatGreen(), colour.getFloatBlue(),colour.getAlpha() );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  }
+}
+
+
 bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& area)
 {
     if (! makeCurrentRenderingTarget())
