@@ -976,6 +976,7 @@ struct AAXClasses
                         pluginInstance->prepareToPlay (sampleRate, bufferSize);
                         maxBufferSize = bufferSize;
                         sideChainBuffer.realloc (static_cast<size_t> (maxBufferSize));
+                        sideChainBuffer.clear   (static_cast<size_t> (maxBufferSize));
                     }
                 }
 
@@ -1096,7 +1097,10 @@ struct AAXClasses
 
             hasSidechain = enableAuxBusesForCurrentFormat (busUtils, inputSet, outputSet);
             if (hasSidechain)
+            {
                 sideChainBuffer.realloc (static_cast<size_t> (maxBufferSize));
+                sideChainBuffer.clear   (static_cast<size_t> (maxBufferSize));
+            }
 
             // recheck the format
             if ( (busUtils.getBusCount (true)  > 0 && busUtils.getChannelSet (true, 0)  != inputSet)
@@ -1230,7 +1234,7 @@ struct AAXClasses
         {
             const JUCEAlgorithmContext& i = **iter;
 
-            int sideChainBufferIdx = i.pluginInstance->parameters.supportsSidechain() && i.sideChainBuffers != nullptr
+            int sideChainBufferIdx = i.pluginInstance->parameters.supportsSidechain() && i.sideChainBuffers != nullptr && *i.sideChainBuffers > 0
                                          ? static_cast<int> (*i.sideChainBuffers)
                                          : -1;
 
