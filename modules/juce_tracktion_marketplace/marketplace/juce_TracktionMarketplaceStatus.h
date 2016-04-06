@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 /**
     An implementation of the OnlineUnlockStatus class which talks to the
     Tracktion Marketplace server.

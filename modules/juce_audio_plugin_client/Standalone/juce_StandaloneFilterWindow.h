@@ -25,8 +25,6 @@
 #ifndef JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
 #define JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
 
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
 //==============================================================================
 /**
     An object that creates and plays a standalone instance of an AudioProcessor.
@@ -74,10 +72,15 @@ public:
     //==============================================================================
     virtual void createPlugin()
     {
+
+      #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+        processor = ::createPluginFilterOfType (AudioProcessor::wrapperType_Standalone);
+      #else
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
         processor = createPluginFilter();
-        jassert (processor != nullptr); // Your createPluginFilter() function must return a valid object!
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
+      #endif
+        jassert (processor != nullptr); // Your createPluginFilter() function must return a valid object!
 
         // try to disable sidechain and aux buses
         const int numInBuses  = processor->busArrangement.inputBuses.size();

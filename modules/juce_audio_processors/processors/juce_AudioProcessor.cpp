@@ -48,11 +48,31 @@ AudioProcessor::AudioProcessor()
     const short channelConfigs[][2] = { {2, 2} };
    #endif
 
+   #ifdef JucePlugin_MaxNumInputChannels
+    const int maxInChannels = JucePlugin_MaxNumInputChannels;
+   #else
+    const int maxInChannels = std::numeric_limits<int>::max();
+   #endif
+    ignoreUnused (maxInChannels);
+
+   #ifdef JucePlugin_MaxNumOutputChannels
+    const int maxOutChannels = JucePlugin_MaxNumOutputChannels;
+   #else
+    const int maxOutChannels = std::numeric_limits<int>::max();
+   #endif
+    ignoreUnused (maxOutChannels);
+
  #if ! JucePlugin_IsMidiEffect
    #if ! JucePlugin_IsSynth
-    busArrangement.inputBuses.add  (AudioProcessorBus ("Input",  AudioChannelSet::canonicalChannelSet (channelConfigs[0][0])));
+    const int numInChannels = jmin (maxInChannels, (int) channelConfigs[0][0]);
+
+    if (numInChannels > 0)
+        busArrangement.inputBuses.add  (AudioProcessorBus ("Input",  AudioChannelSet::canonicalChannelSet (numInChannels)));
    #endif
-    busArrangement.outputBuses.add (AudioProcessorBus ("Output", AudioChannelSet::canonicalChannelSet (channelConfigs[0][1])));
+
+    const int numOutChannels = jmin (maxOutChannels, (int) channelConfigs[0][1]);
+    if (numOutChannels > 0)
+        busArrangement.outputBuses.add (AudioProcessorBus ("Output", AudioChannelSet::canonicalChannelSet (numOutChannels)));
 
   #ifdef JucePlugin_PreferredChannelConfigurations
    #if ! JucePlugin_IsSynth
@@ -434,6 +454,16 @@ bool AudioProcessor::setPreferredBusArrangement (bool isInput, int busIndex, con
 
     if (! isPositiveAndBelow (busIndex, numBuses))
         return false;
+
+   #ifdef JucePlugin_MaxNumInputChannels
+    if (isInput && preferredSet.size() > JucePlugin_MaxNumInputChannels)
+        return false;
+   #endif
+
+   #ifdef JucePlugin_MaxNumOutputChannels
+    if (! isInput && preferredSet.size() > JucePlugin_MaxNumOutputChannels)
+        return false;
+   #endif
 
     AudioProcessorBus& bus = buses.getReference (busIndex);
 

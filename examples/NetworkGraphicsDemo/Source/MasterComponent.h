@@ -59,7 +59,7 @@ struct MasterContentComponent  : public Component,
         OSCReceiver::removeListener (this);
     }
 
-    //==========================================================================
+    //==============================================================================
     struct Client
     {
         String name, ipAddress;
@@ -273,7 +273,7 @@ private:
                  total.getY() + total.getHeight() * (p.y / getHeight()) };
     }
 
-    //==========================================================================
+    //==============================================================================
     struct DeviceComponent  : public Component
     {
         DeviceComponent (MasterContentComponent& e, String name)
@@ -327,7 +327,7 @@ private:
         return nullptr;
     }
 
-    //==========================================================================
+    //==============================================================================
     void broadcastNewCanvasState (const MemoryBlock& canvasData)
     {
         BlockPacketiser packetiser;
@@ -376,7 +376,7 @@ private:
         return nullptr;
     }
 
-    //==========================================================================
+    //==============================================================================
     void oscMessageReceived (const OSCMessage& message) override
     {
         auto address = message.getAddressPattern();
@@ -403,7 +403,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     AnimatedContent* content = nullptr;
     PropertiesFile& properties;
     OwnedArray<DeviceComponent> devices;

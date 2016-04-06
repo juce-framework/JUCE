@@ -27,7 +27,15 @@
 
 #if JucePlugin_Build_RTAS
 
+ #include "../utility/juce_IncludeSystemHeaders.h"
  #include "juce_RTAS_DigiCode_Header.h"
+
+ #ifdef __clang__
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+  #pragma clang diagnostic ignored "-Wextra-tokens"
+  #pragma clang diagnostic ignored "-Wreorder"
+ #endif
 
  /*
     This file is used to include and build the required digidesign CPP files without your project
@@ -47,18 +55,20 @@
  #if WINDOWS_VERSION
   #undef _UNICODE
   #undef UNICODE
-
   #define DllMain DllMainRTAS
   #include <DLLMain.cpp>
   #undef DllMain
   #include <DefaultSwap.cpp>
-
  #else
   #include <PlugInInitialize.cpp>
   #include <Dispatcher.cpp>
  #endif
 
- #else
+ #ifdef __clang__
+  #pragma clang diagnostic pop
+ #endif
+
+#else
 
  #if _MSC_VER
   short __stdcall NewPlugIn (void*)                          { return 0; }

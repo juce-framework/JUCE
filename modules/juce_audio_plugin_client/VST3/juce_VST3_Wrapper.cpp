@@ -55,6 +55,8 @@
  #endif
 #endif
 
+JUCE_DEFINE_WRAPPER_TYPE (wrapperType_VST3);
+
 namespace juce
 {
 
@@ -68,9 +70,9 @@ using namespace Steinberg;
   extern void updateEditorCompBoundsVST (Component*);
  #endif
 
-  extern void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
-  extern void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
-  extern void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
+  extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
+  extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
+  extern JUCE_API void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
 #endif
 
 //==============================================================================
@@ -782,7 +784,12 @@ public:
         isMidiOutputBusEnabled = true;
        #endif
 
-        busUtils.findAllCompatibleLayouts();
+        busUtils.init();
+
+        // VST-3 requires your default layout to be non-discrete!
+        // For example, your default layout must be mono, stereo, quadrophonic
+        // and not AudioChannelSet::discreteChannels (2) etc.
+        jassert (busUtils.checkBusFormatsAreNotDiscrete());
 
         copyEnabledBuses (lastEnabledBusStates.inputBuses,  pluginInstance->busArrangement.inputBuses,  Vst::kInput);
         copyEnabledBuses (lastEnabledBusStates.outputBuses, pluginInstance->busArrangement.outputBuses, Vst::kOutput);
@@ -1376,7 +1383,7 @@ public:
                 info.channelCount = bus->channels.size();
                 toString128 (info.name, bus->name);
                 info.busType = index == 0 ? Vst::kMain : Vst::kAux;
-                info.flags = busUtils.getSupportedBusLayouts (dir == Vst::kInput, index).isEnabledByDefault ? Vst::BusInfo::kDefaultActive : 0;
+                info.flags = busUtils.isBusEnabledByDefault (dir == Vst::kInput, index) ? Vst::BusInfo::kDefaultActive : 0;
                 return kResultTrue;
             }
         }
@@ -1390,7 +1397,7 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
-                info.channelCount = 0;
+                info.channelCount = 1;
                 toString128 (info.name, TRANS("MIDI Input"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
@@ -1402,7 +1409,7 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
-                info.channelCount = 0;
+                info.channelCount = 1;
                 toString128 (info.name, TRANS("MIDI Output"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
@@ -1733,7 +1740,10 @@ private:
                     for (int i = 0; i < numChans; ++i)
                     {
                         if (totalOutputChans >= totalInputChans)
+                        {
+                            FloatVectorOperations::clear (busChannels[i], data.numSamples);
                             channelList.set (totalOutputChans, busChannels[i]);
+                        }
 
                         ++totalOutputChans;
                     }
@@ -2211,6 +2221,8 @@ private:
 // The VST3 plugin entry point.
 JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 {
+    JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST3);
+
    #if JUCE_WINDOWS
     // Cunning trick to force this function to be exported. Life's too short to
     // faff around creating .def files for this kind of thing.

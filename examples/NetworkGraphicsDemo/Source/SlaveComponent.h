@@ -86,7 +86,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void oscMessageReceived (const OSCMessage& message) override
     {
         auto address = message.getAddressPattern();
@@ -121,7 +121,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     String getMachineInfoToDisplay() const
     {
         //auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre());

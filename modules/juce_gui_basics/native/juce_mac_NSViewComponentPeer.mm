@@ -393,15 +393,19 @@ public:
              && isPositiveAndBelow (localPos.getY(), (int) viewFrame.size.height)))
             return false;
 
-        if (NSWindow* const viewWindow = [view window])
+        if (! SystemStats::isRunningInAppExtensionSandbox())
         {
-            const NSRect windowFrame = [viewWindow frame];
-            const NSPoint windowPoint = [view convertPoint: NSMakePoint (localPos.x, viewFrame.size.height - localPos.y) toView: nil];
-            const NSPoint screenPoint = NSMakePoint (windowFrame.origin.x + windowPoint.x,
-                                                     windowFrame.origin.y + windowPoint.y);
+            if (NSWindow* const viewWindow = [view window])
+            {
+                const NSRect windowFrame = [viewWindow frame];
+                const NSPoint windowPoint = [view convertPoint: NSMakePoint (localPos.x, viewFrame.size.height - localPos.y) toView: nil];
+                const NSPoint screenPoint = NSMakePoint (windowFrame.origin.x + windowPoint.x,
+                                                         windowFrame.origin.y + windowPoint.y);
 
-            if (! isWindowAtPoint (viewWindow, screenPoint))
-                return false;
+                if (! isWindowAtPoint (viewWindow, screenPoint))
+                    return false;
+
+            }
         }
 
         NSView* v = [view hitTest: NSMakePoint (viewFrame.origin.x + localPos.getX(),

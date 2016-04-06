@@ -36,12 +36,19 @@ public:
     GainProcessor()
     {
         addParameter (gain = new AudioParameterFloat ("gain", "Gain", 0.0f, 1.0f, 0.5f));
+
+        // Some VST-2 DAWs want the maximum amount of channels to be enabled by default
+        if (wrapperType == wrapperType_VST)
+        {
+            busArrangement.inputBuses. getReference (0).channels = AudioChannelSet::discreteChannels (kVST2MaxChannels);
+            busArrangement.outputBuses.getReference (0).channels = AudioChannelSet::discreteChannels (kVST2MaxChannels);
+        }
     }
 
     ~GainProcessor() {}
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override {}
+    void prepareToPlay (double, int) override {}
     void releaseResources() override {}
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer&) override
@@ -74,7 +81,7 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        gain->setValueNotifyingHost (MemoryInputStream (data, sizeInBytes, false).readFloat());
+        gain->setValueNotifyingHost (MemoryInputStream (data, static_cast<size_t> (sizeInBytes), false).readFloat());
     }
 
     //==============================================================================
@@ -84,7 +91,12 @@ public:
         const int numChannels = preferred.size();
 
         // do not allow disabling channels
-        if (numChannels == 0) return false;
+        if (numChannels == 0)
+            return false;
+
+        // limit the amount of channels for VST-2
+        if (wrapperType == wrapperType_VST && numChannels > kVST2MaxChannels)
+            return false;
 
         // always have the same channel layout on both input and output on the main bus
         if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
@@ -96,6 +108,8 @@ public:
 private:
     //==============================================================================
     AudioParameterFloat* gain;
+
+    enum { kVST2MaxChannels = 16 };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GainProcessor)

@@ -148,9 +148,17 @@ public:
         Threads need to check this regularly, and if it returns true, they should
         return from their run() method at the first possible opportunity.
 
-        @see signalThreadShouldExit
+        @see signalThreadShouldExit, currentThreadShouldExit
     */
-    inline bool threadShouldExit() const                { return shouldExit; }
+    bool threadShouldExit() const                { return shouldExit; }
+
+    /** Checks whether the current thread has been told to stop running.
+        On the message thread, this will always return false, otherwise
+        it will return threadShouldExit() called on the current thread.
+
+        @see threadShouldExit
+    */
+    static bool currentThreadShouldExit();
 
     /** Waits for the thread to stop.
 

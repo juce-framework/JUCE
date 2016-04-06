@@ -22,7 +22,7 @@ class MainContentComponent   : public Component,
                                private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
-    //==========================================================================
+    //==============================================================================
     MainContentComponent()
     {
         setSize (200, 200);
@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void oscMessageReceived (const OSCMessage& message) override
     {
         if (message.size() == 1 && message[0].isFloat32())
@@ -59,7 +59,7 @@ private:
             "OK");
     }
 
-    //==========================================================================
+    //==============================================================================
     Slider rotaryKnob;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)

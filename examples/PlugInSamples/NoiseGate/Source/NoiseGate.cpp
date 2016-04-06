@@ -35,8 +35,11 @@ public:
         addParameter (alpha  = new AudioParameterFloat ("alpha",  "Alpha",   0.0f, 1.0f, 0.8f));
 
         // add single side-chain bus
-        busArrangement.inputBuses. add (AudioProcessorBus ("Sidechain In",  AudioChannelSet::stereo()));
-        busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out", AudioChannelSet::stereo()));
+        busArrangement.inputBuses.add (AudioProcessorBus ("Sidechain In",  AudioChannelSet::mono()));
+
+        // To be compatible with all VST2 DAWs, it's best to pass through the sidechain
+        if (isVST2())
+            busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out",  AudioChannelSet::mono()));
     }
 
     ~NoiseGate() {}
@@ -44,16 +47,28 @@ public:
     //==============================================================================
     bool setPreferredBusArrangement (bool isInputBus, int busIndex, const AudioChannelSet& preferred) override
     {
+        const bool isMainBus   = (busIndex == 0);
+        const bool isSideChain = (busIndex == 1);
+
         const int numChannels = preferred.size();
 
-        // do not allow disabling channels
-        if (numChannels == 0) return false;
+        // do not allow disabling channels on main bus
+        if (numChannels == 0 && isMainBus) return false;
 
-        // only allow stereo on the side-chain bus
-        if (busIndex == 1 && numChannels != 2) return false;
+        // VST2 does not natively support sidechains/aux buses.
+        // But many DAWs treat the third input of a plug-in
+        // as a sidechain. So limit the main bus to stereo!
+        if (isVST2())
+        {
+            if (isMainBus && numChannels != 2) return false;
+
+            // we only allow mono sidechains in VST-2
+            if (isSideChain && numChannels != 1)
+                return false;
+        }
 
         // always have the same channel layout on both input and output on the main bus
-        if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
+        if (isMainBus && ! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
             return false;
 
         return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
@@ -65,9 +80,6 @@ public:
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer&) override
     {
-        for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
-            buffer.clear (i, 0, buffer.getNumSamples());
-
         AudioSampleBuffer mainInputOutput = busArrangement.getBusBuffer (buffer, true, 0);
         AudioSampleBuffer sideChainInput  = busArrangement.getBusBuffer (buffer, true, 1);
 
@@ -93,6 +105,9 @@ public:
             if (sampleCountDown > 0)
                 --sampleCountDown;
         }
+
+        // VST-2 passes this through so clear the audio in this channel
+        sideChainInput.clear();
     }
 
     //==============================================================================
@@ -107,6 +122,7 @@ public:
     void setCurrentProgram (int) override                    {}
     const String getProgramName (int) override               { return ""; }
     void changeProgramName (int, const String&) override     {}
+    bool isVST2() const noexcept                             { return (wrapperType == wrapperType_VST); }
 
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
@@ -124,6 +140,11 @@ public:
         threshold->setValueNotifyingHost (stream.readFloat());
         alpha->setValueNotifyingHost (stream.readFloat());
     }
+
+    enum
+    {
+        kVST2MaxChannels = 8
+    };
 
 private:
     //==============================================================================

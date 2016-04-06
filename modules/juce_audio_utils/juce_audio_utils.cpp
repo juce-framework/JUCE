@@ -36,6 +36,10 @@
 
 #include "juce_audio_utils.h"
 
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+ #include <juce_gui_extra/juce_gui_extra.h>
+#endif
+
 namespace juce
 {
 
@@ -46,10 +50,6 @@ namespace juce
 #include "gui/juce_MidiKeyboardComponent.cpp"
 #include "gui/juce_AudioAppComponent.cpp"
 #include "players/juce_AudioProcessorPlayer.cpp"
-
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
- #include "../juce_gui_extra/embedding/juce_UIViewComponent.h"
-#endif
 
 #if JUCE_MAC
  #include "native/juce_mac_BluetoothMidiDevicePairingDialogue.mm"

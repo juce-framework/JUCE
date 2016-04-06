@@ -355,7 +355,8 @@ namespace SocketHelpers
                         if (errno == EINPROGRESS)
                        #endif
                         {
-                            if (waitForReadiness (newHandle, readLock, false, timeOutMillisecs) == 1)
+                            const volatile int cvHandle = (int) newHandle;
+                            if (waitForReadiness (cvHandle, readLock, false, timeOutMillisecs) == 1)
                                 success = true;
                         }
                     }

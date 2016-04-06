@@ -45,7 +45,39 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
     {
         if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
         {
-            processorToPlay->setPlayConfigDetails (numInputChans, numOutputChans, sampleRate, blockSize);
+            const int numInBuses  = processorToPlay->busArrangement.inputBuses. size();
+            const int numOutBuses = processorToPlay->busArrangement.outputBuses.size();
+
+            for (int i = 1; i < numInBuses; ++i)
+            {
+                bool success = processorToPlay->setPreferredBusArrangement (true, i, AudioChannelSet::disabled());
+
+                // if using in audio processor player, it must be possible to disable sidechains
+                jassert (success);
+
+                ignoreUnused (success);
+            }
+
+            for (int i = 1; i < numOutBuses; ++i)
+            {
+                bool success = processorToPlay->setPreferredBusArrangement (false, i, AudioChannelSet::disabled());
+
+                // if using in audio processor player, it must be possible to disable aux outputs
+                jassert (success);
+
+                ignoreUnused(success);
+            }
+
+            if (numInBuses > 0 && processorToPlay->busArrangement.inputBuses.getReference(0).channels.size() != numInputChans)
+                processorToPlay->setPreferredBusArrangement (true,  0, AudioChannelSet::canonicalChannelSet(numInputChans));
+
+            if (numOutBuses > 0 && processorToPlay->busArrangement.outputBuses.getReference(0).channels.size() != numOutputChans)
+                processorToPlay->setPreferredBusArrangement (false,  0, AudioChannelSet::canonicalChannelSet(numOutputChans));
+
+            jassert (processorToPlay->getTotalNumInputChannels()  == numInputChans);
+            jassert (processorToPlay->getTotalNumOutputChannels() == numOutputChans);
+
+            processorToPlay->setRateAndBufferSizeDetails (sampleRate, blockSize);
 
             const bool supportsDouble = processorToPlay->supportsDoublePrecisionProcessing() && isDoublePrecision;
             AudioProcessor::ProcessingPrecision precision = supportsDouble ? AudioProcessor::doublePrecision

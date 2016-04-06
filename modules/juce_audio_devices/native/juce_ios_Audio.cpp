@@ -679,6 +679,16 @@ private:
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &format, sizeof (format));
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof (format));
 
+        UInt32 framesPerSlice;
+        UInt32 dataSize = sizeof (framesPerSlice);
+
+        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &framesPerSlice, &dataSize) == noErr
+               && dataSize == sizeof (framesPerSlice) && framesPerSlice != actualBufferSize)
+        {
+            actualBufferSize = framesPerSlice;
+            prepareFloatBuffers (actualBufferSize);
+        }
+
         AudioUnitInitialize (audioUnit);
         return true;
     }

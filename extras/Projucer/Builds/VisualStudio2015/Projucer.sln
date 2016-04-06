@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{9EC86232-31E3-55F2-1B6F-6E1C1F954A40}") = "Projucer", "Projucer.vcxproj", "{26ABE2A4-1F2F-8375-088D-D692A4408B5A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Debug|x64.ActiveCfg = Debug|x64
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Debug|x64.Build.0 = Debug|x64
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Release|x64.ActiveCfg = Release|x64
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -99,9 +99,11 @@ public:
 
         No more timer callbacks will be triggered after this method returns.
 
-        Note that if you call this from a background thread at the same time as the
-        message-thread is already in mid-callback, then it won't wait for the current
-        callback to finish, but it will cancel any future callbacks.
+        Note that if you call this from a background thread while the message-thread
+        is already in the middle of your callback, then this method will cancel any
+        future timer callbacks, but it will return without waiting for the current one
+        to finish. The current callback will continue, possibly still running some of
+        your timer code after this method has returned.
     */
     void stopTimer() noexcept;
 

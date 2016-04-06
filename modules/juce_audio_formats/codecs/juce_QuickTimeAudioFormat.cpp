@@ -222,7 +222,7 @@ public:
             DisposeMovie (movie);
 
            #if JUCE_MAC
-            ExitMoviesOnThread ();
+            ExitMoviesOnThread();
            #endif
         }
     }

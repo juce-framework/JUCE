@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 MidiBuffer MPEMessages::addZone (MPEZone zone)
 {
     MidiBuffer buffer (MidiRPNGenerator::generate (zone.getFirstNoteChannel(),

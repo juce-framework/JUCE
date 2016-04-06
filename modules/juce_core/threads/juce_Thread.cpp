@@ -163,6 +163,14 @@ void Thread::signalThreadShouldExit()
     shouldExit = true;
 }
 
+bool Thread::currentThreadShouldExit()
+{
+    if (Thread* currentThread = getCurrentThread())
+        return currentThread->threadShouldExit();
+
+    return false;
+}
+
 bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
 {
     // Doh! So how exactly do you expect this thread to wait for itself to stop??

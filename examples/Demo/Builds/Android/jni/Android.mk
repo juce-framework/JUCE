@@ -1,5 +1,5 @@
-# Automatically generated makefile, created by the Introjucer
-# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!
+# Automatically generated makefile, created by the Projucer
+# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!
 
 LOCAL_PATH := $(call my-dir)
 
@@ -52,31 +52,31 @@ LOCAL_SRC_FILES := \
   ../../../Source/Demos/WindowsDemo.cpp\
   ../../../Source/Demos/XMLandJSONDemo.cpp\
   ../../../JuceLibraryCode/BinaryData.cpp\
-  ../../../../../modules/juce_audio_basics/juce_audio_basics.cpp\
-  ../../../../../modules/juce_audio_devices/juce_audio_devices.cpp\
-  ../../../../../modules/juce_audio_formats/juce_audio_formats.cpp\
-  ../../../../../modules/juce_audio_processors/juce_audio_processors.cpp\
-  ../../../../../modules/juce_audio_utils/juce_audio_utils.cpp\
-  ../../../../../modules/juce_box2d/juce_box2d.cpp\
-  ../../../../../modules/juce_core/juce_core.cpp\
-  ../../../../../modules/juce_cryptography/juce_cryptography.cpp\
-  ../../../../../modules/juce_data_structures/juce_data_structures.cpp\
-  ../../../../../modules/juce_events/juce_events.cpp\
-  ../../../../../modules/juce_graphics/juce_graphics.cpp\
-  ../../../../../modules/juce_gui_basics/juce_gui_basics.cpp\
-  ../../../../../modules/juce_gui_extra/juce_gui_extra.cpp\
-  ../../../../../modules/juce_opengl/juce_opengl.cpp\
-  ../../../../../modules/juce_video/juce_video.cpp\
+  ../../../JuceLibraryCode/juce_audio_basics.cpp\
+  ../../../JuceLibraryCode/juce_audio_devices.cpp\
+  ../../../JuceLibraryCode/juce_audio_formats.cpp\
+  ../../../JuceLibraryCode/juce_audio_processors.cpp\
+  ../../../JuceLibraryCode/juce_audio_utils.cpp\
+  ../../../JuceLibraryCode/juce_box2d.cpp\
+  ../../../JuceLibraryCode/juce_core.cpp\
+  ../../../JuceLibraryCode/juce_cryptography.cpp\
+  ../../../JuceLibraryCode/juce_data_structures.cpp\
+  ../../../JuceLibraryCode/juce_events.cpp\
+  ../../../JuceLibraryCode/juce_graphics.cpp\
+  ../../../JuceLibraryCode/juce_gui_basics.cpp\
+  ../../../JuceLibraryCode/juce_gui_extra.cpp\
+  ../../../JuceLibraryCode/juce_opengl.cpp\
+  ../../../JuceLibraryCode/juce_video.cpp\
 
 ifeq ($(NDK_DEBUG),1)
-  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
-  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
 else
-  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
-  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=c++11 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
 endif
 

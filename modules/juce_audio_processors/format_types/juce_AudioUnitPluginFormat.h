@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if (JUCE_PLUGINHOST_AU && JUCE_MAC) || DOXYGEN
+#if (JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)) || DOXYGEN
 
 //==============================================================================
 /**
@@ -38,16 +38,24 @@ public:
     //==============================================================================
     String getName() const override                { return "AudioUnit"; }
     void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc, double, int) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
     bool pluginNeedsRescanning (const PluginDescription&) override;
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive) override;
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
     bool doesPluginStillExist (const PluginDescription&) override;
     FileSearchPath getDefaultLocationsToSearch() override;
     bool canScanForPlugins() const override        { return true; }
 
 private:
+    //==============================================================================
+    void createPluginInstance (const PluginDescription&,
+                               double initialSampleRate,
+                               int initialBufferSize,
+                               void* userData,
+                               void (*callback) (void*, AudioPluginInstance*, const String&)) override;
+
+    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginFormat)
 };

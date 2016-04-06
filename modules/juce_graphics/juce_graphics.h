@@ -22,11 +22,38 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_graphics
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE graphics classes
+  description:      Classes for 2D vector graphics, image loading/saving, font handling, etc.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_events
+  OSXFrameworks:    Cocoa QuartzCore
+  iOSFrameworks:    CoreGraphics CoreText QuartzCore
+  linuxLibs:        X11 Xinerama Xext freetype
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_GRAPHICS_H_INCLUDED // %%
 #define JUCE_GRAPHICS_H_INCLUDED
 
-#include "../juce_core/juce_core.h"
-#include "../juce_events/juce_events.h"
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
 
 //==============================================================================
 /** Config: JUCE_USE_COREIMAGE_LOADER

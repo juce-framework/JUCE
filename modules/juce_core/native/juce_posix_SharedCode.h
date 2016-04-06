@@ -26,6 +26,10 @@
   ==============================================================================
 */
 
+#ifdef JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+ extern int* jucePlugInClientCurrentWrapperType;
+#endif
+
 CriticalSection::CriticalSection() noexcept
 {
     pthread_mutexattr_t atts;
@@ -629,12 +633,19 @@ File juce_getExecutableFile()
         static String getFilename()
         {
             Dl_info exeInfo;
-            dladdr ((void*) juce_getExecutableFile, &exeInfo);
+
+          #ifdef JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+            void* localSymbol = jucePlugInClientCurrentWrapperType != nullptr ? (void*) jucePlugInClientCurrentWrapperType
+                                                                              : (void*) juce_getExecutableFile;
+          #else
+            void* localSymbol = (void*) juce_getExecutableFile;
+          #endif
+            dladdr (localSymbol, &exeInfo);
             return CharPointer_UTF8 (exeInfo.dli_fname);
         }
     };
 
-    static String filename (DLAddrReader::getFilename());
+    static String filename = DLAddrReader::getFilename();
     return File::getCurrentWorkingDirectory().getChildFile (filename);
    #endif
 }

@@ -59,7 +59,7 @@ import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.app.ActivityCompat;
 import android.Manifest;
-$$JuceAndroidMidiImports$$ // If you get an error here, you need to re-save your project with the introjucer!
+$$JuceAndroidMidiImports$$ // If you get an error here, you need to re-save your project with the Projucer!
 
 
 //==============================================================================
@@ -138,7 +138,7 @@ public class JuceAppActivity   extends Activity
 
     private native void androidRuntimePermissionsCallback (boolean permissionWasGranted, long ptrToCallback);
 
-    $$JuceAndroidRuntimePermissionsCode$$ // If you get an error here, you need to re-save your project with the introjucer!
+    $$JuceAndroidRuntimePermissionsCode$$ // If you get an error here, you need to re-save your project with the Projucer!
 
     //==============================================================================
     public static class MidiPortID extends Object
@@ -189,7 +189,7 @@ public class JuceAppActivity   extends Activity
     }
 
     //==============================================================================
-    $$JuceAndroidMidiCode$$ // If you get an error here, you need to re-save your project with the introjucer!
+    $$JuceAndroidMidiCode$$ // If you get an error here, you need to re-save your project with the Projucer!
 
     //==============================================================================
     @Override

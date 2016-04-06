@@ -1,5 +1,5 @@
-# Automatically generated makefile, created by the Introjucer
-# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!
+# Automatically generated makefile, created by the Projucer
+# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!
 
 # (this disables dependency generation if multiple architectures are set)
 DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)
@@ -50,12 +50,12 @@ endif
 
 OBJECTS := \
   $(OBJDIR)/Main_90ebc5c2.o \
-  $(OBJDIR)/juce_core_1ee54a40.o \
-  $(OBJDIR)/juce_data_structures_84790dfc.o \
-  $(OBJDIR)/juce_events_584896b4.o \
-  $(OBJDIR)/juce_graphics_f9afc18.o \
-  $(OBJDIR)/juce_gui_basics_90929794.o \
-  $(OBJDIR)/juce_osc_72ef0f3c.o \
+  $(OBJDIR)/juce_core_75b14332.o \
+  $(OBJDIR)/juce_data_structures_72d3da2c.o \
+  $(OBJDIR)/juce_events_d2be882c.o \
+  $(OBJDIR)/juce_graphics_9c18891e.o \
+  $(OBJDIR)/juce_gui_basics_8a6da59c.o \
+  $(OBJDIR)/juce_osc_be4cee16.o \
 
 .PHONY: clean
 
@@ -79,32 +79,32 @@ $(OBJDIR)/Main_90ebc5c2.o: ../../Source/Main.cpp
 	@echo "Compiling Main.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_core_1ee54a40.o: ../../../../modules/juce_core/juce_core.cpp
+$(OBJDIR)/juce_core_75b14332.o: ../../JuceLibraryCode/juce_core.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_core.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_data_structures_84790dfc.o: ../../../../modules/juce_data_structures/juce_data_structures.cpp
+$(OBJDIR)/juce_data_structures_72d3da2c.o: ../../JuceLibraryCode/juce_data_structures.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_data_structures.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_events_584896b4.o: ../../../../modules/juce_events/juce_events.cpp
+$(OBJDIR)/juce_events_d2be882c.o: ../../JuceLibraryCode/juce_events.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_events.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_graphics_f9afc18.o: ../../../../modules/juce_graphics/juce_graphics.cpp
+$(OBJDIR)/juce_graphics_9c18891e.o: ../../JuceLibraryCode/juce_graphics.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_graphics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_gui_basics_90929794.o: ../../../../modules/juce_gui_basics/juce_gui_basics.cpp
+$(OBJDIR)/juce_gui_basics_8a6da59c.o: ../../JuceLibraryCode/juce_gui_basics.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_gui_basics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_osc_72ef0f3c.o: ../../../../modules/juce_osc/juce_osc.cpp
+$(OBJDIR)/juce_osc_be4cee16.o: ../../JuceLibraryCode/juce_osc.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_osc.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

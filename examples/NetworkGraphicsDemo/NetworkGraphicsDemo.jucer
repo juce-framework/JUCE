@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="gWI5Ir" name="JUCE Network Graphics Demo" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              includeBinaryInAppConfig="1" jucerVersion="4.1.0">
+              includeBinaryInAppConfig="1" jucerVersion="4.2.0">
   <MAINGROUP id="OT9rJ2" name="JUCE Network Graphics Demo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>
@@ -64,7 +64,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw">
+    <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw" iosScreenOrientation="portraitlandscape">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
                        targetName="JUCE Network Graphics Demo"/>
@@ -117,7 +117,9 @@
                    androidKeyStore="${user.home}/.android/debug.keystore" androidKeyStorePass="android"
                    androidKeyAlias="androiddebugkey" androidKeyAliasPass="android"
                    androidCpp11="1" targetFolder="Builds/AndroidStudio" androidSDKPath=""
-                   androidNDKPath="" bigIcon="Ww6bQw" androidScreenOrientation="unspecified">
+                   androidNDKPath="" bigIcon="Ww6bQw" androidScreenOrientation="unspecified"
+                   gradleVersion="2.10" gradleWrapperVersion="0.6.0-beta5" gradleToolchain="clang"
+                   gradleToolchainVersion="3.6" buildToolsVersion="23.0.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>

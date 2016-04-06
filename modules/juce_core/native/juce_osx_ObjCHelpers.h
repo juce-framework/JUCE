@@ -65,12 +65,28 @@ namespace
                            static_cast<CGFloat> (r.getWidth()),
                            static_cast<CGFloat> (r.getHeight()));
     }
+   #endif
+  #if JUCE_MAC || JUCE_IOS
+   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
+
+    // This is necessary as on iOS builds, some arguments may be passed on registers
+    // depending on the argument type. The re-cast objc_msgSendSuper to a function
+    // take the same arguments as the target method.
+    template <typename ReturnValue, typename... Params>
+    static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
+    {
+        typedef ReturnValue (*SuperFn)(struct objc_super*, SEL, Params...);
+        SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
+        return fn (s, sel, params...);
+    }
+
+   #endif
 
     // These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
     typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
     static inline MsgSendSuperFn getMsgSendSuperFn() noexcept   { return (MsgSendSuperFn) (void*) objc_msgSendSuper; }
 
-   #if ! JUCE_PPC
+   #if ! JUCE_PPC && ! JUCE_IOS
     typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
     static inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
    #endif
@@ -149,7 +165,7 @@ struct ObjCClass
         jassert (b); ignoreUnused (b);
     }
 
-   #if JUCE_MAC
+   #if JUCE_MAC || JUCE_IOS
     static id sendSuperclassMessage (id self, SEL selector)
     {
         objc_super s = { self, [SuperclassType class] };
@@ -175,6 +191,38 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ObjCClass)
 };
+
+#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
+
+template <typename ReturnT, class Class, typename... Params>
+ReturnT (^CreateObjCBlock(Class* object, ReturnT (Class::*fn)(Params...))) (Params...)
+{
+    __block Class* _this = object;
+    __block ReturnT (Class::*_fn)(Params...) = fn;
+
+    return [[^ReturnT (Params... params) { return (_this->*_fn) (params...); } copy] autorelease];
+}
+
+template <typename BlockType>
+class ObjCBlock
+{
+public:
+    ObjCBlock()  { block = nullptr; }
+    template <typename R, class C, typename... P>
+    ObjCBlock (C* _this, R (C::*fn)(P...))  : block (CreateObjCBlock (_this, fn)) {}
+    ObjCBlock (BlockType b) : block ([b copy]) {}
+    ObjCBlock& operator= (const BlockType& other) { if (block != nullptr) { [block release]; } block = [other copy]; return *this; }
+    bool operator== (std::nullptr_t) const  { return (block == nullptr); }
+    bool operator!= (std::nullptr_t) const  { return (block != nullptr); }
+    ~ObjCBlock() { if (block != nullptr) [block release]; }
+
+    operator BlockType() { return block; }
+
+private:
+    BlockType block;
+};
+
+#endif
 
 
 #endif   // JUCE_OSX_OBJCHELPERS_H_INCLUDED
