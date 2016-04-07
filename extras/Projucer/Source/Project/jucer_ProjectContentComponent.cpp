@@ -447,11 +447,11 @@ struct EnableBuildComp   : public Component
 Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* child)
 {
    #if JUCE_WINDOWS
-    ignoreUnused(child);
+    ignoreUnused (child);
     return new ProjucerDisabledComp ("Windows support is still under development - "
                                      "please check for updates at www.juce.com!", false);
    #elif JUCE_LINUX
-    ignoreUnused(child);
+    ignoreUnused (child);
     return new ProjucerDisabledComp ("Linux support is still under development - "
                                      "please check for updates at www.juce.com!", false);
    #else
