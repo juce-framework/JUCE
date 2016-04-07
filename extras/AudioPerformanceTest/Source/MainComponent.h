@@ -138,7 +138,7 @@ private:
     }
 
     //==============================================================================
-    void allocateBuffers (int bufferSize)
+    void allocateBuffers (std::size_t bufferSize)
     {
         a.resize (bufferSize);
         b.resize (bufferSize);
@@ -174,8 +174,8 @@ private:
 
         for (int i = 0; i < numIterations; ++i)
         {
-            FloatVectorOperations::multiply (c.data(), a.data(), b.data(), bufferSize);
-            FloatVectorOperations::addWithMultiply (outBuffer, b.data(), c.data(), bufferSize);
+            FloatVectorOperations::multiply (c.data(), a.data(), b.data(), (int) bufferSize);
+            FloatVectorOperations::addWithMultiply (outBuffer, b.data(), c.data(), (int) bufferSize);
         }
     }
 
