@@ -33,7 +33,6 @@
 #include <AudioToolbox/AudioUnitUtilities.h>
 #endif
 
-#include <CoreAudioKit/AUViewController.h>
 #include <CoreMIDI/MIDIServices.h>
 
 #if JUCE_SUPPORT_CARBON
@@ -1507,7 +1506,7 @@ private:
     AutoResizingNSViewComponent wrapper;
 
    #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-    typedef void (^ViewControllerCallbackBlock)(AUViewControllerBase *);
+    typedef void (^ViewControllerCallbackBlock)(NSViewController *);
     bool waitingForViewCallback;
     ObjCBlock<ViewControllerCallbackBlock> viewControllerCallback;
    #endif
@@ -1607,7 +1606,7 @@ private:
     }
 
    #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-    void requestViewControllerCallback (AUViewControllerBase* controller)
+    void requestViewControllerCallback (NSViewController* controller)
     {
         if (! MessageManager::getInstance()->isThisTheMessageThread())
         {
