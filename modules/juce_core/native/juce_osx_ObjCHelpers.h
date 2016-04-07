@@ -212,8 +212,8 @@ public:
     ObjCBlock (C* _this, R (C::*fn)(P...))  : block (CreateObjCBlock (_this, fn)) {}
     ObjCBlock (BlockType b) : block ([b copy]) {}
     ObjCBlock& operator= (const BlockType& other) { if (block != nullptr) { [block release]; } block = [other copy]; return *this; }
-    bool operator== (std::nullptr_t) const  { return (block == nullptr); }
-    bool operator!= (std::nullptr_t) const  { return (block != nullptr); }
+    bool operator== (const void* ptr) const  { return (block == ptr); }
+    bool operator!= (const void* ptr) const  { return (block != ptr); }
     ~ObjCBlock() { if (block != nullptr) [block release]; }
 
     operator BlockType() { return block; }
