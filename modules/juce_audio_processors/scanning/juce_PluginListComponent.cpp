@@ -552,7 +552,7 @@ private:
 
 void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    currentScanner = new Scanner (*this, format, propertiesToUse, numThreads, allowAsync,
+    currentScanner = new Scanner (*this, format, propertiesToUse, allowAsync, numThreads,
                                   dialogTitle.isNotEmpty() ? dialogTitle : TRANS("Scanning for plug-ins..."),
                                   dialogText.isNotEmpty()  ? dialogText  : TRANS("Searching for all possible plug-in files..."));
 }

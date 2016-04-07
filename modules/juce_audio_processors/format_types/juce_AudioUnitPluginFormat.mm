@@ -1608,6 +1608,9 @@ private:
    #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
     void requestViewControllerCallback (NSViewController* controller)
     {
+        auto nsSize = [controller preferredContentSize];
+        auto viewSize = CGSizeMake (nsSize.width, nsSize.height);
+
         if (! MessageManager::getInstance()->isThisTheMessageThread())
         {
             struct AsyncViewControllerCallback : public CallbackMessage
@@ -1628,11 +1631,11 @@ private:
                 }
             };
 
-            (new AsyncViewControllerCallback (this, [controller view], [controller preferredContentSize]))->post();
+            (new AsyncViewControllerCallback (this, [controller view], viewSize))->post();
         }
         else
         {
-            embedViewController ([controller view], [controller preferredContentSize]);
+            embedViewController ([controller view], viewSize);
         }
     }
    #endif
