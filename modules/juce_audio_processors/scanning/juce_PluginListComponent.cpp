@@ -130,7 +130,8 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
       deadMansPedalFile (deadMansPedal),
       optionsButton ("Options..."),
       propertiesToUse (props),
-      allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
+      allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
+      numThreads (allowAsync ? 1 : 0)
 {
     tableModel = new TableModel (*this, listToEdit);
 
@@ -176,6 +177,11 @@ void PluginListComponent::setScanDialogText (const String& title, const String& 
 {
     dialogTitle = title;
     dialogText = content;
+}
+
+void PluginListComponent::setNumberOfThreadsForScanning (int num)
+{
+    numThreads = num;
 }
 
 void PluginListComponent::resized()
@@ -323,18 +329,22 @@ void PluginListComponent::setLastSearchPath (PropertiesFile& properties, AudioPl
 }
 
 //==============================================================================
-class PluginListComponent::Scanner    : private Timer, private Thread
+class PluginListComponent::Scanner    : private Timer
 {
 public:
     Scanner (PluginListComponent& plc, AudioPluginFormat& format, PropertiesFile* properties,
-             bool allowPluginsWhichRequireAsynchronousInstantiation, const String& title, const String& text)
-        : Thread ("Plug-in Scanner"),
-          owner (plc), formatToScan (format), propertiesToUse (properties),
+             bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
+             const String& title, const String& text)
+        : owner (plc), formatToScan (format), propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String::empty, AlertWindow::NoIcon),
           progressWindow (title, text, AlertWindow::NoIcon),
-          progress (0.0), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation), finished (false)
+          progress (0.0), numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
+          finished (false)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
+
+        // You need to use at least one thread when scanning plug-ins asynchronously
+        jassert (! allowAsync || (numThreads > 0));
 
         if (path.getNumPaths() > 0) // if the path is empty, then paths aren't used for this format.
         {
@@ -361,10 +371,10 @@ public:
 
     ~Scanner()
     {
-        if (allowAsync)
+        if (pool != nullptr)
         {
-            signalThreadShouldExit();
-            waitForThreadToExit (-1);
+            pool->removeAllJobs (true, 60000);
+            pool = nullptr;
         }
     }
 
@@ -377,7 +387,9 @@ private:
     FileSearchPathListComponent pathList;
     String pluginBeingScanned;
     double progress;
+    int numThreads;
     bool allowAsync, finished;
+    ScopedPointer<ThreadPool> pool;
 
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
     {
@@ -472,8 +484,13 @@ private:
         progressWindow.addProgressBarComponent (progress);
         progressWindow.enterModalState();
 
-        if (allowAsync)
-            startThread();
+        if (numThreads > 0)
+        {
+            pool = new ThreadPool (numThreads);
+
+            for (int i = numThreads; --i >= 0;)
+                pool->addJob (new ScanJob (*this), true);
+        }
 
         startTimer (20);
     }
@@ -486,7 +503,7 @@ private:
 
     void timerCallback() override
     {
-        if (! allowAsync)
+        if (pool == nullptr)
         {
             if (doNextScan())
                 startTimer (20);
@@ -513,18 +530,29 @@ private:
         return false;
     }
 
-    void run() override
+    struct ScanJob  : public ThreadPoolJob
     {
-        while (doNextScan() && ! threadShouldExit())
-        {}
-    }
+        ScanJob (Scanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
+
+        JobStatus runJob()
+        {
+            while (scanner.doNextScan() && ! shouldExit())
+            {}
+
+            return jobHasFinished;
+        }
+
+        Scanner& scanner;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScanJob)
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Scanner)
 };
 
 void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    currentScanner = new Scanner (*this, format, propertiesToUse, allowAsync,
+    currentScanner = new Scanner (*this, format, propertiesToUse, numThreads, allowAsync,
                                   dialogTitle.isNotEmpty() ? dialogTitle : TRANS("Scanning for plug-ins..."),
                                   dialogText.isNotEmpty()  ? dialogText  : TRANS("Searching for all possible plug-in files..."));
 }
