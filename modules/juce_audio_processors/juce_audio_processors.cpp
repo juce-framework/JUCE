@@ -56,15 +56,19 @@
  #define JUCE_PLUGINHOST_VST3 0
 #endif
 
-#if JUCE_IOS
-#define IOS_MAC_VIEW  UIView
-#elif JUCE_MAC
-#define IOS_MAC_VIEW  NSView
-#endif
-
 //==============================================================================
 namespace juce
 {
+
+#if JUCE_IOS
+ #define JUCE_IOS_MAC_VIEW  UIView
+ typedef UIViewComponent  ViewComponentBaseClass;
+#elif JUCE_MAC
+ #define JUCE_IOS_MAC_VIEW  NSView
+ typedef NSViewComponent  ViewComponentBaseClass;
+#else
+ #error
+#endif
 
 static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                         const PluginDescription& desc)
@@ -77,14 +81,10 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 }
 
 #if JUCE_MAC || JUCE_IOS
+
 //==============================================================================
-struct AutoResizingNSViewComponent  :
-#if JUCE_MAC
-                                    public NSViewComponent,
-#else
-                                    public UIViewComponent,
-#endif
-                                    private AsyncUpdater
+struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
+                                      private AsyncUpdater
 {
     AutoResizingNSViewComponent() : recursive (false) {}
 
@@ -113,16 +113,16 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 {
     AutoResizingNSViewComponentWithParent()
     {
-        IOS_MAC_VIEW* v = [[IOS_MAC_VIEW alloc] init];
+        JUCE_IOS_MAC_VIEW* v = [[JUCE_IOS_MAC_VIEW alloc] init];
         setView (v);
         [v release];
 
         startTimer (30);
     }
 
-    IOS_MAC_VIEW* getChildView() const
+    JUCE_IOS_MAC_VIEW* getChildView() const
     {
-        if (IOS_MAC_VIEW* parent = (IOS_MAC_VIEW*) getView())
+        if (JUCE_IOS_MAC_VIEW* parent = (JUCE_IOS_MAC_VIEW*) getView())
             if ([[parent subviews] count] > 0)
                 return [[parent subviews] objectAtIndex: 0];
 
@@ -131,7 +131,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
     void timerCallback() override
     {
-        if (IOS_MAC_VIEW* child = getChildView())
+        if (JUCE_IOS_MAC_VIEW* child = getChildView())
         {
             stopTimer();
             setView (child);

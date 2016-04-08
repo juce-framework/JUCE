@@ -1467,7 +1467,7 @@ public:
     }
 
    #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-    void embedViewController (IOS_MAC_VIEW* pluginView, const CGSize& size)
+    void embedViewController (JUCE_IOS_MAC_VIEW* pluginView, const CGSize& size)
     {
         wrapper.setView (pluginView);
         waitingForViewCallback = false;
@@ -1516,7 +1516,7 @@ private:
         if (! plugin.initialiseAudioUnit())
             return false;
 
-        IOS_MAC_VIEW* pluginView = nil;
+        JUCE_IOS_MAC_VIEW* pluginView = nil;
         UInt32 dataSize = 0;
         Boolean isWritable = false;
 
@@ -1616,10 +1616,10 @@ private:
             struct AsyncViewControllerCallback : public CallbackMessage
             {
                 AudioUnitPluginWindowCocoa* owner;
-                IOS_MAC_VIEW* controllerView;
+                JUCE_IOS_MAC_VIEW* controllerView;
                 CGSize size;
 
-                AsyncViewControllerCallback (AudioUnitPluginWindowCocoa* plugInWindow, IOS_MAC_VIEW* inView,
+                AsyncViewControllerCallback (AudioUnitPluginWindowCocoa* plugInWindow, JUCE_IOS_MAC_VIEW* inView,
                                              const CGSize& preferredSize)
                     : owner (plugInWindow), controllerView ([inView retain]), size (preferredSize)
                 {}
