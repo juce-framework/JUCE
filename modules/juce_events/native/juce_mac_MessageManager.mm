@@ -356,8 +356,8 @@ void MessageManager::broadcastMessage (const String& message)
 }
 
 // Special function used by some plugin classes to re-post carbon events
-void repostCurrentNSEvent();
-void repostCurrentNSEvent()
+void __attribute__ ((visibility("default"))) repostCurrentNSEvent();
+void __attribute__ ((visibility("default"))) repostCurrentNSEvent()
 {
     struct EventReposter  : public CallbackMessage
     {
