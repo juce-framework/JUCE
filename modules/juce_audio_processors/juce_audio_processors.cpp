@@ -60,16 +60,6 @@
 namespace juce
 {
 
-#if JUCE_IOS
- #define JUCE_IOS_MAC_VIEW  UIView
- typedef UIViewComponent  ViewComponentBaseClass;
-#elif JUCE_MAC
- #define JUCE_IOS_MAC_VIEW  NSView
- typedef NSViewComponent  ViewComponentBaseClass;
-#else
- #error
-#endif
-
 static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                         const PluginDescription& desc)
 {
@@ -81,6 +71,14 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 }
 
 #if JUCE_MAC || JUCE_IOS
+
+#if JUCE_IOS
+ #define JUCE_IOS_MAC_VIEW  UIView
+ typedef UIViewComponent  ViewComponentBaseClass;
+#else
+ #define JUCE_IOS_MAC_VIEW  NSView
+ typedef NSViewComponent  ViewComponentBaseClass;
+#endif
 
 //==============================================================================
 struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
