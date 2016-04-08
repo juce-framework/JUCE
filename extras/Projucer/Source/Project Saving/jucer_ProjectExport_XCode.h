@@ -1074,7 +1074,7 @@ public:
             flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
             flags.add (owner.getExternalLibraryFlags (config));
 
-            StringArray libs (xcodeLibs);
+            StringArray libs (owner.xcodeLibs);
             libs.addArray (xcodeLibs);
 
             for (int i = 0; i < libs.size(); ++i)
