@@ -265,7 +265,7 @@ private:
         cancelButton.setEnabled (true);
         registerButton.setEnabled (true);
 
-        ProjucerApplication::getApp().updateBuildEnabledSetting();
+        ProjucerApplication::getApp().updateAllBuildTabs();
     }
 
     void loginSuccess (const String& username, const String& apiKey) override
@@ -276,7 +276,7 @@ private:
         if (DialogWindow* parentDialog = findParentComponentOfClass<DialogWindow>())
         {
             parentDialog->exitModalState (0);
-            ProjucerApplication::getApp().updateBuildEnabledSetting();
+            ProjucerApplication::getApp().updateAllBuildTabs();
         }
     }
 

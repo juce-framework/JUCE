@@ -99,7 +99,7 @@ public:
     void showLoginForm();
     void hideLoginForm();
 
-    void updateBuildEnabledSetting();
+    void updateAllBuildTabs();
     LatestVersionChecker* createVersionChecker() const;
 
     //==============================================================================

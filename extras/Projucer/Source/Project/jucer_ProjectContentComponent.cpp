@@ -405,7 +405,7 @@ struct ProjucerDisabledComp   : public Component,
         else if (btn == signOutButton.get())
         {
             ProjucerLicences::getInstance()->logout();
-            ProjucerApplication::getApp().updateBuildEnabledSetting();
+            ProjucerApplication::getApp().updateAllBuildTabs();
         }
     }
 

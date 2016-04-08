@@ -769,11 +769,11 @@ void ProjucerApplication::timerCallback()
         showLoginForm();
 }
 
-void ProjucerApplication::updateBuildEnabledSetting()
+void ProjucerApplication::updateAllBuildTabs()
 {
     for (int i = 0; i < mainWindowList.windows.size(); ++i)
         if (ProjectContentComponent* p = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
-            p->refreshTabsIfBuildStatusChanged();
+            p->rebuildProjectTabs();
 }
 
 //==============================================================================
@@ -786,7 +786,7 @@ void ProjucerApplication::loginOrLogout()
     else
         showLoginForm();
 
-    updateBuildEnabledSetting();
+    updateAllBuildTabs();
 }
 
 bool ProjucerApplication::currentEULAHasBeenAcceptedPreviously() const
