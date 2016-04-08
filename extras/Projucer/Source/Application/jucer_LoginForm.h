@@ -55,7 +55,9 @@ public:
         addAndMakeVisible (passwordEditor);
         initialiseTextField (userIDEditor, userIDLabel);
         addAndMakeVisible (userIDEditor);
-        userIDEditor.setText (ProjucerLicences::getInstance()->getLoginName());
+
+        String userName = ProjucerLicences::getInstance()->getLoginName();
+        userIDEditor.setText (userName.isEmpty() ? getLastUserName() : userName);
 
         initialiseLabel (errorLabel, Font::plain, ProjucerDialogLookAndFeel::getErrorTextColour());
         addChildComponent (errorLabel);
@@ -205,6 +207,8 @@ private:
     void loginButtonClicked()
     {
         loginName = userIDEditor.getText();
+        getGlobalProperties().setValue ("lastUserName", loginName);
+
         password = passwordEditor.getText();
 
         if (! isValidEmail (loginName) || password.isEmpty())
@@ -235,6 +239,11 @@ private:
     void rememberLoginCheckboxClicked()
     {
         rememberLogin = rememberLoginCheckbox.getToggleState();
+    }
+
+    String getLastUserName() const
+    {
+        return getGlobalProperties().getValue ("lastUserName");
     }
 
     void handleInvalidLogin()
