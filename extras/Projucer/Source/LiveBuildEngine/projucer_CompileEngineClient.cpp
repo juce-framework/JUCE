@@ -290,6 +290,15 @@ public:
             return;
         }
 
+        if (areAnyModulesMissing (project))
+        {
+            MessageTypes::sendNewBuild (*server, build);
+
+            owner.errorList.resetToError ("Some of your JUCE modules can't be found! "
+                                          "Please check that all the module paths are correct");
+            return;
+        }
+
         build.setSystemIncludes (getSystemIncludePaths());
         build.setUserIncludes (getUserIncludes());
 
@@ -443,6 +452,18 @@ private:
         ValueTree diskModules (ValueTree::fromXml (*xml).getChildWithName (Ids::MODULES));
 
         return liveModules.isEquivalentTo (diskModules);
+    }
+
+    static bool areAnyModulesMissing (Project& project)
+    {
+        OwnedArray<LibraryModule> modules;
+        project.getModules().createRequiredModules (modules);
+
+        for (auto* module : modules)
+            if (! module->getFolder().isDirectory())
+                return true;
+
+        return false;
     }
 
     StringArray getUserIncludes()
