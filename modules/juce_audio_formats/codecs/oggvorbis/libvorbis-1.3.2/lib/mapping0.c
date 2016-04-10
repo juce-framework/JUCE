@@ -64,7 +64,7 @@ static void mapping0_pack(vorbis_info *vi,vorbis_info_mapping *vm,
      packed 4 binary zeros here to signify one submapping in use.  We
      now redefine that to mean four bitflags that indicate use of
      deeper features; bit0:submappings, bit1:coupling,
-     bit2,3:reserved. This is backward compatable with all actual uses
+     bit2,3:reserved. This is backward compatible with all actual uses
      of the beta code. */
 
   if(info->submaps>1){

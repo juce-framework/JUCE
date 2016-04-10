@@ -80,7 +80,7 @@ inline SInt32 CAAtomicAdd32Barrier(SInt32 theAmt, volatile SInt32* theValue)
 #if TARGET_OS_WIN32
 	long lRetVal = InterlockedExchangeAdd((volatile long*)theValue, theAmt);
 	// InterlockedExchangeAdd returns the original value which differs from OSX version.
-	// At this point the addition would have occured and hence returning the new value
+	// At this point the addition would have occurred and hence returning the new value
 	// to keep it sync with OSX.
 	return lRetVal + theAmt;
 #else

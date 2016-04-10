@@ -25,7 +25,7 @@ public:
         // Adds the child light components and makes them visible
         // within this component.
         // (they currently rely on having a default constructor
-        // so they dont have to be individually initialised)
+        // so they don't have to be individually initialised)
         for (int i = 0; i < numX * numY; ++i)
             addAndMakeVisible (toggleLights[i]);
     }

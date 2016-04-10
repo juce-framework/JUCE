@@ -316,7 +316,7 @@ namespace PathStrokeHelpers
 
             if (style == PathStrokeType::square)
             {
-                // sqaure ends
+                // square ends
                 destPath.lineTo (offx1, offy1);
                 destPath.lineTo (offx2, offy2);
                 destPath.lineTo (x2, y2);

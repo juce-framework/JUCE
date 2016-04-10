@@ -184,7 +184,7 @@ typedef unsigned int JDIMENSION;
 #define METHODDEF(type)		static type
 /* a function used only in its module: */
 #define LOCAL(type)		static type
-/* a function referenced thru EXTERNs: */
+/* a function referenced through EXTERNs: */
 #define GLOBAL(type)		type
 /* a reference to a GLOBAL function: */
 #define EXTERN(type)		extern type

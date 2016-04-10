@@ -1016,7 +1016,7 @@ png_colorspace_set_gamma(png_const_structrp png_ptr,
    png_colorspacerp colorspace, png_fixed_point gAMA)
 {
    /* Changed in libpng-1.5.4 to limit the values to ensure overflow can't
-    * occur.  Since the fixed point representation is assymetrical it is
+    * occur.  Since the fixed point representation is asymmetrical it is
     * possible for 1/gamma to overflow the limit of 21474 and this means the
     * gamma value must be at least 5/100000 and hence at most 20000.0.  For
     * safety the limits here are a little narrower.  The values are 0.00016 to
@@ -1894,7 +1894,7 @@ png_icc_check_header(png_const_structrp png_ptr, png_colorspacerp colorspace,
     */
 
    /* Data checks (could be skipped).  These checks must be independent of the
-    * version number; however, the version number doesn't accomodate changes in
+    * version number; however, the version number doesn't accommodate changes in
     * the header fields (just the known tags and the interpretation of the
     * data.)
     */
@@ -1979,7 +1979,7 @@ png_icc_check_header(png_const_structrp png_ptr, png_colorspacerp colorspace,
             "invalid embedded Abstract ICC profile");
 
       case 0x6C696E6B: /* 'link' */
-         /* DeviceLink profiles cannnot be interpreted in a non-device specific
+         /* DeviceLink profiles cannot be interpreted in a non-device specific
           * fashion, if an app uses the AToB0Tag in the profile the results are
           * undefined unless the result is sent to the intended device,
           * therefore a DeviceLink profile should not be found embedded in a
@@ -2497,7 +2497,7 @@ png_check_IHDR(png_const_structrp png_ptr,
 
 #if defined(PNG_sCAL_SUPPORTED) || defined(PNG_pCAL_SUPPORTED)
 /* ASCII to fp functions */
-/* Check an ASCII formated floating point value, see the more detailed
+/* Check an ASCII formatted floating point value, see the more detailed
  * comments in pngpriv.h
  */
 /* The following is used internally to preserve the sticky flags */

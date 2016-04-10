@@ -1327,7 +1327,7 @@ PNG_FIXED_EXPORT(228, void, png_set_alpha_mode_fixed, (png_structrp png_ptr,
  *
  * png_set_alpha_mode(pp, PNG_ALPHA_PNG, PNG_GAMMA_MAC);
  *    In this case the output is assumed to be something like an sRGB conformant
- *    display preceeded by a power-law lookup table of power 1.45.  This is how
+ *    display preceded by a power-law lookup table of power 1.45.  This is how
  *    early Mac systems behaved.
  *
  * png_set_alpha_mode(pp, PNG_ALPHA_STANDARD, PNG_GAMMA_LINEAR);
@@ -1846,12 +1846,12 @@ PNG_EXPORT(218, png_byte, png_get_current_pass_number, (png_const_structrp));
  *
  * The integer return from the callback function is interpreted thus:
  *
- * negative: An error occured, png_chunk_error will be called.
+ * negative: An error occurred, png_chunk_error will be called.
  *     zero: The chunk was not handled, the chunk will be saved. A critical
  *           chunk will cause an error at this point unless it is to be saved.
  * positive: The chunk was handled, libpng will ignore/discard it.
  *
- * See "INTERACTION WTIH USER CHUNK CALLBACKS" below for important notes about
+ * See "INTERACTION WITH USER CHUNK CALLBACKS" below for important notes about
  * how this behavior will change in libpng 1.7
  */
 PNG_EXPORT(88, void, png_set_read_user_chunk_fn, (png_structrp png_ptr,
@@ -2386,7 +2386,7 @@ PNG_EXPORT(171, void, png_set_sCAL_s, (png_const_structrp png_ptr,
  * to specifying "NEVER", however when "AS_DEFAULT" is used for specific chunks
  * it simply resets the behavior to the libpng default.
  *
- * INTERACTION WTIH USER CHUNK CALLBACKS:
+ * INTERACTION WITH USER CHUNK CALLBACKS:
  * The per-chunk handling is always used when there is a png_user_chunk_ptr
  * callback and the callback returns 0; the chunk is then always stored *unless*
  * it is critical and the per-chunk setting is other than ALWAYS.  Notice that
@@ -2784,7 +2784,7 @@ PNG_EXPORT(207, void, png_save_uint_16, (png_bytep buf, unsigned int i));
  * The simplified API hides the details of both libpng and the PNG file format
  * itself.  It allows PNG files to be read into a very limited number of
  * in-memory bitmap formats or to be written from the same formats.  If these
- * formats do not accomodate your needs then you can, and should, use the more
+ * formats do not accommodate your needs then you can, and should, use the more
  * sophisticated APIs above - these support a wide variety of in-memory formats
  * and a wide variety of sophisticated transformations to those formats as well
  * as a wide variety of APIs to manipulate ancillary information.

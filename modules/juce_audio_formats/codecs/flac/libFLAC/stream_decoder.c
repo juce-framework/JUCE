@@ -169,7 +169,7 @@ typedef struct FLAC__StreamDecoderPrivate {
 	FLAC__MD5Context md5context;
 	FLAC__byte computed_md5sum[16]; /* this is the sum we computed from the decoded data */
 	/* (the rest of these are only used for seeking) */
-	FLAC__Frame last_frame; /* holds the info of the last frame we seeked to */
+	FLAC__Frame last_frame; /* holds the info of the last frame we sought to */
 	FLAC__uint64 first_frame_offset; /* hint to the seek routine of where in the stream the first audio frame starts */
 	FLAC__uint64 target_sample;
 	unsigned unparseable_frame_count; /* used to tell whether we're decoding a future version of FLAC or just got a bad sync */

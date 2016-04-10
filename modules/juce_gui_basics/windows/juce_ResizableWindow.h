@@ -154,7 +154,7 @@ public:
     /** Sets the bounds-constrainer object to use for resizing and dragging this window.
 
         A pointer to the object you pass in will be kept, but it won't be deleted
-        by this object, so it's the caller's responsiblity to manage it.
+        by this object, so it's the caller's responsibility to manage it.
 
         If you pass a nullptr, then no contraints will be placed on the positioning of the window.
     */
@@ -216,7 +216,7 @@ public:
 
     /** Restores the window to a previously-saved size and position.
 
-        This restores the window's size, positon and full-screen status from an
+        This restores the window's size, position and full-screen status from an
         string that was previously created with the getWindowStateAsString()
         method.
 

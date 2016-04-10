@@ -98,7 +98,7 @@ public:
 
     /** Checks whether a point lies within the path.
 
-        This is only relevent for closed paths (see closeSubPath()), and
+        This is only relevant for closed paths (see closeSubPath()), and
         may produce false results if used on a path which has open sub-paths.
 
         The path's winding rule is taken into account by this method.
@@ -114,7 +114,7 @@ public:
 
     /** Checks whether a point lies within the path.
 
-        This is only relevent for closed paths (see closeSubPath()), and
+        This is only relevant for closed paths (see closeSubPath()), and
         may produce false results if used on a path which has open sub-paths.
 
         The path's winding rule is taken into account by this method.

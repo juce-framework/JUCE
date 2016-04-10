@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* This is the prefered location of all CPP hackery to make $random_compiler
+/* This is the preferred location of all CPP hackery to make $random_compiler
  * work like something approaching a C99 (or maybe more accurately GNU99)
  * compiler.
  *
