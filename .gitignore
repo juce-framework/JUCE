@@ -55,3 +55,4 @@ profile
 **/CodeBlocks/*.depend
 **/CodeBlocks/*.layout
 doxygen/doc
+extras/Introjucer/Builds/VisualStudio2015/The Introjucer.VC.db
