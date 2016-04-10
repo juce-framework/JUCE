@@ -199,7 +199,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
     }else if(min_target_bits>0 && this_bits<min_target_bits){
       bm->minmax_reservoir+=(this_bits-min_target_bits);
     }else{
-      /* inbetween; we want to take reservoir toward but not past desired_fill */
+      /* between; we want to take reservoir toward but not past desired_fill */
       if(bm->minmax_reservoir>desired_fill){
         if(max_target_bits>0){ /* logical bulletproofing against initialization state */
           bm->minmax_reservoir+=(this_bits-max_target_bits);

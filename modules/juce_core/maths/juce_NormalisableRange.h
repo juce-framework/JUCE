@@ -150,7 +150,7 @@ public:
     /** An optional skew factor that alters the way values are distribute across the range.
 
         The skew factor lets you skew the mapping logarithmically so that larger or smaller
-        values are given a larger proportion of the avilable space.
+        values are given a larger proportion of the available space.
 
         A factor of 1.0 has no skewing effect at all. If the factor is < 1.0, the lower end
         of the range will fill more of the slider's length; if the factor is > 1.0, the upper

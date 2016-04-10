@@ -88,7 +88,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
     }
 
     if(m&1){
-      /* odd order filter; slightly assymetric */
+      /* odd order filter; slightly asymmetric */
       /* the last coefficient */
       q*=ftmp[0]-w;
       q*=q;
@@ -175,7 +175,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
     /* pi,qi normalized collectively, both tracked using qexp */
 
     if(m&1){
-      /* odd order filter; slightly assymetric */
+      /* odd order filter; slightly asymmetric */
       /* the last coefficient */
       qi=(qi>>shift)*labs(ilsp[j-1]-wi);
       pi=(pi>>shift)<<14;
@@ -262,7 +262,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
       p *= w-lsp[j];
     }
     if(j==m){
-      /* odd order filter; slightly assymetric */
+      /* odd order filter; slightly asymmetric */
       /* the last coefficient */
       q*=w-lsp[j-1];
       p*=p*(4.f-w*w);

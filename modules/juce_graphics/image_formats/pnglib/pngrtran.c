@@ -1306,7 +1306,7 @@ png_init_read_transformations(png_structrp png_ptr)
 
       else if (png_ptr->screen_gamma != 0)
          /* The converse - assume the file matches the screen, note that this
-          * perhaps undesireable default can (from 1.5.4) be changed by calling
+          * perhaps undesirable default can (from 1.5.4) be changed by calling
           * png_set_alpha_mode (even if the alpha handling mode isn't required
           * or isn't changed from the default.)
           */

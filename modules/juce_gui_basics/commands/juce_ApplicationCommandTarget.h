@@ -219,7 +219,7 @@ public:
     */
     bool isCommandActive (const CommandID commandID);
 
-    /** If this object is a Component, this method will seach upwards in its current
+    /** If this object is a Component, this method will search upwards in its current
         UI hierarchy for the next parent component that implements the
         ApplicationCommandTarget class.
 

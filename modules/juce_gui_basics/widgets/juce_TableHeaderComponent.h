@@ -208,14 +208,14 @@ public:
 
         If there's no such column ID, this will return -1.
 
-        If onlyCountVisibleColumns is true, this will return the index amoungst the visible columns;
+        If onlyCountVisibleColumns is true, this will return the index amongst the visible columns;
         otherwise it'll return the index amongst all the columns, including any hidden ones.
     */
     int getIndexOfColumnId (int columnId, bool onlyCountVisibleColumns) const;
 
     /** Returns the ID of the column at a given index.
 
-        If onlyCountVisibleColumns is true, this will count the index amoungst the visible columns;
+        If onlyCountVisibleColumns is true, this will count the index amongst the visible columns;
         otherwise it'll count it amongst all the columns, including any hidden ones.
 
         If the index is out-of-range, it'll return 0.

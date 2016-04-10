@@ -691,7 +691,7 @@ public:
 
             { const ScopedLock sl (callbackLock); }
 
-            // wait until it's definately stopped calling back..
+            // wait until it's definitely stopped calling back..
             for (int i = 40; --i >= 0;)
             {
                 Thread::sleep (50);

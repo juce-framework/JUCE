@@ -1133,7 +1133,7 @@ png_read_png(png_structrp png_ptr, png_inforp info_ptr,
 #  define E_LINEAR8 4 /* 8-bit linear: only from a file value */
 
 /* Color-map processing: after libpng has run on the PNG image further
- * processing may be needed to conver the data to color-map indicies.
+ * processing may be needed to conver the data to color-map indices.
  */
 #define PNG_CMAP_NONE      0
 #define PNG_CMAP_GA        1 /* Process GA data to a color-map with alpha */
@@ -2093,7 +2093,7 @@ png_image_read_colormap(png_voidp argument)
             data_encoding = E_FILE;
 
             /* The rows from libpng, while technically gray values, are now also
-             * color-map indicies; however, they may need to be expanded to 1
+             * color-map indices; however, they may need to be expanded to 1
              * byte per pixel.  This is what png_set_packing does (i.e., it
              * unpacks the bit values into bytes.)
              */
@@ -2658,7 +2658,7 @@ png_image_read_colormap(png_voidp argument)
                num_trans = 0;
 
             output_processing = PNG_CMAP_NONE;
-            data_encoding = E_FILE; /* Don't change from color-map indicies */
+            data_encoding = E_FILE; /* Don't change from color-map indices */
             cmap_entries = png_ptr->num_palette;
             if (cmap_entries > 256)
                cmap_entries = 256;
@@ -2698,7 +2698,7 @@ png_image_read_colormap(png_voidp argument)
                      i < num_trans ? trans[i] : 255U, E_FILE/*8-bit*/);
             }
 
-            /* The PNG data may have indicies packed in fewer than 8 bits, it
+            /* The PNG data may have indices packed in fewer than 8 bits, it
              * must be expanded if so.
              */
             if (png_ptr->bit_depth < 8)

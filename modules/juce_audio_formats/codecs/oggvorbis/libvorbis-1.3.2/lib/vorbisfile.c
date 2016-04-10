@@ -258,7 +258,7 @@ static ogg_int64_t _get_prev_page_serial(OggVorbis_File *vf,
         }
 
         if(!_lookup_serialno(ret_serialno,serial_list,serial_n)){
-          /* we fell off the end of the link, which means we seeked
+          /* we fell off the end of the link, which means we sought
              back too far and shouldn't have been looking in that link
              to begin with.  If we found the preferred serial number,
              forget that we saw it. */
@@ -524,7 +524,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
     vorbis_info vi;
     vorbis_comment vc;
 
-    /* the below guards against garbage seperating the last and
+    /* the below guards against garbage separating the last and
        first pages of two links. */
     while(searched<endsearched){
       ogg_int64_t bisect;
@@ -1807,7 +1807,7 @@ vorbis_info *ov_info(OggVorbis_File *vf,int link){
   }
 }
 
-/* grr, strong typing, grr, no templates/inheritence, grr */
+/* grr, strong typing, grr, no templates/inheritance, grr */
 vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
   if(vf->seekable){
     if(link<0)

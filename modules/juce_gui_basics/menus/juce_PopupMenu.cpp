@@ -407,7 +407,7 @@ public:
             {
                 // we want to dismiss the menu, but if we do it synchronously, then
                 // the mouse-click will be allowed to pass through. That's good, except
-                // when the user clicks on the button that orginally popped the menu up,
+                // when the user clicks on the button that originally popped the menu up,
                 // as they'll expect the menu to go away, and in fact it'll just
                 // come back. So only dismiss synchronously if they're not on the original
                 // comp that we're attached to.

@@ -113,7 +113,7 @@ struct DiagnosticReceiver
 struct DiagnosticList
 {
     // after some research, it seems that notes never come on their own
-    // i.e. they always have a warning / error preceeding them
+    // i.e. they always have a warning / error preceding them
     // so we can use this to keep notes and their associated notes together
     // by keeping track of the last message
     DiagnosticMessage lastMessage;

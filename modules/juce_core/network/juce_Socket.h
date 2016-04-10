@@ -247,7 +247,7 @@ public:
         This is useful if you need to know to which port the OS has actually bound your
         socket when bindToPort was called with zero.
 
-        Returns -1 if the socket didn't bind to any port yet or an error occured. */
+        Returns -1 if the socket didn't bind to any port yet or an error occurred. */
     int getBoundPort() const noexcept;
 
     /** Returns the OS's socket handle that's currently open. */

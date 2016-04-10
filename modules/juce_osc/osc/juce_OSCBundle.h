@@ -106,7 +106,7 @@ public:
     bool isEmpty() const noexcept                                { return elements.isEmpty(); }
 
     /** Returns a reference to the OSCBundle element at index i in this bundle.
-        This method does not check the range and results in undefined behavour
+        This method does not check the range and results in undefined behaviour
         in case i < 0 or i >= size().
     */
     OSCBundle::Element& operator[] (const int i) const noexcept

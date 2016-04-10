@@ -59,7 +59,7 @@ public:
         canSelectFiles                  = 4,    /**< specifies that the user can select files (can be used in
                                                      conjunction with canSelectDirectories). */
         canSelectDirectories            = 8,    /**< specifies that the user can select directories (can be used in
-                                                     conjuction with canSelectFiles). */
+                                                     conjunction with canSelectFiles). */
         canSelectMultipleItems          = 16,   /**< specifies that the user can select multiple items. */
         useTreeView                     = 32,   /**< specifies that a tree-view should be shown instead of a file list. */
         filenameBoxIsReadOnly           = 64,   /**< specifies that the user can't type directly into the filename box. */

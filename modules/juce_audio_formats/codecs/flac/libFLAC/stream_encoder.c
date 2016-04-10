@@ -1893,7 +1893,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_metadata(FLAC__StreamEncoder *encod
 }
 
 /*
- * These three functions are not static, but not publically exposed in
+ * These three functions are not static, but not publicly exposed in
  * include/FLAC/ either.  They are used by the test suite.
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_disable_constant_subframes(FLAC__StreamEncoder *encoder, FLAC__bool value)

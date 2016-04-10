@@ -59,7 +59,7 @@ public:
     class JUCE_API  Position
     {
     public:
-        /** Creates an uninitialised postion.
+        /** Creates an uninitialised position.
             Don't attempt to call any methods on this until you've given it an owner document
             to refer to!
         */
@@ -142,7 +142,7 @@ public:
 
         /** Allows the position to be automatically updated when the document changes.
 
-            If this is set to true, the positon will register with its document so that
+            If this is set to true, the position will register with its document so that
             when the document has text inserted or deleted, this position will be automatically
             moved to keep it at the same position in the text.
         */

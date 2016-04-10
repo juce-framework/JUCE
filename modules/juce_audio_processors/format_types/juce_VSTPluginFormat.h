@@ -36,7 +36,7 @@ public:
     ~VSTPluginFormat();
 
     //==============================================================================
-    /** Attempts to retreive the VSTXML data from a plugin.
+    /** Attempts to retrieve the VSTXML data from a plugin.
         Will return nullptr if the plugin isn't a VST, or if it doesn't have any VSTXML.
     */
     static const XmlElement* getVSTXML (AudioPluginInstance* plugin);

@@ -707,7 +707,7 @@ public:
 #pragma mark AU Music Base Dispatch
 
 #if !TARGET_OS_IPHONE
-// these methods are deprecated, so we don't include them except for compatability
+// these methods are deprecated, so we don't include them except for compatibility
 	/*! @method PrepareInstrument */
 	virtual OSStatus			PrepareInstrument(MusicDeviceInstrumentID inInstrument) { return kAudio_UnimplementedError; }
 

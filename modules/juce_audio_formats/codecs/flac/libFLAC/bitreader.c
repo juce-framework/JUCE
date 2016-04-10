@@ -143,7 +143,7 @@ static FLAC__bool bitreader_read_from_client_(FLAC__BitReader *br)
 
 	/* before reading, if the existing reader looks like this (say uint32_t is 32 bits wide)
 	 *   bitstream :  11 22 33 44 55            br->words=1 br->bytes=1 (partial tail word is left-justified)
-	 *   buffer[BE]:  11 22 33 44 55 ?? ?? ??   (shown layed out as bytes sequentially in memory)
+	 *   buffer[BE]:  11 22 33 44 55 ?? ?? ??   (shown laid out as bytes sequentially in memory)
 	 *   buffer[LE]:  44 33 22 11 ?? ?? ?? 55   (?? being don't-care)
 	 *                               ^^-------target, bytes=3
 	 * on LE machines, have to byteswap the odd tail word so nothing is

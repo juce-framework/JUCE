@@ -106,7 +106,7 @@ public:
 
         If you intend to instantiate a AudioUnit v3 plug-in then you must use
         this non-blocking asynchrous version - or call the synchrous method
-        from an auxilliary thread.
+        from an auxiliary thread.
     */
     void createPluginInstanceAsync (const PluginDescription& description,
                                     double initialSampleRate,
