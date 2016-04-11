@@ -38,6 +38,9 @@
     <Filter Include="Juce Modules\juce_core\native">
       <UniqueIdentifier>{C79A4D23-7866-8F3E-AC39-BD68C52A9259}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce Modules\juce_core\native\java">
+      <UniqueIdentifier>{146EB229-F48F-ABC0-BEBB-625D129596D3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce Modules\juce_core\network">
       <UniqueIdentifier>{DA0DC4AC-B511-A2D4-199A-C93454D6F114}</UniqueIdentifier>
     </Filter>
@@ -64,6 +67,9 @@
     </Filter>
     <Filter Include="Juce Modules\juce_core\zip">
       <UniqueIdentifier>{F03654BC-34D8-F975-BEA3-750CC2783D23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_core\zip\zlib">
+      <UniqueIdentifier>{585D6A72-C5E7-BCF1-A168-63A40C6B6313}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Library Code">
       <UniqueIdentifier>{8B4D1BAA-6DB4-CAEC-A0FA-271F354D5C61}</UniqueIdentifier>
@@ -324,6 +330,39 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\zip\juce_ZipFile.cpp">
       <Filter>Juce Modules\juce_core\zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\adler32.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\compress.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\crc32.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\deflate.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\infback.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inffast.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inflate.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inftrees.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\trees.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\uncompr.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\zutil.c">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\juce_core.cpp">
       <Filter>Juce Library Code</Filter>
@@ -681,6 +720,39 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_ZipFile.h">
       <Filter>Juce Modules\juce_core\zip</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\crc32.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\deflate.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inffast.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inffixed.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inflate.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inftrees.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\trees.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zconf.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zconf.in.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zlib.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zutil.h">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\juce_core.h">
       <Filter>Juce Modules\juce_core</Filter>
     </ClInclude>
@@ -690,6 +762,23 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>Juce Library Code</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidMidi.java">
+      <Filter>Juce Modules\juce_core\native\java</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidMidiFallback.java">
+      <Filter>Juce Modules\juce_core\native\java</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidRuntimePermissions.java">
+      <Filter>Juce Modules\juce_core\native\java</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_core\native\java\JuceAppActivity.java">
+      <Filter>Juce Modules\juce_core\native\java</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\README">
+      <Filter>Juce Modules\juce_core\zip\zlib</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc">

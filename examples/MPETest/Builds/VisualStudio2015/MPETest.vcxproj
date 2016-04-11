@@ -316,6 +316,123 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WindowsMediaAudioFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\bitmath.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\bitreader.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\bitwriter.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\cpu.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\crc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\fixed.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\float.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\format.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\lpc_flac.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\md5.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\memory.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\stream_decoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\stream_encoder.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\stream_encoder_framing.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\window_flac.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\bitwise.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\framing.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\analysis.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\bitrate.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\block.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\codebook.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\envelope.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\floor0.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\floor1.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\info.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\lookup.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\lpc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\lsp.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\mapping0.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\mdct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\psy.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\registry.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\res0.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\sharedbook.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\smallft.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\synthesis.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\vorbisenc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\vorbisfile.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\window.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -655,6 +772,39 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\zip\juce_ZipFile.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\adler32.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\compress.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\crc32.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\deflate.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\infback.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inffast.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inflate.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inftrees.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\trees.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\uncompr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\zutil.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\encryption\juce_BlowFish.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -803,6 +953,189 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\juce_PNGLoader.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcapimin.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcapistd.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jccoefct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jccolor.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcdctmgr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jchuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcinit.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcmainct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcmarker.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcmaster.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcomapi.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcparam.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcphuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcprepct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcsample.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jctrans.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdapimin.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdapistd.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdatasrc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdcoefct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdcolor.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jddctmgr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdhuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdinput.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmainct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmarker.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmaster.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmerge.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdphuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdpostct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdsample.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdtrans.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jerror.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jfdctflt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jfdctfst.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jfdctint.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctflt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctfst.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctint.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctred.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmemmgr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmemnobs.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jquant1.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jquant2.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jutils.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\transupp.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\png.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngerror.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngget.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngmem.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngpread.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngread.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngrio.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngrtran.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngrutil.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngset.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngtrans.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwio.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwrite.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwtran.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwutil.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\images\juce_Image.cpp">
@@ -1386,6 +1719,86 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WindowsMediaAudioFormat.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\all.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\alloc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\assert.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\callback.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\compat.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\endswap.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\export.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\format.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\metadata.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\ordinals.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\stream_decoder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\stream_encoder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\win_utf8_io.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\all.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\bitmath.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\bitreader.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\bitwriter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\cpu.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\crc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\fixed.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\float.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\format.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\lpc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\md5.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\memory.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\metadata.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\stream_encoder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\stream_encoder_framing.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\window.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\protected\all.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\protected\stream_decoder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\protected\stream_encoder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\codec.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\config_types.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\ogg.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\os_types.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\vorbisenc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\vorbisfile.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\backends.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\bitrate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\codebook.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\codec_internal.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\envelope.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\highlevel.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\lookup.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\lookup_data.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\lpc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\lsp.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\masking.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\mdct.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\misc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\os.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\psy.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\registry.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\scales.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\smallft.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\window.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\books\coupled\res_books_51.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\books\coupled\res_books_stereo.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\books\floor\floor_books.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\books\uncoupled\res_books_uncoupled.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\floor_all.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_8.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_11.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_16.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_44.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_8.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_16.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44p51.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44u.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_8.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_11.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_16.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_22.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_32.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44p51.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44u.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_X.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormatManager.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormatReader.h"/>
@@ -1552,6 +1965,17 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_GZIPCompressorOutputStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_GZIPDecompressorInputStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_ZipFile.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\crc32.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\deflate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inffast.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inffixed.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inflate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inftrees.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\trees.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zconf.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zconf.in.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zlib.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zutil.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\juce_core.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_cryptography\encryption\juce_BlowFish.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_cryptography\encryption\juce_Primes.h"/>
@@ -1619,6 +2043,24 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Point.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Rectangle.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\cderror.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jchuff.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jconfig.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdct.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdhuff.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jerror.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jinclude.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmemsys.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmorecfg.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jpegint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jpeglib.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jversion.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\transupp.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\png.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngconf.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pnginfo.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngpriv.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngstruct.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_Image.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageCache.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageConvolutionKernel.h"/>
@@ -1809,6 +2251,23 @@
     <ClInclude Include="..\..\..\..\modules\juce_video\juce_video.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\AUTHORS"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\CHANGES"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\COPYING"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\README"/>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidMidi.java"/>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidMidiFallback.java"/>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidRuntimePermissions.java"/>
+    <None Include="..\..\..\..\modules\juce_core\native\java\JuceAppActivity.java"/>
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\README"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\README"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\LICENSE"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>

@@ -367,6 +367,39 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\zip\juce_ZipFile.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\adler32.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\compress.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\crc32.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\deflate.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\infback.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inffast.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inflate.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\inftrees.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\trees.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\uncompr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\zip\zlib\zutil.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\app_properties\juce_ApplicationProperties.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -497,6 +530,189 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\juce_PNGLoader.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcapimin.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcapistd.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jccoefct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jccolor.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcdctmgr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jchuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcinit.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcmainct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcmarker.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcmaster.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcomapi.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcparam.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcphuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcprepct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jcsample.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jctrans.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdapimin.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdapistd.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdatasrc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdcoefct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdcolor.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jddctmgr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdhuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdinput.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmainct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmarker.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmaster.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdmerge.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdphuff.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdpostct.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdsample.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdtrans.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jerror.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jfdctflt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jfdctfst.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jfdctint.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctflt.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctfst.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctint.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jidctred.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmemmgr.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmemnobs.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jquant1.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jquant2.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jutils.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\transupp.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\png.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngerror.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngget.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngmem.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngpread.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngread.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngrio.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngrtran.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngrutil.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngset.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngtrans.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwio.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwrite.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwtran.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngwutil.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\images\juce_Image.cpp">
@@ -1042,6 +1258,17 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_GZIPCompressorOutputStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_GZIPDecompressorInputStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\juce_ZipFile.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\crc32.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\deflate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inffast.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inffixed.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inflate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\inftrees.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\trees.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zconf.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zconf.in.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zlib.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\zutil.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\juce_core.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\app_properties\juce_ApplicationProperties.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\app_properties\juce_PropertiesFile.h"/>
@@ -1102,6 +1329,24 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Point.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Rectangle.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_RectangleList.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\cderror.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jchuff.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jconfig.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdct.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jdhuff.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jerror.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jinclude.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmemsys.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jmorecfg.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jpegint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jpeglib.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\jversion.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\transupp.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\png.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngconf.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pnginfo.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngpriv.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngstruct.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_Image.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageCache.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\images\juce_ImageConvolutionKernel.h"/>
@@ -1251,6 +1496,17 @@
     <ClInclude Include="..\..\..\..\modules\juce_osc\juce_osc.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidMidi.java"/>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidMidiFallback.java"/>
+    <None Include="..\..\..\..\modules\juce_core\native\java\AndroidRuntimePermissions.java"/>
+    <None Include="..\..\..\..\modules\juce_core\native\java\JuceAppActivity.java"/>
+    <None Include="..\..\..\..\modules\juce_core\zip\zlib\README"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\README"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>
+    <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\LICENSE"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>
