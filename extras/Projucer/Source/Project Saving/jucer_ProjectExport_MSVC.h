@@ -757,6 +757,11 @@ protected:
                                                                 TargetOS::windows)));
     }
 
+    static bool shouldUseStdCall (const RelativePath& path)
+    {
+        return path.getFileNameWithoutExtension().startsWithIgnoreCase ("juce_audio_plugin_client_RTAS_");
+    }
+
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase)
 };
 
@@ -903,7 +908,7 @@ protected:
             addFile (path, parent,
                      projectItem.shouldBeAddedToBinaryResources()
                        || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()),
-                     shouldFileBeCompiledByDefault (path) && projectItem.shouldUseStdCall());
+                     shouldFileBeCompiledByDefault (path) && shouldUseStdCall (path));
         }
     }
 
@@ -1653,7 +1658,7 @@ protected:
                 if (! projectItem.shouldBeCompiled())
                     e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
 
-                if (projectItem.shouldUseStdCall())
+                if (shouldUseStdCall (path))
                     e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
             }
             else if (path.hasFileExtension (headerFileExtensions))

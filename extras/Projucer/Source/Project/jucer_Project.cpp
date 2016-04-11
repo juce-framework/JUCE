@@ -726,9 +726,6 @@ bool Project::Item::shouldBeAddedToXcodeResources() const   { return state [Ids:
 Value Project::Item::getShouldInhibitWarningsValue()        { return state.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
 bool Project::Item::shouldInhibitWarnings() const           { return state [Ids::noWarnings]; }
 
-Value Project::Item::getShouldUseStdCallValue()             { return state.getPropertyAsValue (Ids::useStdCall, nullptr); }
-bool Project::Item::shouldUseStdCall() const                { return state [Ids::useStdCall]; }
-
 bool Project::Item::isModuleCode() const                    { return belongsToModule; }
 
 String Project::Item::getFilePath() const

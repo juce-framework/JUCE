@@ -209,8 +209,6 @@ public:
 
         Value getShouldInhibitWarningsValue();
         bool shouldInhibitWarnings() const;
-        Value getShouldUseStdCallValue();
-        bool shouldUseStdCall() const;
 
         bool isModuleCode() const;
 
