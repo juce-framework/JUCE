@@ -513,7 +513,7 @@ static void findWildcardMatches (const File& folder, Array<File>& result)
 
 void LibraryModule::findBrowseableFiles (const File& localModuleFolder, Array<File>& filesFound) const
 {
-    DirectoryIterator iter (localModuleFolder, false, "*", File::findDirectories);
+    DirectoryIterator iter (localModuleFolder, true, "*", File::findDirectories);
     bool isHiddenFile;
 
     while (iter.next (nullptr, &isHiddenFile, nullptr, nullptr, nullptr, nullptr))
