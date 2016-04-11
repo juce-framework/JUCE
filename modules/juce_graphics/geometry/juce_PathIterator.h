@@ -53,7 +53,7 @@ public:
     */
     PathFlatteningIterator (const Path& path,
                             const AffineTransform& transform = AffineTransform(),
-                            float tolerance = defaultTolerance);
+                            float tolerance = Path::defaultToleranceForMeasurement);
 
     /** Destructor. */
     ~PathFlatteningIterator();
@@ -89,9 +89,6 @@ public:
 
     /** Returns true if the current segment is the last in the current sub-path. */
     bool isLastInSubpath() const noexcept;
-
-    /** This is the default value that should be used for the tolerance value (see the constructor parameters). */
-    static const float defaultTolerance;
 
 private:
     //==============================================================================

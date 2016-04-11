@@ -60,6 +60,9 @@ const float Path::quadMarker           = 100003.0f;
 const float Path::cubicMarker          = 100004.0f;
 const float Path::closeSubPathMarker   = 100005.0f;
 
+const float Path::defaultToleranceForTesting = 1.0f;
+const float Path::defaultToleranceForMeasurement = 0.6f;
+
 //==============================================================================
 Path::PathBounds::PathBounds() noexcept
     : pathXMin (0), pathXMax (0), pathYMin (0), pathYMax (0)
@@ -1060,7 +1063,7 @@ bool Path::contains (const Point<float> point, const float tolerance) const
     return contains (point.x, point.y, tolerance);
 }
 
-bool Path::intersectsLine (const Line<float>& line, const float tolerance)
+bool Path::intersectsLine (Line<float> line, const float tolerance)
 {
     PathFlatteningIterator i (*this, AffineTransform(), tolerance);
     Point<float> intersection;
@@ -1072,7 +1075,7 @@ bool Path::intersectsLine (const Line<float>& line, const float tolerance)
     return false;
 }
 
-Line<float> Path::getClippedLine (const Line<float>& line, const bool keepSectionOutsidePath) const
+Line<float> Path::getClippedLine (Line<float> line, const bool keepSectionOutsidePath) const
 {
     Line<float> result (line);
     const bool startInside = contains (line.getStart());
@@ -1103,10 +1106,10 @@ Line<float> Path::getClippedLine (const Line<float>& line, const bool keepSectio
     return result;
 }
 
-float Path::getLength (const AffineTransform& transform) const
+float Path::getLength (const AffineTransform& transform, float tolerance) const
 {
     float length = 0;
-    PathFlatteningIterator i (*this, transform);
+    PathFlatteningIterator i (*this, transform, tolerance);
 
     while (i.next())
         length += Line<float> (i.x1, i.y1, i.x2, i.y2).getLength();
@@ -1114,9 +1117,11 @@ float Path::getLength (const AffineTransform& transform) const
     return length;
 }
 
-Point<float> Path::getPointAlongPath (float distanceFromStart, const AffineTransform& transform) const
+Point<float> Path::getPointAlongPath (float distanceFromStart,
+                                      const AffineTransform& transform,
+                                      float tolerance) const
 {
-    PathFlatteningIterator i (*this, transform);
+    PathFlatteningIterator i (*this, transform, tolerance);
 
     while (i.next())
     {
@@ -1133,9 +1138,10 @@ Point<float> Path::getPointAlongPath (float distanceFromStart, const AffineTrans
 }
 
 float Path::getNearestPoint (const Point<float> targetPoint, Point<float>& pointOnPath,
-                             const AffineTransform& transform) const
+                             const AffineTransform& transform,
+                             float tolerance) const
 {
-    PathFlatteningIterator i (*this, transform);
+    PathFlatteningIterator i (*this, transform, tolerance);
     float bestPosition = 0, bestDistance = std::numeric_limits<float>::max();
     float length = 0;
     Point<float> pointOnLine;

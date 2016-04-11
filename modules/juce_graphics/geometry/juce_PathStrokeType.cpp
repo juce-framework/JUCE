@@ -570,7 +570,7 @@ namespace PathStrokeHelpers
 
         // Iterate the path, creating a list of the
         // left/right-hand lines along either side of it...
-        PathFlatteningIterator it (*sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
+        PathFlatteningIterator it (*sourcePath, transform, Path::defaultToleranceForMeasurement / extraAccuracy);
 
         Array <LineSection> subPath;
         subPath.ensureStorageAllocated (512);
@@ -668,7 +668,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
         return;
 
     Path newDestPath;
-    PathFlatteningIterator it (sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
+    PathFlatteningIterator it (sourcePath, transform, Path::defaultToleranceForMeasurement / extraAccuracy);
 
     bool first = true;
     int dashNum = 0;
