@@ -691,6 +691,7 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
         for (int i = getNumChildren(); --i >= 0;)
         {
             Item found (getChild(i).findItemWithID (targetId));
+
             if (found.isValid())
                 return found;
         }
@@ -735,7 +736,7 @@ String Project::Item::getFilePath() const
     if (isFile())
         return state [Ids::file].toString();
 
-    return String::empty;
+    return String();
 }
 
 File Project::Item::getFile() const
@@ -1060,8 +1061,8 @@ ValueTree Project::getConfigNode()
     return projectRoot.getOrCreateChildWithName (Ids::JUCEOPTIONS, nullptr);
 }
 
-const char* const Project::configFlagDefault = "default";
-const char* const Project::configFlagEnabled = "enabled";
+const char* const Project::configFlagDefault  = "default";
+const char* const Project::configFlagEnabled  = "enabled";
 const char* const Project::configFlagDisabled = "disabled";
 
 Value Project::getConfigFlag (const String& name)
@@ -1114,7 +1115,7 @@ String Project::getAUMainTypeString()
     {
         if (getPluginIsSynth().getValue())              s = "kAudioUnitType_MusicDevice";
         else if (getPluginWantsMidiInput().getValue())  s = "kAudioUnitType_MusicEffect";
-        else                                                    s = "kAudioUnitType_Effect";
+        else                                            s = "kAudioUnitType_Effect";
     }
 
     return s;
@@ -1129,7 +1130,7 @@ String Project::getAUMainTypeCode()
         if      (getPluginIsMidiEffectPlugin().getValue()) s = "aumi";
         else if (getPluginIsSynth().getValue())            s = "aumu";
         else if (getPluginWantsMidiInput().getValue())     s = "aumf";
-        else                                                       s = "aufx";
+        else                                               s = "aufx";
     }
 
     return s;
@@ -1141,7 +1142,7 @@ String Project::getPluginVSTCategoryString()
 
     if (s.isEmpty())
         s = static_cast<bool> (getPluginIsSynth().getValue()) ? "kPlugCategSynth"
-                                                                      : "kPlugCategEffect";
+                                                              : "kPlugCategEffect";
     return s;
 }
 

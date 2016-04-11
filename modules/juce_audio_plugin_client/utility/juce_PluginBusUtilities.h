@@ -341,7 +341,7 @@ private:
         AudioChannelSet set;
 
         // If the plug-in does not complain about setting it's layout to an undefined layout
-        // then we assume that the plug-in ignores the layout alltogether
+        // then we assume that the plug-in ignores the layout altogether
         for (int i = 0; i < channelNum; ++i)
             set.addChannel (static_cast<AudioChannelSet::ChannelType> (pseudoChannelBitNum + i));
 

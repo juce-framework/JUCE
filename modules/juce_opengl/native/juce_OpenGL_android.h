@@ -68,7 +68,7 @@ public:
         if (surfaceView.get() == nullptr)
             return;
 
-        // add the view to the view hierachy
+        // add the view to the view hierarchy
         // after this the nativecontext can receive callbacks
         env->CallVoidMethod ((jobject) component.getPeer()->getNativeHandle(),
                              AndroidViewGroup.addView, surfaceView.get());
@@ -251,7 +251,7 @@ private:
     }
 
     //==============================================================================
-    bool hasInitialised, hasBeenAddedToViewHierachy;
+    bool hasInitialised;
 
     GlobalRef surfaceView;
     Rectangle<int> lastBounds;

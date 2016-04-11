@@ -1902,7 +1902,7 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
                 }
                 else
                 {
-                    String errMsg = NEEDS_TRANS ("An OS error ocurred during initialisation of the plug-in (XXX)");
+                    String errMsg = NEEDS_TRANS ("An OS error occurred during initialisation of the plug-in (XXX)");
                     originalCallback (passUserData, nullptr, errMsg.replace ("XXX", String (err)));
                 }
 

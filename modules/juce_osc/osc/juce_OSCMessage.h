@@ -89,7 +89,7 @@ public:
     bool isEmpty() const noexcept;
 
     /** Returns a reference to the OSCArgument at index i in the OSCMessage object.
-        This method does not check the range and results in undefined behavour
+        This method does not check the range and results in undefined behaviour
         in case i < 0 or i >= size().
     */
     OSCArgument& operator[] (const int i) const noexcept;

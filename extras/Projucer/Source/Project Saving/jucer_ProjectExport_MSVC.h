@@ -903,7 +903,7 @@ protected:
             addFile (path, parent,
                      projectItem.shouldBeAddedToBinaryResources()
                        || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()),
-                     shouldFileBeCompiledByDefault (path) && (bool) projectItem.shouldUseStdCall());
+                     shouldFileBeCompiledByDefault (path) && projectItem.shouldUseStdCall());
         }
     }
 

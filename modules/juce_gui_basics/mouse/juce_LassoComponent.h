@@ -44,7 +44,7 @@ public:
 
     /** Returns the set of items that lie within a given lassoable region.
 
-        Your implementation of this method must find all the relevent items that lie
+        Your implementation of this method must find all the relevant items that lie
         within the given rectangle. and add them to the itemsFound array.
 
         The coordinates are relative to the top-left of the lasso component's parent
