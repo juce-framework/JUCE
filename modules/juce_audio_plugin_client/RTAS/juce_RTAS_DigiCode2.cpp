@@ -29,6 +29,15 @@
 
 #include "juce_RTAS_DigiCode_Header.h"
 
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wcomment"
+ #pragma clang diagnostic ignored "-Wextra-tokens"
+ #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+ #pragma clang diagnostic ignored "-Wreorder"
+ #pragma clang diagnostic ignored "-Wdeprecated"
+#endif
+
 /*
     This file is used to include and build the required digidesign CPP files without your project
     needing to reference the files directly. Because these files will be found via your include path,
@@ -46,5 +55,9 @@
 
 #include <CEffectProcessMIDI.cpp>
 #include <PlugInUtils.cpp>
+
+#ifdef __clang__
+ #pragma clang diagnostic pop
+#endif
 
 #endif

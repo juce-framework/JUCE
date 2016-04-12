@@ -405,6 +405,10 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
 
       #if JUCE_IOS
         ignoreUnused (parameters);
+
+        if (SystemStats::isRunningInAppExtensionSandbox())
+            return false;
+
         return [[UIApplication sharedApplication] openURL: filenameAsURL];
       #else
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];

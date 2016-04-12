@@ -2783,8 +2783,11 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
     }
 }
 
-AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
-                                                                     double sampleRate, int blockSize)
+void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
+                                            double sampleRate,
+                                            int blockSize,
+                                            void* userData,
+                                            void (*callback) (void*, AudioPluginInstance*, const String&))
 {
     ScopedPointer<VSTPluginInstance> result;
 
@@ -2807,15 +2810,23 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
                 result->initialise (sampleRate, blockSize);
             }
             else
-            {
                 result = nullptr;
-            }
         }
 
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    return result.release();
+    String errorMsg;
+
+    if (result == nullptr)
+        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-2");
+
+    callback (userData, result.release(), errorMsg);
+}
+
+bool VSTPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+{
+    return false;
 }
 
 bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
@@ -2866,7 +2877,7 @@ bool VSTPluginFormat::doesPluginStillExist (const PluginDescription& desc)
     return File (desc.fileOrIdentifier).exists();
 }
 
-StringArray VSTPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
+StringArray VSTPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
 {
     StringArray results;
 

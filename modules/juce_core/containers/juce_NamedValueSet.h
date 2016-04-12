@@ -63,6 +63,9 @@ public:
     /** Returns the total number of values that the set contains. */
     int size() const noexcept;
 
+    /** Returns true if the set is empty. */
+    bool isEmpty() const noexcept;
+
     /** Returns the value of a named item.
         If the name isn't found, this will return a void variant.
         @see getProperty

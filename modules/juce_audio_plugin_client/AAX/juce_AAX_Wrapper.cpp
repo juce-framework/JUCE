@@ -43,23 +43,23 @@
  #pragma warning (disable : 4127 4512)
 #endif
 
-#include "AAX_Exports.cpp"
-#include "AAX_ICollection.h"
-#include "AAX_IComponentDescriptor.h"
-#include "AAX_IEffectDescriptor.h"
-#include "AAX_IPropertyMap.h"
-#include "AAX_CEffectParameters.h"
-#include "AAX_Errors.h"
-#include "AAX_CBinaryTaperDelegate.h"
-#include "AAX_CBinaryDisplayDelegate.h"
-#include "AAX_CLinearTaperDelegate.h"
-#include "AAX_CNumberDisplayDelegate.h"
-#include "AAX_CEffectGUI.h"
-#include "AAX_IViewContainer.h"
-#include "AAX_ITransport.h"
-#include "AAX_IMIDINode.h"
-#include "AAX_UtilsNative.h"
-#include "AAX_Enums.h"
+#include <AAX_Exports.cpp>
+#include <AAX_ICollection.h>
+#include <AAX_IComponentDescriptor.h>
+#include <AAX_IEffectDescriptor.h>
+#include <AAX_IPropertyMap.h>
+#include <AAX_CEffectParameters.h>
+#include <AAX_Errors.h>
+#include <AAX_CBinaryTaperDelegate.h>
+#include <AAX_CBinaryDisplayDelegate.h>
+#include <AAX_CLinearTaperDelegate.h>
+#include <AAX_CNumberDisplayDelegate.h>
+#include <AAX_CEffectGUI.h>
+#include <AAX_IViewContainer.h>
+#include <AAX_ITransport.h>
+#include <AAX_IMIDINode.h>
+#include <AAX_UtilsNative.h>
+#include <AAX_Enums.h>
 
 #ifdef _MSC_VER
  #pragma warning (pop)
@@ -71,7 +71,7 @@
 
 #if JUCE_WINDOWS
  #ifndef JucePlugin_AAXLibs_path
-  #error "You need to define the JucePlugin_AAXLibs_path macro. (This is best done via the introjucer)"
+  #error "You need to define the JucePlugin_AAXLibs_path macro. (This is best done via the Projucer)"
  #endif
 
  #if JUCE_64BIT
@@ -94,6 +94,9 @@
 #undef check
 
 const int32_t juceChunkType = 'juce';
+const int maxAAXChannels = 8;
+
+JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AAX);
 
 //==============================================================================
 struct AAXClasses
@@ -121,6 +124,7 @@ struct AAXClasses
     };
 
     static AAXChannelStreamOrder aaxChannelOrder[];
+    static AAX_EStemFormat aaxFormats[AAX_eStemFormatNum];
 
     static AAX_EStemFormat getFormatForAudioChannelSet (const AudioChannelSet& set, bool ignoreLayout) noexcept
     {
@@ -494,19 +498,23 @@ struct AAXClasses
     {
     public:
         JuceAAX_Processor()  : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_AAX)),
-                               busUtils (*pluginInstance, false),
+                               busUtils (*pluginInstance, false, maxAAXChannels),
                                sampleRate (0), lastBufferSize (1024), maxBufferSize (1024),
                                hasSidechain (false)
         {
             pluginInstance->setPlayHead (this);
             pluginInstance->addListener (this);
 
-            busUtils.findAllCompatibleLayouts();
+            busUtils.init();
 
             AAX_CEffectParameters::GetNumberOfChunks (&juceChunkIndex);
         }
 
-        static AAX_CEffectParameters* AAX_CALLBACK Create()   { return new JuceAAX_Processor(); }
+        static AAX_CEffectParameters* AAX_CALLBACK Create()
+        {
+            JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AAX);
+            return new JuceAAX_Processor();
+        }
 
         AAX_Result EffectInit() override
         {
@@ -1226,6 +1234,10 @@ struct AAXClasses
                                          ? static_cast<int> (*i.sideChainBuffers)
                                          : -1;
 
+            // sidechain index of zero is an invalid index
+            if (sideChainBufferIdx <= 0)
+                sideChainBufferIdx = -1;
+
             i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels, sideChainBufferIdx,
                                                   *(i.bufferSize), *(i.bypass) != 0,
                                                   getMidiNodeIn(i), getMidiNodeOut(i));
@@ -1279,8 +1291,9 @@ struct AAXClasses
             bool success = true;
             bool hasSidechain = false;
 
-            if (const AudioChannelSet* set = busUtils.getSupportedBusLayouts (true, 1).getDefaultLayoutForChannelNum (1))
-                hasSidechain = busUtils.processor.setPreferredBusArrangement (true, 1, *set);
+            const AudioChannelSet set = busUtils.getDefaultLayoutForChannelNumAndBus (true, 1, 1);
+            if (! set.isDisabled())
+                hasSidechain = busUtils.processor.setPreferredBusArrangement (true, 1, set);
 
             if (! hasSidechain)
                 success = busUtils.processor.setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
@@ -1410,10 +1423,17 @@ struct AAXClasses
 
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor)
     {
-        ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
-        PluginBusUtilities busUtils (*plugin, false);
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AAX);
 
-        busUtils.findAllCompatibleLayouts();
+        ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
+        PluginBusUtilities busUtils (*plugin, false, maxAAXChannels);
+
+        busUtils.init();
+
+        // AAX requires your default layout to be non-discrete!
+        // For example, your default layout must be mono, stereo, quadrophonic
+        // and not AudioChannelSet::discreteChannels (2) etc.
+        jassert (busUtils.checkBusFormatsAreNotDiscrete());
 
         descriptor.AddName (JucePlugin_Desc);
         descriptor.AddName (JucePlugin_Name);
@@ -1428,16 +1448,9 @@ struct AAXClasses
         check (descriptor.AddProcPtr ((void*) JuceAAX_GUI::Create,        kAAX_ProcPtrID_Create_EffectGUI));
         check (descriptor.AddProcPtr ((void*) JuceAAX_Processor::Create,  kAAX_ProcPtrID_Create_EffectParameters));
 
-        SortedSet<AAXFormatConfiguration> aaxFormats;
-        SortedSet<AudioChannelSet> inLayouts =  busUtils.getBusCount (true)  > 0 ? busUtils.getSupportedBusLayouts (true,  0).supportedLayouts : SortedSet<AudioChannelSet>();
-        SortedSet<AudioChannelSet> outLayouts = busUtils.getBusCount (false) > 0 ? busUtils.getSupportedBusLayouts (false, 0).supportedLayouts : SortedSet<AudioChannelSet>();
-
-        const int numIns  = inLayouts. size();
-        const int numOuts = outLayouts.size();
-
        #if JucePlugin_IsMidiEffect
         // MIDI effect plug-ins do not support any audio channels
-        jassert (numIns == 0 && numOuts == 0);
+        jassert (getBusCount (true) == 0 && getBusCount (false) == 0);
 
         if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
         {
@@ -1450,34 +1463,32 @@ struct AAXClasses
        #else
         int configIndex = 0;
 
+        const int numIns  = busUtils.getBusCount (true) > 0 ? AAX_eStemFormatNum : 0;
+        const int numOuts = busUtils.getBusCount (false) > 0 ? AAX_eStemFormatNum : 0;
+
         for (int inIdx = 0; inIdx < jmax (numIns, 1); ++inIdx)
         {
+            AAX_EStemFormat aaxInFormat  = numIns > 0 ? aaxFormats[inIdx] : AAX_eStemFormat_None;
+            AudioChannelSet inLayout  = channelSetFromStemFormat (aaxInFormat, false);
+
             for (int outIdx = 0; outIdx < jmax (numOuts, 1); ++outIdx)
             {
+                AAX_EStemFormat aaxOutFormat = numOuts > 0 ? aaxFormats[outIdx] : AAX_eStemFormat_None;
+                AudioChannelSet outLayout = channelSetFromStemFormat (aaxOutFormat, false);
+
                 bool success = true;
 
                 if (numIns > 0)
-                    success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayouts.getReference (inIdx));
+                    success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayout);
 
                 if (numOuts > 0 && success)
-                    success = busUtils.processor.setPreferredBusArrangement (false, 0, outLayouts.getReference (outIdx));
+                    success = busUtils.processor.setPreferredBusArrangement (false, 0, outLayout);
 
-                // We should never hit this assertion: PluginBusUtilities reported this as supported.
-                // Please report this as a bug!
-                jassert (success);
-
-                AudioChannelSet inLayout  = numIns  > 0 ? busUtils.getChannelSet (true,  0) : AudioChannelSet();
-                AudioChannelSet outLayout = numOuts > 0 ? busUtils.getChannelSet (false, 0) : AudioChannelSet();
-
-                // if we can't set both in AND out formats simultaneously then ignore this format!
-                if (numIns > 0 && numOuts > 0 && (inLayout != inLayouts.getReference (inIdx) || (outLayout != outLayouts.getReference (outIdx))))
+                if (! success)
                     continue;
 
-                AAX_EStemFormat aaxInFormat  = getFormatForAudioChannelSet (inLayout,  busUtils.busIgnoresLayout (true,  0));
-                AAX_EStemFormat aaxOutFormat = getFormatForAudioChannelSet (outLayout, busUtils.busIgnoresLayout (false, 0));
-
-                // does AAX support this layout?
-                if (aaxInFormat == AAX_eStemFormat_INT32_MAX || aaxOutFormat == AAX_eStemFormat_INT32_MAX)
+                // if we can't set both in AND out formats simultaneously then ignore this format!
+                if (numIns > 0 && numOuts > 0 && (inLayout != busUtils.getChannelSet (true, 0) || (outLayout != busUtils.getChannelSet (false, 0))))
                     continue;
 
                 // AAX requires a single input if this plug-in is a synth
@@ -1489,16 +1500,10 @@ struct AAXClasses
                 if (aaxInFormat == AAX_eStemFormat_None && aaxOutFormat == AAX_eStemFormat_None)
                     continue;
 
-                AAXFormatConfiguration aaxFormat (aaxInFormat, aaxOutFormat);
-                if (aaxFormats.indexOf (aaxFormat) < 0)
+                if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
                 {
-                    aaxFormats.add (aaxFormat);
-
-                    if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
-                    {
-                        createDescriptor (*desc, configIndex++, busUtils, inLayout, outLayout, aaxInFormat, aaxOutFormat);
-                        check (descriptor.AddComponent (desc));
-                    }
+                    createDescriptor (*desc, configIndex++, busUtils, inLayout, outLayout, aaxInFormat, aaxOutFormat);
+                    check (descriptor.AddComponent (desc));
                 }
             }
         }
@@ -1510,21 +1515,38 @@ struct AAXClasses
 };
 
 //==============================================================================
+AAX_EStemFormat AAXClasses::aaxFormats[] =
+{
+    AAX_eStemFormat_Mono,
+    AAX_eStemFormat_Stereo,
+    AAX_eStemFormat_LCR,
+    AAX_eStemFormat_LCRS,
+    AAX_eStemFormat_Quad,
+    AAX_eStemFormat_5_0,
+    AAX_eStemFormat_5_1,
+    AAX_eStemFormat_6_0,
+    AAX_eStemFormat_6_1,
+    AAX_eStemFormat_7_0_SDDS,
+    AAX_eStemFormat_7_1_SDDS,
+    AAX_eStemFormat_7_0_DTS,
+    AAX_eStemFormat_7_1_DTS
+};
+
 AAXClasses::AAXChannelStreamOrder AAXClasses::aaxChannelOrder[] =
 {
     {AAX_eStemFormat_Mono,     {AudioChannelSet::centre, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
     {AAX_eStemFormat_Stereo,   {AudioChannelSet::left, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
     {AAX_eStemFormat_LCR,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
     {AAX_eStemFormat_LCRS,     {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::surround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_Quad,     {AudioChannelSet::left, AudioChannelSet::right,  AudioChannelSet::surroundLeft, AudioChannelSet::surroundRight, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_5_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::surroundLeft, AudioChannelSet::surroundRight, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_5_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::surroundLeft, AudioChannelSet::surroundRight, AudioChannelSet::subbass, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_6_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::surroundLeft, AudioChannelSet::surround, AudioChannelSet::surroundRight, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_6_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::surroundLeft, AudioChannelSet::surround, AudioChannelSet::surroundRight, AudioChannelSet::subbass, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_7_0_SDDS, {AudioChannelSet::left, AudioChannelSet::centreLeft, AudioChannelSet::centre, AudioChannelSet::centreRight, AudioChannelSet::right, AudioChannelSet::surroundLeft, AudioChannelSet::surroundRight, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_7_0_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::sideLeft, AudioChannelSet::sideRight, AudioChannelSet::surroundLeft, AudioChannelSet::surroundRight, AudioChannelSet::unknown}},
-    {AAX_eStemFormat_7_1_SDDS, {AudioChannelSet::left, AudioChannelSet::centreLeft, AudioChannelSet::centre, AudioChannelSet::centreRight, AudioChannelSet::right, AudioChannelSet::surroundLeft, AudioChannelSet::surroundRight, AudioChannelSet::subbass}},
-    {AAX_eStemFormat_7_1_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::sideLeft, AudioChannelSet::sideRight, AudioChannelSet::surroundLeft, AudioChannelSet::surroundRight, AudioChannelSet::subbass}},
+    {AAX_eStemFormat_Quad,     {AudioChannelSet::left, AudioChannelSet::right,  AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+    {AAX_eStemFormat_5_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+    {AAX_eStemFormat_5_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::subbass, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+    {AAX_eStemFormat_6_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::surround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+    {AAX_eStemFormat_6_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::surround, AudioChannelSet::rightSurround, AudioChannelSet::subbass, AudioChannelSet::unknown}},
+    {AAX_eStemFormat_7_0_SDDS, {AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown}},
+    {AAX_eStemFormat_7_0_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftRearSurround, AudioChannelSet::rightRearSurround, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown}},
+    {AAX_eStemFormat_7_1_SDDS, {AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::subbass}},
+    {AAX_eStemFormat_7_1_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftRearSurround, AudioChannelSet::rightRearSurround, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::subbass}},
     {AAX_eStemFormat_None,     {AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
 };
 

@@ -118,7 +118,10 @@ public:
 
     //==============================================================================
     /** Returns the number of strings in the array */
-    inline int size() const noexcept                                    { return strings.size(); };
+    inline int size() const noexcept                                    { return strings.size(); }
+
+    /** Returns true if the array is empty, false otherwise. */
+    inline bool isEmpty() const noexcept                                { return size() == 0; }
 
     /** Returns one of the strings from the array.
 

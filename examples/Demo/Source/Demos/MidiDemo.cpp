@@ -188,7 +188,7 @@ private:
         {
             currentMidiOutput = MidiOutput::openDevice (index);
             jassert (currentMidiOutput);
-   	    }
+        }
     }
 
     void comboBoxChanged (ComboBox* box) override

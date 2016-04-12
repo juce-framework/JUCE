@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -20,7 +20,7 @@
    available: visit www.juce.com for more information.
 
   ==============================================================================
- */
+*/
 
 #ifndef JUCE_OSCMESSAGE_H_INCLUDED
 #define JUCE_OSCMESSAGE_H_INCLUDED
@@ -86,7 +86,7 @@ public:
     int size() const noexcept;
 
     /** Returns true if the OSCMessage contains no OSCArgument objects; false otherwise. */
-    bool empty() const noexcept;
+    bool isEmpty() const noexcept;
 
     /** Returns a reference to the OSCArgument at index i in the OSCMessage object.
         This method does not check the range and results in undefined behavour

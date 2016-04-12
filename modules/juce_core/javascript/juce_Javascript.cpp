@@ -1362,7 +1362,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             ScopedPointer<FunctionCall> f (new FunctionCall (location));
             f->object = new UnqualifiedName (location, "typeof");
-            f->arguments.add (parseExpression());
+            f->arguments.add (parseUnary());
             return f.release();
         }
 

@@ -86,7 +86,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void oscMessageReceived (const OSCMessage& message) override
     {
         auto address = message.getAddressPattern();
@@ -103,7 +103,7 @@ private:
 
     void canvasStateOSCMessageReceived (const OSCMessage& message)
     {
-        if (message.empty() || ! message[0].isBlob())
+        if (message.isEmpty() || ! message[0].isBlob())
             return;
 
         if (packetiser.appendIncomingBlock (message[0].getBlob()))
@@ -121,7 +121,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     String getMachineInfoToDisplay() const
     {
         //auto display = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre());

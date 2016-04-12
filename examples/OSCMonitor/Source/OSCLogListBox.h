@@ -78,7 +78,7 @@ public:
                         + String (message.size())
                         + " argument(s)");
 
-        if (! message.empty())
+        if (! message.isEmpty())
         {
             for (OSCArgument* arg = message.begin(); arg != message.end(); ++arg)
                 addOSCMessageArgument (*arg, level + 1);

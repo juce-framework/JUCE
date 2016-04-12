@@ -68,7 +68,7 @@
 class JUCE_API  RuntimePermissions
 {
 public:
-    //==========================================================================
+    //==============================================================================
     enum PermissionID
     {
         /** Permission to access the microphone (required on Android).
@@ -84,7 +84,7 @@ public:
         bluetoothMidi = 2,
     };
 
-    //==========================================================================
+    //==============================================================================
     /** Function type of runtime permission request callbacks. */
    #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     typedef std::function<void (bool)> Callback;
@@ -92,7 +92,7 @@ public:
     typedef void (*Callback) (bool);
    #endif
 
-    //==========================================================================
+    //==============================================================================
     /** Call this method to request a runtime permission.
 
         @param permission  The PermissionID of the permission you want to request.

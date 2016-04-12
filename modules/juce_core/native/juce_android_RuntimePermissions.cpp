@@ -57,7 +57,7 @@ void RuntimePermissions::request (PermissionID permission, Callback callback)
     {
         // Error! If you want to be able to request this runtime permission, you
         // also need to declare it in your app's manifest. You can do so via
-        // the Introjucer. Otherwise this can't work.
+        // the Projucer. Otherwise this can't work.
         jassertfalse;
 
         callback (false);

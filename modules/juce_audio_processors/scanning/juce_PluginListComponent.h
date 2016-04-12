@@ -47,7 +47,8 @@ public:
     PluginListComponent (AudioPluginFormatManager& formatManager,
                          KnownPluginList& listToRepresent,
                          const File& deadMansPedalFile,
-                         PropertiesFile* propertiesToUse);
+                         PropertiesFile* propertiesToUse,
+                         bool allowPluginsWhichRequireAsynchronousInstantiation = false);
 
     /** Destructor. */
     ~PluginListComponent();
@@ -58,11 +59,6 @@ public:
     /** Changes the text in the progress dialog box that is shown when scanning. */
     void setScanDialogText (const String& textForProgressWindowTitle,
                             const String& textForProgressWindowDescription);
-
-    /** Sets how many threads to simultaneously scan for plugins.
-        If this is 0, then all scanning happens on the message thread (this is the default)
-    */
-    void setNumberOfThreadsForScanning (int numThreads);
 
     /** Returns the last search path stored in a given properties file for the specified format. */
     static FileSearchPath getLastSearchPath (PropertiesFile&, AudioPluginFormat&);
@@ -96,7 +92,7 @@ private:
     TextButton optionsButton;
     PropertiesFile* propertiesToUse;
     String dialogTitle, dialogText;
-    int numThreads;
+    bool allowAsync;
 
     class TableModel;
     ScopedPointer<TableListBoxModel> tableModel;

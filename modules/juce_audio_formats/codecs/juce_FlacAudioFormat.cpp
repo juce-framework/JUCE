@@ -29,7 +29,7 @@ namespace FlacNamespace
 #if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
 
  #undef VERSION
- #define VERSION "1.2.1"
+ #define VERSION "1.3.1"
 
  #define FLAC__NO_DLL 1
 

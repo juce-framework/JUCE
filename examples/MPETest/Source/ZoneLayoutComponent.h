@@ -31,12 +31,12 @@ class ZoneLayoutComponent : public Component,
                             public MPESetupComponent::Listener
 {
 public:
-    //==========================================================================
+    //==============================================================================
     ZoneLayoutComponent (const ZoneColourPicker& zoneColourPicker)
         : colourPicker (zoneColourPicker)
     {}
 
-    //==========================================================================
+    //==============================================================================
     void paint (Graphics& g) override
     {
         paintBackground (g);
@@ -47,7 +47,7 @@ public:
             paintZones (g);
     }
 
-    //==========================================================================
+    //==============================================================================
     void zoneAdded (MPEZone newZone) override
     {
         zoneLayout.addZone (newZone);
@@ -72,7 +72,7 @@ public:
     void numberOfVoicesChanged (int) override          { /* not interested in this change */ }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void paintBackground (Graphics& g)
     {
         g.setColour (Colours::black);
@@ -89,7 +89,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void paintZones (Graphics& g)
     {
         float channelWidth = getChannelRectangleWidth();
@@ -116,7 +116,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void paintLegacyMode (Graphics& g)
     {
         int startChannel = legacyModeChannelRange.getStart() - 1;
@@ -134,18 +134,18 @@ private:
         g.drawText ("<>" + String (legacyModePitchbendRange), zoneRect.reduced (4, 4), Justification::bottomLeft, false);
     }
 
-    //==========================================================================
+    //==============================================================================
     float getChannelRectangleWidth() const noexcept
     {
         return float (getWidth()) / numMidiChannels;
     }
 
-    //==========================================================================
+    //==============================================================================
     MPEZoneLayout zoneLayout;
     const ZoneColourPicker& colourPicker;
 
-	bool legacyModeEnabled = false;
-	int legacyModePitchbendRange = 48;
+    bool legacyModeEnabled = false;
+    int legacyModePitchbendRange = 48;
     Range<int> legacyModeChannelRange = { 1, 17 };
     const int numMidiChannels = 16;
 };

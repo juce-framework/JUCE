@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -44,9 +44,9 @@ int OSCMessage::size() const noexcept
     return arguments.size();
 }
 
-bool OSCMessage::empty() const noexcept
+bool OSCMessage::isEmpty() const noexcept
 {
-    return arguments.empty();
+    return arguments.isEmpty();
 }
 
 OSCArgument& OSCMessage::operator[] (const int i) const noexcept

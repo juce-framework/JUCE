@@ -105,7 +105,7 @@ public:
     void clear();
 
     /** Describes a popup menu item. */
-    struct Item
+    struct JUCE_API  Item
     {
         /** Creates a null item.
             You'll need to set some fields after creating an Item before you

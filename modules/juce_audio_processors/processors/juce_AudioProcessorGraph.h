@@ -183,6 +183,12 @@ public:
     */
     bool removeNode (uint32 nodeId);
 
+    /** Deletes a node within the graph which has the specified ID.
+
+        This will also delete any connections that are attached to this node.
+     */
+    bool removeNode (Node* node);
+
     //==============================================================================
     /** Returns the number of connections in the graph. */
     int getNumConnections() const                                       { return connections.size(); }

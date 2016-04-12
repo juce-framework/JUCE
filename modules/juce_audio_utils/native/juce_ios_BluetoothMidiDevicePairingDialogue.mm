@@ -87,7 +87,7 @@ public:
     void inputAttemptWhenModal() override           { close(); }
     void mouseDrag (const MouseEvent&) override     {}
     void mouseDown (const MouseEvent&) override     { close(); }
-    void resized () override                        { update(); }
+    void resized() override                         { update(); }
     void parentSizeChanged() override               { update(); }
 
 private:

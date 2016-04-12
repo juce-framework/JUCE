@@ -41,7 +41,7 @@ public:
         shutdownAudio();
     }
 
-    //=======================================================================
+    //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double newSampleRate) override
     {
         sampleRate = newSampleRate;
@@ -83,7 +83,7 @@ public:
     }
 
 
-    //=======================================================================
+    //==============================================================================
     void paint (Graphics& g) override
     {
         // (Our component is opaque, so we must completely fill the background with a solid colour)

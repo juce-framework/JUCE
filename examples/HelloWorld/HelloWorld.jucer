@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="tTAKTK1s" name="HelloWorld" projectType="guiapp" juceLinkage="amalg_multi"
-              juceFolder="../../../juce" jucerVersion="4.1.0" version="1.0.0"
-              buildVST="1" buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4"
-              vstFolderPC="c:\SDKs\vstsdk2.4" rtasFolderMac="~/SDKs/PT_80_SDK"
-              rtasFolderPC="c:\SDKs\PT_80_SDK" pluginName="HelloWorld" pluginDesc="HelloWorld"
-              pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
-              pluginCode="Abcd" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
-              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
-              pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="HelloWorldAU"
-              pluginAUViewClass="HelloWorldAU_V1" pluginRTASCategory="" bundleIdentifier="com.roli.jucehelloworld"
+<JUCERPROJECT id="tTAKTK1s" name="HelloWorld" projectType="guiapp" juceFolder="../../../juce"
+              jucerVersion="4.2.0" version="1.0.0" bundleIdentifier="com.roli.jucehelloworld"
               companyName="ROLI Ltd." includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
@@ -30,7 +22,7 @@
       </MODULEPATHS>
     </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-                  objCExtraSuffix="JtTAKTK1s">
+                  objCExtraSuffix="JtTAKTK1s" iosScreenOrientation="portraitlandscape">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"
                        osxSDK="1" osxCompatibility="1" osxArchitecture="default" iosCompatibility="default"/>

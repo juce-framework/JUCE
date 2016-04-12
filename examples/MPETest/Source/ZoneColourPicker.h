@@ -30,13 +30,13 @@
 class ZoneColourPicker
 {
 public:
-    //==========================================================================
+    //==============================================================================
     ZoneColourPicker()
         : legacyModeEnabled (false)
     {
     }
 
-    //==========================================================================
+    //==============================================================================
     Colour getColourForMidiChannel (int midiChannel) const noexcept
     {
         if (legacyModeEnabled)
@@ -54,7 +54,7 @@ public:
 
     }
 
-    //==========================================================================
+    //==============================================================================
     Colour getColourForZoneIndex (int zoneIndex) const noexcept
     {
         if (legacyModeEnabled)
@@ -77,12 +77,12 @@ public:
         return colours[zoneIndex % colours.size()];
     }
 
-    //==========================================================================
+    //==============================================================================
     void setZoneLayout (MPEZoneLayout layout) noexcept       { zoneLayout = layout; }
     void setLegacyModeEnabled (bool shouldBeEnabled) noexcept  { legacyModeEnabled = shouldBeEnabled; }
 
 private:
-    //==========================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZoneColourPicker)
 
     MPEZoneLayout zoneLayout;

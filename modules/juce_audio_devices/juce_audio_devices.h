@@ -22,12 +22,40 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_audio_devices
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE audio and MIDI I/O device classes
+  description:      Classes to play and record from audio and MIDI I/O devices
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_audio_basics, juce_audio_formats, juce_events
+  OSXFrameworks:    CoreAudio CoreMIDI DiscRecording
+  iOSFrameworks:    CoreAudio CoreMIDI AudioToolbox AVFoundation
+  linuxLibs:        asound
+  mingwLibs:        winmm
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_AUDIO_DEVICES_H_INCLUDED
 #define JUCE_AUDIO_DEVICES_H_INCLUDED
 
-#include "../juce_events/juce_events.h"
-#include "../juce_audio_basics/juce_audio_basics.h"
-#include "../juce_audio_formats/juce_audio_formats.h"
+#include <juce_events/juce_events.h>
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_formats/juce_audio_formats.h>
 
 //==============================================================================
 /** Config: JUCE_ASIO

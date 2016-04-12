@@ -28,7 +28,7 @@ public:
         shutdownAudio();
     }
 
-    //=======================================================================
+    //==============================================================================
     void prepareToPlay (int /*samplesPerBlockExpected*/, double sampleRate) override
     {
         generateStringSynths (sampleRate);
@@ -61,7 +61,7 @@ public:
         stringSynths.clear();
     }
 
-    //=======================================================================
+    //==============================================================================
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::black);
@@ -103,7 +103,7 @@ private:
         }
     }
 
-    //=======================================================================
+    //==============================================================================
     struct StringParameters
     {
         StringParameters (int midiNote)
@@ -140,7 +140,7 @@ private:
         }
     }
 
-    //=======================================================================
+    //==============================================================================
     OwnedArray<StringComponent> stringLines;
     OwnedArray<StringSynthesiser> stringSynths;
 

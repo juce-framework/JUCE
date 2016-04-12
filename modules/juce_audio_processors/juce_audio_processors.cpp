@@ -34,7 +34,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 
 #include "juce_audio_processors.h"
-#include "../juce_gui_extra/juce_gui_extra.h"
+#include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
 #if JUCE_MAC
@@ -56,6 +56,12 @@
  #define JUCE_PLUGINHOST_VST3 0
 #endif
 
+#if JUCE_IOS
+#define IOS_MAC_VIEW  UIView
+#elif JUCE_MAC
+#define IOS_MAC_VIEW  NSView
+#endif
+
 //==============================================================================
 namespace juce
 {
@@ -70,10 +76,15 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
     return false;
 }
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IOS
 //==============================================================================
-struct AutoResizingNSViewComponent  : public NSViewComponent,
-                                      private AsyncUpdater
+struct AutoResizingNSViewComponent  :
+#if JUCE_MAC
+                                    public NSViewComponent,
+#else
+                                    public UIViewComponent,
+#endif
+                                    private AsyncUpdater
 {
     AutoResizingNSViewComponent() : recursive (false) {}
 
@@ -102,16 +113,16 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 {
     AutoResizingNSViewComponentWithParent()
     {
-        NSView* v = [[NSView alloc] init];
+        IOS_MAC_VIEW* v = [[IOS_MAC_VIEW alloc] init];
         setView (v);
         [v release];
 
         startTimer (30);
     }
 
-    NSView* getChildView() const
+    IOS_MAC_VIEW* getChildView() const
     {
-        if (NSView* parent = (NSView*) getView())
+        if (IOS_MAC_VIEW* parent = (IOS_MAC_VIEW*) getView())
             if ([[parent subviews] count] > 0)
                 return [[parent subviews] objectAtIndex: 0];
 
@@ -120,7 +131,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
     void timerCallback() override
     {
-        if (NSView* child = getChildView())
+        if (IOS_MAC_VIEW* child = getChildView())
         {
             stopTimer();
             setView (child);

@@ -67,6 +67,13 @@
  #define JUCE_USE_ARM_NEON 1
 #endif
 
+#if TARGET_IPHONE_SIMULATOR
+ #ifdef JUCE_USE_ARM_NEON
+  #undef JUCE_USE_ARM_NEON
+ #endif
+ #define JUCE_USE_ARM_NEON 0
+#endif
+
 #if JUCE_USE_ARM_NEON
  #include <arm_neon.h>
 #endif

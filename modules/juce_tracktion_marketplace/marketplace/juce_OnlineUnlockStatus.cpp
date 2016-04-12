@@ -245,7 +245,7 @@ void OnlineUnlockStatus::MachineIDUtilities::addMACAddressesToList (StringArray&
         ids.add (getEncodedIDString (addresses.getReference(i).toString()));
 }
 
-StringArray OnlineUnlockStatus::getLocalMachineIDs()
+StringArray OnlineUnlockStatus::MachineIDUtilities::getLocalMachineIDs()
 {
     StringArray ids;
 
@@ -263,6 +263,11 @@ StringArray OnlineUnlockStatus::getLocalMachineIDs()
 
     jassert (ids.size() > 0); // failed to create any IDs!
     return ids;
+}
+
+StringArray OnlineUnlockStatus::getLocalMachineIDs()
+{
+    return MachineIDUtilities::getLocalMachineIDs();
 }
 
 void OnlineUnlockStatus::setUserEmail (const String& usernameOrEmail)
@@ -310,7 +315,8 @@ static bool canConnectToWebsite (const URL& url)
 
 static bool areMajorWebsitesAvailable()
 {
-    const char* urlsToTry[] = { "http://google.com", "http://bing.com", "http://amazon.com", nullptr};
+    const char* urlsToTry[] = { "http://google.com",  "http://bing.com",  "http://amazon.com",
+                                "https://google.com", "https://bing.com", "https://amazon.com", nullptr};
 
     for (const char** url = urlsToTry; *url != nullptr; ++url)
         if (canConnectToWebsite (URL (*url)))

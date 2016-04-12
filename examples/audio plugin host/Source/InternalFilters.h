@@ -55,16 +55,23 @@ public:
 
     //==============================================================================
     String getName() const override                                      { return "Internal"; }
-    bool fileMightContainThisPluginType (const String&) override         { return false; }
+    bool fileMightContainThisPluginType (const String&) override         { return true; }
     FileSearchPath getDefaultLocationsToSearch() override                { return FileSearchPath(); }
     bool canScanForPlugins() const override                              { return false; }
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&) override     {}
     bool doesPluginStillExist (const PluginDescription&) override        { return true; }
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override   { return fileOrIdentifier; }
     bool pluginNeedsRescanning (const PluginDescription&) override       { return false; }
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool) override         { return StringArray(); }
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&, double, int) override;
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool, bool) override         { return StringArray(); }
 
+private:
+    //==============================================================================
+    void createPluginInstance (const PluginDescription& description,
+                               double initialSampleRate,
+                               int initialBufferSize,
+                               void* userData,
+                               void (*callback) (void*, AudioPluginInstance*, const String&)) override;
+    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
 private:
     //==============================================================================
     PluginDescription audioInDesc;

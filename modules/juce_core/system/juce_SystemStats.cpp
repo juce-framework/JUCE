@@ -188,3 +188,21 @@ void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
     }
    #endif
 }
+
+bool SystemStats::isRunningInAppExtensionSandbox() noexcept
+{
+  #if JUCE_MAC || JUCE_IOS
+    File bundle = File::getSpecialLocation (File::invokedExecutableFile).getParentDirectory();
+
+   #if JUCE_MAC
+    bundle = bundle.getParentDirectory().getParentDirectory();
+   #endif
+
+    if (! bundle.isDirectory())
+        return false;
+
+    return (bundle.getFileExtension() == ".appex");
+  #else
+    return false;
+  #endif
+}

@@ -69,7 +69,6 @@ public:
           view (nil),
           isSharedWindow (viewToAttachTo != nil),
           fullScreen (false),
-          insideDrawRect (false),
          #if USE_COREGRAPHICS_RENDERING
           usingCoreGraphics (true),
          #else
@@ -394,15 +393,19 @@ public:
              && isPositiveAndBelow (localPos.getY(), (int) viewFrame.size.height)))
             return false;
 
-        if (NSWindow* const viewWindow = [view window])
+        if (! SystemStats::isRunningInAppExtensionSandbox())
         {
-            const NSRect windowFrame = [viewWindow frame];
-            const NSPoint windowPoint = [view convertPoint: NSMakePoint (localPos.x, viewFrame.size.height - localPos.y) toView: nil];
-            const NSPoint screenPoint = NSMakePoint (windowFrame.origin.x + windowPoint.x,
-                                                     windowFrame.origin.y + windowPoint.y);
+            if (NSWindow* const viewWindow = [view window])
+            {
+                const NSRect windowFrame = [viewWindow frame];
+                const NSPoint windowPoint = [view convertPoint: NSMakePoint (localPos.x, viewFrame.size.height - localPos.y) toView: nil];
+                const NSPoint screenPoint = NSMakePoint (windowFrame.origin.x + windowPoint.x,
+                                                         windowFrame.origin.y + windowPoint.y);
 
-            if (! isWindowAtPoint (viewWindow, screenPoint))
-                return false;
+                if (! isWindowAtPoint (viewWindow, screenPoint))
+                    return false;
+
+            }
         }
 
         NSView* v = [view hitTest: NSMakePoint (viewFrame.origin.x + localPos.getX(),
@@ -793,6 +796,37 @@ public:
             displayScale = (float) screen.backingScaleFactor;
        #endif
 
+       #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        // This option invokes a separate paint call for each rectangle of the clip region.
+        // It's a long story, but this is a basically a workaround for a CGContext not having
+        // a way of finding whether a rectangle falls within its clip region
+        if (usingCoreGraphics)
+        {
+            const NSRect* rects = nullptr;
+            NSInteger numRects = 0;
+            [view getRectsBeingDrawn: &rects count: &numRects];
+
+            if (numRects > 1)
+            {
+                for (int i = 0; i < numRects; ++i)
+                {
+                    NSRect rect = rects[i];
+                    CGContextSaveGState (cg);
+                    CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+                    drawRect (cg, rect, displayScale);
+                    CGContextRestoreGState (cg);
+                }
+
+                return;
+            }
+        }
+       #endif
+
+        drawRect (cg, r, displayScale);
+    }
+
+    void drawRect (CGContextRef cg, NSRect r, float displayScale)
+    {
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
@@ -872,9 +906,7 @@ public:
     void invokePaint (LowLevelGraphicsContext& context)
     {
         lastRepaintTime = Time::getCurrentTime();
-        insideDrawRect = true;
         handlePaint (context);
-        insideDrawRect = false;
     }
 
     void performAnyPendingRepaintsNow() override
@@ -1283,7 +1315,7 @@ public:
     //==============================================================================
     NSWindow* window;
     NSView* view;
-    bool isSharedWindow, fullScreen, insideDrawRect;
+    bool isSharedWindow, fullScreen;
     bool usingCoreGraphics, isZooming, textWasInserted;
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter;

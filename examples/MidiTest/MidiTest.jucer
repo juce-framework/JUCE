@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="wHE0ay" name="MidiTest" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.MidiTest" includeBinaryInAppConfig="1"
-              jucerVersion="4.1.0">
+              jucerVersion="4.2.0">
   <MAINGROUP id="s3xxCh" name="MidiTest">
     <GROUP id="{7D29F5BC-1B05-AE8F-9202-5CF152AB1103}" name="Source">
       <FILE id="kpmJ3T" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -78,7 +78,7 @@
         <MODULEPATH id="juce_dsp" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS">
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" iosCompatibility="8.0" isDebug="1" optimisation="1"
                        targetName="MidiTest"/>
@@ -104,7 +104,9 @@
                    androidKeyStore="${user.home}/.android/debug.keystore" androidKeyStorePass="android"
                    androidKeyAlias="androiddebugkey" androidKeyAliasPass="android"
                    androidCpp11="1" androidScreenOrientation="unspecified" targetFolder="Builds/AndroidStudio"
-                   androidSDKPath="" androidNDKPath="" androidMicNeeded="1">
+                   androidSDKPath="" androidNDKPath="" androidMicNeeded="1" gradleVersion="2.10"
+                   gradleWrapperVersion="0.6.0-beta5" gradleToolchain="clang" gradleToolchainVersion="3.6"
+                   buildToolsVersion="23.0.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="MidiTest"/>

@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 namespace PopupMenuSettings
 {
     const int scrollZone = 24;

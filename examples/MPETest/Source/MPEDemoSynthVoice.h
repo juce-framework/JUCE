@@ -30,13 +30,13 @@
 class MPEDemoSynthVoice : public MPESynthesiserVoice
 {
 public:
-    //==========================================================================
+    //==============================================================================
     MPEDemoSynthVoice()
         : phase (0.0), phaseDelta (0.0), tailOff (0.0)
     {
     }
 
-    //==========================================================================
+    //==============================================================================
     void noteStarted() override
     {
         jassert (currentlyPlayingNote.isValid());
@@ -107,7 +107,7 @@ public:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     virtual void renderNextBlock (AudioBuffer<float>& outputBuffer,
                                   int startSample,
                                   int numSamples) override
@@ -152,7 +152,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     float getNextSample() noexcept
     {
         const double levelDb = (level.getNextValue() - 1.0) * maxLevelDb;
@@ -160,7 +160,7 @@ private:
 
         // timbre is used to blend between a sine and a square.
         const double f1 = std::sin (phase);
-		const double f2 = std::copysign (1.0, f1);
+        const double f2 = std::copysign (1.0, f1);
         const double a2 = timbre.getNextValue();
         const double a1 = 1.0 - a2;
 
@@ -173,7 +173,7 @@ private:
         return nextSample;
     }
 
-    //==========================================================================
+    //==============================================================================
     LinearSmoothedValue<double> level, timbre, frequency;
     double phase, phaseDelta, tailOff;
 

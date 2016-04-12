@@ -405,6 +405,8 @@ public:
 
         while (SUCCEEDED (mediaEvent->GetEvent (&ec, &p1, &p2, 0)))
         {
+            mediaEvent->FreeEventParams (ec, p1, p2);
+
             switch (ec)
             {
             case EC_REPAINT:
@@ -427,8 +429,6 @@ public:
             default:
                 break;
             }
-
-            mediaEvent->FreeEventParams (ec, p1, p2);
         }
     }
 

@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 #if JUCE_USE_DIRECTWRITE
 namespace DirectWriteTypeLayout
 {

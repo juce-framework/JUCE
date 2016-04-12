@@ -22,11 +22,36 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_events
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE message and event handling classes
+  description:      Classes for running an application's main event loop and sending/receiving messages, timers, etc.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_core
+  linuxLibs:        X11
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_EVENTS_H_INCLUDED
 #define JUCE_EVENTS_H_INCLUDED
 
 //==============================================================================
-#include "../juce_core/juce_core.h"
+#include <juce_core/juce_core.h>
 
 namespace juce
 {

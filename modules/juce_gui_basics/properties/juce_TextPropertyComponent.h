@@ -136,7 +136,7 @@ private:
 };
 
 #ifndef DOXYGEN
- /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
+ /** This typedef is just for compatibility with old code and VC6 - newer code should use TextPropertyComponent::Listener instead. */
  typedef TextPropertyComponent::Listener TextPropertyComponentListener;
 #endif
 

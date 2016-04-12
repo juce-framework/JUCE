@@ -32,7 +32,8 @@
 
 
 //==============================================================================
-class PluginHostApp  : public JUCEApplication
+class PluginHostApp  : public JUCEApplication,
+                       private AsyncUpdater
 {
 public:
     PluginHostApp() {}
@@ -59,6 +60,19 @@ public:
 
         mainWindow->menuItemsChanged();
 
+        // Important note! We're going to use an async update here so that if we need
+        // to re-open a file and instantiate some plugins, it will happen AFTER this
+        // initialisation method has returned.
+        // On Windows this probably won't make a difference, but on OSX there's a subtle event loop
+        // issue that can happen if a plugin runs one of those irritating modal dialogs while it's
+        // being loaded. If that happens inside this method, the OSX event loop seems to be in some
+        // kind of special "initialisation" mode and things get confused. But if we load the plugin
+        // later when the normal event loop is running, everything's fine.
+        triggerAsyncUpdate();
+    }
+
+    void handleAsyncUpdate() override
+    {
         File fileToOpen;
 
         for (int i = 0; i < getCommandLineParameterArray().size(); ++i)

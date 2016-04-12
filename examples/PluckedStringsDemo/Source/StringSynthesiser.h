@@ -16,7 +16,7 @@
 class StringSynthesiser
 {
 public:
-    //=======================================================================
+    //==============================================================================
     /** Constructor.
 
         @param sampleRate      The audio sample rate to use.
@@ -29,7 +29,7 @@ public:
         prepareSynthesiserState (sampleRate, frequencyInHz);
     }
 
-    //=======================================================================
+    //==============================================================================
     /** Excite the simulated string by plucking it at a given position.
 
         @param pluckPosition The position of the plucking, relative to the length
@@ -51,7 +51,7 @@ public:
         }
     }
 
-    //=======================================================================
+    //==============================================================================
     /** Generate next chunk of mono audio output and add it into a buffer.
 
         @param outBuffer  Buffer to fill (one channel only). New sound will be
@@ -78,7 +78,7 @@ public:
     }
 
 private:
-    //=======================================================================
+    //==============================================================================
     void prepareSynthesiserState (double sampleRate, double frequencyInHz)
     {
         size_t delayLineLength = (size_t) roundToInt (sampleRate / frequencyInHz);
@@ -112,7 +112,7 @@ private:
                         [this] (double sample) { return amplitude * sample; } );
     };
 
-    //=======================================================================
+    //==============================================================================
     const double decay = 0.998;
     double amplitude = 0.0;
 
