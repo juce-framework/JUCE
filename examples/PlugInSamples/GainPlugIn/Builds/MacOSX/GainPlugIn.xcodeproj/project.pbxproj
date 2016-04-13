@@ -28,6 +28,7 @@
 		434F6E14A0DACDAA2BF2212B = {isa = PBXBuildFile; fileRef = E13512F9451169A200CA63BF; };
 		685F85F881C02A3AAA5E9B47 = {isa = PBXBuildFile; fileRef = BF909DFBC9B899C6119F556B; };
 		FADD82E463A2C5169B5F72E9 = {isa = PBXBuildFile; fileRef = ECD7D7FB3760E3792BAAC6CE; };
+		9D6465B0B231D381F43E350E = {isa = PBXBuildFile; fileRef = 52F901B45BB73B9A4C4588C4; };
 		BE1CCB2BA25C1B9CC93BD180 = {isa = PBXBuildFile; fileRef = 2A42EB4E6808C916CD805B55; };
 		6A823DA60FD178B0AE4F7795 = {isa = PBXBuildFile; fileRef = 539D8FB917601AE0FEF2EDD0; };
 		6859170B30F156B4628F7476 = {isa = PBXBuildFile; fileRef = 3F62CC0D964ADA2C5FEE8780; };
@@ -460,6 +461,7 @@
 		52B3A797835ED0B7474BD7C5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_QuickTimeMovieComponent.cpp"; path = "../../../../../modules/juce_video/native/juce_win32_QuickTimeMovieComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		52BFB6C68B8BF5A6BEFC0127 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AUBuffer.h; path = "../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/AUBuffer.h"; sourceTree = "SOURCE_ROOT"; };
 		52E047F304B418DC34B7961D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_UnitTest.cpp"; path = "../../../../../modules/juce_core/unit_tests/juce_UnitTest.cpp"; sourceTree = "SOURCE_ROOT"; };
+		52F901B45BB73B9A4C4588C4 = {isa = PBXFileReference; lastKnownFileType = file.r; name = "juce_RezResources_AU.r"; path = "../../../../../modules/juce_audio_plugin_client/AU/juce_RezResources_AU.r"; sourceTree = "SOURCE_ROOT"; };
 		534AA9A1FB63F939B7C34BE0 = {isa = PBXFileReference; lastKnownFileType = file.java; name = AndroidMidi.java; path = "../../../../../modules/juce_core/native/java/AndroidMidi.java"; sourceTree = "SOURCE_ROOT"; };
 		539D8FB917601AE0FEF2EDD0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_devices.mm"; path = "../../JuceLibraryCode/juce_audio_devices.mm"; sourceTree = "SOURCE_ROOT"; };
 		53C8168EAD3420C0EFD34BE8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CoreAudioFormat.cpp"; path = "../../../../../modules/juce_audio_formats/codecs/juce_CoreAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1198,6 +1200,7 @@
 		EE3D9D885DC024F73E7BA834 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CarbonEventHandler.cpp; path = "../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/CarbonEventHandler.cpp"; sourceTree = "SOURCE_ROOT"; };
 		EE64FBAE53DA40192BEACCC7 = {isa = PBXFileReference; lastKnownFileType = file; name = README; path = "../../../../../modules/juce_graphics/image_formats/jpglib/README"; sourceTree = "SOURCE_ROOT"; };
 		EE68D617C21D6400FFDC08E3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ActiveXControlComponent.h"; path = "../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h"; sourceTree = "SOURCE_ROOT"; };
+		EE799DBCC57F1B69CEB332A1 = {isa = PBXFileReference; lastKnownFileType = file.r; name = AUResources.r; path = "../../../../../modules/juce_audio_plugin_client/AU/AUResources.r"; sourceTree = "SOURCE_ROOT"; };
 		EEE02CD512C902DD7B0C5D13 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Process.h"; path = "../../../../../modules/juce_core/threads/juce_Process.h"; sourceTree = "SOURCE_ROOT"; };
 		EF055DD10D73DD84E657AB0B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_gui_extra.h"; path = "../../../../../modules/juce_gui_extra/juce_gui_extra.h"; sourceTree = "SOURCE_ROOT"; };
 		EF0ED3DFA2926694133E27E6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ModalComponentManager.cpp"; path = "../../../../../modules/juce_gui_basics/components/juce_ModalComponentManager.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1620,7 +1623,7 @@
 					18B7B5B0C06A1C96ED45C9AB, ); name = "juce_audio_formats"; sourceTree = "<group>"; };
 		ACD80D137D40FF3D98E4BDD9 = {isa = PBXGroup; children = (
 					B41DB1D9877BC61AB0558A69, ); name = AAX; sourceTree = "<group>"; };
-		3435B20E6248CCE6A20DD647 = {isa = PBXGroup; children = (
+		3400DEB0A398D259B792ECB5 = {isa = PBXGroup; children = (
 					F12E2F9633C0C10172C7EB29,
 					1C71EB70C3F4FAD9C2701C80,
 					9E2A17A739BE8605D8C13CFD,
@@ -1678,10 +1681,12 @@
 					BC143154D01C14EC6438FD2E,
 					5E148B6D2D4D3ACADBD369BA, ); name = CoreAudioUtilityClasses; sourceTree = "<group>"; };
 		40670BA45D5A8B83FFD1D43D = {isa = PBXGroup; children = (
+					EE799DBCC57F1B69CEB332A1,
 					8CABBDFF3D48FA622F561D56,
 					B15D003DE2F4E963EC111711,
 					8782AADF74783EA3DD066529,
-					3435B20E6248CCE6A20DD647, ); name = AU; sourceTree = "<group>"; };
+					52F901B45BB73B9A4C4588C4,
+					3400DEB0A398D259B792ECB5, ); name = AU; sourceTree = "<group>"; };
 		481A2320BE06B39707A658B9 = {isa = PBXGroup; children = (
 					B7EC6979B78232E97C67586D,
 					2B7C784CF333CA6BEEF5038A,
@@ -3286,6 +3291,8 @@
 		A8BFD81EACAF4420A2D9C7E7 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
 					434F6E14A0DACDAA2BF2212B,
 					685F85F881C02A3AAA5E9B47, ); runOnlyForDeploymentPostprocessing = 0; };
+		12E5B85CBAEF4ADCEF60C693 = {isa = PBXRezBuildPhase; buildActionMask = 2147483647; files = (
+					9D6465B0B231D381F43E350E, ); runOnlyForDeploymentPostprocessing = 0; };
 		F64B4E3D3CB6B1C555806A9C = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; files = (
 					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; name = "Embed Frameworks"; dstPath = ""; dstSubfolderSpec = 10; };
 		7CD5DF20930E5FD4B8978F68 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
@@ -3309,6 +3316,7 @@
 					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; };
 		95B232D53C8384ECDA8C519B = {isa = PBXNativeTarget; buildConfigurationList = BC01B854A2B1C169532B3C40; buildPhases = (
 					A8BFD81EACAF4420A2D9C7E7,
+					12E5B85CBAEF4ADCEF60C693,
 					F64B4E3D3CB6B1C555806A9C,
 					7CD5DF20930E5FD4B8978F68,
 					0466EDF982628A74C5EF25A0, ); buildRules = ( ); dependencies = (

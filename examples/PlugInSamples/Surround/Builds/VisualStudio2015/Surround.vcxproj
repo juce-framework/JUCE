@@ -2360,6 +2360,8 @@
     <None Include="..\..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\CHANGES"/>
     <None Include="..\..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\COPYING"/>
     <None Include="..\..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\README"/>
+    <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\AUResources.r"/>
+    <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_RezResources_AU.r"/>
     <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_WinExports.def"/>
     <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_WinResources.rsr"/>
     <None Include="..\..\..\..\..\modules\juce_core\native\java\AndroidMidi.java"/>
