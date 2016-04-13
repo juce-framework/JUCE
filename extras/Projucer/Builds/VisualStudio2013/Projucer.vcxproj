@@ -2511,7 +2511,6 @@
     <None Include="..\..\Source\BinaryData\ContaxPro55Rm.otf"/>
     <None Include="..\..\Source\BinaryData\ContaxPro55RmSC.otf"/>
     <None Include="..\..\Source\BinaryData\ContaxPro65Med.otf"/>
-    <None Include="..\..\Source\BinaryData\juce_AU_Resources.r"/>
     <None Include="..\..\Source\BinaryData\juce_icon.png"/>
     <None Include="..\..\Source\BinaryData\projectIconAndroid.png"/>
     <None Include="..\..\Source\BinaryData\projectIconCodeblocks.png"/>

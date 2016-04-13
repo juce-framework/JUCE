@@ -604,8 +604,6 @@
             file="Source/BinaryData/ContaxPro55RmSC.otf"/>
       <FILE id="noDr2N" name="ContaxPro65Med.otf" compile="0" resource="1"
             file="Source/BinaryData/ContaxPro65Med.otf"/>
-      <FILE id="rywk5G" name="juce_AU_Resources.r" compile="0" resource="1"
-            file="Source/BinaryData/juce_AU_Resources.r"/>
       <FILE id="OCyr5F" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/juce_icon.png"/>
       <FILE id="pBWoUz" name="projectIconAndroid.png" compile="0" resource="1"
             file="Source/BinaryData/projectIconAndroid.png"/>

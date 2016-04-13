@@ -2801,126 +2801,8 @@ static const unsigned char temp_binary_data_28[] =
 
 const char* ContaxPro65Med_otf = (const char*) temp_binary_data_28;
 
-//================== juce_AU_Resources.r ==================
-static const unsigned char temp_binary_data_29[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"   This file is part of the JUCE library.\r\n"
-"   Copyright (c) 2015 - ROLI Ltd.\r\n"
-"\r\n"
-"   Permission is granted to use this software under the terms of either:\r\n"
-"   a) the GPL v2 (or any later version)\r\n"
-"   b) the Affero GPL v3\r\n"
-"\r\n"
-"   Details of these licenses can be found at: www.gnu.org/licenses\r\n"
-"\r\n"
-"   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY\r\n"
-"   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR\r\n"
-"   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\r\n"
-"\r\n"
-"   ------------------------------------------------------------------------------\r\n"
-"\r\n"
-"   To release a closed-source product which uses JUCE, commercial licenses are\r\n"
-"   available: visit www.juce.com for more information.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#define UseExtendedThingResource 1\r\n"
-"#include <AudioUnit/AudioUnit.r>\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/*  The AppConfig.h file should be a file in your project, containing info to describe the\r\n"
-"    plugin's name, type, etc. The Projucer will generate this file automatically for you.\r\n"
-"\r\n"
-"    You may need to adjust the include path of your project to make sure it can be \r\n"
-"    found by this include statement. (Don't hack this file to change the include path)\r\n"
-"*/\r\n"
-"#include \"AppConfig.h\"\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// component resources for Audio Unit\r\n"
-"#define RES_ID          1000\r\n"
-"#define COMP_TYPE       JucePlugin_AUMainType\r\n"
-"#define COMP_SUBTYPE    JucePlugin_AUSubType\r\n"
-"#define COMP_MANUF      JucePlugin_AUManufacturerCode\r\n"
-"#define VERSION         JucePlugin_VersionCode\r\n"
-"#define NAME            JucePlugin_Manufacturer \": \" JucePlugin_Name\r\n"
-"#define DESCRIPTION     JucePlugin_Desc\r\n"
-"#define ENTRY_POINT     JucePlugin_AUExportPrefixQuoted \"Entry\"\r\n"
-"\r\n"
-"#include <CoreServices/CoreServices.r>\r\n"
-"\r\n"
-"resource 'STR ' (RES_ID, purgeable) { NAME };\r\n"
-"resource 'STR ' (RES_ID + 1, purgeable) { DESCRIPTION };\r\n"
-"resource 'dlle' (RES_ID) { ENTRY_POINT };\r\n"
-"\r\n"
-"resource 'thng' (RES_ID, NAME)\r\n"
-"{\r\n"
-"    COMP_TYPE, COMP_SUBTYPE, COMP_MANUF,\r\n"
-"    0, 0, 0, 0,\r\n"
-"    'STR ', RES_ID,\r\n"
-"    'STR ', RES_ID + 1,\r\n"
-"    0, 0, VERSION,\r\n"
-"    componentHasMultiplePlatforms | componentDoAutoVersion, 0,\r\n"
-"    {\r\n"
-"        0x10000000, 'dlle', RES_ID, platformIA32NativeEntryPoint,\r\n"
-"        0x10000000, 'dlle', RES_ID, 8\r\n"
-"    }\r\n"
-"};\r\n"
-"\r\n"
-"#undef RES_ID\r\n"
-"#undef COMP_TYPE\r\n"
-"#undef COMP_SUBTYPE\r\n"
-"#undef COMP_MANUF\r\n"
-"#undef VERSION\r\n"
-"#undef NAME\r\n"
-"#undef DESCRIPTION\r\n"
-"#undef ENTRY_POINT\r\n"
-"#undef NeedLeadingComma\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// component resources for Audio Unit Carbon View\r\n"
-"\r\n"
-"#ifndef BUILD_AU_CARBON_UI\r\n"
-" #define BUILD_AU_CARBON_UI 1\r\n"
-"#endif\r\n"
-"\r\n"
-"#if BUILD_AU_CARBON_UI\r\n"
-"    #define RES_ID         2000\r\n"
-"    #define COMP_TYPE      kAudioUnitCarbonViewComponentType\r\n"
-"    #define COMP_SUBTYPE   JucePlugin_AUSubType\r\n"
-"    #define COMP_MANUF     JucePlugin_AUManufacturerCode\r\n"
-"    #define VERSION        JucePlugin_VersionCode\r\n"
-"    #define NAME           JucePlugin_Manufacturer \": \" JucePlugin_Name \" View\"\r\n"
-"    #define DESCRIPTION    NAME\r\n"
-"    #define ENTRY_POINT    JucePlugin_AUExportPrefixQuoted \"ViewEntry\"\r\n"
-"\r\n"
-"    resource 'STR ' (RES_ID, purgeable) { NAME };\r\n"
-"    resource 'STR ' (RES_ID + 1, purgeable) { DESCRIPTION };\r\n"
-"    resource 'dlle' (RES_ID) { ENTRY_POINT };\r\n"
-"\r\n"
-"    resource 'thng' (RES_ID, NAME)\r\n"
-"    {\r\n"
-"        COMP_TYPE, COMP_SUBTYPE, COMP_MANUF,\r\n"
-"        0, 0, 0, 0,\r\n"
-"        'STR ', RES_ID,\r\n"
-"        'STR ', RES_ID + 1,\r\n"
-"        0, 0, VERSION,\r\n"
-"        componentHasMultiplePlatforms | componentDoAutoVersion, 0,\r\n"
-"        {\r\n"
-"            0x10000000, 'dlle', RES_ID, platformIA32NativeEntryPoint,\r\n"
-"            0x10000000, 'dlle', RES_ID, 8\r\n"
-"        }\r\n"
-"    };\r\n"
-"#endif\r\n";
-
-const char* juce_AU_Resources_r = (const char*) temp_binary_data_29;
-
 //================== juce_icon.png ==================
-static const unsigned char temp_binary_data_30[] =
+static const unsigned char temp_binary_data_29[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,2,0,0,0,2,0,8,6,0,0,0,244,120,212,250,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,40,105,84,88,116,88,77,76,58,
 99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,120,
 58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,54,55,32,55,57,46,49,53,55,
@@ -3566,10 +3448,10 @@ static const unsigned char temp_binary_data_30[] =
 0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,128,191,246,33,192,0,100,235,173,153,70,62,64,
 37,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* juce_icon_png = (const char*) temp_binary_data_30;
+const char* juce_icon_png = (const char*) temp_binary_data_29;
 
 //================== projectIconAndroid.png ==================
-static const unsigned char temp_binary_data_31[] =
+static const unsigned char temp_binary_data_30[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -3686,10 +3568,10 @@ static const unsigned char temp_binary_data_31[] =
 139,240,165,4,64,57,166,132,157,54,246,220,165,230,39,27,156,211,4,232,176,247,44,193,125,203,174,137,229,132,198,114,231,150,74,124,238,9,19,9,244,154,7,0,175,121,0,240,154,7,0,175,121,0,240,154,7,0,175,121,0,240,154,7,0,175,189,235,246,255,2,12,0,158,
 137,39,54,252,6,9,64,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconAndroid_png = (const char*) temp_binary_data_31;
+const char* projectIconAndroid_png = (const char*) temp_binary_data_30;
 
 //================== projectIconCodeblocks.png ==================
-static const unsigned char temp_binary_data_32[] =
+static const unsigned char temp_binary_data_31[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -3859,10 +3741,10 @@ static const unsigned char temp_binary_data_32[] =
 202,84,15,91,2,120,13,161,41,237,191,111,130,252,4,17,176,224,208,111,140,253,56,221,147,207,16,11,238,233,234,37,192,250,248,241,59,248,122,10,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,
 62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,214,12,176,62,126,28,143,255,39,192,0,238,147,31,89,162,25,31,21,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconCodeblocks_png = (const char*) temp_binary_data_32;
+const char* projectIconCodeblocks_png = (const char*) temp_binary_data_31;
 
 //================== projectIconLinuxMakefile.png ==================
-static const unsigned char temp_binary_data_33[] =
+static const unsigned char temp_binary_data_32[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,110,0,0,0,128,8,6,0,0,0,234,21,92,9,0,0,10,65,105,67,67,80,73,67,67,32,80,114,111,102,105,108,101,0,0,72,13,157,150,119,84,83,217,22,135,207,189,55,189,208,18,34,32,37,244,26,122,9,32,210,59,72,21,4,
 81,137,73,128,80,2,134,132,38,118,68,5,70,20,17,41,86,100,84,192,1,71,135,34,99,69,20,11,131,130,98,215,9,242,16,80,198,193,81,68,69,229,221,140,107,9,239,173,53,243,222,154,253,199,89,223,217,231,183,215,217,103,239,125,215,186,0,80,252,130,4,194,116,
 88,1,128,52,161,88,20,238,235,193,92,18,19,203,196,247,2,24,16,1,14,88,1,192,225,102,102,4,71,248,68,2,212,252,189,61,153,153,168,72,198,179,246,238,46,128,100,187,219,44,191,80,38,115,214,255,127,145,34,55,67,36,6,0,10,69,213,54,60,126,38,23,229,2,148,
@@ -4098,10 +3980,10 @@ static const unsigned char temp_binary_data_33[] =
 194,72,142,254,249,31,79,111,60,173,241,241,124,82,34,189,246,233,251,163,179,223,129,178,15,181,97,103,68,217,251,253,17,198,63,35,254,218,150,109,129,235,236,183,141,63,16,97,60,125,157,93,199,211,219,217,245,128,211,250,223,12,238,70,210,82,169,25,
 10,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconLinuxMakefile_png = (const char*) temp_binary_data_33;
+const char* projectIconLinuxMakefile_png = (const char*) temp_binary_data_32;
 
 //================== projectIconVisualStudio.png ==================
-static const unsigned char temp_binary_data_34[] =
+static const unsigned char temp_binary_data_33[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,1,115,82,71,66,0,174,206,28,233,0,0,4,166,105,84,88,116,88,77,76,58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,120,58,120,109,112,109,101,
 116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,88,77,80,32,67,111,114,101,32,53,46,52,46,48,34,62,10,32,32,32,60,114,100,102,58,82,68,70,32,120,109,108,110,115,58,114,
 100,102,61,34,104,116,116,112,58,47,47,119,119,119,46,119,51,46,111,114,103,47,49,57,57,57,47,48,50,47,50,50,45,114,100,102,45,115,121,110,116,97,120,45,110,115,35,34,62,10,32,32,32,32,32,32,60,114,100,102,58,68,101,115,99,114,105,112,116,105,111,110,
@@ -4204,10 +4086,10 @@ static const unsigned char temp_binary_data_34[] =
 60,9,167,156,184,49,164,154,223,25,2,227,183,193,73,245,49,24,79,213,175,147,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,128,166,192,129,64,
 129,255,7,47,12,150,8,60,209,161,194,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconVisualStudio_png = (const char*) temp_binary_data_34;
+const char* projectIconVisualStudio_png = (const char*) temp_binary_data_33;
 
 //================== projectIconXcode.png ==================
-static const unsigned char temp_binary_data_35[] =
+static const unsigned char temp_binary_data_34[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,40,105,84,88,116,88,77,76,58,
 99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,120,
 58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,54,
@@ -4467,10 +4349,10 @@ static const unsigned char temp_binary_data_35[] =
 94,156,0,232,23,120,134,102,179,249,235,17,128,9,19,38,192,59,223,249,206,152,182,172,169,75,67,169,119,178,110,237,223,246,242,196,143,188,48,28,50,88,157,63,127,254,175,124,82,161,71,186,231,200,203,63,99,234,231,229,216,252,127,248,207,255,19,96,0,
 221,83,18,25,240,8,112,38,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconXcode_png = (const char*) temp_binary_data_35;
+const char* projectIconXcode_png = (const char*) temp_binary_data_34;
 
 //================== projectIconXcodeIOS.png ==================
-static const unsigned char temp_binary_data_36[] =
+static const unsigned char temp_binary_data_35[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,134,105,84,88,116,88,77,76,
 58,99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,
 120,58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,49,52,32,55,57,46,49,53,
@@ -4728,10 +4610,10 @@ static const unsigned char temp_binary_data_36[] =
 4,97,9,162,191,203,0,199,198,0,162,157,87,213,105,220,35,12,64,131,146,62,249,201,79,186,117,103,130,86,133,76,84,14,16,185,67,123,223,37,252,241,103,134,146,206,234,228,201,147,143,250,164,172,171,29,174,239,254,252,101,253,188,235,155,255,31,255,249,
 255,2,12,0,235,154,52,248,249,240,115,28,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* projectIconXcodeIOS_png = (const char*) temp_binary_data_36;
+const char* projectIconXcodeIOS_png = (const char*) temp_binary_data_35;
 
 //================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_37[] =
+static const unsigned char temp_binary_data_36[] =
 "IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
 "\r\n"
 "This licence agreement (Licence) is a legal agreement between you (Licensee or you) and Raw Material Software Limited (Licensor, us or we) for:\r\n"
@@ -4858,10 +4740,10 @@ static const unsigned char temp_binary_data_37[] =
 "   7.6.  Please note that this Licence, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction. \r\n"
 "   ";
 
-const char* projucer_EULA_txt = (const char*) temp_binary_data_37;
+const char* projucer_EULA_txt = (const char*) temp_binary_data_36;
 
 //================== projucer_login_bg.svg ==================
-static const unsigned char temp_binary_data_38[] =
+static const unsigned char temp_binary_data_37[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 19.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
@@ -4925,10 +4807,10 @@ static const unsigned char temp_binary_data_38[] =
 "\tc7.6,0,12,4.8,12,11c0,5.4-4,9.8-9,10l13,15.5H343.9z\"/>\r\n"
 "</svg>\r\n";
 
-const char* projucer_login_bg_svg = (const char*) temp_binary_data_38;
+const char* projucer_login_bg_svg = (const char*) temp_binary_data_37;
 
 //================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_39[] =
+static const unsigned char temp_binary_data_38[] =
 { 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
 0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
 0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
@@ -4965,10 +4847,10 @@ static const unsigned char temp_binary_data_39[] =
 7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
 41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
 
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_39;
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_38;
 
 //================== wizard_AnimatedApp.svg ==================
-static const unsigned char temp_binary_data_40[] =
+static const unsigned char temp_binary_data_39[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5015,10 +4897,10 @@ static const unsigned char temp_binary_data_40[] =
 "<line opacity=\"0.7\" fill=\"none\" stroke=\"#F29100\" stroke-width=\"1.3469\" stroke-miterlimit=\"10\" x1=\"57.7\" y1=\"48.4\" x2=\"34.2\" y2=\"48.4\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_40;
+const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_39;
 
 //================== wizard_AudioApp.svg ==================
-static const unsigned char temp_binary_data_41[] =
+static const unsigned char temp_binary_data_40[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5092,10 +4974,10 @@ static const unsigned char temp_binary_data_41[] =
 "<line fill=\"none\" stroke=\"#F29300\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-miterlimit=\"10\" x1=\"118.8\" y1=\"43.8\" x2=\"118.8\" y2=\"44.5\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_AudioApp_svg = (const char*) temp_binary_data_41;
+const char* wizard_AudioApp_svg = (const char*) temp_binary_data_40;
 
 //================== wizard_AudioPlugin.svg ==================
-static const unsigned char temp_binary_data_42[] =
+static const unsigned char temp_binary_data_41[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5206,10 +5088,10 @@ static const unsigned char temp_binary_data_42[] =
 "</g>\r\n"
 "</svg>\r\n";
 
-const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_42;
+const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_41;
 
 //================== wizard_ConsoleApp.svg ==================
-static const unsigned char temp_binary_data_43[] =
+static const unsigned char temp_binary_data_42[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5232,10 +5114,10 @@ static const unsigned char temp_binary_data_43[] =
 "</g>\r\n"
 "</svg>\r\n";
 
-const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_43;
+const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_42;
 
 //================== wizard_DLL.svg ==================
-static const unsigned char temp_binary_data_44[] =
+static const unsigned char temp_binary_data_43[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5278,10 +5160,10 @@ static const unsigned char temp_binary_data_44[] =
 "\tl-7.7,5.3c-0.7,0.5-1.7,0.3-2.2-0.4L70.1,31\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_DLL_svg = (const char*) temp_binary_data_44;
+const char* wizard_DLL_svg = (const char*) temp_binary_data_43;
 
 //================== wizard_GUI.svg ==================
-static const unsigned char temp_binary_data_45[] =
+static const unsigned char temp_binary_data_44[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5332,10 +5214,10 @@ static const unsigned char temp_binary_data_45[] =
 "\tC0,3.1,3.1,0,6.9,0H130c3.8,0,6.9,3.1,6.9,6.9v101.1C136.9,111.7,133.9,114.8,130,114.8z\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_GUI_svg = (const char*) temp_binary_data_45;
+const char* wizard_GUI_svg = (const char*) temp_binary_data_44;
 
 //================== wizard_Highlight.svg ==================
-static const unsigned char temp_binary_data_46[] =
+static const unsigned char temp_binary_data_45[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5345,10 +5227,10 @@ static const unsigned char temp_binary_data_46[] =
 "\tV108C136.9,111.8,133.9,114.8,130.1,114.8z\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_Highlight_svg = (const char*) temp_binary_data_46;
+const char* wizard_Highlight_svg = (const char*) temp_binary_data_45;
 
 //================== wizard_Openfile.svg ==================
-static const unsigned char temp_binary_data_47[] =
+static const unsigned char temp_binary_data_46[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5358,10 +5240,10 @@ static const unsigned char temp_binary_data_47[] =
 "\tc0-3.8,3.1-6.9,6.9-6.9h151.5c3.8,0,6.9,3.1,6.9,6.9v20.9C171.6,68.3,168.5,71.4,164.7,71.4z\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_Openfile_svg = (const char*) temp_binary_data_47;
+const char* wizard_Openfile_svg = (const char*) temp_binary_data_46;
 
 //================== wizard_OpenGL.svg ==================
-static const unsigned char temp_binary_data_48[] =
+static const unsigned char temp_binary_data_47[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5389,10 +5271,10 @@ static const unsigned char temp_binary_data_48[] =
 "\ts-13.4-19.6-6.9-30\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_OpenGL_svg = (const char*) temp_binary_data_48;
+const char* wizard_OpenGL_svg = (const char*) temp_binary_data_47;
 
 //================== wizard_StaticLibrary.svg ==================
-static const unsigned char temp_binary_data_49[] =
+static const unsigned char temp_binary_data_48[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\r\n"
 "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\r\n"
@@ -5435,7 +5317,7 @@ static const unsigned char temp_binary_data_49[] =
 "\tc-1,0-1.8-0.8-1.8-1.8V20.8\"/>\r\n"
 "</svg>\r\n";
 
-const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_49;
+const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_48;
 
 
 const char* getNamedResource (const char*, int&) throw();
@@ -5477,7 +5359,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x7ba17cc1:  numBytes = 30772; return ContaxPro55Rm_otf;
         case 0x0245c351:  numBytes = 25312; return ContaxPro55RmSC_otf;
         case 0x76ebbc0b:  numBytes = 24964; return ContaxPro65Med_otf;
-        case 0x9a9fd8bf:  numBytes = 3950; return juce_AU_Resources_r;
         case 0x154a7275:  numBytes = 45854; return juce_icon_png;
         case 0x507a15c7:  numBytes = 8150; return projectIconAndroid_png;
         case 0xe8e2796f:  numBytes = 11917; return projectIconCodeblocks_png;
@@ -5536,7 +5417,6 @@ const char* namedResourceList[] =
     "ContaxPro55Rm_otf",
     "ContaxPro55RmSC_otf",
     "ContaxPro65Med_otf",
-    "juce_AU_Resources_r",
     "juce_icon_png",
     "projectIconAndroid_png",
     "projectIconCodeblocks_png",

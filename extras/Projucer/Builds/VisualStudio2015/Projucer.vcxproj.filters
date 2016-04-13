@@ -4526,9 +4526,6 @@
     <None Include="..\..\Source\BinaryData\ContaxPro65Med.otf">
       <Filter>Projucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\juce_AU_Resources.r">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
     <None Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>Projucer\BinaryData</Filter>
     </None>

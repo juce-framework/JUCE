@@ -2174,15 +2174,7 @@ private:
 
         if (shouldBeCompiled)
         {
-            if (path.hasFileExtension (".r"))
-            {
-                String rezFileID = addBuildFile (pathAsString, refID, false, inhibitWarnings, xcodeTarget);
-
-                if (xcodeTarget != nullptr) xcodeTarget->rezFileIDs.add (rezFileID);
-                else rezFileIDs.add (rezFileID);
-            }
-            else
-                addBuildFile (pathAsString, refID, true, inhibitWarnings, xcodeTarget);
+            addBuildFile (pathAsString, refID, true, inhibitWarnings, xcodeTarget);
         }
         else if (! shouldBeAddedToBinaryResources || shouldBeAddedToXcodeResources)
         {
@@ -2194,6 +2186,22 @@ private:
                 resourceFileRefs.add (refID);
             }
         }
+
+        return refID;
+    }
+
+    String addRezFile (const RelativePath& path) const
+    {
+        const String pathAsString (path.toUnixStyle());
+        const String refID (addFileReference (path.toUnixStyle()));
+
+        Target* auTarget = getTargetOfType (Target::AudioUnitPlugIn);
+
+        if (auTarget == nullptr)
+            return String();
+
+        String rezFileID = addBuildFile (pathAsString, refID, false, false, auTarget);
+        auTarget->rezFileIDs.add (rezFileID);
 
         return refID;
     }
@@ -2248,6 +2256,9 @@ private:
             else
                 path = RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
+            if (path.hasFileExtension (".r") && LibraryModule::CompileUnit::hasSuffix (projectItem.getFile(), "_AU"))
+                return addRezFile (path);
+
             Target* xcodeTarget = nullptr;
             if (projectItem.isModuleCode() && projectItem.shouldBeCompiled())
             {
@@ -2262,11 +2273,7 @@ private:
                 else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       targetType = Target::VST3PlugIn;
                 else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) targetType = Target::StandalonePlugIn;
 
-                int i;
-                for (i = 0; i < targets.size(); ++i)
-                    if (targetType == targets[i]->type) break;
-
-                if (i < targets.size()) xcodeTarget = targets[i];
+                xcodeTarget = getTargetOfType (targetType);
             }
 
             return addFile (path, projectItem.shouldBeCompiled(),
