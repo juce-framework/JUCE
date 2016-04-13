@@ -27,22 +27,17 @@
 } // (juce namespace)
 
 #include <AudioUnit/AudioUnit.h>
-#include <CoreMIDI/MIDIServices.h>
-
 #if JUCE_MAC
-
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
+#endif
+
+#include <CoreAudioKit/AUViewController.h>
+#include <CoreMIDI/MIDIServices.h>
 
 #if JUCE_SUPPORT_CARBON
  #include <AudioUnit/AudioUnitCarbonView.h>
-#endif
-
-#endif // JUCE_MAC
-
-#if JUCE_IOS // https://developer.apple.com/library/ios/qa/qa1643/_index.html
-#define AudioGetCurrentHostTime() mach_absolute_time()
 #endif
 
 namespace juce
@@ -50,7 +45,7 @@ namespace juce
 
 #include "../../juce_audio_devices/native/juce_MidiDataConcatenator.h"
 
-#if JUCE_MAC && JUCE_SUPPORT_CARBON
+#if JUCE_SUPPORT_CARBON
  #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
 #endif
 
@@ -183,7 +178,6 @@ namespace AudioUnitFormatHelpers
         return false;
     }
 
-#if JUCE_MAC
     bool getComponentDescFromFile (const String& fileOrIdentifier, AudioComponentDescription& desc,
                                    String& name, String& version, String& manufacturer)
     {
@@ -267,7 +261,6 @@ namespace AudioUnitFormatHelpers
         return desc.componentType != 0 && desc.componentSubType != 0;
        #endif
     }
-#endif
 
     const char* getCategory (OSType type) noexcept
     {
@@ -305,17 +298,10 @@ public:
           numOutputBusChannels (0),
           numInputBusses (0),
           numOutputBusses (0),
-<<<<<<< HEAD
-          audioUnit (nullptr),
-#if JUCE_MAC
-          eventListenerRef (0),
-#endif
-=======
           audioUnit (au),
         #if JUCE_MAC
           eventListenerRef (0),
         #endif
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
           midiConcatenator (2048)
     {
         using namespace AudioUnitFormatHelpers;
@@ -324,25 +310,8 @@ public:
 
         isAUv3 = ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
 
-<<<<<<< HEAD
-        if (getComponentDescFromIdentifier (fileOrIdentifier, componentDesc, pluginName, version, manufacturer)
-            #if JUCE_MAC
-             || getComponentDescFromFile (fileOrIdentifier, componentDesc, pluginName, version, manufacturer)
-            #endif
-            )
-        {
-            if (AudioComponent comp = AudioComponentFindNext (0, &componentDesc))
-            {
-                AudioComponentInstanceNew (comp, &audioUnit);
-
-                wantsMidiMessages = componentDesc.componentType == kAudioUnitType_MusicDevice
-                                 || componentDesc.componentType == kAudioUnitType_MusicEffect;
-            }
-        }
-=======
         wantsMidiMessages = componentDesc.componentType == kAudioUnitType_MusicDevice
                          || componentDesc.componentType == kAudioUnitType_MusicEffect;
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
 
         AudioComponentDescription ignore;
         getComponentDescFromIdentifier (createPluginIdentifier (componentDesc), ignore, pluginName, version, manufacturer);
@@ -358,21 +327,13 @@ public:
         jassert (AudioUnitFormatHelpers::insideCallback.get() == 0);
        #endif
 
-<<<<<<< HEAD
-        #if JUCE_MAC
-=======
       #if JUCE_MAC
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
         if (eventListenerRef != 0)
         {
             AUListenerDispose (eventListenerRef);
             eventListenerRef = 0;
         }
-<<<<<<< HEAD
-        #endif
-=======
       #endif
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
 
         if (audioUnit != nullptr)
         {
@@ -719,11 +680,7 @@ public:
 
     void sendParameterChangeEvent (int index)
     {
-<<<<<<< HEAD
-#if JUCE_MAC
-=======
        #if JUCE_MAC
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
         jassert (audioUnit != nullptr);
 
         const ParamInfo& p = *parameters.getUnchecked (index);
@@ -736,22 +693,14 @@ public:
         ev.mArgument.mParameter.mElement     = 0;
 
         AUEventListenerNotify (nullptr, nullptr, &ev);
-<<<<<<< HEAD
-#endif
-=======
        #else
         ignoreUnused (index);
        #endif
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
     }
 
     void sendAllParametersChangedEvents()
     {
-<<<<<<< HEAD
-#if JUCE_MAC
-=======
        #if JUCE_MAC
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
         jassert (audioUnit != nullptr);
 
         AudioUnitParameter param;
@@ -759,11 +708,7 @@ public:
         param.mParameterID = kAUParameterListener_AnyParameter;
 
         AUParameterListenerNotify (nullptr, nullptr, &param);
-<<<<<<< HEAD
-#endif
-=======
        #endif
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
     }
 
     const String getParameterName (int index) override
@@ -996,8 +941,7 @@ private:
     friend class AudioUnitPluginWindowCarbon;
     friend class AudioUnitPluginWindowCocoa;
     friend class AudioUnitPluginFormat;
-    friend class IOSBuiltinPluginFormat;
-    
+
     AudioComponentDescription componentDesc;
     AudioComponent auComponent;
     String pluginName, manufacturer, version;
@@ -1011,15 +955,9 @@ private:
     AudioUnitElement numInputBusChannels, numOutputBusChannels, numInputBusses, numOutputBusses;
 
     AudioUnit audioUnit;
-<<<<<<< HEAD
-#if JUCE_MAC
-    AUEventListenerRef eventListenerRef;
-#endif
-=======
    #if JUCE_MAC
     AUEventListenerRef eventListenerRef;
    #endif
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
 
     struct ParamInfo
     {
@@ -1051,11 +989,7 @@ private:
                                           kAudioUnitScope_Input, i, &info, sizeof (info));
             }
 
-<<<<<<< HEAD
-#if JUCE_MAC
-=======
            #if JUCE_MAC
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
             if (producesMidiMessages)
             {
                 AUMIDIOutputCallbackStruct info;
@@ -1067,11 +1001,7 @@ private:
                 producesMidiMessages = (AudioUnitSetProperty (audioUnit, kAudioUnitProperty_MIDIOutputCallback,
                                                               kAudioUnitScope_Global, 0, &info, sizeof (info)) == noErr);
             }
-<<<<<<< HEAD
-#endif
-=======
            #endif
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
 
             {
                 HostCallbackInfo info;
@@ -1085,13 +1015,7 @@ private:
                 AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks,
                                       kAudioUnitScope_Global, 0, &info, sizeof (info));
             }
-<<<<<<< HEAD
-
-
-#if JUCE_MAC
-=======
            #if JUCE_MAC
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
             AUEventListenerCreate (eventListenerCallback, this, CFRunLoopGetMain(),
                                    kCFRunLoopDefaultMode, 0, 0, &eventListenerRef);
 
@@ -1116,20 +1040,11 @@ private:
             addPropertyChangeListener (kAudioUnitProperty_PresentPreset);
             addPropertyChangeListener (kAudioUnitProperty_ParameterList);
             addPropertyChangeListener (kAudioUnitProperty_Latency);
-<<<<<<< HEAD
-#endif
-        }
-    }
-
-#if JUCE_MAC
-    
-=======
            #endif
         }
     }
 
    #if JUCE_MAC
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
     void addPropertyChangeListener (AudioUnitPropertyID type) const
     {
 
@@ -1187,12 +1102,7 @@ private:
         jassert (event != nullptr);
         static_cast<AudioUnitPluginInstance*> (userRef)->eventCallback (*event, value);
     }
-<<<<<<< HEAD
-    
-    #endif
-=======
    #endif
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
 
     //==============================================================================
     OSStatus renderGetInput (AudioUnitRenderActionFlags*,
@@ -1475,11 +1385,7 @@ private:
 
     bool canProduceMidiOutput()
     {
-<<<<<<< HEAD
-#if JUCE_MAC
-=======
        #if JUCE_MAC
->>>>>>> 70949aa0c6de95ed7814e97061a81aa1e27bcf80
         UInt32 dataSize = 0;
         Boolean isWritable = false;
 
@@ -1497,8 +1403,7 @@ private:
                 return result;
             }
         }
-#endif
-        
+
         return false;
        #else
         return false;
@@ -1528,9 +1433,8 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginInstance)
 };
-    
+
 //==============================================================================
-#if JUCE_MAC
 class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
 {
 public:
@@ -1870,15 +1774,10 @@ private:
 };
 
 #endif
-    
-#endif // JUCE_MAC
 
 //==============================================================================
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
-#if JUCE_IOS
-    return nullptr;
-#else
     ScopedPointer<AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
 
     if (! static_cast<AudioUnitPluginWindowCocoa*> (w.get())->isValid())
@@ -1898,7 +1797,6 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
         w = new AudioUnitPluginWindowCocoa (*this, true); // use AUGenericView as a fallback
 
     return w.release();
-#endif
 }
 
 
