@@ -727,9 +727,6 @@
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.cpp">
       <Filter>Juce Modules\juce_audio_plugin_client\AAX</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.mm">
-      <Filter>Juce Modules\juce_audio_plugin_client\AAX</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AU_Wrapper.mm">
       <Filter>Juce Modules\juce_audio_plugin_client\AU</Filter>
     </ClCompile>
