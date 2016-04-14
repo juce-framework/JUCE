@@ -1949,6 +1949,7 @@ private:
                 xcodeFrameworks.addIfNotAlreadyThere ("StoreKit");
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
+            xcodeFrameworks.trim();
 
             StringArray s (xcodeFrameworks);
 
