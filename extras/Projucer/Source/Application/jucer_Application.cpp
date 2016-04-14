@@ -115,15 +115,8 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         settings->appearance.refreshPresetSchemeList();
 
-        initialiseWindows (commandLine);
-
-       #if JUCE_MAC
-        MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
-       #endif
-
-        versionChecker = new LatestVersionChecker();
-
-        showLoginFormAsyncIfNotTriedRecently();
+        // do further initialisation in a moment when the message loop has started
+        triggerAsyncUpdate();
     }
 }
 
@@ -171,9 +164,22 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
     return logger != nullptr;
 }
 
+void ProjucerApplication::handleAsyncUpdate()
+{
+    initialiseWindows (getCommandLineParameters());
+
+   #if JUCE_MAC
+    MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
+   #endif
+
+    versionChecker = new LatestVersionChecker();
+
+    showLoginFormAsyncIfNotTriedRecently();
+}
+
 void ProjucerApplication::initialiseWindows (const String& commandLine)
 {
-    const String commandLineWithoutNSDebug (commandLine.replace ("-NSDocumentRevisionsDebugMode YES", ""));
+    const String commandLineWithoutNSDebug (commandLine.replace ("-NSDocumentRevisionsDebugMode YES", StringRef()));
 
     if (commandLineWithoutNSDebug.trim().isNotEmpty() && ! commandLineWithoutNSDebug.trim().startsWithChar ('-'))
         anotherInstanceStarted (commandLine);

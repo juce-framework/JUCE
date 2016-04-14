@@ -34,7 +34,8 @@ struct ChildProcessCache;
 
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
-                              private Timer
+                              private Timer,
+                              private AsyncUpdater
 {
 public:
     ProjucerApplication();
@@ -134,6 +135,7 @@ private:
 
     void showLoginFormAsyncIfNotTriedRecently();
     void timerCallback() override;
+    void handleAsyncUpdate() override;
     void initCommandManager();
 };
 

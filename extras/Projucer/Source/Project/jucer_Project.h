@@ -36,7 +36,7 @@ class Project  : public FileBasedDocument,
 {
 public:
     //==============================================================================
-    Project (const File& file);
+    Project (const File&);
     ~Project();
 
     //==============================================================================
@@ -157,6 +157,7 @@ public:
     bool isVSTPluginHost();
     bool isVST3PluginHost();
 
+    void updateDeprecatedProjectSettingsInteractively();
 
     //==============================================================================
     class Item

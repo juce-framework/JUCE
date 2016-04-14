@@ -189,6 +189,8 @@ ProjectExporter::~ProjectExporter()
 {
 }
 
+void ProjectExporter::updateDeprecatedProjectSettingsInteractively() {}
+
 File ProjectExporter::getTargetFolder() const
 {
     return project.resolveFilename (getTargetLocationString());
