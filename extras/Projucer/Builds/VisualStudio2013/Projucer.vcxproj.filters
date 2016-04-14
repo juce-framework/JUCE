@@ -3239,18 +3239,6 @@
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
       <Filter>Projucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\ContaxPro45Lig.otf">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\ContaxPro55Rm.otf">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\ContaxPro55RmSC.otf">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\ContaxPro65Med.otf">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
     <None Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>Projucer\BinaryData</Filter>
     </None>

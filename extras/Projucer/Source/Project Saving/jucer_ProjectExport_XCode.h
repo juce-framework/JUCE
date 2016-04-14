@@ -319,9 +319,8 @@ public:
 
             if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                               "Project settings: " + project.getDocumentTitle(),
-                                              alertWindowText, "Update", "Cancel",
-                                              nullptr, nullptr))
-                getPostBuildScriptValue() = Value();
+                                              alertWindowText, "Update", "Cancel", nullptr, nullptr))
+                getPostBuildScriptValue() = var();
         }
     }
 

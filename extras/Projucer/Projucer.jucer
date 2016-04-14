@@ -569,14 +569,6 @@
             file="Source/BinaryData/colourscheme_dark.xml"/>
       <FILE id="cVh68s" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
-      <FILE id="h8midx" name="ContaxPro45Lig.otf" compile="0" resource="1"
-            file="Source/BinaryData/ContaxPro45Lig.otf"/>
-      <FILE id="TJYKhn" name="ContaxPro55Rm.otf" compile="0" resource="1"
-            file="Source/BinaryData/ContaxPro55Rm.otf"/>
-      <FILE id="VNy40Q" name="ContaxPro55RmSC.otf" compile="0" resource="1"
-            file="Source/BinaryData/ContaxPro55RmSC.otf"/>
-      <FILE id="noDr2N" name="ContaxPro65Med.otf" compile="0" resource="1"
-            file="Source/BinaryData/ContaxPro65Med.otf"/>
       <FILE id="OCyr5F" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/juce_icon.png"/>
       <FILE id="pBWoUz" name="projectIconAndroid.png" compile="0" resource="1"
             file="Source/BinaryData/projectIconAndroid.png"/>

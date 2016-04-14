@@ -84,18 +84,6 @@ namespace BinaryData
     extern const char*   colourscheme_light_xml;
     const int            colourscheme_light_xmlSize = 1050;
 
-    extern const char*   ContaxPro45Lig_otf;
-    const int            ContaxPro45Lig_otfSize = 24660;
-
-    extern const char*   ContaxPro55Rm_otf;
-    const int            ContaxPro55Rm_otfSize = 30772;
-
-    extern const char*   ContaxPro55RmSC_otf;
-    const int            ContaxPro55RmSC_otfSize = 25312;
-
-    extern const char*   ContaxPro65Med_otf;
-    const int            ContaxPro65Med_otfSize = 24964;
-
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 45854;
 
@@ -160,7 +148,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 49;
+    const int namedResourceListSize = 45;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

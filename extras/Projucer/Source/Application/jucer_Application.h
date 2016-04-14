@@ -46,7 +46,6 @@ public:
     //==============================================================================
     void initialise (const String& commandLine) override;
     void initialiseBasics();
-    bool initialiseLog();
     bool initialiseLogger (const char* filePrefix);
     void initialiseWindows (const String& commandLine);
 
@@ -129,6 +128,8 @@ private:
     ScopedPointer<LatestVersionChecker> versionChecker;
 
     void loginOrLogout();
+
+    bool checkEULA();
     bool currentEULAHasBeenAcceptedPreviously() const;
     String getEULAChecksumProperty() const;
     void setCurrentEULAAccepted (bool hasBeenAccepted) const;

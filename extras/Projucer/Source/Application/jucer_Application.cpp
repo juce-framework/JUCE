@@ -102,7 +102,9 @@ void ProjucerApplication::initialise (const String& commandLine)
             return;
         }
 
-        if (! initialiseLog())
+        openDocumentManager.registerType (new ProjucerAppClasses::LiveBuildCodeEditorDocument::Type(), 2);
+
+        if (! checkEULA())
         {
             quit();
             return;
@@ -126,23 +128,6 @@ void ProjucerApplication::initialiseBasics()
     settings = new StoredSettings();
     ImageCache::setCacheTimeout (30 * 1000);
     icons = new Icons();
-}
-
-bool ProjucerApplication::initialiseLog()
-{
-    openDocumentManager.registerType (new ProjucerAppClasses::LiveBuildCodeEditorDocument::Type(), 2);
-
-    if (currentEULAHasBeenAcceptedPreviously())
-        return true;
-
-    ScopedPointer<AlertWindow> eulaDialogue (new EULADialogue());
-    bool hasBeenAccepted = (eulaDialogue->runModalLoop() == EULADialogue::accepted);
-    setCurrentEULAAccepted (hasBeenAccepted);
-
-    if (hasBeenAccepted)
-        return initialiseLogger ("log_");
-
-    return false;
 }
 
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
@@ -793,6 +778,18 @@ void ProjucerApplication::loginOrLogout()
         showLoginForm();
 
     updateAllBuildTabs();
+}
+
+bool ProjucerApplication::checkEULA()
+{
+    if (currentEULAHasBeenAcceptedPreviously()
+          || ! ProjucerLicences::getInstance()->isDLLPresent())
+        return true;
+
+    ScopedPointer<AlertWindow> eulaDialogue (new EULADialogue());
+    bool hasBeenAccepted = (eulaDialogue->runModalLoop() == EULADialogue::accepted);
+    setCurrentEULAAccepted (hasBeenAccepted);
+    return hasBeenAccepted;
 }
 
 bool ProjucerApplication::currentEULAHasBeenAcceptedPreviously() const

@@ -1840,10 +1840,6 @@
     <None Include="..\..\Source\BinaryData\background_tile.png"/>
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml"/>
-    <None Include="..\..\Source\BinaryData\ContaxPro45Lig.otf"/>
-    <None Include="..\..\Source\BinaryData\ContaxPro55Rm.otf"/>
-    <None Include="..\..\Source\BinaryData\ContaxPro55RmSC.otf"/>
-    <None Include="..\..\Source\BinaryData\ContaxPro65Med.otf"/>
     <None Include="..\..\Source\BinaryData\juce_icon.png"/>
     <None Include="..\..\Source\BinaryData\projectIconAndroid.png"/>
     <None Include="..\..\Source\BinaryData\projectIconCodeblocks.png"/>
