@@ -199,7 +199,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillTiledBackground (g);
+        fillStandardDemoBackground (g);
     }
 
     void resized() override
@@ -263,7 +263,12 @@ private:
             case applyForce:
             {
                 String s;
-                s << "Keys:" << newLine << newLine << "Left: \'a\'" << newLine << "Right: \'d\'" << newLine << "Forward: \'w\'";
+                s << "Keys:" << newLine
+                  << newLine
+                  << "Left: \'a\'" << newLine
+                  << "Right: \'d\'" << newLine
+                  << "Forward: \'w\'";
+
                 return s;
             }
 
@@ -271,7 +276,7 @@ private:
                 break;
         }
 
-        return String::empty;
+        return String();
     }
 
     void checkKeys()

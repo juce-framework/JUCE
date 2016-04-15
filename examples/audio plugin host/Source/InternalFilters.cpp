@@ -46,19 +46,28 @@ InternalPluginFormat::InternalPluginFormat()
     }
 }
 
-AudioPluginInstance* InternalPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
-                                                                          double /*sampleRate*/, int /*blockSize*/)
+void InternalPluginFormat::createPluginInstance (const PluginDescription& desc,
+                                                 double /*initialSampleRate*/,
+                                                 int /*initialBufferSize*/,
+                                                 void* userData,
+                                                 void (*callback) (void*, AudioPluginInstance*, const String&))
 {
+    AudioPluginInstance* retval = nullptr;
     if (desc.name == audioOutDesc.name)
-        return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
+        retval = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
 
     if (desc.name == audioInDesc.name)
-        return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
+        retval = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
 
     if (desc.name == midiInDesc.name)
-        return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
+        retval = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
 
-    return 0;
+    callback (userData, retval, retval == nullptr ? NEEDS_TRANS ("Invalid internal filter name") : String());
+}
+
+bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+{
+    return false;
 }
 
 const PluginDescription* InternalPluginFormat::getDescriptionFor (const InternalFilterType type)

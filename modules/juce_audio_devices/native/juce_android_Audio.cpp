@@ -195,25 +195,51 @@ public:
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
                                                       (jint) (minBufferSizeOut * numDeviceOutputChannels * sizeof (int16)), MODE_STREAM));
 
-            if (env->CallIntMethod (outputDevice, AudioTrack.getState) != STATE_UNINITIALIZED)
+            int outputDeviceState = env->CallIntMethod (outputDevice, AudioTrack.getState);
+            if (outputDeviceState > 0)
+            {
                 isRunning = true;
+            }
             else
-                outputDevice.clear(); // failed to open the device
+            {
+                 // failed to open the device
+                outputDevice.clear();
+                lastError = "Error opening audio output device: android.media.AudioTrack failed with state = " + String (outputDeviceState);
+            }
         }
 
         if (numClientInputChannels > 0 && numDeviceInputChannelsAvailable > 0)
         {
-            numDeviceInputChannels = jmin (numClientInputChannels, numDeviceInputChannelsAvailable);
-            inputDevice = GlobalRef (env->NewObject (AudioRecord, AudioRecord.constructor,
-                                                     0 /* (default audio source) */, sampleRate,
-                                                     numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
-                                                     ENCODING_PCM_16BIT,
-                                                     (jint) (minBufferSizeIn * numDeviceInputChannels * sizeof (int16))));
+            if (! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
+            {
+                // If you hit this assert, you probably forgot to get RuntimePermissions::recordAudio
+                // before trying to open an audio input device. This is not going to work!
+                jassertfalse;
 
-            if (env->CallIntMethod (inputDevice, AudioRecord.getState) != STATE_UNINITIALIZED)
-                isRunning = true;
+                inputDevice.clear();
+                lastError = "Error opening audio input device: the app was not granted android.permission.RECORD_AUDIO";
+            }
             else
-                inputDevice.clear(); // failed to open the device
+            {
+                numDeviceInputChannels = jmin (numClientInputChannels, numDeviceInputChannelsAvailable);
+                inputDevice = GlobalRef (env->NewObject (AudioRecord, AudioRecord.constructor,
+                                                         0 /* (default audio source) */, sampleRate,
+                                                         numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
+                                                         ENCODING_PCM_16BIT,
+                                                         (jint) (minBufferSizeIn * numDeviceInputChannels * sizeof (int16))));
+
+                int inputDeviceState = env->CallIntMethod (inputDevice, AudioRecord.getState);
+                if (inputDeviceState > 0)
+                {
+                    isRunning = true;
+                }
+                else
+                {
+                     // failed to open the device
+                    inputDevice.clear();
+                    lastError = "Error opening audio input device: android.media.AudioRecord failed with state = " + String (inputDeviceState);
+                }
+            }
         }
 
         if (isRunning)
@@ -368,7 +394,7 @@ public:
     int minBufferSizeOut, minBufferSizeIn;
 
 private:
-    //==================================================================================================
+    //==============================================================================
     CriticalSection callbackLock;
     AudioIODeviceCallback* callback;
     jint sampleRate;

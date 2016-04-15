@@ -22,11 +22,6 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LAGRANGEINTERPOLATOR_H_INCLUDED
-#define JUCE_LAGRANGEINTERPOLATOR_H_INCLUDED
-
-
-//==============================================================================
 /**
     Interpolator for resampling a stream of floats using 4-point lagrange interpolation.
 
@@ -35,12 +30,14 @@
     it any new data. And like with any other stateful filter, if you're resampling
     multiple channels, make sure each one uses its own LagrangeInterpolator
     object.
+
+    @see CatmullRomInterpolator
 */
 class JUCE_API  LagrangeInterpolator
 {
 public:
-    LagrangeInterpolator();
-    ~LagrangeInterpolator();
+    LagrangeInterpolator() noexcept;
+    ~LagrangeInterpolator() noexcept;
 
     /** Resets the state of the interpolator.
         Call this when there's a break in the continuity of the input data stream.
@@ -89,6 +86,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LagrangeInterpolator)
 };
-
-
-#endif   // JUCE_LAGRANGEINTERPOLATOR_H_INCLUDED

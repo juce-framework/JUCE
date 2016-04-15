@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if defined (JUCE_AUDIO_UTILS_H_INCLUDED) && ! JUCE_AMALGAMATED_INCLUDE
+#ifdef JUCE_AUDIO_UTILS_H_INCLUDED
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -31,12 +31,14 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_audio_utils.h"
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+ #include <juce_gui_extra/juce_gui_extra.h>
+#endif
 
 namespace juce
 {
@@ -48,5 +50,17 @@ namespace juce
 #include "gui/juce_MidiKeyboardComponent.cpp"
 #include "gui/juce_AudioAppComponent.cpp"
 #include "players/juce_AudioProcessorPlayer.cpp"
+
+#if JUCE_MAC
+ #include "native/juce_mac_BluetoothMidiDevicePairingDialogue.mm"
+#elif JUCE_IOS
+ #include "native/juce_ios_BluetoothMidiDevicePairingDialogue.mm"
+#elif JUCE_ANDROID
+ #include "native/juce_android_BluetoothMidiDevicePairingDialogue.cpp"
+#elif JUCE_LINUX
+ #include "native/juce_linux_BluetoothMidiDevicePairingDialogue.cpp"
+#elif JUCE_WINDOWS
+ #include "native/juce_win_BluetoothMidiDevicePairingDialogue.cpp"
+#endif
 
 }

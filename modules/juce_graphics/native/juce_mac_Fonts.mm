@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#if (! defined (JUCE_CORETEXT_AVAILABLE)) \
-     && (JUCE_IOS || (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4))
+#ifndef JUCE_CORETEXT_AVAILABLE
  #define JUCE_CORETEXT_AVAILABLE 1
 #endif
 
@@ -214,100 +213,122 @@ namespace CoreTextTypeLayout
     }
 
     //==============================================================================
+    static CTTextAlignment getTextAlignment (const AttributedString& text)
+    {
+        switch (text.getJustification().getOnlyHorizontalFlags())
+        {
+           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
+            case Justification::right:                  return kCTTextAlignmentRight;
+            case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
+            case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
+            default:                                    return kCTTextAlignmentLeft;
+           #else
+            case Justification::right:                  return kCTRightTextAlignment;
+            case Justification::horizontallyCentred:    return kCTCenterTextAlignment;
+            case Justification::horizontallyJustified:  return kCTJustifiedTextAlignment;
+            default:                                    return kCTLeftTextAlignment;
+           #endif
+        }
+    }
+
+    static CTLineBreakMode getLineBreakMode (const AttributedString& text)
+    {
+        switch (text.getWordWrap())
+        {
+            case AttributedString::none:        return kCTLineBreakByClipping;
+            case AttributedString::byChar:      return kCTLineBreakByCharWrapping;
+            default:                            return kCTLineBreakByWordWrapping;
+        }
+    }
+
+    static CTWritingDirection getWritingDirection (const AttributedString& text)
+    {
+        switch (text.getReadingDirection())
+        {
+            case AttributedString::rightToLeft:   return kCTWritingDirectionRightToLeft;
+            case AttributedString::leftToRight:   return kCTWritingDirectionLeftToRight;
+            default:                              return kCTWritingDirectionNatural;
+        }
+    }
+
+    //==============================================================================
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
        #if JUCE_IOS
         CGColorSpaceRef rgbColourSpace = CGColorSpaceCreateDeviceRGB();
        #endif
 
-        CFStringRef cfText = text.getText().toCFString();
         CFMutableAttributedStringRef attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
-        CFAttributedStringReplaceString (attribString, CFRangeMake(0, 0), cfText);
+
+        CFStringRef cfText = text.getText().toCFString();
+        CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText);
         CFRelease (cfText);
 
         const int numCharacterAttributes = text.getNumAttributes();
+        const CFIndex attribStringLen = CFAttributedStringGetLength (attribString);
 
         for (int i = 0; i < numCharacterAttributes; ++i)
         {
-            const AttributedString::Attribute& attr = *text.getAttribute (i);
+            const AttributedString::Attribute& attr = text.getAttribute (i);
+            const int rangeStart = attr.range.getStart();
 
-            if (attr.range.getStart() > CFAttributedStringGetLength (attribString))
+            if (rangeStart >= attribStringLen)
                 continue;
 
-            Range<int> range (attr.range);
-            range.setEnd (jmin (range.getEnd(), (int) CFAttributedStringGetLength (attribString)));
+            CFRange range = CFRangeMake (rangeStart, jmin (attr.range.getEnd(), (int) attribStringLen) - rangeStart);
 
-            if (const Font* const f = attr.getFont())
+            if (CTFontRef ctFontRef = getOrCreateFont (attr.font))
             {
-                if (CTFontRef ctFontRef = getOrCreateFont (*f))
-                {
-                    ctFontRef = getFontWithPointSize (ctFontRef, f->getHeight() * getHeightToPointsFactor (ctFontRef));
+                ctFontRef = getFontWithPointSize (ctFontRef, attr.font.getHeight() * getHeightToPointsFactor (ctFontRef));
 
-                    CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
-                                                    kCTFontAttributeName, ctFontRef);
-                    CFRelease (ctFontRef);
+                CFAttributedStringSetAttribute (attribString, range, kCTFontAttributeName, ctFontRef);
+
+                float extraKerning = attr.font.getExtraKerningFactor();
+
+                if (extraKerning != 0.0f)
+                {
+                    extraKerning *= attr.font.getHeight();
+
+                    CFNumberRef numberRef = CFNumberCreate (0, kCFNumberFloatType, &extraKerning);
+                    CFAttributedStringSetAttribute (attribString, range, kCTKernAttributeName, numberRef);
+                    CFRelease (numberRef);
                 }
+
+                CFRelease (ctFontRef);
             }
 
-            if (const Colour* const col = attr.getColour())
             {
+                const Colour col (attr.colour);
+
                #if JUCE_IOS
-                const CGFloat components[] = { col->getFloatRed(),
-                                               col->getFloatGreen(),
-                                               col->getFloatBlue(),
-                                               col->getFloatAlpha() };
+                const CGFloat components[] = { col.getFloatRed(),
+                                               col.getFloatGreen(),
+                                               col.getFloatBlue(),
+                                               col.getFloatAlpha() };
                 CGColorRef colour = CGColorCreate (rgbColourSpace, components);
                #else
-                CGColorRef colour = CGColorCreateGenericRGB (col->getFloatRed(),
-                                                             col->getFloatGreen(),
-                                                             col->getFloatBlue(),
-                                                             col->getFloatAlpha());
+                CGColorRef colour = CGColorCreateGenericRGB (col.getFloatRed(),
+                                                             col.getFloatGreen(),
+                                                             col.getFloatBlue(),
+                                                             col.getFloatAlpha());
                #endif
 
-                CFAttributedStringSetAttribute (attribString,
-                                                CFRangeMake (range.getStart(), range.getLength()),
-                                                kCTForegroundColorAttributeName, colour);
+                CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, colour);
                 CGColorRelease (colour);
             }
         }
 
         // Paragraph Attributes
-       #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-        CTTextAlignment ctTextAlignment = kCTTextAlignmentLeft;
-       #else
-        CTTextAlignment ctTextAlignment = kCTLeftTextAlignment;
-       #endif
-
-        CTLineBreakMode ctLineBreakMode = kCTLineBreakByWordWrapping;
+        CTTextAlignment ctTextAlignment = getTextAlignment (text);
+        CTLineBreakMode ctLineBreakMode = getLineBreakMode (text);
+        CTWritingDirection ctWritingDirection = getWritingDirection (text);
         const CGFloat ctLineSpacing = text.getLineSpacing();
-
-        switch (text.getJustification().getOnlyHorizontalFlags())
-        {
-            case Justification::left:                   break;
-           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-            case Justification::right:                  ctTextAlignment = kCTTextAlignmentRight; break;
-            case Justification::horizontallyCentred:    ctTextAlignment = kCTTextAlignmentCenter; break;
-            case Justification::horizontallyJustified:  ctTextAlignment = kCTTextAlignmentJustified; break;
-           #else
-            case Justification::right:                  ctTextAlignment = kCTRightTextAlignment; break;
-            case Justification::horizontallyCentred:    ctTextAlignment = kCTCenterTextAlignment; break;
-            case Justification::horizontallyJustified:  ctTextAlignment = kCTJustifiedTextAlignment; break;
-           #endif
-            default:                                    jassertfalse; break; // Illegal justification flags
-        }
-
-        switch (text.getWordWrap())
-        {
-            case AttributedString::byWord:      break;
-            case AttributedString::none:        ctLineBreakMode = kCTLineBreakByClipping; break;
-            case AttributedString::byChar:      ctLineBreakMode = kCTLineBreakByCharWrapping; break;
-            default: break;
-        }
 
         CTParagraphStyleSetting settings[] =
         {
             { kCTParagraphStyleSpecifierAlignment,              sizeof (CTTextAlignment), &ctTextAlignment },
             { kCTParagraphStyleSpecifierLineBreakMode,          sizeof (CTLineBreakMode), &ctLineBreakMode },
+            { kCTParagraphStyleSpecifierBaseWritingDirection,   sizeof (CTWritingDirection), &ctWritingDirection},
 
            #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
             { kCTParagraphStyleSpecifierLineSpacingAdjustment,  sizeof (CGFloat),         &ctLineSpacing }
@@ -440,7 +461,7 @@ namespace CoreTextTypeLayout
                 CFDictionaryRef runAttributes = CTRunGetAttributes (run);
 
                 CTFontRef ctRunFont;
-                if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void **) &ctRunFont))
+                if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void**) &ctRunFont))
                 {
                     CFStringRef cfsFontName = CTFontCopyPostScriptName (ctRunFont);
                     CTFontRef ctFontRef = CTFontCreateWithName (cfsFontName, referenceFontSize, nullptr);
@@ -562,7 +583,7 @@ public:
 
         ascent = ctAscent / ctTotalHeight;
         unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
-        pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+        pathTransform = AffineTransform::scale (unitsToHeightScaleFactor);
 
         fontHeightToPointsFactor = referenceFontSize / ctTotalHeight;
 
@@ -625,7 +646,7 @@ public:
         return x;
     }
 
-    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets) override
+    void getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets) override
     {
         xOffsets.add (0);
 
@@ -806,29 +827,6 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 #else
 
 //==============================================================================
-// The stuff that follows is a mash-up that supports pre-OSX 10.5 APIs.
-// (Hopefully all of this can be ditched at some point in the future).
-
-//==============================================================================
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-  #define SUPPORT_10_4_FONTS 1
-  #define NEW_CGFONT_FUNCTIONS_UNAVAILABLE (CGFontCreateWithFontName == 0)
-
-  #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
-    #define SUPPORT_ONLY_10_4_FONTS 1
-  #endif
-
-  } // (juce namespace)
-
-  @interface NSFont (PrivateHack)
-    - (NSGlyph) _defaultGlyphForChar: (unichar) theChar;
-  @end
-
-  namespace juce
-  {
-#endif
-
-//==============================================================================
 class OSXTypeface  : public Typeface
 {
 public:
@@ -848,33 +846,20 @@ public:
 
             [nsFont retain];
 
-          #if SUPPORT_ONLY_10_4_FONTS
-            initWithATSFont();
-          #else
-           #if SUPPORT_10_4_FONTS
-            if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
-            {
-                initWithATSFont();
-            }
-            else
-           #endif
-            {
-                fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
+            fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
 
-                const float absAscent = std::abs ((float) CGFontGetAscent (fontRef));
-                const float totalHeight = absAscent + std::abs ((float) CGFontGetDescent (fontRef));
+            const float absAscent = std::abs ((float) CGFontGetAscent (fontRef));
+            const float totalHeight = absAscent + std::abs ((float) CGFontGetDescent (fontRef));
 
-                ascent = absAscent / totalHeight;
-                unitsToHeightScaleFactor = 1.0f / totalHeight;
+            ascent = absAscent / totalHeight;
+            unitsToHeightScaleFactor = 1.0f / totalHeight;
 
-                const float nsFontAscent  = std::abs ([nsFont ascender]);
-                const float nsFontDescent = std::abs ([nsFont descender]);
+            const float nsFontAscent  = std::abs ([nsFont ascender]);
+            const float nsFontDescent = std::abs ([nsFont descender]);
 
-                fontHeightToPointsFactor = referenceFontSize / (nsFontAscent + nsFontDescent);
-           }
-          #endif
+            fontHeightToPointsFactor = referenceFontSize / (nsFontAscent + nsFontDescent);
 
-            pathTransform = AffineTransform::identity.scale (unitsToHeightScaleFactor);
+            pathTransform = AffineTransform::scale (unitsToHeightScaleFactor);
         }
     }
 
@@ -888,27 +873,6 @@ public:
             CGFontRelease (fontRef);
     }
 
-   #if SUPPORT_10_4_FONTS
-    void initWithATSFont()
-    {
-        ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
-
-        if (atsFont == 0)
-            atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
-
-        fontRef = CGFontCreateWithPlatformFont (&atsFont);
-
-        const float absAscent = std::abs ([nsFont ascender]);
-        const float absDescent = std::abs ([nsFont descender]);
-        const float totalHeight = absAscent + absDescent;
-
-        unitsToHeightScaleFactor = 1.0f / totalHeight;
-        fontHeightToPointsFactor = referenceFontSize / totalHeight;
-        ascent = absAscent / totalHeight;
-    }
-   #endif
-
-
     float getAscent() const override                 { return ascent; }
     float getDescent() const override                { return 1.0f - ascent; }
     float getHeightToPointsFactor() const override   { return fontHeightToPointsFactor; }
@@ -919,37 +883,16 @@ public:
             return 0;
 
         const int length = text.length();
-        HeapBlock <CGGlyph> glyphs;
+        HeapBlock<CGGlyph> glyphs;
         createGlyphsForString (text.getCharPointer(), length, glyphs);
 
         float x = 0;
 
-#if SUPPORT_ONLY_10_4_FONTS
-        HeapBlock <NSSize> advances (length);
-        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast<NSGlyph*> (glyphs.getData()) count: length];
+        HeapBlock<int> advances (length);
 
-        for (int i = 0; i < length; ++i)
-            x += advances[i].width;
-#else
-       #if SUPPORT_10_4_FONTS
-        if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
-        {
-            HeapBlock <NSSize> advances (length);
-            [nsFont getAdvancements: advances forGlyphs: reinterpret_cast<NSGlyph*> (glyphs.getData()) count: length];
-
+        if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
             for (int i = 0; i < length; ++i)
-                x += advances[i].width;
-        }
-        else
-       #endif
-        {
-            HeapBlock <int> advances (length);
-
-            if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
-                for (int i = 0; i < length; ++i)
-                    x += advances[i];
-        }
-#endif
+                x += advances[i];
 
         return x * unitsToHeightScaleFactor;
     }
@@ -962,54 +905,21 @@ public:
             return;
 
         const int length = text.length();
-        HeapBlock <CGGlyph> glyphs;
+        HeapBlock<CGGlyph> glyphs;
         createGlyphsForString (text.getCharPointer(), length, glyphs);
 
-#if SUPPORT_ONLY_10_4_FONTS
-        HeapBlock <NSSize> advances (length);
-        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast <NSGlyph*> (glyphs.getData()) count: length];
+        HeapBlock<int> advances (length);
 
-        int x = 0;
-        for (int i = 0; i < length; ++i)
+        if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
         {
-            x += advances[i].width;
-            xOffsets.add (x * unitsToHeightScaleFactor);
-            resultGlyphs.add (reinterpret_cast <NSGlyph*> (glyphs.getData())[i]);
-        }
-
-#else
-       #if SUPPORT_10_4_FONTS
-        if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
-        {
-            HeapBlock <NSSize> advances (length);
-            NSGlyph* const nsGlyphs = reinterpret_cast<NSGlyph*> (glyphs.getData());
-            [nsFont getAdvancements: advances forGlyphs: nsGlyphs count: length];
-
-            float x = 0;
+            int x = 0;
             for (int i = 0; i < length; ++i)
             {
-                x += advances[i].width;
+                x += advances [i];
                 xOffsets.add (x * unitsToHeightScaleFactor);
-                resultGlyphs.add (nsGlyphs[i]);
+                resultGlyphs.add (glyphs[i]);
             }
         }
-        else
-       #endif
-        {
-            HeapBlock <int> advances (length);
-
-            if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
-            {
-                int x = 0;
-                for (int i = 0; i < length; ++i)
-                {
-                    x += advances [i];
-                    xOffsets.add (x * unitsToHeightScaleFactor);
-                    resultGlyphs.add (glyphs[i]);
-                }
-            }
-        }
-#endif
     }
 
     bool getOutlineForGlyph (int glyphNumber, Path& path) override
@@ -1064,24 +974,8 @@ private:
     AffineTransform pathTransform;
    #endif
 
-    void createGlyphsForString (String::CharPointerType text, const int length, HeapBlock <CGGlyph>& glyphs)
+    void createGlyphsForString (String::CharPointerType text, const int length, HeapBlock<CGGlyph>& glyphs)
     {
-      #if SUPPORT_10_4_FONTS
-       #if ! SUPPORT_ONLY_10_4_FONTS
-        if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
-       #endif
-        {
-            glyphs.malloc (sizeof (NSGlyph) * length, 1);
-            NSGlyph* const nsGlyphs = reinterpret_cast<NSGlyph*> (glyphs.getData());
-
-            for (int i = 0; i < length; ++i)
-                nsGlyphs[i] = (NSGlyph) [nsFont _defaultGlyphForChar: text.getAndAdvance()];
-
-            return;
-        }
-      #endif
-
-       #if ! SUPPORT_ONLY_10_4_FONTS
         if (charToGlyphMapper == nullptr)
             charToGlyphMapper = new CharToGlyphMapper (fontRef);
 
@@ -1089,10 +983,8 @@ private:
 
         for (int i = 0; i < length; ++i)
             glyphs[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text.getAndAdvance());
-       #endif
     }
 
-   #if ! SUPPORT_ONLY_10_4_FONTS
     // Reads a CGFontRef's character map table to convert unicode into glyph numbers
     class CharToGlyphMapper
     {
@@ -1190,8 +1082,7 @@ private:
         }
     };
 
-    ScopedPointer <CharToGlyphMapper> charToGlyphMapper;
-   #endif
+    ScopedPointer<CharToGlyphMapper> charToGlyphMapper;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface)
 };
@@ -1297,17 +1188,16 @@ static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 
     for (int i = 0; i < numCharacterAttributes; ++i)
     {
-        if (const Font* const f = text.getAttribute (i)->getFont())
+        Typeface* t = text.getAttribute(i).font.getTypeface();
+
+        if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (t))
         {
-            if (OSXTypeface* tf = dynamic_cast<OSXTypeface*> (f->getTypeface()))
-            {
-                if (tf->isMemoryFont)
-                    return false;
-            }
-            else if (dynamic_cast<CustomTypeface*> (f->getTypeface()) != nullptr)
-            {
+            if (tf->isMemoryFont)
                 return false;
-            }
+        }
+        else if (dynamic_cast<CustomTypeface*> (t) != nullptr)
+        {
+            return false;
         }
     }
 
@@ -1327,6 +1217,6 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
     }
    #endif
 
-    (void) text;
+    ignoreUnused (text);
     return false;
 }

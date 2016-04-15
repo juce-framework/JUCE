@@ -25,7 +25,6 @@
 #ifndef JUCE_AUDIOPROCESSORGRAPH_H_INCLUDED
 #define JUCE_AUDIOPROCESSORGRAPH_H_INCLUDED
 
-
 //==============================================================================
 /**
     A type of AudioProcessor which plays back a graph of other AudioProcessors.
@@ -92,7 +91,7 @@ public:
         Node (uint32 nodeId, AudioProcessor*) noexcept;
 
         void setParentGraph (AudioProcessorGraph*) const;
-        void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*);
+        void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*, ProcessingPrecision);
         void unprepare();
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node)
@@ -183,6 +182,12 @@ public:
         This will also delete any connections that are attached to this node.
     */
     bool removeNode (uint32 nodeId);
+
+    /** Deletes a node within the graph which has the specified ID.
+
+        This will also delete any connections that are attached to this node.
+     */
+    bool removeNode (Node* node);
 
     //==============================================================================
     /** Returns the number of connections in the graph. */
@@ -308,13 +313,10 @@ public:
         void fillInPluginDescription (PluginDescription&) const override;
         void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock) override;
         void releaseResources() override;
-        void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
+        void processBlock (AudioBuffer<float>& , MidiBuffer&) override;
+        void processBlock (AudioBuffer<double>&, MidiBuffer&) override;
+        bool supportsDoublePrecisionProcessing() const override;
 
-        const String getInputChannelName (int channelIndex) const override;
-        const String getOutputChannelName (int channelIndex) const override;
-        bool isInputChannelStereoPair (int index) const override;
-        bool isOutputChannelStereoPair (int index) const override;
-        bool silenceInProducesSilenceOut() const override;
         double getTailLengthSeconds() const override;
         bool acceptsMidi() const override;
         bool producesMidi() const override;
@@ -338,6 +340,10 @@ public:
         const IODeviceType type;
         AudioProcessorGraph* graph;
 
+        //==============================================================================
+        template <typename floatType>
+        void processAudio (AudioBuffer<floatType>& buffer, MidiBuffer& midiMessages);
+
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioGraphIOProcessor)
     };
 
@@ -345,18 +351,14 @@ public:
     const String getName() const override;
     void prepareToPlay (double, int) override;
     void releaseResources() override;
-    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
+    void processBlock (AudioBuffer<float>&,  MidiBuffer&) override;
+    void processBlock (AudioBuffer<double>&, MidiBuffer&) override;
+    bool supportsDoublePrecisionProcessing() const override;
 
     void reset() override;
     void setNonRealtime (bool) noexcept override;
     void setPlayHead (AudioPlayHead*) override;
 
-    const String getInputChannelName (int) const override;
-    const String getOutputChannelName (int) const override;
-    bool isInputChannelStereoPair (int) const override;
-    bool isOutputChannelStereoPair (int) const override;
-
-    bool silenceInProducesSilenceOut() const override;
     double getTailLengthSeconds() const override;
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -373,16 +375,20 @@ public:
 
 private:
     //==============================================================================
+    template <typename floatType>
+    void processAudio (AudioBuffer<floatType>& buffer, MidiBuffer& midiMessages);
+
+    //==============================================================================
     ReferenceCountedArray<Node> nodes;
     OwnedArray<Connection> connections;
     uint32 lastNodeId;
-    AudioSampleBuffer renderingBuffers;
     OwnedArray<MidiBuffer> midiBuffers;
     Array<void*> renderingOps;
 
     friend class AudioGraphIOProcessor;
-    AudioSampleBuffer* currentAudioInputBuffer;
-    AudioSampleBuffer currentAudioOutputBuffer;
+    struct AudioProcessorGraphBufferHelpers;
+    ScopedPointer<AudioProcessorGraphBufferHelpers> audioBuffers;
+
     MidiBuffer* currentMidiInputBuffer;
     MidiBuffer currentMidiOutputBuffer;
 

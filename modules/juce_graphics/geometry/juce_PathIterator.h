@@ -52,7 +52,7 @@ public:
                             less lines, so can be generated faster, but will be less smooth.
     */
     PathFlatteningIterator (const Path& path,
-                            const AffineTransform& transform = AffineTransform::identity,
+                            const AffineTransform& transform = AffineTransform(),
                             float tolerance = defaultTolerance);
 
     /** Destructor. */
@@ -102,7 +102,7 @@ private:
     float subPathCloseX, subPathCloseY;
     const bool isIdentityTransform;
 
-    HeapBlock <float> stackBase;
+    HeapBlock<float> stackBase;
     float* stackPos;
     size_t index, stackSize;
 

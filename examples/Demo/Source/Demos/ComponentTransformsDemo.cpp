@@ -48,7 +48,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillTiledBackground (g);
+        fillStandardDemoBackground (g);
 
         g.setColour (Colours::white);
         g.setFont (15.0f);

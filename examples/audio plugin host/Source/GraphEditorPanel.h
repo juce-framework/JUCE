@@ -88,6 +88,7 @@ public:
 
     //==============================================================================
     void createNewPlugin (const PluginDescription* desc, int x, int y);
+    inline void setDoublePrecision (bool doublePrecision) { graphPlayer.setDoublePrecisionProcessing (doublePrecision); }
 
     //==============================================================================
     FilterGraph graph;

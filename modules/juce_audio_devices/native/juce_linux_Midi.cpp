@@ -136,7 +136,7 @@ private:
                 HeapBlock<pollfd> pfd ((size_t) numPfds);
                 snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
 
-                HeapBlock <uint8> buffer (maxEventSize);
+                HeapBlock<uint8> buffer (maxEventSize);
 
                 while (! threadShouldExit())
                 {
@@ -471,7 +471,7 @@ private:
     snd_midi_event_t* midiParser;
     int maxEventSize;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice)
 };
 
 } // namespace

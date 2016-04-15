@@ -138,22 +138,35 @@ public:
     SliderStyle getSliderStyle() const noexcept;
 
     //==============================================================================
-    /** Changes the properties of a rotary slider.
+    struct RotaryParameters
+    {
+        /** The angle (in radians, clockwise from the top) at which
+            the slider's minimum value is represented. */
+        float startAngleRadians;
 
-        @param startAngleRadians    the angle (in radians, clockwise from the top) at which
-                                    the slider's minimum value is represented
-        @param endAngleRadians      the angle (in radians, clockwise from the top) at which
-                                    the slider's maximum value is represented. This must be
-                                    greater than startAngleRadians
-        @param stopAtEnd            determines what happens when a circular drag action rotates beyond
-                                    the minimum or maximum angle. If true, the value will stop changing
-                                    until the mouse moves back the way it came; if false, the value
-                                    will snap back to the value nearest to the mouse. Note that this has
-                                    no effect if the drag mode is vertical or horizontal.
-    */
+        /** The angle (in radians, clockwise from the top) at which
+            the slider's maximum value is represented. This must be
+            greater than startAngleRadians. */
+        float endAngleRadians;
+
+        /** Determines what happens when a circular drag action rotates beyond
+            the minimum or maximum angle. If true, the value will stop changing
+            until the mouse moves back the way it came; if false, the value
+            will snap back to the value nearest to the mouse. Note that this has
+            no effect if the drag mode is vertical or horizontal.*/
+        bool stopAtEnd;
+    };
+
+    /** Changes the properties of a rotary slider. */
+    void setRotaryParameters (RotaryParameters newParameters) noexcept;
+
+    /** Changes the properties of a rotary slider. */
     void setRotaryParameters (float startAngleRadians,
                               float endAngleRadians,
-                              bool stopAtEnd);
+                              bool stopAtEnd) noexcept;
+
+    /** Changes the properties of a rotary slider. */
+    RotaryParameters getRotaryParameters() const noexcept;
 
     /** Sets the distance the mouse has to move to drag the slider across
         the full extent of its range.

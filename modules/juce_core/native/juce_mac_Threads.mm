@@ -38,6 +38,9 @@ bool isIOSAppActive = true;
 //==============================================================================
 JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
+   if (SystemStats::isRunningInAppExtensionSandbox())
+       return true;
+
    #if JUCE_MAC
     return [NSApp isActive];
    #else
@@ -48,14 +51,16 @@ JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess()
 {
    #if JUCE_MAC
-    [NSApp activateIgnoringOtherApps: YES];
+    if (! SystemStats::isRunningInAppExtensionSandbox())
+        [NSApp activateIgnoringOtherApps: YES];
    #endif
 }
 
 JUCE_API void JUCE_CALLTYPE Process::hide()
 {
    #if JUCE_MAC
-    [NSApp hide: nil];
+    if (! SystemStats::isRunningInAppExtensionSandbox())
+        [NSApp hide: nil];
    #endif
 }
 
@@ -75,23 +80,11 @@ JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority)
 }
 
 //==============================================================================
-JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
+JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
 {
-    static char testResult = 0;
-
-    if (testResult == 0)
-    {
-        struct kinfo_proc info;
-        int m[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
-        size_t sz = sizeof (info);
-        sysctl (m, 4, &info, &sz, 0, 0);
-        testResult = ((info.kp_proc.p_flag & P_TRACED) != 0) ? 1 : -1;
-    }
-
-    return testResult > 0;
-}
-
-JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
-{
-    return juce_isRunningUnderDebugger();
+    struct kinfo_proc info;
+    int m[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+    size_t sz = sizeof (info);
+    sysctl (m, 4, &info, &sz, 0, 0);
+    return (info.kp_proc.p_flag & P_TRACED) != 0;
 }

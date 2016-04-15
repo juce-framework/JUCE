@@ -156,23 +156,34 @@ struct MidiMessageSequenceSorter
     }
 };
 
+void MidiMessageSequence::addSequence (const MidiMessageSequence& other, double timeAdjustment)
+{
+    for (int i = 0; i < other.list.size(); ++i)
+    {
+        const MidiMessage& m = other.list.getUnchecked(i)->message;
+
+        MidiEventHolder* const newOne = new MidiEventHolder (m);
+        newOne->message.addToTimeStamp (timeAdjustment);
+        list.add (newOne);
+    }
+
+    sort();
+}
+
 void MidiMessageSequence::addSequence (const MidiMessageSequence& other,
                                        double timeAdjustment,
                                        double firstAllowableTime,
                                        double endOfAllowableDestTimes)
 {
-    firstAllowableTime -= timeAdjustment;
-    endOfAllowableDestTimes -= timeAdjustment;
-
     for (int i = 0; i < other.list.size(); ++i)
     {
         const MidiMessage& m = other.list.getUnchecked(i)->message;
-        const double t = m.getTimeStamp();
+        const double t = m.getTimeStamp() + timeAdjustment;
 
         if (t >= firstAllowableTime && t < endOfAllowableDestTimes)
         {
             MidiEventHolder* const newOne = new MidiEventHolder (m);
-            newOne->message.setTimeStamp (timeAdjustment + t);
+            newOne->message.setTimeStamp (t);
 
             list.add (newOne);
         }

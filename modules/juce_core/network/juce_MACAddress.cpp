@@ -26,28 +26,44 @@
   ==============================================================================
 */
 
-MACAddress::MACAddress()
+MACAddress::MACAddress() noexcept
 {
     zeromem (address, sizeof (address));
 }
 
-MACAddress::MACAddress (const MACAddress& other)
+MACAddress::MACAddress (const MACAddress& other) noexcept
 {
     memcpy (address, other.address, sizeof (address));
 }
 
-MACAddress& MACAddress::operator= (const MACAddress& other)
+MACAddress& MACAddress::operator= (const MACAddress& other) noexcept
 {
     memcpy (address, other.address, sizeof (address));
     return *this;
 }
 
-MACAddress::MACAddress (const uint8 bytes[6])
+MACAddress::MACAddress (const uint8 bytes[6]) noexcept
 {
     memcpy (address, bytes, sizeof (address));
 }
 
+MACAddress::MACAddress (StringRef addressString)
+{
+    MemoryBlock hex;
+    hex.loadFromHexString (addressString);
+
+    if (hex.getSize() == sizeof (address))
+        memcpy (address, hex.getData(), sizeof (address));
+    else
+        zeromem (address, sizeof (address));
+}
+
 String MACAddress::toString() const
+{
+    return toString ("-");
+}
+
+String MACAddress::toString (StringRef separator) const
 {
     String s;
 
@@ -56,7 +72,7 @@ String MACAddress::toString() const
         s << String::toHexString ((int) address[i]).paddedLeft ('0', 2);
 
         if (i < sizeof (address) - 1)
-            s << '-';
+            s << separator;
     }
 
     return s;

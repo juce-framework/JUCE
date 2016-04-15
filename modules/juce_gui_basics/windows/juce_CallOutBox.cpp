@@ -230,7 +230,7 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
 void CallOutBox::refreshPath()
 {
     repaint();
-    background = Image::null;
+    background = Image();
     outline.clear();
 
     const float gap = 4.5f;

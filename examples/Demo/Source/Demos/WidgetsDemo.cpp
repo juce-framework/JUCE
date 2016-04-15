@@ -89,7 +89,7 @@ public:
 
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        if (ColourSelector* cs = dynamic_cast <ColourSelector*> (source))
+        if (ColourSelector* cs = dynamic_cast<ColourSelector*> (source))
             setColour (TextButton::buttonColourId, cs->getCurrentColour());
     }
 };

@@ -32,7 +32,7 @@ class CodeEditorDemo  : public Component,
 public:
     CodeEditorDemo()
         : fileChooser ("File", File::nonexistent, true, false, false,
-                       "*.cpp;*.h;*.hpp;*.c;*.mm;*.m", String::empty,
+                       "*.cpp;*.h;*.hpp;*.c;*.mm;*.m", String(),
                        "Choose a C++ file to open it in the editor")
     {
         setOpaque (true);
@@ -44,7 +44,7 @@ public:
                              "/* Code editor demo!\n"
                              "\n"
                              "   To see a real-world example of the code editor\n"
-                             "   in action, try the Introjucer!\n"
+                             "   in action, have a look at the Projucer!\n"
                              "\n"
                              "*/\n"
                              "\n");

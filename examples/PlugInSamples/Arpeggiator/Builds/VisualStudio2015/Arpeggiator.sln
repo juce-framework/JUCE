@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{D05C2BD0-94F7-39A6-BA23-B33E1090B397}") = "Arpeggiator", "Arpeggiator.vcxproj", "{DAAE7B30-B2B0-1B15-7D65-5C1F3AEA9037}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DAAE7B30-B2B0-1B15-7D65-5C1F3AEA9037}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DAAE7B30-B2B0-1B15-7D65-5C1F3AEA9037}.Debug|Win32.Build.0 = Debug|Win32
+		{DAAE7B30-B2B0-1B15-7D65-5C1F3AEA9037}.Release|Win32.ActiveCfg = Release|Win32
+		{DAAE7B30-B2B0-1B15-7D65-5C1F3AEA9037}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -22,13 +22,40 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_gui_basics
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE GUI core classes
+  description:      Basic user-interface components and related classes.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_events juce_graphics juce_data_structures
+  OSXFrameworks:    Cocoa Carbon QuartzCore
+  iOSFrameworks:    UIKit
+  linuxLibs:        X11 Xinerama Xext
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_GUI_BASICS_H_INCLUDED
 #define JUCE_GUI_BASICS_H_INCLUDED
 
-#include "../juce_graphics/juce_graphics.h"
-#include "../juce_data_structures/juce_data_structures.h"
+#include <juce_graphics/juce_graphics.h>
+#include <juce_data_structures/juce_data_structures.h>
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_ENABLE_REPAINT_DEBUGGING
     If this option is turned on, each area of the screen that gets repainted will
     flash in a random colour, so that you can see exactly which bits of your
@@ -80,7 +107,7 @@
  #define JUCE_USE_XCURSOR 1
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

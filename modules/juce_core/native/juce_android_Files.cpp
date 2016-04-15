@@ -43,7 +43,12 @@ bool File::isOnRemovableDrive() const
 
 String File::getVersion() const
 {
-    return String::empty;
+    return String();
+}
+
+static File getSpecialFile (jmethodID type)
+{
+    return File (juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (JuceAppActivity, type))));
 }
 
 File File::getSpecialLocation (const SpecialLocationType type)
@@ -51,17 +56,16 @@ File File::getSpecialLocation (const SpecialLocationType type)
     switch (type)
     {
         case userHomeDirectory:
-        case userDocumentsDirectory:
-        case userMusicDirectory:
-        case userMoviesDirectory:
-        case userPicturesDirectory:
         case userApplicationDataDirectory:
         case userDesktopDirectory:
+        case commonApplicationDataDirectory:
             return File (android.appDataDir);
 
-        case commonApplicationDataDirectory:
-        case commonDocumentsDirectory:
-            return File (android.appDataDir);
+        case userDocumentsDirectory:
+        case commonDocumentsDirectory:  return getSpecialFile (JuceAppActivity.getDocumentsFolder);
+        case userPicturesDirectory:     return getSpecialFile (JuceAppActivity.getPicturesFolder);
+        case userMusicDirectory:        return getSpecialFile (JuceAppActivity.getMusicFolder);
+        case userMoviesDirectory:       return getSpecialFile (JuceAppActivity.getMoviesFolder);
 
         case globalApplicationsDirectory:
             return File ("/system/app");

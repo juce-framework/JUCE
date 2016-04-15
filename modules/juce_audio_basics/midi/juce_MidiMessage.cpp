@@ -309,6 +309,31 @@ uint8* MidiMessage::allocateSpace (int bytes)
     return preallocatedData.asBytes;
 }
 
+String MidiMessage::getDescription() const
+{
+    if (isNoteOn())           return "Note on "  + MidiMessage::getMidiNoteName (getNoteNumber(), true, true, 3) + " Velocity " + String (getVelocity()) + " Channel " + String (getChannel());
+    if (isNoteOff())          return "Note off " + MidiMessage::getMidiNoteName (getNoteNumber(), true, true, 3) + " Velocity " + String (getVelocity()) + " Channel " + String (getChannel());
+    if (isProgramChange())    return "Program change " + String (getProgramChangeNumber()) + " Channel " + String (getChannel());
+    if (isPitchWheel())       return "Pitch wheel " + String (getPitchWheelValue()) + " Channel " + String (getChannel());
+    if (isAftertouch())       return "Aftertouch " + MidiMessage::getMidiNoteName (getNoteNumber(), true, true, 3) +  ": " + String (getAfterTouchValue()) + " Channel " + String (getChannel());
+    if (isChannelPressure())  return "Channel pressure " + String (getChannelPressureValue()) + " Channel " + String (getChannel());
+    if (isAllNotesOff())      return "All notes off Channel " + String (getChannel());
+    if (isAllSoundOff())      return "All sound off Channel " + String (getChannel());
+    if (isMetaEvent())        return "Meta event";
+
+    if (isController())
+    {
+        String name (MidiMessage::getControllerName (getControllerNumber()));
+
+        if (name.isEmpty())
+            name = String (getControllerNumber());
+
+        return "Controller " + name + ": " + String (getControllerValue()) + " Channel " + String (getChannel());
+    }
+
+    return String::toHexString (getRawData(), getRawDataSize());
+}
+
 int MidiMessage::getChannel() const noexcept
 {
     const uint8* const data = getRawData();
@@ -371,7 +396,7 @@ int MidiMessage::getNoteNumber() const noexcept
 
 void MidiMessage::setNoteNumber (const int newNoteNumber) noexcept
 {
-    if (isNoteOnOrOff())
+    if (isNoteOnOrOff() || isAftertouch())
         getData()[1] = (uint8) (newNoteNumber & 127);
 }
 
@@ -672,7 +697,7 @@ bool MidiMessage::isTextMetaEvent() const noexcept
 
 String MidiMessage::getTextFromTextMetaEvent() const
 {
-    const char* const textData = reinterpret_cast <const char*> (getMetaEventData());
+    const char* const textData = reinterpret_cast<const char*> (getMetaEventData());
     return String (CharPointer_UTF8 (textData),
                    CharPointer_UTF8 (textData + getMetaEventLength()));
 }
@@ -982,7 +1007,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
         return s;
     }
 
-    return String::empty;
+    return String();
 }
 
 double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept

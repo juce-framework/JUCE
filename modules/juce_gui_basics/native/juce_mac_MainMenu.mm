@@ -87,28 +87,6 @@ public:
     void updateTopLevelMenu (NSMenuItem* parentItem, const PopupMenu& menuToCopy,
                              const String& name, const int menuId, const int tag)
     {
-       #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-        static bool is10_4 = (SystemStats::getOperatingSystemType() == SystemStats::MacOSX_10_4);
-
-        if (is10_4)
-        {
-            [parentItem setTag: tag];
-            NSMenu* menu = [parentItem submenu];
-
-            [menu setTitle: juceStringToNS (name)];
-
-            while ([menu numberOfItems] > 0)
-                [menu removeItemAtIndex: 0];
-
-            for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
-                addMenuItem (iter, menu, menuId, tag);
-
-            [menu setAutoenablesItems: false];
-            [menu update];
-            return;
-        }
-       #endif
-
         // Note: This method used to update the contents of the existing menu in-place, but that caused
         // weird side-effects which messed-up keyboard focus when switching between windows. By creating
         // a new menu and replacing the old one with it, that problem seems to be avoided..
@@ -203,16 +181,17 @@ public:
     void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo,
                       const int topLevelMenuId, const int topLevelIndex)
     {
-        NSString* text = juceStringToNS (iter.itemName.upToFirstOccurrenceOf ("<end>", false, true));
+        const PopupMenu::Item& i = iter.getItem();
+        NSString* text = juceStringToNS (i.text);
 
         if (text == nil)
             text = nsEmptyString();
 
-        if (iter.isSeparator)
+        if (i.isSeparator)
         {
             [menuToAddTo addItem: [NSMenuItem separatorItem]];
         }
-        else if (iter.isSectionHeader)
+        else if (i.isSectionHeader)
         {
             NSMenuItem* item = [menuToAddTo addItemWithTitle: text
                                                       action: nil
@@ -220,9 +199,9 @@ public:
 
             [item setEnabled: false];
         }
-        else if (iter.subMenu != nullptr)
+        else if (i.subMenu != nullptr)
         {
-            if (iter.itemName == recentItemsMenuName)
+            if (i.text == recentItemsMenuName)
             {
                 if (recent == nullptr)
                     recent = new RecentFilesMenuItem();
@@ -241,10 +220,10 @@ public:
                                                       action: nil
                                                keyEquivalent: nsEmptyString()];
 
-            [item setTag: iter.itemId];
-            [item setEnabled: iter.isEnabled];
+            [item setTag: i.itemID];
+            [item setEnabled: i.isEnabled];
 
-            NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex, false);
+            NSMenu* sub = createMenu (*i.subMenu, i.text, topLevelMenuId, topLevelIndex, false);
             [menuToAddTo setSubmenu: sub forItem: item];
             [sub release];
         }
@@ -254,19 +233,19 @@ public:
                                                       action: @selector (menuItemInvoked:)
                                                keyEquivalent: nsEmptyString()];
 
-            [item setTag: iter.itemId];
-            [item setEnabled: iter.isEnabled];
-            [item setState: iter.isTicked ? NSOnState : NSOffState];
+            [item setTag: i.itemID];
+            [item setEnabled: i.isEnabled];
+            [item setState: i.isTicked ? NSOnState : NSOffState];
             [item setTarget: (id) callback];
 
-            NSMutableArray* info = [NSMutableArray arrayWithObject: [NSNumber numberWithUnsignedLongLong: (pointer_sized_uint) (void*) iter.commandManager]];
+            NSMutableArray* info = [NSMutableArray arrayWithObject: [NSNumber numberWithUnsignedLongLong: (pointer_sized_uint) (void*) i.commandManager]];
             [info addObject: [NSNumber numberWithInt: topLevelIndex]];
             [item setRepresentedObject: info];
 
-            if (iter.commandManager != nullptr)
+            if (i.commandManager != nullptr)
             {
-                const Array<KeyPress> keyPresses (iter.commandManager->getKeyMappings()
-                                                     ->getKeyPressesAssignedToCommand (iter.itemId));
+                const Array<KeyPress> keyPresses (i.commandManager->getKeyMappings()
+                                                     ->getKeyPressesAssignedToCommand (i.itemID));
 
                 if (keyPresses.size() > 0)
                 {
@@ -513,7 +492,7 @@ private:
                 {
                     if (juce::Component* focused = juce::Component::getCurrentlyFocusedComponent())
                     {
-                        if (juce::NSViewComponentPeer* peer = dynamic_cast <juce::NSViewComponentPeer*> (focused->getPeer()))
+                        if (juce::NSViewComponentPeer* peer = dynamic_cast<juce::NSViewComponentPeer*> (focused->getPeer()))
                         {
                             if ([e type] == NSKeyDown)
                                 peer->redirectKeyDown (e);

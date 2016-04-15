@@ -99,7 +99,8 @@ namespace PathStrokeHelpers
 
                         return along >= 0 && along <= 1.0f;
                     }
-                    else if (dy2 == 0 && dy1 != 0)
+
+                    if (dy2 == 0 && dy1 != 0)
                     {
                         const float along = (y3 - y1) / dy1;
                         intersectionX = x1 + along * dx1;
@@ -112,7 +113,8 @@ namespace PathStrokeHelpers
 
                         return along >= 0 && along <= 1.0f;
                     }
-                    else if (dx1 == 0 && dx2 != 0)
+
+                    if (dx1 == 0 && dx2 != 0)
                     {
                         const float along = (x1 - x3) / dx2;
                         intersectionX = x1;
@@ -126,7 +128,8 @@ namespace PathStrokeHelpers
 
                         return along >= 0 && along <= 1.0f;
                     }
-                    else if (dx2 == 0 && dx1 != 0)
+
+                    if (dx2 == 0 && dx1 != 0)
                     {
                         const float along = (x3 - x1) / dx1;
                         intersectionX = x3;
@@ -147,33 +150,31 @@ namespace PathStrokeHelpers
                 distanceBeyondLine1EndSquared = 0.0f;
                 return false;
             }
-            else
+
+            const float along1 = ((y1 - y3) * dx2 - (x1 - x3) * dy2) / divisor;
+
+            intersectionX = x1 + along1 * dx1;
+            intersectionY = y1 + along1 * dy1;
+
+            if (along1 >= 0 && along1 <= 1.0f)
             {
-                const float along1 = ((y1 - y3) * dx2 - (x1 - x3) * dy2) / divisor;
+                const float along2 = ((y1 - y3) * dx1 - (x1 - x3) * dy1) / divisor;
 
-                intersectionX = x1 + along1 * dx1;
-                intersectionY = y1 + along1 * dy1;
-
-                if (along1 >= 0 && along1 <= 1.0f)
+                if (along2 >= 0 && along2 <= 1.0f)
                 {
-                    const float along2 = ((y1 - y3) * dx1 - (x1 - x3) * dy1);
-
-                    if (along2 >= 0 && along2 <= divisor)
-                    {
-                        distanceBeyondLine1EndSquared = 0.0f;
-                        return true;
-                    }
+                    distanceBeyondLine1EndSquared = 0.0f;
+                    return true;
                 }
-
-                distanceBeyondLine1EndSquared = along1 - 1.0f;
-                distanceBeyondLine1EndSquared *= distanceBeyondLine1EndSquared;
-                distanceBeyondLine1EndSquared *= (dx1 * dx1 + dy1 * dy1);
-
-                if (along1 < 1.0f)
-                    distanceBeyondLine1EndSquared = -distanceBeyondLine1EndSquared;
-
-                return false;
             }
+
+            distanceBeyondLine1EndSquared = along1 - 1.0f;
+            distanceBeyondLine1EndSquared *= distanceBeyondLine1EndSquared;
+            distanceBeyondLine1EndSquared *= (dx1 * dx1 + dy1 * dy1);
+
+            if (along1 < 1.0f)
+                distanceBeyondLine1EndSquared = -distanceBeyondLine1EndSquared;
+
+            return false;
         }
 
         intersectionX = x2;
@@ -666,9 +667,6 @@ void PathStrokeType::createDashedStroke (Path& destPath,
     if (thickness <= 0)
         return;
 
-    // this should really be an even number..
-    jassert ((numDashLengths & 1) == 0);
-
     Path newDestPath;
     PathFlatteningIterator it (sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
 
@@ -695,7 +693,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
                 if (isSolid && ! first)
                     newDestPath.lineTo (it.x2, it.y2);
 
-                createStrokedPath (destPath, newDestPath, AffineTransform::identity, extraAccuracy);
+                createStrokedPath (destPath, newDestPath, AffineTransform(), extraAccuracy);
                 return;
             }
 

@@ -49,7 +49,7 @@ public:
     virtual int toInt (const ValueUnion&) const noexcept                        { return 0; }
     virtual int64 toInt64 (const ValueUnion&) const noexcept                    { return 0; }
     virtual double toDouble (const ValueUnion&) const noexcept                  { return 0; }
-    virtual String toString (const ValueUnion&) const                           { return String::empty; }
+    virtual String toString (const ValueUnion&) const                           { return String(); }
     virtual bool toBool (const ValueUnion&) const noexcept                      { return false; }
     virtual ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
     virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return nullptr; }
@@ -274,7 +274,7 @@ public:
     }
 
     String toString (const ValueUnion& data) const override                            { return "Object 0x" + String::toHexString ((int) (pointer_sized_int) data.objectValue); }
-    bool toBool (const ValueUnion& data) const noexcept override                       { return data.objectValue != 0; }
+    bool toBool (const ValueUnion& data) const noexcept override                       { return data.objectValue != nullptr; }
     ReferenceCountedObject* toObject (const ValueUnion& data) const noexcept override  { return data.objectValue; }
     bool isObject() const noexcept override                                            { return true; }
 

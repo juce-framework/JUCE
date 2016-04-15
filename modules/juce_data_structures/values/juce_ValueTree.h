@@ -226,14 +226,14 @@ public:
     */
     ValueTree getChild (int index) const;
 
-    /** Returns the first child node with the speficied type name.
+    /** Returns the first child node with the specified type name.
         If no such node is found, it'll return an invalid node. (See isValid() to find out
         whether a node is valid).
         @see getOrCreateChildWithName
     */
     ValueTree getChildWithName (const Identifier& type) const;
 
-    /** Returns the first child node with the speficied type name, creating and adding
+    /** Returns the first child node with the specified type name, creating and adding
         a child with this name if there wasn't already one there.
 
         The only time this will return an invalid object is when the object that you're calling
@@ -242,7 +242,7 @@ public:
     */
     ValueTree getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager);
 
-    /** Looks for the first child node that has the speficied property value.
+    /** Looks for the first child node that has the specified property value.
 
         This will scan the child nodes in order, until it finds one that has property that matches
         the specified value.

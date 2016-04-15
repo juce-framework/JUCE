@@ -87,7 +87,7 @@ BigInteger::BigInteger (const BigInteger& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 BigInteger::BigInteger (BigInteger&& other) noexcept
-    : values (static_cast <HeapBlock <uint32>&&> (other.values)),
+    : values (static_cast<HeapBlock<uint32>&&> (other.values)),
       numValues (other.numValues),
       highestBit (other.highestBit),
       negative (other.negative)
@@ -96,7 +96,7 @@ BigInteger::BigInteger (BigInteger&& other) noexcept
 
 BigInteger& BigInteger::operator= (BigInteger&& other) noexcept
 {
-    values = static_cast <HeapBlock <uint32>&&> (other.values);
+    values = static_cast<HeapBlock<uint32>&&> (other.values);
     numValues = other.numValues;
     highestBit = other.highestBit;
     negative = other.negative;
@@ -315,7 +315,7 @@ inline static int highestBitInInt (uint32 n) noexcept
 {
     jassert (n != 0); // (the built-in functions may not work for n = 0)
 
-  #if JUCE_GCC
+  #if JUCE_GCC || JUCE_CLANG
     return 31 - __builtin_clz (n);
   #elif JUCE_USE_MSVC_INTRINSICS
     unsigned long highest;

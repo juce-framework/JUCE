@@ -41,7 +41,7 @@ struct FTLibWrapper     : public ReferenceCountedObject
 
     FT_Library library;
 
-    typedef ReferenceCountedObjectPtr <FTLibWrapper> Ptr;
+    typedef ReferenceCountedObjectPtr<FTLibWrapper> Ptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTLibWrapper)
 };

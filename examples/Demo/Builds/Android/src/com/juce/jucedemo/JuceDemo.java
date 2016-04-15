@@ -30,27 +30,40 @@ import android.content.DialogInterface;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.Handler;
+import android.os.ParcelUuid;
+import android.os.Environment;
 import android.view.*;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.graphics.*;
-import android.opengl.*;
 import android.text.ClipboardManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import java.lang.Runnable;
+import java.util.*;
 import java.io.*;
 import java.net.URL;
 import java.net.HttpURLConnection;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 import android.media.AudioManager;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityCompat;
+import android.Manifest;
+
+import android.media.midi.*;
+import android.bluetooth.*;
+import android.bluetooth.le.*;
+
 
 //==============================================================================
 public class JuceDemo   extends Activity
@@ -61,16 +74,985 @@ public class JuceDemo   extends Activity
         System.loadLibrary ("juce_jni");
     }
 
+    //==============================================================================
+    public boolean isPermissionDeclaredInManifest (int permissionID)
+    {
+        String permissionToCheck = getAndroidPermissionName(permissionID);
+
+        try
+        {
+            PackageInfo info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
+
+            if (info.requestedPermissions != null)
+                for (String permission : info.requestedPermissions)
+                    if (permission.equals (permissionToCheck))
+                        return true;
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
+            Log.d ("JUCE", "isPermissionDeclaredInManifest: PackageManager.NameNotFoundException = " + e.toString());
+        }
+
+        Log.d ("JUCE", "isPermissionDeclaredInManifest: could not find requested permission " + permissionToCheck);
+        return false;
+    }
+
+    //==============================================================================
+    // these have to match the values of enum PermissionID in C++ class RuntimePermissions:
+    private static final int JUCE_PERMISSIONS_RECORD_AUDIO = 1;
+    private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI = 2;
+
+    private static String getAndroidPermissionName (int permissionID)
+    {
+        switch (permissionID)
+        {
+            case JUCE_PERMISSIONS_RECORD_AUDIO:     return Manifest.permission.RECORD_AUDIO;
+            case JUCE_PERMISSIONS_BLUETOOTH_MIDI:   return Manifest.permission.ACCESS_COARSE_LOCATION;
+        }
+
+        // unknown permission ID!
+        assert false;
+        return new String();
+    }
+
+    public boolean isPermissionGranted (int permissionID)
+    {
+        return ContextCompat.checkSelfPermission (this, getAndroidPermissionName (permissionID)) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private Map<Integer, Long> permissionCallbackPtrMap;
+
+    public void requestRuntimePermission (int permissionID, long ptrToCallback)
+    {
+        String permissionName = getAndroidPermissionName (permissionID);
+
+        if (ContextCompat.checkSelfPermission (this, permissionName) != PackageManager.PERMISSION_GRANTED)
+        {
+            // remember callbackPtr, request permissions, and let onRequestPermissionResult call callback asynchronously
+            permissionCallbackPtrMap.put (permissionID, ptrToCallback);
+            ActivityCompat.requestPermissions (this, new String[]{permissionName}, permissionID);
+        }
+        else
+        {
+            // permissions were already granted before, we can call callback directly
+            androidRuntimePermissionsCallback (true, ptrToCallback);
+        }
+    }
+
+    private native void androidRuntimePermissionsCallback (boolean permissionWasGranted, long ptrToCallback);
+
+    @Override
+    public void onRequestPermissionsResult (int permissionID, String permissions[], int[] grantResults)
+    {
+        boolean permissionsGranted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+
+        if (! permissionsGranted)
+            Log.d ("JUCE", "onRequestPermissionsResult: runtime permission was DENIED: " + getAndroidPermissionName (permissionID));
+
+        Long ptrToCallback = permissionCallbackPtrMap.get (permissionID);
+        permissionCallbackPtrMap.remove (permissionID);
+        androidRuntimePermissionsCallback (permissionsGranted, ptrToCallback);
+    }
+
+    //==============================================================================
+    public static class MidiPortID extends Object
+    {
+        public MidiPortID (int index, boolean direction)
+        {
+            androidIndex = index;
+            isInput = direction;
+        }
+
+        public int androidIndex;
+        public boolean isInput;
+
+        @Override
+        public int hashCode()
+        {
+            Integer i = new Integer (androidIndex);
+            return i.hashCode() * (isInput ? -1 : 1);
+        }
+
+        @Override
+        public boolean equals (Object obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (getClass() != obj.getClass())
+                return false;
+
+            MidiPortID other = (MidiPortID) obj;
+            return (androidIndex == other.androidIndex && isInput == other.isInput);
+        }
+    }
+
+    public interface JuceMidiPort
+    {
+        boolean isInputPort();
+
+        // start, stop does nothing on an output port
+        void start();
+        void stop();
+
+        void close();
+        MidiPortID getPortId();
+
+        // send will do nothing on an input port
+        void sendMidi (byte[] msg, int offset, int count);
+    }
+
+    //==============================================================================
+    //==============================================================================
+    public class BluetoothManager extends ScanCallback
+    {
+        BluetoothManager()
+        {
+            ScanFilter.Builder scanFilterBuilder = new ScanFilter.Builder();
+            scanFilterBuilder.setServiceUuid (ParcelUuid.fromString (bluetoothLEMidiServiceUUID));
+
+            ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
+            scanSettingsBuilder.setCallbackType (ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+                               .setScanMode (ScanSettings.SCAN_MODE_LOW_POWER)
+                               .setScanMode (ScanSettings.MATCH_MODE_STICKY);
+
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            if (bluetoothAdapter == null)
+            {
+                Log.d ("JUCE", "BluetoothManager error: could not get default Bluetooth adapter");
+                return;
+            }
+
+            BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+
+            if (bluetoothLeScanner == null)
+            {
+                Log.d ("JUCE", "BluetoothManager error: could not get Bluetooth LE scanner");
+                return;
+            }
+
+            bluetoothLeScanner.startScan (Arrays.asList (scanFilterBuilder.build()),
+                                          scanSettingsBuilder.build(),
+                                          this);
+        }
+
+        public String[] getMidiBluetoothAddresses()
+        {
+            return bluetoothMidiDevices.toArray (new String[bluetoothMidiDevices.size()]);
+        }
+
+        public String getHumanReadableStringForBluetoothAddress (String address)
+        {
+            BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice (address);
+            return btDevice.getName();
+        }
+
+        public boolean isBluetoothDevicePaired (String address)
+        {
+            return getAndroidMidiDeviceManager().isBluetoothDevicePaired (address);
+        }
+
+        public boolean pairBluetoothMidiDevice(String address)
+        {
+            BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice (address);
+
+            if (btDevice == null)
+            {
+                Log.d ("JUCE", "failed to create buletooth device from address");
+                return false;
+            }
+
+            MidiManager mm = (MidiManager) getSystemService (MIDI_SERVICE);
+
+            PhysicalMidiDevice midiDevice = PhysicalMidiDevice.fromBluetoothLeDevice (btDevice, mm);
+
+            if (midiDevice != null)
+            {
+                getAndroidMidiDeviceManager().addDeviceToList (midiDevice);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void unpairBluetoothMidiDevice (String address)
+        {
+            getAndroidMidiDeviceManager().unpairBluetoothDevice (address);
+        }
+
+        public void onScanFailed (int errorCode)
+        {
+        }
+
+        public void onScanResult (int callbackType, ScanResult result)
+        {
+            if (callbackType == ScanSettings.CALLBACK_TYPE_ALL_MATCHES
+                 || callbackType == ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
+            {
+                BluetoothDevice device = result.getDevice();
+
+                if (device != null)
+                    bluetoothMidiDevices.add (device.getAddress());
+            }
+
+            if (callbackType == ScanSettings.CALLBACK_TYPE_MATCH_LOST)
+            {
+                Log.d ("JUCE", "ScanSettings.CALLBACK_TYPE_MATCH_LOST");
+                BluetoothDevice device = result.getDevice();
+
+                if (device != null)
+                {
+                    bluetoothMidiDevices.remove (device.getAddress());
+                    unpairBluetoothMidiDevice (device.getAddress());
+                }
+            }
+        }
+
+        public void onBatchScanResults (List<ScanResult> results)
+        {
+            for (ScanResult result : results)
+                onScanResult (ScanSettings.CALLBACK_TYPE_ALL_MATCHES, result);
+        }
+
+        private BluetoothLeScanner scanner;
+        private static final String bluetoothLEMidiServiceUUID = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700";
+
+        private HashSet<String> bluetoothMidiDevices = new HashSet<String>();
+    }
+
+    public static class JuceMidiInputPort extends MidiReceiver implements JuceMidiPort
+    {
+        private native void handleReceive (long host, byte[] msg, int offset, int count, long timestamp);
+
+        public JuceMidiInputPort (PhysicalMidiDevice device, long host, MidiOutputPort midiPort)
+        {
+            parent = device;
+            juceHost = host;
+            port = midiPort;
+        }
+
+        @Override
+        public boolean isInputPort()
+        {
+            return true;
+        }
+
+        @Override
+        public void start()
+        {
+            port.connect (this);
+        }
+
+        @Override
+        public void stop()
+        {
+            port.disconnect (this);
+        }
+
+        @Override
+        public void close()
+        {
+            stop();
+
+            try
+            {
+                port.close();
+            }
+            catch (IOException e)
+            {
+                Log.d ("JUCE", "JuceMidiInputPort::close: IOException = " + e.toString());
+            }
+
+            if (parent != null)
+            {
+                parent.removePort (port.getPortNumber(), true);
+                parent = null;
+            }
+        }
+
+        public void onSend (byte[] msg, int offset, int count, long timestamp)
+        {
+            if (count > 0)
+                handleReceive (juceHost, msg, offset, count, timestamp);
+        }
+
+        @Override
+        public MidiPortID getPortId()
+        {
+            return new MidiPortID (port.getPortNumber(), true);
+        }
+
+        @Override
+        public void sendMidi (byte[] msg, int offset, int count)
+        {
+        }
+
+        private PhysicalMidiDevice parent = null;
+        private long juceHost = 0;
+        private MidiOutputPort port;
+    }
+
+    public static class JuceMidiOutputPort implements JuceMidiPort
+    {
+        public JuceMidiOutputPort (PhysicalMidiDevice device, MidiInputPort midiPort)
+        {
+            parent = device;
+            port = midiPort;
+        }
+
+        @Override
+        public boolean isInputPort()
+        {
+            return false;
+        }
+
+        @Override
+        public void start()
+        {
+        }
+
+        @Override
+        public void stop()
+        {
+        }
+
+        @Override
+        public void sendMidi (byte[] msg, int offset, int count)
+        {
+            try
+            {
+                port.send(msg, offset, count);
+            }
+            catch (IOException e)
+            {
+                Log.d ("JUCE", "JuceMidiOutputPort::sendMidi: IOException = " + e.toString());
+            }
+        }
+
+        @Override
+        public void close()
+        {
+            try
+            {
+                port.close();
+            }
+            catch (IOException e)
+            {
+                Log.d ("JUCE", "JuceMidiOutputPort::close: IOException = " + e.toString());
+            }
+
+            if (parent != null)
+            {
+                parent.removePort (port.getPortNumber(), false);
+                parent = null;
+            }
+        }
+
+
+        @Override
+        public MidiPortID getPortId()
+        {
+            return new MidiPortID (port.getPortNumber(), false);
+        }
+
+        private PhysicalMidiDevice parent = null;
+        private MidiInputPort port;
+    }
+
+    public static class PhysicalMidiDevice
+    {
+        private static class MidiDeviceThread extends Thread
+        {
+            public Handler handler = null;
+            public Object sync = null;
+
+            public MidiDeviceThread (Object syncrhonization)
+            {
+                sync = syncrhonization;
+            }
+
+            public void run()
+            {
+                Looper.prepare();
+
+                synchronized (sync)
+                {
+                    handler = new Handler();
+                    sync.notifyAll();
+                }
+
+                Looper.loop();
+            }
+        }
+
+        private static class MidiDeviceOpenCallback implements MidiManager.OnDeviceOpenedListener
+        {
+            public Object sync = null;
+            public boolean isWaiting = true;
+            public android.media.midi.MidiDevice theDevice = null;
+
+            public MidiDeviceOpenCallback (Object waiter)
+            {
+                sync = waiter;
+            }
+
+            public void onDeviceOpened (MidiDevice device)
+            {
+                synchronized (sync)
+                {
+                    theDevice = device;
+                    isWaiting = false;
+                    sync.notifyAll();
+                }
+            }
+        }
+
+        public static PhysicalMidiDevice fromBluetoothLeDevice (BluetoothDevice bluetoothDevice, MidiManager mm)
+        {
+            Object waitForCreation = new Object();
+            MidiDeviceThread thread = new MidiDeviceThread (waitForCreation);
+            thread.start();
+
+            synchronized (waitForCreation)
+            {
+                while (thread.handler == null)
+                {
+                    try
+                    {
+                        waitForCreation.wait();
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.d ("JUCE", "Wait was interrupted but we don't care");
+                    }
+                }
+            }
+
+            Object waitForDevice = new Object();
+
+            MidiDeviceOpenCallback openCallback = new MidiDeviceOpenCallback (waitForDevice);
+
+            synchronized (waitForDevice)
+            {
+                mm.openBluetoothDevice (bluetoothDevice, openCallback, thread.handler);
+
+                while (openCallback.isWaiting)
+                {
+                    try
+                    {
+                        waitForDevice.wait();
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.d ("JUCE", "Wait was interrupted but we don't care");
+                    }
+                }
+            }
+
+            if (openCallback.theDevice == null)
+            {
+                Log.d ("JUCE", "openBluetoothDevice failed");
+                return null;
+            }
+
+            PhysicalMidiDevice device = new PhysicalMidiDevice();
+
+            device.handle = openCallback.theDevice;
+            device.info = device.handle.getInfo();
+            device.bluetoothAddress = bluetoothDevice.getAddress();
+            device.midiManager = mm;
+
+            return device;
+        }
+
+        public void unpair()
+        {
+            if (! bluetoothAddress.equals ("") && handle != null)
+            {
+                JuceMidiPort ports[] = new JuceMidiPort[0];
+                ports = juceOpenedPorts.values().toArray(ports);
+
+                for (int i = 0; i < ports.length; ++i)
+                    ports[i].close();
+
+                juceOpenedPorts.clear();
+
+                try
+                {
+                    handle.close();
+                }
+                catch (IOException e)
+                {
+                    Log.d ("JUCE", "handle.close(): IOException = " + e.toString());
+                }
+
+                handle = null;
+            }
+        }
+
+        public static PhysicalMidiDevice fromMidiDeviceInfo (MidiDeviceInfo info, MidiManager mm)
+        {
+            PhysicalMidiDevice device = new PhysicalMidiDevice();
+            device.info = info;
+            device.midiManager = mm;
+            return device;
+        }
+
+        public PhysicalMidiDevice()
+        {
+            bluetoothAddress = "";
+            juceOpenedPorts = new Hashtable<MidiPortID, JuceMidiPort>();
+            handle = null;
+        }
+
+        public MidiDeviceInfo.PortInfo[] getPorts()
+        {
+            return info.getPorts();
+        }
+
+        public String getHumanReadableNameForPort (MidiDeviceInfo.PortInfo port, int portIndexToUseInName)
+        {
+            String portName = port.getName();
+
+            if (portName.equals (""))
+                portName = ((port.getType() == MidiDeviceInfo.PortInfo.TYPE_OUTPUT) ? "Out " : "In ")
+                              + Integer.toString (portIndexToUseInName);
+
+            return getHumanReadableDeviceName() + " " + portName;
+        }
+
+        public String getHumanReadableNameForPort (int portType, int androidPortID, int portIndexToUseInName)
+        {
+            MidiDeviceInfo.PortInfo[] ports = info.getPorts();
+
+            for (MidiDeviceInfo.PortInfo port : ports)
+            {
+                if (port.getType() == portType)
+                {
+                    if (port.getPortNumber() == androidPortID)
+                        return getHumanReadableNameForPort (port, portIndexToUseInName);
+                }
+            }
+
+            return "Unknown";
+        }
+
+        public String getHumanReadableDeviceName()
+        {
+            Bundle bundle = info.getProperties();
+            return bundle.getString (MidiDeviceInfo.PROPERTY_NAME , "Unknown device");
+        }
+
+        public void checkIfDeviceCanBeClosed()
+        {
+            if (juceOpenedPorts.size() == 0)
+            {
+                // never close bluetooth LE devices, otherwise they unpair and we have
+                // no idea how many ports they have.
+                // Only remove bluetooth devices when we specifically unpair
+                if (bluetoothAddress.equals (""))
+                {
+                    try
+                    {
+                        handle.close();
+                        handle = null;
+                    }
+                    catch (IOException e)
+                    {
+                        Log.d ("JUCE", "PhysicalMidiDevice::checkIfDeviceCanBeClosed: IOException = " + e.toString());
+                    }
+                }
+            }
+        }
+
+        public void removePort (int portIdx, boolean isInput)
+        {
+            MidiPortID portID = new MidiPortID (portIdx, isInput);
+            JuceMidiPort port = juceOpenedPorts.get (portID);
+
+            if (port != null)
+            {
+                juceOpenedPorts.remove (portID);
+                checkIfDeviceCanBeClosed();
+                return;
+            }
+
+            // tried to remove a port that was never added
+            assert false;
+        }
+
+        public JuceMidiPort openPort (int portIdx, boolean isInput, long host)
+        {
+            open();
+
+            if (handle == null)
+            {
+                Log.d ("JUCE", "PhysicalMidiDevice::openPort: handle = null, device not open");
+                return null;
+            }
+
+            // make sure that the port is not already open
+            if (findPortForIdx (portIdx, isInput) != null)
+            {
+                Log.d ("JUCE", "PhysicalMidiDevice::openInputPort: port already open, not opening again!");
+                return null;
+            }
+
+            JuceMidiPort retval = null;
+
+            if (isInput)
+            {
+                MidiOutputPort androidPort = handle.openOutputPort (portIdx);
+
+                if (androidPort == null)
+                {
+                    Log.d ("JUCE", "PhysicalMidiDevice::openPort: MidiDevice::openOutputPort (portIdx = "
+                           + Integer.toString (portIdx) + ") failed!");
+                    return null;
+                }
+
+                retval = new JuceMidiInputPort (this, host, androidPort);
+            }
+            else
+            {
+                MidiInputPort androidPort = handle.openInputPort (portIdx);
+
+                if (androidPort == null)
+                {
+                    Log.d ("JUCE", "PhysicalMidiDevice::openPort: MidiDevice::openInputPort (portIdx = "
+                           + Integer.toString (portIdx) + ") failed!");
+                    return null;
+                }
+
+                retval = new JuceMidiOutputPort (this, androidPort);
+            }
+
+            juceOpenedPorts.put (new MidiPortID (portIdx, isInput), retval);
+            return retval;
+        }
+
+        private JuceMidiPort findPortForIdx (int idx, boolean isInput)
+        {
+            return juceOpenedPorts.get (new MidiPortID (idx, isInput));
+        }
+
+        // opens the device
+        private synchronized void open()
+        {
+            if (handle != null)
+                return;
+
+            Object waitForCreation = new Object();
+            MidiDeviceThread thread = new MidiDeviceThread (waitForCreation);
+            thread.start();
+
+            synchronized(waitForCreation)
+            {
+                while (thread.handler == null)
+                {
+                    try
+                    {
+                        waitForCreation.wait();
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.d ("JUCE", "wait was interrupted but we don't care");
+                    }
+                }
+            }
+
+            Object waitForDevice = new Object();
+
+            MidiDeviceOpenCallback openCallback = new MidiDeviceOpenCallback (waitForDevice);
+
+            synchronized (waitForDevice)
+            {
+                midiManager.openDevice (info, openCallback, thread.handler);
+
+                while (openCallback.isWaiting)
+                {
+                    try
+                    {
+                        waitForDevice.wait();
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.d ("JUCE", "wait was interrupted but we don't care");
+                    }
+                }
+            }
+
+            handle = openCallback.theDevice;
+        }
+
+        private MidiDeviceInfo info;
+        private Hashtable<MidiPortID, JuceMidiPort> juceOpenedPorts;
+        public MidiDevice handle;
+        public String bluetoothAddress;
+        private MidiManager midiManager;
+    }
+
+    //==============================================================================
+    public class MidiDeviceManager extends MidiManager.DeviceCallback
+    {
+        public class MidiPortPath
+        {
+            public PhysicalMidiDevice midiDevice;
+            public int androidMidiPortID;
+            public int portIndexToUseInName;
+        }
+
+        public class JuceDeviceList
+        {
+            public ArrayList<MidiPortPath> inPorts = new ArrayList<MidiPortPath>();
+            public ArrayList<MidiPortPath> outPorts = new ArrayList<MidiPortPath>();
+        }
+
+        // We need to keep a thread local copy of the devices
+        // which we returned the last time
+        // getJuceAndroidMidiIn/OutputDevices() was called
+        private final ThreadLocal<JuceDeviceList> lastDevicesReturned =
+            new ThreadLocal<JuceDeviceList>()
+            {
+                @Override protected JuceDeviceList initialValue()
+                {
+                    return new JuceDeviceList();
+                }
+            };
+
+        public MidiDeviceManager()
+        {
+            physicalMidiDevices = new ArrayList<PhysicalMidiDevice>();
+            manager = (MidiManager) getSystemService (MIDI_SERVICE);
+
+            if (manager == null)
+            {
+                Log.d ("JUCE", "MidiDeviceManager error: could not get MidiManager system service");
+                return;
+            }
+
+            manager.registerDeviceCallback (this, null);
+
+            MidiDeviceInfo[] foundDevices = manager.getDevices();
+
+            for (MidiDeviceInfo info : foundDevices)
+                physicalMidiDevices.add (PhysicalMidiDevice.fromMidiDeviceInfo (info, manager));
+        }
+
+        // specifically add a device to the list
+        public void addDeviceToList (PhysicalMidiDevice device)
+        {
+            physicalMidiDevices.add (device);
+        }
+
+        public void unpairBluetoothDevice (String address)
+        {
+            for (int i = 0; i < physicalMidiDevices.size(); ++i)
+            {
+                PhysicalMidiDevice device = physicalMidiDevices.get(i);
+
+                if (device.bluetoothAddress.equals (address))
+                {
+                    physicalMidiDevices.remove (i);
+                    device.unpair();
+                    return;
+                }
+            }
+        }
+
+        public boolean isBluetoothDevicePaired (String address)
+        {
+            for (int i = 0; i < physicalMidiDevices.size(); ++i)
+            {
+                PhysicalMidiDevice device = physicalMidiDevices.get(i);
+
+                if (device.bluetoothAddress.equals (address))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public String[] getJuceAndroidMidiInputDevices()
+        {
+            return getJuceAndroidMidiDevices (MidiDeviceInfo.PortInfo.TYPE_INPUT);
+        }
+
+        public String[] getJuceAndroidMidiOutputDevices()
+        {
+            return getJuceAndroidMidiDevices (MidiDeviceInfo.PortInfo.TYPE_OUTPUT);
+        }
+
+        private String[] getJuceAndroidMidiDevices (int portType)
+        {
+            ArrayList<MidiPortPath> listOfReturnedDevices = new ArrayList<MidiPortPath>();
+            List<String> deviceNames = new ArrayList<String>();
+
+            for (PhysicalMidiDevice physicalMidiDevice : physicalMidiDevices)
+            {
+                int portIdx = 0;
+                MidiDeviceInfo.PortInfo[] ports = physicalMidiDevice.getPorts();
+
+                for (MidiDeviceInfo.PortInfo port : ports)
+                {
+                    if (port.getType() == portType)
+                    {
+                        MidiPortPath path = new MidiPortPath();
+                        path.midiDevice = physicalMidiDevice;
+                        path.androidMidiPortID = port.getPortNumber();
+                        path.portIndexToUseInName = ++portIdx;
+                        listOfReturnedDevices.add (path);
+
+                        deviceNames.add (physicalMidiDevice.getHumanReadableNameForPort (port,
+                                                                                         path.portIndexToUseInName));
+                    }
+                }
+            }
+
+            String[] deviceNamesArray = new String[deviceNames.size()];
+
+            if (portType == MidiDeviceInfo.PortInfo.TYPE_INPUT)
+            {
+                lastDevicesReturned.get().inPorts.clear();
+                lastDevicesReturned.get().inPorts.addAll (listOfReturnedDevices);
+            }
+            else
+            {
+                lastDevicesReturned.get().outPorts.clear();
+                lastDevicesReturned.get().outPorts.addAll (listOfReturnedDevices);
+            }
+
+            return deviceNames.toArray(deviceNamesArray);
+        }
+
+        public JuceMidiPort openMidiInputPortWithJuceIndex (int index, long host)
+        {
+            ArrayList<MidiPortPath> lastDevices = lastDevicesReturned.get().inPorts;
+
+            if (index >= lastDevices.size() || index < 0)
+                return null;
+
+            MidiPortPath path = lastDevices.get (index);
+            return path.midiDevice.openPort (path.androidMidiPortID, true, host);
+        }
+
+        public JuceMidiPort openMidiOutputPortWithJuceIndex (int index)
+        {
+            ArrayList<MidiPortPath> lastDevices = lastDevicesReturned.get().outPorts;
+
+            if (index >= lastDevices.size() || index < 0)
+                return null;
+
+            MidiPortPath path = lastDevices.get (index);
+            return path.midiDevice.openPort (path.androidMidiPortID, false, 0);
+        }
+
+        public String getInputPortNameForJuceIndex (int index)
+        {
+            ArrayList<MidiPortPath> lastDevices = lastDevicesReturned.get().inPorts;
+
+            if (index >= lastDevices.size() || index < 0)
+                return "";
+
+            MidiPortPath path = lastDevices.get (index);
+
+            return path.midiDevice.getHumanReadableNameForPort (MidiDeviceInfo.PortInfo.TYPE_INPUT,
+                                                                path.androidMidiPortID,
+                                                                path.portIndexToUseInName);
+        }
+
+        public String getOutputPortNameForJuceIndex (int index)
+        {
+            ArrayList<MidiPortPath> lastDevices = lastDevicesReturned.get().outPorts;
+
+            if (index >= lastDevices.size() || index < 0)
+                return "";
+
+            MidiPortPath path = lastDevices.get (index);
+
+            return path.midiDevice.getHumanReadableNameForPort (MidiDeviceInfo.PortInfo.TYPE_OUTPUT,
+                                                                path.androidMidiPortID,
+                                                                path.portIndexToUseInName);
+        }
+
+        public void onDeviceAdded (MidiDeviceInfo info)
+        {
+            PhysicalMidiDevice device = PhysicalMidiDevice.fromMidiDeviceInfo (info, manager);
+
+            // Do not add bluetooth devices as they are already added by the native bluetooth dialog
+            if (info.getType() != MidiDeviceInfo.TYPE_BLUETOOTH)
+                physicalMidiDevices.add (device);
+        }
+
+        public void onDeviceRemoved (MidiDeviceInfo info)
+        {
+            for (int i = 0; i < physicalMidiDevices.size(); ++i)
+            {
+                if (physicalMidiDevices.get(i).info.getId() == info.getId())
+                {
+                    physicalMidiDevices.remove (i);
+                    return;
+                }
+            }
+            // Don't assert here as this may be called again after a bluetooth device is unpaired
+        }
+
+        public void onDeviceStatusChanged (MidiDeviceStatus status)
+        {
+        }
+
+        private ArrayList<PhysicalMidiDevice> physicalMidiDevices;
+        private MidiManager manager;
+    }
+
+    public MidiDeviceManager getAndroidMidiDeviceManager()
+    {
+        if (getSystemService (MIDI_SERVICE) == null)
+            return null;
+
+        synchronized (JuceDemo.class)
+        {
+            if (midiDeviceManager == null)
+                midiDeviceManager = new MidiDeviceManager();
+        }
+
+        return midiDeviceManager;
+    }
+
+    public BluetoothManager getAndroidBluetoothManager()
+    {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (adapter == null)
+            return null;
+
+        if (adapter.getBluetoothLeScanner() == null)
+            return null;
+
+        synchronized (JuceDemo.class)
+        {
+            if (bluetoothManager == null)
+                bluetoothManager = new BluetoothManager();
+        }
+
+        return bluetoothManager;
+    }
+
+    //==============================================================================
     @Override
     public void onCreate (Bundle savedInstanceState)
     {
         super.onCreate (savedInstanceState);
 
         isScreenSaverEnabled = true;
+        hideActionBar();
         viewHolder = new ViewHolder (this);
         setContentView (viewHolder);
 
         setVolumeControlStream (AudioManager.STREAM_MUSIC);
+
+        permissionCallbackPtrMap = new HashMap<Integer, Long>();
     }
 
     @Override
@@ -85,9 +1067,6 @@ public class JuceDemo   extends Activity
     @Override
     protected void onPause()
     {
-        if (viewHolder != null)
-            viewHolder.onPause();
-
         suspendApp();
         super.onPause();
     }
@@ -96,10 +1075,6 @@ public class JuceDemo   extends Activity
     protected void onResume()
     {
         super.onResume();
-
-        if (viewHolder != null)
-            viewHolder.onResume();
-
         resumeApp();
     }
 
@@ -114,6 +1089,49 @@ public class JuceDemo   extends Activity
     {
         launchApp (getApplicationInfo().publicSourceDir,
                    getApplicationInfo().dataDir);
+    }
+
+    private void hideActionBar()
+    {
+        // get "getActionBar" method
+        java.lang.reflect.Method getActionBarMethod = null;
+        try
+        {
+            getActionBarMethod = this.getClass().getMethod ("getActionBar");
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (getActionBarMethod == null) return;
+
+        // invoke "getActionBar" method
+        Object actionBar = null;
+        try
+        {
+            actionBar = getActionBarMethod.invoke (this);
+        }
+        catch (java.lang.IllegalArgumentException e) { return; }
+        catch (java.lang.IllegalAccessException e) { return; }
+        catch (java.lang.reflect.InvocationTargetException e) { return; }
+        if (actionBar == null) return;
+
+        // get "hide" method
+        java.lang.reflect.Method actionBarHideMethod = null;
+        try
+        {
+            actionBarHideMethod = actionBar.getClass().getMethod ("hide");
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (actionBarHideMethod == null) return;
+
+        // invoke "hide" method
+        try
+        {
+            actionBarHideMethod.invoke (actionBar);
+        }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
     }
 
     //==============================================================================
@@ -142,7 +1160,10 @@ public class JuceDemo   extends Activity
 
     //==============================================================================
     private ViewHolder viewHolder;
+    private MidiDeviceManager midiDeviceManager = null;
+    private BluetoothManager bluetoothManager = null;
     private boolean isScreenSaverEnabled;
+    private java.util.Timer keepAliveTimer;
 
     public final ComponentPeerView createNewView (boolean opaque, long host)
     {
@@ -159,7 +1180,7 @@ public class JuceDemo   extends Activity
             group.removeView (view);
     }
 
-    public final void deleteOpenGLView (OpenGLView view)
+    public final void deleteNativeSurfaceView (NativeSurfaceView view)
     {
         ViewGroup group = (ViewGroup) (view.getParent());
 
@@ -187,28 +1208,6 @@ public class JuceDemo   extends Activity
             }
         }
 
-        public final void onPause()
-        {
-            for (int i = getChildCount(); --i >= 0;)
-            {
-                View v = getChildAt (i);
-
-                if (v instanceof ComponentPeerView)
-                    ((ComponentPeerView) v).onPause();
-            }
-        }
-
-        public final void onResume()
-        {
-            for (int i = getChildCount(); --i >= 0;)
-            {
-                View v = getChildAt (i);
-
-                if (v instanceof ComponentPeerView)
-                    ((ComponentPeerView) v).onResume();
-             }
-         }
-
         private final int getDPI()
         {
             DisplayMetrics metrics = new DisplayMetrics();
@@ -230,14 +1229,46 @@ public class JuceDemo   extends Activity
         if (isScreenSaverEnabled != enabled)
         {
             isScreenSaverEnabled = enabled;
+
+            if (keepAliveTimer != null)
+            {
+                keepAliveTimer.cancel();
+                keepAliveTimer = null;
+            }
+
             if (enabled)
+            {
                 getWindow().clearFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
             else
+            {
                 getWindow().addFlags (WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+                // If no user input is received after about 3 seconds, the OS will lower the
+                // task's priority, so this timer forces it to be kept active.
+                keepAliveTimer = new java.util.Timer();
+
+                keepAliveTimer.scheduleAtFixedRate (new TimerTask()
+                {
+                    @Override
+                    public void run()
+                    {
+                        android.app.Instrumentation instrumentation = new android.app.Instrumentation();
+
+                        try
+                        {
+                            instrumentation.sendKeyDownUpSync (KeyEvent.KEYCODE_UNKNOWN);
+                        }
+                        catch (Exception e)
+                        {
+                        }
+                    }
+                }, 2000, 2000);
+            }
         }
     }
 
-    public final boolean getScreenSaver ()
+    public final boolean getScreenSaver()
     {
         return isScreenSaverEnabled;
     }
@@ -546,70 +1577,83 @@ public class JuceDemo   extends Activity
         {
             return true; //xxx needs to check overlapping views
         }
-
-        public final void onPause()
-        {
-            for (int i = getChildCount(); --i >= 0;)
-            {
-                View v = getChildAt (i);
-
-                if (v instanceof OpenGLView)
-                    ((OpenGLView) v).onPause();
-            }
-        }
-
-        public final void onResume()
-        {
-            for (int i = getChildCount(); --i >= 0;)
-            {
-                View v = getChildAt (i);
-
-                if (v instanceof OpenGLView)
-                    ((OpenGLView) v).onResume();
-            }
-        }
-
-        public OpenGLView createGLView()
-        {
-            OpenGLView glView = new OpenGLView (getContext());
-            addView (glView);
-            return glView;
-        }
     }
 
     //==============================================================================
-    public final class OpenGLView   extends GLSurfaceView
-                                    implements GLSurfaceView.Renderer
+    public static class NativeSurfaceView    extends SurfaceView
+                                          implements SurfaceHolder.Callback
     {
-        OpenGLView (Context context)
+        private long nativeContext = 0;
+
+        NativeSurfaceView (Context context, long nativeContextPtr)
         {
             super (context);
-            setEGLContextClientVersion (2);
-            setRenderer (this);
-            setRenderMode (RENDERMODE_WHEN_DIRTY);
+            nativeContext = nativeContextPtr;
+        }
+
+        public Surface getNativeSurface()
+        {
+            Surface retval = null;
+
+            SurfaceHolder holder = getHolder();
+            if (holder != null)
+                retval = holder.getSurface();
+
+            return retval;
+        }
+
+        //==============================================================================
+        @Override
+        public void surfaceChanged (SurfaceHolder holder, int format, int width, int height)
+        {
+            surfaceChangedNative (nativeContext, holder, format, width, height);
         }
 
         @Override
-        public void onSurfaceCreated (GL10 unused, EGLConfig config)
+        public void surfaceCreated (SurfaceHolder holder)
         {
-            contextCreated();
+            surfaceCreatedNative (nativeContext, holder);
         }
 
         @Override
-        public void onSurfaceChanged (GL10 unused, int width, int height)
+        public void surfaceDestroyed (SurfaceHolder holder)
         {
-            contextChangedSize();
+            surfaceDestroyedNative (nativeContext, holder);
         }
 
         @Override
-        public void onDrawFrame (GL10 unused)
+        protected void dispatchDraw (Canvas canvas)
         {
-            render();
+            super.dispatchDraw (canvas);
+            dispatchDrawNative (nativeContext, canvas);
         }
 
-        private native void contextCreated();
-        private native void contextChangedSize();
-        private native void render();
+        //==============================================================================
+        @Override
+        protected void onAttachedToWindow ()
+        {
+            super.onAttachedToWindow();
+            getHolder().addCallback (this);
+        }
+
+        @Override
+        protected void onDetachedFromWindow ()
+        {
+            super.onDetachedFromWindow();
+            getHolder().removeCallback (this);
+        }
+
+        //==============================================================================
+        private native void dispatchDrawNative (long nativeContextPtr, Canvas canvas);
+        private native void surfaceCreatedNative (long nativeContextptr, SurfaceHolder holder);
+        private native void surfaceDestroyedNative (long nativeContextptr, SurfaceHolder holder);
+        private native void surfaceChangedNative (long nativeContextptr, SurfaceHolder holder,
+                                                  int format, int width, int height);
+    }
+
+    public NativeSurfaceView createNativeSurfaceView (long nativeSurfacePtr)
+    {
+        return new NativeSurfaceView (this, nativeSurfacePtr);
     }
 
     //==============================================================================
@@ -833,6 +1877,17 @@ public class JuceDemo   extends Activity
                         : locale.getDisplayLanguage (java.util.Locale.US);
     }
 
+    private static final String getFileLocation (String type)
+    {
+        return Environment.getExternalStoragePublicDirectory (type).getAbsolutePath();
+    }
+
+    public static final String getDocumentsFolder()  { return Environment.getDataDirectory().getAbsolutePath(); }
+    public static final String getPicturesFolder()   { return getFileLocation (Environment.DIRECTORY_PICTURES); }
+    public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
+    public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
+    public static final String getDownloadsFolder()  { return getFileLocation (Environment.DIRECTORY_DOWNLOADS); }
+
     //==============================================================================
     private final class SingleMediaScanner  implements MediaScannerConnectionClient
     {
@@ -943,5 +1998,72 @@ public class JuceDemo   extends Activity
         }
 
         return null;
+    }
+
+    public final int getAndroidSDKVersion()
+    {
+        return android.os.Build.VERSION.SDK_INT;
+    }
+
+    public final String audioManagerGetProperty (String property)
+    {
+        Object obj = getSystemService (AUDIO_SERVICE);
+        if (obj == null)
+            return null;
+
+        java.lang.reflect.Method method;
+
+        try
+        {
+            method = obj.getClass().getMethod ("getProperty", String.class);
+        }
+        catch (SecurityException e)     { return null; }
+        catch (NoSuchMethodException e) { return null; }
+
+        if (method == null)
+            return null;
+
+        try
+        {
+            return (String) method.invoke (obj, property);
+        }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
+
+        return null;
+    }
+
+    public final int setCurrentThreadPriority (int priority)
+    {
+        android.os.Process.setThreadPriority (android.os.Process.myTid(), priority);
+        return android.os.Process.getThreadPriority (android.os.Process.myTid());
+    }
+
+    public final boolean hasSystemFeature (String property)
+    {
+        return getPackageManager().hasSystemFeature (property);
+    }
+
+    private static class JuceThread extends Thread
+    {
+        public JuceThread (long host, String threadName, long threadStackSize)
+        {
+            super (null, null, threadName, threadStackSize);
+            _this = host;
+        }
+
+        public void run()
+        {
+            runThread(_this);
+        }
+
+        private native void runThread (long host);
+        private long _this;
+    }
+
+    public final Thread createNewThread(long host, String threadName, long threadStackSize)
+    {
+        return new JuceThread(host, threadName, threadStackSize);
     }
 }

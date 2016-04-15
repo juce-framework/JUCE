@@ -28,7 +28,7 @@ JUCEApplication::~JUCEApplication() {}
 //==============================================================================
 JUCEApplication* JUCE_CALLTYPE JUCEApplication::getInstance() noexcept
 {
-    return dynamic_cast <JUCEApplication*> (JUCEApplicationBase::getInstance());
+    return dynamic_cast<JUCEApplication*> (JUCEApplicationBase::getInstance());
 }
 
 bool JUCEApplication::moreThanOneInstanceAllowed()  { return true; }

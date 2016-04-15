@@ -136,7 +136,7 @@ namespace ActiveXHelpers
             if (type == IID_IOleInPlaceSite)
             {
                 inplaceSite->AddRef();
-                *result = static_cast <IOleInPlaceSite*> (inplaceSite);
+                *result = static_cast<IOleInPlaceSite*> (inplaceSite);
                 return S_OK;
             }
 
@@ -189,6 +189,7 @@ namespace ActiveXHelpers
                 peer->handleMouseEvent (0, Point<int> (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left,
                                                        GET_Y_LPARAM (lParam) + activeXRect.top  - peerRect.top).toFloat(),
                                         ModifierKeys::getCurrentModifiersRealtime(),
+                                        MouseInputSource::invalidPressure,
                                         getMouseEventTime());
                 break;
 

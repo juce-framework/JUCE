@@ -93,7 +93,7 @@ public:
             you'd like the dialog to automatically delete the component when the dialog
             has terminated.
         */
-        OptionalScopedPointer <Component> content;
+        OptionalScopedPointer<Component> content;
 
         /** If this is not a nullptr, it indicates a component that you'd like to position this
             dialog box in front of. See the DocumentWindow::centreAroundComponent() method for
@@ -238,6 +238,12 @@ public:
                                 bool useBottomRightCornerResizer = false);
    #endif
 
+
+    /** Called when the escape key is pressed.
+        This can be overridden to do things other than the default behaviour, which is to hide
+        the window. Return true if the key has been used, or false if it was ignored.
+    */
+    virtual bool escapeKeyPressed();
 
 protected:
     //==============================================================================

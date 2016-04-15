@@ -162,7 +162,7 @@ public:
 
 private:
     const int width, height;
-    HeapBlock <PixelARGB> data;
+    HeapBlock<PixelARGB> data;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState)
 };
@@ -274,12 +274,12 @@ bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
     return true;
 }
 
-GLuint OpenGLFrameBuffer::getFrameBufferID() const
+GLuint OpenGLFrameBuffer::getFrameBufferID() const noexcept
 {
     return pimpl != nullptr ? pimpl->frameBufferID : 0;
 }
 
-GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
+GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget() noexcept
 {
     GLint fb;
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, &fb);

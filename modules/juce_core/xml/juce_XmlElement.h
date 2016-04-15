@@ -134,7 +134,7 @@
     }
 
     // now we can turn the whole thing into a text document..
-    String myXmlDoc = animalsList.createDocument (String::empty);
+    String myXmlDoc = animalsList.createDocument (String());
     @endcode
 
     @see XmlDocument
@@ -642,7 +642,7 @@ public:
 
         if (num > 1)
         {
-            HeapBlock <XmlElement*> elems ((size_t) num);
+            HeapBlock<XmlElement*> elems ((size_t) num);
             getChildElementsAsArray (elems);
             sortArray (comparator, (XmlElement**) elems, 0, num - 1, retainOrderOfEquivalentItems);
             reorderChildElements (elems, num);
@@ -723,6 +723,9 @@ public:
 
     /** Creates a text element that can be added to a parent element. */
     static XmlElement* createTextElement (const String& text);
+
+    /** Checks if a given string is a valid XML name */
+    static bool isValidXmlName (StringRef possibleName) noexcept;
 
     //==============================================================================
 private:

@@ -40,9 +40,9 @@ class CarbonViewWrapperComponent  : public Component,
 public:
     CarbonViewWrapperComponent()
         : ComponentMovementWatcher (this),
+          carbonWindow (nil),
           keepPluginWindowWhenHidden (false),
-          wrapperWindow (0),
-          carbonWindow (0),
+          wrapperWindow (nil),
           embeddedView (0),
           recursiveResize (false),
           repaintChildOnCreation (true)
@@ -73,7 +73,7 @@ public:
 
     void createWindow()
     {
-        if (wrapperWindow == 0)
+        if (wrapperWindow == nil)
         {
             Rect r;
             r.left   = (short) getScreenX();
@@ -99,9 +99,10 @@ public:
 
             // Check for the plugin creating its own floating window, and if there is one,
             // we need to reparent it to make it visible..
-            if (NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0])
-                [getOwnerWindow() addChildWindow: floatingChildWindow
-                                         ordered: NSWindowAbove];
+            if (carbonWindow.childWindows.count > 0)
+                if (NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0])
+                    [getOwnerWindow() addChildWindow: floatingChildWindow
+                                             ordered: NSWindowAbove];
 
             EventTypeSpec windowEventTypes[] =
             {
@@ -134,7 +135,7 @@ public:
         removeView (embeddedView);
         embeddedView = 0;
 
-        if (wrapperWindow != 0)
+        if (wrapperWindow != nil)
         {
             NSWindow* ownerWindow = getOwnerWindow();
 
@@ -146,7 +147,7 @@ public:
 
             RemoveEventHandler (eventHandlerRef);
             DisposeWindow (wrapperWindow);
-            wrapperWindow = 0;
+            wrapperWindow = nil;
         }
     }
 
@@ -191,7 +192,7 @@ public:
                 HIViewSetFrame (embeddedView, &r);
             }
 
-            if (wrapperWindow != 0)
+            if (wrapperWindow != nil)
             {
                 jassert (getTopLevelComponent()->getDesktopScaleFactor() == 1.0f);
                 Rectangle<int> screenBounds (getScreenBounds() * Desktop::getInstance().getGlobalScaleFactor());
@@ -315,11 +316,11 @@ public:
         return ((CarbonViewWrapperComponent*) userData)->carbonEventHandler (nextHandlerRef, event);
     }
 
+    NSWindow* carbonWindow;
     bool keepPluginWindowWhenHidden;
 
 protected:
     WindowRef wrapperWindow;
-    NSWindow* carbonWindow;
     HIViewRef embeddedView;
     bool recursiveResize, repaintChildOnCreation;
     Time creationTime;
@@ -328,5 +329,16 @@ protected:
 
     NSWindow* getOwnerWindow() const    { return [((NSView*) getWindowHandle()) window]; }
 };
+
+//==============================================================================
+// Non-public utility function that hosts can use if they need to get hold of the
+// internals of a carbon wrapper window..
+void* getCarbonWindow (Component* possibleCarbonComponent)
+{
+    if (CarbonViewWrapperComponent* cv = dynamic_cast<CarbonViewWrapperComponent*> (possibleCarbonComponent))
+        return cv->carbonWindow;
+
+    return nullptr;
+}
 
 #endif   // JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED

@@ -31,41 +31,36 @@ class ZipFile::ZipEntryHolder
 public:
     ZipEntryHolder (const char* const buffer, const int fileNameLen)
     {
-        entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
-
-        const int time = ByteOrder::littleEndianShort (buffer + 12);
-        const int date = ByteOrder::littleEndianShort (buffer + 14);
-        entry.fileTime = getFileTimeFromRawEncodings (time, date);
-
-        compressed = ByteOrder::littleEndianShort (buffer + 10) != 0;
-        compressedSize = (size_t) ByteOrder::littleEndianInt (buffer + 20);
-        entry.uncompressedSize = ByteOrder::littleEndianInt (buffer + 24);
-
-        streamOffset = ByteOrder::littleEndianInt (buffer + 42);
+        isCompressed            = ByteOrder::littleEndianShort (buffer + 10) != 0;
+        entry.fileTime          = parseFileTime ((uint32) ByteOrder::littleEndianShort (buffer + 12),
+                                                 (uint32) ByteOrder::littleEndianShort (buffer + 14));
+        compressedSize          = (int64) (uint32) ByteOrder::littleEndianInt (buffer + 20);
+        entry.uncompressedSize  = (int64) (uint32) ByteOrder::littleEndianInt (buffer + 24);
+        streamOffset            = (int64) (uint32) ByteOrder::littleEndianInt (buffer + 42);
+        entry.filename          = String::fromUTF8 (buffer + 46, fileNameLen);
     }
 
     struct FileNameComparator
     {
-        static int compareElements (const ZipEntryHolder* first, const ZipEntryHolder* second)
+        static int compareElements (const ZipEntryHolder* e1, const ZipEntryHolder* e2) noexcept
         {
-            return first->entry.filename.compare (second->entry.filename);
+            return e1->entry.filename.compare (e2->entry.filename);
         }
     };
 
     ZipEntry entry;
-    size_t streamOffset;
-    size_t compressedSize;
-    bool compressed;
+    int64 streamOffset, compressedSize;
+    bool isCompressed;
 
 private:
-    static Time getFileTimeFromRawEncodings (int time, int date)
+    static Time parseFileTime (uint32 time, uint32 date) noexcept
     {
         const int year      = 1980 + (date >> 9);
         const int month     = ((date >> 5) & 15) - 1;
         const int day       = date & 31;
         const int hours     = time >> 11;
         const int minutes   = (time >> 5) & 63;
-        const int seconds   = (time & 31) << 1;
+        const int seconds   = (int) ((time & 31) << 1);
 
         return Time (year, month, day, hours, minutes, seconds);
     }
@@ -135,7 +130,7 @@ public:
         char buffer [30];
 
         if (inputStream != nullptr
-             && inputStream->setPosition ((int64) zei.streamOffset)
+             && inputStream->setPosition (zei.streamOffset)
              && inputStream->read (buffer, 30) == 30
              && ByteOrder::littleEndianInt (buffer) == 0x04034b50)
         {
@@ -152,17 +147,17 @@ public:
        #endif
     }
 
-    int64 getTotalLength()
+    int64 getTotalLength() override
     {
-        return (int64) zipEntryHolder.compressedSize;
+        return zipEntryHolder.compressedSize;
     }
 
-    int read (void* buffer, int howMany)
+    int read (void* buffer, int howMany) override
     {
         if (headerSize <= 0)
             return 0;
 
-        howMany = (int) jmin ((int64) howMany, ((int64) zipEntryHolder.compressedSize) - pos);
+        howMany = (int) jmin ((int64) howMany, zipEntryHolder.compressedSize - pos);
 
         if (inputStream == nullptr)
             return 0;
@@ -172,12 +167,12 @@ public:
         if (inputStream == file.inputStream)
         {
             const ScopedLock sl (file.lock);
-            inputStream->setPosition (pos + (int64) zipEntryHolder.streamOffset + headerSize);
+            inputStream->setPosition (pos + zipEntryHolder.streamOffset + headerSize);
             num = inputStream->read (buffer, howMany);
         }
         else
         {
-            inputStream->setPosition (pos + (int64) zipEntryHolder.streamOffset + headerSize);
+            inputStream->setPosition (pos + zipEntryHolder.streamOffset + headerSize);
             num = inputStream->read (buffer, howMany);
         }
 
@@ -185,19 +180,19 @@ public:
         return num;
     }
 
-    bool isExhausted()
+    bool isExhausted() override
     {
-        return headerSize <= 0 || pos >= (int64) zipEntryHolder.compressedSize;
+        return headerSize <= 0 || pos >= zipEntryHolder.compressedSize;
     }
 
-    int64 getPosition()
+    int64 getPosition() override
     {
         return pos;
     }
 
-    bool setPosition (int64 newPos)
+    bool setPosition (int64 newPos) override
     {
-        pos = jlimit ((int64) 0, (int64) zipEntryHolder.compressedSize, newPos);
+        pos = jlimit ((int64) 0, zipEntryHolder.compressedSize, newPos);
         return true;
     }
 
@@ -296,11 +291,11 @@ InputStream* ZipFile::createStreamForEntry (const int index)
     {
         stream = new ZipInputStream (*this, *zei);
 
-        if (zei->compressed)
+        if (zei->isCompressed)
         {
             stream = new GZIPDecompressorInputStream (stream, true,
                                                       GZIPDecompressorInputStream::deflateFormat,
-                                                      (int64) zei->entry.uncompressedSize);
+                                                      zei->entry.uncompressedSize);
 
             // (much faster to unzip in big blocks using a buffer..)
             stream = new BufferedInputStream (stream, 32768, true);
@@ -440,14 +435,14 @@ Result ZipFile::uncompressEntry (const int index,
 }
 
 
-//=============================================================================
+//==============================================================================
 class ZipFile::Builder::Item
 {
 public:
-    Item (const File& f, InputStream* s, const int compression, const String& storedPath, Time time)
-        : file (f), stream (s), storedPathname (storedPath),
-          fileTime (time), compressionLevel (compression),
-          compressedSize (0), uncompressedSize (0), headerStart (0), checksum (0)
+    Item (const File& f, InputStream* s, int compression, const String& storedPath, Time time)
+        : file (f), stream (s), storedPathname (storedPath), fileTime (time),
+          compressedSize (0), uncompressedSize (0), headerStart (0),
+          compressionLevel (compression), checksum (0)
     {
     }
 
@@ -468,8 +463,8 @@ public:
                 return false;
         }
 
-        compressedSize = (int) compressedData.getDataSize();
-        headerStart = (int) (target.getPosition() - overallStartPosition);
+        compressedSize = (int64) compressedData.getDataSize();
+        headerStart = target.getPosition() - overallStartPosition;
 
         target.writeInt (0x04034b50);
         writeFlagsAndSizes (target);
@@ -488,7 +483,7 @@ public:
         target.writeShort (0); // start disk num
         target.writeShort (0); // internal attributes
         target.writeInt (0); // external attributes
-        target.writeInt (headerStart);
+        target.writeInt ((int) (uint32) headerStart);
         target << storedPathname;
 
         return true;
@@ -499,7 +494,8 @@ private:
     ScopedPointer<InputStream> stream;
     String storedPathname;
     Time fileTime;
-    int compressionLevel, compressedSize, uncompressedSize, headerStart;
+    int64 compressedSize, uncompressedSize, headerStart;
+    int compressionLevel;
     unsigned long checksum;
 
     static void writeTimeAndDate (OutputStream& target, Time t)
@@ -546,8 +542,8 @@ private:
         target.writeShort (compressionLevel > 0 ? (short) 8 : (short) 0);
         writeTimeAndDate (target, fileTime);
         target.writeInt ((int) checksum);
-        target.writeInt (compressedSize);
-        target.writeInt (uncompressedSize);
+        target.writeInt ((int) (uint32) compressedSize);
+        target.writeInt ((int) (uint32) uncompressedSize);
         target.writeShort ((short) storedPathname.toUTF8().sizeInBytes() - 1);
         target.writeShort (0); // extra field length
     }
@@ -555,7 +551,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Item)
 };
 
-//=============================================================================
+//==============================================================================
 ZipFile::Builder::Builder() {}
 ZipFile::Builder::~Builder() {}
 

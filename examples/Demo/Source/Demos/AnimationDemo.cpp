@@ -168,7 +168,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillTiledBackground (g);
+        fillStandardDemoBackground (g);
     }
 
 private:
@@ -237,7 +237,8 @@ private:
     Button* createButton()
     {
         Image juceIcon = ImageCache::getFromMemory (BinaryData::juce_icon_png,
-                                                    BinaryData::juce_icon_pngSize);
+                                                    BinaryData::juce_icon_pngSize)
+                            .rescaled (128, 128);
 
         ImageButton* b = new ImageButton ("ImageButton");
 

@@ -55,9 +55,9 @@ public:
 
     void audioDeviceIOCallback (const float** inputChannelData, int numInputChannels,
                                 float** outputChannelData, int numOutputChannels,
-                                int numSamples) override
+                                int numberOfSamples) override
     {
-        for (int i = 0; i < numSamples; ++i)
+        for (int i = 0; i < numberOfSamples; ++i)
         {
             float inputSample = 0;
 
@@ -73,7 +73,7 @@ public:
         // We need to clear the output buffers before returning, in case they're full of junk..
         for (int j = 0; j < numOutputChannels; ++j)
             if (float* outputChannel = outputChannelData[j])
-                zeromem (outputChannel, sizeof (float) * (size_t) numSamples);
+                zeromem (outputChannel, sizeof (float) * (size_t) numberOfSamples);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveScrollingAudioDisplay)

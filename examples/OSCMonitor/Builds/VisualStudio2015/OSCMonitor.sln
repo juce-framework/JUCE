@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{3DD2BA40-00F8-EE08-8A77-AA2C799B45FD}") = "OSCMonitor", "OSCMonitor.vcxproj", "{A618CC48-937F-E23E-FBA6-0FBB024D4FD8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A618CC48-937F-E23E-FBA6-0FBB024D4FD8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A618CC48-937F-E23E-FBA6-0FBB024D4FD8}.Debug|Win32.Build.0 = Debug|Win32
+		{A618CC48-937F-E23E-FBA6-0FBB024D4FD8}.Release|Win32.ActiveCfg = Release|Win32
+		{A618CC48-937F-E23E-FBA6-0FBB024D4FD8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

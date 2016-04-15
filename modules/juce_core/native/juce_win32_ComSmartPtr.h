@@ -145,7 +145,7 @@ protected:
     template <class Type>
     JUCE_COMRESULT castToType (void** result)
     {
-        this->AddRef(); *result = dynamic_cast <Type*> (this); return S_OK;
+        this->AddRef(); *result = dynamic_cast<Type*> (this); return S_OK;
     }
 };
 

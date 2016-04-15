@@ -329,9 +329,8 @@ void Label::mouseUp (const MouseEvent& e)
 {
     if (editSingleClick
          && isEnabled()
-         && e.mouseWasClicked()
          && contains (e.getPosition())
-         && ! e.mods.isPopupMenu())
+         && ! (e.mouseWasDraggedSinceMouseDown() || e.mods.isPopupMenu()))
     {
         showEditor();
     }
@@ -391,7 +390,7 @@ public:
 
     static Component* getComp (Component* current)
     {
-        return dynamic_cast <TextEditor*> (current) != nullptr
+        return dynamic_cast<TextEditor*> (current) != nullptr
                  ? current->getParentComponent() : current;
     }
 };
@@ -460,7 +459,7 @@ void Label::textEditorEscapeKeyPressed (TextEditor& ed)
     if (editor != nullptr)
     {
         jassert (&ed == editor);
-        (void) ed;
+        ignoreUnused (ed);
 
         editor->setText (textValue.toString(), false);
         hideEditor (true);

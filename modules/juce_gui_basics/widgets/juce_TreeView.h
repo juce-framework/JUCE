@@ -573,7 +573,7 @@ public:
 
     private:
         TreeViewItem& treeViewItem;
-        ScopedPointer <XmlElement> oldOpenness;
+        ScopedPointer<XmlElement> oldOpenness;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpennessRestorer)
     };

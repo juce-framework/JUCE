@@ -85,7 +85,20 @@ public:
         // not interested in controllers in this case.
     }
 
-    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
+    void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
+    {
+        processBlock (outputBuffer, startSample, numSamples);
+    }
+
+    void renderNextBlock (AudioBuffer<double>& outputBuffer, int startSample, int numSamples) override
+    {
+        processBlock (outputBuffer, startSample, numSamples);
+    }
+
+private:
+
+    template <typename FloatType>
+    void processBlock (AudioBuffer<FloatType>& outputBuffer, int startSample, int numSamples)
     {
         if (angleDelta != 0.0)
         {
@@ -93,7 +106,8 @@ public:
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = (float) (sin (currentAngle) * level * tailOff);
+                    const FloatType currentSample =
+                        static_cast<FloatType> (std::sin (currentAngle) * level * tailOff);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -116,7 +130,7 @@ public:
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = (float) (sin (currentAngle) * level);
+                    const FloatType currentSample = static_cast<FloatType> (std::sin (currentAngle) * level);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -128,82 +142,42 @@ public:
         }
     }
 
-private:
     double currentAngle, angleDelta, level, tailOff;
 };
 
-class FloatParameter : public AudioProcessorParameter
-{
-public:
-
-    FloatParameter (float defaultParameterValue, const String& paramName)
-       : defaultValue (defaultParameterValue),
-         value (defaultParameterValue),
-         name (paramName)
-    {
-    }
-
-    float getValue() const override
-    {
-        return value;
-    }
-
-    void setValue (float newValue) override
-    {
-        value = newValue;
-    }
-
-    float getDefaultValue() const override
-    {
-        return defaultValue;
-    }
-
-    String getName (int /* maximumStringLength */) const override
-    {
-        return name;
-    }
-
-    String getLabel() const override
-    {
-        return String();
-    }
-
-    float getValueForText (const String& text) const override
-    {
-        return text.getFloatValue();
-    }
-
-private:
-    float defaultValue, value;
-    String name;
-};
-
-const float defaultGain = 1.0f;
-const float defaultDelay = 0.5f;
-
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
-    : delayBuffer (2, 12000)
+    : lastUIWidth (400),
+      lastUIHeight (200),
+      gainParam (nullptr),
+      delayParam (nullptr),
+      delayPosition (0)
 {
-    // Set up our parameters. The base class will delete them for us.
-    addParameter (gain  = new FloatParameter (defaultGain,  "Gain"));
-    addParameter (delay = new FloatParameter (defaultDelay, "Delay"));
-
-    lastUIWidth = 400;
-    lastUIHeight = 200;
-
     lastPosInfo.resetToDefault();
-    delayPosition = 0;
 
-    // Initialise the synth...
-    for (int i = 4; --i >= 0;)
-        synth.addVoice (new SineWaveVoice());   // These voices will play our custom sine-wave sounds..
+    // This creates our parameters. We'll keep some raw pointers to them in this class,
+    // so that we can easily access them later, but the base class will take care of
+    // deleting them for us.
+    addParameter (gainParam  = new AudioParameterFloat ("gain",  "Gain",           0.0f, 1.0f, 0.9f));
+    addParameter (delayParam = new AudioParameterFloat ("delay", "Delay Feedback", 0.0f, 1.0f, 0.5f));
 
-    synth.addSound (new SineWaveSound());
+    initialiseSynth();
 }
 
 JuceDemoPluginAudioProcessor::~JuceDemoPluginAudioProcessor()
 {
+}
+
+void JuceDemoPluginAudioProcessor::initialiseSynth()
+{
+    const int numVoices = 8;
+
+    // Add some voices...
+    for (int i = numVoices; --i >= 0;)
+        synth.addVoice (new SineWaveVoice());
+
+    // ..and give the synth a sound to play
+    synth.addSound (new SineWaveSound());
 }
 
 //==============================================================================
@@ -213,7 +187,19 @@ void JuceDemoPluginAudioProcessor::prepareToPlay (double newSampleRate, int /*sa
     // initialisation that you need..
     synth.setCurrentPlaybackSampleRate (newSampleRate);
     keyboardState.reset();
-    delayBuffer.clear();
+
+    if (isUsingDoublePrecision())
+    {
+        delayBufferDouble.setSize (2, 12000);
+        delayBufferFloat.setSize (1, 1);
+    }
+    else
+    {
+        delayBufferFloat.setSize (2, 12000);
+        delayBufferDouble.setSize (1, 1);
+    }
+
+    reset();
 }
 
 void JuceDemoPluginAudioProcessor::releaseResources()
@@ -227,63 +213,93 @@ void JuceDemoPluginAudioProcessor::reset()
 {
     // Use this method as the place to clear any delay lines, buffers, etc, as it
     // means there's been a break in the audio's continuity.
-    delayBuffer.clear();
+    delayBufferFloat.clear();
+    delayBufferDouble.clear();
 }
 
-void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+template <typename FloatType>
+void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
+                                            MidiBuffer& midiMessages,
+                                            AudioBuffer<FloatType>& delayBuffer)
 {
     const int numSamples = buffer.getNumSamples();
-    int channel, dp = 0;
 
-    // Go through the incoming data, and apply our gain to it...
-    for (channel = 0; channel < getNumInputChannels(); ++channel)
-        buffer.applyGain (channel, 0, buffer.getNumSamples(), gain->getValue());
+    // apply our gain-change to the incoming data..
+    applyGain (buffer, delayBuffer);
 
     // Now pass any incoming midi messages to our keyboard state object, and let it
     // add messages to the buffer if the user is clicking on the on-screen keys
     keyboardState.processNextMidiBuffer (midiMessages, 0, numSamples, true);
 
-    // and now get the synth to process these midi events and generate its output.
+    // and now get our synth to process these midi events and generate its output.
     synth.renderNextBlock (buffer, midiMessages, 0, numSamples);
 
     // Apply our delay effect to the new output..
-    for (channel = 0; channel < getNumInputChannels(); ++channel)
-    {
-        float* channelData = buffer.getWritePointer (channel);
-        float* delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));
-        dp = delayPosition;
-
-        for (int i = 0; i < numSamples; ++i)
-        {
-            const float in = channelData[i];
-            channelData[i] += delayData[dp];
-            delayData[dp] = (delayData[dp] + in) * delay->getValue();
-            if (++dp >= delayBuffer.getNumSamples())
-                dp = 0;
-        }
-    }
-
-    delayPosition = dp;
+    applyDelay (buffer, delayBuffer);
 
     // In case we have more outputs than inputs, we'll clear any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
-    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+        buffer.clear (i, 0, numSamples);
 
-    // ask the host for the current time so we can display it...
-    AudioPlayHead::CurrentPositionInfo newTime;
+    // Now ask the host for the current time so we can store it to be displayed later...
+    updateCurrentTimeInfoFromHost();
+}
 
-    if (getPlayHead() != nullptr && getPlayHead()->getCurrentPosition (newTime))
+template <typename FloatType>
+void JuceDemoPluginAudioProcessor::applyGain (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer)
+{
+    ignoreUnused (delayBuffer);
+    const float gainLevel = *gainParam;
+
+    for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
+        buffer.applyGain (channel, 0, buffer.getNumSamples(), gainLevel);
+}
+
+template <typename FloatType>
+void JuceDemoPluginAudioProcessor::applyDelay (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer)
+{
+    const int numSamples = buffer.getNumSamples();
+    const float delayLevel = *delayParam;
+
+    int delayPos = 0;
+
+    for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
     {
-        // Successfully got the current time from the host..
-        lastPosInfo = newTime;
+        FloatType* const channelData = buffer.getWritePointer (channel);
+        FloatType* const delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));
+        delayPos = delayPosition;
+
+        for (int i = 0; i < numSamples; ++i)
+        {
+            const FloatType in = channelData[i];
+            channelData[i] += delayData[delayPos];
+            delayData[delayPos] = (delayData[delayPos] + in) * delayLevel;
+
+            if (++delayPos >= delayBuffer.getNumSamples())
+                delayPos = 0;
+        }
     }
-    else
+
+    delayPosition = delayPos;
+}
+
+void JuceDemoPluginAudioProcessor::updateCurrentTimeInfoFromHost()
+{
+    if (AudioPlayHead* ph = getPlayHead())
     {
-        // If the host fails to fill-in the current time, we'll just clear it to a default..
-        lastPosInfo.resetToDefault();
+        AudioPlayHead::CurrentPositionInfo newTime;
+
+        if (ph->getCurrentPosition (newTime))
+        {
+            lastPosInfo = newTime;  // Successfully got the current time from the host..
+            return;
+        }
     }
+
+    // If the host fails to provide the current time, we'll just reset our copy to a default..
+    lastPosInfo.resetToDefault();
 }
 
 //==============================================================================
@@ -304,8 +320,11 @@ void JuceDemoPluginAudioProcessor::getStateInformation (MemoryBlock& destData)
     // add some attributes to it..
     xml.setAttribute ("uiWidth", lastUIWidth);
     xml.setAttribute ("uiHeight", lastUIHeight);
-    xml.setAttribute ("gain", gain->getValue());
-    xml.setAttribute ("delay", delay->getValue());
+
+    // Store the values of all our parameters, using their param ID as the XML attribute
+    for (int i = 0; i < getNumParameters(); ++i)
+        if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters().getUnchecked(i)))
+            xml.setAttribute (p->paramID, p->getValue());
 
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
@@ -324,62 +343,16 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
         // make sure that it's actually our type of XML object..
         if (xmlState->hasTagName ("MYPLUGINSETTINGS"))
         {
-            // ok, now pull out our parameters..
+            // ok, now pull out our last window size..
             lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
             lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
 
-            gain->setValue ((float) xmlState->getDoubleAttribute ("gain", gain->getValue()));
-            delay->setValue ((float) xmlState->getDoubleAttribute ("delay", delay->getValue()));
+            // Now reload our parameters..
+            for (int i = 0; i < getNumParameters(); ++i)
+                if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters().getUnchecked(i)))
+                    p->setValueNotifyingHost ((float) xmlState->getDoubleAttribute (p->paramID, p->getValue()));
         }
     }
-}
-
-const String JuceDemoPluginAudioProcessor::getInputChannelName (const int channelIndex) const
-{
-    return String (channelIndex + 1);
-}
-
-const String JuceDemoPluginAudioProcessor::getOutputChannelName (const int channelIndex) const
-{
-    return String (channelIndex + 1);
-}
-
-bool JuceDemoPluginAudioProcessor::isInputChannelStereoPair (int /*index*/) const
-{
-    return true;
-}
-
-bool JuceDemoPluginAudioProcessor::isOutputChannelStereoPair (int /*index*/) const
-{
-    return true;
-}
-
-bool JuceDemoPluginAudioProcessor::acceptsMidi() const
-{
-   #if JucePlugin_WantsMidiInput
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-bool JuceDemoPluginAudioProcessor::producesMidi() const
-{
-   #if JucePlugin_ProducesMidiOutput
-    return true;
-   #else
-    return false;
-   #endif
-}
-
-bool JuceDemoPluginAudioProcessor::silenceInProducesSilenceOut() const
-{
-    return false;
-}
-
-double JuceDemoPluginAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
 }
 
 //==============================================================================

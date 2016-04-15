@@ -22,11 +22,35 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_box2d
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE wrapper for the Box2D physics engine
+  description:      The Box2D physics engine and some utility classes.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_graphics
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_BOX2D_H_INCLUDED
 #define JUCE_BOX2D_H_INCLUDED
 
-//=============================================================================
-#include "../juce_graphics/juce_graphics.h"
+//==============================================================================
+#include <juce_graphics/juce_graphics.h>
 
 #include "box2d/Box2D.h"
 

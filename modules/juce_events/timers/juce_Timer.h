@@ -97,11 +97,13 @@ public:
 
     /** Stops the timer.
 
-        No more callbacks will be made after this method returns.
+        No more timer callbacks will be triggered after this method returns.
 
-        If this is called from a different thread, any callbacks that may
-        be currently executing may be allowed to finish before the method
-        returns.
+        Note that if you call this from a background thread while the message-thread
+        is already in the middle of your callback, then this method will cancel any
+        future timer callbacks, but it will return without waiting for the current one
+        to finish. The current callback will continue, possibly still running some of
+        your timer code after this method has returned.
     */
     void stopTimer() noexcept;
 

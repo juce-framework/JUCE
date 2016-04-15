@@ -104,7 +104,7 @@ public:
     */
     void createStrokedPath (Path& destPath,
                             const Path& sourcePath,
-                            const AffineTransform& transform = AffineTransform::identity,
+                            const AffineTransform& transform = AffineTransform(),
                             float extraAccuracy = 1.0f) const;
 
 
@@ -136,7 +136,7 @@ public:
                              const Path& sourcePath,
                              const float* dashLengths,
                              int numDashLengths,
-                             const AffineTransform& transform = AffineTransform::identity,
+                             const AffineTransform& transform = AffineTransform(),
                              float extraAccuracy = 1.0f) const;
 
     //==============================================================================
@@ -163,7 +163,7 @@ public:
                                      const Path& sourcePath,
                                      float arrowheadStartWidth, float arrowheadStartLength,
                                      float arrowheadEndWidth, float arrowheadEndLength,
-                                     const AffineTransform& transform = AffineTransform::identity,
+                                     const AffineTransform& transform = AffineTransform(),
                                      float extraAccuracy = 1.0f) const;
 
     //==============================================================================

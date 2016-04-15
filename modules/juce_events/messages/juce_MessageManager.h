@@ -32,8 +32,7 @@ class ActionBroadcaster;
 
 
 //==============================================================================
-/** See MessageManager::callFunctionOnMessageThread() for use of this function type
-*/
+/** See MessageManager::callFunctionOnMessageThread() for use of this function type. */
 typedef void* (MessageCallbackFunction) (void* userData);
 
 
@@ -202,7 +201,7 @@ private:
     friend class QuitMessage;
     friend class MessageManagerLock;
 
-    ScopedPointer <ActionBroadcaster> broadcaster;
+    ScopedPointer<ActionBroadcaster> broadcaster;
     bool quitMessagePosted, quitMessageReceived;
     Thread::ThreadID messageThreadId;
     Thread::ThreadID volatile threadWithLock;
@@ -242,6 +241,9 @@ private:
 
     Obviously be careful not to create one of these and leave it lying around, or
     your app will grind to a halt!
+
+    MessageManagerLocks are re-entrant, so can be safely nested if the current thread
+    already has the lock.
 
     Another caveat is that using this in conjunction with other CriticalSections
     can create lots of interesting ways of producing a deadlock! In particular, if

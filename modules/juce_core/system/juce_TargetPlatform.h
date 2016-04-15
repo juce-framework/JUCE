@@ -39,8 +39,23 @@
     - Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
     - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
     - Either JUCE_INTEL or JUCE_PPC
-    - Either JUCE_GCC or JUCE_MSVC
+    - Either JUCE_GCC or JUCE_CLANG or JUCE_MSVC
 */
+
+//==============================================================================
+#ifdef JUCE_APP_CONFIG_HEADER
+ #include JUCE_APP_CONFIG_HEADER
+#elif ! defined (JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED)
+ /* Most projects will want to contain a global header file containing settings that
+    should be applied to all the modules when building them. The projucer will set
+    this up automatically, but if you're doing things manually, you may want to set
+    the JUCE_APP_CONFIG_HEADER macro with the name of a file to include, or just include
+    one before all the module cpp files, and set JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
+    in it to silence this error. (Or if you don't need a global header, then you can
+    just set JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED to stop this error)
+ */
+ #error "No global header file was included!"
+#endif
 
 //==============================================================================
 #if (defined (_WIN32) || defined (_WIN64))
@@ -52,18 +67,8 @@
 #elif defined (LINUX) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
-  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
-  #define Component CarbonDummyCompName
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
-  #undef Point
-  #undef Component
-
-  #if JUCE_PROJUCER_LIVE_BUILD
-   // This hack is a workaround for a bug (?) in Apple's 10.11 SDK headers
-   // which cause some configurations of Clang to throw out an error..
-   #undef CF_OPTIONS
-   #define CF_OPTIONS(_type, _name) _type _name; enum
-  #endif
+  #include "../native/juce_mac_ClangBugWorkaround.h"
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1
@@ -137,12 +142,12 @@
     #define JUCE_INTEL 1
   #endif
 
-  #if JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
-    #error "Building for OSX 10.3 is no longer supported!"
+  #if JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+    #error "Building for OSX 10.4 is no longer supported!"
   #endif
 
-  #if JUCE_MAC && ! defined (MAC_OS_X_VERSION_10_5)
-    #error "To build with 10.4 compatibility, use a 10.5 or 10.6 SDK and set the deployment target to 10.4"
+  #if JUCE_MAC && ! defined (MAC_OS_X_VERSION_10_6)
+    #error "To build with 10.5 compatibility, use a later SDK and set the deployment target to 10.5"
   #endif
 #endif
 
@@ -180,7 +185,6 @@
 
 #ifdef __clang__
  #define JUCE_CLANG 1
- #define JUCE_GCC 1
 #elif defined (__GNUC__)
   #define JUCE_GCC 1
 #elif defined (_MSC_VER)

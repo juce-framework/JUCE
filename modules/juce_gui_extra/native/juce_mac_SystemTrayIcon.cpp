@@ -104,6 +104,7 @@ public:
             const Time now (Time::getCurrentTime());
 
             MouseInputSource mouseSource = Desktop::getInstance().getMainMouseSource();
+            const float pressure = (float) e.pressure;
 
             if (isLeft || isRight)  // Only mouse up is sent by the OS, so simulate a down/up
             {
@@ -113,17 +114,17 @@ public:
                 owner.mouseDown (MouseEvent (mouseSource, Point<float>(),
                                              eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                          : ModifierKeys::rightButtonModifier),
-                                             &owner, &owner, now,
+                                             pressure, &owner, &owner, now,
                                              Point<float>(), now, 1, false));
 
                 owner.mouseUp (MouseEvent (mouseSource, Point<float>(), eventMods.withoutMouseButtons(),
-                                           &owner, &owner, now,
+                                           pressure, &owner, &owner, now,
                                            Point<float>(), now, 1, false));
             }
             else if (type == NSMouseMoved)
             {
                 owner.mouseMove (MouseEvent (mouseSource, Point<float>(), eventMods,
-                                             &owner, &owner, now,
+                                             pressure, &owner, &owner, now,
                                              Point<float>(), now, 1, false));
             }
         }

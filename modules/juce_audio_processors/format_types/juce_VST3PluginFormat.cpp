@@ -110,6 +110,7 @@ static void createPluginDescription (PluginDescription& description,
 {
     description.fileOrIdentifier    = pluginFile.getFullPathName();
     description.lastFileModTime     = pluginFile.getLastModificationTime();
+    description.lastInfoUpdateTime  = Time::getCurrentTime();
     description.manufacturerName    = company;
     description.name                = name;
     description.descriptiveName     = name;
@@ -454,7 +455,7 @@ public:
 
     tresult PLUGIN_API requestOpenEditor (FIDString name) override
     {
-        (void) name;
+        ignoreUnused (name);
         jassertfalse;
         return kResultFalse;
     }
@@ -1189,6 +1190,7 @@ private:
         if (library.open (filePath))
         {
             typedef bool (PLUGIN_API *InitModuleProc) ();
+
             if (InitModuleProc proc = (InitModuleProc) getFunction ("InitDll"))
             {
                 if (proc())
@@ -1575,6 +1577,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginWindow)
 };
 
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4996) // warning about overriding deprecated methods
+#endif
+
 //==============================================================================
 class VST3PluginInstance : public AudioPluginInstance
 {
@@ -1664,8 +1671,8 @@ public:
         createPluginDescription (description, module->file,
                                  company, module->name,
                                  *info, info2, infoW,
-                                 getNumInputChannels(),
-                                 getNumOutputChannels());
+                                 getTotalNumInputChannels(),
+                                 getTotalNumOutputChannels());
     }
 
     void* getPlatformSpecificData() override   { return component; }
@@ -1674,7 +1681,7 @@ public:
     //==============================================================================
     const String getName() const override
     {
-        return module != nullptr ? module->name : String::empty;
+        return module != nullptr ? module->name : String();
     }
 
     void repopulateArrangements()
@@ -1701,7 +1708,7 @@ public:
         using namespace Vst;
 
         ProcessSetup setup;
-        setup.symbolicSampleSize    = kSample32;
+        setup.symbolicSampleSize    = isUsingDoublePrecision() ? kSample64 : kSample32;
         setup.maxSamplesPerBlock    = estimatedSamplesPerBlock;
         setup.sampleRate            = newSampleRate;
         setup.processMode           = isNonRealtime() ? kOffline : kRealtime;
@@ -1753,54 +1760,67 @@ public:
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
-        JUCE_TRY
-        {
-            isActive = false;
+        isActive = false;
 
-            setStateForAllBusses (false);
+        setStateForAllBusses (false);
 
-            if (processor != nullptr)
-                warnOnFailure (processor->setProcessing (false));
+        if (processor != nullptr)
+            warnOnFailure (processor->setProcessing (false));
 
-            if (component != nullptr)
-                warnOnFailure (component->setActive (false));
-        }
-        JUCE_CATCH_ALL_ASSERT
+        if (component != nullptr)
+            warnOnFailure (component->setActive (false));
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
+    bool supportsDoublePrecisionProcessing() const override
+    {
+        return (processor->canProcessSampleSize (Vst::kSample64) == kResultTrue);
+    }
+
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (! isUsingDoublePrecision());
+
+        if (isActive && processor != nullptr)
+            processAudio (buffer, midiMessages, Vst::kSample32);
+    }
+
+    void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
+    {
+        jassert (isUsingDoublePrecision());
+
+        if (isActive && processor != nullptr)
+            processAudio (buffer, midiMessages, Vst::kSample64);
+    }
+
+    template <typename FloatType>
+    void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
+                       Vst::SymbolicSampleSizes sampleSize)
     {
         using namespace Vst;
+        const int numSamples = buffer.getNumSamples();
 
-        if (isActive
-             && processor != nullptr
-             && processor->canProcessSampleSize (kSample32) == kResultTrue)
-        {
-            const int numSamples = buffer.getNumSamples();
+        ProcessData data;
+        data.processMode            = isNonRealtime() ? kOffline : kRealtime;
+        data.symbolicSampleSize     = sampleSize;
+        data.numInputs              = numInputAudioBusses;
+        data.numOutputs             = numOutputAudioBusses;
+        data.inputParameterChanges  = inputParameterChanges;
+        data.outputParameterChanges = outputParameterChanges;
+        data.numSamples             = (Steinberg::int32) numSamples;
 
-            ProcessData data;
-            data.processMode            = isNonRealtime() ? kOffline : kRealtime;
-            data.symbolicSampleSize     = kSample32;
-            data.numInputs              = numInputAudioBusses;
-            data.numOutputs             = numOutputAudioBusses;
-            data.inputParameterChanges  = inputParameterChanges;
-            data.outputParameterChanges = outputParameterChanges;
-            data.numSamples             = (Steinberg::int32) numSamples;
+        updateTimingInformation (data, getSampleRate());
 
-            updateTimingInformation (data, getSampleRate());
+        for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
+            buffer.clear (i, 0, numSamples);
 
-            for (int i = getNumInputChannels(); i < buffer.getNumChannels(); ++i)
-                buffer.clear (i, 0, numSamples);
+        associateTo (data, buffer);
+        associateTo (data, midiMessages);
 
-            associateTo (data, buffer);
-            associateTo (data, midiMessages);
+        processor->process (data);
 
-            processor->process (data);
+        MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
 
-            MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
-
-            inputParameterChanges->clearAllQueues();
-        }
+        inputParameterChanges->clearAllQueues();
     }
 
     //==============================================================================
@@ -1819,7 +1839,7 @@ public:
                 return toString (busInfo.name);
         }
 
-        return String::empty;
+        return String();
     }
 
     const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, true, true); }
@@ -1827,41 +1847,29 @@ public:
 
     bool isInputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumInputChannels())
-            return false;
-
-        return getBusInfo (true, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumInputChannels())
+                 && getBusInfo (true, true).channelCount == 2;
     }
 
     bool isOutputChannelStereoPair (int channelIndex) const override
     {
-        if (channelIndex < 0 || channelIndex >= getNumOutputChannels())
-            return false;
-
-        return getBusInfo (false, true).channelCount == 2;
+        return isPositiveAndBelow (channelIndex, getTotalNumOutputChannels())
+                 && getBusInfo (false, true).channelCount == 2;
     }
 
     bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
     bool producesMidi() const override   { return getBusInfo (false, false).channelCount > 0; }
 
     //==============================================================================
-    bool silenceInProducesSilenceOut() const override
-    {
-        if (processor != nullptr)
-            return processor->getTailSamples() == Vst::kNoTail;
-
-        return true;
-    }
-
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */
     double getTailLengthSeconds() const override
     {
         if (processor != nullptr)
         {
-            const double currentSampleRate = getSampleRate();
+            const double sampleRate = getSampleRate();
 
-            if (currentSampleRate > 0.0)
-                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / currentSampleRate;
+            if (sampleRate > 0.0)
+                return jlimit (0, 0x7fffffff, (int) processor->getTailSamples()) / sampleRate;
         }
 
         return 0.0;
@@ -1923,7 +1931,7 @@ public:
             return toString (result);
         }
 
-        return String::empty;
+        return String();
     }
 
     void setParameter (int parameterIndex, float newValue) override
@@ -2005,8 +2013,7 @@ public:
     /** @note Not applicable to VST3 */
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override
     {
-        (void) data;
-        (void) sizeInBytes;
+        ignoreUnused (data, sizeInBytes);
     }
 
     //==============================================================================
@@ -2150,7 +2157,7 @@ private:
     */
     int numInputAudioBusses, numOutputAudioBusses;
     Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements; // Caching to improve performance and to avoid possible non-thread-safe calls to getBusArrangements().
-    VST3BufferExchange::BusMap inputBusMap, outputBusMap;
+    VST3FloatAndDoubleBusMapComposite inputBusMap, outputBusMap;
     Array<Vst::AudioBusBuffers> inputBusses, outputBusses;
 
     //==============================================================================
@@ -2392,12 +2399,11 @@ private:
     }
 
     //==============================================================================
-    void associateTo (Vst::ProcessData& destination, AudioSampleBuffer& buffer)
+    template <typename FloatType>
+    void associateTo (Vst::ProcessData& destination, AudioBuffer<FloatType>& buffer)
     {
-        using namespace VST3BufferExchange;
-
-        mapBufferToBusses (inputBusses, inputBusMap, inputArrangements, buffer);
-        mapBufferToBusses (outputBusses, outputBusMap, outputArrangements, buffer);
+        VST3BufferExchange<FloatType>::mapBufferToBusses (inputBusses, inputBusMap.get<FloatType>(), inputArrangements, buffer);
+        VST3BufferExchange<FloatType>::mapBufferToBusses (outputBusses, outputBusMap.get<FloatType>(), outputArrangements, buffer);
 
         destination.inputs  = inputBusses.getRawDataPointer();
         destination.outputs = outputBusses.getRawDataPointer();
@@ -2443,6 +2449,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginInstance)
 };
 
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
+
 };
 
 //==============================================================================
@@ -2457,9 +2467,14 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
     VST3Classes::VST3ModuleHandle::getAllDescriptionsForFile (results, fileOrIdentifier);
 }
 
-AudioPluginInstance* VST3PluginFormat::createInstanceFromDescription (const PluginDescription& description, double, int)
+void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
+                                             double,
+                                             int,
+                                             void* userData,
+                                             void (*callback) (void*, AudioPluginInstance*, const String&))
 {
     ScopedPointer<VST3Classes::VST3PluginInstance> result;
+
 
     if (fileMightContainThisPluginType (description.fileOrIdentifier))
     {
@@ -2479,7 +2494,17 @@ AudioPluginInstance* VST3PluginFormat::createInstanceFromDescription (const Plug
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    return result.release();
+    String errorMsg;
+
+    if (result == nullptr)
+        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-3");
+
+    callback (userData, result.release(), errorMsg);
+}
+
+bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+{
+    return false;
 }
 
 bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
@@ -2509,7 +2534,7 @@ bool VST3PluginFormat::doesPluginStillExist (const PluginDescription& descriptio
     return File (description.fileOrIdentifier).exists();
 }
 
-StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
+StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
 {
     StringArray results;
 

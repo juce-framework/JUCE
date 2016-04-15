@@ -40,6 +40,10 @@
     When you create a Value with its default constructor, it acts as a wrapper around a
     simple var object, but by creating a Value that refers to a custom subclass of ValueSource,
     you can map the Value onto any kind of underlying data.
+
+    Important note! The Value class is not thread-safe! If you're accessing one from
+    multiple threads, then you'll need to use your own synchronisation around any code
+    that accesses it.
 */
 class JUCE_API  Value
 {

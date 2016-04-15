@@ -363,7 +363,7 @@ public:
         results[numChars] = -1;
         float x = 0;
 
-        if (GetGlyphIndices (dc, utf16, (int) numChars, reinterpret_cast <WORD*> (results.getData()),
+        if (GetGlyphIndices (dc, utf16, (int) numChars, reinterpret_cast<WORD*> (results.getData()),
                              GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR)
         {
             for (size_t i = 0; i < numChars; ++i)
@@ -381,7 +381,7 @@ public:
         results[numChars] = -1;
         float x = 0;
 
-        if (GetGlyphIndices (dc, utf16, (int) numChars, reinterpret_cast <WORD*> (results.getData()),
+        if (GetGlyphIndices (dc, utf16, (int) numChars, reinterpret_cast<WORD*> (results.getData()),
                              GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR)
         {
             resultGlyphs.ensureStorageAllocated ((int) numChars);

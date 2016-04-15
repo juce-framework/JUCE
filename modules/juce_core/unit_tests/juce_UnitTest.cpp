@@ -205,9 +205,9 @@ void UnitTestRunner::endTest()
             m << r->failures << (r->failures == 1 ? " test" : " tests")
               << " failed, out of a total of " << (r->passes + r->failures);
 
-            logMessage (String::empty);
+            logMessage (String());
             logMessage (m);
-            logMessage (String::empty);
+            logMessage (String());
         }
         else
         {

@@ -22,10 +22,7 @@
   ==============================================================================
 */
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
-
+#include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_RTAS
@@ -52,6 +49,16 @@
  #undef UNICODE
 #endif
 
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+ #pragma clang diagnostic ignored "-Wcomment"
+ #pragma clang diagnostic ignored "-Wreorder"
+ #pragma clang diagnostic ignored "-Wextra-tokens"
+ #pragma clang diagnostic ignored "-Wunused-variable"
+ #pragma clang diagnostic ignored "-Wdeprecated"
+#endif
+
 #include <CEffectGroup.cpp>
 #include <CEffectGroupMIDI.cpp>
 #include <CEffectMIDIUtils.cpp>
@@ -60,5 +67,9 @@
 #include <CEffectType.cpp>
 #include <CEffectTypeRTAS.cpp>
 #include <ChunkDataParser.cpp>
+
+#ifdef __clang__
+ #pragma clang diagnostic pop
+#endif
 
 #endif

@@ -579,7 +579,7 @@ void ComboBox::mouseDrag (const MouseEvent& e)
 {
     beginDragAutoRepeat (50);
 
-    if (isButtonDown && ! e.mouseWasClicked())
+    if (isButtonDown && e.mouseWasDraggedSinceMouseDown())
         showPopupIfNotActive();
 }
 

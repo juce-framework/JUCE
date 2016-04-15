@@ -48,9 +48,9 @@ public:
 
         @param destStream                       the stream into which the compressed data should
                                                 be written
-        @param compressionLevel                 how much to compress the data, between 1 and 9, where
-                                                1 is the fastest/lowest compression, and 9 is the
-                                                slowest/highest compression. Any value outside this range
+        @param compressionLevel                 how much to compress the data, between 0 and 9, where
+                                                0 is non-compressed storage, 1 is the fastest/lowest compression,
+                                                and 9 is the slowest/highest compression. Any value outside this range
                                                 indicates that a default compression level should be used.
         @param deleteDestStreamWhenDestroyed    whether or not to delete the destStream object when
                                                 this stream is destroyed
@@ -59,7 +59,7 @@ public:
                                                 its value for some reason
     */
     GZIPCompressorOutputStream (OutputStream* destStream,
-                                int compressionLevel = 0,
+                                int compressionLevel = -1,
                                 bool deleteDestStreamWhenDestroyed = false,
                                 int windowBits = 0);
 

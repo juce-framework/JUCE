@@ -53,7 +53,7 @@ public:
    #endif
 
     /** Destructor. */
-    ~AttributedString();
+    ~AttributedString() noexcept;
 
     //==============================================================================
     /** Returns the complete text of this attributed string. */
@@ -150,36 +150,28 @@ public:
     class JUCE_API  Attribute
     {
     public:
-        /** Creates an attribute that changes the colour for a range of characters.
-            @see AttributedString::setColour()
-        */
-        Attribute (Range<int> range, Colour colour);
+        Attribute() noexcept;
+        ~Attribute() noexcept;
+        Attribute (const Attribute&) noexcept;
+        Attribute& operator= (const Attribute&) noexcept;
+       #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+        Attribute (Attribute&&) noexcept;
+        Attribute& operator= (Attribute&&) noexcept;
+       #endif
 
-        /** Creates an attribute that changes the font for a range of characters.
-            @see AttributedString::setFont()
-        */
-        Attribute (Range<int> range, const Font& font);
-
-        Attribute (const Attribute&);
-        ~Attribute();
-
-        /** If this attribute specifies a font, this returns it; otherwise it returns nullptr. */
-        const Font* getFont() const noexcept            { return font; }
-
-        /** If this attribute specifies a colour, this returns it; otherwise it returns nullptr. */
-        const Colour* getColour() const noexcept        { return colour; }
+        /** Creates an attribute that specifies the font and colour for a range of characters. */
+        Attribute (Range<int> range, const Font& font, Colour colour) noexcept;
 
         /** The range of characters to which this attribute will be applied. */
-        const Range<int> range;
+        Range<int> range;
+
+        /** The font for this range of characters. */
+        Font font;
+
+        /** The colour for this range of characters. */
+        Colour colour;
 
     private:
-        ScopedPointer<Font> font;
-        ScopedPointer<Colour> colour;
-
-        friend class AttributedString;
-        Attribute (const Attribute&, int);
-        Attribute& operator= (const Attribute&);
-
         JUCE_LEAK_DETECTOR (Attribute)
     };
 
@@ -189,7 +181,7 @@ public:
     /** Returns one of the string's attributes.
         The index provided must be less than getNumAttributes(), and >= 0.
     */
-    const Attribute* getAttribute (int index) const noexcept    { return attributes.getUnchecked (index); }
+    const Attribute& getAttribute (int index) const noexcept    { return attributes.getReference (index); }
 
     //==============================================================================
     /** Adds a colour attribute for the specified range. */
@@ -210,7 +202,7 @@ private:
     Justification justification;
     WordWrap wordWrap;
     ReadingDirection readingDirection;
-    OwnedArray<Attribute> attributes;
+    Array<Attribute> attributes;
 
     JUCE_LEAK_DETECTOR (AttributedString)
 };

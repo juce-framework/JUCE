@@ -136,13 +136,13 @@ public:
         If testResult is true, a pass is logged; if it's false, a failure is logged.
         If the failure message is specified, it will be written to the log if the test fails.
     */
-    void expect (bool testResult, const String& failureMessage = String::empty);
+    void expect (bool testResult, const String& failureMessage = String());
 
     /** Compares two values, and if they don't match, prints out a message containing the
         expected and actual result values.
     */
     template <class ValueType>
-    void expectEquals (ValueType actual, ValueType expected, String failureMessage = String::empty)
+    void expectEquals (ValueType actual, ValueType expected, String failureMessage = String())
     {
         const bool result = (actual == expected);
 
@@ -156,6 +156,47 @@ public:
 
         expect (result, failureMessage);
     }
+
+    //==============================================================================
+    /** Checks that the result of an expression does not throw an exception. */
+    #define expectDoesNotThrow(expr)         \
+        try                                  \
+        {                                    \
+            (expr);                          \
+            expect (true);                   \
+        }                                    \
+        catch (...)                          \
+        {                                    \
+            expect (false, "Expected: does not throw an exception, Actual: throws."); \
+        }
+
+    /** Checks that the result of an expression throws an exception. */
+    #define expectThrows(expr)               \
+        try                                  \
+        {                                    \
+            (expr);                          \
+            expect (false, "Expected: throws an exception, Actual: does not throw."); \
+        }                                    \
+        catch (...)                          \
+        {                                    \
+            expect (true);                   \
+        }
+
+    /** Checks that the result of an expression throws an exception of a certain type. */
+    #define expectThrowsType(expr, type)     \
+        try                                  \
+        {                                    \
+            (expr);                          \
+            expect (false, "Expected: throws an exception of type " #type ", Actual: does not throw."); \
+        }                                    \
+        catch (type&)                        \
+        {                                    \
+            expect (true);                   \
+        }                                    \
+        catch (...)                          \
+        {                                    \
+            expect (false, "Expected: throws an exception of type " #type ", Actual: throws another type."); \
+        }
 
     //==============================================================================
     /** Writes a message to the test log.

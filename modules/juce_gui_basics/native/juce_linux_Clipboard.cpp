@@ -142,7 +142,7 @@ namespace ClipboardHelpers
             reply.property = None; // == "fail"
             reply.time = evt.time;
 
-            HeapBlock <char> data;
+            HeapBlock<char> data;
             int propertyFormat = 0;
             size_t numDataItems = 0;
 

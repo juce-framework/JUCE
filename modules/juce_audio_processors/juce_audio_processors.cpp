@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if defined (JUCE_AUDIO_PROCESSORS_H_INCLUDED) && ! JUCE_AMALGAMATED_INCLUDE
+#ifdef JUCE_AUDIO_PROCESSORS_H_INCLUDED
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -31,24 +31,17 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-// Your project must contain an AppConfig.h file with your project-specific settings in it,
-// and your header search path must make it accessible to the module's files.
-#include "AppConfig.h"
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 
-#include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_audio_processors.h"
-#include "../juce_gui_extra/juce_gui_extra.h"
+#include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
 #if JUCE_MAC
  #if JUCE_SUPPORT_CARBON \
       && ((JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU) \
            || ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6))
-  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
-  #define Component CarbonDummyCompName
   #include <Carbon/Carbon.h>
-  #undef Point
-  #undef Component
  #endif
 #endif
 
@@ -61,6 +54,12 @@
 #if ! JUCE_WINDOWS && ! JUCE_MAC
  #undef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
+#endif
+
+#if JUCE_IOS
+#define IOS_MAC_VIEW  UIView
+#elif JUCE_MAC
+#define IOS_MAC_VIEW  NSView
 #endif
 
 //==============================================================================
@@ -77,10 +76,15 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
     return false;
 }
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IOS
 //==============================================================================
-struct AutoResizingNSViewComponent  : public NSViewComponent,
-                                      private AsyncUpdater
+struct AutoResizingNSViewComponent  :
+#if JUCE_MAC
+                                    public NSViewComponent,
+#else
+                                    public UIViewComponent,
+#endif
+                                    private AsyncUpdater
 {
     AutoResizingNSViewComponent() : recursive (false) {}
 
@@ -109,16 +113,16 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 {
     AutoResizingNSViewComponentWithParent()
     {
-        NSView* v = [[NSView alloc] init];
+        IOS_MAC_VIEW* v = [[IOS_MAC_VIEW alloc] init];
         setView (v);
         [v release];
 
         startTimer (30);
     }
 
-    NSView* getChildView() const
+    IOS_MAC_VIEW* getChildView() const
     {
-        if (NSView* parent = (NSView*) getView())
+        if (IOS_MAC_VIEW* parent = (IOS_MAC_VIEW*) getView())
             if ([[parent subviews] count] > 0)
                 return [[parent subviews] objectAtIndex: 0];
 
@@ -127,7 +131,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
     void timerCallback() override
     {
-        if (NSView* child = getChildView())
+        if (IOS_MAC_VIEW* child = getChildView())
         {
             stopTimer();
             setView (child);
@@ -143,6 +147,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
 #include "processors/juce_AudioProcessor.cpp"
+#include "processors/juce_AudioChannelSet.cpp"
 #include "processors/juce_AudioProcessorEditor.cpp"
 #include "processors/juce_AudioProcessorGraph.cpp"
 #include "processors/juce_GenericAudioProcessorEditor.cpp"
@@ -154,5 +159,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "scanning/juce_KnownPluginList.cpp"
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
+#include "utilities/juce_AudioProcessorValueTreeState.cpp"
+#include "utilities/juce_AudioProcessorParameters.cpp"
 
 }

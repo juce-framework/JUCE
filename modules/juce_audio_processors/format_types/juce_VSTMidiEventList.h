@@ -160,7 +160,7 @@ public:
     }
 
     //==============================================================================
-    HeapBlock <VstEvents> events;
+    HeapBlock<VstEvents> events;
 
 private:
     int numEventsUsed, numEventsAllocated;

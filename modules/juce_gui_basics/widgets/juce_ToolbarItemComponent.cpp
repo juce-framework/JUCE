@@ -64,13 +64,13 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (! (isDragging || e.mouseWasClicked()))
+        if (e.mouseWasDraggedSinceMouseDown() && ! isDragging)
         {
             isDragging = true;
 
             if (DragAndDropContainer* const dnd = DragAndDropContainer::findParentDragContainerFor (this))
             {
-                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image::null, true);
+                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image(), true);
 
                 if (ToolbarItemComponent* const tc = getToolbarItemComponent())
                 {
@@ -109,7 +109,7 @@ private:
 
     ToolbarItemComponent* getToolbarItemComponent() const noexcept
     {
-        return dynamic_cast <ToolbarItemComponent*> (getParentComponent());
+        return dynamic_cast<ToolbarItemComponent*> (getParentComponent());
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemDragAndDropOverlayComponent)
@@ -141,7 +141,7 @@ ToolbarItemComponent::~ToolbarItemComponent()
 
 Toolbar* ToolbarItemComponent::getToolbar() const
 {
-    return dynamic_cast <Toolbar*> (getParentComponent());
+    return dynamic_cast<Toolbar*> (getParentComponent());
 }
 
 bool ToolbarItemComponent::isToolbarVertical() const

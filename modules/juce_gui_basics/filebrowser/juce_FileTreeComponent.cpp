@@ -133,7 +133,7 @@ public:
             for (int maxRetries = 500; --maxRetries > 0;)
             {
                 for (int i = 0; i < getNumSubItems(); ++i)
-                    if (FileListTreeItem* f = dynamic_cast <FileListTreeItem*> (getSubItem (i)))
+                    if (FileListTreeItem* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
                         if (f->selectFile (target))
                             return true;
 
@@ -282,7 +282,7 @@ void FileTreeComponent::refresh()
 //==============================================================================
 File FileTreeComponent::getSelectedFile (const int index) const
 {
-    if (const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (index)))
+    if (const FileListTreeItem* const item = dynamic_cast<const FileListTreeItem*> (getSelectedItem (index)))
         return item->file;
 
     return File::nonexistent;
@@ -305,7 +305,7 @@ void FileTreeComponent::setDragAndDropDescription (const String& description)
 
 void FileTreeComponent::setSelectedFile (const File& target)
 {
-    if (FileListTreeItem* t = dynamic_cast <FileListTreeItem*> (getRootItem()))
+    if (FileListTreeItem* t = dynamic_cast<FileListTreeItem*> (getRootItem()))
         if (! t->selectFile (target))
             clearSelectedItems();
 }

@@ -64,6 +64,7 @@ public:
         MacOSX_10_8     = MacOSX | 8,
         MacOSX_10_9     = MacOSX | 9,
         MacOSX_10_10    = MacOSX | 10,
+        MacOSX_10_11    = MacOSX | 11,
 
         Win2000         = Windows | 1,
         WinXP           = Windows | 2,
@@ -151,13 +152,16 @@ public:
     */
     static String getCpuVendor();
 
-    static bool hasMMX() noexcept;   /**< Returns true if Intel MMX instructions are available. */
-    static bool has3DNow() noexcept; /**< Returns true if AMD 3DNOW instructions are available. */
-    static bool hasSSE() noexcept;   /**< Returns true if Intel SSE instructions are available. */
-    static bool hasSSE2() noexcept;  /**< Returns true if Intel SSE2 instructions are available. */
-    static bool hasSSE3() noexcept;  /**< Returns true if Intel SSE2 instructions are available. */
-    static bool hasSSSE3() noexcept; /**< Returns true if Intel SSSE3 instructions are available. */
-    static bool hasAVX() noexcept;   /**< Returns true if Intel AVX instructions are available. */
+    static bool hasMMX() noexcept;    /**< Returns true if Intel MMX instructions are available. */
+    static bool has3DNow() noexcept;  /**< Returns true if AMD 3DNOW instructions are available. */
+    static bool hasSSE() noexcept;    /**< Returns true if Intel SSE instructions are available. */
+    static bool hasSSE2() noexcept;   /**< Returns true if Intel SSE2 instructions are available. */
+    static bool hasSSE3() noexcept;   /**< Returns true if Intel SSE3 instructions are available. */
+    static bool hasSSSE3() noexcept;  /**< Returns true if Intel SSSE3 instructions are available. */
+    static bool hasSSE41() noexcept;  /**< Returns true if Intel SSE4.1 instructions are available. */
+    static bool hasSSE42() noexcept;  /**< Returns true if Intel SSE4.2 instructions are available. */
+    static bool hasAVX() noexcept;    /**< Returns true if Intel AVX instructions are available. */
+    static bool hasAVX2() noexcept;   /**< Returns true if Intel AVX2 instructions are available. */
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
@@ -188,6 +192,12 @@ public:
         where the problem happened and log it, etc.
     */
     static void setApplicationCrashHandler (CrashHandlerFunction);
+
+    /** Returns true if this code is running inside an app extension sandbox.
+
+        This function will always return false on windows, linux and android.
+    */
+    static bool isRunningInAppExtensionSandbox() noexcept;
 
 private:
     //==============================================================================

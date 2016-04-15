@@ -58,7 +58,7 @@ public:
             trails.add (t);
         }
 
-        t->pushPoint (e.position, e.mods);
+        t->pushPoint (e.position, e.mods, e.pressure);
         repaint();
     }
 
@@ -74,22 +74,26 @@ public:
             : source (ms), colour (getRandomBrightColour().withAlpha (0.6f))
         {}
 
-        void pushPoint (Point<float> p, ModifierKeys newMods)
+        void pushPoint (Point<float> newPoint, ModifierKeys newMods, float pressure)
         {
-            currentPosition = p;
+            currentPosition = newPoint;
             modifierKeys = newMods;
 
-            if (lastPoint.getDistanceFrom(p) > 5.0f)
+            if (lastPoint.getDistanceFrom (newPoint) > 5.0f)
             {
                 if (lastPoint != Point<float>())
                 {
-                    path.quadraticTo (lastPoint, p);
-                    lastPoint = Point<float>();
+                    Path newSegment;
+                    newSegment.startNewSubPath (lastPoint);
+                    newSegment.lineTo (newPoint);
+
+                    float diameter = 20.0f * (pressure > 0 && pressure < 1.0f ? pressure : 1.0f);
+
+                    PathStrokeType (diameter, PathStrokeType::curved, PathStrokeType::rounded).createStrokedPath (newSegment, newSegment);
+                    path.addPath (newSegment);
                 }
-                else
-                {
-                    lastPoint = p;
-                }
+
+                lastPoint = newPoint;
             }
         }
 
@@ -107,7 +111,7 @@ public:
     void drawTrail (Trail& trail, Graphics& g)
     {
         g.setColour (trail.colour);
-        g.strokePath (trail.path, PathStrokeType (20.0f, PathStrokeType::curved, PathStrokeType::rounded));
+        g.fillPath (trail.path);
 
         const float radius = 40.0f;
 
@@ -120,6 +124,11 @@ public:
 
         String desc ("Mouse #");
         desc << trail.source.getIndex();
+
+        float pressure = trail.source.getCurrentPressure();
+
+        if (pressure > 0.0f && pressure < 1.0f)
+            desc << "  (pressure: " << (int) (pressure * 100.0f) << "%)";
 
         if (trail.modifierKeys.isCommandDown()) desc << " (CMD)";
         if (trail.modifierKeys.isShiftDown())   desc << " (SHIFT)";

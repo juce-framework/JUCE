@@ -269,6 +269,11 @@ public:
     */
     bool handleKeyPress (int keyCode, juce_wchar textCharacter);
 
+    /** Called when a key is pressed.
+        Returns true if the keystroke was used.
+    */
+    bool handleKeyPress (const KeyPress& key);
+
     /** Called whenever a key is pressed or released.
         Returns true if the keystroke was used.
     */
@@ -306,7 +311,7 @@ public:
     virtual void setAlpha (float newAlpha) = 0;
 
     //==============================================================================
-    void handleMouseEvent (int touchIndex, Point<float> positionWithinPeer, ModifierKeys newMods, int64 time);
+    void handleMouseEvent (int touchIndex, Point<float> positionWithinPeer, ModifierKeys newMods, float pressure, int64 time);
     void handleMouseWheel (int touchIndex, Point<float> positionWithinPeer, int64 time, const MouseWheelDetails&);
     void handleMagnifyGesture (int touchIndex, Point<float> positionWithinPeer, int64 time, float scaleFactor);
 

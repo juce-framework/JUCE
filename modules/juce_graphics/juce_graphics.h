@@ -22,13 +22,40 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_graphics
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE graphics classes
+  description:      Classes for 2D vector graphics, image loading/saving, font handling, etc.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_events
+  OSXFrameworks:    Cocoa QuartzCore
+  iOSFrameworks:    CoreGraphics CoreText QuartzCore
+  linuxLibs:        X11 Xinerama Xext freetype
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_GRAPHICS_H_INCLUDED // %%
 #define JUCE_GRAPHICS_H_INCLUDED
 
-#include "../juce_core/juce_core.h"
-#include "../juce_events/juce_events.h"
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_USE_COREIMAGE_LOADER
 
     On OSX, enabling this flag means that the CoreImage codecs will be used to load
@@ -60,7 +87,7 @@
  #define USE_COREGRAPHICS_RENDERING 1
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 
@@ -91,9 +118,9 @@ class LowLevelGraphicsContext;
 #include "images/juce_ImageCache.h"
 #include "images/juce_ImageConvolutionKernel.h"
 #include "images/juce_ImageFileFormat.h"
-#include "fonts/juce_AttributedString.h"
 #include "fonts/juce_Typeface.h"
 #include "fonts/juce_Font.h"
+#include "fonts/juce_AttributedString.h"
 #include "fonts/juce_GlyphArrangement.h"
 #include "fonts/juce_TextLayout.h"
 #include "fonts/juce_CustomTypeface.h"
@@ -107,6 +134,11 @@ class LowLevelGraphicsContext;
 #include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
+
+#if JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS && (JUCE_MAC || JUCE_IOS)
+ #include "native/juce_mac_CoreGraphicsHelpers.h"
+ #include "native/juce_mac_CoreGraphicsContext.h"
+#endif
 
 }
 

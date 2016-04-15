@@ -167,7 +167,7 @@ public:
     /** Registers handlers for various standard juce components. */
     void registerStandardComponentTypes();
 
-    //=============================================================================
+    //==============================================================================
     /** This class is used when references to images need to be stored in ValueTrees.
 
         An instance of an ImageProvider provides a mechanism for converting an Image to/from
@@ -213,7 +213,7 @@ public:
     /** Returns the current image provider that this builder is using, or nullptr if none has been set. */
     ImageProvider* getImageProvider() const noexcept;
 
-    //=============================================================================
+    //==============================================================================
     /** Updates the children of a parent component by updating them from the children of
         a given ValueTree.
     */
@@ -225,7 +225,7 @@ public:
     static const Identifier idProperty;
 
 private:
-    //=============================================================================
+    //==============================================================================
     OwnedArray<TypeHandler> types;
     ScopedPointer<Component> component;
     ImageProvider* imageProvider;

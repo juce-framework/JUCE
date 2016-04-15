@@ -22,14 +22,40 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_audio_processors
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE audio processor classes
+  description:      Classes for loading and playing VST, AU, or internally-generated audio processors.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_gui_extra, juce_audio_basics
+  OSXFrameworks:    CoreAudio CoreMIDI AudioToolbox
+  iOSFrameworks:    AudioToolbox
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_AUDIO_PROCESSORS_H_INCLUDED
 #define JUCE_AUDIO_PROCESSORS_H_INCLUDED
 
-#include "../juce_gui_basics/juce_gui_basics.h"
-#include "../juce_audio_basics/juce_audio_basics.h"
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_audio_basics/juce_audio_basics.h>
 
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_PLUGINHOST_VST
     Enables the VST audio plugin hosting classes. This requires the Steinberg VST SDK to be
     installed on your machine.
@@ -67,8 +93,8 @@
  #define JUCE_SUPPORT_CARBON 1
 #endif
 
-//=============================================================================
-//=============================================================================
+//==============================================================================
+//==============================================================================
 namespace juce
 {
 
@@ -77,6 +103,7 @@ class AudioProcessor;
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
 #include "processors/juce_AudioProcessorParameter.h"
+#include "processors/juce_AudioChannelSet.h"
 #include "processors/juce_AudioProcessor.h"
 #include "processors/juce_PluginDescription.h"
 #include "processors/juce_AudioPluginInstance.h"
@@ -92,6 +119,12 @@ class AudioProcessor;
 #include "format_types/juce_VST3PluginFormat.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
+#include "utilities/juce_AudioProcessorValueTreeState.h"
+#include "utilities/juce_AudioProcessorParameterWithID.h"
+#include "utilities/juce_AudioParameterFloat.h"
+#include "utilities/juce_AudioParameterInt.h"
+#include "utilities/juce_AudioParameterBool.h"
+#include "utilities/juce_AudioParameterChoice.h"
 
 }
 

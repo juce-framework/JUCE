@@ -445,7 +445,7 @@ String TableHeaderComponent::toString() const
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)
 {
-    ScopedPointer <XmlElement> storedXml (XmlDocument::parse (storedVersion));
+    ScopedPointer<XmlElement> storedXml (XmlDocument::parse (storedVersion));
     int index = 0;
 
     if (storedXml != nullptr && storedXml->hasTagName ("TABLELAYOUT"))
@@ -590,7 +590,8 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
 {
     if (columnIdBeingResized == 0
          && columnIdBeingDragged == 0
-         && ! (e.mouseWasClicked() || e.mods.isPopupMenu()))
+         && e.mouseWasDraggedSinceMouseDown()
+         && ! e.mods.isPopupMenu())
     {
         dragOverlayComp = nullptr;
 
@@ -599,6 +600,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
         if (columnIdBeingResized != 0)
         {
             const ColumnInfo* const ci = getInfoForId (columnIdBeingResized);
+            jassert (ci != nullptr);
             initialColumnWidth = ci->width;
         }
         else
@@ -767,7 +769,7 @@ void TableHeaderComponent::mouseUp (const MouseEvent& e)
 
     updateColumnUnderMouse (e);
 
-    if (columnIdUnderMouse != 0 && e.mouseWasClicked() && ! e.mods.isPopupMenu())
+    if (columnIdUnderMouse != 0 && ! (e.mouseWasDraggedSinceMouseDown() || e.mods.isPopupMenu()))
         columnClicked (columnIdUnderMouse, e.mods);
 
     dragOverlayComp = nullptr;

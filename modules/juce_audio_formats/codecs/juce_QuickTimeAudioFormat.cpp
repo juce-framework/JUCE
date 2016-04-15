@@ -27,15 +27,11 @@
 } // (juce namespace)
 
 #if ! JUCE_WINDOWS
- #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
- #define Component CarbonDummyCompName
  #include <QuickTime/Movies.h>
  #include <QuickTime/QTML.h>
  #include <QuickTime/QuickTimeComponents.h>
  #include <QuickTime/MediaHandlers.h>
  #include <QuickTime/ImageCodec.h>
- #undef Point
- #undef Component
 #else
  #if JUCE_MSVC
   #pragma warning (push)
@@ -142,7 +138,7 @@ public:
             if (err != noErr)
                 return;
 
-            HeapBlock <AudioChannelLayout> qt_audio_channel_layout;
+            HeapBlock<AudioChannelLayout> qt_audio_channel_layout;
             qt_audio_channel_layout.calloc (output_layout_size, 1);
 
             MovieAudioExtractionGetProperty (extractor,
@@ -226,7 +222,7 @@ public:
             DisposeMovie (movie);
 
            #if JUCE_MAC
-            ExitMoviesOnThread ();
+            ExitMoviesOnThread();
            #endif
         }
     }
@@ -322,8 +318,8 @@ private:
     Thread::ThreadID lastThreadId;
     MovieAudioExtractionRef extractor;
     AudioStreamBasicDescription inputStreamDesc;
-    HeapBlock <AudioBufferList> bufferList;
-    HeapBlock <char> dataBuffer;
+    HeapBlock<AudioBufferList> bufferList;
+    HeapBlock<char> dataBuffer;
     Handle dataHandle;
 
     //==============================================================================

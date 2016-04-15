@@ -279,4 +279,27 @@ private:
 };
 
 
+//==============================================================================
+#if JUCE_CATCH_UNHANDLED_EXCEPTIONS || defined (DOXYGEN)
+
+ /** The JUCE_TRY/JUCE_CATCH_EXCEPTION wrappers can be used to pass any uncaught exceptions to
+     the JUCEApplicationBase::sendUnhandledException() method.
+     This functionality can be enabled with the JUCE_CATCH_UNHANDLED_EXCEPTIONS macro.
+ */
+ #define JUCE_TRY try
+
+ /** The JUCE_TRY/JUCE_CATCH_EXCEPTION wrappers can be used to pass any uncaught exceptions to
+     the JUCEApplicationBase::sendUnhandledException() method.
+     This functionality can be enabled with the JUCE_CATCH_UNHANDLED_EXCEPTIONS macro.
+ */
+ #define JUCE_CATCH_EXCEPTION \
+    catch (const std::exception& e) { juce::JUCEApplicationBase::sendUnhandledException (&e,      __FILE__, __LINE__); } \
+    catch (...)                     { juce::JUCEApplicationBase::sendUnhandledException (nullptr, __FILE__, __LINE__); }
+
+#else
+ #define JUCE_TRY
+ #define JUCE_CATCH_EXCEPTION
+#endif
+
+
 #endif   // JUCE_APPLICATIONBASE_H_INCLUDED

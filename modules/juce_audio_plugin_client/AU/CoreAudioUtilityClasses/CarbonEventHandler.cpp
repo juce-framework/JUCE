@@ -44,6 +44,8 @@
  Copyright (C) 2014 Apple Inc. All Rights Reserved.
 
 */
+
+#include "../../../juce_core/native/juce_mac_ClangBugWorkaround.h"
 #include "CarbonEventHandler.h"
 
 static pascal OSStatus TheEventHandler(EventHandlerCallRef inHandlerRef, EventRef inEvent, void *inUserData)

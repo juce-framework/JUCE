@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{45F7ED0D-469F-7EB0-7B2E-D2EAA2170C4E}") = "JuceDemoPlugin", "JuceDemoPlugin.vcxproj", "{64F92774-5695-B20A-C63E-7690CA0ECE34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{64F92774-5695-B20A-C63E-7690CA0ECE34}.Debug|Win32.ActiveCfg = Debug|Win32
+		{64F92774-5695-B20A-C63E-7690CA0ECE34}.Debug|Win32.Build.0 = Debug|Win32
+		{64F92774-5695-B20A-C63E-7690CA0ECE34}.Release|Win32.ActiveCfg = Release|Win32
+		{64F92774-5695-B20A-C63E-7690CA0ECE34}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

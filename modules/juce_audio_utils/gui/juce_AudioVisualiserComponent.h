@@ -112,7 +112,7 @@ public:
     */
     void getChannelAsPath (Path& result, const Range<float>* levels, int numLevels, int nextSample);
 
-    //==========================================================================
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
 
@@ -123,7 +123,6 @@ private:
 
     OwnedArray<ChannelInfo> channels;
     int numSamples, inputSamplesPerBlock;
-    float interpolation;
     Colour backgroundColour, waveformColour;
 
     void timerCallback() override;

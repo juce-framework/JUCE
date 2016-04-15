@@ -208,7 +208,10 @@ public:
     bool operator!= (Range other) const noexcept     { return start != other.start || end != other.end; }
 
     //==============================================================================
-    /** Returns true if the given position lies inside this range. */
+    /** Returns true if the given position lies inside this range.
+        When making this comparison, the start value is considered to be inclusive,
+        and the end of the range exclusive.
+    */
     bool contains (const ValueType position) const noexcept
     {
         return start <= position && position < end;
@@ -220,10 +223,7 @@ public:
         return jlimit (start, end, value);
     }
 
-    /** Returns true if the given range lies entirely inside this range.
-        When making this comparison, the start value is considered to be inclusive,
-        and the end of the range exclusive.
-     */
+    /** Returns true if the given range lies entirely inside this range. */
     bool contains (Range other) const noexcept
     {
         return start <= other.start && end >= other.end;

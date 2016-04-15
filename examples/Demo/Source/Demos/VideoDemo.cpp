@@ -113,13 +113,9 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         "Couldn't load the file!",
-                                        #if JUCE_QUICKTIME
-                                         "Sorry, QuickTime didn't manage to load that file!");
-                                        #elif JUCE_DIRECTSHOW
-                                         "Sorry, DirectShow didn't manage to load that file!");
-                                        #endif
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Couldn't load the file!",
+                                              r.getErrorMessage());
         }
     }
 
@@ -185,7 +181,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillTiledBackground (g);
+        fillStandardDemoBackground (g);
     }
 
     void resized() override

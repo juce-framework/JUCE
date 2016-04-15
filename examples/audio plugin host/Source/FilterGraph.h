@@ -51,13 +51,15 @@ public:
 
     void addFilter (const PluginDescription* desc, double x, double y);
 
+    void addFilterCallback (AudioPluginInstance* instance, const String& error, double x, double y);
+
     void removeFilter (const uint32 filterUID);
     void disconnectFilter (const uint32 filterUID);
 
     void removeIllegalConnections();
 
-    void setNodePosition (const int nodeId, double x, double y);
-    void getNodePosition (const int nodeId, double& x, double& y) const;
+    void setNodePosition (uint32 nodeId, double x, double y);
+    Point<double> getNodePosition (uint32 nodeId) const;
 
     //==============================================================================
     int getNumConnections() const noexcept;

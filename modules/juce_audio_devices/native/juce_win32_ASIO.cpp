@@ -67,7 +67,7 @@ namespace ASIODebugging
    #else
     static void dummyLog() {}
     #define JUCE_ASIO_LOG(msg)               ASIODebugging::dummyLog()
-    #define JUCE_ASIO_LOG_ERROR(msg, errNum) (void) errNum; ASIODebugging::dummyLog()
+    #define JUCE_ASIO_LOG_ERROR(msg, errNum) ignoreUnused (errNum); ASIODebugging::dummyLog()
    #endif
 }
 
@@ -320,9 +320,9 @@ public:
          classId (clsID),
          inputLatency (0),
          outputLatency (0),
-         minSize (0), maxSize (0),
-         preferredSize (0),
-         granularity (0),
+         minBufferSize (0), maxBufferSize (0),
+         preferredBufferSize (0),
+         bufferGranularity (0),
          numClockSources (0),
          currentBlockSizeSamples (0),
          currentBitDepth (16),
@@ -403,7 +403,7 @@ public:
 
     Array<double> getAvailableSampleRates() override    { return sampleRates; }
     Array<int> getAvailableBufferSizes() override       { return bufferSizes; }
-    int getDefaultBufferSize() override                 { return preferredSize; }
+    int getDefaultBufferSize() override                 { return preferredBufferSize; }
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
@@ -469,10 +469,10 @@ public:
             removeCurrentDriver();
 
             loadDriver();
-            const String error (initDriver());
+            String initError = initDriver();
 
-            if (error.isNotEmpty())
-                JUCE_ASIO_LOG ("ASIOInit: " + error);
+            if (initError.isNotEmpty())
+                JUCE_ASIO_LOG ("ASIOInit: " + initError);
 
             needToReset = false;
         }
@@ -489,7 +489,7 @@ public:
 
         if (err != ASE_OK)
         {
-            currentBlockSizeSamples = preferredSize;
+            currentBlockSizeSamples = preferredBufferSize;
             JUCE_ASIO_LOG_ERROR ("create buffers 2", err);
 
             asioObject->disposeBuffers();
@@ -561,8 +561,7 @@ public:
             }
 
             readLatencies();
-
-            asioObject->getBufferSize (&minSize, &maxSize, &preferredSize, &granularity);
+            refreshBufferSizes();
             deviceIsOpen = true;
 
             JUCE_ASIO_LOG ("starting");
@@ -690,31 +689,24 @@ public:
         JUCE_ASIO_LOG ("showing control panel");
 
         bool done = false;
+        insideControlPanelModalLoop = true;
 
-        JUCE_TRY
+        const uint32 started = Time::getMillisecondCounter();
+
+        if (asioObject != nullptr)
         {
-            // are there are devices that need to be closed before showing their control panel?
-            // close();
-            insideControlPanelModalLoop = true;
+            asioObject->controlPanel();
 
-            const uint32 started = Time::getMillisecondCounter();
+            const int spent = (int) Time::getMillisecondCounter() - (int) started;
 
-            if (asioObject != nullptr)
+            JUCE_ASIO_LOG ("spent: " + String (spent));
+
+            if (spent > 300)
             {
-                asioObject->controlPanel();
-
-                const int spent = (int) Time::getMillisecondCounter() - (int) started;
-
-                JUCE_ASIO_LOG ("spent: " + String (spent));
-
-                if (spent > 300)
-                {
-                    shouldUsePreferredSize = true;
-                    done = true;
-                }
+                shouldUsePreferredSize = true;
+                done = true;
             }
         }
-        JUCE_CATCH_ALL
 
         insideControlPanelModalLoop = false;
         return done;
@@ -769,7 +761,7 @@ private:
     Array<double> sampleRates;
     Array<int> bufferSizes;
     long inputLatency, outputLatency;
-    long minSize, maxSize, preferredSize, granularity;
+    long minBufferSize, maxBufferSize, preferredBufferSize, bufferGranularity;
     ASIOClockSource clocks[32];
     int numClockSources;
 
@@ -785,7 +777,7 @@ private:
     HeapBlock<ASIOSampleFormat> inputFormat, outputFormat;
 
     WaitableEvent event1;
-    HeapBlock <float> tempBuffer;
+    HeapBlock<float> tempBuffer;
     int volatile bufferIndex, numActiveInputChans, numActiveOutputChans;
 
     bool deviceIsOpen, isStarted, buffersCreated;
@@ -836,23 +828,27 @@ private:
         }
     }
 
+    long refreshBufferSizes()
+    {
+        return asioObject->getBufferSize (&minBufferSize, &maxBufferSize, &preferredBufferSize, &bufferGranularity);
+    }
+
     int readBufferSizes (int bufferSizeSamples)
     {
-        minSize = 0;
-        maxSize = 0;
-        granularity = 0;
-
+        minBufferSize = 0;
+        maxBufferSize = 0;
+        bufferGranularity = 0;
         long newPreferredSize = 0;
 
-        if (asioObject->getBufferSize (&minSize, &maxSize, &newPreferredSize, &granularity) == ASE_OK)
+        if (asioObject->getBufferSize (&minBufferSize, &maxBufferSize, &newPreferredSize, &bufferGranularity) == ASE_OK)
         {
-            if (preferredSize != 0 && newPreferredSize != 0 && newPreferredSize != preferredSize)
+            if (preferredBufferSize != 0 && newPreferredSize != 0 && newPreferredSize != preferredBufferSize)
                 shouldUsePreferredSize = true;
 
-            if (bufferSizeSamples < minSize || bufferSizeSamples > maxSize)
+            if (bufferSizeSamples < minBufferSize || bufferSizeSamples > maxBufferSize)
                 shouldUsePreferredSize = true;
 
-            preferredSize = newPreferredSize;
+            preferredBufferSize = newPreferredSize;
         }
 
         // unfortunate workaround for certain drivers which crash if you make
@@ -862,11 +858,11 @@ private:
         if (shouldUsePreferredSize)
         {
             JUCE_ASIO_LOG ("Using preferred size for buffer..");
-            long err = asioObject->getBufferSize (&minSize, &maxSize, &preferredSize, &granularity);
+            long err = refreshBufferSizes();
 
             if (err == ASE_OK)
             {
-                bufferSizeSamples = (int) preferredSize;
+                bufferSizeSamples = (int) preferredBufferSize;
             }
             else
             {
@@ -941,9 +937,7 @@ private:
         }
 
         bufferSizes.addIfNotAlreadyThere (preferredSize);
-
-        DefaultElementComparator <int> comparator;
-        bufferSizes.sort (comparator);
+        bufferSizes.sort();
     }
 
     double getSampleRate() const
@@ -1091,8 +1085,8 @@ private:
             if (i < 2)
             {
                 // clear the channels that are used with the dummy stuff
-                outputFormat[i].clear (bufferInfos [outputBufferIndex + i].buffers[0], preferredSize);
-                outputFormat[i].clear (bufferInfos [outputBufferIndex + i].buffers[1], preferredSize);
+                outputFormat[i].clear (bufferInfos [outputBufferIndex + i].buffers[0], preferredBufferSize);
+                outputFormat[i].clear (bufferInfos [outputBufferIndex + i].buffers[1], preferredBufferSize);
             }
         }
     }
@@ -1212,9 +1206,9 @@ private:
                     inputFormat.calloc (chansToAllocate);
                     outputFormat.calloc (chansToAllocate);
 
-                    if ((err = asioObject->getBufferSize (&minSize, &maxSize, &preferredSize, &granularity)) == 0)
+                    if ((err = refreshBufferSizes()) == 0)
                     {
-                        addBufferSizes (minSize, maxSize, preferredSize, granularity);
+                        addBufferSizes (minBufferSize, maxBufferSize, preferredBufferSize, bufferGranularity);
 
                         double currentRate = getSampleRate();
 
@@ -1235,8 +1229,8 @@ private:
 
                         updateSampleRates();
 
-                        readLatencies();                     // ..doing these steps because cubase does so at this stage
-                        createDummyBuffers (preferredSize);  // in initialisation, and some devices fail if we don't.
+                        readLatencies();                          // ..doing these steps because cubase does so at this stage
+                        createDummyBuffers (preferredBufferSize); // in initialisation, and some devices fail if we don't.
                         readLatencies();
 
                         // start and stop because cubase does it..
@@ -1416,18 +1410,18 @@ private:
         }
     };
 
-    template <>
-    struct ASIOCallbackFunctions <sizeof(currentASIODev) / sizeof(currentASIODev[0])>
-    {
-        static void setCallbacksForDevice (ASIOCallbacks&, ASIOAudioIODevice*) noexcept {}
-    };
-
     void setCallbackFunctions() noexcept
     {
         ASIOCallbackFunctions<0>::setCallbacksForDevice (callbacks, this);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ASIOAudioIODevice)
+};
+
+template <>
+struct ASIOAudioIODevice::ASIOCallbackFunctions <sizeof(currentASIODev) / sizeof(currentASIODev[0])>
+{
+    static void setCallbacksForDevice (ASIOCallbacks&, ASIOAudioIODevice*) noexcept {}
 };
 
 //==============================================================================

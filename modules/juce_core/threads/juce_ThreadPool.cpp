@@ -157,13 +157,13 @@ ThreadPoolJob* ThreadPool::getJob (const int index) const
 bool ThreadPool::contains (const ThreadPoolJob* const job) const
 {
     const ScopedLock sl (lock);
-    return jobs.contains (const_cast <ThreadPoolJob*> (job));
+    return jobs.contains (const_cast<ThreadPoolJob*> (job));
 }
 
 bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const
 {
     const ScopedLock sl (lock);
-    return jobs.contains (const_cast <ThreadPoolJob*> (job)) && job->isActive;
+    return jobs.contains (const_cast<ThreadPoolJob*> (job)) && job->isActive;
 }
 
 bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job, const int timeOutMs) const
@@ -336,11 +336,14 @@ bool ThreadPool::runNextJob (ThreadPoolThread& thread)
         ThreadPoolJob::JobStatus result = ThreadPoolJob::jobHasFinished;
         thread.currentJob = job;
 
-        JUCE_TRY
+        try
         {
             result = job->runJob();
         }
-        JUCE_CATCH_ALL_ASSERT
+        catch (...)
+        {
+            jassertfalse; // Your runJob() method mustn't throw any exceptions!
+        }
 
         thread.currentJob = nullptr;
 

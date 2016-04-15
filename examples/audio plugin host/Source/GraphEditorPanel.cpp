@@ -227,19 +227,24 @@ public:
         {
             String tip;
 
-            if (index_ == FilterGraph::midiChannelNumber)
+            if (index == FilterGraph::midiChannelNumber)
             {
-                tip = isInput ? "MIDI Input" : "MIDI Output";
+                tip = isInput ? "MIDI Input"
+                              : "MIDI Output";
             }
             else
             {
-                if (isInput)
-                    tip = node->getProcessor()->getInputChannelName (index_);
-                else
-                    tip = node->getProcessor()->getOutputChannelName (index_);
+                const AudioProcessor::AudioBusArrangement& busArrangement = node->getProcessor()->busArrangement;
+
+                const Array<AudioProcessor::AudioProcessorBus>& buses = isInput ? busArrangement.inputBuses
+                                                                                : busArrangement.outputBuses;
+
+                if (buses.size() > 0)
+                    tip = AudioChannelSet::getChannelTypeName (buses.getReference(0).channels.getTypeOfChannel (index));
 
                 if (tip.isEmpty())
-                    tip = (isInput ? "Input " : "Output ") + String (index_ + 1);
+                    tip = (isInput ? "Input "
+                                   : "Output ") + String (index + 1);
             }
 
             setTooltip (tip);
@@ -322,7 +327,7 @@ public:
         deleteAllChildren();
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         originalPos = localPointToGlobal (Point<int>());
 
@@ -384,7 +389,7 @@ public:
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         if (! e.mods.isPopupMenu())
         {
@@ -401,21 +406,21 @@ public:
         }
     }
 
-    void mouseUp (const MouseEvent& e)
+    void mouseUp (const MouseEvent& e) override
     {
-        if (e.mouseWasClicked() && e.getNumberOfClicks() == 2)
+        if (e.mouseWasDraggedSinceMouseDown())
+        {
+            graph.setChangedFlag (true);
+        }
+        else if (e.getNumberOfClicks() == 2)
         {
             if (const AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
                 if (PluginWindow* const w = PluginWindow::getWindowFor (f, PluginWindow::Normal))
                     w->toFront (true);
         }
-        else if (! e.mouseWasClicked())
-        {
-            graph.setChangedFlag (true);
-        }
     }
 
-    bool hitTest (int x, int y)
+    bool hitTest (int x, int y) override
     {
         for (int i = getNumChildComponents(); --i >= 0;)
             if (getChildComponent(i)->getBounds().contains (x, y))
@@ -424,7 +429,7 @@ public:
         return x >= 3 && x < getWidth() - 6 && y >= pinSize && y < getHeight() - pinSize;
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colours::lightgrey);
 
@@ -443,11 +448,11 @@ public:
         g.drawRect (x, y, w, h);
     }
 
-    void resized()
+    void resized() override
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            if (PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i)))
+            if (PinComponent* const pc = dynamic_cast<PinComponent*> (getChildComponent(i)))
             {
                 const int total = pc->isInput ? numIns : numOuts;
                 const int index = pc->index == FilterGraph::midiChannelNumber ? (total - 1) : pc->index;
@@ -463,7 +468,7 @@ public:
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            if (PinComponent* const pc = dynamic_cast <PinComponent*> (getChildComponent(i)))
+            if (PinComponent* const pc = dynamic_cast<PinComponent*> (getChildComponent(i)))
             {
                 if (pc->index == index && isInput == pc->isInput)
                 {
@@ -485,11 +490,11 @@ public:
             return;
         }
 
-        numIns = f->getProcessor()->getNumInputChannels();
+        numIns = f->getProcessor()->getMainBusNumInputChannels();
         if (f->getProcessor()->acceptsMidi())
             ++numIns;
 
-        numOuts = f->getProcessor()->getNumOutputChannels();
+        numOuts = f->getProcessor()->getMainBusNumOutputChannels();
         if (f->getProcessor()->producesMidi())
             ++numOuts;
 
@@ -508,9 +513,8 @@ public:
         setName (f->getProcessor()->getName());
 
         {
-            double x, y;
-            graph.getNodePosition (filterID, x, y);
-            setCentreRelative ((float) x, (float) y);
+            Point<double> p = graph.getNodePosition (filterID);
+            setCentreRelative ((float) p.x, (float) p.y);
         }
 
         if (numIns != numInputs || numOuts != numOutputs)
@@ -521,13 +525,13 @@ public:
             deleteAllChildren();
 
             int i;
-            for (i = 0; i < f->getProcessor()->getNumInputChannels(); ++i)
+            for (i = 0; i < f->getProcessor()->getMainBusNumInputChannels(); ++i)
                 addAndMakeVisible (new PinComponent (graph, filterID, i, true));
 
             if (f->getProcessor()->acceptsMidi())
                 addAndMakeVisible (new PinComponent (graph, filterID, FilterGraph::midiChannelNumber, true));
 
-            for (i = 0; i < f->getProcessor()->getNumOutputChannels(); ++i)
+            for (i = 0; i < f->getProcessor()->getMainBusNumOutputChannels(); ++i)
                 addAndMakeVisible (new PinComponent (graph, filterID, i, false));
 
             if (f->getProcessor()->producesMidi())
@@ -695,7 +699,11 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if ((! dragging) && ! e.mouseWasClicked())
+        if (dragging)
+        {
+            getGraphPanel()->dragConnector (e);
+        }
+        else if (e.mouseWasDraggedSinceMouseDown())
         {
             dragging = true;
 
@@ -710,10 +718,6 @@ public:
                                                  isNearerSource ? destFilterID : 0,
                                                  destFilterChannel,
                                                  e);
-        }
-        else if (dragging)
-        {
-            getGraphPanel()->dragConnector (e);
         }
     }
 
@@ -758,7 +762,7 @@ public:
                            -arrowL, -arrowW,
                            arrowL, 0.0f);
 
-        arrow.applyTransform (AffineTransform::identity
+        arrow.applyTransform (AffineTransform()
                                 .rotated (float_Pi * 0.5f - (float) atan2 (x2 - x1, y2 - y1))
                                 .translated ((x1 + x2) * 0.5f,
                                              (y1 + y2) * 0.5f));
@@ -840,7 +844,7 @@ FilterComponent* GraphEditorPanel::getComponentForFilter (const uint32 filterID)
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
+        if (FilterComponent* const fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
             if (fc->filterID == filterID)
                 return fc;
     }
@@ -852,7 +856,7 @@ ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProc
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (ConnectorComponent* const c = dynamic_cast <ConnectorComponent*> (getChildComponent (i)))
+        if (ConnectorComponent* const c = dynamic_cast<ConnectorComponent*> (getChildComponent (i)))
             if (c->sourceFilterID == conn.sourceNodeId
                  && c->destFilterID == conn.destNodeId
                  && c->sourceFilterChannel == conn.sourceChannelIndex
@@ -867,10 +871,10 @@ PinComponent* GraphEditorPanel::findPinAt (const int x, const int y) const
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (FilterComponent* fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
+        if (FilterComponent* fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
         {
-            if (PinComponent* pin = dynamic_cast <PinComponent*> (fc->getComponentAt (x - fc->getX(),
-                                                                                      y - fc->getY())))
+            if (PinComponent* pin = dynamic_cast<PinComponent*> (fc->getComponentAt (x - fc->getX(),
+                                                                                     y - fc->getY())))
                 return pin;
         }
     }
@@ -892,13 +896,13 @@ void GraphEditorPanel::updateComponents()
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        if (FilterComponent* const fc = dynamic_cast <FilterComponent*> (getChildComponent (i)))
+        if (FilterComponent* const fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
             fc->update();
     }
 
     for (int i = getNumChildComponents(); --i >= 0;)
     {
-        ConnectorComponent* const cc = dynamic_cast <ConnectorComponent*> (getChildComponent (i));
+        ConnectorComponent* const cc = dynamic_cast<ConnectorComponent*> (getChildComponent (i));
 
         if (cc != nullptr && cc != draggingConnector)
         {
@@ -945,7 +949,7 @@ void GraphEditorPanel::beginConnectorDrag (const uint32 sourceFilterID, const in
                                            const uint32 destFilterID, const int destFilterChannel,
                                            const MouseEvent& e)
 {
-    draggingConnector = dynamic_cast <ConnectorComponent*> (e.originalComponent);
+    draggingConnector = dynamic_cast<ConnectorComponent*> (e.originalComponent);
 
     if (draggingConnector == nullptr)
         draggingConnector = new ConnectorComponent (graph);
@@ -1064,7 +1068,7 @@ public:
     void timerCallback()
     {
         Component* const underMouse = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
-        TooltipClient* const ttc = dynamic_cast <TooltipClient*> (underMouse);
+        TooltipClient* const ttc = dynamic_cast<TooltipClient*> (underMouse);
 
         String newTip;
 
@@ -1087,7 +1091,8 @@ private:
 //==============================================================================
 GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& formatManager,
                                                 AudioDeviceManager* deviceManager_)
-    : graph (formatManager), deviceManager (deviceManager_)
+    : graph (formatManager), deviceManager (deviceManager_),
+      graphPlayer (getAppProperties().getUserSettings()->getBoolValue ("doublePrecisionProcessing", false))
 {
     addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
 

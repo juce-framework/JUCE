@@ -47,7 +47,7 @@ public:
                 return item->image;
         }
 
-        return Image::null;
+        return Image();
     }
 
     void addImageToCache (const Image& image, const int64 hashCode)
@@ -128,7 +128,7 @@ Image ImageCache::getFromHashCode (const int64 hashCode)
     if (Pimpl::getInstanceWithoutCreating() != nullptr)
         return Pimpl::getInstanceWithoutCreating()->getFromHashCode (hashCode);
 
-    return Image::null;
+    return Image();
 }
 
 void ImageCache::addImageToCache (const Image& image, const int64 hashCode)

@@ -36,25 +36,25 @@ template <typename Type>
 class Quaternion
 {
 public:
-    Quaternion() noexcept  : scalar() {}
-    Quaternion (const Quaternion& other) noexcept                                     : vector (other.vector), scalar (other.scalar) {}
-    Quaternion (const Vector3D<Type>& vectorPart, const Type& scalarPart) noexcept    : vector (vectorPart), scalar (scalarPart) {}
-    Quaternion (const Type& x, const Type& y, const Type& z, const Type& w) noexcept  : vector (x, y, z), scalar (w) {}
+    Quaternion() noexcept                                               : scalar() {}
+    Quaternion (const Quaternion& other) noexcept                       : vector (other.vector), scalar (other.scalar) {}
+    Quaternion (Vector3D<Type> vectorPart, Type scalarPart) noexcept    : vector (vectorPart), scalar (scalarPart) {}
+    Quaternion (Type x, Type y, Type z, Type w) noexcept                : vector (x, y, z), scalar (w) {}
 
     /** Creates a quaternion from an angle and an axis. */
-    static Quaternion fromAngle (const Type& angle, const Vector3D<Type>& axis) noexcept
+    static Quaternion fromAngle (Type angle, Vector3D<Type> axis) noexcept
     {
         return Quaternion (axis.normalised() * std::sin (angle / (Type) 2), std::cos (angle / (Type) 2));
     }
 
-    Quaternion& operator= (const Quaternion& other) noexcept
+    Quaternion& operator= (Quaternion other) noexcept
     {
         vector = other.vector;
         scalar = other.scalar;
         return *this;
     }
 
-    Quaternion& operator*= (const Quaternion& other) noexcept
+    Quaternion& operator*= (Quaternion other) noexcept
     {
         const Type oldScalar (scalar);
         scalar = (scalar * other.scalar) - (vector * other.vector);

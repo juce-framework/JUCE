@@ -428,7 +428,7 @@ private:
         const String s (metadata [name]);
 
         if (s.isNotEmpty())
-            vorbis_comment_add_tag (&vc, vorbisName, const_cast <char*> (s.toRawUTF8()));
+            vorbis_comment_add_tag (&vc, vorbisName, const_cast<char*> (s.toRawUTF8()));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggWriter)
@@ -483,8 +483,12 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
                                                           const StringPairArray& metadataValues,
                                                           int qualityOptionIndex)
 {
-    ScopedPointer <OggWriter> w (new OggWriter (out, sampleRate, numChannels,
-                                                (unsigned int) bitsPerSample, qualityOptionIndex, metadataValues));
+    if (out == nullptr)
+        return nullptr;
+
+    ScopedPointer<OggWriter> w (new OggWriter (out, sampleRate, numChannels,
+                                               (unsigned int) bitsPerSample,
+                                               qualityOptionIndex, metadataValues));
 
     return w->ok ? w.release() : nullptr;
 }

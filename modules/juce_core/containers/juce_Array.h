@@ -216,11 +216,16 @@ public:
     }
 
     //==============================================================================
-    /** Returns the current number of elements in the array.
-    */
+    /** Returns the current number of elements in the array. */
     inline int size() const noexcept
     {
         return numUsed;
+    }
+
+    /** Returns true if the array is empty, false otherwise. */
+    inline bool isEmpty() const noexcept
+    {
+        return size() == 0;
     }
 
     /** Returns one of the elements in the array.
@@ -360,7 +365,7 @@ public:
 
         for (; e != end_; ++e)
             if (elementToLookFor == *e)
-                return static_cast <int> (e - data.elements.getData());
+                return static_cast<int> (e - data.elements.getData());
 
         return -1;
     }
@@ -757,8 +762,8 @@ public:
     template <typename ElementComparator, typename TargetValueType>
     int indexOfSorted (ElementComparator& comparator, TargetValueType elementToLookFor) const
     {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
+        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
+                                   // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
 
@@ -805,6 +810,28 @@ public:
         }
 
         return ElementType();
+    }
+
+    /** Removes an element from the array.
+
+        This will remove the element pointed to by the given iterator,
+        and move back all the subsequent elements to close the gap.
+        If the iterator passed in does not point to an element within the
+        array, behaviour is undefined.
+
+        @param elementToRemove  a pointer to the element to remove
+        @see removeFirstMatchingValue, removeAllInstancesOf, removeRange
+    */
+    void remove (const ElementType* elementToRemove)
+    {
+        jassert (elementToRemove != nullptr);
+        const ScopedLockType lock (getLock());
+
+        jassert (data.elements != nullptr);
+        const int indexToRemove = int (elementToRemove - data.elements);
+        jassert (isPositiveAndBelow (indexToRemove, numUsed));
+
+        removeInternal (indexToRemove);
     }
 
     /** Removes an item from the array.
@@ -1048,6 +1075,16 @@ public:
     }
 
     //==============================================================================
+    /** Sorts the array using a default comparison operation.
+        If the type of your elements isn't supported by the DefaultElementComparator class
+        then you may need to use the other version of sort, which takes a custom comparator.
+    */
+    void sort()
+    {
+        DefaultElementComparator<ElementType> comparator;
+        sort (comparator);
+    }
+
     /** Sorts the elements in the array.
 
         This will use a comparator object to sort the elements into order. The object
@@ -1076,11 +1113,11 @@ public:
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,
-               const bool retainOrderOfEquivalentItems = false) const
+               const bool retainOrderOfEquivalentItems = false)
     {
         const ScopedLockType lock (getLock());
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
+        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
+                                   // avoids getting warning messages about the parameter being unused
         sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 

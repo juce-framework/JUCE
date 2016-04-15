@@ -1,0 +1,20 @@
+
+                        Where did the Introjucer go??
+
+If you've just updated to JUCE v4.2 from an earlier version, you'll probably
+be a little puzzled to find that this folder is empty, apart from some abandoned
+build folders that GIT has failed to delete, and you may be wondering what happened...
+
+Historically, we had the Introjucer, which was open-source, and the Projucer,
+which was closed-source. These shared a vast amount of their code, and we
+wanted to find a way to blend them into a single project. We also found it
+very tiresome and confusing for beginners to keep having to explain the
+difference between the Introjucer and the Projucer.
+
+So what we've done is to delete the Introjucer altogether! All of its open-source
+functionality is now provided by our newly open-sourced version of the Projucer.
+To keep the live-coding stuff secret, we squashed all of that functionality into a
+closed-source DLL. You can build the Projucer yourself now from the open-source
+folder in here, and it will run just fine (doing all the things that the old
+Introjucer used to do) but if it can also find the DLL, it'll be able to use
+all the fancy live-coding stuff too.

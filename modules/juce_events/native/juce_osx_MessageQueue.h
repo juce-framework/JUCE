@@ -32,10 +32,10 @@ class MessageQueue
 public:
     MessageQueue()
     {
-       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 && ! JUCE_IOS
-        runLoop = CFRunLoopGetMain();
-       #else
+       #if JUCE_IOS
         runLoop = CFRunLoopGetCurrent();
+       #else
+        runLoop = CFRunLoopGetMain();
        #endif
 
         CFRunLoopSourceContext sourceContext;
@@ -46,7 +46,7 @@ public:
         CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
     }
 
-    ~MessageQueue()
+    ~MessageQueue() noexcept
     {
         CFRunLoopRemoveSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
         CFRunLoopSourceInvalidate (runLoopSource);
@@ -56,14 +56,19 @@ public:
     void post (MessageManager::MessageBase* const message)
     {
         messages.add (message);
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
+        wakeUp();
     }
 
 private:
-    ReferenceCountedArray <MessageManager::MessageBase, CriticalSection> messages;
+    ReferenceCountedArray<MessageManager::MessageBase, CriticalSection> messages;
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
+
+    void wakeUp() noexcept
+    {
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
+    }
 
     bool deliverNextMessage()
     {
@@ -84,19 +89,18 @@ private:
         return true;
     }
 
-    void runLoopCallback()
+    void runLoopCallback() noexcept
     {
         for (int i = 4; --i >= 0;)
             if (! deliverNextMessage())
                 return;
 
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
+        wakeUp();
     }
 
-    static void runLoopSourceCallback (void* info)
+    static void runLoopSourceCallback (void* info) noexcept
     {
-        static_cast <MessageQueue*> (info)->runLoopCallback();
+        static_cast<MessageQueue*> (info)->runLoopCallback();
     }
 };
 

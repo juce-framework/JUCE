@@ -254,12 +254,12 @@ bool MidiFile::readFrom (InputStream& sourceStream)
     if (sourceStream.readIntoMemoryBlock (data, maxSensibleMidiFileSize))
     {
         size_t size = data.getSize();
-        const uint8* d = static_cast <const uint8*> (data.getData());
+        const uint8* d = static_cast<const uint8*> (data.getData());
         short fileType, expectedTracks;
 
         if (size > 16 && MidiFileHelpers::parseMidiHeader (d, timeFormat, fileType, expectedTracks))
         {
-            size -= (size_t) (d - static_cast <const uint8*> (data.getData()));
+            size -= (size_t) (d - static_cast<const uint8*> (data.getData()));
 
             int track = 0;
 

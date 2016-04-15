@@ -22,12 +22,38 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_audio_formats
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE audio file format codecs
+  description:      Classes for reading and writing various audio file formats.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_audio_basics
+  OSXFrameworks:    CoreAudio CoreMIDI QuartzCore AudioToolbox
+  iOSFrameworks:    AudioToolbox QuartzCore
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_AUDIO_FORMATS_H_INCLUDED
 #define JUCE_AUDIO_FORMATS_H_INCLUDED
 
-#include "../juce_audio_basics/juce_audio_basics.h"
+#include <juce_audio_basics/juce_audio_basics.h>
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_USE_FLAC
     Enables the FLAC audio codec classes (available on all platforms).
     If your app doesn't need to read FLAC files, you might want to disable this to
@@ -81,7 +107,7 @@
  #define JUCE_USE_WINDOWS_MEDIA_FORMAT 0
 #endif
 
-//=============================================================================
+//==============================================================================
 namespace juce
 {
 

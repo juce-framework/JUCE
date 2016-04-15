@@ -48,7 +48,7 @@ void DirectoryContentsDisplayComponent::removeListener (FileBrowserListener* con
 
 void DirectoryContentsDisplayComponent::sendSelectionChangeMessage()
 {
-    Component::BailOutChecker checker (dynamic_cast <Component*> (this));
+    Component::BailOutChecker checker (dynamic_cast<Component*> (this));
     listeners.callChecked (checker, &FileBrowserListener::selectionChanged);
 }
 
@@ -56,7 +56,7 @@ void DirectoryContentsDisplayComponent::sendMouseClickMessage (const File& file,
 {
     if (fileList.getDirectory().exists())
     {
-        Component::BailOutChecker checker (dynamic_cast <Component*> (this));
+        Component::BailOutChecker checker (dynamic_cast<Component*> (this));
         listeners.callChecked (checker, &FileBrowserListener::fileClicked, file, e);
     }
 }
@@ -65,7 +65,7 @@ void DirectoryContentsDisplayComponent::sendDoubleClickMessage (const File& file
 {
     if (fileList.getDirectory().exists())
     {
-        Component::BailOutChecker checker (dynamic_cast <Component*> (this));
+        Component::BailOutChecker checker (dynamic_cast<Component*> (this));
         listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, file);
     }
 }

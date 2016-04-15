@@ -56,7 +56,7 @@ public:
         setSource (new FileInputSource (file))
         @endcode
 
-        You can pass a zero in here to clear the thumbnail.
+        You can pass a nullptr in here to clear the thumbnail.
         The source that is passed in will be deleted by this object when it is no longer needed.
         @returns true if the source could be opened as a valid audio file, false if this failed for
         some reason.
