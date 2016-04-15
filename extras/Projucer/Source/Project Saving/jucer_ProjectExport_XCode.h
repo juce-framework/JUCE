@@ -310,7 +310,7 @@ public:
     void updateDeprecatedProjectSettingsInteractively() override
     {
         // check for an old version of the script from the Introjucer
-        if (MD5::fromUTF32 (getPostBuildScript()).toHexString() == "265ac212a7e734c5bbd6150e1eae18a1")
+        if (MD5 (getPostBuildScript().toUTF8()).toHexString() == "265ac212a7e734c5bbd6150e1eae18a1")
         {
             String alertWindowText = iOS ? "Your Xcode (iOS) Exporter settings use an invalid post-build script. Click 'Update' to remove it."
                                          : "Your Xcode (OSX) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
