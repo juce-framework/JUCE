@@ -63,10 +63,15 @@ public:
     bool moreThanOneInstanceAllowed() override              { return true; }
     void anotherInstanceStarted (const String&) override    {}
 
+    virtual StandaloneFilterWindow* createWindow()
+    {
+        return new StandaloneFilterWindow (getApplicationName(), Colours::white, nullptr, true);
+    }
+
     //==============================================================================
     void initialise (const String&) override
     {
-        mainWindow = new StandaloneFilterWindow (getApplicationName(), Colour(), nullptr, true);
+        mainWindow = createWindow();
 
        #if JUCE_IOS || JUCE_ANDROID
         Desktop::getInstance().setKioskModeComponent (mainWindow, false);
