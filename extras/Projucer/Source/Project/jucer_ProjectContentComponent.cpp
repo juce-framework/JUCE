@@ -1355,7 +1355,8 @@ bool ProjectContentComponent::isBuildEnabled() const
 {
     return project != nullptr
             && ! LiveBuildProjectSettings::isBuildDisabled (*project)
-            && ProjucerLicences::getInstance()->hasLiveCodingLicence();
+            && ProjucerLicences::getInstance()->hasLiveCodingLicence()
+            && ProjucerLicences::getInstance()->isLoggedIn();
 }
 
 void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
