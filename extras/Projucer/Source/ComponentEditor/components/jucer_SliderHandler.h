@@ -22,6 +22,33 @@
   ==============================================================================
 */
 
+static const Slider::SliderStyle sliderStyleTypes[] =
+{
+    Slider::LinearHorizontal,
+    Slider::LinearVertical,
+    Slider::LinearBar,
+    Slider::LinearBarVertical,
+    Slider::Rotary,
+    Slider::RotaryHorizontalDrag,
+    Slider::RotaryVerticalDrag,
+    Slider::RotaryHorizontalVerticalDrag,
+    Slider::IncDecButtons,
+    Slider::TwoValueHorizontal,
+    Slider::TwoValueVertical,
+    Slider::ThreeValueHorizontal,
+    Slider::ThreeValueVertical
+};
+
+static const Slider::TextEntryBoxPosition sliderTextBoxPositions[] =
+{
+    Slider::NoTextBox,
+    Slider::TextBoxLeft,
+    Slider::TextBoxRight,
+    Slider::TextBoxAbove,
+    Slider::TextBoxBelow
+};
+
+
 struct SliderHandler  : public ComponentTypeHandler
 {
     SliderHandler()
@@ -183,7 +210,8 @@ private:
         {
             choices.add ("Linear Horizontal");
             choices.add ("Linear Vertical");
-            choices.add ("Linear Bar");
+            choices.add ("Linear Bar Horizontal");
+            choices.add ("Linear Bar Vertical");
             choices.add ("Rotary");
             choices.add ("Rotary HorizontalDrag");
             choices.add ("Rotary VerticalDrag");
@@ -197,43 +225,16 @@ private:
 
         void setIndex (int newIndex) override
         {
-            const Slider::SliderStyle types[] = { Slider::LinearHorizontal,
-                                                  Slider::LinearVertical,
-                                                  Slider::LinearBar,
-                                                  Slider::Rotary,
-                                                  Slider::RotaryHorizontalDrag,
-                                                  Slider::RotaryVerticalDrag,
-                                                  Slider::RotaryHorizontalVerticalDrag,
-                                                  Slider::IncDecButtons,
-                                                  Slider::TwoValueHorizontal,
-                                                  Slider::TwoValueVertical,
-                                                  Slider::ThreeValueHorizontal,
-                                                  Slider::ThreeValueVertical };
-
-            if (newIndex >= 0 && newIndex < numElementsInArray (types))
-            {
-                document.perform (new SliderTypeChangeAction (component, *document.getComponentLayout(), types [newIndex]),
+            if (newIndex >= 0 && newIndex < numElementsInArray (sliderStyleTypes))
+                document.perform (new SliderTypeChangeAction (component, *document.getComponentLayout(),
+                                                              sliderStyleTypes[newIndex]),
                                   "Change Slider style");
-            }
         }
 
         int getIndex() const override
         {
-            const Slider::SliderStyle types[] = { Slider::LinearHorizontal,
-                                                  Slider::LinearVertical,
-                                                  Slider::LinearBar,
-                                                  Slider::Rotary,
-                                                  Slider::RotaryHorizontalDrag,
-                                                  Slider::RotaryVerticalDrag,
-                                                  Slider::RotaryHorizontalVerticalDrag,
-                                                  Slider::IncDecButtons,
-                                                  Slider::TwoValueHorizontal,
-                                                  Slider::TwoValueVertical,
-                                                  Slider::ThreeValueHorizontal,
-                                                  Slider::ThreeValueVertical };
-
-            for (int i = 0; i < numElementsInArray (types); ++i)
-                if (types [i] == dynamic_cast<Slider*> (component)->getSliderStyle())
+            for (int i = 0; i < numElementsInArray (sliderStyleTypes); ++i)
+                if (sliderStyleTypes[i] == dynamic_cast<Slider*> (component)->getSliderStyle())
                     return i;
 
             return -1;
@@ -284,29 +285,16 @@ private:
 
         void setIndex (int newIndex) override
         {
-            const Slider::TextEntryBoxPosition types[] = { Slider::NoTextBox,
-                                                           Slider::TextBoxLeft,
-                                                           Slider::TextBoxRight,
-                                                           Slider::TextBoxAbove,
-                                                           Slider::TextBoxBelow };
-
-            if (newIndex >= 0 && newIndex < numElementsInArray (types))
-            {
-                document.perform (new SliderTextBoxChangeAction (component, *document.getComponentLayout(), types [newIndex]),
+            if (newIndex >= 0 && newIndex < numElementsInArray (sliderTextBoxPositions))
+                document.perform (new SliderTextBoxChangeAction (component, *document.getComponentLayout(),
+                                                                 sliderTextBoxPositions[newIndex]),
                                   "Change Slider textbox");
-            }
         }
 
         int getIndex() const override
         {
-            const Slider::TextEntryBoxPosition types[] = { Slider::NoTextBox,
-                                                           Slider::TextBoxLeft,
-                                                           Slider::TextBoxRight,
-                                                           Slider::TextBoxAbove,
-                                                           Slider::TextBoxBelow };
-
-            for (int i = 0; i < numElementsInArray (types); ++i)
-                if (types [i] == component->getTextBoxPosition())
+            for (int i = 0; i < numElementsInArray (sliderTextBoxPositions); ++i)
+                if (sliderTextBoxPositions[i] == component->getTextBoxPosition())
                     return i;
 
             return -1;
@@ -558,7 +546,7 @@ private:
                 default:    jassertfalse; break;
             }
 
-            return String::empty;
+            return String();
         }
 
     private:
@@ -569,13 +557,13 @@ private:
             SliderRangeChangeAction (Slider* comp, ComponentLayout& l, const double newState_[3])
                 : ComponentUndoableAction<Slider> (comp, l)
             {
-                newState [0] = newState_ [0];
-                newState [1] = newState_ [1];
-                newState [2] = newState_ [2];
+                newState[0] = newState_ [0];
+                newState[1] = newState_ [1];
+                newState[2] = newState_ [2];
 
-                oldState [0] = comp->getMinimum();
-                oldState [1] = comp->getMaximum();
-                oldState [2] = comp->getInterval();
+                oldState[0] = comp->getMinimum();
+                oldState[1] = comp->getMaximum();
+                oldState[2] = comp->getInterval();
             }
 
             bool perform() override
@@ -659,6 +647,7 @@ private:
             case Slider::LinearHorizontal:              return "LinearHorizontal";
             case Slider::LinearVertical:                return "LinearVertical";
             case Slider::LinearBar:                     return "LinearBar";
+            case Slider::LinearBarVertical:             return "LinearBarVertical";
             case Slider::Rotary:                        return "Rotary";
             case Slider::RotaryHorizontalDrag:          return "RotaryHorizontalDrag";
             case Slider::RotaryVerticalDrag:            return "RotaryVerticalDrag";
@@ -671,23 +660,14 @@ private:
             default:                                    jassertfalse; break;
         }
 
-        return String::empty;
+        return String();
     }
 
     static Slider::SliderStyle sliderStringToStyle (const String& s)
     {
-        if (s == "LinearHorizontal")                    return Slider::LinearHorizontal;
-        if (s == "LinearVertical")                      return Slider::LinearVertical;
-        if (s == "LinearBar")                           return Slider::LinearBar;
-        if (s == "Rotary")                              return Slider::Rotary;
-        if (s == "RotaryHorizontalDrag")                return Slider::RotaryHorizontalDrag;
-        if (s == "RotaryVerticalDrag")                  return Slider::RotaryVerticalDrag;
-        if (s == "RotaryHorizontalVerticalDrag")        return Slider::RotaryHorizontalVerticalDrag;
-        if (s == "IncDecButtons")                       return Slider::IncDecButtons;
-        if (s.startsWithIgnoreCase ("TwoValueHoriz"))   return Slider::TwoValueHorizontal;
-        if (s.startsWithIgnoreCase ("TwoValueVert"))    return Slider::TwoValueVertical;
-        if (s.startsWithIgnoreCase ("ThreeValueHoriz")) return Slider::ThreeValueHorizontal;
-        if (s.startsWithIgnoreCase ("ThreeValueVert"))  return Slider::ThreeValueVertical;
+        for (int i = 0; i < numElementsInArray (sliderStyleTypes); ++i)
+            if (s == sliderStyleToString (sliderStyleTypes[i]))
+                return sliderStyleTypes[i];
 
         jassertfalse;
         return Slider::LinearHorizontal;
@@ -705,16 +685,14 @@ private:
             default:                    jassertfalse; break;
         }
 
-        return String::empty;
+        return String();
     }
 
     static Slider::TextEntryBoxPosition stringToTextBoxPos (const String& s)
     {
-        if (s == "NoTextBox")      return Slider::NoTextBox;
-        if (s == "TextBoxLeft")    return Slider::TextBoxLeft;
-        if (s == "TextBoxRight")   return Slider::TextBoxRight;
-        if (s == "TextBoxAbove")   return Slider::TextBoxAbove;
-        if (s == "TextBoxBelow")   return Slider::TextBoxBelow;
+        for (int i = 0; i < numElementsInArray (sliderTextBoxPositions); ++i)
+            if (s == textBoxPosToString (sliderTextBoxPositions[i]))
+                return sliderTextBoxPositions[i];
 
         jassertfalse;
         return Slider::TextBoxLeft;
