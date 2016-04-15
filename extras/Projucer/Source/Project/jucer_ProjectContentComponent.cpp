@@ -159,7 +159,7 @@ struct LogoComponent  : public Component
         logo = Drawable::createFromSVG (*svg);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
 

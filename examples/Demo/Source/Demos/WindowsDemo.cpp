@@ -110,13 +110,13 @@ public:
         startTimer (60);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (colour);
         g.fillEllipse (ballBounds - getPosition().toFloat());
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         ballBounds += direction;
 
@@ -150,18 +150,18 @@ public:
         }
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent& e) override
     {
         dragger.startDraggingComponent (this, e);
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void mouseDrag (const MouseEvent& e) override
     {
         // as there's no titlebar we have to manage the dragging ourselves
         dragger.dragComponent (this, e, 0);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (isOpaque())
             g.fillAll (Colours::white);

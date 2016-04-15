@@ -342,7 +342,7 @@ private:
             setSize (2048, 2048);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             if (jucerComp == nullptr)
                 g.fillCheckerBoard (getLocalBounds(), 50, 50,
@@ -350,7 +350,7 @@ private:
                                     Colour::greyLevel (0.8f).withAlpha (0.4f));
         }
 
-        void resized()
+        void resized() override
         {
             if (jucerComp != nullptr)
             {
@@ -384,7 +384,7 @@ private:
             resized();
         }
 
-        void parentHierarchyChanged()
+        void parentHierarchyChanged() override
         {
             updateContent();
         }

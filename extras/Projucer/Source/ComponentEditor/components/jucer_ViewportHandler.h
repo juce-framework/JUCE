@@ -266,15 +266,14 @@ private:
     };
 
     //==============================================================================
-    class ViewportDemoContentComp : public Component
+    struct ViewportDemoContentComp : public Component
     {
-    public:
         ViewportDemoContentComp()
         {
             setSize (2048, 2048);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.fillCheckerBoard (getLocalBounds(), 50, 50,
                                 Colours::lightgrey.withAlpha (0.5f),

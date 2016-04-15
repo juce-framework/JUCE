@@ -738,7 +738,7 @@ static const unsigned char temp_binary_data_10[] =
 "    {\r\n"
 "    }\r\n"
 "\r\n"
-"    void paint (Graphics& g)\r\n"
+"    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        // You should replace everything in this method with your own drawing code..\r\n"
 "\r\n"
@@ -753,7 +753,7 @@ static const unsigned char temp_binary_data_10[] =
 "                    Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
 "\r\n"
-"    void resized()\r\n"
+"    void resized() override\r\n"
 "    {\r\n"
 "        // This method is where you should set the bounds of any child\r\n"
 "        // components that your component contains..\r\n"
@@ -1229,7 +1229,7 @@ static const unsigned char temp_binary_data_19[] =
 "    {\r\n"
 "    }\r\n"
 "\r\n"
-"    void paint (Graphics& g)\r\n"
+"    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        /* This demo code just fills the component's background and\r\n"
 "           draws some placeholder text to get you started.\r\n"
@@ -1249,7 +1249,7 @@ static const unsigned char temp_binary_data_19[] =
 "                    Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
 "\r\n"
-"    void resized()\r\n"
+"    void resized() override\r\n"
 "    {\r\n"
 "        // This method is where you should set the bounds of any child\r\n"
 "        // components that your component contains..\r\n"
@@ -4027,7 +4027,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xfc72fe86:  numBytes = 2155; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
-        case 0x28d496ad:  numBytes = 1143; return jucer_InlineComponentTemplate_h;
+        case 0x28d496ad:  numBytes = 1161; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1992; return jucer_MainTemplate_NoWindow_cpp;
         case 0xda2391f8:  numBytes = 3848; return jucer_MainTemplate_SimpleWindow_cpp;
@@ -4036,7 +4036,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xe7bf237a:  numBytes = 648; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:  numBytes = 1626; return jucer_NewInlineComponentTemplate_h;
+        case 0x36e634a1:  numBytes = 1644; return jucer_NewInlineComponentTemplate_h;
         case 0x7fbac252:  numBytes = 1827; return jucer_OpenGLComponentTemplate_cpp;
         case 0x406db5c1:  numBytes = 3117; return background_logo_svg;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;

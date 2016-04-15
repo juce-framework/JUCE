@@ -40,7 +40,7 @@ public:
         tryToLoadImage();
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
 

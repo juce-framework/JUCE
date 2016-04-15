@@ -54,12 +54,12 @@ public:
         userText.setText (getLastText());
     }
 
-    void textEditorTextChanged (TextEditor&)
+    void textEditorTextChanged (TextEditor&) override
     {
         update();
     }
 
-    void textEditorEscapeKeyPressed (TextEditor&)
+    void textEditorEscapeKeyPressed (TextEditor&) override
     {
         getTopLevelComponent()->exitModalState (0);
     }
@@ -93,7 +93,7 @@ public:
         repaint (previewPathArea);
     }
 
-    void resized()
+    void resized() override
     {
         Rectangle<int> r (getLocalBounds().reduced (8));
         desc.setBounds (r.removeFromTop (44));
@@ -104,7 +104,7 @@ public:
         resultText.setBounds (r);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (Colours::white);
         g.fillPath (path, path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));

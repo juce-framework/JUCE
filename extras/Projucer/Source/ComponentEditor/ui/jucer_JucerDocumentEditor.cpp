@@ -58,12 +58,12 @@ public:
         document.removeChangeListener (this);
     }
 
-    int getNumRows()
+    int getNumRows() override
     {
         return methods.size();
     }
 
-    void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected)
+    void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected) override
     {
         if (row < 0 || row >= getNumRows())
             return;
@@ -80,7 +80,7 @@ public:
         getLookAndFeel().drawTickBox (g, *this, 6, 2, 18, 18, document.isOptionalMethodEnabled (methods [row]), true, false, false);
     }
 
-    void listBoxItemClicked (int row, const MouseEvent& e)
+    void listBoxItemClicked (int row, const MouseEvent& e) override
     {
         if (row < 0 || row >= getNumRows())
             return;
@@ -90,17 +90,17 @@ public:
                                                ! document.isOptionalMethodEnabled (methods [row]));
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::white);
     }
 
-    void resized()
+    void resized() override
     {
         listBox->setBounds (getLocalBounds());
     }
 
-    void refresh()
+    void refresh() override
     {
         baseClasses.clear();
         returnValues.clear();
@@ -113,7 +113,7 @@ public:
         listBox->repaint();
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }
