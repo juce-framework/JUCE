@@ -394,7 +394,8 @@ String Time::getTimeZone() const noexcept
 {
     String zone[2];
 
-  #if JUCE_MSVC
+  #if JUCE_WINDOWS
+   #if JUCE_MSVC || JUCE_CLANG
     _tzset();
 
     for (int i = 0; i < 2; ++i)
@@ -404,12 +405,12 @@ String Time::getTimeZone() const noexcept
         _get_tzname (&length, name, 127, i);
         zone[i] = name;
     }
-  #else
-   #if JUCE_MINGW
-    #warning "Can't find a replacement for tzset on mingw - ideas welcome!"
    #else
-    tzset();
+    #warning "Can't find a replacement for tzset on mingw - ideas welcome!"
    #endif
+  #else
+    tzset();
+
     const char** const zonePtr = (const char**) tzname;
     zone[0] = zonePtr[0];
     zone[1] = zonePtr[1];

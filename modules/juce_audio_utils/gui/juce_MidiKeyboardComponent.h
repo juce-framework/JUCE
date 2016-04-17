@@ -370,12 +370,12 @@ protected:
     /** Callback for when the mouse was down on a key and is no longer down on it.
         This can happen on mouse up, or if the mouse is still down but is being
         dragged away from the key.
-     
-        Timing wise, this will be called -after- the mouseDownOnKey, mouseUpOnKey, 
+
+        Timing wise, this will be called -after- the mouseDownOnKey, mouseUpOnKey,
         and mouseDraggedToKey callbacks. */
     virtual void mouseDownFinishedOnKey (int midiNoteNumber, float velocity);
-    
-    /** Calculates the positon of a given midi-note.
+
+    /** Calculates the position of a given midi-note.
 
         This can be overridden to create layouts with custom key-widths.
 
@@ -394,7 +394,7 @@ protected:
 
     /** Interface for subclasses for read-only access to the mouseDownNotes array. */
     const Array<int>& getMouseDownNotes();
-    
+
 private:
     //==============================================================================
     friend class MidiKeyboardUpDownButton;
@@ -441,7 +441,7 @@ private:
 /**
  A MidiKeyboardComponent subclass with a "sticky" keys behavior - A clicked key
  remains pressed until clicked again.
- 
+
  @see MidiKeyboardComponent
  */
 class StickyMidiKeyboardComponent : public MidiKeyboardComponent
@@ -449,7 +449,7 @@ class StickyMidiKeyboardComponent : public MidiKeyboardComponent
 public:
     //==============================================================================
     /** Creates a StickyMidiKeyboardComponent.
-     
+
      @see MidiKeyboardComponent constructor.
      */
     StickyMidiKeyboardComponent (MidiKeyboardState& state,
@@ -465,7 +465,7 @@ protected:
 
 private:
     BigInteger stuckKeys = BigInteger();
-    
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StickyMidiKeyboardComponent)
 };
 

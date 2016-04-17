@@ -45,10 +45,22 @@
 //==============================================================================
 #ifdef JUCE_APP_CONFIG_HEADER
  #include JUCE_APP_CONFIG_HEADER
-#else
- // Your project must contain an AppConfig.h file with your project-specific settings in it,
- // and your header search path must make it accessible to the module's files.
- #include "AppConfig.h"
+#elif ! defined (JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED)
+ /*
+    Most projects will contain a global header file containing various settings that
+    should be applied to all the code in your project. If you use the projucer, it'll
+    set up a global header file for you automatically, but if you're doing things manually,
+    you may want to set the JUCE_APP_CONFIG_HEADER macro with the name of a file to include,
+    or just include one before all the module cpp files, in which you set
+    JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1 to silence this error.
+    (Or if you don't need a global header, then you can just define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
+    globally to avoid this error).
+
+    Note for people who hit this error when trying to compile a JUCE project created by
+    a pre-v4.2 version of the Introjucer/Projucer, it's very easy to fix: just re-save
+    your project with the latest version of the Projucer, and it'll magically fix this!
+ */
+ #error "No global header file was included!"
 #endif
 
 //==============================================================================

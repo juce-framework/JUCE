@@ -22,6 +22,30 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_tracktion_marketplace
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE Tracktion marketplace support
+  description:      Classes for online product authentication via the Tracktion marketplace.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_data_structures juce_cryptography
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
 #define JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
 
@@ -37,11 +61,11 @@
 */
 
 //==============================================================================
-#include "../juce_cryptography/juce_cryptography.h"
-#include "../juce_data_structures/juce_data_structures.h"
+#include <juce_cryptography/juce_cryptography.h>
+#include <juce_data_structures/juce_data_structures.h>
 
 #if JUCE_MODULE_AVAILABLE_juce_gui_extra
- #include "../juce_gui_extra/juce_gui_extra.h"
+ #include <juce_gui_extra/juce_gui_extra.h>
 #endif
 
 namespace juce

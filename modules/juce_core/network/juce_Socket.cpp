@@ -333,45 +333,58 @@ namespace SocketHelpers
                                const int portNumber,
                                const int timeOutMillisecs) noexcept
     {
-        struct addrinfo* info = getAddressInfo (false, hostName, portNumber);
+        bool success = false;
 
-        if (info == nullptr)
-            return false;
-
-        if (handle < 0)
-            handle = (int) socket (info->ai_family, info->ai_socktype, 0);
-
-        if (handle < 0)
+        if (struct addrinfo* info = getAddressInfo (false, hostName, portNumber))
         {
-            freeaddrinfo (info);
-            return false;
-        }
-
-        setSocketBlockingState (handle, false);
-        const int result = ::connect (handle, info->ai_addr, (socklen_t) info->ai_addrlen);
-        freeaddrinfo (info);
-
-        bool retval = (result >= 0);
-
-        if (result < 0)
-        {
-           #if JUCE_WINDOWS
-            if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
-           #else
-            if (errno == EINPROGRESS)
-           #endif
+            for (struct addrinfo* i = info; i != nullptr; i = i->ai_next)
             {
-                if (waitForReadiness (handle, readLock, false, timeOutMillisecs) == 1)
-                    retval = true;
+                const SocketHandle newHandle = socket (i->ai_family, i->ai_socktype, 0);
+
+                if (newHandle >= 0)
+                {
+                    setSocketBlockingState (newHandle, false);
+                    const int result = ::connect (newHandle, i->ai_addr, (socklen_t) i->ai_addrlen);
+                    success = (result >= 0);
+
+                    if (! success)
+                    {
+                       #if JUCE_WINDOWS
+                        if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
+                       #else
+                        if (errno == EINPROGRESS)
+                       #endif
+                        {
+                            const volatile int cvHandle = (int) newHandle;
+                            if (waitForReadiness (cvHandle, readLock, false, timeOutMillisecs) == 1)
+                                success = true;
+                        }
+                    }
+
+                    if (success)
+                    {
+                        handle = (int) newHandle;
+                        break;
+                    }
+
+                   #if JUCE_WINDOWS
+                    closesocket (newHandle);
+                   #else
+                    ::close (newHandle);
+                   #endif
+                }
+            }
+
+            freeaddrinfo (info);
+
+            if (success)
+            {
+                setSocketBlockingState (handle, true);
+                resetSocketOptions (handle, false, false);
             }
         }
 
-        setSocketBlockingState (handle, true);
-
-        if (retval)
-            resetSocketOptions (handle, false, false);
-
-        return retval;
+        return success;
     }
 
     static void makeReusable (int handle) noexcept

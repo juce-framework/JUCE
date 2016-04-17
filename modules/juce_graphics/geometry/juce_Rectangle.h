@@ -773,7 +773,7 @@ public:
     }
 
     /** Returns the smallest integer-aligned rectangle that completely contains this one.
-        This is only relevent for floating-point rectangles, of course.
+        This is only relevant for floating-point rectangles, of course.
         @see toFloat(), toNearestInt()
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept

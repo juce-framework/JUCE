@@ -118,7 +118,7 @@ public:
         given identifier string.
 
         Note that this isn't quite as simple as them just calling createIdentifierString()
-        and comparing the strings, because the identifers can differ (thanks to shell plug-ins).
+        and comparing the strings, because the identifiers can differ (thanks to shell plug-ins).
     */
     bool matchesIdentifierString (const String& identifierString) const;
 

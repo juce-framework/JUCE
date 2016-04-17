@@ -63,7 +63,7 @@
     the older VST2.4 files.
 
     Then, you'll need to make sure your include path contains your "VST SDK3"
-    directory (or whatever you've named it on your machine). The introjucer has
+    directory (or whatever you've named it on your machine). The Projucer has
     a special box for setting this path.
 */
 #include <public.sdk/source/vst2.x/audioeffectx.h>
@@ -111,17 +111,19 @@
 class JuceVSTWrapper;
 static bool recursionCheck = false;
 
+JUCE_DEFINE_WRAPPER_TYPE (wrapperType_VST);
+
 namespace juce
 {
  #if JUCE_MAC
-  extern void initialiseMacVST();
-  extern void* attachComponentToWindowRefVST (Component*, void* parent, bool isNSView);
-  extern void detachComponentFromWindowRefVST (Component*, void* window, bool isNSView);
-  extern void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
-  extern void checkWindowVisibilityVST (void* window, Component*, bool isNSView);
-  extern bool forwardCurrentKeyEventToHostVST (Component*, bool isNSView);
+  extern JUCE_API void initialiseMacVST();
+  extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parent, bool isNSView);
+  extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* window, bool isNSView);
+  extern JUCE_API void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
+  extern JUCE_API void checkWindowVisibilityVST (void* window, Component*, bool isNSView);
+  extern JUCE_API bool forwardCurrentKeyEventToHostVST (Component*, bool isNSView);
  #if ! JUCE_64BIT
-  extern void updateEditorCompBoundsVST (Component*);
+  extern JUCE_API void updateEditorCompBoundsVST (Component*);
  #endif
  #endif
 
@@ -261,7 +263,7 @@ public:
     JuceVSTWrapper (audioMasterCallback audioMasterCB, AudioProcessor* const af)
        : AudioEffectX (audioMasterCB, af->getNumPrograms(), af->getNumParameters()),
          filter (af),
-         busUtils (*filter, false),
+         busUtils (*filter, true, 64),
          chunkMemoryTime (0),
          isProcessing (false),
          isBypassed (false),
@@ -276,42 +278,27 @@ public:
         #endif
          hostWindow (0)
     {
-        int maxNumInChannels, maxNumOutChannels;
-
-        busUtils.findAllCompatibleLayouts();
+        busUtils.init();
 
         // VST-2 does not support disabling buses: so always enable all of them
         if (busUtils.hasDynamicInBuses() || busUtils.hasDynamicOutBuses())
             busUtils.enableAllBuses();
 
         {
+            // Using the legacy Projucer field? Then keep the maximum number of channels
+            // as the default plug-in layout. Otherwise, leave it up to the user
+            // which default layout the prefer.
+          #ifndef JucePlugin_PreferredChannelConfigurations
             PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
+          #endif
 
-            maxNumInChannels  = busUtils.getBusCount (true)  > 0 ? busUtils.getSupportedBusLayouts (true,  0).maxNumberOfChannels() : 0;
-            maxNumOutChannels = busUtils.getBusCount (false) > 0 ? busUtils.getSupportedBusLayouts (false, 0).maxNumberOfChannels() : 0;
+            findMaxTotalChannels (maxNumInChannels, maxNumOutChannels);
+            bool success = setBusArrangementFromTotalChannelNum (maxNumInChannels, maxNumOutChannels);
+            ignoreUnused (success);
 
-            if (hostOnlySupportsStereo())
-            {
-                maxNumInChannels  = jmin (maxNumInChannels,  2);
-                maxNumOutChannels = jmin (maxNumOutChannels, 2);
-            }
-
-            // try setting the number of channels
-            if (maxNumInChannels > 0)
-                filter->setPreferredBusArrangement (true,  0, busUtils.getDefaultLayoutForChannelNumAndBus (true,  0, maxNumInChannels));
-
-            if (maxNumOutChannels > 0)
-                filter->setPreferredBusArrangement (false, 0, busUtils.getDefaultLayoutForChannelNumAndBus (false, 0, maxNumOutChannels));
-
-            resetAuxChannelsToDefaultLayout (true);
-            resetAuxChannelsToDefaultLayout (false);
-
-            maxNumInChannels = busUtils.findTotalNumChannels (true);
-            maxNumOutChannels = busUtils.findTotalNumChannels (false);
-
-            if ((busUtils.getBusCount (true)  > 0 && busUtils.getDefaultLayoutForBus (true, 0) .size() > maxNumInChannels)
-             || (busUtils.getBusCount (false) > 0 && busUtils.getDefaultLayoutForBus (false, 0).size() > maxNumOutChannels))
-                busRestorer.release();
+            // please file a bug if you hit this assertsion!
+            jassert (maxNumInChannels  == busUtils.findTotalNumChannels (true) && success
+                  && maxNumOutChannels == busUtils.findTotalNumChannels (false));
         }
 
         filter->setRateAndBufferSizeDetails (0, 0);
@@ -522,6 +509,16 @@ public:
                 resume();
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
+
+           #if JUCE_WINDOWS
+            if (getHostType().isWavelab())
+            {
+                int priority = GetThreadPriority (GetCurrentThread());
+
+                if (priority <= THREAD_PRIORITY_NORMAL && priority >= THREAD_PRIORITY_LOWEST)
+                    filter->setNonRealtime (true);
+            }
+           #endif
         }
 
        #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
@@ -566,8 +563,15 @@ public:
                         }
                     }
 
-                    if (i < numIn && chan != inputs[i])
-                        memcpy (chan, inputs[i], sizeof (FloatType) * (size_t) numSamples);
+                    if (i < numIn)
+                    {
+                        if (chan != inputs[i])
+                            memcpy (chan, inputs[i], sizeof (FloatType) * (size_t) numSamples);
+                    }
+                    else
+                    {
+                        FloatVectorOperations::clear (chan, numSamples);
+                    }
 
                     tmpBuffers.channels[i] = chan;
                 }
@@ -923,73 +927,57 @@ public:
     bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
                                 VstSpeakerArrangement* pluginOutput) override
     {
-        if (pluginInput != nullptr && filter->busArrangement.inputBuses.size() == 0)
+        const int numIns  = busUtils.getBusCount (true);
+        const int numOuts = busUtils.getBusCount (false);;
+
+        if (pluginInput != nullptr && numIns == 0)
             return false;
 
-        if (pluginOutput != nullptr && filter->busArrangement.outputBuses.size() == 0)
+        if (pluginOutput != nullptr && numOuts == 0)
             return false;
 
-        PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
-
-        resetAuxChannelsToDefaultLayout (true);
-        resetAuxChannelsToDefaultLayout (false);
-
-        if (pluginInput != nullptr && pluginInput->numChannels >= 0)
+        if (numIns > 1 || numOuts > 1)
         {
-            AudioChannelSet newType;
+            int newNumInChannels  = (pluginInput  != nullptr && pluginInput-> numChannels >= 0) ? pluginInput-> numChannels
+                                                                                                : busUtils.findTotalNumChannels (true);
+            int newNumOutChannels = (pluginOutput != nullptr && pluginOutput->numChannels >= 0) ? pluginOutput->numChannels
+                                                                                                : busUtils.findTotalNumChannels (false);
 
-           // subtract the number of channels which are used by the aux channels
-            int mainNumChannels = pluginInput->numChannels - busUtils.findTotalNumChannels (true, 1);
+            newNumInChannels  = jmin (newNumInChannels,  maxNumInChannels);
+            newNumOutChannels = jmin (newNumOutChannels, maxNumOutChannels);
 
-            if (mainNumChannels <= 0)
-                return false;
-
-            if (mainNumChannels > busUtils.getSupportedBusLayouts (true, 0).maxNumberOfChannels())
-                return false;
-
-            newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput);
-
-            if (mainNumChannels != newType.size())
-                newType = AudioChannelSet::canonicalChannelSet(mainNumChannels);
-
-            if (busUtils.getChannelSet (true, 0) != newType)
-                if (! filter->setPreferredBusArrangement (true, 0, newType))
-                    return false;
-        }
-
-        if (pluginOutput != nullptr && pluginOutput->numChannels >= 0)
-        {
-            AudioChannelSet newType;
-
-            // subtract the number of channels which are used by the aux channels
-            int mainNumChannels = pluginOutput->numChannels - busUtils.findTotalNumChannels (false, 1);
-
-            if (mainNumChannels <= 0)
-                return false;
-
-            if (mainNumChannels > busUtils.getSupportedBusLayouts (false, 0).maxNumberOfChannels())
-                return false;
-
-            newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput);
-
-            if (mainNumChannels != newType.size())
-                newType = AudioChannelSet::canonicalChannelSet(mainNumChannels);
-
-            AudioChannelSet oldOutputLayout = busUtils.getChannelSet (false, 0);
-            AudioChannelSet oldInputLayout  = busUtils.getChannelSet (true, 0);
-
-            if (busUtils.getChannelSet (false, 0) != newType)
-                if (! filter->setPreferredBusArrangement (false, 0, newType))
-                    return false;
-
-            // did this change the input layout?
-            if (oldInputLayout != busUtils.getChannelSet (true, 0) && pluginInput != nullptr)
+            if (! setBusArrangementFromTotalChannelNum (newNumInChannels, newNumOutChannels))
                 return false;
         }
+        else
+        {
+            PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
+            AudioChannelSet inLayoutType;
 
-        busRestorer.release();
+            if (pluginInput  != nullptr && pluginInput-> numChannels >= 0)
+            {
+                inLayoutType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput);
+                if (busUtils.getChannelSet (true, 0) != inLayoutType)
+                    if (! filter->setPreferredBusArrangement (true, 0, inLayoutType))
+                        return false;
+            }
+
+            if (pluginOutput != nullptr && pluginOutput->numChannels >= 0)
+            {
+                AudioChannelSet newType = SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput);
+                if (busUtils.getChannelSet (false, 0) != newType)
+                    if (! filter->setPreferredBusArrangement (false, 0, newType))
+                        return false;
+
+                // re-check the input
+                if ((! inLayoutType.isDisabled()) && busUtils.getChannelSet (true, 0) != inLayoutType)
+                    return false;
+
+                busRestorer.release();
+            }
+        }
+
         filter->setRateAndBufferSizeDetails(0, 0);
-
         return true;
     }
 
@@ -1008,23 +996,20 @@ public:
             return false;
         }
 
-        if (busUtils.getBusCount (true) > 1)
+        if (pluginHasSidechainsOrAuxs())
         {
-            AudioChannelSet layout = AudioChannelSet::canonicalChannelSet (busUtils.findTotalNumChannels(true));
-            SpeakerMappings::channelSetToVstArrangement (layout,  **pluginInput);
-        }
-        else
-        {
-            SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (true, 0),  **pluginInput);
-        }
+            int numIns  = busUtils.findTotalNumChannels (true);
+            int numOuts = busUtils.findTotalNumChannels (false);
 
-        if (busUtils.getBusCount (false) > 1)
-        {
-            AudioChannelSet layout = AudioChannelSet::canonicalChannelSet (busUtils.findTotalNumChannels(false));
+            AudioChannelSet layout = AudioChannelSet::canonicalChannelSet (numIns);
+            SpeakerMappings::channelSetToVstArrangement (layout,  **pluginInput);
+
+            layout = AudioChannelSet::canonicalChannelSet (numOuts);
             SpeakerMappings::channelSetToVstArrangement (layout,  **pluginOutput);
         }
         else
         {
+            SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (true,  0), **pluginInput);
             SpeakerMappings::channelSetToVstArrangement (busUtils.getChannelSet (false, 0), **pluginOutput);
         }
 
@@ -1045,6 +1030,12 @@ public:
 
     bool getPinProperties (VstPinProperties& properties, bool direction, int index) const
     {
+        // fill with default
+        properties.flags = kVstPinUseSpeaker;
+        properties.label[0] = 0;
+        properties.shortLabel[0] = 0;
+        properties.arrangementType = kSpeakerArrEmpty;
+
         // index refers to the absolute index when combining all channels of every bus
         if (index >= (direction ? cEffect.numInputs : cEffect.numOutputs))
             return false;
@@ -1061,21 +1052,17 @@ public:
         }
 
         if (busIdx >= n)
-        {
-            properties.flags = kVstPinUseSpeaker;
-            properties.label[0] = 0;
-            properties.shortLabel[0] = 0;
-            properties.arrangementType = kSpeakerArrEmpty;
-
             return true;
-        }
 
         const AudioProcessor::AudioProcessorBus& busInfo = busUtils.getFilterBus (direction).getReference (busIdx);
 
-        String channelName = busInfo.name;
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        String abbvChannelName = String (index);
+       #else
+        String abbvChannelName = AudioChannelSet::getAbbreviatedChannelTypeName (busInfo.channels.getTypeOfChannel(index));
+       #endif
 
-        channelName +=
-            String (" ") + AudioChannelSet::getAbbreviatedChannelTypeName (busInfo.channels.getTypeOfChannel(index));
+        String channelName = busInfo.name + String (" ") + abbvChannelName;
 
         channelName.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
         channelName.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
@@ -1169,33 +1156,33 @@ public:
             {
                 { kSpeakerArrMono,           { centre, unknown } },
                 { kSpeakerArrStereo,         { left, right, unknown } },
-                { kSpeakerArrStereoSurround, { surroundLeft, surroundRight, unknown } },
-                { kSpeakerArrStereoCenter,   { centreLeft, centreRight, unknown } },
-                { kSpeakerArrStereoSide,     { sideLeft, sideRight, unknown } },
+                { kSpeakerArrStereoSurround, { leftSurround, rightSurround, unknown } },
+                { kSpeakerArrStereoCenter,   { leftCentre, rightCentre, unknown } },
+                { kSpeakerArrStereoSide,     { leftRearSurround, rightRearSurround, unknown } },
                 { kSpeakerArrStereoCLfe,     { centre, subbass, unknown } },
                 { kSpeakerArr30Cine,         { left, right, centre, unknown } },
                 { kSpeakerArr30Music,        { left, right, surround, unknown } },
                 { kSpeakerArr31Cine,         { left, right, centre, subbass, unknown } },
                 { kSpeakerArr31Music,        { left, right, subbass, surround, unknown } },
                 { kSpeakerArr40Cine,         { left, right, centre, surround, unknown } },
-                { kSpeakerArr40Music,        { left, right, surroundLeft, surroundRight, unknown } },
+                { kSpeakerArr40Music,        { left, right, leftSurround, rightSurround, unknown } },
                 { kSpeakerArr41Cine,         { left, right, centre, subbass, surround, unknown } },
-                { kSpeakerArr41Music,        { left, right, subbass, surroundLeft, surroundRight, unknown } },
-                { kSpeakerArr50,             { left, right, centre, surroundLeft, surroundRight, unknown } },
-                { kSpeakerArr51,             { left, right, centre, subbass, surroundLeft, surroundRight, unknown } },
-                { kSpeakerArr60Cine,         { left, right, centre, surroundLeft, surroundRight, surround, unknown } },
-                { kSpeakerArr60Music,        { left, right, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
-                { kSpeakerArr61Cine,         { left, right, centre, subbass, surroundLeft, surroundRight, surround, unknown } },
-                { kSpeakerArr61Music,        { left, right, subbass, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
-                { kSpeakerArr70Cine,         { left, right, centre, surroundLeft, surroundRight, topFrontLeft, topFrontRight, unknown } },
-                { kSpeakerArr70Music,        { left, right, centre, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
-                { kSpeakerArr71Cine,         { left, right, centre, subbass, surroundLeft, surroundRight, topFrontLeft, topFrontRight, unknown } },
-                { kSpeakerArr71Music,        { left, right, centre, subbass, surroundLeft, surroundRight, sideLeft, sideRight, unknown } },
-                { kSpeakerArr80Cine,         { left, right, centre, surroundLeft, surroundRight, topFrontLeft, topFrontRight, surround, unknown } },
-                { kSpeakerArr80Music,        { left, right, centre, surroundLeft, surroundRight, surround, sideLeft, sideRight, unknown } },
-                { kSpeakerArr81Cine,         { left, right, centre, subbass, surroundLeft, surroundRight, topFrontLeft, topFrontRight, surround, unknown } },
-                { kSpeakerArr81Music,        { left, right, centre, subbass, surroundLeft, surroundRight, surround, sideLeft, sideRight, unknown } },
-                { kSpeakerArr102,            { left, right, centre, subbass, surroundLeft, surroundRight, topFrontLeft, topFrontCentre, topFrontRight, topRearLeft, topRearRight, subbass2, unknown } },
+                { kSpeakerArr41Music,        { left, right, subbass, leftSurround, rightSurround, unknown } },
+                { kSpeakerArr50,             { left, right, centre, leftSurround, rightSurround, unknown } },
+                { kSpeakerArr51,             { left, right, centre, subbass, leftSurround, rightSurround, unknown } },
+                { kSpeakerArr60Cine,         { left, right, centre, leftSurround, rightSurround, surround, unknown } },
+                { kSpeakerArr60Music,        { left, right, leftSurround, rightSurround, leftRearSurround, rightRearSurround, unknown } },
+                { kSpeakerArr61Cine,         { left, right, centre, subbass, leftSurround, rightSurround, surround, unknown } },
+                { kSpeakerArr61Music,        { left, right, subbass, leftSurround, rightSurround, leftRearSurround, rightRearSurround, unknown } },
+                { kSpeakerArr70Cine,         { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
+                { kSpeakerArr70Music,        { left, right, centre, leftSurround, rightSurround, leftRearSurround, rightRearSurround, unknown } },
+                { kSpeakerArr71Cine,         { left, right, centre, subbass, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
+                { kSpeakerArr71Music,        { left, right, centre, subbass, leftSurround, rightSurround, leftRearSurround, rightRearSurround, unknown } },
+                { kSpeakerArr80Cine,         { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
+                { kSpeakerArr80Music,        { left, right, centre, leftSurround, rightSurround, surround, leftRearSurround, rightRearSurround, unknown } },
+                { kSpeakerArr81Cine,         { left, right, centre, subbass, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
+                { kSpeakerArr81Music,        { left, right, centre, subbass, leftSurround, rightSurround, surround, leftRearSurround, rightRearSurround, unknown } },
+                { kSpeakerArr102,            { left, right, centre, subbass, leftSurround, rightSurround, topFrontLeft, topFrontCentre, topFrontRight, topRearLeft, topRearRight, subbass2, unknown } },
                 { kSpeakerArrEmpty,          { unknown } }
             };
 
@@ -1210,13 +1197,13 @@ public:
                 case AudioChannelSet::right:             return kSpeakerR;
                 case AudioChannelSet::centre:            return kSpeakerC;
                 case AudioChannelSet::subbass:           return kSpeakerLfe;
-                case AudioChannelSet::surroundLeft:      return kSpeakerLs;
-                case AudioChannelSet::surroundRight:     return kSpeakerRs;
-                case AudioChannelSet::centreLeft:        return kSpeakerLc;
-                case AudioChannelSet::centreRight:       return kSpeakerRc;
+                case AudioChannelSet::leftSurround:      return kSpeakerLs;
+                case AudioChannelSet::rightSurround:     return kSpeakerRs;
+                case AudioChannelSet::leftCentre:        return kSpeakerLc;
+                case AudioChannelSet::rightCentre:       return kSpeakerRc;
                 case AudioChannelSet::surround:          return kSpeakerS;
-                case AudioChannelSet::sideLeft:          return kSpeakerSl;
-                case AudioChannelSet::sideRight:         return kSpeakerSr;
+                case AudioChannelSet::leftRearSurround:  return kSpeakerSl;
+                case AudioChannelSet::rightRearSurround: return kSpeakerSr;
                 case AudioChannelSet::topMiddle:         return kSpeakerTm;
                 case AudioChannelSet::topFrontLeft:      return kSpeakerTfl;
                 case AudioChannelSet::topFrontCentre:    return kSpeakerTfc;
@@ -1239,13 +1226,13 @@ public:
                 case kSpeakerR:     return AudioChannelSet::right;
                 case kSpeakerC:     return AudioChannelSet::centre;
                 case kSpeakerLfe:   return AudioChannelSet::subbass;
-                case kSpeakerLs:    return AudioChannelSet::surroundLeft;
-                case kSpeakerRs:    return AudioChannelSet::surroundRight;
-                case kSpeakerLc:    return AudioChannelSet::centreLeft;
-                case kSpeakerRc:    return AudioChannelSet::centreRight;
+                case kSpeakerLs:    return AudioChannelSet::leftSurround;
+                case kSpeakerRs:    return AudioChannelSet::rightSurround;
+                case kSpeakerLc:    return AudioChannelSet::leftCentre;
+                case kSpeakerRc:    return AudioChannelSet::rightCentre;
                 case kSpeakerS:     return AudioChannelSet::surround;
-                case kSpeakerSl:    return AudioChannelSet::sideLeft;
-                case kSpeakerSr:    return AudioChannelSet::sideRight;
+                case kSpeakerSl:    return AudioChannelSet::leftRearSurround;
+                case kSpeakerSr:    return AudioChannelSet::rightRearSurround;
                 case kSpeakerTm:    return AudioChannelSet::topMiddle;
                 case kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
                 case kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
@@ -1687,6 +1674,7 @@ private:
     bool shouldDeleteEditor, useNSView;
     VstTempBuffers<float> floatTempBuffers;
     VstTempBuffers<double> doubleTempBuffers;
+    int maxNumInChannels, maxNumOutChannels;
 
    #if JUCE_MAC
     void* hostWindow;
@@ -1757,6 +1745,47 @@ private:
     }
 
     //==============================================================================
+    void findMaxTotalChannels (int& maxTotalIns, int& maxTotalOuts)
+    {
+        setMaxChannelsOnAllBuses (true);
+        setMaxChannelsOnAllBuses (false);
+
+        maxTotalIns = busUtils.findTotalNumChannels (true);
+        maxTotalOuts = busUtils.findTotalNumChannels (false);
+    }
+
+    void setMaxChannelsOnAllBuses (bool isInput)
+    {
+        const int n = busUtils.getBusCount (isInput);
+
+        for (int i = 0; i < n; ++i)
+        {
+            int ch = busUtils.findMaxNumberOfChannelsForBus (isInput, i);
+
+            if (ch == -1)
+            {
+                // VST-2 requires a maximum number of channels. If you are hitting this assertion
+                // then make sure that your setPreferredBusArrangement only accepts layouts
+                // up to a maximum number of channels
+                jassertfalse;
+
+                // do something sensible if the above assertions was hit
+                ch = busUtils.getDefaultLayoutForBus (isInput, i).size();
+            }
+
+            AudioChannelSet set =
+                busUtils.getDefaultLayoutForChannelNumAndBus (isInput, i, ch);
+
+            bool success = filter->setPreferredBusArrangement (isInput, i, set);
+            ignoreUnused (success);
+
+            // If you are hitting this assertsion then please file bug!
+            jassert ((! set.isDisabled()) && success);
+        }
+    }
+
+
+    //==============================================================================
     void resetAuxChannelsToDefaultLayout (bool isInput) const
     {
         // set side-chain and aux channels to their default layout
@@ -1772,12 +1801,138 @@ private:
         }
     }
 
-    bool hostOnlySupportsStereo () const
+    bool setBusArrangementFromTotalChannelNum (const int numInChannels, const int numOutChannels)
     {
-        const PluginHostType host (getHostType ());
+        PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
+        const int numIns  = busUtils.getBusCount (true);
+        const int numOuts = busUtils.getBusCount (false);
 
-        // there are probably more hosts that need listing here
-        return host.isAbletonLive();
+        const int n = numIns + numOuts;
+        HeapBlock<int> config (static_cast<size_t> (n), true);
+        HeapBlock<int> maxChans (static_cast<size_t> (n), true);
+
+        for (int i = 0; i < numIns; ++i)
+            maxChans[i] = busUtils.findMaxNumberOfChannelsForBus (true, i, numInChannels);
+
+        for (int i = 0; i < numOuts; ++i)
+            maxChans[i + numIns] = busUtils.findMaxNumberOfChannelsForBus (false, i, numOutChannels);
+
+        const int* inConfig  = config.getData();
+        const int* outConfig = config.getData() + numIns;
+
+       #if JUCE_DEBUG
+        bool firstMatch = true;
+        AudioProcessor::AudioBusArrangement saveFirstMatch;
+       #endif
+
+        for (int i = 0; i < n;)
+        {
+            if  (sumOfConfig (inConfig,  numIns)  == numInChannels
+              && sumOfConfig (outConfig, numOuts) == numOutChannels)
+            {
+                if (applyConfiguration (inConfig, outConfig))
+                {
+                   #if JUCE_DEBUG
+                    if (! firstMatch)
+                    {
+                        // Unfortunately, VST-2 requires that there is a unique plug-in bus
+                        // arrangement for every x,y pair where x,y is the total number of
+                        // input, output channels respectively.
+                        jassertfalse;
+
+                        busUtils.restoreBusArrangement (saveFirstMatch);
+                        return true;
+                    }
+
+                    saveFirstMatch = filter->busArrangement;
+                    firstMatch = false;
+                   #else
+                    busRestorer.release();
+                    return true;
+                   #endif
+                }
+            }
+
+            for (i = 0; i < n; ++i)
+                if ((config[i] = (config[i] + 1) % maxChans[i]) > 0)
+                    break;
+        }
+
+       #if JUCE_DEBUG
+        if (! firstMatch)
+        {
+            busRestorer.release();
+            busUtils.restoreBusArrangement (saveFirstMatch);
+            return true;
+        }
+       #endif
+
+        return false;
+    }
+
+    bool setBusConfiguration (bool isInput, const int config[], const int n)
+    {
+        Array<AudioProcessor::AudioProcessorBus>& busArray = isInput ? filter->busArrangement.inputBuses
+                                                                     : filter->busArrangement.outputBuses;
+
+        int idx;
+        for (idx = 0; idx < n; ++idx)
+        {
+            if (busArray.getReference (idx).channels.size() == (config [idx] + 1))
+                continue;
+
+            AudioChannelSet set;
+            if ((set = busUtils.getDefaultLayoutForChannelNumAndBus (isInput, idx, config [idx] + 1)).isDisabled())
+                break;
+
+            if (! filter->setPreferredBusArrangement (isInput, idx, set))
+                break;
+        }
+
+        return (idx >= n);
+    }
+
+    bool configurationMatches (bool isInput, const int config[], const int n)
+    {
+        Array<AudioProcessor::AudioProcessorBus>& busArray = isInput ? filter->busArrangement.inputBuses
+                                                                     : filter->busArrangement.outputBuses;
+
+        int idx;
+        for (idx = 0; idx < n; ++idx)
+            if (busArray.getReference (idx).channels.size() != (config [idx] + 1))
+                break;
+
+        return (idx >= n);
+    }
+
+    bool applyConfiguration (const int inConfig[], const int outConfig[])
+    {
+        const int numIns  = busUtils.getBusCount (true);
+        const int numOuts = busUtils.getBusCount (false);
+
+        if (! setBusConfiguration (true,  inConfig,  numIns))
+            return false;
+
+        if (! setBusConfiguration (false, outConfig, numOuts))
+            return false;
+
+        // re-check configuration
+        if (configurationMatches (true, inConfig, numIns) && configurationMatches (false, outConfig, numOuts))
+            return true;
+
+        return false;
+    }
+
+    //==============================================================================
+    bool pluginHasSidechainsOrAuxs() const { return (busUtils.getBusCount (true) > 1 || busUtils.getBusCount (false) > 1); }
+
+    static int sumOfConfig (const int config[], int num) noexcept
+    {
+        int retval = 0;
+        for (int i = 0; i < num; ++i)
+            retval += (config [i] + 1);
+
+        return retval;
     }
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)
@@ -1824,6 +1979,8 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+
         initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
@@ -1831,6 +1988,8 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster)
     {
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+
         initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
@@ -1842,6 +2001,8 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+
         SharedMessageThread::getInstance();
         return pluginEntryPoint (audioMaster);
     }
@@ -1849,6 +2010,8 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
     JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster)
     {
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+
         return VSTPluginMain (audioMaster);
     }
 
@@ -1862,12 +2025,16 @@ namespace
 
     extern "C" __declspec (dllexport) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+
         return pluginEntryPoint (audioMaster);
     }
 
    #ifndef JUCE_64BIT // (can't compile this on win64, but it's not needed anyway with VST2.4)
     extern "C" __declspec (dllexport) int main (audioMasterCallback audioMaster)
     {
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+
         return (int) pluginEntryPoint (audioMaster);
     }
    #endif

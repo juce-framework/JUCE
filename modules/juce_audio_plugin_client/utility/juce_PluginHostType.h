@@ -22,6 +22,18 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+ // @internal
+ extern JUCE_API int* jucePlugInClientCurrentWrapperType;
+
+ // this is ugly hack is needed by juce_getExecutableFile to have a wrapper
+ // dependent symbol
+ #define JUCE_DEFINE_WRAPPER_TYPE(x) JUCE_API int jucePlugInClientCurrentWrapperType_ ## x = static_cast<int> (AudioProcessor::x);
+ #define JUCE_DECLARE_WRAPPER_TYPE(x) jucePlugInClientCurrentWrapperType = &jucePlugInClientCurrentWrapperType_ ## x;
+
+#endif
+
+
 //==============================================================================
 class PluginHostType
 {
@@ -170,6 +182,23 @@ public:
     }
 
     //==============================================================================
+    /**
+         Returns the plug-in format via which the plug-in file was loaded. This value is
+         identical to AudioProcessor::wrapperType of the main audio processor of this
+         plug-in. This function is useful for code that does not have access to the
+         plug-in's main audio processor.
+
+         @see AudioProcessor::wrapperType
+    */
+    static AudioProcessor::WrapperType getPluginLoadedAs() noexcept
+    {
+        if (jucePlugInClientCurrentWrapperType != nullptr)
+            return static_cast<AudioProcessor::WrapperType> (*jucePlugInClientCurrentWrapperType);
+
+        return AudioProcessor::wrapperType_Undefined;
+    }
+
+    //==============================================================================
 private:
     static HostType getHostType()
     {
@@ -249,7 +278,7 @@ private:
 
        #elif JUCE_LINUX
         if (hostFilename.containsIgnoreCase ("Ardour"))            return Ardour;
-
+       #elif JUCE_IOS
        #else
         #error
        #endif

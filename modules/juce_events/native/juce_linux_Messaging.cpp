@@ -346,7 +346,6 @@ void MessageManager::doPlatformSpecificShutdown()
     if (display != nullptr && ! LinuxErrorHandling::errorOccurred)
     {
         XDestroyWindow (display, juce_messageWindowHandle);
-        XCloseDisplay (display);
 
         juce_messageWindowHandle = 0;
         display = nullptr;

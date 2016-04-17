@@ -41,11 +41,11 @@ class MainContentComponent  : public Component,
                               private ButtonListener
 {
 public:
-    //==========================================================================
+    //==============================================================================
     MainContentComponent ();
     ~MainContentComponent();
 
-    //==========================================================================
+    //==============================================================================
     void timerCallback () override;
     void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
@@ -63,20 +63,20 @@ public:
 
     ReferenceCountedObjectPtr<MidiDeviceListEntry> getMidiDevice (int index, bool isInputDevice) const noexcept;
 private:
-    //==========================================================================
+    //==============================================================================
     void handleIncomingMidiMessage (MidiInput *source, const MidiMessage &message) override;
     void sendToOutputs(const MidiMessage& msg);
 
-    //==========================================================================
+    //==============================================================================
     bool hasDeviceListChanged (const StringArray& deviceNames, bool isInputDevice);
     ReferenceCountedObjectPtr<MidiDeviceListEntry> findDeviceWithName (const String& name, bool isInputDevice) const;
     void closeUnpluggedDevices (StringArray& currentlyPluggedInDevices, bool isInputDevice);
     void updateDeviceList (bool isInputDeviceList);
 
-    //==========================================================================
+    //==============================================================================
     void addLabelAndSetStyle (Label& label);
 
-    //==========================================================================
+    //==============================================================================
     Label midiInputLabel;
     Label midiOutputLabel;
     Label incomingMidiLabel;
@@ -92,7 +92,7 @@ private:
     ReferenceCountedArray<MidiDeviceListEntry> midiInputs;
     ReferenceCountedArray<MidiDeviceListEntry> midiOutputs;
 
-    //==========================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
 

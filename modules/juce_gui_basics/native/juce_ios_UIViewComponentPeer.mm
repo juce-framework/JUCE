@@ -211,7 +211,7 @@ public:
 
     static Rectangle<int> rotatedScreenPosToReal (const Rectangle<int>& r)
     {
-        if (isUsingOldRotationMethod())
+        if (! SystemStats::isRunningInAppExtensionSandbox() && isUsingOldRotationMethod())
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
@@ -241,7 +241,7 @@ public:
 
     static Rectangle<int> realScreenPosToRotated (const Rectangle<int>& r)
     {
-        if (isUsingOldRotationMethod())
+        if (! SystemStats::isRunningInAppExtensionSandbox() && isUsingOldRotationMethod())
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
@@ -363,28 +363,29 @@ static bool isKioskModeView (JuceUIViewController* c)
 - (void) viewDidLoad
 {
     sendScreenBoundsUpdate (self);
+    [super viewDidLoad];
 }
 
 - (void) viewWillAppear: (BOOL) animated
 {
-    ignoreUnused (animated);
-    [self viewDidLoad];
+    sendScreenBoundsUpdate (self);
+    [super viewWillAppear:animated];
 }
 
 - (void) viewDidAppear: (BOOL) animated
 {
-    ignoreUnused (animated);
-    [self viewDidLoad];
+    sendScreenBoundsUpdate (self);
+    [super viewDidAppear:animated];
 }
 
 - (void) viewWillLayoutSubviews
 {
-    [self viewDidLoad];
+    sendScreenBoundsUpdate (self);
 }
 
 - (void) viewDidLayoutSubviews
 {
-    [self viewDidLoad];
+    sendScreenBoundsUpdate (self);
 }
 
 @end
@@ -469,7 +470,7 @@ static bool isKioskModeView (JuceUIViewController* c)
     if (owner != nullptr)
         owner->viewFocusLoss();
 
-    return true;
+    return [super resignFirstResponder];
 }
 
 - (BOOL) canBecomeFirstResponder
@@ -997,7 +998,10 @@ void UIViewComponentPeer::drawRect (CGRect r)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, getComponent().getHeight()));
-    CoreGraphicsContext g (cg, getComponent().getHeight(), static_cast<float> ([UIScreen mainScreen].scale));
+
+    // NB the CTM on iOS already includes a factor for the display scale, so
+    // we'll tell the context that the scale is 1.0 to avoid it using it twice
+    CoreGraphicsContext g (cg, getComponent().getHeight(), 1.0f);
 
     insideDrawRect = true;
     handlePaint (g);

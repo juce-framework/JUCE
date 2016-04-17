@@ -16,6 +16,8 @@
 *.d
 *.sdf
 *.opensdf
+*.VC.db
+*.VC.opendb
 xcuserdata
 *.xccheckout
 contents.xcworkspacedata
@@ -50,4 +52,5 @@ profile
 **/CodeBlocks/*.layout
 **/Builds/AndroidStudio
 doxygen/doc
+extras/Projucer/JUCECompileEngine.dylib
 project.xcworkspace

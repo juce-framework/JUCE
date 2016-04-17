@@ -27,6 +27,7 @@ class ChannelClickListener
 public:
     virtual ~ChannelClickListener() {}
     virtual void channelButtonClicked (int channelIndex) = 0;
+    virtual bool isChannelActive (int channelIndex) = 0;
 };
 
 class SurroundEditor : public AudioProcessorEditor,
@@ -37,11 +38,16 @@ public:
     SurroundEditor (AudioProcessor& parent)
         : AudioProcessorEditor (parent),
           currentChannelLayout (AudioChannelSet::disabled()),
-          noChannelsLabel ("noChannelsLabel", "Input disabled")
+          noChannelsLabel ("noChannelsLabel", "Input disabled"),
+          layoutTitle ("LayoutTitleLabel", getLayoutName())
     {
+        layoutTitle.setJustificationType (Justification::centred);
+        addAndMakeVisible (layoutTitle);
         addAndMakeVisible (noChannelsLabel);
+
         setSize (640, 64);
 
+        lastSuspended = ! getAudioProcessor()->isSuspended();
         timerCallback();
         startTimer (500);
     }
@@ -53,6 +59,8 @@ public:
     void resized() override
     {
         Rectangle<int> r = getLocalBounds();
+
+        layoutTitle.setBounds (r.removeFromBottom (16));
 
         noChannelsLabel.setBounds (r);
 
@@ -82,42 +90,89 @@ public:
     }
 
 private:
+    String getLayoutName() const
+    {
+        if (AudioProcessor* processor = getAudioProcessor())
+            return processor->busArrangement.outputBuses.getReference (0).channels.getDescription();
+
+        return "Unknown";
+    }
+
     void timerCallback() override
     {
-        const AudioChannelSet& channelSet = getAudioProcessor()->busArrangement.outputBuses.getReference (0).channels;
-
-        if (channelSet != currentChannelLayout)
+        if (getAudioProcessor()->isSuspended() != lastSuspended)
         {
-            currentChannelLayout = channelSet;
-            channelButtons.clear();
+            lastSuspended = getAudioProcessor()->isSuspended();
 
-            if (currentChannelLayout == AudioChannelSet::disabled())
-            {
-                noChannelsLabel.setVisible (true);
-            }
-            else
-            {
-                const int numChannels = currentChannelLayout.size();
+            const AudioChannelSet& channelSet = getAudioProcessor()->busArrangement.outputBuses.getReference (0).channels;
 
-                for (int i = 0; i < numChannels; ++i)
+            if (channelSet != currentChannelLayout)
+            {
+                currentChannelLayout = channelSet;
+
+                layoutTitle.setText (currentChannelLayout.getDescription(), NotificationType::dontSendNotification);
+                channelButtons.clear();
+                activeChannels.resize (currentChannelLayout.size());
+
+                if (currentChannelLayout == AudioChannelSet::disabled())
                 {
-                    const String channelName =
-                        AudioChannelSet::getAbbreviatedChannelTypeName (currentChannelLayout.getTypeOfChannel (i));
+                    noChannelsLabel.setVisible (true);
+                }
+                else
+                {
+                    const int numChannels = currentChannelLayout.size();
 
-                    TextButton* newButton;
-                    channelButtons.add (newButton = new TextButton (channelName, channelName));
+                    for (int i = 0; i < numChannels; ++i)
+                    {
+                        const String channelName =
+                            AudioChannelSet::getAbbreviatedChannelTypeName (currentChannelLayout.getTypeOfChannel (i));
 
-                    newButton->addListener (this);
-                    addAndMakeVisible (newButton);
+                        TextButton* newButton;
+                        channelButtons.add (newButton = new TextButton (channelName, channelName));
+
+                        newButton->addListener (this);
+                        addAndMakeVisible (newButton);
+                    }
+
+                    noChannelsLabel.setVisible (false);
+                    resized();
                 }
 
-                noChannelsLabel.setVisible (false);
-                resized();
+                if (ChannelClickListener* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
+                {
+                    for (int i = 0; i < activeChannels.size(); ++i)
+                    {
+                        bool isActive = listener->isChannelActive (i);
+                        activeChannels.getReference (i) = isActive;
+                        channelButtons [i]->setColour (TextButton::buttonColourId, isActive ? Colours::lightsalmon : Colours::lightgrey);
+                        channelButtons [i]->repaint();
+                    }
+                }
+            }
+        }
+
+        if (! lastSuspended)
+        {
+            if (ChannelClickListener* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
+            {
+                for (int i = 0; i < activeChannels.size(); ++i)
+                {
+                    bool isActive = listener->isChannelActive (i);
+                    if (activeChannels.getReference (i) != isActive)
+                    {
+                        activeChannels.getReference (i) = isActive;
+                        channelButtons [i]->setColour (TextButton::buttonColourId, isActive ? Colours::lightsalmon : Colours::lightgrey);
+                        channelButtons [i]->repaint();
+                    }
+                }
             }
         }
     }
 
     AudioChannelSet currentChannelLayout;
-    Label noChannelsLabel;
+    Label noChannelsLabel, layoutTitle;
     OwnedArray<TextButton> channelButtons;
+    Array<bool> activeChannels;
+
+    bool lastSuspended;
 };

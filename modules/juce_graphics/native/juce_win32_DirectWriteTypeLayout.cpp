@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 #if JUCE_USE_DIRECTWRITE
 namespace DirectWriteTypeLayout
 {
@@ -128,19 +127,22 @@ namespace DirectWriteTypeLayout
             const Point<float> lineOrigin (layout->getLine (currentLine).lineOrigin);
             float x = baselineOriginX - lineOrigin.x;
 
+            const float extraKerning = glyphRunLayout->font.getExtraKerningFactor()
+                                          * glyphRunLayout->font.getHeight();
+
             for (UINT32 i = 0; i < glyphRun->glyphCount; ++i)
             {
                 const float advance = glyphRun->glyphAdvances[i];
 
                 if ((glyphRun->bidiLevel & 1) != 0)
-                    x -= advance;  // RTL text
+                    x -= advance + extraKerning;  // RTL text
 
                 glyphRunLayout->glyphs.add (TextLayout::Glyph (glyphRun->glyphIndices[i],
                                                                Point<float> (x, baselineOriginY - lineOrigin.y),
                                                                advance));
 
                 if ((glyphRun->bidiLevel & 1) == 0)
-                    x += advance;  // LTR text
+                    x += advance + extraKerning;  // LTR text
             }
 
             return S_OK;

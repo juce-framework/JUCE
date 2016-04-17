@@ -195,7 +195,7 @@ public:
                            float maxLineWidth,
                            Justification horizontalLayout);
 
-    /** Tries to fit some text withing a given space.
+    /** Tries to fit some text within a given space.
 
         This does its best to make the given text readable within the specified rectangle,
         so it useful for labelling things.

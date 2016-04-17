@@ -22,6 +22,39 @@
   ==============================================================================
 */
 
+namespace PluginFormatManagerHelpers
+{
+    struct ErrorCallbackOnMessageThread : public CallbackMessage
+    {
+        ErrorCallbackOnMessageThread (const String& inError,
+                                      AudioPluginFormat::InstantiationCompletionCallback* inCallback)
+            : error (inError), callback (inCallback)
+        {
+        }
+
+        void messageCallback() override          { callback->completionCallback (nullptr, error); }
+
+        String error;
+        ScopedPointer<AudioPluginFormat::InstantiationCompletionCallback> callback;
+    };
+
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    struct ErrorLambdaOnMessageThread : public CallbackMessage
+    {
+        ErrorLambdaOnMessageThread (const String& inError,
+                                    std::function<void (AudioPluginInstance*, const String&)> f)
+            : error (inError), lambda (f)
+        {
+        }
+
+        void messageCallback() override          { lambda (nullptr, error); }
+
+        String error;
+        std::function<void (AudioPluginInstance*, const String&)> lambda;
+    };
+   #endif
+}
+
 AudioPluginFormatManager::AudioPluginFormatManager() {}
 AudioPluginFormatManager::~AudioPluginFormatManager() {}
 
@@ -40,7 +73,7 @@ void AudioPluginFormatManager::addDefaultFormats()
         jassert (dynamic_cast<VST3PluginFormat*> (formats[i]) == nullptr);
        #endif
 
-       #if JUCE_PLUGINHOST_AU && JUCE_MAC
+       #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
         jassert (dynamic_cast<AudioUnitPluginFormat*> (formats[i]) == nullptr);
        #endif
 
@@ -50,7 +83,7 @@ void AudioPluginFormatManager::addDefaultFormats()
     }
    #endif
 
-   #if JUCE_PLUGINHOST_AU && JUCE_MAC
+   #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
     formats.add (new AudioUnitPluginFormat());
    #endif
 
@@ -85,12 +118,55 @@ void AudioPluginFormatManager::addFormat (AudioPluginFormat* const format)
 AudioPluginInstance* AudioPluginFormatManager::createPluginInstance (const PluginDescription& description, double rate,
                                                                      int blockSize, String& errorMessage) const
 {
-    for (int i = 0; i < formats.size(); ++i)
-        if (AudioPluginInstance* result = formats.getUnchecked(i)->createInstanceFromDescription (description, rate, blockSize))
-            return result;
+    if (AudioPluginFormat* format = findFormatForDescription (description, errorMessage))
+        return format->createInstanceFromDescription (description, rate, blockSize, errorMessage);
 
-    errorMessage = doesPluginStillExist (description) ? TRANS ("This plug-in failed to load correctly")
-                                                      : TRANS ("This plug-in file no longer exists");
+    return nullptr;
+}
+
+void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescription& description,
+                                                          double initialSampleRate,
+                                                          int initialBufferSize,
+                                                          AudioPluginFormat::InstantiationCompletionCallback* callback)
+{
+    String error;
+
+    if (AudioPluginFormat* format = findFormatForDescription (description, error))
+        return format->createPluginInstanceAsync (description, initialSampleRate, initialBufferSize, callback);
+
+    (new PluginFormatManagerHelpers::ErrorCallbackOnMessageThread (error, callback))->post();
+}
+
+#if JUCE_COMPILER_SUPPORTS_LAMBDAS
+void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescription& description,
+                                                          double initialSampleRate,
+                                                          int initialBufferSize,
+                                                          std::function<void (AudioPluginInstance*, const String&)> f)
+{
+    String error;
+
+    if (AudioPluginFormat* format = findFormatForDescription (description, error))
+        return format->createPluginInstanceAsync (description, initialSampleRate, initialBufferSize, f);
+
+    (new PluginFormatManagerHelpers::ErrorLambdaOnMessageThread (error, f))->post();
+}
+#endif
+
+AudioPluginFormat* AudioPluginFormatManager::findFormatForDescription (const PluginDescription& description, String& errorMessage) const
+{
+    errorMessage = String();
+
+    for (int i = 0; i < formats.size(); ++i)
+    {
+        AudioPluginFormat* format;
+
+        if ((format = formats.getUnchecked (i))->getName() == description.pluginFormatName
+               && format->fileMightContainThisPluginType (description.fileOrIdentifier))
+            return format;
+    }
+
+    errorMessage = NEEDS_TRANS ("No compatible plug-in format exists for this plug-in");
+
     return nullptr;
 }
 

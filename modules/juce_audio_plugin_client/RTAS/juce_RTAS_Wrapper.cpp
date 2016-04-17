@@ -39,6 +39,13 @@
  #include <Mac2Win.H>
 #endif
 
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Widiomatic-parentheses"
+ #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+ #pragma clang diagnostic ignored "-Wcomment"
+#endif
+
 /* Note about include paths
    ------------------------
 
@@ -86,14 +93,20 @@
 #include <FicProcessTokens.h>
 #include <ExternalVersionDefines.h>
 
+#ifdef __clang__
+ #pragma clang diagnostic pop
+#endif
+
 //==============================================================================
 #ifdef _MSC_VER
  #pragma pack (push, 8)
- #pragma warning (disable: 4263 4264)
+ #pragma warning (disable: 4263 4264 4250)
 #endif
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_PluginBusUtilities.h"
+
+JUCE_DEFINE_WRAPPER_TYPE (wrapperType_RTAS);
 
 #ifdef _MSC_VER
  #pragma pack (pop)
@@ -270,7 +283,7 @@ public:
             }
         }
 
-        void DrawContents (Rect*)
+        void DrawContents (Rect*) override
         {
            #if JUCE_WINDOWS
             if (wrapper != nullptr)
@@ -281,7 +294,7 @@ public:
            #endif
         }
 
-        void DrawBackground (Rect*)  {}
+        void DrawBackground (Rect*) override  {}
 
         //==============================================================================
     private:
@@ -486,14 +499,14 @@ public:
            #if JucePlugin_WantsMidiInput
             if (CEffectType* const type = dynamic_cast<CEffectType*> (this->GetProcessType()))
             {
-                char nodeName [64];
+                char nodeName[80] = { 0 };
                 type->GetProcessTypeName (63, nodeName);
-                p2cstrcpy (nodeName, reinterpret_cast<unsigned char*> (nodeName));
+                nodeName[nodeName[0] + 1] = 0;
 
                 midiBufferNode = new CEffectMIDIOtherBufferedNode (&mMIDIWorld,
                                                                    8192,
                                                                    eLocalNode,
-                                                                   nodeName,
+                                                                   nodeName + 1,
                                                                    midiBuffer);
 
                 midiBufferNode->Initialize (0xffff, true);
@@ -915,48 +928,66 @@ public:
         shutdownJuce_GUI();
     }
 
+    static AudioChannelSet channelSetFromStemFormat (EPlugIn_StemFormat format) noexcept
+    {
+        switch (format)
+        {
+            case ePlugIn_StemFormat_Mono:      return AudioChannelSet::mono();
+            case ePlugIn_StemFormat_Stereo:    return AudioChannelSet::stereo();
+            case ePlugIn_StemFormat_LCR:       return AudioChannelSet::createLCR();
+            case ePlugIn_StemFormat_LCRS:      return AudioChannelSet::createLCRS();
+            case ePlugIn_StemFormat_Quad:      return AudioChannelSet::quadraphonic();
+            case ePlugIn_StemFormat_5dot0:     return AudioChannelSet::create5point0();
+            case ePlugIn_StemFormat_5dot1:     return AudioChannelSet::create5point1();
+            case ePlugIn_StemFormat_6dot0:     return AudioChannelSet::create6point0();
+            case ePlugIn_StemFormat_6dot1:     return AudioChannelSet::create6point1();
+            case ePlugIn_StemFormat_7dot0SDDS: return AudioChannelSet::createFront7point0();
+            case ePlugIn_StemFormat_7dot0DTS:  return AudioChannelSet::create7point0();
+            case ePlugIn_StemFormat_7dot1SDDS: return AudioChannelSet::createFront7point1();
+            case ePlugIn_StemFormat_7dot1DTS:  return AudioChannelSet::create7point1();
+            default:
+                break;
+        }
+
+        return AudioChannelSet::disabled();
+    }
+
     //==============================================================================
     void CreateEffectTypes()
     {
         ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
         PluginBusUtilities busUtils (*plugin, false);
 
-        busUtils.findAllCompatibleLayouts();
+        busUtils.init();
 
-        SortedSet<AudioChannelSet> inLayouts =  busUtils.getSupportedBusLayouts (true,  0).supportedLayouts;
-        SortedSet<AudioChannelSet> outLayouts = busUtils.getSupportedBusLayouts (false, 0).supportedLayouts;
-
-        const int numIns  = inLayouts. size();
-        const int numOuts = outLayouts.size();
+        const int numIns  = busUtils.getBusCount (true) > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
+        const int numOuts = busUtils.getBusCount (false) > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
 
         int configIndex = 0;
 
         for (int inIdx = 0; inIdx < jmax (numIns, 1); ++inIdx)
         {
+            EPlugIn_StemFormat rtasInFormat = numIns > 0 ? (EPlugIn_StemFormat) inIdx : ePlugIn_StemFormat_Error;
+            const AudioChannelSet inLayout = channelSetFromStemFormat (rtasInFormat);
+
             for (int outIdx = 0; outIdx < jmax (numOuts, 1); ++outIdx)
             {
+                EPlugIn_StemFormat rtasOutFormat = numOuts > 0 ? (EPlugIn_StemFormat) outIdx : ePlugIn_StemFormat_Error;
+                const AudioChannelSet outLayout = channelSetFromStemFormat (rtasOutFormat);
+
+                bool success = true;
+
                 // Try setting this input and output layouts combo.
                 if (numIns > 0)
-                {
-                    const bool success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayouts.getReference (inIdx));
-                    jassert (success);
-                }	
-                if (numOuts > 0)
-                {
-                    const bool success = busUtils.processor.setPreferredBusArrangement (false, 0, inLayouts.getReference (outIdx));
-                    jassert (success);
-                }
+                    success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayout);
 
-                AudioChannelSet inLayout  = numIns  > 0 ? busUtils.getChannelSet (true,  0) : AudioChannelSet();
-                AudioChannelSet outLayout = numOuts > 0 ? busUtils.getChannelSet (false, 0) : AudioChannelSet();
-                
-                if (inLayout.size() > 8 || outLayout.size() > 8)
-                {
-                    // These channel layouts are not supported in RTAS.
+                if (numOuts > 0 && success)
+                    success = busUtils.processor.setPreferredBusArrangement (false, 0, outLayout);
+
+                if (! success)
                     continue;
-                }
 
-                if (numIns > 0 && numOuts > 0 && (inLayout != inLayouts.getReference (inIdx) || (outLayout != outLayouts.getReference (outIdx))))
+                if (numIns > 0 && numOuts > 0 && (inLayout != busUtils.getChannelSet (true, 0) || (outLayout != busUtils.getChannelSet (false, 0))))
                 {
                     // The input and output layouts we tried do not work together.
                     continue;
@@ -1010,7 +1041,7 @@ private:
        #if JUCE_WINDOWS
         Process::setCurrentModuleInstanceHandle (gThisModule);
        #endif
-
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_RTAS);
         initialiseJuce_GUI();
 
         return new JucePlugInProcess();

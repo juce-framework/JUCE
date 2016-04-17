@@ -133,7 +133,7 @@ public:
         returned. If none has been set, it will just return Colours::black.
 
         The colour IDs for various purposes are stored as enums in the components that
-        they are relevent to - for an example, see Slider::ColourIds,
+        they are relevant to - for an example, see Slider::ColourIds,
         Label::ColourIds, TextEditor::ColourIds, TreeView::ColourIds, etc.
 
         If you're looking up a colour for use in drawing a component, it's usually

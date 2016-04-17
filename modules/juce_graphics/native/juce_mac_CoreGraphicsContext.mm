@@ -172,7 +172,7 @@ CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, const float h, const f
       state (new SavedState())
 {
     CGContextRetain (context);
-    CGContextSaveGState(context);
+    CGContextSaveGState (context);
     CGContextSetShouldSmoothFonts (context, true);
     CGContextSetAllowsFontSmoothing (context, true);
     CGContextSetShouldAntialias (context, true);

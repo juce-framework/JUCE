@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 MidiRPNDetector::MidiRPNDetector() noexcept
 {
 }
@@ -55,7 +54,7 @@ void MidiRPNDetector::reset() noexcept
 }
 
 //==============================================================================
-MidiRPNDetector::ChannelState::ChannelState () noexcept
+MidiRPNDetector::ChannelState::ChannelState() noexcept
     : parameterMSB (0xff), parameterLSB (0xff), valueMSB (0xff), valueLSB (0xff), isNRPN (false)
 {
 }

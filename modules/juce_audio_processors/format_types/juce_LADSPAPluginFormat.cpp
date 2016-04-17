@@ -610,10 +610,13 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& re
     }
 }
 
-AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
-                                                                        double sampleRate, int blockSize)
+void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
+                                               double sampleRate, int blockSize,
+                                               void* userData,
+                                               void (*callback) (void*, AudioPluginInstance*, const String&))
 {
     ScopedPointer<LADSPAPluginInstance> result;
+
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -639,7 +642,17 @@ AudioPluginInstance* LADSPAPluginFormat::createInstanceFromDescription (const Pl
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    return result.release();
+    String errorMsg;
+
+    if (result == nullptr)
+        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "LADSPA");
+
+    callback (userData, result.release(), errorMsg);
+}
+
+bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override
+{
+    return false;
 }
 
 bool LADSPAPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
@@ -663,7 +676,7 @@ bool LADSPAPluginFormat::doesPluginStillExist (const PluginDescription& desc)
     return File::createFileWithoutCheckingPath (desc.fileOrIdentifier).exists();
 }
 
-StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
+StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
 {
     StringArray results;
 

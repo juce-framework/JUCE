@@ -51,7 +51,9 @@ class ColourSelectorWindow   : public DocumentWindow,
 public:
     ColourSelectorWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
         : DocumentWindow (name, backgroundColour, buttonsNeeded),
-          selector (ColourSelector::showColourAtTop | ColourSelector::showSliders | ColourSelector::showColourspace)
+          selector (ColourSelector::showColourAtTop
+                     | ColourSelector::showSliders
+                     | ColourSelector::showColourspace)
     {
         selector.setCurrentColour (backgroundColour);
         selector.setColour (ColourSelector::backgroundColourId, Colours::transparentWhite);
@@ -271,6 +273,7 @@ private:
         options.content.setOwned (label);
 
         Rectangle<int> area (0, 0, 300, 200);
+
         options.content->setSize (area.getWidth(), area.getHeight());
 
         options.dialogTitle                   = "Dialog Window";
@@ -278,8 +281,6 @@ private:
         options.escapeKeyTriggersCloseButton  = true;
         options.useNativeTitleBar             = false;
         options.resizable                     = true;
-
-        const RectanglePlacement placement (RectanglePlacement::xRight + RectanglePlacement::yBottom + RectanglePlacement::doNotResize);
 
         DialogWindow* dw = options.launchAsync();
         dw->centreWithSize (300, 200);
@@ -291,9 +292,14 @@ private:
         windows.add (dw);
 
         Rectangle<int> area (0, 0, 300, 400);
-        const RectanglePlacement placement ((native ? RectanglePlacement::xLeft : RectanglePlacement::xRight)
-                                            + RectanglePlacement::yTop + RectanglePlacement::doNotResize);
-        Rectangle<int> result (placement.appliedTo (area, Desktop::getInstance().getDisplays().getMainDisplay().userArea.reduced (20)));
+
+        RectanglePlacement placement ((native ? RectanglePlacement::xLeft
+                                              : RectanglePlacement::xRight)
+                                       | RectanglePlacement::yTop
+                                       | RectanglePlacement::doNotResize);
+
+        Rectangle<int> result (placement.appliedTo (area, Desktop::getInstance().getDisplays()
+                                                            .getMainDisplay().userArea.reduced (20)));
         dw->setBounds (result);
 
         dw->setResizable (true, ! native);
@@ -308,8 +314,13 @@ private:
         windows.add (balls);
 
         Rectangle<int> area (0, 0, 200, 200);
-        const RectanglePlacement placement (RectanglePlacement::xLeft + RectanglePlacement::yBottom + RectanglePlacement::doNotResize);
-        Rectangle<int> result (placement.appliedTo (area, Desktop::getInstance().getDisplays().getMainDisplay().userArea.reduced (20)));
+
+        RectanglePlacement placement (RectanglePlacement::xLeft
+                                       | RectanglePlacement::yBottom
+                                       | RectanglePlacement::doNotResize);
+
+        Rectangle<int> result (placement.appliedTo (area, Desktop::getInstance().getDisplays()
+                                                            .getMainDisplay().userArea.reduced (20)));
         balls->setBounds (result);
 
         balls->setVisible (true);

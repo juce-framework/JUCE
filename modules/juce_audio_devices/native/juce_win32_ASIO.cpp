@@ -1567,7 +1567,7 @@ private:
                             DWORD dsize = sizeof (pathName);
 
                             if (RegQueryValueEx (pathKey, 0, 0, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
-                                // In older code, this used to check for the existance of the file, but there are situations
+                                // In older code, this used to check for the existence of the file, but there are situations
                                 // where our process doesn't have access to it, but where the driver still loads ok..
                                 ok = (pathName[0] != 0);
 

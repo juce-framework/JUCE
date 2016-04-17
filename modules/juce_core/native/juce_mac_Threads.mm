@@ -38,6 +38,9 @@ bool isIOSAppActive = true;
 //==============================================================================
 JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
+   if (SystemStats::isRunningInAppExtensionSandbox())
+       return true;
+
    #if JUCE_MAC
     return [NSApp isActive];
    #else
@@ -48,14 +51,16 @@ JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()
 JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess()
 {
    #if JUCE_MAC
-    [NSApp activateIgnoringOtherApps: YES];
+    if (! SystemStats::isRunningInAppExtensionSandbox())
+        [NSApp activateIgnoringOtherApps: YES];
    #endif
 }
 
 JUCE_API void JUCE_CALLTYPE Process::hide()
 {
    #if JUCE_MAC
-    [NSApp hide: nil];
+    if (! SystemStats::isRunningInAppExtensionSandbox())
+        [NSApp hide: nil];
    #endif
 }
 

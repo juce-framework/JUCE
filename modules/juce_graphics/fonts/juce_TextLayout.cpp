@@ -242,7 +242,7 @@ void TextLayout::createLayout (const AttributedString& text, float maxWidth, flo
     if (! createNativeLayout (text))
         createStandardLayout (text);
 
-    recalculateSize (text);
+    recalculateSize();
 }
 
 void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text, float maxWidth)
@@ -540,7 +540,7 @@ namespace TextLayoutHelpers
         static String getTrimmedEndIfNotAllWhitespace (const String& s)
         {
             String trimmed (s.trimEnd());
-            if (trimmed.isEmpty() && ! s.isEmpty())
+            if (trimmed.isEmpty() && s.isNotEmpty())
                 trimmed = s.replaceCharacters ("\r\n\t", "   ");
 
             return trimmed;
@@ -560,9 +560,9 @@ void TextLayout::createStandardLayout (const AttributedString& text)
     l.createLayout (text, *this);
 }
 
-void TextLayout::recalculateSize (const AttributedString& text)
+void TextLayout::recalculateSize()
 {
-    if (lines.size() > 0 && text.getReadingDirection() != AttributedString::rightToLeft)
+    if (lines.size() > 0)
     {
         Rectangle<float> bounds (lines.getFirst()->getLineBounds());
 

@@ -67,17 +67,17 @@ inline juce::String toString (const Steinberg::char16* string) noexcept     { re
 inline juce::String toString (const Steinberg::UString128& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
 inline juce::String toString (const Steinberg::UString256& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
 
-static void toString128 (Steinberg::Vst::String128 result, const char* source)
+inline void toString128 (Steinberg::Vst::String128 result, const char* source)
 {
     Steinberg::UString (result, 128).fromAscii (source);
 }
 
-static void toString128 (Steinberg::Vst::String128 result, const juce::String& source)
+inline void toString128 (Steinberg::Vst::String128 result, const juce::String& source)
 {
     Steinberg::UString (result, 128).fromAscii (source.toUTF8());
 }
 
-static Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
+inline Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
 {
     return reinterpret_cast<Steinberg::Vst::TChar*> (source.toUTF16().getAddress());
 }
@@ -147,13 +147,13 @@ static inline Steinberg::Vst::Speaker getSpeakerType (AudioChannelSet::ChannelTy
         case AudioChannelSet::right:             return kSpeakerR;
         case AudioChannelSet::centre:            return kSpeakerC;
         case AudioChannelSet::subbass:           return kSpeakerLfe;
-        case AudioChannelSet::surroundLeft:      return kSpeakerLs;
-        case AudioChannelSet::surroundRight:     return kSpeakerRs;
-        case AudioChannelSet::centreLeft:        return kSpeakerLc;
-        case AudioChannelSet::centreRight:       return kSpeakerRc;
+        case AudioChannelSet::leftSurround:      return kSpeakerLs;
+        case AudioChannelSet::rightSurround:     return kSpeakerRs;
+        case AudioChannelSet::leftCentre:        return kSpeakerLc;
+        case AudioChannelSet::rightCentre:       return kSpeakerRc;
         case AudioChannelSet::surround:          return kSpeakerS;
-        case AudioChannelSet::sideLeft:          return kSpeakerSl;
-        case AudioChannelSet::sideRight:         return kSpeakerSr;
+        case AudioChannelSet::leftRearSurround:  return kSpeakerSl;
+        case AudioChannelSet::rightRearSurround: return kSpeakerSr;
         case AudioChannelSet::topMiddle:         return kSpeakerTm;
         case AudioChannelSet::topFrontLeft:      return kSpeakerTfl;
         case AudioChannelSet::topFrontCentre:    return kSpeakerTfc;
@@ -178,13 +178,13 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case kSpeakerR:     return AudioChannelSet::right;
         case kSpeakerC:     return AudioChannelSet::centre;
         case kSpeakerLfe:   return AudioChannelSet::subbass;
-        case kSpeakerLs:    return AudioChannelSet::surroundLeft;
-        case kSpeakerRs:    return AudioChannelSet::surroundRight;
-        case kSpeakerLc:    return AudioChannelSet::centreLeft;
-        case kSpeakerRc:    return AudioChannelSet::centreRight;
+        case kSpeakerLs:    return AudioChannelSet::leftSurround;
+        case kSpeakerRs:    return AudioChannelSet::rightSurround;
+        case kSpeakerLc:    return AudioChannelSet::leftCentre;
+        case kSpeakerRc:    return AudioChannelSet::rightCentre;
         case kSpeakerS:     return AudioChannelSet::surround;
-        case kSpeakerSl:    return AudioChannelSet::sideLeft;
-        case kSpeakerSr:    return AudioChannelSet::sideRight;
+        case kSpeakerSl:    return AudioChannelSet::leftRearSurround;
+        case kSpeakerSr:    return AudioChannelSet::rightRearSurround;
         case kSpeakerTm:    return AudioChannelSet::topMiddle;
         case kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
         case kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
@@ -201,6 +201,10 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
 
 static inline Steinberg::Vst::SpeakerArrangement getSpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
+     // treat mono as special case as we do not have a designated mono speaker
+    if (channels == AudioChannelSet::mono())
+        return Steinberg::Vst::kSpeakerM;
+
     Steinberg::Vst::SpeakerArrangement result = 0;
 
     Array<AudioChannelSet::ChannelType> types (channels.getChannelTypes());
@@ -213,6 +217,10 @@ static inline Steinberg::Vst::SpeakerArrangement getSpeakerArrangement (const Au
 
 static inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
 {
+    // treat mono as special case as we do not have a designated mono speaker
+    if (arr == Steinberg::Vst::kSpeakerM)
+        return AudioChannelSet::mono();
+
     AudioChannelSet result;
 
     for (Steinberg::Vst::Speaker speaker = 1; speaker <= Steinberg::Vst::kSpeakerRcs; speaker <<= 1)

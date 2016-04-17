@@ -320,36 +320,6 @@ public:
     /** Re-sets the pitchbend range in semitones (0-96) to be used for notes when in legacy mode. */
     void setLegacyModePitchbendRange (int pitchbendRange);
 
-protected:
-    //==============================================================================
-    /** This method defines what initial pitchbend value should be used for newly
-        triggered notes. The default is to use the last pitchbend value
-        that has been received on the same MIDI channel (or no pitchbend
-        if no pitchbend messages have been received so far).
-        Override this method if you need different behaviour.
-    */
-    virtual MPEValue getInitialPitchbendForNoteOn (int midiChannel,
-                                                   int midiNoteNumber,
-                                                   MPEValue midiNoteOnVelocity) const;
-
-    /** This method defines what initial pressure value should be used for newly
-        triggered notes. The default is to re-use the note-on velocity value.
-        Override this method if you need different behaviour.
-    */
-    virtual MPEValue getInitialPressureForNoteOn (int midiChannel,
-                                                  int midiNoteNumber,
-                                                  MPEValue midiNoteOnVelocity) const;
-
-    /** This method defines what initial timbre value should be used for newly
-        triggered notes. The default is to use the last timbre value that has
-        that has been received on the same MIDI channel (or a neutral centred value
-        if no pitchbend messages have been received so far).
-        Override this method if you need different behaviour.
-    */
-    virtual MPEValue getInitialTimbreForNoteOn (int midiChannel,
-                                                int midiNoteNumber,
-                                                MPEValue midiNoteOnVelocity) const;
-
 private:
     //==============================================================================
     CriticalSection lock;
@@ -384,6 +354,7 @@ private:
     void updateDimensionMaster (MPEZone&, MPEDimension&, MPEValue);
     void updateDimensionForNote (MPENote&, MPEDimension&, MPEValue);
     void callListenersDimensionChanged (MPENote&, MPEDimension&);
+    MPEValue getInitialValueForNewNote (int midiChannel, MPEDimension&) const;
 
     void processMidiNoteOnMessage (const MidiMessage&);
     void processMidiNoteOffMessage (const MidiMessage&);

@@ -51,10 +51,16 @@
  #endif
 
  #ifdef __OBJC__
-  #include <Cocoa/Cocoa.h>
+  #if JUCE_MAC
+   #include <Cocoa/Cocoa.h>
+  #elif JUCE_IOS
+   #include <UIKit/UIKit.h>
+  #else
+   #error
+  #endif
  #endif
 
- #if JUCE_SUPPORT_CARBON
+ #if JUCE_SUPPORT_CARBON && (! JUCE_IOS)
   #include <Carbon/Carbon.h>
  #endif
 

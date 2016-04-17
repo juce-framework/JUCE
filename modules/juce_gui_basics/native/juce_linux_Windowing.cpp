@@ -2308,7 +2308,7 @@ public:
 
         // if we have opengl contexts then just repaint them all
         // regardless if this is really necessary
-        repaintOpenGLContexts ();
+        repaintOpenGLContexts();
 
         if (exposeEvent.window != windowH)
         {

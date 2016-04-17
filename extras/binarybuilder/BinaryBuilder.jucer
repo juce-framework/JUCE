@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceLinkage="amalg_template" juceFolder="../../../juce" jucerVersion="4.1.0"
-              version="1.0.0" buildVST="1" buildRTAS="0" buildAU="1" pluginName="BinaryBuilder"
-              pluginDesc="BinaryBuilder" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
-              pluginCode="Abcd" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
-              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
-              pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="BinaryBuilderAU"
-              pluginAUViewClass="BinaryBuilderAU_V1" pluginRTASCategory=""
-              bundleIdentifier="com.rawmaterialsoftware.binarybuilder" includeBinaryInAppConfig="1">
+              juceFolder="../../../juce" jucerVersion="4.2.0" bundleIdentifier="com.rawmaterialsoftware.binarybuilder"
+              includeBinaryInAppConfig="1" version="1.0.0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="OeJtJb">

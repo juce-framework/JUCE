@@ -1190,6 +1190,7 @@ private:
         if (library.open (filePath))
         {
             typedef bool (PLUGIN_API *InitModuleProc) ();
+
             if (InitModuleProc proc = (InitModuleProc) getFunction ("InitDll"))
             {
                 if (proc())
@@ -2466,9 +2467,14 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
     VST3Classes::VST3ModuleHandle::getAllDescriptionsForFile (results, fileOrIdentifier);
 }
 
-AudioPluginInstance* VST3PluginFormat::createInstanceFromDescription (const PluginDescription& description, double, int)
+void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
+                                             double,
+                                             int,
+                                             void* userData,
+                                             void (*callback) (void*, AudioPluginInstance*, const String&))
 {
     ScopedPointer<VST3Classes::VST3PluginInstance> result;
+
 
     if (fileMightContainThisPluginType (description.fileOrIdentifier))
     {
@@ -2488,7 +2494,17 @@ AudioPluginInstance* VST3PluginFormat::createInstanceFromDescription (const Plug
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    return result.release();
+    String errorMsg;
+
+    if (result == nullptr)
+        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-3");
+
+    callback (userData, result.release(), errorMsg);
+}
+
+bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+{
+    return false;
 }
 
 bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
@@ -2518,7 +2534,7 @@ bool VST3PluginFormat::doesPluginStillExist (const PluginDescription& descriptio
     return File (description.fileOrIdentifier).exists();
 }
 
-StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
+StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
 {
     StringArray results;
 

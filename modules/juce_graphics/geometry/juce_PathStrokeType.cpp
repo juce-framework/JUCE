@@ -316,7 +316,7 @@ namespace PathStrokeHelpers
 
             if (style == PathStrokeType::square)
             {
-                // sqaure ends
+                // square ends
                 destPath.lineTo (offx1, offy1);
                 destPath.lineTo (offx2, offy2);
                 destPath.lineTo (x2, y2);
@@ -570,7 +570,7 @@ namespace PathStrokeHelpers
 
         // Iterate the path, creating a list of the
         // left/right-hand lines along either side of it...
-        PathFlatteningIterator it (*sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
+        PathFlatteningIterator it (*sourcePath, transform, Path::defaultToleranceForMeasurement / extraAccuracy);
 
         Array <LineSection> subPath;
         subPath.ensureStorageAllocated (512);
@@ -668,7 +668,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
         return;
 
     Path newDestPath;
-    PathFlatteningIterator it (sourcePath, transform, PathFlatteningIterator::defaultTolerance / extraAccuracy);
+    PathFlatteningIterator it (sourcePath, transform, Path::defaultToleranceForMeasurement / extraAccuracy);
 
     bool first = true;
     int dashNum = 0;

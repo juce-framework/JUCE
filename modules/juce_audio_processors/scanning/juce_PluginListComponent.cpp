@@ -123,13 +123,15 @@ public:
 
 //==============================================================================
 PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, KnownPluginList& listToEdit,
-                                          const File& deadMansPedal, PropertiesFile* const props)
+                                          const File& deadMansPedal, PropertiesFile* const props,
+                                          bool allowPluginsWhichRequireAsynchronousInstantiation)
     : formatManager (manager),
       list (listToEdit),
       deadMansPedalFile (deadMansPedal),
       optionsButton ("Options..."),
       propertiesToUse (props),
-      numThreads (0)
+      allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
+      numThreads (allowAsync ? 1 : 0)
 {
     tableModel = new TableModel (*this, listToEdit);
 
@@ -331,13 +333,18 @@ class PluginListComponent::Scanner    : private Timer
 {
 public:
     Scanner (PluginListComponent& plc, AudioPluginFormat& format, PropertiesFile* properties,
-             int threads, const String& title, const String& text)
+             bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
+             const String& title, const String& text)
         : owner (plc), formatToScan (format), propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String::empty, AlertWindow::NoIcon),
           progressWindow (title, text, AlertWindow::NoIcon),
-          progress (0.0), numThreads (threads), finished (false)
+          progress (0.0), numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
+          finished (false)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
+
+        // You need to use at least one thread when scanning plug-ins asynchronously
+        jassert (! allowAsync || (numThreads > 0));
 
         if (path.getNumPaths() > 0) // if the path is empty, then paths aren't used for this format.
         {
@@ -381,7 +388,7 @@ private:
     String pluginBeingScanned;
     double progress;
     int numThreads;
-    bool finished;
+    bool allowAsync, finished;
     ScopedPointer<ThreadPool> pool;
 
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
@@ -465,7 +472,7 @@ private:
         pathChooserWindow.setVisible (false);
 
         scanner = new PluginDirectoryScanner (owner.list, formatToScan, pathList.getPath(),
-                                              true, owner.deadMansPedalFile);
+                                              true, owner.deadMansPedalFile, allowAsync);
 
         if (propertiesToUse != nullptr)
         {
@@ -545,7 +552,7 @@ private:
 
 void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    currentScanner = new Scanner (*this, format, propertiesToUse, numThreads,
+    currentScanner = new Scanner (*this, format, propertiesToUse, allowAsync, numThreads,
                                   dialogTitle.isNotEmpty() ? dialogTitle : TRANS("Scanning for plug-ins..."),
                                   dialogText.isNotEmpty()  ? dialogText  : TRANS("Searching for all possible plug-in files..."));
 }

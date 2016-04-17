@@ -153,7 +153,7 @@ JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024JuceM
 class AndroidMidiDeviceManager
 {
 public:
-    AndroidMidiDeviceManager ()
+    AndroidMidiDeviceManager()
         : deviceManager (android.activity.callObjectMethod (JuceAppActivity.getAndroidMidiDeviceManager))
     {
     }

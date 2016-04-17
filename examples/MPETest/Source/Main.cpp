@@ -42,14 +42,14 @@ struct MPETestClasses
 class MPETestApplication  : public JUCEApplication
 {
 public:
-    //==========================================================================
+    //==============================================================================
     MPETestApplication() {}
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
     bool moreThanOneInstanceAllowed() override       { return true; }
 
-    //==========================================================================
+    //==============================================================================
     void initialise (const String&) override
     {
         mainWindow = new MainWindow (getApplicationName());
@@ -65,7 +65,7 @@ public:
         quit();
     }
 
-    //==========================================================================
+    //==============================================================================
     class MainWindow    : public DocumentWindow
     {
     public:
@@ -88,7 +88,7 @@ public:
     };
 
 private:
-    //==========================================================================
+    //==============================================================================
     ScopedPointer<MainWindow> mainWindow;
 };
 

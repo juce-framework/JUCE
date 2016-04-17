@@ -332,7 +332,7 @@ private:
 
     void run() override
     {
-        setThreadToAudioPriority ();
+        setThreadToAudioPriority();
 
         if (recorder != nullptr)    recorder->start();
         if (player != nullptr)      player->start();
@@ -341,7 +341,7 @@ private:
             processBuffers();
     }
 
-    void setThreadToAudioPriority ()
+    void setThreadToAudioPriority()
     {
         // see android.os.Process.THREAD_PRIORITY_AUDIO
         const int THREAD_PRIORITY_AUDIO = -16;

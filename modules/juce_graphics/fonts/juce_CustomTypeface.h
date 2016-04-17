@@ -38,7 +38,7 @@
 
     NOTE! For most people this class is almost certainly NOT the right tool to use!
     If what you want to do is to embed a font into your exe, then your best plan is
-    probably to embed your TTF/OTF font file into your binary using the Introjucer,
+    probably to embed your TTF/OTF font file into your binary using the Projucer,
     and then call Typeface::createSystemTypefaceFor() to load it from memory.
 
     @see Typeface, Font

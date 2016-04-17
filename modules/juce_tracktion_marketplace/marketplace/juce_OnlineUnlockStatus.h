@@ -106,21 +106,9 @@ public:
         machine, this list of tokens is compared to the ones that were stored
         on the webserver.
 
-        The default implementation of this method will calculate some
-        machine IDs based on things like network MAC addresses, hard-disk
-        IDs, etc, but if you want, you can overload it to generate your
-        own list of IDs.
-
-        The IDs that are returned should be short alphanumeric strings
-        without any punctuation characters. Since users may need to type
-        them, case is ignored when comparing them.
-
-        Note that the first item in the list is considered to be the
-        "main" ID, and this will be the one that is displayed to the user
-        and registered with the marketplace webserver. Subsequent IDs are
-        just used as fallback to avoid false negatives when checking for
-        registration on machines which have had hardware added/removed
-        since the product was first registered.
+        The default implementation of this method will simply call
+        MachineIDUtilities::getLocalMachineIDs(), which provides a default
+        version of this functionality.
     */
     virtual StringArray getLocalMachineIDs();
 
@@ -230,6 +218,23 @@ public:
             This adds some ID strings to the given array which represent each MAC address of the machine.
         */
         static void addMACAddressesToList (StringArray& result);
+
+        /** This method calculates some machine IDs based on things like network
+            MAC addresses, hard-disk IDs, etc, but if you want, you can overload
+            it to generate your own list of IDs.
+
+            The IDs that are returned should be short alphanumeric strings
+            without any punctuation characters. Since users may need to type
+            them, case is ignored when comparing them.
+
+            Note that the first item in the list is considered to be the
+            "main" ID, and this will be the one that is displayed to the user
+            and registered with the marketplace webserver. Subsequent IDs are
+            just used as fallback to avoid false negatives when checking for
+            registration on machines which have had hardware added/removed
+            since the product was first registered.
+        */
+        static StringArray getLocalMachineIDs();
     };
 
 private:
