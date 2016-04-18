@@ -62,8 +62,8 @@ public:
     {
         TreeView* tree = getOwnerView();
         const int numSelected = tree->getNumSelectedItems();
-        OwnedArray <File> filesToTrash;
-        OwnedArray <Project::Item> itemsToRemove;
+        OwnedArray<File> filesToTrash;
+        OwnedArray<Project::Item> itemsToRemove;
 
         for (int i = 0; i < numSelected; ++i)
         {
@@ -352,9 +352,8 @@ protected:
 
     void triggerAsyncRename (const Project::Item& itemToRename)
     {
-        class RenameMessage  : public CallbackMessage
+        struct RenameMessage  : public CallbackMessage
         {
-        public:
             RenameMessage (TreeView* const t, const Project::Item& i)
                 : tree (t), itemToRename (i)  {}
 
@@ -374,7 +373,7 @@ protected:
         (new RenameMessage (getOwnerView(), itemToRename))->post();
     }
 
-    static void moveItems (OwnedArray <Project::Item>& selectedNodes, Project::Item destNode, int insertIndex)
+    static void moveItems (OwnedArray<Project::Item>& selectedNodes, Project::Item destNode, int insertIndex)
     {
         for (int i = selectedNodes.size(); --i >= 0;)
         {

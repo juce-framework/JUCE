@@ -21,10 +21,7 @@
 #define %%headerGuard%%
 
 //[Headers]     -- You can add your own extra header files here --
-
-#include "JuceHeader.h" // you may want to edit this path to
-                        // something more appropriate for your app.
-
+%%includeJUCEHeader%%
 //[/Headers]
 
 %%includeFilesH%%

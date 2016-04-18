@@ -171,8 +171,18 @@ public:
             case 1002:  browseToAddExistingFiles(); break;
 
             default:
-                NewFileWizard().runWizardFromMenu (menuID, item);
+                jassert (getProject() != nullptr);
+                NewFileWizard().runWizardFromMenu (menuID, *getProject(), item);
                 break;
         }
+    }
+
+    Project* getProject()
+    {
+        if (TreeView* tv = getOwnerView())
+            if (ProjectContentComponent* pcc = tv->findParentComponentOfClass<ProjectContentComponent>())
+                return pcc->getProject();
+
+        return nullptr;
     }
 };

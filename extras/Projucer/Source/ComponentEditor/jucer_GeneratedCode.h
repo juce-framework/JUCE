@@ -25,6 +25,7 @@
 #ifndef JUCER_GENERATEDCODE_H_INCLUDED
 #define JUCER_GENERATEDCODE_H_INCLUDED
 
+#include "../project/jucer_Project.h"
 class JucerDocument;
 
 
@@ -41,9 +42,9 @@ public:
 
     //==============================================================================
     void applyToCode (String& code,
-                      const String& fileNameRoot,
-                      const bool isForPreview,
-                      const String& oldFileWithUserData = String::empty) const;
+                      const File& targetFile,
+                      const String& oldFileWithUserData,
+                      Project* project) const;
 
     int getUniqueSuffix();
 
@@ -58,7 +59,7 @@ public:
     String constructorParams;
     String privateMemberDeclarations;
     String publicMemberDeclarations;
-    StringArray includeFilesH, includeFilesCPP;
+    Array<File> includeFilesH, includeFilesCPP;
     String constructorCode;
     String destructorCode;
     String staticMemberDefinitions;

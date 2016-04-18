@@ -31,7 +31,7 @@ namespace BinaryData
     const int            jucer_ComponentTemplate_cppSize = 2151;
 
     extern const char*   jucer_ComponentTemplate_h;
-    const int            jucer_ComponentTemplate_hSize = 2243;
+    const int            jucer_ComponentTemplate_hSize = 2131;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
     const int            jucer_ContentCompTemplate_cppSize = 886;

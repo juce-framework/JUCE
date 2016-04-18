@@ -165,14 +165,13 @@ public:
 
             if (isTabUsingJucerComp (t, i))
             {
-                ScopedPointer<JucerDocument> doc
-                    (JucerDocument::createForCppFile (nullptr, code.document->getCppFile()
-                                                                 .getSiblingFile (getTabJucerFile (t, i))));
+                File jucerCpp = code.document->getCppFile().getSiblingFile (getTabJucerFile (t, i));
+
+                ScopedPointer<JucerDocument> doc (JucerDocument::createForCppFile (nullptr, jucerCpp));
 
                 if (doc != nullptr)
                 {
-                    code.includeFilesCPP.add (getTabJucerFile (t, i).replace (".cpp", ".h"));
-
+                    code.includeFilesCPP.add (jucerCpp.withFileExtension (".h"));
                     contentClassName = doc->getClassName();
                 }
             }
