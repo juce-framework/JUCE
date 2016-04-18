@@ -245,25 +245,25 @@ void ProjectExporter::createDependencyPathProperties (PropertyListBuilder& props
     if (supportsVST() && (project.shouldBuildVST().getValue() || project.isVSTPluginHost()))
     {
         props.add (new DependencyPathPropertyComponent (getVSTPathValue (false), "VST SDK Folder"),
-                   "If you're building a VST plugin or host, this must be the folder containing the VST SDK. This should be an absolute path.");
+                   "If you're building a VST plugin or host, this must be the folder containing the VST SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
     if (supportsVST3() && (project.shouldBuildVST3().getValue() || project.isVST3PluginHost()))
     {
         props.add (new DependencyPathPropertyComponent (getVSTPathValue (true), "VST3 SDK Folder"),
-                   "If you're building a VST3 plugin or host, this must be the folder containing the VST3 SDK. This should be an absolute path.");
+                   "If you're building a VST3 plugin or host, this must be the folder containing the VST3 SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
     if (supportsAAX() && project.shouldBuildAAX().getValue())
     {
         props.add (new DependencyPathPropertyComponent (getAAXPathValue(), "AAX SDK Folder"),
-                   "If you're building an AAX plugin, this must be the folder containing the AAX SDK. This should be an absolute path.");
+                   "If you're building an AAX plugin, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
     if (supportsRTAS() && project.shouldBuildRTAS().getValue())
     {
         props.add (new DependencyPathPropertyComponent (getRTASPathValue(), "RTAS SDK Folder"),
-                   "If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
+                   "If you're building an RTAS, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 }
 
