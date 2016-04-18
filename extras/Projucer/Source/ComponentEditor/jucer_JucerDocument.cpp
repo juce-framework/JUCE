@@ -712,10 +712,10 @@ OpenDocumentManager::DocumentType* createGUIDocumentType()
 }
 
 //==============================================================================
-class JucerFileWizard  : public NewFileWizard::Type
+class NewGUIComponentWizard  : public NewFileWizard::Type
 {
 public:
-    JucerFileWizard() {}
+    NewGUIComponentWizard() {}
 
     String getName() override  { return "GUI Component"; }
 
@@ -723,13 +723,13 @@ public:
     {
         const File newFile (askUserToChooseNewFile (String (defaultClassName) + ".h", "*.h;*.cpp", parent));
 
-        if (newFile != File::nonexistent)
+        if (newFile != File())
         {
             const File headerFile (newFile.withFileExtension (".h"));
             const File cppFile (newFile.withFileExtension (".cpp"));
 
-            headerFile.replaceWithText (String::empty);
-            cppFile.replaceWithText (String::empty);
+            headerFile.replaceWithText (String());
+            cppFile.replaceWithText (String());
 
             OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
 
@@ -762,5 +762,5 @@ public:
 
 NewFileWizard::Type* createGUIComponentWizard()
 {
-    return new JucerFileWizard();
+    return new NewGUIComponentWizard();
 }

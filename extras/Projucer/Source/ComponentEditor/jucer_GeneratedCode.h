@@ -73,7 +73,7 @@ public:
         bool hasPrePostUserSections;
     };
 
-    OwnedArray <CallbackMethod> callbacks;
+    OwnedArray<CallbackMethod> callbacks;
 
     String& getCallbackCode (const String& requiredParentClass,
                              const String& returnType,

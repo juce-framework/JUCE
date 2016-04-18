@@ -595,7 +595,10 @@ static const unsigned char temp_binary_data_7[] =
 "#define %%headerGuard%%\r\n"
 "\r\n"
 "//[Headers]     -- You can add your own extra header files here --\r\n"
-"#include \"../../JuceLibraryCode/JuceHeader.h\"\r\n"
+"\r\n"
+"#include \"JuceHeader.h\" // you may want to edit this path to\r\n"
+"                        // something more appropriate for your app.\r\n"
+"\r\n"
 "//[/Headers]\r\n"
 "\r\n"
 "%%includeFilesH%%\r\n"
@@ -4024,7 +4027,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x51b49ac5:  numBytes = 4255; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2114; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2155; return jucer_ComponentTemplate_h;
+        case 0xfc72fe86:  numBytes = 2243; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x28d496ad:  numBytes = 1161; return jucer_InlineComponentTemplate_h;
