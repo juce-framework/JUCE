@@ -25,7 +25,7 @@
 #ifndef JUCER_GENERATEDCODE_H_INCLUDED
 #define JUCER_GENERATEDCODE_H_INCLUDED
 
-#include "../project/jucer_Project.h"
+#include "../Project/jucer_Project.h"
 class JucerDocument;
 
 
