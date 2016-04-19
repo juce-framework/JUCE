@@ -99,13 +99,10 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
-    <ANDROIDSTUDIO androidVersionCode="1" androidActivityClass="com.yourcompany.miditest.MidiTest"
-                   androidMinimumSDK="23" androidInternetNeeded="0" androidBluetoothNeeded="1"
-                   androidKeyStore="${user.home}/.android/debug.keystore" androidKeyStorePass="android"
-                   androidKeyAlias="androiddebugkey" androidKeyAliasPass="android"
-                   androidCpp11="1" androidScreenOrientation="unspecified" targetFolder="Builds/AndroidStudio"
-                   androidSDKPath="" androidNDKPath="" androidMicNeeded="1" gradleVersion="2.10"
-                   gradleWrapperVersion="0.6.0-beta5" gradleToolchain="clang" gradleToolchainVersion="3.6"
+    <ANDROIDSTUDIO androidActivityClass="com.yourcompany.miditest.MidiTest" androidInternetNeeded="0"
+                   androidBluetoothNeeded="1" androidCpp11="1" androidScreenOrientation="unspecified"
+                   targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
+                   androidMicNeeded="1" gradleToolchain="clang" gradleToolchainVersion="3.6"
                    buildToolsVersion="23.0.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
