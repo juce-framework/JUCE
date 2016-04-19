@@ -990,7 +990,7 @@ public:
 
             {
                 StringArray linkerFlags, librarySearchPaths;
-                getLinkerFlags (config, linkerFlags, librarySearchPaths);
+                getLinkerSettings (config, linkerFlags, librarySearchPaths);
 
                 if (linkerFlags.size() > 0)
                     s.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (" ") + "\"");
@@ -1090,7 +1090,7 @@ public:
         }
 
         //==============================================================================
-        void getLinkerFlags (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths) const
+        void getLinkerSettings (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths) const
         {
             if (xcodeIsBundle)
                 flags.add ("-bundle");
@@ -1098,8 +1098,11 @@ public:
             const Array<RelativePath>& extraLibs = config.isDebug() ? xcodeExtraLibrariesDebug
                                                                     : xcodeExtraLibrariesRelease;
 
-            for (int i = 0; i < extraLibs.size(); ++i)
-                owner.getLinkerFlagsForStaticLibrary (extraLibs.getReference(i), flags, &librarySearchPaths);
+            for (auto& lib : extraLibs)
+            {
+                flags.add (getLinkerFlagForLib (lib.getFileNameWithoutExtension()));
+                librarySearchPaths.add (owner.getSearchPathForStaticLibrary (lib));
+            }
 
             if (owner.project.getProjectType().isAudioPlugin() && type != Target::SharedCodeTarget)
             {
@@ -1108,11 +1111,9 @@ public:
                     String productName (getLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString())));
 
                     RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
-                    owner.getLinkerFlagsForStaticLibrary (sharedCodelib, flags);
+                    flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
                 }
             }
-
-
 
             flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
             flags.add (owner.getExternalLibraryFlags (config));
@@ -1582,7 +1583,6 @@ private:
                 if (rezFiles.size() > 0)
                     target.addBuildPhase ("PBXRezBuildPhase", rezFiles);
 
-
                 StringArray sourceFiles (target.sourceIDs);
 
                 if (target.type == Target::SharedCodeTarget
@@ -1892,10 +1892,8 @@ private:
         return "-l" + library.upToLastOccurrenceOf (".", false, false);
     }
 
-    void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray* librarySearchPaths = nullptr) const
+    String getSearchPathForStaticLibrary (const RelativePath& library) const
     {
-        flags.add (getLinkerFlagForLib (library.getFileNameWithoutExtension()));
-
         String searchPath (library.toUnixStyle().upToLastOccurrenceOf ("/", false, false));
 
         if (! library.isAbsolute())
@@ -1908,8 +1906,7 @@ private:
             searchPath = srcRoot + searchPath;
         }
 
-        if (librarySearchPaths != nullptr)
-            librarySearchPaths->add (sanitisePath (searchPath));
+        return sanitisePath (searchPath);
     }
 
     StringArray getProjectSettings (const XcodeBuildConfiguration& config) const
@@ -1997,10 +1994,8 @@ private:
 
                 // find all the targets that are referring to this object
                 for (auto& target : targets)
-                {
                     if (xcodeFrameworks.contains (s[i]) || target->xcodeFrameworks.contains (s[i]))
                         target->frameworkIDs.add (frameworkID);
-                }
             }
         }
     }
