@@ -16,8 +16,7 @@
               buildAUv3="0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
-               objCExtraSuffix="JuceDemo" aaxFolder="~/SDKs/AAX" postbuildCommand=""
-               vst3Folder="">
+               objCExtraSuffix="JuceDemo" aaxFolder="" postbuildCommand="" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="64BitUniversal"/>
