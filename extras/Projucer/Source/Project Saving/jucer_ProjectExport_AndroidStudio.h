@@ -45,63 +45,35 @@ public:
     }
 
     //==============================================================================
-    Value  getGradleVersionValue()                     { return getSetting (Ids::gradleVersion); }
-    String getGradleVersionString() const              { return settings [Ids::gradleVersion]; }
-    Value  getGradleWrapperVersionValue()              { return getSetting (Ids::gradleWrapperVersion); }
-    String getGradleWrapperVersionString() const       { return settings [Ids::gradleWrapperVersion]; }
-
-    Value  getGradleToolchainValue()                   { return getSetting (Ids::gradleToolchain); }
-    String getGradleToolchainString() const            { return settings [Ids::gradleToolchain]; }
-    Value  getGradleToolchainVersionValue()            { return getSetting (Ids::gradleToolchainVersion); }
-    String getGradleToolchainVersionString() const     { return settings [Ids::gradleToolchainVersion]; }
+    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain;
 
     //==============================================================================
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
         : AndroidProjectExporterBase (p, t),
+          gradleVersion (settings, Ids::gradleVersion, nullptr, "2.10"),
+          gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.7.0-alpha4"),
+          gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {
         name = getName();
-        setEmptyPropertiesToDefaultValues();
-    }
 
-    //==============================================================================
-    void setEmptyPropertiesToDefaultValues()
-    {
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + "AndroidStudio";
-
-        if (getGradleVersionString().isEmpty())
-            getGradleVersionValue() = "2.10";
-
-        if (getGradleWrapperVersionString().isEmpty())
-            getGradleWrapperVersionValue() = "0.7.0-alpha4";
-
-        if (getGradleToolchainString().isEmpty())
-            getGradleToolchainValue() = "clang";
-
-        if (getGradleToolchainVersionString().isEmpty())
-            getGradleToolchainVersionValue() = getGradleToolchainValue() == "clang" ? "3.6" : "4.9";
-
-        if (getBuildToolsVersionString().isEmpty())
-            getBuildToolsVersionValue() = "23.0.1";
     }
 
     //==============================================================================
     void createToolchainExporterProperties (PropertyListBuilder& props) override
     {
-        props.add (new TextPropertyComponent (getGradleVersionValue(), "gradle version", 32, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleVersion, "gradle version", 32),
                    "The version of gradle that Android Studio should use to build this app");
 
-        props.add (new TextPropertyComponent (getGradleWrapperVersionValue(), "gradle-experimental wrapper version", 32, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleWrapperVersion, "gradle-experimental wrapper version", 32),
                    "The version of the gradle-experimental wrapper that Android Studio should use to build this app");
 
         static const char* toolchains[] = { "clang", "gcc", nullptr };
 
-        props.add (new ChoicePropertyComponent (getGradleToolchainValue(), "NDK Toolchain", StringArray (toolchains), Array<var> (toolchains)),
+        props.add (new ChoicePropertyComponent (gradleToolchain.getPropertyAsValue(), "NDK Toolchain", StringArray (toolchains), Array<var> (toolchains)),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
-
-        props.add (new TextPropertyComponent (getGradleToolchainVersionValue(), "NDK Toolchain version", 32, false),
-                   "The version number of the toolchainthat gradle should invoke for NDK compilation (variable model.android.ndk.tooclhainVersion in app/build.gradle)");
     }
 
     void createLibraryModuleExporterProperties (PropertyListBuilder&) override
@@ -512,7 +484,7 @@ private:
         auto dependencies = new GradleObject ("dependencies");
 
         dependencies->add<GradleStatement> ("classpath 'com.android.tools.build:gradle-experimental:"
-                                            + getGradleWrapperVersionString() + "'");
+                                            + gradleWrapperVersion.get() + "'");
         return dependencies;
     }
 
@@ -584,16 +556,24 @@ private:
 
     GradleObject* getAndroidNdkSettings() const
     {
-        const String toolchain = getGradleToolchainString();
-        const String toolchainVersion = getGradleToolchainVersionString();
+        const String toolchain = gradleToolchain.get();
         const bool isClang = (toolchain == "clang");
 
         auto ndkSettings = new GradleObject ("android.ndk");
 
         ndkSettings->add<GradleString> ("moduleName",       "juce_jni");
         ndkSettings->add<GradleString> ("toolchain",        toolchain);
-        ndkSettings->add<GradleValue>  ("toolchainVersion", toolchainVersion);
-        ndkSettings->add<GradleString> ("stl",              isClang ? "c++_static" : "gnustl_static");
+
+        if (isClang)
+        {
+            ndkSettings->add<GradleString> ("stl", "c++_static");
+        }
+        else
+        {
+            ndkSettings->add<GradleValue>  ("toolchainVersion", "4.9");
+            ndkSettings->add<GradleString> ("stl", "gnustl_static");
+        }
+
         ndkSettings->addChildObject (getNdkJuceExtraProperties());
 
         addAllNdkCompilerSettings (ndkSettings);
@@ -835,7 +815,7 @@ private:
         String props;
 
         props << "distributionUrl=https\\://services.gradle.org/distributions/gradle-"
-              << getGradleVersionString() << "-all.zip";
+              << gradleVersion.get() << "-all.zip";
 
         return props;
     }
