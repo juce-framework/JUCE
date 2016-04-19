@@ -102,9 +102,6 @@ public:
         return androidStudioExecutable.startAsProcess ("\"" + targetFolder.getFullPathName() + "\"");
     }
 
-    Value getNDKPlatformVersionValue()         { return getSetting (Ids::androidNdkPlatformVersion); }
-    String getNDKPlatformVersionString() const { return settings [Ids::androidNdkPlatformVersion]; }
-
     Value getBuildToolsVersionValue()          { return getSetting (Ids::buildToolsVersion); }
     String getBuildToolsVersionString() const  { return settings [Ids::buildToolsVersion]; }
 

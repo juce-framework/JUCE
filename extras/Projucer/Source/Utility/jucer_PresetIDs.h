@@ -165,7 +165,6 @@ namespace Ids
     DECLARE_ID (androidTheme);
     DECLARE_ID (androidStaticLibraries);
     DECLARE_ID (androidSharedLibraries);
-    DECLARE_ID (androidNdkPlatformVersion);
     DECLARE_ID (androidScreenOrientation);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
