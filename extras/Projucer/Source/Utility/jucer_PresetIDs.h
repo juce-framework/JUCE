@@ -90,6 +90,7 @@ namespace Ids
     DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);
     DECLARE_ID (linkTimeOptimisation);
+    DECLARE_ID (stripLocalSymbols);
     DECLARE_ID (xcodeVstBinaryLocation);
     DECLARE_ID (xcodeVst3BinaryLocation);
     DECLARE_ID (xcodeAudioUnitBinaryLocation);

@@ -347,6 +347,7 @@ protected:
               codeSignIdentity            (config, Ids::codeSigningIdentity,  nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
               fastMathEnabled             (config, Ids::fastMath,             nullptr),
               linkTimeOptimisationEnabled (config, Ids::linkTimeOptimisation, nullptr),
+              stripLocalSymbolsEnabled    (config, Ids::stripLocalSymbols,    nullptr),
               vstBinaryLocation           (config, Ids::xcodeVstBinaryLocation,       nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST/"),
               vst3BinaryLocation          (config, Ids::xcodeVst3BinaryLocation,      nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
               auBinaryLocation            (config, Ids::xcodeAudioUnitBinaryLocation, nullptr, "$(HOME)/Library/Audio/Plug-Ins/Components/"),
@@ -360,7 +361,7 @@ protected:
 
         CachedValue<String> osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
                             customXcodeFlags, cppLanguageStandard, cppStandardLibrary, codeSignIdentity;
-        CachedValue<bool>   fastMathEnabled, linkTimeOptimisationEnabled;
+        CachedValue<bool>   fastMathEnabled, linkTimeOptimisationEnabled, stripLocalSymbolsEnabled;
         CachedValue<String> vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
 
         //==========================================================================
@@ -447,6 +448,9 @@ protected:
 
             props.add (new BooleanPropertyComponent (linkTimeOptimisationEnabled.getPropertyAsValue(), "Link-Time Optimisation", "Enabled"),
                        "Enable this to perform link-time code generation. This is recommended for release builds.");
+
+            props.add (new BooleanPropertyComponent (stripLocalSymbolsEnabled.getPropertyAsValue(), "Strip local symbols", "Enabled"),
+                       "Enable this to strip any locally defined symbols resulting in a smaller binary size. Enabling this will also remove any function names from crash logs. Must be disabled for static library projects.");
         }
 
     private:
@@ -1021,6 +1025,14 @@ public:
                 s.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
                 s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
                 s.add ("DEAD_CODE_STRIPPING = YES");
+            }
+
+            if (type != Target::SharedCodeTarget && type != Target::StaticLibrary && type != Target::DynamicLibrary
+                  && config.stripLocalSymbolsEnabled.get())
+            {
+                s.add ("STRIPFLAGS = \"-x\"");
+                s.add ("DEPLOYMENT_POSTPROCESSING = YES");
+                s.add ("SEPARATE_STRIP = YES");
             }
 
             if (type == Target::SharedCodeTarget)
