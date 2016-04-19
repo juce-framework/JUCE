@@ -533,7 +533,7 @@ private:
     {
         auto android = new GradleObject ("android");
 
-        android->add<GradleValue> ("compileSdkVersion", getMinimumSDKVersionString().getIntValue());
+        android->add<GradleValue> ("compileSdkVersion", androidMinimumSDK.get().getIntValue());
         android->add<GradleString> ("buildToolsVersion", getBuildToolsVersionString());
         android->addChildObject (getAndroidDefaultConfig());
 
@@ -543,7 +543,7 @@ private:
     GradleObject* getAndroidDefaultConfig() const
     {
         const String bundleIdentifier  = project.getBundleIdentifier().toString().toLowerCase();
-        const int minSdkVersion = getMinimumSDKVersionString().getIntValue();
+        const int minSdkVersion = androidMinimumSDK.get().getIntValue();
 
         auto defaultConfig = new GradleObject ("defaultConfig.with");
 
@@ -741,9 +741,9 @@ private:
             ndkSettings->add<GradleLibrarySearchPath> (path);
 
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID", "1");
-        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_API_VERSION", getMinimumSDKVersionString());
+        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
-        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSPATH","\\\"" + getActivityClassPath().replaceCharacter('.', '/') + "\\\"");
+        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSPATH","\\\"" + androidActivityClass.get().replaceCharacter('.', '/') + "\\\"");
 
         const auto defines = config.getAllPreprocessorDefs();
         for (int i = 0; i < defines.size(); ++i)
@@ -756,10 +756,10 @@ private:
     {
         auto releaseConfig = new GradleObject ("create(\"releaseConfig\")");
 
-        releaseConfig->add<GradleFilePath>  ("storeFile",     getKeyStoreString());
-        releaseConfig->add<GradleString>    ("storePassword", getKeyStorePassString());
-        releaseConfig->add<GradleString>    ("keyAlias",      getKeyAliasString());
-        releaseConfig->add<GradleString>    ("keyPassword",   getKeyAliasPassString());
+        releaseConfig->add<GradleFilePath>  ("storeFile",     androidKeyStore.get());
+        releaseConfig->add<GradleString>    ("storePassword", androidKeyStorePass.get());
+        releaseConfig->add<GradleString>    ("keyAlias",      androidKeyAlias.get());
+        releaseConfig->add<GradleString>    ("keyPassword",   androidKeyAliasPass.get());
         releaseConfig->add<GradleString>    ("storeType",     "jks");
 
         auto signingConfigs = new GradleObject ("android.signingConfigs");
@@ -804,8 +804,8 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (getNDKPathString()) << newLine
-              << "sdk.dir=" << sanitisePath (getSDKPathString()) << newLine;
+        props << "ndk.dir=" << sanitisePath (ndkPath.toString()) << newLine
+              << "sdk.dir=" << sanitisePath (sdkPath.toString()) << newLine;
 
         return props;
     }
