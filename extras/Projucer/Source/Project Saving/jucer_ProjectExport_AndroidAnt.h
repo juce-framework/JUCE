@@ -444,8 +444,8 @@ private:
         << "sdk.dir=" << escapeSpaces (replacePreprocessorDefs (getAllPreprocessorDefs(), sdkPath.toString())) << newLine
         << "ndk.dir=" << escapeSpaces (replacePreprocessorDefs (getAllPreprocessorDefs(), ndkPath.toString())) << newLine
         << "key.store=" << androidKeyStore.get() << newLine
-        << "key.alias=" << androidKeyStorePass.get() << newLine
-        << "key.store.password=" << androidKeyAlias.get() << newLine
+        << "key.alias=" << androidKeyAlias.get() << newLine
+        << "key.store.password=" << androidKeyStorePass.get() << newLine
         << "key.alias.password=" << androidKeyAliasPass.get() << newLine
         << newLine;
 
