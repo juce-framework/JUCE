@@ -45,7 +45,7 @@ public:
     }
 
     //==============================================================================
-    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain;
+    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain, buildToolsVersion;
 
     //==============================================================================
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
@@ -53,6 +53,7 @@ public:
           gradleVersion (settings, Ids::gradleVersion, nullptr, "2.10"),
           gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.7.0-alpha4"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
+          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.1"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {
         name = getName();
@@ -74,6 +75,9 @@ public:
 
         props.add (new ChoicePropertyComponent (gradleToolchain.getPropertyAsValue(), "NDK Toolchain", StringArray (toolchains), Array<var> (toolchains)),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
+
+        props.add (new TextWithDefaultPropertyComponent<String> (buildToolsVersion, "Android build tools version", 32),
+                   "The Android build tools version that Android Studio should use to build this app");
     }
 
     void createLibraryModuleExporterProperties (PropertyListBuilder&) override
@@ -101,9 +105,6 @@ public:
         // will choke if there are any space characters in the path.
         return androidStudioExecutable.startAsProcess ("\"" + targetFolder.getFullPathName() + "\"");
     }
-
-    Value getBuildToolsVersionValue()          { return getSetting (Ids::buildToolsVersion); }
-    String getBuildToolsVersionString() const  { return settings [Ids::buildToolsVersion]; }
 
     //==============================================================================
     void create (const OwnedArray<LibraryModule>& modules) const override
@@ -531,7 +532,7 @@ private:
         auto android = new GradleObject ("android");
 
         android->add<GradleValue> ("compileSdkVersion", androidMinimumSDK.get().getIntValue());
-        android->add<GradleString> ("buildToolsVersion", getBuildToolsVersionString());
+        android->add<GradleString> ("buildToolsVersion", buildToolsVersion.get());
         android->addChildObject (getAndroidDefaultConfig());
 
         return android;
