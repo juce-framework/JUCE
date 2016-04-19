@@ -620,34 +620,11 @@ private:
         const char* basicJucePaths[] = { "${project.rootDir}/app", "${ext.juceRootDir}", "${ext.juceModuleDir}", nullptr };
         StringArray includePaths (basicJucePaths);
 
-        auto cppFiles = getAllIncludedCppFiles();
-
-        for (const auto& cppFile : cppFiles)
-            includePaths.addIfNotAlreadyThere (getIncludePathForFile (cppFile));
+        includePaths.add (sanitisePath (project.getProjectFolder().getFullPathName() + "/Source/"));
+        includePaths.add (sanitisePath (project.getProjectFolder().getFullPathName() + "/../../JUCE/modules/"));
 
         for (const auto& path : includePaths)
             ndk->add<GradleHeaderIncludePath> (path);
-    }
-
-    Array<RelativePath> getAllIncludedCppFiles() const
-    {
-        Array<RelativePath> cppFiles;
-        const auto& groups = getAllGroups();
-
-        for (int i = 0; i < groups.size(); ++i)
-            findAllProjectItemsWithPredicate (groups.getReference (i), cppFiles, ShouldBeAddedToProjectPredicate());
-
-        return cppFiles;
-    }
-
-    String getIncludePathForFile (const RelativePath& file) const
-    {
-        return sanitisePath (project.getProjectFolder().getFullPathName() + "/"
-                             + file.rebased (getTargetFolder(),
-                                             project.getProjectFolder(),
-                                             RelativePath::projectFolder)
-                                   .toUnixStyle()
-                                   .upToLastOccurrenceOf ("/", false, false));
     }
 
     void addNdkLinkerFlags (GradleObject* ndk) const
