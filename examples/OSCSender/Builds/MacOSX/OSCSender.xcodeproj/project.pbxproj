@@ -334,6 +334,7 @@
 		73ECE098454A1E93F65F750C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Uuid.cpp"; path = "../../../../modules/juce_core/misc/juce_Uuid.cpp"; sourceTree = "SOURCE_ROOT"; };
 		7419FCD8B242A894D72EC5F8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ComponentMovementWatcher.cpp"; path = "../../../../modules/juce_gui_basics/layout/juce_ComponentMovementWatcher.cpp"; sourceTree = "SOURCE_ROOT"; };
 		741AE4CDEAAA1AB1657A4A53 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ModalComponentManager.cpp"; path = "../../../../modules/juce_gui_basics/components/juce_ModalComponentManager.cpp"; sourceTree = "SOURCE_ROOT"; };
+		7500AB21C77CF4783576F759 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		766243F2E499522B0BCF90D7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ImageButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_ImageButton.h"; sourceTree = "SOURCE_ROOT"; };
 		76FA69159E195EC73C54C166 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OutputStream.h"; path = "../../../../modules/juce_core/streams/juce_OutputStream.h"; sourceTree = "SOURCE_ROOT"; };
 		775586DF3FED31DE6FAF7A48 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_NamedPipe.h"; path = "../../../../modules/juce_core/network/juce_NamedPipe.h"; sourceTree = "SOURCE_ROOT"; };
@@ -349,6 +350,7 @@
 		7ACB4BC6D063A4BF3EDA90FC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DrawableText.h"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawableText.h"; sourceTree = "SOURCE_ROOT"; };
 		7B79F66C174BAC99CD5FA90A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ApplicationBase.cpp"; path = "../../../../modules/juce_events/messages/juce_ApplicationBase.cpp"; sourceTree = "SOURCE_ROOT"; };
 		7B8EBDFC8FC37BAF659298DB = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_PropertiesFile.cpp"; path = "../../../../modules/juce_data_structures/app_properties/juce_PropertiesFile.cpp"; sourceTree = "SOURCE_ROOT"; };
+		7B9A1218329A138B8F63FDF2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		7BA2E0A4F0F1FCE1692CDA4A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdmaster.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdmaster.c"; sourceTree = "SOURCE_ROOT"; };
 		7C33F1B4BF7CBFE66731D34C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ImageCache.h"; path = "../../../../modules/juce_graphics/images/juce_ImageCache.h"; sourceTree = "SOURCE_ROOT"; };
 		7D5378C4B695E584814A8AEE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctred.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jidctred.c"; sourceTree = "SOURCE_ROOT"; };
@@ -1031,6 +1033,8 @@
 					EBFFEFCE6CB0E4D77E05D225,
 					8457A426244850B181C5B86A, ); name = undomanager; sourceTree = "<group>"; };
 		00EEEBB08AF562D9077C354E = {isa = PBXGroup; children = (
+					7B9A1218329A138B8F63FDF2,
+					7500AB21C77CF4783576F759,
 					18B5B1CFAFF39440F3429D12,
 					EFE0A6D09D69C4210D26BCBB,
 					6D81EC26DD64274A3BB77D96,
@@ -1716,7 +1720,7 @@
 		3D76C0E767055A9B4699DD95 = {isa = PBXNativeTarget; buildConfigurationList = 39783C8C7DACE951DC0EA0C9; buildPhases = (
 					1E9F219D82037569524E98CF,
 					CDCF3ED48FB54EFBE0DD9046,
-					53E02F5676BF451851C9C06E, ); buildRules = ( ); dependencies = (  ); name = "OSCSender (App)"; productName = OSCSender; productReference = E6F7F38EEF1BA55231F5B1D4; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					53E02F5676BF451851C9C06E, ); buildRules = ( ); dependencies = (  ); name = "OSCSender (App)"; productName = OSCSender; productReference = E6F7F38EEF1BA55231F5B1D4; productType = "com.apple.product-type.application"; };
 		9CD8E1E30EDAF4E86990F260 = {isa = PBXProject; buildConfigurationList = ABFD3DA91CD9955D1FEC14F5; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { 3D76C0E767055A9B4699DD95 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 168BF90B7EF8C12090B0A9B2; projectDirPath = ""; projectRoot = ""; targets = (3D76C0E767055A9B4699DD95); };
 	};
 	rootObject = 9CD8E1E30EDAF4E86990F260;

@@ -204,6 +204,7 @@
 		27C406540653447AC2D3661B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DrawableText.cpp"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawableText.cpp"; sourceTree = "SOURCE_ROOT"; };
 		27D80591F48FEE943DA925AF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jcdctmgr.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jcdctmgr.c"; sourceTree = "SOURCE_ROOT"; };
 		27E53A80CB7DF9FCCB106B76 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdsample.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdsample.c"; sourceTree = "SOURCE_ROOT"; };
+		2825D7AB5CBA0AC36DD68D0B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		28C5D30A359C5676262E96C0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioProcessorListener.h"; path = "../../../../modules/juce_audio_processors/processors/juce_AudioProcessorListener.h"; sourceTree = "SOURCE_ROOT"; };
 		2967AB09D392074A228EA204 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jcapimin.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jcapimin.c"; sourceTree = "SOURCE_ROOT"; };
 		2997C443B652C787BEFCDB6C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MidiMessageSequence.cpp"; path = "../../../../modules/juce_audio_basics/midi/juce_MidiMessageSequence.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -418,6 +419,7 @@
 		584E5E26ACA7AD527A7C6751 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdpostct.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdpostct.c"; sourceTree = "SOURCE_ROOT"; };
 		5895CBDE3C1717110102E430 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SliderPropertyComponent.h"; path = "../../../../modules/juce_gui_basics/properties/juce_SliderPropertyComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		58FC211C847065896BF74E4D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MenuBarModel.h"; path = "../../../../modules/juce_gui_basics/menus/juce_MenuBarModel.h"; sourceTree = "SOURCE_ROOT"; };
+		5906AD70A7E2AA3CEB98F5FE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		591BC5ABAC5BAC7C425431B9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pngstruct.h; path = "../../../../modules/juce_graphics/image_formats/pnglib/pngstruct.h"; sourceTree = "SOURCE_ROOT"; };
 		59BAD2AB51CEECCD39CDCD90 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_devices.mm"; path = "../../JuceLibraryCode/juce_audio_devices.mm"; sourceTree = "SOURCE_ROOT"; };
 		5A40FD30E8401DA9D26CD764 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ByteOrder.h"; path = "../../../../modules/juce_core/memory/juce_ByteOrder.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1831,6 +1833,8 @@
 					95D963E74D3B94C7DF6E1ADF,
 					F74DA30CDA5ED0BF3BA71AA3, ); name = undomanager; sourceTree = "<group>"; };
 		C79ACA92C3F77EAF70732BD7 = {isa = PBXGroup; children = (
+					2825D7AB5CBA0AC36DD68D0B,
+					5906AD70A7E2AA3CEB98F5FE,
 					919D39066CE50FABB7FFC9D3,
 					9E188388D731F86A3462278E,
 					6A1EBAD397DC24CC101A95C3,
@@ -2584,7 +2588,7 @@
 		B15B6C659E27D8982A94F805 = {isa = PBXNativeTarget; buildConfigurationList = 849791D67A098129A7068BA8; buildPhases = (
 					28277E0496F9A366F1E8A121,
 					5EDB4F61A6B9E9073901673E,
-					922CC2B83A0B55C36D188E46, ); buildRules = ( ); dependencies = (  ); name = "PluckedStringsDemo (App)"; productName = PluckedStringsDemo; productReference = 3A8608CBA979E2BD17B50D0E; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					922CC2B83A0B55C36D188E46, ); buildRules = ( ); dependencies = (  ); name = "PluckedStringsDemo (App)"; productName = PluckedStringsDemo; productReference = 3A8608CBA979E2BD17B50D0E; productType = "com.apple.product-type.application"; };
 		209D68C0E5F80B54B99D6435 = {isa = PBXProject; buildConfigurationList = DE12D5F044F75EB7B3CF17BB; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { B15B6C659E27D8982A94F805 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = B4D11720461A13D5D9F3E047; projectDirPath = ""; projectRoot = ""; targets = (B15B6C659E27D8982A94F805); };
 	};
 	rootObject = 209D68C0E5F80B54B99D6435;

@@ -22,6 +22,7 @@
 		8512EAE7AF8CDF51BBA09EE8 = {isa = PBXBuildFile; fileRef = A094C1384EE9BF1669F5C10E; };
 		CD5A10EC4CD09370AD820C7C = {isa = PBXBuildFile; fileRef = 28FB2369C7BAE3960D6E0AF0; };
 		0002AB33B2B1E2A83F861C49 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdphuff.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdphuff.c"; sourceTree = "SOURCE_ROOT"; };
+		00A034C410DBA61297D65E37 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		00CDCA76917B831BBA098886 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ReadWriteLock.h"; path = "../../../../modules/juce_core/threads/juce_ReadWriteLock.h"; sourceTree = "SOURCE_ROOT"; };
 		016711C25CA1C36A4746C73A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jcprepct.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jcprepct.c"; sourceTree = "SOURCE_ROOT"; };
 		0251FE0DE5ED2D9D43022582 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ApplicationProperties.cpp"; path = "../../../../modules/juce_data_structures/app_properties/juce_ApplicationProperties.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -31,6 +32,7 @@
 		0337C98E5F43F9318BB902E2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = cderror.h; path = "../../../../modules/juce_graphics/image_formats/jpglib/cderror.h"; sourceTree = "SOURCE_ROOT"; };
 		038A941B607C1FFDB9E808DD = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ShapeButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_ShapeButton.h"; sourceTree = "SOURCE_ROOT"; };
 		038C0DBB08FAB84ACE73E6F6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jpeglib.h; path = "../../../../modules/juce_graphics/image_formats/jpglib/jpeglib.h"; sourceTree = "SOURCE_ROOT"; };
+		0393286D5722938DD268A9DA = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		042A6506F7508AC4A48527E7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ConcertinaPanel.h"; path = "../../../../modules/juce_gui_basics/layout/juce_ConcertinaPanel.h"; sourceTree = "SOURCE_ROOT"; };
 		0431BBE1A6560B6109FDAABB = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = pngrtran.c; path = "../../../../modules/juce_graphics/image_formats/pnglib/pngrtran.c"; sourceTree = "SOURCE_ROOT"; };
 		045771320DE8188DA10004C7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_XmlDocument.cpp"; path = "../../../../modules/juce_core/xml/juce_XmlDocument.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1073,6 +1075,8 @@
 					D8B0DE77AD69B6EF9912BFFF,
 					EAD3F95BA32E79C92298C479, ); name = undomanager; sourceTree = "<group>"; };
 		51C0B761FB78535730E44CEE = {isa = PBXGroup; children = (
+					0393286D5722938DD268A9DA,
+					00A034C410DBA61297D65E37,
 					FF81F9A67E4B9973B5485F0D,
 					767CBBD58A107FCA005D38E8,
 					891B14FF053DF9A2853BEF7A,
@@ -1802,7 +1806,7 @@
 		FDDAB81F5F4DA48E7807E65A = {isa = PBXNativeTarget; buildConfigurationList = 19D4440E4BC04A92B1ECD9BE; buildPhases = (
 					7065518BA4A719BD600955DB,
 					A0BD0396A9AB3F7FCF37AD62,
-					8F57F6817BE0F4126A95541F, ); buildRules = ( ); dependencies = (  ); name = "ComponentTutorialExample (App)"; productName = ComponentTutorialExample; productReference = 48DBB774ADD58780B75FD130; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					8F57F6817BE0F4126A95541F, ); buildRules = ( ); dependencies = (  ); name = "ComponentTutorialExample (App)"; productName = ComponentTutorialExample; productReference = 48DBB774ADD58780B75FD130; productType = "com.apple.product-type.application"; };
 		3B89677F666BF40854CDE8D3 = {isa = PBXProject; buildConfigurationList = D2C0D08571281A97A8437C77; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { FDDAB81F5F4DA48E7807E65A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D0953BB62CDDA1D6C60E6893; projectDirPath = ""; projectRoot = ""; targets = (FDDAB81F5F4DA48E7807E65A); };
 	};
 	rootObject = 3B89677F666BF40854CDE8D3;

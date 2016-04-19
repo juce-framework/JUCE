@@ -286,6 +286,7 @@
 		3FBBEAEA8D7EE76A80A9EAD5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "os_types.h"; path = "../../../../modules/juce_audio_formats/codecs/oggvorbis/os_types.h"; sourceTree = "SOURCE_ROOT"; };
 		3FC0A1C5851BC3D26D981A86 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdcolor.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdcolor.c"; sourceTree = "SOURCE_ROOT"; };
 		401004DACA9FBDDC00C7097F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_graphics.mm"; path = "../../JuceLibraryCode/juce_graphics.mm"; sourceTree = "SOURCE_ROOT"; };
+		407EF555630609E612CC1D3D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		40C7F5C7EB0D6FA334EC41DE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdmerge.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdmerge.c"; sourceTree = "SOURCE_ROOT"; };
 		41430EC92AF6D3A5B8317875 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioThumbnailCache.h"; path = "../../../../modules/juce_audio_utils/gui/juce_AudioThumbnailCache.h"; sourceTree = "SOURCE_ROOT"; };
 		414422FDC4E9C4C096680D6B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioSourcePlayer.cpp"; path = "../../../../modules/juce_audio_devices/sources/juce_AudioSourcePlayer.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -830,6 +831,7 @@
 		B710D5415F8040FDA3E5F3C4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_StatisticsAccumulator.h"; path = "../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"; sourceTree = "SOURCE_ROOT"; };
 		B73AF386AD8DC4E75DDCE7AB = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Thread.h"; path = "../../../../modules/juce_core/threads/juce_Thread.h"; sourceTree = "SOURCE_ROOT"; };
 		B73EDB2FF27E91703573FE40 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MidiDataConcatenator.h"; path = "../../../../modules/juce_audio_devices/native/juce_MidiDataConcatenator.h"; sourceTree = "SOURCE_ROOT"; };
+		B749D40A9DB6D2236BDE8F13 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		B781D185E5DDAC0AAE6D41A2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioFormatReaderSource.cpp"; path = "../../../../modules/juce_audio_formats/format/juce_AudioFormatReaderSource.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B78A875B8D42696228DF8B45 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = mdct.c; path = "../../../../modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/mdct.c"; sourceTree = "SOURCE_ROOT"; };
 		B7AE0149FF49C6EE294D03EE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VST3Headers.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VST3Headers.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1827,6 +1829,8 @@
 					95B66CAB0FAA7F33FADF872F,
 					B7E8544884A3E7373CBBEAE5, ); name = undomanager; sourceTree = "<group>"; };
 		4762B6775DC42CB4CCEA876B = {isa = PBXGroup; children = (
+					407EF555630609E612CC1D3D,
+					B749D40A9DB6D2236BDE8F13,
 					5A5BDC41BBF43457B2EA4C70,
 					1717D7DD9D258595E300D248,
 					0929A69E87BFDBCC09C653D2,
@@ -2580,7 +2584,7 @@
 		D0E4014BABB86AAE963C0EC0 = {isa = PBXNativeTarget; buildConfigurationList = 9757697CD762C5D12E7FC75A; buildPhases = (
 					48322B9DE3337E69E96F7551,
 					69128EEF3B23EA7E960EBE08,
-					B8B3353D164D52CC62A584F2, ); buildRules = ( ); dependencies = (  ); name = "SimpleFFTExample (App)"; productName = SimpleFFTExample; productReference = 8D8ED3E7474D65E7177750A8; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					B8B3353D164D52CC62A584F2, ); buildRules = ( ); dependencies = (  ); name = "SimpleFFTExample (App)"; productName = SimpleFFTExample; productReference = 8D8ED3E7474D65E7177750A8; productType = "com.apple.product-type.application"; };
 		CF307CC82EF6FB552266854D = {isa = PBXProject; buildConfigurationList = C877108FC7BF2DA280A51F46; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { D0E4014BABB86AAE963C0EC0 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4DB04A617E8DFE6D06731154; projectDirPath = ""; projectRoot = ""; targets = (D0E4014BABB86AAE963C0EC0); };
 	};
 	rootObject = CF307CC82EF6FB552266854D;

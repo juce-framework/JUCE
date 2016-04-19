@@ -942,6 +942,7 @@
 		C7C592A7CC93688EC1C0DFBF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MemoryMappedFile.h"; path = "../../../../modules/juce_core/files/juce_MemoryMappedFile.h"; sourceTree = "SOURCE_ROOT"; };
 		C7CB4553F9D049D08AD7DDA3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fixed.h; path = "../../../../modules/juce_audio_formats/codecs/flac/libFLAC/include/private/fixed.h"; sourceTree = "SOURCE_ROOT"; };
 		C7E65D4B08AC8EE1CED896B5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctred.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jidctred.c"; sourceTree = "SOURCE_ROOT"; };
+		C919023E9D395E95E857BE3E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		C93AA91AAF05334E4EED3F0F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = res0.c; path = "../../../../modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/res0.c"; sourceTree = "SOURCE_ROOT"; };
 		C9C1B109F10AEE13151695D2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_PropertiesFile.h"; path = "../../../../modules/juce_data_structures/app_properties/juce_PropertiesFile.h"; sourceTree = "SOURCE_ROOT"; };
 		CA0E041B0C65D0880A1CEB79 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ResamplingAudioSource.h"; path = "../../../../modules/juce_audio_basics/sources/juce_ResamplingAudioSource.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1090,6 +1091,7 @@
 		E9B14DC45CDADE518EEACF9A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CustomTypeface.cpp"; path = "../../../../modules/juce_graphics/fonts/juce_CustomTypeface.cpp"; sourceTree = "SOURCE_ROOT"; };
 		E9C50B5DF0C6757DD6B3F67E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Slider.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_Slider.h"; sourceTree = "SOURCE_ROOT"; };
 		E9FA55F622DA134AF22EA129 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioProcessorParameterWithID.h"; path = "../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorParameterWithID.h"; sourceTree = "SOURCE_ROOT"; };
+		EA05BB038D8599792E19A159 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		EA1B643DE23EB2F415B84814 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_IPAddress.h"; path = "../../../../modules/juce_core/network/juce_IPAddress.h"; sourceTree = "SOURCE_ROOT"; };
 		EA3EDA7EE4DF3EB95FE646A9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_QuickTimeMovieComponent.mm"; path = "../../../../modules/juce_video/native/juce_mac_QuickTimeMovieComponent.mm"; sourceTree = "SOURCE_ROOT"; };
 		EA5ADC60EF5D84630772E681 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ordinals.h; path = "../../../../modules/juce_audio_formats/codecs/flac/ordinals.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1875,6 +1877,8 @@
 					41FBBAEA5B88952DD3885A11,
 					5270E66C5C7578382B430BC6, ); name = undomanager; sourceTree = "<group>"; };
 		36631354AB069FAEA0F514DC = {isa = PBXGroup; children = (
+					C919023E9D395E95E857BE3E,
+					EA05BB038D8599792E19A159,
 					40D1DB4A897D8436C3303CCD,
 					881CF0D48C44D83FBEFE11C1,
 					6FAE80EBA0BD373154CD9F6C,
@@ -2724,7 +2728,7 @@
 		B0D62ED1051EE9DFD49F6321 = {isa = PBXNativeTarget; buildConfigurationList = FCC937D27051A7D36CD9198E; buildPhases = (
 					DD4C62A6EA1FD3497B42CDB0,
 					E8585DDC9F9A0EE2FB82FA52,
-					136E27FD16209F9868093A6C, ); buildRules = ( ); dependencies = (  ); name = "UnitTestRunner (ConsoleApp)"; productName = UnitTestRunner; productReference = 080EAB9CF5AB2BD6B2BBB173; productInstallPath = /usr/bin; productType = "com.apple.product-type.tool"; };
+					136E27FD16209F9868093A6C, ); buildRules = ( ); dependencies = (  ); name = "UnitTestRunner (ConsoleApp)"; productName = UnitTestRunner; productReference = 080EAB9CF5AB2BD6B2BBB173; productType = "com.apple.product-type.tool"; };
 		E1E93F2B4B2D17E011395520 = {isa = PBXProject; buildConfigurationList = 18FC121B1014F7999CD135D3; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 99F3717D3FEAFDCA3C22E868; projectDirPath = ""; projectRoot = ""; targets = (B0D62ED1051EE9DFD49F6321); };
 	};
 	rootObject = E1E93F2B4B2D17E011395520;

@@ -620,6 +620,7 @@
 		7544A58B9E4B2489393AE5C2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OggVorbisAudioFormat.h"; path = "../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		754FD974215C7B29C3D36B59 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AiffAudioFormat.cpp"; path = "../../../../../modules/juce_audio_formats/codecs/juce_AiffAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
 		7554A45516CA0D4D326BF16A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TopLevelWindow.h"; path = "../../../../../modules/juce_gui_basics/windows/juce_TopLevelWindow.h"; sourceTree = "SOURCE_ROOT"; };
+		757E6ED6016F88C0C0795D95 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		7587EA4C7776CD377785687F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DocumentWindow.cpp"; path = "../../../../../modules/juce_gui_basics/windows/juce_DocumentWindow.cpp"; sourceTree = "SOURCE_ROOT"; };
 		758818D3B814CBEC6F3508E0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AppleRemote.h"; path = "../../../../../modules/juce_gui_extra/misc/juce_AppleRemote.h"; sourceTree = "SOURCE_ROOT"; };
 		75E146DCDDC75E6BD0513621 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctfst.c; path = "../../../../../modules/juce_graphics/image_formats/jpglib/jidctfst.c"; sourceTree = "SOURCE_ROOT"; };
@@ -692,6 +693,7 @@
 		839025056234563257AE4999 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLPixelFormat.h"; path = "../../../../../modules/juce_opengl/opengl/juce_OpenGLPixelFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		839E732C6A0D6E541D9C1AD1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_FilenameComponent.h"; path = "../../../../../modules/juce_gui_basics/filebrowser/juce_FilenameComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		83AC9494BD2349B30766D871 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_audio_plugin_client_VST2.cpp"; path = "../../JuceLibraryCode/juce_audio_plugin_client_VST2.cpp"; sourceTree = "SOURCE_ROOT"; };
+		83B23AF218F71386842E4DC8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		83FBB1FB818257BCAA788551 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ApplicationCommandManager.cpp"; path = "../../../../../modules/juce_gui_basics/commands/juce_ApplicationCommandManager.cpp"; sourceTree = "SOURCE_ROOT"; };
 		841B2622BB3EA55BE06941C4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = pngwio.c; path = "../../../../../modules/juce_graphics/image_formats/pnglib/pngwio.c"; sourceTree = "SOURCE_ROOT"; };
 		8422F5EA5C8771457846DD08 = {isa = PBXFileReference; lastKnownFileType = file; name = README; path = "../../../../../modules/juce_core/zip/zlib/README"; sourceTree = "SOURCE_ROOT"; };
@@ -2077,6 +2079,8 @@
 					10AC5DD4504B88617FA9B1B4,
 					35B4ED2CB96C0BB28AA63805, ); name = undomanager; sourceTree = "<group>"; };
 		093BAFCD0477BE4189CFDB23 = {isa = PBXGroup; children = (
+					757E6ED6016F88C0C0795D95,
+					83B23AF218F71386842E4DC8,
 					BCAAA3A76C65BBCDAF588FFA,
 					0F34C1D3DEE90416576E69FC,
 					E8377090D95557FD1AC33920,
@@ -3059,7 +3063,7 @@
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-AAX.plist;
-				INSTALL_PATH = "/Library/Application Support/Avid/Audio/Plug-Ins/";
+				INSTALL_PATH = "/Library/Application Support/Digidesign/Plug-Ins/";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = ("$(inherited)", "\"$(HOME)/SDKs/AAX/Libs/Debug\"");
 				LIBRARY_STYLE = Bundle;
@@ -3098,7 +3102,7 @@
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-AAX.plist;
-				INSTALL_PATH = "/Library/Application Support/Avid/Audio/Plug-Ins/";
+				INSTALL_PATH = "/Library/Application Support/Digidesign/Plug-Ins/";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = ("$(inherited)", "\"$(HOME)/SDKs/AAX/Libs/Release\"");
 				LIBRARY_STYLE = Bundle;
@@ -3254,7 +3258,7 @@
 					D751EAE19631A157B10D04ED,
 					006D5D33A2A2D68C9354B32D,
 					911E05FA69C1B8015EA96560, ); buildRules = ( ); dependencies = (
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST)"; productName = GainPlugIn; productReference = 169146CE0C9730602B3D31BD; productInstallPath = "$(HOME)/Library/Audio/Plug-Ins/VST/"; productType = "com.apple.product-type.bundle"; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST)"; productName = GainPlugIn; productReference = 169146CE0C9730602B3D31BD; productType = "com.apple.product-type.bundle"; };
 		391979B4660EDD6E009E0AD5 = {isa = XCConfigurationList; buildConfigurations = (
 					1F8B7104586EEA017DC9E66D,
 					8C4CBD97ADA22451A0CBDB2A, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3284,7 +3288,7 @@
 					D7BCC30C63CAC7A7920D8047,
 					961B720A39DE7A36993450FB,
 					B97CFDFCFBB3263FBE4CE9DA, ); buildRules = ( ); dependencies = (
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST3)"; productName = GainPlugIn; productReference = E5C2175FF96CED1519F2B7D6; productInstallPath = "$(HOME)/Library/Audio/Plug-Ins/VST3/"; productType = "com.apple.product-type.bundle"; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST3)"; productName = GainPlugIn; productReference = E5C2175FF96CED1519F2B7D6; productType = "com.apple.product-type.bundle"; };
 		BC01B854A2B1C169532B3C40 = {isa = XCConfigurationList; buildConfigurations = (
 					913C8DA77769EF7E429930F2,
 					93405247663082AE0B727930, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3320,7 +3324,7 @@
 					F64B4E3D3CB6B1C555806A9C,
 					7CD5DF20930E5FD4B8978F68,
 					0466EDF982628A74C5EF25A0, ); buildRules = ( ); dependencies = (
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (AU)"; productName = GainPlugIn; productReference = F8D93BA03DB14514E2F9D007; productInstallPath = "$(HOME)/Library/Audio/Plug-Ins/Components/"; productType = "com.apple.product-type.bundle"; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (AU)"; productName = GainPlugIn; productReference = F8D93BA03DB14514E2F9D007; productType = "com.apple.product-type.bundle"; };
 		4BDDEC55EDB7DC56497AC19A = {isa = XCConfigurationList; buildConfigurations = (
 					71BC79A3E5FEBDB257DE068E,
 					A1AD203AE69C428760D3AD4A, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3350,7 +3354,7 @@
 					711822CA5418D9A6BEBB7723,
 					5ED60E79CB2B11C45637CA8A,
 					B4837EEA7868B856A37F43BD, ); buildRules = ( ); dependencies = (
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (AAX)"; productName = GainPlugIn; productReference = C43A527A45129CF421296BD0; productInstallPath = "/Library/Application Support/Avid/Audio/Plug-Ins/"; productType = "com.apple.product-type.bundle"; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (AAX)"; productName = GainPlugIn; productReference = C43A527A45129CF421296BD0; productType = "com.apple.product-type.bundle"; };
 		2D1D1BFA76D5FF752D06187F = {isa = XCConfigurationList; buildConfigurations = (
 					2CB812B0DEE790549B33EA23,
 					1A69EAB78F178B933E748B51, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3386,7 +3390,7 @@
 					14E482AFF9CC9F18BA3798BD, ); runOnlyForDeploymentPostprocessing = 0; };
 		EF7E12AA943CABF4C9ACE9FC = {isa = PBXNativeTarget; buildConfigurationList = 2D1D1BFA76D5FF752D06187F; buildPhases = (
 					E57E58AA3A8632B697CF894F,
-					9C508A8FAB3E51327104655F, ); buildRules = ( ); dependencies = (  ); name = "GainPlugIn (Shared Code)"; productName = GainPlugIn; productReference = 074F1E0FAFBD4B127B869BC2; productInstallPath = "@executable_path/../Frameworks"; productType = "com.apple.product-type.framework"; };
+					9C508A8FAB3E51327104655F, ); buildRules = ( ); dependencies = (  ); name = "GainPlugIn (Shared Code)"; productName = GainPlugIn; productReference = 074F1E0FAFBD4B127B869BC2; productType = "com.apple.product-type.framework"; };
 		14B1FDE882BA4A9678780A26 = {isa = PBXProject; buildConfigurationList = 738DD13F786359A977312E92; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { 67946078D4B1207C2A6BDB4F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };BBE761975F619DAA1B4D0F57 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };8777AC1501FECCF360363C10 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };95B232D53C8384ECDA8C519B = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };AD71869D70E2F5CD06AF8831 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };EF7E12AA943CABF4C9ACE9FC = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 807311746F9F870D03BE88D9; projectDirPath = ""; projectRoot = ""; targets = (67946078D4B1207C2A6BDB4F, BBE761975F619DAA1B4D0F57, 8777AC1501FECCF360363C10, 95B232D53C8384ECDA8C519B, AD71869D70E2F5CD06AF8831, EF7E12AA943CABF4C9ACE9FC); };
 	};
 	rootObject = 14B1FDE882BA4A9678780A26;

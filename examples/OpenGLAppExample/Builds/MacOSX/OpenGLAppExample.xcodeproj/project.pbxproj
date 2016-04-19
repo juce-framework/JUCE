@@ -904,6 +904,7 @@
 		C159C35E078C5B5B9BFEFB52 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_MouseCursor.mm"; path = "../../../../modules/juce_gui_basics/native/juce_mac_MouseCursor.mm"; sourceTree = "SOURCE_ROOT"; };
 		C1A299D4A5AAEA645975EEB8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_GlyphArrangement.h"; path = "../../../../modules/juce_graphics/fonts/juce_GlyphArrangement.h"; sourceTree = "SOURCE_ROOT"; };
 		C24880A7007CE75B7F8BBD71 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Slider.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_Slider.h"; sourceTree = "SOURCE_ROOT"; };
+		C2563F798C3ECAE115E33D05 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		C2B61447889E781465E49AC3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MenuBarModel.h"; path = "../../../../modules/juce_gui_basics/menus/juce_MenuBarModel.h"; sourceTree = "SOURCE_ROOT"; };
 		C33DDF76E058D3E11E61DE63 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_BigInteger.h"; path = "../../../../modules/juce_core/maths/juce_BigInteger.h"; sourceTree = "SOURCE_ROOT"; };
 		C3983DF936C4501C564FFF0F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MPESynthesiserBase.h"; path = "../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserBase.h"; sourceTree = "SOURCE_ROOT"; };
@@ -982,6 +983,7 @@
 		D33BA771F1FA8F73233004EA = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_RuntimePermissions.cpp"; path = "../../../../modules/juce_core/native/juce_android_RuntimePermissions.cpp"; sourceTree = "SOURCE_ROOT"; };
 		D37936ED5B5A415DF1F5F2C2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SystemStats.h"; path = "../../../../modules/juce_core/system/juce_SystemStats.h"; sourceTree = "SOURCE_ROOT"; };
 		D41D5B61C6164873CABC4DF3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdmarker.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdmarker.c"; sourceTree = "SOURCE_ROOT"; };
+		D45F14581BBA9D98130D5E05 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		D476B9FCEF30511BC736C744 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_core.h"; path = "../../../../modules/juce_core/juce_core.h"; sourceTree = "SOURCE_ROOT"; };
 		D4BB844DC118FF84DAFC1249 = {isa = PBXFileReference; lastKnownFileType = text.txt; name = "Flac Licence.txt"; path = "../../../../modules/juce_audio_formats/codecs/flac/Flac Licence.txt"; sourceTree = "SOURCE_ROOT"; };
 		D4CA818D9DA2269EBCE376DE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SystemAudioVolume.h"; path = "../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1869,6 +1871,8 @@
 					0CB9B8098AB7F4CFF3991565,
 					14254C2E6F168DB69F9F6494, ); name = undomanager; sourceTree = "<group>"; };
 		169C103F9191DD2874A7B556 = {isa = PBXGroup; children = (
+					C2563F798C3ECAE115E33D05,
+					D45F14581BBA9D98130D5E05,
 					B2E2A77534D9104C78E8F3E2,
 					D1A2603E46734D31975B7540,
 					4EBBA20040624174084744DF,
@@ -2696,7 +2700,7 @@
 		9F2051B91F59B036C151A2F9 = {isa = PBXNativeTarget; buildConfigurationList = DFEC4A70ACFDEF29698A9ACE; buildPhases = (
 					56C1AB4D5E9F6E55C4A4D18C,
 					9C76B98AD0B6E256C4C90D77,
-					9CAA70AAF55A5D696C59AA51, ); buildRules = ( ); dependencies = (  ); name = "OpenGLAppExample (App)"; productName = OpenGLAppExample; productReference = 7451C664E0B1FF42F028813E; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					9CAA70AAF55A5D696C59AA51, ); buildRules = ( ); dependencies = (  ); name = "OpenGLAppExample (App)"; productName = OpenGLAppExample; productReference = 7451C664E0B1FF42F028813E; productType = "com.apple.product-type.application"; };
 		92078120DD024E75D724B8AB = {isa = PBXProject; buildConfigurationList = 46FEBDB3E8E7421830E627F2; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { 9F2051B91F59B036C151A2F9 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5EB8D0E327356FA2D5323013; projectDirPath = ""; projectRoot = ""; targets = (9F2051B91F59B036C151A2F9); };
 	};
 	rootObject = 92078120DD024E75D724B8AB;

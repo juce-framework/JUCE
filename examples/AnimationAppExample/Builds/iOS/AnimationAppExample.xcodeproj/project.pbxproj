@@ -1007,6 +1007,7 @@
 		DD2007C851B70E2C71171145 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_NamedValueSet.cpp"; path = "../../../../modules/juce_core/containers/juce_NamedValueSet.cpp"; sourceTree = "SOURCE_ROOT"; };
 		DD73087B002B1DB6B90B666E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InterprocessConnection.h"; path = "../../../../modules/juce_events/interprocess/juce_InterprocessConnection.h"; sourceTree = "SOURCE_ROOT"; };
 		DDAFF654664C571998E6C0D5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "res_books_uncoupled.h"; path = "../../../../modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/books/uncoupled/res_books_uncoupled.h"; sourceTree = "SOURCE_ROOT"; };
+		DDB7CF1A01382FDD2636147F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		DE1943CA08D7FAB2E3EC0A14 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Line.h"; path = "../../../../modules/juce_graphics/geometry/juce_Line.h"; sourceTree = "SOURCE_ROOT"; };
 		DE2D7E4CDC8E5826FE64552F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdphuff.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdphuff.c"; sourceTree = "SOURCE_ROOT"; };
 		DE4C0926D2EFA7649BD3AAA5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TimeSliceThread.h"; path = "../../../../modules/juce_core/threads/juce_TimeSliceThread.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1053,6 +1054,7 @@
 		E7488E12D0F3300AE33E0B9E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_GlowEffect.h"; path = "../../../../modules/juce_graphics/effects/juce_GlowEffect.h"; sourceTree = "SOURCE_ROOT"; };
 		E75F722F65364D9AE4AEB3B4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "lookup_data.h"; path = "../../../../modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lookup_data.h"; sourceTree = "SOURCE_ROOT"; };
 		E7EC04A96E1CBFA9428A4B80 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DynamicLibrary.h"; path = "../../../../modules/juce_core/threads/juce_DynamicLibrary.h"; sourceTree = "SOURCE_ROOT"; };
+		E822AAEEB411787234978545 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		E892A32133E6FDB385135C55 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdinput.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdinput.c"; sourceTree = "SOURCE_ROOT"; };
 		E958ECCACCCE70690FAE58B9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ImageComponent.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_ImageComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		E972515A102857BAF9D6F49F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = memory.c; path = "../../../../modules/juce_audio_formats/codecs/flac/libFLAC/memory.c"; sourceTree = "SOURCE_ROOT"; };
@@ -1856,6 +1858,8 @@
 					369C06F1DC7B3B7EB497D062,
 					F7E781AFAA34B511C812896A, ); name = undomanager; sourceTree = "<group>"; };
 		8D4A79EA8498A5DEE3174813 = {isa = PBXGroup; children = (
+					E822AAEEB411787234978545,
+					DDB7CF1A01382FDD2636147F,
 					2E96848340E1C1B1095AC1F3,
 					9A4FCF66FF42906A7A2187A5,
 					2B1494112273ADF380C99FD3,
@@ -2682,7 +2686,7 @@
 		80F5D4DB72CAE33FF7BE0E28 = {isa = PBXNativeTarget; buildConfigurationList = CA4D2206213720EC7DE41E1A; buildPhases = (
 					6DD59723DA58F112C3C6F427,
 					2CCE82C7290D2D226DD34C0B,
-					4516F5A575174EF76FEAD8B3, ); buildRules = ( ); dependencies = (  ); name = "AnimationAppExample (App)"; productName = AnimationAppExample; productReference = CBF69B3CBCD089CD7DC8343C; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					4516F5A575174EF76FEAD8B3, ); buildRules = ( ); dependencies = (  ); name = "AnimationAppExample (App)"; productName = AnimationAppExample; productReference = CBF69B3CBCD089CD7DC8343C; productType = "com.apple.product-type.application"; };
 		AEF97977FF56185DB5E0C493 = {isa = PBXProject; buildConfigurationList = 576D6DACFB71E339D0AD373A; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { 80F5D4DB72CAE33FF7BE0E28 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = E2839CF91E2C633A933666F4; projectDirPath = ""; projectRoot = ""; targets = (80F5D4DB72CAE33FF7BE0E28); };
 	};
 	rootObject = AEF97977FF56185DB5E0C493;

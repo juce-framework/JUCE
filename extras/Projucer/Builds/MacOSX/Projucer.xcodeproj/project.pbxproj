@@ -313,6 +313,7 @@
 		3804BE13635F779ACB8C5491 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_LassoComponent.h"; path = "../../../../modules/juce_gui_basics/mouse/juce_LassoComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		389B101B43F42E80A54EDAEC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctflt.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jidctflt.c"; sourceTree = "SOURCE_ROOT"; };
 		38CE1587800D612BA0C394A5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ApplicationBase.h"; path = "../../../../modules/juce_events/messages/juce_ApplicationBase.h"; sourceTree = "SOURCE_ROOT"; };
+		391D3BD098AC7300A4D3EF73 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3A2888667372BA896AACFBDB = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TemporaryFile.h"; path = "../../../../modules/juce_core/files/juce_TemporaryFile.h"; sourceTree = "SOURCE_ROOT"; };
 		3A55FEFC24C387D3B29444D5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Result.cpp"; path = "../../../../modules/juce_core/misc/juce_Result.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3A5B5DC92BE6D22CA15B9671 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_SnapGridPainter.h"; path = "../../Source/ComponentEditor/ui/jucer_SnapGridPainter.h"; sourceTree = "SOURCE_ROOT"; };
@@ -860,6 +861,7 @@
 		C094F3B6A65A79A6DF87C9C2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_PaintElementGroup.h"; path = "../../Source/ComponentEditor/paintelements/jucer_PaintElementGroup.h"; sourceTree = "SOURCE_ROOT"; };
 		C09BBB58CA45B66D693E8C31 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_TemplateThumbnailsComponent.h"; path = "../../Source/Wizards/jucer_TemplateThumbnailsComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		C0FCB15A3768037BA4D037D3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inffixed.h; path = "../../../../modules/juce_core/zip/zlib/inffixed.h"; sourceTree = "SOURCE_ROOT"; };
+		C11F98345D2D2FBC11C08962 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		C187718F7B9EBA88584B43F3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_PaintRoutine.cpp"; path = "../../Source/ComponentEditor/jucer_PaintRoutine.cpp"; sourceTree = "SOURCE_ROOT"; };
 		C1CE3850BA3418E1D13DA30E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jdhuff.h; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdhuff.h"; sourceTree = "SOURCE_ROOT"; };
 		C1FDD2DDB01AC8C4DECB2C10 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DrawableImage.cpp"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawableImage.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1694,6 +1696,8 @@
 					F7E829D0B21B9C1B4790A245,
 					1B03B2952A4DDA6E6A1C35F9, ); name = undomanager; sourceTree = "<group>"; };
 		6F6B6EC125462224B6393FC1 = {isa = PBXGroup; children = (
+					391D3BD098AC7300A4D3EF73,
+					C11F98345D2D2FBC11C08962,
 					7C02936574E000C436E3AD8E,
 					72FED7B10FBF5AD1F504FDFF,
 					5D5E0592B7C61D523CC40C50,
@@ -2502,7 +2506,7 @@
 		0039FE1A254FE518518BF8B8 = {isa = PBXNativeTarget; buildConfigurationList = 0655A4A348F7F91F77583ADC; buildPhases = (
 					C262D0F297DDE25326F5AC81,
 					5CB869A8DA78BE6FA2757034,
-					D150288A32EE596408C2B99F, ); buildRules = ( ); dependencies = (  ); name = "Projucer (App)"; productName = Projucer; productReference = 09DE066936CF037E9709ADB1; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					D150288A32EE596408C2B99F, ); buildRules = ( ); dependencies = (  ); name = "Projucer (App)"; productName = Projucer; productReference = 09DE066936CF037E9709ADB1; productType = "com.apple.product-type.application"; };
 		74EA481348A24104E6ACE009 = {isa = PBXProject; buildConfigurationList = F90407F24422C589DA251604; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { 0039FE1A254FE518518BF8B8 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3CC531922CC2D398E283A845; projectDirPath = ""; projectRoot = ""; targets = (0039FE1A254FE518518BF8B8); };
 	};
 	rootObject = 74EA481348A24104E6ACE009;

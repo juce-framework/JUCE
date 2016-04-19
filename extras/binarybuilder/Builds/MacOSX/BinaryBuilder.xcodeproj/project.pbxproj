@@ -632,7 +632,7 @@
 		80B70DE094998C267F152DD5 = {isa = PBXNativeTarget; buildConfigurationList = A88E30959D785F48A594450E; buildPhases = (
 					4F5C64675AD3AC67829798FF,
 					A69CF4AD8F7015A8D3228FDE,
-					2722C90F3B5DAD661891FDF4, ); buildRules = ( ); dependencies = (  ); name = "BinaryBuilder (ConsoleApp)"; productName = BinaryBuilder; productReference = 799073185F72F5FAD05253C3; productInstallPath = /usr/bin; productType = "com.apple.product-type.tool"; };
+					2722C90F3B5DAD661891FDF4, ); buildRules = ( ); dependencies = (  ); name = "BinaryBuilder (ConsoleApp)"; productName = BinaryBuilder; productReference = 799073185F72F5FAD05253C3; productType = "com.apple.product-type.tool"; };
 		36B6F402BC83F21646259DEF = {isa = PBXProject; buildConfigurationList = E4C85B0464A93027D035AA1F; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = C18D022743CF5BD14D6A6A9E; projectDirPath = ""; projectRoot = ""; targets = (80B70DE094998C267F152DD5); };
 	};
 	rootObject = 36B6F402BC83F21646259DEF;

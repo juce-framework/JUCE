@@ -528,6 +528,7 @@
 		6623883EA006103A2C58D58A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_GlowEffect.h"; path = "../../../../modules/juce_graphics/effects/juce_GlowEffect.h"; sourceTree = "SOURCE_ROOT"; };
 		664A82AE5A1999CA0D1CD221 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MouseEvent.h"; path = "../../../../modules/juce_gui_basics/mouse/juce_MouseEvent.h"; sourceTree = "SOURCE_ROOT"; };
 		6692043E22BB181F01767845 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainHostWindow.h; path = ../../Source/MainHostWindow.h; sourceTree = "SOURCE_ROOT"; };
+		66B4F5A7E315FD4C143A632C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CachedValue.cpp"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.cpp"; sourceTree = "SOURCE_ROOT"; };
 		66DF7C3FFFB44D01D73161C7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MessageListener.cpp"; path = "../../../../modules/juce_events/messages/juce_MessageListener.cpp"; sourceTree = "SOURCE_ROOT"; };
 		66E794F08C5AE6A1DB818651 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inffixed.h; path = "../../../../modules/juce_core/zip/zlib/inffixed.h"; sourceTree = "SOURCE_ROOT"; };
 		6731007E5C3E79C1DE863EF2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MemoryInputStream.cpp"; path = "../../../../modules/juce_core/streams/juce_MemoryInputStream.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1187,6 +1188,7 @@
 		F8D4181043B6E13CF16E7E00 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctflt.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jidctflt.c"; sourceTree = "SOURCE_ROOT"; };
 		F8D4B164A423E3A891708A59 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jconfig.h; path = "../../../../modules/juce_graphics/image_formats/jpglib/jconfig.h"; sourceTree = "SOURCE_ROOT"; };
 		F95046FD2C915F846BD111EF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ColourSelector.h"; path = "../../../../modules/juce_gui_extra/misc/juce_ColourSelector.h"; sourceTree = "SOURCE_ROOT"; };
+		F95EC8D7FBD7472EAB2614F3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedValue.h"; path = "../../../../modules/juce_data_structures/values/juce_CachedValue.h"; sourceTree = "SOURCE_ROOT"; };
 		F98172E9B1C7D23875AC5D81 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Button.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_Button.h"; sourceTree = "SOURCE_ROOT"; };
 		FA39CCD1AEE7A87056968609 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pngconf.h; path = "../../../../modules/juce_graphics/image_formats/pnglib/pngconf.h"; sourceTree = "SOURCE_ROOT"; };
 		FA6653EBE05E085359941C7F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MultiDocumentPanel.h"; path = "../../../../modules/juce_gui_basics/layout/juce_MultiDocumentPanel.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1930,6 +1932,8 @@
 					E6E9A8E11791B4B4D6B3E6D4,
 					4F5AE334AD243259E370E8CE, ); name = undomanager; sourceTree = "<group>"; };
 		F01DC3430F9500A8BF788440 = {isa = PBXGroup; children = (
+					66B4F5A7E315FD4C143A632C,
+					F95EC8D7FBD7472EAB2614F3,
 					46B1B45E0E2F0E937590C309,
 					0BD19EFE55728A56EB3EE5C5,
 					8F748FDB2E7593E987B9C42B,
@@ -2763,7 +2767,7 @@
 		DE12B7643D374BFF7E4FEB1C = {isa = PBXNativeTarget; buildConfigurationList = E4ECAE24A646A7D1585F776C; buildPhases = (
 					2429BB4D705CC57F49418CFB,
 					E8E94B3C187DA578BFCBDA98,
-					C515A1FE1A53D3968C22FAEF, ); buildRules = ( ); dependencies = (  ); name = "Plugin Host (App)"; productName = "Plugin Host"; productReference = 8D8BBC353637DA442C5575DA; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
+					C515A1FE1A53D3968C22FAEF, ); buildRules = ( ); dependencies = (  ); name = "Plugin Host (App)"; productName = "Plugin Host"; productReference = 8D8BBC353637DA442C5575DA; productType = "com.apple.product-type.application"; };
 		ADE6E539DB98A302483A82D0 = {isa = PBXProject; buildConfigurationList = 493C2C5E457692E5149C5525; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 65BEFC705A89E5C8A9E35C97; projectDirPath = ""; projectRoot = ""; targets = (DE12B7643D374BFF7E4FEB1C); };
 	};
 	rootObject = ADE6E539DB98A302483A82D0;

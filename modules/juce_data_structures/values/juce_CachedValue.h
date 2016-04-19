@@ -33,20 +33,20 @@
     A CachedValue provides an easy way to read and write a ValueTree property with
     a chosen type. So for example a CachedValue<int> allows you to read or write the
     property as an int, and a CachedValue<String> lets you work with it as a String.
- 
+
     It also allows efficient access to the value, by caching a copy of it in the
     type that is being used.
- 
+
     You can give the CachedValue an optional UndoManager which it will use when writing
     to the underlying ValueTree.
 
     If the property inside the ValueTree is missing, the CachedValue will automatically
     return an optional default value, which can be specified when initialising the CachedValue.
- 
+
     To create one, you can either use the constructor to attach the CachedValue to a
     ValueTree, or can create an uninitialised CachedValue with its default constructor and
     then attach it later with the referTo() methods.
- 
+
     Common types like String, int, double which can be easily converted to a var should work
     out-of-the-box, but if you want to use more complex custom types, you may need to implement
     some template specialisations of VariantConverter which this class uses to convert between
