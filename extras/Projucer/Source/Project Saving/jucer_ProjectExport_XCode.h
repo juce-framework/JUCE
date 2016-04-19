@@ -351,8 +351,8 @@ protected:
               vstBinaryLocation           (config, Ids::xcodeVstBinaryLocation,       nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST/"),
               vst3BinaryLocation          (config, Ids::xcodeVst3BinaryLocation,      nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
               auBinaryLocation            (config, Ids::xcodeAudioUnitBinaryLocation, nullptr, "$(HOME)/Library/Audio/Plug-Ins/Components/"),
-              rtasBinaryLocation          (config, Ids::xcodeRtasBinaryLocation,      nullptr, "/Library/Application Support/Avid/Audio/Plug-Ins/"),
-              aaxBinaryLocation           (config, Ids::xcodeAaxBinaryLocation,       nullptr, "/Library/Application Support/Digidesign/Plug-Ins/")
+              rtasBinaryLocation          (config, Ids::xcodeRtasBinaryLocation,      nullptr, "/Library/Application Support/Digidesign/Plug-Ins/"),
+              aaxBinaryLocation           (config, Ids::xcodeAaxBinaryLocation,       nullptr, "/Library/Application Support/Avid/Audio/Plug-Ins/")
         {
         }
 
