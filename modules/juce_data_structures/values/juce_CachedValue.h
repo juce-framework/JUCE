@@ -175,7 +175,7 @@ public:
     /** Returns a reference to the ValueTree containing the referenced property. */
     ValueTree& getValueTree() noexcept                      { return targetTree; }
 
-    /** Returns the property ID of thereferenced property. */
+    /** Returns the property ID of the referenced property. */
     const Identifier& getPropertyID() const noexcept        { return targetProperty; }
 
 private:
@@ -202,10 +202,10 @@ private:
 
 //==============================================================================
 template <typename Type>
-CachedValue<Type>::CachedValue()  : undoManager (nullptr) {}
+inline CachedValue<Type>::CachedValue()  : undoManager (nullptr) {}
 
 template <typename Type>
-CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* um)
+inline CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* um)
     : targetTree (v), targetProperty (i), undoManager (um),
       defaultValue(), cachedValue (getTypedValue())
 {
@@ -213,7 +213,7 @@ CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* 
 }
 
 template <typename Type>
-CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* um, const Type& defaultToUse)
+inline CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* um, const Type& defaultToUse)
     : targetTree (v), targetProperty (i), undoManager (um),
       defaultValue (defaultToUse), cachedValue (getTypedValue())
 {
@@ -221,26 +221,26 @@ CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* 
 }
 
 template <typename Type>
-Value CachedValue<Type>::getPropertyAsValue()
+inline Value CachedValue<Type>::getPropertyAsValue()
 {
     return targetTree.getPropertyAsValue (targetProperty, undoManager);
 }
 
 template <typename Type>
-bool CachedValue<Type>::isUsingDefault() const
+inline bool CachedValue<Type>::isUsingDefault() const
 {
     return ! targetTree.hasProperty (targetProperty);
 }
 
 template <typename Type>
-CachedValue<Type>& CachedValue<Type>::operator= (const Type& newValue)
+inline CachedValue<Type>& CachedValue<Type>::operator= (const Type& newValue)
 {
     setValue (newValue, undoManager);
     return *this;
 }
 
 template <typename Type>
-void CachedValue<Type>::setValue (const Type& newValue, UndoManager* undoManagerToUse)
+inline void CachedValue<Type>::setValue (const Type& newValue, UndoManager* undoManagerToUse)
 {
     if (cachedValue != newValue)
     {
@@ -250,38 +250,38 @@ void CachedValue<Type>::setValue (const Type& newValue, UndoManager* undoManager
 }
 
 template <typename Type>
-void CachedValue<Type>::resetToDefault()
+inline void CachedValue<Type>::resetToDefault()
 {
     resetToDefault (undoManager);
 }
 
 template <typename Type>
-void CachedValue<Type>::resetToDefault (UndoManager* undoManagerToUse)
+inline void CachedValue<Type>::resetToDefault (UndoManager* undoManagerToUse)
 {
     targetTree.removeProperty (targetProperty, undoManagerToUse);
     forceUpdateOfCachedValue();
 }
 
 template <typename Type>
-void CachedValue<Type>::referTo (ValueTree& v, const Identifier& i, UndoManager* um)
+inline void CachedValue<Type>::referTo (ValueTree& v, const Identifier& i, UndoManager* um)
 {
     referToWithDefault (v, i, um, Type());
 }
 
 template <typename Type>
-void CachedValue<Type>::referTo (ValueTree& v, const Identifier& i, UndoManager* um, const Type& defaultVal)
+inline void CachedValue<Type>::referTo (ValueTree& v, const Identifier& i, UndoManager* um, const Type& defaultVal)
 {
     referToWithDefault (v, i, um, defaultVal);
 }
 
 template <typename Type>
-void CachedValue<Type>::forceUpdateOfCachedValue()
+inline void CachedValue<Type>::forceUpdateOfCachedValue()
 {
     cachedValue = getTypedValue();
 }
 
 template <typename Type>
-void CachedValue<Type>::referToWithDefault (ValueTree& v, const Identifier& i, UndoManager* um, const Type& defaultVal)
+inline void CachedValue<Type>::referToWithDefault (ValueTree& v, const Identifier& i, UndoManager* um, const Type& defaultVal)
 {
     targetTree.removeListener (this);
     targetTree = v;
@@ -293,7 +293,7 @@ void CachedValue<Type>::referToWithDefault (ValueTree& v, const Identifier& i, U
 }
 
 template <typename Type>
-Type CachedValue<Type>::getTypedValue() const
+inline Type CachedValue<Type>::getTypedValue() const
 {
     if (const var* property = targetTree.getPropertyPointer (targetProperty))
         return VariantConverter<Type>::fromVar (*property);
@@ -302,7 +302,7 @@ Type CachedValue<Type>::getTypedValue() const
 }
 
 template <typename Type>
-void CachedValue<Type>::valueTreePropertyChanged (ValueTree& changedTree, const Identifier& changedProperty)
+inline void CachedValue<Type>::valueTreePropertyChanged (ValueTree& changedTree, const Identifier& changedProperty)
 {
     if (changedProperty == targetProperty && targetTree == changedTree)
         forceUpdateOfCachedValue();
