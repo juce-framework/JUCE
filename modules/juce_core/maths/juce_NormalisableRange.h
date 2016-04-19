@@ -40,7 +40,7 @@
 
     @see Range
 */
-template<typename ValueType>
+template <typename ValueType>
 class NormalisableRange
 {
 public:
