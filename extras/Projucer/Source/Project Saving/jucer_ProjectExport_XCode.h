@@ -670,15 +670,10 @@ public:
                 case SharedCodeTarget:
                     xcodeIsBundle = false;
                     xcodeIsExecutable = false;
-                    xcodeCreatePList = true;
-                    xcodePackageType = "FMWK";
-                    xcodeBundleSignature = "????";
-                    xcodeFileType = "wrapper.framework";
-                    xcodeBundleExtension = ".framework";
-                    xcodeProductType = "com.apple.product-type.framework";
-                    xcodeBundleIDSubPath = "Framework";
+                    xcodeCreatePList = false;
+                    xcodeFileType = "archive.ar";
+                    xcodeProductType = "com.apple.product-type.library.static";
                     xcodeCopyToProductInstallPathAfterBuild = false;
-
                     break;
 
                 case AggregateTarget:
@@ -1031,28 +1026,8 @@ public:
             if (type == Target::SharedCodeTarget)
                 defines.set ("JUCE_SHARED_CODE", "1");
 
-            if (owner.project.getProjectType().isAudioPlugin())
-            {
-                if (type == Target::SharedCodeTarget)
-                {
-                    s.add ("DYLIB_INSTALL_NAME_BASE = \"@rpath\"");
-                    s.add ("LD_DYLIB_INSTALL_NAME = \"$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)\"");
-                }
-                else if (type == Target::AudioUnitv3PlugIn)
-                {
-                    String frameworksFolderPath = (owner.isiOS() ? "@loader_path/../../Frameworks" : "@loader_path/../../../../Frameworks");
-                    s.add (String ("LD_RUNPATH_SEARCH_PATHS = \"") + frameworksFolderPath + String ("\""));
-
-                    if (! owner.isiOS())
-                        s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
-                }
-                else
-                {
-                    String executableType = xcodeIsExecutable ? "@executable_path" : "@loader_path";
-                    String frameworksFolderPath = executableType + (owner.isiOS() ? "/Frameworks" : "/../Frameworks");
-                    s.add (String ("LD_RUNPATH_SEARCH_PATHS = \"") + frameworksFolderPath + String ("\""));
-                }
-            }
+            if (owner.project.getProjectType().isAudioPlugin() && type == Target::AudioUnitv3PlugIn &&  owner.isOSX())
+                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
 
             if (owner.project.getProjectType().isAudioPlugin())
             {
@@ -1112,7 +1087,20 @@ public:
                                                                     : xcodeExtraLibrariesRelease;
 
             for (int i = 0; i < extraLibs.size(); ++i)
-                owner.getLinkerFlagsForStaticLibrary (extraLibs.getReference(i), flags, librarySearchPaths);
+                owner.getLinkerFlagsForStaticLibrary (extraLibs.getReference(i), flags, &librarySearchPaths);
+
+            if (owner.project.getProjectType().isAudioPlugin() && type != Target::SharedCodeTarget)
+            {
+                if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
+                {
+                    String productName (getLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString())));
+
+                    RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
+                    owner.getLinkerFlagsForStaticLibrary (sharedCodelib, flags);
+                }
+            }
+
+
 
             flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
             flags.add (owner.getExternalLibraryFlags (config));
@@ -1582,15 +1570,6 @@ private:
                 if (rezFiles.size() > 0)
                     target.addBuildPhase ("PBXRezBuildPhase", rezFiles);
 
-                if (project.getProjectType().isAudioPlugin() && target.type != Target::SharedCodeTarget && target.type != Target::AudioUnitv3PlugIn)
-                {
-                    if (Target* sharedCodeTarget = getTargetOfType (Target::SharedCodeTarget))
-                    {
-                        StringArray files;
-                        files.add (sharedCodeTarget->mainBuildProductID);
-                        target.addCopyFilesPhase ("Embed Frameworks", files, kFrameworksFolder);
-                    }
-                }
 
                 StringArray sourceFiles (target.sourceIDs);
 
@@ -1600,7 +1579,7 @@ private:
 
                 target.addBuildPhase ("PBXSourcesBuildPhase", sourceFiles);
 
-                if (! projectType.isStaticLibrary())
+                if (! projectType.isStaticLibrary() && target.type != Target::SharedCodeTarget)
                     target.addBuildPhase ("PBXFrameworksBuildPhase", target.frameworkIDs);
 
                 target.addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
@@ -1901,7 +1880,7 @@ private:
         return "-l" + library.upToLastOccurrenceOf (".", false, false);
     }
 
-    void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths) const
+    void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray* librarySearchPaths = nullptr) const
     {
         flags.add (getLinkerFlagForLib (library.getFileNameWithoutExtension()));
 
@@ -1917,7 +1896,8 @@ private:
             searchPath = srcRoot + searchPath;
         }
 
-        librarySearchPaths.add (sanitisePath (searchPath));
+        if (librarySearchPaths != nullptr)
+            librarySearchPaths->add (sanitisePath (searchPath));
     }
 
     StringArray getProjectSettings (const XcodeBuildConfiguration& config) const
@@ -2008,16 +1988,6 @@ private:
                 {
                     if (xcodeFrameworks.contains (s[i]) || target->xcodeFrameworks.contains (s[i]))
                         target->frameworkIDs.add (frameworkID);
-                }
-            }
-
-            if (project.getProjectType().isAudioPlugin())
-            {
-                if (Target* sharedCodeTarget = getTargetOfType (Target::SharedCodeTarget))
-                {
-                    for (auto& target : targets)
-                        if (target->type != Target::SharedCodeTarget && target->type != Target::AggregateTarget)
-                            target->frameworkIDs.add (sharedCodeTarget->mainBuildProductID);
                 }
             }
         }
