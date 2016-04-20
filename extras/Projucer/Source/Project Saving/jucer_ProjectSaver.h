@@ -604,14 +604,6 @@ private:
         replaceFileIfDifferent (generatedCodeFolder.getChildFile ("ReadMe.txt"), out);
     }
 
-    static void sortGroupRecursively (Project::Item group)
-    {
-        group.sortAlphabetically (true);
-
-        for (int i = group.getNumChildren(); --i >= 0;)
-            sortGroupRecursively (group.getChild(i));
-    }
-
     void addError (const String& message)
     {
         const ScopedLock sl (errorLock);
@@ -645,7 +637,7 @@ private:
                 if (project.getProjectType().isAudioPlugin())
                     writePluginCharacteristicsFile();
 
-                sortGroupRecursively (generatedFilesGroup);
+                generatedFilesGroup.sortAlphabetically (true, true);
                 exporter->getAllGroups().add (generatedFilesGroup);
 
                 threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);

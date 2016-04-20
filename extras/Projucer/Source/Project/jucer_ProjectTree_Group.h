@@ -146,8 +146,8 @@ public:
             case 2:     openOrCloseAllSubGroups (*this, true); break;
             case 3:     setFilesToCompile (item, true); break;
             case 4:     setFilesToCompile (item, false); break;
-            case 5:     item.sortAlphabetically (false); break;
-            case 6:     item.sortAlphabetically (true); break;
+            case 5:     item.sortAlphabetically (false, false); break;
+            case 6:     item.sortAlphabetically (true, false); break;
             case 7:     triggerAsyncRename (item); break;
             case 8:     deleteAllSelectedItems(); break;
             default:    processCreateFileMenuItem (resultCode); break;
