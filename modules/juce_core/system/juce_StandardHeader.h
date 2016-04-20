@@ -66,9 +66,6 @@
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4514 4245 4100)
-#endif
-
-#if JUCE_USE_MSVC_INTRINSICS
  #include <intrin.h>
 #endif
 

@@ -202,27 +202,17 @@ private:
 #else
   #define JUCE_ATOMICS_WINDOWS 1    // Windows with intrinsics
 
-  #if JUCE_USE_MSVC_INTRINSICS
-    #ifndef __INTEL_COMPILER
-     #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
-                        _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
-    #endif
-    #define juce_InterlockedExchange(a, b)              _InterlockedExchange(a, b)
-    #define juce_InterlockedIncrement(a)                _InterlockedIncrement(a)
-    #define juce_InterlockedDecrement(a)                _InterlockedDecrement(a)
-    #define juce_InterlockedExchangeAdd(a, b)           _InterlockedExchangeAdd(a, b)
-    #define juce_InterlockedCompareExchange(a, b, c)    _InterlockedCompareExchange(a, b, c)
-    #define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
-    #define juce_MemoryBarrier _ReadWriteBarrier
-  #else
-    long juce_InterlockedExchange (volatile long* a, long b) noexcept;
-    long juce_InterlockedIncrement (volatile long* a) noexcept;
-    long juce_InterlockedDecrement (volatile long* a) noexcept;
-    long juce_InterlockedExchangeAdd (volatile long* a, long b) noexcept;
-    long juce_InterlockedCompareExchange (volatile long* a, long b, long c) noexcept;
-    __int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) noexcept;
-    inline void juce_MemoryBarrier() noexcept  { long x = 0; juce_InterlockedIncrement (&x); }
+  #ifndef __INTEL_COMPILER
+   #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
+                      _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
   #endif
+  #define juce_InterlockedExchange(a, b)              _InterlockedExchange(a, b)
+  #define juce_InterlockedIncrement(a)                _InterlockedIncrement(a)
+  #define juce_InterlockedDecrement(a)                _InterlockedDecrement(a)
+  #define juce_InterlockedExchangeAdd(a, b)           _InterlockedExchangeAdd(a, b)
+  #define juce_InterlockedCompareExchange(a, b, c)    _InterlockedCompareExchange(a, b, c)
+  #define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
+  #define juce_MemoryBarrier _ReadWriteBarrier
 
   #if JUCE_64BIT
     #ifndef __INTEL_COMPILER

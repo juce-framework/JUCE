@@ -307,7 +307,7 @@ void BigInteger::negate() noexcept
     negative = (! negative) && ! isZero();
 }
 
-#if JUCE_USE_MSVC_INTRINSICS && ! defined (__INTEL_COMPILER)
+#if JUCE_MSVC && ! defined (__INTEL_COMPILER)
  #pragma intrinsic (_BitScanReverse)
 #endif
 
@@ -317,7 +317,7 @@ inline static int highestBitInInt (uint32 n) noexcept
 
   #if JUCE_GCC || JUCE_CLANG
     return 31 - __builtin_clz (n);
-  #elif JUCE_USE_MSVC_INTRINSICS
+  #elif JUCE_MSVC
     unsigned long highest;
     _BitScanReverse (&highest, n);
     return (int) highest;

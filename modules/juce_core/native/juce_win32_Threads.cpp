@@ -36,37 +36,10 @@ void* getUser32Function (const char* functionName)
 }
 
 //==============================================================================
-#if ! JUCE_USE_MSVC_INTRINSICS
-// In newer compilers, the inline versions of these are used (in juce_Atomic.h), but in
-// older ones we have to actually call the ops as win32 functions..
-long juce_InterlockedExchange (volatile long* a, long b) noexcept                { return InterlockedExchange (a, b); }
-long juce_InterlockedIncrement (volatile long* a) noexcept                       { return InterlockedIncrement (a); }
-long juce_InterlockedDecrement (volatile long* a) noexcept                       { return InterlockedDecrement (a); }
-long juce_InterlockedExchangeAdd (volatile long* a, long b) noexcept             { return InterlockedExchangeAdd (a, b); }
-long juce_InterlockedCompareExchange (volatile long* a, long b, long c) noexcept { return InterlockedCompareExchange (a, b, c); }
-
-__int64 juce_InterlockedCompareExchange64 (volatile __int64* value, __int64 newValue, __int64 valueToCompare) noexcept
-{
-    jassertfalse; // This operation isn't available in old MS compiler versions!
-
-    __int64 oldValue = *value;
-    if (oldValue == valueToCompare)
-        *value = newValue;
-
-    return oldValue;
-}
-
-#endif
-
-//==============================================================================
 CriticalSection::CriticalSection() noexcept
 {
     // (just to check the MS haven't changed this structure and broken things...)
-   #if JUCE_VC7_OR_EARLIER
-    static_jassert (sizeof (CRITICAL_SECTION) <= 24);
-   #else
     static_jassert (sizeof (CRITICAL_SECTION) <= sizeof (lock));
-   #endif
 
     InitializeCriticalSection ((CRITICAL_SECTION*) lock);
 }

@@ -68,7 +68,7 @@
       @see jassert()
   */
   #define JUCE_BREAK_IN_DEBUGGER        { ::kill (0, SIGTRAP); }
-#elif JUCE_USE_MSVC_INTRINSICS
+#elif JUCE_MSVC
   #ifndef __INTEL_COMPILER
     #pragma intrinsic (__debugbreak)
   #endif

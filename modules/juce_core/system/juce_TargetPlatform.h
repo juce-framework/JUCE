@@ -190,7 +190,7 @@
 // Compiler type macros.
 
 #ifdef __clang__
- #define JUCE_CLANG 1
+  #define JUCE_CLANG 1
 #elif defined (__GNUC__)
   #define JUCE_GCC 1
 #elif defined (_MSC_VER)
@@ -200,16 +200,8 @@
     #define JUCE_VC8_OR_EARLIER 1
 
     #if _MSC_VER < 1400
-      #define JUCE_VC7_OR_EARLIER 1
-
-      #if _MSC_VER < 1300
-        #warning "MSVC 6.0 is no longer supported!"
-      #endif
+      #error "Visual Studio 2003 and earlier are no longer supported!"
     #endif
-  #endif
-
-  #if JUCE_64BIT || ! JUCE_VC7_OR_EARLIER
-    #define JUCE_USE_MSVC_INTRINSICS 1
   #endif
 #else
   #error unknown compiler
