@@ -367,6 +367,31 @@ static const unsigned char temp_binary_data_4[] =
 "    // spare memory, etc.\r\n"
 "}\r\n"
 "\r\n"
+"#ifndef JucePlugin_PreferredChannelConfigurations\r\n"
+"bool FILTERCLASSNAME::setPreferredBusArrangement (bool isInput, int bus, const AudioChannelSet& preferredSet)\r\n"
+"{\r\n"
+"    // Reject any bus arrangements that are not compatible with your plugin\r\n"
+"    \r\n"
+"    const int numChannels = preferredSet.size();\r\n"
+"    \r\n"
+"   #if JucePlugin_IsMidiEffect\r\n"
+"    if (numChannels != 0)\r\n"
+"        return false;\r\n"
+"   #elif JucePlugin_IsSynth\r\n"
+"    if (isInput || (numChannels != 1 && numChannels != 2))\r\n"
+"        return false;\r\n"
+"   #else\r\n"
+"    if (numChannels != 1 && numChannels != 2)\r\n"
+"        return false;\r\n"
+"    \r\n"
+"    if (! AudioProcessor::setPreferredBusArrangement (! isInput, bus, preferredSet))\r\n"
+"        return false;\r\n"
+"   #endif\r\n"
+"\r\n"
+"    return AudioProcessor::setPreferredBusArrangement (isInput, bus, preferredSet);\r\n"
+"}\r\n"
+"#endif\r\n"
+"\r\n"
 "void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)\r\n"
 "{\r\n"
 "    const int totalNumInputChannels  = getTotalNumInputChannels();\r\n"
@@ -456,6 +481,10 @@ static const unsigned char temp_binary_data_5[] =
 "    //==============================================================================\r\n"
 "    void prepareToPlay (double sampleRate, int samplesPerBlock) override;\r\n"
 "    void releaseResources() override;\r\n"
+"    \r\n"
+"   #ifndef JucePlugin_PreferredChannelConfigurations\r\n"
+"    bool setPreferredBusArrangement (bool isInput, int bus, const AudioChannelSet& preferredSet) override;\r\n"
+"   #endif\r\n"
 "\r\n"
 "    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;\r\n"
 "\r\n"
@@ -4021,8 +4050,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3203; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1162; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 994; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 4255; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2114; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 5059; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2293; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2131; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
