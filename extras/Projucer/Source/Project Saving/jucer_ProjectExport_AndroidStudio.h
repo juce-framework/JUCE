@@ -336,7 +336,7 @@ private:
     struct GradleHeaderIncludePath  : public GradleStatement
     {
         GradleHeaderIncludePath (const String& path)
-            : GradleStatement ("cppFlags.add(\"-I" + sanitisePath (path) + "\".toString())") {}
+            : GradleStatement ("cppFlags.add(\"-I${project.rootDir}/" + sanitisePath (path) + "\".toString())") {}
     };
 
     struct GradleLibrarySearchPath  : public GradleStatement
@@ -563,19 +563,9 @@ private:
         ndkSettings->add<GradleString> ("toolchain",        toolchain);
         ndkSettings->add<GradleString> ("stl", isClang ? "c++_static" :  "gnustl_static");
 
-        ndkSettings->addChildObject (getNdkJuceExtraProperties());
-
         addAllNdkCompilerSettings (ndkSettings);
 
         return ndkSettings;
-    }
-
-    GradleObject* getNdkJuceExtraProperties() const
-    {
-        auto ext = new GradleObject ("ext");
-        ext->add<GradleString> ("juceRootDir",   "${project.rootDir}/../../../../");
-        ext->add<GradleString> ("juceModuleDir", "${juceRootDir}/modules");
-        return ext;
     }
 
     void addAllNdkCompilerSettings (GradleObject* ndk) const
@@ -608,14 +598,31 @@ private:
 
     void addNdkHeaderIncludePaths (GradleObject* ndk) const
     {
-        const char* basicJucePaths[] = { "${project.rootDir}/app", "${ext.juceRootDir}", "${ext.juceModuleDir}", nullptr };
-        StringArray includePaths (basicJucePaths);
+        StringArray includePaths;
 
-        includePaths.add (sanitisePath (project.getProjectFolder().getFullPathName() + "/Source/"));
-        includePaths.add (sanitisePath (project.getProjectFolder().getFullPathName() + "/../../JUCE/modules/"));
+        for (const auto& cppFile : getAllCppFilesToBeIncludedWithPath())
+            includePaths.addIfNotAlreadyThere (cppFile.getParentDirectory().toUnixStyle());
 
         for (const auto& path : includePaths)
             ndk->add<GradleHeaderIncludePath> (path);
+    }
+
+    Array<RelativePath> getAllCppFilesToBeIncludedWithPath() const
+    {
+        Array<RelativePath> cppFiles;
+
+        struct NeedsToBeIncludedWithPathPredicate
+        {
+            bool operator() (const Project::Item& projectItem) const
+            {
+                return projectItem.shouldBeAddedToTargetProject() && ! projectItem.isModuleCode();
+            }
+        };
+
+        for (const auto& group : getAllGroups())
+            findAllProjectItemsWithPredicate (group, cppFiles, NeedsToBeIncludedWithPathPredicate());
+
+        return cppFiles;
     }
 
     void addNdkLinkerFlags (GradleObject* ndk) const
@@ -700,7 +707,7 @@ private:
 
         ndkSettings->add<GradleCppFlag> ("-O" + config.getGCCOptimisationFlag());
 
-        for (const auto& path : config.getHeaderSearchPaths())
+        for (const auto& path : getHeaderSearchPaths (config))
             ndkSettings->add<GradleHeaderIncludePath> (path);
 
         for (const auto& path : config.getLibrarySearchPaths())
@@ -716,6 +723,14 @@ private:
             ndkSettings->add<GradlePreprocessorDefine> (defines.getAllKeys()[i], defines.getAllValues()[i]);
 
         buildConfig->addChildObject (ndkSettings);
+    }
+
+    StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
+    {
+        StringArray paths (extraSearchPaths);
+        paths.addArray (config.getHeaderSearchPaths());
+        paths = getCleanedStringArray (paths);
+        return paths;
     }
 
     GradleObject* getAndroidSigningConfigs() const
@@ -805,12 +820,6 @@ private:
 
         writeXmlOrThrow (*manifest, folder.getChildFile ("app/src/main/AndroidManifest.xml"), "utf-8", 100, true);
     }
-
-    //==============================================================================
-    struct ShouldBeAddedToProjectPredicate
-    {
-        bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
-    };
 
     //==============================================================================
     const File androidStudioExecutable;
