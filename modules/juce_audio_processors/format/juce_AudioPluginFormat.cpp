@@ -116,7 +116,7 @@ AudioPluginInstance* AudioPluginFormat::createInstanceFromDescription (const Plu
 
     ScopedPointer<EventSignaler> eventSignaler (new EventSignaler (waitForCreation, instance, errorMessage));
 
-    if (requiresUnblockedMessageThreadDuringCreation (desc))
+    if (! MessageManager::getInstance()->isThisTheMessageThread())
         createPluginInstanceAsync (desc, initialSampleRate, initialBufferSize, eventSignaler.release());
     else
         createPluginInstance (desc, initialSampleRate, initialBufferSize,
