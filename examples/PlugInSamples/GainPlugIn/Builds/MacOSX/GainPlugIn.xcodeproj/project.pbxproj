@@ -910,7 +910,6 @@
 		B24F5C6EC49FA1CBE3E9F76A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLTexture.h"; path = "../../../../../modules/juce_opengl/opengl/juce_OpenGLTexture.h"; sourceTree = "SOURCE_ROOT"; };
 		B27A9D33D351006D133C2A4F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ChangeBroadcaster.cpp"; path = "../../../../../modules/juce_events/broadcasters/juce_ChangeBroadcaster.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B28A17E23DF0DCDA94E53D24 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Identifier.h"; path = "../../../../../modules/juce_core/text/juce_Identifier.h"; sourceTree = "SOURCE_ROOT"; };
-		B2AE3E6AD988E981E7FEBF6C = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-Shared_Code.plist"; path = "Info-Shared_Code.plist"; sourceTree = "SOURCE_ROOT"; };
 		B2F20017F08CD996FB8053D0 = {isa = PBXFileReference; lastKnownFileType = text.txt; name = "Ogg Vorbis Licence.txt"; path = "../../../../../modules/juce_audio_formats/codecs/oggvorbis/Ogg Vorbis Licence.txt"; sourceTree = "SOURCE_ROOT"; };
 		B37A4AA60856836984FD7F08 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Vector3D.h"; path = "../../../../../modules/juce_opengl/geometry/juce_Vector3D.h"; sourceTree = "SOURCE_ROOT"; };
 		B3C0C30D7F463149807A83A6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Colours.cpp"; path = "../../../../../modules/juce_graphics/colour/juce_Colours.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1247,7 +1246,7 @@
 		F7FA3CA65C2B371C902CA9EA = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_XmlDocument.cpp"; path = "../../../../../modules/juce_core/xml/juce_XmlDocument.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F8D93BA03DB14514E2F9D007 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GainPlugIn.component; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		C43A527A45129CF421296BD0 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GainPlugIn.aaxplugin; sourceTree = "BUILT_PRODUCTS_DIR"; };
-		074F1E0FAFBD4B127B869BC2 = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GainPlugIn.framework; sourceTree = "BUILT_PRODUCTS_DIR"; };
+		074F1E0FAFBD4B127B869BC2 = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libGainPlugIn.a; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		F3B8EEB02E5588D99021DD10 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AiffAudioFormat.h"; path = "../../../../../modules/juce_audio_formats/codecs/juce_AiffAudioFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		F6D61FC781A1532ACF955A56 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_FileBrowserListener.h"; path = "../../../../../modules/juce_gui_basics/filebrowser/juce_FileBrowserListener.h"; sourceTree = "SOURCE_ROOT"; };
 		F73E61CD3ACE30495293E399 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jcphuff.c; path = "../../../../../modules/juce_graphics/image_formats/jpglib/jcphuff.c"; sourceTree = "SOURCE_ROOT"; };
@@ -2775,7 +2774,6 @@
 					F1A0F0881D3C62C8E705120E,
 					EDFE3B976573F01C8D3AA486,
 					9D1C58BBAA0B7F70D6EB7724,
-					B2AE3E6AD988E981E7FEBF6C,
 					E13512F9451169A200CA63BF,
 					BF909DFBC9B899C6119F556B, ); name = Resources; sourceTree = "<group>"; };
 		00DE399BF0EF1D2BB5C99DF6 = {isa = PBXGroup; children = (
@@ -2837,12 +2835,11 @@
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-VST.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/VST/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle";
+				OTHER_LDFLAGS = "-bundle -lGainPlugIn";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = vst; }; name = Debug; };
@@ -2875,12 +2872,11 @@
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-VST.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/VST/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle";
+				OTHER_LDFLAGS = "-bundle -lGainPlugIn";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = vst; }; name = Release; };
@@ -2912,12 +2908,11 @@
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-VST3.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/VST3/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle";
+				OTHER_LDFLAGS = "-bundle -lGainPlugIn";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = vst3; }; name = Debug; };
@@ -2950,12 +2945,11 @@
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-VST3.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/VST3/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle";
+				OTHER_LDFLAGS = "-bundle -lGainPlugIn";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = vst3; }; name = Release; };
@@ -2987,12 +2981,11 @@
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-AU.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle";
+				OTHER_LDFLAGS = "-bundle -lGainPlugIn";
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
@@ -3026,12 +3019,11 @@
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-AU.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle";
+				OTHER_LDFLAGS = "-bundle -lGainPlugIn";
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
@@ -3063,14 +3055,13 @@
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-AAX.plist;
-				INSTALL_PATH = "/Library/Application Support/Digidesign/Plug-Ins/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				INSTALL_PATH = "/Library/Application Support/Avid/Audio/Plug-Ins/";
 				LIBRARY_SEARCH_PATHS = ("$(inherited)", "\"$(HOME)/SDKs/AAX/Libs/Debug\"");
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle -lAAXLibrary";
+				OTHER_LDFLAGS = "-bundle -lAAXLibrary -lGainPlugIn";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = aaxplugin; }; name = Debug; };
@@ -3102,14 +3093,13 @@
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-AAX.plist;
-				INSTALL_PATH = "/Library/Application Support/Digidesign/Plug-Ins/";
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				INSTALL_PATH = "/Library/Application Support/Avid/Audio/Plug-Ins/";
 				LIBRARY_SEARCH_PATHS = ("$(inherited)", "\"$(HOME)/SDKs/AAX/Libs/Release\"");
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				OTHER_LDFLAGS = "-bundle -lAAXLibrary";
+				OTHER_LDFLAGS = "-bundle -lAAXLibrary -lGainPlugIn";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5;
 				WRAPPER_EXTENSION = aaxplugin; }; name = Release; };
@@ -3119,7 +3109,6 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = NO;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3138,13 +3127,11 @@
 					"JUCE_APP_VERSION_HEX=0x10000", );
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
-				INFOPLIST_FILE = Info-Shared_Code.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
-				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn.GainPlugInFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5; }; name = Debug; };
 		1A69EAB78F178B933E748B51 = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
@@ -3152,7 +3139,6 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				DEAD_CODE_STRIPPING = YES;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3172,13 +3158,11 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "~/SDKs/AAX", "~/SDKs/AAX/Interfaces", "~/SDKs/AAX/Interfaces/ACF", "../../../../../modules", "$(inherited)");
-				INFOPLIST_FILE = Info-Shared_Code.plist;
 				INSTALL_PATH = "@executable_path/../Frameworks";
-				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn.GainPlugInFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ROLI.GainPlugIn;
 				SDKROOT_ppc = macosx10.5; }; name = Release; };
 		12107CEF96782BFB9B82B7AC = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -3235,8 +3219,6 @@
 		AAA7EBE70E20807CF2102118 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
 					434F6E14A0DACDAA2BF2212B,
 					685F85F881C02A3AAA5E9B47, ); runOnlyForDeploymentPostprocessing = 0; };
-		D751EAE19631A157B10D04ED = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; files = (
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; name = "Embed Frameworks"; dstPath = ""; dstSubfolderSpec = 10; };
 		006D5D33A2A2D68C9354B32D = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					C396DBDD84D1162113B3ABD7, ); runOnlyForDeploymentPostprocessing = 0; };
 		911E05FA69C1B8015EA96560 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
@@ -3251,11 +3233,9 @@
 					E35621718EE50BEA328E3CD9,
 					0F58D649AF5E12F772510165,
 					6B4E64CC0DA5E1DC53159376,
-					14E482AFF9CC9F18BA3798BD,
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; };
+					14E482AFF9CC9F18BA3798BD, ); runOnlyForDeploymentPostprocessing = 0; };
 		BBE761975F619DAA1B4D0F57 = {isa = PBXNativeTarget; buildConfigurationList = BFCD4A7D0A1F6DB0A953047C; buildPhases = (
 					AAA7EBE70E20807CF2102118,
-					D751EAE19631A157B10D04ED,
 					006D5D33A2A2D68C9354B32D,
 					911E05FA69C1B8015EA96560, ); buildRules = ( ); dependencies = (
 					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST)"; productName = GainPlugIn; productReference = 169146CE0C9730602B3D31BD; productType = "com.apple.product-type.bundle"; };
@@ -3265,8 +3245,6 @@
 		F779790510354BCC375B6866 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
 					434F6E14A0DACDAA2BF2212B,
 					685F85F881C02A3AAA5E9B47, ); runOnlyForDeploymentPostprocessing = 0; };
-		D7BCC30C63CAC7A7920D8047 = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; files = (
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; name = "Embed Frameworks"; dstPath = ""; dstSubfolderSpec = 10; };
 		961B720A39DE7A36993450FB = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					60A23086F8F04399960054A9, ); runOnlyForDeploymentPostprocessing = 0; };
 		B97CFDFCFBB3263FBE4CE9DA = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
@@ -3281,11 +3259,9 @@
 					E35621718EE50BEA328E3CD9,
 					0F58D649AF5E12F772510165,
 					6B4E64CC0DA5E1DC53159376,
-					14E482AFF9CC9F18BA3798BD,
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; };
+					14E482AFF9CC9F18BA3798BD, ); runOnlyForDeploymentPostprocessing = 0; };
 		8777AC1501FECCF360363C10 = {isa = PBXNativeTarget; buildConfigurationList = 391979B4660EDD6E009E0AD5; buildPhases = (
 					F779790510354BCC375B6866,
-					D7BCC30C63CAC7A7920D8047,
 					961B720A39DE7A36993450FB,
 					B97CFDFCFBB3263FBE4CE9DA, ); buildRules = ( ); dependencies = (
 					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST3)"; productName = GainPlugIn; productReference = E5C2175FF96CED1519F2B7D6; productType = "com.apple.product-type.bundle"; };
@@ -3297,8 +3273,6 @@
 					685F85F881C02A3AAA5E9B47, ); runOnlyForDeploymentPostprocessing = 0; };
 		12E5B85CBAEF4ADCEF60C693 = {isa = PBXRezBuildPhase; buildActionMask = 2147483647; files = (
 					9D6465B0B231D381F43E350E, ); runOnlyForDeploymentPostprocessing = 0; };
-		F64B4E3D3CB6B1C555806A9C = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; files = (
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; name = "Embed Frameworks"; dstPath = ""; dstSubfolderSpec = 10; };
 		7CD5DF20930E5FD4B8978F68 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					27BAA78181CB9EA282A6AC64,
 					7EFB529B9EA74539375A96E0, ); runOnlyForDeploymentPostprocessing = 0; };
@@ -3316,12 +3290,10 @@
 					E35621718EE50BEA328E3CD9,
 					0F58D649AF5E12F772510165,
 					6B4E64CC0DA5E1DC53159376,
-					14E482AFF9CC9F18BA3798BD,
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; };
+					14E482AFF9CC9F18BA3798BD, ); runOnlyForDeploymentPostprocessing = 0; };
 		95B232D53C8384ECDA8C519B = {isa = PBXNativeTarget; buildConfigurationList = BC01B854A2B1C169532B3C40; buildPhases = (
 					A8BFD81EACAF4420A2D9C7E7,
 					12E5B85CBAEF4ADCEF60C693,
-					F64B4E3D3CB6B1C555806A9C,
 					7CD5DF20930E5FD4B8978F68,
 					0466EDF982628A74C5EF25A0, ); buildRules = ( ); dependencies = (
 					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (AU)"; productName = GainPlugIn; productReference = F8D93BA03DB14514E2F9D007; productType = "com.apple.product-type.bundle"; };
@@ -3331,8 +3303,6 @@
 		87D9874ECD12A1F70BE4B01C = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
 					434F6E14A0DACDAA2BF2212B,
 					685F85F881C02A3AAA5E9B47, ); runOnlyForDeploymentPostprocessing = 0; };
-		711822CA5418D9A6BEBB7723 = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; files = (
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; name = "Embed Frameworks"; dstPath = ""; dstSubfolderSpec = 10; };
 		5ED60E79CB2B11C45637CA8A = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					920289CA43FF41424E0F0AE9, ); runOnlyForDeploymentPostprocessing = 0; };
 		B4837EEA7868B856A37F43BD = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
@@ -3347,11 +3317,9 @@
 					E35621718EE50BEA328E3CD9,
 					0F58D649AF5E12F772510165,
 					6B4E64CC0DA5E1DC53159376,
-					14E482AFF9CC9F18BA3798BD,
-					221F64B3B662038BA2BF5FC3, ); runOnlyForDeploymentPostprocessing = 0; };
+					14E482AFF9CC9F18BA3798BD, ); runOnlyForDeploymentPostprocessing = 0; };
 		AD71869D70E2F5CD06AF8831 = {isa = PBXNativeTarget; buildConfigurationList = 4BDDEC55EDB7DC56497AC19A; buildPhases = (
 					87D9874ECD12A1F70BE4B01C,
-					711822CA5418D9A6BEBB7723,
 					5ED60E79CB2B11C45637CA8A,
 					B4837EEA7868B856A37F43BD, ); buildRules = ( ); dependencies = (
 					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (AAX)"; productName = GainPlugIn; productReference = C43A527A45129CF421296BD0; productType = "com.apple.product-type.bundle"; };
@@ -3375,22 +3343,8 @@
 					C9DD20D66EE17A910A48C7F5,
 					4BE2D2BC6F1DC08BB64BAC78,
 					DBB093FB9913BE37F564E2AE, ); runOnlyForDeploymentPostprocessing = 0; };
-		9C508A8FAB3E51327104655F = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
-					FA171B2FEC24575B5157EB15,
-					46AB8BC7FA7E34563E5F005C,
-					CE59F17AE351D2C1CE9576C3,
-					353BAEC02C6386CEE3594B18,
-					C4CDB09203A906EA7EAA2026,
-					FBB6DF69B4E4774056CA59CE,
-					428763007D4B4F27095FC927,
-					9A8029F7D3A5673112C6CD48,
-					E35621718EE50BEA328E3CD9,
-					0F58D649AF5E12F772510165,
-					6B4E64CC0DA5E1DC53159376,
-					14E482AFF9CC9F18BA3798BD, ); runOnlyForDeploymentPostprocessing = 0; };
 		EF7E12AA943CABF4C9ACE9FC = {isa = PBXNativeTarget; buildConfigurationList = 2D1D1BFA76D5FF752D06187F; buildPhases = (
-					E57E58AA3A8632B697CF894F,
-					9C508A8FAB3E51327104655F, ); buildRules = ( ); dependencies = (  ); name = "GainPlugIn (Shared Code)"; productName = GainPlugIn; productReference = 074F1E0FAFBD4B127B869BC2; productType = "com.apple.product-type.framework"; };
+					E57E58AA3A8632B697CF894F, ); buildRules = ( ); dependencies = (  ); name = "GainPlugIn (Shared Code)"; productName = GainPlugIn; productReference = 074F1E0FAFBD4B127B869BC2; productType = "com.apple.product-type.library.static"; };
 		14B1FDE882BA4A9678780A26 = {isa = PBXProject; buildConfigurationList = 738DD13F786359A977312E92; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { 67946078D4B1207C2A6BDB4F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };BBE761975F619DAA1B4D0F57 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };8777AC1501FECCF360363C10 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };95B232D53C8384ECDA8C519B = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };AD71869D70E2F5CD06AF8831 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };EF7E12AA943CABF4C9ACE9FC = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 807311746F9F870D03BE88D9; projectDirPath = ""; projectRoot = ""; targets = (67946078D4B1207C2A6BDB4F, BBE761975F619DAA1B4D0F57, 8777AC1501FECCF360363C10, 95B232D53C8384ECDA8C519B, AD71869D70E2F5CD06AF8831, EF7E12AA943CABF4C9ACE9FC); };
 	};
 	rootObject = 14B1FDE882BA4A9678780A26;
