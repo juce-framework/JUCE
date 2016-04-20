@@ -1889,7 +1889,7 @@ private:
         if (library.substring (0, 3) == "lib")
             library = library.substring (3);
 
-        return "-l" + library.upToLastOccurrenceOf (".", false, false);
+        return "-l" + library.replace (" ", "\\\\ ").upToLastOccurrenceOf (".", false, false);
     }
 
     String getSearchPathForStaticLibrary (const RelativePath& library) const
