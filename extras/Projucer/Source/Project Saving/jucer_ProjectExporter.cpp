@@ -306,15 +306,22 @@ void ProjectExporter::addSettingsForProjectType (const ProjectType& type)
 
 void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
-    if (supportsVST() && (project.shouldBuildVST().getValue() || project.isVSTPluginHost()))
+    if (supportsVST())
     {
-        makefileTargetSuffix = ".so";
-        addVSTFolderToPath (false);
+        if (project.shouldBuildVST().getValue())
+            makefileTargetSuffix = ".so";
+
+        if (project.shouldBuildVST().getValue() || project.isVSTPluginHost())
+            addVSTFolderToPath (false);
     }
-    if (supportsVST3() && (project.shouldBuildVST3().getValue() || project.isVST3PluginHost()))
+
+    if (supportsVST3())
     {
-        makefileTargetSuffix = ".so";
-        addVSTFolderToPath (true);
+        if (project.shouldBuildVST3().getValue())
+            makefileTargetSuffix = ".so";
+
+        if (project.shouldBuildVST3().getValue() || project.isVST3PluginHost())
+            addVSTFolderToPath (true);
     }
 }
 
