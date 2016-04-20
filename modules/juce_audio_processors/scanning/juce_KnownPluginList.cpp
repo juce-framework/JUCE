@@ -486,9 +486,10 @@ struct PluginTreeUtils
             const KnownPluginList::PluginTree& sub = *tree.subFolders.getUnchecked(i);
 
             PopupMenu subMenu;
-            isTicked = addToMenu (sub, subMenu, allPlugins, currentlyTickedPluginID) || isTicked;
+            const bool isItemTicked = addToMenu (sub, subMenu, allPlugins, currentlyTickedPluginID);
+            isTicked = isTicked || isItemTicked;
 
-            m.addSubMenu (sub.folder, subMenu, true, nullptr, isTicked, 0);
+            m.addSubMenu (sub.folder, subMenu, true, nullptr, isItemTicked, 0);
         }
 
         for (int i = 0; i < tree.plugins.size(); ++i)
