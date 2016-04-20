@@ -52,7 +52,7 @@ public:
         : AndroidProjectExporterBase (p, t),
           gradleVersion (settings, Ids::gradleVersion, nullptr, "2.10"),
           gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.7.0-alpha4"),
-          gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
+          gradleToolchain (settings, Ids::gradleToolchain, nullptr, "gcc"),
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.1"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {

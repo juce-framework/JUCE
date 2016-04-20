@@ -102,8 +102,7 @@
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.miditest.MidiTest" androidInternetNeeded="0"
                    androidBluetoothNeeded="1" androidCpp11="1" androidScreenOrientation="unspecified"
                    targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
-                   androidMicNeeded="1" gradleToolchain="clang" gradleToolchainVersion="3.6"
-                   buildToolsVersion="23.0.1">
+                   androidMicNeeded="1" gradleToolchain="gcc" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="MidiTest"/>

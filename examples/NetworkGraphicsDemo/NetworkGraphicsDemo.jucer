@@ -115,8 +115,8 @@
     <ANDROIDSTUDIO androidActivityClass="com.juce.networkgraphicsdemo.JUCENetworkGraphicsDemo"
                    androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
                    targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
-                   bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="clang"
-                   gradleToolchainVersion="3.6" buildToolsVersion="23.0.1">
+                   bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="gcc"
+                   gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
