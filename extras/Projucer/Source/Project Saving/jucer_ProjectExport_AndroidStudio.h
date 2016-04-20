@@ -561,16 +561,7 @@ private:
 
         ndkSettings->add<GradleString> ("moduleName",       "juce_jni");
         ndkSettings->add<GradleString> ("toolchain",        toolchain);
-
-        if (isClang)
-        {
-            ndkSettings->add<GradleString> ("stl", "c++_static");
-        }
-        else
-        {
-            ndkSettings->add<GradleValue>  ("toolchainVersion", "4.9");
-            ndkSettings->add<GradleString> ("stl", "gnustl_static");
-        }
+        ndkSettings->add<GradleString> ("stl", isClang ? "c++_static" :  "gnustl_static");
 
         ndkSettings->addChildObject (getNdkJuceExtraProperties());
 
