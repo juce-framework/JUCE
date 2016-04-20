@@ -90,7 +90,8 @@ namespace
         Array<File> files;
 
         for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m", File::findFiles); di.next();)
-            files.add (di.getFile());
+            if (! di.getFile().isSymbolicLink())
+                files.add (di.getFile());
 
         return files;
     }
