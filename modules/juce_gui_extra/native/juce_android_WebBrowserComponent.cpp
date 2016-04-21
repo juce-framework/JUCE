@@ -27,6 +27,10 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
       blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
+    // Unfortunately, WebBrowserComponent is not implemented for Android yet!
+    // This is just a stub implementation without any useful functionality.
+    jassertfalse;
+
     setOpaque (true);
 }
 
