@@ -22,10 +22,38 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_opengl
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE OpenGL classes
+  description:      Classes for rendering OpenGL in a JUCE window.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_gui_extra
+  OSXFrameworks:    OpenGL
+  iOSFrameworks:    OpenGLES
+  linuxLibs:        GL
+  mingwLibs:        opengl32
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_OPENGL_H_INCLUDED
 #define JUCE_OPENGL_H_INCLUDED
 
-#include "../juce_gui_extra/juce_gui_extra.h"
+#include <juce_gui_extra/juce_gui_extra.h>
 
 #undef JUCE_OPENGL
 #define JUCE_OPENGL 1
@@ -43,7 +71,13 @@
   #define WINGDIAPI __declspec(dllimport)
   #define CLEAR_TEMP_WINGDIAPI 1
  #endif
- #include <gl/GL.h>
+
+ #if JUCE_MINGW
+  #include <GL/gl.h>
+ #else
+  #include <gl/GL.h>
+ #endif
+
  #ifdef CLEAR_TEMP_WINGDIAPI
   #undef WINGDIAPI
   #undef CLEAR_TEMP_WINGDIAPI

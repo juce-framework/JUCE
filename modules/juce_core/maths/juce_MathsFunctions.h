@@ -93,7 +93,7 @@ typedef unsigned int                uint32;
 #endif
 
 //==============================================================================
-// Some indispensible min/max functions
+// Some indispensable min/max functions
 
 /** Returns the larger of two values. */
 template <typename Type>

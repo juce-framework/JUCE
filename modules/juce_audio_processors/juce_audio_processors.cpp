@@ -34,7 +34,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 
 #include "juce_audio_processors.h"
-#include "../juce_gui_extra/juce_gui_extra.h"
+#include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
 #if JUCE_MAC
@@ -70,9 +70,18 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
     return false;
 }
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IOS
+
+#if JUCE_IOS
+ #define JUCE_IOS_MAC_VIEW  UIView
+ typedef UIViewComponent  ViewComponentBaseClass;
+#else
+ #define JUCE_IOS_MAC_VIEW  NSView
+ typedef NSViewComponent  ViewComponentBaseClass;
+#endif
+
 //==============================================================================
-struct AutoResizingNSViewComponent  : public NSViewComponent,
+struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
                                       private AsyncUpdater
 {
     AutoResizingNSViewComponent() : recursive (false) {}
@@ -102,16 +111,16 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 {
     AutoResizingNSViewComponentWithParent()
     {
-        NSView* v = [[NSView alloc] init];
+        JUCE_IOS_MAC_VIEW* v = [[JUCE_IOS_MAC_VIEW alloc] init];
         setView (v);
         [v release];
 
         startTimer (30);
     }
 
-    NSView* getChildView() const
+    JUCE_IOS_MAC_VIEW* getChildView() const
     {
-        if (NSView* parent = (NSView*) getView())
+        if (JUCE_IOS_MAC_VIEW* parent = (JUCE_IOS_MAC_VIEW*) getView())
             if ([[parent subviews] count] > 0)
                 return [[parent subviews] objectAtIndex: 0];
 
@@ -120,7 +129,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
     void timerCallback() override
     {
-        if (NSView* child = getChildView())
+        if (JUCE_IOS_MAC_VIEW* child = getChildView())
         {
             stopTimer();
             setView (child);

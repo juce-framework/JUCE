@@ -28,6 +28,7 @@ LookAndFeel_V3::LookAndFeel_V3()
 
     const Colour textButtonColour (0xffeeeeff);
     setColour (TextButton::buttonColourId, textButtonColour);
+    setColour (TextButton::buttonOnColourId, textButtonColour);
     setColour (ComboBox::buttonColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
     setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x66000000));

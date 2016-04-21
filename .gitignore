@@ -23,6 +23,9 @@
 *.ipdb
 *.iobj
 
+*.VC.db
+*.VC.opendb
+
 xcuserdata
 *.xccheckout
 contents.xcworkspacedata
@@ -57,3 +60,4 @@ profile
 doxygen/doc
 extras/Introjucer/Builds/VisualStudio2015/The Introjucer.VC.db
 examples/Demo/Builds/VisualStudio2015/JuceDemo.VC.db
+extras/Projucer/JUCECompileEngine.dylib

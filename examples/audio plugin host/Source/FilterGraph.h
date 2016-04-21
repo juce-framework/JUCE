@@ -51,6 +51,8 @@ public:
 
     void addFilter (const PluginDescription* desc, double x, double y);
 
+    void addFilterCallback (AudioPluginInstance* instance, const String& error, double x, double y);
+
     void removeFilter (const uint32 filterUID);
     void disconnectFilter (const uint32 filterUID);
 

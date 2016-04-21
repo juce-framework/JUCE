@@ -362,7 +362,7 @@ protected:
     */
     virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e);
 
-    /** Calculates the positon of a given midi-note.
+    /** Calculates the position of a given midi-note.
 
         This can be overridden to create layouts with custom key-widths.
 

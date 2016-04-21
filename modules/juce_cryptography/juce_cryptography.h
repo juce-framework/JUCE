@@ -22,11 +22,35 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_cryptography
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE cryptography classes
+  description:      Classes for various basic cryptography functions, including RSA, Blowfish, MD5, SHA, etc.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_core
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_CRYPTOGRAPHY_H_INCLUDED
 #define JUCE_CRYPTOGRAPHY_H_INCLUDED
 
 //==============================================================================
-#include "../juce_core/juce_core.h"
+#include <juce_core/juce_core.h>
 
 namespace juce
 {

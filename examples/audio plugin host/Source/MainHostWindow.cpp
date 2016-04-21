@@ -42,7 +42,7 @@ public:
         setContentOwned (new PluginListComponent (pluginFormatManager,
                                                   owner.knownPluginList,
                                                   deadMansPedalFile,
-                                                  getAppProperties().getUserSettings()), true);
+                                                  getAppProperties().getUserSettings(), true), true);
 
         setResizable (true, false);
         setResizeLimits (300, 400, 800, 1500);

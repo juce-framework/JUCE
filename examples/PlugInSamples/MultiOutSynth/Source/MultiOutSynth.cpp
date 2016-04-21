@@ -48,7 +48,6 @@ public:
         for (int busNr = 1; busNr < maxMidiChannel; ++busNr)
             busArrangement.outputBuses.add (AudioProcessorBus (String ("Output #") += String (busNr + 1), AudioChannelSet::disabled()));
 
-
         // initialize other stuff (not related to buses)
         formatManager.registerBasicFormats();
 
@@ -78,7 +77,6 @@ public:
         // only support mono or stereo (or disabling) buses
         if (numChannels > 2) return false;
 
-
         // pass the call on to the base class
         return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
     }
@@ -96,14 +94,13 @@ public:
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiBuffer) override
     {
-        buffer.clear();
-
         for (int busNr = 0; busNr < maxMidiChannel; ++busNr)
         {
             MidiBuffer midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
             AudioSampleBuffer audioBusBuffer = busArrangement.getBusBuffer (buffer, false, busNr);
 
-            synth [busNr]->renderNextBlock (audioBusBuffer, midiChannelBuffer, 0, audioBusBuffer.getNumSamples());
+            if (! busArrangement.outputBuses.getReference (busNr).channels.isDisabled())
+                synth [busNr]->renderNextBlock (audioBusBuffer, midiChannelBuffer, 0, audioBusBuffer.getNumSamples());
         }
     }
 

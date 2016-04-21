@@ -36,7 +36,7 @@ public:
     ~VSTPluginFormat();
 
     //==============================================================================
-    /** Attempts to retreive the VSTXML data from a plugin.
+    /** Attempts to retrieve the VSTXML data from a plugin.
         Will return nullptr if the plugin isn't a VST, or if it doesn't have any VSTXML.
     */
     static const XmlElement* getVSTXML (AudioPluginInstance* plugin);
@@ -87,11 +87,10 @@ public:
     //==============================================================================
     String getName() const override                { return "VST"; }
     void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&, double, int) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
     bool pluginNeedsRescanning (const PluginDescription&) override;
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive) override;
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
     bool doesPluginStillExist (const PluginDescription&) override;
     FileSearchPath getDefaultLocationsToSearch() override;
     bool canScanForPlugins() const override        { return true; }
@@ -102,6 +101,14 @@ public:
         this is called.
     */
     virtual void aboutToScanVSTShellPlugin (const PluginDescription&);
+
+private:
+    //==============================================================================
+    void createPluginInstance (const PluginDescription&, double initialSampleRate,
+                               int initialBufferSize, void* userData,
+                               void (*callback) (void*, AudioPluginInstance*, const String&)) override;
+
+    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
 
 private:
     void recursiveFileSearch (StringArray&, const File&, bool recursive);

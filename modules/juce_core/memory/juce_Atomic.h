@@ -147,7 +147,7 @@ public:
    #endif
 
     /** The raw value that this class operates on.
-        This is exposed publically in case you need to manipulate it directly
+        This is exposed publicly in case you need to manipulate it directly
         for performance reasons.
     */
     volatile Type value;

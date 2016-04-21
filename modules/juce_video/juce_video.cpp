@@ -35,7 +35,6 @@
 #define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 
-#include "../juce_gui_extra/juce_gui_extra.h"
 #include "juce_video.h"
 
 #if JUCE_MAC

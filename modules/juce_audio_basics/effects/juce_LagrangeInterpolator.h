@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 /**
     Interpolator for resampling a stream of floats using 4-point lagrange interpolation.
 

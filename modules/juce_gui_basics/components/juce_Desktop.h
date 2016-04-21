@@ -159,7 +159,7 @@ public:
 
         If allowMenusAndBars is true, things like the menu and dock (on mac) are still
         allowed to pop up when the mouse moves onto them. If this is false, it'll try
-        to hide as much on-screen paraphenalia as possible.
+        to hide as much on-screen paraphernalia as possible.
     */
     void setKioskModeComponent (Component* componentToUse,
                                 bool allowMenusAndBars = true);

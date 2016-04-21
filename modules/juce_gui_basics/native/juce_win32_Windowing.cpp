@@ -858,7 +858,7 @@ public:
 
         if (! makeActive)
         {
-            // in this case a broughttofront call won't have occured, so do it now..
+            // in this case a broughttofront call won't have occurred, so do it now..
             handleBroughtToFront();
         }
     }
@@ -1726,7 +1726,7 @@ private:
         if (registerTouchWindow == nullptr)
             return false;
 
-        // Relevent info about touch/pen detection flags:
+        // Relevant info about touch/pen detection flags:
         // https://msdn.microsoft.com/en-us/library/windows/desktop/ms703320(v=vs.85).aspx
         // http://www.petertissen.de/?p=4
 

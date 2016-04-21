@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-
 struct CatmullRomAlgorithm
 {
     static forcedinline float valueAtOffset (const float* const inputs, const float offset) noexcept

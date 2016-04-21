@@ -55,7 +55,7 @@
     get them.
 
     Then, you'll need to make sure your include path contains your "VST3 SDK"
-    directory (or whatever you've named it on your machine). The Introjucer has
+    directory (or whatever you've named it on your machine). The Projucer has
     a special box for setting this path.
 */
 #if JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY

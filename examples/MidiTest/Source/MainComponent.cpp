@@ -48,7 +48,7 @@ class MidiDeviceListBox : public ListBox,
 private ListBoxModel
 {
 public:
-    //==========================================================================
+    //==============================================================================
     MidiDeviceListBox (const String& name,
                        MainContentComponent& contentComponent,
                        bool isInputDeviceList)
@@ -61,14 +61,14 @@ public:
         setClickingTogglesRowSelection (true);
     }
 
-    //==========================================================================
+    //==============================================================================
     int getNumRows() override
     {
         return isInput ? parent.getNumMidiInputs()
                        : parent.getNumMidiOutputs();
     }
 
-    //==========================================================================
+    //==============================================================================
     void paintListBoxItem (int rowNumber, Graphics &g,
                            int width, int height, bool rowIsSelected) override
     {
@@ -97,7 +97,7 @@ public:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void selectedRowsChanged (int) override
     {
         SparseSet<int> newSelectedItems = getSelectedRows();
@@ -119,7 +119,7 @@ public:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void syncSelectedItemsWithDeviceList (const ReferenceCountedArray<MidiDeviceListEntry>& midiDevices)
     {
         SparseSet<int> selectedRows;
@@ -133,7 +133,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     MainContentComponent& parent;
     bool isInput;
     SparseSet<int> lastSelectedItems;

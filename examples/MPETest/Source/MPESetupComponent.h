@@ -33,7 +33,7 @@ class MPESetupComponent : public Component,
                           private ComboBox::Listener
 {
 public:
-    //==========================================================================
+    //==============================================================================
     class Listener
     {
     public:
@@ -48,7 +48,7 @@ public:
     void addListener (Listener* listenerToAdd)         { listeners.add (listenerToAdd); }
     void removeListener (Listener* listenerToRemove)   { listeners.remove (listenerToRemove); }
 
-    //==========================================================================
+    //==============================================================================
     MPESetupComponent()
         : masterChannelLabel (String::empty, "Master channel:"),
           noteChannelsLabel (String::empty, "Nr. of note channels:"),
@@ -82,7 +82,7 @@ public:
         numberOfVoices.addListener (this);
     }
 
-    //==========================================================================
+    //==============================================================================
     void resized() override
     {
         Rectangle<int> r (proportionOfWidth (0.65f), 15, proportionOfWidth (0.25f), 3000);
@@ -122,7 +122,7 @@ public:
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void initialiseComboBoxWithConsecutiveIntegers (ComboBox& comboBox, Label& labelToAttach,
                                                     int firstValue, int numValues, int valueToSelect,
                                                     bool makeVisible = true)
@@ -141,14 +141,14 @@ private:
         comboBox.addListener (this);
     }
 
-    //==========================================================================
+    //==============================================================================
     void initialiseButton (Button& button)
     {
         addAndMakeVisible (button);
         button.addListener (this);
     }
 
-    //==========================================================================
+    //==============================================================================
     void buttonClicked (Button* button) override
     {
         if (button == &addZoneButton)
@@ -161,7 +161,7 @@ private:
             voiceStealingEnabledToggleClicked();
     }
 
-    //==========================================================================
+    //==============================================================================
     void addZoneButtonClicked()
     {
         if (areMPEParametersValid())
@@ -180,14 +180,14 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void clearAllZonesButtonClicked()
     {
         zoneLayout.clearAllZones();
         listeners.call (&MPESetupComponent::Listener::allZonesCleared);
     }
 
-    //==========================================================================
+    //==============================================================================
     void legacyModeEnabledToggleClicked()
     {
         bool legacyModeEnabled = legacyModeEnabledToggle.getToggleState();
@@ -216,14 +216,14 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void voiceStealingEnabledToggleClicked()
     {
         listeners.call (&MPESetupComponent::Listener::voiceStealingEnabledChanged,
                         voiceStealingEnabledToggle.getToggleState());
     }
 
-    //==========================================================================
+    //==============================================================================
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override
     {
         if (comboBoxThatHasChanged == &numberOfVoices)
@@ -239,7 +239,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void numberOfVoicesChanged()
     {
         listeners.call (&MPESetupComponent::Listener::numberOfVoicesChanged,
@@ -271,7 +271,7 @@ private:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     bool areMPEParametersValid() const
     {
         int maxPossibleNumNoteChannels = 16 - masterChannel.getText().getIntValue();
@@ -301,14 +301,14 @@ private:
                                           "Got it");
     }
 
-    //==========================================================================
+    //==============================================================================
     Range<int> getLegacyModeChannelRange() const
     {
         return Range<int> (legacyStartChannel.getText().getIntValue(),
                            legacyEndChannel.getText().getIntValue() + 1);
     }
 
-    //==========================================================================
+    //==============================================================================
     MPEZoneLayout zoneLayout;
 
     ComboBox masterChannel, noteChannels, masterPitchbendRange, notePitchbendRange;

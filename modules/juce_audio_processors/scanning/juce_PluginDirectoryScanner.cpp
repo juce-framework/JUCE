@@ -34,15 +34,17 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
                                                 AudioPluginFormat& formatToLookFor,
                                                 FileSearchPath directoriesToSearch,
                                                 const bool recursive,
-                                                const File& deadMansPedal)
+                                                const File& deadMansPedal,
+                                                bool allowPluginsWhichRequireAsynchronousInstantiation)
     : list (listToAddTo),
       format (formatToLookFor),
       deadMansPedalFile (deadMansPedal),
-      progress (0)
+      progress (0),
+      allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
 {
     directoriesToSearch.removeRedundantPaths();
 
-    filesOrIdentifiersToScan = format.searchPathsForPlugins (directoriesToSearch, recursive);
+    filesOrIdentifiersToScan = format.searchPathsForPlugins (directoriesToSearch, recursive, allowAsync);
 
     // If any plugins have crashed recently when being loaded, move them to the
     // end of the list to give the others a chance to load correctly..

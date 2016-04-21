@@ -78,24 +78,43 @@ void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
 {
     if (desc != nullptr)
     {
-        AudioProcessorGraph::Node* node = nullptr;
+        struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
+        {
+            AsyncCallback (FilterGraph* myself, double inX, double inY)
+                : owner (myself), posX (inX), posY (inY)
+            {}
 
-        String errorMessage;
+            void completionCallback (AudioPluginInstance* instance, const String& error) override
+            {
+                owner->addFilterCallback (instance, error, posX, posY);
+            }
 
-        if (AudioPluginInstance* instance = formatManager.createPluginInstance (*desc, graph.getSampleRate(), graph.getBlockSize(), errorMessage))
-            node = graph.addNode (instance);
+            FilterGraph* owner;
+            double posX, posY;
+        };
+
+        formatManager.createPluginInstanceAsync (*desc, graph.getSampleRate(), graph.getBlockSize(),
+                                                 new AsyncCallback (this, x, y));
+    }
+}
+
+void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String& error, double x, double y)
+{
+    if (instance == nullptr)
+    {
+        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                     TRANS("Couldn't create filter"),
+                                     error);
+    }
+    else
+    {
+        AudioProcessorGraph::Node* node = graph.addNode (instance);
 
         if (node != nullptr)
         {
             node->properties.set ("x", x);
             node->properties.set ("y", y);
             changed();
-        }
-        else
-        {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Couldn't create filter"),
-                                         errorMessage);
         }
     }
 }

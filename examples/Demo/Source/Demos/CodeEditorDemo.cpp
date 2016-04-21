@@ -44,7 +44,7 @@ public:
                              "/* Code editor demo!\n"
                              "\n"
                              "   To see a real-world example of the code editor\n"
-                             "   in action, try the Introjucer!\n"
+                             "   in action, have a look at the Projucer!\n"
                              "\n"
                              "*/\n"
                              "\n");

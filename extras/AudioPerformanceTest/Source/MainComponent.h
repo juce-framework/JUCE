@@ -37,7 +37,7 @@ class MainContentComponent   : public AudioAppComponent,
                                private Timer
 {
 public:
-    //==========================================================================
+    //==============================================================================
     MainContentComponent()
     {
         setSize (400, 400);
@@ -53,7 +53,7 @@ public:
         shutdownAudio();
     }
 
-    //==========================================================================
+    //==============================================================================
     void prepareToPlay (int bufferSize, double sampleRate) override
     {
         currentSampleRate = sampleRate;
@@ -69,7 +69,7 @@ public:
         currentSampleRate = 0.0;
     }
 
-    //==========================================================================
+    //==============================================================================
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
     {
         const double startTimeMs = getPreciseTimeMs();
@@ -87,7 +87,7 @@ public:
         addCallbackMetrics (startTimeMs, endTimeMs);
     }
 
-    //==========================================================================
+    //==============================================================================
     void addCallbackMetrics (double startTimeMs, double endTimeMs)
     {
         double runtimeMs = endTimeMs - startTimeMs;
@@ -108,7 +108,7 @@ public:
         lastCallbackStartTimeMs = startTimeMs;
     }
 
-    //==========================================================================
+    //==============================================================================
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::black);
@@ -118,14 +118,14 @@ public:
                     getLocalBounds().withY (loopIterationsSlider.getHeight()), Justification::centred, true);
     }
 
-    //==========================================================================
+    //==============================================================================
     void resized() override
     {
         loopIterationsSlider.setBounds (getLocalBounds().withSizeKeepingCentre (proportionOfWidth (0.9f), 50));
     }
 
 private:
-    //==========================================================================
+    //==============================================================================
     void initGui()
     {
         loopIterationsSlider.setSliderStyle (Slider::LinearBar);
@@ -137,15 +137,15 @@ private:
         addAndMakeVisible (loopIterationsSlider);
     }
 
-    //==========================================================================
-    void allocateBuffers (int bufferSize)
+    //==============================================================================
+    void allocateBuffers (std::size_t bufferSize)
     {
         a.resize (bufferSize);
         b.resize (bufferSize);
         c.resize (bufferSize);
     }
 
-    //==========================================================================
+    //==============================================================================
     void initialiseBuffers (const AudioSourceChannelInfo& bufferToFill, std::size_t bufferSize)
     {
         if (bufferSize != a.size())
@@ -167,25 +167,25 @@ private:
         std::fill (c.begin(), c.end(), 0.11f);
     }
 
-    //==========================================================================
+    //==============================================================================
     void crunchSomeNumbers (float* outBuffer, std::size_t bufferSize, int numIterations) noexcept
     {
         jassert (a.size() == bufferSize && b.size() == bufferSize && c.size() == bufferSize);
 
         for (int i = 0; i < numIterations; ++i)
         {
-            FloatVectorOperations::multiply (c.data(), a.data(), b.data(), bufferSize);
-            FloatVectorOperations::addWithMultiply (outBuffer, b.data(), c.data(), bufferSize);
+            FloatVectorOperations::multiply (c.data(), a.data(), b.data(), (int) bufferSize);
+            FloatVectorOperations::addWithMultiply (outBuffer, b.data(), c.data(), (int) bufferSize);
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void timerCallback() override
     {
         printAndResetPerformanceMetrics();
     }
 
-    //==========================================================================
+    //==============================================================================
     void printHeader() const
     {
         Logger::writeToLog ("buffer size = " + String (a.size()) + " samples");
@@ -197,7 +197,7 @@ private:
         Logger::writeToLog ("-----    | -----   -----   -----   -----    | -----   -----   -----   -----    | ---     ---     ---      ");
     }
 
-    //==========================================================================
+    //==============================================================================
     void printAndResetPerformanceMetrics()
     {
         std::unique_lock<std::mutex> lock (metricMutex);
@@ -220,7 +220,7 @@ private:
                             + String (overLimit).paddedRight (' ', 8) + " | ");
     }
 
-    //==========================================================================
+    //==============================================================================
     String getPercentFormattedMetricString (const StatisticsAccumulator<double> metric) const
     {
         auto physTimeLimit = getPhysicalTimeLimitMs();
@@ -231,7 +231,7 @@ private:
              + String (metric.getStandardDeviation(), 3).paddedRight (' ', 8);
     }
 
-    //==========================================================================
+    //==============================================================================
     void resetPerformanceMetrics()
     {
         audioCallbackRuntimeMs.reset();
@@ -240,25 +240,25 @@ private:
         numCallbacksOverPhysicalTimeLimit = 0;
     }
 
-    //==========================================================================
+    //==============================================================================
     void updateNumLoopIterationsPerCallback()
     {
         numLoopIterationsPerCallback = (int) loopIterationsSlider.getValue();
     }
 
-    //==========================================================================
+    //==============================================================================
     static double getPreciseTimeMs() noexcept
     {
         return 1000.0 * Time::getHighResolutionTicks() / (double) Time::getHighResolutionTicksPerSecond();
     }
 
-    //==========================================================================
+    //==============================================================================
     double getPhysicalTimeLimitMs() const noexcept
     {
         return 1000.0 * a.size() / currentSampleRate;
     }
 
-    //==========================================================================
+    //==============================================================================
     std::vector<float> a, b, c; // must always be of size == current bufferSize
     double currentSampleRate = 0.0;
 
@@ -272,7 +272,7 @@ private:
     Slider loopIterationsSlider;
     std::mutex metricMutex;
 
-    //==========================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
 

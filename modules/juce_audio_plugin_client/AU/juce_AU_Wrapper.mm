@@ -78,20 +78,19 @@
 #include "../utility/juce_CarbonVisibility.h"
 #include "../utility/juce_PluginBusUtilities.h"
 
+#include "juce_AU_Shared.h"
+
+JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AudioUnit);
+
 //==============================================================================
 static Array<void*> activePlugins, activeUIs;
 
 static const AudioUnitPropertyID juceFilterObjectPropertyID = 0x1a45ffe9;
 
-// This macro can be set if you need to override this internal name for some reason..
-#ifndef JUCE_STATE_DICTIONARY_KEY
- #define JUCE_STATE_DICTIONARY_KEY   CFSTR("jucePluginState")
-#endif
-
 // make sure the audio processor is initialized before the AUBase class
 struct AudioProcessorHolder
 {
-    AudioProcessorHolder(bool initialiseGUI)
+    AudioProcessorHolder (bool initialiseGUI)
     {
         if (initialiseGUI)
         {
@@ -121,10 +120,14 @@ public:
           MusicDeviceBase (component, (UInt32) PluginBusUtilities (*juceFilter, false).getNumEnabledBuses (true),
                                       (UInt32) PluginBusUtilities (*juceFilter, false).getNumEnabledBuses (false)),
           isBypassed (false),
-          busUtils (*juceFilter, true)
+          busUtils (*juceFilter, true, maxChannelsToProbeFor()),
+          totalInChannels  (busUtils.findTotalNumChannels (true)),
+          totalOutChannels (busUtils.findTotalNumChannels (false)),
+          mapper (busUtils)
     {
-        busUtils.findAllCompatibleLayouts();
-        populateAUChannelInfo();
+        busUtils.init();
+
+        channelInfo = AudioUnitHelpers::getAUChannelInfo (busUtils);
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
@@ -142,7 +145,7 @@ public:
 
         CreateElements();
 
-        if (syncAudioUnitWithProcessor () != noErr)
+        if (syncAudioUnitWithProcessor() != noErr)
             jassertfalse;
     }
 
@@ -171,6 +174,8 @@ public:
         if ((err = MusicDeviceBase::Initialize()) != noErr)
             return err;
 
+        mapper.alloc();
+
         prepareToPlay();
         restorer.release();
 
@@ -181,10 +186,12 @@ public:
     {
         MusicDeviceBase::Cleanup();
 
+        mapper.release();
+
         if (juceFilter != nullptr)
             juceFilter->releaseResources();
 
-        bufferSpace.setSize (2, 16);
+        audioBuffer.release();
         midiEvents.clear();
         incomingEvents.clear();
         prepared = false;
@@ -208,18 +215,13 @@ public:
         {
             juceFilter->setRateAndBufferSizeDetails (getSampleRate(), (int) GetMaxFramesPerSlice());
 
-            bufferSpace.setSize (jmax (busUtils.findTotalNumChannels (true), busUtils.findTotalNumChannels (false)),
-                                 (int) GetMaxFramesPerSlice() + 32);
-
+            audioBuffer.prepare (totalInChannels, totalOutChannels, (int) GetMaxFramesPerSlice() + 32);
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
 
             midiEvents.ensureSize (2048);
             midiEvents.clear();
             incomingEvents.ensureSize (2048);
             incomingEvents.clear();
-
-            channels.calloc ((size_t) jmax (juceFilter->getTotalNumInputChannels(),
-                                            juceFilter->getTotalNumOutputChannels()) + 4);
 
             prepared = true;
         }
@@ -292,15 +294,22 @@ public:
             {
                 for (int busNr = currentNumBus; busNr < requestedNumBus; ++busNr)
                     if ((err = syncAudioUnitWithChannelSet (isInput, busNr, busUtils.getDefaultLayoutForBus (isInput, busNr))) != noErr)
-                        return err;
+                        break;
             }
             else
             {
-                AudioChannelLayoutTag nulltag = ChannelSetToCALayoutTag (AudioChannelSet());
+                AudioChannelLayoutTag nulltag = AudioUnitHelpers::ChannelSetToCALayoutTag (AudioChannelSet());
 
                 for (int busNr = requestedNumBus; busNr < currentNumBus; ++busNr)
                     getCurrentLayout (isInput, busNr) = nulltag;
             }
+
+            // update total channel count
+            totalInChannels = busUtils.findTotalNumChannels (true);
+            totalOutChannels = busUtils.findTotalNumChannels (false);
+
+            if (err != noErr)
+                return err;
         }
 
         return MusicDeviceBase::SetBusCount (scope, count);
@@ -565,7 +574,10 @@ public:
             if (state.getSize() > 0)
             {
                 CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), (CFIndex) state.getSize());
-                CFDictionarySetValue (dict, JUCE_STATE_DICTIONARY_KEY, ourState);
+
+                CFStringRef key = CFStringCreateWithCString (kCFAllocatorDefault, JUCE_STATE_DICTIONARY_KEY, kCFStringEncodingUTF8);
+                CFDictionarySetValue (dict, key, ourState);
+                CFRelease (key);
                 CFRelease (ourState);
             }
         }
@@ -591,7 +603,12 @@ public:
             CFDictionaryRef dict = (CFDictionaryRef) inData;
             CFDataRef data = 0;
 
-            if (CFDictionaryGetValueIfPresent (dict, JUCE_STATE_DICTIONARY_KEY, (const void**) &data))
+            CFStringRef key = CFStringCreateWithCString (kCFAllocatorDefault, JUCE_STATE_DICTIONARY_KEY, kCFStringEncodingUTF8);
+
+            bool valuePresent = CFDictionaryGetValueIfPresent (dict, key, (const void**) &data);
+            CFRelease (key);
+
+            if (valuePresent)
             {
                 if (data != 0)
                 {
@@ -619,7 +636,7 @@ public:
         if (elementToBusIdx (scope, element, isInput, busNr) != noErr)
             return 0;
 
-        if (busUtils.getSupportedBusLayouts (isInput, busNr).busIgnoresLayout)
+        if (busUtils.busIgnoresLayout(isInput, busNr))
             return 0;
 
         outWritable = true;
@@ -643,7 +660,7 @@ public:
         if (elementToBusIdx (scope, element, isInput, busNr) != noErr)
             return 0;
 
-        if (busUtils.getSupportedBusLayouts (isInput, busNr).busIgnoresLayout)
+        if (busUtils.busIgnoresLayout(isInput, busNr))
             return 0;
 
         const Array<AudioChannelLayoutTag>& layouts = getSupportedBusLayouts (isInput, busNr);
@@ -663,15 +680,18 @@ public:
         if ((err = elementToBusIdx (scope, element, isInput, busNr)) != noErr)
             return err;
 
-        if (busUtils.getSupportedBusLayouts (isInput, busNr).busIgnoresLayout)
+        if (busUtils.busIgnoresLayout(isInput, busNr))
             return kAudioUnitErr_PropertyNotWritable;
+
+        if (IsInitialized())
+            jassertfalse; // TODO: Fabian arrggghhhh: auval changes layout after it is initialized
 
         if (inLayout == nullptr)
             return kAudioUnitErr_InvalidPropertyValue;
 
         if (const AUIOElement* ioElement = GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, element))
         {
-            const AudioChannelSet newChannelSet = CoreAudioChannelLayoutToJuceType (*inLayout);
+            const AudioChannelSet newChannelSet = AudioUnitHelpers::CoreAudioChannelLayoutToJuceType (*inLayout);
             const int currentNumChannels = static_cast<int> (ioElement->GetStreamFormat().NumberChannels());
 
             if (currentNumChannels != newChannelSet.size())
@@ -685,7 +705,7 @@ public:
             if (!success)
                 return kAudioUnitErr_FormatNotSupported;
 
-            getCurrentLayout (isInput, busNr) = ChannelSetToCALayoutTag (newChannelSet);
+            getCurrentLayout (isInput, busNr) = AudioUnitHelpers::ChannelSetToCALayoutTag (newChannelSet);
 
             return noErr;
         }
@@ -952,7 +972,7 @@ public:
         err = MusicDeviceBase::ChangeStreamFormat (scope, element, old, format);
 
         if (err == noErr)
-            currentTag = ChannelSetToCALayoutTag (set);
+            currentTag = AudioUnitHelpers::ChannelSetToCALayoutTag (set);
 
         return err;
     }
@@ -964,228 +984,85 @@ public:
     {
         lastTimeStamp = inTimeStamp;
 
-        const unsigned int numInputBuses  = GetScope (kAudioUnitScope_Input) .GetNumberOfElements();
-        const unsigned int numOutputBuses = GetScope (kAudioUnitScope_Output).GetNumberOfElements();
-
-        for (unsigned int i = 0; i < numInputBuses; ++i)
+        // prepare buffers
         {
-            AudioUnitRenderActionFlags flags = ioActionFlags;
-            AUInputElement* input = GetInput (i);
+            if (! pullInputAudio (ioActionFlags, inTimeStamp, nFrames))
+                return noErr;
 
-            OSStatus result = input->PullInput (flags, inTimeStamp, i, nFrames);
+            prepareOutputBuffers (nFrames);
+            audioBuffer.reset();
+        }
 
-            if (result != noErr)
-                return noErr; // logic sometimes doesn't connect all the inputs immedietely
+        const int numInputBuses  = static_cast<int> (GetScope (kAudioUnitScope_Input) .GetNumberOfElements());
+        const int numOutputBuses = static_cast<int> (GetScope (kAudioUnitScope_Output).GetNumberOfElements());
 
-            if ((flags & kAudioUnitRenderAction_OutputIsSilence) != 0)
+        // set buffer pointers to minimize copying
+        {
+            int chIdx = 0, numChannels;
+            bool interleaved;
+            AudioBufferList* buffer;
+
+            // use output pointers
+            for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
             {
-                AudioBufferList& inBuffer = input->GetBufferList();
+                if (! GetAudioBufferList (false, busIdx, buffer, interleaved, numChannels))
+                    continue;
 
-                for (unsigned int ch = 0; ch < inBuffer.mNumberBuffers; ++ch)
-                    zeromem (inBuffer.mBuffers[ch].mData, inBuffer.mBuffers[ch].mDataByteSize);
+                const int* outLayoutMap = mapper.get (false, busIdx);
+
+                for (int ch = 0; ch < numChannels; ++ch)
+                    audioBuffer.setBuffer (chIdx++, interleaved ? nullptr : static_cast<float*> (buffer->mBuffers[outLayoutMap[ch]].mData));
+            }
+
+            // use input pointers on remaining channels
+            int channelCount = 0;
+            for (int busIdx = 0; chIdx < totalInChannels;)
+            {
+                busIdx = busUtils.getBusIdxForChannelIdx (true, chIdx, channelCount, busIdx);
+
+                if (! GetAudioBufferList (true, busIdx, buffer, interleaved, numChannels))
+                    continue;
+
+                const int* inLayoutMap = mapper.get (true, busIdx);
+
+                for (int ch = chIdx - channelCount; ch < numChannels; ++ch)
+                    audioBuffer.setBuffer (chIdx++, interleaved ? nullptr : static_cast<float*> (buffer->mBuffers[inLayoutMap[ch]].mData));
             }
         }
 
+        // copy input
         {
-            int idx = 0, scratchIdx = 0;
-            float** scratchBuffers = bufferSpace.getArrayOfWritePointers();
+            for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
+                audioBuffer.push (GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
 
-            for (unsigned int busIdx = 0; busIdx < jmax (numInputBuses, numOutputBuses); ++busIdx)
-            {
-                AUInputElement*  input  = (busIdx < numInputBuses)  ? GetInput (busIdx)  : nullptr;
-                AUOutputElement* output = (busIdx < numOutputBuses) ? GetOutput (busIdx) : nullptr;
-
-                const unsigned int numInChannels  = (input != nullptr  ? input ->GetStreamFormat().mChannelsPerFrame : 0);
-                const unsigned int numOutChannels = (output != nullptr ? output->GetStreamFormat().mChannelsPerFrame : 0);
-
-                if (numOutChannels > numInChannels)
-                {
-                    if (output->WillAllocateBuffer())
-                        output->PrepareBuffer (nFrames);
-
-                    const AudioBufferList& outBuffer = output->GetBufferList();
-
-                    for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
-                    {
-                        int mappedInChIdx  = numInChannels > 0 ? inputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)] : 0;
-                        int mappedOutChIdx = outputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
-
-                        const bool isOutputInterleaved = (numOutChannels > 1) && (outBuffer.mNumberBuffers == 1);
-                        float* outData = isOutputInterleaved ? scratchBuffers[scratchIdx++] : static_cast<float*> (outBuffer.mBuffers[mappedOutChIdx].mData);
-
-                        if (chIdx < numInChannels)
-                        {
-                            const AudioBufferList& inBuffer = input->GetBufferList();
-                            const bool isInputInterleaved = (numInChannels > 1) && (inBuffer.mNumberBuffers == 1);
-                            const float* inData = static_cast<float*> (inBuffer.mBuffers[isInputInterleaved ? 0 : mappedInChIdx].mData);
-
-                            if (isInputInterleaved)
-                            {
-                                for (unsigned int i = 0; i < nFrames; ++i)
-                                {
-                                    outData [i] = inData[mappedInChIdx];
-                                    inData += numInChannels;
-                                }
-                            }
-                            else
-                                std::copy (inData, inData + nFrames, outData);
-                        }
-
-                        channels[idx++] = outData;
-                    }
-                }
-                else
-                {
-                    const AudioBufferList& inBuffer = input->GetBufferList();
-                    const bool isInputInterleaved = (numInChannels > 1) && (inBuffer.mNumberBuffers == 1);
-
-                    for (unsigned int chIdx = 0; chIdx < numInChannels; ++chIdx)
-                    {
-                        int mappedInChIdx = inputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
-
-                        float* buffer = isInputInterleaved ? scratchBuffers[scratchIdx++]
-                                                           : static_cast<float*> (inBuffer.mBuffers[mappedInChIdx].mData);
-
-                        if (isInputInterleaved)
-                        {
-                            const float* inData = static_cast<float*> (inBuffer.mBuffers[0].mData);
-                            for (unsigned int i = 0; i < nFrames; ++i)
-                            {
-                                buffer [i] = inData [mappedInChIdx];
-                                inData += numInChannels;
-                            }
-                        }
-
-                        channels[idx++] = buffer;
-                    }
-                }
-            }
-
-            jassert (idx == bufferSpace.getNumChannels());
+            // clear remaining channels
+            for (int i = totalInChannels; i < totalOutChannels; ++i)
+                zeromem (audioBuffer.push(), sizeof (float) * nFrames);
         }
 
+        // swap midi buffers
         {
             const ScopedLock sl (incomingMidiLock);
             midiEvents.clear();
             incomingEvents.swapWith (midiEvents);
         }
 
-        {
-            const ScopedLock sl (juceFilter->getCallbackLock());
-            AudioSampleBuffer buffer (channels, bufferSpace.getNumChannels(), (int) nFrames);
+        // process audio
+        processBlock (audioBuffer.getBuffer (nFrames), midiEvents);
 
-            if (juceFilter->isSuspended())
-            {
-                for (int j = 0; j < buffer.getNumChannels(); ++j)
-                    zeromem (channels [j], sizeof (float) * nFrames);
-            }
-            else if (isBypassed)
-            {
-                juceFilter->processBlockBypassed (buffer, midiEvents);
-            }
-            else
-            {
-                juceFilter->processBlock (buffer, midiEvents);
-            }
+        // copy back
+        {
+            for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
+                audioBuffer.pop (GetOutput ((UInt32) busIdx)->GetBufferList(), mapper.get (false, busIdx));
         }
 
-        // copy output back
-        {
-            int idx = 0;
+        // process midi output
+      #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
+        if (! midiEvents.isEmpty() && midiCallback.midiOutputCallback != nullptr)
+            pushMidiOutput (nFrames);
+      #endif
 
-            for (unsigned int busIdx = 0; busIdx < jmax (numInputBuses, numOutputBuses); ++busIdx)
-            {
-                AUInputElement*   input  = (busIdx < numInputBuses)  ? GetInput (busIdx)  : nullptr;
-                AUOutputElement* output  = (busIdx < numOutputBuses) ? GetOutput (busIdx) : nullptr;
-
-                const unsigned int numInChannels  = (input != nullptr  ? input ->GetStreamFormat().mChannelsPerFrame : 0);
-                const unsigned int numOutChannels = (output != nullptr ? output->GetStreamFormat().mChannelsPerFrame : 0);
-
-                if (numInChannels >= numOutChannels)
-                {
-                    if (numOutChannels > 0)
-                    {
-                        // the input buffers were used. We must copy the output
-                        if (output->WillAllocateBuffer())
-                            output->PrepareBuffer (nFrames);
-
-                        const AudioBufferList& outBuffer = output->GetBufferList();
-                        const bool isOutputInterleaved = (numOutChannels > 1) && (outBuffer.mNumberBuffers == 1);
-
-                        for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
-                        {
-                            int mappedOutChIdx = outputLayoutMap.getReference (static_cast<int> (busIdx))[static_cast<int> (chIdx)];
-
-                            float* outData = static_cast<float*> (outBuffer.mBuffers[isOutputInterleaved ? 0 : mappedOutChIdx].mData);
-                            float* buffer = static_cast<float*> (channels [idx]);
-
-                            if (isOutputInterleaved)
-                            {
-                                for (unsigned int i = 0; i < nFrames; ++i)
-                                {
-                                    outData [mappedOutChIdx] = buffer[i];
-                                    outData += numOutChannels;
-                                }
-                            }
-                            else
-                                std::copy (buffer, buffer + nFrames, outData);
-
-                            zeromem (buffer, sizeof(float) * nFrames);
-                            idx++;
-                        }
-                        idx += numInChannels - numOutChannels;
-                    }
-                    else
-                    {
-                        for (unsigned int chIdx = 0; chIdx < numOutChannels; ++chIdx)
-                            zeromem (channels [chIdx], sizeof(float) * nFrames);
-                    }
-                }
-            }
-        }
-
-        if (! midiEvents.isEmpty())
-        {
-           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-            if (midiCallback.midiOutputCallback != nullptr)
-            {
-                UInt32 numPackets = 0;
-                size_t dataSize = 0;
-
-                const juce::uint8* midiEventData;
-                int midiEventSize, midiEventPosition;
-
-                for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
-                {
-                    jassert (isPositiveAndBelow (midiEventPosition, (int) nFrames));
-                    dataSize += (size_t) midiEventSize;
-                    ++numPackets;
-                }
-
-                MIDIPacket* p;
-                const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
-                const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
-
-                HeapBlock<MIDIPacketList> packetList;
-                packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
-                packetList->numPackets = numPackets;
-
-                p = packetList->packet;
-
-                for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
-                {
-                    p->timeStamp = (MIDITimeStamp) midiEventPosition;
-                    p->length = (UInt16) midiEventSize;
-                    memcpy (p->data, midiEventData, (size_t) midiEventSize);
-                    p = MIDIPacketNext (p);
-                }
-
-                midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
-            }
-           #endif
-
-            midiEvents.clear();
-        }
+        midiEvents.clear();
 
         return noErr;
     }
@@ -1524,8 +1401,7 @@ public:
 
 private:
     //==============================================================================
-    AudioSampleBuffer bufferSpace;
-    HeapBlock<float*> channels;
+    AudioUnitHelpers::CoreAudioBufferList audioBuffer;
     MidiBuffer midiEvents, incomingEvents;
     bool prepared, isBypassed;
     AudioUnitEvent auEvent;
@@ -1534,12 +1410,119 @@ private:
     AUMIDIOutputCallbackStruct midiCallback;
     AudioTimeStamp lastTimeStamp;
     PluginBusUtilities busUtils;
+    int totalInChannels, totalOutChannels;
 
     //==============================================================================
     Array<AUChannelInfo> channelInfo;
     Array<Array<AudioChannelLayoutTag> > supportedInputLayouts, supportedOutputLayouts;
     Array<AudioChannelLayoutTag> currentInputLayout, currentOutputLayout;
-    Array<Array<int> > inputLayoutMap, outputLayoutMap;
+
+    //==============================================================================
+    AudioUnitHelpers::ChannelRemapper mapper;
+
+    //==============================================================================
+    bool pullInputAudio (AudioUnitRenderActionFlags& flags, const AudioTimeStamp& timestamp, const UInt32 nFrames) noexcept
+    {
+        const unsigned int numInputBuses = GetScope (kAudioUnitScope_Input).GetNumberOfElements();
+
+        for (unsigned int i = 0; i < numInputBuses; ++i)
+        {
+            if (AUInputElement* input = GetInput (i))
+            {
+                if (input->PullInput (flags, timestamp, i, nFrames) != noErr)
+                    return false; // logic sometimes doesn't connect all the inputs immedietely
+
+                if ((flags & kAudioUnitRenderAction_OutputIsSilence) != 0)
+                    AudioUnitHelpers::clearAudioBuffer (input->GetBufferList());
+            }
+        }
+
+        return true;
+    }
+
+    void prepareOutputBuffers (const UInt32 nFrames) noexcept
+    {
+        const unsigned int numOutputBuses = GetScope (kAudioUnitScope_Output).GetNumberOfElements();
+
+        for (unsigned int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
+        {
+            AUOutputElement* output = GetOutput (busIdx);
+
+            if (output->WillAllocateBuffer())
+                output->PrepareBuffer (nFrames);
+        }
+    }
+
+    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiBuffer) noexcept
+    {
+        const ScopedLock sl (juceFilter->getCallbackLock());
+
+        if (juceFilter->isSuspended())
+        {
+            buffer.clear();
+        }
+        else if (isBypassed)
+        {
+            juceFilter->processBlockBypassed (buffer, midiBuffer);
+        }
+        else
+        {
+            juceFilter->processBlock (buffer, midiBuffer);
+        }
+    }
+
+    void pushMidiOutput (UInt32 nFrames) noexcept
+    {
+        UInt32 numPackets = 0;
+        size_t dataSize = 0;
+
+        const juce::uint8* midiEventData;
+        int midiEventSize, midiEventPosition;
+
+        for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+        {
+            jassert (isPositiveAndBelow (midiEventPosition, (int) nFrames));
+            dataSize += (size_t) midiEventSize;
+            ++numPackets;
+        }
+
+        MIDIPacket* p;
+        const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
+        const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
+
+        HeapBlock<MIDIPacketList> packetList;
+        packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
+        packetList->numPackets = numPackets;
+
+        p = packetList->packet;
+
+        for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+        {
+            p->timeStamp = (MIDITimeStamp) midiEventPosition;
+            p->length = (UInt16) midiEventSize;
+            memcpy (p->data, midiEventData, (size_t) midiEventSize);
+            p = MIDIPacketNext (p);
+        }
+
+        midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
+    }
+
+    bool GetAudioBufferList (bool isInput, int busIdx, AudioBufferList*& bufferList, bool& interleaved, int& numChannels)
+    {
+        if (AUIOElement* element = GetElement (isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output, static_cast<UInt32> (busIdx))->AsIOElement())
+        {
+            bufferList = &element->GetBufferList();
+
+            if (bufferList->mNumberBuffers > 0)
+            {
+                interleaved = AudioUnitHelpers::isAudioBufferInterleaved (*bufferList);
+                numChannels = static_cast<int> (interleaved ? bufferList->mBuffers[0].mNumberChannels : bufferList->mNumberBuffers);
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     //==============================================================================
     static OSStatus scopeToDirection (AudioUnitScope scope, bool& isInput) noexcept
@@ -1602,12 +1585,6 @@ private:
         const int numInputElements  = static_cast<int> (GetScope(kAudioUnitScope_Input). GetNumberOfElements());
         const int numOutputElements = static_cast<int> (GetScope(kAudioUnitScope_Output).GetNumberOfElements());
 
-        inputLayoutMap. clear();
-        outputLayoutMap.clear();
-
-        inputLayoutMap. resize (numInputBuses);
-        outputLayoutMap.resize (numOutputBuses);
-
         for (int i = 0; i < numInputBuses; ++i)
             if ((err = syncProcessorWithAudioUnitForBus (true, i)) != noErr) return err;
 
@@ -1623,6 +1600,10 @@ private:
 
         for (int i = 0; i < busUtils.getNumEnabledBuses (false); ++i)
             if (! audioUnitAndProcessorIsFormatMatching (false, i)) return kAudioUnitErr_FormatNotSupported;
+
+        // update total channel count
+        totalInChannels = busUtils.findTotalNumChannels (true);
+        totalOutChannels = busUtils.findTotalNumChannels (false);
 
         return noErr;
     }
@@ -1642,15 +1623,10 @@ private:
         if (numChannels != tagNumChannels)
             return kAudioUnitErr_FormatNotSupported;
 
-        const AudioChannelSet channelFormat = CALayoutTagToChannelSet(currentLayoutTag);
+        const AudioChannelSet channelFormat = AudioUnitHelpers::CALayoutTagToChannelSet(currentLayoutTag);
 
         if (! juceFilter->setPreferredBusArrangement (isInput, busNr, channelFormat))
             return kAudioUnitErr_FormatNotSupported;
-
-        Array<int>& layoutMap = (isInput ? inputLayoutMap : outputLayoutMap).getReference (busNr);
-
-        for (int i = 0; i < numChannels; ++i)
-            layoutMap.add (auChannelIndexToJuce (i, channelFormat));
 
         return noErr;
     }
@@ -1659,14 +1635,14 @@ private:
     {
         const int numChannels = channelSet.size();
 
+        getCurrentLayout (isInput, busNr) = AudioUnitHelpers::ChannelSetToCALayoutTag (channelSet);
+
         // is this bus activated?
         if (numChannels == 0)
             return noErr;
 
         if (AUIOElement* element = GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, (UInt32) busNr))
         {
-            getCurrentLayout (isInput, busNr) = ChannelSetToCALayoutTag (channelSet);
-
             element->SetName ((CFStringRef) juceStringToNS (busUtils.getFilterBus (isInput).getReference (busNr).name));
 
             CAStreamBasicDescription streamDescription;
@@ -1697,148 +1673,6 @@ private:
             jassertfalse;
 
         return false;
-    }
-
-    //==============================================================================
-    void populateAUChannelInfo()
-    {
-        channelInfo.clear();
-
-        const AudioProcessor::AudioBusArrangement& arr = juceFilter->busArrangement;
-        PluginBusUtilities::ScopedBusRestorer restorer (busUtils);
-
-        const bool hasMainInputBus  = (busUtils.getNumEnabledBuses (true)  > 0);
-        const bool hasMainOutputBus = (busUtils.getNumEnabledBuses (false) > 0);
-
-        if ((! hasMainInputBus)  && (! hasMainOutputBus))
-        {
-            // midi effect plug-in: no audio
-            AUChannelInfo info;
-            info.inChannels = 0;
-            info.outChannels = 0;
-
-            channelInfo.add (info);
-            return;
-        }
-        else
-        {
-            const uint32_t maxNumChanToCheckFor = 9;
-
-            uint32_t defaultInputs  = static_cast<uint32_t> (busUtils.getNumChannels (true,  0));
-            uint32_t defaultOutputs = static_cast<uint32_t> (busUtils.getNumChannels (false, 0));
-
-            uint32_t lastInputs  = defaultInputs;
-            uint32_t lastOutputs = defaultOutputs;
-
-            SortedSet<uint32_t> supportedChannels;
-
-            // add the current configuration
-            if (lastInputs != 0 || lastOutputs != 0)
-                supportedChannels.add ((lastInputs << 16) | lastOutputs);
-
-            for (uint32_t inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
-            {
-                const AudioChannelSet* dfltInLayout = nullptr;
-
-                if (inChanNum != 0 && (dfltInLayout = busUtils.getSupportedBusLayouts (true, 0).getDefaultLayoutForChannelNum (static_cast<int> (inChanNum))) == nullptr)
-                    continue;
-
-                for (uint32_t outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
-                {
-                    const AudioChannelSet* dfltOutLayout = nullptr;
-
-                    if (outChanNum != 0 && (dfltOutLayout = busUtils.getSupportedBusLayouts (false, 0).getDefaultLayoutForChannelNum (static_cast<int> (outChanNum))) == nullptr)
-                        continue;
-
-                    // get the number of channels again. This is only needed for some processors that change their configuration
-                    // even when they indicate that setPreferredBusArrangement failed.
-                    lastInputs  = hasMainInputBus  ? static_cast<uint32_t> (arr.inputBuses. getReference (0). channels.size()) : 0;
-                    lastOutputs = hasMainOutputBus ? static_cast<uint32_t> (arr.outputBuses.getReference (0). channels.size()) : 0;
-
-                    uint32_t channelConfiguration = (inChanNum << 16) | outChanNum;
-
-                    // did we already try this configuration?
-                    if (supportedChannels.contains (channelConfiguration)) continue;
-
-                    if (lastInputs != inChanNum && dfltInLayout != nullptr)
-                    {
-                        if (! juceFilter->setPreferredBusArrangement (true, 0, *dfltInLayout)) continue;
-
-                        lastInputs = inChanNum;
-                        lastOutputs = hasMainOutputBus ? static_cast<uint32_t> (arr.outputBuses.getReference (0). channels.size()) : 0;
-
-                        supportedChannels.add ((lastInputs << 16) | lastOutputs);
-                    }
-
-                    if (lastOutputs != outChanNum && dfltOutLayout != nullptr)
-                    {
-                        if (! juceFilter->setPreferredBusArrangement (false, 0, *dfltOutLayout)) continue;
-
-                        lastInputs = hasMainInputBus ? static_cast<uint32_t> (arr.inputBuses.getReference (0).channels.size()) : 0;
-                        lastOutputs = outChanNum;
-
-                        supportedChannels.add ((lastInputs << 16) | lastOutputs);
-                    }
-                }
-            }
-
-            bool hasInOutMismatch = false;
-            for (int i = 0; i < supportedChannels.size(); ++i)
-            {
-                const uint32_t numInputs  = (supportedChannels[i] >> 16) & 0xffff;
-                const uint32_t numOutputs = (supportedChannels[i] >> 0)  & 0xffff;
-
-                if (numInputs != numOutputs)
-                {
-                    hasInOutMismatch = true;
-                    break;
-                }
-            }
-
-            bool hasUnsupportedInput = ! hasMainOutputBus, hasUnsupportedOutput = ! hasMainInputBus;
-            for (uint32_t inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
-            {
-                uint32_t channelConfiguration = (inChanNum << 16) | (hasInOutMismatch ? defaultOutputs : inChanNum);
-                if (! supportedChannels.contains (channelConfiguration))
-                {
-                    hasUnsupportedInput = true;
-                    break;
-                }
-            }
-
-            for (uint32_t outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
-            {
-                uint32_t channelConfiguration = ((hasInOutMismatch ? defaultInputs : outChanNum) << 16) | outChanNum;
-                if (! supportedChannels.contains (channelConfiguration))
-                {
-                    hasUnsupportedOutput = true;
-                    break;
-                }
-            }
-
-            for (int i = 0; i < supportedChannels.size(); ++i)
-            {
-                const int numInputs  = (supportedChannels[i] >> 16) & 0xffff;
-                const int numOutputs = (supportedChannels[i] >> 0)  & 0xffff;
-
-                AUChannelInfo info;
-
-                // see here: https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html
-                info.inChannels  = static_cast<SInt16> (hasMainInputBus  ? (hasUnsupportedInput  ? numInputs :  (hasInOutMismatch && (! hasUnsupportedOutput) ? -2 : -1)) : 0);
-                info.outChannels = static_cast<SInt16> (hasMainOutputBus ? (hasUnsupportedOutput ? numOutputs : (hasInOutMismatch && (! hasUnsupportedInput)  ? -2 : -1)) : 0);
-
-                if (info.inChannels == -2 && info.outChannels == -2)
-                    info.inChannels = -1;
-
-                int j;
-                for (j = 0; j < channelInfo.size(); ++j)
-                    if (channelInfo[j].inChannels == info.inChannels && channelInfo[j].outChannels == info.outChannels)
-                        break;
-
-                if (j >= channelInfo.size())
-                    channelInfo.add (info);
-            }
-        }
     }
 
     //==============================================================================
@@ -1873,261 +1707,36 @@ private:
 
     bool toggleBus (bool isInput, int busIdx)
     {
-        const PluginBusUtilities::SupportedBusLayouts& layouts = busUtils.getSupportedBusLayouts (isInput, busIdx);
-
-        if (! layouts.canBeDisabled)
+        if (busUtils.busCanBeDisabled (isInput, busIdx))
             return false;
 
         AudioChannelSet newSet;
 
         if (! busUtils.isBusEnabled (isInput, busIdx))
-            newSet = layouts.getDefault();
+            newSet = busUtils.getDefaultLayoutForBus (isInput, busIdx);
 
         return juceFilter->setPreferredBusArrangement (isInput, busIdx, newSet);
     }
 
     //==============================================================================
-    // maps a channel index into an AU format to an index of a juce format
-    struct AUChannelStreamOrder
-    {
-        AudioChannelLayoutTag auLayoutTag;
-        AudioChannelLabel speakerOrder[8];
-    };
-
-    static AUChannelStreamOrder auChannelStreamOrder[];
-
-    static int auChannelIndexToJuce (int auIndex, const AudioChannelSet& channelSet)
-    {
-        if (auIndex >= 8) return auIndex;
-
-        AudioChannelLayoutTag currentLayout = ChannelSetToCALayoutTag (channelSet);
-
-        int layoutIndex;
-        for (layoutIndex = 0; auChannelStreamOrder[layoutIndex].auLayoutTag != currentLayout; ++layoutIndex)
-            if (auChannelStreamOrder[layoutIndex].auLayoutTag == 0) return auIndex;
-
-        const AudioChannelSet::ChannelType channelType
-           = CoreAudioChannelLabelToJuceType (auChannelStreamOrder[layoutIndex].speakerOrder[auIndex]);
-
-        const int juceIndex = channelSet.getChannelTypes().indexOf (channelType);
-        return juceIndex >= 0 ? juceIndex : auIndex;
-    }
-
-    static int juceChannelIndexToAu (int juceIndex, const AudioChannelSet& channelSet)
-    {
-        AudioChannelLayoutTag currentLayout = ChannelSetToCALayoutTag (channelSet);
-
-        int layoutIndex;
-        for (layoutIndex = 0; auChannelStreamOrder[layoutIndex].auLayoutTag != currentLayout; ++layoutIndex)
-            if (auChannelStreamOrder[layoutIndex].auLayoutTag == 0) return juceIndex;
-
-        const AUChannelStreamOrder& channelOrder = auChannelStreamOrder[layoutIndex];
-        const AudioChannelSet::ChannelType channelType = channelSet.getTypeOfChannel (juceIndex);
-
-        for (int i = 0; i < 8 && channelOrder.speakerOrder[i] != 0; ++i)
-            if (CoreAudioChannelLabelToJuceType (channelOrder.speakerOrder[i]) == channelType)
-                return i;
-
-        return juceIndex;
-    }
-
-    static AudioChannelSet::ChannelType CoreAudioChannelLabelToJuceType (AudioChannelLabel label) noexcept
-    {
-        if (label >= kAudioChannelLabel_Discrete_0 && label <= kAudioChannelLabel_Discrete_65535)
-        {
-            const unsigned int discreteChannelNum = label - kAudioChannelLabel_Discrete_0;
-            return static_cast<AudioChannelSet::ChannelType> (AudioChannelSet::discreteChannel0 + discreteChannelNum);
-        }
-
-        switch (label)
-        {
-            case kAudioChannelLabel_Center:
-            case kAudioChannelLabel_Mono:                   return AudioChannelSet::centre;
-            case kAudioChannelLabel_Left:
-            case kAudioChannelLabel_HeadphonesLeft:         return AudioChannelSet::left;
-            case kAudioChannelLabel_Right:
-            case kAudioChannelLabel_HeadphonesRight:        return AudioChannelSet::right;
-            case kAudioChannelLabel_LFEScreen:              return AudioChannelSet::subbass;
-            case kAudioChannelLabel_LeftSurround:           return AudioChannelSet::surroundLeft;
-            case kAudioChannelLabel_RightSurround:          return AudioChannelSet::surroundRight;
-            case kAudioChannelLabel_LeftCenter:             return AudioChannelSet::centreLeft;
-            case kAudioChannelLabel_RightCenter:            return AudioChannelSet::centreRight;
-            case kAudioChannelLabel_CenterSurround:         return AudioChannelSet::surround;
-            case kAudioChannelLabel_LeftSurroundDirect:     return AudioChannelSet::sideLeft;
-            case kAudioChannelLabel_RightSurroundDirect:    return AudioChannelSet::sideRight;
-            case kAudioChannelLabel_TopCenterSurround:      return AudioChannelSet::topMiddle;
-            case kAudioChannelLabel_VerticalHeightLeft:     return AudioChannelSet::topFrontLeft;
-            case kAudioChannelLabel_VerticalHeightRight:    return AudioChannelSet::topFrontRight;
-            case kAudioChannelLabel_VerticalHeightCenter:   return AudioChannelSet::topFrontCentre;
-            case kAudioChannelLabel_TopBackLeft:
-            case kAudioChannelLabel_RearSurroundLeft:       return AudioChannelSet::topRearLeft;
-            case kAudioChannelLabel_TopBackRight:
-            case kAudioChannelLabel_RearSurroundRight:      return AudioChannelSet::topRearRight;
-            case kAudioChannelLabel_TopBackCenter:          return AudioChannelSet::topRearCentre;
-            case kAudioChannelLabel_LFE2:                   return AudioChannelSet::subbass2;
-            case kAudioChannelLabel_LeftWide:               return AudioChannelSet::wideLeft;
-            case kAudioChannelLabel_RightWide:              return AudioChannelSet::wideRight;
-            case kAudioChannelLabel_Ambisonic_W:            return AudioChannelSet::ambisonicW;
-            case kAudioChannelLabel_Ambisonic_X:            return AudioChannelSet::ambisonicX;
-            case kAudioChannelLabel_Ambisonic_Y:            return AudioChannelSet::ambisonicY;
-            case kAudioChannelLabel_Ambisonic_Z:            return AudioChannelSet::ambisonicZ;
-            default:                                        return AudioChannelSet::unknown;
-        }
-    }
-
-    static AudioChannelLabel JuceChannelTypeToCoreAudioLabel (const AudioChannelSet::ChannelType& label) noexcept
-    {
-        if (label >= AudioChannelSet::discreteChannel0)
-        {
-            const unsigned int discreteChannelNum = label - AudioChannelSet::discreteChannel0;;
-            return static_cast<AudioChannelLabel> (kAudioChannelLabel_Discrete_0 + discreteChannelNum);
-        }
-
-        switch (label)
-        {
-            case AudioChannelSet::centre:           return kAudioChannelLabel_Center;
-            case AudioChannelSet::left:             return kAudioChannelLabel_Left;
-            case AudioChannelSet::right:            return kAudioChannelLabel_Right;
-            case AudioChannelSet::subbass:          return kAudioChannelLabel_LFEScreen;
-            case AudioChannelSet::surroundLeft:     return kAudioChannelLabel_LeftSurround;
-            case AudioChannelSet::surroundRight:    return kAudioChannelLabel_RightSurround;
-            case AudioChannelSet::centreLeft:       return kAudioChannelLabel_LeftCenter;
-            case AudioChannelSet::centreRight:      return kAudioChannelLabel_RightCenter;
-            case AudioChannelSet::surround:         return kAudioChannelLabel_CenterSurround;
-            case AudioChannelSet::sideLeft:         return kAudioChannelLabel_LeftSurroundDirect;
-            case AudioChannelSet::sideRight:        return kAudioChannelLabel_RightSurroundDirect;
-            case AudioChannelSet::topMiddle:        return kAudioChannelLabel_TopCenterSurround;
-            case AudioChannelSet::topFrontLeft:     return kAudioChannelLabel_VerticalHeightLeft;
-            case AudioChannelSet::topFrontRight:    return kAudioChannelLabel_VerticalHeightRight;
-            case AudioChannelSet::topFrontCentre:   return kAudioChannelLabel_VerticalHeightCenter;
-            case AudioChannelSet::topRearLeft:      return kAudioChannelLabel_RearSurroundLeft;
-            case AudioChannelSet::topRearRight:     return kAudioChannelLabel_RearSurroundRight;
-            case AudioChannelSet::topRearCentre:    return kAudioChannelLabel_TopBackCenter;
-            case AudioChannelSet::subbass2:         return kAudioChannelLabel_LFE2;
-            case AudioChannelSet::wideLeft:         return kAudioChannelLabel_LeftWide;
-            case AudioChannelSet::wideRight:        return kAudioChannelLabel_RightWide;
-            case AudioChannelSet::ambisonicW:       return kAudioChannelLabel_Ambisonic_W;
-            case AudioChannelSet::ambisonicX:       return kAudioChannelLabel_Ambisonic_X;
-            case AudioChannelSet::ambisonicY:       return kAudioChannelLabel_Ambisonic_Y;
-            case AudioChannelSet::ambisonicZ:       return kAudioChannelLabel_Ambisonic_Z;
-            case AudioChannelSet::unknown:          return kAudioChannelLabel_Unknown;
-            case AudioChannelSet::discreteChannel0: return kAudioChannelLabel_Discrete_0;
-        }
-
-        return kAudioChannelLabel_Unknown;
-    }
-
-    static AudioChannelSet CoreAudioChannelBitmapToJuceType (UInt32 bitmap) noexcept
-    {
-        AudioChannelSet set;
-
-        if ((bitmap & kAudioChannelBit_Left)                 != 0) set.addChannel (AudioChannelSet::left);
-        if ((bitmap & kAudioChannelBit_Right)                != 0) set.addChannel (AudioChannelSet::right);
-        if ((bitmap & kAudioChannelBit_Center)               != 0) set.addChannel (AudioChannelSet::centre);
-        if ((bitmap & kAudioChannelBit_LFEScreen)            != 0) set.addChannel (AudioChannelSet::subbass);
-        if ((bitmap & kAudioChannelBit_LeftSurround)         != 0) set.addChannel (AudioChannelSet::surroundLeft);
-        if ((bitmap & kAudioChannelBit_RightSurround)        != 0) set.addChannel (AudioChannelSet::surroundRight);
-        if ((bitmap & kAudioChannelBit_LeftCenter)           != 0) set.addChannel (AudioChannelSet::centreLeft);
-        if ((bitmap & kAudioChannelBit_RightCenter)          != 0) set.addChannel (AudioChannelSet::centreRight);
-        if ((bitmap & kAudioChannelBit_CenterSurround)       != 0) set.addChannel (AudioChannelSet::surround);
-        if ((bitmap & kAudioChannelBit_LeftSurroundDirect)   != 0) set.addChannel (AudioChannelSet::sideLeft);
-        if ((bitmap & kAudioChannelBit_RightSurroundDirect)  != 0) set.addChannel (AudioChannelSet::sideRight);
-        if ((bitmap & kAudioChannelBit_TopCenterSurround)    != 0) set.addChannel (AudioChannelSet::topMiddle);
-        if ((bitmap & kAudioChannelBit_VerticalHeightLeft)   != 0) set.addChannel (AudioChannelSet::topFrontLeft);
-        if ((bitmap & kAudioChannelBit_VerticalHeightCenter) != 0) set.addChannel (AudioChannelSet::topFrontCentre);
-        if ((bitmap & kAudioChannelBit_VerticalHeightRight)  != 0) set.addChannel (AudioChannelSet::topFrontRight);
-        if ((bitmap & kAudioChannelBit_TopBackLeft)          != 0) set.addChannel (AudioChannelSet::topRearLeft);
-        if ((bitmap & kAudioChannelBit_TopBackCenter)        != 0) set.addChannel (AudioChannelSet::topRearCentre);
-        if ((bitmap & kAudioChannelBit_TopBackRight)         != 0) set.addChannel (AudioChannelSet::topRearRight);
-
-        return set;
-    }
-
-    static AudioChannelSet CoreAudioChannelLayoutToJuceType (const AudioChannelLayout& layout) noexcept
-    {
-        const AudioChannelLayoutTag tag = layout.mChannelLayoutTag;
-
-        if (tag == kAudioChannelLayoutTag_UseChannelBitmap)         return CoreAudioChannelBitmapToJuceType (layout.mChannelBitmap);
-        if (tag == kAudioChannelLayoutTag_UseChannelDescriptions)
-        {
-            AudioChannelSet set;
-            for (unsigned int i = 0; i < layout.mNumberChannelDescriptions; ++i)
-                set.addChannel (CoreAudioChannelLabelToJuceType (layout.mChannelDescriptions[i].mChannelLabel));
-
-            return set;
-        }
-
-        return CALayoutTagToChannelSet (tag);
-    }
-
-    static AudioChannelSet CALayoutTagToChannelSet (AudioChannelLayoutTag tag) noexcept
-    {
-        switch (tag)
-        {
-            case kAudioChannelLayoutTag_Unknown:                return AudioChannelSet::disabled();
-            case kAudioChannelLayoutTag_Mono:                   return AudioChannelSet::mono();
-            case kAudioChannelLayoutTag_Stereo:
-            case kAudioChannelLayoutTag_StereoHeadphones:
-            case kAudioChannelLayoutTag_Binaural:               return AudioChannelSet::stereo();
-            case kAudioChannelLayoutTag_Quadraphonic:           return AudioChannelSet::quadraphonic();
-            case kAudioChannelLayoutTag_Pentagonal:             return AudioChannelSet::pentagonal();
-            case kAudioChannelLayoutTag_Hexagonal:              return AudioChannelSet::hexagonal();
-            case kAudioChannelLayoutTag_Octagonal:              return AudioChannelSet::octagonal();
-            case kAudioChannelLayoutTag_Ambisonic_B_Format:     return AudioChannelSet::ambisonic();
-            case kAudioChannelLayoutTag_AudioUnit_6_0:          return AudioChannelSet::create6point0();
-            case kAudioChannelLayoutTag_MPEG_6_1_A:             return AudioChannelSet::create6point1();
-            case kAudioChannelLayoutTag_MPEG_5_0_B:             return AudioChannelSet::create5point0();
-            case kAudioChannelLayoutTag_MPEG_5_1_A:             return AudioChannelSet::create5point1();
-            case kAudioChannelLayoutTag_DTS_7_1:
-            case kAudioChannelLayoutTag_MPEG_7_1_C:             return AudioChannelSet::create7point1();
-            case kAudioChannelLayoutTag_AudioUnit_7_0_Front:    return AudioChannelSet::createFront7point0();
-            case kAudioChannelLayoutTag_AudioUnit_7_1_Front:    return AudioChannelSet::createFront7point1();
-            case kAudioChannelLayoutTag_MPEG_3_0_A:
-            case kAudioChannelLayoutTag_MPEG_3_0_B:             return AudioChannelSet::createLCR();
-            case kAudioChannelLayoutTag_MPEG_4_0_A:
-            case kAudioChannelLayoutTag_MPEG_4_0_B:             return AudioChannelSet::createLCRS();
-        }
-
-        if (int numChannels = static_cast<int> (tag) & 0xffff)
-            return AudioChannelSet::discreteChannels (numChannels);
-
-        // Bitmap and channel description array layout tags are currently unsupported :-(
-        jassertfalse;
-        return AudioChannelSet();
-    }
-
-    static AudioChannelLayoutTag ChannelSetToCALayoutTag (const AudioChannelSet& set) noexcept
-    {
-        if (set == AudioChannelSet::mono())               return kAudioChannelLayoutTag_Mono;
-        if (set == AudioChannelSet::stereo())             return kAudioChannelLayoutTag_Stereo;
-        if (set == AudioChannelSet::createLCR())          return kAudioChannelLayoutTag_MPEG_3_0_A;
-        if (set == AudioChannelSet::createLCRS())         return kAudioChannelLayoutTag_MPEG_4_0_A;
-        if (set == AudioChannelSet::quadraphonic())       return kAudioChannelLayoutTag_Quadraphonic;
-        if (set == AudioChannelSet::pentagonal())         return kAudioChannelLayoutTag_Pentagonal;
-        if (set == AudioChannelSet::hexagonal())          return kAudioChannelLayoutTag_Hexagonal;
-        if (set == AudioChannelSet::octagonal())          return kAudioChannelLayoutTag_Octagonal;
-        if (set == AudioChannelSet::ambisonic())          return kAudioChannelLayoutTag_Ambisonic_B_Format;
-        if (set == AudioChannelSet::create5point0())      return kAudioChannelLayoutTag_MPEG_5_0_B;
-        if (set == AudioChannelSet::create5point1())      return kAudioChannelLayoutTag_MPEG_5_1_A;
-        if (set == AudioChannelSet::create6point0())      return kAudioChannelLayoutTag_AudioUnit_6_0;
-        if (set == AudioChannelSet::create6point1())      return kAudioChannelLayoutTag_MPEG_6_1_A;
-        if (set == AudioChannelSet::create7point0())      return kAudioChannelLayoutTag_AudioUnit_7_0;
-        if (set == AudioChannelSet::create7point1())      return kAudioChannelLayoutTag_MPEG_7_1_C;
-        if (set == AudioChannelSet::createFront7point0()) return kAudioChannelLayoutTag_AudioUnit_7_0_Front;
-        if (set == AudioChannelSet::createFront7point1()) return kAudioChannelLayoutTag_AudioUnit_7_1_Front;
-        if (set == AudioChannelSet::disabled())           return kAudioChannelLayoutTag_Unknown;
-
-        return static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | set.size());
-    }
-
-    //==============================================================================
     void addSupportedLayoutTagsForBus (bool isInput, int busNum, Array<AudioChannelLayoutTag>& tags)
     {
-        const PluginBusUtilities::SupportedBusLayouts& layouts = busUtils.getSupportedBusLayouts (isInput, busNum);
+        int layoutIndex;
+        AudioChannelLayoutTag tag;
 
-        if (! layouts.busIgnoresLayout)
-            for (int i = 0; i < layouts.supportedLayouts.size(); ++i)
-                tags.add (ChannelSetToCALayoutTag (layouts.supportedLayouts.getReference (i)));
+        for (layoutIndex = 0; (tag = AudioUnitHelpers::auChannelStreamOrder[layoutIndex].auLayoutTag) != 0; ++layoutIndex)
+            if (juceFilter->setPreferredBusArrangement (isInput, busNum, AudioUnitHelpers::CALayoutTagToChannelSet (tag)))
+                tags.add (tag);
+
+        // add discrete layout tags
+        int n = busUtils.findMaxNumberOfChannelsForBus (true, busNum);
+        n = n < 0 ? maxChannelsToProbeFor() : n;
+
+        for (int ch = 0; ch < n; ++ch)
+        {
+            if (juceFilter->setPreferredBusArrangement (isInput, busNum, AudioChannelSet::discreteChannels (ch)))
+                tags.add (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));
+        }
     }
 
     void addSupportedLayoutTagsForDirection (bool isInput)
@@ -2151,37 +1760,17 @@ private:
         currentInputLayout. resize (juceFilter->busArrangement.inputBuses. size());
         currentOutputLayout.resize (juceFilter->busArrangement.outputBuses.size());
 
+        PluginBusUtilities::ScopedBusRestorer busRestorer (busUtils);
         addSupportedLayoutTagsForDirection (true);
         addSupportedLayoutTagsForDirection (false);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (JuceAU)
-};
+    static int maxChannelsToProbeFor()
+    {
+        return (getHostType().isLogic() ? 8 : 64);
+    }
 
-JuceAU::AUChannelStreamOrder JuceAU::auChannelStreamOrder[] =
-{
-    {kAudioChannelLayoutTag_Mono,               {kAudioChannelLabel_Center, 0, 0, 0, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_Stereo,             {kAudioChannelLabel_Left, kAudioChannelLabel_Right, 0, 0, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_StereoHeadphones,   {kAudioChannelLabel_HeadphonesLeft, kAudioChannelLabel_HeadphonesRight, 0, 0, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_Binaural,           {kAudioChannelLabel_Left, kAudioChannelLabel_Right, 0, 0, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_Quadraphonic,       {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_Pentagonal,         {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_Center, 0, 0, 0}},
-    {kAudioChannelLayoutTag_Hexagonal,          {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_Center, kAudioChannelLabel_CenterSurround, 0, 0}},
-    {kAudioChannelLayoutTag_Octagonal,          {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_Center, kAudioChannelLabel_CenterSurround, kAudioChannelLabel_LeftWide, kAudioChannelLabel_RightWide}},
-    {kAudioChannelLayoutTag_Ambisonic_B_Format, {kAudioChannelLabel_Ambisonic_W, kAudioChannelLabel_Ambisonic_X, kAudioChannelLabel_Ambisonic_Y, kAudioChannelLabel_Ambisonic_Z, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_MPEG_5_0_B,         {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_Center, 0, 0, 0}},
-    {kAudioChannelLayoutTag_MPEG_5_1_A,         {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_Center, kAudioChannelLabel_LFEScreen, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, 0, 0}},
-    {kAudioChannelLayoutTag_AudioUnit_6_0,      {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_Center, kAudioChannelLabel_CenterSurround, 0, 0}},
-    {kAudioChannelLayoutTag_MPEG_6_1_A,         {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_Center, kAudioChannelLabel_LFEScreen, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_CenterSurround, 0}},
-    {kAudioChannelLayoutTag_AudioUnit_7_0,      {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_Center, kAudioChannelLabel_RearSurroundLeft, kAudioChannelLabel_RearSurroundRight, 0}},
-    {kAudioChannelLayoutTag_MPEG_7_1_C,         {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_Center, kAudioChannelLabel_LFEScreen, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_RearSurroundLeft, kAudioChannelLabel_RearSurroundRight}},
-    {kAudioChannelLayoutTag_AudioUnit_7_0_Front,{kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_Center, kAudioChannelLabel_LeftCenter, kAudioChannelLabel_RightCenter, 0}},
-    {kAudioChannelLayoutTag_AudioUnit_7_1_Front,{kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_Center, kAudioChannelLabel_LFEScreen, kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_LeftCenter, kAudioChannelLabel_RightCenter}},
-    {kAudioChannelLayoutTag_MPEG_3_0_A,         {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_Center, 0, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_MPEG_3_0_B,         {kAudioChannelLabel_Center, kAudioChannelLabel_Left, kAudioChannelLabel_Right, 0, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_MPEG_4_0_A,         {kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_Center, kAudioChannelLabel_CenterSurround, 0, 0, 0, 0}},
-    {kAudioChannelLayoutTag_MPEG_4_0_B,         {kAudioChannelLabel_Center, kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_CenterSurround, 0, 0, 0, 0}},
-    {0,                                         {0,0,0,0,0,0,0,0}}
+    JUCE_DECLARE_NON_COPYABLE (JuceAU)
 };
 
 //==============================================================================
@@ -2423,6 +2012,7 @@ private:
     extern "C" __attribute__((visibility("default"))) ComponentResult Name ## Suffix (ComponentParameters* params, Class* obj); \
     extern "C" __attribute__((visibility("default"))) ComponentResult Name ## Suffix (ComponentParameters* params, Class* obj) \
     { \
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnit); \
         return ComponentEntryPoint<Class>::Dispatch (params, obj); \
     }
 
@@ -2436,6 +2026,7 @@ private:
     extern "C" __attribute__((visibility("default"))) void* Name ## Factory (const AudioComponentDescription* desc); \
     extern "C" __attribute__((visibility("default"))) void* Name ## Factory (const AudioComponentDescription* desc) \
     { \
+        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnit); \
         return FACTORY_BASE_CLASS<Class>::Factory (desc); \
     }
 

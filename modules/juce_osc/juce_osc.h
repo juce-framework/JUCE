@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,11 +22,35 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_osc
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE OSC classes
+  description:      Open Sound Control implementation.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_core
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_OSC_H_INCLUDED
 #define JUCE_OSC_H_INCLUDED
 
-#include "../juce_core/juce_core.h"
-#include "../juce_events/juce_events.h"
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
 
 
 //==============================================================================

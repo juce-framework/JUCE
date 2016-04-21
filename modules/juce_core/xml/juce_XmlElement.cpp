@@ -407,6 +407,11 @@ bool XmlElement::writeToFile (const File& file,
             return false;
 
         writeToStream (out, dtdToUse, false, true, encodingType, lineWrapLength);
+
+        out.flush(); // (called explicitly to force an fsync on posix)
+
+        if (out.getStatus().failed())
+            return false;
     }
 
     return tempFile.overwriteTargetFileWithTemporary();

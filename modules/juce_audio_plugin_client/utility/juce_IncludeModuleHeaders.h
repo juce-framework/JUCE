@@ -46,6 +46,6 @@ namespace juce
     }
 }
 
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
+extern AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
 
 #endif   // JUCE_INCLUDEMODULEHEADERS_H_INCLUDED

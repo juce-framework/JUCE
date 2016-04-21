@@ -35,7 +35,7 @@ public:
     {
     }
 
-    //==========================================================================
+    //==============================================================================
     void update (const MPENote& newNote, Point<float> newCentre)
     {
         note = newNote;
@@ -49,7 +49,7 @@ public:
         repaint();
     }
 
-    //==========================================================================
+    //==============================================================================
     void paint (Graphics& g) override
     {
         if (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained)
@@ -62,13 +62,13 @@ public:
         drawNoteLabel (g, colour);
     }
 
-    //==========================================================================
+    //==============================================================================
     MPENote note;
     Colour colour;
     Point<float> centre;
 
 private:
-    //==========================================================================
+    //==============================================================================
     void drawPressedNoteCircle (Graphics& g, Colour zoneColour)
     {
         g.setColour (zoneColour.withAlpha (0.3f));
@@ -77,7 +77,7 @@ private:
         g.drawEllipse (translateToLocalBounds (getSquareAroundCentre (getPressureRadius())), 2.0f);
     }
 
-    //==========================================================================
+    //==============================================================================
     void drawSustainedNoteCircle (Graphics& g, Colour zoneColour)
     {
         g.setColour (zoneColour);
@@ -88,7 +88,7 @@ private:
         g.fillPath (dashedCircle);
     }
 
-    //==========================================================================
+    //==============================================================================
     void drawNoteLabel (Graphics& g, Colour zoneColour)
     {
         Rectangle<int> textBounds = translateToLocalBounds (getTextRectangle()).getSmallestIntegerContainer();
@@ -98,7 +98,7 @@ private:
         g.drawText (String (note.midiChannel), textBounds, Justification::centredTop);
     }
 
-    //==========================================================================
+    //==============================================================================
     Rectangle<float> getSquareAroundCentre (float radius) const noexcept
     {
         return Rectangle<float> (radius * 2.0f, radius * 2.0f).withCentre (centre);
@@ -129,12 +129,12 @@ class Visualiser : public Component,
                    private AsyncUpdater
 {
 public:
-    //==========================================================================
+    //==============================================================================
     Visualiser (const ZoneColourPicker& zoneColourPicker)
         : colourPicker (zoneColourPicker)
     {}
 
-    //==========================================================================
+    //==============================================================================
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::black);
@@ -156,7 +156,7 @@ public:
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     void noteAdded (MPENote newNote) override
     {
         const ScopedLock sl (lock);
@@ -193,7 +193,7 @@ public:
 
 
 private:
-    //==========================================================================
+    //==============================================================================
     MPENote* findActiveNote (int noteID) const noexcept
     {
         for (auto& note : activeNotes)
@@ -212,7 +212,7 @@ private:
         return nullptr;
     }
 
-    //==========================================================================
+    //==============================================================================
     void handleAsyncUpdate() override
     {
         const ScopedLock sl (lock);
@@ -230,7 +230,7 @@ private:
                 noteComp->update (*noteInfo, getCentrePositionForNote (*noteInfo));
     }
 
-    //==========================================================================
+    //==============================================================================
     Point<float> getCentrePositionForNote (MPENote note) const
     {
         float n = float (note.initialNote) + float (note.totalPitchbendInSemitones);
@@ -240,7 +240,7 @@ private:
         return Point<float> (x, y);
     }
 
-    //==========================================================================
+    //==============================================================================
     OwnedArray<NoteComponent> noteComponents;
     CriticalSection lock;
     Array<MPENote> activeNotes;

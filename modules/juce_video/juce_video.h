@@ -22,11 +22,37 @@
   ==============================================================================
 */
 
+
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_video
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE video playback and capture classes
+  description:      Classes for playing video and capturing camera input.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_data_structures juce_cryptography
+  OSXFrameworks:    QTKit QuickTime
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_VIDEO_H_INCLUDED
 #define JUCE_VIDEO_H_INCLUDED
 
 //==============================================================================
-#include "../juce_gui_extra/juce_gui_extra.h"
+#include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
 /** Config: JUCE_DIRECTSHOW
