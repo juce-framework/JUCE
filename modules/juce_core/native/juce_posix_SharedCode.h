@@ -26,7 +26,7 @@
   ==============================================================================
 */
 
-#ifdef JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
  extern int* jucePlugInClientCurrentWrapperType;
 #endif
 
@@ -634,7 +634,7 @@ File juce_getExecutableFile()
         {
             Dl_info exeInfo;
 
-          #ifdef JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+          #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
             void* localSymbol = jucePlugInClientCurrentWrapperType != nullptr ? (void*) jucePlugInClientCurrentWrapperType
                                                                               : (void*) juce_getExecutableFile;
           #else
