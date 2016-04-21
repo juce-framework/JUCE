@@ -5,7 +5,9 @@ This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
 Version 4.2.1
-  - new class CachedValue, for providing easy and efficient access to ValueTree properties
+  - New class CachedValue, for providing easy and efficient access to ValueTree properties
+  - Reduced audio plug-in binary sizes on OS X and added symbol-stripping option
+  - Miscellaneous fixes and improvements
 
 Version 4.2
   - Added support for AudioUnit v3 on OS X and iOS
