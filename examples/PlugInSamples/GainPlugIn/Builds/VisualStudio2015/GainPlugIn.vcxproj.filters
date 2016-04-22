@@ -4160,6 +4160,12 @@
     <None Include="..\..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt">
       <Filter>Juce Modules\juce_audio_formats\codecs\oggvorbis</Filter>
     </None>
+    <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\AUResources.r">
+      <Filter>Juce Modules\juce_audio_plugin_client\AU</Filter>
+    </None>
+    <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_RezResources_AU.r">
+      <Filter>Juce Modules\juce_audio_plugin_client\AU</Filter>
+    </None>
     <None Include="..\..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt">
       <Filter>Juce Modules\juce_graphics\image_formats\jpglib</Filter>
     </None>
