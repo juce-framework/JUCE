@@ -107,9 +107,10 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        TestComponent* const tc = dynamic_cast<TestComponent*> (component);
-
-        code.includeFilesH.add (tc->getFilename().replace (".cpp", ".h"));
+        if (TestComponent* const tc = dynamic_cast<TestComponent*> (component))
+            code.includeFilesH.add (tc->findFile().withFileExtension (".h"));
+        else
+            jassertfalse;
     }
 
     //==============================================================================
@@ -193,9 +194,8 @@ private:
     };
 
     //==============================================================================
-    class JucerCompOpenDocProperty  : public ButtonPropertyComponent
+    struct JucerCompOpenDocProperty  : public ButtonPropertyComponent
     {
-    public:
         JucerCompOpenDocProperty (TestComponent* const c)
             : ButtonPropertyComponent ("edit", false),
               component (c)
@@ -213,14 +213,12 @@ private:
             return "Open file for editing";
         }
 
-    private:
         TestComponent* const component;
     };
 
     //==============================================================================
-    class ConstructorParamsProperty   : public ComponentTextProperty <TestComponent>
+    struct ConstructorParamsProperty   : public ComponentTextProperty <TestComponent>
     {
-    public:
         ConstructorParamsProperty (TestComponent* comp, JucerDocument& doc)
             : ComponentTextProperty <TestComponent> ("constructor params", 512, false, comp, doc)
         {
@@ -238,9 +236,8 @@ private:
         }
 
     private:
-        class ConstructorParamChangeAction  : public ComponentUndoableAction <TestComponent>
+        struct ConstructorParamChangeAction  : public ComponentUndoableAction <TestComponent>
         {
-        public:
             ConstructorParamChangeAction (TestComponent* const comp, ComponentLayout& l, const String& newValue_)
                 : ComponentUndoableAction <TestComponent> (comp, l),
                   newValue (newValue_)

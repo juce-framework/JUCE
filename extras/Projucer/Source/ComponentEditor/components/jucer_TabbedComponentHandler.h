@@ -165,14 +165,13 @@ public:
 
             if (isTabUsingJucerComp (t, i))
             {
-                ScopedPointer<JucerDocument> doc
-                    (JucerDocument::createForCppFile (nullptr, code.document->getCppFile()
-                                                                 .getSiblingFile (getTabJucerFile (t, i))));
+                File jucerCpp = code.document->getCppFile().getSiblingFile (getTabJucerFile (t, i));
+
+                ScopedPointer<JucerDocument> doc (JucerDocument::createForCppFile (nullptr, jucerCpp));
 
                 if (doc != nullptr)
                 {
-                    code.includeFilesCPP.add (getTabJucerFile (t, i).replace (".cpp", ".h"));
-
+                    code.includeFilesCPP.add (jucerCpp.withFileExtension (".h"));
                     contentClassName = doc->getClassName();
                 }
             }
@@ -342,7 +341,7 @@ private:
             setSize (2048, 2048);
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             if (jucerComp == nullptr)
                 g.fillCheckerBoard (getLocalBounds(), 50, 50,
@@ -350,7 +349,7 @@ private:
                                     Colour::greyLevel (0.8f).withAlpha (0.4f));
         }
 
-        void resized()
+        void resized() override
         {
             if (jucerComp != nullptr)
             {
@@ -384,7 +383,7 @@ private:
             resized();
         }
 
-        void parentHierarchyChanged()
+        void parentHierarchyChanged() override
         {
             updateContent();
         }

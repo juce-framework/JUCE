@@ -52,7 +52,7 @@ struct ModuleDescription
     String getPreprocessorDefs() const  { return moduleInfo [Ids::defines].toString(); }
     String getExtraSearchPaths() const  { return moduleInfo [Ids::searchpaths].toString(); }
 
-    File getFolder() const              { jassert (moduleFolder != File::nonexistent); return moduleFolder; }
+    File getFolder() const              { jassert (moduleFolder != File()); return moduleFolder; }
     File getHeader() const;
 
     bool isPluginClient() const         { return getID() == "juce_audio_plugin_client"; }

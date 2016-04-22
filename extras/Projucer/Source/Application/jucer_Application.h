@@ -34,7 +34,8 @@ struct ChildProcessCache;
 
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
-                              private Timer
+                              private Timer,
+                              private AsyncUpdater
 {
 public:
     ProjucerApplication();
@@ -45,7 +46,6 @@ public:
     //==============================================================================
     void initialise (const String& commandLine) override;
     void initialiseBasics();
-    bool initialiseLog();
     bool initialiseLogger (const char* filePrefix);
     void initialiseWindows (const String& commandLine);
 
@@ -128,12 +128,15 @@ private:
     ScopedPointer<LatestVersionChecker> versionChecker;
 
     void loginOrLogout();
+
+    bool checkEULA();
     bool currentEULAHasBeenAcceptedPreviously() const;
     String getEULAChecksumProperty() const;
     void setCurrentEULAAccepted (bool hasBeenAccepted) const;
 
     void showLoginFormAsyncIfNotTriedRecently();
     void timerCallback() override;
+    void handleAsyncUpdate() override;
     void initCommandManager();
 };
 

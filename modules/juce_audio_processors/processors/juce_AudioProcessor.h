@@ -73,15 +73,17 @@ public:
         or query the busArrangement member variable to find out the number of
         channels your processBlock callback must process.
 
-        The estimatedSamplesPerBlock value is a HINT about the typical number of
-        samples that will be processed for each callback, but isn't any kind
-        of guarantee. The actual block sizes that the host uses may be different
-        each time the callback happens, and may be more or less than this value.
+        The maximumExpectedSamplesPerBlock value is a strong hint about the maximum
+        number of samples that will be provided in each block. You may want to use
+        this value to resize internal buffers. You should program defensively in
+        case a buggy host exceeds this value. The actual block sizes that the host
+        uses may be different each time the callback happens: completely variable
+        block sizes can be expected from some hosts.
 
        @see busArrangement, getTotalNumInputChannels, getTotalNumOutputChannels
     */
     virtual void prepareToPlay (double sampleRate,
-                                int estimatedSamplesPerBlock) = 0;
+                                int maximumExpectedSamplesPerBlock) = 0;
 
     /** Called after playback has stopped, to let the filter free up any resources it
         no longer needs.

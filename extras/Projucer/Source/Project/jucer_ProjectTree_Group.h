@@ -146,8 +146,8 @@ public:
             case 2:     openOrCloseAllSubGroups (*this, true); break;
             case 3:     setFilesToCompile (item, true); break;
             case 4:     setFilesToCompile (item, false); break;
-            case 5:     item.sortAlphabetically (false); break;
-            case 6:     item.sortAlphabetically (true); break;
+            case 5:     item.sortAlphabetically (false, false); break;
+            case 6:     item.sortAlphabetically (true, false); break;
             case 7:     triggerAsyncRename (item); break;
             case 8:     deleteAllSelectedItems(); break;
             default:    processCreateFileMenuItem (resultCode); break;
@@ -171,8 +171,18 @@ public:
             case 1002:  browseToAddExistingFiles(); break;
 
             default:
-                NewFileWizard().runWizardFromMenu (menuID, item);
+                jassert (getProject() != nullptr);
+                NewFileWizard().runWizardFromMenu (menuID, *getProject(), item);
                 break;
         }
+    }
+
+    Project* getProject()
+    {
+        if (TreeView* tv = getOwnerView())
+            if (ProjectContentComponent* pcc = tv->findParentComponentOfClass<ProjectContentComponent>())
+                return pcc->getProject();
+
+        return nullptr;
     }
 };

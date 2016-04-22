@@ -67,6 +67,7 @@ public:
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
+    virtual void updateDeprecatedProjectSettingsInteractively();
 
     // IDE targeted by exporter
     virtual bool isXcode() const         = 0;

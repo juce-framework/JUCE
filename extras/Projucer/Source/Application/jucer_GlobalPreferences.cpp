@@ -27,21 +27,6 @@
 #include "../Utility/jucer_FloatingToolWindow.h"
 #include "../Utility/jucer_ColourPropertyComponent.h"
 
-
-//==============================================================================
-class AppearanceSettingsTab  : public GlobalPreferencesTab,
-                               public Component
-{
-public:
-    AppearanceSettingsTab();
-
-    Component* getContent() override;
-    void changeContent (Component* newContent);
-    String getName() const noexcept override;
-
-    ScopedPointer<Component> content;
-};
-
 //==============================================================================
 PathSettingsTab::PathSettingsTab (DependencyPathOS os)
 {
@@ -365,13 +350,18 @@ Component* AppearanceSettingsTab::getContent()
 void AppearanceSettingsTab::changeContent (Component* newContent)
 {
     content = newContent;
-    addAndMakeVisible(content);
-    content->setBoundsInset(BorderSize<int>());
+    addAndMakeVisible (content);
+    content->setBounds (getLocalBounds());
 }
 
 String AppearanceSettingsTab::getName() const noexcept
 {
     return "Code Editor";
+}
+
+void AppearanceSettingsTab::resized()
+{
+    content->setBounds (getLocalBounds());
 }
 
 //==============================================================================

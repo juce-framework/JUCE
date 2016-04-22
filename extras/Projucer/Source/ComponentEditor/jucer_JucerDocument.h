@@ -44,7 +44,7 @@ public:
 
     static bool isValidJucerCppFile (const File&);
     static XmlElement* pullMetaDataFromCppFile (const String& cpp);
-    static JucerDocument* createForCppFile (Project* project, const File&);
+    static JucerDocument* createForCppFile (Project*, const File&);
 
     void changed();
     void beginTransaction();
@@ -58,7 +58,7 @@ public:
     File getCppFile() const     { return cpp->getFile(); }
     File getHeaderFile() const  { return getCppFile().withFileExtension (".h"); }
 
-    bool flushChangesToDocuments();
+    bool flushChangesToDocuments (Project*);
     bool reloadFromDocument();
 
     //==============================================================================

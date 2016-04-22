@@ -110,7 +110,7 @@ void JucerDocument::timerCallback()
         stopTimer();
         beginTransaction();
 
-        flushChangesToDocuments();
+        flushChangesToDocuments (nullptr);
     }
 }
 
@@ -511,7 +511,7 @@ bool JucerDocument::findTemplateFiles (String& headerContent, String& cppContent
         const File f (getCppFile().getSiblingFile (templateFile));
 
         const File templateCpp (f.withFileExtension (".cpp"));
-        const File templateH (f.withFileExtension (".h"));
+        const File templateH   (f.withFileExtension (".h"));
 
         headerContent = templateH.loadFileAsString();
         cppContent = templateCpp.loadFileAsString();
@@ -536,12 +536,12 @@ static String fixLineEndings (const String& s)
     while (lines.size() > 0 && lines [lines.size() - 1].trim().isEmpty())
         lines.remove (lines.size() - 1);
 
-    lines.add (String::empty);
+    lines.add (String());
 
     return lines.joinIntoString ("\r\n");
 }
 
-bool JucerDocument::flushChangesToDocuments()
+bool JucerDocument::flushChangesToDocuments (Project* project)
 {
     String headerTemplate, cppTemplate;
     if (! findTemplateFiles (headerTemplate, cppTemplate))
@@ -551,17 +551,20 @@ bool JucerDocument::flushChangesToDocuments()
     fillInGeneratedCode (generated);
 
     const File headerFile (getHeaderFile());
-    generated.includeFilesCPP.insert (0, headerFile.getFileName());
+    generated.includeFilesCPP.insert (0, headerFile);
 
     OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
 
-    if (SourceCodeDocument* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, getHeaderFile())))
+    if (SourceCodeDocument* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
     {
         String existingHeader (header->getCodeDocument().getAllContent());
         String existingCpp (cpp->getCodeDocument().getAllContent());
 
-        generated.applyToCode (headerTemplate, headerFile.getFileNameWithoutExtension(), false, existingHeader);
-        generated.applyToCode (cppTemplate,    headerFile.getFileNameWithoutExtension(), false, existingCpp);
+        generated.applyToCode (headerTemplate, headerFile,
+                               existingHeader, project);
+
+        generated.applyToCode (cppTemplate, headerFile.withFileExtension (".cpp"),
+                               existingCpp, project);
 
         headerTemplate = fixLineEndings (headerTemplate);
         cppTemplate    = fixLineEndings (cppTemplate);
@@ -712,24 +715,24 @@ OpenDocumentManager::DocumentType* createGUIDocumentType()
 }
 
 //==============================================================================
-class JucerFileWizard  : public NewFileWizard::Type
+class NewGUIComponentWizard  : public NewFileWizard::Type
 {
 public:
-    JucerFileWizard() {}
+    NewGUIComponentWizard() {}
 
     String getName() override  { return "GUI Component"; }
 
-    void createNewFile (Project::Item parent) override
+    void createNewFile (Project& project, Project::Item parent) override
     {
         const File newFile (askUserToChooseNewFile (String (defaultClassName) + ".h", "*.h;*.cpp", parent));
 
-        if (newFile != File::nonexistent)
+        if (newFile != File())
         {
             const File headerFile (newFile.withFileExtension (".h"));
             const File cppFile (newFile.withFileExtension (".cpp"));
 
-            headerFile.replaceWithText (String::empty);
-            cppFile.replaceWithText (String::empty);
+            headerFile.replaceWithText (String());
+            cppFile.replaceWithText (String());
 
             OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
 
@@ -743,7 +746,7 @@ public:
                     {
                         jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
 
-                        jucerDoc->flushChangesToDocuments();
+                        jucerDoc->flushChangesToDocuments (&project);
                         jucerDoc = nullptr;
 
                         cpp->save();
@@ -762,5 +765,5 @@ public:
 
 NewFileWizard::Type* createGUIComponentWizard()
 {
-    return new JucerFileWizard();
+    return new NewGUIComponentWizard();
 }

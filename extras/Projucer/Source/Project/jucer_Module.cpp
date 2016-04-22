@@ -496,29 +496,19 @@ static void addFileWithGroups (Project::Item& group, const RelativePath& file, c
     }
 }
 
-static void findWildcardMatches (const File& folder, Array<File>& result)
+void LibraryModule::findBrowseableFiles (const File& folder, Array<File>& filesFound) const
 {
     Array<File> tempList;
     FileSorter sorter;
 
-    DirectoryIterator iter (folder, false, "*");
+    DirectoryIterator iter (folder, true, "*", File::findFiles);
     bool isHiddenFile;
 
     while (iter.next (nullptr, &isHiddenFile, nullptr, nullptr, nullptr, nullptr))
-        if (! isHiddenFile)
+        if (! isHiddenFile && iter.getFile().hasFileExtension (browseableFileExtensions))
             tempList.addSorted (sorter, iter.getFile());
 
-    result.addArray (tempList);
-}
-
-void LibraryModule::findBrowseableFiles (const File& localModuleFolder, Array<File>& filesFound) const
-{
-    DirectoryIterator iter (localModuleFolder, true, "*", File::findDirectories);
-    bool isHiddenFile;
-
-    while (iter.next (nullptr, &isHiddenFile, nullptr, nullptr, nullptr, nullptr))
-        if (! isHiddenFile)
-            findWildcardMatches (iter.getFile(), filesFound);
+    filesFound.addArray (tempList);
 }
 
 void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const
@@ -542,6 +532,7 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
                                pathWithinModule);
     }
 
+    sourceGroup.sortAlphabetically (true, true);
     sourceGroup.addFileAtIndex (moduleInfo.getHeader(), -1, false);
 
     exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);

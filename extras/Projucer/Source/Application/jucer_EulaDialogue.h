@@ -63,7 +63,8 @@ private:
             editor.setCaretVisible (false);
             editor.setMultiLine (true, true);
             editor.setScrollbarsShown (true);
-            editor.setText (BinaryData::projucer_EULA_txt);
+            editor.setFont (Font (Font::getDefaultMonospacedFontName(), 13.0f, Font::plain));
+            editor.setText (String (BinaryData::projucer_EULA_txt));
 
             addAndMakeVisible (editor);
         }

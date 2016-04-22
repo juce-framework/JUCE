@@ -102,7 +102,7 @@ struct BallComponent  : public Component
         return position.y < 400.0f && position.x >= -10.0f;
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (colour);
         g.fillEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f);

@@ -650,7 +650,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
     callback (userData, result.release(), errorMsg);
 }
 
-bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override
+bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
 {
     return false;
 }
@@ -676,7 +676,7 @@ bool LADSPAPluginFormat::doesPluginStillExist (const PluginDescription& desc)
     return File::createFileWithoutCheckingPath (desc.fileOrIdentifier).exists();
 }
 
-StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
+StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive, bool)
 {
     StringArray results;
 

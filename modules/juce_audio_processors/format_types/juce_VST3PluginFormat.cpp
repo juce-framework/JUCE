@@ -93,7 +93,7 @@ static int getHashForTUID (const TUID& tuid) noexcept
     return value;
 }
 
-template<typename ObjectType>
+template <typename ObjectType>
 static void fillDescriptionWith (PluginDescription& description, ObjectType& object)
 {
     description.version  = toString (object.version).trim();
@@ -901,7 +901,7 @@ private:
         Atomic<int> refCount;
 
         //==============================================================================
-        template<typename Type>
+        template <typename Type>
         void addMessageToQueue (AttrID id, const Type& value)
         {
             jassert (id != nullptr);
@@ -920,7 +920,7 @@ private:
             owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, value)));
         }
 
-        template<typename Type>
+        template <typename Type>
         bool findMessageOnQueueWithID (AttrID id, Type& value)
         {
             jassert (id != nullptr);

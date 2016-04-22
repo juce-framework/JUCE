@@ -33,8 +33,8 @@
 */
 
 //==============================================================================
-template<typename FloatType>
-class JUCE_API  LinearSmoothedValue
+template <typename FloatType>
+class LinearSmoothedValue
 {
 public:
     /** Constructor. */

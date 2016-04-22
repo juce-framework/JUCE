@@ -45,63 +45,39 @@ public:
     }
 
     //==============================================================================
-    Value  getGradleVersionValue()                     { return getSetting (Ids::gradleVersion); }
-    String getGradleVersionString() const              { return settings [Ids::gradleVersion]; }
-    Value  getGradleWrapperVersionValue()              { return getSetting (Ids::gradleWrapperVersion); }
-    String getGradleWrapperVersionString() const       { return settings [Ids::gradleWrapperVersion]; }
-
-    Value  getGradleToolchainValue()                   { return getSetting (Ids::gradleToolchain); }
-    String getGradleToolchainString() const            { return settings [Ids::gradleToolchain]; }
-    Value  getGradleToolchainVersionValue()            { return getSetting (Ids::gradleToolchainVersion); }
-    String getGradleToolchainVersionString() const     { return settings [Ids::gradleToolchainVersion]; }
+    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain, buildToolsVersion;
 
     //==============================================================================
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
         : AndroidProjectExporterBase (p, t),
+          gradleVersion (settings, Ids::gradleVersion, nullptr, "2.10"),
+          gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.7.0-alpha4"),
+          gradleToolchain (settings, Ids::gradleToolchain, nullptr, "gcc"),
+          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.1"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {
         name = getName();
-        setEmptyPropertiesToDefaultValues();
-    }
 
-    //==============================================================================
-    void setEmptyPropertiesToDefaultValues()
-    {
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + "AndroidStudio";
-
-        if (getGradleVersionString().isEmpty())
-            getGradleVersionValue() = "2.10";
-
-        if (getGradleWrapperVersionString().isEmpty())
-            getGradleWrapperVersionValue() = "0.7.0-alpha4";
-
-        if (getGradleToolchainString().isEmpty())
-            getGradleToolchainValue() = "clang";
-
-        if (getGradleToolchainVersionString().isEmpty())
-            getGradleToolchainVersionValue() = getGradleToolchainValue() == "clang" ? "3.6" : "4.9";
-
-        if (getBuildToolsVersionString().isEmpty())
-            getBuildToolsVersionValue() = "23.0.1";
     }
 
     //==============================================================================
     void createToolchainExporterProperties (PropertyListBuilder& props) override
     {
-        props.add (new TextPropertyComponent (getGradleVersionValue(), "gradle version", 32, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleVersion, "gradle version", 32),
                    "The version of gradle that Android Studio should use to build this app");
 
-        props.add (new TextPropertyComponent (getGradleWrapperVersionValue(), "gradle-experimental wrapper version", 32, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleWrapperVersion, "gradle-experimental wrapper version", 32),
                    "The version of the gradle-experimental wrapper that Android Studio should use to build this app");
 
         static const char* toolchains[] = { "clang", "gcc", nullptr };
 
-        props.add (new ChoicePropertyComponent (getGradleToolchainValue(), "NDK Toolchain", StringArray (toolchains), Array<var> (toolchains)),
+        props.add (new ChoicePropertyComponent (gradleToolchain.getPropertyAsValue(), "NDK Toolchain", StringArray (toolchains), Array<var> (toolchains)),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
 
-        props.add (new TextPropertyComponent (getGradleToolchainVersionValue(), "NDK Toolchain version", 32, false),
-                   "The version number of the toolchainthat gradle should invoke for NDK compilation (variable model.android.ndk.tooclhainVersion in app/build.gradle)");
+        props.add (new TextWithDefaultPropertyComponent<String> (buildToolsVersion, "Android build tools version", 32),
+                   "The Android build tools version that Android Studio should use to build this app");
     }
 
     void createLibraryModuleExporterProperties (PropertyListBuilder&) override
@@ -129,12 +105,6 @@ public:
         // will choke if there are any space characters in the path.
         return androidStudioExecutable.startAsProcess ("\"" + targetFolder.getFullPathName() + "\"");
     }
-
-    Value getNDKPlatformVersionValue()         { return getSetting (Ids::androidNdkPlatformVersion); }
-    String getNDKPlatformVersionString() const { return settings [Ids::androidNdkPlatformVersion]; }
-
-    Value getBuildToolsVersionValue()          { return getSetting (Ids::buildToolsVersion); }
-    String getBuildToolsVersionString() const  { return settings [Ids::buildToolsVersion]; }
 
     //==============================================================================
     void create (const OwnedArray<LibraryModule>& modules) const override
@@ -366,7 +336,7 @@ private:
     struct GradleHeaderIncludePath  : public GradleStatement
     {
         GradleHeaderIncludePath (const String& path)
-            : GradleStatement ("cppFlags.add(\"-I" + sanitisePath (path) + "\".toString())") {}
+            : GradleStatement ("cppFlags.add(\"-I${project.rootDir}/" + sanitisePath (path) + "\".toString())") {}
     };
 
     struct GradleLibrarySearchPath  : public GradleStatement
@@ -512,7 +482,7 @@ private:
         auto dependencies = new GradleObject ("dependencies");
 
         dependencies->add<GradleStatement> ("classpath 'com.android.tools.build:gradle-experimental:"
-                                            + getGradleWrapperVersionString() + "'");
+                                            + gradleWrapperVersion.get() + "'");
         return dependencies;
     }
 
@@ -561,8 +531,8 @@ private:
     {
         auto android = new GradleObject ("android");
 
-        android->add<GradleValue> ("compileSdkVersion", getMinimumSDKVersionString().getIntValue());
-        android->add<GradleString> ("buildToolsVersion", getBuildToolsVersionString());
+        android->add<GradleValue> ("compileSdkVersion", androidMinimumSDK.get().getIntValue());
+        android->add<GradleString> ("buildToolsVersion", buildToolsVersion.get());
         android->addChildObject (getAndroidDefaultConfig());
 
         return android;
@@ -571,7 +541,7 @@ private:
     GradleObject* getAndroidDefaultConfig() const
     {
         const String bundleIdentifier  = project.getBundleIdentifier().toString().toLowerCase();
-        const int minSdkVersion = getMinimumSDKVersionString().getIntValue();
+        const int minSdkVersion = androidMinimumSDK.get().getIntValue();
 
         auto defaultConfig = new GradleObject ("defaultConfig.with");
 
@@ -584,29 +554,18 @@ private:
 
     GradleObject* getAndroidNdkSettings() const
     {
-        const String toolchain = getGradleToolchainString();
-        const String toolchainVersion = getGradleToolchainVersionString();
+        const String toolchain = gradleToolchain.get();
         const bool isClang = (toolchain == "clang");
 
         auto ndkSettings = new GradleObject ("android.ndk");
 
         ndkSettings->add<GradleString> ("moduleName",       "juce_jni");
         ndkSettings->add<GradleString> ("toolchain",        toolchain);
-        ndkSettings->add<GradleValue>  ("toolchainVersion", toolchainVersion);
-        ndkSettings->add<GradleString> ("stl",              isClang ? "c++_static" : "gnustl_static");
-        ndkSettings->addChildObject (getNdkJuceExtraProperties());
+        ndkSettings->add<GradleString> ("stl", isClang ? "c++_static" :  "gnustl_static");
 
         addAllNdkCompilerSettings (ndkSettings);
 
         return ndkSettings;
-    }
-
-    GradleObject* getNdkJuceExtraProperties() const
-    {
-        auto ext = new GradleObject ("ext");
-        ext->add<GradleString> ("juceRootDir",   "${project.rootDir}/../../../../");
-        ext->add<GradleString> ("juceModuleDir", "${juceRootDir}/modules");
-        return ext;
     }
 
     void addAllNdkCompilerSettings (GradleObject* ndk) const
@@ -639,37 +598,31 @@ private:
 
     void addNdkHeaderIncludePaths (GradleObject* ndk) const
     {
-        const char* basicJucePaths[] = { "${project.rootDir}/app", "${ext.juceRootDir}", "${ext.juceModuleDir}", nullptr };
-        StringArray includePaths (basicJucePaths);
+        StringArray includePaths;
 
-        auto cppFiles = getAllIncludedCppFiles();
-
-        for (const auto& cppFile : cppFiles)
-            includePaths.addIfNotAlreadyThere (getIncludePathForFile (cppFile));
+        for (const auto& cppFile : getAllCppFilesToBeIncludedWithPath())
+            includePaths.addIfNotAlreadyThere (cppFile.getParentDirectory().toUnixStyle());
 
         for (const auto& path : includePaths)
             ndk->add<GradleHeaderIncludePath> (path);
     }
 
-    Array<RelativePath> getAllIncludedCppFiles() const
+    Array<RelativePath> getAllCppFilesToBeIncludedWithPath() const
     {
         Array<RelativePath> cppFiles;
-        const auto& groups = getAllGroups();
 
-        for (int i = 0; i < groups.size(); ++i)
-            findAllProjectItemsWithPredicate (groups.getReference (i), cppFiles, ShouldBeAddedToProjectPredicate());
+        struct NeedsToBeIncludedWithPathPredicate
+        {
+            bool operator() (const Project::Item& projectItem) const
+            {
+                return projectItem.shouldBeAddedToTargetProject() && ! projectItem.isModuleCode();
+            }
+        };
+
+        for (const auto& group : getAllGroups())
+            findAllProjectItemsWithPredicate (group, cppFiles, NeedsToBeIncludedWithPathPredicate());
 
         return cppFiles;
-    }
-
-    String getIncludePathForFile (const RelativePath& file) const
-    {
-        return sanitisePath (project.getProjectFolder().getFullPathName() + "/"
-                             + file.rebased (getTargetFolder(),
-                                             project.getProjectFolder(),
-                                             RelativePath::projectFolder)
-                                   .toUnixStyle()
-                                   .upToLastOccurrenceOf ("/", false, false));
     }
 
     void addNdkLinkerFlags (GradleObject* ndk) const
@@ -754,16 +707,16 @@ private:
 
         ndkSettings->add<GradleCppFlag> ("-O" + config.getGCCOptimisationFlag());
 
-        for (const auto& path : config.getHeaderSearchPaths())
+        for (const auto& path : getHeaderSearchPaths (config))
             ndkSettings->add<GradleHeaderIncludePath> (path);
 
         for (const auto& path : config.getLibrarySearchPaths())
             ndkSettings->add<GradleLibrarySearchPath> (path);
 
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID", "1");
-        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_API_VERSION", getMinimumSDKVersionString());
+        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
-        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSPATH","\\\"" + getActivityClassPath().replaceCharacter('.', '/') + "\\\"");
+        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSPATH","\\\"" + androidActivityClass.get().replaceCharacter('.', '/') + "\\\"");
 
         const auto defines = config.getAllPreprocessorDefs();
         for (int i = 0; i < defines.size(); ++i)
@@ -772,14 +725,22 @@ private:
         buildConfig->addChildObject (ndkSettings);
     }
 
+    StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
+    {
+        StringArray paths (extraSearchPaths);
+        paths.addArray (config.getHeaderSearchPaths());
+        paths = getCleanedStringArray (paths);
+        return paths;
+    }
+
     GradleObject* getAndroidSigningConfigs() const
     {
         auto releaseConfig = new GradleObject ("create(\"releaseConfig\")");
 
-        releaseConfig->add<GradleFilePath>  ("storeFile",     getKeyStoreString());
-        releaseConfig->add<GradleString>    ("storePassword", getKeyStorePassString());
-        releaseConfig->add<GradleString>    ("keyAlias",      getKeyAliasString());
-        releaseConfig->add<GradleString>    ("keyPassword",   getKeyAliasPassString());
+        releaseConfig->add<GradleFilePath>  ("storeFile",     androidKeyStore.get());
+        releaseConfig->add<GradleString>    ("storePassword", androidKeyStorePass.get());
+        releaseConfig->add<GradleString>    ("keyAlias",      androidKeyAlias.get());
+        releaseConfig->add<GradleString>    ("keyPassword",   androidKeyAliasPass.get());
         releaseConfig->add<GradleString>    ("storeType",     "jks");
 
         auto signingConfigs = new GradleObject ("android.signingConfigs");
@@ -824,8 +785,8 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (getNDKPathString()) << newLine
-              << "sdk.dir=" << sanitisePath (getSDKPathString()) << newLine;
+        props << "ndk.dir=" << sanitisePath (ndkPath.toString()) << newLine
+              << "sdk.dir=" << sanitisePath (sdkPath.toString()) << newLine;
 
         return props;
     }
@@ -835,7 +796,7 @@ private:
         String props;
 
         props << "distributionUrl=https\\://services.gradle.org/distributions/gradle-"
-              << getGradleVersionString() << "-all.zip";
+              << gradleVersion.get() << "-all.zip";
 
         return props;
     }
@@ -859,12 +820,6 @@ private:
 
         writeXmlOrThrow (*manifest, folder.getChildFile ("app/src/main/AndroidManifest.xml"), "utf-8", 100, true);
     }
-
-    //==============================================================================
-    struct ShouldBeAddedToProjectPredicate
-    {
-        bool operator() (const Project::Item& projectItem) const { return projectItem.shouldBeAddedToTargetProject(); }
-    };
 
     //==============================================================================
     const File androidStudioExecutable;

@@ -22,6 +22,46 @@
   ==============================================================================
 */
 
+namespace AudioPluginFormatHelpers
+{
+    struct CallbackInvoker
+    {
+        struct InvokeOnMessageThread : public CallbackMessage
+        {
+            InvokeOnMessageThread (AudioPluginInstance* inInstance, const String& inError,
+                                   AudioPluginFormat::InstantiationCompletionCallback* inCompletion,
+                                   CallbackInvoker* invoker)
+                : instance (inInstance), error (inError), compCallback (inCompletion), owner (invoker)
+            {}
+
+            void messageCallback() override     { compCallback->completionCallback (instance, error); }
+
+            //==============================================================================
+            AudioPluginInstance* instance;
+            String error;
+            ScopedPointer<AudioPluginFormat::InstantiationCompletionCallback> compCallback;
+            ScopedPointer<CallbackInvoker> owner;
+        };
+
+        //==============================================================================
+        CallbackInvoker (AudioPluginFormat::InstantiationCompletionCallback* cc)  : completion (cc)
+        {}
+
+        void completionCallback (AudioPluginInstance* instance, const String& error)
+        {
+            (new InvokeOnMessageThread (instance, error, completion, this))->post();
+        }
+
+        static void staticCompletionCallback (void* userData, AudioPluginInstance* instance, const String& error)
+        {
+            reinterpret_cast<CallbackInvoker*> (userData)->completionCallback (instance, error);
+        }
+
+        //==============================================================================
+        AudioPluginFormat::InstantiationCompletionCallback* completion;
+    };
+}
+
 AudioPluginFormat::AudioPluginFormat() noexcept {}
 AudioPluginFormat::~AudioPluginFormat() {}
 
@@ -74,9 +114,9 @@ AudioPluginInstance* AudioPluginFormat::createInstanceFromDescription (const Plu
     WaitableEvent waitForCreation;
     AudioPluginInstance* instance = nullptr;
 
-    ScopedPointer<EventSignaler> eventSignaler = new EventSignaler (waitForCreation, instance, errorMessage);
+    ScopedPointer<EventSignaler> eventSignaler (new EventSignaler (waitForCreation, instance, errorMessage));
 
-    if (requiresUnblockedMessageThreadDuringCreation (desc))
+    if (! MessageManager::getInstance()->isThisTheMessageThread())
         createPluginInstanceAsync (desc, initialSampleRate, initialBufferSize, eventSignaler.release());
     else
         createPluginInstance (desc, initialSampleRate, initialBufferSize,
@@ -159,46 +199,11 @@ void AudioPluginFormat::createPluginInstanceOnMessageThread (const PluginDescrip
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
     //==============================================================================
-    struct CallbackInvoker
-    {
-        struct InvokeOnMessageThread : public CallbackMessage
-        {
-            InvokeOnMessageThread (AudioPluginInstance* inInstance, const String& inError,
-                                   AudioPluginFormat::InstantiationCompletionCallback* inCompletion,
-                                   CallbackInvoker* invoker = nullptr)
-               : instance (inInstance), error (inError), compCallback (inCompletion), owner (invoker)
-            {}
 
-            void messageCallback() override     { compCallback->completionCallback (instance, error); }
-
-            //==============================================================================
-            AudioPluginInstance* instance;
-            String error;
-            ScopedPointer<AudioPluginFormat::InstantiationCompletionCallback> compCallback;
-            ScopedPointer<CallbackInvoker> owner;
-        };
-
-        //==============================================================================
-        CallbackInvoker (AudioPluginFormat::InstantiationCompletionCallback* cc)  : completion (cc)
-        {}
-
-        void completionCallback (AudioPluginInstance* instance, const String& error)
-        {
-            (new InvokeOnMessageThread (instance, error, completion, this))->post();
-        }
-
-        static void staticCompletionCallback (void* userData, AudioPluginInstance* instance, const String& error)
-        {
-            reinterpret_cast<CallbackInvoker*> (userData)->completionCallback (instance, error);
-        }
-
-        //==============================================================================
-        AudioPluginFormat::InstantiationCompletionCallback* completion;
-    };
 
     //==============================================================================
-    CallbackInvoker* completion = new CallbackInvoker (callback);
+    AudioPluginFormatHelpers::CallbackInvoker* completion = new AudioPluginFormatHelpers::CallbackInvoker (callback);
 
     createPluginInstance (description, initialSampleRate, initialBufferSize, completion,
-                          CallbackInvoker::staticCompletionCallback);
+                          AudioPluginFormatHelpers::CallbackInvoker::staticCompletionCallback);
 }

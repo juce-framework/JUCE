@@ -203,18 +203,6 @@ namespace
         return FSPathMakeRef (reinterpret_cast<const UInt8*> (path.toRawUTF8()), destFSRef, 0) == noErr;
     }
    #endif
-
-   #if JUCE_MAC && JUCE_PPC
-    static void* newCFMFromMachO (void* const machofp) noexcept
-    {
-        void* result = (void*) new char[8];
-
-        ((void**) result)[0] = machofp;
-        ((void**) result)[1] = result;
-
-        return result;
-    }
-   #endif
 }
 
 //==============================================================================
@@ -385,9 +373,6 @@ public:
     ModuleHandle (const File& f)
         : file (f), moduleMain (nullptr), customMain (nullptr)
          #if JUCE_MAC
-          #if JUCE_PPC
-           , fragId (0)
-          #endif
            , resHandle (0), bundleRef (0), resFileId (0)
          #endif
     {
@@ -473,9 +458,6 @@ public:
     }
    #endif
 #else
-   #if JUCE_PPC
-    CFragConnectionID fragId;
-   #endif
     Handle resHandle;
     CFBundleRef bundleRef;
     FSSpec parentDirFSSpec;
@@ -545,80 +527,12 @@ public:
                 }
             }
         }
-       #if JUCE_PPC
-        else
-        {
-            FSRef fn;
-
-            if (FSPathMakeRef ((UInt8*) file.getFullPathName().toRawUTF8(), &fn, 0) == noErr)
-            {
-                resFileId = FSOpenResFile (&fn, fsRdPerm);
-
-                if (resFileId != -1)
-                {
-                    const int numEffs = Count1Resources ('aEff');
-
-                    for (int i = 0; i < numEffs; ++i)
-                    {
-                        resHandle = Get1IndResource ('aEff', i + 1);
-
-                        if (resHandle != 0)
-                        {
-                            OSType type;
-                            Str255 name;
-                            SInt16 id;
-                            GetResInfo (resHandle, &id, &type, name);
-                            pluginName = String ((const char*) name + 1, name[0]);
-                            DetachResource (resHandle);
-                            HLock (resHandle);
-
-                            ::Ptr ptr;
-                            Str255 errorText;
-
-                            OSErr err = GetMemFragment (*resHandle, GetHandleSize (resHandle),
-                                                        name, kPrivateCFragCopy,
-                                                        &fragId, &ptr, errorText);
-
-                            if (err == noErr)
-                            {
-                                moduleMain = (MainCall) newMachOFromCFM (ptr);
-                                ok = true;
-                            }
-                            else
-                            {
-                                HUnlock (resHandle);
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (! ok)
-                        CloseResFile (resFileId);
-                }
-            }
-        }
-       #endif
 
         return ok;
     }
 
     void close()
     {
-       #if JUCE_PPC
-        if (fragId != 0)
-        {
-            if (moduleMain != nullptr)
-                disposeMachOFromCFM ((void*) moduleMain);
-
-            CloseConnection (&fragId);
-            HUnlock (resHandle);
-
-            if (resFileId != 0)
-                CloseResFile (resFileId);
-        }
-        else
-       #endif
         if (bundleRef != 0)
         {
             CFBundleCloseBundleResourceMap (bundleRef, resFileId);
@@ -633,64 +547,8 @@ public:
 
     void closeEffect (AEffect* eff)
     {
-       #if JUCE_PPC
-        if (fragId != 0)
-        {
-            Array<void*> thingsToDelete;
-            thingsToDelete.add ((void*) eff->dispatcher);
-            thingsToDelete.add ((void*) eff->process);
-            thingsToDelete.add ((void*) eff->setParameter);
-            thingsToDelete.add ((void*) eff->getParameter);
-            thingsToDelete.add ((void*) eff->processReplacing);
-
-            eff->dispatcher (eff, effClose, 0, 0, 0, 0);
-
-            for (int i = thingsToDelete.size(); --i >= 0;)
-                disposeMachOFromCFM (thingsToDelete[i]);
-        }
-        else
-       #endif
-        {
-            eff->dispatcher (eff, effClose, 0, 0, 0, 0);
-        }
+        eff->dispatcher (eff, effClose, 0, 0, 0, 0);
     }
-
-   #if JUCE_PPC
-    static void* newMachOFromCFM (void* cfmfp)
-    {
-        if (cfmfp == 0)
-            return nullptr;
-
-        UInt32* const mfp = new UInt32[6];
-
-        mfp[0] = 0x3d800000 | ((UInt32) cfmfp >> 16);
-        mfp[1] = 0x618c0000 | ((UInt32) cfmfp & 0xffff);
-        mfp[2] = 0x800c0000;
-        mfp[3] = 0x804c0004;
-        mfp[4] = 0x7c0903a6;
-        mfp[5] = 0x4e800420;
-
-        MakeDataExecutable (mfp, sizeof (UInt32) * 6);
-        return mfp;
-    }
-
-    static void disposeMachOFromCFM (void* ptr)
-    {
-        delete[] static_cast<UInt32*> (ptr);
-    }
-
-    void coerceAEffectFunctionCalls (AEffect* eff)
-    {
-        if (fragId != 0)
-        {
-            eff->dispatcher       = (AEffectDispatcherProc)   newMachOFromCFM ((void*) eff->dispatcher);
-            eff->process          = (AEffectProcessProc)      newMachOFromCFM ((void*) eff->process);
-            eff->setParameter     = (AEffectSetParameterProc) newMachOFromCFM ((void*) eff->setParameter);
-            eff->getParameter     = (AEffectGetParameterProc) newMachOFromCFM ((void*) eff->getParameter);
-            eff->processReplacing = (AEffectProcessProc)      newMachOFromCFM ((void*) eff->processReplacing);
-        }
-    }
-   #endif
 
 #endif
 
@@ -732,29 +590,14 @@ public:
           #if JUCE_MAC
             if (module->resFileId != 0)
                 UseResFile (module->resFileId);
-
-           #if JUCE_PPC
-            if (module->fragId != 0)
-            {
-                static void* audioMasterCoerced = nullptr;
-                if (audioMasterCoerced == nullptr)
-                    audioMasterCoerced = newCFMFromMachO ((void*) &audioMaster);
-
-                effect = module->moduleMain ((audioMasterCallback) audioMasterCoerced);
-            }
-            else
-           #endif
           #endif
+
             {
                 JUCE_VST_WRAPPER_INVOKE_MAIN
             }
 
             if (effect != nullptr && effect->magic == kEffectMagic)
             {
-               #if JUCE_PPC
-                module->coerceAEffectFunctionCalls (effect);
-               #endif
-
                 jassert (effect->resvd2 == 0);
                 jassert (effect->object != 0);
 
@@ -2834,27 +2677,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
     const File f (File::createFileWithoutCheckingPath (fileOrIdentifier));
 
   #if JUCE_MAC
-    if (f.isDirectory() && f.hasFileExtension (".vst"))
-        return true;
-
-   #if JUCE_PPC
-    FSRef fileRef;
-    if (makeFSRefFromPath (&fileRef, f.getFullPathName()))
-    {
-        const short resFileId = FSOpenResFile (&fileRef, fsRdPerm);
-
-        if (resFileId != -1)
-        {
-            const int numEffects = Count1Resources ('aEff');
-            CloseResFile (resFileId);
-
-            if (numEffects > 0)
-                return true;
-        }
-    }
-   #endif
-
-    return false;
+    return f.isDirectory() && f.hasFileExtension (".vst");
   #elif JUCE_WINDOWS
     return f.existsAsFile() && f.hasFileExtension (".dll");
   #elif JUCE_LINUX

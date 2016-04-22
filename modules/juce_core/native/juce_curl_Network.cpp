@@ -185,9 +185,11 @@ private:
 
             if (timeOutMs > 0)
             {
-                long timeOutSecs = static_cast<long> (ceil (static_cast<double> (timeOutMs) / 1000.0));
+                long timeOutSecs = ((long) timeOutMs + 999) / 1000;
 
-                if (curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT, timeOutSecs) != CURLE_OK)
+                if (curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT, timeOutSecs) != CURLE_OK
+                     || curl_easy_setopt (curl, CURLOPT_LOW_SPEED_LIMIT, 100) != CURLE_OK
+                     || curl_easy_setopt (curl, CURLOPT_LOW_SPEED_TIME, timeOutSecs) != CURLE_OK)
                     return false;
             }
 

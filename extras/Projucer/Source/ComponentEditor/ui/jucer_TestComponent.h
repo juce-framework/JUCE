@@ -56,10 +56,10 @@ public:
     void setToInitialSize();
 
     //==============================================================================
-    void paint (Graphics& g);
-    void resized();
+    void paint (Graphics&) override;
+    void resized() override;
 
-    static void showInDialogBox (JucerDocument& design);
+    static void showInDialogBox (JucerDocument&);
 
     // reloads any test comps that need to do so
     static void reloadAll();

@@ -46,7 +46,7 @@ public:
 
         //==============================================================================
         virtual String getName() = 0;
-        virtual void createNewFile (Project::Item projectGroupToAddTo) = 0;
+        virtual void createNewFile (Project&, Project::Item projectGroupToAddTo) = 0;
 
     protected:
         //==============================================================================
@@ -58,7 +58,8 @@ public:
 
     //==============================================================================
     void addWizardsToMenu (PopupMenu&) const;
-    bool runWizardFromMenu (int chosenMenuItemID, const Project::Item& projectGroupToAddTo) const;
+    bool runWizardFromMenu (int chosenMenuItemID, Project&,
+                            const Project::Item& projectGroupToAddTo) const;
 
     void registerWizard (Type*);
 

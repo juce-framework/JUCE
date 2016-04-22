@@ -188,7 +188,7 @@ private:
 
     void createStandardLayout (const AttributedString&);
     bool createNativeLayout (const AttributedString&);
-    void recalculateSize (const AttributedString&);
+    void recalculateSize();
 
     JUCE_LEAK_DETECTOR (TextLayout)
 };

@@ -38,7 +38,7 @@
     - One of JUCE_WINDOWS, JUCE_MAC JUCE_LINUX, JUCE_IOS, JUCE_ANDROID, etc.
     - Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
     - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
-    - Either JUCE_INTEL or JUCE_PPC
+    - Either JUCE_INTEL or JUCE_ARM
     - Either JUCE_GCC or JUCE_CLANG or JUCE_MSVC
 */
 
@@ -141,7 +141,7 @@
   #endif
 
   #if defined (__ppc__) || defined (__ppc64__)
-    #define JUCE_PPC 1
+    #error "PowerPC is no longer supported by JUCE!"
   #elif defined (__arm__) || defined (__arm64__)
     #define JUCE_ARM 1
   #else
@@ -190,7 +190,7 @@
 // Compiler type macros.
 
 #ifdef __clang__
- #define JUCE_CLANG 1
+  #define JUCE_CLANG 1
 #elif defined (__GNUC__)
   #define JUCE_GCC 1
 #elif defined (_MSC_VER)
@@ -200,16 +200,8 @@
     #define JUCE_VC8_OR_EARLIER 1
 
     #if _MSC_VER < 1400
-      #define JUCE_VC7_OR_EARLIER 1
-
-      #if _MSC_VER < 1300
-        #warning "MSVC 6.0 is no longer supported!"
-      #endif
+      #error "Visual Studio 2003 and earlier are no longer supported!"
     #endif
-  #endif
-
-  #if JUCE_64BIT || ! JUCE_VC7_OR_EARLIER
-    #define JUCE_USE_MSVC_INTRINSICS 1
   #endif
 #else
   #error unknown compiler

@@ -31,7 +31,6 @@
 class JUCE_API  LADSPAPluginFormat   : public AudioPluginFormat
 {
 public:
-    //==============================================================================
     LADSPAPluginFormat();
     ~LADSPAPluginFormat();
 
@@ -41,18 +40,17 @@ public:
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
     bool pluginNeedsRescanning (const PluginDescription&) override;
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive) override;
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
     bool doesPluginStillExist (const PluginDescription&) override;
     FileSearchPath getDefaultLocationsToSearch() override;
     bool canScanForPlugins() const override        { return true; }
 
 private:
     //==============================================================================
-    void createPluginInstance (const PluginDescription& description,
-                               double initialSampleRate,
-                               int initialBufferSize,
-                               void* userData,
+    void createPluginInstance (const PluginDescription&, double initialSampleRate,
+                               int initialBufferSize, void* userData,
                                void (*callback) (void*, AudioPluginInstance*, const String&)) override;
+
     bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
 
 private:

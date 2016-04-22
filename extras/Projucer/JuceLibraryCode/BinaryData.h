@@ -22,16 +22,16 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 994;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 4255;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 5047;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2114;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2289;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2151;
 
     extern const char*   jucer_ComponentTemplate_h;
-    const int            jucer_ComponentTemplate_hSize = 2155;
+    const int            jucer_ComponentTemplate_hSize = 2131;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
     const int            jucer_ContentCompTemplate_cppSize = 886;
@@ -40,7 +40,7 @@ namespace BinaryData
     const int            jucer_ContentCompTemplate_hSize = 924;
 
     extern const char*   jucer_InlineComponentTemplate_h;
-    const int            jucer_InlineComponentTemplate_hSize = 1143;
+    const int            jucer_InlineComponentTemplate_hSize = 1161;
 
     extern const char*   jucer_MainConsoleAppTemplate_cpp;
     const int            jucer_MainConsoleAppTemplate_cppSize = 470;
@@ -67,7 +67,7 @@ namespace BinaryData
     const int            jucer_NewCppFileTemplate_hSize = 308;
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
-    const int            jucer_NewInlineComponentTemplate_hSize = 1626;
+    const int            jucer_NewInlineComponentTemplate_hSize = 1644;
 
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
     const int            jucer_OpenGLComponentTemplate_cppSize = 1827;
@@ -83,21 +83,6 @@ namespace BinaryData
 
     extern const char*   colourscheme_light_xml;
     const int            colourscheme_light_xmlSize = 1050;
-
-    extern const char*   ContaxPro45Lig_otf;
-    const int            ContaxPro45Lig_otfSize = 24660;
-
-    extern const char*   ContaxPro55Rm_otf;
-    const int            ContaxPro55Rm_otfSize = 30772;
-
-    extern const char*   ContaxPro55RmSC_otf;
-    const int            ContaxPro55RmSC_otfSize = 25312;
-
-    extern const char*   ContaxPro65Med_otf;
-    const int            ContaxPro65Med_otfSize = 24964;
-
-    extern const char*   juce_AU_Resources_r;
-    const int            juce_AU_Resources_rSize = 3950;
 
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 45854;
@@ -121,7 +106,7 @@ namespace BinaryData
     const int            projectIconXcodeIOS_pngSize = 18111;
 
     extern const char*   projucer_EULA_txt;
-    const int            projucer_EULA_txtSize = 14598;
+    const int            projucer_EULA_txtSize = 14390;
 
     extern const char*   projucer_login_bg_svg;
     const int            projucer_login_bg_svgSize = 5046;
@@ -163,7 +148,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 50;
+    const int namedResourceListSize = 45;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).
