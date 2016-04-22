@@ -40,23 +40,14 @@ public:
     ~VST3PluginFormat();
 
     //==============================================================================
-    /** @internal */
     String getName() const override             { return "VST3"; }
-    /** @internal */
-    void findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier) override;
-    /** @internal */
+    void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
-    /** @internal */
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;
-    /** @internal */
     bool pluginNeedsRescanning (const PluginDescription&) override;
-    /** @internal */
     StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
-    /** @internal */
     bool doesPluginStillExist (const PluginDescription&) override;
-    /** @internal */
     FileSearchPath getDefaultLocationsToSearch() override;
-    /** @internal */
     bool canScanForPlugins() const override     { return true; }
 
 private:

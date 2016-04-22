@@ -74,6 +74,29 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PathSettingsTab)
 };
 
+//==============================================================================
+/** This component implements the "Code Editor" tabl in the global preferences window,
+    which sets font sizes and colours for the Projucer's code editor.
+    The content is either an EditorPanel (the actual settings tab) or a FontScanPanel
+    (shown if the tab is scanning for available fonts before showing the EditorPanel).
+*/
+class AppearanceSettingsTab  : public GlobalPreferencesTab,
+                               public Component
+{
+public:
+    AppearanceSettingsTab();
+
+    Component* getContent() override;
+    void changeContent (Component* newContent);
+    String getName() const noexcept override;
+
+    void resized() override;
+
+private:
+    ScopedPointer<Component> content;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettingsTab)
+};
 
 //==============================================================================
 class GlobalPreferencesComponent  : public TabbedComponent

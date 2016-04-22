@@ -13,7 +13,7 @@ public:
     {
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         // You should replace everything in this method with your own drawing code..
 
@@ -28,7 +28,7 @@ public:
                     Justification::centred, true);   // draw some placeholder text
     }
 
-    void resized()
+    void resized() override
     {
         // This method is where you should set the bounds of any child
         // components that your component contains..

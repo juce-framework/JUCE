@@ -27,9 +27,23 @@ class AndroidProjectExporterBase  : public ProjectExporter
 public:
     //==============================================================================
     AndroidProjectExporterBase (Project& p, const ValueTree& t)
-        : ProjectExporter (p, t)
+        : ProjectExporter (p, t),
+          androidScreenOrientation (settings, Ids::androidScreenOrientation, nullptr, "unspecified"),
+          androidActivityClass (settings, Ids::androidActivityClass, nullptr, createDefaultClassName()),
+          androidActivitySubClassName (settings, Ids::androidActivitySubClassName, nullptr),
+          androidVersionCode (settings, Ids::androidVersionCode, nullptr, "1"),
+          androidMinimumSDK (settings, Ids::androidMinimumSDK, nullptr, "23"),
+          androidTheme (settings, Ids::androidTheme, nullptr),
+          androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
+          androidMicNeeded (settings, Ids::androidMicNeeded, nullptr, false),
+          androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
+          androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
+          androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
+          androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
+          androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
+          androidKeyAliasPass (settings, Ids::androidKeyAliasPass, nullptr, "android")
     {
-        setEmptyPropertiesToDefaultValues();
+        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -53,35 +67,6 @@ public:
     bool supportsStandalone() const override     { return false;  }
 
     //==============================================================================
-    void setEmptyPropertiesToDefaultValues()
-    {
-        if (getVersionCodeString().isEmpty())
-            getVersionCodeValue() = 1;
-
-        if (getActivityClassPath().isEmpty())
-            getActivityClassPathValue() = createDefaultClassName();
-
-        if (getMinimumSDKVersionString().isEmpty())
-            getMinimumSDKVersionValue() = 23;
-
-        if (getInternetNeededValue().toString().isEmpty())
-            getInternetNeededValue() = true;
-
-        if (getBluetoothPermissionsValue().toString().isEmpty())
-            getBluetoothPermissionsValue() = true;
-
-        if (getKeyStoreValue().getValue().isVoid())         getKeyStoreValue()      = "${user.home}/.android/debug.keystore";
-        if (getKeyStorePassValue().getValue().isVoid())     getKeyStorePassValue()  = "android";
-        if (getKeyAliasValue().getValue().isVoid())         getKeyAliasValue()      = "androiddebugkey";
-        if (getKeyAliasPassValue().getValue().isVoid())     getKeyAliasPassValue()  = "android";
-
-        initialiseDependencyPathValues();
-
-        if (getScreenOrientationValue().toString().isEmpty())
-            getScreenOrientationValue() = "unspecified";
-    }
-
-    //==============================================================================
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
         const String package (getActivityClassPackage());
@@ -96,51 +81,6 @@ public:
     {
         // no-op.
     }
-
-    //==============================================================================
-    // base properties
-
-    Value  getScreenOrientationValue()              { return getSetting (Ids::androidScreenOrientation); }
-    String getScreenOrientationString() const       { return settings [Ids::androidScreenOrientation]; }
-    Value  getActivityClassPathValue()              { return getSetting (Ids::androidActivityClass); }
-    String getActivityClassPath() const             { return settings [Ids::androidActivityClass]; }
-    Value  getActivitySubClassPathValue()           { return getSetting (Ids::androidActivitySubClassName); }
-    String getActivitySubClassPath() const          { return settings [Ids::androidActivitySubClassName]; }
-    Value  getVersionCodeValue()                    { return getSetting (Ids::androidVersionCode); }
-    String getVersionCodeString() const             { return settings [Ids::androidVersionCode]; }
-    Value  getSDKPathValue()                        { return sdkPath; }
-    String getSDKPathString() const                 { return sdkPath.toString(); }
-    Value  getNDKPathValue()                        { return ndkPath; }
-    String getNDKPathString() const                 { return ndkPath.toString(); }
-    Value  getMinimumSDKVersionValue()              { return getSetting (Ids::androidMinimumSDK); }
-    String getMinimumSDKVersionString() const       { return settings [Ids::androidMinimumSDK]; }
-
-    // manifest properties
-
-    Value  getInternetNeededValue()                 { return getSetting (Ids::androidInternetNeeded); }
-    bool   getInternetNeeded() const                { return settings [Ids::androidInternetNeeded]; }
-    Value  getAudioRecordNeededValue()              { return getSetting (Ids::androidMicNeeded); }
-    bool   getAudioRecordNeeded() const             { return settings [Ids::androidMicNeeded]; }
-    Value  getBluetoothPermissionsValue()           { return getSetting(Ids::androidBluetoothNeeded); }
-    bool   getBluetoothPermissions() const          { return settings[Ids::androidBluetoothNeeded]; }
-    Value  getOtherPermissionsValue()               { return getSetting (Ids::androidOtherPermissions); }
-    String getOtherPermissions() const              { return settings [Ids::androidOtherPermissions]; }
-
-    // code signing properties
-
-    Value  getKeyStoreValue()                       { return getSetting (Ids::androidKeyStore); }
-    String getKeyStoreString() const                { return settings [Ids::androidKeyStore]; }
-    Value  getKeyStorePassValue()                   { return getSetting (Ids::androidKeyStorePass); }
-    String getKeyStorePassString() const            { return settings [Ids::androidKeyStorePass]; }
-    Value  getKeyAliasValue()                       { return getSetting (Ids::androidKeyAlias); }
-    String getKeyAliasString() const                { return settings [Ids::androidKeyAlias]; }
-    Value  getKeyAliasPassValue()                   { return getSetting (Ids::androidKeyAliasPass); }
-    String getKeyAliasPassString() const            { return settings [Ids::androidKeyAliasPass]; }
-
-    // other properties
-
-    Value  getThemeValue()                          { return getSetting (Ids::androidTheme); }
-    String getThemeString() const                   { return settings [Ids::androidTheme]; }
 
     //==============================================================================
     void createExporterProperties (PropertyListBuilder& props) override
@@ -162,31 +102,40 @@ public:
     };
 
     //==============================================================================
+    CachedValue<String> androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
+                        androidVersionCode, androidMinimumSDK, androidTheme;
+
+    CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded;
+    CachedValue<String> androidOtherPermissions;
+
+    CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
+
+    //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
         static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
         static const char* orientationValues[] = { "unspecified", "portrait", "landscape", nullptr };
 
-        props.add (new ChoicePropertyComponent (getScreenOrientationValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
+        props.add (new ChoicePropertyComponent (androidScreenOrientation.getPropertyAsValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
                    "The screen orientations that this app should support");
 
-        props.add (new TextPropertyComponent (getActivityClassPathValue(), "Android Activity class name", 256, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (androidActivityClass, "Android Activity class name", 256),
                    "The full java class name to use for the app's Activity class.");
 
-        props.add (new TextPropertyComponent (getActivitySubClassPathValue(), "Android Activity sub-class name", 256, false),
+        props.add (new TextPropertyComponent (androidActivitySubClassName.getPropertyAsValue(), "Android Activity sub-class name", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest. "
                    "Use this if you would like to use your own Android Activity sub-class.");
 
-        props.add (new TextPropertyComponent (getVersionCodeValue(), "Android Version Code", 32, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (androidVersionCode, "Android Version Code", 32),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
-        props.add (new DependencyPathPropertyComponent (getSDKPathValue(), "Android SDK Path"),
+        props.add (new DependencyPathPropertyComponent (sdkPath, "Android SDK Path"),
                    "The path to the Android SDK folder on the target build machine");
 
-        props.add (new DependencyPathPropertyComponent (getNDKPathValue(), "Android NDK Path"),
+        props.add (new DependencyPathPropertyComponent (ndkPath, "Android NDK Path"),
                    "The path to the Android NDK folder on the target build machine");
 
-        props.add (new TextPropertyComponent (getMinimumSDKVersionValue(), "Minimum SDK version", 32, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (androidMinimumSDK, "Minimum SDK version", 32),
                    "The number of the minimum version of the Android SDK that the app requires");
     }
 
@@ -196,16 +145,16 @@ public:
     //==============================================================================
     void createManifestExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new BooleanPropertyComponent (getInternetNeededValue(), "Internet Access", "Specify internet access permission in the manifest"),
+        props.add (new BooleanPropertyComponent (androidInternetNeeded.getPropertyAsValue(), "Internet Access", "Specify internet access permission in the manifest"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
 
-        props.add (new BooleanPropertyComponent (getAudioRecordNeededValue(), "Audio Input Required", "Specify audio record permission in the manifest"),
+        props.add (new BooleanPropertyComponent (androidMicNeeded.getPropertyAsValue(), "Audio Input Required", "Specify audio record permission in the manifest"),
                    "If enabled, this will set the android.permission.RECORD_AUDIO flag in the manifest.");
 
-        props.add (new BooleanPropertyComponent (getBluetoothPermissionsValue(), "Bluetooth permissions Required", "Specify bluetooth permission (required for Bluetooth MIDI)"),
+        props.add (new BooleanPropertyComponent (androidBluetoothNeeded.getPropertyAsValue(), "Bluetooth permissions Required", "Specify bluetooth permission (required for Bluetooth MIDI)"),
                    "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
 
-        props.add (new TextPropertyComponent (getOtherPermissionsValue(), "Custom permissions", 2048, false),
+        props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
     }
 
@@ -215,23 +164,23 @@ public:
     //==============================================================================
     void createCodeSigningExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (getKeyStoreValue(), "Key Signing: key.store", 2048, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyStore, "Key Signing: key.store", 2048),
                    "The key.store value, used when signing the package.");
 
-        props.add (new TextPropertyComponent (getKeyStorePassValue(), "Key Signing: key.store.password", 2048, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyStorePass, "Key Signing: key.store.password", 2048),
                    "The key.store password, used when signing the package.");
 
-        props.add (new TextPropertyComponent (getKeyAliasValue(), "Key Signing: key.alias", 2048, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyAlias, "Key Signing: key.alias", 2048),
                    "The key.alias value, used when signing the package.");
 
-        props.add (new TextPropertyComponent (getKeyAliasPassValue(), "Key Signing: key.alias.password", 2048, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyAliasPass, "Key Signing: key.alias.password", 2048),
                    "The key.alias password, used when signing the package.");
     }
 
     //==============================================================================
     void createOtherExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (getThemeValue(), "Android Theme", 256, false),
+        props.add (new TextPropertyComponent (androidTheme.getPropertyAsValue(), "Android Theme", 256, false),
                    "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
     }
 
@@ -270,7 +219,7 @@ public:
         const String className (getActivityName());
 
         if (className.isEmpty())
-            throw SaveError ("Invalid Android Activity class name: " + getActivityClassPath());
+            throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get());
 
         createDirectoryOrThrow (targetFolder);
 
@@ -287,7 +236,7 @@ public:
 
             juceMidiImports << newLine;
 
-            if (getMinimumSDKVersionString().getIntValue() >= 23)
+            if (androidMinimumSDK.get().getIntValue() >= 23)
             {
                 File javaAndroidMidi (javaSourceFolder.getChildFile ("AndroidMidi.java"));
                 File javaRuntimePermissions (javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java"));
@@ -342,24 +291,24 @@ public:
 
     String getActivityName() const
     {
-        return getActivityClassPath().fromLastOccurrenceOf (".", false, false);
+        return androidActivityClass.get().fromLastOccurrenceOf (".", false, false);
     }
 
     String getActivitySubClassName() const
     {
-        String activityPath = getActivitySubClassPath();
+        String activityPath = androidActivitySubClassName.get();
 
         return (activityPath.isEmpty()) ? getActivityName() : activityPath.fromLastOccurrenceOf (".", false, false);
     }
 
     String getActivityClassPackage() const
     {
-        return getActivityClassPath().upToLastOccurrenceOf (".", false, false);
+        return androidActivityClass.get().upToLastOccurrenceOf (".", false, false);
     }
 
     String getJNIActivityClassName() const
     {
-        return getActivityClassPath().replaceCharacter ('.', '/');
+        return androidActivityClass.get().replaceCharacter ('.', '/');
     }
 
     static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
@@ -374,15 +323,15 @@ public:
     StringArray getPermissionsRequired() const
     {
         StringArray s;
-        s.addTokens (getOtherPermissions(), ", ", "");
+        s.addTokens (androidOtherPermissions.get(), ", ", "");
 
-        if (getInternetNeeded())
+        if (androidInternetNeeded.get())
             s.add ("android.permission.INTERNET");
 
-        if (getAudioRecordNeeded())
+        if (androidMicNeeded.get())
             s.add ("android.permission.RECORD_AUDIO");
 
-        if (getBluetoothPermissions())
+        if (androidBluetoothNeeded.get())
         {
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
@@ -462,7 +411,7 @@ public:
         XmlElement* manifest = new XmlElement ("manifest");
 
         manifest->setAttribute ("xmlns:android", "http://schemas.android.com/apk/res/android");
-        manifest->setAttribute ("android:versionCode", getVersionCodeString());
+        manifest->setAttribute ("android:versionCode", androidVersionCode.get());
         manifest->setAttribute ("android:versionName",  project.getVersionString());
         manifest->setAttribute ("package", getActivityClassPackage());
 
@@ -474,8 +423,8 @@ public:
         screens->setAttribute ("android:anyDensity", "true");
 
         XmlElement* sdk = manifest->createNewChildElement ("uses-sdk");
-        sdk->setAttribute ("android:minSdkVersion", getMinimumSDKVersionString());
-        sdk->setAttribute ("android:targetSdkVersion", "11");
+        sdk->setAttribute ("android:minSdkVersion", androidMinimumSDK.get());
+        sdk->setAttribute ("android:targetSdkVersion", androidMinimumSDK.get());
 
         {
             const StringArray permissions (getPermissionsRequired());
@@ -494,9 +443,8 @@ public:
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
 
-        String androidThemeString (getThemeString());
-        if (androidThemeString.isNotEmpty())
-            app->setAttribute ("android:theme", androidThemeString);
+        if (androidTheme.get().isNotEmpty())
+            app->setAttribute ("android:theme", androidTheme.get());
 
         {
             ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
@@ -505,14 +453,14 @@ public:
                 app->setAttribute ("android:icon", "@drawable/icon");
         }
 
-        if (getMinimumSDKVersionString().getIntValue() >= 11)
+        if (androidMinimumSDK.get().getIntValue() >= 11)
             app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
 
         XmlElement* act = app->createNewChildElement ("activity");
         act->setAttribute ("android:name", getActivitySubClassName());
         act->setAttribute ("android:label", "@string/app_name");
         act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
-        act->setAttribute ("android:screenOrientation", getScreenOrientationString());
+        act->setAttribute ("android:screenOrientation", androidScreenOrientation.get());
 
         XmlElement* intent = act->createNewChildElement ("intent-filter");
         intent->createNewChildElement ("action")->setAttribute ("android:name", "android.intent.action.MAIN");

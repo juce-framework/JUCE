@@ -509,6 +509,16 @@ public:
                 resume();
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
+
+           #if JUCE_WINDOWS
+            if (getHostType().isWavelab())
+            {
+                int priority = GetThreadPriority (GetCurrentThread());
+
+                if (priority <= THREAD_PRIORITY_NORMAL && priority >= THREAD_PRIORITY_LOWEST)
+                    filter->setNonRealtime (true);
+            }
+           #endif
         }
 
        #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput

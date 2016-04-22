@@ -410,7 +410,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         var getResult (const Scope& s) const override
         {
-            if (const Array<var>* array = object->getResult (s).getArray())
+            var arrayVar (object->getResult (s)); // must stay alive for the scope of this method
+
+            if (const Array<var>* array = arrayVar.getArray())
                 return (*array) [static_cast<int> (index->getResult (s))];
 
             return var::undefined();
@@ -418,7 +420,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         void assign (const Scope& s, const var& newValue) const override
         {
-            if (Array<var>* array = object->getResult (s).getArray())
+            var arrayVar (object->getResult (s)); // must stay alive for the scope of this method
+
+            if (Array<var>* array = arrayVar.getArray())
             {
                 const int i = index->getResult (s);
                 while (array->size() < i)

@@ -202,6 +202,9 @@ bool MainWindow::openFile (const File& file)
             jassert (getProjectContentComponent() != nullptr);
             getProjectContentComponent()->reloadLastOpenDocuments();
 
+            if (Project* p = getProject())
+                p->updateDeprecatedProjectSettingsInteractively();
+
             return true;
         }
     }

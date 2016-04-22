@@ -30,7 +30,7 @@ struct LiveConstantDemoComponent  : public Component
 {
     LiveConstantDemoComponent() {}
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (JUCE_LIVE_CONSTANT (Colour (0xffe5e7a7)));
 

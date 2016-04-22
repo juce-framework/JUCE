@@ -133,35 +133,42 @@ void Project::setMissingDefaultValues()
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
 }
 
+void Project::updateDeprecatedProjectSettingsInteractively()
+{
+    jassert (! ProjucerApplication::getApp().isRunningCommandLine);
+
+    for (Project::ExporterIterator exporter (*this); exporter.next();)
+        exporter->updateDeprecatedProjectSettingsInteractively();
+}
+
 void Project::setMissingAudioPluginDefaultValues()
 {
     const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (getTitle(), false, true, false));
 
-    setValueIfVoid (shouldBuildVST(), true);
-    setValueIfVoid (shouldBuildVST3(), false);
-    setValueIfVoid (shouldBuildAU(),  true);
-    setValueIfVoid (shouldBuildAUv3(),  false);
-    setValueIfVoid (shouldBuildRTAS(), false);
-    setValueIfVoid (shouldBuildAAX(), false);
-    setValueIfVoid (shouldBuildStandalone(), false);
+    setValueIfVoid (shouldBuildVST(),                   true);
+    setValueIfVoid (shouldBuildVST3(),                  false);
+    setValueIfVoid (shouldBuildAU(),                    true);
+    setValueIfVoid (shouldBuildAUv3(),                  false);
+    setValueIfVoid (shouldBuildRTAS(),                  false);
+    setValueIfVoid (shouldBuildAAX(),                   false);
+    setValueIfVoid (shouldBuildStandalone(),            false);
 
-    setValueIfVoid (getPluginName(),                   getTitle());
-    setValueIfVoid (getPluginDesc(),                   getTitle());
-    setValueIfVoid (getPluginManufacturer(),           "yourcompany");
-    setValueIfVoid (getPluginManufacturerCode(),       "Manu");
-    setValueIfVoid (getPluginCode(),                   makeValid4CC (getProjectUID() + getProjectUID()));
-    setValueIfVoid (getPluginChannelConfigs(),         "");
-    setValueIfVoid (getPluginIsSynth(),                false);
-    setValueIfVoid (getPluginWantsMidiInput(),         false);
-    setValueIfVoid (getPluginProducesMidiOut(),        false);
-    setValueIfVoid (getPluginIsMidiEffectPlugin(),     false);
-    setValueIfVoid (getPluginEditorNeedsKeyFocus(),    false);
-    setValueIfVoid (getPluginAUExportPrefix(),         sanitisedProjectName + "AU");
-    setValueIfVoid (getPluginRTASCategory(),           String::empty);
-    setValueIfVoid (getBundleIdentifier(),             getDefaultBundleIdentifier());
-    setValueIfVoid (getAAXIdentifier(),                getDefaultAAXIdentifier());
-    setValueIfVoid (getPluginAAXCategory(),            "AAX_ePlugInCategory_Dynamics");
-
+    setValueIfVoid (getPluginName(),                    getTitle());
+    setValueIfVoid (getPluginDesc(),                    getTitle());
+    setValueIfVoid (getPluginManufacturer(),            "yourcompany");
+    setValueIfVoid (getPluginManufacturerCode(),        "Manu");
+    setValueIfVoid (getPluginCode(),                    makeValid4CC (getProjectUID() + getProjectUID()));
+    setValueIfVoid (getPluginChannelConfigs(),          String());
+    setValueIfVoid (getPluginIsSynth(),                 false);
+    setValueIfVoid (getPluginWantsMidiInput(),          false);
+    setValueIfVoid (getPluginProducesMidiOut(),         false);
+    setValueIfVoid (getPluginIsMidiEffectPlugin(),      false);
+    setValueIfVoid (getPluginEditorNeedsKeyFocus(),     false);
+    setValueIfVoid (getPluginAUExportPrefix(),          sanitisedProjectName + "AU");
+    setValueIfVoid (getPluginRTASCategory(),            String());
+    setValueIfVoid (getBundleIdentifier(),              getDefaultBundleIdentifier());
+    setValueIfVoid (getAAXIdentifier(),                 getDefaultAAXIdentifier());
+    setValueIfVoid (getPluginAAXCategory(),             "AAX_ePlugInCategory_Dynamics");
 }
 
 void Project::updateOldStyleConfigList()
@@ -371,7 +378,7 @@ void Project::valueTreeParentChanged (ValueTree&)                   {}
 File Project::resolveFilename (String filename) const
 {
     if (filename.isEmpty())
-        return File::nonexistent;
+        return File();
 
     filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
 
@@ -741,7 +748,7 @@ File Project::Item::getFile() const
     if (isFile())
         return project.resolveFilename (state [Ids::file].toString());
 
-    return File::nonexistent;
+    return File();
 }
 
 void Project::Item::setFile (const File& file)
@@ -921,9 +928,13 @@ static bool isGroupSorted (const ValueTree& state, bool keepGroupsAtStart)
     return stateCopy.isEquivalentTo (state);
 }
 
-void Project::Item::sortAlphabetically (bool keepGroupsAtStart)
+void Project::Item::sortAlphabetically (bool keepGroupsAtStart, bool recursive)
 {
     sortGroup (state, keepGroupsAtStart, getUndoManager());
+
+    if (recursive)
+        for (int i = getNumChildren(); --i >= 0;)
+            getChild(i).sortAlphabetically (keepGroupsAtStart, true);
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
@@ -955,7 +966,7 @@ Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex
 
 bool Project::Item::addFileAtIndex (const File& file, int insertIndex, const bool shouldCompile)
 {
-    if (file == File::nonexistent || file.isHidden() || file.getFileName().startsWithChar ('.'))
+    if (file == File() || file.isHidden() || file.getFileName().startsWithChar ('.'))
         return false;
 
     if (file.isDirectory())
@@ -988,7 +999,7 @@ bool Project::Item::addFileRetainingSortOrder (const File& file, bool shouldComp
         return false;
 
     if (wasSortedGroupsNotFirst || wasSortedGroupsFirst)
-        sortAlphabetically (wasSortedGroupsFirst);
+        sortAlphabetically (wasSortedGroupsFirst, false);
 
     return true;
 }

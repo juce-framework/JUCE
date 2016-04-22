@@ -47,7 +47,7 @@ BigInteger::BigInteger (const int32 value)
       negative (value < 0)
 {
     values.calloc (numValues + 1);
-    values[0] = (uint32) abs (value);
+    values[0] = (uint32) std::abs (value);
     highestBit = getHighestBit();
 }
 
@@ -307,7 +307,7 @@ void BigInteger::negate() noexcept
     negative = (! negative) && ! isZero();
 }
 
-#if JUCE_USE_MSVC_INTRINSICS && ! defined (__INTEL_COMPILER)
+#if JUCE_MSVC && ! defined (__INTEL_COMPILER)
  #pragma intrinsic (_BitScanReverse)
 #endif
 
@@ -317,7 +317,7 @@ inline static int highestBitInInt (uint32 n) noexcept
 
   #if JUCE_GCC || JUCE_CLANG
     return 31 - __builtin_clz (n);
-  #elif JUCE_USE_MSVC_INTRINSICS
+  #elif JUCE_MSVC
     unsigned long highest;
     _BitScanReverse (&highest, n);
     return (int) highest;
@@ -644,15 +644,15 @@ BigInteger& BigInteger::operator>>= (const int numBits)              { shiftBits
 //==============================================================================
 int BigInteger::compare (const BigInteger& other) const noexcept
 {
-    if (isNegative() == other.isNegative())
+    const bool isNeg = isNegative();
+
+    if (isNeg == other.isNegative())
     {
         const int absComp = compareAbsolute (other);
-        return isNegative() ? -absComp : absComp;
+        return isNeg ? -absComp : absComp;
     }
-    else
-    {
-        return isNegative() ? -1 : 1;
-    }
+
+    return isNeg ? -1 : 1;
 }
 
 int BigInteger::compareAbsolute (const BigInteger& other) const noexcept
@@ -660,10 +660,8 @@ int BigInteger::compareAbsolute (const BigInteger& other) const noexcept
     const int h1 = getHighestBit();
     const int h2 = other.getHighestBit();
 
-    if (h1 > h2)
-        return 1;
-    else if (h1 < h2)
-        return -1;
+    if (h1 > h2) return 1;
+    if (h1 < h2) return -1;
 
     for (int i = (int) bitToIndex (h1) + 1; --i >= 0;)
         if (values[i] != other.values[i])
@@ -674,9 +672,9 @@ int BigInteger::compareAbsolute (const BigInteger& other) const noexcept
 
 bool BigInteger::operator== (const BigInteger& other) const noexcept    { return compare (other) == 0; }
 bool BigInteger::operator!= (const BigInteger& other) const noexcept    { return compare (other) != 0; }
-bool BigInteger::operator<  (const BigInteger& other) const noexcept    { return compare (other) < 0; }
+bool BigInteger::operator<  (const BigInteger& other) const noexcept    { return compare (other) <  0; }
 bool BigInteger::operator<= (const BigInteger& other) const noexcept    { return compare (other) <= 0; }
-bool BigInteger::operator>  (const BigInteger& other) const noexcept    { return compare (other) > 0; }
+bool BigInteger::operator>  (const BigInteger& other) const noexcept    { return compare (other) >  0; }
 bool BigInteger::operator>= (const BigInteger& other) const noexcept    { return compare (other) >= 0; }
 
 //==============================================================================
@@ -803,7 +801,7 @@ BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 
     while (! n.isZero())
     {
-        if (abs (m.getHighestBit() - n.getHighestBit()) <= 16)
+        if (std::abs (m.getHighestBit() - n.getHighestBit()) <= 16)
             return simpleGCD (&m, &n);
 
         BigInteger temp2;
@@ -853,17 +851,14 @@ void BigInteger::inverseModulo (const BigInteger& modulus)
     if (isOne())
         return;
 
-    if (! (*this)[0])
+    if (findGreatestCommonDivisor (modulus) != 1)
     {
-        // not invertible
-        clear();
+        clear();  // not invertible!
         return;
     }
 
-    BigInteger a1 (modulus);
-    BigInteger a2 (*this);
-    BigInteger b1 (modulus);
-    BigInteger b2 (1);
+    BigInteger a1 (modulus), a2 (*this);
+    BigInteger b1 (modulus), b2 (1);
 
     while (! a2.isOne())
     {

@@ -31,6 +31,10 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
+#if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8)
+ #error AUv3 needs Deployment Target OS X 10.8 or higher to compile
+#endif
+
 #ifndef __OBJC2__
  #error AUv3 needs Objective-C 2 support (compile with 64-bit)
 #endif

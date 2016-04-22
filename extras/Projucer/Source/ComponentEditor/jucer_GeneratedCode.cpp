@@ -211,14 +211,12 @@ String GeneratedCode::getInitialiserList() const
     return s;
 }
 
-static String getIncludeFileCode (StringArray files)
+static String getIncludeFileCode (const Array<File>& files, const File& targetFile)
 {
     String s;
 
-    files = getCleanedStringArray (files);
-
     for (int i = 0; i < files.size(); ++i)
-        s << "#include \"" << files[i] << "\"\n";
+        s << CodeHelpers::createIncludeStatement (files.getReference(i), targetFile) << newLine;
 
     return s;
 }
@@ -320,13 +318,13 @@ static void copyAcrossUserSections (String& dest, const String& src)
 
 //==============================================================================
 void GeneratedCode::applyToCode (String& code,
-                                 const String& fileNameRoot,
-                                 const bool isForPreview,
-                                 const String& oldFileWithUserData) const
+                                 const File& targetFile,
+                                 const String& oldFileWithUserData,
+                                 Project* project) const
 {
     // header guard..
     String headerGuard ("__JUCE_HEADER_");
-    headerGuard << String::toHexString ((className + "xx" + fileNameRoot).hashCode64()).toUpperCase() << "__";
+    headerGuard << String::toHexString ((className + "xx" + targetFile.getFileNameWithoutExtension()).hashCode64()).toUpperCase() << "__";
     replaceTemplate (code, "headerGuard", headerGuard);
 
     replaceTemplate (code, "version", JUCEApplicationBase::getInstance()->getApplicationVersion());
@@ -338,26 +336,23 @@ void GeneratedCode::applyToCode (String& code,
 
     replaceTemplate (code, "classDeclaration", getClassDeclaration());
     replaceTemplate (code, "privateMemberDeclarations", privateMemberDeclarations);
-    replaceTemplate (code, "publicMemberDeclarations", getCallbackDeclarations() + "\n" + publicMemberDeclarations);
+    replaceTemplate (code, "publicMemberDeclarations", getCallbackDeclarations() + newLine + publicMemberDeclarations);
 
     replaceTemplate (code, "methodDefinitions", getCallbackDefinitions());
 
-    replaceTemplate (code, "includeFilesH", getIncludeFileCode (includeFilesH));
-    replaceTemplate (code, "includeFilesCPP", getIncludeFileCode (includeFilesCPP));
+    File juceHeaderFile = project != nullptr ? project->getAppIncludeFile()
+                                             : targetFile.getSiblingFile ("JuceHeader.h");
+
+    replaceTemplate (code, "includeJUCEHeader", CodeHelpers::createIncludeStatement (juceHeaderFile, targetFile));
+
+    replaceTemplate (code, "includeFilesH", getIncludeFileCode (includeFilesH, targetFile));
+    replaceTemplate (code, "includeFilesCPP", getIncludeFileCode (includeFilesCPP, targetFile));
 
     replaceTemplate (code, "constructor", constructorCode);
     replaceTemplate (code, "destructor", destructorCode);
 
-    if (! isForPreview)
-    {
-        replaceTemplate (code, "metadata", jucerMetadata);
-        replaceTemplate (code, "staticMemberDefinitions", staticMemberDefinitions);
-    }
-    else
-    {
-        replaceTemplate (code, "metadata", "  << Metadata isn't shown in the code preview >>\n");
-        replaceTemplate (code, "staticMemberDefinitions", "// Static member declarations and resources would go here... (these aren't shown in the code preview)");
-    }
+    replaceTemplate (code, "metadata", jucerMetadata);
+    replaceTemplate (code, "staticMemberDefinitions", staticMemberDefinitions);
 
     copyAcrossUserSections (code, oldFileWithUserData);
 }

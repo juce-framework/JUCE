@@ -71,7 +71,7 @@ public:
         rememberLoginCheckbox.addListener (this);
 
         forgotPasswordButton.setColour (HyperlinkButton::textColourId, Colours::white);
-        forgotPasswordButton.setFont (lookAndFeel.getContaxProFont().withHeight (lookAndFeel.labelFontSize), false, Justification::topLeft);
+        forgotPasswordButton.setFont (ProjucerDialogLookAndFeel::getDialogFont().withHeight (lookAndFeel.labelFontSize), false, Justification::topLeft);
         addAndMakeVisible (forgotPasswordButton);
 
         initialiseButton (loginButton, KeyPress::returnKey);
@@ -168,7 +168,7 @@ private:
     {
         textField.setColour (TextEditor::focusedOutlineColourId, Colours::transparentWhite);
         textField.setColour (TextEditor::highlightColourId, ProjucerDialogLookAndFeel::getErrorTextColour());
-        textField.setFont (lookAndFeel.getContaxProFont().withHeight (17));
+        textField.setFont (ProjucerDialogLookAndFeel::getDialogFont().withHeight (17));
         textField.addListener (this);
         associatedLabel.setColour (Label::textColourId, Colours::white);
         addAndMakeVisible (associatedLabel);

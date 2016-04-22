@@ -30,7 +30,7 @@ public:
     {
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         /* This demo code just fills the component's background and
            draws some placeholder text to get you started.
@@ -50,7 +50,7 @@ public:
                     Justification::centred, true);   // draw some placeholder text
     }
 
-    void resized()
+    void resized() override
     {
         // This method is where you should set the bounds of any child
         // components that your component contains..

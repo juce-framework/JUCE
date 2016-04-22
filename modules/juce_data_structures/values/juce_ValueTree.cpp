@@ -743,6 +743,12 @@ var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValu
                              : object->properties.getWithDefault (name, defaultReturnValue);
 }
 
+const var* ValueTree::getPropertyPointer (const Identifier& name) const noexcept
+{
+    return object == nullptr ? nullptr
+                             : object->properties.getVarPointer (name);
+}
+
 ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager)
 {
     jassert (name.toString().isNotEmpty()); // Must have a valid property name!

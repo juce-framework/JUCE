@@ -181,6 +181,7 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
     MidiBuffer::Iterator midiIterator (midiData);
     midiIterator.setNextSamplePosition (startSample);
 
+    bool firstEvent = true;
     int midiEventPos;
     MidiMessage m;
 
@@ -203,11 +204,13 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
             break;
         }
 
-        if (samplesToNextMidiMessage < minimumSubBlockSize)
+        if (samplesToNextMidiMessage < minimumSubBlockSize && ! firstEvent)
         {
             handleMidiEvent (m);
             continue;
         }
+
+        firstEvent = false;
 
         renderVoices (outputAudio, startSample, samplesToNextMidiMessage);
         handleMidiEvent (m);

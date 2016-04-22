@@ -356,12 +356,12 @@ public:
         loadButton.addListener (this);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
     }
 
-    void resized()
+    void resized() override
     {
         const int m = 6;
         const int textH = 44;
@@ -401,7 +401,7 @@ private:
 
     ProjucerLookAndFeel lf;
 
-    void buttonClicked (Button* b)
+    void buttonClicked (Button* b) override
     {
         if (b == &generateButton)   generate();
         else if (b == &loadButton)  loadFile();

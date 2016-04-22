@@ -46,7 +46,7 @@ public:
         }
 
         g.setColour (button.findColour (ToggleButton::textColourId));
-        g.setFont (getContaxProFont().withHeight (labelFontSize));
+        g.setFont (getDialogFont().withHeight (labelFontSize));
 
         g.drawFittedText (button.getButtonText(), 24, 1,
                           button.getWidth() - 24, button.getHeight(),
@@ -83,26 +83,22 @@ public:
     //==============================================================================
     Font getTextButtonFont (TextButton&, int /*buttonHeight*/) override
     {
-        return getContaxProFont().withHeight (buttonFontSize);
+        return getDialogFont().withHeight (buttonFontSize);
     }
 
     Font getLabelFont (Label&) override
     {
-        return getContaxProFont().withHeight (labelFontSize);
-    }
-
-    static const Font& getContaxProFont()
-    {
-        static Font font (Typeface::createSystemTypefaceFor (BinaryData::ContaxPro55Rm_otf, BinaryData::ContaxPro55Rm_otfSize));
-        return font;
+        return getDialogFont().withHeight (labelFontSize);
     }
 
     //==============================================================================
     int getAlertWindowButtonHeight() override   { return 40; }
 
-    Font getAlertWindowTitleFont() override     { return getContaxProFont().withHeight (18); }
-    Font getAlertWindowMessageFont() override   { return getContaxProFont().withHeight (12); }
-    Font getAlertWindowFont() override          { return getContaxProFont().withHeight (12); }
+    static Font getDialogFont()                 { return Font(); }
+
+    Font getAlertWindowTitleFont() override     { return getDialogFont().withHeight (18); }
+    Font getAlertWindowMessageFont() override   { return getDialogFont().withHeight (12); }
+    Font getAlertWindowFont() override          { return getDialogFont().withHeight (12); }
 
     //==============================================================================
     static Colour getBackgroundColour()         { return Colour (0xff4d4d4d); }

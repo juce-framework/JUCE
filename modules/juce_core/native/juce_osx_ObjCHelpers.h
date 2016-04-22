@@ -86,7 +86,7 @@ namespace
     typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
     static inline MsgSendSuperFn getMsgSendSuperFn() noexcept   { return (MsgSendSuperFn) (void*) objc_msgSendSuper; }
 
-   #if ! JUCE_PPC && ! JUCE_IOS
+   #if ! JUCE_IOS
     typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
     static inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
    #endif

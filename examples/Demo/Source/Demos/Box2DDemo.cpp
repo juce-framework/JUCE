@@ -136,7 +136,7 @@ struct Box2DRenderComponent  : public Component
         setOpaque (true);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillAll (Colours::white);
 
