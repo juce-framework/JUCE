@@ -368,7 +368,6 @@ class var::VariantType_Binary   : public var::VariantType
 {
 public:
     VariantType_Binary() noexcept {}
-
     static const VariantType_Binary instance;
 
     void cleanUp (ValueUnion& data) const noexcept override                      { delete data.binaryValue; }
@@ -430,7 +429,6 @@ const var::VariantType_Object       var::VariantType_Object::instance;
 const var::VariantType_Array        var::VariantType_Array::instance;
 const var::VariantType_Binary       var::VariantType_Binary::instance;
 const var::VariantType_Method       var::VariantType_Method::instance;
-
 
 //==============================================================================
 var::var() noexcept : type (&VariantType_Void::instance) {}
