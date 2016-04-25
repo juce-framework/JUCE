@@ -51,6 +51,7 @@ struct ModuleDescription
     String getLicense() const           { return moduleInfo [Ids::license].toString(); }
     String getPreprocessorDefs() const  { return moduleInfo [Ids::defines].toString(); }
     String getExtraSearchPaths() const  { return moduleInfo [Ids::searchpaths].toString(); }
+    StringArray getDependencies() const;
 
     File getFolder() const              { jassert (moduleFolder != File()); return moduleFolder; }
     File getHeader() const;

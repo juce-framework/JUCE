@@ -105,6 +105,14 @@ File ModuleDescription::getHeader() const
     return File();
 }
 
+StringArray ModuleDescription::getDependencies() const
+{
+    StringArray deps = StringArray::fromTokens (moduleInfo ["dependencies"].toString(), " \t;,", "\"'");
+    deps.trim();
+    deps.removeEmptyStrings();
+    return deps;
+}
+
 //==============================================================================
 ModuleList::ModuleList()
 {
@@ -127,6 +135,7 @@ const ModuleDescription* ModuleList::getModuleWithID (const String& moduleID) co
     for (int i = 0; i < modules.size(); ++i)
     {
         ModuleDescription* m = modules.getUnchecked(i);
+
         if (m->getID() == moduleID)
             return m;
     }
@@ -694,25 +703,12 @@ static void getDependencies (Project& project, const String& moduleID, StringArr
 {
     ModuleDescription info (project.getModules().getModuleInfo (moduleID));
 
-    if (info.isValid())
+    for (auto uid : info.getDependencies())
     {
-        const var depsArray (info.moduleInfo ["dependencies"]);
-
-        if (const Array<var>* const deps = depsArray.getArray())
+        if (! dependencies.contains (uid, true))
         {
-            for (int i = 0; i < deps->size(); ++i)
-            {
-                const var& d = deps->getReference(i);
-
-                String uid (d [Ids::ID].toString());
-                String version (d [Ids::version].toString());
-
-                if (! dependencies.contains (uid, true))
-                {
-                    dependencies.add (uid);
-                    getDependencies (project, uid, dependencies);
-                }
-            }
+            dependencies.add (uid);
+            getDependencies (project, uid, dependencies);
         }
     }
 }
@@ -722,9 +718,9 @@ StringArray EnabledModuleList::getExtraDependenciesNeeded (const String& moduleI
     StringArray dependencies, extraDepsNeeded;
     getDependencies (project, moduleID, dependencies);
 
-    for (int i = 0; i < dependencies.size(); ++i)
-        if ((! isModuleEnabled (dependencies[i])) && dependencies[i] != moduleID)
-            extraDepsNeeded.add (dependencies[i]);
+    for (auto dep : dependencies)
+        if (dep != moduleID && ! isModuleEnabled (dep))
+            extraDepsNeeded.add (dep);
 
     return extraDepsNeeded;
 }
