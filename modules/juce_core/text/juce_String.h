@@ -1199,6 +1199,8 @@ public:
     */
     size_t copyToUTF32 (CharPointer_UTF32::CharType* destBuffer, size_t maxBufferSizeBytes) const noexcept;
 
+    static String fromSingleByteData (const void* data, size_t numBytes);
+
     //==============================================================================
     /** Increases the string's internally allocated storage.
 
