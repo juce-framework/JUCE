@@ -48,7 +48,7 @@
 #include "../LiveBuildEngine/projucer_CompileEngineServer.h"
 
 #include "jucer_ProjucerLicenses.h"
-juce_ImplementSingleton (ProjucerLicences);
+juce_ImplementSingleton (ProjucerLicenses);
 
 struct ProjucerAppClasses
 {
