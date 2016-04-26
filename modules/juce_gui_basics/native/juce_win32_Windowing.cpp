@@ -1040,8 +1040,9 @@ public:
 
             Point<float> getMousePos (const POINTL& mousePos) const
             {
-                return owner.globalToLocal (Point<float> (static_cast<float> (mousePos.x),
-                                                          static_cast<float> (mousePos.y)));
+                return owner.globalToLocal (ScalingHelpers::unscaledScreenPosToScaled (owner.getComponent().getDesktopScaleFactor(),
+                                                                                       Point<float> (static_cast<float> (mousePos.x),
+                                                                                                     static_cast<float> (mousePos.y))));
             }
 
             template <typename CharType>
