@@ -999,8 +999,10 @@ public:
     {
         if (constrainer != nullptr && ! isKioskMode())
         {
-            Rectangle<int> pos      (convertToRectInt (flippedScreenRect (r)));
-            Rectangle<int> original (convertToRectInt (flippedScreenRect ([window frame])));
+            const float scale = getComponent().getDesktopScaleFactor();
+
+            Rectangle<int> pos      = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
+            Rectangle<int> original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
 
             const Rectangle<int> screenBounds (Desktop::getInstance().getDisplays().getTotalBounds (true));
 
@@ -1022,6 +1024,8 @@ public:
                                           pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
                                           pos.getX() == original.getX() && pos.getRight()  != original.getRight());
             }
+
+            pos = ScalingHelpers::scaledScreenPosToUnscaled (scale, pos);
 
             r = flippedScreenRect (makeNSRect (pos));
         }
