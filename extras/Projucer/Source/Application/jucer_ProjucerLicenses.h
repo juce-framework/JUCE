@@ -1,23 +1,40 @@
 /*
- ==============================================================================
- Copyright 2015 by Raw Material Software Ltd.
- ==============================================================================
-*/
+  ==============================================================================
 
+   This file is part of the JUCE library.
+   Copyright (c) 2015 - ROLI Ltd.
+
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
+
+   Details of these licenses can be found at: www.gnu.org/licenses
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+   ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.juce.com for more information.
+
+  ==============================================================================
+*/
 
 #ifndef PROJUCER_PROJUCERLICENSES_H_INCLUDED
 #define PROJUCER_PROJUCERLICENSES_H_INCLUDED
 
 
 //==============================================================================
-struct ProjucerLicences  : private DeletedAtShutdown
+struct ProjucerLicenses  : private DeletedAtShutdown
 {
-    ProjucerLicences()
+    ProjucerLicenses()
     {
         dll.initialise (crashCallback, quitCallback, false);
     }
 
-    juce_DeclareSingleton (ProjucerLicences, false);
+    juce_DeclareSingleton (ProjucerLicenses, false);
 
     //==============================================================================
     struct LoginCallback
@@ -103,7 +120,7 @@ private:
 
     static void staticCallbackFunction (void* userInfo, const char* errorMessage, const char* username, const char* apiKey)
     {
-        static_cast<ProjucerLicences*> (userInfo)->callbackFunction (errorMessage, username, apiKey);
+        static_cast<ProjucerLicenses*> (userInfo)->callbackFunction (errorMessage, username, apiKey);
     }
 
     static void crashCallback (const char*) {}

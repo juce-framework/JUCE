@@ -27,9 +27,9 @@
 
 
 class LoginForm  : public Component,
-                   public ButtonListener,
+                   private ButtonListener,
                    private TextEditor::Listener,
-                   private ProjucerLicences::LoginCallback
+                   private ProjucerLicenses::LoginCallback
 {
 public:
     LoginForm()
@@ -56,7 +56,7 @@ public:
         initialiseTextField (userIDEditor, userIDLabel);
         addAndMakeVisible (userIDEditor);
 
-        String userName = ProjucerLicences::getInstance()->getLoginName();
+        String userName = ProjucerLicenses::getInstance()->getLoginName();
         userIDEditor.setText (userName.isEmpty() ? getLastUserName() : userName);
 
         initialiseLabel (errorLabel, Font::plain, ProjucerDialogLookAndFeel::getErrorTextColour());
@@ -223,7 +223,7 @@ private:
         errorLabel.setVisible (false);
         spinner.setVisible (true);
 
-        ProjucerLicences::getInstance()->login (loginName, password, rememberLogin, this);
+        ProjucerLicenses::getInstance()->login (loginName, password, rememberLogin, this);
     }
 
     void registerButtonClicked()
