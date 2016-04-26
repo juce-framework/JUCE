@@ -1388,6 +1388,10 @@ struct AAXClasses
         properties->AddProperty (AAX_eProperty_Constraint_AlwaysProcess, true);
        #endif
 
+       #if JucePlugin_AAXDisableSaveRestore
+        properties->AddProperty (AAX_eProperty_SupportsSaveRestore, false);
+       #endif
+
         if (enableAuxBusesForCurrentFormat (busUtils, inputLayout, outputLayout))
         {
             check (desc.AddSideChainIn (JUCEAlgorithmIDs::sideChainBuffers));
