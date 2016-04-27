@@ -2194,7 +2194,7 @@ private:
         {
             const String fileType (getFileType (path));
 
-            if (shouldBeAddedToXcodeResources || fileType.startsWith ("image.") || fileType.startsWith ("text.") || fileType.startsWith ("file."))
+            if (shouldBeAddedToXcodeResources)
             {
                 resourceIDs.add (addBuildFile (pathAsString, refID, false, false));
                 resourceFileRefs.add (refID);
