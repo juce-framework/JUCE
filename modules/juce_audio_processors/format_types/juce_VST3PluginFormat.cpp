@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST3
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WIN)
 
 } // namespace juce
 

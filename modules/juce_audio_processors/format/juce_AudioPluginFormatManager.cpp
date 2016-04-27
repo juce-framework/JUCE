@@ -65,11 +65,11 @@ void AudioPluginFormatManager::addDefaultFormats()
     // you should only call this method once!
     for (int i = formats.size(); --i >= 0;)
     {
-       #if JUCE_PLUGINHOST_VST
+       #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WIN || JUCE_LINUX)
         jassert (dynamic_cast<VSTPluginFormat*> (formats[i]) == nullptr);
        #endif
 
-       #if JUCE_PLUGINHOST_VST3
+       #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WIN)
         jassert (dynamic_cast<VST3PluginFormat*> (formats[i]) == nullptr);
        #endif
 
@@ -87,11 +87,11 @@ void AudioPluginFormatManager::addDefaultFormats()
     formats.add (new AudioUnitPluginFormat());
    #endif
 
-   #if JUCE_PLUGINHOST_VST
+   #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WIN || JUCE_LINUX)
     formats.add (new VSTPluginFormat());
    #endif
 
-   #if JUCE_PLUGINHOST_VST3
+   #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WIN)
     formats.add (new VST3PluginFormat());
    #endif
 
