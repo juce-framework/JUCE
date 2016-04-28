@@ -276,9 +276,9 @@ void ProjectExporter::createIconProperties (PropertyListBuilder& props)
     Array<var> ids;
 
     choices.add ("<None>");
-    ids.add (var::null);
-    choices.add (String::empty);
-    ids.add (var::null);
+    ids.add (var());
+    choices.add (String());
+    ids.add (var());
 
     for (int i = 0; i < images.size(); ++i)
     {

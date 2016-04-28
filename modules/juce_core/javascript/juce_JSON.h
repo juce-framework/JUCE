@@ -52,7 +52,7 @@ public:
         it will contain an error message.
 
         If you're not interested in the error message, you can use one of the other
-        shortcut parse methods, which simply return a var::null if the parsing fails.
+        shortcut parse methods, which simply return a var() if the parsing fails.
 
         Note that this will only parse valid JSON, which means that the item given must
         be either an object or an array definition. If you want to also be able to parse
@@ -62,7 +62,7 @@ public:
 
     /** Attempts to parse some JSON-formatted text, and returns the result as a var object.
 
-        If the parsing fails, this simply returns var::null - if you need to find out more
+        If the parsing fails, this simply returns var() - if you need to find out more
         detail about the parse error, use the alternative parse() method which returns a Result.
 
         Note that this will only parse valid JSON, which means that the item given must
@@ -77,7 +77,7 @@ public:
         Note that this is just a short-cut for reading the entire file into a string and
         parsing the result.
 
-        If the parsing fails, this simply returns var::null - if you need to find out more
+        If the parsing fails, this simply returns var() - if you need to find out more
         detail about the parse error, use the alternative parse() method which returns a Result.
     */
     static var parse (const File& file);
@@ -88,7 +88,7 @@ public:
         Note that this is just a short-cut for reading the entire stream into a string and
         parsing the result.
 
-        If the parsing fails, this simply returns var::null - if you need to find out more
+        If the parsing fails, this simply returns var() - if you need to find out more
         detail about the parse error, use the alternative parse() method which returns a Result.
     */
     static var parse (InputStream& input);

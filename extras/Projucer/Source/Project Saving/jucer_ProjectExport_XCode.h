@@ -419,7 +419,7 @@ protected:
 
             const char* cppLanguageStandardNames[] = { "Use Default", "C++98", "GNU++98", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
             Array<var> cppLanguageStandardValues;
-            cppLanguageStandardValues.add (var::null);
+            cppLanguageStandardValues.add (var());
             cppLanguageStandardValues.add ("c++98");
             cppLanguageStandardValues.add ("gnu++98");
             cppLanguageStandardValues.add ("c++11");
@@ -433,7 +433,7 @@ protected:
 
             const char* cppLibNames[] = { "Use Default", "LLVM libc++", "GNU libstdc++", nullptr };
             Array<var> cppLibValues;
-            cppLibValues.add (var::null);
+            cppLibValues.add (var());
             cppLibValues.add ("libc++");
             cppLibValues.add ("libstdc++");
 
