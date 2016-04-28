@@ -107,7 +107,7 @@ String ProjectExporter::getCurrentPlatformExporterName()
    #if JUCE_MAC
     return XCodeProjectExporter::getNameMac();
    #elif JUCE_WINDOWS
-    return MSVCProjectExporterVC2010::getName();
+    return MSVCProjectExporterVC2015::getName();
    #elif JUCE_LINUX
     return MakefileProjectExporter::getNameLinux();
    #else
