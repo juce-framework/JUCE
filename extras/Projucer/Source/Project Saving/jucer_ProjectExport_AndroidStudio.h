@@ -53,7 +53,7 @@ public:
           gradleVersion (settings, Ids::gradleVersion, nullptr, "2.10"),
           gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.7.0-rc1"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
-          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.3"),
+          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.2"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {
         name = getName();
