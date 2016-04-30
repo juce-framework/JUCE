@@ -737,8 +737,8 @@ static const unsigned char temp_binary_data_9[] =
 "    CONTENTCOMPCLASS();\r\n"
 "    ~CONTENTCOMPCLASS();\r\n"
 "\r\n"
-"    void paint (Graphics&);\r\n"
-"    void resized();\r\n"
+"    void paint (Graphics&) override;\r\n"
+"    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
@@ -1173,8 +1173,8 @@ static const unsigned char temp_binary_data_16[] =
 "    COMPONENTCLASS();\r\n"
 "    ~COMPONENTCLASS();\r\n"
 "\r\n"
-"    void paint (Graphics&);\r\n"
-"    void resized();\r\n"
+"    void paint (Graphics&) override;\r\n"
+"    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
@@ -4055,14 +4055,14 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2131; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
-        case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
+        case 0x6fa10171:  numBytes = 942; return jucer_ContentCompTemplate_h;
         case 0x28d496ad:  numBytes = 1161; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1992; return jucer_MainTemplate_NoWindow_cpp;
         case 0xda2391f8:  numBytes = 3848; return jucer_MainTemplate_SimpleWindow_cpp;
         case 0x400bc026:  numBytes = 3760; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
-        case 0xe7bf237a:  numBytes = 648; return jucer_NewComponentTemplate_h;
+        case 0xe7bf237a:  numBytes = 666; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1644; return jucer_NewInlineComponentTemplate_h;
