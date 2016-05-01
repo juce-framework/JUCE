@@ -100,6 +100,7 @@ void MPESynthesiserBase::renderNextBlock (AudioBuffer<floatType>& outputAudio,
     MidiBuffer::Iterator midiIterator (inputMidi);
     midiIterator.setNextSamplePosition (startSample);
 
+    bool firstEvent = true;
     int midiEventPos;
     MidiMessage m;
 
@@ -122,11 +123,13 @@ void MPESynthesiserBase::renderNextBlock (AudioBuffer<floatType>& outputAudio,
             break;
         }
 
-        if (samplesToNextMidiMessage < minimumSubBlockSize)
+        if (samplesToNextMidiMessage < minimumSubBlockSize && ! firstEvent)
         {
             handleMidiEvent (m);
             continue;
         }
+
+        firstEvent = false;
 
         renderNextSubBlock (outputAudio, startSample, samplesToNextMidiMessage);
         handleMidiEvent (m);

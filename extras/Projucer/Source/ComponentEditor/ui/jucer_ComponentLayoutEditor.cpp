@@ -43,7 +43,7 @@ public:
         setFocusContainer (true);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         if (! dontFillBackground)
         {
@@ -59,7 +59,7 @@ public:
         }
     }
 
-    void resized()
+    void resized() override
     {
         if (! getBounds().isEmpty())
         {
@@ -92,7 +92,7 @@ public:
         }
     }
 
-    void moved()
+    void moved() override
     {
         ((ComponentLayoutEditor*) getParentComponent())->updateOverlayPositions();
     }

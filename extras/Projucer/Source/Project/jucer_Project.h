@@ -226,7 +226,7 @@ public:
         void addFileUnchecked (const File& file, int insertIndex, bool shouldCompile);
         bool addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile);
         void removeItemFromProject();
-        void sortAlphabetically (bool keepGroupsAtStart);
+        void sortAlphabetically (bool keepGroupsAtStart, bool recursive);
         Item findItemForFile (const File& file) const;
         bool containsChildForFile (const RelativePath& file) const;
 

@@ -650,7 +650,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
     callback (userData, result.release(), errorMsg);
 }
 
-bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override
+bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
 {
     return false;
 }

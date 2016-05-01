@@ -148,7 +148,8 @@ public:
 
         Use getIndexChosenByMenu() to find out the type that was chosen.
     */
-    void addToMenu (PopupMenu& menu, SortMethod sortMethod) const;
+    void addToMenu (PopupMenu& menu, SortMethod sortMethod,
+                    const String& currentlyTickedPluginID = String()) const;
 
     /** Converts a menu item index that has been chosen into its index in this list.
         Returns -1 if it's not an ID that was used.

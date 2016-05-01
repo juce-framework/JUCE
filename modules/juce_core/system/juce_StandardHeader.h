@@ -36,7 +36,7 @@
 */
 #define JUCE_MAJOR_VERSION      4
 #define JUCE_MINOR_VERSION      2
-#define JUCE_BUILDNUMBER        0
+#define JUCE_BUILDNUMBER        1
 
 /** Current Juce version number.
 
@@ -66,9 +66,6 @@
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4514 4245 4100)
-#endif
-
-#if JUCE_USE_MSVC_INTRINSICS
  #include <intrin.h>
 #endif
 
@@ -130,7 +127,7 @@
  #ifdef __INTEL_COMPILER
   #pragma warning (disable: 1125) // (virtual override warning)
  #endif
-#elif defined (JUCE_DLL) || defined (JUCE_DLL_BUILD) || defined (JUCE_SHARED_CODE)
+#elif defined (JUCE_DLL) || defined (JUCE_DLL_BUILD)
  #define JUCE_API __attribute__ ((visibility("default")))
 #endif
 

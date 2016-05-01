@@ -145,16 +145,22 @@ public:
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant.
         You can also use operator[] to get a property.
-        @see var, setProperty, hasProperty
+        @see var, setProperty, getPropertyPointer, hasProperty
     */
     const var& getProperty (const Identifier& name) const noexcept;
 
-    /** Returns the value of a named property, or a user-specified default if the property doesn't exist.
-        If no such property has been set, this will return the value of defaultReturnValue.
+    /** Returns the value of a named property, or the value of defaultReturnValue
+        if the property doesn't exist.
         You can also use operator[] and getProperty to get a property.
-        @see var, getProperty, setProperty, hasProperty
+        @see var, getProperty, getPropertyPointer, setProperty, hasProperty
     */
     var getProperty (const Identifier& name, const var& defaultReturnValue) const;
+
+    /** Returns a pointer to the value of a named property, or nullptr if the property
+        doesn't exist.
+        @see var, getProperty, setProperty, hasProperty
+    */
+    const var* getPropertyPointer (const Identifier& name) const noexcept;
 
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant. This is the same as

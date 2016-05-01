@@ -928,9 +928,13 @@ static bool isGroupSorted (const ValueTree& state, bool keepGroupsAtStart)
     return stateCopy.isEquivalentTo (state);
 }
 
-void Project::Item::sortAlphabetically (bool keepGroupsAtStart)
+void Project::Item::sortAlphabetically (bool keepGroupsAtStart, bool recursive)
 {
     sortGroup (state, keepGroupsAtStart, getUndoManager());
+
+    if (recursive)
+        for (int i = getNumChildren(); --i >= 0;)
+            getChild(i).sortAlphabetically (keepGroupsAtStart, true);
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
@@ -995,7 +999,7 @@ bool Project::Item::addFileRetainingSortOrder (const File& file, bool shouldComp
         return false;
 
     if (wasSortedGroupsNotFirst || wasSortedGroupsFirst)
-        sortAlphabetically (wasSortedGroupsFirst);
+        sortAlphabetically (wasSortedGroupsFirst, false);
 
     return true;
 }

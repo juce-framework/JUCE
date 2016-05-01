@@ -110,8 +110,7 @@ public:
     void killChildProcess();
     void cleanAll();
     void handleMissingSystemHeaders();
-    bool isBuildTabShowing() const;
-    bool isLoggedInTabShowing() const;
+    bool isBuildTabEnabled() const;
     void setBuildEnabled (bool);
     bool isBuildEnabled() const;
     bool areWarningsEnabled() const;
@@ -162,6 +161,8 @@ private:
     void updateWarningState();
     void launchApp();
     void killApp();
+    bool isBuildTabSuitableForLoggedInUser() const;
+    bool isBuildTabLoggedInWithoutLicense() const;
 
     ReferenceCountedObjectPtr<CompileEngineChildProcess> getChildProcess();
 

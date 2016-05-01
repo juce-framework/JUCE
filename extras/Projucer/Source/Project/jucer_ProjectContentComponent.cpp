@@ -159,7 +159,7 @@ struct LogoComponent  : public Component
         logo = Drawable::createFromSVG (*svg);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
 
@@ -354,9 +354,9 @@ struct BuildTabComponent  : public ConcertinaPanel
 struct ProjucerDisabledComp   : public Component,
                                 private Button::Listener
 {
-    ProjucerDisabledComp (String message, bool canLogin, bool requirePurchase = false,
+    ProjucerDisabledComp (String message, bool loggedIn, bool canLogin, bool requirePurchase = false,
                           const String& loginName = String())
-              : isPurchaseButton (requirePurchase)
+              : isLoggedIn (loggedIn), isPurchaseButton (requirePurchase)
     {
         infoLabel.setColour (Label::textColourId, findColour (mainBackgroundColourId).contrasting (0.7f));
         infoLabel.setJustificationType (Justification::centred);
@@ -404,7 +404,7 @@ struct ProjucerDisabledComp   : public Component,
         }
         else if (btn == signOutButton.get())
         {
-            ProjucerLicences::getInstance()->logout();
+            ProjucerLicenses::getInstance()->logout();
             ProjucerApplication::getApp().updateAllBuildTabs();
         }
     }
@@ -412,7 +412,7 @@ struct ProjucerDisabledComp   : public Component,
     Label infoLabel { "info", String() };
     TextButton loginButton { "Log-in..." };
     ScopedPointer<TextButton> signOutButton;
-    bool isPurchaseButton;
+    bool isLoggedIn, isPurchaseButton;
 };
 
 struct EnableBuildComp   : public Component
@@ -449,11 +449,11 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
    #if JUCE_WINDOWS
     ignoreUnused (child);
     return new ProjucerDisabledComp ("Windows support is still under development - "
-                                     "please check for updates at www.juce.com!", false);
+                                     "please check for updates at www.juce.com!", false, false);
    #elif JUCE_LINUX
     ignoreUnused (child);
     return new ProjucerDisabledComp ("Linux support is still under development - "
-                                     "please check for updates at www.juce.com!", false);
+                                     "please check for updates at www.juce.com!", false, false);
    #else
     if (child != nullptr)
     {
@@ -462,7 +462,7 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
         return new BuildTabComponent (child, new ProjucerAppClasses::ErrorListComp (child->errorList));
     }
 
-    auto& unlockStatus = *ProjucerLicences::getInstance();
+    auto& unlockStatus = *ProjucerLicenses::getInstance();
 
     if (unlockStatus.hasLiveCodingLicence()
         && project != nullptr
@@ -474,7 +474,7 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
                                           + newLine
                                           + "Your account " + unlockStatus.getLoginName().quoted()
                                           + " does not have an asscociated JUCE Pro license:",
-                                         true, true, unlockStatus.getLoginName());
+                                         true, true, true, unlockStatus.getLoginName());
 
     if (! unlockStatus.isDLLPresent())
         return new ProjucerDisabledComp (String ("The live-building DLL is missing!") + newLine
@@ -482,10 +482,12 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
                                           + "To enable the compiler, you'll need to install the missing DLL "
                                           + CompileEngineDLL::getDLLName().quoted() + newLine
                                           + newLine
-                                          + "Visit the JUCE website/forum for more help on getting and installing the DLL!", false);
+                                          + "Visit the JUCE website/forum for more help on getting and installing the DLL!",
+                                         false, false);
 
     return new ProjucerDisabledComp ("The Projucer's live-build features are currently disabled!\n\n"
-                                     "To enable them, you'll need to log-in with your JUCE account details:", true, false);
+                                     "To enable them, you'll need to log-in with your JUCE account details:",
+                                     false, true, false);
    #endif
 }
 
@@ -494,14 +496,24 @@ BuildTabComponent* findBuildTab (const TabbedComponent& tabs)
     return dynamic_cast<BuildTabComponent*> (tabs.getTabContentComponent (2));
 }
 
-bool ProjectContentComponent::isBuildTabShowing() const
+bool ProjectContentComponent::isBuildTabEnabled() const
 {
     return findBuildTab (treeViewTabs) != nullptr;
 }
 
-bool ProjectContentComponent::isLoggedInTabShowing() const
+bool ProjectContentComponent::isBuildTabSuitableForLoggedInUser() const
 {
-    return isBuildTabShowing() || dynamic_cast<EnableBuildComp*> (treeViewTabs.getTabContentComponent (2)) != nullptr;
+    return isBuildTabEnabled()
+             || isBuildTabLoggedInWithoutLicense()
+             || dynamic_cast<EnableBuildComp*> (treeViewTabs.getTabContentComponent (2)) != nullptr;
+}
+
+bool ProjectContentComponent::isBuildTabLoggedInWithoutLicense() const
+{
+    if (auto* c = dynamic_cast<ProjucerDisabledComp*> (treeViewTabs.getTabContentComponent (2)))
+        return c->isLoggedIn;
+
+    return false;
 }
 
 void ProjectContentComponent::createProjectTabs()
@@ -1355,16 +1367,16 @@ bool ProjectContentComponent::isBuildEnabled() const
 {
     return project != nullptr
             && ! LiveBuildProjectSettings::isBuildDisabled (*project)
-            && ProjucerLicences::getInstance()->hasLiveCodingLicence()
-            && ProjucerLicences::getInstance()->isLoggedIn();
+            && ProjucerLicenses::getInstance()->hasLiveCodingLicence()
+            && ProjucerLicenses::getInstance()->isLoggedIn();
 }
 
 void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
 {
     if (project != nullptr
          && (treeViewTabs.getNumTabs() < 3
-              || isBuildEnabled() != isBuildTabShowing()
-              || ProjucerLicences::getInstance()->isLoggedIn() != isLoggedInTabShowing()))
+              || isBuildEnabled() != isBuildTabEnabled()
+              || ProjucerLicenses::getInstance()->isLoggedIn() != isBuildTabSuitableForLoggedInUser()))
         rebuildProjectTabs();
 }
 
@@ -1493,7 +1505,7 @@ void ProjectContentComponent::handleMissingSystemHeaders()
     deleteProjectTabs();
     createProjectTabs();
 
-    ProjucerDisabledComp* buildTab = new ProjucerDisabledComp (tabMessage, false);
+    ProjucerDisabledComp* buildTab = new ProjucerDisabledComp (tabMessage, false, false);
 
     treeViewTabs.addTab ("Build", Colours::transparentBlack, buildTab, true);
     showBuildTab();

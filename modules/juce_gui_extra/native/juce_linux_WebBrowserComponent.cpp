@@ -32,6 +32,10 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
       blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
+    // Unfortunately, WebBrowserComponent is not implemented for Linux yet!
+    // This is just a stub implementation without any useful functionality.
+    jassertfalse;
+
     setOpaque (true);
 }
 

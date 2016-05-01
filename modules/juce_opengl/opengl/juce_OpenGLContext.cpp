@@ -560,6 +560,23 @@ public:
         detach();
     }
 
+    void detach()
+    {
+        stopTimer();
+
+        Component& comp = *getComponent();
+
+       #if JUCE_MAC
+        [[(NSView*) comp.getWindowHandle() window] disableScreenUpdatesUntilFlush];
+       #endif
+
+        if (CachedImage* const oldCachedImage = CachedImage::get (comp))
+            oldCachedImage->stop(); // (must stop this before detaching it from the component)
+
+        comp.setCachedComponentImage (nullptr);
+        context.nativeContext = nullptr;
+    }
+
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         Component& comp = *getComponent();
@@ -650,23 +667,6 @@ private:
         startTimer (400);
     }
 
-    void detach()
-    {
-        stopTimer();
-
-        Component& comp = *getComponent();
-
-       #if JUCE_MAC
-        [[(NSView*) comp.getWindowHandle() window] disableScreenUpdatesUntilFlush];
-       #endif
-
-        if (CachedImage* const oldCachedImage = CachedImage::get (comp))
-            oldCachedImage->stop(); // (must stop this before detaching it from the component)
-
-        comp.setCachedComponentImage (nullptr);
-        context.nativeContext = nullptr;
-    }
-
     void timerCallback() override
     {
         if (CachedImage* const cachedImage = CachedImage::get (*getComponent()))
@@ -676,10 +676,13 @@ private:
 
 //==============================================================================
 OpenGLContext::OpenGLContext()
-    : nativeContext (nullptr), renderer (nullptr), currentRenderScale (1.0),
-      contextToShareWith (nullptr), versionRequired (OpenGLContext::defaultGLVersion),
+    : nativeContext (nullptr), renderer (nullptr),
+      currentRenderScale (1.0), contextToShareWith (nullptr),
+      versionRequired (OpenGLContext::defaultGLVersion),
       imageCacheMaxSize (8 * 1024 * 1024),
-      renderComponents (true), useMultisampling (false), continuousRepaint (false)
+      renderComponents (true),
+      useMultisampling (false),
+      continuousRepaint (false)
 {
 }
 
@@ -757,7 +760,12 @@ void OpenGLContext::attachTo (Component& component)
 
 void OpenGLContext::detach()
 {
-    attachment = nullptr;
+    if (Attachment* a = attachment)
+    {
+        a->detach(); // must detach before nulling our pointer
+        attachment = nullptr;
+    }
+
     nativeContext = nullptr;
 }
 
@@ -1078,13 +1086,11 @@ void OpenGLContext::NativeContext::surfaceCreated (jobject holder)
 void OpenGLContext::NativeContext::surfaceDestroyed (jobject holder)
 {
     ignoreUnused (holder);
-    // unlike the name suggets this will be called just before the
-    // surface is destroyed. We need to pause the render thread.
 
+    // unlike the name suggests this will be called just before the
+    // surface is destroyed. We need to pause the render thread.
     if (juceContext != nullptr)
-    {
         if (OpenGLContext::CachedImage* cachedImage = juceContext->getCachedImage())
             cachedImage->pause();
-    }
 }
 #endif

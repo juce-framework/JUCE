@@ -140,17 +140,13 @@ private:
 
 
 //==============================================================================
-#if JUCE_USE_MSVC_INTRINSICS && ! defined (__INTEL_COMPILER)
+#if JUCE_MSVC && ! defined (__INTEL_COMPILER)
  #pragma intrinsic (_byteswap_ulong)
 #endif
 
 inline uint16 ByteOrder::swap (uint16 n) noexcept
 {
-   #if JUCE_USE_MSVC_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
-    return static_cast<uint16> (_byteswap_ushort (n));
-   #else
     return static_cast<uint16> ((n << 8) | (n >> 8));
-   #endif
 }
 
 inline uint32 ByteOrder::swap (uint32 n) noexcept
@@ -160,15 +156,8 @@ inline uint32 ByteOrder::swap (uint32 n) noexcept
    #elif (JUCE_GCC  || JUCE_CLANG) && JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     asm("bswap %%eax" : "=a"(n) : "a"(n));
     return n;
-   #elif JUCE_USE_MSVC_INTRINSICS
+   #elif JUCE_MSVC
     return _byteswap_ulong (n);
-   #elif JUCE_MSVC && ! JUCE_NO_INLINE_ASM
-    __asm {
-        mov eax, n
-        bswap eax
-        mov n, eax
-    }
-    return n;
    #elif JUCE_ANDROID
     return bswap_32 (n);
    #else
@@ -180,7 +169,7 @@ inline uint64 ByteOrder::swap (uint64 value) noexcept
 {
    #if JUCE_MAC || JUCE_IOS
     return OSSwapInt64 (value);
-   #elif JUCE_USE_MSVC_INTRINSICS
+   #elif JUCE_MSVC
     return _byteswap_uint64 (value);
    #else
     return (((uint64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));

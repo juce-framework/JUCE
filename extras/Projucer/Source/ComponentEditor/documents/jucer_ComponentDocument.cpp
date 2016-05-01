@@ -111,13 +111,13 @@ public:
             removeChildComponent (i);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         document->getPaintRoutine (0)->fillWithBackground (g, alwaysFillBackground);
         document->getPaintRoutine (0)->drawElements (g, getLocalBounds());
     }
 
-    void resized()
+    void resized() override
     {
         if (! getBounds().isEmpty())
         {

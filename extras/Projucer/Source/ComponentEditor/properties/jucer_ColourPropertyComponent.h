@@ -41,7 +41,7 @@ public:
     virtual Colour getColour() const = 0;
     virtual void resetToDefault() = 0;
 
-    void refresh()
+    void refresh() override
     {
         ((ColourPropEditorComponent*) getChildComponent (0))->refresh();
     }
@@ -55,7 +55,7 @@ public:
         {
         }
 
-        void paint (Graphics& g)
+        void paint (Graphics& g) override
         {
             g.fillAll (Colours::grey);
 
@@ -86,13 +86,13 @@ public:
             }
         }
 
-        void mouseDown (const MouseEvent&)
+        void mouseDown (const MouseEvent&) override
         {
             CallOutBox::launchAsynchronously (new ColourSelectorComp (this, canResetToDefault),
                                               getScreenBounds(), nullptr);
         }
 
-        void changeListenerCallback (ChangeBroadcaster* source)
+        void changeListenerCallback (ChangeBroadcaster* source) override
         {
             const ColourSelector* const cs = (const ColourSelector*) source;
 
@@ -123,7 +123,7 @@ public:
                 setSize (300, 400);
             }
 
-            void resized()
+            void resized() override
             {
                 if (defaultButton.isVisible())
                 {
@@ -137,7 +137,7 @@ public:
                 }
             }
 
-            void buttonClicked (Button*)
+            void buttonClicked (Button*) override
             {
                 owner->resetToDefault();
                 owner->refresh();

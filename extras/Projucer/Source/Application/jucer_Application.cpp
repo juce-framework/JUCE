@@ -511,11 +511,11 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         break;
 
     case CommandIDs::loginLogout:
-        result.setInfo (ProjucerLicences::getInstance()->isLoggedIn()
-                           ? String ("Sign out ") + ProjucerLicences::getInstance()->getLoginName()
+        result.setInfo (ProjucerLicenses::getInstance()->isLoggedIn()
+                           ? String ("Sign out ") + ProjucerLicenses::getInstance()->getLoginName()
                            : String ("Sign in..."),
                         "Log out of your JUCE account", CommandCategories::general, 0);
-        result.setActive (ProjucerLicences::getInstance()->isDLLPresent());
+        result.setActive (ProjucerLicenses::getInstance()->isDLLPresent());
         break;
 
     default:
@@ -711,7 +711,7 @@ void ProjucerApplication::hideLoginForm()
 
 void ProjucerApplication::showLoginForm()
 {
-    if (ProjucerLicences::getInstance()->isDLLPresent())
+    if (ProjucerLicenses::getInstance()->isDLLPresent())
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
@@ -739,7 +739,7 @@ void ProjucerApplication::showLoginForm()
 
 void ProjucerApplication::showLoginFormAsyncIfNotTriedRecently()
 {
-    if (ProjucerLicences::getInstance()->isDLLPresent())
+    if (ProjucerLicenses::getInstance()->isDLLPresent())
     {
         Time lastLoginAttempt (getGlobalProperties().getValue ("lastLoginAttemptTime").getIntValue() * (int64) 1000);
 
@@ -756,7 +756,7 @@ void ProjucerApplication::timerCallback()
 {
     stopTimer();
 
-    if (! ProjucerLicences::getInstance()->isLoggedIn())
+    if (! ProjucerLicenses::getInstance()->isLoggedIn())
         showLoginForm();
 }
 
@@ -770,7 +770,7 @@ void ProjucerApplication::updateAllBuildTabs()
 //==============================================================================
 void ProjucerApplication::loginOrLogout()
 {
-    ProjucerLicences& status = *ProjucerLicences::getInstance();
+    ProjucerLicenses& status = *ProjucerLicenses::getInstance();
 
     if (status.isLoggedIn())
         status.logout();
@@ -783,7 +783,7 @@ void ProjucerApplication::loginOrLogout()
 bool ProjucerApplication::checkEULA()
 {
     if (currentEULAHasBeenAcceptedPreviously()
-          || ! ProjucerLicences::getInstance()->isDLLPresent())
+          || ! ProjucerLicenses::getInstance()->isDLLPresent())
         return true;
 
     ScopedPointer<AlertWindow> eulaDialogue (new EULADialogue());

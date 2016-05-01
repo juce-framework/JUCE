@@ -105,6 +105,14 @@ File ModuleDescription::getHeader() const
     return File();
 }
 
+StringArray ModuleDescription::getDependencies() const
+{
+    StringArray deps = StringArray::fromTokens (moduleInfo ["dependencies"].toString(), " \t;,", "\"'");
+    deps.trim();
+    deps.removeEmptyStrings();
+    return deps;
+}
+
 //==============================================================================
 ModuleList::ModuleList()
 {
@@ -127,6 +135,7 @@ const ModuleDescription* ModuleList::getModuleWithID (const String& moduleID) co
     for (int i = 0; i < modules.size(); ++i)
     {
         ModuleDescription* m = modules.getUnchecked(i);
+
         if (m->getID() == moduleID)
             return m;
     }
@@ -496,29 +505,19 @@ static void addFileWithGroups (Project::Item& group, const RelativePath& file, c
     }
 }
 
-static void findWildcardMatches (const File& folder, Array<File>& result)
+void LibraryModule::findBrowseableFiles (const File& folder, Array<File>& filesFound) const
 {
     Array<File> tempList;
     FileSorter sorter;
 
-    DirectoryIterator iter (folder, false, "*");
+    DirectoryIterator iter (folder, true, "*", File::findFiles);
     bool isHiddenFile;
 
     while (iter.next (nullptr, &isHiddenFile, nullptr, nullptr, nullptr, nullptr))
-        if (! isHiddenFile)
+        if (! isHiddenFile && iter.getFile().hasFileExtension (browseableFileExtensions))
             tempList.addSorted (sorter, iter.getFile());
 
-    result.addArray (tempList);
-}
-
-void LibraryModule::findBrowseableFiles (const File& localModuleFolder, Array<File>& filesFound) const
-{
-    DirectoryIterator iter (localModuleFolder, true, "*", File::findDirectories);
-    bool isHiddenFile;
-
-    while (iter.next (nullptr, &isHiddenFile, nullptr, nullptr, nullptr, nullptr))
-        if (! isHiddenFile)
-            findWildcardMatches (iter.getFile(), filesFound);
+    filesFound.addArray (tempList);
 }
 
 void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const
@@ -542,6 +541,7 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
                                pathWithinModule);
     }
 
+    sourceGroup.sortAlphabetically (true, true);
     sourceGroup.addFileAtIndex (moduleInfo.getHeader(), -1, false);
 
     exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
@@ -703,25 +703,12 @@ static void getDependencies (Project& project, const String& moduleID, StringArr
 {
     ModuleDescription info (project.getModules().getModuleInfo (moduleID));
 
-    if (info.isValid())
+    for (auto uid : info.getDependencies())
     {
-        const var depsArray (info.moduleInfo ["dependencies"]);
-
-        if (const Array<var>* const deps = depsArray.getArray())
+        if (! dependencies.contains (uid, true))
         {
-            for (int i = 0; i < deps->size(); ++i)
-            {
-                const var& d = deps->getReference(i);
-
-                String uid (d [Ids::ID].toString());
-                String version (d [Ids::version].toString());
-
-                if (! dependencies.contains (uid, true))
-                {
-                    dependencies.add (uid);
-                    getDependencies (project, uid, dependencies);
-                }
-            }
+            dependencies.add (uid);
+            getDependencies (project, uid, dependencies);
         }
     }
 }
@@ -731,9 +718,9 @@ StringArray EnabledModuleList::getExtraDependenciesNeeded (const String& moduleI
     StringArray dependencies, extraDepsNeeded;
     getDependencies (project, moduleID, dependencies);
 
-    for (int i = 0; i < dependencies.size(); ++i)
-        if ((! isModuleEnabled (dependencies[i])) && dependencies[i] != moduleID)
-            extraDepsNeeded.add (dependencies[i]);
+    for (auto dep : dependencies)
+        if (dep != moduleID && ! isModuleEnabled (dep))
+            extraDepsNeeded.add (dep);
 
     return extraDepsNeeded;
 }

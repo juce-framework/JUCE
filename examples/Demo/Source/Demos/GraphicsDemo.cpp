@@ -569,13 +569,13 @@ public:
         setOpaque (true);
     }
 
-    void paint (Graphics& g)
+    void paint (Graphics& g) override
     {
         g.fillCheckerBoard (getLocalBounds(), 48, 48,
                             Colours::lightgrey, Colours::white);
     }
 
-    void timerCallback()
+    void timerCallback() override
     {
         if (currentDemo != nullptr)
             currentDemo->repaint();
@@ -596,7 +596,7 @@ public:
         }
     }
 
-    void resized()
+    void resized() override
     {
         if (currentDemo != nullptr)
             currentDemo->setBounds (getLocalBounds());

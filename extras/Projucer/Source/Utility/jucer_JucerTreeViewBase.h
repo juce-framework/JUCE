@@ -131,7 +131,7 @@ public:
         tree.setRootItem (nullptr);
     }
 
-    void setRoot (JucerTreeViewBase* root);
+    void setRoot (JucerTreeViewBase*);
     void saveOpenness();
 
     void deleteSelectedItems()

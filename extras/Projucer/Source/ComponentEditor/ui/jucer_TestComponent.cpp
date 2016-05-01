@@ -69,7 +69,7 @@ static StringArray recursiveFiles;
 File TestComponent::findFile() const
 {
     if (filename.isEmpty())
-        return File::nonexistent;
+        return File();
 
     if (ownerDocument != nullptr)
         return ownerDocument->getCppFile().getSiblingFile (filename);

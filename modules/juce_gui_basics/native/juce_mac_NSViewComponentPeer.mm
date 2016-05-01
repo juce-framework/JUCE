@@ -615,7 +615,6 @@ public:
         wheel.isSmooth = false;
         wheel.isInertial = false;
 
-       #if ! JUCE_PPC
         @try
         {
            #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
@@ -644,7 +643,6 @@ public:
         }
         @catch (...)
         {}
-       #endif
 
         if (wheel.deltaX == 0 && wheel.deltaY == 0)
         {
