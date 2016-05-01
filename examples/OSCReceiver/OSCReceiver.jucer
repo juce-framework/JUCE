@@ -85,7 +85,7 @@
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.oscreceiver.OSCReceiver"
                    androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
                    targetFolder="Builds/AndroidStudio" androidScreenOrientation="unspecified"
-                   gradleToolchain="gcc" gradleToolchainVersion="3.6" androidSDKPath=""
+                   gradleToolchain="clang" gradleToolchainVersion="3.6" androidSDKPath=""
                    androidNDKPath="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"

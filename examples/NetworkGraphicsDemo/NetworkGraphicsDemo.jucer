@@ -115,7 +115,7 @@
     <ANDROIDSTUDIO androidActivityClass="com.juce.networkgraphicsdemo.JUCENetworkGraphicsDemo"
                    androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
                    targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
-                   bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="gcc"
+                   bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="clang"
                    gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"

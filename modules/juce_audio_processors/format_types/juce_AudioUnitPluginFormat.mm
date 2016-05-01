@@ -39,6 +39,18 @@
  #include <AudioUnit/AudioUnitCarbonView.h>
 #endif
 
+#ifndef JUCE_SUPPORTS_AUv3
+ #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && defined (MAC_OS_X_VERSION_MIN_REQUIRED) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) && __OBJC2__
+  #define JUCE_SUPPORTS_AUv3 1
+ #else
+  #define JUCE_SUPPORTS_AUv3 0
+ #endif
+#endif
+
+#if JUCE_SUPPORTS_AUv3
+ #include <CoreAudioKit/AUViewController.h>
+#endif
+
 namespace juce
 {
 
@@ -59,14 +71,6 @@ namespace juce
  #define JUCE_AU_LOG(a) Logger::writeToLog(a);
 #else
  #define JUCE_AU_LOG(a)
-#endif
-
-#ifndef JUCE_SUPPORTS_AUv3
- #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-  #define JUCE_SUPPORTS_AUv3 1
- #else
-  #define JUCE_SUPPORTS_AUv3 0
- #endif
 #endif
 
 namespace AudioUnitFormatHelpers
@@ -1516,7 +1520,7 @@ private:
     AutoResizingNSViewComponent wrapper;
 
    #if JUCE_SUPPORTS_AUv3
-    typedef void (^ViewControllerCallbackBlock)(NSViewController *);
+    typedef void (^ViewControllerCallbackBlock)(AUViewControllerBase *);
     ObjCBlock<ViewControllerCallbackBlock> viewControllerCallback;
    #endif
 
@@ -1617,7 +1621,7 @@ private:
     }
 
    #if JUCE_SUPPORTS_AUv3
-    void requestViewControllerCallback (NSViewController* controller)
+    void requestViewControllerCallback (AUViewControllerBase* controller)
     {
         auto nsSize = [controller preferredContentSize];
         auto viewSize = CGSizeMake (nsSize.width, nsSize.height);
@@ -2008,6 +2012,8 @@ StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath&,
              || desc.componentType == kAudioUnitType_Generator
              || desc.componentType == kAudioUnitType_Panner)
         {
+            ignoreUnused (allowPluginsWhichRequireAsynchronousInstantiation);
+
           #if JUCE_SUPPORTS_AUv3
             bool isAUv3 = ((desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
 

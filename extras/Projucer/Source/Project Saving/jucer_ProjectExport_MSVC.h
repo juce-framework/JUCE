@@ -408,7 +408,7 @@ protected:
 
             {
                 static const char* characterSetNames[] = { "Default", "MultiByte", "Unicode", nullptr };
-                const var charSets[]                   = { var::null, "MultiByte", "Unicode", };
+                const var charSets[]                   = { var(),     "MultiByte", "Unicode", };
 
                 props.add (new ChoicePropertyComponent (getCharacterSetValue(), "Character Set",
                                                         StringArray (characterSetNames), Array<var> (charSets, numElementsInArray (charSets))));

@@ -127,7 +127,7 @@ void Project::setMissingDefaultValues()
     if (getBundleIdentifier().toString().isEmpty())
         getBundleIdentifier() = getDefaultBundleIdentifier();
 
-    if (shouldIncludeBinaryInAppConfig() == var::null)
+    if (shouldIncludeBinaryInAppConfig() == var())
         shouldIncludeBinaryInAppConfig() = true;
 
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
@@ -469,10 +469,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
         Array<var> maxSizeCodes;
 
         maxSizeNames.add (TRANS("Default"));
-        maxSizeCodes.add (var::null);
+        maxSizeCodes.add (var());
 
-        maxSizeNames.add (String::empty);
-        maxSizeCodes.add (var::null);
+        maxSizeNames.add (String());
+        maxSizeCodes.add (var());
 
         for (int i = 0; i < numElementsInArray (maxSizes); ++i)
         {

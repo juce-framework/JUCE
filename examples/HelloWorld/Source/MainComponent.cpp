@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 4.2.0
+  Created with Projucer version: 4.2.1
 
   ------------------------------------------------------------------------------
 
@@ -29,8 +29,11 @@
 //==============================================================================
 MainComponent::MainComponent ()
 {
-    addAndMakeVisible (helloWorldLabel = new Label (String::empty,
-                                                    "Hello World!"));
+    //[Constructor_pre] You can add your own custom stuff here..
+    //[/Constructor_pre]
+
+    addAndMakeVisible (helloWorldLabel = new Label (String(),
+                                                    TRANS("Hello World!")));
     helloWorldLabel->setFont (Font (40.00f, Font::bold));
     helloWorldLabel->setJustificationType (Justification::centred);
     helloWorldLabel->setEditable (false, false, false);
@@ -38,8 +41,8 @@ MainComponent::MainComponent ()
     helloWorldLabel->setColour (TextEditor::textColourId, Colours::black);
     helloWorldLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (quitButton = new TextButton (String::empty));
-    quitButton->setButtonText ("Quit");
+    addAndMakeVisible (quitButton = new TextButton (String()));
+    quitButton->setButtonText (TRANS("Quit"));
     quitButton->addListener (this);
 
 
@@ -85,6 +88,9 @@ void MainComponent::paint (Graphics& g)
 
 void MainComponent::resized()
 {
+    //[UserPreResize] Add your own custom resize code here..
+    //[/UserPreResize]
+
     helloWorldLabel->setBounds (152, 80, 296, 48);
     quitButton->setBounds (getWidth() - 176, getHeight() - 60, 120, 32);
     internalPath1.clear();
@@ -136,10 +142,10 @@ BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="MainComponent" componentName=""
                  parentClasses="public Component" constructorParams="" variableInitialisers=""
-                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330000013"
+                 snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="1" initialWidth="600" initialHeight="300">
   <BACKGROUND backgroundColour="ffc1d0ff">
-    <PATH pos="0 0 100 100" fill="solid: ffffffff" hasStroke="1" stroke="5.19999981, mitered, butt"
+    <PATH pos="0 0 100 100" fill="solid: ffffffff" hasStroke="1" stroke="5.2, mitered, butt"
           strokeColour="solid: ff6f6f6f" nonZeroWinding="1">s 136 80 q 176 24 328 32 q 472 40 472 104 q 472 192 232 176 l 184 216 l 200 168 q 96 136 136 80 x</PATH>
   </BACKGROUND>
   <LABEL name="" id="be4f6f2e5725a063" memberName="helloWorldLabel" virtualName=""

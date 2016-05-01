@@ -328,7 +328,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         XCodeProjectExporter& xcodeExporter = dynamic_cast<XCodeProjectExporter&> (exporter);
 
         if (project.isAUPluginHost())
-            xcodeExporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+            xcodeExporter.xcodeFrameworks.addTokens (xcodeExporter.isOSX() ? "AudioUnit CoreAudioKit" : "CoreAudioKit", false);
 
         const String frameworks (moduleInfo.moduleInfo [xcodeExporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
         xcodeExporter.xcodeFrameworks.addTokens (frameworks, ", ", StringRef());

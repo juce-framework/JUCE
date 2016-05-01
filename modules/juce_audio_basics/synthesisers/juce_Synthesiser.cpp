@@ -204,7 +204,7 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
             break;
         }
 
-        if (samplesToNextMidiMessage < minimumSubBlockSize && ! firstEvent)
+        if (samplesToNextMidiMessage < (firstEvent ? 1 : minimumSubBlockSize))
         {
             handleMidiEvent (m);
             continue;

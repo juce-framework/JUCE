@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST
+#if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WIN || JUCE_LINUX)
 
 //==============================================================================
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
@@ -1601,7 +1601,7 @@ private:
         jassert (index >= 0 && index < effect->numParams);
         char nm [256] = { 0 };
         dispatch (opcode, index, 0, nm, 0);
-        return String (CharPointer_UTF8 (nm)).trim();
+        return String::createStringFromData (nm, (int) sizeof (nm)).trim();
     }
 
     String getCurrentProgramName()
@@ -1613,7 +1613,7 @@ private:
             {
                 char nm[256] = { 0 };
                 dispatch (effGetProgramName, 0, 0, nm, 0);
-                progName = String (CharPointer_UTF8 (nm)).trim();
+                progName = String::createStringFromData (nm, (int) sizeof (nm)).trim();
             }
 
             const int index = getCurrentProgram();
