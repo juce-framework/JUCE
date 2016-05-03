@@ -77,7 +77,7 @@
 /** JUCE_USE_XINERAMA: Enables Xinerama multi-monitor support (Linux only).
     Unless you specifically want to disable this, it's best to leave this option turned on.
     This will be used as a fallback if JUCE_USE_XRANDR not set or libxrandr cannot be found.
-    Note that your users do not need to have Xrandr installed for your JUCE app to run, as
+    Note that your users do not need to have Xinerama installed for your JUCE app to run, as
     the availability of Xinerama is queried during runtime.
 */
 #ifndef JUCE_USE_XINERAMA

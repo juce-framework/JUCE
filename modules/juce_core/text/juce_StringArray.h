@@ -259,7 +259,7 @@ public:
     /** Returns an array containing the tokens in a given string.
 
         This will tokenise the given string using whitespace characters as the
-        token delimiters, and return these tokens as an array.
+        token delimiters, and return the parsed tokens as an array.
         @see addTokens
     */
     static StringArray fromTokens (StringRef stringToTokenise,
@@ -267,8 +267,8 @@ public:
 
     /** Returns an array containing the tokens in a given string.
 
-        This will tokenise the given string using whitespace characters as the
-        token delimiters, and return these tokens as an array.
+        This will tokenise the given string using the breakCharacters string to define
+        the token delimiters, and will return the parsed tokens as an array.
 
         @param stringToTokenise     the string to tokenise
         @param breakCharacters      a string of characters, any of which will be considered
