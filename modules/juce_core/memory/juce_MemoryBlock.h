@@ -222,21 +222,29 @@ public:
                      size_t numBitsToRead) const noexcept;
 
     //==============================================================================
-    /** Returns a string of characters that represent the binary contents of this block.
+    /** Returns a string of characters in a JUCE-specific text encoding that represents the
+        binary contents of this block.
 
-        Uses a 64-bit encoding system to allow binary data to be turned into a string
-        of simple non-extended characters, e.g. for storage in XML.
+        This uses a JUCE-specific (i.e. not standard!) 64-bit encoding system to convert binary
+        data into a string of ASCII characters for purposes like storage in XML.
+        Note that this proprietary format is mainly kept here for backwards-compatibility, and
+        you may prefer to use the Base64::toBase64() method if you want to use the standard
+        base-64 encoding.
 
-        @see fromBase64Encoding
+        @see fromBase64Encoding, Base64::toBase64, Base64::convertToBase64
     */
     String toBase64Encoding() const;
 
-    /** Takes a string of encoded characters and turns it into binary data.
+    /** Takes a string created by MemoryBlock::toBase64Encoding() and extracts the original data.
 
         The string passed in must have been created by to64BitEncoding(), and this
         block will be resized to recreate the original data block.
 
-        @see toBase64Encoding
+        Note that these methods use a JUCE-specific (i.e. not standard!) 64-bit encoding system.
+        You may prefer to use the Base64::convertFromBase64() method if you want to use the
+        standard base-64 encoding.
+
+        @see toBase64Encoding, Base64::convertFromBase64
     */
     bool fromBase64Encoding  (StringRef encodedString);
 
