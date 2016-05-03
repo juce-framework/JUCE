@@ -67,12 +67,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 {
     RootObject()
     {
-        setMethod ("exec",      exec);
-        setMethod ("eval",      eval);
-        setMethod ("trace",     trace);
-        setMethod ("charToInt", charToInt);
-        setMethod ("parseInt",  IntegerClass::parseInt);
-        setMethod ("typeof",    typeof_internal);
+        setMethod ("exec",       exec);
+        setMethod ("eval",       eval);
+        setMethod ("trace",      trace);
+        setMethod ("charToInt",  charToInt);
+        setMethod ("parseInt",   IntegerClass::parseInt);
+        setMethod ("typeof",     typeof_internal);
+        setMethod ("parseFloat", parseFloat);
     }
 
     Time timeout;
@@ -1677,6 +1678,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     //==============================================================================
     static var trace (Args a)      { Logger::outputDebugString (JSON::toString (a.thisObject)); return var::undefined(); }
     static var charToInt (Args a)  { return (int) (getString (a, 0)[0]); }
+    static var parseFloat (Args a) { return getDouble (a, 0); }
 
     static var typeof_internal (Args a)
     {
