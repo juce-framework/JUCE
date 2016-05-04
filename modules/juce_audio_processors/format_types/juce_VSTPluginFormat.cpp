@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WIN || JUCE_LINUX)
+#if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
 
 //==============================================================================
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
