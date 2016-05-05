@@ -195,6 +195,9 @@ public:
     /** Returns if this is a channel layout made-up of discrete channels. */
     bool isDiscreteLayout() const noexcept;
 
+    /** Intersect two channel layouts. */
+    void intersect (const AudioChannelSet& other)      { channels &= other.channels; }
+
     //==============================================================================
     bool operator== (const AudioChannelSet&) const noexcept;
     bool operator!= (const AudioChannelSet&) const noexcept;
