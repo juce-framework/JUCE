@@ -602,12 +602,15 @@ public:
 
     void audioProcessorParameterChanged (AudioProcessor*, int idx, float newValue) override
     {
-        if (AUParameter* param = [paramTree parameterWithAddress: static_cast<AUParameterAddress> (idx)])
+        if (isPositiveAndBelow (idx, getAudioProcessor().getNumParameters()))
         {
-            if (editorObserverToken != nullptr)
-                [param setValue: newValue  originator: editorObserverToken];
-            else
-                [param setValue: newValue];
+            if (AUParameter* param = [paramTree parameterWithAddress: getAUParameterAddressForIndex (idx)])
+            {
+                if (editorObserverToken != nullptr)
+                    [param setValue: newValue  originator: editorObserverToken];
+                else
+                    [param setValue: newValue];
+            }
         }
     }
 
@@ -814,6 +817,11 @@ private:
         auto& processor = getAudioProcessor();
         const int n = processor.getNumParameters();
 
+       #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        // check if all parameters are managed?
+        usingManagedParameter = (processor.getParameters().size() == processor.getNumParameters());
+       #endif
+
         for (int idx = 0; idx < n; ++idx)
         {
             const String identifier (idx);
@@ -835,7 +843,13 @@ private:
             if (processor.isMetaParameter (idx))
                 flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
+           #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
             AUParameterAddress address = static_cast<AUParameterAddress> (idx);
+           #else
+            AUParameterAddress address = generateAUParameterAddressForIndex (idx);
+            paramAddresses.add (address);
+            paramMap.set (static_cast<int64> (address), idx);
+          #endif
 
             // create methods in AUParameterTree return unretained objects (!) -> see Apple header AUAudioUnitImplementation.h
 
@@ -916,7 +930,7 @@ private:
                 case AURenderEventParameterRamp:
                 {
                     const AUParameterEvent& paramEvent = event->parameter;
-                    const int idx = static_cast<int> (paramEvent.parameterAddress);
+                    const int idx = getJuceParameterIndexForAUAddress (paramEvent.parameterAddress);
 
                     if (isPositiveAndBelow (idx, numParams))
                         getAudioProcessor().setParameter (idx, paramEvent.value);
@@ -1059,7 +1073,7 @@ private:
     {
         if (param != nullptr)
         {
-            const int idx = static_cast<int> ([param address]);
+            const int idx = getJuceParameterIndexForAUAddress ([param address]);
             auto& processor = getAudioProcessor();
 
             if (isPositiveAndBelow (idx, processor.getNumParameters()))
@@ -1071,7 +1085,7 @@ private:
     {
         if (param != nullptr)
         {
-            const int idx = static_cast<int> ([param address]);
+            const int idx = getJuceParameterIndexForAUAddress ([param address]);
             auto& processor = getAudioProcessor();
 
             if (isPositiveAndBelow (idx, processor.getNumParameters()))
@@ -1087,6 +1101,39 @@ private:
     }
 
     //==============================================================================
+   #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    inline AUParameterAddress getAUParameterAddressForIndex (int paramIndex) const noexcept     { return static_cast<AUParameterAddress> (paramIndex); }
+    inline int getJuceParameterIndexForAUAddress (AUParameterAddress address) const noexcept    { return static_cast<int> (address); }
+   #else
+    AUParameterAddress generateAUParameterAddressForIndex (int paramIndex) const
+    {
+        auto& processor = getAudioProcessor();
+        const int n = processor.getNumParameters();
+
+        if (isPositiveAndBelow (paramIndex, n))
+        {
+            const String& juceParamID = processor.getParameterID (paramIndex);
+            return usingManagedParameter ? static_cast<AUParameterAddress> (juceParamID.hashCode64())
+                                         : static_cast<AUParameterAddress> (juceParamID.getIntValue());
+        }
+
+        return static_cast<AUParameterAddress> (-1);
+    }
+
+    inline AUParameterAddress getAUParameterAddressForIndex (int paramIndex) const noexcept
+    {
+        return usingManagedParameter ? paramAddresses.getReference (paramIndex)
+                                     : static_cast<AUParameterAddress> (paramIndex);
+    }
+
+    inline int getJuceParameterIndexForAUAddress (AUParameterAddress address) const noexcept
+    {
+        return usingManagedParameter ? paramMap[static_cast<int64> (address)]
+                                     : static_cast<int> (address);
+    }
+   #endif
+
+    //==============================================================================
     static const double kDefaultSampleRate;
 
     AudioProcessorHolder::Ptr processorHolder;
@@ -1099,6 +1146,12 @@ private:
 
     ObjCBlock<AUImplementorValueObserver> paramObserver;
     ObjCBlock<AUImplementorValueProvider> paramProvider;
+
+   #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    bool usingManagedParameter;
+    Array<AUParameterAddress> paramAddresses;
+    HashMap<int64, int> paramMap;
+   #endif
 
     // to avoid recursion on parameter changes, we need to add an
     // editor observer to do the parameter changes

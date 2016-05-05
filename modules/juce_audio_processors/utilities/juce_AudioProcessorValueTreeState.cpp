@@ -25,7 +25,7 @@
 #if JUCE_COMPILER_SUPPORTS_LAMBDAS
 
 //==============================================================================
-struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParameter,
+struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParameterWithID,
                                                    private ValueTree::Listener
 {
     Parameter (AudioProcessorValueTreeState& s,
@@ -33,7 +33,8 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                NormalisableRange<float> r, float defaultVal,
                std::function<String (float)> valueToText,
                std::function<float (const String&)> textToValue)
-        : owner (s), paramID (parameterID), name (paramName), label (labelText),
+        : AudioProcessorParameterWithID (parameterID, paramName),
+          owner (s), label (labelText),
           valueToTextFunction (valueToText),
           textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
@@ -51,7 +52,6 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     float getValue() const override                             { return range.convertTo0to1 (value); }
     float getDefaultValue() const override                      { return range.convertTo0to1 (defaultValue); }
-    String getName (int maximumStringLength) const override     { return name.substring (0, maximumStringLength); }
     String getLabel() const override                            { return label; }
 
     float getValueForText (const String& text) const override
@@ -141,7 +141,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     AudioProcessorValueTreeState& owner;
     ValueTree state;
-    String paramID, name, label;
+    String label;
     ListenerList<AudioProcessorValueTreeState::Listener> listeners;
     std::function<String (float)> valueToTextFunction;
     std::function<float (const String&)> textToValueFunction;

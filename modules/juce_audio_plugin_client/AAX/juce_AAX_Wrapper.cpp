@@ -101,14 +101,19 @@ JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AAX);
 //==============================================================================
 struct AAXClasses
 {
+    static int32 getAAXParamHash (AAX_CParamID paramID) noexcept
+    {
+        int32 result = 0;
+
+        while (*paramID != 0)
+            result = (31 * result) + (*paramID++);
+
+        return result;
+    }
+
     static void check (AAX_Result result)
     {
         jassert (result == AAX_SUCCESS); ignoreUnused (result);
-    }
-
-    static int getParamIndexFromID (AAX_CParamID paramID) noexcept
-    {
-        return atoi (paramID);
     }
 
     static bool isBypassParam (AAX_CParamID paramID) noexcept
@@ -410,6 +415,24 @@ struct AAXClasses
         }
 
     private:
+        //==============================================================================
+        inline int getParamIndexFromID (AAX_CParamID paramID) const noexcept
+        {
+            if (const JuceAAX_Processor* params = dynamic_cast<const JuceAAX_Processor*> (GetEffectParameters()))
+                return params->getParamIndexFromID (paramID);
+
+            return -1;
+        }
+
+        inline AAX_CParamID getAAXParamIDFromJuceIndex (int index) const noexcept
+        {
+            if (const JuceAAX_Processor* params = dynamic_cast<const JuceAAX_Processor*> (GetEffectParameters()))
+                return params->getAAXParamIDFromJuceIndex (index);
+
+            return nullptr;
+        }
+
+        //==============================================================================
         struct ContentWrapperComponent  : public Component
         {
             ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor& plugin)
@@ -449,11 +472,12 @@ struct AAXClasses
                 {
                     const int parameterIndex = pluginEditor->getControlParameterIndex (*e.eventComponent);
 
-                    if (parameterIndex >= 0)
+                    if (AAX_CParamID aaxParamID = owner.getAAXParamIDFromJuceIndex (parameterIndex))
                     {
                         uint32_t mods = 0;
                         vc->GetModifiers (&mods);
-                        (vc->*method) (IndexAsParamID (parameterIndex), mods);
+
+                        (vc->*method) (aaxParamID, mods);
                     }
                 }
             }
@@ -606,7 +630,7 @@ struct AAXClasses
             const int numParameters = pluginInstance->getNumParameters();
 
             for (int i = 0; i < numParameters; ++i)
-                SetParameterNormalizedValue (IndexAsParamID (i), (double) pluginInstance->getParameter(i));
+                SetParameterNormalizedValue (getAAXParamIDFromJuceIndex (i), (double) pluginInstance->getParameter(i));
 
             return AAX_SUCCESS;
         }
@@ -844,7 +868,7 @@ struct AAXClasses
 
         void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue) override
         {
-            SetParameterNormalizedValue (IndexAsParamID (parameterIndex), (double) newValue);
+            SetParameterNormalizedValue (getAAXParamIDFromJuceIndex (parameterIndex), (double) newValue);
         }
 
         void audioProcessorChanged (AudioProcessor* processor) override
@@ -855,12 +879,12 @@ struct AAXClasses
 
         void audioProcessorParameterChangeGestureBegin (AudioProcessor* /*processor*/, int parameterIndex) override
         {
-            TouchParameter (IndexAsParamID (parameterIndex));
+            TouchParameter (getAAXParamIDFromJuceIndex (parameterIndex));
         }
 
         void audioProcessorParameterChangeGestureEnd (AudioProcessor* /*processor*/, int parameterIndex) override
         {
-            ReleaseParameter (IndexAsParamID (parameterIndex));
+            ReleaseParameter (getAAXParamIDFromJuceIndex (parameterIndex));
         }
 
         AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size) override
@@ -935,6 +959,8 @@ struct AAXClasses
         bool supportsSidechain() const noexcept { return hasSidechain; };
 
     private:
+        friend class JuceAAX_GUI;
+
         void process (float* const* channels, const int numChans, const int bufferSize,
                       const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
         {
@@ -1030,14 +1056,27 @@ struct AAXClasses
         void addAudioProcessorParameters()
         {
             AudioProcessor& audioProcessor = getPluginInstance();
+
             const int numParameters = audioProcessor.getNumParameters();
+
+           #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+            const bool usingManagedParameters = false;
+           #else
+            const bool usingManagedParameters = (audioProcessor.getParameters().size() == numParameters);
+           #endif
 
             for (int parameterIndex = 0; parameterIndex < numParameters; ++parameterIndex)
             {
+                aaxParamIDs.add (usingManagedParameters ? audioProcessor.getParameterID (parameterIndex)
+                                                        : String (parameterIndex));
+
                 AAX_CString paramName (audioProcessor.getParameterName (parameterIndex, 31).toRawUTF8());
+                AAX_CParamID paramID = aaxParamIDs.getReference (parameterIndex).getCharPointer();
+
+                paramMap.set (AAXClasses::getAAXParamHash (paramID), parameterIndex);
 
                 AAX_IParameter* parameter
-                    = new AAX_CParameter<float> (IndexAsParamID (parameterIndex),
+                    = new AAX_CParameter<float> (paramID,
                                                  paramName,
                                                  audioProcessor.getParameterDefaultValue (parameterIndex),
                                                  AAX_CLinearTaperDelegate<float, 0>(),
@@ -1141,6 +1180,20 @@ struct AAXClasses
             }
         }
 
+        //==============================================================================
+        inline int getParamIndexFromID (AAX_CParamID paramID) const noexcept
+        {
+            return paramMap [AAXClasses::getAAXParamHash (paramID)];
+        }
+
+        inline AAX_CParamID getAAXParamIDFromJuceIndex (int index) const noexcept
+        {
+            if (! isPositiveAndBelow (index, aaxParamIDs.size())) return nullptr;
+
+            return aaxParamIDs.getReference (index).getCharPointer();
+        }
+
+        //==============================================================================
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
         ScopedPointer<AudioProcessor> pluginInstance;
@@ -1153,6 +1206,9 @@ struct AAXClasses
         bool hasSidechain;
         HeapBlock<float> sideChainBuffer;
         Array<int> inputLayoutMap, outputLayoutMap;
+
+        Array<String> aaxParamIDs;
+        HashMap<int32, int> paramMap;
 
         struct ChunkMemoryBlock  : public ReferenceCountedObject
         {
@@ -1171,36 +1227,6 @@ struct AAXClasses
         CriticalSection perThreadDataLock;
 
         JUCE_DECLARE_NON_COPYABLE (JuceAAX_Processor)
-    };
-
-    //==============================================================================
-    struct IndexAsParamID
-    {
-        inline explicit IndexAsParamID (int i) noexcept : index (i) {}
-
-        operator AAX_CParamID() noexcept
-        {
-            jassert (index >= 0);
-
-            char* t = name + sizeof (name);
-            *--t = 0;
-            int v = index;
-
-            do
-            {
-                *--t = (char) ('0' + (v % 10));
-                v /= 10;
-
-            } while (v > 0);
-
-            return static_cast<AAX_CParamID> (t);
-        }
-
-    private:
-        int index;
-        char name[32];
-
-        JUCE_DECLARE_NON_COPYABLE (IndexAsParamID)
     };
 
     //==============================================================================

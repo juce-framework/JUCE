@@ -611,6 +611,17 @@ public:
     */
     virtual const String getParameterName (int parameterIndex);
 
+    /** Returns the ID of a particular parameter.
+
+        The ID is used to communicate the value or mapping of a particular parameter with
+        the host. By default this method will simply return a string representation of
+        index.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        AudioProcessorParameterWithID class instead to manage your parameters.
+     */
+    virtual String getParameterID (int index);
+
     /** Called by the host to find out the value of one of the filter's parameters.
 
         The host will expect the value returned to be between 0 and 1.0.
