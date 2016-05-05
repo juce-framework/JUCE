@@ -2204,20 +2204,23 @@ private:
         return refID;
     }
 
-    String addRezFile (const RelativePath& path) const
+    String addRezFile (const Project::Item& projectItem, const RelativePath& path) const
     {
         const String pathAsString (path.toUnixStyle());
         const String refID (addFileReference (path.toUnixStyle()));
 
-        Target* auTarget = getTargetOfType (Target::AudioUnitPlugIn);
+        if (projectItem.isModuleCode())
+        {
+            if (Target* xcodeTarget = getTargetOfType (getTargetTypeFromFilePath (projectItem.getFile(), false)))
+            {
+                String rezFileID = addBuildFile (pathAsString, refID, false, false, xcodeTarget);
+                xcodeTarget->rezFileIDs.add (rezFileID);
 
-        if (auTarget == nullptr)
-            return String();
+                return refID;
+            }
+        }
 
-        String rezFileID = addBuildFile (pathAsString, refID, false, false, auTarget);
-        auTarget->rezFileIDs.add (rezFileID);
-
-        return refID;
+        return String();
     }
 
     String getEntitlementsFileName() const
@@ -2270,25 +2273,12 @@ private:
             else
                 path = RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-            if (path.hasFileExtension (".r") && LibraryModule::CompileUnit::hasSuffix (projectItem.getFile(), "_AU"))
-                return addRezFile (path);
+            if (path.hasFileExtension (".r"))
+                return addRezFile (projectItem, path);
 
             Target* xcodeTarget = nullptr;
             if (projectItem.isModuleCode() && projectItem.shouldBeCompiled())
-            {
-                const File& file = projectItem.getFile();
-
-                Target::Type targetType = Target::unspecified;
-                if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         targetType = Target::AudioUnitPlugIn;
-                else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       targetType = Target::AudioUnitv3PlugIn;
-                else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        targetType = Target::AAXPlugIn;
-                else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       targetType = Target::RTASPlugIn;
-                else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       targetType = Target::VSTPlugIn;
-                else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       targetType = Target::VST3PlugIn;
-                else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) targetType = Target::StandalonePlugIn;
-
-                xcodeTarget = getTargetOfType (targetType);
-            }
+                xcodeTarget = getTargetOfType (getTargetTypeFromFilePath (projectItem.getFile(), false));
 
             return addFile (path, projectItem.shouldBeCompiled(),
                             projectItem.shouldBeAddedToBinaryResources(),
@@ -2390,6 +2380,19 @@ private:
         String targetString = "(" + targetIDs.joinIntoString (", ") + ")";
         v->setProperty ("targets", targetString, nullptr);
         misc.add (v);
+    }
+
+    static Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffic)
+    {
+        if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return Target::AudioUnitPlugIn;
+        else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return Target::AudioUnitv3PlugIn;
+        else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return Target::AAXPlugIn;
+        else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return Target::RTASPlugIn;
+        else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return Target::VSTPlugIn;
+        else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return Target::VST3PlugIn;
+        else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return Target::StandalonePlugIn;
+
+        return (returnSharedTargetIfNoValidSuffic ? Target::SharedCodeTarget : Target::unspecified);
     }
 
     //==============================================================================

@@ -46,8 +46,6 @@
  #pragma clang diagnostic ignored "-Wcomment"
 #endif
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_RTAS);
-
 /* Note about include paths
    ------------------------
 
@@ -106,6 +104,8 @@ JUCE_DEFINE_WRAPPER_TYPE (wrapperType_RTAS);
 #endif
 
 #include "../utility/juce_IncludeModuleHeaders.h"
+
+JUCE_DEFINE_WRAPPER_TYPE (wrapperType_RTAS);
 
 #ifdef _MSC_VER
  #pragma pack (pop)
