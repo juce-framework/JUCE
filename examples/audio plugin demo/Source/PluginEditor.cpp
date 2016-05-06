@@ -136,14 +136,14 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
 // quick-and-dirty function to format a timecode string
 static String timeToTimecodeString (double seconds)
 {
-    const int millisecs = roundToInt (std::abs (seconds * 1000.0));
+    const int millisecs = roundToInt (seconds * 1000.0);
+    const int absMillisecs = std::abs (millisecs);
 
-    return String::formatted ("%s%02d:%02d:%02d.%03d",
-                              seconds < 0 ? "-" : "",
+    return String::formatted ("%02d:%02d:%02d.%03d",
                               millisecs / 360000,
-                              (millisecs / 60000) % 60,
-                              (millisecs / 1000) % 60,
-                              millisecs % 1000);
+                              (absMillisecs / 60000) % 60,
+                              (absMillisecs / 1000) % 60,
+                              absMillisecs % 1000);
 }
 
 // quick-and-dirty function to format a bars/beats string
