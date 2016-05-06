@@ -39,8 +39,6 @@ private:
     ScopedPointer<ResizableCornerComponent> resizer;
     ComponentBoundsConstrainer resizeLimits;
 
-    AudioPlayHead::CurrentPositionInfo lastDisplayedPosition;
-
     //==============================================================================
     JuceDemoPluginAudioProcessor& getProcessor() const
     {

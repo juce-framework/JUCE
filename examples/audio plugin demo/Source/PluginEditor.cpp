@@ -165,25 +165,20 @@ static String quarterNotePositionToBarsBeatsString (double quarterNotes, int num
 // Updates the text in our position label.
 void JuceDemoPluginAudioProcessorEditor::updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo pos)
 {
-    if (lastDisplayedPosition != pos)
-    {
-        lastDisplayedPosition = pos;
+    MemoryOutputStream displayText;
 
-        MemoryOutputStream displayText;
+    displayText << "[" << SystemStats::getJUCEVersion() << "]   "
+                << String (pos.bpm, 2) << " bpm, "
+                << pos.timeSigNumerator << '/' << pos.timeSigDenominator
+                << "  -  " << timeToTimecodeString (pos.timeInSeconds)
+                << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
+                                                                    pos.timeSigNumerator,
+                                                                    pos.timeSigDenominator);
 
-        displayText << "[" << SystemStats::getJUCEVersion() << "]   "
-                    << String (pos.bpm, 2) << " bpm, "
-                    << pos.timeSigNumerator << '/' << pos.timeSigDenominator
-                    << "  -  " << timeToTimecodeString (pos.timeInSeconds)
-                    << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
-                                                                        pos.timeSigNumerator,
-                                                                        pos.timeSigDenominator);
+    if (pos.isRecording)
+        displayText << "  (recording)";
+    else if (pos.isPlaying)
+        displayText << "  (playing)";
 
-        if (pos.isRecording)
-            displayText << "  (recording)";
-        else if (pos.isPlaying)
-            displayText << "  (playing)";
-
-        timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
-    }
+    timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
 }
