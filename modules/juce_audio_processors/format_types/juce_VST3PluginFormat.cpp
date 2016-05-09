@@ -398,6 +398,14 @@ public:
             return kResultFalse;
 
         owner->sendParamChangeMessageToListeners (index, (float) valueNormalized);
+
+        // did the plug-in already update the parameter internally
+        if (owner->editController->getParamNormalized (paramID) != (float) valueNormalized)
+        {
+            Steinberg::int32 eventIndex;
+            owner->inputParameterChanges->addParameterData (paramID, eventIndex)->addPoint (0, valueNormalized, eventIndex);
+        }
+
         return owner->editController->setParamNormalized (paramID, valueNormalized);
     }
 
