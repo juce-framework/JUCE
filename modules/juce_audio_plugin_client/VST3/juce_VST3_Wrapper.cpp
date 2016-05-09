@@ -27,7 +27,15 @@
 //==============================================================================
 #if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
 
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
+ #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+ #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
+#endif
+
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
+
+#undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
