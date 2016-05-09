@@ -136,14 +136,14 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
 // quick-and-dirty function to format a timecode string
 static String timeToTimecodeString (double seconds)
 {
-    const int millisecs = roundToInt (std::abs (seconds * 1000.0));
+    const int millisecs = roundToInt (seconds * 1000.0);
+    const int absMillisecs = std::abs (millisecs);
 
-    return String::formatted ("%s%02d:%02d:%02d.%03d",
-                              seconds < 0 ? "-" : "",
+    return String::formatted ("%02d:%02d:%02d.%03d",
                               millisecs / 360000,
-                              (millisecs / 60000) % 60,
-                              (millisecs / 1000) % 60,
-                              millisecs % 1000);
+                              (absMillisecs / 60000) % 60,
+                              (absMillisecs / 1000) % 60,
+                              absMillisecs % 1000);
 }
 
 // quick-and-dirty function to format a bars/beats string
@@ -165,25 +165,20 @@ static String quarterNotePositionToBarsBeatsString (double quarterNotes, int num
 // Updates the text in our position label.
 void JuceDemoPluginAudioProcessorEditor::updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo pos)
 {
-    if (lastDisplayedPosition != pos)
-    {
-        lastDisplayedPosition = pos;
+    MemoryOutputStream displayText;
 
-        MemoryOutputStream displayText;
+    displayText << "[" << SystemStats::getJUCEVersion() << "]   "
+                << String (pos.bpm, 2) << " bpm, "
+                << pos.timeSigNumerator << '/' << pos.timeSigDenominator
+                << "  -  " << timeToTimecodeString (pos.timeInSeconds)
+                << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
+                                                                    pos.timeSigNumerator,
+                                                                    pos.timeSigDenominator);
 
-        displayText << "[" << SystemStats::getJUCEVersion() << "]   "
-                    << String (pos.bpm, 2) << " bpm, "
-                    << pos.timeSigNumerator << '/' << pos.timeSigDenominator
-                    << "  -  " << timeToTimecodeString (pos.timeInSeconds)
-                    << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
-                                                                        pos.timeSigNumerator,
-                                                                        pos.timeSigDenominator);
+    if (pos.isRecording)
+        displayText << "  (recording)";
+    else if (pos.isPlaying)
+        displayText << "  (playing)";
 
-        if (pos.isRecording)
-            displayText << "  (recording)";
-        else if (pos.isPlaying)
-            displayText << "  (playing)";
-
-        timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
-    }
+    timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
 }

@@ -26,15 +26,8 @@
 
 } // namespace juce
 
-#if JucePlugin_Build_VST3
- #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
- #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
-#endif
-
 #include <map>
 #include "juce_VST3Headers.h"
-
-#undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 
 namespace juce
 {
