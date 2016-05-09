@@ -24,8 +24,8 @@ public:
     CONTENTCOMPCLASS();
     ~CONTENTCOMPCLASS();
 
-    void paint (Graphics&);
-    void resized();
+    void paint (Graphics&) override;
+    void resized() override;
 
 private:
     //==============================================================================
