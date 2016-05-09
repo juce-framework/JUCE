@@ -82,6 +82,7 @@
  #endif
 
  #if JUCE_LINUX
+  #include <stdio.h>
   #include <langinfo.h>
   #include <ifaddrs.h>
   #include <sys/resource.h>
