@@ -251,7 +251,7 @@ class ModalComponentManager::ReturnValueRetriever     : public ModalComponentMan
 public:
     ReturnValueRetriever (int& v, bool& done) : value (v), finished (done) {}
 
-    void modalStateFinished (int returnValue)
+    void modalStateFinished (int returnValue) override
     {
         finished = true;
         value = returnValue;

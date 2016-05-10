@@ -1506,7 +1506,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
     }
 
-    void modalStateFinished (int result)
+    void modalStateFinished (int result) override
     {
         if (managerOfChosenCommand != nullptr && result != 0)
         {
