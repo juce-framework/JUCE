@@ -187,6 +187,17 @@ public:
         return new FunctionCaller1<ParamType> (functionToCall, parameterValue);
     }
 
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    /** This is a utility function to create a ModalComponentManager::Callback that will
+        call a lambda function.
+        The lambda that you supply must take an integer parameter, which is the result code that
+        was returned when the modal component was dismissed.
+
+        @see ModalComponentManager::Callback
+    */
+    static ModalComponentManager::Callback* create (std::function<void(int)>);
+   #endif
+
     //==============================================================================
     /** This is a utility function to create a ModalComponentManager::Callback that will
         call a static function with two custom parameters.
