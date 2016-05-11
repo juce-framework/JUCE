@@ -108,8 +108,6 @@
 
 JUCE_DEFINE_WRAPPER_TYPE (wrapperType_RTAS);
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_RTAS);
-
 #ifdef _MSC_VER
  #pragma pack (pop)
 
