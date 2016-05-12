@@ -1,0 +1,90 @@
+# ==============================================
+#
+# Astyle (Artistic Style http://astyle.sourceforge.net/) is a source code indenter,
+# formatter, and beautifier for the C, C++, C++/CLI, Objective‑C, C# and Java
+# programming languages.
+#
+# This file contains the options for formatting the files according JUCE Coding Guidelines
+# (it covers mostly all of them regarding formatting and indenting).
+#
+# Usage:
+# > astyle --options="juce_astyle.options" [path to the file]
+#
+# If we want to perform recursive formatting we should use "-r" flag and wildcard:
+# > astyle --options="juce_astyle.options" "*.cpp" -r
+#
+# To perform a trial run with no changes to the files, add "--dry-run" flag.
+# The report will be output as usual.
+# > astyle --options="juce_astyle.options" "*.cpp" -r --dry-run
+#
+# ==============================================
+
+# Do not retain a backup of the original file.
+# The original file is purged after it is formatted. 
+suffix=none
+
+# Formatted files display mode.
+# Display only the files that have been formatted.
+# Do not display files that are unchanged. 
+formatted
+
+# This is the bracket style (Allman style uses broken brackets)
+style=allman
+
+# Indentation always uses 4 spaces.
+indent=spaces=4
+
+# Indent 'switch' blocks so that the 'case X:' statements are indented in the switch block.
+# The entire case block is indented.
+indent-switches
+
+# Indent preprocessor blocks at bracket level zero, and immediately within a namespace.
+# There are restrictions on what will be indented. Blocks within methods, classes,
+# arrays, etc, will not be indented. Blocks containing brackets or multi-line define
+# statements will not be indented. Without this option the preprocessor block is not indented.
+indent-preproc-block
+
+# Indent C++ comments beginning in column one. By default C++ comments beginning in column one
+# are assumed to be commented‑out code and not indented.
+# This option will allow the comments to be indented with the code.
+indent-col1-comments
+
+# Set the minimal indent that is added when a header is built of multiple lines.
+# This indent helps to easily separate the header from the command statements that follow.
+# That means that conditionals inside if, else, while, for are not indented if they break a line.
+min-conditional-indent=0
+
+# Pad empty lines around header blocks (e.g. 'if', 'for', 'while'...). 
+break-blocks
+
+# Don't break one-line blocks.
+keep-one-line-blocks
+
+# Insert space padding around operators.
+# Any end of line comments will remain in the original column, if possible.
+pad-oper
+
+# Insert space padding around the first parenthesis in a series on the outside only.
+# Parentheses that are empty will not be padded.
+# Any end of line comments will remain in the original column, if possible. 
+pad-first-paren-out
+
+# Insert space padding between a header (e.g. 'if', 'for', 'while'...) and the following paren.
+# Any end of line comments will remain in the original column, if possible.
+pad-header
+
+# Attach a pointer or reference operator (*, &, or ^) to the variable type (left)
+align-pointer=type
+
+# Converts tabs into spaces in the non-indentation part of the line.
+# The number of spaces inserted will maintain the spacing of the tab.
+# The current setting for spaces per tab is used.
+convert-tabs
+
+# Set the  maximum of # spaces to indent a continuation line.
+# The # indicates a number of columns and must not be greater than 120.
+# If no # is set, the default value of 40 will be used.
+# A maximum of less than two indent lengths will be ignored.
+# This option will prevent continuation lines from extending too far to the right.
+# Setting a larger value will allow the code to be extended further to the right.
+max-instatement-indent=80
