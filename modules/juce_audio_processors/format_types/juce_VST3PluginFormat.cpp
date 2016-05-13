@@ -1155,7 +1155,10 @@ struct DLLHandle
             if (GetFactoryProc proc = (GetFactoryProc) getFunction ("GetPluginFactory"))
                 factory = proc();
 
-        jassert (factory != nullptr); // The plugin NEEDS to provide a factory to be able to be called a VST3!
+        // The plugin NEEDS to provide a factory to be able to be called a VST3!
+        // Most likely you are trying to load a 32-bit VST3 from a 64-bit host
+        // or vice versa.
+        jassert (factory != nullptr);
         return factory;
     }
 
