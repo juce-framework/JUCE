@@ -1594,7 +1594,7 @@ public:
       : module (handle),
         numInputAudioBusses (0),
         numOutputAudioBusses (0),
-        programParameterID (-1),
+        programParameterID ((Vst::ParamID) -1),
         inputParameterChanges (new ParamValueQueueList()),
         outputParameterChanges (new ParamValueQueueList()),
         midiInputs (new MidiEventList()),
@@ -2491,13 +2491,13 @@ private:
 
         if (unitInfo != nullptr)
         {
-            Vst::UnitInfo info = { 0 };
+            Vst::UnitInfo uInfo = { 0 };
             const int unitCount = unitInfo->getUnitCount();
 
             for (int idx = 0; idx < unitCount; ++idx)
             {
-                if (unitInfo->getUnitInfo(idx, info) == kResultOk
-                      && info.id == programUnitID)
+                if (unitInfo->getUnitInfo(idx, uInfo) == kResultOk
+                      && uInfo.id == programUnitID)
                 {
                     const int programListCount = unitInfo->getProgramListCount();
 
@@ -2506,7 +2506,7 @@ private:
                         Vst::ProgramListInfo programListInfo = { 0 };
 
                         if (unitInfo->getProgramListInfo (j, programListInfo) == kResultOk
-                              && programListInfo.id == info.programListId)
+                              && programListInfo.id == uInfo.programListId)
                         {
                             Vst::String128 name;
 
