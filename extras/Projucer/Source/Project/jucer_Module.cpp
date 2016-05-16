@@ -601,12 +601,6 @@ File EnabledModuleList::findLocalModuleFolder (const String& moduleID, bool useE
 
                     if (ModuleDescription (f).isValid())
                         return f;
-
-                    f = moduleFolder.getChildFile ("modules")
-                                    .getChildFile (moduleID);
-
-                    if (ModuleDescription (f).isValid())
-                        return f;
                 }
             }
         }
