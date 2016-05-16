@@ -1966,10 +1966,13 @@ public:
     //==============================================================================
     void reset() override
     {
-        if (component != nullptr)
+        if (component != nullptr && processor != nullptr)
         {
+            processor->setProcessing (false);
             component->setActive (false);
+
             component->setActive (true);
+            processor->setProcessing (true);
         }
     }
 
