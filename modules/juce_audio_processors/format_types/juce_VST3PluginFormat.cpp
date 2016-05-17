@@ -2331,8 +2331,8 @@ private:
 
         if (componentConnection != nullptr && editControllerConnection != nullptr)
         {
-            warnOnFailure (editControllerConnection->connect (componentConnection));
             warnOnFailure (componentConnection->connect (editControllerConnection));
+            warnOnFailure (editControllerConnection->connect (componentConnection));
         }
     }
 
