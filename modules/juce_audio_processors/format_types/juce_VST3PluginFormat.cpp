@@ -2472,7 +2472,6 @@ private:
             return;
 
         Vst::UnitID programUnitID;
-        int stepCount;
         Vst::ParameterInfo paramInfo = { 0 };
 
         {
@@ -2486,7 +2485,6 @@ private:
 
             programParameterID = paramInfo.id;
             programUnitID = paramInfo.unitId;
-            stepCount = paramInfo.stepCount;
         }
 
         if (unitInfo != nullptr)
