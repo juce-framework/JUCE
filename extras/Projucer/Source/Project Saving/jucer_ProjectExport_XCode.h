@@ -1611,9 +1611,9 @@ private:
 
                 if (! projectType.isStaticLibrary() && target.type != Target::SharedCodeTarget)
                     target.addBuildPhase ("PBXFrameworksBuildPhase", target.frameworkIDs);
-
-                target.addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
             }
+
+            target.addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
 
             if (project.getProjectType().isAudioPlugin() && project.shouldBuildAUv3().getValue()
                 && project.shouldBuildStandalone().getValue() && target.type == Target::StandalonePlugIn)
@@ -1679,11 +1679,8 @@ private:
         v->setProperty ("isa", target.type == Target::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
         v->setProperty ("buildConfigurationList", createID (String ("__configList") + targetName), nullptr);
 
-        if (target.type != Target::AggregateTarget)
-        {
-            v->setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
-            v->setProperty ("buildRules", "( )", nullptr);
-        }
+        v->setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
+        v->setProperty ("buildRules", "( )", nullptr);
 
         v->setProperty ("dependencies", indentParenthesisedList (getTargetDependencies (target)), nullptr);
         v->setProperty (Ids::name, target.getXCodeSchemeName(), nullptr);

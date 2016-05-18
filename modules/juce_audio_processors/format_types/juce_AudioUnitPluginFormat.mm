@@ -340,48 +340,53 @@ public:
         jassert (AudioUnitFormatHelpers::insideCallback.get() == 0);
        #endif
 
-      #if JUCE_MAC
-        if (eventListenerRef != 0)
-        {
-            AUListenerDispose (eventListenerRef);
-            eventListenerRef = 0;
-        }
-      #endif
-
         if (audioUnit != nullptr)
         {
-            if (prepared)
-                releaseResources();
-
             struct AUDeleter : public CallbackMessage
             {
-                AUDeleter (AudioComponentInstance& inInstance, WaitableEvent& inEvent)
+                AUDeleter (AudioUnitPluginInstance& inInstance, WaitableEvent& inEvent)
                     : auInstance (inInstance), completionSignal (inEvent)
                 {}
 
                 void messageCallback() override
                 {
-                    AudioComponentInstanceDispose (auInstance);
-                    auInstance = nullptr;
+                    auInstance.cleanup();
                     completionSignal.signal();
                 }
 
-                AudioComponentInstance& auInstance;
+                AudioUnitPluginInstance& auInstance;
                 WaitableEvent& completionSignal;
             };
 
             if (MessageManager::getInstance()->isThisTheMessageThread())
             {
-                AudioComponentInstanceDispose (audioUnit);
-                audioUnit = nullptr;
+                cleanup();
             }
             else
             {
                 WaitableEvent completionEvent;
-                (new AUDeleter (audioUnit, completionEvent))->post();
+                (new AUDeleter (*this, completionEvent))->post();
                 completionEvent.wait();
             }
         }
+    }
+
+    // called from the destructer above
+    void cleanup()
+    {
+       #if JUCE_MAC
+        if (eventListenerRef != 0)
+        {
+            AUListenerDispose (eventListenerRef);
+            eventListenerRef = 0;
+        }
+       #endif
+
+        if (prepared)
+            releaseResources();
+
+        AudioComponentInstanceDispose (audioUnit);
+        audioUnit = nullptr;
     }
 
     bool initialise (double rate, int blockSize)

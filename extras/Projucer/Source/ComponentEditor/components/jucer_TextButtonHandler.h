@@ -30,47 +30,34 @@ public:
     {
         registerColour (TextButton::buttonColourId, "background (normal)", "bgColOff");
         registerColour (TextButton::buttonOnColourId, "background (on)", "bgColOn");
-        registerColour (TextButton::textColourOnId, "text colour (normal)", "textCol");
-        registerColour (TextButton::textColourOffId, "text colour (on)", "textColOn");
+        registerColour (TextButton::textColourOffId, "text colour (normal)", "textCol");
+        registerColour (TextButton::textColourOnId, "text colour (on)", "textColOn");
     }
 
     Component* createNewComponent (JucerDocument*)
     {
-        return new TextButton ("new button", String::empty);
+        return new TextButton ("new button", String());
     }
 
     void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
     {
         ButtonHandler::getEditableProperties (component, document, props);
-
         addColourProperties (component, document, props);
     }
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
     {
-        XmlElement* e = ButtonHandler::createXmlFor (comp, layout);
-
-        //TextButton* tb = (TextButton*) comp;
-
-        return e;
+        return ButtonHandler::createXmlFor (comp, layout);
     }
 
     bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
     {
-        if (! ButtonHandler::restoreFromXml (xml, comp, layout))
-            return false;
-
-        //TextButton* tb = (TextButton*) comp;
-
-        return true;
+        return ButtonHandler::restoreFromXml (xml, comp, layout);
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
     {
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
-
-        //TextButton* const tb = dynamic_cast<TextButton*> (component);
-        //TextButton defaultButton (String::empty);
 
         String s;
 

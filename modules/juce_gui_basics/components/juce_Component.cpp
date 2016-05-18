@@ -2679,7 +2679,7 @@ void Component::internalFocusLoss (const FocusChangeType cause)
 {
     const WeakReference<Component> safePointer (this);
 
-    focusLost (focusChangedDirectly);
+    focusLost (cause);
 
     if (safePointer != nullptr)
         internalChildFocusChange (cause, safePointer);
