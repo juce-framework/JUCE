@@ -6,7 +6,7 @@
 
 //==============================================================================
 /**
- 
+
  */
 class JUCE_API  MidiSetupListener
 {
@@ -21,14 +21,14 @@ public:
 class JUCE_API  MidiSetup
 {
 public:
-    
-    #if JUCE_MAC || JUCE_IOS || DOXYGEN
-    /** Listen to setup changes (Only available on iOS and OS X).
-     
+
+    #if JUCE_MAC || JUCE_IOS || JUCE_WINDOWS || DOXYGEN
+    /** Listen to setup changes (Only available on iOS, OS X and Windows).
+
      */
     static void addListener (MidiSetupListener * const listener);
     static void removeListener (MidiSetupListener * const listener);
-    
+
     #endif
 };
 
