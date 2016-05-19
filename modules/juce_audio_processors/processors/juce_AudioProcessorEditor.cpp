@@ -65,14 +65,14 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable)
     else
     {
         setConstrainer (&defaultConstrainer);
+        resizableCorner = nullptr;
 
         if (getWidth() > 0 && getHeight() > 0)
+        {
             defaultConstrainer.setSizeLimits (getWidth(), getHeight(), getWidth(), getHeight());
-
-        resizableCorner = nullptr;
+            resized();
+        }
     }
-
-    resized();
 }
 
 bool AudioProcessorEditor::isResizable() const noexcept
