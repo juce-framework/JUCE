@@ -45,7 +45,7 @@ struct PluginBusUtilities
     AudioBusArray&       getFilterBus (bool inputBus) noexcept         { return inputBus ? processor.busArrangement.inputBuses : processor.busArrangement.outputBuses; }
     const AudioBusArray& getFilterBus (bool inputBus) const noexcept   { return inputBus ? processor.busArrangement.inputBuses : processor.busArrangement.outputBuses; }
     int getBusCount (bool inputBus) const noexcept                     { return getFilterBus (inputBus).size(); }
-    AudioChannelSet getChannelSet (bool inputBus, int bus) noexcept    { return getFilterBus (inputBus).getReference (bus).channels; }
+    AudioChannelSet getChannelSet (bool inp, int bus) noexcept         { return isPositiveAndBelow (bus, getBusCount (inp)) ? getFilterBus (inp).getReference (bus).channels : AudioChannelSet(); }
     int getNumChannels (bool inp, int bus) const noexcept              { return isPositiveAndBelow (bus, getBusCount (inp)) ? getFilterBus (inp).getReference (bus).channels.size() : 0; }
     bool isBusEnabled (bool inputBus, int bus) const noexcept          { return (getNumChannels (inputBus, bus) > 0); }
     bool hasInputs  (int bus) const noexcept                           { return isBusEnabled (true,  bus); }
