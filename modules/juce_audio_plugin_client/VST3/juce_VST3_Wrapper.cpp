@@ -709,14 +709,30 @@ private:
             return kResultFalse;
         }
 
-        tresult PLUGIN_API canResize() override         { return kResultTrue; }
+        tresult PLUGIN_API canResize() override
+        {
+            if (component != nullptr)
+                if (AudioProcessorEditor* editor = component->pluginEditor)
+                    return editor->isResizable();
+
+            return true;
+        }
 
         tresult PLUGIN_API checkSizeConstraint (ViewRect* rectToCheck) override
         {
             if (rectToCheck != nullptr && component != nullptr)
             {
-                rectToCheck->right  = rectToCheck->left + component->getWidth();
-                rectToCheck->bottom = rectToCheck->top  + component->getHeight();
+                // checkSizeConstraint
+                Rectangle<int> juceRect = Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
+                                                                              rectToCheck->right, rectToCheck->bottom);
+                if (AudioProcessorEditor* editor = component->pluginEditor)
+                    if (ComponentBoundsConstrainer* constrainer = editor->getConstrainer())
+                        juceRect.setSize (jlimit (constrainer->getMinimumWidth(),  constrainer->getMaximumWidth(),  juceRect.getWidth()),
+                                          jlimit (constrainer->getMinimumHeight(), constrainer->getMaximumHeight(), juceRect.getHeight()));
+
+                rectToCheck->right  = rectToCheck->left + juceRect.getWidth();
+                rectToCheck->bottom = rectToCheck->top  + juceRect.getHeight();
+
                 return kResultTrue;
             }
 
@@ -730,8 +746,8 @@ private:
         {
         public:
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
-               : owner (editor),
-                 pluginEditor (plugin.createEditorIfNeeded())
+               : pluginEditor (plugin.createEditorIfNeeded()),
+                 owner (editor)
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
@@ -802,9 +818,10 @@ private:
                 }
             }
 
+            ScopedPointer<AudioProcessorEditor> pluginEditor;
+
         private:
             JuceVST3Editor& owner;
-            ScopedPointer<AudioProcessorEditor> pluginEditor;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };

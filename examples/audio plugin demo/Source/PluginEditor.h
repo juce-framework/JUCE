@@ -36,8 +36,6 @@ private:
     MidiKeyboardComponent midiKeyboard;
     Label timecodeDisplayLabel, gainLabel, delayLabel;
     ScopedPointer<ParameterSlider> gainSlider, delaySlider;
-    ScopedPointer<ResizableCornerComponent> resizer;
-    ComponentBoundsConstrainer resizeLimits;
 
     //==============================================================================
     JuceDemoPluginAudioProcessor& getProcessor() const
