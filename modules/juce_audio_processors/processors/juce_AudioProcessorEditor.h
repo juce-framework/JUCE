@@ -142,9 +142,9 @@ private:
     //==============================================================================
     struct AudioProcessorEditorListener : ComponentListener
     {
-        AudioProcessorEditorListener (AudioProcessorEditor& audioEditor) : e (audioEditor) {}
-        void componentMovedOrResized (Component&, bool, bool wasResized) override   { e.editorResized (wasResized); }
-        AudioProcessorEditor& e;
+        AudioProcessorEditorListener (AudioProcessorEditor* audioEditor) : e (audioEditor) {}
+        void componentMovedOrResized (Component&, bool, bool wasResized) override   { e->editorResized (wasResized); }
+        AudioProcessorEditor* e;
     };
 
     //==============================================================================

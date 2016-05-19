@@ -48,7 +48,7 @@ int AudioProcessorEditor::getControlParameterIndex (Component&)  { return -1; }
 void AudioProcessorEditor::initialise()
 {
     setConstrainer (&defaultConstrainer);
-    addComponentListener (resizeListener = new AudioProcessorEditorListener (*this));
+    addComponentListener (resizeListener = new AudioProcessorEditorListener (this));
 }
 
 //==============================================================================

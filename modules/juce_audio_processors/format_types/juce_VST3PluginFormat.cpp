@@ -2514,14 +2514,11 @@ private:
 
                             return;
                         }
-
-                        break;
                     }
 
                     break;
                 }
             }
-
         }
 
         if (editController != nullptr
