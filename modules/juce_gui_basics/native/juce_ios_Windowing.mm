@@ -35,20 +35,10 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
 } // (juce namespace)
 
-@interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
-{
+#import "juce_ios_Windowing.h"
+
+@implementation JuceAppStartupDelegate {
 }
-
-- (void) applicationDidFinishLaunching: (UIApplication*) application;
-- (void) applicationWillTerminate: (UIApplication*) application;
-- (void) applicationDidEnterBackground: (UIApplication*) application;
-- (void) applicationWillEnterForeground: (UIApplication*) application;
-- (void) applicationDidBecomeActive: (UIApplication*) application;
-- (void) applicationWillResignActive: (UIApplication*) application;
-
-@end
-
-@implementation JuceAppStartupDelegate
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
