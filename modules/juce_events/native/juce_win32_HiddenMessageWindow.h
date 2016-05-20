@@ -49,10 +49,19 @@ public:
         hwnd = CreateWindow (getClassNameFromAtom(), messageWindowName,
                              0, 0, 0, 0, 0, 0, 0, moduleHandle, 0);
         jassert (hwnd != 0);
+
+        // Register the window to receive WM_DEVICECHANGE events
+        DEV_BROADCAST_DEVICEINTERFACE filter;
+        ZeroMemory(&filter, sizeof(filter));
+        filter.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+        filter.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+        hdevnotify = RegisterDeviceNotification(hwnd, &filter, DEVICE_NOTIFY_WINDOW_HANDLE);
+        jassert(hdevnotify != 0);
     }
 
     ~HiddenMessageWindow()
     {
+        UnregisterDeviceNotification(hdevnotify);
         DestroyWindow (hwnd);
         UnregisterClass (getClassNameFromAtom(), 0);
     }
@@ -62,6 +71,7 @@ public:
 private:
     ATOM atom;
     HWND hwnd;
+    HDEVNOTIFY hdevnotify;
 
     LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) (pointer_sized_uint) atom; }
 };

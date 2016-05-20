@@ -92,6 +92,7 @@
  #endif
 
  #include <windows.h>
+ #include <dbt.h>
  #include <shellapi.h>
  #include <tchar.h>
  #include <stddef.h>

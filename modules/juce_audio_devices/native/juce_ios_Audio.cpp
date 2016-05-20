@@ -293,6 +293,8 @@ public:
                  const BigInteger& outputChannelsWanted,
                  double targetSampleRate, int bufferSize) override
     {
+        const ScopedLock sl (statusLock);
+        
         close();
 
         lastError.clear();
@@ -349,6 +351,8 @@ public:
 
     void close() override
     {
+        const ScopedLock sl (statusLock);
+        
         if (isRunning)
         {
             isRunning = false;
@@ -390,6 +394,8 @@ public:
 
     void stop() override
     {
+        const ScopedLock sl (statusLock);
+        
         if (isRunning)
         {
             AudioIODeviceCallback* lastCallback;
@@ -433,6 +439,8 @@ public:
     {
         JUCE_IOS_AUDIO_LOG ("handleStatusChange: enabled: " << (int) enabled << ", reason: " << reason);
 
+        const ScopedLock sl (statusLock);
+        
         isRunning = enabled;
         setAudioSessionActive (enabled);
 
@@ -449,6 +457,8 @@ public:
     {
         JUCE_IOS_AUDIO_LOG ("handleRouteChange: reason: " << reason);
 
+        const ScopedLock sl (statusLock);
+        
         fixAudioRouteIfSetToReceiver();
 
         if (isRunning)
@@ -476,6 +486,7 @@ private:
     //==============================================================================
     SharedResourcePointer<AudioSessionHolder> sessionHolder;
     CriticalSection callbackLock;
+    CriticalSection statusLock;
     NSTimeInterval sampleRate = 0;
     int numInputChannels = 2, numOutputChannels = 2;
     int preferredBufferSize = 0, actualBufferSize = 0;
@@ -679,15 +690,18 @@ private:
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &format, sizeof (format));
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof (format));
 
-        UInt32 framesPerSlice;
-        UInt32 dataSize = sizeof (framesPerSlice);
+        // The below code is not correct, and has been removed by us (Yousician) due to the Juce guys being to slow in fixing it,
+        // see https://forum.juce.com/t/block-size-on-ios-8/17280 for details.
+        
+        //UInt32 framesPerSlice;
+        //UInt32 dataSize = sizeof (framesPerSlice);
 
-        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &framesPerSlice, &dataSize) == noErr
-               && dataSize == sizeof (framesPerSlice) && framesPerSlice != actualBufferSize)
-        {
-            actualBufferSize = framesPerSlice;
-            prepareFloatBuffers (actualBufferSize);
-        }
+        //if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &framesPerSlice, &dataSize) == noErr
+        //       && dataSize == sizeof (framesPerSlice) && framesPerSlice != actualBufferSize)
+        //{
+        //    actualBufferSize = framesPerSlice;
+        //    prepareFloatBuffers (actualBufferSize);
+        //}
 
         AudioUnitInitialize (audioUnit);
         return true;

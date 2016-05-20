@@ -35,7 +35,7 @@
 
 #include <CoreMIDI/MIDIServices.h>
 
-#if JUCE_SUPPORT_CARBON
+#if JUCE_MAC && JUCE_SUPPORT_CARBON
  #include <AudioUnit/AudioUnitCarbonView.h>
 #endif
 
@@ -56,7 +56,7 @@ namespace juce
 
 #include "../../juce_audio_devices/native/juce_MidiDataConcatenator.h"
 
-#if JUCE_SUPPORT_CARBON
+#if JUCE_MAC && JUCE_SUPPORT_CARBON
  #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
 #endif
 
@@ -1656,7 +1656,7 @@ private:
    #endif
 };
 
-#if JUCE_SUPPORT_CARBON
+#if JUCE_MAC && JUCE_SUPPORT_CARBON
 
 //==============================================================================
 class AudioUnitPluginWindowCarbon   : public AudioProcessorEditor
@@ -1800,7 +1800,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
     if (! static_cast<AudioUnitPluginWindowCocoa*> (w.get())->isValid())
         w = nullptr;
 
-   #if JUCE_SUPPORT_CARBON
+   #if JUCE_MAC && JUCE_SUPPORT_CARBON
     if (w == nullptr)
     {
         w = new AudioUnitPluginWindowCarbon (*this);

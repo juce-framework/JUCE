@@ -22,6 +22,51 @@
   ==============================================================================
 */
 
+
+class MidiChangeDetector : private DeviceChangeDetector
+{
+public:
+    MidiChangeDetector() : DeviceChangeDetector(L"MidiChangeDetector")
+    {}
+
+    void addListener(MidiSetupListener* const l)
+    {
+        listeners.addIfNotAlreadyThere(l);
+    }
+
+    void removeListener(MidiSetupListener* const l)
+    {
+        listeners.removeFirstMatchingValue(l);
+    }
+
+private:
+    void systemDeviceChanged() override
+    {
+        // Called from DeviceChangeDetector when new devices are plugged in/out. To check whether
+        // the device being added/removed is a MIDI input, we compare the lists of connected MIDI
+        // devices before and after the call.
+
+        auto newDeviceNames = MidiInput::getDevices();
+        if (newDeviceNames != deviceNames)
+        {
+            deviceNames = newDeviceNames;
+            for (auto& listener : listeners)
+            {
+                listener->midiDevicesChanged();
+            }
+        }
+    }
+
+    StringArray deviceNames;
+    Array<MidiSetupListener*> listeners;
+};
+
+MidiChangeDetector& getMidiChangeDetector()
+{
+    static MidiChangeDetector out;
+    return out;
+}
+
 class MidiInCollector
 {
 public:
@@ -490,4 +535,14 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
             Sleep (1);
         }
     }
+}
+
+void MidiSetup::addListener(MidiSetupListener* const l)
+{
+    getMidiChangeDetector().addListener(l);
+}
+
+void MidiSetup::removeListener(MidiSetupListener* const l)
+{
+    getMidiChangeDetector().removeListener(l);
 }
