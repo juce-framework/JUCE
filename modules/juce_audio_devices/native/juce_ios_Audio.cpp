@@ -684,9 +684,9 @@ private:
 
         if (AudioUnitSetProperty (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &actualBufferSize, sizeof (actualBufferSize)) == noErr
                && AudioUnitGetProperty (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &framesPerSlice, &dataSize) == noErr
-               && dataSize == sizeof (framesPerSlice) && framesPerSlice != actualBufferSize)
+               && dataSize == sizeof (framesPerSlice) && static_cast<int> (framesPerSlice) != actualBufferSize)
         {
-            actualBufferSize = framesPerSlice;
+            actualBufferSize = static_cast<int> (framesPerSlice);
             prepareFloatBuffers (actualBufferSize);
         }
 
