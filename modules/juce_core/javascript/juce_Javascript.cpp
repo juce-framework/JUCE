@@ -1506,6 +1506,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("remove",   remove);
             setMethod ("join",     join);
             setMethod ("push",     push);
+            setMethod ("slice",    slice);
         }
 
         static Identifier getClassName()   { static const Identifier i ("Array"); return i; }
@@ -1545,6 +1546,32 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                     array->add (a.arguments[i]);
 
                 return array->size();
+            }
+
+            return var::undefined();
+        }
+        
+        static var slice (Args a)
+        {
+            var b = a.thisObject.clone();
+            if (Array<var>* array = b.getArray())
+            {
+                int startIndex = get (a, 0).isUndefined() || get (a, 0).isVoid() ? 0 : (int) get (a, 0);
+                if (startIndex < 0)
+                {
+                    startIndex = array->size ()+startIndex;
+                }
+
+                int endIndex = a.numArguments > 1 ?  (int) get (a, 1) : array->size();
+                if (endIndex < 0)
+                {
+                    endIndex = array->size ()+endIndex+1;
+                }
+
+                array->removeRange (endIndex, array->size());
+                array->removeRange (0, startIndex);
+
+                return *array;
             }
 
             return var::undefined();
