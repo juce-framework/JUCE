@@ -91,10 +91,8 @@ public:
         quit();
     }
 
-private:
+protected:
     ScopedPointer<StandaloneFilterWindow> mainWindow;
 };
-
-START_JUCE_APPLICATION (StandaloneFilterApp);
 
 #endif

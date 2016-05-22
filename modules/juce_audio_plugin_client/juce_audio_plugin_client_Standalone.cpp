@@ -27,3 +27,5 @@
 #endif
 
 #include "Standalone/juce_StandaloneFilterApp.cpp"
+
+START_JUCE_APPLICATION (StandaloneFilterApp);
