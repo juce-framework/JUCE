@@ -82,9 +82,8 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
     timecodeDisplayLabel.setColour (Label::textColourId, Colours::blue);
     timecodeDisplayLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
-    // add the triangular resizer component for the bottom-right of the UI
-    addAndMakeVisible (resizer = new ResizableCornerComponent (this, &resizeLimits));
-    resizeLimits.setSizeLimits (150, 150, 800, 300);
+    // set resize limits for this plug-in
+    setResizeLimits (400, 200, 800, 300);
 
     // set our component's initial size to be the last one that was stored in the filter's settings
     setSize (owner.lastUIWidth,
@@ -119,8 +118,6 @@ void JuceDemoPluginAudioProcessorEditor::resized()
     Rectangle<int> sliderArea (r.removeFromTop (50));
     gainSlider->setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
     delaySlider->setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
-
-    resizer->setBounds (getWidth() - 16, getHeight() - 16, 16, 16);
 
     getProcessor().lastUIWidth = getWidth();
     getProcessor().lastUIHeight = getHeight();

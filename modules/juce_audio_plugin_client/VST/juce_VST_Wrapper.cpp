@@ -386,13 +386,13 @@ public:
     //==============================================================================
     bool getEffectName (char* name) override
     {
-        String (JucePlugin_Name).copyToUTF8 (name, 64);
+        String (JucePlugin_Name).copyToUTF8 (name, 64 + 1);
         return true;
     }
 
     bool getVendorString (char* text) override
     {
-        String (JucePlugin_Manufacturer).copyToUTF8 (text, 64);
+        String (JucePlugin_Manufacturer).copyToUTF8 (text, 64 + 1);
         return true;
     }
 
@@ -822,14 +822,14 @@ public:
     void getProgramName (char* name) override
     {
         if (filter != nullptr)
-            filter->getProgramName (filter->getCurrentProgram()).copyToUTF8 (name, 24);
+            filter->getProgramName (filter->getCurrentProgram()).copyToUTF8 (name, 24 + 1);
     }
 
     bool getProgramNameIndexed (VstInt32 /*category*/, VstInt32 index, char* text) override
     {
         if (filter != nullptr && isPositiveAndBelow (index, filter->getNumPrograms()))
         {
-            filter->getProgramName (index).copyToUTF8 (text, 24);
+            filter->getProgramName (index).copyToUTF8 (text, 24 + 1);
             return true;
         }
 
@@ -860,7 +860,7 @@ public:
         if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterText (index, 24).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterText (index, 24).copyToUTF8 (text, 24 + 1); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
@@ -885,7 +885,7 @@ public:
         if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterName (index, 16).copyToUTF8 (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterName (index, 16).copyToUTF8 (text, 16 + 1); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
@@ -894,7 +894,7 @@ public:
         if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterLabel (index).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterLabel (index).copyToUTF8 (text, 24 + 1); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
@@ -1064,8 +1064,8 @@ public:
 
         String channelName = busInfo.name + String (" ") + abbvChannelName;
 
-        channelName.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
-        channelName.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
+        channelName.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen + 1));
+        channelName.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen + 1));
 
         properties.flags = kVstPinUseSpeaker | kVstPinIsActive;
         properties.arrangementType = SpeakerMappings::channelSetToVstArrangementType (busInfo.channels);

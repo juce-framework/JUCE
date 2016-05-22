@@ -1090,14 +1090,14 @@ public:
                 close (pipeHandles[0]);   // close the read handle
 
                 if ((streamFlags & wantStdOut) != 0)
-                    dup2 (pipeHandles[1], 1); // turns the pipe into stdout
+                    dup2 (pipeHandles[1], STDOUT_FILENO); // turns the pipe into stdout
                 else
-                    close (STDOUT_FILENO);
+                    dup2 (open ("/dev/null", O_WRONLY), STDOUT_FILENO);
 
                 if ((streamFlags & wantStdErr) != 0)
-                    dup2 (pipeHandles[1], 2);
+                    dup2 (pipeHandles[1], STDERR_FILENO);
                 else
-                    close (STDERR_FILENO);
+                    dup2 (open ("/dev/null", O_WRONLY), STDERR_FILENO);
 
                 close (pipeHandles[1]);
 
