@@ -93,6 +93,11 @@
 
 #undef check
 
+namespace juce
+{
+ #include "juce_AAX_Modifier_Injector.h"
+}
+
 const int32_t juceChunkType = 'juce';
 const int maxAAXChannels = 8;
 
@@ -328,7 +333,7 @@ struct AAXClasses
    #endif
 
     //==============================================================================
-    class JuceAAX_GUI   : public AAX_CEffectGUI
+    class JuceAAX_GUI   : public AAX_CEffectGUI, public ModifierKeyProvider
     {
     public:
         JuceAAX_GUI() {}
@@ -361,6 +366,9 @@ struct AAXClasses
                 {
                     component->setVisible (true);
                     component->addToDesktop (0, nativeViewToAttachTo);
+
+                    if (ModifierKeyReceiver* modReceiver = dynamic_cast<ModifierKeyReceiver*> (component->getPeer()))
+                        modReceiver->setModifierKeyProvider (this);
                 }
             }
         }
@@ -371,6 +379,9 @@ struct AAXClasses
             {
                 JUCE_AUTORELEASEPOOL
                 {
+                    if (ModifierKeyReceiver* modReceiver = dynamic_cast<ModifierKeyReceiver*> (component->getPeer()))
+                        modReceiver->removeModifierKeyProvider();
+
                     component->removeFromDesktop();
                     component = nullptr;
                 }
@@ -412,6 +423,22 @@ struct AAXClasses
             }
 
             return AAX_ERROR_NULL_OBJECT;
+        }
+
+        int getWin32Modifiers() const override
+        {
+            int modifierFlags = 0;
+
+            if (const AAX_IViewContainer* viewContainer = GetViewContainer())
+            {
+                uint32 aaxViewMods = 0;
+                const_cast<AAX_IViewContainer*>(viewContainer)->GetModifiers (&aaxViewMods);
+
+                if ((aaxViewMods & AAX_eModifiers_Shift) != 0) modifierFlags |= ModifierKeys::shiftModifier;
+                if ((aaxViewMods & AAX_eModifiers_Alt )  != 0) modifierFlags |= ModifierKeys::altModifier;
+            }
+
+            return modifierFlags;
         }
 
     private:
