@@ -1502,7 +1502,7 @@ public:
             info.flags = Vst::BusInfo::kDefaultActive;
 
            #if JucePlugin_WantsMidiInput
-            if (dir == Vst::kInput)
+            if (dir == Vst::kInput && index == 0)
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
@@ -1514,7 +1514,7 @@ public:
            #endif
 
            #if JucePlugin_ProducesMidiOutput
-            if (dir == Vst::kOutput)
+            if (dir == Vst::kOutput && index == 0)
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
