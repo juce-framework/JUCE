@@ -22,9 +22,10 @@
   ==============================================================================
 */
 
+#include "../../juce_core/system/juce_TargetPlatform.h"
+
 #if JUCE_MAC
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_VST || JucePlugin_Build_VST3
