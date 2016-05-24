@@ -22,18 +22,6 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
- // @internal
- extern JUCE_API int* jucePlugInClientCurrentWrapperType;
-
- // this is ugly hack is needed by juce_getExecutableFile to have a wrapper
- // dependent symbol
- #define JUCE_DEFINE_WRAPPER_TYPE(x) JUCE_API int jucePlugInClientCurrentWrapperType_ ## x = static_cast<int> (AudioProcessor::x);
- #define JUCE_DECLARE_WRAPPER_TYPE(x) jucePlugInClientCurrentWrapperType = &jucePlugInClientCurrentWrapperType_ ## x;
-
-#endif
-
-
 //==============================================================================
 class PluginHostType
 {
@@ -190,15 +178,15 @@ public:
 
          @see AudioProcessor::wrapperType
     */
-    static AudioProcessor::WrapperType getPluginLoadedAs() noexcept
-    {
-        if (jucePlugInClientCurrentWrapperType != nullptr)
-            return static_cast<AudioProcessor::WrapperType> (*jucePlugInClientCurrentWrapperType);
-
-        return AudioProcessor::wrapperType_Undefined;
-    }
+    static AudioProcessor::WrapperType getPluginLoadedAs() noexcept    { return jucePlugInClientCurrentWrapperType; }
 
     //==============================================================================
+
+   #ifndef DOXYGEN
+    // @internal
+    static AudioProcessor::WrapperType jucePlugInClientCurrentWrapperType;
+   #endif
+
 private:
     static HostType getHostType()
     {

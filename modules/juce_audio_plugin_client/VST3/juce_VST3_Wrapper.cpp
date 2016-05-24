@@ -63,8 +63,6 @@
  #endif
 #endif
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_VST3);
-
 namespace juce
 {
 
@@ -2410,7 +2408,7 @@ private:
 // The VST3 plugin entry point.
 JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 {
-    JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST3);
+    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST3;
 
    #if JUCE_WINDOWS
     // Cunning trick to force this function to be exported. Life's too short to

@@ -101,8 +101,6 @@ namespace juce
 const int32_t juceChunkType = 'juce';
 const int maxAAXChannels = 8;
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AAX);
-
 //==============================================================================
 struct AAXClasses
 {
@@ -563,7 +561,7 @@ struct AAXClasses
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()
         {
-            JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AAX);
+            PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
             return new JuceAAX_Processor();
         }
 
@@ -1549,7 +1547,7 @@ struct AAXClasses
 
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AAX);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
 
         ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
         PluginBusUtilities busUtils (*plugin, false, maxAAXChannels);

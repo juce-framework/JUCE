@@ -105,8 +105,6 @@
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_RTAS);
-
 #ifdef _MSC_VER
  #pragma pack (pop)
 
@@ -958,7 +956,7 @@ private:
        #if JUCE_WINDOWS
         Process::setCurrentModuleInstanceHandle (gThisModule);
        #endif
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_RTAS);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_RTAS;
         initialiseJuce_GUI();
 
         return new JucePlugInProcess();

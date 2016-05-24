@@ -72,8 +72,6 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
-
 // TODO: ask Timur: use SFINAE to automatically generate this for all NSObjects
 template <> struct ContainerDeletePolicy<AUAudioUnitBusArray>                   { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AUParameterTree>                       { static void destroy (NSObject* o) { [o release]; } };
@@ -1183,7 +1181,7 @@ const double JuceAudioUnitv3::kDefaultSampleRate = 44100.0;
 
 JuceAudioUnitv3Base* JuceAudioUnitv3Base::create (AUAudioUnit* audioUnit, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
 {
-    JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
+    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
     return new JuceAudioUnitv3 (audioUnit, descr, options, error);
 }
 
@@ -1197,7 +1195,7 @@ public:
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         initialiseJuce_GUI();
     }
 

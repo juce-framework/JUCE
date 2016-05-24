@@ -111,8 +111,6 @@
 class JuceVSTWrapper;
 static bool recursionCheck = false;
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_VST);
-
 namespace juce
 {
  #if JUCE_MAC
@@ -1994,7 +1992,7 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
        #if JUCE_MAC
         initialiseMacVST();
@@ -2006,7 +2004,7 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
        #if JUCE_MAC
         initialiseMacVST();
@@ -2022,7 +2020,7 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         SharedMessageThread::getInstance();
         return pluginEntryPoint (audioMaster);
@@ -2031,7 +2029,7 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
     JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         return VSTPluginMain (audioMaster);
     }
@@ -2046,7 +2044,7 @@ namespace
 
     extern "C" __declspec (dllexport) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         return pluginEntryPoint (audioMaster);
     }
@@ -2054,7 +2052,7 @@ namespace
    #ifndef JUCE_64BIT // (can't compile this on win64, but it's not needed anyway with VST2.4)
     extern "C" __declspec (dllexport) int main (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         return (int) pluginEntryPoint (audioMaster);
     }
