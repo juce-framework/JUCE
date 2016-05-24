@@ -832,9 +832,8 @@ private:
                                                       | kAudioUnitParameterFlag_HasCFNameString
                                                       | kAudioUnitParameterFlag_ValuesHaveStrings);
 
-           #if JucePlugin_AUHighResolutionParameters
+           if (juceFilter->isHighResolutionParameters())
             flags |= (UInt32) kAudioUnitParameterFlag_IsHighResolution;
-           #endif
 
             // set whether the param is automatable (unnamed parameters aren't allowed to be automated)
             if (name.isEmpty() || ! processor.isParameterAutomatable (idx))

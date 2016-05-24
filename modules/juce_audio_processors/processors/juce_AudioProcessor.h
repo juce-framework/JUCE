@@ -596,6 +596,16 @@ public:
     AudioProcessorEditor* createEditorIfNeeded();
 
     //==============================================================================
+    /** Returns if AU should use high resolution (continious) instead of steps for better precision.
+     
+     Replace JucePlugin_AUHighResolutionParameters.
+     
+     This must return the correct value immediately after the object has been
+     created, and mustn't change the value later.
+     */
+    bool isHighResolutionParameters(bool initialValue = false);
+    
+    //==============================================================================
     /** This must return the correct value immediately after the object has been
         created, and mustn't change the number of parameters later.
 

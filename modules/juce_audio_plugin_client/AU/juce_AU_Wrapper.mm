@@ -732,9 +732,8 @@ public:
                                                 | kAudioUnitParameterFlag_HasCFNameString
                                                 | kAudioUnitParameterFlag_ValuesHaveStrings);
 
-           #if JucePlugin_AUHighResolutionParameters
+           if (juceFilter->isHighResolutionParameters())
             outParameterInfo.flags |= (UInt32) kAudioUnitParameterFlag_IsHighResolution;
-           #endif
 
             const String name (juceFilter->getParameterName (index));
 

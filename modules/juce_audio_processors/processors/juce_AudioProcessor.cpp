@@ -175,6 +175,12 @@ void AudioProcessor::setLatencySamples (const int newLatency)
     }
 }
 
+bool AudioProcessor::isHighResolutionParameters(bool initialValue)
+{
+    static bool isHighResolutionParams = initialValue;
+    return isHighResolutionParams;
+}
+
 void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
                                                 const float newValue)
 {
