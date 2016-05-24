@@ -32,7 +32,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 #if JUCE_MAC
- #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8)
+ #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11)
   #error AUv3 needs Deployment Target OS X 10.8 or higher to compile
  #endif
 #endif
