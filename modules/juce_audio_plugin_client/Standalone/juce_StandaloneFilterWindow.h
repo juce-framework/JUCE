@@ -83,8 +83,8 @@ public:
         jassert (processor != nullptr); // Your createPluginFilter() function must return a valid object!
 
         // try to disable sidechain and aux buses
-        const int numInBuses  = processor->busArrangement.inputBuses.size();
-        const int numOutBuses = processor->busArrangement.inputBuses.size();
+        const int numInBuses  = processor->busArrangement.inputBuses. size();
+        const int numOutBuses = processor->busArrangement.outputBuses.size();
 
         for (int busIdx = 1; busIdx < numInBuses; ++busIdx)
             processor->setPreferredBusArrangement (true, busIdx, AudioChannelSet::disabled());
