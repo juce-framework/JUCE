@@ -564,7 +564,10 @@ namespace IconConverters
 }
 
 //==============================================================================
-class HWNDComponentPeer  : public ComponentPeer, public ModifierKeyReceiver
+class HWNDComponentPeer  : public ComponentPeer
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+    , public ModifierKeyReceiver
+   #endif
 {
 public:
     enum RenderingEngineType
@@ -2420,6 +2423,7 @@ private:
     }
 
     //==============================================================================
+  #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     void setModifierKeyProvider (ModifierKeyProvider* provider) override
     {
         modProvider = provider;
@@ -2429,6 +2433,7 @@ private:
     {
         modProvider = nullptr;
     }
+   #endif
 
     //==============================================================================
 public:
