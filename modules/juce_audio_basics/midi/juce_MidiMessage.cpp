@@ -33,11 +33,22 @@ namespace MidiHelpers
     {
         return (uint8) jlimit (0, 127, v);
     }
+}
 
-    inline uint8 floatVelocityToByte (const float v) noexcept
-    {
-        return validVelocity (roundToInt (v * 127.0f));
-    }
+//==============================================================================
+uint8 MidiMessage::floatValueToMidiByte (const float v) noexcept
+{
+    return MidiHelpers::validVelocity (roundToInt (v * 127.0f));
+}
+
+uint16 MidiMessage::pitchbendToPitchwheelPos (const float pitchbend,
+                                 const float pitchbendRange) noexcept
+{
+    // can't translate a pitchbend value that is outside of the given range!
+    jassert (std::abs (pitchbend) <= pitchbendRange);
+
+    return pitchbend > 0.0f ? jmap (pitchbend, 0.0f, pitchbendRange, 8192.0f, 16383.0f)
+    : jmap (pitchbend, -pitchbendRange, 0.0f, 0.0f, 8192.0f);
 }
 
 //==============================================================================
@@ -416,7 +427,7 @@ float MidiMessage::getFloatVelocity() const noexcept
 void MidiMessage::setVelocity (const float newVelocity) noexcept
 {
     if (isNoteOnOrOff())
-        getData()[2] = MidiHelpers::floatVelocityToByte (newVelocity);
+        getData()[2] = floatValueToMidiByte (newVelocity);
 }
 
 void MidiMessage::multiplyVelocity (const float scaleFactor) noexcept
@@ -563,7 +574,7 @@ MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const 
 
 MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const float velocity) noexcept
 {
-    return noteOn (channel, noteNumber, MidiHelpers::floatVelocityToByte (velocity));
+    return noteOn (channel, noteNumber, floatValueToMidiByte (velocity));
 }
 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8 velocity) noexcept
@@ -577,7 +588,7 @@ MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8
 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, float velocity) noexcept
 {
-    return noteOff (channel, noteNumber, MidiHelpers::floatVelocityToByte (velocity));
+    return noteOff (channel, noteNumber, floatValueToMidiByte (velocity));
 }
 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber) noexcept
@@ -1010,7 +1021,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
     return String();
 }
 
-double MidiMessage::getMidiNoteInHertz (int noteNumber, const double frequencyOfA) noexcept
+double MidiMessage::getMidiNoteInHertz (const int noteNumber, const double frequencyOfA) noexcept
 {
     return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
 }
