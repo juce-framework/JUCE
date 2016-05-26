@@ -47,8 +47,9 @@ uint16 MidiMessage::pitchbendToPitchwheelPos (const float pitchbend,
     // can't translate a pitchbend value that is outside of the given range!
     jassert (std::abs (pitchbend) <= pitchbendRange);
 
-    return pitchbend > 0.0f ? jmap (pitchbend, 0.0f, pitchbendRange, 8192.0f, 16383.0f)
-    : jmap (pitchbend, -pitchbendRange, 0.0f, 0.0f, 8192.0f);
+    return static_cast<uint16> (pitchbend > 0.0f
+                                  ? jmap (pitchbend, 0.0f, pitchbendRange, 8192.0f, 16383.0f)
+                                  : jmap (pitchbend, -pitchbendRange, 0.0f, 0.0f, 8192.0f));
 }
 
 //==============================================================================
