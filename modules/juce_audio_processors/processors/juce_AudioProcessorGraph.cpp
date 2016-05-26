@@ -1646,8 +1646,8 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
 
     if (graph != nullptr)
     {
-        setPlayConfigDetails (type == audioInputNode   ? graph->getMainBusNumInputChannels()  : 0,
-                              type == audioOutputNode  ? graph->getMainBusNumOutputChannels() : 0,
+        setPlayConfigDetails (type == audioOutputNode ? graph->getMainBusNumOutputChannels() : 0,
+                              type == audioInputNode  ? graph->getMainBusNumInputChannels()  : 0,
                               getSampleRate(),
                               getBlockSize());
 
