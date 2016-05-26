@@ -93,6 +93,9 @@ public:
     };
 
 private:
+
+    static void runtimPermissionsCallback (bool wasGranted);
+
     ScopedPointer<ContentComponent> contentComponent;
     ScopedPointer<Component> taskbarIcon;
     ScopedPointer<BubbleMessageComponent> currentBubbleMessage;

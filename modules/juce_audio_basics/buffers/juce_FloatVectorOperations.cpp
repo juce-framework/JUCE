@@ -204,10 +204,11 @@ namespace FloatVectorHelpers
         typedef float Type;
         typedef float32x4_t ParallelType;
         typedef uint32x4_t IntegerType;
+        union signMaskUnion { ParallelType f; IntegerType i; };
         enum { numParallel = 4 };
 
-        static forcedinline IntegerType toint (ParallelType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
-        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { signMaskUnion u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { signMaskUnion u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return vld1q_dup_f32 (&v); }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return vld1q_f32 (v); }
@@ -235,10 +236,11 @@ namespace FloatVectorHelpers
         typedef double Type;
         typedef double ParallelType;
         typedef uint64 IntegerType;
+        union signMaskUnion { ParallelType f; IntegerType i; };
         enum { numParallel = 1 };
 
-        static forcedinline IntegerType toint (ParallelType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.f = v; return u.i; }
-        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { union { ParallelType f; IntegerType i; } u; u.i = v; return u.f; }
+        static forcedinline IntegerType toint (ParallelType v) noexcept                 { signMaskUnion u; u.f = v; return u.i; }
+        static forcedinline ParallelType toflt (IntegerType v) noexcept                 { signMaskUnion u; u.i = v; return u.f; }
 
         static forcedinline ParallelType load1 (Type v) noexcept                        { return v; }
         static forcedinline ParallelType loadA (const Type* v) noexcept                 { return *v; }
@@ -345,6 +347,9 @@ namespace FloatVectorHelpers
     #define JUCE_LOAD_SRC1_SRC2(src1Load, src2Load)                 const Mode::ParallelType s1 = src1Load (src1), s2 = src2Load (src2);
     #define JUCE_LOAD_SRC1_SRC2_DEST(src1Load, src2Load, dstLoad)   const Mode::ParallelType d = dstLoad (dest), s1 = src1Load (src1), s2 = src2Load (src2);
     #define JUCE_LOAD_SRC_DEST(srcLoad, dstLoad)                    const Mode::ParallelType d = dstLoad (dest), s = srcLoad (src);
+
+    union signMask32 { float  f; uint32 i; };
+    union signMask64 { double d; uint64 i; };
 
    #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
     template<int typeSize> struct ModeType    { typedef BasicOps32 Mode; };
@@ -806,7 +811,7 @@ void FloatVectorOperations::abs (float* dest, const float* src, int num) noexcep
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vabs ((float*) src, 1, dest, 1, (vDSP_Length) num);
    #else
-    union { float f; uint32 i; } signMask;
+    FloatVectorHelpers::signMask32 signMask;
     signMask.i = 0x7fffffffUL;
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
@@ -821,7 +826,7 @@ void FloatVectorOperations::abs (double* dest, const double* src, int num) noexc
    #if JUCE_USE_VDSP_FRAMEWORK
     vDSP_vabsD ((double*) src, 1, dest, 1, (vDSP_Length) num);
    #else
-    union {double d; uint64 i;} signMask;
+    FloatVectorHelpers::signMask64 signMask;
     signMask.i = 0x7fffffffffffffffULL;
 
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]), Mode::bit_and (s, mask),

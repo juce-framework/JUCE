@@ -98,7 +98,7 @@
   #define JUCE_COMPILER_SUPPORTS_STATIC_ASSERT 1
  #endif
 
- #ifndef JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL
+ #if __has_feature (cxx_override_control) && (! defined (JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL))
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #endif
 

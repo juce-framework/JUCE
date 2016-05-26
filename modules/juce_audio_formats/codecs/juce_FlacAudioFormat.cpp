@@ -24,6 +24,66 @@
 
 #if JUCE_USE_FLAC
 
+}
+
+#if defined _WIN32 && !defined __CYGWIN__
+ #include <io.h>
+#else
+ #include <unistd.h>
+#endif
+
+#if defined _MSC_VER || defined __BORLANDC__ || defined __MINGW32__
+ #include <sys/types.h> /* for off_t */
+#endif
+
+#if HAVE_INTTYPES_H
+ #define __STDC_FORMAT_MACROS
+ #include <inttypes.h>
+#endif
+
+#if defined _MSC_VER || defined __MINGW32__ || defined __CYGWIN__ || defined __EMX__
+ #include <io.h> /* for _setmode(), chmod() */
+ #include <fcntl.h> /* for _O_BINARY */
+#else
+ #include <unistd.h> /* for chown(), unlink() */
+#endif
+
+#if defined _MSC_VER || defined __BORLANDC__ || defined __MINGW32__
+ #if defined __BORLANDC__
+  #include <utime.h> /* for utime() */
+ #else
+  #include <sys/utime.h> /* for utime() */
+ #endif
+#else
+ #include <sys/types.h> /* some flavors of BSD (like OS X) require this to get time_t */
+ #include <utime.h> /* for utime() */
+#endif
+
+#if defined _MSC_VER
+ #if _MSC_VER >= 1600
+  #include <stdint.h>
+ #else
+  #include <limits.h>
+ #endif
+#endif
+
+#ifdef _WIN32
+ #include <stdio.h>
+ #include <sys/stat.h>
+ #include <stdarg.h>
+ #include <windows.h>
+#endif
+
+#ifdef DEBUG
+ #include <assert.h>
+#endif
+
+#include <stdlib.h>
+#include <stdio.h>
+
+namespace juce
+{
+
 namespace FlacNamespace
 {
 #if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
@@ -62,7 +122,7 @@ namespace FlacNamespace
   #define FLAC__HAS_X86INTRIN 1
  #endif
 
- #undef __STDC_LIMIT_MACROS
+#undef __STDC_LIMIT_MACROS
  #define __STDC_LIMIT_MACROS 1
  #define flac_max jmax
  #define flac_min jmin

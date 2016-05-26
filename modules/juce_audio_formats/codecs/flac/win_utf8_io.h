@@ -38,11 +38,6 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <windows.h>
-
 int get_utf8_argv(int *argc, char ***argv);
 
 int printf_utf8(const char *format, ...);
