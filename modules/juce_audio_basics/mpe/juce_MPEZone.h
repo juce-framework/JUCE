@@ -69,12 +69,6 @@ struct JUCE_API  MPEZone
              int perNotePitchbendRange = 48,
              int masterPitchbendRange = 2) noexcept;
 
-    /** Copy constructor. */
-    MPEZone (const MPEZone& other) noexcept;
-
-    /** Copy assignment operator. */
-    MPEZone& operator= (const MPEZone& other) noexcept;
-
     /* Returns the MIDI master channel number (in the range 1-16) of this zone. */
     int getMasterChannel() const noexcept;
 
