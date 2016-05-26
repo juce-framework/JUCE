@@ -69,27 +69,35 @@ struct JUCE_API  MPEZone
              int perNotePitchbendRange = 48,
              int masterPitchbendRange = 2) noexcept;
 
-    /* Returns the MIDI master channel of this zone. */
+    /* Returns the MIDI master channel number (in the range 1-16) of this zone. */
     int getMasterChannel() const noexcept;
 
     /** Returns the number of note channels occupied by this zone. */
     int getNumNoteChannels() const noexcept;
 
-    /* Returns the MIDI channel number of the lowest-numbered note channel of this zone.  */
+    /* Returns the MIDI channel number (in the range 1-16) of the
+       lowest-numbered note channel of this zone.
+    */
     int getFirstNoteChannel() const noexcept;
 
-    /* Returns the MIDI channel number of the highest-numbered note channel of this zone.  */
+    /* Returns the MIDI channel number (in the range 1-16) of the
+       highest-numbered note channel of this zone.
+    */
     int getLastNoteChannel() const noexcept;
 
-    /** Returns the MIDI channel numbers of the note channels of this zone as a Range. */
+    /** Returns the MIDI channel numbers (in the range 1-16) of the
+        note channels of this zone as a Range.
+    */
     Range<int> getNoteChannelRange() const noexcept;
 
     /** Returns true if the MIDI channel (in the range 1-16) is used by this zone
-        either as a note channel or as the master channel; false otherwise. */
+        either as a note channel or as the master channel; false otherwise.
+    */
     bool isUsingChannel (int channel) const noexcept;
 
     /** Returns true if the MIDI channel (in the range 1-16) is used by this zone
-        as a note channel; false otherwise. */
+        as a note channel; false otherwise.
+    */
     bool isUsingChannelAsNoteChannel (int channel) const noexcept;
 
     /** Returns the per-note pitchbend range in semitones set for this zone. */
