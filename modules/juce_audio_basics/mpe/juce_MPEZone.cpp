@@ -58,6 +58,27 @@ MPEZone::MPEZone (int masterChannel_,
     checkAndLimitZoneParameters (0, 96,                  masterPitchbendRange);
 }
 
+MPEZone::MPEZone (const MPEZone& other) noexcept
+    : masterChannel (other.masterChannel),
+      numNoteChannels (other.numNoteChannels),
+      perNotePitchbendRange (other.perNotePitchbendRange),
+      masterPitchbendRange (other.masterPitchbendRange)
+{
+}
+
+MPEZone& MPEZone::operator= (const MPEZone& other) noexcept
+{
+    if  (this != &other)
+    {
+        masterChannel = other.masterChannel;
+        numNoteChannels = other.numNoteChannels;
+        perNotePitchbendRange = other.perNotePitchbendRange;
+        masterPitchbendRange = other.masterPitchbendRange;
+    }
+
+    return *this;
+}
+
 //==============================================================================
 int MPEZone::getMasterChannel() const noexcept
 {
