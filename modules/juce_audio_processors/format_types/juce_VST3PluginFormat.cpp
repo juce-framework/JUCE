@@ -399,14 +399,16 @@ public:
 
         owner->sendParamChangeMessageToListeners (index, (float) valueNormalized);
 
-        // did the plug-in already update the parameter internally
-        if (owner->editController->getParamNormalized (paramID) != (float) valueNormalized)
         {
             Steinberg::int32 eventIndex;
             owner->inputParameterChanges->addParameterData (paramID, eventIndex)->addPoint (0, valueNormalized, eventIndex);
         }
 
-        return owner->editController->setParamNormalized (paramID, valueNormalized);
+        // did the plug-in already update the parameter internally
+        if (owner->editController->getParamNormalized (paramID) != (float) valueNormalized)
+            return owner->editController->setParamNormalized (paramID, valueNormalized);
+
+        return kResultTrue;
     }
 
     tresult PLUGIN_API endEdit (Vst::ParamID paramID) override
@@ -2398,6 +2400,7 @@ private:
         Vst::BusInfo busInfo;
         busInfo.mediaType = forAudio ? Vst::kAudio : Vst::kEvent;
         busInfo.direction = forInput ? Vst::kInput : Vst::kOutput;
+        busInfo.channelCount = 0;
 
         component->getBusInfo (busInfo.mediaType, busInfo.direction,
                                (Steinberg::int32) index, busInfo);
