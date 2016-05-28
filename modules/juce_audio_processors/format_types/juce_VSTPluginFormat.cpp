@@ -727,7 +727,7 @@ public:
         wantsMidiMessages = pluginCanDo ("receiveVstMidiEvent") > 0;
 
        #if JUCE_MAC && JUCE_SUPPORT_CARBON
-        usesCocoaNSView = (pluginCanDo ("hasCockosViewAsConfig") & (int) 0xffff0000) == 0xbeef0000;
+        usesCocoaNSView = ((unsigned int) pluginCanDo ("hasCockosViewAsConfig") & 0xffff0000ul) == 0xbeef0000ul;
        #endif
 
         setLatencySamples (effect->initialDelay);
