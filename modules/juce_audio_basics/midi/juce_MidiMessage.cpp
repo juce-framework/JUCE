@@ -96,25 +96,24 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) noexcept
 MidiMessage::MidiMessage() noexcept
    : timeStamp (0), size (2)
 {
-    preallocatedData.asBytes[0] = 0xf0;
-    preallocatedData.asBytes[1] = 0xf7;
+    packedData.asBytes[0] = 0xf0;
+    packedData.asBytes[1] = 0xf7;
 }
 
 MidiMessage::MidiMessage (const void* const d, const int dataSize, const double t)
-   : timeStamp (t),
-     size (dataSize)
+   : timeStamp (t), size (dataSize)
 {
     jassert (dataSize > 0);
-    memcpy (allocateSpace (dataSize), d, (size_t) dataSize);
+    // this checks that the length matches the data..
+    jassert (dataSize > 3 || *(uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
 
-    // check that the length matches the data..
-    jassert (size > 3 || *(uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
+    memcpy (allocateSpace (dataSize), d, (size_t) dataSize);
 }
 
 MidiMessage::MidiMessage (const int byte1, const double t) noexcept
    : timeStamp (t), size (1)
 {
-    preallocatedData.asBytes[0] = (uint8) byte1;
+    packedData.asBytes[0] = (uint8) byte1;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 1);
@@ -123,8 +122,8 @@ MidiMessage::MidiMessage (const int byte1, const double t) noexcept
 MidiMessage::MidiMessage (const int byte1, const int byte2, const double t) noexcept
    : timeStamp (t), size (2)
 {
-    preallocatedData.asBytes[0] = (uint8) byte1;
-    preallocatedData.asBytes[1] = (uint8) byte2;
+    packedData.asBytes[0] = (uint8) byte1;
+    packedData.asBytes[1] = (uint8) byte2;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 2);
@@ -133,9 +132,9 @@ MidiMessage::MidiMessage (const int byte1, const int byte2, const double t) noex
 MidiMessage::MidiMessage (const int byte1, const int byte2, const int byte3, const double t) noexcept
    : timeStamp (t), size (3)
 {
-    preallocatedData.asBytes[0] = (uint8) byte1;
-    preallocatedData.asBytes[1] = (uint8) byte2;
-    preallocatedData.asBytes[2] = (uint8) byte3;
+    packedData.asBytes[0] = (uint8) byte1;
+    packedData.asBytes[1] = (uint8) byte2;
+    packedData.asBytes[2] = (uint8) byte3;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 3);
@@ -144,29 +143,19 @@ MidiMessage::MidiMessage (const int byte1, const int byte2, const int byte3, con
 MidiMessage::MidiMessage (const MidiMessage& other)
    : timeStamp (other.timeStamp), size (other.size)
 {
-    if (other.allocatedData != nullptr)
-    {
-        allocatedData.malloc ((size_t) size);
-        memcpy (allocatedData, other.allocatedData, (size_t) size);
-    }
+    if (isHeapAllocated())
+        memcpy (allocateSpace (size), other.getData(), (size_t) size);
     else
-    {
-        preallocatedData.asInt32 = other.preallocatedData.asInt32;
-    }
+        packedData.allocatedData = other.packedData.allocatedData;
 }
 
 MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
    : timeStamp (newTimeStamp), size (other.size)
 {
-    if (other.allocatedData != nullptr)
-    {
-        allocatedData.malloc ((size_t) size);
-        memcpy (allocatedData, other.allocatedData, (size_t) size);
-    }
+    if (isHeapAllocated())
+        memcpy (allocateSpace (size), other.getData(), (size_t) size);
     else
-    {
-        preallocatedData.asInt32 = other.preallocatedData.asInt32;
-    }
+        packedData.allocatedData = other.packedData.allocatedData;
 }
 
 MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const uint8 lastStatusByte,
@@ -241,16 +230,15 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
         }
         else
         {
-            preallocatedData.asInt32 = 0;
             size = getMessageLengthFromFirstByte ((uint8) byte);
-            preallocatedData.asBytes[0] = (uint8) byte;
+            packedData.asBytes[0] = (uint8) byte;
 
             if (size > 1)
             {
-                preallocatedData.asBytes[1] = src[0];
+                packedData.asBytes[1] = src[0];
 
                 if (size > 2)
-                    preallocatedData.asBytes[2] = src[1];
+                    packedData.asBytes[2] = src[1];
             }
         }
 
@@ -258,7 +246,7 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
     }
     else
     {
-        preallocatedData.asInt32 = 0;
+        packedData.allocatedData = nullptr;
         size = 0;
     }
 }
@@ -267,19 +255,25 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
 {
     if (this != &other)
     {
-        timeStamp = other.timeStamp;
-        size = other.size;
-
-        if (other.allocatedData != nullptr)
+        if (other.isHeapAllocated())
         {
-            allocatedData.malloc ((size_t) size);
-            memcpy (allocatedData, other.allocatedData, (size_t) size);
+            if (isHeapAllocated())
+                packedData.allocatedData = static_cast<uint8*> (std::realloc (packedData.allocatedData, (size_t) other.size));
+            else
+                packedData.allocatedData = static_cast<uint8*> (std::malloc ((size_t) other.size));
+
+            memcpy (packedData.allocatedData, other.packedData.allocatedData, (size_t) other.size);
         }
         else
         {
-            allocatedData.free();
-            preallocatedData.asInt32 = other.preallocatedData.asInt32;
+            if (isHeapAllocated())
+                std::free (packedData.allocatedData);
+
+            packedData.allocatedData = other.packedData.allocatedData;
         }
+
+        timeStamp = other.timeStamp;
+        size = other.size;
     }
 
     return *this;
@@ -289,36 +283,36 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
 MidiMessage::MidiMessage (MidiMessage&& other) noexcept
    : timeStamp (other.timeStamp), size (other.size)
 {
-    if (other.allocatedData != nullptr)
-        allocatedData.swapWith (other.allocatedData);
-    else
-        preallocatedData.asInt32 = other.preallocatedData.asInt32;
+    packedData.allocatedData = other.packedData.allocatedData;
+    other.size = 0;
 }
 
 MidiMessage& MidiMessage::operator= (MidiMessage&& other) noexcept
 {
-    jassert (this != &other); // shouldn't be possible
-
+    packedData.allocatedData = other.packedData.allocatedData;
     timeStamp = other.timeStamp;
     size = other.size;
-    allocatedData.swapWith (other.allocatedData);
-    preallocatedData.asInt32 = other.preallocatedData.asInt32;
-
+    other.size = 0;
     return *this;
 }
 #endif
 
-MidiMessage::~MidiMessage() {}
+MidiMessage::~MidiMessage() noexcept
+{
+    if (isHeapAllocated())
+        std::free (packedData.allocatedData);
+}
 
 uint8* MidiMessage::allocateSpace (int bytes)
 {
-    if (bytes > 4)
+    if (bytes > (int) sizeof (packedData))
     {
-        allocatedData.malloc ((size_t) bytes);
-        return allocatedData;
+        uint8* d = static_cast<uint8*> (std::malloc ((size_t) bytes));
+        packedData.allocatedData = d;
+        return d;
     }
 
-    return preallocatedData.asBytes;
+    return packedData.asBytes;
 }
 
 String MidiMessage::getDescription() const
@@ -734,9 +728,10 @@ MidiMessage MidiMessage::textMetaEvent (int type, StringRef text)
     header[--n] = 0xff;
 
     const size_t headerLen = sizeof (header) - n;
+    const int totalSize = (int) (headerLen + textSize);
 
-    uint8* const dest = result.allocateSpace ((int) (headerLen + textSize));
-    result.size = (int) (headerLen + textSize);
+    uint8* const dest = result.allocateSpace (totalSize);
+    result.size = totalSize;
 
     memcpy (dest, header + n, headerLen);
     memcpy (dest + headerLen, text.text.getAddress(), textSize);

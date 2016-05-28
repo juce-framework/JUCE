@@ -48,6 +48,11 @@ public:
     /** Replaces this sequence with another one. */
     MidiMessageSequence& operator= (const MidiMessageSequence&);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    MidiMessageSequence (MidiMessageSequence&&) noexcept = default;
+    MidiMessageSequence& operator= (MidiMessageSequence&&) noexcept = default;
+   #endif
+
     /** Destructor. */
     ~MidiMessageSequence();
 
