@@ -93,10 +93,13 @@
 
 #undef check
 
+namespace juce
+{
+ #include "juce_AAX_Modifier_Injector.h"
+}
+
 const int32_t juceChunkType = 'juce';
 const int maxAAXChannels = 8;
-
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AAX);
 
 //==============================================================================
 struct AAXClasses
@@ -328,7 +331,7 @@ struct AAXClasses
    #endif
 
     //==============================================================================
-    class JuceAAX_GUI   : public AAX_CEffectGUI
+    class JuceAAX_GUI   : public AAX_CEffectGUI, public ModifierKeyProvider
     {
     public:
         JuceAAX_GUI() {}
@@ -361,6 +364,9 @@ struct AAXClasses
                 {
                     component->setVisible (true);
                     component->addToDesktop (0, nativeViewToAttachTo);
+
+                    if (ModifierKeyReceiver* modReceiver = dynamic_cast<ModifierKeyReceiver*> (component->getPeer()))
+                        modReceiver->setModifierKeyProvider (this);
                 }
             }
         }
@@ -371,6 +377,9 @@ struct AAXClasses
             {
                 JUCE_AUTORELEASEPOOL
                 {
+                    if (ModifierKeyReceiver* modReceiver = dynamic_cast<ModifierKeyReceiver*> (component->getPeer()))
+                        modReceiver->removeModifierKeyProvider();
+
                     component->removeFromDesktop();
                     component = nullptr;
                 }
@@ -412,6 +421,22 @@ struct AAXClasses
             }
 
             return AAX_ERROR_NULL_OBJECT;
+        }
+
+        int getWin32Modifiers() const override
+        {
+            int modifierFlags = 0;
+
+            if (const AAX_IViewContainer* viewContainer = GetViewContainer())
+            {
+                uint32 aaxViewMods = 0;
+                const_cast<AAX_IViewContainer*>(viewContainer)->GetModifiers (&aaxViewMods);
+
+                if ((aaxViewMods & AAX_eModifiers_Shift) != 0) modifierFlags |= ModifierKeys::shiftModifier;
+                if ((aaxViewMods & AAX_eModifiers_Alt )  != 0) modifierFlags |= ModifierKeys::altModifier;
+            }
+
+            return modifierFlags;
         }
 
     private:
@@ -522,7 +547,7 @@ struct AAXClasses
     {
     public:
         JuceAAX_Processor()  : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_AAX)),
-                               busUtils (*pluginInstance, false, maxAAXChannels),
+                               isPrepared (false), busUtils (*pluginInstance, false, maxAAXChannels),
                                sampleRate (0), lastBufferSize (1024), maxBufferSize (1024),
                                hasSidechain (false)
         {
@@ -536,8 +561,19 @@ struct AAXClasses
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()
         {
-            JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AAX);
+            PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
             return new JuceAAX_Processor();
+        }
+
+        AAX_Result Uninitialize() override
+        {
+            if (isPrepared && pluginInstance != nullptr)
+            {
+                isPrepared = false;
+                pluginInstance->releaseResources();
+            }
+
+            return AAX_CEffectParameters::Uninitialize();
         }
 
         AAX_Result EffectInit() override
@@ -1103,6 +1139,7 @@ struct AAXClasses
         AAX_Result preparePlugin()
         {
             AudioProcessor& audioProcessor = getPluginInstance();
+            bool hasSomethingChanged = false;
 
            #if JucePlugin_IsMidiEffect
             // MIDI effect plug-ins do not support any audio channels
@@ -1120,38 +1157,73 @@ struct AAXClasses
 
             if (  (inputSet  == AudioChannelSet::disabled() && inputStemFormat  != AAX_eStemFormat_None)
                || (outputSet == AudioChannelSet::disabled() && outputStemFormat != AAX_eStemFormat_None))
+            {
+                if (isPrepared)
+                {
+                    isPrepared = false;
+                    audioProcessor.releaseResources();
+                }
+
                 return AAX_ERROR_UNIMPLEMENTED;
+            }
+
 
             bool success = true;
 
             if (busUtils.getBusCount (true) > 0)
-                success = audioProcessor.setPreferredBusArrangement (true, 0, inputSet);
+                success = setPreferredBusArrangement (busUtils, true, 0, inputSet, hasSomethingChanged);
 
             if (success && busUtils.getBusCount (false) > 0)
-                success = audioProcessor.setPreferredBusArrangement (false, 0, outputSet);
+                success = setPreferredBusArrangement (busUtils, false, 0, outputSet, hasSomethingChanged);
 
             // This should never happen as the plugin reported that this layout is supported
             jassert (success);
 
-            hasSidechain = enableAuxBusesForCurrentFormat (busUtils, inputSet, outputSet);
-            if (hasSidechain)
+            hasSidechain = enableAuxBusesForCurrentFormat (busUtils, inputSet, outputSet, hasSomethingChanged);
+            if (hasSidechain && hasSomethingChanged)
                 sideChainBuffer.realloc (static_cast<size_t> (maxBufferSize));
 
             // recheck the format
             if ( (busUtils.getBusCount (true)  > 0 && busUtils.getChannelSet (true, 0)  != inputSet)
               || (busUtils.getBusCount (false) > 0 && busUtils.getChannelSet (false, 0) != outputSet)
               || (hasSidechain && busUtils.getNumChannels(true, 1) != 1))
-                return AAX_ERROR_UNIMPLEMENTED;
+            {
+                if (isPrepared)
+                {
+                    isPrepared = false;
+                    audioProcessor.releaseResources();
+                }
 
-            rebuildChannelMapArrays (true);
-            rebuildChannelMapArrays (false);
+                return AAX_ERROR_UNIMPLEMENTED;
+            }
+
+            if (hasSomethingChanged)
+            {
+                rebuildChannelMapArrays (true);
+                rebuildChannelMapArrays (false);
+            }
            #endif
 
-            audioProcessor.setRateAndBufferSizeDetails (sampleRate, maxBufferSize);
-            audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
-            maxBufferSize = lastBufferSize;
+            hasSomethingChanged = (sampleRate != audioProcessor.getSampleRate()
+                             || maxBufferSize != lastBufferSize
+                             || hasSomethingChanged);
+
+            if (hasSomethingChanged || (! isPrepared))
+            {
+                if (isPrepared)
+                {
+                    isPrepared = false;
+                    audioProcessor.releaseResources();
+                }
+
+                audioProcessor.setRateAndBufferSizeDetails (sampleRate, lastBufferSize);
+                audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
+                maxBufferSize = lastBufferSize;
+            }
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
+
+            isPrepared = true;
 
             return AAX_SUCCESS;
         }
@@ -1197,6 +1269,7 @@ struct AAXClasses
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
         ScopedPointer<AudioProcessor> pluginInstance;
+        bool isPrepared;
         PluginBusUtilities busUtils;
         MidiBuffer midiBuffer;
         Array<float*> channelList;
@@ -1271,7 +1344,8 @@ struct AAXClasses
     }
 
     static bool enableAuxBusesForCurrentFormat (PluginBusUtilities& busUtils, const AudioChannelSet& inputLayout,
-                                                                              const AudioChannelSet& outputLayout)
+                                                                              const AudioChannelSet& outputLayout,
+                                                                              bool& hasSomethingChanged)
     {
         const int numOutBuses = busUtils.getBusCount (false);
         const int numInputBuses = busUtils.getBusCount(true);
@@ -1289,7 +1363,7 @@ struct AAXClasses
                 if (layout == AudioChannelSet::disabled())
                 {
                     layout = busUtils.getDefaultLayoutForBus (false, busIdx);
-                    busUtils.processor.setPreferredBusArrangement (false, busIdx, layout);
+                    setPreferredBusArrangement (busUtils, false, busIdx, layout, hasSomethingChanged);
                 }
             }
 
@@ -1297,15 +1371,17 @@ struct AAXClasses
             bool success = true;
 
             if (numInputBuses > 0)
-                success = busUtils.processor.setPreferredBusArrangement (true, 0, inputLayout);
+                success = setPreferredBusArrangement (busUtils, true, 0, inputLayout, hasSomethingChanged);
 
             if (success)
-                success = busUtils.processor.setPreferredBusArrangement (false, 0, outputLayout);
+                success = setPreferredBusArrangement (busUtils, false, 0, outputLayout, hasSomethingChanged);
 
             // was the above successful
             if (success && (numInputBuses == 0 || busUtils.getChannelSet (true,  0) == inputLayout)
                         && busUtils.getChannelSet (false, 0) == outputLayout)
                 layoutRestorer.release();
+            else
+                hasSomethingChanged = true;
         }
 
         // does the plug-in have side-chain support? Check the following:
@@ -1319,10 +1395,12 @@ struct AAXClasses
 
             const AudioChannelSet set = busUtils.getDefaultLayoutForChannelNumAndBus (true, 1, 1);
             if (! set.isDisabled())
-                hasSidechain = busUtils.processor.setPreferredBusArrangement (true, 1, set);
+                hasSidechain = setPreferredBusArrangement (busUtils, true, 1, set, hasSomethingChanged);
 
             if (! hasSidechain)
-                success = busUtils.processor.setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
+                success = setPreferredBusArrangement (busUtils, true, 1,
+                                                      AudioChannelSet::disabled(),
+                                                      hasSomethingChanged);
 
             // AAX requires your processor's first sidechain to be either mono or that
             // it can be disabled
@@ -1331,7 +1409,9 @@ struct AAXClasses
             // disable all other input buses
             for (int busIdx = 2; busIdx < numInputBuses; ++busIdx)
             {
-                success = busUtils.processor.setPreferredBusArrangement (true, busIdx, AudioChannelSet::disabled());
+                success = setPreferredBusArrangement (busUtils, true, busIdx,
+                                                      AudioChannelSet::disabled(),
+                                                      hasSomethingChanged);
 
                 // AAX can only have a single side-chain input. Therefore, your processor must either
                 // only have a single side-chain input or allow disabling all other side-chains
@@ -1341,19 +1421,32 @@ struct AAXClasses
             if (hasSidechain)
             {
                 if (busUtils.getBusCount (false) == 0 || busUtils.getBusCount (true) == 0 ||
-                   (busUtils.getChannelSet (true, 0)  == inputLayout && busUtils.getChannelSet (false, 0) == outputLayout))
+                   (busUtils.getChannelSet (true, 0) == inputLayout && busUtils.getChannelSet (false, 0) == outputLayout))
                     return true;
 
                 // restore the old layout
                 if (busUtils.getBusCount(true) > 0)
-                    busUtils.processor.setPreferredBusArrangement (true,  0, inputLayout);
+                    setPreferredBusArrangement (busUtils, true,  0, inputLayout, hasSomethingChanged);
 
                 if (busUtils.getBusCount (false) > 0)
-                    busUtils.processor.setPreferredBusArrangement (false, 0, outputLayout);
+                    setPreferredBusArrangement (busUtils, false, 0, outputLayout, hasSomethingChanged);
             }
         }
 
         return false;
+    }
+
+    // wrap setPreferredBusArrangement calls with this to prevent excessive calls to the plug-in
+    static bool setPreferredBusArrangement (PluginBusUtilities& busUtils, bool isInput, int busIdx,
+                                                                          const AudioChannelSet& layout,
+                                                                          bool& didChangePlugin)
+    {
+        // no need to do anything
+        if (busUtils.getChannelSet (isInput, busIdx) == layout)
+            return true;
+
+        didChangePlugin = true;
+        return busUtils.processor.setPreferredBusArrangement (isInput, busIdx, layout);
     }
 
     //==============================================================================
@@ -1418,7 +1511,8 @@ struct AAXClasses
         properties->AddProperty (AAX_eProperty_SupportsSaveRestore, false);
        #endif
 
-        if (enableAuxBusesForCurrentFormat (busUtils, inputLayout, outputLayout))
+        bool ignore;
+        if (enableAuxBusesForCurrentFormat (busUtils, inputLayout, outputLayout, ignore))
         {
             check (desc.AddSideChainIn (JUCEAlgorithmIDs::sideChainBuffers));
             properties->AddProperty (AAX_eProperty_SupportsSideChainInput, true);
@@ -1453,7 +1547,7 @@ struct AAXClasses
 
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AAX);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
 
         ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
         PluginBusUtilities busUtils (*plugin, false, maxAAXChannels);

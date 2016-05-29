@@ -32,13 +32,13 @@
 #import <AVFoundation/AVFoundation.h>
 
 #if JUCE_MAC
- #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8)
+ #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (! defined MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11)
   #error AUv3 needs Deployment Target OS X 10.8 or higher to compile
  #endif
 #endif
 
 #if JUCE_IOS
- #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
+ #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_9_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
   #error AUv3 needs Deployment Target iOS 9.0 or higher to compile
  #endif
 #endif
@@ -71,8 +71,6 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
 
 // TODO: ask Timur: use SFINAE to automatically generate this for all NSObjects
 template <> struct ContainerDeletePolicy<AUAudioUnitBusArray>                   { static void destroy (NSObject* o) { [o release]; } };
@@ -1182,7 +1180,7 @@ const double JuceAudioUnitv3::kDefaultSampleRate = 44100.0;
 
 JuceAudioUnitv3Base* JuceAudioUnitv3Base::create (AUAudioUnit* audioUnit, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
 {
-    JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
+    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
     return new JuceAudioUnitv3 (audioUnit, descr, options, error);
 }
 
@@ -1196,7 +1194,7 @@ public:
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         initialiseJuce_GUI();
     }
 
