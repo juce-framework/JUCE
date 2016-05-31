@@ -488,7 +488,7 @@ BigInteger& BigInteger::operator*= (const BigInteger& other)
     n >>= 5;
     t >>= 5;
 
-    total.ensureSize (n + t + 2);
+    total.ensureSize ((size_t) (n + t + 2));
 
     BigInteger m (other);
     m.setNegative (false);
