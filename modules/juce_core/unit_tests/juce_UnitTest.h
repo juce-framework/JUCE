@@ -157,6 +157,27 @@ public:
         expect (result, failureMessage);
     }
 
+    /** Computes the difference between two values, and if it is larger than a
+        specified value, prints out a message containing the expected and actual
+        difference.
+    */
+    template <class ValueType>
+    void expectWithinAbsoluteError (ValueType actual, ValueType expected, ValueType maxAbsoluteError, String failureMessage = String())
+    {
+        const ValueType diff = std::abs (actual - expected);
+        const bool result = diff <= maxAbsoluteError;
+
+        if (! result)
+        {
+            if (failureMessage.isNotEmpty())
+                failureMessage << " -- ";
+
+            failureMessage << "Expected value: " << expected << ", Actual value: " << actual << " Max absolute error: " << maxAbsoluteError << " Actual difference: " << diff;
+        }
+
+        expect (result, failureMessage);
+    }
+
     //==============================================================================
     /** Checks that the result of an expression does not throw an exception. */
     #define expectDoesNotThrow(expr)         \
