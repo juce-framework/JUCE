@@ -181,6 +181,22 @@ public:
     int getHighestBit() const noexcept;
 
     //==============================================================================
+    /** Returns true if the value is less than zero.
+        @see setNegative, negate
+    */
+    bool isNegative() const noexcept;
+
+    /** Changes the sign of the number to be positive or negative.
+        @see isNegative, negate
+    */
+    void setNegative (bool shouldBeNegative) noexcept;
+
+    /** Inverts the sign of the number.
+        @see isNegative, setNegative
+    */
+    void negate() noexcept;
+
+    //==============================================================================
     // All the standard arithmetic ops...
 
     BigInteger& operator+= (const BigInteger&);
@@ -236,6 +252,7 @@ public:
     */
     int compareAbsolute (const BigInteger& other) const noexcept;
 
+    //==============================================================================
     /** Divides this value by another one and returns the remainder.
 
         This number is divided by other, leaving the quotient in this number,
@@ -243,7 +260,7 @@ public:
     */
     void divideBy (const BigInteger& divisor, BigInteger& remainder);
 
-    /** Returns the largest value that will divide both this value and the one passed-in. */
+    /** Returns the largest value that will divide both this value and the argument. */
     BigInteger findGreatestCommonDivisor (BigInteger other) const;
 
     /** Performs a combined exponent and modulo operation.
@@ -256,21 +273,20 @@ public:
     */
     void inverseModulo (const BigInteger& modulus);
 
-    //==============================================================================
-    /** Returns true if the value is less than zero.
-        @see setNegative, negate
+    /** Performs the Montgomery Multiplication with modulo.
+        This object is left containing the result value: ((this * other) * R1) % modulus.
+        To get this result, we need modulus, modulusp and k such as R = 2^k, with
+        modulus * modulusp - R * R1 = GCD(modulus, R) = 1
     */
-    bool isNegative() const noexcept;
+    void montgomeryMultiplication (const BigInteger& other, const BigInteger& modulus,
+                                   const BigInteger& modulusp, int k);
 
-    /** Changes the sign of the number to be positive or negative.
-        @see isNegative, negate
+    /** Performs the Extended Euclidean algorithm.
+        This method will set the xOut and yOut arguments such that (a * xOut) - (b * yOut) = GCD (a, b).
+        On return, this object is left containing the value of the GCD.
     */
-    void setNegative (bool shouldBeNegative) noexcept;
-
-    /** Inverts the sign of the number.
-        @see isNegative, setNegative
-    */
-    void negate() noexcept;
+    void extendedEuclidean (const BigInteger& a, const BigInteger& b,
+                            BigInteger& xOut, BigInteger& yOut);
 
     //==============================================================================
     /** Converts the number to a string.
