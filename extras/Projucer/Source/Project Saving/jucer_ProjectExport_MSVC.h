@@ -335,6 +335,9 @@ protected:
         Value shouldGenerateManifestValue()         { return getValue (Ids::generateManifest); }
         bool shouldGenerateManifest() const         { return config [Ids::generateManifest]; }
 
+        Value shouldLinkIncrementalValue()          { return getValue (Ids::enableIncrementalLinking); }
+        bool shouldLinkIncremental() const          { return config [Ids::enableIncrementalLinking]; }
+
         Value getWholeProgramOptValue()             { return getValue (Ids::wholeProgramOptimisation); }
         bool shouldDisableWholeProgramOpt() const   { return static_cast<int> (config [Ids::wholeProgramOptimisation]) > 0; }
 
@@ -397,6 +400,12 @@ protected:
 
                 props.add (new ChoicePropertyComponent (getWholeProgramOptValue(), "Whole Program Optimisation",
                                                         StringArray (wpoNames), Array<var> (wpoValues, numElementsInArray (wpoValues))));
+            }
+
+            {
+                props.add (new BooleanPropertyComponent (shouldLinkIncrementalValue(), "Incremental Linking", "Enable"),
+                           "Enable to avoid linking from scratch for every new build. "
+                           "Disable to ensure that your final release build does not contain padding or thunks.");
             }
 
             if (! isDebug())
@@ -1026,6 +1035,7 @@ protected:
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", (isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
+            linker->setAttribute ("LinkIncremental", config.shouldLinkIncremental() ? "2" : "1");
             linker->setAttribute ("ProgramDatabaseFile", getIntDirFile (config, config.getOutputFilename (".pdb", true)));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
@@ -1073,6 +1083,8 @@ protected:
 
                 linker->setAttribute ("OutputFile", getOutDirFile (config, config.getOutputFilename (msvcTargetSuffix, false)));
                 linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
+
+                linker->setAttribute ("LinkIncremental", config.shouldLinkIncremental() ? "2" : "1");
             }
             else
             {
@@ -1369,6 +1381,9 @@ protected:
 
             if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
+
+            if (config.shouldLinkIncremental())
+                e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
 
             if (config.is64Bit())
                 e->createNewChildElement ("PlatformToolset")->addTextElement (getPlatformToolset());
