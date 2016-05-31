@@ -169,7 +169,7 @@ public:
     /** Returns the number of channels in the set. */
     int size() const noexcept;
 
-    /** Returns the number of channels in the set. */
+    /** Returns true if there are no channels in the set. */
     bool isDisabled() const noexcept                    { return size() == 0; }
 
     /** Returns an array of all the types in this channel set. */
