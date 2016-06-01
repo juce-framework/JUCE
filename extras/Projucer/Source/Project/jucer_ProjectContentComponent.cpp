@@ -453,9 +453,7 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
    #else
     if (child != nullptr)
     {
-        child->crashHandler = [this] (const String& m) { 
-          this->handleCrash (m); 
-        };
+        child->crashHandler = [this] (const String& m) { this->handleCrash (m); };
 
         return new BuildTabComponent (child, new ProjucerAppClasses::ErrorListComp (child->errorList));
     }
