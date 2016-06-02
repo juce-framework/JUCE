@@ -139,7 +139,7 @@ public:
     void expect (bool testResult, const String& failureMessage = String());
 
     //==============================================================================
-    /** Compares a value to an expected value. 
+    /** Compares a value to an expected value.
         If they are not equal, prints out a message containing the expected and actual values.
     */
     template <class ValueType>

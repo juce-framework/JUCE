@@ -938,7 +938,7 @@ void BigInteger::extendedEuclidean (const BigInteger& a, const BigInteger& b,
 
     for (int i = 1; i < tempValues.size(); ++i)
     {
-    	const BigInteger& v = tempValues.getReference (tempValues.size() - i - 1);
+        const BigInteger& v = tempValues.getReference (tempValues.size() - i - 1);
 
         if ((i & 1) != 0)
             x += y * v;
