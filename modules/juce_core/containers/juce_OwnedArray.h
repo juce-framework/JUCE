@@ -378,16 +378,17 @@ public:
         If the array already contains a matching object, nothing will be done.
 
         @param newObject   the new object to add to the array
-        @returns           the new object that was added
+        @returns           true if the new object was added, false otherwise
     */
-    ObjectClass* addIfNotAlreadyThere (ObjectClass* newObject) noexcept
+    bool addIfNotAlreadyThere (ObjectClass* newObject) noexcept
     {
         const ScopedLockType lock (getLock());
 
-        if (! contains (newObject))
-            add (newObject);
+        if (contains (newObject))
+            return false;
 
-        return newObject;
+        add (newObject);
+        return true;
     }
 
     /** Replaces an object in the array with a different one.

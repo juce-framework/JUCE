@@ -87,13 +87,14 @@ void FileSearchPath::add (const File& dir, const int insertIndex)
     directories.insert (insertIndex, dir.getFullPathName());
 }
 
-void FileSearchPath::addIfNotAlreadyThere (const File& dir)
+bool FileSearchPath::addIfNotAlreadyThere (const File& dir)
 {
     for (int i = 0; i < directories.size(); ++i)
         if (File (directories[i]) == dir)
-            return;
+            return false;
 
     add (dir);
+    return true;
 }
 
 void FileSearchPath::remove (const int index)
