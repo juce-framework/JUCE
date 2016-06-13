@@ -799,9 +799,9 @@ private:
         {
             if (component != nullptr)
                 if (AudioProcessorEditor* editor = component->pluginEditor)
-                    return editor->isResizable();
+                    return editor->isResizable() ? kResultTrue : kResultFalse;
 
-            return true;
+            return kResultFalse;
         }
 
         tresult PLUGIN_API checkSizeConstraint (ViewRect* rectToCheck) override

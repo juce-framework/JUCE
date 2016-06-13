@@ -90,13 +90,13 @@ public:
         @param shouldBeResizable   whether it's resizable at all
         @see setResizeLimits, isResizable
     */
-    void setResizable (bool shouldBeResizable);
+    void setResizable (bool shouldBeResizable, bool useBottomRightCornerResizer);
 
     /** Returns true if resizing is enabled.
 
         @see setResizable
     */
-    bool isResizable() const noexcept;
+    bool isResizable() const noexcept      { return resizable; }
 
     /** This sets the maximum and minimum sizes for the window.
 
@@ -143,16 +143,21 @@ private:
     struct AudioProcessorEditorListener : ComponentListener
     {
         AudioProcessorEditorListener (AudioProcessorEditor* audioEditor) : e (audioEditor) {}
+
         void componentMovedOrResized (Component&, bool, bool wasResized) override   { e->editorResized (wasResized); }
+        void componentParentHierarchyChanged (Component&) override                  { e->updatePeer(); }
         AudioProcessorEditor* e;
     };
 
     //==============================================================================
     void initialise();
     void editorResized (bool wasResized);
+    void updatePeer();
+    void attachConstrainer (ComponentBoundsConstrainer* newConstrainer);
 
     //==============================================================================
     ScopedPointer<AudioProcessorEditorListener> resizeListener;
+    bool resizable;
     ComponentBoundsConstrainer defaultConstrainer;
     ComponentBoundsConstrainer* constrainer;
 

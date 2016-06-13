@@ -47,37 +47,42 @@ int AudioProcessorEditor::getControlParameterIndex (Component&)  { return -1; }
 
 void AudioProcessorEditor::initialise()
 {
-    setConstrainer (&defaultConstrainer);
+    resizable = false;
+
+    attachConstrainer (&defaultConstrainer);
     addComponentListener (resizeListener = new AudioProcessorEditorListener (this));
 }
 
 //==============================================================================
-void AudioProcessorEditor::setResizable (const bool shouldBeResizable)
+void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const bool useBottomRightCornerResizer)
 {
-    if (shouldBeResizable)
+    if (shouldBeResizable != resizable)
     {
-        if (resizableCorner == nullptr)
+        resizable = shouldBeResizable;
+
+        if (! resizable)
+        {
+            setConstrainer (&defaultConstrainer);
+
+            if (getWidth() > 0 && getHeight() > 0)
+            {
+                defaultConstrainer.setSizeLimits (getWidth(), getHeight(), getWidth(), getHeight());
+                resized();
+            }
+        }
+    }
+
+    const bool shouldHaveCornerResizer = (useBottomRightCornerResizer && shouldBeResizable);
+    if (shouldHaveCornerResizer != (resizableCorner != nullptr))
+    {
+        if (shouldHaveCornerResizer)
         {
             Component::addChildComponent (resizableCorner = new ResizableCornerComponent (this, constrainer));
             resizableCorner->setAlwaysOnTop (true);
         }
+        else
+            resizableCorner = nullptr;
     }
-    else
-    {
-        setConstrainer (&defaultConstrainer);
-        resizableCorner = nullptr;
-
-        if (getWidth() > 0 && getHeight() > 0)
-        {
-            defaultConstrainer.setSizeLimits (getWidth(), getHeight(), getWidth(), getHeight());
-            resized();
-        }
-    }
-}
-
-bool AudioProcessorEditor::isResizable() const noexcept
-{
-    return resizableCorner != nullptr;
 }
 
 void AudioProcessorEditor::setResizeLimits (const int newMinimumWidth,
@@ -88,7 +93,10 @@ void AudioProcessorEditor::setResizeLimits (const int newMinimumWidth,
     // if you've set up a custom constrainer then these settings won't have any effect..
     jassert (constrainer == &defaultConstrainer || constrainer == nullptr);
 
-    setResizable (newMinimumWidth != newMaximumWidth || newMinimumHeight != newMaximumHeight);
+    const bool shouldEnableResize      = (newMinimumWidth != newMaximumWidth || newMinimumHeight != newMaximumHeight);
+    const bool shouldHaveCornerResizer = (shouldEnableResize != resizable    || resizableCorner != nullptr);
+
+    setResizable (shouldEnableResize, shouldHaveCornerResizer);
 
     if (constrainer == nullptr)
         setConstrainer (&defaultConstrainer);
@@ -103,17 +111,17 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
 {
     if (constrainer != newConstrainer)
     {
+        resizable = true;
+        attachConstrainer (newConstrainer);
+    }
+}
+
+void AudioProcessorEditor::attachConstrainer (ComponentBoundsConstrainer* newConstrainer)
+{
+    if (constrainer != newConstrainer)
+    {
         constrainer = newConstrainer;
-
-        const bool shouldBeResizable = resizableCorner != nullptr;
-
-        resizableCorner = nullptr;
-
-        setResizable (shouldBeResizable);
-
-        if (isOnDesktop())
-            if (ComponentPeer* const peer = getPeer())
-                peer->setConstrainer (constrainer);
+        updatePeer();
     }
 }
 
@@ -136,18 +144,27 @@ void AudioProcessorEditor::editorResized (bool wasResized)
 
         if (resizableCorner != nullptr)
         {
-            resizableCorner->setVisible (! resizerHidden);
+           resizableCorner->setVisible (! resizerHidden);
 
             const int resizerSize = 18;
             resizableCorner->setBounds (getWidth() - resizerSize,
                                         getHeight() - resizerSize,
                                         resizerSize, resizerSize);
         }
-        else
+
+
+        if (! resizable)
         {
             if (getWidth() > 0 && getHeight() > 0)
                 defaultConstrainer.setSizeLimits (getWidth(), getHeight(),
                                                   getWidth(), getHeight());
         }
     }
+}
+
+void AudioProcessorEditor::updatePeer()
+{
+    if (isOnDesktop())
+        if (ComponentPeer* const peer = getPeer())
+            peer->setConstrainer (constrainer);
 }
