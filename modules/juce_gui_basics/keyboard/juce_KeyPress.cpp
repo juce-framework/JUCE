@@ -250,7 +250,7 @@ String KeyPress::getTextDescription() const
     {
         // some keyboard layouts use a shift-key to get the slash, but in those cases, we
         // want to store it as being a slash, not shift+whatever.
-        if (textCharacter == '/')
+        if (textCharacter == '/' && keyCode != numberPadDivide)
             return "/";
 
         if (mods.isCtrlDown())      desc << "ctrl + ";
