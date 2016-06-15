@@ -49,8 +49,15 @@ public:
     MidiMessageSequence& operator= (const MidiMessageSequence&);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    MidiMessageSequence (MidiMessageSequence&&) noexcept = default;
-    MidiMessageSequence& operator= (MidiMessageSequence&&) noexcept = default;
+    MidiMessageSequence (MidiMessageSequence&& other) noexcept
+        : list (std::move (other.list))
+    {}
+
+    MidiMessageSequence& operator= (MidiMessageSequence&& other) noexcept
+    {
+        list = std::move (other.list);
+        return *this;
+    }
    #endif
 
     /** Destructor. */
