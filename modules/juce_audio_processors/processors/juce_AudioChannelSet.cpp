@@ -208,6 +208,13 @@ void AudioChannelSet::addChannel (ChannelType newChannel)
     channels.setBit (bit);
 }
 
+void AudioChannelSet::removeChannel (ChannelType newChannel)
+{
+    const int bit = static_cast<int> (newChannel);
+    jassert (bit >= 0 && bit < 1024);
+    channels.clearBit (bit);
+}
+
 AudioChannelSet AudioChannelSet::disabled()           { return AudioChannelSet(); }
 AudioChannelSet AudioChannelSet::mono()               { return AudioChannelSet (1u << centre); }
 AudioChannelSet AudioChannelSet::stereo()             { return AudioChannelSet ((1u << left) | (1u << right)); }

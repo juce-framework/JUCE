@@ -166,6 +166,9 @@ public:
     /** Adds a channel to the set. */
     void addChannel (ChannelType newChannelType);
 
+    /** Removes a channel from the set. */
+    void removeChannel (ChannelType newChannelType);
+
     /** Returns the number of channels in the set. */
     int size() const noexcept;
 
