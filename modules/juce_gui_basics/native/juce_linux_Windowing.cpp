@@ -2769,14 +2769,22 @@ private:
         Keys::AltMask = 0;
         Keys::NumLockMask = 0;
 
+        // Map contains 8 * max_keypermod entries, one for each modifier key.
+        // Modifier keys (and mask) in order are: 
+        //  shift, lock, control, mod1, mod2, mod3, mod4, mod5
         if (XModifierKeymap* const mapping = XGetModifierMapping (display))
         {
             for (int i = 0; i < 8; i++)
             {
-                if (mapping->modifiermap [i << 1] == altLeftCode)
-                    Keys::AltMask = 1 << i;
-                else if (mapping->modifiermap [i << 1] == numLockCode)
-                    Keys::NumLockMask = 1 << i;
+                for (int j = 0; j<mapping->max_keypermod; ++j)
+                {
+                    const int mapIndex = i * mapping->max_keypermod + j;
+
+                    if (mapping->modifiermap[mapIndex] == altLeftCode)
+                        Keys::AltMask = 1 << i;
+                    else if (mapping->modifiermap[mapIndex] == numLockCode)
+                        Keys::NumLockMask = 1 << i;
+                }
             }
 
             XFreeModifiermap (mapping);
