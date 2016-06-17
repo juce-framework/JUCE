@@ -260,10 +260,10 @@
  #define JucePlugin_ManufacturerEmail      "info@juce.com"
 #endif
 #ifndef  JucePlugin_ManufacturerCode
- #define JucePlugin_ManufacturerCode       0x524f4c49
+ #define JucePlugin_ManufacturerCode       0x524f4c49 // 'ROLI'
 #endif
 #ifndef  JucePlugin_PluginCode
- #define JucePlugin_PluginCode             0x41727067
+ #define JucePlugin_PluginCode             0x41727067 // 'Arpg'
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0

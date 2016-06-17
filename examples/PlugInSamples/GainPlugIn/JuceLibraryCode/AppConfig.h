@@ -260,10 +260,10 @@
  #define JucePlugin_ManufacturerEmail      ""
 #endif
 #ifndef  JucePlugin_ManufacturerCode
- #define JucePlugin_ManufacturerCode       0x524f4c49
+ #define JucePlugin_ManufacturerCode       0x524f4c49 // 'ROLI'
 #endif
 #ifndef  JucePlugin_PluginCode
- #define JucePlugin_PluginCode             0x4761696e
+ #define JucePlugin_PluginCode             0x4761696e // 'Gain'
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
