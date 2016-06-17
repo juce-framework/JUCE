@@ -1712,7 +1712,7 @@ int Component::runModalLoop()
                                            ->callFunctionOnMessageThread (&ComponentHelpers::runModalLoopCallback, this);
     }
 
-    if (! isCurrentlyModal())
+    if (! isCurrentlyModal (false))
         enterModalState (true);
 
     return ModalComponentManager::getInstance()->runEventLoopForCurrentComponent();
@@ -1728,7 +1728,7 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus,
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    if (! isCurrentlyModal())
+    if (! isCurrentlyModal (false))
     {
         ModalComponentManager& mcm = *ModalComponentManager::getInstance();
         mcm.startModal (this, deleteWhenDismissed);
@@ -1748,7 +1748,7 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus,
 
 void Component::exitModalState (const int returnValue)
 {
-    if (isCurrentlyModal())
+    if (isCurrentlyModal (false))
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -1777,9 +1777,15 @@ void Component::exitModalState (const int returnValue)
     }
 }
 
-bool Component::isCurrentlyModal() const noexcept
+bool Component::isCurrentlyModal (bool onlyConsiderForemostModalComponent) const noexcept
 {
-    return getCurrentlyModalComponent() == this;
+    const int n = onlyConsiderForemostModalComponent ? 1 : getNumCurrentlyModalComponents();
+
+    for (int i = 0; i < n; ++i)
+        if (getCurrentlyModalComponent (i) == this)
+            return true;
+
+    return false;
 }
 
 bool Component::isCurrentlyBlockedByAnotherModalComponent() const
