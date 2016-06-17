@@ -50,12 +50,12 @@ public:
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     MidiMessageSequence (MidiMessageSequence&& other) noexcept
-        : list (std::move (other.list))
+        : list (static_cast<OwnedArray<MidiEventHolder>&&> (other.list))
     {}
 
     MidiMessageSequence& operator= (MidiMessageSequence&& other) noexcept
     {
-        list = std::move (other.list);
+        list = static_cast<OwnedArray<MidiEventHolder>&&> (other.list);
         return *this;
     }
    #endif
