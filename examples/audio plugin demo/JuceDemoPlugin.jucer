@@ -3,7 +3,7 @@
 <JUCERPROJECT id="0nRd9LLGO" name="JuceDemoPlugin" projectType="audioplug"
               version="1.0.0" juceLinkage="amalg_multi" buildVST="1" buildRTAS="0"
               buildAU="1" pluginName="Juce Demo Plugin" pluginDesc="Juce Demo Plugin"
-              pluginManufacturer="ROLI Ltd." pluginManufacturerCode="Roli"
+              pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
               pluginCode="Jcdm" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
               pluginWantsMidiIn="1" pluginProducesMidiOut="1" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
