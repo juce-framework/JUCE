@@ -239,10 +239,10 @@
  #define JucePlugin_ManufacturerEmail      "info@juce.com"
 #endif
 #ifndef  JucePlugin_ManufacturerCode
- #define JucePlugin_ManufacturerCode       'Roli'
+ #define JucePlugin_ManufacturerCode       0x526f6c69
 #endif
 #ifndef  JucePlugin_PluginCode
- #define JucePlugin_PluginCode             'Jcdm'
+ #define JucePlugin_PluginCode             0x4a63646d
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
