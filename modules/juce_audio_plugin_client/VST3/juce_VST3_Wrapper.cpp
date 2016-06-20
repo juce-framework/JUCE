@@ -1813,7 +1813,7 @@ public:
                     else if (vstParamID == JuceVST3EditController::paramPreset)
                     {
                         const int numPrograms  = pluginInstance->getNumPrograms();
-                        const int programValue = static_cast<int> (std::round (value * static_cast<Vst::ParamValue> (numPrograms)));
+                        const int programValue = roundToInt (value * static_cast<Vst::ParamValue> (numPrograms));
 
                         if (numPrograms > 1 && isPositiveAndBelow (programValue, numPrograms)
                                             && programValue != pluginInstance->getCurrentProgram())
