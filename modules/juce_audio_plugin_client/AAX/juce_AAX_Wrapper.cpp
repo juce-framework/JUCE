@@ -1574,7 +1574,7 @@ struct AAXClasses
 
        #if JucePlugin_IsMidiEffect
         // MIDI effect plug-ins do not support any audio channels
-        jassert (getBusCount (true) == 0 && getBusCount (false) == 0);
+        jassert (busUtils.getBusCount (true) == 0 && busUtils.getBusCount (false) == 0);
 
         if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
         {

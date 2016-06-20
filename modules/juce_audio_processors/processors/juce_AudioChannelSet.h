@@ -166,10 +166,13 @@ public:
     /** Adds a channel to the set. */
     void addChannel (ChannelType newChannelType);
 
+    /** Removes a channel from the set. */
+    void removeChannel (ChannelType newChannelType);
+
     /** Returns the number of channels in the set. */
     int size() const noexcept;
 
-    /** Returns the number of channels in the set. */
+    /** Returns true if there are no channels in the set. */
     bool isDisabled() const noexcept                    { return size() == 0; }
 
     /** Returns an array of all the types in this channel set. */

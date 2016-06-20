@@ -70,7 +70,7 @@ public:
 private:
     void createRSAKey()
     {
-        int bits = jlimit (32, 512, bitSize.getText().getIntValue());
+        int bits = jlimit (32, 1024, bitSize.getText().getIntValue());
         bitSize.setText (String (bits), dontSendNotification);
 
         // Create a key-pair...

@@ -71,8 +71,7 @@ public:
                     // the normal message, handle it now..
                     if (*d >= 0xf8 && *d <= 0xfe)
                     {
-                        const MidiMessage m (*d++, time);
-                        callback.handleIncomingMidiMessage (input, m);
+                        callback.handleIncomingMidiMessage (input, MidiMessage (*d++, time));
                         --numBytes;
                     }
                     else
@@ -83,7 +82,15 @@ public:
                         data[len++] = *d++;
                         --numBytes;
 
-                        if (len >= MidiMessage::getMessageLengthFromFirstByte (data[0]))
+                        const uint8 firstByte = data[0];
+
+                        if (firstByte < 0x80 || firstByte == 0xf7)
+                        {
+                            len = 0;
+                            break;   // ignore this malformed MIDI message..
+                        }
+
+                        if (len >= MidiMessage::getMessageLengthFromFirstByte (firstByte))
                             break;
                     }
                 }

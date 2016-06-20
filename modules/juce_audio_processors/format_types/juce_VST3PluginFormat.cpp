@@ -2039,18 +2039,18 @@ public:
     class ParamValueQueueList  : public Vst::IParameterChanges
     {
     public:
-        ParamValueQueueList() {}
+        ParamValueQueueList() : numQueuesUsed (0) {}
         virtual ~ParamValueQueueList() {}
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
-        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return (Steinberg::int32) queues.size(); }
-        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return queues[(int) index]; }
+        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return numQueuesUsed; }
+        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed) ? queues[(int) index] : nullptr; }
 
         Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
         {
-            for (int i = queues.size(); --i >= 0;)
+            for (int i = numQueuesUsed; --i >= 0;)
             {
                 if (queues.getUnchecked (i)->getParameterId() == id)
                 {
@@ -2059,24 +2059,31 @@ public:
                 }
             }
 
-            index = getParameterCount();
-            return queues.add (new ParamValueQueue (id));
+            index = numQueuesUsed++;
+            ParamValueQueue* valueQueue = (index < queues.size() ? queues[index]
+                                                                 : queues.add (new ParamValueQueue));
+
+            valueQueue->clear();
+            valueQueue->setParamID (id);
+
+            return valueQueue;
         }
 
         void clearAllQueues() noexcept
         {
-            for (int i = queues.size(); --i >= 0;)
-                queues.getUnchecked (i)->clear();
+            numQueuesUsed = 0;
         }
 
         struct ParamValueQueue  : public Vst::IParamValueQueue
         {
-            ParamValueQueue (Vst::ParamID parameterID) : paramID (parameterID)
+            ParamValueQueue () : paramID (static_cast<Vst::ParamID> (-1))
             {
                 points.ensureStorageAllocated (1024);
             }
 
             virtual ~ParamValueQueue() {}
+
+            void setParamID (Vst::ParamID pID) noexcept    { paramID = pID; }
 
             JUCE_DECLARE_VST3_COM_REF_METHODS
             JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -2129,7 +2136,7 @@ public:
             };
 
             Atomic<int> refCount;
-            const Vst::ParamID paramID;
+            Vst::ParamID paramID;
             Array<ParamPoint> points;
             CriticalSection pointLock;
 
@@ -2138,6 +2145,7 @@ public:
 
         Atomic<int> refCount;
         OwnedArray<ParamValueQueue> queues;
+        int numQueuesUsed;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueueList)
     };

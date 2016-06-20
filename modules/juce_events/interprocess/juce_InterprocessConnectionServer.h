@@ -57,9 +57,16 @@ public:
 
         Use stop() to stop the thread running.
 
+        @param portNumber    The port on which the server will receive
+                             connections
+        @param bindAddress   The address on which the server will listen
+                             for connections. An empty string indicates
+                             that it should listen on all addresses
+                             assigned to this machine.
+
         @see createConnectionObject, stop
     */
-    bool beginWaitingForSocket (int portNumber);
+    bool beginWaitingForSocket (int portNumber, const String& bindAddress = String());
 
     /** Terminates the listener thread, if it's active.
 

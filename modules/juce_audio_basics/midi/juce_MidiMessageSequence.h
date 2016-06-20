@@ -48,6 +48,18 @@ public:
     /** Replaces this sequence with another one. */
     MidiMessageSequence& operator= (const MidiMessageSequence&);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    MidiMessageSequence (MidiMessageSequence&& other) noexcept
+        : list (static_cast<OwnedArray<MidiEventHolder>&&> (other.list))
+    {}
+
+    MidiMessageSequence& operator= (MidiMessageSequence&& other) noexcept
+    {
+        list = static_cast<OwnedArray<MidiEventHolder>&&> (other.list);
+        return *this;
+    }
+   #endif
+
     /** Destructor. */
     ~MidiMessageSequence();
 

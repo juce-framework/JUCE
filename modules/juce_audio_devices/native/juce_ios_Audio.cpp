@@ -287,7 +287,14 @@ public:
         return r;
     }
 
-    int getDefaultBufferSize() override         { return 256; }
+    int getDefaultBufferSize() override
+    {
+       #if TARGET_IPHONE_SIMULATOR
+        return 512;
+       #else
+        return 256;
+       #endif
+    }
 
     String open (const BigInteger& inputChannelsWanted,
                  const BigInteger& outputChannelsWanted,

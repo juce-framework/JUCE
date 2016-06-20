@@ -20,6 +20,7 @@
 *.VC.opendb
 xcuserdata
 *.xccheckout
+*.xcscmblueprint
 contents.xcworkspacedata
 .DS_Store
 Thumbs.db

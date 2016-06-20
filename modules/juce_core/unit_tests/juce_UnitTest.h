@@ -138,23 +138,78 @@ public:
     */
     void expect (bool testResult, const String& failureMessage = String());
 
-    /** Compares two values, and if they don't match, prints out a message containing the
-        expected and actual result values.
+    //==============================================================================
+    /** Compares a value to an expected value.
+        If they are not equal, prints out a message containing the expected and actual values.
     */
     template <class ValueType>
     void expectEquals (ValueType actual, ValueType expected, String failureMessage = String())
     {
-        const bool result = (actual == expected);
+        bool result = actual == expected;
+        expectResultAndPrint (actual, expected, result, "", failureMessage);
+    }
 
-        if (! result)
-        {
-            if (failureMessage.isNotEmpty())
-                failureMessage << " -- ";
+    /** Checks whether a value is not equal to a comparison value.
+        If this check fails, prints out a message containing the actual and comparison values.
+    */
+    template <class ValueType>
+    void expectNotEquals (ValueType value, ValueType valueToCompareTo, String failureMessage = String())
+    {
+        bool result = value != valueToCompareTo;
+        expectResultAndPrint (value, valueToCompareTo, result, "unequal to", failureMessage);
+    }
 
-            failureMessage << "Expected value: " << expected << ", Actual value: " << actual;
-        }
+    /** Checks whether a value is greater than a comparison value.
+        If this check fails, prints out a message containing the actual and comparison values.
+    */
+    template <class ValueType>
+    void expectGreaterThan (ValueType value, ValueType valueToCompareTo, String failureMessage = String())
+    {
+        bool result = value > valueToCompareTo;
+        expectResultAndPrint (value, valueToCompareTo, result, "greater than", failureMessage);
+    }
 
-        expect (result, failureMessage);
+    /** Checks whether a value is less than a comparison value.
+        If this check fails, prints out a message containing the actual and comparison values.
+    */
+    template <class ValueType>
+    void expectLessThan (ValueType value, ValueType valueToCompareTo, String failureMessage = String())
+    {
+        bool result = value < valueToCompareTo;
+        expectResultAndPrint (value, valueToCompareTo, result, "less than", failureMessage);
+    }
+
+    /** Checks whether a value is greater or equal to a comparison value.
+        If this check fails, prints out a message containing the actual and comparison values.
+    */
+    template <class ValueType>
+    void expectGreaterOrEqual (ValueType value, ValueType valueToCompareTo, String failureMessage = String())
+    {
+        bool result = value >= valueToCompareTo;
+        expectResultAndPrint (value, valueToCompareTo, result, "greater or equal to", failureMessage);
+    }
+
+    /** Checks whether a value is less or equal to a comparison value.
+        If this check fails, prints out a message containing the actual and comparison values.
+    */
+    template <class ValueType>
+    void expectLessOrEqual (ValueType value, ValueType valueToCompareTo, String failureMessage = String())
+    {
+        bool result = value <= valueToCompareTo;
+        expectResultAndPrint (value, valueToCompareTo, result, "less or equal to", failureMessage);
+    }
+
+    /** Computes the difference between a value and a comparison value, and if it is larger than a
+        specified maximum value, prints out a message containing the actual and comparison values
+        and the maximum allowed error.
+    */
+    template <class ValueType>
+    void expectWithinAbsoluteError (ValueType actual, ValueType expected, ValueType maxAbsoluteError, String failureMessage = String())
+    {
+        const ValueType diff = std::abs (actual - expected);
+        const bool result = diff <= maxAbsoluteError;
+
+        expectResultAndPrint (actual, expected, result, " within " + String (maxAbsoluteError) + " of" , failureMessage);
     }
 
     //==============================================================================
@@ -221,6 +276,24 @@ public:
     Random getRandom() const;
 
 private:
+    //==============================================================================
+    template <class ValueType>
+    void expectResultAndPrint (ValueType value, ValueType valueToCompareTo, bool result,
+                               String compDescription, String failureMessage)
+    {
+        if (! result)
+        {
+            if (failureMessage.isNotEmpty())
+                failureMessage << " -- ";
+
+            failureMessage << "Expected value" << (compDescription.isEmpty() ? "" : " ")
+                           << compDescription << ": " << valueToCompareTo
+                           << ", Actual value: " << value;
+        }
+
+        expect (result, failureMessage);
+    }
+
     //==============================================================================
     const String name;
     UnitTestRunner* runner;
