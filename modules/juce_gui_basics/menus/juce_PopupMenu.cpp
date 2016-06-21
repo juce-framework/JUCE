@@ -152,7 +152,9 @@ private:
 
     void updateShortcutKeyDescription()
     {
-        if (item.commandManager != nullptr && item.itemID != 0)
+        if (item.commandManager != nullptr
+             && item.itemID != 0
+             && item.shortcutKeyDescription.isEmpty())
         {
             String shortcutKey;
             const Array<KeyPress> keyPresses (item.commandManager->getKeyMappings()
