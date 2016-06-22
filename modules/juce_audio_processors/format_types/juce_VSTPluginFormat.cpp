@@ -634,6 +634,7 @@ public:
     ~VSTPluginInstance()
     {
         const ScopedLock sl (lock);
+        stopTimer();
 
         if (effect != nullptr && effect->magic == kEffectMagic)
         {
