@@ -102,7 +102,7 @@ public:
             sendDataChangeMessage();
     }
 
-    ImagePixelData* clone() override
+    ImagePixelData::Ptr clone() override
     {
         SoftwarePixelData* s = new SoftwarePixelData (pixelFormat, width, height, false);
         memcpy (s->imageData, imageData, (size_t) (lineStride * height));
@@ -153,13 +153,13 @@ class SubsectionPixelData  : public ImagePixelData
 public:
     SubsectionPixelData (ImagePixelData* const im, const Rectangle<int>& r)
         : ImagePixelData (im->pixelFormat, r.getWidth(), r.getHeight()),
-          image (im), area (r)
+          sourceImage (im), area (r)
     {
     }
 
     LowLevelGraphicsContext* createLowLevelContext() override
     {
-        LowLevelGraphicsContext* g = image->createLowLevelContext();
+        LowLevelGraphicsContext* g = sourceImage->createLowLevelContext();
         g->clipToRectangle (area);
         g->setOrigin (area.getPosition());
         return g;
@@ -167,16 +167,16 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        image->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
+        sourceImage->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
 
         if (mode != Image::BitmapData::readOnly)
             sendDataChangeMessage();
     }
 
-    ImagePixelData* clone() override
+    ImagePixelData::Ptr clone() override
     {
         jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
-        const ScopedPointer<ImageType> type (image->createType());
+        const ScopedPointer<ImageType> type (createType());
 
         Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
 
@@ -185,18 +185,17 @@ public:
             g.drawImageAt (Image (this), 0, 0);
         }
 
-        newImage.getPixelData()->incReferenceCount();
         return newImage.getPixelData();
     }
 
-    ImageType* createType() const override          { return image->createType(); }
+    ImageType* createType() const override          { return sourceImage->createType(); }
 
     /* as we always hold a reference to image, don't double count */
-    int getSharedCount() const noexcept override    { return getReferenceCount() + image->getSharedCount() - 1; }
+    int getSharedCount() const noexcept override    { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
 
 private:
     friend class Image;
-    const ImagePixelData::Ptr image;
+    const ImagePixelData::Ptr sourceImage;
     const Rectangle<int> area;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionPixelData)

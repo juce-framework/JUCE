@@ -72,7 +72,7 @@ public:
         }
     }
 
-    ImagePixelData* clone() override
+    ImagePixelData::Ptr clone() override
     {
         CoreGraphicsImage* im = new CoreGraphicsImage (pixelFormat, width, height, false);
         memcpy (im->imageData, imageData, (size_t) (lineStride * height));

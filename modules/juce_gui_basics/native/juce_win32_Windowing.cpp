@@ -385,7 +385,7 @@ public:
             sendDataChangeMessage();
     }
 
-    ImagePixelData* clone() override
+    ImagePixelData:Ptr clone() override
     {
         WindowsBitmapImage* im = new WindowsBitmapImage (pixelFormat, width, height, false);
 

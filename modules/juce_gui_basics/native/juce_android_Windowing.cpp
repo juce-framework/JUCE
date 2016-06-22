@@ -572,9 +572,8 @@ private:
     int sizeAllocated;
     float scale;
 
-    class PreallocatedImage  : public ImagePixelData
+    struct PreallocatedImage  : public ImagePixelData
     {
-    public:
         PreallocatedImage (const int width_, const int height_, jint* data_, bool hasAlpha_)
             : ImagePixelData (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
         {
@@ -607,7 +606,7 @@ private:
             bm.data = (uint8*) (data + x + y * width);
         }
 
-        ImagePixelData* clone()
+        ImagePixelData::Ptr clone()
         {
             PreallocatedImage* s = new PreallocatedImage (width, height, 0, hasAlpha);
             s->allocatedData.malloc (sizeof (jint) * width * height);
