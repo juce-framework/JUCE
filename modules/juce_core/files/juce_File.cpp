@@ -78,11 +78,15 @@ static String removeEllipsis (const String& path)
 
     for (int i = 1; i < toks.size(); ++i)
     {
-        if (toks[i] == ".." && toks[i - 1] != "..")
+        if (toks[i] == ".." && toks[i - 1] != "..") // 'pop' previous token
         {
             toks.removeRange (i - 1, 2);
             i = jmax (0, i - 2);
         }
+		else if(toks[i] == "."){ // no op
+			toks.removeRange (i , 1);
+			i = jmax (0, i - 1);
+		}
     }
 
     return toks.joinIntoString (File::separatorString);
