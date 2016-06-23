@@ -1075,6 +1075,7 @@ public:
         expect (home.getChildFile (".././xyz") == home.getParentDirectory().getChildFile ("xyz"));
         expect (home.getChildFile (".././xyz/./abc") == home.getParentDirectory().getChildFile ("xyz/abc"));
         expect (home.getChildFile ("./../xyz") == home.getParentDirectory().getChildFile ("xyz"));
+        expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
 
         {
             FileOutputStream fo (tempFile);
