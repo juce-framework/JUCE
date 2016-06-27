@@ -252,6 +252,12 @@ public:
         latestTotalBytes = static_cast<int> (totalBytesWritten);
     }
 
+    void willPerformHTTPRedirection (NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
+    {
+        NSURLRequest* newRequest = (numRedirects++ < numRedirectsToFollow ? request : nullptr);
+        completionHandler (newRequest);
+    }
+
     void run() override
     {
         jassert (task == nil && session == nil);
@@ -308,6 +314,8 @@ private:
             addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData,            "v@:@@@");
             addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
                                                                             didSendBodyData,           "v@:@@qqq");
+            addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
+                                                                            willPerformHTTPRedirection, "v@:@@@@@");
             registerClass();
         }
 
@@ -333,6 +341,12 @@ private:
         static void didSendBodyData (id self, SEL, NSURLSession*, NSURLSessionTask*, int64_t, int64_t totalBytesWritten, int64_t)
         {
             getState (self)->didSendBodyData (totalBytesWritten);
+        }
+
+        static void willPerformHTTPRedirection (id self, SEL, NSURLSession*, NSURLSessionTask*, NSHTTPURLResponse*,
+                                                NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
+        {
+            getState (self)->willPerformHTTPRedirection (request, completionHandler);
         }
     };
 
