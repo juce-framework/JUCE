@@ -252,9 +252,9 @@ public:
         latestTotalBytes = static_cast<int> (totalBytesWritten);
     }
 
-    void willPerformHTTPRedirection (NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
+    void willPerformHTTPRedirection (NSURLRequest* aRequest, void (^completionHandler)(NSURLRequest *))
     {
-        NSURLRequest* newRequest = (numRedirects++ < numRedirectsToFollow ? request : nullptr);
+        NSURLRequest* newRequest = (numRedirects++ < numRedirectsToFollow ? aRequest : nullptr);
         completionHandler (newRequest);
     }
 
