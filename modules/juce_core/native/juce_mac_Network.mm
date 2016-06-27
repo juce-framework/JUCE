@@ -162,7 +162,11 @@ public:
 
     void stop()
     {
-        [task cancel];
+        {
+            const ScopedLock sl (dataLock);
+            [task cancel];
+        }
+
         stopThread (10000);
         [task release];
         task = nil;
@@ -366,6 +370,11 @@ public:
                 }
             }
         }
+    }
+
+    ~WebInputStream()
+    {
+        connection = nullptr;
     }
 
     //==============================================================================
