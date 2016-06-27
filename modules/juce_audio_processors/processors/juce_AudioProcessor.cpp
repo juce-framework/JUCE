@@ -403,8 +403,16 @@ void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 }
 
 void AudioProcessor::reset() {}
-void AudioProcessor::processBlockBypassed (AudioBuffer<float>&, MidiBuffer&) {}
-void AudioProcessor::processBlockBypassed (AudioBuffer<double>&, MidiBuffer&) {}
+
+template <typename floatType>
+void AudioProcessor::processBypassed (AudioBuffer<floatType>& buffer, MidiBuffer&)
+{
+    for (int ch = getMainBusNumInputChannels(); ch < getTotalNumOutputChannels(); ++ch)
+        buffer.clear (ch, 0, buffer.getNumSamples());
+}
+
+void AudioProcessor::processBlockBypassed (AudioBuffer<float>&  buffer, MidiBuffer& midi)    { processBypassed (buffer, midi); }
+void AudioProcessor::processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midi)    { processBypassed (buffer, midi); }
 
 void AudioProcessor::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
 {
