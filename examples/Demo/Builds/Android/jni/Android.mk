@@ -69,14 +69,14 @@ LOCAL_SRC_FILES := \
   ../../../JuceLibraryCode/juce_video.cpp\
 
 ifeq ($(NDK_DEBUG),1)
-  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=gnu++11 -DJUCE_ANDROID=1 -DJUCE_ANDROID_API_VERSION=23 -DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo -DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -DDEBUG=1 -D_DEBUG=1 -DJUCE_UNIT_TESTS=1 -DJUCER_ANDROID_7F0E4A25=1 -DJUCE_APP_VERSION=3.0.0 -DJUCE_APP_VERSION_HEX=0x30000
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
-  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -I "../../../../modules" -O0 -std=gnu++11 -DJUCE_ANDROID=1 -DJUCE_ANDROID_API_VERSION=23 -DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo -DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -DDEBUG=1 -D_DEBUG=1 -DJUCE_UNIT_TESTS=1 -DJUCER_ANDROID_7F0E4A25=1 -DJUCE_APP_VERSION=3.0.0 -DJUCE_APP_VERSION_HEX=0x30000
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
 else
-  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=gnu++11 -DJUCE_ANDROID=1 -DJUCE_ANDROID_API_VERSION=23 -DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo -DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -DNDEBUG=1 -DJUCE_UNIT_TESTS=1 -DJUCER_ANDROID_7F0E4A25=1 -DJUCE_APP_VERSION=3.0.0 -DJUCE_APP_VERSION_HEX=0x30000
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
-  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=gnu++11 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_API_VERSION=23" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1" -D "JUCE_APP_VERSION=3.0.0" -D "JUCE_APP_VERSION_HEX=0x30000"
+  LOCAL_CFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -I "../../../../modules" -O3 -std=gnu++11 -DJUCE_ANDROID=1 -DJUCE_ANDROID_API_VERSION=23 -DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_jucedemo_JuceDemo -DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/jucedemo/JuceDemo\" -DNDEBUG=1 -DJUCE_UNIT_TESTS=1 -DJUCER_ANDROID_7F0E4A25=1 -DJUCE_APP_VERSION=3.0.0 -DJUCE_APP_VERSION_HEX=0x30000
   LOCAL_LDLIBS := -llog -lGLESv2 -landroid -lEGL
 endif
 
