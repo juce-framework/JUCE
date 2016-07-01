@@ -46,10 +46,7 @@ public:
     void paintIcon (Graphics& g, Rectangle<int> area) override
     {
         g.setColour (Colours::black);
-
-        g.drawImageWithin (icon, area.getX(), area.getY(),
-                           area.getWidth(), area.getHeight(),
-                           RectanglePlacement::centred, false);
+        g.drawImage (icon, area.toFloat(), RectanglePlacement::centred);
     }
 
     void deleteItem() override

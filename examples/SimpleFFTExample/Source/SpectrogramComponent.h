@@ -56,7 +56,7 @@ public:
         g.fillAll (Colours::black);
 
         g.setOpacity (1.0f);
-        g.drawImageWithin (spectrogramImage, 0, 0, getWidth(), getHeight(), RectanglePlacement::stretchToFit);
+        g.drawImage (spectrogramImage, getLocalBounds().toFloat());
     }
 
     void timerCallback() override

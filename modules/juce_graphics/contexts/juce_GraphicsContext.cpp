@@ -642,16 +642,20 @@ void Graphics::drawImageAt (const Image& imageToDraw, int x, int y, bool fillAlp
                           fillAlphaChannel);
 }
 
-void Graphics::drawImageWithin (const Image& imageToDraw,
-                                int dx, int dy, int dw, int dh,
-                                RectanglePlacement placementWithinTarget,
-                                const bool fillAlphaChannelWithCurrentBrush) const
+void Graphics::drawImage (const Image& imageToDraw, Rectangle<float> targetArea,
+                          RectanglePlacement placementWithinTarget, bool fillAlphaChannelWithCurrentBrush) const
 {
     if (imageToDraw.isValid())
         drawImageTransformed (imageToDraw,
-                              placementWithinTarget.getTransformToFit (imageToDraw.getBounds().toFloat(),
-                                                                       coordsToRectangle (dx, dy, dw, dh).toFloat()),
+                              placementWithinTarget.getTransformToFit (imageToDraw.getBounds().toFloat(), targetArea),
                               fillAlphaChannelWithCurrentBrush);
+}
+
+void Graphics::drawImageWithin (const Image& imageToDraw, int dx, int dy, int dw, int dh,
+                                RectanglePlacement placementWithinTarget, bool fillAlphaChannelWithCurrentBrush) const
+{
+    drawImage (imageToDraw, coordsToRectangle (dx, dy, dw, dh).toFloat(),
+               placementWithinTarget, fillAlphaChannelWithCurrentBrush);
 }
 
 void Graphics::drawImage (const Image& imageToDraw,

@@ -544,6 +544,23 @@ public:
 
     /** Draws an image to fit within a designated rectangle.
 
+        @param imageToDraw              the source image to draw
+        @param destArea                 the target rectangle to fit it into
+        @param placementWithinTarget    this specifies how the image should be positioned
+                                        within the target rectangle - see the RectanglePlacement
+                                        class for more details about this.
+        @param fillAlphaChannelWithCurrentBrush     if true, then instead of drawing the image, just its
+                                                    alpha channel will be used as a mask with which to
+                                                    draw with the current brush or colour. This is
+                                                    similar to fillAlphaMap(), and see also drawImage()
+        @see drawImage, drawImageTransformed, drawImageAt, RectanglePlacement
+    */
+    void drawImage (const Image& imageToDraw, Rectangle<float> targetArea,
+                    RectanglePlacement placementWithinTarget = RectanglePlacement::stretchToFit,
+                    bool fillAlphaChannelWithCurrentBrush = false) const;
+
+    /** Draws an image to fit within a designated rectangle.
+
         If the image is too big or too small for the space, it will be rescaled
         to fit as nicely as it can do without affecting its aspect ratio. It will
         then be placed within the target rectangle according to the justification flags
@@ -567,7 +584,6 @@ public:
                           int destX, int destY, int destWidth, int destHeight,
                           RectanglePlacement placementWithinTarget,
                           bool fillAlphaChannelWithCurrentBrush = false) const;
-
 
     //==============================================================================
     /** Returns the position of the bounding box for the current clipping region.

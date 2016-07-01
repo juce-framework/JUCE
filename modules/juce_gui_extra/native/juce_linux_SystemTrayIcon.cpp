@@ -112,8 +112,8 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
 void SystemTrayIconComponent::paint (Graphics& g)
 {
     if (pimpl != nullptr)
-        g.drawImageWithin (pimpl->image, 0, 0, getWidth(), getHeight(),
-                           RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize, false);
+        g.drawImage (pimpl->image, getLocalBounds().toFloat(),
+                     RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize);
 }
 
 void SystemTrayIconComponent::setIconTooltip (const String& /*tooltip*/)
