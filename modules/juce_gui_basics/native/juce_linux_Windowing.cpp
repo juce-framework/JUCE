@@ -635,7 +635,7 @@ public:
             sendDataChangeMessage();
     }
 
-    ImagePixelData* clone() override
+    ImagePixelData::Ptr clone() override
     {
         jassertfalse;
         return nullptr;
@@ -3962,9 +3962,8 @@ void* CustomMouseCursorInfo::create() const
             hotspotX = (hotspotX * (int) cursorW) / (int) imageW;
             hotspotY = (hotspotY * (int) cursorH) / (int) imageH;
 
-            g.drawImageWithin (image, 0, 0, (int) imageW, (int) imageH,
-                               RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
-                               false);
+            g.drawImage (image, Rectangle<float> ((float) imageW, (float) imageH),
+                         RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize);
         }
         else
         {

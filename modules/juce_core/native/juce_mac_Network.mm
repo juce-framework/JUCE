@@ -35,6 +35,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
         for (const ifaddrs* cursor = addrs; cursor != nullptr; cursor = cursor->ifa_next)
         {
             sockaddr_storage* sto = (sockaddr_storage*) cursor->ifa_addr;
+
             if (sto->ss_family == AF_LINK)
             {
                 const sockaddr_dl* const sadd = (const sockaddr_dl*) cursor->ifa_addr;
@@ -45,7 +46,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 
                 if (sadd->sdl_type == IFT_ETHER)
                 {
-                    MACAddress ma (MACAddress (((const uint8*) sadd->sdl_data) + sadd->sdl_nlen));
+                    MACAddress ma (((const uint8*) sadd->sdl_data) + sadd->sdl_nlen);
 
                     if (! ma.isNull())
                         result.addIfNotAlreadyThere (ma);
@@ -109,7 +110,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
 }
 
 //==============================================================================
-class URLConnectionState   : public Thread
+class URLConnectionState   : private Thread
 {
 public:
     URLConnectionState (NSURLRequest* req, const int maxRedirects)
@@ -117,7 +118,8 @@ public:
           contentLength (-1),
           delegate (nil),
           request ([req retain]),
-          connection (nil),
+          session (nil),
+          task (nil),
           data ([[NSMutableData data] retain]),
           headers (nil),
           statusCode (0),
@@ -136,10 +138,10 @@ public:
     ~URLConnectionState()
     {
         stop();
-        [connection release];
         [data release];
         [request release];
         [headers release];
+        [session release];
         [delegate release];
     }
 
@@ -150,18 +152,24 @@ public:
         while (isThreadRunning() && ! initialised)
         {
             if (callback != nullptr)
-                callback (context, latestTotalBytes, (int) [[request HTTPBody] length]);
+                callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]);
 
             Thread::sleep (1);
         }
 
-        return connection != nil && ! hasFailed;
+        return true;
     }
 
     void stop()
     {
-        [connection cancel];
+        {
+            const ScopedLock sl (dataLock);
+            [task cancel];
+        }
+
         stopThread (10000);
+        [task release];
+        task = nil;
     }
 
     int read (char* dest, int numBytes)
@@ -194,7 +202,7 @@ public:
         return numDone;
     }
 
-    void didReceiveResponse (NSURLResponse* response)
+    void didReceiveResponse (NSURLResponse* response, id completionHandler)
     {
         {
             const ScopedLock sl (dataLock);
@@ -214,22 +222,17 @@ public:
         }
 
         initialised = true;
-    }
 
-    NSURLRequest* willSendRequest (NSURLRequest* newRequest, NSURLResponse* redirectResponse)
-    {
-        if (redirectResponse != nullptr)
+        if (completionHandler != nil)
         {
-            if (numRedirects >= numRedirectsToFollow)
-                return nil;  // Cancel redirect and allow connection to continue
-
-            ++numRedirects;
+            // Need to wrangle this parameter back into an obj-C block,
+            // and call it to allow the transfer to continue..
+            void (^callbackBlock)(NSURLSessionResponseDisposition) = completionHandler;
+            callbackBlock (NSURLSessionResponseAllow);
         }
-
-        return newRequest;
     }
 
-    void didFailWithError (NSError* error)
+    void didBecomeInvalidWithError (NSError* error)
     {
         DBG (nsStringToJuce ([error description])); ignoreUnused (error);
         hasFailed = true;
@@ -244,60 +247,75 @@ public:
         initialised = true;
     }
 
-    void didSendBodyData (NSInteger totalBytesWritten, NSInteger /*totalBytesExpected*/)
+    void didSendBodyData (int64_t totalBytesWritten)
     {
         latestTotalBytes = static_cast<int> (totalBytesWritten);
     }
 
-    void finishedLoading()
+    void willPerformHTTPRedirection (NSURLRequest* aRequest, void (^completionHandler)(NSURLRequest *))
     {
-        hasFinished = true;
-        initialised = true;
-        signalThreadShouldExit();
+        NSURLRequest* newRequest = (numRedirects++ < numRedirectsToFollow ? aRequest : nullptr);
+        completionHandler (newRequest);
     }
 
     void run() override
     {
-        connection = [[NSURLConnection alloc] initWithRequest: request
-                                                     delegate: delegate];
+        jassert (task == nil && session == nil);
+
+        session = [[NSURLSession sessionWithConfiguration: [NSURLSessionConfiguration defaultSessionConfiguration]
+                                                 delegate: delegate
+                                            delegateQueue: [NSOperationQueue currentQueue]] retain];
+
+        task = [session dataTaskWithRequest: request];
+
+        if (task == nil)
+            return;
+
+        [task retain];
+        [task resume];
+
         while (! threadShouldExit())
         {
-            JUCE_AUTORELEASEPOOL
-            {
-                [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
-            }
+            wait (5);
+
+            if (task.state != NSURLSessionTaskStateRunning)
+                break;
         }
+
+        hasFinished = true;
+        initialised = true;
     }
 
     int64 contentLength;
     CriticalSection dataLock;
-    NSObject* delegate;
+    id delegate;
     NSURLRequest* request;
-    NSURLConnection* connection;
+    NSURLSession* session;
+    NSURLSessionTask* task;
     NSMutableData* data;
     NSDictionary* headers;
     int statusCode;
     bool initialised, hasFailed, hasFinished;
     const int numRedirectsToFollow;
     int numRedirects;
-    int latestTotalBytes;
+    int64 latestTotalBytes;
 
 private:
     //==============================================================================
     struct DelegateClass  : public ObjCClass<NSObject>
     {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
+        DelegateClass()  : ObjCClass<NSObject> ("JUCE_URLDelegate_")
         {
             addIvar<URLConnectionState*> ("state");
 
-            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,            "v@:@@");
-            addMethod (@selector (connection:didFailWithError:),   didFailWithError,              "v@:@@");
-            addMethod (@selector (connection:didReceiveData:),     didReceiveData,                "v@:@@");
-            addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:),
-                                                                   connectionDidSendBodyData,     "v@:@iii");
-            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading,    "v@:@");
-            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest, "@@:@@@");
-
+            addMethod (@selector (URLSession:dataTask:didReceiveResponse:completionHandler:),
+                                                                            didReceiveResponse,        "v@:@@@@");
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),   didBecomeInvalidWithError, "v@:@@");
+            addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData,            "v@:@@@");
+            addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
+                                                                            didSendBodyData,           "v@:@@qqq");
+            addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
+                                                                            willPerformHTTPRedirection, "v@:@@@@@");
             registerClass();
         }
 
@@ -305,34 +323,30 @@ private:
         static URLConnectionState* getState (id self)              { return getIvar<URLConnectionState*> (self, "state"); }
 
     private:
-        static void didReceiveResponse (id self, SEL, NSURLConnection*, NSURLResponse* response)
+        static void didReceiveResponse (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSURLResponse* response, id completionHandler)
         {
-            getState (self)->didReceiveResponse (response);
+            getState (self)->didReceiveResponse (response, completionHandler);
         }
 
-        static void didFailWithError (id self, SEL, NSURLConnection*, NSError* error)
+        static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSError* error)
         {
-            getState (self)->didFailWithError (error);
+            getState (self)->didBecomeInvalidWithError (error);
         }
 
-        static void didReceiveData (id self, SEL, NSURLConnection*, NSData* newData)
+        static void didReceiveData (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSData* newData)
         {
             getState (self)->didReceiveData (newData);
         }
 
-        static NSURLRequest* willSendRequest (id self, SEL, NSURLConnection*, NSURLRequest* request, NSURLResponse* response)
+        static void didSendBodyData (id self, SEL, NSURLSession*, NSURLSessionTask*, int64_t, int64_t totalBytesWritten, int64_t)
         {
-            return getState (self)->willSendRequest (request, response);
+            getState (self)->didSendBodyData (totalBytesWritten);
         }
 
-        static void connectionDidSendBodyData (id self, SEL, NSURLConnection*, NSInteger, NSInteger totalBytesWritten, NSInteger totalBytesExpected)
+        static void willPerformHTTPRedirection (id self, SEL, NSURLSession*, NSURLSessionTask*, NSHTTPURLResponse*,
+                                                NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
         {
-            getState (self)->didSendBodyData (totalBytesWritten, totalBytesExpected);
-        }
-
-        static void connectionDidFinishLoading (id self, SEL, NSURLConnection*)
-        {
-            getState (self)->finishedLoading();
+            getState (self)->willPerformHTTPRedirection (request, completionHandler);
         }
     };
 
@@ -370,6 +384,11 @@ public:
                 }
             }
         }
+    }
+
+    ~WebInputStream()
+    {
+        connection = nullptr;
     }
 
     //==============================================================================
@@ -433,14 +452,11 @@ private:
     {
         jassert (connection == nullptr);
 
-        NSMutableURLRequest* req = [NSMutableURLRequest  requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
-                                                            cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                        timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
-
-        if (req != nil)
+        if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
+                                                               cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                                           timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)])
         {
             [req setHTTPMethod: [NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()]];
-            //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
 
             StringArray headerLines;
             headerLines.addLines (headers);
@@ -448,8 +464,8 @@ private:
 
             for (int i = 0; i < headerLines.size(); ++i)
             {
-                const String key (headerLines[i].upToFirstOccurrenceOf (":", false, false).trim());
-                const String value (headerLines[i].fromFirstOccurrenceOf (":", false, false).trim());
+                String key   = headerLines[i].upToFirstOccurrenceOf (":", false, false).trim();
+                String value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
                 if (key.isNotEmpty() && value.isNotEmpty())
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];

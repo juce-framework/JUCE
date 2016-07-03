@@ -1023,6 +1023,9 @@ private:
     void disableNonMainBuses (bool isInput);
     void updateSpeakerFormatStrings();
 
+    template <typename floatType>
+    void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
+
     // This method is no longer used - you can delete it from your AudioProcessor classes.
     JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; });
 

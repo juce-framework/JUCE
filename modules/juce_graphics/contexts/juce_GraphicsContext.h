@@ -170,7 +170,7 @@ public:
         @see drawSingleLineText, drawFittedText, drawMultiLineText, GlyphArrangement::addJustifiedText
     */
     void drawText (const String& text,
-                   const Rectangle<int>& area,
+                   Rectangle<int> area,
                    Justification justificationType,
                    bool useEllipsesIfTooBig = true) const;
 
@@ -184,7 +184,7 @@ public:
         @see drawSingleLineText, drawFittedText, drawMultiLineText, GlyphArrangement::addJustifiedText
     */
     void drawText (const String& text,
-                   const Rectangle<float>& area,
+                   Rectangle<float> area,
                    Justification justificationType,
                    bool useEllipsesIfTooBig = true) const;
 
@@ -233,7 +233,7 @@ public:
         @see GlyphArrangement::addFittedText
     */
     void drawFittedText (const String& text,
-                         const Rectangle<int>& area,
+                         Rectangle<int> area,
                          Justification justificationFlags,
                          int maximumNumberOfLines,
                          float minimumHorizontalScale = 0.0f) const;
@@ -257,12 +257,12 @@ public:
     /** Fills a rectangle with the current colour or brush.
         @see drawRect, fillRoundedRectangle
     */
-    void fillRect (const Rectangle<int>& rectangle) const;
+    void fillRect (Rectangle<int> rectangle) const;
 
     /** Fills a rectangle with the current colour or brush.
         @see drawRect, fillRoundedRectangle
     */
-    void fillRect (const Rectangle<float>& rectangle) const;
+    void fillRect (Rectangle<float> rectangle) const;
 
     /** Fills a rectangle with the current colour or brush.
         @see drawRect, fillRoundedRectangle
@@ -297,11 +297,11 @@ public:
     /** Uses the current colour or brush to fill a rectangle with rounded corners.
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
-    void fillRoundedRectangle (const Rectangle<float>& rectangle,
+    void fillRoundedRectangle (Rectangle<float> rectangle,
                                float cornerSize) const;
 
     /** Fills a rectangle with a checkerboard pattern, alternating between two colours. */
-    void fillCheckerBoard (const Rectangle<int>& area,
+    void fillCheckerBoard (Rectangle<int> area,
                            int checkWidth, int checkHeight,
                            Colour colour1, Colour colour2) const;
 
@@ -321,7 +321,7 @@ public:
         The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
         @see fillRect
     */
-    void drawRect (const Rectangle<int>& rectangle, int lineThickness = 1) const;
+    void drawRect (Rectangle<int> rectangle, int lineThickness = 1) const;
 
     /** Draws a rectangular outline, using the current colour or brush.
         The lines are drawn inside the given rectangle, and greater line thicknesses extend inwards.
@@ -338,7 +338,7 @@ public:
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
-    void drawRoundedRectangle (const Rectangle<float>& rectangle,
+    void drawRoundedRectangle (Rectangle<float> rectangle,
                                float cornerSize, float lineThickness) const;
 
     /** Fills a 1x1 pixel using the current colour or brush.
@@ -358,7 +358,7 @@ public:
         The ellipse is drawn to fit inside the given rectangle.
         @see drawEllipse, Path::addEllipse
     */
-    void fillEllipse (const Rectangle<float>& area) const;
+    void fillEllipse (Rectangle<float> area) const;
 
     /** Draws an elliptical stroke using the current colour or brush.
         @see fillEllipse, Path::addEllipse
@@ -369,7 +369,7 @@ public:
     /** Draws an elliptical stroke using the current colour or brush.
         @see fillEllipse, Path::addEllipse
     */
-    void drawEllipse (const Rectangle<float>& area, float lineThickness) const;
+    void drawEllipse (Rectangle<float> area, float lineThickness) const;
 
     //==============================================================================
     /** Draws a line between two points.
@@ -544,6 +544,23 @@ public:
 
     /** Draws an image to fit within a designated rectangle.
 
+        @param imageToDraw              the source image to draw
+        @param destArea                 the target rectangle to fit it into
+        @param placementWithinTarget    this specifies how the image should be positioned
+                                        within the target rectangle - see the RectanglePlacement
+                                        class for more details about this.
+        @param fillAlphaChannelWithCurrentBrush     if true, then instead of drawing the image, just its
+                                                    alpha channel will be used as a mask with which to
+                                                    draw with the current brush or colour. This is
+                                                    similar to fillAlphaMap(), and see also drawImage()
+        @see drawImage, drawImageTransformed, drawImageAt, RectanglePlacement
+    */
+    void drawImage (const Image& imageToDraw, Rectangle<float> targetArea,
+                    RectanglePlacement placementWithinTarget = RectanglePlacement::stretchToFit,
+                    bool fillAlphaChannelWithCurrentBrush = false) const;
+
+    /** Draws an image to fit within a designated rectangle.
+
         If the image is too big or too small for the space, it will be rescaled
         to fit as nicely as it can do without affecting its aspect ratio. It will
         then be placed within the target rectangle according to the justification flags
@@ -568,7 +585,6 @@ public:
                           RectanglePlacement placementWithinTarget,
                           bool fillAlphaChannelWithCurrentBrush = false) const;
 
-
     //==============================================================================
     /** Returns the position of the bounding box for the current clipping region.
         @see getClipRegion, clipRegionIntersects
@@ -581,7 +597,7 @@ public:
         method can be used to optimise a component's paint() method, by letting it
         avoid drawing complex objects that aren't within the region being repainted.
     */
-    bool clipRegionIntersects (const Rectangle<int>& area) const;
+    bool clipRegionIntersects (Rectangle<int> area) const;
 
     /** Intersects the current clipping region with another region.
 
@@ -595,7 +611,7 @@ public:
         @returns true if the resulting clipping region is non-zero in size
         @see setOrigin, clipRegionIntersects
     */
-    bool reduceClipRegion (const Rectangle<int>& area);
+    bool reduceClipRegion (Rectangle<int> area);
 
     /** Intersects the current clipping region with a rectangle list region.
 
@@ -625,7 +641,7 @@ public:
     bool reduceClipRegion (const Image& image, const AffineTransform& transform);
 
     /** Excludes a rectangle to stop it being drawn into. */
-    void excludeClipRegion (const Rectangle<int>& rectangleToExclude);
+    void excludeClipRegion (Rectangle<int> rectangleToExclude);
 
     /** Returns true if no drawing can be done because the clip region is zero. */
     bool isClipEmpty() const;

@@ -39,6 +39,7 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 {
 }
 
+@property (strong, nonatomic) UIWindow *window;
 - (void) applicationDidFinishLaunching: (UIApplication*) application;
 - (void) applicationWillTerminate: (UIApplication*) application;
 - (void) applicationDidEnterBackground: (UIApplication*) application;

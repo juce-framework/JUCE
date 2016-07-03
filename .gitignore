@@ -29,6 +29,7 @@ profile
 **/MacOSX/build
 **/iOS/build
 **/Linux/build
+**/LinuxMakefile/build
 **/VisualStudio2005/Debug
 **/VisualStudio2005/Release
 **/VisualStudio2008/Debug

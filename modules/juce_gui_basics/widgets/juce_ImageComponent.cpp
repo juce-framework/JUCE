@@ -73,5 +73,5 @@ RectanglePlacement ImageComponent::getImagePlacement() const
 void ImageComponent::paint (Graphics& g)
 {
     g.setOpacity (1.0f);
-    g.drawImageWithin (image, 0, 0, getWidth(), getHeight(), placement, false);
+    g.drawImage (image, getLocalBounds().toFloat(), placement);
 }

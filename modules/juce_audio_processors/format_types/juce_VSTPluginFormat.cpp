@@ -342,7 +342,7 @@ public:
     }
 
     //==============================================================================
-    static ModuleHandle* findOrCreateModule (const File& file)
+    static Ptr findOrCreateModule (const File& file)
     {
         for (int i = getActiveModules().size(); --i >= 0;)
         {
@@ -352,26 +352,26 @@ public:
                 return module;
         }
 
-        _fpreset(); // (doesn't do any harm)
-
         const IdleCallRecursionPreventer icrp;
         shellUIDToCreate = 0;
+        _fpreset();
 
         JUCE_VST_LOG ("Attempting to load VST: " + file.getFullPathName());
 
-        ScopedPointer<ModuleHandle> m (new ModuleHandle (file));
+        Ptr m = new ModuleHandle (file, nullptr);
 
-        if (! m->open())
-            m = nullptr;
+        if (m->open())
+        {
+            _fpreset();
+            return m;
+        }
 
-        _fpreset(); // (doesn't do any harm)
-
-        return m.release();
+        return nullptr;
     }
 
     //==============================================================================
-    ModuleHandle (const File& f)
-        : file (f), moduleMain (nullptr), customMain (nullptr)
+    ModuleHandle (const File& f, MainCall customMainCall)
+        : file (f), moduleMain (customMainCall), customMain (nullptr)
          #if JUCE_MAC
            , resHandle (0), bundleRef (0), resFileId (0)
          #endif
@@ -403,6 +403,9 @@ public:
 
     bool open()
     {
+        if (moduleMain != nullptr)
+            return true;
+
         pluginName = file.getFileNameWithoutExtension();
 
         module.open (file.getFullPathName());
@@ -471,6 +474,9 @@ public:
 
     bool open()
     {
+        if (moduleMain != nullptr)
+            return true;
+
         bool ok = false;
 
         if (file.hasFileExtension (".vst"))
@@ -628,6 +634,7 @@ public:
     ~VSTPluginInstance()
     {
         const ScopedLock sl (lock);
+        stopTimer();
 
         if (effect != nullptr && effect->magic == kEffectMagic)
         {
@@ -679,6 +686,18 @@ public:
         desc.numInputChannels = getTotalNumInputChannels();
         desc.numOutputChannels = getTotalNumOutputChannels();
         desc.isInstrument = (effect != nullptr && (effect->flags & effFlagsIsSynth) != 0);
+    }
+
+    bool initialiseEffect (double initialSampleRate, int initialBlockSize)
+    {
+        if (effect != nullptr)
+        {
+            effect->resvd2 = (VstIntPtr) (pointer_sized_int) this;
+            initialise (initialSampleRate, initialBlockSize);
+            return true;
+        }
+
+        return false;
     }
 
     void initialise (double initialSampleRate, int initialBlockSize)
@@ -2670,12 +2689,7 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
 
             result = new VSTPluginInstance (module);
 
-            if (result->effect != nullptr)
-            {
-                result->effect->resvd2 = (VstIntPtr) (pointer_sized_int) (VSTPluginInstance*) result;
-                result->initialise (sampleRate, blockSize);
-            }
-            else
+            if (! result->initialiseEffect (sampleRate, blockSize))
                 result = nullptr;
         }
 
@@ -2829,6 +2843,22 @@ bool VSTPluginFormat::setChunkData (AudioPluginInstance* plugin, const void* dat
         return vst->setChunkData (data, size, isPreset);
 
     return false;
+}
+
+AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPointFunction,
+                                                                   double initialSampleRate, int initialBufferSize)
+{
+    ModuleHandle::Ptr module = new ModuleHandle (File(), (MainCall) entryPointFunction);
+
+    if (module->open())
+    {
+        ScopedPointer<VSTPluginInstance> result (new VSTPluginInstance (module));
+
+        if (result->initialiseEffect (initialSampleRate, initialBufferSize))
+            return result.release();
+    }
+
+    return nullptr;
 }
 
 void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunctions* functions)

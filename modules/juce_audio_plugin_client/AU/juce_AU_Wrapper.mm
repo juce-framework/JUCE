@@ -481,7 +481,7 @@ public:
                             String text;
 
                             if (AudioProcessorParameter* param = juceFilter->getParameters() [paramID])
-                                text = param->getText ((float) *(pv->inValue), 0);
+                                text = param->getText (value, 0);
                             else
                                 text = String (value);
 

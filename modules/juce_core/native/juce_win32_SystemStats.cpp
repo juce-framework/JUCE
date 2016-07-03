@@ -260,17 +260,6 @@ public:
     {
         LARGE_INTEGER ticks;
         QueryPerformanceCounter (&ticks);
-
-        const int64 mainCounterAsHiResTicks = (juce_millisecondsSinceStartup() * hiResTicksPerSecond) / 1000;
-        const int64 newOffset = mainCounterAsHiResTicks - ticks.QuadPart;
-
-        // fix for a very obscure PCI hardware bug that can make the counter
-        // sometimes jump forwards by a few seconds..
-        const int64 offsetDrift = abs64 (newOffset - hiResTicksOffset);
-
-        if (offsetDrift > (hiResTicksPerSecond >> 1))
-            hiResTicksOffset = newOffset;
-
         return ticks.QuadPart + hiResTicksOffset;
     }
 
