@@ -1507,6 +1507,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("join",     join);
             setMethod ("push",     push);
             setMethod ("splice",   splice);
+            setMethod ("indexOf",  indexOf);
         }
 
         static Identifier getClassName()   { static const Identifier i ("Array"); return i; }
@@ -1563,7 +1564,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 else if (start > arraySize)
                     start = arraySize;
 
-                const int num = a.numArguments > 1 ? jlimit (0, arraySize - start, static_cast<int> (get (a, 1)))
+                const int num = a.numArguments > 1 ? jlimit (0, arraySize - start, getInt (a, 1))
                                                    : arraySize - start;
 
                 Array<var> itemsRemoved;
@@ -1581,6 +1582,20 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             }
 
             return var::undefined();
+        }
+
+        static var indexOf (Args a)
+        {
+            if (const Array<var>* array = a.thisObject.getArray())
+            {
+                const var target (get (a, 0));
+
+                for (int i = (a.numArguments > 1 ? getInt (a, 1) : 0); i < array->size(); ++i)
+                    if (array->getReference(i) == target)
+                        return i;
+            }
+
+            return -1;
         }
     };
 
