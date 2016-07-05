@@ -633,7 +633,7 @@ public:
     }
 
     //==============================================================================
-    bool isError() const                { return connection == nullptr; }
+    bool isError() const                { return (connection == nullptr || connection->headers == nullptr); }
     int64 getTotalLength() override     { return connection == nullptr ? -1 : connection->contentLength; }
     bool isExhausted() override         { return finished; }
     int64 getPosition() override        { return position; }
