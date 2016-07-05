@@ -630,8 +630,8 @@ public:
     };
 
     //==============================================================================
-    /** A user-defined component that can be used as an item in a popup menu.
-        @see PopupMenu::addCustomItem
+    /** A user-defined callback that can be used for specific items in a popup menu.
+        @see PopupMenu::Item::customCallback
     */
     class JUCE_API  CustomCallback  : public SingleThreadedReferenceCountedObject
     {
@@ -639,9 +639,9 @@ public:
         CustomCallback();
         ~CustomCallback();
 
-        /** Callback to indicate this object has been triggered.
-            @returns true if the itemID should be sent to the existModalState method, false
-                     if it should send 0, indicating no further action should be taken
+        /** Callback to indicate this item has been triggered.
+            @returns true if the itemID should be sent to the exitModalState method, or
+                     false if it should send 0, indicating no further action should be taken
         */
         virtual bool menuItemTriggered() = 0;
 
