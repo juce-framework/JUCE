@@ -248,7 +248,7 @@ public:
 
    #if JUCE_COMPILER_SUPPORTS_NULLPTR
     /** Creates a pointer to a null object. */
-    ReferenceCountedObjectPtr (std::nullptr_t) noexcept
+    ReferenceCountedObjectPtr (decltype (nullptr)) noexcept
         : referencedObject (nullptr)
     {
     }
