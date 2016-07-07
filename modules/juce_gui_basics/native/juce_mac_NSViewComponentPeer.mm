@@ -75,7 +75,10 @@ public:
           usingCoreGraphics (false),
          #endif
           isZooming (false),
+          isFirstLiveResize (false),
           textWasInserted (false),
+          isStretchingTop (false), isStretchingLeft (false),
+          isStretchingBottom (false), isStretchingRight (false),
           notificationCenter (nil)
     {
         appFocusChangeCallback = appFocusChanged;
@@ -986,7 +989,10 @@ public:
     void liveResizingStart()
     {
         if (constrainer != nullptr)
+        {
             constrainer->resizeStart();
+            isFirstLiveResize = true;
+        }
     }
 
     void liveResizingEnd()
@@ -1007,26 +1013,26 @@ public:
             const Rectangle<int> screenBounds (Desktop::getInstance().getDisplays().getTotalBounds (true));
 
            #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-            if ([window inLiveResize])
+            const bool inLiveResize = [window inLiveResize];
            #else
-            if ([window respondsToSelector: @selector (inLiveResize)]
-                 && [window performSelector: @selector (inLiveResize)])
+            const bool inLiveResize = [window respondsToSelector: @selector (inLiveResize)]
+                                   && [window performSelector: @selector (inLiveResize)];
            #endif
+
+            if (! inLiveResize || isFirstLiveResize)
             {
-                constrainer->checkBounds (pos, original, screenBounds,
-                                          false, false, true, true);
+                isFirstLiveResize = false;
+
+                isStretchingTop    = (pos.getY() != original.getY() && pos.getBottom() == original.getBottom());
+                isStretchingLeft   = (pos.getX() != original.getX() && pos.getRight()  == original.getRight());
+                isStretchingBottom = (pos.getY() == original.getY() && pos.getBottom() != original.getBottom());
+                isStretchingRight  = (pos.getX() == original.getX() && pos.getRight()  != original.getRight());
             }
-            else
-            {
-                constrainer->checkBounds (pos, original, screenBounds,
-                                          pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
-                                          pos.getX() != original.getX() && pos.getRight()  == original.getRight(),
-                                          pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
-                                          pos.getX() == original.getX() && pos.getRight()  != original.getRight());
-            }
+
+            constrainer->checkBounds (pos, original, screenBounds,
+                                      isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
 
             pos = ScalingHelpers::scaledScreenPosToUnscaled (scale, pos);
-
             r = flippedScreenRect (makeNSRect (pos));
         }
 
@@ -1318,7 +1324,8 @@ public:
     NSWindow* window;
     NSView* view;
     bool isSharedWindow, fullScreen;
-    bool usingCoreGraphics, isZooming, textWasInserted;
+    bool usingCoreGraphics, isZooming, isFirstLiveResize, textWasInserted;
+    bool isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight;
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter;
 
