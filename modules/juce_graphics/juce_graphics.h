@@ -42,7 +42,7 @@
   dependencies:     juce_events
   OSXFrameworks:    Cocoa QuartzCore
   iOSFrameworks:    CoreGraphics CoreText QuartzCore
-  linuxLibs:        X11 Xinerama Xext freetype
+  linuxPackages:    x11 xinerama xext freetype2
 
  END_JUCE_MODULE_DECLARATION
 

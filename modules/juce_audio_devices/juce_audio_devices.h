@@ -42,7 +42,7 @@
   dependencies:     juce_audio_basics, juce_audio_formats, juce_events
   OSXFrameworks:    CoreAudio CoreMIDI DiscRecording
   iOSFrameworks:    CoreAudio CoreMIDI AudioToolbox AVFoundation
-  linuxLibs:        asound
+  linuxPackages:    alsa
   mingwLibs:        winmm
 
  END_JUCE_MODULE_DECLARATION

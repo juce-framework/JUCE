@@ -48,6 +48,7 @@
   OSXFrameworks:    Cocoa IOKit
   iOSFrameworks:    Foundation
   linuxLibs:        rt dl pthread
+  linuxPackages:    libcurl
   mingwLibs:        uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
 
  END_JUCE_MODULE_DECLARATION
@@ -138,7 +139,7 @@
 
 /** Config: JUCE_USE_CURL
     Enables http/https support via libcurl (Linux only). Enabling this will add an additional
-    run-time dynmic dependency to libcurl.
+    run-time dynamic dependency to libcurl.
 
     If you disable this then https/ssl support will not be available on linux.
 */

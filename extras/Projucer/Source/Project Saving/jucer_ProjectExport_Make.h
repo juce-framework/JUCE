@@ -29,6 +29,9 @@ public:
     static const char* getNameLinux()           { return "Linux Makefile"; }
     static const char* getValueTreeTypeName()   { return "LINUX_MAKE"; }
 
+    Value getExtraPkgConfig()                   { return getSetting (Ids::linuxExtraPkgConfig); }
+    String getExtraPkgConfigString() const      { return getSettingString (Ids::linuxExtraPkgConfig); }
+
     static MakefileProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
@@ -90,6 +93,9 @@ public:
                                                      StringArray (cppStandardNames),
                                                      Array<var>  (cppStandardValues)),
                         "The C++ standard to specify in the makefile");
+
+        properties.add (new TextPropertyComponent (getExtraPkgConfig(), "pkg-config libraries", 8192, false),
+                   "Extra pkg-config libraries for you application. Each package should be space separated.");
     }
 
     //==============================================================================
@@ -126,7 +132,6 @@ protected:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e)
         {
-            setValueIfVoid (getLibrarySearchPathValue(), "/usr/X11R6/lib/");
         }
 
         Value getArchitectureType()             { return getValue (Ids::linuxArchitecture); }
@@ -191,18 +196,36 @@ private:
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
 
-        searchPaths.insert (0, "/usr/include/freetype2");
-        searchPaths.insert (0, "/usr/include");
+        StringArray packages;
+        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        packages.removeEmptyStrings();
+
+        if (linuxPackages.size() > 0 || packages.size() > 0)
+        {
+            out << " $(shell pkg-config --cflags";
+
+            for (int i = 0; i < linuxPackages.size(); ++i)
+                out << " " << linuxPackages[i];
+
+            for (int i = 0; i < packages.size(); ++i)
+                out << " " << packages[i];
+
+            out << ")";
+        }
+
+        if (linuxLibs.contains("pthread"))
+            out << " -pthread";
 
         searchPaths = getCleanedStringArray (searchPaths);
 
+        // Replace ~ character with $(HOME) environment variable
         for (int i = 0; i < searchPaths.size(); ++i)
-            out << " -I " << escapeSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])));
+            out << " -I" << escapeSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i]))).replace ("~", "$(HOME)");
     }
 
     void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  CPPFLAGS := $(DEPFLAGS)";
+        out << "  JUCE_CPPFLAGS := $(DEPFLAGS)";
         writeDefineFlags (out, config);
         writeHeaderPathFlags (out, config);
         out << newLine;
@@ -210,7 +233,7 @@ private:
 
     void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  LDFLAGS += $(TARGET_ARCH) -L$(BINDIR) -L$(LIBDIR)";
+        out << "  JUCE_LDFLAGS += $(LDFLAGS) $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR)";
 
         {
             StringArray flags (makefileExtraLinkerFlags);
@@ -227,11 +250,25 @@ private:
 
         out << config.getGCCLibraryPathFlags();
 
+        StringArray packages;
+        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        packages.removeEmptyStrings();
+
+        if (linuxPackages.size() > 0  || packages.size() > 0)
+        {
+            out << " $(shell pkg-config --libs";
+
+            for (int i = 0; i < linuxPackages.size(); ++i)
+                out << " " << linuxPackages[i];
+
+            for (int i = 0; i < packages.size(); ++i)
+                out << " " << packages[i];
+
+            out << ")";
+        }
+
         for (int i = 0; i < linuxLibs.size(); ++i)
             out << " -l" << linuxLibs[i];
-
-        if (getProject().isConfigFlagEnabled ("JUCE_USE_CURL"))
-            out << " -lcurl";
 
         StringArray libraries;
         libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
@@ -257,10 +294,10 @@ private:
         }
 
         out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName()) << ")" << newLine;
-        out << "  BINDIR := " << escapeSpaces (buildDirName) << newLine
-            << "  LIBDIR := " << escapeSpaces (buildDirName) << newLine
-            << "  OBJDIR := " << escapeSpaces (intermediatesDirName) << newLine
-            << "  OUTDIR := " << escapeSpaces (outputDir) << newLine
+        out << "  JUCE_BINDIR := " << escapeSpaces (buildDirName) << newLine
+            << "  JUCE_LIBDIR := " << escapeSpaces (buildDirName) << newLine
+            << "  JUCE_OBJDIR := " << escapeSpaces (intermediatesDirName) << newLine
+            << "  JUCE_OUTDIR := " << escapeSpaces (outputDir) << newLine
             << newLine
             << "  ifeq ($(TARGET_ARCH),)" << newLine
             << "    TARGET_ARCH := " << getArchFlags (config) << newLine
@@ -269,7 +306,7 @@ private:
 
         writeCppFlags (out, config);
 
-        out << "  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH)";
+        out << "  JUCE_CFLAGS += $(CFLAGS) $(JUCE_CPPFLAGS) $(TARGET_ARCH)";
 
         if (config.isDebug())
             out << " -g -ggdb";
@@ -286,7 +323,7 @@ private:
         if (cppStandardToUse.isEmpty())
             cppStandardToUse = "-std=c++11";
 
-        out << "  CXXFLAGS += $(CFLAGS) "
+        out << "  JUCE_CXXFLAGS += $(CXXFLAGS) $(JUCE_CFLAGS) "
             << cppStandardToUse
             << newLine;
 
@@ -304,11 +341,11 @@ private:
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 
         if (projectType.isStaticLibrary())
-            out << "  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS)" << newLine;
+            out << "  BLDCMD = $(AR) -rcs $(JUCE_OUTDIR)/$(TARGET) $(OBJECTS)" << newLine;
         else
-            out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
+            out << "  BLDCMD = $(CXX) -o $(JUCE_OUTDIR)/$(TARGET) $(OBJECTS) $(JUCE_LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
 
-        out << "  CLEANCMD = rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)" << newLine
+        out << "  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)" << newLine
             << "endif" << newLine
             << newLine;
     }
@@ -319,7 +356,7 @@ private:
 
         for (int i = 0; i < files.size(); ++i)
             if (shouldFileBeCompiledByDefault (files.getReference(i)))
-                out << "  $(OBJDIR)/" << escapeSpaces (getObjectFileFor (files.getReference(i))) << " \\" << newLine;
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (getObjectFileFor (files.getReference(i))) << " \\" << newLine;
 
         out << newLine;
     }
@@ -332,6 +369,16 @@ private:
 
         out << "# (this disables dependency generation if multiple architectures are set)" << newLine
             << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
+            << newLine;
+
+        out << "ifndef STRIP" << newLine
+            << "  STRIP=strip" << newLine
+            << "endif" << newLine
+            << newLine;
+
+        out << "ifndef AR" << newLine
+            << "  AR=ar" << newLine
+            << "endif" << newLine
             << newLine;
 
         out << "ifndef CONFIG" << newLine
@@ -347,13 +394,38 @@ private:
         out << ".PHONY: clean" << newLine
             << newLine;
 
-        out << "$(OUTDIR)/$(TARGET): $(OBJECTS) $(RESOURCES)" << newLine
+        StringArray packages;
+        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        packages.removeEmptyStrings();
+
+        bool useLinuxPackages = (linuxPackages.size() > 0 || packages.size() > 0);
+
+        out << "$(JUCE_OUTDIR)/$(TARGET): "
+            << ((useLinuxPackages) ? "check-pkg-config " : "")
+            << "$(OBJECTS) $(RESOURCES)" << newLine
             << "\t@echo Linking " << projectName << newLine
-            << "\t-@mkdir -p $(BINDIR)" << newLine
-            << "\t-@mkdir -p $(LIBDIR)" << newLine
-            << "\t-@mkdir -p $(OUTDIR)" << newLine
+            << "\t-@mkdir -p $(JUCE_BINDIR)" << newLine
+            << "\t-@mkdir -p $(JUCE_LIBDIR)" << newLine
+            << "\t-@mkdir -p $(JUCE_OUTDIR)" << newLine
             << "\t@$(BLDCMD)" << newLine
             << newLine;
+
+        if (useLinuxPackages)
+        {
+            out << "check-pkg-config:" << newLine
+                << "\t@command -v pkg-config >/dev/null 2>&1 || "
+                "{ echo >&2 \"pkg-config not installed. Please, install it.\"; "
+                "exit 1; }" << newLine
+                << "\t@pkg-config --print-errors";
+
+            for (int i = 0; i < linuxPackages.size(); ++i)
+                out << " " << linuxPackages[i];
+
+            for (int i = 0; i < packages.size(); ++i)
+                out << " " << packages[i];
+
+            out << newLine << newLine;
+        }
 
         out << "clean:" << newLine
             << "\t@echo Cleaning " << projectName << newLine
@@ -362,7 +434,7 @@ private:
 
         out << "strip:" << newLine
             << "\t@echo Stripping " << projectName << newLine
-            << "\t-@strip --strip-unneeded $(OUTDIR)/$(TARGET)" << newLine
+            << "\t-@$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)" << newLine
             << newLine;
 
         for (int i = 0; i < files.size(); ++i)
@@ -371,12 +443,12 @@ private:
             {
                 jassert (files.getReference(i).getRoot() == RelativePath::buildTargetFolder);
 
-                out << "$(OBJDIR)/" << escapeSpaces (getObjectFileFor (files.getReference(i)))
+                out << "$(JUCE_OBJDIR)/" << escapeSpaces (getObjectFileFor (files.getReference(i)))
                     << ": " << escapeSpaces (files.getReference(i).toUnixStyle()) << newLine
-                    << "\t-@mkdir -p $(OBJDIR)" << newLine
+                    << "\t-@mkdir -p $(JUCE_OBJDIR)" << newLine
                     << "\t@echo \"Compiling " << files.getReference(i).getFileName() << "\"" << newLine
-                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t@$(CC) $(CFLAGS) -o \"$@\" -c \"$<\""
-                                                                         : "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"")
+                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t@$(CC) $(JUCE_CFLAGS) -o \"$@\" -c \"$<\""
+                                                                         : "\t@$(CXX) $(JUCE_CXXFLAGS) -o \"$@\" -c \"$<\"")
                     << newLine << newLine;
             }
         }

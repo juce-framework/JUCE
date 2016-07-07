@@ -40,7 +40,7 @@
   license:          GPL/Commercial
 
   dependencies:     juce_core
-  linuxLibs:        X11
+  linuxPackages:    x11
 
  END_JUCE_MODULE_DECLARATION
 

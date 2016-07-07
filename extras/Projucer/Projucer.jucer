@@ -70,10 +70,10 @@
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="-std=c++11"
                 extraLinkerFlags="" bigIcon="OCyr5F" smallIcon="" vstFolder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/&#10;" isDebug="1" optimisation="1"
-                       targetName="Projucer" headerPath=""/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;" isDebug="0"
-                       optimisation="3" targetName="Projucer" headerPath=""/>
+        <CONFIGURATION name="Debug" libraryPath="" isDebug="1" optimisation="1" targetName="Projucer"
+                       headerPath=""/>
+        <CONFIGURATION name="Release" libraryPath="" isDebug="0" optimisation="3" targetName="Projucer"
+                       headerPath=""/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -626,5 +626,6 @@
     <OSX headerPath="~/SDKs/llvm/include&#10;~/SDKs/llvm/tools/clang/include"
          enableCxx11="1" systemHeaderPath="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/c++/v1&#10;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/4.2/include"/>
     <WINDOWS enableCxx11="1"/>
+    <LINUX/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>

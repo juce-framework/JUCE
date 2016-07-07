@@ -831,7 +831,7 @@ String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
     const StringArray libraryPaths (getLibrarySearchPaths());
 
     for (int i = 0; i < libraryPaths.size(); ++i)
-        s << " -L" << escapeSpaces (libraryPaths[i]);
+        s << " -L" << escapeSpaces (libraryPaths[i]).replace ("~", "$(HOME)");
 
     return s;
 }

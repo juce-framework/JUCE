@@ -338,6 +338,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
     else if (exporter.isLinux())
     {
         parseAndAddLibs (exporter.linuxLibs, moduleInfo.moduleInfo ["linuxLibs"].toString());
+        parseAndAddLibs (exporter.linuxPackages, moduleInfo.moduleInfo ["linuxPackages"].toString());
     }
     else if (exporter.isCodeBlocks() && exporter.isWindows())
     {

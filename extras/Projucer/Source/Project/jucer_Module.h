@@ -118,6 +118,7 @@ public:
 
 private:
     mutable Array<File> sourceFiles;
+    OwnedArray<Project::ConfigFlag> configFlags;
 
     void addBrowseableCode (ProjectExporter&, const Array<File>& compiled, const File& localModuleFolder) const;
 };

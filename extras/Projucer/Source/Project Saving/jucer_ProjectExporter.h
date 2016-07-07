@@ -189,7 +189,7 @@ public:
     //==============================================================================
     String makefileTargetSuffix;
     bool makefileIsDLL;
-    StringArray linuxLibs, makefileExtraLinkerFlags;
+    StringArray linuxLibs, linuxPackages, makefileExtraLinkerFlags;
 
     //==============================================================================
     String msvcTargetSuffix;
