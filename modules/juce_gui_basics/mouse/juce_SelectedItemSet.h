@@ -75,7 +75,7 @@ public:
 
             for (int i = selectedItems.size(); --i >= 0;)
                 if (! other.isSelected (selectedItems.getReference (i)))
-                    itemDeselected (selectedItems.remove (i));
+                    itemDeselected (selectedItems.removeAndReturn (i));
 
             for (SelectableItemType* i = other.selectedItems.begin(), *e = other.selectedItems.end(); i != e; ++i)
             {
@@ -235,7 +235,7 @@ public:
         if (i >= 0)
         {
             changed();
-            itemDeselected (selectedItems.remove (i));
+            itemDeselected (selectedItems.removeAndReturn (i));
         }
     }
 
@@ -248,7 +248,7 @@ public:
 
             for (int i = selectedItems.size(); --i >= 0;)
             {
-                itemDeselected (selectedItems.remove (i));
+                itemDeselected (selectedItems.removeAndReturn (i));
                 i = jmin (i, selectedItems.size());
             }
         }

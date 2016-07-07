@@ -333,7 +333,7 @@ OpenDocumentManager::Document* RecentDocumentList::getPrevious()
     if (! canGoToPrevious())
         return nullptr;
 
-    nextDocs.insert (0, previousDocs.remove (previousDocs.size() - 1));
+    nextDocs.insert (0, previousDocs.removeAndReturn (previousDocs.size() - 1));
     return previousDocs.getLast();
 }
 
@@ -342,7 +342,7 @@ OpenDocumentManager::Document* RecentDocumentList::getNext()
     if (! canGoToNext())
         return nullptr;
 
-    OpenDocumentManager::Document* d = nextDocs.remove (0);
+    OpenDocumentManager::Document* d = nextDocs.removeAndReturn (0);
     previousDocs.add (d);
     return d;
 }

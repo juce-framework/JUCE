@@ -798,10 +798,30 @@ public:
         If the index passed in is out-of-range, nothing will happen.
 
         @param indexToRemove    the index of the element to remove
+        @see removeAndReturn, removeFirstMatchingValue, removeAllInstancesOf, removeRange
+    */
+    void remove (int indexToRemove)
+    {
+        const ScopedLockType lock (getLock());
+
+        if (isPositiveAndBelow (indexToRemove, numUsed))
+        {
+            jassert (data.elements != nullptr);
+            removeInternal (indexToRemove);
+        }
+    }
+
+    /** Removes an element from the array.
+
+        This will remove the element at a given index, and move back
+        all the subsequent elements to close the gap.
+        If the index passed in is out-of-range, nothing will happen.
+
+        @param indexToRemove    the index of the element to remove
         @returns                the element that has been removed
         @see removeFirstMatchingValue, removeAllInstancesOf, removeRange
     */
-    ElementType remove (const int indexToRemove)
+    ElementType removeAndReturn (const int indexToRemove)
     {
         const ScopedLockType lock (getLock());
 
