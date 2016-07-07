@@ -938,6 +938,20 @@ public:
         if (pluginOutput != nullptr && numOuts == 0)
             return false;
 
+        if (pluginInput != nullptr && pluginInput->type >= 0)
+        {
+            // inconsistent request?
+            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput).size() != pluginInput->numChannels)
+                return false;
+        }
+
+        if (pluginOutput != nullptr && pluginOutput->type >= 0)
+        {
+            // inconsistent request?
+            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput).size() != pluginOutput->numChannels)
+                return false;
+        }
+
         if (numIns > 1 || numOuts > 1)
         {
             int newNumInChannels  = (pluginInput  != nullptr && pluginInput-> numChannels >= 0) ? pluginInput-> numChannels
