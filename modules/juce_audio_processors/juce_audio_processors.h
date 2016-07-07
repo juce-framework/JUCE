@@ -89,7 +89,7 @@
 // #error "You need to set either the JUCE_PLUGINHOST_AU and/or JUCE_PLUGINHOST_VST and/or JUCE_PLUGINHOST_VST3 flags if you're using this module!"
 #endif
 
-#if ! (defined (JUCE_SUPPORT_CARBON) || JUCE_64BIT)
+#if ! (defined (JUCE_SUPPORT_CARBON) || JUCE_64BIT || JUCE_IOS)
  #define JUCE_SUPPORT_CARBON 1
 #endif
 
