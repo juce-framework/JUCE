@@ -142,7 +142,8 @@ private:
              && curl_easy_setopt (curl, CURLOPT_WRITEDATA, this) == CURLE_OK
              && curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, StaticCurlWrite) == CURLE_OK
              && curl_easy_setopt (curl, CURLOPT_MAXREDIRS, static_cast<long> (maxRedirects)) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_USERAGENT, userAgent.toRawUTF8()) == CURLE_OK)
+             && curl_easy_setopt (curl, CURLOPT_USERAGENT, userAgent.toRawUTF8()) == CURLE_OK
+             && curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1) == CURLE_OK)
         {
             if (isPost)
             {
