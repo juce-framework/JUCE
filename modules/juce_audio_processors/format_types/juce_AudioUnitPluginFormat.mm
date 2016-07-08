@@ -1080,28 +1080,39 @@ private:
 
     void eventCallback (const AudioUnitEvent& event, AudioUnitParameterValue newValue)
     {
+        int paramIndex = -1;
+
+        if (event.mEventType == kAudioUnitEvent_ParameterValueChange
+         || event.mEventType == kAudioUnitEvent_BeginParameterChangeGesture
+         || event.mEventType == kAudioUnitEvent_EndParameterChangeGesture)
+        {
+            for (paramIndex = 0; paramIndex < parameters.size(); ++paramIndex)
+            {
+                const ParamInfo& p = *parameters.getUnchecked(paramIndex);
+
+                if (p.paramID == event.mArgument.mParameter.mParameterID)
+                    break;
+            }
+
+            if (! isPositiveAndBelow (paramIndex, parameters.size()))
+                return;
+        }
+
         switch (event.mEventType)
         {
             case kAudioUnitEvent_ParameterValueChange:
-                for (int i = 0; i < parameters.size(); ++i)
                 {
-                    const ParamInfo& p = *parameters.getUnchecked(i);
-
-                    if (p.paramID == event.mArgument.mParameter.mParameterID)
-                    {
-                        sendParamChangeMessageToListeners (i, (newValue - p.minValue) / (p.maxValue - p.minValue));
-                        break;
-                    }
+                    const ParamInfo& p = *parameters.getUnchecked(paramIndex);
+                    sendParamChangeMessageToListeners (paramIndex, (newValue - p.minValue) / (p.maxValue - p.minValue));
                 }
-
                 break;
 
             case kAudioUnitEvent_BeginParameterChangeGesture:
-                beginParameterChangeGesture ((int) event.mArgument.mParameter.mParameterID);
+                beginParameterChangeGesture (paramIndex);
                 break;
 
             case kAudioUnitEvent_EndParameterChangeGesture:
-                endParameterChangeGesture ((int) event.mArgument.mParameter.mParameterID);
+                endParameterChangeGesture (paramIndex);
                 break;
 
             default:
