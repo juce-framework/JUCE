@@ -603,7 +603,7 @@ public:
      This must return the correct value immediately after the object has been
      created, and mustn't change the value later.
      */
-    bool isHighResolutionParameters(bool initialValue = false);
+    virtual bool isHighResolutionParameters(bool initialValue = false);
     
     //==============================================================================
     /** This must return the correct value immediately after the object has been
