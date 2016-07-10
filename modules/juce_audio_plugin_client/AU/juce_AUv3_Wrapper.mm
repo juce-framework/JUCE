@@ -845,6 +845,11 @@ private:
             AUParameterAddress address = static_cast<AUParameterAddress> (idx);
            #else
             AUParameterAddress address = generateAUParameterAddressForIndex (idx);
+
+            // Consider yourself very unlucky if you hit this assertion. The hash code of your
+            // parameter ids are not unique.
+            jassert (! paramMap.contains (static_cast<int64> (address)));
+
             paramAddresses.add (address);
             paramMap.set (static_cast<int64> (address), idx);
           #endif

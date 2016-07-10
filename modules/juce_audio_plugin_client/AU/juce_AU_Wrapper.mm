@@ -1578,6 +1578,10 @@ private:
             {
                 const AudioUnitParameterID auParamID = generateAUParameterIDForIndex (i);
 
+                // Consider yourself very unlucky if you hit this assertion. The hash code of your
+                // parameter ids are not unique.
+                jassert (! paramMap.contains (static_cast<int32> (auParamID)));
+
                 auParamIDs.add (auParamID);
                 paramMap.set (static_cast<int32> (auParamID), i);
 

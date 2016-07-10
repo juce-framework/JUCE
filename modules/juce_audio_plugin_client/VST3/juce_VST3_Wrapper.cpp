@@ -2093,6 +2093,10 @@ private:
         {
             const Vst::ParamID paramID = JuceVST3EditController::generateVSTParamIDForIndex (pluginInstance, i);
 
+            // Consider yourself very unlucky if you hit this assertion. The hash code of your
+            // parameter ids are not unique.
+            jassert (! vstParamIDs.contains (static_cast<int32> (paramID)));
+
             vstParamIDs.add (paramID);
             paramMap.set (static_cast<int32> (paramID), i);
         }
