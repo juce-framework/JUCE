@@ -877,9 +877,16 @@ public:
 
     void handleAsyncUpdate() override
     {
+       #if JucePlugin_Build_AAX || JucePlugin_Build_RTAS || JucePlugin_Build_AUv3 || JucePlugin_Build_AU || JucePlugin_Build_VST3 || JucePlugin_Build_VST
+        const bool shouldThrottle = true;
+       #else
+        const bool shouldThrottle = areAnyWindowsInLiveResize();
+       #endif
+
         // When windows are being resized, artificially throttling high-frequency repaints helps
-        // to stop the event queue getting clogged, and keeps everything working smoothly
-        if (areAnyWindowsInLiveResize()
+        // to stop the event queue getting clogged, and keeps everything working smoothly.
+        // For some reason Logic also needs this throttling to recored parameter events correctly.
+        if (shouldThrottle
               && Time::getCurrentTime() < lastRepaintTime + RelativeTime::milliseconds (1000 / 30))
         {
             triggerAsyncUpdate();
