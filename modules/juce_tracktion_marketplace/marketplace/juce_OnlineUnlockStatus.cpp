@@ -29,6 +29,42 @@
 
 struct KeyFileUtils
 {
+    static XmlElement createKeyFileContent (const String& appName,
+                                            const String& userEmail,
+                                            const String& userName,
+                                            const String& machineNumbers,
+                                            const String& machineNumbersAttributeName)
+    {
+        XmlElement xml ("key");
+
+        xml.setAttribute ("user", userName);
+        xml.setAttribute ("email", userEmail);
+        xml.setAttribute (machineNumbersAttributeName, machineNumbers);
+        xml.setAttribute ("app", appName);
+        xml.setAttribute ("date", String::toHexString (Time::getCurrentTime().toMilliseconds()));
+
+        return xml;
+    }
+
+    static String createKeyFileComment (const String& appName,
+                                        const String& userEmail,
+                                        const String& userName,
+                                        const String& machineNumbers)
+    {
+        String comment;
+        comment << "Keyfile for " << appName << newLine;
+
+        if (userName.isNotEmpty())
+            comment << "User: " << userName << newLine;
+
+        comment << "Email: " << userEmail << newLine
+                << "Machine numbers: " << machineNumbers << newLine
+                << "Created: " << Time::getCurrentTime().toString (true, true);
+
+        return comment;
+    }
+
+    //==============================================================================
     static String encryptXML (const XmlElement& xml, RSAKey privateKey)
     {
         MemoryOutputStream text;
@@ -93,10 +129,10 @@ struct KeyFileUtils
         return decryptXML (keyFileText.fromLastOccurrenceOf ("#", false, false).trim(), rsaPublicKey);
     }
 
-    static StringArray getMachineNumbers (XmlElement xml)
+    static StringArray getMachineNumbers (XmlElement xml, StringRef attributeName)
     {
         StringArray numbers;
-        numbers.addTokens (xml.getStringAttribute ("mach"), ",; ", StringRef());
+        numbers.addTokens (xml.getStringAttribute (attributeName), ",; ", StringRef());
         numbers.trim();
         numbers.removeEmptyStrings();
         return numbers;
@@ -110,6 +146,9 @@ struct KeyFileUtils
     {
         String licensee, email, appID;
         StringArray machineNumbers;
+
+        bool keyFileExpires;
+        Time expiryTime;
     };
 
     static KeyFileData getDataFromKeyFile (XmlElement xml)
@@ -119,7 +158,18 @@ struct KeyFileUtils
         data.licensee = getLicensee (xml);
         data.email = getEmail (xml);
         data.appID = getAppID (xml);
-        data.machineNumbers.addArray (getMachineNumbers (xml));
+
+        if (xml.hasAttribute ("expiryTime") && xml.hasAttribute ("expiring_mach"))
+        {
+            data.keyFileExpires = true;
+            data.machineNumbers.addArray (getMachineNumbers (xml, "expiring_mach"));
+            data.expiryTime = Time (xml.getStringAttribute ("expiryTime").getHexValue64());
+        }
+        else
+        {
+            data.keyFileExpires = false;
+            data.machineNumbers.addArray (getMachineNumbers (xml, "mach"));
+        }
 
         return data;
     }
@@ -127,6 +177,7 @@ struct KeyFileUtils
 
 //==============================================================================
 const char* OnlineUnlockStatus::unlockedProp = "u";
+const char* OnlineUnlockStatus::expiryTimeProp = "t";
 static const char* stateTagName = "REG";
 static const char* userNameProp = "user";
 static const char* keyfileDataProp = "key";
@@ -183,11 +234,22 @@ void OnlineUnlockStatus::load()
     KeyFileUtils::KeyFileData data;
     data = KeyFileUtils::getDataFromKeyFile (KeyFileUtils::getXmlFromKeyFile (status[keyfileDataProp], getPublicKey()));
 
-    if (! doesProductIDMatch (data.appID))
-        status.removeProperty (unlockedProp, nullptr);
+    if (data.keyFileExpires)
+    {
+        if (! doesProductIDMatch (data.appID))
+            status.removeProperty (expiryTimeProp, nullptr);
 
-    if (! machineNumberAllowed (data.machineNumbers, localMachineNums))
-        status.removeProperty (unlockedProp, nullptr);
+        if (! machineNumberAllowed (data.machineNumbers, localMachineNums))
+            status.removeProperty (expiryTimeProp, nullptr);
+    }
+    else
+    {
+        if (! doesProductIDMatch (data.appID))
+            status.removeProperty (unlockedProp, nullptr);
+
+        if (! machineNumberAllowed (data.machineNumbers, localMachineNums))
+            status.removeProperty (unlockedProp, nullptr);
+    }
 }
 
 void OnlineUnlockStatus::save()
@@ -289,7 +351,7 @@ bool OnlineUnlockStatus::applyKeyFile (String keyFileContent)
     {
         setUserEmail (data.email);
         status.setProperty (keyfileDataProp, keyFileContent, nullptr);
-        status.removeProperty (unlockedProp, nullptr);
+        status.removeProperty (data.keyFileExpires ? expiryTimeProp : unlockedProp, nullptr);
 
         var actualResult (0), dummyResult (1.0);
         var v (machineNumberAllowed (data.machineNumbers, getLocalMachineIDs()));
@@ -297,6 +359,14 @@ bool OnlineUnlockStatus::applyKeyFile (String keyFileContent)
         v = machineNumberAllowed (StringArray ("01"), getLocalMachineIDs());
         dummyResult.swapWith (v);
         jassert (! dummyResult);
+
+        if (data.keyFileExpires)
+        {
+            if ((! dummyResult) && actualResult)
+                status.setProperty (expiryTimeProp, data.expiryTime.toMilliseconds(), nullptr);
+
+            return getExpiryTime().toMilliseconds() > 0;
+        }
 
         if ((! dummyResult) && actualResult)
             status.setProperty (unlockedProp, actualResult, nullptr);
@@ -395,23 +465,24 @@ String KeyGeneration::generateKeyFile (const String& appName,
                                        const String& machineNumbers,
                                        const RSAKey& privateKey)
 {
-    XmlElement xml ("key");
+    XmlElement xml (KeyFileUtils::createKeyFileContent (appName, userEmail, userName, machineNumbers, "mach"));
+    const String comment (KeyFileUtils::createKeyFileComment (appName, userEmail, userName, machineNumbers));
 
-    xml.setAttribute ("user", userName);
-    xml.setAttribute ("email", userEmail);
-    xml.setAttribute ("mach", machineNumbers);
-    xml.setAttribute ("app", appName);
-    xml.setAttribute ("date", String::toHexString (Time::getCurrentTime().toMilliseconds()));
+    return KeyFileUtils::createKeyFile (comment, xml, privateKey);
+}
 
-    String comment;
-    comment << "Keyfile for " << appName << newLine;
+String KeyGeneration::generateExpiringKeyFile (const String& appName,
+                                               const String& userEmail,
+                                               const String& userName,
+                                               const String& machineNumbers,
+                                               const Time expiryTime,
+                                               const RSAKey& privateKey)
+{
+    XmlElement xml (KeyFileUtils::createKeyFileContent (appName, userEmail, userName, machineNumbers, "expiring_mach"));
+    xml.setAttribute ("expiryTime", String::toHexString (expiryTime.toMilliseconds()));
 
-    if (userName.isNotEmpty())
-        comment << "User: " << userName << newLine;
-
-    comment << "Email: " << userEmail << newLine
-            << "Machine numbers: " << machineNumbers << newLine
-            << "Created: " << Time::getCurrentTime().toString (true, true);
+    String comment (KeyFileUtils::createKeyFileComment (appName, userEmail, userName, machineNumbers));
+    comment << "Expires: " << expiryTime.toString (true, true);
 
     return KeyFileUtils::createKeyFile (comment, xml, privateKey);
 }
