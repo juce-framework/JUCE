@@ -1093,7 +1093,7 @@ public:
         void getLinkerSettings (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths) const
         {
             if (xcodeIsBundle)
-                flags.add ("-bundle");
+                flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
             const Array<RelativePath>& extraLibs = config.isDebug() ? xcodeExtraLibrariesDebug
                                                                     : xcodeExtraLibrariesRelease;
