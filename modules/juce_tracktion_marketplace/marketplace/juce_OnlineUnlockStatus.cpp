@@ -482,7 +482,7 @@ String KeyGeneration::generateExpiringKeyFile (const String& appName,
     xml.setAttribute ("expiryTime", String::toHexString (expiryTime.toMilliseconds()));
 
     String comment (KeyFileUtils::createKeyFileComment (appName, userEmail, userName, machineNumbers));
-    comment << "Expires: " << expiryTime.toString (true, true);
+    comment << newLine << "Expires: " << expiryTime.toString (true, true);
 
     return KeyFileUtils::createKeyFile (comment, xml, privateKey);
 }
