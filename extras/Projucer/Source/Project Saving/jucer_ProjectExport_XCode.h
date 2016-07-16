@@ -124,7 +124,7 @@ public:
     bool isOSX() const override                      { return ! iOS; }
     bool isiOS() const override                      { return iOS; }
 
-    bool supportsVST() const override                { return true; }
+    bool supportsVST() const override                { return ! iOS; }
     bool supportsVST3() const override               { return ! iOS; }
     bool supportsAAX() const override                { return ! iOS; }
     bool supportsRTAS() const override               { return ! iOS; }
