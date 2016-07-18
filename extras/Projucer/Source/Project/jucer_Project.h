@@ -278,13 +278,14 @@ public:
     //==============================================================================
     struct ConfigFlag
     {
-        String symbol, description, sourceModuleID;
+        String symbol, description, sourceModuleID, defaultValue;
         Value value;   // 1 = true, 2 = false, anything else = use default
     };
 
     static const char* const configFlagDefault;
     static const char* const configFlagEnabled;
     static const char* const configFlagDisabled;
+
     Value getConfigFlag (const String& name);
     bool isConfigFlagEnabled (const String& name) const;
 

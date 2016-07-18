@@ -4,6 +4,12 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 4.2.3
+  - Various VST3 improvements: resizing VST3 windows, plug-in compatibility issues
+  - Use NSURLSession on newer OS X versions
+  - Add compatibility for VST 3 SDK update 3.6.6
+  - Miscellaneous fixes and improvements
+
 Version 4.2.1
   - New class CachedValue, for providing easy and efficient access to ValueTree properties
   - Reduced audio plug-in binary sizes on OS X and added symbol-stripping option

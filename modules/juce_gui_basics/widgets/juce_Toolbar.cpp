@@ -178,7 +178,7 @@ public:
                 if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (getChildComponent (i)))
                 {
                     tc->setVisible (false);
-                    const int index = oldIndexes.remove (i);
+                    const int index = oldIndexes.removeAndReturn (i);
                     owner->addChildComponent (tc, index);
                     --i;
                 }

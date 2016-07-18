@@ -270,13 +270,11 @@ public:
          firstProcessCallback (true),
          shouldDeleteEditor (false),
         #if JUCE_64BIT
-         useNSView (true)
+         useNSView (true),
         #else
-         useNSView (false)
+         useNSView (false),
         #endif
-        #if ! JUCE_IOS
-         , hostWindow (0)
-        #endif
+         hostWindow (0)
     {
         busUtils.init();
 
@@ -343,9 +341,7 @@ public:
                 delete filter;
                 filter = nullptr;
 
-               #if ! JUCE_IOS
                 jassert (editorComp == 0);
-               #endif
 
                 deleteTempChannels();
 
@@ -938,6 +934,20 @@ public:
         if (pluginOutput != nullptr && numOuts == 0)
             return false;
 
+        if (pluginInput != nullptr && pluginInput->type >= 0)
+        {
+            // inconsistent request?
+            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput).size() != pluginInput->numChannels)
+                return false;
+        }
+
+        if (pluginOutput != nullptr && pluginOutput->type >= 0)
+        {
+            // inconsistent request?
+            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput).size() != pluginOutput->numChannels)
+                return false;
+        }
+
         if (numIns > 1 || numOuts > 1)
         {
             int newNumInChannels  = (pluginInput  != nullptr && pluginInput-> numChannels >= 0) ? pluginInput-> numChannels
@@ -1333,7 +1343,6 @@ public:
 
     void createEditorComp()
     {
-       #if ! JUCE_IOS
         if (hasShutdown || filter == nullptr)
             return;
 
@@ -1352,16 +1361,12 @@ public:
                 cEffect.flags &= ~effFlagsHasEditor;
             }
         }
-       #endif
 
         shouldDeleteEditor = false;
     }
 
     void deleteEditor (bool canDeleteLaterIfModal)
     {
-       #if JUCE_IOS
-        ignoreUnused (canDeleteLaterIfModal);
-       #else
         JUCE_AUTORELEASEPOOL
         {
             PopupMenu::dismissAllActiveMenus();
@@ -1403,7 +1408,6 @@ public:
             hostWindow = 0;
            #endif
         }
-       #endif
     }
 
     VstIntPtr dispatcher (VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt) override
@@ -1411,7 +1415,6 @@ public:
         if (hasShutdown)
             return 0;
 
-       #if ! JUCE_IOS
         if (opCode == effEditIdle)
         {
             doIdleCallback();
@@ -1441,7 +1444,7 @@ public:
                 hostWindow = (Window) ptr;
                 Window editorWnd = (Window) editorComp->getWindowHandle();
                 XReparentWindow (display, editorWnd, hostWindow, 0, 0);
-              #elif JUCE_MAC
+              #else
                 hostWindow = attachComponentToWindowRefVST (editorComp, ptr, useNSView);
               #endif
                 editorComp->setVisible (true);
@@ -1476,11 +1479,10 @@ public:
 
             return 0;
         }
-       #endif
+
         return AudioEffectX::dispatcher (opCode, index, value, ptr, opt);
     }
 
-   #if ! JUCE_IOS
     void resizeHostWindow (int newWidth, int newHeight)
     {
         if (editorComp != nullptr)
@@ -1669,7 +1671,6 @@ public:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
     };
-   #endif
 
     //==============================================================================
 private:
@@ -1677,10 +1678,8 @@ private:
     PluginBusUtilities busUtils;
     juce::MemoryBlock chunkMemory;
     juce::uint32 chunkMemoryTime;
-   #if ! JUCE_IOS
     ScopedPointer<EditorCompWrapper> editorComp;
     ERect editorSize;
-   #endif
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
     bool isProcessing, isBypassed, hasShutdown, isInSizeWindow, firstProcessCallback;
@@ -1693,7 +1692,7 @@ private:
     void* hostWindow;
    #elif JUCE_LINUX
     Window hostWindow;
-   #elif JUCE_WINDOWS
+   #else
     HWND hostWindow;
    #endif
 
@@ -1987,17 +1986,14 @@ namespace
 
 //==============================================================================
 // Mac startup code..
-#if JUCE_MAC || JUCE_IOS
+#if JUCE_MAC
 
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
-       #if JUCE_MAC
         initialiseMacVST();
-       #endif
-
         return pluginEntryPoint (audioMaster);
     }
 
@@ -2006,10 +2002,7 @@ namespace
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
-       #if JUCE_MAC
         initialiseMacVST();
-       #endif
-
         return pluginEntryPoint (audioMaster);
     }
 

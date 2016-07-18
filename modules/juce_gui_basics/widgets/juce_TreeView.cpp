@@ -1755,6 +1755,9 @@ int TreeViewItem::getRowNumberInTree() const noexcept
 {
     if (parentItem != nullptr && ownerView != nullptr)
     {
+        if (! parentItem->isOpen())
+            return parentItem->getRowNumberInTree();
+
         int n = 1 + parentItem->getRowNumberInTree();
 
         int ourIndex = parentItem->subItems.indexOf (this);

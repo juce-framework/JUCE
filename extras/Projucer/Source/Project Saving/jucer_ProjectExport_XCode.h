@@ -124,7 +124,7 @@ public:
     bool isOSX() const override                      { return ! iOS; }
     bool isiOS() const override                      { return iOS; }
 
-    bool supportsVST() const override                { return true; }
+    bool supportsVST() const override                { return ! iOS; }
     bool supportsVST3() const override               { return ! iOS; }
     bool supportsAAX() const override                { return ! iOS; }
     bool supportsRTAS() const override               { return ! iOS; }
@@ -1093,7 +1093,7 @@ public:
         void getLinkerSettings (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths) const
         {
             if (xcodeIsBundle)
-                flags.add ("-bundle");
+                flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
             const Array<RelativePath>& extraLibs = config.isDebug() ? xcodeExtraLibrariesDebug
                                                                     : xcodeExtraLibrariesRelease;

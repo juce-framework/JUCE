@@ -81,6 +81,7 @@ private:
 
 public:
     class CustomComponent;
+    class CustomCallback;
 
     //==============================================================================
     /** Creates an empty popup menu. */
@@ -133,6 +134,9 @@ public:
 
         /** A custom component for the item to display, or nullptr if there isn't one. */
         ReferenceCountedObjectPtr<CustomComponent> customComponent;
+
+        /** A custom callback for the item to use, or nullptr if there isn't one. */
+        ReferenceCountedObjectPtr<CustomCallback> customCallback;
 
         /** A command manager to use to automatically invoke the command, or nullptr if none is specified. */
         ApplicationCommandManager* commandManager;
@@ -623,6 +627,26 @@ public:
         bool isHighlighted, triggeredAutomatically;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponent)
+    };
+
+    //==============================================================================
+    /** A user-defined callback that can be used for specific items in a popup menu.
+        @see PopupMenu::Item::customCallback
+    */
+    class JUCE_API  CustomCallback  : public SingleThreadedReferenceCountedObject
+    {
+    public:
+        CustomCallback();
+        ~CustomCallback();
+
+        /** Callback to indicate this item has been triggered.
+            @returns true if the itemID should be sent to the exitModalState method, or
+                     false if it should send 0, indicating no further action should be taken
+        */
+        virtual bool menuItemTriggered() = 0;
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomCallback)
     };
 
     //==============================================================================

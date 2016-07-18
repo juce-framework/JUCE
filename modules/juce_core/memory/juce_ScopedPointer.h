@@ -76,6 +76,13 @@ public:
     {
     }
 
+   #if JUCE_COMPILER_SUPPORTS_NULLPTR
+    /** Creates a ScopedPointer containing a null pointer. */
+    inline ScopedPointer (decltype (nullptr)) noexcept   : object (nullptr)
+    {
+    }
+   #endif
+
     /** Creates a ScopedPointer that owns the specified object. */
     inline ScopedPointer (ObjectType* const objectToTakePossessionOf) noexcept
         : object (objectToTakePossessionOf)

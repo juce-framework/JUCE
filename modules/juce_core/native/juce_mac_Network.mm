@@ -109,28 +109,19 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
   #endif
 }
 
+//==============================================================================
 // Unfortunately, we need to have this ugly ifdef here as long as some older OS X versions do not support NSURLSession
-#if (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
+#if JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
+
 //==============================================================================
 class URLConnectionState   : private Thread
 {
 public:
     URLConnectionState (NSURLRequest* req, const int maxRedirects)
         : Thread ("http connection"),
-          contentLength (-1),
-          delegate (nil),
           request ([req retain]),
-          session (nil),
-          task (nil),
           data ([[NSMutableData data] retain]),
-          headers (nil),
-          statusCode (0),
-          initialised (false),
-          hasFailed (false),
-          hasFinished (false),
-          numRedirectsToFollow (maxRedirects),
-          numRedirects (0),
-          latestTotalBytes (0)
+          numRedirectsToFollow (maxRedirects)
     {
         static DelegateClass cls;
         delegate = [cls.createInstance() init];
@@ -218,7 +209,7 @@ public:
 
         if ([response isKindOfClass: [NSHTTPURLResponse class]])
         {
-            NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*) response;
+            auto httpResponse = (NSHTTPURLResponse*) response;
             headers = [[httpResponse allHeaderFields] retain];
             statusCode = (int) [httpResponse statusCode];
         }
@@ -288,19 +279,19 @@ public:
         initialised = true;
     }
 
-    int64 contentLength;
+    int64 contentLength = -1;
     CriticalSection dataLock;
-    id delegate;
-    NSURLRequest* request;
-    NSURLSession* session;
-    NSURLSessionTask* task;
-    NSMutableData* data;
-    NSDictionary* headers;
-    int statusCode;
-    bool initialised, hasFailed, hasFinished;
+    id delegate = nil;
+    NSURLRequest* request = nil;
+    NSURLSession* session = nil;
+    NSURLSessionTask* task = nil;
+    NSMutableData* data = nil;
+    NSDictionary* headers = nil;
+    int statusCode = 0;
+    bool initialised = false, hasFailed = false, hasFinished = false;
     const int numRedirectsToFollow;
-    int numRedirects;
-    int64 latestTotalBytes;
+    int numRedirects = 0;
+    int64 latestTotalBytes = 0;
 
 private:
     //==============================================================================
@@ -355,7 +346,15 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
 
+//==============================================================================
 #else
+
+// This version is only used for backwards-compatibility with older OSX targets,
+// so we'll turn off deprecation warnings. This code will be removed at some point
+// in the future.
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
 
 //==============================================================================
 class URLConnectionState   : public Thread
@@ -592,6 +591,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
 
+#pragma clang diagnostic pop
+
 #endif
 
 
@@ -633,7 +634,7 @@ public:
     }
 
     //==============================================================================
-    bool isError() const                { return connection == nullptr; }
+    bool isError() const                { return (connection == nullptr || connection->headers == nullptr); }
     int64 getTotalLength() override     { return connection == nullptr ? -1 : connection->contentLength; }
     bool isExhausted() override         { return finished; }
     int64 getPosition() override        { return position; }

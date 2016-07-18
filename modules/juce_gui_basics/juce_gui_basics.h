@@ -33,7 +33,7 @@
 
   ID:               juce_gui_basics
   vendor:           juce
-  version:          4.2.2
+  version:          4.2.3
   name:             JUCE GUI core classes
   description:      Basic user-interface components and related classes.
   website:          http://www.juce.com/juce
@@ -42,7 +42,7 @@
   dependencies:     juce_events juce_graphics juce_data_structures
   OSXFrameworks:    Cocoa Carbon QuartzCore
   iOSFrameworks:    UIKit
-  linuxLibs:        X11 Xinerama Xext
+  linuxPackages:    x11 xinerama xext
 
  END_JUCE_MODULE_DECLARATION
 

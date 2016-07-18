@@ -33,7 +33,7 @@
 
   ID:               juce_audio_processors
   vendor:           juce
-  version:          4.2.2
+  version:          4.2.3
   name:             JUCE audio processor classes
   description:      Classes for loading and playing VST, AU, or internally-generated audio processors.
   website:          http://www.juce.com/juce
@@ -89,7 +89,7 @@
 // #error "You need to set either the JUCE_PLUGINHOST_AU and/or JUCE_PLUGINHOST_VST and/or JUCE_PLUGINHOST_VST3 flags if you're using this module!"
 #endif
 
-#if ! (defined (JUCE_SUPPORT_CARBON) || JUCE_64BIT)
+#if ! (defined (JUCE_SUPPORT_CARBON) || JUCE_64BIT || JUCE_IOS)
  #define JUCE_SUPPORT_CARBON 1
 #endif
 

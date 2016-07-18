@@ -1726,6 +1726,9 @@ void LookAndFeel_V2::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
                                                  int w, int h, int titleSpaceX, int titleSpaceW,
                                                  const Image* icon, bool drawTitleTextOnLeft)
 {
+    if (w * h == 0)
+        return;
+
     const bool isActive = window.isActiveWindow();
 
     g.setGradientFill (ColourGradient (window.getBackgroundColour(),

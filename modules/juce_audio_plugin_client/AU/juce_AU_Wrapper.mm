@@ -1493,6 +1493,8 @@ private:
         for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
         {
             jassert (isPositiveAndBelow (midiEventPosition, (int) nFrames));
+            ignoreUnused (nFrames);
+
             dataSize += (size_t) midiEventSize;
             ++numPackets;
         }
@@ -1573,6 +1575,10 @@ private:
             for (int i = 0; i < n; ++i)
             {
                 const AudioUnitParameterID auParamID = generateAUParameterIDForIndex (i);
+
+                // Consider yourself very unlucky if you hit this assertion. The hash code of your
+                // parameter ids are not unique.
+                jassert (! paramMap.contains (static_cast<int32> (auParamID)));
 
                 auParamIDs.add (auParamID);
                 paramMap.set (static_cast<int32> (auParamID), i);

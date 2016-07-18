@@ -136,7 +136,7 @@ namespace URLHelpers
                 || url[i] == '+' || url[i] == '-' || url[i] == '.')
             ++i;
 
-        return url.substring (i) == "://" ? i + 1 : 0;
+        return url.substring (i).startsWith ("://") ? i + 1 : 0;
     }
 
     static int findStartOfNetLocation (const String& url)
@@ -220,6 +220,13 @@ int URL::getPort() const
     const int colonPos = url.indexOfChar (URLHelpers::findStartOfNetLocation (url), ':');
 
     return colonPos > 0 ? url.substring (colonPos + 1).getIntValue() : 0;
+}
+
+URL URL::withNewDomainAndPath (const String& newURL) const
+{
+    URL u (*this);
+    u.url = newURL;
+    return u;
 }
 
 URL URL::withNewSubPath (const String& newPath) const

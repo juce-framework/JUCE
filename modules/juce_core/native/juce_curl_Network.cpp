@@ -133,10 +133,17 @@ private:
                      const int maxRedirects, const String& headers,
                      bool isPost, const String& httpRequest, size_t postSize)
     {
+        curl_version_info_data* data = curl_version_info (CURLVERSION_NOW);
+        jassert (data != nullptr);
+
+        String userAgent = String ("curl/") + data->version;
+
         if (curl_easy_setopt (curl, CURLOPT_URL, address.toRawUTF8()) == CURLE_OK
              && curl_easy_setopt (curl, CURLOPT_WRITEDATA, this) == CURLE_OK
              && curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, StaticCurlWrite) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_MAXREDIRS, static_cast<long> (maxRedirects)) == CURLE_OK)
+             && curl_easy_setopt (curl, CURLOPT_MAXREDIRS, static_cast<long> (maxRedirects)) == CURLE_OK
+             && curl_easy_setopt (curl, CURLOPT_USERAGENT, userAgent.toRawUTF8()) == CURLE_OK
+             && curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, (maxRedirects > 0 ? 1 : 0)) == CURLE_OK)
         {
             if (isPost)
             {
@@ -434,9 +441,16 @@ private:
 
         size_t len = size * nmemb;
 
-        curlHeaders += String (ptr, len);
+        String header (ptr, len);
+
+        if (! header.contains (":") && header.startsWithIgnoreCase ("HTTP/"))
+            curlHeaders.clear();
+        else
+            curlHeaders += header;
+
         return len;
     }
+
 
     //==============================================================================
     // Static method wrappers

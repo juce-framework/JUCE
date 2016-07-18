@@ -113,13 +113,15 @@ bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previ
     }
     else
     {
-        WildcardFileFilter wildcard (selectsFiles ? filters : String::empty,
-                                     selectsDirectories ? "*" : String::empty,
-                                     String::empty);
+        ignoreUnused (selectMultiple);
+
+        WildcardFileFilter wildcard (selectsFiles ? filters : String(),
+                                     selectsDirectories ? "*" : String(),
+                                     String());
 
         FileBrowserComponent browserComponent (flags, startingFile, &wildcard, previewComp);
 
-        FileChooserDialogBox box (title, String::empty,
+        FileChooserDialogBox box (title, String(),
                                   browserComponent, warnAboutOverwrite,
                                   browserComponent.findColour (AlertWindow::backgroundColourId));
 

@@ -33,7 +33,7 @@
 
   ID:               juce_audio_devices
   vendor:           juce
-  version:          4.2.2
+  version:          4.2.3
   name:             JUCE audio and MIDI I/O device classes
   description:      Classes to play and record from audio and MIDI I/O devices
   website:          http://www.juce.com/juce
@@ -42,7 +42,7 @@
   dependencies:     juce_audio_basics, juce_audio_formats, juce_events
   OSXFrameworks:    CoreAudio CoreMIDI DiscRecording
   iOSFrameworks:    CoreAudio CoreMIDI AudioToolbox AVFoundation
-  linuxLibs:        asound
+  linuxPackages:    alsa
   mingwLibs:        winmm
 
  END_JUCE_MODULE_DECLARATION

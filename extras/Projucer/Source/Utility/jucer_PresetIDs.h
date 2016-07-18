@@ -177,6 +177,7 @@ namespace Ids
     DECLARE_ID (gradleWrapperVersion);
     DECLARE_ID (gradleToolchain);
     DECLARE_ID (gradleToolchainVersion);
+    DECLARE_ID (linuxExtraPkgConfig);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

@@ -1117,14 +1117,6 @@ public:
 
             ownerInfo->dragInfo.clear();
 
-            DroppedData textData (dataObject, CF_UNICODETEXT);
-
-            if (SUCCEEDED (textData.error))
-            {
-                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((const WCHAR*) textData.data),
-                                                   CharPointer_UTF16 ((const WCHAR*) addBytesToPointer (textData.data, textData.dataSize)));
-            }
-            else
             {
                 DroppedData fileData (dataObject, CF_HDROP);
 
@@ -1137,14 +1129,21 @@ public:
                         ownerInfo->parseFileList (static_cast<const WCHAR*> (names), fileData.dataSize);
                     else
                         ownerInfo->parseFileList (static_cast<const char*>  (names), fileData.dataSize);
-                }
-                else
-                {
-                    return fileData.error;
+
+                    return S_OK;
                 }
             }
 
-            return S_OK;
+            DroppedData textData (dataObject, CF_UNICODETEXT);
+
+            if (SUCCEEDED (textData.error))
+            {
+                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((const WCHAR*) textData.data),
+                                                   CharPointer_UTF16 ((const WCHAR*) addBytesToPointer (textData.data, textData.dataSize)));
+                return S_OK;
+            }
+
+            return textData.error;
         }
 
         JUCE_DECLARE_NON_COPYABLE (JuceDropTarget)
