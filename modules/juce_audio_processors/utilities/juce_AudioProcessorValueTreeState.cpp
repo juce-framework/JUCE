@@ -69,7 +69,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     int getNumSteps () const override
     {
         if (range.interval > 0)
-            return (((range.end - range.start) / range.interval) + 1);
+            return (static_cast<int> ((range.end - range.start) / range.interval) + 1);
         else
             return AudioProcessor::getDefaultNumParameterSteps ();
     }
