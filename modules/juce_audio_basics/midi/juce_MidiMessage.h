@@ -104,7 +104,7 @@ public:
     MidiMessage (const MidiMessage&, double newTimeStamp);
 
     /** Destructor. */
-    ~MidiMessage();
+    ~MidiMessage() noexcept;
 
     /** Copies this message from another one. */
     MidiMessage& operator= (const MidiMessage& other);
@@ -118,7 +118,7 @@ public:
     /** Returns a pointer to the raw midi data.
         @see getRawDataSize
     */
-    const uint8* getRawData() const noexcept            { return allocatedData != nullptr ? allocatedData.getData() : preallocatedData.asBytes; }
+    const uint8* getRawData() const noexcept            { return getData(); }
 
     /** Returns the number of bytes of data in the message.
         @see getRawData
@@ -851,7 +851,7 @@ public:
 
         The value passed in must be 0x80 or higher.
     */
-    static int getMessageLengthFromFirstByte (const uint8 firstByte) noexcept;
+    static int getMessageLengthFromFirstByte (uint8 firstByte) noexcept;
 
     //==============================================================================
     /** Returns the name of a midi note number.
@@ -878,7 +878,7 @@ public:
         The frequencyOfA parameter is an optional frequency for 'A', normally 440-444Hz for concert pitch.
         @see getMidiNoteName
     */
-    static double getMidiNoteInHertz (int noteNumber, const double frequencyOfA = 440.0) noexcept;
+    static double getMidiNoteInHertz (int noteNumber, double frequencyOfA = 440.0) noexcept;
 
     /** Returns true if the given midi note number is a black key. */
     static bool isMidiNoteBlack (int noteNumber) noexcept;
@@ -905,21 +905,29 @@ public:
     */
     static const char* getControllerName (int controllerNumber);
 
+    /** Converts a floating-point value between 0 and 1 to a MIDI 7-bit value between 0 and 127. */
+    static uint8 floatValueToMidiByte (float valueBetween0and1) noexcept;
+
+    /** Converts a pitchbend value in semitones to a MIDI 14-bit pitchwheel position value. */
+    static uint16 pitchbendToPitchwheelPos (float pitchbendInSemitones,
+                                            float pitchbendRangeInSemitones) noexcept;
+
 private:
     //==============================================================================
-    double timeStamp;
-    HeapBlock<uint8> allocatedData;
-    int size;
-
    #ifndef DOXYGEN
-    union
+    union PackedData
     {
-        uint8 asBytes[4];
-        uint32 asInt32;
-    } preallocatedData;
+        uint8* allocatedData;
+        uint8 asBytes[sizeof (uint8*)];
+    };
+
+    PackedData packedData;
+    double timeStamp;
+    int size;
    #endif
 
-    inline uint8* getData() noexcept   { return allocatedData != nullptr ? allocatedData.getData() : preallocatedData.asBytes; }
+    inline bool isHeapAllocated() const noexcept  { return size > (int) sizeof (packedData); }
+    inline uint8* getData() const noexcept        { return isHeapAllocated() ? packedData.allocatedData : (uint8*) packedData.asBytes; }
     uint8* allocateSpace (int);
 };
 

@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="wHE0ay" name="MidiTest" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.MidiTest" includeBinaryInAppConfig="1"
-              jucerVersion="4.2.1">
+              jucerVersion="4.2.3">
   <MAINGROUP id="s3xxCh" name="MidiTest">
     <GROUP id="{7D29F5BC-1B05-AE8F-9202-5CF152AB1103}" name="Source">
       <FILE id="kpmJ3T" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -102,7 +102,7 @@
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.miditest.MidiTest" androidInternetNeeded="0"
                    androidBluetoothNeeded="1" androidCpp11="1" androidScreenOrientation="unspecified"
                    targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
-                   androidMicNeeded="1" gradleToolchain="gcc" gradleToolchainVersion="3.6">
+                   androidMicNeeded="1" gradleToolchain="clang" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="MidiTest"/>

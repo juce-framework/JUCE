@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="gWI5Ir" name="JUCE Network Graphics Demo" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              includeBinaryInAppConfig="1" jucerVersion="4.2.1">
+              includeBinaryInAppConfig="1" jucerVersion="4.2.3">
   <MAINGROUP id="OT9rJ2" name="JUCE Network Graphics Demo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>
@@ -115,7 +115,7 @@
     <ANDROIDSTUDIO androidActivityClass="com.juce.networkgraphicsdemo.JUCENetworkGraphicsDemo"
                    androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
                    targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
-                   bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="gcc"
+                   bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="clang"
                    gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"

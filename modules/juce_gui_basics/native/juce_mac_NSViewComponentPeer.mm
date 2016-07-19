@@ -999,8 +999,10 @@ public:
     {
         if (constrainer != nullptr && ! isKioskMode())
         {
-            Rectangle<int> pos      (convertToRectInt (flippedScreenRect (r)));
-            Rectangle<int> original (convertToRectInt (flippedScreenRect ([window frame])));
+            const float scale = getComponent().getDesktopScaleFactor();
+
+            Rectangle<int> pos      = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
+            Rectangle<int> original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
 
             const Rectangle<int> screenBounds (Desktop::getInstance().getDisplays().getTotalBounds (true));
 
@@ -1022,6 +1024,8 @@ public:
                                           pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
                                           pos.getX() == original.getX() && pos.getRight()  != original.getRight());
             }
+
+            pos = ScalingHelpers::scaledScreenPosToUnscaled (scale, pos);
 
             r = flippedScreenRect (makeNSRect (pos));
         }
@@ -2094,7 +2098,7 @@ const int KeyPress::F7Key           = NSF7FunctionKey;
 const int KeyPress::F8Key           = NSF8FunctionKey;
 const int KeyPress::F9Key           = NSF9FunctionKey;
 const int KeyPress::F10Key          = NSF10FunctionKey;
-const int KeyPress::F11Key          = NSF1FunctionKey;
+const int KeyPress::F11Key          = NSF11FunctionKey;
 const int KeyPress::F12Key          = NSF12FunctionKey;
 const int KeyPress::F13Key          = NSF13FunctionKey;
 const int KeyPress::F14Key          = NSF14FunctionKey;

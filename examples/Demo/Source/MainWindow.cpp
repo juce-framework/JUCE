@@ -22,6 +22,7 @@
   ==============================================================================
 */
 
+#include <typeinfo>
 #include "JuceDemoHeader.h"
 
 //==============================================================================
@@ -558,17 +559,16 @@ AudioDeviceManager& MainAppWindow::getSharedAudioDeviceManager()
     if (sharedAudioDeviceManager == nullptr)
     {
         sharedAudioDeviceManager = new AudioDeviceManager();
-
-        RuntimePermissions::request (
-            RuntimePermissions::recordAudio,
-            [] (bool wasGranted) {
-                int numInputChannels = wasGranted ? 2 : 0;
-                sharedAudioDeviceManager->initialise (numInputChannels, 2, nullptr, true, String(), nullptr);
-            }
-        );
+        RuntimePermissions::request (RuntimePermissions::recordAudio, runtimPermissionsCallback);
     }
 
     return *sharedAudioDeviceManager;
+}
+
+void MainAppWindow::runtimPermissionsCallback (bool wasGranted)
+{
+    int numInputChannels = wasGranted ? 2 : 0;
+    sharedAudioDeviceManager->initialise (numInputChannels, 2, nullptr, true, String(), nullptr);
 }
 
 MainAppWindow* MainAppWindow::getMainAppWindow()

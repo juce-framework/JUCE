@@ -35,6 +35,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
         for (const ifaddrs* cursor = addrs; cursor != nullptr; cursor = cursor->ifa_next)
         {
             sockaddr_storage* sto = (sockaddr_storage*) cursor->ifa_addr;
+
             if (sto->ss_family == AF_LINK)
             {
                 const sockaddr_dl* const sadd = (const sockaddr_dl*) cursor->ifa_addr;
@@ -45,7 +46,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 
                 if (sadd->sdl_type == IFT_ETHER)
                 {
-                    MACAddress ma (MACAddress (((const uint8*) sadd->sdl_data) + sadd->sdl_nlen));
+                    MACAddress ma (((const uint8*) sadd->sdl_data) + sadd->sdl_nlen);
 
                     if (! ma.isNull())
                         result.addIfNotAlreadyThere (ma);
@@ -109,6 +110,253 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
 }
 
 //==============================================================================
+// Unfortunately, we need to have this ugly ifdef here as long as some older OS X versions do not support NSURLSession
+#if JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
+
+//==============================================================================
+class URLConnectionState   : private Thread
+{
+public:
+    URLConnectionState (NSURLRequest* req, const int maxRedirects)
+        : Thread ("http connection"),
+          request ([req retain]),
+          data ([[NSMutableData data] retain]),
+          numRedirectsToFollow (maxRedirects)
+    {
+        static DelegateClass cls;
+        delegate = [cls.createInstance() init];
+        DelegateClass::setState (delegate, this);
+    }
+
+    ~URLConnectionState()
+    {
+        stop();
+        [data release];
+        [request release];
+        [headers release];
+        [session release];
+        [delegate release];
+    }
+
+    bool start (URL::OpenStreamProgressCallback* callback, void* context)
+    {
+        startThread();
+
+        while (isThreadRunning() && ! initialised)
+        {
+            if (callback != nullptr)
+                callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]);
+
+            Thread::sleep (1);
+        }
+
+        return true;
+    }
+
+    void stop()
+    {
+        {
+            const ScopedLock sl (dataLock);
+            [task cancel];
+        }
+
+        stopThread (10000);
+        [task release];
+        task = nil;
+    }
+
+    int read (char* dest, int numBytes)
+    {
+        int numDone = 0;
+
+        while (numBytes > 0)
+        {
+            const int available = jmin (numBytes, (int) [data length]);
+
+            if (available > 0)
+            {
+                const ScopedLock sl (dataLock);
+                [data getBytes: dest length: (NSUInteger) available];
+                [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
+
+                numDone += available;
+                numBytes -= available;
+                dest += available;
+            }
+            else
+            {
+                if (hasFailed || hasFinished)
+                    break;
+
+                Thread::sleep (1);
+            }
+        }
+
+        return numDone;
+    }
+
+    void didReceiveResponse (NSURLResponse* response, id completionHandler)
+    {
+        {
+            const ScopedLock sl (dataLock);
+            [data setLength: 0];
+        }
+
+        contentLength = [response expectedContentLength];
+
+        [headers release];
+        headers = nil;
+
+        if ([response isKindOfClass: [NSHTTPURLResponse class]])
+        {
+            auto httpResponse = (NSHTTPURLResponse*) response;
+            headers = [[httpResponse allHeaderFields] retain];
+            statusCode = (int) [httpResponse statusCode];
+        }
+
+        initialised = true;
+
+        if (completionHandler != nil)
+        {
+            // Need to wrangle this parameter back into an obj-C block,
+            // and call it to allow the transfer to continue..
+            void (^callbackBlock)(NSURLSessionResponseDisposition) = completionHandler;
+            callbackBlock (NSURLSessionResponseAllow);
+        }
+    }
+
+    void didBecomeInvalidWithError (NSError* error)
+    {
+        DBG (nsStringToJuce ([error description])); ignoreUnused (error);
+        hasFailed = true;
+        initialised = true;
+        signalThreadShouldExit();
+    }
+
+    void didReceiveData (NSData* newData)
+    {
+        const ScopedLock sl (dataLock);
+        [data appendData: newData];
+        initialised = true;
+    }
+
+    void didSendBodyData (int64_t totalBytesWritten)
+    {
+        latestTotalBytes = static_cast<int> (totalBytesWritten);
+    }
+
+    void willPerformHTTPRedirection (NSURLRequest* aRequest, void (^completionHandler)(NSURLRequest *))
+    {
+        NSURLRequest* newRequest = (numRedirects++ < numRedirectsToFollow ? aRequest : nullptr);
+        completionHandler (newRequest);
+    }
+
+    void run() override
+    {
+        jassert (task == nil && session == nil);
+
+        session = [[NSURLSession sessionWithConfiguration: [NSURLSessionConfiguration defaultSessionConfiguration]
+                                                 delegate: delegate
+                                            delegateQueue: [NSOperationQueue currentQueue]] retain];
+
+        task = [session dataTaskWithRequest: request];
+
+        if (task == nil)
+            return;
+
+        [task retain];
+        [task resume];
+
+        while (! threadShouldExit())
+        {
+            wait (5);
+
+            if (task.state != NSURLSessionTaskStateRunning)
+                break;
+        }
+
+        hasFinished = true;
+        initialised = true;
+    }
+
+    int64 contentLength = -1;
+    CriticalSection dataLock;
+    id delegate = nil;
+    NSURLRequest* request = nil;
+    NSURLSession* session = nil;
+    NSURLSessionTask* task = nil;
+    NSMutableData* data = nil;
+    NSDictionary* headers = nil;
+    int statusCode = 0;
+    bool initialised = false, hasFailed = false, hasFinished = false;
+    const int numRedirectsToFollow;
+    int numRedirects = 0;
+    int64 latestTotalBytes = 0;
+
+private:
+    //==============================================================================
+    struct DelegateClass  : public ObjCClass<NSObject>
+    {
+        DelegateClass()  : ObjCClass<NSObject> ("JUCE_URLDelegate_")
+        {
+            addIvar<URLConnectionState*> ("state");
+
+            addMethod (@selector (URLSession:dataTask:didReceiveResponse:completionHandler:),
+                                                                            didReceiveResponse,        "v@:@@@@");
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),   didBecomeInvalidWithError, "v@:@@");
+            addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData,            "v@:@@@");
+            addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
+                                                                            didSendBodyData,           "v@:@@qqq");
+            addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
+                                                                            willPerformHTTPRedirection, "v@:@@@@@");
+            registerClass();
+        }
+
+        static void setState (id self, URLConnectionState* state)  { object_setInstanceVariable (self, "state", state); }
+        static URLConnectionState* getState (id self)              { return getIvar<URLConnectionState*> (self, "state"); }
+
+    private:
+        static void didReceiveResponse (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSURLResponse* response, id completionHandler)
+        {
+            getState (self)->didReceiveResponse (response, completionHandler);
+        }
+
+        static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSError* error)
+        {
+            getState (self)->didBecomeInvalidWithError (error);
+        }
+
+        static void didReceiveData (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSData* newData)
+        {
+            getState (self)->didReceiveData (newData);
+        }
+
+        static void didSendBodyData (id self, SEL, NSURLSession*, NSURLSessionTask*, int64_t, int64_t totalBytesWritten, int64_t)
+        {
+            getState (self)->didSendBodyData (totalBytesWritten);
+        }
+
+        static void willPerformHTTPRedirection (id self, SEL, NSURLSession*, NSURLSessionTask*, NSHTTPURLResponse*,
+                                                NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
+        {
+            getState (self)->willPerformHTTPRedirection (request, completionHandler);
+        }
+    };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
+};
+
+//==============================================================================
+#else
+
+// This version is only used for backwards-compatibility with older OSX targets,
+// so we'll turn off deprecation warnings. This code will be removed at some point
+// in the future.
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated"
+
+//==============================================================================
 class URLConnectionState   : public Thread
 {
 public:
@@ -160,7 +408,11 @@ public:
 
     void stop()
     {
-        [connection cancel];
+        {
+            const ScopedLock sl (dataLock);
+            [connection cancel];
+        }
+
         stopThread (10000);
     }
 
@@ -339,6 +591,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
 
+#pragma clang diagnostic pop
+
+#endif
+
 
 //==============================================================================
 class WebInputStream  : public InputStream
@@ -372,8 +628,13 @@ public:
         }
     }
 
+    ~WebInputStream()
+    {
+        connection = nullptr;
+    }
+
     //==============================================================================
-    bool isError() const                { return connection == nullptr; }
+    bool isError() const                { return (connection == nullptr || connection->headers == nullptr); }
     int64 getTotalLength() override     { return connection == nullptr ? -1 : connection->contentLength; }
     bool isExhausted() override         { return finished; }
     int64 getPosition() override        { return position; }
@@ -433,14 +694,11 @@ private:
     {
         jassert (connection == nullptr);
 
-        NSMutableURLRequest* req = [NSMutableURLRequest  requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
-                                                            cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                        timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
-
-        if (req != nil)
+        if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
+                                                               cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                                           timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)])
         {
             [req setHTTPMethod: [NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()]];
-            //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
 
             StringArray headerLines;
             headerLines.addLines (headers);
@@ -448,8 +706,8 @@ private:
 
             for (int i = 0; i < headerLines.size(); ++i)
             {
-                const String key (headerLines[i].upToFirstOccurrenceOf (":", false, false).trim());
-                const String value (headerLines[i].fromFirstOccurrenceOf (":", false, false).trim());
+                String key   = headerLines[i].upToFirstOccurrenceOf (":", false, false).trim();
+                String value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
                 if (key.isNotEmpty() && value.isNotEmpty())
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];

@@ -104,7 +104,7 @@ public:
 
         @see contentAreaChanged
     */
-    const Rectangle<int>& getContentArea() const noexcept           { return contentArea; }
+    Rectangle<int> getContentArea() const noexcept                  { return contentArea; }
 
     //==============================================================================
     /** This method must return the size criteria for this item, based on a given toolbar

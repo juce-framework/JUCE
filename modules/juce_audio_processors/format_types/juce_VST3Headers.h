@@ -81,6 +81,7 @@
  #include <pluginterfaces/vst/ivstunits.h>
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
  #include <public.sdk/source/common/memorystream.h>
+ #include <public.sdk/source/vst/vsteditcontroller.h>
 #else
  #include <base/source/baseiids.cpp>
  #include <base/source/fatomic.cpp>
@@ -126,6 +127,10 @@ namespace Steinberg
  #pragma warning (pop)
 #elif __clang__
  #pragma clang diagnostic pop
+#endif
+
+#if JUCE_WINDOWS
+ #include <windows.h>
 #endif
 
 //==============================================================================

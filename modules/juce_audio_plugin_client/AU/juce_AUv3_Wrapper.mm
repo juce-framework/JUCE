@@ -31,8 +31,16 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
-#if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8)
- #error AUv3 needs Deployment Target OS X 10.8 or higher to compile
+#if JUCE_MAC
+ #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (! defined MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11)
+  #error AUv3 needs Deployment Target OS X 10.8 or higher to compile
+ #endif
+#endif
+
+#if JUCE_IOS
+ #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_9_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
+  #error AUv3 needs Deployment Target iOS 9.0 or higher to compile
+ #endif
 #endif
 
 #ifndef __OBJC2__
@@ -63,8 +71,6 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
 
 // TODO: ask Timur: use SFINAE to automatically generate this for all NSObjects
 template <> struct ContainerDeletePolicy<AUAudioUnitBusArray>                   { static void destroy (NSObject* o) { [o release]; } };
@@ -594,12 +600,15 @@ public:
 
     void audioProcessorParameterChanged (AudioProcessor*, int idx, float newValue) override
     {
-        if (AUParameter* param = [paramTree parameterWithAddress: static_cast<AUParameterAddress> (idx)])
+        if (isPositiveAndBelow (idx, getAudioProcessor().getNumParameters()))
         {
-            if (editorObserverToken != nullptr)
-                [param setValue: newValue  originator: editorObserverToken];
-            else
-                [param setValue: newValue];
+            if (AUParameter* param = [paramTree parameterWithAddress: getAUParameterAddressForIndex (idx)])
+            {
+                if (editorObserverToken != nullptr)
+                    [param setValue: newValue  originator: editorObserverToken];
+                else
+                    [param setValue: newValue];
+            }
         }
     }
 
@@ -806,6 +815,11 @@ private:
         auto& processor = getAudioProcessor();
         const int n = processor.getNumParameters();
 
+       #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+        // check if all parameters are managed?
+        usingManagedParameter = (processor.getParameters().size() == processor.getNumParameters());
+       #endif
+
         for (int idx = 0; idx < n; ++idx)
         {
             const String identifier (idx);
@@ -827,7 +841,13 @@ private:
             if (processor.isMetaParameter (idx))
                 flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
+           #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
             AUParameterAddress address = static_cast<AUParameterAddress> (idx);
+           #else
+            AUParameterAddress address = generateAUParameterAddressForIndex (idx);
+            paramAddresses.add (address);
+            paramMap.set (static_cast<int64> (address), idx);
+          #endif
 
             // create methods in AUParameterTree return unretained objects (!) -> see Apple header AUAudioUnitImplementation.h
 
@@ -908,7 +928,7 @@ private:
                 case AURenderEventParameterRamp:
                 {
                     const AUParameterEvent& paramEvent = event->parameter;
-                    const int idx = static_cast<int> (paramEvent.parameterAddress);
+                    const int idx = getJuceParameterIndexForAUAddress (paramEvent.parameterAddress);
 
                     if (isPositiveAndBelow (idx, numParams))
                         getAudioProcessor().setParameter (idx, paramEvent.value);
@@ -1051,7 +1071,7 @@ private:
     {
         if (param != nullptr)
         {
-            const int idx = static_cast<int> ([param address]);
+            const int idx = getJuceParameterIndexForAUAddress ([param address]);
             auto& processor = getAudioProcessor();
 
             if (isPositiveAndBelow (idx, processor.getNumParameters()))
@@ -1063,7 +1083,7 @@ private:
     {
         if (param != nullptr)
         {
-            const int idx = static_cast<int> ([param address]);
+            const int idx = getJuceParameterIndexForAUAddress ([param address]);
             auto& processor = getAudioProcessor();
 
             if (isPositiveAndBelow (idx, processor.getNumParameters()))
@@ -1079,6 +1099,39 @@ private:
     }
 
     //==============================================================================
+   #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    inline AUParameterAddress getAUParameterAddressForIndex (int paramIndex) const noexcept     { return static_cast<AUParameterAddress> (paramIndex); }
+    inline int getJuceParameterIndexForAUAddress (AUParameterAddress address) const noexcept    { return static_cast<int> (address); }
+   #else
+    AUParameterAddress generateAUParameterAddressForIndex (int paramIndex) const
+    {
+        auto& processor = getAudioProcessor();
+        const int n = processor.getNumParameters();
+
+        if (isPositiveAndBelow (paramIndex, n))
+        {
+            const String& juceParamID = processor.getParameterID (paramIndex);
+            return usingManagedParameter ? static_cast<AUParameterAddress> (juceParamID.hashCode64())
+                                         : static_cast<AUParameterAddress> (juceParamID.getIntValue());
+        }
+
+        return static_cast<AUParameterAddress> (-1);
+    }
+
+    inline AUParameterAddress getAUParameterAddressForIndex (int paramIndex) const noexcept
+    {
+        return usingManagedParameter ? paramAddresses.getReference (paramIndex)
+                                     : static_cast<AUParameterAddress> (paramIndex);
+    }
+
+    inline int getJuceParameterIndexForAUAddress (AUParameterAddress address) const noexcept
+    {
+        return usingManagedParameter ? paramMap[static_cast<int64> (address)]
+                                     : static_cast<int> (address);
+    }
+   #endif
+
+    //==============================================================================
     static const double kDefaultSampleRate;
 
     AudioProcessorHolder::Ptr processorHolder;
@@ -1091,6 +1144,12 @@ private:
 
     ObjCBlock<AUImplementorValueObserver> paramObserver;
     ObjCBlock<AUImplementorValueProvider> paramProvider;
+
+   #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
+    bool usingManagedParameter;
+    Array<AUParameterAddress> paramAddresses;
+    HashMap<int64, int> paramMap;
+   #endif
 
     // to avoid recursion on parameter changes, we need to add an
     // editor observer to do the parameter changes
@@ -1122,7 +1181,7 @@ const double JuceAudioUnitv3::kDefaultSampleRate = 44100.0;
 
 JuceAudioUnitv3Base* JuceAudioUnitv3Base::create (AUAudioUnit* audioUnit, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
 {
-    JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
+    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
     return new JuceAudioUnitv3 (audioUnit, descr, options, error);
 }
 
@@ -1136,7 +1195,7 @@ public:
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_AudioUnitv3);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         initialiseJuce_GUI();
     }
 

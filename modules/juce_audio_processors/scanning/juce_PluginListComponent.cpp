@@ -348,8 +348,10 @@ public:
 
         if (path.getNumPaths() > 0) // if the path is empty, then paths aren't used for this format.
         {
+           #if ! JUCE_IOS
             if (propertiesToUse != nullptr)
                 path = getLastSearchPath (*propertiesToUse, formatToScan);
+           #endif
 
             pathList.setSize (500, 300);
             pathList.setPath (path);

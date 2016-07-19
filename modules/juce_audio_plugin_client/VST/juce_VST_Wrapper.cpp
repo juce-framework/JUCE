@@ -111,8 +111,6 @@
 class JuceVSTWrapper;
 static bool recursionCheck = false;
 
-JUCE_DEFINE_WRAPPER_TYPE (wrapperType_VST);
-
 namespace juce
 {
  #if JUCE_MAC
@@ -272,11 +270,13 @@ public:
          firstProcessCallback (true),
          shouldDeleteEditor (false),
         #if JUCE_64BIT
-         useNSView (true),
+         useNSView (true)
         #else
-         useNSView (false),
+         useNSView (false)
         #endif
-         hostWindow (0)
+        #if ! JUCE_IOS
+         , hostWindow (0)
+        #endif
     {
         busUtils.init();
 
@@ -343,7 +343,9 @@ public:
                 delete filter;
                 filter = nullptr;
 
+               #if ! JUCE_IOS
                 jassert (editorComp == 0);
+               #endif
 
                 deleteTempChannels();
 
@@ -386,13 +388,13 @@ public:
     //==============================================================================
     bool getEffectName (char* name) override
     {
-        String (JucePlugin_Name).copyToUTF8 (name, 64);
+        String (JucePlugin_Name).copyToUTF8 (name, 64 + 1);
         return true;
     }
 
     bool getVendorString (char* text) override
     {
-        String (JucePlugin_Manufacturer).copyToUTF8 (text, 64);
+        String (JucePlugin_Manufacturer).copyToUTF8 (text, 64 + 1);
         return true;
     }
 
@@ -822,14 +824,14 @@ public:
     void getProgramName (char* name) override
     {
         if (filter != nullptr)
-            filter->getProgramName (filter->getCurrentProgram()).copyToUTF8 (name, 24);
+            filter->getProgramName (filter->getCurrentProgram()).copyToUTF8 (name, 24 + 1);
     }
 
     bool getProgramNameIndexed (VstInt32 /*category*/, VstInt32 index, char* text) override
     {
         if (filter != nullptr && isPositiveAndBelow (index, filter->getNumPrograms()))
         {
-            filter->getProgramName (index).copyToUTF8 (text, 24);
+            filter->getProgramName (index).copyToUTF8 (text, 24 + 1);
             return true;
         }
 
@@ -860,7 +862,7 @@ public:
         if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterText (index, 24).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterText (index, 24).copyToUTF8 (text, 24 + 1); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
@@ -885,7 +887,7 @@ public:
         if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterName (index, 16).copyToUTF8 (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterName (index, 16).copyToUTF8 (text, 16 + 1); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
@@ -894,7 +896,7 @@ public:
         if (filter != nullptr)
         {
             jassert (isPositiveAndBelow (index, filter->getNumParameters()));
-            filter->getParameterLabel (index).copyToUTF8 (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+            filter->getParameterLabel (index).copyToUTF8 (text, 24 + 1); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
 
@@ -1064,8 +1066,8 @@ public:
 
         String channelName = busInfo.name + String (" ") + abbvChannelName;
 
-        channelName.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen - 1));
-        channelName.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen - 1));
+        channelName.copyToUTF8 (properties.label, (size_t) (kVstMaxLabelLen + 1));
+        channelName.copyToUTF8 (properties.shortLabel, (size_t) (kVstMaxShortLabelLen + 1));
 
         properties.flags = kVstPinUseSpeaker | kVstPinIsActive;
         properties.arrangementType = SpeakerMappings::channelSetToVstArrangementType (busInfo.channels);
@@ -1331,6 +1333,7 @@ public:
 
     void createEditorComp()
     {
+       #if ! JUCE_IOS
         if (hasShutdown || filter == nullptr)
             return;
 
@@ -1349,12 +1352,16 @@ public:
                 cEffect.flags &= ~effFlagsHasEditor;
             }
         }
+       #endif
 
         shouldDeleteEditor = false;
     }
 
     void deleteEditor (bool canDeleteLaterIfModal)
     {
+       #if JUCE_IOS
+        ignoreUnused (canDeleteLaterIfModal);
+       #else
         JUCE_AUTORELEASEPOOL
         {
             PopupMenu::dismissAllActiveMenus();
@@ -1396,6 +1403,7 @@ public:
             hostWindow = 0;
            #endif
         }
+       #endif
     }
 
     VstIntPtr dispatcher (VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt) override
@@ -1403,6 +1411,7 @@ public:
         if (hasShutdown)
             return 0;
 
+       #if ! JUCE_IOS
         if (opCode == effEditIdle)
         {
             doIdleCallback();
@@ -1432,7 +1441,7 @@ public:
                 hostWindow = (Window) ptr;
                 Window editorWnd = (Window) editorComp->getWindowHandle();
                 XReparentWindow (display, editorWnd, hostWindow, 0, 0);
-              #else
+              #elif JUCE_MAC
                 hostWindow = attachComponentToWindowRefVST (editorComp, ptr, useNSView);
               #endif
                 editorComp->setVisible (true);
@@ -1467,10 +1476,11 @@ public:
 
             return 0;
         }
-
+       #endif
         return AudioEffectX::dispatcher (opCode, index, value, ptr, opt);
     }
 
+   #if ! JUCE_IOS
     void resizeHostWindow (int newWidth, int newHeight)
     {
         if (editorComp != nullptr)
@@ -1659,6 +1669,7 @@ public:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
     };
+   #endif
 
     //==============================================================================
 private:
@@ -1666,8 +1677,10 @@ private:
     PluginBusUtilities busUtils;
     juce::MemoryBlock chunkMemory;
     juce::uint32 chunkMemoryTime;
+   #if ! JUCE_IOS
     ScopedPointer<EditorCompWrapper> editorComp;
     ERect editorSize;
+   #endif
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
     bool isProcessing, isBypassed, hasShutdown, isInSizeWindow, firstProcessCallback;
@@ -1680,7 +1693,7 @@ private:
     void* hostWindow;
    #elif JUCE_LINUX
     Window hostWindow;
-   #else
+   #elif JUCE_WINDOWS
     HWND hostWindow;
    #endif
 
@@ -1974,23 +1987,29 @@ namespace
 
 //==============================================================================
 // Mac startup code..
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IOS
 
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
+       #if JUCE_MAC
         initialiseMacVST();
+       #endif
+
         return pluginEntryPoint (audioMaster);
     }
 
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
+       #if JUCE_MAC
         initialiseMacVST();
+       #endif
+
         return pluginEntryPoint (audioMaster);
     }
 
@@ -2001,7 +2020,7 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         SharedMessageThread::getInstance();
         return pluginEntryPoint (audioMaster);
@@ -2010,7 +2029,7 @@ namespace
     JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
     JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         return VSTPluginMain (audioMaster);
     }
@@ -2025,7 +2044,7 @@ namespace
 
     extern "C" __declspec (dllexport) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         return pluginEntryPoint (audioMaster);
     }
@@ -2033,7 +2052,7 @@ namespace
    #ifndef JUCE_64BIT // (can't compile this on win64, but it's not needed anyway with VST2.4)
     extern "C" __declspec (dllexport) int main (audioMasterCallback audioMaster)
     {
-        JUCE_DECLARE_WRAPPER_TYPE (wrapperType_VST);
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
         return (int) pluginEntryPoint (audioMaster);
     }

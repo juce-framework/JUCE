@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST || DOXYGEN
+#if (JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS)) || DOXYGEN
 
 //==============================================================================
 /**
@@ -52,6 +52,13 @@ public:
 
     /** Attempts to set a VST's state from a chunk of memory. */
     static bool setChunkData (AudioPluginInstance* plugin, const void* data, int size, bool isPreset);
+
+    /** Given a suitable function pointer to a VSTPluginMain function, this will attempt to
+        instantiate and return a plugin for it.
+    */
+    static AudioPluginInstance* createCustomVSTFromMainCall (void* entryPointFunction,
+                                                             double initialSampleRate,
+                                                             int initialBufferSize);
 
     //==============================================================================
     /** Base class for some extra functions that can be attached to a VST plugin instance. */

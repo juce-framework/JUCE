@@ -47,19 +47,19 @@ public:
     virtual void showPopupMenu();
 
     //==============================================================================
-    void paint (Graphics& g);
-    void resized();
+    void paint (Graphics&) override;
+    void resized() override;
 
-    void mouseDown (const MouseEvent& e);
-    void mouseDrag (const MouseEvent& e);
-    void mouseUp (const MouseEvent& e);
+    void mouseDown (const MouseEvent&) override;
+    void mouseDrag (const MouseEvent&) override;
+    void mouseUp (const MouseEvent&) override;
 
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+    void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
 
-    void changeListenerCallback (ChangeBroadcaster*);
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
-    void resizeStart();
-    void resizeEnd();
+    void resizeStart() override;
+    void resizeEnd() override;
 
     void updateBoundsToMatchTarget();
 
@@ -69,9 +69,9 @@ public:
                       bool isStretchingTop,
                       bool isStretchingLeft,
                       bool isStretchingBottom,
-                      bool isStretchingRight);
+                      bool isStretchingRight) override;
 
-    void applyBoundsToComponent (Component* component, const Rectangle<int>& bounds);
+    void applyBoundsToComponent (Component*, const Rectangle<int>&) override;
 
     //==============================================================================
     Component::SafePointer<Component> target;

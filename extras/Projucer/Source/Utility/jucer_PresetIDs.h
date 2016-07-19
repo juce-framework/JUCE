@@ -117,6 +117,7 @@ namespace Ids
     DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (wholeProgramOptimisation);
+    DECLARE_ID (enableIncrementalLinking);
     DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);

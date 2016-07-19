@@ -346,8 +346,8 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
             currentDeviceType = availableDeviceTypes.getUnchecked(0)->getTypeName();
     }
 
-    setup.bufferSize = xml.getIntAttribute ("audioDeviceBufferSize");
-    setup.sampleRate = xml.getDoubleAttribute ("audioDeviceRate");
+    setup.bufferSize = xml.getIntAttribute ("audioDeviceBufferSize", setup.bufferSize);
+    setup.sampleRate = xml.getDoubleAttribute ("audioDeviceRate", setup.sampleRate);
 
     setup.inputChannels .parseString (xml.getStringAttribute ("audioDeviceInChans",  "11"), 2);
     setup.outputChannels.parseString (xml.getStringAttribute ("audioDeviceOutChans", "11"), 2);

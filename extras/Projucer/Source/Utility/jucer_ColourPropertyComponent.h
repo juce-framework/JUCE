@@ -88,7 +88,7 @@ private:
             if (getColour() != newColour)
             {
                 if (newColour == defaultColour && canResetToDefault)
-                    colourValue = var::null;
+                    colourValue = var();
                 else
                     colourValue = newColour.toDisplayString (true);
             }

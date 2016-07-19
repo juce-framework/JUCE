@@ -33,13 +33,13 @@ InterprocessConnectionServer::~InterprocessConnectionServer()
 }
 
 //==============================================================================
-bool InterprocessConnectionServer::beginWaitingForSocket (const int portNumber)
+bool InterprocessConnectionServer::beginWaitingForSocket (const int portNumber, const String& bindAddress)
 {
     stop();
 
     socket = new StreamingSocket();
 
-    if (socket->createListener (portNumber))
+    if (socket->createListener (portNumber, bindAddress))
     {
         startThread();
         return true;

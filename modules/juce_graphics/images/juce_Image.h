@@ -435,10 +435,12 @@ public:
     ImagePixelData (Image::PixelFormat, int width, int height);
     ~ImagePixelData();
 
+    typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
+
     /** Creates a context that will draw into this image. */
     virtual LowLevelGraphicsContext* createLowLevelContext() = 0;
     /** Creates a copy of this image. */
-    virtual ImagePixelData* clone() = 0;
+    virtual Ptr clone() = 0;
     /** Creates an instance of the type of this image. */
     virtual ImageType* createType() const = 0;
     /** Initialises a BitmapData object. */
@@ -457,8 +459,6 @@ public:
         @see Image::getProperties().
     */
     NamedValueSet userData;
-
-    typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
 
     //==============================================================================
     struct Listener

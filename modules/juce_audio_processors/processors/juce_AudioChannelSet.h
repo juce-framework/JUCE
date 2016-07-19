@@ -166,10 +166,13 @@ public:
     /** Adds a channel to the set. */
     void addChannel (ChannelType newChannelType);
 
+    /** Removes a channel from the set. */
+    void removeChannel (ChannelType newChannelType);
+
     /** Returns the number of channels in the set. */
     int size() const noexcept;
 
-    /** Returns the number of channels in the set. */
+    /** Returns true if there are no channels in the set. */
     bool isDisabled() const noexcept                    { return size() == 0; }
 
     /** Returns an array of all the types in this channel set. */
@@ -194,6 +197,9 @@ public:
 
     /** Returns if this is a channel layout made-up of discrete channels. */
     bool isDiscreteLayout() const noexcept;
+
+    /** Intersect two channel layouts. */
+    void intersect (const AudioChannelSet& other)      { channels &= other.channels; }
 
     //==============================================================================
     bool operator== (const AudioChannelSet&) const noexcept;

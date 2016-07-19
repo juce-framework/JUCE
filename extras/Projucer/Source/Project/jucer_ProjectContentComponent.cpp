@@ -446,11 +446,7 @@ struct EnableBuildComp   : public Component
 //==============================================================================
 Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* child)
 {
-   #if JUCE_WINDOWS
-    ignoreUnused (child);
-    return new ProjucerDisabledComp ("Windows support is still under development - "
-                                     "please check for updates at www.juce.com!", false, false);
-   #elif JUCE_LINUX
+   #if JUCE_LINUX
     ignoreUnused (child);
     return new ProjucerDisabledComp ("Linux support is still under development - "
                                      "please check for updates at www.juce.com!", false, false);
@@ -1474,7 +1470,6 @@ void ProjectContentComponent::timerCallback()
 
 ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::getChildProcess()
 {
-   #if JUCE_MAC
     if (childProcess == nullptr && isBuildEnabled())
     {
         childProcess = ProjucerApplication::getApp().childProcessCache->getOrCreate (*project);
@@ -1482,7 +1477,6 @@ ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::ge
         if (childProcess != nullptr)
             childProcess->setContinuousRebuild (isContinuousRebuildEnabled());
     }
-   #endif
 
     return childProcess;
 }

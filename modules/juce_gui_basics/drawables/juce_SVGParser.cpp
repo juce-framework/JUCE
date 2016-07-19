@@ -66,6 +66,55 @@ public:
         const XmlPath* parent;
     };
 
+  //==============================================================================
+  struct UsePathOp
+  {
+    const SVGState* state;
+    Path* targetPath;
+
+    void operator() (const XmlPath& xmlPath)
+    {
+      state->parsePathElement (xmlPath, *targetPath);
+    }
+  };
+
+  struct GetClipPathOp
+  {
+    const SVGState* state;
+    Drawable* target;
+
+    void operator() (const XmlPath& xmlPath)
+    {
+      state->applyClipPath (*target, xmlPath);
+    }
+  };
+
+  struct SetGradientStopsOp
+  {
+    const SVGState* state;
+    ColourGradient* gradient;
+
+    void operator() (const XmlPath& xml)
+    {
+      state->addGradientStopsIn (*gradient, xml);
+    }
+  };
+
+  struct GetFillTypeOp
+  {
+    const SVGState* state;
+    const Path* path;
+    float opacity;
+    FillType fillType;
+
+    void operator() (const XmlPath& xml)
+    {
+      if (xml->hasTagNameIgnoringNamespace ("linearGradient")
+      || xml->hasTagNameIgnoringNamespace ("radialGradient"))
+    fillType = state->getGradientFillType (xml, *path, opacity);
+    }
+  };
+
     //==============================================================================
     Drawable* parseSVGElement (const XmlPath& xml)
     {
@@ -553,17 +602,6 @@ private:
         {
             const String linkedID = link.substring (1);
 
-            struct UsePathOp
-            {
-                const SVGState* state;
-                Path* targetPath;
-
-                void operator() (const XmlPath& xmlPath)
-                {
-                    state->parsePathElement (xmlPath, *targetPath);
-                }
-            };
-
             UsePathOp op = { this, &path };
             topLevelXml.applyOperationToChildWithID (linkedID, op);
         }
@@ -692,17 +730,6 @@ private:
 
             if (urlID.isNotEmpty())
             {
-                struct GetClipPathOp
-                {
-                    const SVGState* state;
-                    Drawable* target;
-
-                    void operator() (const XmlPath& xmlPath)
-                    {
-                        state->applyClipPath (*target, xmlPath);
-                    }
-                };
-
                 GetClipPathOp op = { this, &d };
                 topLevelXml.applyOperationToChildWithID (urlID, op);
             }
@@ -751,17 +778,6 @@ private:
 
             if (id.startsWithChar ('#'))
             {
-                struct SetGradientStopsOp
-                {
-                    const SVGState* state;
-                    ColourGradient* gradient;
-
-                    void operator() (const XmlPath& xml)
-                    {
-                        state->addGradientStopsIn (*gradient, xml);
-                    }
-                };
-
                 SetGradientStopsOp op = { this, &gradient, };
                 topLevelXml.applyOperationToChildWithID (id.substring (1), op);
             }
@@ -769,10 +785,13 @@ private:
 
         addGradientStopsIn (gradient, fillXml);
 
-        if (gradient.getNumColours() > 0)
+        if (int numColours = gradient.getNumColours())
         {
-            gradient.addColour (0.0, gradient.getColour (0));
-            gradient.addColour (1.0, gradient.getColour (gradient.getNumColours() - 1));
+            if (gradient.getColourPosition (0) > 0)
+                gradient.addColour (0.0, gradient.getColour (0));
+
+            if (gradient.getColourPosition (numColours - 1) < 1.0)
+                gradient.addColour (1.0, gradient.getColour (numColours - 1));
         }
         else
         {
@@ -890,21 +909,6 @@ private:
 
         if (urlID.isNotEmpty())
         {
-            struct GetFillTypeOp
-            {
-                const SVGState* state;
-                const Path* path;
-                float opacity;
-                FillType fillType;
-
-                void operator() (const XmlPath& xml)
-                {
-                    if (xml->hasTagNameIgnoringNamespace ("linearGradient")
-                         || xml->hasTagNameIgnoringNamespace ("radialGradient"))
-                        fillType = state->getGradientFillType (xml, *path, opacity);
-                }
-            };
-
             GetFillTypeOp op = { this, &path, opacity, FillType() };
 
             if (topLevelXml.applyOperationToChildWithID (urlID, op))

@@ -92,8 +92,11 @@ public:
     void add (const File& directoryToAdd,
               int insertIndex = -1);
 
-    /** Adds a new directory to the search path if it's not already in there. */
-    void addIfNotAlreadyThere (const File& directoryToAdd);
+    /** Adds a new directory to the search path if it's not already in there.
+
+        @return true if the directory has been added, false otherwise.
+    */
+    bool addIfNotAlreadyThere (const File& directoryToAdd);
 
     /** Removes a directory from the search path. */
     void remove (int indexToRemove);

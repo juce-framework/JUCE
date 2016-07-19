@@ -26,10 +26,6 @@
   ==============================================================================
 */
 
-#ifdef JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
- extern int* jucePlugInClientCurrentWrapperType;
-#endif
-
 CriticalSection::CriticalSection() noexcept
 {
     pthread_mutexattr_t atts;
@@ -336,11 +332,21 @@ uint64 File::getFileIdentifier() const
     return juce_stat (fullPath, info) ? (uint64) info.st_ino : 0;
 }
 
+static bool hasEffectiveRootFilePermissions()
+{
+   #if JUCE_LINUX
+    return (geteuid() == 0);
+   #else
+    return false;
+   #endif
+}
+
 //==============================================================================
 bool File::hasWriteAccess() const
 {
     if (exists())
-        return access (fullPath.toUTF8(), W_OK) == 0;
+        return (hasEffectiveRootFilePermissions()
+             || access (fullPath.toUTF8(), W_OK) == 0);
 
     if ((! isDirectory()) && fullPath.containsChar (separator))
         return getParentDirectory().hasWriteAccess();
@@ -634,12 +640,7 @@ File juce_getExecutableFile()
         {
             Dl_info exeInfo;
 
-          #ifdef JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-            void* localSymbol = jucePlugInClientCurrentWrapperType != nullptr ? (void*) jucePlugInClientCurrentWrapperType
-                                                                              : (void*) juce_getExecutableFile;
-          #else
             void* localSymbol = (void*) juce_getExecutableFile;
-          #endif
             dladdr (localSymbol, &exeInfo);
             return CharPointer_UTF8 (exeInfo.dli_fname);
         }
@@ -1090,14 +1091,14 @@ public:
                 close (pipeHandles[0]);   // close the read handle
 
                 if ((streamFlags & wantStdOut) != 0)
-                    dup2 (pipeHandles[1], 1); // turns the pipe into stdout
+                    dup2 (pipeHandles[1], STDOUT_FILENO); // turns the pipe into stdout
                 else
-                    close (STDOUT_FILENO);
+                    dup2 (open ("/dev/null", O_WRONLY), STDOUT_FILENO);
 
                 if ((streamFlags & wantStdErr) != 0)
-                    dup2 (pipeHandles[1], 2);
+                    dup2 (pipeHandles[1], STDERR_FILENO);
                 else
-                    close (STDERR_FILENO);
+                    dup2 (open ("/dev/null", O_WRONLY), STDERR_FILENO);
 
                 close (pipeHandles[1]);
 

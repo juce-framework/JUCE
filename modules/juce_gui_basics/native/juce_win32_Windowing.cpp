@@ -39,6 +39,10 @@
  #define WM_APPCOMMAND                     0x0319
 #endif
 
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+ #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
+#endif
+
 extern void juce_repeatLastProcessPriority();
 extern void juce_checkCurrentlyFocusedTopLevelWindow();  // in juce_TopLevelWindow.cpp
 extern bool juce_isRunningInWine();
@@ -381,7 +385,7 @@ public:
             sendDataChangeMessage();
     }
 
-    ImagePixelData* clone() override
+    ImagePixelData::Ptr clone() override
     {
         WindowsBitmapImage* im = new WindowsBitmapImage (pixelFormat, width, height, false);
 
@@ -561,6 +565,9 @@ namespace IconConverters
 
 //==============================================================================
 class HWNDComponentPeer  : public ComponentPeer
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+    , public ModifierKeyReceiver
+   #endif
 {
 public:
     enum RenderingEngineType
@@ -585,6 +592,9 @@ public:
           currentWindowIcon (0),
           dropTarget (nullptr),
           updateLayeredWindowAlpha (255)
+         #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+        , modProvider (nullptr)
+         #endif
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
 
@@ -1040,8 +1050,9 @@ public:
 
             Point<float> getMousePos (const POINTL& mousePos) const
             {
-                return owner.globalToLocal (Point<float> (static_cast<float> (mousePos.x),
-                                                          static_cast<float> (mousePos.y)));
+                return owner.globalToLocal (ScalingHelpers::unscaledScreenPosToScaled (owner.getComponent().getDesktopScaleFactor(),
+                                                                                       Point<float> (static_cast<float> (mousePos.x),
+                                                                                                     static_cast<float> (mousePos.y))));
             }
 
             template <typename CharType>
@@ -1165,6 +1176,9 @@ private:
     JuceDropTarget* dropTarget;
     uint8 updateLayeredWindowAlpha;
     MultiTouchMapper<DWORD> currentTouches;
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+    ModifierKeyProvider* modProvider;
+   #endif
 
     //==============================================================================
     class TemporaryImage    : public Timer
@@ -1751,6 +1765,11 @@ private:
 
             updateKeyModifiers();
 
+           #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+            if (modProvider != nullptr)
+                currentModifiers = currentModifiers.withFlags (modProvider->getWin32Modifiers());
+           #endif
+
             TRACKMOUSEEVENT tme;
             tme.cbSize = sizeof (tme);
             tme.dwFlags = TME_LEAVE;
@@ -1793,6 +1812,12 @@ private:
         if (isValidPeer (this))
         {
             updateModifiersFromWParam (wParam);
+
+          #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+            if (modProvider != nullptr)
+                currentModifiers = currentModifiers.withFlags (modProvider->getWin32Modifiers());
+          #endif
+
             isDragging = true;
 
             doMouseEvent (position, MouseInputSource::invalidPressure);
@@ -1806,6 +1831,12 @@ private:
             return;
 
         updateModifiersFromWParam (wParam);
+
+       #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+        if (modProvider != nullptr)
+            currentModifiers = currentModifiers.withFlags (modProvider->getWin32Modifiers());
+       #endif
+
         const bool wasDragging = isDragging;
         isDragging = false;
 
@@ -2390,6 +2421,19 @@ private:
     void handleDPIChange() // happens when a window moves to a screen with a different DPI.
     {
     }
+
+    //==============================================================================
+  #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+    void setModifierKeyProvider (ModifierKeyProvider* provider) override
+    {
+        modProvider = provider;
+    }
+
+    void removeModifierKeyProvider() override
+    {
+        modProvider = nullptr;
+    }
+   #endif
 
     //==============================================================================
 public:

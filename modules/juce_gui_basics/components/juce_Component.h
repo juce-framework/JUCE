@@ -1952,12 +1952,14 @@ public:
     /** Returns true if this component is the modal one.
 
         It's possible to have nested modal components, e.g. a pop-up dialog box
-        that launches another pop-up, but this will only return true for
-        the one at the top of the stack.
+        that launches another pop-up. If onlyConsiderForemostModalComponent is
+        true then isCurrentlyModal will only return true for the one at the top
+        of the stack. If onlyConsiderForemostModalComponent is false then
+        isCurrentlyModal will return true for any modal component in the stack.
 
         @see getCurrentlyModalComponent
     */
-    bool isCurrentlyModal() const noexcept;
+    bool isCurrentlyModal (bool onlyConsiderForemostModalComponent = true) const noexcept;
 
     /** Returns the number of components that are currently in a modal state.
         @see getCurrentlyModalComponent

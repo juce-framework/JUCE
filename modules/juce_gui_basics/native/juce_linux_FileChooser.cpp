@@ -171,8 +171,6 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     else
         addZenityArgs (args, separator, title, file, filters, isDirectory, isSave, selectMultipleFiles);
 
-    args.add ("2>/dev/null"); // (to avoid logging info ending up in the results)
-
     ChildProcess child;
 
     if (child.start (args, ChildProcess::wantStdOut))

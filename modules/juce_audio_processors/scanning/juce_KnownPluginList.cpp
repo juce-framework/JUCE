@@ -27,6 +27,8 @@ KnownPluginList::~KnownPluginList() {}
 
 void KnownPluginList::clear()
 {
+    ScopedLock lock (typesArrayLock);
+
     if (types.size() > 0)
     {
         types.clear();
@@ -36,6 +38,8 @@ void KnownPluginList::clear()
 
 PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const
 {
+    ScopedLock lock (typesArrayLock);
+
     for (int i = 0; i < types.size(); ++i)
         if (types.getUnchecked(i)->fileOrIdentifier == fileOrIdentifier)
             return types.getUnchecked(i);
@@ -45,6 +49,8 @@ PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifi
 
 PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const
 {
+    ScopedLock lock (typesArrayLock);
+
     for (int i = 0; i < types.size(); ++i)
         if (types.getUnchecked(i)->matchesIdentifierString (identifierString))
             return types.getUnchecked(i);
@@ -54,27 +60,37 @@ PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& id
 
 bool KnownPluginList::addType (const PluginDescription& type)
 {
-    for (int i = types.size(); --i >= 0;)
     {
-        if (types.getUnchecked(i)->isDuplicateOf (type))
-        {
-            // strange - found a duplicate plugin with different info..
-            jassert (types.getUnchecked(i)->name == type.name);
-            jassert (types.getUnchecked(i)->isInstrument == type.isInstrument);
+        ScopedLock lock (typesArrayLock);
 
-            *types.getUnchecked(i) = type;
-            return false;
+        for (int i = types.size(); --i >= 0;)
+        {
+            if (types.getUnchecked(i)->isDuplicateOf (type))
+            {
+                // strange - found a duplicate plugin with different info..
+                jassert (types.getUnchecked(i)->name == type.name);
+                jassert (types.getUnchecked(i)->isInstrument == type.isInstrument);
+
+                *types.getUnchecked(i) = type;
+                return false;
+            }
         }
+
+        types.insert (0, new PluginDescription (type));
     }
 
-    types.insert (0, new PluginDescription (type));
     sendChangeMessage();
     return true;
 }
 
 void KnownPluginList::removeType (const int index)
 {
-    types.remove (index);
+    {
+        ScopedLock lock (typesArrayLock);
+
+        types.remove (index);
+    }
+
     sendChangeMessage();
 }
 
@@ -83,6 +99,8 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier,
 {
     if (getTypeForFile (fileOrIdentifier) == nullptr)
         return false;
+
+    ScopedLock lock (typesArrayLock);
 
     for (int i = types.size(); --i >= 0;)
     {
@@ -112,6 +130,8 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
          && getTypeForFile (fileOrIdentifier) != nullptr)
     {
         bool needsRescanning = false;
+
+        ScopedLock lock (typesArrayLock);
 
         for (int i = types.size(); --i >= 0;)
         {
@@ -298,12 +318,17 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
     if (method != defaultOrder)
     {
         Array<PluginDescription*> oldOrder, newOrder;
-        oldOrder.addArray (types);
 
-        PluginSorter sorter (method, forwards);
-        types.sort (sorter, true);
+        {
+            ScopedLock lock (typesArrayLock);
 
-        newOrder.addArray (types);
+            oldOrder.addArray (types);
+
+            PluginSorter sorter (method, forwards);
+            types.sort (sorter, true);
+
+            newOrder.addArray (types);
+        }
 
         if (oldOrder != newOrder)
             sendChangeMessage();
@@ -315,8 +340,12 @@ XmlElement* KnownPluginList::createXml() const
 {
     XmlElement* const e = new XmlElement ("KNOWNPLUGINS");
 
-    for (int i = types.size(); --i >= 0;)
-        e->prependChildElement (types.getUnchecked(i)->createXml());
+    {
+        ScopedLock lock (typesArrayLock);
+
+        for (int i = types.size(); --i >= 0;)
+            e->prependChildElement (types.getUnchecked(i)->createXml());
+    }
 
     for (int i = 0; i < blacklist.size(); ++i)
         e->createNewChildElement ("BLACKLISTED")->setAttribute ("id", blacklist[i]);
@@ -516,6 +545,7 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
     Array<PluginDescription*> sorted;
 
     {
+        ScopedLock lock (typesArrayLock);
         PluginSorter sorter (sortMethod, true);
 
         for (int i = 0; i < types.size(); ++i)

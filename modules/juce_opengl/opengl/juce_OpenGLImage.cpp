@@ -46,19 +46,13 @@ public:
 
     ImageType* createType() const override     { return new OpenGLImageType(); }
 
-    ImagePixelData* clone() override
+    ImagePixelData::Ptr clone() override
     {
-        OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (context, width, height);
-        im->incReferenceCount();
+        Image newImage (new OpenGLFrameBufferImage (context, width, height));
+        Graphics g (newImage);
+        g.drawImageAt (Image (this), 0, 0, false);
 
-        {
-            Image newImage (im);
-            Graphics g (newImage);
-            g.drawImageAt (Image (this), 0, 0, false);
-        }
-
-        im->resetReferenceCount();
-        return im;
+        return newImage.getPixelData();
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode) override

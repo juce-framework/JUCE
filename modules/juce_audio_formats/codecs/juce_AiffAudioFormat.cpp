@@ -668,13 +668,14 @@ public:
     //==============================================================================
     bool write (const int** data, int numSamples) override
     {
+        jassert (numSamples >= 0);
         jassert (data != nullptr && *data != nullptr); // the input must contain at least one channel!
 
         if (writeFailed)
             return false;
 
-        const size_t bytes = (size_t) numSamples * numChannels * bitsPerSample / 8;
-        tempBlock.ensureSize ((size_t) bytes, false);
+        const size_t bytes = numChannels * (size_t) numSamples * bitsPerSample / 8;
+        tempBlock.ensureSize (bytes, false);
 
         switch (bitsPerSample)
         {
@@ -695,13 +696,10 @@ public:
             writeFailed = true;
             return false;
         }
-        else
-        {
-            bytesWritten += bytes;
-            lengthInSamples += (uint64) numSamples;
 
-            return true;
-        }
+        bytesWritten += bytes;
+        lengthInSamples += (uint64) numSamples;
+        return true;
     }
 
 private:

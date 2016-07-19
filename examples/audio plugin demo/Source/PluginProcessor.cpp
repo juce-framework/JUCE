@@ -344,8 +344,8 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
         if (xmlState->hasTagName ("MYPLUGINSETTINGS"))
         {
             // ok, now pull out our last window size..
-            lastUIWidth  = xmlState->getIntAttribute ("uiWidth", lastUIWidth);
-            lastUIHeight = xmlState->getIntAttribute ("uiHeight", lastUIHeight);
+            lastUIWidth  = jmax (xmlState->getIntAttribute ("uiWidth", lastUIWidth), 400);
+            lastUIHeight = jmax (xmlState->getIntAttribute ("uiHeight", lastUIHeight), 200);
 
             // Now reload our parameters..
             for (int i = 0; i < getNumParameters(); ++i)

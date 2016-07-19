@@ -328,7 +328,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         XCodeProjectExporter& xcodeExporter = dynamic_cast<XCodeProjectExporter&> (exporter);
 
         if (project.isAUPluginHost())
-            xcodeExporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+            xcodeExporter.xcodeFrameworks.addTokens (xcodeExporter.isOSX() ? "AudioUnit CoreAudioKit" : "CoreAudioKit", false);
 
         const String frameworks (moduleInfo.moduleInfo [xcodeExporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
         xcodeExporter.xcodeFrameworks.addTokens (frameworks, ", ", StringRef());
@@ -598,12 +598,6 @@ File EnabledModuleList::findLocalModuleFolder (const String& moduleID, bool useE
                         return moduleFolder;
 
                     File f = moduleFolder.getChildFile (moduleID);
-
-                    if (ModuleDescription (f).isValid())
-                        return f;
-
-                    f = moduleFolder.getChildFile ("modules")
-                                    .getChildFile (moduleID);
 
                     if (ModuleDescription (f).isValid())
                         return f;

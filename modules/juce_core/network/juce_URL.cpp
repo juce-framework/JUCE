@@ -136,7 +136,7 @@ namespace URLHelpers
                 || url[i] == '+' || url[i] == '-' || url[i] == '.')
             ++i;
 
-        return url[i] == ':' ? i + 1 : 0;
+        return url.substring (i).startsWith ("://") ? i + 1 : 0;
     }
 
     static int findStartOfNetLocation (const String& url)

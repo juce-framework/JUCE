@@ -72,7 +72,7 @@ public:
         }
     }
 
-    ImagePixelData* clone() override
+    ImagePixelData::Ptr clone() override
     {
         CoreGraphicsImage* im = new CoreGraphicsImage (pixelFormat, width, height, false);
         memcpy (im->imageData, imageData, (size_t) (lineStride * height));
@@ -707,6 +707,10 @@ static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef co
         *comps++ = (CGFloat) colour.getFloatBlue();
         *comps++ = (CGFloat) colour.getFloatAlpha();
         locations[i] = (CGFloat) g.getColourPosition (i);
+
+        // There's a bug (?) in the way the CG renderer works where it seems
+        // to go wrong if you have two colour stops both at position 0..
+        jassert (i == 0 || locations[i] != 0);
     }
 
     return CGGradientCreateWithColorComponents (colourSpace, components, locations, (size_t) numColours);

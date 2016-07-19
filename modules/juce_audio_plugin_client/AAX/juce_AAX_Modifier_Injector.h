@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -22,12 +22,20 @@
   ==============================================================================
 */
 
-#if ! JUCE_MODULE_AVAILABLE_juce_audio_utils
- #error To compile AudioUnitv3 and/or Standalone plug-ins, you need to add the juce_audio_utils module!
-#endif
+#ifndef JUCE_AAX_MODIFIER_INJECTOR_H_INCLUDED
+#define JUCE_AAX_MODIFIER_INJECTOR_H_INCLUDED
 
-#include "Standalone/juce_StandaloneFilterApp.cpp"
+struct ModifierKeyProvider
+{
+    virtual ~ModifierKeyProvider() {}
+    virtual int getWin32Modifiers() const = 0;
+};
 
-#if ! JUCE_USE_CUSTOM_AU3_STANDALONE_APP
- START_JUCE_APPLICATION (StandaloneFilterApp);
+struct ModifierKeyReceiver
+{
+    virtual ~ModifierKeyReceiver() {}
+    virtual void setModifierKeyProvider (ModifierKeyProvider* provider) = 0;
+    virtual void removeModifierKeyProvider () = 0;
+};
+
 #endif

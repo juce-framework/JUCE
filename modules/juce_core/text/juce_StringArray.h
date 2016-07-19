@@ -191,8 +191,10 @@ public:
 
     /** Adds a string to the array as long as it's not already in there.
         The search can optionally be case-insensitive.
+
+        @return true if the string has been added, false otherwise.
     */
-    void addIfNotAlreadyThere (const String& stringToAdd, bool ignoreCase = false);
+    bool addIfNotAlreadyThere (const String& stringToAdd, bool ignoreCase = false);
 
     /** Replaces one of the strings in the array with another one.
 
@@ -259,7 +261,7 @@ public:
     /** Returns an array containing the tokens in a given string.
 
         This will tokenise the given string using whitespace characters as the
-        token delimiters, and return these tokens as an array.
+        token delimiters, and return the parsed tokens as an array.
         @see addTokens
     */
     static StringArray fromTokens (StringRef stringToTokenise,
@@ -267,8 +269,8 @@ public:
 
     /** Returns an array containing the tokens in a given string.
 
-        This will tokenise the given string using whitespace characters as the
-        token delimiters, and return these tokens as an array.
+        This will tokenise the given string using the breakCharacters string to define
+        the token delimiters, and will return the parsed tokens as an array.
 
         @param stringToTokenise     the string to tokenise
         @param breakCharacters      a string of characters, any of which will be considered

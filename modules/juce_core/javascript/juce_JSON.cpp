@@ -571,6 +571,19 @@ public:
         return CharPointer_ASCII (buffer);
     }
 
+    // (creates a random double that can be easily stringified, to avoid
+    // false failures when decimal places are rounded or truncated slightly)
+    static var createRandomDouble (Random& r)
+    {
+        for (;;)
+        {
+            var v (String (r.nextDouble() * 1000.0, 20).getDoubleValue());
+
+            if (v.toString() == String (static_cast<double> (v), 20))
+                return v;
+        }
+    }
+
     static var createRandomVar (Random& r, int depth)
     {
         switch (r.nextInt (depth > 3 ? 6 : 8))
@@ -579,7 +592,7 @@ public:
             case 1:     return r.nextInt();
             case 2:     return r.nextInt64();
             case 3:     return r.nextBool();
-            case 4:     return String (r.nextDouble(), 8).getDoubleValue();
+            case 4:     return createRandomDouble (r);
             case 5:     return createRandomWideCharString (r);
 
             case 6:
@@ -612,7 +625,7 @@ public:
         beginTest ("JSON");
         Random r = getRandom();
 
-        expect (JSON::parse (String::empty) == var::null);
+        expect (JSON::parse (String::empty) == var());
         expect (JSON::parse ("{}").isObject());
         expect (JSON::parse ("[]").isArray());
         expect (JSON::parse ("[ 1234 ]")[0].isInt());

@@ -449,7 +449,7 @@ namespace PathStrokeHelpers
         {
             destPath.startNewSubPath (firstLine.rx2, firstLine.ry2);
 
-            if (arrowhead != nullptr)
+            if (arrowhead != nullptr && arrowhead->startWidth > 0.0f)
                 addArrowhead (destPath, firstLine.rx2, firstLine.ry2, lastX1, lastY1, firstLine.x1, firstLine.y1,
                               width, arrowhead->startWidth);
             else
@@ -491,7 +491,7 @@ namespace PathStrokeHelpers
         {
             destPath.lineTo (lastX2, lastY2);
 
-            if (arrowhead != nullptr)
+            if (arrowhead != nullptr && arrowhead->endWidth > 0.0f)
                 addArrowhead (destPath, lastX2, lastY2, lastLine.rx1, lastLine.ry1, lastLine.x2, lastLine.y2,
                               width, arrowhead->endWidth);
             else

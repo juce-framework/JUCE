@@ -147,10 +147,11 @@ public:
     ~String() noexcept;
 
     //==============================================================================
-    /** This is an empty string that can be used whenever one is needed.
-
-        It's better to use this than String() because it explains what's going on
-        and is more efficient.
+    /** This is a static empty string object that can be used if you need a reference to one.
+        The value of String::empty is exactly the same as String(), and in almost all cases
+        it's better to avoid String::empty and just use String() instead, so that the compiler
+        only has to reason about locally-constructed objects, rather than taking into account
+        the fact that you're referencing a global shared static memory address.
     */
     static const String empty;
 
@@ -1198,6 +1199,8 @@ public:
         @see CharPointer_UTF32::writeWithDestByteLimit
     */
     size_t copyToUTF32 (CharPointer_UTF32::CharType* destBuffer, size_t maxBufferSizeBytes) const noexcept;
+
+    static String fromSingleByteData (const void* data, size_t numBytes);
 
     //==============================================================================
     /** Increases the string's internally allocated storage.
