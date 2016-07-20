@@ -264,7 +264,14 @@ struct ProcessBufferOp   : public AudioGraphRenderingOp<ProcessBufferOp>
 
         AudioBuffer<FloatType> buffer (channels, totalChans, numSamples);
 
-        callProcess (buffer, *sharedMidiBuffers.getUnchecked (midiBufferToUse));
+        {
+            ScopedLock callbackLock (processor->getCallbackLock());
+
+            if (processor->isSuspended())
+                buffer.clear();
+            else
+                callProcess (buffer, *sharedMidiBuffers.getUnchecked (midiBufferToUse));
+        }
     }
 
     void callProcess (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
