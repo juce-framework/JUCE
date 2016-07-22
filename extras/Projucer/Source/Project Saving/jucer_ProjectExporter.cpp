@@ -242,7 +242,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
 void ProjectExporter::createDependencyPathProperties (PropertyListBuilder& props)
 {
-    if (supportsVST() && (project.shouldBuildVST().getValue() || project.isVSTPluginHost()))
+    if (project.shouldBuildVST().getValue() || project.isVSTPluginHost())
     {
         props.add (new DependencyPathPropertyComponent (getVSTPathValue (false), "VST SDK Folder"),
                    "If you're building a VST plugin or host, this must be the folder containing the VST SDK. This can be an absolute path, or a path relative to the Projucer project file.");
@@ -306,14 +306,11 @@ void ProjectExporter::addSettingsForProjectType (const ProjectType& type)
 
 void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
-    if (supportsVST())
-    {
-        if (project.shouldBuildVST().getValue())
-            makefileTargetSuffix = ".so";
+    if (supportsVST() && project.shouldBuildVST().getValue())
+        makefileTargetSuffix = ".so";
 
-        if (project.shouldBuildVST().getValue() || project.isVSTPluginHost())
-            addVSTFolderToPath (false);
-    }
+    if (project.shouldBuildVST().getValue() || project.isVSTPluginHost())
+        addVSTFolderToPath (false);
 
     if (supportsVST3())
     {
