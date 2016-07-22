@@ -54,23 +54,23 @@ public:
     /** Returns the number of files the user has got selected.
         @see getSelectedFile
     */
-    int getNumSelectedFiles() const                 { return TreeView::getNumSelectedItems(); }
+    int getNumSelectedFiles() const override               { return TreeView::getNumSelectedItems(); }
 
     /** Returns one of the files that the user has currently selected.
         The index should be in the range 0 to (getNumSelectedFiles() - 1).
         @see getNumSelectedFiles
     */
-    File getSelectedFile (int index = 0) const;
+    File getSelectedFile (int index = 0) const override;
 
     /** Deselects any files that are currently selected. */
-    void deselectAllFiles();
+    void deselectAllFiles() override;
 
     /** Scrolls the list to the top. */
-    void scrollToTop();
+    void scrollToTop() override;
 
     /** If the specified file is in the list, it will become the only selected item
         (and if the file isn't in the list, all other items will be deselected). */
-    void setSelectedFile (const File&);
+    void setSelectedFile (const File&) override;
 
     /** Updates the files in the list. */
     void refresh();
