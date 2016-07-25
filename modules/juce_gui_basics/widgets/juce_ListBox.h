@@ -265,11 +265,15 @@ public:
         This will add these rows to the current selection, so you might need to
         clear the current selection first with deselectAllRows()
 
-        @param firstRow     the first row to select (inclusive)
-        @param lastRow      the last row to select (inclusive)
+        @param firstRow                       the first row to select (inclusive)
+        @param lastRow                        the last row to select (inclusive)
+        @param dontScrollToShowThisRange      if true, the list's position won't change; if false and
+                                              the selected range is off-screen, it'll scroll to make
+                                              sure that the range of rows is on-screen
     */
     void selectRangeOfRows (int firstRow,
-                            int lastRow);
+                            int lastRow,
+                            bool dontScrollToShowThisRange = false);
 
     /** Deselects a row.
         If it's not currently selected, this will do nothing.
