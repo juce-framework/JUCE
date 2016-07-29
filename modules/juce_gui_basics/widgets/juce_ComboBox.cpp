@@ -46,7 +46,8 @@ ComboBox::ComboBox (const String& name)
       menuActive (false),
       scrollWheelEnabled (false),
       mouseWheelAccumulator (0),
-      noChoicesMessage (TRANS("(no choices)"))
+      noChoicesMessage (TRANS("(no choices)")),
+      labelEditableState (editableUnknown)
 {
     setRepaintsOnMouseActivity (true);
     lookAndFeelChanged();
@@ -66,7 +67,9 @@ void ComboBox::setEditableText (const bool isEditable)
     if (label->isEditableOnSingleClick() != isEditable || label->isEditableOnDoubleClick() != isEditable)
     {
         label->setEditable (isEditable, isEditable, false);
-        setWantsKeyboardFocus (! isEditable);
+        labelEditableState = (isEditable ? labelIsEditable : labelIsNotEditable);
+
+        setWantsKeyboardFocus (labelEditableState == labelIsNotEditable);
         resized();
     }
 }
@@ -437,7 +440,14 @@ void ComboBox::lookAndFeelChanged()
     }
 
     addAndMakeVisible (label);
-    setWantsKeyboardFocus (! label->isEditable());
+
+    EditableState newEditableState = (label->isEditable() ? labelIsEditable : labelIsNotEditable);
+
+    if (newEditableState != labelEditableState)
+    {
+        labelEditableState = newEditableState;
+        setWantsKeyboardFocus (labelEditableState == labelIsNotEditable);
+    }
 
     label->addListener (this);
     label->addMouseListener (this, false);
