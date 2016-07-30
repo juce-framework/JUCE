@@ -805,7 +805,7 @@ public:
             if (! owner.isOpaque())
             {
                 lg.setFill (Colours::transparentBlack);
-                lg.fillRect (imageBounds, true);
+                lg.fillRect (compBounds, true);
                 lg.setFill (Colours::black);
             }
 
