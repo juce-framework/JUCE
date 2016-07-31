@@ -43,7 +43,7 @@ DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer");
  METHOD (isExhausted, "isExhausted", "()Z") \
  METHOD (setPosition, "setPosition", "(J)Z") \
 
-DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream");
+DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_APP_CLASSPATH "$HTTPStream");
 #undef JNI_CLASS_MEMBERS
 
 
@@ -97,7 +97,7 @@ public:
         jassert (statusCodeArray != 0);
 
         stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
-                                                         JuceAppActivity.createHTTPStream,
+                                                         JuceApp.createHTTPStream,
                                                          javaString (address).get(),
                                                          (jboolean) isPost,
                                                          postDataArray,

@@ -42,7 +42,7 @@ namespace
     }
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME,
+JUCE_JNI_CALLBACK (JUCE_ANDROID_APP_CLASSNAME,
                    androidRuntimePermissionsCallback,
                    void, (JNIEnv* env, jobject /*javaObjectHandle*/, jboolean permissionsGranted, jlong callbackPtr))
 {
@@ -53,7 +53,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME,
 
 void RuntimePermissions::request (PermissionID permission, Callback callback)
 {
-    if (! android.activity.callBooleanMethod  (JuceAppActivity.isPermissionDeclaredInManifest, (jint) permission))
+    if (! android.activity.callBooleanMethod  (JuceApp.isPermissionDeclaredInManifest, (jint) permission))
     {
         // Error! If you want to be able to request this runtime permission, you
         // also need to declare it in your app's manifest. You can do so via
@@ -76,7 +76,7 @@ void RuntimePermissions::request (PermissionID permission, Callback callback)
     // we need to move the callback object to the heap so Java can keep track of the pointer
     // and asynchronously pass it back to us (to be called and then deleted)
     Callback* callbackPtr = new Callback (std::move (callback));
-    android.activity.callVoidMethod (JuceAppActivity.requestRuntimePermission, permission, (jlong) callbackPtr);
+    android.activity.callVoidMethod (JuceApp.requestRuntimePermission, permission, (jlong) callbackPtr);
 }
 
 bool RuntimePermissions::isRequired (PermissionID /*permission*/)
@@ -86,5 +86,6 @@ bool RuntimePermissions::isRequired (PermissionID /*permission*/)
 
 bool RuntimePermissions::isGranted (PermissionID permission)
 {
-    return android.activity.callBooleanMethod (JuceAppActivity.isPermissionGranted, permission);
+    jobject juceApp = android.activity.callObjectMethod (JuceAppActivity.getJuceApp);
+    return getEnv()->CallBooleanMethod (juceApp, JuceApp.isPermissionGranted, permission);
 }
