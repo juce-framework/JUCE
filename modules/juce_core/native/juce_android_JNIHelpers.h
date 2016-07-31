@@ -261,17 +261,15 @@ extern AndroidSystem android;
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (createNewView,          "createNewView",        "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
- METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
- METHOD (createNativeSurfaceView, "createNativeSurfaceView", "(J)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView;") \
+ METHOD (createNewView,          "createNewView",        "(ZJ)L" JUCE_ANDROID_APP_CLASSPATH "$ComponentPeerView;") \
+ METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_APP_CLASSPATH "$ComponentPeerView;)V") \
+ METHOD (createNativeSurfaceView, "createNativeSurfaceView", "(J)L" JUCE_ANDROID_APP_CLASSPATH "$NativeSurfaceView;") \
  METHOD (postMessage,            "postMessage",          "(J)V") \
- METHOD (finish,                 "finish",               "()V") \
- METHOD (setRequestedOrientation,"setRequestedOrientation", "(I)V") \
  METHOD (getClipboardContent,    "getClipboardContent",  "()Ljava/lang/String;") \
  METHOD (setClipboardContent,    "setClipboardContent",  "(Ljava/lang/String;)V") \
  METHOD (excludeClipRegion,      "excludeClipRegion",    "(Landroid/graphics/Canvas;FFFF)V") \
  METHOD (renderGlyph,            "renderGlyph",          "(CLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
- STATICMETHOD (createHTTPStream, "createHTTPStream",     "(Ljava/lang/String;Z[BLjava/lang/String;I[ILjava/lang/StringBuffer;ILjava/lang/String;)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream;") \
+ STATICMETHOD (createHTTPStream, "createHTTPStream",     "(Ljava/lang/String;Z[BLjava/lang/String;I[ILjava/lang/StringBuffer;ILjava/lang/String;)L" JUCE_ANDROID_APP_CLASSPATH "$HTTPStream;") \
  METHOD (launchURL,              "launchURL",            "(Ljava/lang/String;)V") \
  METHOD (showMessageBox,         "showMessageBox",       "(Ljava/lang/String;Ljava/lang/String;J)V") \
  METHOD (showOkCancelBox,        "showOkCancelBox",      "(Ljava/lang/String;Ljava/lang/String;J)V") \
@@ -287,8 +285,8 @@ extern AndroidSystem android;
  METHOD (getTypeFaceFromByteArray,"getTypeFaceFromByteArray","([B)Landroid/graphics/Typeface;") \
  METHOD (setScreenSaver,          "setScreenSaver",       "(Z)V") \
  METHOD (getScreenSaver,          "getScreenSaver",       "()Z") \
- METHOD (getAndroidMidiDeviceManager, "getAndroidMidiDeviceManager", "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$MidiDeviceManager;") \
- METHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager;") \
+ METHOD (getAndroidMidiDeviceManager, "getAndroidMidiDeviceManager", "()L" JUCE_ANDROID_APP_CLASSPATH "$MidiDeviceManager;") \
+ METHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "()L" JUCE_ANDROID_APP_CLASSPATH "$BluetoothManager;") \
  METHOD (getAndroidSDKVersion,    "getAndroidSDKVersion", "()I") \
  METHOD (audioManagerGetProperty, "audioManagerGetProperty", "(Ljava/lang/String;)Ljava/lang/String;") \
  METHOD (setCurrentThreadPriority, "setCurrentThreadPriority", "(I)I") \
@@ -297,6 +295,16 @@ extern AndroidSystem android;
  METHOD (requestRuntimePermission, "requestRuntimePermission", "(IJ)V" ) \
  METHOD (isPermissionGranted,     "isPermissionGranted", "(I)Z" ) \
  METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
+
+DECLARE_JNI_CLASS (JuceApp, JUCE_ANDROID_APP_CLASSPATH);
+#undef JNI_CLASS_MEMBERS
+
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (finish,                 "finish",               "()V") \
+ METHOD (setRequestedOrientation,"setRequestedOrientation", "(I)V") \
+ METHOD (setScreenSaver,          "setScreenSaver",       "(Z)V") \
+ METHOD (getJuceApp, "getJuceApp", "()L" JUCE_ANDROID_APP_CLASSPATH ";") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS

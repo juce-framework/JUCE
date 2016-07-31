@@ -62,10 +62,10 @@ File File::getSpecialLocation (const SpecialLocationType type)
             return File (android.appDataDir);
 
         case userDocumentsDirectory:
-        case commonDocumentsDirectory:  return getSpecialFile (JuceAppActivity.getDocumentsFolder);
-        case userPicturesDirectory:     return getSpecialFile (JuceAppActivity.getPicturesFolder);
-        case userMusicDirectory:        return getSpecialFile (JuceAppActivity.getMusicFolder);
-        case userMoviesDirectory:       return getSpecialFile (JuceAppActivity.getMoviesFolder);
+        case commonDocumentsDirectory:  return getSpecialFile (JuceApp.getDocumentsFolder);
+        case userPicturesDirectory:     return getSpecialFile (JuceApp.getPicturesFolder);
+        case userMusicDirectory:        return getSpecialFile (JuceApp.getMusicFolder);
+        case userMoviesDirectory:       return getSpecialFile (JuceApp.getMoviesFolder);
 
         case globalApplicationsDirectory:
             return File ("/system/app");
@@ -99,7 +99,7 @@ bool File::moveToTrash() const
 JUCE_API bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters)
 {
     const LocalRef<jstring> t (javaString (fileName));
-    android.activity.callVoidMethod (JuceAppActivity.launchURL, t.get());
+    android.activity.callVoidMethod (JuceApp.launchURL, t.get());
     return true;
 }
 
