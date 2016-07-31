@@ -581,8 +581,8 @@ public:
     {
         return Rectangle (pos.x + static_cast<ValueType> (w * proportionalRect.pos.x),
                           pos.y + static_cast<ValueType> (h * proportionalRect.pos.y),
-                          proportionOfWidth (proportionalRect.w),
-                          proportionOfWidth (proportionalRect.h));
+                          proportionOfWidth  (proportionalRect.w),
+                          proportionOfHeight (proportionalRect.h));
     }
 
     //==============================================================================

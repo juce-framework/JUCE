@@ -66,6 +66,14 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                                               : AudioProcessorParameter::getText (v, length);
     }
 
+    int getNumSteps () const override
+    {
+        if (range.interval > 0)
+            return (static_cast<int> ((range.end - range.start) / range.interval) + 1);
+        else
+            return AudioProcessor::getDefaultNumParameterSteps ();
+    }
+
     void setValue (float newValue) override
     {
         newValue = range.snapToLegalValue (range.convertFrom0to1 (newValue));

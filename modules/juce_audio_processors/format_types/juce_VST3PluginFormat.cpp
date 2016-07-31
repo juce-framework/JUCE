@@ -1664,8 +1664,8 @@ public:
         isControllerInitialised = true;
         editController->setComponentHandler (host);
         grabInformationObjects();
-        synchroniseStates();
         interconnectComponentAndController();
+        synchroniseStates();
         syncProgramNames();
         setupIO();
         return true;

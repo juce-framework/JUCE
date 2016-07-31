@@ -264,7 +264,14 @@ struct ProcessBufferOp   : public AudioGraphRenderingOp<ProcessBufferOp>
 
         AudioBuffer<FloatType> buffer (channels, totalChans, numSamples);
 
-        callProcess (buffer, *sharedMidiBuffers.getUnchecked (midiBufferToUse));
+        {
+            ScopedLock callbackLock (processor->getCallbackLock());
+
+            if (processor->isSuspended())
+                buffer.clear();
+            else
+                callProcess (buffer, *sharedMidiBuffers.getUnchecked (midiBufferToUse));
+        }
     }
 
     void callProcess (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
@@ -1035,7 +1042,7 @@ struct AudioProcessorGraph::AudioProcessorGraphBufferHelpers
 //==============================================================================
 AudioProcessorGraph::AudioProcessorGraph()
     : lastNodeId (0), audioBuffers (new AudioProcessorGraphBufferHelpers),
-      currentMidiInputBuffer (nullptr)
+      currentMidiInputBuffer (nullptr), isPrepared (false)
 {
 }
 
@@ -1102,7 +1109,9 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
 
     Node* const n = new Node (nodeId, newProcessor);
     nodes.add (n);
-    triggerAsyncUpdate();
+
+    if (isPrepared)
+        triggerAsyncUpdate();
 
     n->setParentGraph (this);
     return n;
@@ -1117,7 +1126,9 @@ bool AudioProcessorGraph::removeNode (const uint32 nodeId)
         if (nodes.getUnchecked(i)->nodeId == nodeId)
         {
             nodes.remove (i);
-            triggerAsyncUpdate();
+
+            if (isPrepared)
+                triggerAsyncUpdate();
 
             return true;
         }
@@ -1203,14 +1214,19 @@ bool AudioProcessorGraph::addConnection (const uint32 sourceNodeId,
     GraphRenderingOps::ConnectionSorter sorter;
     connections.addSorted (sorter, new Connection (sourceNodeId, sourceChannelIndex,
                                                    destNodeId, destChannelIndex));
-    triggerAsyncUpdate();
+
+    if (isPrepared)
+        triggerAsyncUpdate();
+
     return true;
 }
 
 void AudioProcessorGraph::removeConnection (const int index)
 {
     connections.remove (index);
-    triggerAsyncUpdate();
+
+    if (isPrepared)
+        triggerAsyncUpdate();
 }
 
 bool AudioProcessorGraph::removeConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
@@ -1392,6 +1408,8 @@ void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int estimatedSam
 
     clearRenderingSequence();
     buildRenderingSequence();
+
+    isPrepared = true;
 }
 
 bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const
@@ -1401,6 +1419,8 @@ bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const
 
 void AudioProcessorGraph::releaseResources()
 {
+    isPrepared = false;
+
     for (int i = 0; i < nodes.size(); ++i)
         nodes.getUnchecked(i)->unprepare();
 

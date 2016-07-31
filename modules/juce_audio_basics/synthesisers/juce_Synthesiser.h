@@ -539,8 +539,14 @@ public:
         The default setting is 32, which means that midi messages are accurate to about < 1ms
         accuracy, which is probably fine for most purposes, but you may want to increase or
         decrease this value for your synth.
+
+        If shouldBeStrict is true, the audio sub-blocks will strictly never be smaller than numSamples.
+
+        If shouldBeStrict is false (default), the first audio sub-block in the buffer is allowed
+        to be smaller, to make sure that the first MIDI event in a buffer will always be sample-accurate
+        (this can sometimes help to avoid quantisation or phasing issues).
     */
-    void setMinimumRenderingSubdivisionSize (int numSamples) noexcept;
+    void setMinimumRenderingSubdivisionSize (int numSamples, bool shouldBeStrict = false) noexcept;
 
 protected:
     //==============================================================================
@@ -615,6 +621,7 @@ private:
     double sampleRate;
     uint32 lastNoteOnCounter;
     int minimumSubBlockSize;
+    bool subBlockSubdivisionIsStrict;
     bool shouldStealNotes;
     BigInteger sustainPedalsDown;
 

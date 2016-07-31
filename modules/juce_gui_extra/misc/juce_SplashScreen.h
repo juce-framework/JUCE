@@ -146,7 +146,7 @@ private:
     int clickCountToDelete;
 
     void timerCallback() override;
-    void makeVisible (int w, int h, bool shadow);
+    void makeVisible (int w, int h, bool shadow, bool fullscreen);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SplashScreen)
 };

@@ -397,9 +397,9 @@ public:
         convert between 32 and 64 bit float buffer types.
     */
     template <typename OtherType>
-    void makeCopyOf (const AudioBuffer<OtherType>& other)
+    void makeCopyOf (const AudioBuffer<OtherType>& other, bool avoidReallocating = false)
     {
-        setSize (other.getNumChannels(), other.getNumSamples());
+        setSize (other.getNumChannels(), other.getNumSamples(), false, false, avoidReallocating);
 
         if (other.hasBeenCleared())
         {

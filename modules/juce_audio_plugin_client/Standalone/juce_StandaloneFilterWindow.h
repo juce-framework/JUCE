@@ -133,6 +133,7 @@ public:
     /** Pops up a dialog letting the user save the processor's state to a file. */
     void askUserToSaveState (const String& fileSuffix = String())
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         FileChooser fc (TRANS("Save current state"), getLastFile(), getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToSave (true))
@@ -147,11 +148,15 @@ public:
                                                   TRANS("Error whilst saving"),
                                                   TRANS("Couldn't write to the specified file!"));
         }
+       #else
+        ignoreUnused (fileSuffix);
+       #endif
     }
 
     /** Pops up a dialog letting the user re-load the processor's state from a file. */
     void askUserToLoadState (const String& fileSuffix = String())
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         FileChooser fc (TRANS("Load a saved state"), getLastFile(), getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToOpen())
@@ -167,6 +172,9 @@ public:
                                                   TRANS("Error whilst loading"),
                                                   TRANS("Couldn't read from the specified file!"));
         }
+       #else
+        ignoreUnused (fileSuffix);
+       #endif
     }
 
     //==============================================================================

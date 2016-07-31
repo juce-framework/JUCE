@@ -552,7 +552,7 @@ SparseSet<int> ListBox::getSelectedRows() const
     return selected;
 }
 
-void ListBox::selectRangeOfRows (int firstRow, int lastRow)
+void ListBox::selectRangeOfRows (int firstRow, int lastRow, bool dontScrollToShowThisRange)
 {
     if (multipleSelection && (firstRow != lastRow))
     {
@@ -566,7 +566,7 @@ void ListBox::selectRangeOfRows (int firstRow, int lastRow)
         selected.removeRange (Range<int> (lastRow, lastRow + 1));
     }
 
-    selectRowInternal (lastRow, false, false, true);
+    selectRowInternal (lastRow, dontScrollToShowThisRange, false, true);
 }
 
 void ListBox::flipRowSelection (const int row)
