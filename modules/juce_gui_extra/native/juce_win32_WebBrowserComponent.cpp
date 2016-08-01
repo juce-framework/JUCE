@@ -22,6 +22,11 @@
   ==============================================================================
 */
 
+JUCE_COMCLASS (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
+JUCE_COMCLASS (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
+JUCE_COMCLASS (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
+JUCE_COMCLASS (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
+
 class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
 {
 public:
@@ -43,13 +48,18 @@ public:
 
     void createBrowser()
     {
-        createControl (&CLSID_WebBrowser);
-        browser = (IWebBrowser2*) queryInterface (&IID_IWebBrowser2);
+        CLSID webCLSID = __uuidof (WebBrowser);
+        createControl (&webCLSID);
+
+    GUID iidWebBrowser2              = __uuidof (IWebBrowser2);
+    GUID iidConnectionPointContainer = __uuidof (IConnectionPointContainer);
+
+        browser = (IWebBrowser2*) queryInterface (&iidWebBrowser2);
 
         if (IConnectionPointContainer* connectionPointContainer
-                = (IConnectionPointContainer*) queryInterface (&IID_IConnectionPointContainer))
+            = (IConnectionPointContainer*) queryInterface (&iidConnectionPointContainer))
         {
-            connectionPointContainer->FindConnectionPoint (DIID_DWebBrowserEvents2, &connectionPoint);
+            connectionPointContainer->FindConnectionPoint (__uuidof (DWebBrowserEvents2), &connectionPoint);
 
             if (connectionPoint != nullptr)
             {
@@ -330,9 +340,12 @@ void WebBrowserComponent::visibilityChanged()
 
 void WebBrowserComponent::focusGained (FocusChangeType)
 {
-    if (IOleObject* oleObject = (IOleObject*) browser->queryInterface (&IID_IOleObject))
+    GUID iidOleObject = __uuidof (IOleObject);
+    GUID iidOleWindow = __uuidof (IOleWindow);
+
+    if (IOleObject* oleObject = (IOleObject*) browser->queryInterface (&iidOleObject))
     {
-        if (IOleWindow* oleWindow = (IOleWindow*) browser->queryInterface (&IID_IOleWindow))
+        if (IOleWindow* oleWindow = (IOleWindow*) browser->queryInterface (&iidOleWindow))
         {
             IOleClientSite* oleClientSite = nullptr;
 

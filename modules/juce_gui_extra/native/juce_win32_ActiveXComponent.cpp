@@ -24,6 +24,24 @@
 
 extern int64 getMouseEventTime();
 
+#if JUCE_MINGW
+ #define JUCE_COMCLASS(name, guid) \
+    template<> struct UUIDGetter<::name>   { static CLSID get() { return uuidFromString (guid); } };
+
+ #ifdef __uuidof
+  #undef __uuidof
+ #endif
+
+ #define __uuidof(cls) UUIDGetter<::cls>::get()
+
+#else
+ #define JUCE_COMCLASS(name, guid)
+#endif
+
+JUCE_COMCLASS (IOleObject,                "00000112-0000-0000-C000-000000000046")
+JUCE_COMCLASS (IOleWindow,                "00000114-0000-0000-C000-000000000046")
+JUCE_COMCLASS (IOleInPlaceSite,           "00000119-0000-0000-C000-000000000046")
+
 namespace ActiveXHelpers
 {
     //==============================================================================
@@ -133,7 +151,7 @@ namespace ActiveXHelpers
 
         JUCE_COMRESULT QueryInterface (REFIID type, void** result)
         {
-            if (type == IID_IOleInPlaceSite)
+            if (type == __uuidof (IOleInPlaceSite))
             {
                 inplaceSite->AddRef();
                 *result = static_cast<IOleInPlaceSite*> (inplaceSite);
@@ -160,7 +178,7 @@ namespace ActiveXHelpers
     HWND getHWND (const ActiveXControlComponent* const component)
     {
         HWND hwnd = 0;
-        const IID iid = IID_IOleWindow;
+        const IID iid = __uuidof(IOleWindow);
 
         if (IOleWindow* const window = (IOleWindow*) component->queryInterface (&iid))
         {
@@ -340,7 +358,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
         ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, *this));
 
         HRESULT hr;
-        if ((hr = OleCreate (*(const IID*) controlIID, IID_IOleObject, 1 /*OLERENDER_DRAW*/, 0,
+        if ((hr = OleCreate (*(const IID*) controlIID, __uuidof (IOleObject), 1 /*OLERENDER_DRAW*/, 0,
                              newControl->clientSite, newControl->storage,
                              (void**) &(newControl->control))) == S_OK)
         {
