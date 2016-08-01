@@ -45,31 +45,13 @@ class AlsaClient : public ReferenceCountedObject
 public:
     typedef ReferenceCountedObjectPtr<AlsaClient> Ptr;
 
-    AlsaClient (bool forInput)
-        : input (forInput), handle (nullptr)
+    static Ptr getInstance (bool forInput)
     {
-        snd_seq_open (&handle, "default", forInput ? SND_SEQ_OPEN_INPUT
-                                                   : SND_SEQ_OPEN_OUTPUT, 0);
+        AlsaClient*& instance = (forInput ? inInstance : outInstance);
+        if (instance == nullptr)
+            instance = new AlsaClient (forInput);
 
-        snd_seq_set_client_name (handle, forInput ? JUCE_ALSA_MIDI_INPUT_NAME
-                                                  : JUCE_ALSA_MIDI_OUTPUT_NAME);
-    }
-
-    ~AlsaClient()
-    {
-        if (handle != nullptr)
-        {
-            snd_seq_close (handle);
-            handle = nullptr;
-        }
-
-        jassert (activeCallbacks.size() == 0);
-
-        if (inputThread)
-        {
-            inputThread->stopThread (3000);
-            inputThread = nullptr;
-        }
+        return instance;
     }
 
     bool isInput() const noexcept    { return input; }
@@ -112,6 +94,50 @@ private:
 
     Array<AlsaPortAndCallback*> activeCallbacks;
     CriticalSection callbackLock;
+
+    static AlsaClient* inInstance;
+    static AlsaClient* outInstance;
+
+    //==============================================================================
+    friend class ReferenceCountedObjectPtr<AlsaClient>;
+    friend struct ContainerDeletePolicy<AlsaClient>;
+
+    AlsaClient (bool forInput)
+        : input (forInput), handle (nullptr)
+    {
+        AlsaClient*& instance = (input ? inInstance : outInstance);
+        jassert (instance == nullptr);
+
+        instance = this;
+
+        snd_seq_open (&handle, "default", forInput ? SND_SEQ_OPEN_INPUT
+                      : SND_SEQ_OPEN_OUTPUT, 0);
+
+        snd_seq_set_client_name (handle, forInput ? JUCE_ALSA_MIDI_INPUT_NAME
+                                 : JUCE_ALSA_MIDI_OUTPUT_NAME);
+    }
+
+    ~AlsaClient()
+    {
+        AlsaClient*& instance = (input ? inInstance : outInstance);
+        jassert (instance != nullptr);
+
+        instance = nullptr;
+
+        if (handle != nullptr)
+        {
+            snd_seq_close (handle);
+            handle = nullptr;
+        }
+
+        jassert (activeCallbacks.size() == 0);
+
+        if (inputThread)
+        {
+            inputThread->stopThread (3000);
+            inputThread = nullptr;
+        }
+    }
 
     //==============================================================================
     class MidiInputThread   : public Thread
@@ -181,24 +207,8 @@ private:
     ScopedPointer<MidiInputThread> inputThread;
 };
 
-
-static AlsaClient::Ptr globalAlsaSequencerIn()
-{
-    static AlsaClient::Ptr global (new AlsaClient (true));
-    return global;
-}
-
-static AlsaClient::Ptr globalAlsaSequencerOut()
-{
-    static AlsaClient::Ptr global (new AlsaClient (false));
-    return global;
-}
-
-static AlsaClient::Ptr globalAlsaSequencer (bool input)
-{
-    return input ? globalAlsaSequencerIn()
-                 : globalAlsaSequencerOut();
-}
+AlsaClient* AlsaClient::inInstance  = nullptr;
+AlsaClient* AlsaClient::outInstance = nullptr;
 
 //==============================================================================
 // represents an input or output port of the supplied AlsaClient
@@ -368,7 +378,7 @@ static AlsaPort iterateMidiDevices (const bool forInput,
                                     const int deviceIndexToOpen)
 {
     AlsaPort port;
-    const AlsaClient::Ptr client (globalAlsaSequencer (forInput));
+    const AlsaClient::Ptr client (AlsaClient::getInstance (forInput));
 
     if (snd_seq_t* const seqHandle = client->get())
     {
@@ -509,7 +519,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
     MidiOutput* newDevice = nullptr;
     AlsaPort port;
 
-    const AlsaClient::Ptr client (globalAlsaSequencer (false));
+    const AlsaClient::Ptr client (AlsaClient::getInstance (false));
 
     port.createPort (client, deviceName, false);
 
@@ -589,7 +599,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
     MidiInput* newDevice = nullptr;
     AlsaPort port;
 
-    const AlsaClient::Ptr client (globalAlsaSequencer (true));
+    const AlsaClient::Ptr client (AlsaClient::getInstance (true));
 
     port.createPort (client, deviceName, true);
 
