@@ -89,10 +89,6 @@ public:
             context.nativeContext = nativeContext;
         else
             nativeContext = nullptr;
-
-       #if JUCE_MAC
-        displayLink = nullptr;
-       #endif
     }
 
     ~CachedImage()
@@ -105,24 +101,18 @@ public:
     {
         if (nativeContext != nullptr)
         {
-           #if !JUCE_MAC
             renderThread = new ThreadPool (1);
-           #endif
             resume();
         }
     }
 
     void stop()
     {
-       #if JUCE_MAC
-        pause();
-       #else
         if (renderThread != nullptr)
         {
             pause();
             renderThread = nullptr;
         }
-       #endif
 
         hasInitialised = false;
     }
@@ -130,38 +120,17 @@ public:
     //==============================================================================
     void pause()
     {
-       #if JUCE_MAC
-        if (displayLink != nullptr)
-        {
-            CVDisplayLinkStop (displayLink);
-            CVDisplayLinkRelease (displayLink);
-            displayLink = nullptr;
-            hasInitialised = false;
-            context.makeActive();
-            shutdownOnThread();
-            OpenGLContext::deactivateCurrentContext();
-        }
-       #else
         if (renderThread != nullptr)
         {
             repaintEvent.signal();
             renderThread->removeJob (this, true, -1);
         }
-       #endif
     }
 
     void resume()
     {
-       #if JUCE_MAC
-        initialiseOnThread();
-        hasInitialised = true;
-        CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
-        CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
-        CVDisplayLinkStart (displayLink);
-       #else
         if (renderThread != nullptr)
             renderThread->addJob (this, false);
-       #endif
     }
 
    #if JUCE_MAC
@@ -475,10 +444,14 @@ public:
             if (shouldExit())
                 break;
 
+           #if JUCE_MAC
+            repaintEvent.wait (1000);
+           #else
             if (! renderFrame())
                 repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
             else if (! context.continuousRepaint && ! shouldExit())
                 repaintEvent.wait (-1);
+           #endif
         }
 
         hasInitialised = false;
@@ -527,10 +500,21 @@ public:
 
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
+
+       #if JUCE_MAC
+        CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
+        CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
+        CVDisplayLinkStart (displayLink);
+       #endif
     }
 
     void shutdownOnThread()
     {
+       #if JUCE_MAC
+        CVDisplayLinkStop (displayLink);
+        CVDisplayLinkRelease (displayLink);
+       #endif
+
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
 
@@ -576,9 +560,8 @@ public:
 
    #if JUCE_MAC
     CVDisplayLinkRef displayLink;
-   #else
-    ScopedPointer<ThreadPool> renderThread;
    #endif
+    ScopedPointer<ThreadPool> renderThread;
 
    #if JUCE_IOS
     iOSBackgroundProcessCheck backgroundProcessCheck;
