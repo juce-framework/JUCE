@@ -131,8 +131,8 @@ public:
     /** Sets a named property to an XML element.
 
         @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param xml          the new element to set it to. If this is zero, the value will be set to
-                            an empty string
+        @param xml          the new element to set it to. If this is a nullptr, the value will
+                            be set to an empty string
         @see getXmlValue
     */
     void setValue (const String& keyName, const XmlElement* xml);

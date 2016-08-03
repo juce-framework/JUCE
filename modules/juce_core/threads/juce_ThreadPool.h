@@ -237,8 +237,8 @@ public:
                                     methods called to try to interrupt them
         @param timeOutMilliseconds  the length of time this method should wait for all the jobs to finish
                                     before giving up and returning false
-        @param selectedJobsToRemove if this is non-zero, the JobSelector object is asked to decide which
-                                    jobs should be removed. If it is zero, all jobs are removed
+        @param selectedJobsToRemove if this is not a nullptr, the JobSelector object is asked to decide
+                                    which jobs should be removed. If it is a nullptr, all jobs are removed
         @returns    true if all jobs are successfully stopped and removed; false if the timeout period
                     expires while waiting for one or more jobs to stop
     */
