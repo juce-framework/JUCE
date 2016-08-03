@@ -439,12 +439,12 @@ public:
                                         in zero.
         @param standardItemHeight       if this is non-zero, it will be used as the standard
                                         height for menu items (apart from custom items)
-        @param callback                 if this is non-zero, the menu will be launched asynchronously,
-                                        returning immediately, and the callback will receive a
-                                        call when the menu is either dismissed or has an item
-                                        selected. This object will be owned and deleted by the
-                                        system, so make sure that it works safely and that any
-                                        pointers that it uses are safely within scope.
+        @param callback                 if this is not a nullptr, the menu will be launched
+                                        asynchronously, returning immediately, and the callback
+                                        will receive a call when the menu is either dismissed or
+                                        has an item selected. This object will be owned and
+                                        deleted by the system, so make sure that it works safely
+                                        and that any pointers that it uses are safely within scope.
         @see showAt
     */
     int show (int itemIDThatMustBeVisible = 0,

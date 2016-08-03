@@ -224,6 +224,8 @@ public:
             if (v != valueNormalized)
             {
                 valueNormalized = v;
+                owner.setParameter (paramIndex, static_cast<float> (v));
+
                 changed();
                 return true;
             }

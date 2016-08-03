@@ -259,7 +259,7 @@ private:
 public:
     //==============================================================================
     JuceVSTWrapper (audioMasterCallback audioMasterCB, AudioProcessor* const af)
-       : AudioEffectX (audioMasterCB, af->getNumPrograms(), af->getNumParameters()),
+       : AudioEffectX (audioMasterCB, jmax (1, af->getNumPrograms()), af->getNumParameters()),
          filter (af),
          busUtils (*filter, true, 64),
          chunkMemoryTime (0),
@@ -317,10 +317,6 @@ public:
         isSynth ((JucePlugin_IsSynth) != 0);
         setInitialDelay (filter->getLatencySamples());
         programsAreChunks (true);
-
-        // NB: For reasons best known to themselves, some hosts fail to load/save plugin
-        // state correctly if the plugin doesn't report that it has at least 1 program.
-        jassert (af->getNumPrograms() > 0);
 
         activePlugins.add (this);
     }
@@ -802,24 +798,24 @@ public:
     //==============================================================================
     VstInt32 getProgram() override
     {
-        return filter != nullptr ? filter->getCurrentProgram() : 0;
+        return (filter != nullptr && filter->getNumPrograms() > 0 ? filter->getCurrentProgram() : 0);
     }
 
     void setProgram (VstInt32 program) override
     {
-        if (filter != nullptr)
+        if (filter != nullptr && filter->getNumPrograms() > 0)
             filter->setCurrentProgram (program);
     }
 
     void setProgramName (char* name) override
     {
-        if (filter != nullptr)
+        if (filter != nullptr && filter->getNumPrograms() > 0)
             filter->changeProgramName (filter->getCurrentProgram(), name);
     }
 
     void getProgramName (char* name) override
     {
-        if (filter != nullptr)
+        if (filter != nullptr && filter->getNumPrograms() > 0)
             filter->getProgramName (filter->getCurrentProgram()).copyToUTF8 (name, 24 + 1);
     }
 

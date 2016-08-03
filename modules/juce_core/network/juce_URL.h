@@ -283,7 +283,7 @@ public:
                                  if the parameter httpRequestCmd is not specified (or empty) then this
                                  parameter will determine which HTTP request command will be used
                                  (POST or GET).
-        @param progressCallback  if this is non-zero, it lets you supply a callback function
+        @param progressCallback  if this is not a nullptr, it lets you supply a callback function
                                  to keep track of the operation's progress. This can be useful
                                  for lengthy POST operations, so that you can provide user feedback.
         @param progressCallbackContext  if a callback is specified, this value will be passed to
