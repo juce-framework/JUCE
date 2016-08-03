@@ -49,7 +49,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 {
     Pimpl (const String&, int index,
            int minWidth, int minHeight,
-           int maxWidth, int maxHeight)
+           int maxWidth, int maxHeight, bool /*highQuality*/)
        : isRecording (false),
          openedSuccessfully (false),
          imageNeedsFlipping (false),

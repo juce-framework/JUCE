@@ -597,10 +597,10 @@ private:
             if (wc->isRegistered())
             {
                 DWORD exstyle = 0;
-                DWORD type = WS_CHILD;
+                DWORD windowType = WS_CHILD;
 
                 hwnd = CreateWindowEx (exstyle, wc->getWindowClassName(),
-                                       L"", type, 0, 0, 0, 0, parentToAddTo, 0,
+                                       L"", windowType, 0, 0, 0, 0, parentToAddTo, 0,
                                        (HINSTANCE) Process::getCurrentModuleInstanceHandle(), 0);
 
                 if (hwnd != 0)
