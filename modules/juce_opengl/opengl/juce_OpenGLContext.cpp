@@ -89,6 +89,10 @@ public:
             context.nativeContext = nativeContext;
         else
             nativeContext = nullptr;
+
+       #if JUCE_MAC
+        displayLink = nullptr;
+       #endif
     }
 
     ~CachedImage()
@@ -101,18 +105,24 @@ public:
     {
         if (nativeContext != nullptr)
         {
+           #if !JUCE_MAC
             renderThread = new ThreadPool (1);
+           #endif
             resume();
         }
     }
 
     void stop()
     {
+       #if JUCE_MAC
+        pause();
+       #else
         if (renderThread != nullptr)
         {
             pause();
             renderThread = nullptr;
         }
+       #endif
 
         hasInitialised = false;
     }
@@ -120,18 +130,48 @@ public:
     //==============================================================================
     void pause()
     {
+       #if JUCE_MAC
+        if (displayLink != nullptr)
+        {
+            CVDisplayLinkStop (displayLink);
+            CVDisplayLinkRelease (displayLink);
+            displayLink = nullptr;
+            hasInitialised = false;
+            context.makeActive();
+            shutdownOnThread();
+            OpenGLContext::deactivateCurrentContext();
+        }
+       #else
         if (renderThread != nullptr)
         {
             repaintEvent.signal();
             renderThread->removeJob (this, true, -1);
         }
+       #endif
     }
 
     void resume()
     {
+       #if JUCE_MAC
+        initialiseOnThread();
+        hasInitialised = true;
+        CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
+        CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
+        CVDisplayLinkStart (displayLink);
+       #else
         if (renderThread != nullptr)
             renderThread->addJob (this, false);
+       #endif
     }
+
+   #if JUCE_MAC
+    static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*, CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
+    {
+        CachedImage* self = (CachedImage*) displayLinkContext;
+        self->renderFrame();
+        return kCVReturnSuccess;
+    }
+   #endif
 
     //==============================================================================
     void paint (Graphics&) override {}
@@ -534,7 +574,11 @@ public:
     Atomic<int> needsUpdate;
     uint32 lastMMLockReleaseTime;
 
+   #if JUCE_MAC
+    CVDisplayLinkRef displayLink;
+   #else
     ScopedPointer<ThreadPool> renderThread;
+   #endif
 
    #if JUCE_IOS
     iOSBackgroundProcessCheck backgroundProcessCheck;
