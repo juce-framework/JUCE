@@ -519,7 +519,7 @@ public:
             {
                 insertPos += indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
-                memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ElementType));
+                memmove (insertPos + numberOfElements, insertPos, (size_t) numberToMove * sizeof (ElementType));
             }
             else
             {
