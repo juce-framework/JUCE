@@ -55,6 +55,10 @@
  #import <AVFoundation/AVFoundation.h>
  #import <CoreMIDI/MIDIServices.h>
 
+ #if TARGET_OS_SIMULATOR
+  #import <CoreMIDI/MIDINetworkSession.h>
+ #endif
+
 //==============================================================================
 #elif JUCE_WINDOWS
  #if JUCE_WASAPI

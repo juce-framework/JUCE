@@ -220,6 +220,14 @@ namespace CoreMidiHelpers
             // correctly when called from the message thread!
             jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
+           #if TARGET_OS_SIMULATOR
+            // Enable MIDI for iOS simulator
+            MIDINetworkSession* session = [MIDINetworkSession defaultSession];
+            session.enabled = YES;
+            session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
+           #endif
+
+
             CoreMidiHelpers::ScopedCFString name;
             name.cfString = getGlobalMidiClientName().toCFString();
             CHECK_ERROR (MIDIClientCreate (name.cfString, &globalSystemChangeCallback, nullptr, &globalMidiClient));
