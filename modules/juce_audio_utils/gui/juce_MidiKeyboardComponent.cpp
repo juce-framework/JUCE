@@ -90,6 +90,7 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation 
 
     colourChanged();
     setWantsKeyboardFocus (true);
+    setLosesFocusWhenAccessingMainMenuBar (true);
 
     state.addListener (this);
 

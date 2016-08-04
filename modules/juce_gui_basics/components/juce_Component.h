@@ -880,6 +880,18 @@ public:
                                    bool& allowsClicksOnChildComponents) const noexcept;
 
 
+    /** Changes the focus behavior when the main menu bar is accessed.
+
+         If set to true, then clicking the main menu bar on Mac will unfocus the component.
+    */
+    void setLosesFocusWhenAccessingMainMenuBar (bool loseFocus) noexcept { flags.shouldReleaseFocusOnMainMenuBarAccess = loseFocus; }
+
+    /** Retrieves the focus behavior when the main menu bar is accessed.
+
+        Returns true if clicking the main menu bar on Mac will unfocus this component.
+     */
+    bool getLosesFocusWhenAccessingMainMenuBar() const noexcept          { return flags.shouldReleaseFocusOnMainMenuBarAccess; }
+
     /** Returns true if a given point lies within this component or one of its children.
 
         Never override this method! Use hitTest to create custom hit regions.
@@ -2266,27 +2278,28 @@ private:
 
     struct ComponentFlags
     {
-        bool hasHeavyweightPeerFlag     : 1;
-        bool visibleFlag                : 1;
-        bool opaqueFlag                 : 1;
-        bool ignoresMouseClicksFlag     : 1;
-        bool allowChildMouseClicksFlag  : 1;
-        bool wantsFocusFlag             : 1;
-        bool isFocusContainerFlag       : 1;
-        bool dontFocusOnMouseClickFlag  : 1;
-        bool alwaysOnTopFlag            : 1;
-        bool bufferToImageFlag          : 1;
-        bool bringToFrontOnClickFlag    : 1;
-        bool repaintOnMouseActivityFlag : 1;
-        bool isDisabledFlag             : 1;
-        bool childCompFocusedFlag       : 1;
-        bool dontClipGraphicsFlag       : 1;
-        bool mouseDownWasBlocked        : 1;
-        bool isMoveCallbackPending      : 1;
-        bool isResizeCallbackPending    : 1;
+        bool hasHeavyweightPeerFlag                : 1;
+        bool visibleFlag                           : 1;
+        bool opaqueFlag                            : 1;
+        bool ignoresMouseClicksFlag                : 1;
+        bool allowChildMouseClicksFlag             : 1;
+        bool wantsFocusFlag                        : 1;
+        bool isFocusContainerFlag                  : 1;
+        bool dontFocusOnMouseClickFlag             : 1;
+        bool alwaysOnTopFlag                       : 1;
+        bool bufferToImageFlag                     : 1;
+        bool bringToFrontOnClickFlag               : 1;
+        bool repaintOnMouseActivityFlag            : 1;
+        bool isDisabledFlag                        : 1;
+        bool childCompFocusedFlag                  : 1;
+        bool dontClipGraphicsFlag                  : 1;
+        bool mouseDownWasBlocked                   : 1;
+        bool isMoveCallbackPending                 : 1;
+        bool isResizeCallbackPending               : 1;
        #if JUCE_DEBUG
-        bool isInsidePaintCall          : 1;
+        bool isInsidePaintCall                     : 1;
        #endif
+        bool shouldReleaseFocusOnMainMenuBarAccess : 1;
     };
 
     union
