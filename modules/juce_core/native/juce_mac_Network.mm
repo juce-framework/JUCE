@@ -145,7 +145,8 @@ public:
         while (isThreadRunning() && ! initialised)
         {
             if (callback != nullptr)
-                callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]);
+                if (! callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
+                    return false;
 
             Thread::sleep (1);
         }
@@ -398,7 +399,8 @@ public:
         while (isThreadRunning() && ! initialised)
         {
             if (callback != nullptr)
-                callback (context, latestTotalBytes, (int) [[request HTTPBody] length]);
+                if (! callback (context, latestTotalBytes, (int) [[request HTTPBody] length]))
+                    return false;
 
             Thread::sleep (1);
         }
