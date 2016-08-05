@@ -593,7 +593,7 @@ private:
 
         jassert (alertBox != nullptr); // you have to return one of these!
 
-        alertBox->setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows);
+        alertBox->setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (modal)
