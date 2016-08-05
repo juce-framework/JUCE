@@ -34,6 +34,9 @@
     computer's audio/MIDI devices using AudioDeviceManager and AudioProcessorPlayer.
 */
 class StandalonePluginHolder
+   #if JUCE_IOS || JUCE_ANDROID
+    : private Timer
+   #endif
 {
 public:
     /** Creates an instance of the default plugin.
@@ -61,10 +64,18 @@ public:
         setupAudioDevices (preferredDefaultDeviceName, preferredSetupOptions);
         reloadPluginState();
         startPlaying();
+
+       #if JUCE_IOS || JUCE_ANDROID
+        startTimer (500);
+       #endif
     }
 
     virtual ~StandalonePluginHolder()
     {
+       #if JUCE_IOS || JUCE_ANDROID
+        stopTimer();
+       #endif
+
         deletePlugin();
         shutDownAudioDevices();
     }
@@ -265,6 +276,10 @@ public:
     AudioDeviceManager deviceManager;
     AudioProcessorPlayer player;
 
+   #if JUCE_IOS || JUCE_ANDROID
+    StringArray lastMidiDevices;
+   #endif
+
 private:
     void setupAudioDevices (const String& preferredDefaultDeviceName,
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
@@ -282,6 +297,43 @@ private:
         deviceManager.removeMidiInputCallback (String(), &player);
         deviceManager.removeAudioCallback (&player);
     }
+
+   #if JUCE_IOS || JUCE_ANDROID
+    void timerCallback() override
+    {
+        StringArray midiInputDevices = MidiInput::getDevices();
+        if (midiInputDevices != lastMidiDevices)
+        {
+            {
+                const int n = lastMidiDevices.size();
+                for (int i = 0; i < n; ++i)
+                {
+                    const String& oldDevice = lastMidiDevices[i];
+
+                    if (! midiInputDevices.contains (oldDevice))
+                    {
+                        deviceManager.setMidiInputEnabled (oldDevice, false);
+                        deviceManager.removeMidiInputCallback (oldDevice, &player);
+                    }
+                }
+            }
+
+            {
+                const int n = midiInputDevices.size();
+                for (int i = 0; i < n; ++i)
+                {
+                    const String& newDevice = midiInputDevices[i];
+
+                    if (! lastMidiDevices.contains (newDevice))
+                    {
+                        deviceManager.addMidiInputCallback (newDevice, &player);
+                        deviceManager.setMidiInputEnabled (newDevice, true);
+                    }
+                }
+            }
+        }
+    }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandalonePluginHolder)
 };
