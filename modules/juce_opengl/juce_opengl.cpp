@@ -149,6 +149,29 @@ static void checkGLError (const char* file, const int line)
         if (e == GL_NO_ERROR)
             break;
 
+        // The GL error could be due to the window being closed in the main thread.
+        // Check whether this is the case and only if it isn't trigger an assertion failure.
+        OpenGLContext* currentContext = OpenGLContext::getCurrentContext();
+        jassert (currentContext != nullptr);
+        Component* component = currentContext->getTargetComponent();
+        if (component == nullptr)
+            break;
+        ComponentPeer* peer = component->getPeer();
+        if (peer == nullptr)
+            break;
+       #if JUCE_MAC
+        NSView* nsView = (NSView*) peer->getNativeHandle();
+        if (nsView == nullptr)
+            break;
+        NSWindow* nsWindow = [nsView window];
+        if (nsWindow == nullptr)
+            break;
+        if (! [nsWindow isVisible])
+            break;
+        if ([nsWindow hidesOnDeactivate] && ! [NSApp isActive])
+            break;
+       #endif
+
         DBG ("***** " << getGLErrorMessage (e) << "  at " << file << " : " << line);
         jassertfalse;
     }
