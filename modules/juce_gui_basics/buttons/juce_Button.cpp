@@ -480,7 +480,7 @@ bool Button::isMouseOrTouchOver (const MouseEvent& e)
 {
     if (e.source.isTouch())
         return getLocalBounds().toFloat().contains (e.position);
-    
+
     return isMouseOver();
 }
 
