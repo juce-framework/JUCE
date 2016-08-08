@@ -710,10 +710,13 @@ void Component::removeFromDesktop()
         ComponentPeer* const peer = ComponentPeer::getPeerFor (this);
         jassert (peer != nullptr);
 
-        flags.hasHeavyweightPeerFlag = false;
-        delete peer;
+        ScopedPointer<ComponentPeer> oldPeerToDelete (peer);
 
+        flags.hasHeavyweightPeerFlag = false;
         Desktop::getInstance().removeDesktopComponent (this);
+
+        if (masterReference.get() != nullptr)
+            internalHierarchyChanged();
     }
 }
 
