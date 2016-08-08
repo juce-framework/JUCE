@@ -199,10 +199,12 @@ void NSViewComponent::setView (void* const view)
 {
     if (view != getView())
     {
-        attachment = nullptr;
+        ReferenceCountedObject* object = nullptr;
 
         if (view != nullptr)
-            attachment = attachViewToComponent (*this, view);
+            object = attachViewToComponent (*this, view);
+
+        attachment = object;
     }
 }
 
