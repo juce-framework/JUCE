@@ -56,8 +56,13 @@ public:
         will lazily pull the data into memory when blocks are accessed.
 
         If the file can't be opened for some reason, the getData() method will return a null pointer.
+
+        If exclusive is false then other apps can also open the same memory mapped file and use this
+        mapping as an effective way of communicating. If exclusive is true then the mapped file will
+        be opened exclusively - preventing other apps to access the file which may improve the
+        performance of accessing the file.
     */
-    MemoryMappedFile (const File& file, AccessMode mode);
+    MemoryMappedFile (const File& file, AccessMode mode, bool exclusive = false);
 
     /** Opens a section of a file and maps it to an area of virtual memory.
 
@@ -77,7 +82,8 @@ public:
     */
     MemoryMappedFile (const File& file,
                       const Range<int64>& fileRange,
-                      AccessMode mode);
+                      AccessMode mode,
+                      bool exclusive = false);
 
     /** Destructor. */
     ~MemoryMappedFile();
@@ -106,7 +112,7 @@ private:
     int fileHandle;
    #endif
 
-    void openInternal (const File&, AccessMode);
+    void openInternal (const File&, AccessMode, bool);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedFile)
 };
