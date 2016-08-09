@@ -291,6 +291,14 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
 }
 
+void MainHostWindow::menuBarActivated (bool isActivated)
+{
+    GraphDocumentComponent* const graphEditor = getGraphEditor();
+
+    if (graphEditor != nullptr && isActivated)
+        graphEditor->unfocusKeyboardComponent();
+}
+
 void MainHostWindow::createPlugin (const PluginDescription* desc, int x, int y)
 {
     GraphDocumentComponent* const graphEditor = getGraphEditor();

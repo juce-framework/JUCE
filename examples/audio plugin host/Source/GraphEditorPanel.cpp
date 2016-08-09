@@ -1141,3 +1141,8 @@ void GraphDocumentComponent::createNewPlugin (const PluginDescription* desc, int
 {
     graphPanel->createNewPlugin (desc, x, y);
 }
+
+void GraphDocumentComponent::unfocusKeyboardComponent()
+{
+    keyboardComp->unfocusAllComponents();
+}

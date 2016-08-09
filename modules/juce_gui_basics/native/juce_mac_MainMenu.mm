@@ -728,19 +728,13 @@ static void mainMenuTrackingChanged (bool isTracking)
     {
         menuHandler->isOpen = isTracking;
 
-        if (isTracking)
+        if (MenuBarModel* model = menuHandler->currentModel)
+            model->handleMenuBarActivate (isTracking);
+
+        if (menuHandler->defferedUpdateRequested && ! isTracking)
         {
-            if (Component* c = Component::getCurrentlyFocusedComponent())
-                if (c->getLosesFocusWhenAccessingMainMenuBar())
-                    c->unfocusAllComponents();
-        }
-        else
-        {
-            if (menuHandler->defferedUpdateRequested)
-            {
-                menuHandler->defferedUpdateRequested = false;
-                menuHandler->menuBarItemsChanged (menuHandler->currentModel);
-            }
+            menuHandler->defferedUpdateRequested = false;
+            menuHandler->menuBarItemsChanged (menuHandler->currentModel);
         }
     }
 }
