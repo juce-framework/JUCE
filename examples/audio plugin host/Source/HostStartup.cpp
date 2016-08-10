@@ -94,7 +94,8 @@ public:
 
         if (fileToOpen.existsAsFile())
             if (GraphDocumentComponent* graph = mainWindow->getGraphEditor())
-                graph->graph.loadFrom (fileToOpen, true);
+                if (FilterGraph* ioGraph = graph->graph.get())
+                    ioGraph->loadFrom (fileToOpen, true);
     }
 
     void shutdown() override
