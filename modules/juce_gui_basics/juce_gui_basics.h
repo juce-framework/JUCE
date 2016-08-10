@@ -153,6 +153,7 @@ class BubbleComponent;
 class KeyPressMappingSet;
 class ApplicationCommandManagerListener;
 class DrawableButton;
+class FlexBox;
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
@@ -280,6 +281,11 @@ class DrawableButton;
 #include "lookandfeel/juce_LookAndFeel_V2.h"
 #include "lookandfeel/juce_LookAndFeel_V1.h"
 #include "lookandfeel/juce_LookAndFeel_V3.h"
+
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS // these classes are C++11-only
+#include "layout/juce_FlexItem.h"
+#include "layout/juce_FlexBox.h"
+#endif
 
 }
 

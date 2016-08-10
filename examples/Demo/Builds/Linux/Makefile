@@ -73,6 +73,7 @@ OBJECTS := \
   $(JUCE_OBJDIR)/ComponentTransformsDemo_377f7889.o \
   $(JUCE_OBJDIR)/CryptographyDemo_232d46d7.o \
   $(JUCE_OBJDIR)/DialogsDemo_19d585d0.o \
+  $(JUCE_OBJDIR)/FlexBoxDemo_e4f3d9b7.o \
   $(JUCE_OBJDIR)/FontsDemo_6da1e5e9.o \
   $(JUCE_OBJDIR)/GraphicsDemo_85142ef6.o \
   $(JUCE_OBJDIR)/ImagesDemo_ecf13aa3.o \
@@ -213,6 +214,11 @@ $(JUCE_OBJDIR)/CryptographyDemo_232d46d7.o: ../../Source/Demos/CryptographyDemo.
 $(JUCE_OBJDIR)/DialogsDemo_19d585d0.o: ../../Source/Demos/DialogsDemo.cpp
 	-@mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling DialogsDemo.cpp"
+	@$(CXX) $(JUCE_CXXFLAGS) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/FlexBoxDemo_e4f3d9b7.o: ../../Source/Demos/FlexBoxDemo.cpp
+	-@mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling FlexBoxDemo.cpp"
 	@$(CXX) $(JUCE_CXXFLAGS) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/FontsDemo_6da1e5e9.o: ../../Source/Demos/FontsDemo.cpp
