@@ -753,7 +753,21 @@ public:
     }
 
     void* getPlatformSpecificData() override    { return effect; }
-    const String getName() const override       { return name; }
+    const String getName() const override
+    {
+        if (effect != nullptr)
+        {
+            char productNameBuffer [kVstMaxProductStrLen] = { 0 };
+
+            if (dispatch (effGetProductString, 0, 0, productNameBuffer, 0.0f) != 0)
+            {
+                String productName (productNameBuffer, sizeof (productNameBuffer));
+                if (productName.length() > 0)
+                    return productName;
+            }
+        }
+        return name;
+    }
 
     int getUID() const
     {
