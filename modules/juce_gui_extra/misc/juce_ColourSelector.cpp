@@ -336,7 +336,7 @@ ColourSelector::ColourSelector (const int sectionsToShow, const int edge, const 
         addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h,  gapAroundColourSpaceComponent));
     }
 
-    update (sendNotification);
+    update (dontSendNotification);
 }
 
 ColourSelector::~ColourSelector()
