@@ -198,11 +198,9 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
     bundle = bundle.getParentDirectory().getParentDirectory();
    #endif
 
-    if (! bundle.isDirectory())
-        return false;
-
-    return (bundle.getFileExtension() == ".appex");
-  #else
-    return false;
+    if (bundle.isDirectory())
+        return (bundle.getFileExtension() == ".appex");
   #endif
+
+    return false;
 }
