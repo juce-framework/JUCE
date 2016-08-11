@@ -966,16 +966,16 @@ bool File::createSymbolicLink (const File& linkFileToCreate, bool overwriteExist
 }
 
 //==============================================================================
-MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
+MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode, bool exclusive)
     : address (nullptr), range (0, file.getSize()), fileHandle (0)
 {
-    openInternal (file, mode);
+    openInternal (file, mode, exclusive);
 }
 
-MemoryMappedFile::MemoryMappedFile (const File& file, const Range<int64>& fileRange, AccessMode mode)
+MemoryMappedFile::MemoryMappedFile (const File& file, const Range<int64>& fileRange, AccessMode mode, bool exclusive)
     : address (nullptr), range (fileRange.getIntersectionWith (Range<int64> (0, file.getSize()))), fileHandle (0)
 {
-    openInternal (file, mode);
+    openInternal (file, mode, exclusive);
 }
 
 

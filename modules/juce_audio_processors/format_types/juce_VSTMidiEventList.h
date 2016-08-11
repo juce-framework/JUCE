@@ -86,7 +86,7 @@ public:
             if (se->type == kVstSysExType)
                 delete[] se->sysexDump;
 
-            se->sysexDump = new char [numBytes];
+            se->sysexDump = new char [(size_t) numBytes];
             memcpy (se->sysexDump, midiData, (size_t) numBytes);
 
             se->type = kVstSysExType;

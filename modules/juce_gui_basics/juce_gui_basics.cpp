@@ -253,6 +253,10 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "misc/juce_BubbleComponent.cpp"
 #include "misc/juce_DropShadower.cpp"
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS // these classes are C++11-only
+ #include "layout/juce_FlexBox.cpp"
+#endif
+
 #if JUCE_IOS || JUCE_WINDOWS
  #include "native/juce_MultiTouchMapper.h"
 #endif

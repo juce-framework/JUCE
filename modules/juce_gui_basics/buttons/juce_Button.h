@@ -503,6 +503,8 @@ private:
     void sendClickMessage (const ModifierKeys&);
     void sendStateMessage();
 
+    bool isMouseOrTouchOver (const MouseEvent& e);
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button)
 };
 

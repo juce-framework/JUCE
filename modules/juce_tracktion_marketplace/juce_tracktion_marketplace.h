@@ -39,7 +39,7 @@
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_data_structures juce_cryptography
+  dependencies:     juce_cryptography
 
  END_JUCE_MODULE_DECLARATION
 
@@ -62,7 +62,10 @@
 
 //==============================================================================
 #include <juce_cryptography/juce_cryptography.h>
-#include <juce_data_structures/juce_data_structures.h>
+
+#if JUCE_MODULE_AVAILABLE_juce_data_structures
+ #include <juce_data_structures/juce_data_structures.h>
+#endif
 
 #if JUCE_MODULE_AVAILABLE_juce_gui_extra
  #include <juce_gui_extra/juce_gui_extra.h>
@@ -70,8 +73,10 @@
 
 namespace juce
 {
+   #if JUCE_MODULE_AVAILABLE_juce_data_structures
     #include "marketplace/juce_OnlineUnlockStatus.h"
     #include "marketplace/juce_TracktionMarketplaceStatus.h"
+   #endif
     #include "marketplace/juce_KeyFileGeneration.h"
 
    #if JUCE_MODULE_AVAILABLE_juce_gui_extra

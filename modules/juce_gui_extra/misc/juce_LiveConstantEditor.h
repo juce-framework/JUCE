@@ -52,6 +52,7 @@ namespace LiveConstantEditor
     inline void setFromString (uint64& v,         const String& s)    { v = (uint64)         parseInt (s); }
     inline void setFromString (double& v,         const String& s)    { v = parseDouble (s); }
     inline void setFromString (float& v,          const String& s)    { v = (float) parseDouble (s); }
+    inline void setFromString (bool& v,           const String& s)    { v = (s == "true"); }
     inline void setFromString (String& v,         const String& s)    { v = s; }
     inline void setFromString (Colour& v,         const String& s)    { v = Colour ((uint32) parseInt (s)); }
 
@@ -63,6 +64,7 @@ namespace LiveConstantEditor
     inline String getAsString (unsigned short v, bool preferHex) { return intToString ((int) v, preferHex); }
     inline String getAsString (int v, bool preferHex)            { return intToString ((int) v, preferHex); }
     inline String getAsString (unsigned int v, bool preferHex)   { return intToString ((int) v, preferHex); }
+    inline String getAsString (bool v, bool)                     { return v ? "true" : "false"; }
     inline String getAsString (int64 v, bool preferHex)          { return intToString ((int64) v, preferHex); }
     inline String getAsString (uint64 v, bool preferHex)         { return intToString ((int64) v, preferHex); }
     inline String getAsString (Colour v, bool)                   { return intToString ((int) v.getARGB(), true); }
@@ -135,6 +137,7 @@ namespace LiveConstantEditor
     Component* createColourEditor (LivePropertyEditorBase&);
     Component* createIntegerSlider (LivePropertyEditorBase&);
     Component* createFloatSlider (LivePropertyEditorBase&);
+    Component* createBoolSlider (LivePropertyEditorBase&);
 
     template <typename Type> struct CustomEditor    { static Component* create (LivePropertyEditorBase&)   { return nullptr; } };
     template<> struct CustomEditor<char>            { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
@@ -148,6 +151,7 @@ namespace LiveConstantEditor
     template<> struct CustomEditor<float>           { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
     template<> struct CustomEditor<double>          { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
     template<> struct CustomEditor<Colour>          { static Component* create (LivePropertyEditorBase& e) { return createColourEditor (e); } };
+    template<> struct CustomEditor<bool>            { static Component* create (LivePropertyEditorBase& e) { return createBoolSlider (e); } };
 
     template <typename Type>
     struct LivePropertyEditor  : public LivePropertyEditorBase

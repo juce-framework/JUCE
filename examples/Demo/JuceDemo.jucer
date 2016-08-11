@@ -282,6 +282,7 @@
         <FILE id="F4wkwd" name="CryptographyDemo.cpp" compile="1" resource="0"
               file="Source/Demos/CryptographyDemo.cpp"/>
         <FILE id="E17XEZ" name="DialogsDemo.cpp" compile="1" resource="0" file="Source/Demos/DialogsDemo.cpp"/>
+        <FILE id="mYE1dA" name="FlexBoxDemo.cpp" compile="1" resource="0" file="Source/Demos/FlexBoxDemo.cpp"/>
         <FILE id="oM20ll" name="FontsDemo.cpp" compile="1" resource="0" file="Source/Demos/FontsDemo.cpp"/>
         <FILE id="emYkSr" name="GraphicsDemo.cpp" compile="1" resource="0"
               file="Source/Demos/GraphicsDemo.cpp"/>

@@ -88,6 +88,10 @@ public:
         */
         virtual void menuCommandInvoked (MenuBarModel* menuBarModel,
                                          const ApplicationCommandTarget::InvocationInfo& info) = 0;
+
+        /** Called when the menu bar is first activated or when the user finished interacting
+            with the menu bar. */
+        virtual void menuBarActivated (MenuBarModel* menuBarModel, bool isActive);
     };
 
     /** Registers a listener for callbacks when the menu items in this model change.
@@ -125,6 +129,12 @@ public:
     */
     virtual void menuItemSelected (int menuItemID,
                                    int topLevelMenuIndex) = 0;
+
+    /** This is called when the user starts/stops navigating the maenu bar.
+
+        @param isActive              true when the user starts navigating the menu bar
+    */
+    virtual void menuBarActivated (bool isActive);
 
     //==============================================================================
    #if JUCE_MAC || DOXYGEN
@@ -167,7 +177,8 @@ public:
     void applicationCommandListChanged() override;
     /** @internal */
     void handleAsyncUpdate() override;
-
+    /** @internal */
+    void handleMenuBarActivate (bool isActive);
 private:
     ApplicationCommandManager* manager;
     ListenerList<Listener> listeners;

@@ -176,6 +176,7 @@ struct KeyFileUtils
 };
 
 //==============================================================================
+#if JUCE_MODULE_AVAILABLE_juce_data_structures
 const char* OnlineUnlockStatus::unlockedProp = "u";
 const char* OnlineUnlockStatus::expiryTimeProp = "t";
 static const char* stateTagName = "REG";
@@ -457,6 +458,8 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::attemptWebserverUnlock (con
 
     return handleFailedConnection();
 }
+
+#endif // JUCE_MODULE_AVAILABLE_juce_data_structures
 
 //==============================================================================
 String KeyGeneration::generateKeyFile (const String& appName,

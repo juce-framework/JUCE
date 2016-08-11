@@ -728,6 +728,9 @@ static void mainMenuTrackingChanged (bool isTracking)
     {
         menuHandler->isOpen = isTracking;
 
+        if (MenuBarModel* model = menuHandler->currentModel)
+            model->handleMenuBarActivate (isTracking);
+
         if (menuHandler->defferedUpdateRequested && ! isTracking)
         {
             menuHandler->defferedUpdateRequested = false;

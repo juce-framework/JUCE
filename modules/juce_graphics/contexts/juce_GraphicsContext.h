@@ -462,7 +462,7 @@ public:
     //==============================================================================
     /** Types of rendering quality that can be specified when drawing images.
 
-        @see blendImage, Graphics::setImageResamplingQuality
+        @see Graphics::setImageResamplingQuality
     */
     enum ResamplingQuality
     {
