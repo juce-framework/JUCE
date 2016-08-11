@@ -58,6 +58,10 @@ static NSRect flippedScreenRect (NSRect r) noexcept
     return r;
 }
 
+#if JUCE_MODULE_AVAILABLE_juce_opengl
+void componentPeerAboutToBeRemovedFromScreen (ComponentPeer&);
+#endif
+
 //==============================================================================
 class NSViewComponentPeer  : public ComponentPeer,
                              private AsyncUpdater
@@ -674,8 +678,12 @@ public:
 
     void redirectWillMoveToWindow (NSWindow* newWindow)
     {
+       #if JUCE_MODULE_AVAILABLE_juce_opengl
         if ([view window] == window && newWindow == nullptr)
-            getComponent().removeFromDesktop();
+            componentPeerAboutToBeRemovedFromScreen (*this);
+       #else
+        ignoreUnused (newWindow);
+       #endif
     }
 
     void sendMouseEvent (NSEvent* ev)

@@ -193,15 +193,6 @@ public:
                 sharedPointer->clearPointer();
         }
 
-        /** Returns a raw pointer to the underlying object. */
-        ObjectType* get() const noexcept
-        {
-            if (sharedPointer != nullptr)
-                return sharedPointer->get();
-
-            return nullptr;
-        }
-
     private:
         SharedRef sharedPointer;
 
