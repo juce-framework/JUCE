@@ -1967,8 +1967,7 @@ private:
     {
         bool isCancel = false;
 
-        // touchIndex zero is reserved for the mouse
-        const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID) + 1;
+        const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
         const int64 time = getMouseEventTime();
         const Point<float> pos (globalToLocal (Point<float> (touch.x / 100.0f,
                                                              touch.y / 100.0f)));

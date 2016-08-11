@@ -53,7 +53,8 @@
 
     The call-out will resize and position itself when the content changes size.
 */
-class JUCE_API  CallOutBox    : public Component
+class JUCE_API  CallOutBox    : public Component,
+                                private Timer
 {
 public:
     //==============================================================================
@@ -173,7 +174,10 @@ private:
     Image background;
     bool dismissalMouseClicksAreAlwaysConsumed;
 
+    Time creationTime;
+
     void refreshPath();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox)
 };
