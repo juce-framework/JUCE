@@ -787,6 +787,7 @@ static float getMaximumTouchForce (UITouch* touch) noexcept
         return (float) touch.maximumPossibleForce;
    #endif
 
+    ignoreUnused (touch);
     return 0.0f;
 }
 
@@ -797,6 +798,7 @@ static float getTouchForce (UITouch* touch) noexcept
         return (float) touch.force;
    #endif
 
+    ignoreUnused (touch);
     return 0.0f;
 }
 
