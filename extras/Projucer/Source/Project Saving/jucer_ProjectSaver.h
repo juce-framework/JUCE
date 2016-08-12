@@ -104,6 +104,8 @@ public:
             return Result::fail (errors[0]);
         }
 
+        project.updateModificationTime();
+
         return Result::ok();
     }
 

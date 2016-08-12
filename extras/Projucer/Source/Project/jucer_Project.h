@@ -311,6 +311,10 @@ public:
     //==============================================================================
     static const char* projectFileExtension;
 
+    //==============================================================================
+    bool hasProjectBeenModified();
+    void updateModificationTime() { modificationTime = getFile().getLastModificationTime(); }
+
 private:
     //==============================================================================
     void setMissingAudioPluginDefaultValues();
@@ -333,6 +337,8 @@ private:
     void removeDefunctExporters();
     void updateOldModulePaths();
     void warnAboutOldProjucerVersion();
+
+    Time modificationTime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
 };
