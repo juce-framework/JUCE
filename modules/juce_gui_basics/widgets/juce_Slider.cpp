@@ -33,7 +33,7 @@ public:
         style (sliderStyle),
         lastCurrentValue (0), lastValueMin (0), lastValueMax (0),
         minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
-        skewFactor (1.0), velocityModeSensitivity (1.0),
+        skewFactor (1.0), symmetricSkew(false), velocityModeSensitivity (1.0),
         velocityModeOffset (0.0), velocityModeThreshold (1),
         sliderRegionStart (0), sliderRegionSize (1), sliderBeingDragged (-1),
         pixelsForFullDragExtent (250),
@@ -777,13 +777,16 @@ public:
 
     void handleVelocityDrag (const MouseEvent& e)
     {
-        const float mouseDiff = style == RotaryHorizontalVerticalDrag
-                                   ? (e.position.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.position.y)
-                                   : (isHorizontal()
-                                       || style == RotaryHorizontalDrag
-                                       || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                         ? e.position.x - mousePosWhenLastDragged.x
-                                         : e.position.y - mousePosWhenLastDragged.y;
+        const bool hasHorizontalStyle =
+            (isHorizontal() ||  style == RotaryHorizontalDrag
+                            || (style == IncDecButtons && incDecDragDirectionIsHorizontal()));
+
+        float mouseDiff;
+        if (style == RotaryHorizontalVerticalDrag)
+            mouseDiff = (e.position.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.position.y);
+        else
+            mouseDiff = (hasHorizontalStyle ? e.position.x - mousePosWhenLastDragged.x
+                                            : e.position.y - mousePosWhenLastDragged.y);
 
         const double maxSpeed = jmax (200, sliderRegionSize);
         double speed = jlimit (0.0, maxSpeed, (double) std::abs (mouseDiff));
@@ -1181,6 +1184,7 @@ public:
     double lastCurrentValue, lastValueMin, lastValueMax;
     double minimum, maximum, interval, doubleClickReturnValue;
     double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
+    bool symmetricSkew;
     double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
     int velocityModeThreshold;
     RotaryParameters rotaryParams;
@@ -1318,7 +1322,6 @@ void Slider::setRotaryParameters (RotaryParameters p) noexcept
     // make sure the values are sensible..
     jassert (p.startAngleRadians >= 0 && p.endAngleRadians >= 0);
     jassert (p.startAngleRadians < float_Pi * 4.0f && p.endAngleRadians < float_Pi * 4.0f);
-    jassert (p.startAngleRadians < p.endAngleRadians);
 
     pimpl->rotaryParams = p;
 }
@@ -1352,11 +1355,18 @@ void Slider::setVelocityModeParameters (const double sensitivity, const int thre
 }
 
 double Slider::getSkewFactor() const noexcept               { return pimpl->skewFactor; }
-void Slider::setSkewFactor (const double factor)            { pimpl->skewFactor = factor; }
+bool Slider::isSymmetricSkew() const noexcept               { return pimpl->symmetricSkew; }
+void Slider::setSkewFactor (const double factor,
+                            const bool symmetricSkew)
+{
+    pimpl->skewFactor = factor;
+    pimpl->symmetricSkew = symmetricSkew;
+}
 
 void Slider::setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint)
 {
     pimpl->setSkewFactorFromMidPoint (sliderValueToShowAtMidPoint);
+    pimpl->symmetricSkew = false;
 }
 
 int Slider::getMouseDragSensitivity() const noexcept        { return pimpl->pixelsForFullDragExtent; }
@@ -1495,10 +1505,23 @@ double Slider::proportionOfLengthToValue (double proportion)
 {
     const double skew = getSkewFactor();
 
-    if (skew != 1.0 && proportion > 0.0)
-        proportion = exp (log (proportion) / skew);
+    if (!isSymmetricSkew())
+    {
+        if (skew != 1.0 && proportion > 0.0)
+            proportion = exp (log (proportion) / skew);
 
-    return getMinimum() + (getMaximum() - getMinimum()) * proportion;
+        return getMinimum() + (getMaximum() - getMinimum()) * proportion;
+    }
+    else
+    {
+        double distanceFromMiddle = 2.0 * proportion - 1.0;
+        if (skew != 1.0 && distanceFromMiddle != 0.0) {
+            distanceFromMiddle =  exp (log (fabs (distanceFromMiddle)) / skew) *
+                                       (distanceFromMiddle < 0 ? -1 : 1);
+        }
+
+        return getMinimum() + (getMaximum() - getMinimum()) / 2.0 * (1 + distanceFromMiddle);
+    }
 }
 
 double Slider::valueToProportionOfLength (double value)
@@ -1506,7 +1529,16 @@ double Slider::valueToProportionOfLength (double value)
     const double n = (value - getMinimum()) / (getMaximum() - getMinimum());
     const double skew = getSkewFactor();
 
-    return skew == 1.0 ? n : pow (n, skew);
+    if (skew == 1.0) {
+        return n;
+    }
+    else if (!isSymmetricSkew()) {
+        return pow (n, skew);
+    }
+    else {
+        double distanceFromMiddle = 2.0 * n - 1.0;
+        return (1.0 + pow( fabs( distanceFromMiddle), skew) * (distanceFromMiddle < 0 ? -1 : 1)) / 2.0;
+    }
 }
 
 double Slider::snapValue (double attemptedValue, DragMode)
