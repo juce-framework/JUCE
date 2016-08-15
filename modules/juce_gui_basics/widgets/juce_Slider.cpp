@@ -33,7 +33,7 @@ public:
         style (sliderStyle),
         lastCurrentValue (0), lastValueMin (0), lastValueMax (0),
         minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
-        skewFactor (1.0), symmetricSkew(false), velocityModeSensitivity (1.0),
+        skewFactor (1.0), symmetricSkew (false), velocityModeSensitivity (1.0),
         velocityModeOffset (0.0), velocityModeThreshold (1),
         sliderRegionStart (0), sliderRegionSize (1), sliderBeingDragged (-1),
         pixelsForFullDragExtent (250),
@@ -1356,8 +1356,8 @@ void Slider::setVelocityModeParameters (const double sensitivity, const int thre
 
 double Slider::getSkewFactor() const noexcept               { return pimpl->skewFactor; }
 bool Slider::isSymmetricSkew() const noexcept               { return pimpl->symmetricSkew; }
-void Slider::setSkewFactor (const double factor,
-                            const bool symmetricSkew)
+
+void Slider::setSkewFactor (double factor, bool symmetricSkew)
 {
     pimpl->skewFactor = factor;
     pimpl->symmetricSkew = symmetricSkew;
@@ -1505,23 +1505,21 @@ double Slider::proportionOfLengthToValue (double proportion)
 {
     const double skew = getSkewFactor();
 
-    if (!isSymmetricSkew())
+    if (! isSymmetricSkew())
     {
         if (skew != 1.0 && proportion > 0.0)
             proportion = exp (log (proportion) / skew);
 
         return getMinimum() + (getMaximum() - getMinimum()) * proportion;
     }
-    else
-    {
-        double distanceFromMiddle = 2.0 * proportion - 1.0;
-        if (skew != 1.0 && distanceFromMiddle != 0.0) {
-            distanceFromMiddle =  exp (log (fabs (distanceFromMiddle)) / skew) *
-                                       (distanceFromMiddle < 0 ? -1 : 1);
-        }
 
-        return getMinimum() + (getMaximum() - getMinimum()) / 2.0 * (1 + distanceFromMiddle);
-    }
+    double distanceFromMiddle = 2.0 * proportion - 1.0;
+
+    if (skew != 1.0 && distanceFromMiddle != 0.0)
+        distanceFromMiddle =  exp (log (std::abs (distanceFromMiddle)) / skew)
+                                    * (distanceFromMiddle < 0 ? -1 : 1);
+
+    return getMinimum() + (getMaximum() - getMinimum()) / 2.0 * (1 + distanceFromMiddle);
 }
 
 double Slider::valueToProportionOfLength (double value)
@@ -1529,16 +1527,14 @@ double Slider::valueToProportionOfLength (double value)
     const double n = (value - getMinimum()) / (getMaximum() - getMinimum());
     const double skew = getSkewFactor();
 
-    if (skew == 1.0) {
+    if (skew == 1.0)
         return n;
-    }
-    else if (!isSymmetricSkew()) {
-        return pow (n, skew);
-    }
-    else {
-        double distanceFromMiddle = 2.0 * n - 1.0;
-        return (1.0 + pow( fabs( distanceFromMiddle), skew) * (distanceFromMiddle < 0 ? -1 : 1)) / 2.0;
-    }
+
+    if (! isSymmetricSkew())
+        return std::pow (n, skew);
+
+    double distanceFromMiddle = 2.0 * n - 1.0;
+    return (1.0 + pow (std::abs (distanceFromMiddle), skew) * (distanceFromMiddle < 0 ? -1 : 1)) / 2.0;
 }
 
 double Slider::snapValue (double attemptedValue, DragMode)
