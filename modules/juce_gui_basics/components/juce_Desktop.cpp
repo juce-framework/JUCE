@@ -37,7 +37,7 @@ Desktop::~Desktop()
 {
     setScreenSaverEnabled (true);
     animator.cancelAllAnimations (false);
-    
+
     jassert (instance == this);
     instance = nullptr;
 
