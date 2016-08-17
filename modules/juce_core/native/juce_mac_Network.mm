@@ -256,7 +256,7 @@ public:
         latestTotalBytes = static_cast<int> (totalBytesWritten);
     }
 
-    void willPerformHTTPRedirection (NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
+    void willPerformHTTPRedirection (NSURLRequest* urlRequest, void (^completionHandler)(NSURLRequest *))
     {
         {
             const ScopedLock sl (dataLock);
@@ -264,7 +264,7 @@ public:
                 return;
         }
 
-        completionHandler (numRedirects++ < numRedirectsToFollow ? request : nil);
+        completionHandler (numRedirects++ < numRedirectsToFollow ? urlRequest : nil);
     }
 
     void run() override
