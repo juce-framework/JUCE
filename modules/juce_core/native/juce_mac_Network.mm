@@ -130,12 +130,24 @@ public:
 
     ~URLConnectionState()
     {
-        stop();
-        [data release];
+        signalThreadShouldExit();
+
+        {
+            const ScopedLock sl (dataLock);
+            isBeingDeleted = true;
+            [task cancel];
+            DelegateClass::setState (delegate, nullptr);
+        }
+
+        stopThread (10000);
+        [task release];
         [request release];
         [headers release];
         [session release];
+
+        const ScopedLock sl (dataLock);
         [delegate release];
+        [data release];
     }
 
     bool start (URL::OpenStreamProgressCallback* callback, void* context)
@@ -152,18 +164,6 @@ public:
         }
 
         return true;
-    }
-
-    void stop()
-    {
-        {
-            const ScopedLock sl (dataLock);
-            [task cancel];
-        }
-
-        stopThread (10000);
-        [task release];
-        task = nil;
     }
 
     int read (char* dest, int numBytes)
@@ -200,6 +200,9 @@ public:
     {
         {
             const ScopedLock sl (dataLock);
+            if (isBeingDeleted)
+                return;
+
             [data setLength: 0];
         }
 
@@ -228,6 +231,10 @@ public:
 
     void didBecomeInvalidWithError (NSError* error)
     {
+        const ScopedLock sl (dataLock);
+        if (isBeingDeleted)
+            return;
+
         DBG (nsStringToJuce ([error description])); ignoreUnused (error);
         hasFailed = true;
         initialised = true;
@@ -237,6 +244,9 @@ public:
     void didReceiveData (NSData* newData)
     {
         const ScopedLock sl (dataLock);
+        if (isBeingDeleted)
+            return;
+
         [data appendData: newData];
         initialised = true;
     }
@@ -246,10 +256,15 @@ public:
         latestTotalBytes = static_cast<int> (totalBytesWritten);
     }
 
-    void willPerformHTTPRedirection (NSURLRequest* aRequest, void (^completionHandler)(NSURLRequest *))
+    void willPerformHTTPRedirection (NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
     {
-        NSURLRequest* newRequest = (numRedirects++ < numRedirectsToFollow ? aRequest : nullptr);
-        completionHandler (newRequest);
+        {
+            const ScopedLock sl (dataLock);
+            if (isBeingDeleted)
+                return;
+        }
+
+        completionHandler (numRedirects++ < numRedirectsToFollow ? request : nil);
     }
 
     void run() override
@@ -289,7 +304,7 @@ public:
     NSMutableData* data = nil;
     NSDictionary* headers = nil;
     int statusCode = 0;
-    bool initialised = false, hasFailed = false, hasFinished = false;
+    bool initialised = false, hasFailed = false, hasFinished = false, isBeingDeleted = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
@@ -319,28 +334,28 @@ private:
     private:
         static void didReceiveResponse (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSURLResponse* response, id completionHandler)
         {
-            getState (self)->didReceiveResponse (response, completionHandler);
+            if (auto state = getState (self)) state->didReceiveResponse (response, completionHandler);
         }
 
         static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSError* error)
         {
-            getState (self)->didBecomeInvalidWithError (error);
+            if (auto state = getState (self)) state->didBecomeInvalidWithError (error);
         }
 
         static void didReceiveData (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSData* newData)
         {
-            getState (self)->didReceiveData (newData);
+            if (auto state = getState (self)) state->didReceiveData (newData);
         }
 
         static void didSendBodyData (id self, SEL, NSURLSession*, NSURLSessionTask*, int64_t, int64_t totalBytesWritten, int64_t)
         {
-            getState (self)->didSendBodyData (totalBytesWritten);
+            if (auto state = getState (self)) state->didSendBodyData (totalBytesWritten);
         }
 
         static void willPerformHTTPRedirection (id self, SEL, NSURLSession*, NSURLSessionTask*, NSHTTPURLResponse*,
                                                 NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
         {
-            getState (self)->willPerformHTTPRedirection (request, completionHandler);
+            if (auto state = getState (self)) state->willPerformHTTPRedirection (request, completionHandler);
         }
     };
 
