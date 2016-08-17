@@ -1874,6 +1874,8 @@ public:
         pluginProc = None;
 
        #elif JUCE_MAC
+        ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
+
         #if JUCE_SUPPORT_CARBON
         if (! plug.usesCocoaNSView)
             addAndMakeVisible (carbonWrapper = new CarbonWrapperComponent (*this));
