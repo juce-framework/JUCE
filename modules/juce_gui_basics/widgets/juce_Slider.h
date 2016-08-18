@@ -246,7 +246,7 @@ public:
 
         If symmetricSkew is true, the skew factor applies from the middle of the slider
         to each of its ends.
-     
+
         To set the skew position by using a mid-point, use the setSkewFactorFromMidPoint()
         method instead.
 
@@ -270,11 +270,11 @@ public:
     double getSkewFactor() const noexcept;
 
     /** Returns the whether the skew is symmetric from the midpoint to both sides.
-     See setSkewFactor for more info.
-     @see getSkewFactor, setSkewFactor, setSkewFactorFromMidPoint
+        See setSkewFactor for more info.
+        @see getSkewFactor, setSkewFactor, setSkewFactorFromMidPoint
      */
     bool isSymmetricSkew() const noexcept;
-    
+
     //==============================================================================
     /** Used by setIncDecButtonsMode().
     */

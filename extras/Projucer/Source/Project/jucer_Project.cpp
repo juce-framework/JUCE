@@ -59,6 +59,8 @@ Project::Project (const File& f)
     setChangedFlag (false);
 
     projectRoot.addListener (this);
+
+    modificationTime = getFile().getLastModificationTime();
 }
 
 Project::~Project()
@@ -373,6 +375,20 @@ void Project::valueTreeChildAdded (ValueTree&, ValueTree&)          { changed();
 void Project::valueTreeChildRemoved (ValueTree&, ValueTree&, int)   { changed(); }
 void Project::valueTreeChildOrderChanged (ValueTree&, int, int)     { changed(); }
 void Project::valueTreeParentChanged (ValueTree&)                   {}
+
+//==============================================================================
+bool Project::hasProjectBeenModified()
+{
+    Time newModificationTime = getFile().getLastModificationTime();
+
+    if (newModificationTime != modificationTime)
+    {
+        modificationTime = newModificationTime;
+        return true;
+    }
+
+    return false;
+}
 
 //==============================================================================
 File Project::resolveFilename (String filename) const

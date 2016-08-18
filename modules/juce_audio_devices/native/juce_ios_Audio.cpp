@@ -454,6 +454,8 @@ public:
 
     void handleRouteChange (const char* reason)
     {
+        const ScopedLock myScopedLock (callbackLock);
+
         JUCE_IOS_AUDIO_LOG ("handleRouteChange: reason: " << reason);
 
         fixAudioRouteIfSetToReceiver();

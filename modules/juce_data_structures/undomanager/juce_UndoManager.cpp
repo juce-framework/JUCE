@@ -171,15 +171,20 @@ void UndoManager::moveFutureTransactionsToStash()
 
         while (nextIndex < transactions.size())
         {
-            totalUnitsStored -= transactions.getLast()->getTotalSize();
-            stashedFutureTransactions.add (transactions.removeAndReturn (nextIndex));
+            ActionSet* removed = transactions.removeAndReturn (nextIndex);
+            stashedFutureTransactions.add (removed);
+            totalUnitsStored -= removed->getTotalSize();
         }
     }
 }
 
 void UndoManager::restoreStashedFutureTransactions()
 {
-    jassert (nextIndex == transactions.size());
+    while (nextIndex < transactions.size())
+    {
+        totalUnitsStored -= transactions.getUnchecked (nextIndex)->getTotalSize();
+        transactions.remove (nextIndex);
+    }
 
     for (int i = 0; i < stashedFutureTransactions.size(); ++i)
     {

@@ -2697,6 +2697,16 @@ private:
                     break;
 
                 case SC_KEYMENU:
+                   #if ! JUCE_WINDOWS_ALT_KEY_TRIGGERS_MENU
+                    // This test prevents a press of the ALT key from triggering the ancient top-left window menu.
+                    // By default we suppress this behaviour because it's unlikely that more than a tiny subset of
+                    // our users will actually want it, and it causes problems if you're trying to use the ALT key
+                    // as a modifier for mouse actions. If you really need the old behaviour, then just define
+                    // JUCE_WINDOWS_ALT_KEY_TRIGGERS_MENU=1 in your app.
+                    if ((lParam >> 16) <= 0) // Values above zero indicate that a mouse-click triggered the menu
+                        return 0;
+                   #endif
+
                     // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very obscure
                     // situations that can arise if a modal loop is started from an alt-key keypress).
                     if (hasTitleBar() && h == GetCapture())

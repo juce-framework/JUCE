@@ -660,10 +660,10 @@ public:
         desc.name = name;
 
         {
-            char buffer [512] = { 0 };
+            char buffer[512] = { 0 };
             dispatch (effGetEffectName, 0, 0, buffer, 0);
 
-            desc.descriptiveName = String::fromUTF8 (buffer).trim();
+            desc.descriptiveName = String::createStringFromData (buffer, (int) sizeof (buffer)).trim();
 
             if (desc.descriptiveName.isEmpty())
                 desc.descriptiveName = name;
@@ -677,9 +677,9 @@ public:
         desc.category = getCategory();
 
         {
-            char buffer [kVstMaxVendorStrLen + 8] = { 0 };
+            char buffer[512] = { 0 };
             dispatch (effGetVendorString, 0, 0, buffer, 0);
-            desc.manufacturerName = String::fromUTF8 (buffer);
+            desc.manufacturerName = String::createStringFromData (buffer, (int) sizeof (buffer)).trim();
         }
 
         desc.version = getVersion();
@@ -753,7 +753,24 @@ public:
     }
 
     void* getPlatformSpecificData() override    { return effect; }
-    const String getName() const override       { return name; }
+
+    const String getName() const override
+    {
+        if (effect != nullptr)
+        {
+            char buffer[512] = { 0 };
+
+            if (dispatch (effGetProductString, 0, 0, buffer, 0) != 0)
+            {
+                String productName = String::createStringFromData (buffer, (int) sizeof (buffer));
+
+                if (productName.isNotEmpty())
+                    return productName;
+            }
+        }
+
+        return name;
+    }
 
     int getUID() const
     {
@@ -1636,7 +1653,7 @@ private:
             return String();
 
         jassert (index >= 0 && index < effect->numParams);
-        char nm [256] = { 0 };
+        char nm[256] = { 0 };
         dispatch (opcode, index, 0, nm, 0);
         return String::createStringFromData (nm, (int) sizeof (nm)).trim();
     }
@@ -1857,6 +1874,8 @@ public:
         pluginProc = None;
 
        #elif JUCE_MAC
+        ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
+
         #if JUCE_SUPPORT_CARBON
         if (! plug.usesCocoaNSView)
             addAndMakeVisible (carbonWrapper = new CarbonWrapperComponent (*this));
