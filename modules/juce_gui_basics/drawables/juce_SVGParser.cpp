@@ -74,7 +74,7 @@ public:
 
         bool operator() (const XmlPath& xmlPath) const
         {
-            return state->parsePathElement (xmlPath, *targetPath);
+            return state->parsePathElementWithTransform (xmlPath, *targetPath);
         }
     };
 
@@ -805,6 +805,15 @@ private:
         }
 
         return false;
+    }
+
+    bool parsePathElementWithTransform (const XmlPath& xml, Path& path) const
+    {
+        if (! parsePathElement (xml, path))
+            return false;
+        if (xml->hasAttribute ("transform"))
+            path.applyTransform (parseTransform (xml->getStringAttribute ("transform")));
+        return true;
     }
 
     bool applyClipPath (Drawable& target, const XmlPath& xmlPath)
