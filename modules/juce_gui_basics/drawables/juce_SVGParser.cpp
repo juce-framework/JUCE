@@ -74,7 +74,7 @@ public:
 
     void operator() (const XmlPath& xmlPath)
     {
-      state->parsePathElement (xmlPath, *targetPath);
+      state->parsePathElementWithTransform (xmlPath, *targetPath);
     }
   };
 
@@ -745,13 +745,22 @@ private:
         }
     }
 
+    bool parsePathElementWithTransform (const XmlPath& xml, Path& path) const
+    {
+        if (! parsePathElement (xml, path))
+            return false;
+        if (xml->hasAttribute ("transform"))
+            path.applyTransform (parseTransform (xml->getStringAttribute ("transform")));
+        return true;
+    }
+
     void applyClipPath (DrawableShape& target, const XmlPath& xmlPath) const
     {
         if (xmlPath->hasTagNameIgnoringNamespace ("clipPath"))
         {
             Path path;
             forEachXmlChildElement (*xmlPath, e)
-                parsePathElement (xmlPath.getChild (e), path);
+                parsePathElementWithTransform (xmlPath.getChild (e), path);
             path.applyTransform (transform);
             target.setClipPath (path);
         }
