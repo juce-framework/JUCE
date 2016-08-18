@@ -74,7 +74,7 @@ public:
 
         bool operator() (const XmlPath& xmlPath) const
         {
-            return state->parsePathElement (xmlPath, *targetPath);
+            return state->parsePathElementWithTransform (xmlPath, *targetPath);
         }
     };
 
@@ -462,13 +462,16 @@ private:
     }
 
     //==============================================================================
-    void parseSubElements (const XmlPath& xml, DrawableComposite& parentDrawable, const bool shouldParseClip = true)
+    void parseSubElements (const XmlPath& xml,
+                           DrawableComposite& parentDrawable,
+                           const bool shouldParseClip = true,
+                           const bool withTransform = false)
     {
         forEachXmlChildElement (*xml, e)
         {
             const XmlPath child (xml.getChild (e));
 
-            if (auto* drawable = parseSubElement (child))
+            if (auto* drawable = parseSubElement (child, withTransform))
             {
                 parentDrawable.addChildComponent (drawable);
 
@@ -481,11 +484,11 @@ private:
         }
     }
 
-    Drawable* parseSubElement (const XmlPath& xml)
+    Drawable* parseSubElement (const XmlPath& xml, const bool withTransform = false)
     {
         {
             Path path;
-            if (parsePathElement (xml, path))
+            if (withTransform ? parsePathElementWithTransform (xml, path) : parsePathElement (xml, path))
                 return parseShape (xml, path);
         }
 
@@ -518,6 +521,15 @@ private:
         if (tag == "use")       { return parseUsePath (xml, path); }
 
         return false;
+    }
+
+    bool parsePathElementWithTransform (const XmlPath& xml, Path& path) const
+    {
+        if (! parsePathElement (xml, path))
+            return false;
+        if (xml->hasAttribute ("transform"))
+            path.applyTransform (parseTransform (xml->getStringAttribute ("transform")));
+        return true;
     }
 
     DrawableComposite* parseSwitch (const XmlPath& xml)
