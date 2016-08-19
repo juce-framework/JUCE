@@ -38,11 +38,11 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     message->incReferenceCount();
-    android.activity.callVoidMethod (JuceApp.postMessage, (jlong) (pointer_sized_uint) message);
+    android.bridge.callVoidMethod (JuceBridge.postMessage, (jlong) (pointer_sized_uint) message);
     return true;
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_APP_CLASSNAME, deliverMessage, void, (JNIEnv* env, jobject activity, jlong value))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, deliverMessage, void, (JNIEnv* env, jobject activity, jlong value))
 {
     setEnv (env);
 
@@ -73,7 +73,7 @@ void MessageManager::stopDispatchLoop()
         void messageCallback() override
         {
             DBG ("About to call JuceAppActivity.finish");
-            android.activity.callVoidMethod (JuceAppActivity.finish);
+            android.bridge.callVoidMethod (JuceAppActivity.finish);
         }
     };
 
