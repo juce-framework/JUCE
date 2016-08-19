@@ -1576,7 +1576,7 @@ public:
                 addMouseListener (this, true);
            #endif
 
-             ignoreUnused (fakeMouseGenerator);
+            ignoreUnused (fakeMouseGenerator);
         }
 
         ~EditorCompWrapper()

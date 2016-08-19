@@ -40,6 +40,7 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_PluginBusUtilities.h"
+#include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
@@ -849,6 +850,8 @@ private:
                     setBounds (pluginEditor->getLocalBounds());
                     resizeHostWindow();
                 }
+
+                ignoreUnused (fakeMouseGenerator);
             }
 
             ~ContentWrapperComponent()
@@ -910,6 +913,7 @@ private:
 
         private:
             JuceVST3Editor& owner;
+            FakeMouseMoveGenerator fakeMouseGenerator;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };

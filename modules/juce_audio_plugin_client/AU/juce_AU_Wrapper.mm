@@ -1180,6 +1180,8 @@ public:
            #else
             setWantsKeyboardFocus (true);
            #endif
+
+            ignoreUnused (fakeMouseGenerator);
         }
 
         ~EditorCompHolder()
@@ -1259,6 +1261,8 @@ public:
         }
 
     private:
+        FakeMouseMoveGenerator fakeMouseGenerator;
+
         JUCE_DECLARE_NON_COPYABLE (EditorCompHolder)
     };
 
