@@ -22,6 +22,8 @@
   ==============================================================================
 */
 
+#include "../../juce_core/native/juce_android_JNIHelpers.h"
+
 } // (juce namespace)
 
 extern juce::JUCEApplicationBase* juce_CreateApplication(); // (from START_JUCE_APPLICATION)
@@ -30,13 +32,13 @@ namespace juce
 {
 
 //==============================================================================
-JUCE_JNI_CALLBACK (JUCE_ANDROID_APP_CLASSNAME, launchApp, void, (JNIEnv* env, jobject this__, jobject activity,
-                                                                      jstring appFile, jstring appDataDir))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, launchApp, void, (JNIEnv* env, jobject juceBridge,
+        jobject currentActivity, jstring appFile, jstring appDataDir))
 {
     setEnv (env);
     DBG ("setEnv");
 
-    android.initialise (env, activity, appFile, appDataDir);
+    android.initialise (env, juceBridge, currentActivity, appFile, appDataDir);
     DBG ("initialise");
 
     DBG (SystemStats::getJUCEVersion());
@@ -58,7 +60,14 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_APP_CLASSNAME, launchApp, void, (JNIEnv* env, jo
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, isInitialised, bool, (JNIEnv* env, jobject juceBridge))
+{
+    setEnv (env);
+
+    return android.initialised;
+}
+
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject juceBridge))
 {
     setEnv (env);
 
@@ -66,7 +75,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* e
         app->suspended();
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, resumeApp, void, (JNIEnv* env, jobject juceBridge))
 {
     setEnv (env);
 
@@ -74,7 +83,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* en
         app->resumed();
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, quitApp, void, (JNIEnv* env, jobject juceBridge))
 {
     setEnv (env);
 
@@ -110,7 +119,7 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
  METHOD (showKeyboard,  "showKeyboard",     "(Ljava/lang/String;)V") \
  METHOD (setSystemUiVisibility, "setSystemUiVisibility", "(I)V") \
 
-DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_APP_CLASSPATH "$ComponentPeerView");
+DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_BRIDGE_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
 
 
@@ -128,7 +137,7 @@ public:
     {
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
-        view = GlobalRef (android.activity.callObjectMethod (JuceApp.createNewView,
+        view = GlobalRef (android.bridge.callObjectMethod (JuceBridge.createNewView,
                                                              (jboolean) component.isOpaque(),
                                                              (jlong) this));
 
@@ -140,7 +149,7 @@ public:
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            android.activity.callVoidMethod (JuceApp.deleteView, view.get());
+            android.bridge.callVoidMethod (JuceBridge.deleteView, view.get());
         }
         else
         {
@@ -150,7 +159,7 @@ public:
 
                 void messageCallback() override
                 {
-                    android.activity.callVoidMethod (JuceApp.deleteView, view.get());
+                    android.bridge.callVoidMethod (JuceBridge.deleteView, view.get());
                 }
 
             private:
@@ -634,7 +643,7 @@ int64 AndroidComponentPeer::touchesDown = 0;
 
 //==============================================================================
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
-  JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_APP_CLASSNAME, _00024ComponentPeerView), javaMethodName, returnType, params) \
+  JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_BRIDGE_CLASSNAME, _00024ComponentPeerView), javaMethodName, returnType, params) \
   { \
       setEnv (env); \
       if (AndroidComponentPeer* peer = (AndroidComponentPeer*) (pointer_sized_uint) host) \
@@ -718,7 +727,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
                                                           Component* associatedComponent,
                                                           ModalComponentManager::Callback* callback)
 {
-    android.activity.callVoidMethod (JuceApp.showMessageBox, javaString (title).get(),
+    android.bridge.callVoidMethod (JuceBridge.showMessageBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
 }
 
@@ -729,7 +738,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
 {
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (JuceApp.showOkCancelBox, javaString (title).get(),
+    android.bridge.callVoidMethod (JuceBridge.showOkCancelBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
     return false;
 }
@@ -741,12 +750,12 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 {
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (JuceApp.showYesNoCancelBox, javaString (title).get(),
+    android.bridge.callVoidMethod (JuceBridge.showYesNoCancelBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
     return 0;
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_APP_CLASSNAME, alertDismissed, void, (JNIEnv* env, jobject activity,
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, alertDismissed, void, (JNIEnv* env, jobject activity,
                                                                            jlong callbackAsLong, jint result))
 {
     setEnv (env);
@@ -761,13 +770,12 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_APP_CLASSNAME, alertDismissed, void, (JNIEnv* en
 //==============================================================================
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
-    // commnted out for debugging
-//    android.activity.callVoidMethod (JuceApp.setScreenSaver, isEnabled);
+    android.bridge.callVoidMethod (JuceBridge.setScreenSaver, isEnabled);
 }
 
 bool Desktop::isScreenSaverEnabled()
 {
-    return android.activity.callBooleanMethod (JuceApp.getScreenSaver);
+    return android.bridge.callBooleanMethod (JuceBridge.getScreenSaver);
 }
 
 //==============================================================================
@@ -833,7 +841,7 @@ void Desktop::Displays::findDisplays (float masterScale)
     displays.add (d);
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_APP_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject activity,
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject juceBridge,
                                                                           jint screenWidth, jint screenHeight,
                                                                           jint dpi))
 {
@@ -881,12 +889,12 @@ void LookAndFeel::playAlertSound()
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
     const LocalRef<jstring> t (javaString (text));
-    android.activity.callVoidMethod (JuceApp.setClipboardContent, t.get());
+    android.bridge.callVoidMethod (JuceBridge.setClipboardContent, t.get());
 }
 
 String SystemClipboard::getTextFromClipboard()
 {
-    const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (JuceApp.getClipboardContent));
+    const LocalRef<jstring> text ((jstring) android.bridge.callObjectMethod (JuceBridge.getClipboardContent));
     return juceString (text);
 }
 

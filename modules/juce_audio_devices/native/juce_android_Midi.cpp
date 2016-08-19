@@ -25,11 +25,11 @@
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getJuceAndroidMidiInputDevices, "getJuceAndroidMidiInputDevices", "()[Ljava/lang/String;") \
  METHOD (getJuceAndroidMidiOutputDevices, "getJuceAndroidMidiOutputDevices", "()[Ljava/lang/String;") \
- METHOD (openMidiInputPortWithJuceIndex, "openMidiInputPortWithJuceIndex", "(IJ)L" JUCE_ANDROID_APP_CLASSPATH "$JuceMidiPort;") \
- METHOD (openMidiOutputPortWithJuceIndex, "openMidiOutputPortWithJuceIndex", "(I)L" JUCE_ANDROID_APP_CLASSPATH "$JuceMidiPort;") \
+ METHOD (openMidiInputPortWithJuceIndex, "openMidiInputPortWithJuceIndex", "(IJ)L" JUCE_ANDROID_BRIDGE_CLASSPATH "$JuceMidiPort;") \
+ METHOD (openMidiOutputPortWithJuceIndex, "openMidiOutputPortWithJuceIndex", "(I)L" JUCE_ANDROID_BRIDGE_CLASSPATH "$JuceMidiPort;") \
  METHOD (getInputPortNameForJuceIndex, "getInputPortNameForJuceIndex", "(I)Ljava/lang/String;") \
  METHOD (getOutputPortNameForJuceIndex, "getOutputPortNameForJuceIndex", "(I)Ljava/lang/String;")
- DECLARE_JNI_CLASS (MidiDeviceManager, JUCE_ANDROID_APP_CLASSPATH "$MidiDeviceManager")
+ DECLARE_JNI_CLASS (MidiDeviceManager, JUCE_ANDROID_BRIDGE_CLASSPATH "$MidiDeviceManager")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
@@ -37,7 +37,7 @@
  METHOD (stop, "stop", "()V") \
  METHOD (close, "close", "()V") \
  METHOD (sendMidi, "sendMidi", "([BII)V")
- DECLARE_JNI_CLASS (JuceMidiPort, JUCE_ANDROID_APP_CLASSPATH "$JuceMidiPort")
+ DECLARE_JNI_CLASS (JuceMidiPort, JUCE_ANDROID_BRIDGE_CLASSPATH "$JuceMidiPort")
 #undef JNI_CLASS_MEMBERS
 
 
@@ -137,7 +137,7 @@ private:
     GlobalRef javaMidiDevice;
 };
 
-JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_APP_CLASSNAME, _00024JuceMidiInputPort), handleReceive,
+JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_BRIDGE_CLASSNAME, _00024JuceMidiInputPort), handleReceive,
                    void, (JNIEnv* env, jobject device, jlong host, jbyteArray byteArray,
                           jint offset, jint count, jlong timestamp))
 {
@@ -154,7 +154,7 @@ class AndroidMidiDeviceManager
 {
 public:
     AndroidMidiDeviceManager()
-        : deviceManager (android.activity.callObjectMethod (JuceApp.getAndroidMidiDeviceManager))
+        : deviceManager (android.bridge.callObjectMethod (JuceBridge.getAndroidMidiDeviceManager))
     {
     }
 
