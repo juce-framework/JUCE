@@ -267,7 +267,7 @@ extern AndroidSystem android;
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (createNewView,          "createNewView",        "(ZJ)L" JUCE_ANDROID_BRIDGE_CLASSPATH "$ComponentPeerView;") \
+ METHOD (createNewView,          "createNewView",        "(ZJLjava/lang/String;)L" JUCE_ANDROID_BRIDGE_CLASSPATH "$ComponentPeerView;") \
  METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_BRIDGE_CLASSPATH "$ComponentPeerView;)V") \
  METHOD (createNativeSurfaceView, "createNativeSurfaceView", "(J)L" JUCE_ANDROID_BRIDGE_CLASSPATH "$NativeSurfaceView;") \
  METHOD (postMessage,            "postMessage",          "(J)V") \
@@ -301,7 +301,6 @@ extern AndroidSystem android;
  METHOD (requestRuntimePermission, "requestRuntimePermission", "(IJ)V" ) \
  METHOD (isPermissionGranted,     "isPermissionGranted", "(I)Z" ) \
  METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
-// METHOD (isInitialised,           "isInitialised", "(I)Z" ) \
 
 DECLARE_JNI_CLASS (JuceBridge, JUCE_ANDROID_BRIDGE_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
