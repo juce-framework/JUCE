@@ -60,7 +60,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, launchApp, void, (JNIEnv* env,
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, isInitialised, bool, (JNIEnv* env, jobject juceBridge))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_BRIDGE_CLASSNAME, hasInitialised, bool, (JNIEnv* env, jobject juceBridge))
 {
     setEnv (env);
 
@@ -137,9 +137,12 @@ public:
     {
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
+        DBG ("AndroidComponentPeer constructor");
+        jstring componentName = javaString(component.getName());
         view = GlobalRef (android.bridge.callObjectMethod (JuceBridge.createNewView,
-                                                             (jboolean) component.isOpaque(),
-                                                             (jlong) this));
+                                                           (jboolean) component.isOpaque(),
+                                                           (jlong) this,
+                                                           componentName));
 
         if (isFocused())
             handleFocusGain();
