@@ -137,12 +137,12 @@ public:
     {
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
-        DBG ("AndroidComponentPeer constructor");
+        DBG ("AndroidComponentPeer constructor: "+component.getName());
         jstring componentName = javaString(component.getName());
         view = GlobalRef (android.bridge.callObjectMethod (JuceBridge.createNewView,
                                                            (jboolean) component.isOpaque(),
                                                            (jlong) this,
-                                                           componentName));
+                (jstring) javaString(component.getName())));
 
         if (isFocused())
             handleFocusGain();
