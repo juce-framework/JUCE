@@ -288,7 +288,7 @@ public:
             bool success = setBusArrangementFromTotalChannelNum (maxNumInChannels, maxNumOutChannels);
             ignoreUnused (success);
 
-            // please file a bug if you hit this assertsion!
+            // please file a bug if you hit this assertion!
             jassert (maxNumInChannels  == busUtils.findTotalNumChannels (true) && success
                   && maxNumOutChannels == busUtils.findTotalNumChannels (false));
         }
