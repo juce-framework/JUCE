@@ -473,10 +473,6 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),
-                                                                Ids::vst2Path,
-                                                                TargetOS::linux)));
-
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
                                                                 Ids::vst3Path,
                                                                 TargetOS::linux)));

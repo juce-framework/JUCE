@@ -64,7 +64,6 @@ private:
 
     OwnedArray<TextPropertyComponent> pathComponents;
 
-    TextPropertyComponent* vst2PathComponent;
     TextPropertyComponent* vst3PathComponent;
     TextPropertyComponent* rtasPathComponent;
     TextPropertyComponent* aaxPathComponent;

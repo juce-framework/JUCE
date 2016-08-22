@@ -481,7 +481,6 @@ private:
 
         if (project.getProjectType().isAudioPlugin())
         {
-            paths.add (getAppSettings().getGlobalPath (Ids::vst2Path, TargetOS::getThisOS()).toString());
             paths.add (getAppSettings().getGlobalPath (Ids::vst3Path, TargetOS::getThisOS()).toString());
         }
 
