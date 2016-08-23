@@ -546,7 +546,7 @@ public:
         {
             isProcessing = true;
 
-            const size_t nInAndOutChannels = vstEffect.numInputChannels + vstEffect.numOutputChannels;
+            const size_t nInAndOutChannels = static_cast<size_t> (vstEffect.numInputChannels + vstEffect.numOutputChannels);
             floatTempBuffers .channels.calloc (nInAndOutChannels);
             doubleTempBuffers.channels.calloc (nInAndOutChannels);
 
@@ -1604,8 +1604,8 @@ private:
         // The last member of a full VstSpeakerConfiguration struct is an array of 8
         // VstIndividualSpeakerInfo. Here we only allocate space for channels we will
         // actually use.
-        const int allocationSizeToSubtract = (8 - nChannels) * sizeof (VstIndividualSpeakerInfo);
-        const int allocationSize = sizeof (VstSpeakerConfiguration) - allocationSizeToSubtract;
+        const size_t allocationSizeToSubtract = static_cast<size_t> (8 - nChannels) * sizeof (VstIndividualSpeakerInfo);
+        const size_t allocationSize = sizeof (VstSpeakerConfiguration) - allocationSizeToSubtract;
         char* newAllocation = new char[allocationSize];
         memset (newAllocation, 0, allocationSize);
 

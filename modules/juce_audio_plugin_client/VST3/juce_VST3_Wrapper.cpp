@@ -2101,7 +2101,7 @@ private:
 
             // Consider yourself very unlucky if you hit this assertion. The hash code of your
             // parameter ids are not unique.
-            jassert (! vstParamIDs.contains (static_cast<int32> (paramID)));
+            jassert (! vstParamIDs.contains (static_cast<uint32> (paramID)));
 
             vstParamIDs.add (paramID);
             paramMap.set (static_cast<int32> (paramID), i);
