@@ -2514,17 +2514,17 @@ private:
             if (owner.isOpen)
             {
                 owner.isOpen = false;
-                owner.dispatch (effEditClose, 0, 0, 0, 0);
-                owner.dispatch (effEditSleep, 0, 0, 0, 0);
+                owner.dispatch (plugInOpcodeCloseEditor, 0, 0, 0, 0);
+                owner.dispatch (plugInOpcodeIdle + 2 /* sleep */, 0, 0, 0, 0);
             }
         }
 
         bool getEmbeddedViewSize (int& w, int& h) override
         {
-            ERect* rect = nullptr;
-            owner.dispatch (effEditGetRect, 0, 0, &rect, 0);
-            w = rect->right - rect->left;
-            h = rect->bottom - rect->top;
+            VstEditorBounds* rect = nullptr;
+            owner.dispatch (plugInOpcodeGetEditorBounds, 0, 0, &rect, 0);
+            w = rect->rightmost - rect->leftmost;
+            h = rect->lower - rect->upper;
             return true;
         }
 
@@ -2534,7 +2534,7 @@ private:
             {
                 alreadyInside = true;
                 getTopLevelComponent()->toFront (true);
-                owner.dispatch (effEditMouse, x, y, 0, 0);
+                owner.dispatch (plugInOpcodeCloseEditor + 2 /* get mouse */, x, y, 0, 0);
                 alreadyInside = false;
             }
             else
@@ -2548,13 +2548,13 @@ private:
             if (ComponentPeer* const peer = getPeer())
             {
                 const Point<int> pos (peer->globalToLocal (getScreenPosition()));
-                ERect r;
-                r.left   = (VstInt16) pos.getX();
-                r.top    = (VstInt16) pos.getY();
-                r.right  = (VstInt16) (r.left + getWidth());
-                r.bottom = (VstInt16) (r.top + getHeight());
+                VstEditorBounds r;
+                r.leftmost  = (int16) pos.getX();
+                r.upper     = (int16) pos.getY();
+                r.rightmost = (int16) (r.leftmost + getWidth());
+                r.lower     = (int16) (r.upper + getHeight());
 
-                owner.dispatch (effEditDraw, 0, 0, &r, 0);
+                owner.dispatch (plugInOpcodeCloseEditor + 1 /* draw */, 0, 0, &r, 0);
             }
         }
 
