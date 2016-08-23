@@ -329,6 +329,25 @@ public:
     ValueTree getSibling (int delta) const noexcept;
 
     //==============================================================================
+    struct Iterator
+    {
+        Iterator (const ValueTree&, bool isEnd) noexcept;
+        Iterator& operator++() noexcept;
+
+        bool operator!= (const Iterator&) const noexcept;
+        ValueTree operator*() const;
+
+    private:
+        void* internal;
+    };
+
+    /** Returns a start iterator for the children in this tree. */
+    Iterator begin() const noexcept;
+
+    /** Returns an end iterator for the children in this tree. */
+    Iterator end() const noexcept;
+
+    //==============================================================================
     /** Creates an XmlElement that holds a complete image of this node and all its children.
 
         If this node is invalid, this may return nullptr. Otherwise, the XML that is produced can

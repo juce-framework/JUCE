@@ -858,6 +858,29 @@ ValueTree ValueTree::getChild (int index) const
                                         : static_cast<SharedObject*> (nullptr));
 }
 
+ValueTree::Iterator::Iterator (const ValueTree& v, bool isEnd) noexcept
+   : internal (v.object != nullptr ? (isEnd ? v.object->children.end() : v.object->children.begin()) : nullptr)
+{}
+
+ValueTree::Iterator& ValueTree::Iterator::operator++() noexcept
+{
+    internal = static_cast<SharedObject**> (internal) + 1;
+    return *this;
+}
+
+bool ValueTree::Iterator::operator!= (const Iterator& other) const noexcept
+{
+    return internal != other.internal;
+}
+
+ValueTree ValueTree::Iterator::operator*() const
+{
+    return ValueTree (*static_cast<SharedObject**> (internal));
+}
+
+ValueTree::Iterator ValueTree::begin() const noexcept   { return Iterator (*this, false); }
+ValueTree::Iterator ValueTree::end() const noexcept     { return Iterator (*this, true); }
+
 ValueTree ValueTree::getChildWithName (const Identifier& type) const
 {
     return object != nullptr ? object->getChildWithName (type) : ValueTree();
