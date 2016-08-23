@@ -885,7 +885,7 @@ public:
 
             s.add ("PRODUCT_BUNDLE_IDENTIFIER = " + bundleIdentifier);
 
-            const String arch ((! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? osxArch_64Bit : (type == Target::RTASPlugIn) ? osxArch_32BitUniversal : config.osxArchitecture.get());
+            const String arch ((! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? osxArch_64Bit : config.osxArchitecture.get());
             
             if (arch == osxArch_Native)                s.add ("ARCHS = \"$(NATIVE_ARCH_ACTUAL)\"");
             else if (arch == osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
@@ -1068,7 +1068,7 @@ public:
             }
 
             s.add ("GCC_PREPROCESSOR_DEFINITIONS = " + indentParenthesisedList (defsList));
-            if (type == Target::RTASPlugIn) s.add("VALID_ARCHS=\"i386\"");
+            if (type == Target::RTASPlugIn && !config.isDebug()) s.add("VALID_ARCHS=\"i386\"");
             s.addTokens (config.customXcodeFlags.get(), ",", "\"'");
 
             return getCleanedStringArray (s);
