@@ -571,10 +571,7 @@ public:
                 host that we want midi. In the SDK this method is marked as deprecated, but
                 some hosts rely on this behaviour.
             */
-            bool plugCanDoMidi = (hostCallback != nullptr && hostCallback (&vstEffect, hostOpcodeCanHostDo, 0, 0,
-                                                                           const_cast<char*> ("receiveVstMidiEvent"), 0));
-
-            if (vstEffect.flags & vstEffectFlagIsSynth || plugCanDoMidi)
+            if (vstEffect.flags & vstEffectFlagIsSynth || JucePlugin_WantsMidiInput)
             {
                 if (hostCallback != nullptr)
                     hostCallback (&vstEffect, hostOpcodePlugInWantsMidi, 0, 1, 0, 0);
