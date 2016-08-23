@@ -1086,7 +1086,6 @@ public:
             case plugInOpcodeGetEditorBounds:             return handleGetEditorBounds (args);
             case plugInOpcodeOpenEditor:                  return handleOpenEditor (args);
             case plugInOpcodeCloseEditor:                 return handleCloseEditor (args);
-            case plugInOpcodeEditorIdle:                  return handleEditorIdle (args);
             case plugInOpcodeGetData:                     return handleGetData (args);
             case plugInOpcodeSetData:                     return handleSetData (args);
             case plugInOpcodePreAudioProcessingEvents:    return handlePreAudioProcessingEvents (args);
@@ -1801,25 +1800,6 @@ private:
         checkWhetherMessageThreadIsCorrect();
         const MessageManagerLock mmLock;
         deleteEditor (true);
-        return 0;
-    }
-
-    pointer_sized_int handleEditorIdle (VstOpCodeArguments)
-    {
-        // (wavelab calls this on a separate thread and causes a deadlock)..
-        if (MessageManager::getInstance()->isThisTheMessageThread() && ! recursionCheck)
-        {
-            ScopedValueSetter<bool> svs (recursionCheck, true, false);
-            JUCE_AUTORELEASEPOOL
-            {
-                Timer::callPendingTimersSynchronously();
-
-                for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                    if (ComponentPeer* p = ComponentPeer::getPeer(i))
-                        p->performAnyPendingRepaintsNow();
-            }
-        }
-
         return 0;
     }
 
