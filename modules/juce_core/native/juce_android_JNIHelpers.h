@@ -252,12 +252,11 @@ class AndroidSystem
 public:
     AndroidSystem();
 
-    void initialise (JNIEnv*, jobject bridge, jobject activity, jstring appFile, jstring appDataDir);
+    void initialise (JNIEnv*, jobject bridge, jstring appFile, jstring appDataDir);
     void shutdown (JNIEnv*);
 
     //==============================================================================
     GlobalRef bridge;
-    GlobalRef activity;
     String appFile, appDataDir;
     bool initialised = false; // Might not be necessary
     int screenWidth, screenHeight, dpi;
@@ -301,18 +300,12 @@ extern AndroidSystem android;
  METHOD (requestRuntimePermission, "requestRuntimePermission", "(IJ)V" ) \
  METHOD (isPermissionGranted,     "isPermissionGranted", "(I)Z" ) \
  METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
+ METHOD (finish,                 "finish",               "()V") \
+ METHOD (setRequestedOrientation,"setRequestedOrientation", "(I)V") \
 
 DECLARE_JNI_CLASS (JuceBridge, JUCE_ANDROID_BRIDGE_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
 
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (finish,                 "finish",               "()V") \
- METHOD (setRequestedOrientation,"setRequestedOrientation", "(I)V") \
-// METHOD (getJuceBridge,          "getJuceBridge", "()L" JUCE_ANDROID_BRIDGE_CLASSPATH ";") \
-
-DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
-#undef JNI_CLASS_MEMBERS
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
