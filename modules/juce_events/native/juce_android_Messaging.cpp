@@ -73,7 +73,7 @@ void MessageManager::stopDispatchLoop()
         void messageCallback() override
         {
             DBG ("About to call JuceAppActivity.finish");
-            android.bridge.callVoidMethod (JuceAppActivity.finish);
+            android.bridge.callVoidMethod (JuceBridge.finish);
         }
     };
 
