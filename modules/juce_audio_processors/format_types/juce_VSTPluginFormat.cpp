@@ -2515,7 +2515,7 @@ private:
             {
                 owner.isOpen = false;
                 owner.dispatch (plugInOpcodeCloseEditor, 0, 0, 0, 0);
-                owner.dispatch (plugInOpcodeIdle + 2 /* sleep */, 0, 0, 0, 0);
+                owner.dispatch (plugInOpcodeSleepEditor, 0, 0, 0, 0);
             }
         }
 
@@ -2534,7 +2534,7 @@ private:
             {
                 alreadyInside = true;
                 getTopLevelComponent()->toFront (true);
-                owner.dispatch (plugInOpcodeCloseEditor + 2 /* get mouse */, x, y, 0, 0);
+                owner.dispatch (plugInOpcodeGetMouse, x, y, 0, 0);
                 alreadyInside = false;
             }
             else
@@ -2554,7 +2554,7 @@ private:
                 r.rightmost = (int16) (r.leftmost + getWidth());
                 r.lower     = (int16) (r.upper + getHeight());
 
-                owner.dispatch (plugInOpcodeCloseEditor + 1 /* draw */, 0, 0, &r, 0);
+                owner.dispatch (plugInOpcodeDrawEditor, 0, 0, &r, 0);
             }
         }
 
