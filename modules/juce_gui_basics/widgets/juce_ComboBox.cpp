@@ -570,7 +570,7 @@ void ComboBox::mouseDown (const MouseEvent& e)
     beginDragAutoRepeat (300);
 
     isButtonDown = isEnabled() && ! e.mods.isPopupMenu();
-
+    repaint();
     if (isButtonDown && (e.eventComponent == this || ! label->isEditable()))
         showPopupIfNotActive();
 }
