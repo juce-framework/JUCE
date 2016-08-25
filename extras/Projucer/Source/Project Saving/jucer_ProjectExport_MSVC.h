@@ -1428,7 +1428,12 @@ protected:
                 {
                     XmlElement* intdir = props->createNewChildElement ("IntDir");
                     setConditionAttribute (*intdir, config);
-                    intdir->addTextElement (FileHelpers::windowsStylePath (config.getIntermediatesPath()) + "\\");
+
+                    String intermediatesPath = config.getIntermediatesPath();
+                    if (! intermediatesPath.endsWith ("\\"))
+                        intermediatesPath << "\\";
+
+                    intdir->addTextElement (FileHelpers::windowsStylePath (intermediatesPath));
                 }
 
                 {
