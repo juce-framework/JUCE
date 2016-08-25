@@ -192,11 +192,10 @@
         <MODULEPATH id="juce_box2d" path="../../modules"/>
       </MODULEPATHS>
     </ANDROID>
-    <ANDROIDSTUDIO androidActivityClass="com.yourcompany.jucedemo.JuceDemo" androidInternetNeeded="1"
-                   androidCpp11="1" targetFolder="Builds/AndroidStudio" androidSDKPath=""
-                   androidNDKPath="" androidBluetoothNeeded="1" bigIcon="BvyE0d"
-                   androidScreenOrientation="unspecified" androidMicNeeded="1" gradleToolchain="clang"
-                   gradleToolchainVersion="3.6" androidTheme="@android:style/Theme.NoTitleBar">
+    <ANDROIDSTUDIO androidInternetNeeded="1" androidCpp11="1" targetFolder="Builds/AndroidStudio"
+                   androidSDKPath="" androidNDKPath="" androidBluetoothNeeded="1"
+                   bigIcon="BvyE0d" androidScreenOrientation="unspecified" androidMicNeeded="1"
+                   gradleToolchain="clang" gradleToolchainVersion="3.6" androidTheme="@android:style/Theme.NoTitleBar">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
                        targetName="JuceDemo"/>
