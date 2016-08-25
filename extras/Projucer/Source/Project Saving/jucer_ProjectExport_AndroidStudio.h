@@ -109,16 +109,20 @@ public:
     //==============================================================================
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
-        const File targetFolder (getTargetFolder());
 
-        removeOldFiles (targetFolder);
+        const File targetFolder (getTargetFolder());
+        
+        // if (removeAllJavaFilesOnSave)
+        //     removeOldFiles (targetFolder);
 
         {
-            const String package (getActivityClassPackage());
-            const String path (package.replaceCharacter ('.', File::separator));
-            const File javaTarget (targetFolder.getChildFile ("app/src/main/java").getChildFile (path));
+//            const String package (getActivityClassPackage());
 
-            copyActivityJavaFiles (modules, javaTarget, package);
+            const String path (getJuceClassPackage().replaceCharacter ('.', File::separator));
+            const File javaTarget (targetFolder.getChildFile ("app/src/main/java").getChildFile (path));
+            removeOldFiles (javaTarget);
+
+            copyActivityJavaFiles (modules, javaTarget, getJuceClassPackage());
         }
 
         writeFile (targetFolder, "settings.gradle",  getSettingsGradleFileContent());
@@ -712,11 +716,13 @@ private:
 
         for (const auto& path : config.getLibrarySearchPaths())
             ndkSettings->add<GradleLibrarySearchPath> (path);
+        
+        String juceClassName (getJuceClassPackage() + ".JuceBridge");
 
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID", "1");
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
-        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
-        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSPATH","\\\"" + androidActivityClass.get().replaceCharacter('.', '/') + "\\\"");
+        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_BRIDGE_CLASSNAME", juceClassName.replaceCharacter ('.', '_'));
+        ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_BRIDGE_CLASSPATH","\\\"" + juceClassName.replaceCharacter('.', '/') + "\\\"");
 
         const auto defines = config.getAllPreprocessorDefs();
         for (int i = 0; i < defines.size(); ++i)

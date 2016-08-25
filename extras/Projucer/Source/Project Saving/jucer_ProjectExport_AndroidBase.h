@@ -65,15 +65,21 @@ public:
     bool supportsAU()   const override           { return false; }
     bool supportsAUv3() const override           { return false; }
     bool supportsStandalone() const override     { return false;  }
+    
+    const String getJuceClassPackage() const            { return "com.juce"; }
 
     //==============================================================================
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
-        const String package (getActivityClassPackage());
-        const String path (package.replaceCharacter ('.', File::separator));
-        const File target (getTargetFolder().getChildFile ("src").getChildFile (path));
+        DBG ("create");
+//        const String package (getActivityClassPackage());
 
-        copyActivityJavaFiles (modules, target, package);
+        const String path (getJuceClassPackage().replaceCharacter ('.', File::separator));
+
+        const File target (getTargetFolder().getChildFile ("src").getChildFile (path));
+        DBG ("target:" << target.getFullPathName());
+
+        copyActivityJavaFiles (modules, target, getJuceClassPackage());
     }
 
     //==============================================================================
@@ -121,10 +127,6 @@ public:
 
         props.add (new TextWithDefaultPropertyComponent<String> (androidActivityClass, "Android Activity class name", 256),
                    "The full java class name to use for the app's Activity class.");
-
-        props.add (new TextPropertyComponent (androidActivitySubClassName.getPropertyAsValue(), "Android Activity sub-class name", 256, false),
-                   "If not empty, specifies the Android Activity class name stored in the app's manifest. "
-                   "Use this if you would like to use your own Android Activity sub-class.");
 
         props.add (new TextWithDefaultPropertyComponent<String> (androidVersionCode, "Android Version Code", 32),
                    "An integer value that represents the version of the application code, relative to other versions.");
@@ -187,22 +189,24 @@ public:
     //==============================================================================
     String createDefaultClassName() const
     {
-        String s (project.getBundleIdentifier().toString().toLowerCase());
-
-        if (s.length() > 5
-            && s.containsChar ('.')
-            && s.containsOnly ("abcdefghijklmnopqrstuvwxyz_.")
-            && ! s.startsWithChar ('.'))
-        {
-            if (! s.endsWithChar ('.'))
-                s << ".";
-        }
-        else
-        {
-            s = "com.yourcompany.";
-        }
-
-        return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRoot(), false, true, false);
+//        String s (project.getBundleIdentifier().toString().toLowerCase());
+//
+//        if (s.length() > 5
+//            && s.containsChar ('.')
+//            && s.containsOnly ("abcdefghijklmnopqrstuvwxyz_.")
+//            && ! s.startsWithChar ('.'))
+//        {
+//            if (! s.endsWithChar ('.'))
+//                s << ".";
+//        }
+//        else
+//        {
+//            s = "com.yourcompany.";
+//        }
+//
+//        return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRoot(), false, true, false);
+        
+        return getJuceClassPackage() + ".JuceAppActivity";
     }
 
     void initialiseDependencyPathValues()
@@ -216,10 +220,12 @@ public:
 
     void copyActivityJavaFiles (const OwnedArray<LibraryModule>& modules, const File& targetFolder, const String& package) const
     {
-        const String className (getActivityName());
+        DBG ("targetFolder:" << targetFolder.getFullPathName());
+//        const String className (getActivityName());
+        const String className ("JuceAppActivity");
 
-        if (className.isEmpty())
-            throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get());
+//        if (className.isEmpty())
+//            throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get());
 
         createDirectoryOrThrow (targetFolder);
 
@@ -227,7 +233,8 @@ public:
 
         if (coreModule != nullptr)
         {
-            File javaDestFile (targetFolder.getChildFile (className + ".java"));
+            File javaBridgeDestFile (targetFolder.getChildFile ("JuceBridge.java"));
+            DBG ("javaBridgeDestFile:" << javaBridgeDestFile.getFullPathName());
 
             File javaSourceFolder (coreModule->getFolder().getChildFile ("native")
                                                           .getChildFile ("java"));
@@ -245,19 +252,18 @@ public:
                                 << "import android.bluetooth.*;" << newLine
                                 << "import android.bluetooth.le.*;" << newLine;
 
-                juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
+                juceMidiCode = javaAndroidMidi.loadFileAsString(); //.replace ("JuceAppActivity", className);
 
-                juceRuntimePermissionsCode = javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
+                juceRuntimePermissionsCode = javaRuntimePermissions.loadFileAsString(); //.replace ("JuceAppActivity", className);
             }
             else
             {
-                juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
-                                   .loadFileAsString()
-                                   .replace ("JuceAppActivity", className);
+                juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java").loadFileAsString();
+                                //.replace ("JuceAppActivity", className);
             }
 
-            File javaSourceFile (javaSourceFolder.getChildFile ("JuceAppActivity.java"));
-            StringArray javaSourceLines (StringArray::fromLines (javaSourceFile.loadFileAsString()));
+            File javaBridgeSourceFile (javaSourceFolder.getChildFile ("JuceBridge.java"));
+            StringArray javaSourceLines (StringArray::fromLines (javaBridgeSourceFile.loadFileAsString()));
 
             {
                 MemoryOutputStream newFile;
@@ -273,8 +279,10 @@ public:
                     else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
                         newFile << juceRuntimePermissionsCode;
                     else
-                        newFile << line.replace ("JuceAppActivity", className)
-                                       .replace ("package com.juce;", "package " + package + ";") << newLine;
+                        newFile << line << newLine;
+//                    else
+//                        newFile << line.replace ("JuceAppActivity", className)
+//                                       .replace ("package com.juce;", "package " + package + ";") << newLine;
                 }
 
                 javaSourceLines = StringArray::fromLines (newFile.toString());
@@ -285,20 +293,21 @@ public:
                     && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
                 javaSourceLines.remove (javaSourceLines.size() - 1);
 
-            overwriteFileIfDifferentOrThrow (javaDestFile, javaSourceLines.joinIntoString (newLine));
+            overwriteFileIfDifferentOrThrow (javaBridgeDestFile, javaSourceLines.joinIntoString (newLine));
+            
+            File javaActivitySourceFile (javaSourceFolder.getChildFile ("JuceAppActivity.java"));
+            if (!javaActivitySourceFile.copyFileTo (targetFolder.getChildFile ("JuceAppActivity.java")))
+                DBG ("Failed to copy " << javaActivitySourceFile.getFullPathName() << " to " << targetFolder.getFullPathName());
+
+            File javaViewHolderSourceFile (javaSourceFolder.getChildFile ("JuceViewHolder.java"));
+            if (!javaViewHolderSourceFile.copyFileTo (targetFolder.getChildFile ("JuceViewHolder.java")))
+                DBG ("Failed to copy " << javaViewHolderSourceFile.getFullPathName() << " to " << targetFolder.getFullPathName());
         }
     }
 
     String getActivityName() const
     {
         return androidActivityClass.get().fromLastOccurrenceOf (".", false, false);
-    }
-
-    String getActivitySubClassName() const
-    {
-        String activityPath = androidActivitySubClassName.get();
-
-        return (activityPath.isEmpty()) ? getActivityName() : activityPath.fromLastOccurrenceOf (".", false, false);
     }
 
     String getActivityClassPackage() const
@@ -457,7 +466,7 @@ public:
             app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
 
         XmlElement* act = app->createNewChildElement ("activity");
-        act->setAttribute ("android:name", getActivitySubClassName());
+        act->setAttribute ("android:name", androidActivityClass.get());
         act->setAttribute ("android:label", "@string/app_name");
         act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
         act->setAttribute ("android:screenOrientation", androidScreenOrientation.get());

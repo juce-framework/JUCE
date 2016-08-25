@@ -58,7 +58,7 @@
                 return false;
             }
 
-            MidiManager mm = (MidiManager) getSystemService (MIDI_SERVICE);
+            MidiManager mm = (MidiManager) ((Activity) activityContext).getSystemService (Activity.MIDI_SERVICE);
 
             PhysicalMidiDevice midiDevice = PhysicalMidiDevice.fromBluetoothLeDevice (btDevice, mm);
 
@@ -619,7 +619,7 @@
         public MidiDeviceManager()
         {
             physicalMidiDevices = new ArrayList<PhysicalMidiDevice>();
-            manager = (MidiManager) getSystemService (MIDI_SERVICE);
+            manager = (MidiManager) ((Activity) activityContext).getSystemService (Activity.MIDI_SERVICE);
 
             if (manager == null)
             {
@@ -803,7 +803,7 @@
 
     public MidiDeviceManager getAndroidMidiDeviceManager()
     {
-        if (getSystemService (MIDI_SERVICE) == null)
+        if (((Activity) activityContext).getSystemService (Activity.MIDI_SERVICE) == null)
             return null;
 
         synchronized (JuceAppActivity.class)
