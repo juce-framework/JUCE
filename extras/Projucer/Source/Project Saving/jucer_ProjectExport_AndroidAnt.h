@@ -319,8 +319,8 @@ private:
         StringPairArray defines;
         defines.set ("JUCE_ANDROID", "1");
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
-        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
-        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\\\"" + getJNIActivityClassName() + "\\\"");
+        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJuceClassPackage().replaceCharacter ('/', '_'));
+        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\\\"" + getJuceClassPackage() + "\\\"");
 
         String flags ("-fsigned-char -fexceptions -frtti");
 
