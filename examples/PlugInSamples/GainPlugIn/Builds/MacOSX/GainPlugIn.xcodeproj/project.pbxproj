@@ -173,6 +173,7 @@
 		167A331857E2C569DCD49503 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Message.h"; path = "../../../../../modules/juce_events/messages/juce_Message.h"; sourceTree = "SOURCE_ROOT"; };
 		169146CE0C9730602B3D31BD = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GainPlugIn.vst; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		16AA0774C9C905089427796B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ComponentBoundsConstrainer.cpp"; path = "../../../../../modules/juce_gui_basics/layout/juce_ComponentBoundsConstrainer.cpp"; sourceTree = "SOURCE_ROOT"; };
+		1708A4A271D6457F239F1981 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VSTInterface.h"; path = "../../../../../modules/juce_audio_processors/format_types/juce_VSTInterface.h"; sourceTree = "SOURCE_ROOT"; };
 		17F8F5D68492B7AA9085C409 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FlacAudioFormat.cpp"; path = "../../../../../modules/juce_audio_formats/codecs/juce_FlacAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
 		183AA5F36A47F440F056FD9A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctflt.c; path = "../../../../../modules/juce_graphics/image_formats/jpglib/jidctflt.c"; sourceTree = "SOURCE_ROOT"; };
 		18602F0B69EF7D2A12C1BD9A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_osx_MessageQueue.h"; path = "../../../../../modules/juce_events/native/juce_osx_MessageQueue.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1792,6 +1793,7 @@
 					3E750A56336FE91FE4190D0B,
 					CE57E03FD67001AF17AE9348,
 					115075E87FFDE3A0562DAB11,
+					1708A4A271D6457F239F1981,
 					B480AA30CA4A3E925CD4D7BA,
 					8BE1CAAB600CECDD6390B937,
 					8C68CCB04F23709D332A85A3, ); name = "format_types"; sourceTree = "<group>"; };

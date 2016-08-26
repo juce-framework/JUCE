@@ -527,10 +527,10 @@ BigInteger& BigInteger::operator*= (const BigInteger& other)
 
     BigInteger total;
     total.highestBit = n + t + 1;
+    uint32* const totalValues = total.ensureSize (sizeNeededToHold (total.highestBit) + 1);
 
     n >>= 5;
     t >>= 5;
-    uint32* const totalValues = total.ensureSize (n + t + 2);
 
     BigInteger m (other);
     m.setNegative (false);

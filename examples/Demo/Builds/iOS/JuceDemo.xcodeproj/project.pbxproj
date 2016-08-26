@@ -450,6 +450,7 @@
 		417FED446C0B953AB2DDB633 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = b2ContactSolver.cpp; path = "../../../../modules/juce_box2d/box2d/Dynamics/Contacts/b2ContactSolver.cpp"; sourceTree = "SOURCE_ROOT"; };
 		4198EE3311A171C884A5FA9F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_WildcardFileFilter.cpp"; path = "../../../../modules/juce_core/files/juce_WildcardFileFilter.cpp"; sourceTree = "SOURCE_ROOT"; };
 		41F65957FAEED268DBFFE925 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = adler32.c; path = "../../../../modules/juce_core/zip/zlib/adler32.c"; sourceTree = "SOURCE_ROOT"; };
+		41F76FF32798054E741CB90B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VSTInterface.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VSTInterface.h"; sourceTree = "SOURCE_ROOT"; };
 		420516E3BCE114E11526E916 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = smallft.c; path = "../../../../modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/smallft.c"; sourceTree = "SOURCE_ROOT"; };
 		4212EA9CE0B9AA4986108D9D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_OpenGLShaderProgram.cpp"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLShaderProgram.cpp"; sourceTree = "SOURCE_ROOT"; };
 		42386AD366F1AD43B6B29364 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Synthesiser.cpp"; path = "../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1822,6 +1823,7 @@
 					9750423DB3DB6570382DA3C1,
 					9B9E034C5761096ACB8A76C3,
 					73267FE8DDE50FD1E6E31ED4,
+					41F76FF32798054E741CB90B,
 					8AE56D2F4E33B015C3D73EB8,
 					52A95B5754438C999343869A,
 					C8A42EE493A1DF2E283C245E, ); name = "format_types"; sourceTree = "<group>"; };
