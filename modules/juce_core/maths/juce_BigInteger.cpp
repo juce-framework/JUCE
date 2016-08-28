@@ -1193,6 +1193,76 @@ void BigInteger::loadFromMemoryBlock (const MemoryBlock& data)
     highestBit = getHighestBit();
 }
 
+//==============================================================================
+void writeLittleEndianBitsInBuffer (void* buffer, uint32 startBit, uint32 numBits, uint32 value) noexcept
+{
+    jassert (buffer != nullptr);
+    jassert (numBits > 0 && numBits <= 32);
+    jassert (numBits == 32 || (value >> numBits) == 0);
+
+    uint8* data = static_cast<uint8*> (buffer) + startBit / 8;
+
+    if (const uint32 offset = (startBit & 7))
+    {
+        const uint32 bitsInByte = 8 - offset;
+        const uint8 current = *data;
+
+        if (bitsInByte >= numBits)
+        {
+            *data = (uint8) ((current & ~(((1u << numBits) - 1u) << offset)) | (value << offset));
+            return;
+        }
+
+        *data++ = current ^ (uint8) (((value << offset) ^ current) & (((1u << bitsInByte) - 1u) << offset));
+        numBits -= bitsInByte;
+        value >>= bitsInByte;
+    }
+
+    while (numBits >= 8)
+    {
+        *data++ = (uint8) value;
+        value >>= 8;
+        numBits -= 8;
+    }
+
+    if (numBits > 0)
+        *data = (uint8) ((*data & (0xff << numBits)) | value);
+}
+
+uint32 readLittleEndianBitsInBuffer (const void* buffer, uint32 startBit, uint32 numBits) noexcept
+{
+    jassert (buffer != nullptr);
+    jassert (numBits > 0 && numBits <= 32);
+
+    uint32 result = 0;
+    uint32 bitsRead = 0;
+    const uint8* data = static_cast<const uint8*> (buffer) + startBit / 8;
+
+    if (const uint32 offset = (startBit & 7))
+    {
+        const uint32 bitsInByte = 8 - offset;
+        result = (*data >> offset);
+
+        if (bitsInByte >= numBits)
+            return result & ((1u << numBits) - 1u);
+
+        numBits -= bitsInByte;
+        bitsRead += bitsInByte;
+        ++data;
+    }
+
+    while (numBits >= 8)
+    {
+        result |= (((uint32) *data++) << bitsRead);
+        bitsRead += 8;
+        numBits -= 8;
+    }
+
+    if (numBits > 0)
+        result |= ((*data & ((1u << numBits) - 1u)) << bitsRead);
+
+    return result;
+}
 
 //==============================================================================
 //==============================================================================
@@ -1208,54 +1278,68 @@ public:
         BigInteger b;
 
         while (b < 2)
-            r.fillBitsRandomly (b, 0, r.nextInt (200) + 1);
+            r.fillBitsRandomly (b, 0, r.nextInt (150) + 1);
 
         return b;
     }
 
     void runTest() override
     {
-        beginTest ("BigInteger");
-
-        Random r = getRandom();
-
-        expect (BigInteger().isZero());
-        expect (BigInteger(1).isOne());
-
-        for (int j = 10000; --j >= 0;)
         {
-            BigInteger b1 (getBigRandom(r)),
-                       b2 (getBigRandom(r));
+            beginTest ("BigInteger");
 
-            if ((j % 100) == 1 || j == 1) b1 = BigInteger();
-            if ((j % 100) == 2 || j == 1) b2 = BigInteger();
+            Random r = getRandom();
 
-            expect (((b2 << 4) >> 4) == b2);
-            expect (((b2 << 32) >> 32) == b2);
-            expect (((b2 << 200) >> 200) == b2);
+            expect (BigInteger().isZero());
+            expect (BigInteger(1).isOne());
 
-            expect (((b2 & BigInteger (1)) | BigInteger (1)).isOne());
-            expect (((b2 | BigInteger (1)) & BigInteger (1)).isOne());
-            expect ((b2 ^ b2).isZero());
-            expect ((b2 >> 300).isZero());
-            expect ((((b2 >> 16) << 16) & BigInteger (0xffff)).isZero());
+            for (int j = 10000; --j >= 0;)
+            {
+                BigInteger b1 (getBigRandom(r)),
+                           b2 (getBigRandom(r));
 
-            BigInteger b3 = b1 + b2;
-            expect ((b3 > b1 && b3 > b2) || (b1.isZero() || b2.isZero()));
-            expect ((b3 > b1 && b3 > b2) || (b1.isZero() || b2.isZero()));
-            expect (b3 - b1 == b2);
-            expect (b3 - b2 == b1);
+                BigInteger b3 = b1 + b2;
+                expect (b3 > b1 && b3 > b2);
+                expect (b3 - b1 == b2);
+                expect (b3 - b2 == b1);
 
-            BigInteger b4 = b1 * b2;
-            expect ((b4 > b1 && b4 > b2) || b4.isZero());
-            expect (b4 / b1 == b2 || b1.isZero());
-            expect (b4 / b2 == b1 || b2.isZero());
+                BigInteger b4 = b1 * b2;
+                expect (b4 > b1 && b4 > b2);
+                expect (b4 / b1 == b2);
+                expect (b4 / b2 == b1);
 
-            // TODO: should add tests for other ops (although they also get pretty well tested in the RSA unit test)
+                // TODO: should add tests for other ops (although they also get pretty well tested in the RSA unit test)
 
-            BigInteger b5;
-            b5.loadFromMemoryBlock (b3.toMemoryBlock());
-            expect (b3 == b5);
+                BigInteger b5;
+                b5.loadFromMemoryBlock (b3.toMemoryBlock());
+                expect (b3 == b5);
+            }
+        }
+
+        {
+            beginTest ("Bit setting");
+
+            Random r = getRandom();
+            static uint8 test[2048];
+
+            for (int j = 100000; --j >= 0;)
+            {
+                uint32 offset = r.nextInt (200) + 10;
+                uint32 num = r.nextInt (32) + 1;
+                uint32 value = r.nextInt();
+
+                if (num < 32)
+                    value &= ((1u << num) - 1);
+
+                auto old1 = readLittleEndianBitsInBuffer (test, offset - 6, 6);
+                auto old2 = readLittleEndianBitsInBuffer (test, offset + num, 6);
+                writeLittleEndianBitsInBuffer (test, offset, num, value);
+                auto result = readLittleEndianBitsInBuffer (test, offset, num);
+
+                expect (result == value);
+                expect (old1 == readLittleEndianBitsInBuffer (test, offset - 6, 6));
+                expect (old2 == readLittleEndianBitsInBuffer (test, offset + num, 6));
+            }
         }
     }
 };
