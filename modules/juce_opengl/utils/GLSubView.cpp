@@ -224,8 +224,9 @@ void GLSubView::renderGL(){
     mFrameBuffer->readPixels(mPixels, Rectangle<int>{0,0,mWidth,mHeight});
     lock.unlock();
     
-    const MessageManagerLock mmLock;
-    repaint();
+    MessageManagerLock mmLock(Thread::getCurrentThread());
+    if(mmLock.lockWasGained())repaint();
+  
 }
 
 void GLSubView::closeGL(){
