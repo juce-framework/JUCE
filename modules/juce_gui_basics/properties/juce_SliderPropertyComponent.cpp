@@ -26,13 +26,14 @@ SliderPropertyComponent::SliderPropertyComponent (const String& name,
                                                   const double rangeMin,
                                                   const double rangeMax,
                                                   const double interval,
-                                                  const double skewFactor)
+                                                  const double skewFactor,
+                                                  bool symmetricSkew)
     : PropertyComponent (name)
 {
     addAndMakeVisible (slider);
 
     slider.setRange (rangeMin, rangeMax, interval);
-    slider.setSkewFactor (skewFactor);
+    slider.setSkewFactor (skewFactor, symmetricSkew);
     slider.setSliderStyle (Slider::LinearBar);
 
     slider.addListener (this);
@@ -43,13 +44,14 @@ SliderPropertyComponent::SliderPropertyComponent (const Value& valueToControl,
                                                   const double rangeMin,
                                                   const double rangeMax,
                                                   const double interval,
-                                                  const double skewFactor)
+                                                  const double skewFactor,
+                                                  bool symmetricSkew)
     : PropertyComponent (name)
 {
     addAndMakeVisible (slider);
 
     slider.setRange (rangeMin, rangeMax, interval);
-    slider.setSkewFactor (skewFactor);
+    slider.setSkewFactor (skewFactor, symmetricSkew);
     slider.setSliderStyle (Slider::LinearBar);
 
     slider.getValueObject().referTo (valueToControl);
