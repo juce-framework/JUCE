@@ -366,6 +366,18 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
         }
     }
 
+    void beginParameterChange()
+    {
+        if (AudioProcessorParameter* p = state.getParameter (paramID))
+            p->beginChangeGesture();
+    }
+
+    void endParameterChange()
+    {
+        if (AudioProcessorParameter* p = state.getParameter (paramID))
+            p->endChangeGesture();
+    }
+
     void handleAsyncUpdate() override
     {
         setValue (lastValue);
@@ -415,17 +427,8 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
             setNewUnnormalisedValue ((float) s->getValue());
     }
 
-    void sliderDragStarted (Slider*) override
-    {
-        if (AudioProcessorParameter* p = state.getParameter (paramID))
-            p->beginChangeGesture();
-    }
-
-    void sliderDragEnded (Slider*) override
-    {
-        if (AudioProcessorParameter* p = state.getParameter (paramID))
-            p->endChangeGesture();
-    }
+    void sliderDragStarted (Slider*) override { beginParameterChange(); }
+    void sliderDragEnded   (Slider*) override { endParameterChange();   }
 
     Slider& slider;
 
@@ -463,7 +466,9 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
 
     void comboBoxChanged (ComboBox* comboBox) override
     {
+        beginParameterChange();
         setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
+        endParameterChange();
     }
 
     ComboBox& combo;
@@ -502,7 +507,9 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
 
     void buttonClicked (Button* b) override
     {
+        beginParameterChange();
         setNewUnnormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
+        endParameterChange();
     }
 
     Button& button;
