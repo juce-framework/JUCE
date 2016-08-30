@@ -220,10 +220,9 @@ void GLSubView::renderGL(){
     context.extensions.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFrameBuffer->getFrameBufferID());
     context.extensions.glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, mWidth, mHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
     mFrameBuffer->readPixels(mPixels, Rectangle<int>{0,0,mWidth,mHeight});
-    //verticalRowFlip(mPixels, mWidth, mHeight);
-    mutex.unlock();
+    lock.unlock();
     
     const MessageManagerLock mmLock;
     repaint();
@@ -240,13 +239,13 @@ void GLSubView::closeGL(){
 }
 
 void GLSubView::paint(juce::Graphics &g){
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
     Image::BitmapData bitmap(*mImage,0,0,mWidth,mHeight,Image::BitmapData::writeOnly);
     memcpy(bitmap.data, mPixels, sizeof(uint8) * 4 * mWidth * mHeight);
     auto affine = AffineTransform::verticalFlip(getHeight());
     g.addTransform(affine);
     g.drawImage(*mImage, 0, 0,getWidth(),getHeight(),0,0,mWidth,mHeight,false);
-    mutex.unlock();
+    lock.unlock();
     paintOver(g);
 }
 
