@@ -15,7 +15,7 @@ public:
     public:
         virtual ~Renderer(){};
         virtual void initGL() = 0;
-        virtual void renderGL() = 0;
+        virtual bool renderGL() = 0;
         virtual void closeGL() = 0;
     };
 public:
@@ -93,7 +93,7 @@ private:
     
 private:
     void initGL()override final;
-    void renderGL()override final;
+    bool renderGL()override final;
     void closeGL() override final;
     
 };

@@ -100,7 +100,7 @@ bool GLSubFrame::renderFrame(){
     
     OpenGLContext::NativeContext::Locker locker (*mNativeContext);
     mContext.currentRenderScale = scale;
-    mRenderer->renderGL();
+    if(!mRenderer->renderGL())return false;
     mContext.swapBuffers();
     
     return true;
@@ -206,9 +206,7 @@ void GLSubView::verticalRowFlip(PixelARGB*const data,int w, int h){
     }
 }
 
-
-
-void GLSubView::renderGL(){
+bool GLSubView::renderGL(){
     auto& context = getGLContext();
 
     context.extensions.glBindFramebuffer(GL_FRAMEBUFFER,fbo);
@@ -225,8 +223,9 @@ void GLSubView::renderGL(){
     lock.unlock();
     
     MessageManagerLock mmLock(Thread::getCurrentThread());
-    if(mmLock.lockWasGained())repaint();
-  
+    if(!mmLock.lockWasGained())return false;
+    repaint();
+    return true;
 }
 
 void GLSubView::closeGL(){
