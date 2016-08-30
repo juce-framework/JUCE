@@ -320,8 +320,9 @@ public:
         if (filter->supportsDoublePrecisionProcessing())
             vstEffect.flags |= vstEffectFlagInplaceDoubleAudio;
 
-        if (JucePlugin_IsSynth != 0)
-            vstEffect.flags |= vstEffectFlagIsSynth;
+       #if JucePlugin_IsSynth
+        vstEffect.flags |= vstEffectFlagIsSynth;
+       #endif
 
         vstEffect.flags |= vstEffectFlagDataInChunks;
 
