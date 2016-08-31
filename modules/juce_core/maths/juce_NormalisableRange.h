@@ -45,12 +45,13 @@ class NormalisableRange
 {
 public:
     /** Creates a continuous range that performs a dummy mapping. */
-    NormalisableRange() noexcept  : start(), end (1), interval(), skew (static_cast<ValueType> (1)) {}
+    NormalisableRange() noexcept  : start(), end (1), interval(), skew (static_cast<ValueType> (1)), symmetricSkew (false) {}
 
     /** Creates a copy of another range. */
     NormalisableRange (const NormalisableRange& other) noexcept
         : start (other.start), end (other.end),
-          interval (other.interval), skew (other.skew)
+          interval (other.interval), skew (other.skew),
+          symmetricSkew (other.symmetricSkew)
     {
         checkInvariants();
     }
@@ -62,6 +63,7 @@ public:
         end = other.end;
         interval = other.interval;
         skew = other.skew;
+        symmetricSkew = other.symmetricSkew;
         checkInvariants();
         return *this;
     }
@@ -70,9 +72,10 @@ public:
     NormalisableRange (ValueType rangeStart,
                        ValueType rangeEnd,
                        ValueType intervalValue,
-                       ValueType skewFactor) noexcept
-        : start (rangeStart), end (rangeEnd),
-          interval (intervalValue), skew (skewFactor)
+                       ValueType skewFactor,
+                       bool useSymmetricSkew = false) noexcept
+        : start (rangeStart), end (rangeEnd), interval (intervalValue),
+          skew (skewFactor), symmetricSkew (useSymmetricSkew)
     {
         checkInvariants();
     }
@@ -81,8 +84,8 @@ public:
     NormalisableRange (ValueType rangeStart,
                        ValueType rangeEnd,
                        ValueType intervalValue) noexcept
-        : start (rangeStart), end (rangeEnd),
-          interval (intervalValue), skew (static_cast<ValueType> (1))
+        : start (rangeStart), end (rangeEnd), interval (intervalValue),
+          skew (static_cast<ValueType> (1)), symmetricSkew (false)
     {
         checkInvariants();
     }
@@ -90,8 +93,8 @@ public:
     /** Creates a NormalisableRange with a given range, continuous interval, but a dummy skew-factor. */
     NormalisableRange (ValueType rangeStart,
                        ValueType rangeEnd) noexcept
-        : start (rangeStart), end (rangeEnd),
-          interval(), skew (static_cast<ValueType> (1))
+        : start (rangeStart), end (rangeEnd), interval(),
+          skew (static_cast<ValueType> (1)), symmetricSkew (false)
     {
         checkInvariants();
     }
@@ -103,10 +106,18 @@ public:
     {
         ValueType proportion = (v - start) / (end - start);
 
-        if (skew != static_cast<ValueType> (1))
-            proportion = std::pow (proportion, skew);
+        if (skew == static_cast<ValueType> (1))
+            return proportion;
 
-        return proportion;
+        if (! symmetricSkew)
+            return std::pow (proportion, skew);
+
+        ValueType distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
+
+        return (static_cast<ValueType> (1) + std::pow (std::abs (distanceFromMiddle), skew)
+                                           * (distanceFromMiddle < static_cast<ValueType> (0) ? static_cast<ValueType> (-1)
+                                                                                              : static_cast<ValueType> (1)))
+               / static_cast<ValueType> (2);
     }
 
     /** Uses the properties of this mapping to convert a normalised 0->1 value to
@@ -114,10 +125,22 @@ public:
     */
     ValueType convertFrom0to1 (ValueType proportion) const noexcept
     {
-        if (skew != static_cast<ValueType> (1) && proportion > ValueType())
-            proportion = std::exp (std::log (proportion) / skew);
+        if (! symmetricSkew)
+        {
+            if (skew != static_cast<ValueType> (1) && proportion > ValueType())
+                proportion = std::exp (std::log (proportion) / skew);
 
-        return start + (end - start) * proportion;
+                return start + (end - start) * proportion;
+        }
+
+        ValueType distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
+
+        if (skew != static_cast<ValueType> (1) && distanceFromMiddle != static_cast<ValueType> (0))
+            distanceFromMiddle = std::exp (std::log (std::abs (distanceFromMiddle)) / skew)
+                                 * (distanceFromMiddle < static_cast<ValueType> (0) ? static_cast<ValueType> (-1)
+                                                                                    : static_cast<ValueType> (1));
+
+        return start + (end - start) / static_cast<ValueType> (2) * (static_cast<ValueType> (1) + distanceFromMiddle);
     }
 
     /** Takes a non-normalised value and snaps it based on the interval property of
@@ -157,6 +180,9 @@ public:
         end of the range will be expanded.
     */
     ValueType skew;
+
+    /** If true, the skew factor applies from the middle of the slider to each of its ends. */
+    bool symmetricSkew;
 
 private:
     void checkInvariants() const

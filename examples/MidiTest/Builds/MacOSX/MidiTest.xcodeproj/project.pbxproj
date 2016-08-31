@@ -121,6 +121,7 @@
 		15A9B402DFA75E656A407EC6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MessageManager.cpp"; path = "../../../../modules/juce_events/messages/juce_MessageManager.cpp"; sourceTree = "SOURCE_ROOT"; };
 		15ADA6032EE53D202CD50575 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OggVorbisAudioFormat.h"; path = "../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		15C2EE8305EE8F0E0DA60E7E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OutputStream.h"; path = "../../../../modules/juce_core/streams/juce_OutputStream.h"; sourceTree = "SOURCE_ROOT"; };
+		15CD600731386519A6F59ABF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VSTInterface.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VSTInterface.h"; sourceTree = "SOURCE_ROOT"; };
 		16AB60E71EEED710531B2E18 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_KeyMappingEditorComponent.h"; path = "../../../../modules/juce_gui_extra/misc/juce_KeyMappingEditorComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		16B6619A5A552495ADC91C2E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioTransportSource.cpp"; path = "../../../../modules/juce_audio_devices/sources/juce_AudioTransportSource.cpp"; sourceTree = "SOURCE_ROOT"; };
 		176690C8D73C46A2A44EE5F2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_PropertySet.h"; path = "../../../../modules/juce_core/containers/juce_PropertySet.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1501,6 +1502,7 @@
 					68CAC12255032C9598B836DF,
 					004A7D1BC57F2136FF31D767,
 					3AC1657491C449D35317D152,
+					15CD600731386519A6F59ABF,
 					0C7A1C47389DD6A1DE34D831,
 					8781C749016774125396B268,
 					B6F1399CBD41DC2FF546CA8C, ); name = "format_types"; sourceTree = "<group>"; };

@@ -678,6 +678,7 @@
 		90BCC51EEB48DE909139B357 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_OpenSL.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_android_OpenSL.cpp"; sourceTree = "SOURCE_ROOT"; };
 		914D99CE5915E7B68BB47EEB = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_BluetoothMidiDevicePairingDialogue.h"; path = "../../../../modules/juce_audio_utils/gui/juce_BluetoothMidiDevicePairingDialogue.h"; sourceTree = "SOURCE_ROOT"; };
 		9156CF6C64EE06DB55B57572 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_WebBrowserComponent.h"; path = "../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h"; sourceTree = "SOURCE_ROOT"; };
+		915E7E2F19B34D7C2817FC67 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VSTInterface.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VSTInterface.h"; sourceTree = "SOURCE_ROOT"; };
 		9163D3EF55AD0B2B197493EC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jidctflt.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jidctflt.c"; sourceTree = "SOURCE_ROOT"; };
 		917260F53ED8BE9007BBD18A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jddctmgr.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jddctmgr.c"; sourceTree = "SOURCE_ROOT"; };
 		91EA75E4BBE8A87A9618D202 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ResizableCornerComponent.cpp"; path = "../../../../modules/juce_gui_basics/layout/juce_ResizableCornerComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1500,6 +1501,7 @@
 					3DC079D7D7EFDF308DC44D4F,
 					A5EF5FDF979BC1FF68D3EA33,
 					8F9FE852D4F12052C098EECE,
+					915E7E2F19B34D7C2817FC67,
 					45333ACAF454F661FC30924E,
 					123831F52D2C1E9A68B75613,
 					B8B0992FEC384EAE2FC83B39, ); name = "format_types"; sourceTree = "<group>"; };

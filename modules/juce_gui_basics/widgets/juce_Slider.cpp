@@ -477,8 +477,8 @@ public:
     void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint)
     {
         if (maximum > minimum)
-            skewFactor = log (0.5) / log ((sliderValueToShowAtMidPoint - minimum)
-                                            / (maximum - minimum));
+            skewFactor = std::log (0.5) / std::log ((sliderValueToShowAtMidPoint - minimum)
+                                        / (maximum - minimum));
     }
 
     void setIncDecButtonsMode (const IncDecButtonMode mode)
@@ -1508,7 +1508,7 @@ double Slider::proportionOfLengthToValue (double proportion)
     if (! isSymmetricSkew())
     {
         if (skew != 1.0 && proportion > 0.0)
-            proportion = exp (log (proportion) / skew);
+            proportion = std::exp (std::log (proportion) / skew);
 
         return getMinimum() + (getMaximum() - getMinimum()) * proportion;
     }
@@ -1516,8 +1516,8 @@ double Slider::proportionOfLengthToValue (double proportion)
     double distanceFromMiddle = 2.0 * proportion - 1.0;
 
     if (skew != 1.0 && distanceFromMiddle != 0.0)
-        distanceFromMiddle =  exp (log (std::abs (distanceFromMiddle)) / skew)
-                                    * (distanceFromMiddle < 0 ? -1 : 1);
+        distanceFromMiddle =  std::exp (std::log (std::abs (distanceFromMiddle)) / skew)
+                                     * (distanceFromMiddle < 0 ? -1 : 1);
 
     return getMinimum() + (getMaximum() - getMinimum()) / 2.0 * (1 + distanceFromMiddle);
 }
@@ -1534,7 +1534,7 @@ double Slider::valueToProportionOfLength (double value)
         return std::pow (n, skew);
 
     double distanceFromMiddle = 2.0 * n - 1.0;
-    return (1.0 + pow (std::abs (distanceFromMiddle), skew) * (distanceFromMiddle < 0 ? -1 : 1)) / 2.0;
+    return (1.0 + std::pow (std::abs (distanceFromMiddle), skew) * (distanceFromMiddle < 0 ? -1 : 1)) / 2.0;
 }
 
 double Slider::snapValue (double attemptedValue, DragMode)

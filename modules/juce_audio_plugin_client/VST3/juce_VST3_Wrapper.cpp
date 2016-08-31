@@ -40,6 +40,7 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_PluginBusUtilities.h"
+#include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
@@ -849,6 +850,8 @@ private:
                     setBounds (pluginEditor->getLocalBounds());
                     resizeHostWindow();
                 }
+
+                ignoreUnused (fakeMouseGenerator);
             }
 
             ~ContentWrapperComponent()
@@ -910,6 +913,7 @@ private:
 
         private:
             JuceVST3Editor& owner;
+            FakeMouseMoveGenerator fakeMouseGenerator;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
@@ -2097,7 +2101,7 @@ private:
 
             // Consider yourself very unlucky if you hit this assertion. The hash code of your
             // parameter ids are not unique.
-            jassert (! vstParamIDs.contains (static_cast<int32> (paramID)));
+            jassert (! vstParamIDs.contains (static_cast<uint32> (paramID)));
 
             vstParamIDs.add (paramID);
             paramMap.set (static_cast<int32> (paramID), i);

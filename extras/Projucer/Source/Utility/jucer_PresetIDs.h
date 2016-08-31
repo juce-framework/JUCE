@@ -55,11 +55,9 @@ namespace Ids
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (modulePaths);
     DECLARE_ID (searchpaths);
-    DECLARE_ID (vstFolder);
     DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
-    DECLARE_ID (vst2Path);
     DECLARE_ID (vst3Path);
     DECLARE_ID (rtasPath);
     DECLARE_ID (aaxPath);

@@ -749,10 +749,6 @@ protected:
 
     void initialiseDependencyPathValues()
     {
-        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),
-                                                                Ids::vst2Path,
-                                                                TargetOS::windows)));
-
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
                                                                 Ids::vst3Path,
                                                                 TargetOS::windows)));
@@ -1432,7 +1428,12 @@ protected:
                 {
                     XmlElement* intdir = props->createNewChildElement ("IntDir");
                     setConditionAttribute (*intdir, config);
-                    intdir->addTextElement (FileHelpers::windowsStylePath (config.getIntermediatesPath()) + "\\");
+
+                    String intermediatesPath = config.getIntermediatesPath();
+                    if (! intermediatesPath.endsWith ("\\"))
+                        intermediatesPath << "\\";
+
+                    intdir->addTextElement (FileHelpers::windowsStylePath (intermediatesPath));
                 }
 
                 {

@@ -837,6 +837,7 @@
 		A31CE7177BF947DB60F72D94 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_BubbleMessageComponent.cpp"; path = "../../../../modules/juce_gui_extra/misc/juce_BubbleMessageComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A3F95510DCE3352156FE67E4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_audio_utils.cpp"; path = "../../../../modules/juce_audio_utils/juce_audio_utils.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A3FF50EFE17D8634A9A0A6EC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = framing.c; path = "../../../../modules/juce_audio_formats/codecs/oggvorbis/framing.c"; sourceTree = "SOURCE_ROOT"; };
+		A4DAEB5C0621C1C04EA93AEC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VSTInterface.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VSTInterface.h"; sourceTree = "SOURCE_ROOT"; };
 		A52038A2E61AB03CF55A3B0F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_BufferingAudioFormatReader.cpp"; path = "../../../../modules/juce_audio_formats/format/juce_BufferingAudioFormatReader.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A5479787577EB56F20ECF48F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CAReferenceCounted.h; path = "../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/CAReferenceCounted.h"; sourceTree = "SOURCE_ROOT"; };
 		A59A08DCC76EE0FC7EBE1203 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -1749,6 +1750,7 @@
 					6A72E46DBDCFAD6F7039E739,
 					F6AE333028FC864D4653A7B5,
 					070E3EFE91BE8407EE1EBD8C,
+					A4DAEB5C0621C1C04EA93AEC,
 					A9C466FBA4FCF6484BCF86A2,
 					6501BB1AAFD5B3DC4A783F85,
 					CC04A3CE3003C0A0AB35A7AF, ); name = "format_types"; sourceTree = "<group>"; };

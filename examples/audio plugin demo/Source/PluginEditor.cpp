@@ -28,7 +28,10 @@ public:
 
     void valueChanged() override
     {
-        param.setValueNotifyingHost ((float) Slider::getValue());
+        if (isMouseButtonDown())
+            param.setValueNotifyingHost ((float) Slider::getValue());
+        else
+            param.setValue ((float) Slider::getValue());
     }
 
     void timerCallback() override       { updateSliderPos(); }

@@ -34,7 +34,6 @@ PathSettingsTab::PathSettingsTab (DependencyPathOS os)
 
     StoredSettings& settings = getAppSettings();
 
-    vst2PathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::vst2Path, os), "VST SDK",  maxChars, false));
     vst3PathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::vst3Path, os), "VST3 SDK", maxChars, false));
 
    #if ! JUCE_LINUX
@@ -70,7 +69,6 @@ void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textP
 
 Identifier PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* component) const
 {
-    if (component == vst2PathComponent)       return Ids::vst2Path;
     if (component == vst3PathComponent)       return Ids::vst3Path;
     if (component == rtasPathComponent)       return Ids::rtasPath;
     if (component == aaxPathComponent)        return Ids::aaxPath;

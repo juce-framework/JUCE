@@ -131,7 +131,7 @@ public:
 
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 
-    Value getVSTPathValue (bool isVST3) const   { return isVST3 ? vst3Path : vst2Path; }
+    Value getVST3PathValue() const              { return vst3Path; }
     Value getRTASPathValue() const              { return rtasPath; }
     Value getAAXPathValue() const               { return aaxPath; }
 
@@ -341,7 +341,7 @@ protected:
     const ProjectType& projectType;
     const String projectName;
     const File projectFolder;
-    Value vst2Path, vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
+    Value vst3Path, rtasPath, aaxPath; // these must be initialised in the specific exporter c'tors!
 
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;
@@ -406,7 +406,7 @@ private:
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
-    void addVSTFolderToPath (bool isVST3);
+    void addVST3FolderToPath();
     void addAAXFoldersToPath();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
