@@ -114,10 +114,10 @@ public:
 
         ValueType distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
 
-        return (static_cast<ValueType> (1) + pow (std::abs (distanceFromMiddle), skew)
-                * (distanceFromMiddle < static_cast<ValueType> (0) ? static_cast<ValueType> (-1)
-                                                                   : static_cast<ValueType> (1)))
-                / static_cast<ValueType> (2);
+        return (static_cast<ValueType> (1) + std::pow (std::abs (distanceFromMiddle), skew)
+                                           * (distanceFromMiddle < static_cast<ValueType> (0) ? static_cast<ValueType> (-1)
+                                                                                              : static_cast<ValueType> (1)))
+               / static_cast<ValueType> (2);
     }
 
     /** Uses the properties of this mapping to convert a normalised 0->1 value to
@@ -128,7 +128,7 @@ public:
         if (! symmetricSkew)
         {
             if (skew != static_cast<ValueType> (1) && proportion > ValueType())
-                proportion = exp (std::log (proportion) / skew);
+                proportion = std::exp (std::log (proportion) / skew);
 
                 return start + (end - start) * proportion;
         }
@@ -136,9 +136,9 @@ public:
         ValueType distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
 
         if (skew != static_cast<ValueType> (1) && distanceFromMiddle != static_cast<ValueType> (0))
-            distanceFromMiddle = exp (log (std::abs (distanceFromMiddle)) / skew)
-                                       * (distanceFromMiddle < static_cast<ValueType> (0) ? static_cast<ValueType> (-1)
-                                                                                          : static_cast<ValueType> (1));
+            distanceFromMiddle = std::exp (std::log (std::abs (distanceFromMiddle)) / skew)
+                                 * (distanceFromMiddle < static_cast<ValueType> (0) ? static_cast<ValueType> (-1)
+                                                                                    : static_cast<ValueType> (1));
 
         return start + (end - start) / static_cast<ValueType> (2) * (static_cast<ValueType> (1) + distanceFromMiddle);
     }
