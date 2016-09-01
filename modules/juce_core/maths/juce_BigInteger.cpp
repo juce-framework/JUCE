@@ -1324,9 +1324,9 @@ public:
 
             for (int j = 100000; --j >= 0;)
             {
-                uint32 offset = r.nextInt (200) + 10;
-                uint32 num = r.nextInt (32) + 1;
-                uint32 value = r.nextInt();
+                uint32 offset = static_cast<uint32> (r.nextInt (200) + 10);
+                uint32 num = static_cast<uint32> (r.nextInt (32) + 1);
+                uint32 value = static_cast<uint32> (r.nextInt());
 
                 if (num < 32)
                     value &= ((1u << num) - 1);

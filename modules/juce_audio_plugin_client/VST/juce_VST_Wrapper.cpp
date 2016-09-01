@@ -779,13 +779,13 @@ public:
 
         const AudioProcessor::AudioProcessorBus& busInfo = busUtils.getFilterBus (direction).getReference (busIdx);
 
+        String channelName = busInfo.name;
        #ifdef JucePlugin_PreferredChannelConfigurations
-        String abbvChannelName = String (index);
+        channelName += String (" ") + String (index);
        #else
-        String abbvChannelName = AudioChannelSet::getAbbreviatedChannelTypeName (busInfo.channels.getTypeOfChannel(index));
+        if (busUtils.getNumChannels (direction, busIdx) > 1)
+            channelName += String (" ") + AudioChannelSet::getAbbreviatedChannelTypeName (busInfo.channels.getTypeOfChannel (index));
        #endif
-
-        String channelName = busInfo.name + String (" ") + abbvChannelName;
 
         channelName.copyToUTF8 (properties.text, (size_t) (vstMaxParameterOrPinLabelLength + 1));
         channelName.copyToUTF8 (properties.shortText, (size_t) (vstMaxParameterOrPinShortLabelLength + 1));
@@ -1525,7 +1525,7 @@ private:
             }
 
             for (i = 0; i < n; ++i)
-                if ((config[i] = (config[i] + 1) % maxChans[i]) > 0)
+                if ((config[i] = maxChans[i] ? (config[i] + 1) % maxChans[i] : 0) > 0)
                     break;
         }
 

@@ -910,6 +910,7 @@ public:
         for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
             [view setNeedsDisplayInRect: makeNSRect (*i)];
 
+        lastRepaintTime = Time::getCurrentTime();
         deferredRepaints.clear();
     }
 
@@ -927,7 +928,6 @@ public:
 
     void invokePaint (LowLevelGraphicsContext& context)
     {
-        lastRepaintTime = Time::getCurrentTime();
         handlePaint (context);
     }
 
