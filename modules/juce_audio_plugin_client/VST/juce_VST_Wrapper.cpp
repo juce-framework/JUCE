@@ -1525,7 +1525,7 @@ private:
             }
 
             for (i = 0; i < n; ++i)
-                if ((config[i] = (config[i] + 1) % maxChans[i]) > 0)
+                if ((config[i] = maxChans[i] ? (config[i] + 1) % maxChans[i] : 0) > 0)
                     break;
         }
 
