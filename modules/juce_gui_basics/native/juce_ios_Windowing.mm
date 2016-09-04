@@ -296,8 +296,12 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       const String& button1Text,
                                                       const String& button2Text)
 {
-    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, button2Text, button1Text,
+    NSString* button1NSStr = (NSString*) button1Text.toCFString();
+    NSString* button2NSStr = (NSString*) button2Text.toCFString();
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, button2NSStr, button1NSStr,
                                                         nil, callback, callback != nullptr));
+    [button1NSStr release];
+    [button2NSStr release];
 
     if (callback == nullptr)
         return mb->getResult() == 1;
