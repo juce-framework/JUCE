@@ -1080,6 +1080,8 @@ Component* LookAndFeel_V2::getParentComponentForMenuOptions (const PopupMenu::Op
     return options.getParentComponent();
 }
 
+void LookAndFeel_V2::preparePopupMenuWindow (Component&) {}
+
 //==============================================================================
 void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)
 {

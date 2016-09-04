@@ -903,6 +903,7 @@ public:
                                                                   .withTargetComponent (nullptr),
                                                            false, dismissOnMouseUp, managerOfChosenCommand);
 
+            getLookAndFeel().preparePopupMenuWindow (*activeSubMenu);
             activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
             activeSubMenu->enterModalState (false);
             activeSubMenu->toFront (false);
