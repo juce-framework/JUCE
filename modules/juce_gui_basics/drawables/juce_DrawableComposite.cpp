@@ -192,7 +192,7 @@ void DrawableComposite::updateBoundsToFitChildren()
 
                 for (int i = getNumChildComponents(); --i >= 0;)
                     if (Component* const c = getChildComponent(i))
-                        c->setBounds (c->getBoundsInParent() - delta);
+                        c->setBounds (c->getBounds() - delta);
             }
 
             setBounds (childArea);
