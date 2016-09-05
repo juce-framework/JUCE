@@ -78,9 +78,6 @@ public class JuceBridge
 
     public static JuceBridge getInstance()
     {
-//        if (context == null) {
-//            throw new IllegalStateException("JuceBridge.context not set");
-//        }
         return Holder.INSTANCE;
     }
 
@@ -635,9 +632,14 @@ public class JuceBridge
 
     public JuceViewHolder createViewForComponent (String componentName, Context c)
     {
-        JuceViewHolder juceViewHolder = new JuceViewHolder(c);
-        juceViewHolderMap.put(componentName, juceViewHolder);
-        Log.d ("JuceBridge", "Added JuceViewHolder with key="+componentName);
+        JuceViewHolder juceViewHolder;
+        // Check if view exists in map before creating new
+        if ((juceViewHolder = juceViewHolderMap.get (componentName)) == null)
+        {
+           juceViewHolder = new JuceViewHolder(c);
+            Log.d("JuceBridge", "Type of context is "+c.getClass().getName());
+            juceViewHolderMap.put(componentName, juceViewHolder);
+        }
         return juceViewHolder;
     }
 
@@ -653,12 +655,13 @@ public class JuceBridge
 
     public final ComponentPeerView createNewView (boolean opaque, long host, String componentName)
     {
-        ComponentPeerView v = new ComponentPeerView (activityContext, opaque, host);
+        ComponentPeerView v = null;
+        Log.d("JuceBridge", "Add view to JuceViewHolder with key="+componentName);
         JuceViewHolder juceView = juceViewHolderMap.get(componentName);
         if (juceView != null)
         {
+            v = new ComponentPeerView (juceView.getContext(), opaque, host);
             juceView.addView(v);
-            Log.d("JuceBridge", "Added view to JuceViewHolder with key=" + componentName);
         }
         else
         {
@@ -667,6 +670,7 @@ public class JuceBridge
             juceView = juceViewHolderMap.get(null);
             if (juceView != null)
             {
+                v = new ComponentPeerView (juceView.getContext(), opaque, host);
                 juceView.addView(v);
                 Log.d("JuceBridge", "Added view to JuceViewHolder with null key");
             }
@@ -693,20 +697,11 @@ public class JuceBridge
             group.removeView (view);
     }
 
-
-    // TODO: Move to activity?
     public void callAppLauncher()
     {
-        if(activityContext instanceof Activity)
-        {
             if (!hasInitialised())
-            launchApp(activityContext.getApplicationInfo().publicSourceDir,
-                    activityContext.getApplicationInfo().dataDir);
-    }
-        else
-        {
-            Log.d ("callAppLauncher", "JuceBridge.context not instance of Activity: "+activityContext.toString());
-        }
+                launchApp(activityContext.getApplicationInfo().publicSourceDir,
+                        activityContext.getApplicationInfo().dataDir);
     }
 
     public void setRequestedOrientation (int requestedOrientation)
@@ -1041,12 +1036,7 @@ public class JuceBridge
 
     public final void launchURL (String url)
     {
-        if(activityContext instanceof Activity) {
             ((Activity) activityContext).startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-        }
-
-        else
-            Log.d("JuceBridge", "launchURL - Context not an instance of Activity");
     }
 
     public static final String getLocaleValue (boolean isRegion)
