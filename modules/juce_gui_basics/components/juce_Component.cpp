@@ -1341,7 +1341,7 @@ void Component::setTransform (const AffineTransform& newTransform)
             affineTransform = nullptr;
             repaint();
 
-            sendMovedResizedMessages (false, false);
+            sendMovedResizedMessages (true, true);
         }
     }
     else if (affineTransform == nullptr)
@@ -1349,14 +1349,14 @@ void Component::setTransform (const AffineTransform& newTransform)
         repaint();
         affineTransform = new AffineTransform (newTransform);
         repaint();
-        sendMovedResizedMessages (false, false);
+        sendMovedResizedMessages (true, true);
     }
     else if (*affineTransform != newTransform)
     {
         repaint();
         *affineTransform = newTransform;
         repaint();
-        sendMovedResizedMessages (false, false);
+        sendMovedResizedMessages (true, true);
     }
 }
 
