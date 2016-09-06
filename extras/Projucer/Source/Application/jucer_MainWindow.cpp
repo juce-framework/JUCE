@@ -282,8 +282,8 @@ void MainWindow::activeWindowStatusChanged()
         if (p->hasProjectBeenModified())
         {
             const int r = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                                           TRANS (".jucer file has been modified since last save."),
-                                                           TRANS ("Do you want to keep current project or re-load from disk?"),
+                                                           TRANS ("The .jucer file has been modified since the last save."),
+                                                           TRANS ("Do you want to keep the current project or re-load from disk?"),
                                                            TRANS ("Keep"),
                                                            TRANS ("Re-load from disk"));
 
