@@ -282,7 +282,8 @@ class FlexBox;
 #include "lookandfeel/juce_LookAndFeel_V1.h"
 #include "lookandfeel/juce_LookAndFeel_V3.h"
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS // these classes are C++11-only
+// these classes are C++11-only
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS && JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
 #include "layout/juce_FlexItem.h"
 #include "layout/juce_FlexBox.h"
 #endif

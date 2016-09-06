@@ -24,7 +24,8 @@
 
 #include "../JuceDemoHeader.h"
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS // the FlexBox classes are C++11-only
+// these classes are C++11-only
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS && JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
 
 struct DemoFlexPanel   : public juce::Component,
                          private juce::TextEditor::Listener,
