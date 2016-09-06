@@ -1337,6 +1337,8 @@ private:
               && s [index + 1] == 'g'
               && s [index + 2] == 'b')
         {
+            const bool hasAlpha = s[index + 3] == 'a';
+
             const int openBracket = s.indexOfChar (index, '(');
             const int closeBracket = s.indexOfChar (openBracket, ')');
 
@@ -1349,14 +1351,20 @@ private:
                 tokens.trim();
                 tokens.removeEmptyStrings();
 
+                float alpha = 1.0f;
+                if (hasAlpha)
+                    alpha = tokens[3].getDoubleValue();
+
                 if (tokens[0].containsChar ('%'))
                     return Colour ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
                                    (uint8) roundToInt (2.55 * tokens[1].getDoubleValue()),
-                                   (uint8) roundToInt (2.55 * tokens[2].getDoubleValue()));
+                                   (uint8) roundToInt (2.55 * tokens[2].getDoubleValue()),
+                                   alpha);
                 else
                     return Colour ((uint8) tokens[0].getIntValue(),
                                    (uint8) tokens[1].getIntValue(),
-                                   (uint8) tokens[2].getIntValue());
+                                   (uint8) tokens[2].getIntValue(),
+                                   alpha);
             }
         }
 
