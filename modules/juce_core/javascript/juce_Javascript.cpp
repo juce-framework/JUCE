@@ -412,9 +412,16 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getResult (const Scope& s) const override
         {
             var arrayVar (object->getResult (s)); // must stay alive for the scope of this method
+            var key = index->getResult (s);
 
             if (const Array<var>* array = arrayVar.getArray())
-                return (*array) [static_cast<int> (index->getResult (s))];
+                if (key.isInt() || key.isInt64() || key.isDouble())
+                    return (*array) [static_cast<int> (key)];
+
+            if (DynamicObject* o = arrayVar.getDynamicObject())
+                if (key.isString())
+                    if (const var* v = getPropertyPointer (o, Identifier (key)))
+                        return *v;
 
             return var::undefined();
         }
@@ -422,15 +429,28 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         void assign (const Scope& s, const var& newValue) const override
         {
             var arrayVar (object->getResult (s)); // must stay alive for the scope of this method
+            var key = index->getResult (s);
 
             if (Array<var>* array = arrayVar.getArray())
             {
-                const int i = index->getResult (s);
-                while (array->size() < i)
-                    array->add (var::undefined());
+                if (key.isInt() || key.isInt64() || key.isDouble())
+                {
+                    const int i = key;
+                    while (array->size() < i)
+                        array->add (var::undefined());
 
-                array->set (i, newValue);
-                return;
+                    array->set (i, newValue);
+                    return;
+                }
+            }
+
+            if (DynamicObject* o = arrayVar.getDynamicObject())
+            {
+                if (key.isString())
+                {
+                    o->setProperty (Identifier (key), newValue);
+                    return;
+                }
             }
 
             Expression::assign (s, newValue);
