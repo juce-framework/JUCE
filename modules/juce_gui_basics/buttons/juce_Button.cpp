@@ -175,8 +175,15 @@ void Button::setToggleState (const bool shouldBeOn, const NotificationType notif
                 return;
         }
 
-        if (getToggleState() != shouldBeOn)  // this test means that if the value is void rather than explicitly set to
-            isOn = shouldBeOn;               // false, it won't be changed unless the required value is true.
+        // This test is done so that if the value is void rather than explicitly set to
+        // false, the value won't be changed unless the required value is true.
+        if (getToggleState() != shouldBeOn)
+        {
+            isOn = shouldBeOn;
+
+            if (deletionWatcher == nullptr)
+                return;
+        }
 
         lastToggleState = shouldBeOn;
         repaint();
