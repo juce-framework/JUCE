@@ -125,13 +125,6 @@ MainHostWindow::MainHostWindow()
 MainHostWindow::~MainHostWindow()
 {
     pluginListWindow = nullptr;
-
-   #if JUCE_MAC
-    setMacMainMenu (nullptr);
-   #else
-    setMenuBar (nullptr);
-   #endif
-
     knownPluginList.removeChangeListener (this);
 
     if (FilterGraph* filterGraph = getGraphEditor()->graph.get())
@@ -139,6 +132,12 @@ MainHostWindow::~MainHostWindow()
 
     getAppProperties().getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
     clearContentComponent();
+
+   #if JUCE_MAC
+    setMacMainMenu (nullptr);
+   #else
+    setMenuBar (nullptr);
+   #endif
 }
 
 void MainHostWindow::closeButtonPressed()
