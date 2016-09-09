@@ -229,14 +229,18 @@ public:
         }
     }
 
-    void didBecomeInvalidWithError (NSError* error)
+    void didComplete (NSError* error)
     {
         const ScopedLock sl (dataLock);
         if (isBeingDeleted)
             return;
 
-        DBG (nsStringToJuce ([error description])); ignoreUnused (error);
-        hasFailed = true;
+       #if JUCE_DEBUG
+        if (error != nullptr)
+            DBG (nsStringToJuce ([error description]));
+       #endif
+
+        hasFailed = (error != nullptr);
         initialised = true;
         signalThreadShouldExit();
     }
@@ -284,12 +288,7 @@ public:
         [task resume];
 
         while (! threadShouldExit())
-        {
-            wait (5);
-
-            if (task.state != NSURLSessionTaskStateRunning)
-                break;
-        }
+            wait (-1);
 
         hasFinished = true;
         initialised = true;
@@ -325,6 +324,9 @@ private:
                                                                             didSendBodyData,           "v@:@@qqq");
             addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
                                                                             willPerformHTTPRedirection, "v@:@@@@@");
+
+            addMethod (@selector (URLSession:task:didCompleteWithError:), didCompleteWithError,   "v@:@@@");
+
             registerClass();
         }
 
@@ -339,7 +341,7 @@ private:
 
         static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSError* error)
         {
-            if (auto state = getState (self)) state->didBecomeInvalidWithError (error);
+            if (auto state = getState (self)) state->didComplete (error);
         }
 
         static void didReceiveData (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSData* newData)
@@ -356,6 +358,11 @@ private:
                                                 NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
         {
             if (auto state = getState (self)) state->willPerformHTTPRedirection (request, completionHandler);
+        }
+
+        static void didCompleteWithError (id self, SEL, NSURLConnection*, NSURLSessionTask*, NSError* error)
+        {
+            if (auto state = getState (self)) state->didComplete (error);
         }
     };
 
