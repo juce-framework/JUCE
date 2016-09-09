@@ -419,6 +419,9 @@ int BigInteger::findNextClearBit (int i) const noexcept
 //==============================================================================
 BigInteger& BigInteger::operator+= (const BigInteger& other)
 {
+    if (this == &other)
+        return operator+= (BigInteger (other));
+
     if (other.isNegative())
         return operator-= (-other);
 
@@ -467,21 +470,16 @@ BigInteger& BigInteger::operator+= (const BigInteger& other)
 
 BigInteger& BigInteger::operator-= (const BigInteger& other)
 {
+    if (this == &other)
+    {
+        clear();
+        return *this;
+    }
+
     if (other.isNegative())
         return operator+= (-other);
 
-    if (! isNegative())
-    {
-        if (compareAbsolute (other) < 0)
-        {
-            BigInteger temp (other);
-            swapWith (temp);
-            *this -= temp;
-            negate();
-            return *this;
-        }
-    }
-    else
+    if (isNegative())
     {
         negate();
         *this += other;
@@ -489,8 +487,17 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
         return *this;
     }
 
-    const size_t numInts = sizeNeededToHold (highestBit);
-    const size_t maxOtherInts = sizeNeededToHold (other.highestBit);
+    if (compareAbsolute (other) < 0)
+    {
+        BigInteger temp (other);
+        swapWith (temp);
+        *this -= temp;
+        negate();
+        return *this;
+    }
+
+    const size_t numInts = sizeNeededToHold (getHighestBit());
+    const size_t maxOtherInts = sizeNeededToHold (other.getHighestBit());
     jassert (numInts >= maxOtherInts);
     uint32* const values = getValues();
     const uint32* const otherValues = other.getValues();
@@ -514,11 +521,15 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
         }
     }
 
+    highestBit = getHighestBit();
     return *this;
 }
 
 BigInteger& BigInteger::operator*= (const BigInteger& other)
 {
+    if (this == &other)
+        return operator*= (BigInteger (other));
+
     int n = getHighestBit();
     int t = other.getHighestBit();
 
@@ -561,6 +572,9 @@ BigInteger& BigInteger::operator*= (const BigInteger& other)
 
 void BigInteger::divideBy (const BigInteger& divisor, BigInteger& remainder)
 {
+    if (this == &divisor)
+        return divideBy (BigInteger (divisor), remainder);
+
     jassert (this != &remainder); // (can't handle passing itself in to get the remainder)
 
     const int divHB = divisor.getHighestBit();
@@ -612,6 +626,9 @@ BigInteger& BigInteger::operator/= (const BigInteger& other)
 
 BigInteger& BigInteger::operator|= (const BigInteger& other)
 {
+    if (this == &other)
+        return *this;
+
     // this operation doesn't take into account negative values..
     jassert (isNegative() == other.isNegative());
 
@@ -636,6 +653,9 @@ BigInteger& BigInteger::operator|= (const BigInteger& other)
 
 BigInteger& BigInteger::operator&= (const BigInteger& other)
 {
+    if (this == &other)
+        return *this;
+
     // this operation doesn't take into account negative values..
     jassert (isNegative() == other.isNegative());
 
@@ -659,6 +679,12 @@ BigInteger& BigInteger::operator&= (const BigInteger& other)
 
 BigInteger& BigInteger::operator^= (const BigInteger& other)
 {
+    if (this == &other)
+    {
+        clear();
+        return *this;
+    }
+
     // this operation will only work with the absolute values
     jassert (isNegative() == other.isNegative());
 
@@ -752,7 +778,7 @@ void BigInteger::shiftLeft (int bits, const int startBit)
 {
     if (startBit > 0)
     {
-        for (int i = highestBit + 1; --i >= startBit;)
+        for (int i = highestBit; i >= startBit; --i)
             setBit (i + bits, (*this) [i]);
 
         while (--bits >= 0)
@@ -802,7 +828,7 @@ void BigInteger::shiftRight (int bits, const int startBit)
     }
     else
     {
-        if (bits >= highestBit)
+        if (bits > highestBit)
         {
             clear();
         }
@@ -1307,6 +1333,9 @@ public:
                 expect (b4 > b1 && b4 > b2);
                 expect (b4 / b1 == b2);
                 expect (b4 / b2 == b1);
+                expect (((b4 << 1) >> 1) == b4);
+                expect (((b4 << 10) >> 10) == b4);
+                expect (((b4 << 100) >> 100) == b4);
 
                 // TODO: should add tests for other ops (although they also get pretty well tested in the RSA unit test)
 
