@@ -288,7 +288,7 @@ public:
         [task resume];
 
         while (! threadShouldExit())
-            wait (-1);
+            wait (5);
 
         hasFinished = true;
         initialised = true;
