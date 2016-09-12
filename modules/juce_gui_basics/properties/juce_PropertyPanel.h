@@ -150,6 +150,10 @@ public:
     const String& getMessageWhenEmpty() const noexcept;
 
     //==============================================================================
+    /** Returns the PropertyPanel's internal Viewport. */
+    Viewport& getViewport() noexcept        { return viewport; }
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */
