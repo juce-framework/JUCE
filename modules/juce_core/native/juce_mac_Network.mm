@@ -408,10 +408,10 @@ public:
     {
         stop();
         [connection release];
-        [data release];
         [request release];
         [headers release];
         [delegate release];
+        [data release];
     }
 
     bool start (URL::OpenStreamProgressCallback* callback, void* context)
