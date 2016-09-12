@@ -175,8 +175,34 @@ private:
         const RelativePath aaxLibsFolder = RelativePath (getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
 
         for (ProjectExporter::ConfigIterator config (*this); config.next();)
+        {
             if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                 config->getValue (Ids::useRuntimeLibDLL) = true;
+
+            if (config->getValue(Ids::postbuildCommand).toString().isEmpty())
+            {
+                const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
+                const String bundleDir      = "$(OutDir)\\$(TargetName).aaxplugin";
+                const String bundleContents = bundleDir + "\\Contents";
+                const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
+                const String executable     = macOSDir + String ("\\$(TargetName).aaxplugin");
+                const String bundleScript   = aaxPath.toString() + String ("\\Utilities\\CreatePackage.bat");
+                String iconFilePath         = getTargetFolder().getChildFile ("icon.ico").getFullPathName();
+
+                if (! File (iconFilePath).existsAsFile())
+                    iconFilePath = aaxPath.toString() + String ("\\Utilities\\PlugIn.ico");
+
+                String script;
+                script += String ("mkdir \"") + bundleDir      + String ("\"\r\n");
+                script += String ("mkdir \"") + bundleContents + String ("\"\r\n");
+                script += String ("mkdir \"") + macOSDir       + String ("\"\r\n");
+                script += String ("copy /Y \"$(OutDir)\\$(TargetFileName)\" \"") + executable + String ("\"\r\n");
+                script += bundleScript + String (" \"") + macOSDir + String ("\" \"") + iconFilePath + String ("\"");
+
+                config->getValue (Ids::postbuildCommand) = script;
+            }
+        }
+
 
         msvcExtraPreprocessorDefs.set ("JucePlugin_AAXLibs_path",
                                        createRebasedPath (aaxLibsFolder));
