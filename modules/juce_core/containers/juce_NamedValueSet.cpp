@@ -26,40 +26,6 @@
   ==============================================================================
 */
 
-struct NamedValueSet::NamedValue
-{
-    NamedValue() noexcept {}
-    NamedValue (const Identifier& n, const var& v)  : name (n), value (v) {}
-    NamedValue (const NamedValue& other) : name (other.name), value (other.value) {}
-
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    NamedValue (NamedValue&& other) noexcept
-        : name (static_cast<Identifier&&> (other.name)),
-          value (static_cast<var&&> (other.value))
-    {
-    }
-
-    NamedValue (Identifier&& n, var&& v) noexcept
-        : name (static_cast<Identifier&&> (n)),
-          value (static_cast<var&&> (v))
-    {
-    }
-
-    NamedValue& operator= (NamedValue&& other) noexcept
-    {
-        name = static_cast<Identifier&&> (other.name);
-        value = static_cast<var&&> (other.value);
-        return *this;
-    }
-   #endif
-
-    bool operator== (const NamedValue& other) const noexcept   { return name == other.name && value == other.value; }
-    bool operator!= (const NamedValue& other) const noexcept   { return ! operator== (other); }
-
-    Identifier name;
-    var value;
-};
-
 //==============================================================================
 NamedValueSet::NamedValueSet() noexcept
 {
