@@ -154,6 +154,8 @@ private:
     void timerCallback() override;
 
     Component* createBuildTab (CompileEngineChildProcess*);
+    Component* createDisabledBuildTab (bool loggedIn, bool dllPresent);
+
     bool isContinuousRebuildEnabled()           { return getAppSettings().getGlobalProperties().getBoolValue ("continuousRebuild", true);  }
     void setContinuousRebuildEnabled (bool b)   { getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b); }
     void rebuildNow();

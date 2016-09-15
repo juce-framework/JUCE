@@ -230,7 +230,7 @@ String createCommandLineForLaunchingServer (const String& pipeName, const String
 
     const File exe (File::getSpecialLocation (File::currentExecutableFile).getFullPathName());
 
-    return exe.getFullPathName() + " " + commandPrefix + info.joinIntoString (commandTokenSeparator);
+    return "\"" + exe.getFullPathName() + "\" " + commandPrefix + info.joinIntoString (commandTokenSeparator);
 }
 
 static ServerIPC* currentServer = nullptr;

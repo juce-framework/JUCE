@@ -503,6 +503,18 @@ public:
     */
     bool copyFileTo (const File& targetLocation) const;
 
+    /** Replaces a file.
+
+        Replace the file in the given location, assuming the replaced files identity.
+        Depending on the file system this will preserve file attributes such as
+        creation date, short file name, etc.
+
+        If replacement succeeds the original file is deleted.
+
+        @returns    true if the operation succeeds
+    */
+    bool replaceFileIn (const File& targetLocation) const;
+
     /** Copies a directory.
 
         Tries to copy an entire directory, recursively.
@@ -982,6 +994,7 @@ private:
     Result createDirectoryInternal (const String&) const;
     bool copyInternal (const File&) const;
     bool moveInternal (const File&) const;
+    bool replaceInternal (const File&) const;
     bool setFileTimesInternal (int64 m, int64 a, int64 c) const;
     void getFileTimesInternal (int64& m, int64& a, int64& c) const;
     bool setFileReadOnlyInternal (bool) const;

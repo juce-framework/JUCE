@@ -300,6 +300,21 @@ bool File::copyFileTo (const File& newFile) const
             || (exists() && newFile.deleteFile() && copyInternal (newFile));
 }
 
+bool File::replaceFileIn (const File& newFile) const
+{
+    if (newFile.fullPath == fullPath)
+        return true;
+
+    if (! newFile.exists())
+        return moveFileTo (newFile);
+
+    if (! replaceInternal (newFile))
+        return false;
+
+    deleteFile();
+    return true;
+}
+
 bool File::copyDirectoryTo (const File& newDirectory) const
 {
     if (isDirectory() && newDirectory.createDirectory())

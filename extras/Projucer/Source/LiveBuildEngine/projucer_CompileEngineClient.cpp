@@ -89,9 +89,15 @@ namespace ProjectProperties
 
     static File getCacheLocation (Project& project)
     {
+        String cacheFolderName = project.getProjectFilenameRoot() + "_" + project.getProjectUID();
+
+       #if JUCE_DEBUG
+        cacheFolderName += "_debug";
+       #endif
+
         return getProjucerTempFolder()
                 .getChildFile ("Intermediate Files")
-                .getChildFile (project.getProjectFilenameRoot() + "_" + project.getProjectUID());
+                .getChildFile (cacheFolderName);
     }
 }
 

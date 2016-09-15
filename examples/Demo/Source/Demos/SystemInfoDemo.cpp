@@ -119,7 +119,9 @@ static String getAllSystemInfo()
       << "User region:      " << SystemStats::getUserRegion() << newLine
       << "User language:    " << SystemStats::getUserLanguage() << newLine
       << "Display language: " << SystemStats::getDisplayLanguage() << newLine
-      << newLine
+      << newLine;
+
+    systemInfo
       << "Number of CPUs:  " << SystemStats::getNumCpus() << newLine
       << "Memory size:     " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
       << "CPU vendor:      " << SystemStats::getCpuVendor() << newLine
@@ -134,12 +136,16 @@ static String getAllSystemInfo()
       << "CPU has 3DNOW:   " << (SystemStats::has3DNow()  ? "yes" : "no") << newLine
       << "CPU has AVX:     " << (SystemStats::hasAVX()    ? "yes" : "no") << newLine
       << "CPU has AVX2:    " << (SystemStats::hasAVX2()   ? "yes" : "no") << newLine
-      << newLine
+      << newLine;
+
+    systemInfo
       << "Current working directory:  " << File::getCurrentWorkingDirectory().getFullPathName() << newLine
       << "Current application file:   " << File::getSpecialLocation (File::currentApplicationFile).getFullPathName() << newLine
       << "Current executable file:    " << File::getSpecialLocation (File::currentExecutableFile) .getFullPathName() << newLine
       << "Invoked executable file:    " << File::getSpecialLocation (File::invokedExecutableFile) .getFullPathName() << newLine
-      << newLine
+      << newLine;
+
+    systemInfo
       << "User home folder:               " << File::getSpecialLocation (File::userHomeDirectory)             .getFullPathName() << newLine
       << "User desktop folder:            " << File::getSpecialLocation (File::userDesktopDirectory)          .getFullPathName() << newLine
       << "User documents folder:          " << File::getSpecialLocation (File::userDocumentsDirectory)        .getFullPathName() << newLine
@@ -150,7 +156,9 @@ static String getAllSystemInfo()
       << "Common application data folder: " << File::getSpecialLocation (File::commonApplicationDataDirectory).getFullPathName() << newLine
       << "Common documents folder:        " << File::getSpecialLocation (File::commonDocumentsDirectory)      .getFullPathName() << newLine
       << "Local temp folder:              " << File::getSpecialLocation (File::tempDirectory)                 .getFullPathName() << newLine
-      << newLine
+      << newLine;
+
+    systemInfo
       << "File System roots: "          << getFileSystemRoots() << newLine
       << "Free space in home folder: "  << File::descriptionOfSizeInBytes (File::getSpecialLocation (File::userHomeDirectory)
                                                                                 .getBytesFreeOnVolume()) << newLine

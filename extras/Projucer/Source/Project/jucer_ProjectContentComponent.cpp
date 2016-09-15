@@ -354,65 +354,95 @@ struct BuildTabComponent  : public ConcertinaPanel
 struct ProjucerDisabledComp   : public Component,
                                 private Button::Listener
 {
-    ProjucerDisabledComp (String message, bool loggedIn, bool canLogin, bool requirePurchase = false,
-                          const String& loginName = String())
-              : isLoggedIn (loggedIn), isPurchaseButton (requirePurchase)
+    ProjucerDisabledComp (String message, bool loggedIn, bool showSubscribeButton,
+                          bool showSignInButton, bool showSwitchAccountButton)
+              : isLoggedIn (loggedIn)
     {
         infoLabel.setColour (Label::textColourId, findColour (mainBackgroundColourId).contrasting (0.7f));
         infoLabel.setJustificationType (Justification::centred);
         infoLabel.setText (message, dontSendNotification);
         addAndMakeVisible (infoLabel);
 
-        if (canLogin)
+        if (showSubscribeButton)
         {
-            addAndMakeVisible (loginButton);
-            loginButton.addListener (this);
+            subscribeButton = new TextButton (String ( "Subscribe..."));
+            addAndMakeVisible (*subscribeButton);
+            subscribeButton->addListener (this);
+        }
 
-            if (isPurchaseButton)
-            {
-                loginButton.setButtonText ("Purchase JUCE Pro...");
-                signOutButton = new TextButton (String ("Sign Out ") + loginName);
-                addAndMakeVisible (*signOutButton);
-                signOutButton->addListener (this);
-            }
+        if (showSignInButton)
+        {
+            signInButton = new TextButton (String ( "Sign in..."));
+            addAndMakeVisible (*signInButton);
+            signInButton->addListener (this);
+        }
+
+        if (showSwitchAccountButton)
+        {
+            switchAccountButton = new TextButton (String ("Switch account..."));
+            addAndMakeVisible (*switchAccountButton);
+            switchAccountButton->addListener (this);
         }
     }
 
     void resized() override
     {
-        infoLabel.centreWithSize (proportionOfWidth (0.9f), 200);
-        loginButton.setSize (jmin (getWidth() - 10, 150), 22);
-        loginButton.setCentrePosition (infoLabel.getBounds().getCentreX(),
-                                       infoLabel.getBottom() + loginButton.getHeight() * 2);
+        int infoWidth = proportionOfWidth (0.9f);
+        int infoHeight = 100;
 
-        if (signOutButton != nullptr)
+        infoLabel.centreWithSize (infoWidth, infoHeight);
+
+        int buttonWidth = jmin (getWidth() - 10, 150);
+        int buttonHeight = 22;
+        int itemDistance = 10;
+
+        int buttonCenterX = infoLabel.getBounds().getCentreX();
+        int buttonCenterY = infoLabel.getBottom() + itemDistance + buttonHeight / 2;
+
+        if (subscribeButton.get() != nullptr)
         {
-            signOutButton->setSize (jmin (getWidth() - 10, 150), 22);
-            signOutButton->setCentrePosition (infoLabel.getBounds().getCentreX(),
-                                              loginButton.getBottom() + 20);
+            subscribeButton->setSize (buttonWidth, buttonHeight);
+            subscribeButton->setCentrePosition (buttonCenterX, buttonCenterY);
+            buttonCenterY += itemDistance + buttonHeight;
+        }
+
+        if (signInButton.get() != nullptr)
+        {
+            signInButton->setSize (buttonWidth, buttonHeight);
+            signInButton->setCentrePosition (buttonCenterX, buttonCenterY);
+            buttonCenterY += itemDistance + buttonHeight;
+        }
+
+        if (switchAccountButton.get() != nullptr)
+        {
+            switchAccountButton->setSize (buttonWidth, buttonHeight);
+            switchAccountButton->setCentrePosition (buttonCenterX, buttonCenterY);
         }
     }
 
     void buttonClicked (Button* btn) override
     {
-        if (btn == &loginButton)
+        if (btn == subscribeButton.get())
         {
-            if (isPurchaseButton)
-                URL ("http://www.juce.com").launchInDefaultBrowser();
-            else
-                ProjucerApplication::getApp().showLoginForm();
+            URL ("http://www.juce.com/get-juce").launchInDefaultBrowser();
         }
-        else if (btn == signOutButton.get())
+        else if (btn == signInButton.get())
         {
-            ProjucerLicenses::getInstance()->logout();
-            ProjucerApplication::getApp().updateAllBuildTabs();
+            ProjucerApplication::getApp().showLoginForm();
+        }
+        else if (btn == switchAccountButton.get())
+        {
+            ProjucerApplication::getApp().showLoginForm();
         }
     }
 
+    bool isLoggedIn;
+
+private:
     Label infoLabel { "info", String() };
-    TextButton loginButton { "Log-in..." };
-    ScopedPointer<TextButton> signOutButton;
-    bool isLoggedIn, isPurchaseButton;
+    ScopedPointer<TextButton> subscribeButton;
+    ScopedPointer<TextButton> signInButton;
+    ScopedPointer<TextButton> switchAccountButton;
 };
 
 struct EnableBuildComp   : public Component
@@ -458,33 +488,30 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
         return new BuildTabComponent (child, new ProjucerAppClasses::ErrorListComp (child->errorList));
     }
 
-    auto& unlockStatus = *ProjucerLicenses::getInstance();
+    jassert (project != nullptr);
+    const auto& unlockStatus = *ProjucerLicenses::getInstance();
 
-    if (unlockStatus.hasLiveCodingLicence()
-        && project != nullptr
-        && LiveBuildProjectSettings::isBuildDisabled (*project))
-         return new EnableBuildComp();
+    if (unlockStatus.hasLiveCodingLicence())
+    {
+        jassert (unlockStatus.isLoggedIn());
+        jassert (unlockStatus.isDLLPresent());
+        return new EnableBuildComp();
+    }
 
-    if (unlockStatus.isLoggedIn())
-        return new ProjucerDisabledComp (String ("The Projucer's live-build features are currently disabled!") + newLine
-                                          + newLine
-                                          + "Your account " + unlockStatus.getLoginName().quoted()
-                                          + " does not have an asscociated JUCE Pro license:",
-                                         true, true, true, unlockStatus.getLoginName());
-
-    if (! unlockStatus.isDLLPresent())
-        return new ProjucerDisabledComp (String ("The live-building DLL is missing!") + newLine
-                                          + newLine
-                                          + "To enable the compiler, you'll need to install the missing DLL "
-                                          + CompileEngineDLL::getDLLName().quoted() + newLine
-                                          + newLine
-                                          + "Visit the JUCE website/forum for more help on getting and installing the DLL!",
-                                         false, false);
-
-    return new ProjucerDisabledComp ("The Projucer's live-build features are currently disabled!\n\n"
-                                     "To enable them, you'll need to log-in with your JUCE account details:",
-                                     false, true, false);
+    return createDisabledBuildTab(unlockStatus.isLoggedIn(),
+                                  unlockStatus.isDLLPresent());
    #endif
+};
+
+//==============================================================================
+Component* ProjectContentComponent::createDisabledBuildTab(bool loggedIn, bool dllPresent) {
+    bool showSubscribeButton = true;
+    bool showSignInButton = dllPresent && ! loggedIn;
+    bool showSwitchAccountButton = dllPresent && loggedIn;
+
+    return new ProjucerDisabledComp (
+        "Subscribe to JUCE Pro or Indie to use the Projucer's live-build features:",
+        loggedIn, showSubscribeButton, showSignInButton, showSwitchAccountButton);
 }
 
 BuildTabComponent* findBuildTab (const TabbedComponent& tabs)
@@ -1499,7 +1526,8 @@ void ProjectContentComponent::handleMissingSystemHeaders()
     deleteProjectTabs();
     createProjectTabs();
 
-    ProjucerDisabledComp* buildTab = new ProjucerDisabledComp (tabMessage, false, false);
+    bool isLoggedIn = ProjucerLicenses::getInstance()->isLoggedIn();
+    ProjucerDisabledComp* buildTab = new ProjucerDisabledComp (tabMessage, isLoggedIn, false, false, false);
 
     treeViewTabs.addTab ("Build", Colours::transparentBlack, buildTab, true);
     showBuildTab();
