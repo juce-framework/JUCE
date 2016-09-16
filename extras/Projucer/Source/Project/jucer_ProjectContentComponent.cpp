@@ -479,7 +479,7 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
    #if JUCE_LINUX
     ignoreUnused (child);
     return new ProjucerDisabledComp ("Linux support is still under development - "
-                                     "please check for updates at www.juce.com!", false, false);
+                                     "please check for updates at www.juce.com!", false, false, false, false);
    #else
     if (child != nullptr)
     {
