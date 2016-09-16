@@ -33,7 +33,7 @@
 
   ID:               juce_tracktion_marketplace
   vendor:           juce
-  version:          4.2.3
+  version:          4.2.4
   name:             JUCE Tracktion marketplace support
   description:      Classes for online product authentication via the Tracktion marketplace.
   website:          http://www.juce.com/juce
