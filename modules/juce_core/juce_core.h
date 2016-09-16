@@ -148,7 +148,7 @@
 #endif
 
 
-/*  Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
+/** Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
     If enabled, this will add some exception-catching code to forward unhandled exceptions
     to your JUCEApplicationBase::unhandledException() callback.
 */
@@ -156,7 +156,7 @@
  //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
 #endif
 
-/*  Config: JUCE_ALLOW_STATIC_NULL_VARIABLES
+/** Config: JUCE_ALLOW_STATIC_NULL_VARIABLES
     If disabled, this will turn off dangerous static globals like String::empty, var::null, etc
     which can cause nasty order-of-initialisation problems if they are referenced during static
     constructor code.
