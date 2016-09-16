@@ -165,8 +165,20 @@ private:
                 config->getValue (Ids::useRuntimeLibDLL) = true;
 
             if (isVST3)
+            {
                 if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                    config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                {
+                    const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+
+                    String script;
+                    if (previousBuildCommands.isNotEmpty())
+                        script += "\r\n";
+
+                    script += "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+
+                    config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
+                }
+            }
         }
     }
 
@@ -181,6 +193,8 @@ private:
 
             if (config->getValue(Ids::postbuildCommand).toString().isEmpty())
             {
+                const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+
                 const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
                 const String bundleDir      = "$(OutDir)\\$(TargetName).aaxplugin";
                 const String bundleContents = bundleDir + "\\Contents";
@@ -193,16 +207,19 @@ private:
                     iconFilePath = aaxPath.toString() + String ("\\Utilities\\PlugIn.ico");
 
                 String script;
+
+                if (previousBuildCommands.isNotEmpty())
+                    script += "\r\n";
+
                 script += String ("mkdir \"") + bundleDir      + String ("\"\r\n");
                 script += String ("mkdir \"") + bundleContents + String ("\"\r\n");
                 script += String ("mkdir \"") + macOSDir       + String ("\"\r\n");
                 script += String ("copy /Y \"$(OutDir)\\$(TargetFileName)\" \"") + executable + String ("\"\r\n");
                 script += bundleScript + String (" \"") + macOSDir + String ("\" \"") + iconFilePath + String ("\"");
 
-                config->getValue (Ids::postbuildCommand) = script;
+                config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
             }
         }
-
 
         msvcExtraPreprocessorDefs.set ("JucePlugin_AAXLibs_path",
                                        createRebasedPath (aaxLibsFolder));
@@ -236,10 +253,19 @@ private:
                 config->getValue (Ids::useRuntimeLibDLL) = true;
 
             if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                config->getValue (Ids::postbuildCommand)
-                = "copy /Y "
-                + modulePath.getChildFile ("juce_RTAS_WinResources.rsr").toWindowsStyle().quoted()
-                + " \"$(TargetPath)\".rsr";
+            {
+                const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+
+                String script;
+                if (previousBuildCommands.isNotEmpty())
+                    script += "\r\n";
+
+                script += "copy /Y "
+                       + modulePath.getChildFile("juce_RTAS_WinResources.rsr").toWindowsStyle().quoted()
+                       + " \"$(TargetPath)\".rsr";
+
+                config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
+            }
         }
 
         RelativePath juceWrapperFolder (project.getGeneratedCodeFolder(),
@@ -354,6 +380,8 @@ protected:
         String getPrebuildCommandString() const     { return config [Ids::prebuildCommand]; }
         Value getPostbuildCommand()                 { return getValue (Ids::postbuildCommand); }
         String getPostbuildCommandString() const    { return config [Ids::postbuildCommand]; }
+
+        Value getInternalPostbuildCommands()        { return getValue (Ids::internalPostBuildComamnd); }
 
         Value shouldGenerateDebugSymbolsValue()     { return getValue (Ids::alwaysGenerateDebugSymbols); }
         bool shouldGenerateDebugSymbols() const     { return config [Ids::alwaysGenerateDebugSymbols]; }
@@ -1610,10 +1638,11 @@ protected:
                      ->createNewChildElement ("Command")
                      ->addTextElement (config.getPrebuildCommandString());
 
-            if (config.getPostbuildCommandString().isNotEmpty())
+            const String internalPostBuildScripts = config.config[Ids::internalPostBuildComamnd].toString();
+            if (config.getPostbuildCommandString().isNotEmpty() || internalPostBuildScripts.isNotEmpty())
                 group->createNewChildElement ("PostBuildEvent")
                      ->createNewChildElement ("Command")
-                     ->addTextElement (config.getPostbuildCommandString());
+                     ->addTextElement (config.getPostbuildCommandString() + internalPostBuildScripts);
         }
 
         ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
