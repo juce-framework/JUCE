@@ -95,6 +95,8 @@ namespace FlacNamespace
 
  #if JUCE_MSVC
   #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 4005 4334 181 111)
+ #else
+  #define HAVE_LROUND 1
  #endif
 
  #if JUCE_MAC
@@ -122,7 +124,7 @@ namespace FlacNamespace
   #define FLAC__HAS_X86INTRIN 1
  #endif
 
-#undef __STDC_LIMIT_MACROS
+ #undef __STDC_LIMIT_MACROS
  #define __STDC_LIMIT_MACROS 1
  #define flac_max jmax
  #define flac_min jmin

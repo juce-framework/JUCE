@@ -39,7 +39,7 @@ public:
 
     ~JuceMainMenuHandler()
     {
-        setMenu (nullptr, nullptr, String::empty);
+        setMenu (nullptr, nullptr, String());
 
         jassert (instance == this);
         instance = nullptr;
@@ -69,23 +69,20 @@ public:
         extraAppleMenuItems = createCopyIfNotNull (newExtraAppleMenuItems);
     }
 
-    void addTopLevelMenu (NSMenu* parent, const PopupMenu& child,
-                          const String& name, const int menuId, const int tag)
+    void addTopLevelMenu (NSMenu* parent, const PopupMenu& child, const String& name, int menuId, int topLevelIndex)
     {
         NSMenuItem* item = [parent addItemWithTitle: juceStringToNS (name)
                                              action: nil
                                       keyEquivalent: nsEmptyString()];
-        [item setTag: tag];
 
-        NSMenu* sub = createMenu (child, name, menuId, tag, true);
+        NSMenu* sub = createMenu (child, name, menuId, topLevelIndex, true);
 
         [parent setSubmenu: sub forItem: item];
         [sub setAutoenablesItems: false];
         [sub release];
     }
 
-    void updateTopLevelMenu (NSMenuItem* parentItem, const PopupMenu& menuToCopy,
-                             const String& name, const int menuId, const int tag)
+    void updateTopLevelMenu (NSMenuItem* parentItem, const PopupMenu& menuToCopy, const String& name, int menuId, int topLevelIndex)
     {
         // Note: This method used to update the contents of the existing menu in-place, but that caused
         // weird side-effects which messed-up keyboard focus when switching between windows. By creating
@@ -93,11 +90,10 @@ public:
         NSMenu* menu = [[NSMenu alloc] initWithTitle: juceStringToNS (name)];
 
         for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
-            addMenuItem (iter, menu, menuId, tag);
+            addMenuItem (iter, menu, menuId, topLevelIndex);
 
         [menu setAutoenablesItems: false];
         [menu update];
-        [parentItem setTag: tag];
         [parentItem setSubmenu: menu];
         [menu release];
     }
@@ -138,8 +134,10 @@ public:
 
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo& info)
     {
-        if (NSMenuItem* item = findMenuItem ([NSApp mainMenu], info))
-            flashMenuBar ([item menu]);
+        if ((info.commandFlags & ApplicationCommandInfo::dontTriggerVisualFeedback) == 0
+              && info.invocationMethod != ApplicationCommandTarget::InvocationInfo::fromKeyPress)
+            if (NSMenuItem* item = findMenuItemWithTag ([NSApp mainMenu], info.commandID))
+                flashMenuBar ([item menu]);
     }
 
     void updateMenus (NSMenu* menu)
@@ -156,7 +154,7 @@ public:
             (new AsyncMenuUpdater())->post();
     }
 
-    void invoke (const int commandId, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
+    void invoke (int commandId, ApplicationCommandManager* commandManager, int topLevelIndex) const
     {
         if (currentModel != nullptr)
         {
@@ -172,7 +170,7 @@ public:
         }
     }
 
-    void invokeDirectly (const int commandId, const int topLevelIndex)
+    void invokeDirectly (int commandId, int topLevelIndex)
     {
         if (currentModel != nullptr)
             currentModel->menuItemSelected (commandId, topLevelIndex);
@@ -356,16 +354,16 @@ private:
     ScopedPointer<RecentFilesMenuItem> recent;
 
     //==============================================================================
-    static NSMenuItem* findMenuItem (NSMenu* const menu, const ApplicationCommandTarget::InvocationInfo& info)
+    static NSMenuItem* findMenuItemWithTag (NSMenu* const menu, int tag)
     {
         for (NSInteger i = [menu numberOfItems]; --i >= 0;)
         {
             NSMenuItem* m = [menu itemAtIndex: i];
-            if ([m tag] == info.commandID)
+            if ([m tag] == tag)
                 return m;
 
             if (NSMenu* sub = [m submenu])
-                if (NSMenuItem* found = findMenuItem (sub, info))
+                if (NSMenuItem* found = findMenuItemWithTag (sub, tag))
                     return found;
         }
 
@@ -421,9 +419,8 @@ private:
         return m;
     }
 
-    class AsyncMenuUpdater  : public CallbackMessage
+    struct AsyncMenuUpdater  : public CallbackMessage
     {
-    public:
         AsyncMenuUpdater() {}
 
         void messageCallback() override
@@ -432,14 +429,12 @@ private:
                 instance->menuBarItemsChanged (nullptr);
         }
 
-    private:
         JUCE_DECLARE_NON_COPYABLE (AsyncMenuUpdater)
     };
 
-    class AsyncCommandInvoker  : public CallbackMessage
+    struct AsyncCommandInvoker  : public CallbackMessage
     {
-    public:
-        AsyncCommandInvoker (const int commandId_, const int topLevelIndex_)
+        AsyncCommandInvoker (int commandId_, int topLevelIndex_)
             : commandId (commandId_), topLevelIndex (topLevelIndex_)
         {}
 
@@ -449,9 +444,7 @@ private:
                 instance->invokeDirectly (commandId, topLevelIndex);
         }
 
-    private:
         const int commandId, topLevelIndex;
-
         JUCE_DECLARE_NON_COPYABLE (AsyncCommandInvoker)
     };
 
@@ -581,9 +574,8 @@ private:
     // This override is also important because it stops the base class
     // calling ModalComponentManager::bringToFront, which can get
     // recursive when file dialogs are involved
-    class SilentDummyModalComp  : public Component
+    struct SilentDummyModalComp  : public Component
     {
-    public:
         SilentDummyModalComp() {}
         void inputAttemptWhenModal() override {}
     };
@@ -727,6 +719,9 @@ static void mainMenuTrackingChanged (bool isTracking)
     if (JuceMainMenuHandler* menuHandler = JuceMainMenuHandler::instance)
     {
         menuHandler->isOpen = isTracking;
+
+        if (MenuBarModel* model = menuHandler->currentModel)
+            model->handleMenuBarActivate (isTracking);
 
         if (menuHandler->defferedUpdateRequested && ! isTracking)
         {

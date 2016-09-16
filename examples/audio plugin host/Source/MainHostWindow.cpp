@@ -105,7 +105,9 @@ MainHostWindow::MainHostWindow()
                             ->getIntValue ("pluginSortMethod", KnownPluginList::sortByManufacturer);
 
     knownPluginList.addChangeListener (this);
-    getGraphEditor()->graph.addChangeListener (this);
+
+    if (FilterGraph* filterGraph = getGraphEditor()->graph.get())
+        filterGraph->addChangeListener (this);
 
     addKeyListener (getCommandManager().getKeyMappings());
 
@@ -123,18 +125,19 @@ MainHostWindow::MainHostWindow()
 MainHostWindow::~MainHostWindow()
 {
     pluginListWindow = nullptr;
+    knownPluginList.removeChangeListener (this);
+
+    if (FilterGraph* filterGraph = getGraphEditor()->graph.get())
+        filterGraph->removeChangeListener (this);
+
+    getAppProperties().getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
+    clearContentComponent();
 
    #if JUCE_MAC
     setMacMainMenu (nullptr);
    #else
     setMenuBar (nullptr);
    #endif
-
-    knownPluginList.removeChangeListener (this);
-    getGraphEditor()->graph.removeChangeListener (this);
-
-    getAppProperties().getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
-    clearContentComponent();
 }
 
 void MainHostWindow::closeButtonPressed()
@@ -147,8 +150,12 @@ bool MainHostWindow::tryToQuitApplication()
     PluginWindow::closeAllCurrentlyOpenWindows();
 
     if (getGraphEditor() == nullptr
-         || getGraphEditor()->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+         || getGraphEditor()->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
     {
+        // Some plug-ins do not want [NSApp stop] to be called
+        // before the plug-ins are not deallocated.
+        getGraphEditor()->releaseGraph();
+
         JUCEApplication::quit();
         return true;
     }
@@ -172,11 +179,11 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
             getAppProperties().saveIfNeeded();
         }
     }
-    else if (changed == &getGraphEditor()->graph)
+    else if (changed == getGraphEditor()->graph)
     {
         String title = JUCEApplication::getInstance()->getApplicationName();
 
-        File f = getGraphEditor()->graph.getFile();
+        File f = getGraphEditor()->graph->getFile();
 
         if (f.existsAsFile())
             title = f.getFileName() + " - " + title;
@@ -260,7 +267,8 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     if (menuItemID == 250)
     {
         if (graphEditor != nullptr)
-            graphEditor->graph.clear();
+            if (FilterGraph* filterGraph = getGraphEditor()->graph.get())
+                filterGraph->clear();
     }
     else if (menuItemID >= 100 && menuItemID < 200)
     {
@@ -268,8 +276,10 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
         recentFiles.restoreFromString (getAppProperties().getUserSettings()
                                             ->getValue ("recentFilterGraphFiles"));
 
-        if (graphEditor != nullptr && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-            graphEditor->graph.loadFrom (recentFiles.getFile (menuItemID - 100), true);
+        if (graphEditor != nullptr
+              && getGraphEditor()->graph != nullptr
+              && graphEditor->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+            graphEditor->graph->loadFrom (recentFiles.getFile (menuItemID - 100), true);
     }
     else if (menuItemID >= 200 && menuItemID < 210)
     {
@@ -289,6 +299,14 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
                       proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
                       proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f));
     }
+}
+
+void MainHostWindow::menuBarActivated (bool isActivated)
+{
+    GraphDocumentComponent* const graphEditor = getGraphEditor();
+
+    if (graphEditor != nullptr && isActivated)
+        graphEditor->unfocusKeyboardComponent();
 }
 
 void MainHostWindow::createPlugin (const PluginDescription* desc, int x, int y)
@@ -369,12 +387,12 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
         break;
 
     case CommandIDs::showPluginListEditor:
-        result.setInfo ("Edit the list of available plug-Ins...", String::empty, category, 0);
+        result.setInfo ("Edit the list of available plug-Ins...", String(), category, 0);
         result.addDefaultKeypress ('p', ModifierKeys::commandModifier);
         break;
 
     case CommandIDs::showAudioSettings:
-        result.setInfo ("Change the audio device settings", String::empty, category, 0);
+        result.setInfo ("Change the audio device settings", String(), category, 0);
         result.addDefaultKeypress ('a', ModifierKeys::commandModifier);
         break;
 
@@ -383,7 +401,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
         break;
 
     case CommandIDs::aboutBox:
-        result.setInfo ("About...", String::empty, category, 0);
+        result.setInfo ("About...", String(), category, 0);
         break;
 
     case CommandIDs::allWindowsForward:
@@ -403,23 +421,23 @@ bool MainHostWindow::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::newFile:
-        if (graphEditor != nullptr && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-            graphEditor->graph.newDocument();
+        if (graphEditor != nullptr && graphEditor->graph != nullptr && graphEditor->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+            graphEditor->graph->newDocument();
         break;
 
     case CommandIDs::open:
-        if (graphEditor != nullptr && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-            graphEditor->graph.loadFromUserSpecifiedFile (true);
+        if (graphEditor != nullptr && graphEditor->graph != nullptr && graphEditor->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+            graphEditor->graph->loadFromUserSpecifiedFile (true);
         break;
 
     case CommandIDs::save:
-        if (graphEditor != nullptr)
-            graphEditor->graph.save (true, true);
+        if (graphEditor != nullptr && graphEditor->graph != nullptr)
+            graphEditor->graph->save (true, true);
         break;
 
     case CommandIDs::saveAs:
-        if (graphEditor != nullptr)
-            graphEditor->graph.saveAs (File::nonexistent, true, true, true);
+        if (graphEditor != nullptr && graphEditor->graph != nullptr)
+            graphEditor->graph->saveAs (File(), true, true, true);
         break;
 
     case CommandIDs::showPluginListEditor:
@@ -498,8 +516,8 @@ void MainHostWindow::showAudioSettings()
 
     GraphDocumentComponent* const graphEditor = getGraphEditor();
 
-    if (graphEditor != nullptr)
-        graphEditor->graph.removeIllegalConnections();
+    if (graphEditor != nullptr && graphEditor->graph != nullptr)
+        graphEditor->graph->removeIllegalConnections();
 }
 
 bool MainHostWindow::isInterestedInFileDrag (const StringArray&)
@@ -527,8 +545,9 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
     {
         if (files.size() == 1 && File (files[0]).hasFileExtension (filenameSuffix))
         {
-            if (graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-                graphEditor->graph.loadFrom (File (files[0]), true);
+            if (FilterGraph* filterGraph = graphEditor->graph.get())
+            if (filterGraph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+                filterGraph->loadFrom (File (files[0]), true);
         }
         else
         {
@@ -558,6 +577,6 @@ bool MainHostWindow::isDoublePrecisionProcessing()
 
 void MainHostWindow::updatePrecisionMenuItem (ApplicationCommandInfo& info)
 {
-    info.setInfo ("Double floating point precision rendering", String::empty, "General", 0);
+    info.setInfo ("Double floating point precision rendering", String(), "General", 0);
     info.setTicked (isDoublePrecisionProcessing());
 }

@@ -782,6 +782,9 @@ public:
 
         if (isFullScreen() != shouldBeFullScreen)
         {
+            if (constrainer != nullptr)
+                constrainer->resizeStart();
+
             fullScreen = shouldBeFullScreen;
             const WeakReference<Component> deletionChecker (&component);
 
@@ -805,6 +808,9 @@ public:
 
             if (deletionChecker != nullptr)
                 handleMovedOrResized();
+
+            if (constrainer != nullptr)
+                constrainer->resizeEnd();
         }
     }
 
@@ -1117,14 +1123,6 @@ public:
 
             ownerInfo->dragInfo.clear();
 
-            DroppedData textData (dataObject, CF_UNICODETEXT);
-
-            if (SUCCEEDED (textData.error))
-            {
-                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((const WCHAR*) textData.data),
-                                                   CharPointer_UTF16 ((const WCHAR*) addBytesToPointer (textData.data, textData.dataSize)));
-            }
-            else
             {
                 DroppedData fileData (dataObject, CF_HDROP);
 
@@ -1137,14 +1135,21 @@ public:
                         ownerInfo->parseFileList (static_cast<const WCHAR*> (names), fileData.dataSize);
                     else
                         ownerInfo->parseFileList (static_cast<const char*>  (names), fileData.dataSize);
-                }
-                else
-                {
-                    return fileData.error;
+
+                    return S_OK;
                 }
             }
 
-            return S_OK;
+            DroppedData textData (dataObject, CF_UNICODETEXT);
+
+            if (SUCCEEDED (textData.error))
+            {
+                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((const WCHAR*) textData.data),
+                                                   CharPointer_UTF16 ((const WCHAR*) addBytesToPointer (textData.data, textData.dataSize)));
+                return S_OK;
+            }
+
+            return textData.error;
         }
 
         JUCE_DECLARE_NON_COPYABLE (JuceDropTarget)
@@ -1967,6 +1972,7 @@ private:
     bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp)
     {
         bool isCancel = false;
+
         const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
         const int64 time = getMouseEventTime();
         const Point<float> pos (globalToLocal (Point<float> (touch.x / 100.0f,
@@ -2697,6 +2703,16 @@ private:
                     break;
 
                 case SC_KEYMENU:
+                   #if ! JUCE_WINDOWS_ALT_KEY_TRIGGERS_MENU
+                    // This test prevents a press of the ALT key from triggering the ancient top-left window menu.
+                    // By default we suppress this behaviour because it's unlikely that more than a tiny subset of
+                    // our users will actually want it, and it causes problems if you're trying to use the ALT key
+                    // as a modifier for mouse actions. If you really need the old behaviour, then just define
+                    // JUCE_WINDOWS_ALT_KEY_TRIGGERS_MENU=1 in your app.
+                    if ((lParam >> 16) <= 0) // Values above zero indicate that a mouse-click triggered the menu
+                        return 0;
+                   #endif
+
                     // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very obscure
                     // situations that can arise if a modal loop is started from an alt-key keypress).
                     if (hasTitleBar() && h == GetCapture())

@@ -338,6 +338,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
     else if (exporter.isLinux())
     {
         parseAndAddLibs (exporter.linuxLibs, moduleInfo.moduleInfo ["linuxLibs"].toString());
+        parseAndAddLibs (exporter.linuxPackages, moduleInfo.moduleInfo ["linuxPackages"].toString());
     }
     else if (exporter.isCodeBlocks() && exporter.isWindows())
     {
@@ -760,7 +761,7 @@ void EnabledModuleList::addModuleFromUserSelectedFile()
 {
     static File lastLocation (findDefaultModulesFolder (project));
 
-    FileChooser fc ("Select a module to add...", lastLocation, String::empty, false);
+    FileChooser fc ("Select a module to add...", lastLocation, String(), false);
 
     if (fc.browseForDirectory())
     {

@@ -160,6 +160,7 @@ public:
 
     ScopedPointer& operator= (ScopedPointer&& other) noexcept
     {
+        ContainerDeletePolicy<ObjectType>::destroy (object);
         object = other.object;
         other.object = nullptr;
         return *this;

@@ -60,7 +60,7 @@ public:
         The source passed in will not be deleted by this object, so must be managed by
         the caller.
 
-        @param newSource                        the new input source to use. This may be zero
+        @param newSource                        the new input source to use. This may be a nullptr
         @param readAheadBufferSize              a size of buffer to use for reading ahead. If this
                                                 is zero, no reading ahead will be done; if it's
                                                 greater than zero, a BufferingAudioSource will be used

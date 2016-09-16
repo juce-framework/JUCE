@@ -292,10 +292,9 @@ public:
     /** A dummy bail-out checker that always returns false.
         See the ListenerList notes for more info about bail-out checkers.
     */
-    class DummyBailOutChecker
+    struct DummyBailOutChecker
     {
-    public:
-        inline bool shouldBailOut() const noexcept     { return false; }
+        bool shouldBailOut() const noexcept                 { return false; }
     };
 
     //==============================================================================

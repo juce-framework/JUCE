@@ -254,7 +254,7 @@ struct OpenDiskDevice
 
         [device releaseMediaReservation];
         [device releaseExclusiveAccess];
-        return String::empty;
+        return String();
     }
 
     DRDevice* device;

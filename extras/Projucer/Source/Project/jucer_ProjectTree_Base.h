@@ -140,7 +140,7 @@ public:
     virtual void browseToAddExistingFiles()
     {
         const File location (item.isGroup() ? item.determineGroupFolder() : getFile());
-        FileChooser fc ("Add Files to Jucer Project", location, String::empty, false);
+        FileChooser fc ("Add Files to Jucer Project", location, String(), false);
 
         if (fc.browseForMultipleFilesOrDirectories())
         {
@@ -156,7 +156,7 @@ public:
     virtual void checkFileStatus()  // (recursive)
     {
         const File file (getFile());
-        const bool nowMissing = file != File::nonexistent && ! file.exists();
+        const bool nowMissing = file != File() && ! file.exists();
 
         if (nowMissing != isFileMissing)
         {
@@ -235,7 +235,7 @@ public:
     bool mightContainSubItems() override                { return item.getNumChildren() > 0; }
     String getUniqueName() const override               { jassert (item.getID().isNotEmpty()); return item.getID(); }
     bool canBeSelected() const override                 { return true; }
-    String getTooltip() override                        { return String::empty; }
+    String getTooltip() override                        { return String(); }
     File getDraggableFile() const override              { return getFile(); }
 
     var getDragSourceDescription() override

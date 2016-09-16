@@ -46,7 +46,8 @@ ComboBox::ComboBox (const String& name)
       menuActive (false),
       scrollWheelEnabled (false),
       mouseWheelAccumulator (0),
-      noChoicesMessage (TRANS("(no choices)"))
+      noChoicesMessage (TRANS("(no choices)")),
+      labelEditableState (editableUnknown)
 {
     setRepaintsOnMouseActivity (true);
     lookAndFeelChanged();
@@ -66,7 +67,9 @@ void ComboBox::setEditableText (const bool isEditable)
     if (label->isEditableOnSingleClick() != isEditable || label->isEditableOnDoubleClick() != isEditable)
     {
         label->setEditable (isEditable, isEditable, false);
-        setWantsKeyboardFocus (! isEditable);
+        labelEditableState = (isEditable ? labelIsEditable : labelIsNotEditable);
+
+        setWantsKeyboardFocus (labelEditableState == labelIsNotEditable);
         resized();
     }
 }
@@ -109,7 +112,7 @@ void ComboBox::addItem (const String& newItemText, const int newItemId)
         if (separatorPending)
         {
             separatorPending = false;
-            items.add (new ItemInfo (String::empty, 0, false, false));
+            items.add (new ItemInfo (String(), 0, false, false));
         }
 
         items.add (new ItemInfo (newItemText, newItemId, true, false));
@@ -137,7 +140,7 @@ void ComboBox::addSectionHeading (const String& headingName)
         if (separatorPending)
         {
             separatorPending = false;
-            items.add (new ItemInfo (String::empty, 0, false, false));
+            items.add (new ItemInfo (String(), 0, false, false));
         }
 
         items.add (new ItemInfo (headingName, 0, true, true));
@@ -216,7 +219,7 @@ String ComboBox::getItemText (const int index) const
     if (const ItemInfo* const item = getItemForIndex (index))
         return item->name;
 
-    return String::empty;
+    return String();
 }
 
 int ComboBox::getItemId (const int index) const noexcept
@@ -271,7 +274,7 @@ int ComboBox::getSelectedId() const noexcept
 void ComboBox::setSelectedId (const int newItemId, const NotificationType notification)
 {
     const ItemInfo* const item = getItemForId (newItemId);
-    const String newItemText (item != nullptr ? item->name : String::empty);
+    const String newItemText (item != nullptr ? item->name : String());
 
     if (lastCurrentId != newItemId || label->getText() != newItemText)
     {
@@ -437,7 +440,14 @@ void ComboBox::lookAndFeelChanged()
     }
 
     addAndMakeVisible (label);
-    setWantsKeyboardFocus (! label->isEditable());
+
+    EditableState newEditableState = (label->isEditable() ? labelIsEditable : labelIsNotEditable);
+
+    if (newEditableState != labelEditableState)
+    {
+        labelEditableState = newEditableState;
+        setWantsKeyboardFocus (labelEditableState == labelIsNotEditable);
+    }
 
     label->addListener (this);
     label->addMouseListener (this, false);

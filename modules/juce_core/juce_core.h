@@ -38,7 +38,7 @@
 
   ID:               juce_core
   vendor:           juce
-  version:          4.2.3
+  version:          4.2.4
   name:             JUCE core classes
   description:      The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:          http://www.juce.com/juce
@@ -48,6 +48,7 @@
   OSXFrameworks:    Cocoa IOKit
   iOSFrameworks:    Foundation
   linuxLibs:        rt dl pthread
+  linuxPackages:    libcurl
   mingwLibs:        uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
 
  END_JUCE_MODULE_DECLARATION
@@ -138,7 +139,7 @@
 
 /** Config: JUCE_USE_CURL
     Enables http/https support via libcurl (Linux only). Enabling this will add an additional
-    run-time dynmic dependency to libcurl.
+    run-time dynamic dependency to libcurl.
 
     If you disable this then https/ssl support will not be available on linux.
 */
@@ -147,13 +148,23 @@
 #endif
 
 
-/*  Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
+/** Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
     If enabled, this will add some exception-catching code to forward unhandled exceptions
     to your JUCEApplicationBase::unhandledException() callback.
 */
 #ifndef JUCE_CATCH_UNHANDLED_EXCEPTIONS
  //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
 #endif
+
+/** Config: JUCE_ALLOW_STATIC_NULL_VARIABLES
+    If disabled, this will turn off dangerous static globals like String::empty, var::null, etc
+    which can cause nasty order-of-initialisation problems if they are referenced during static
+    constructor code.
+*/
+#ifndef JUCE_ALLOW_STATIC_NULL_VARIABLES
+ #define JUCE_ALLOW_STATIC_NULL_VARIABLES 1
+#endif
+
 
 #ifndef JUCE_STRING_UTF_TYPE
  #define JUCE_STRING_UTF_TYPE 8

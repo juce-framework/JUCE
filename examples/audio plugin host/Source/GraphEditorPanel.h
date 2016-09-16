@@ -91,10 +91,16 @@ public:
     inline void setDoublePrecision (bool doublePrecision) { graphPlayer.setDoublePrecisionProcessing (doublePrecision); }
 
     //==============================================================================
-    FilterGraph graph;
+    ScopedPointer<FilterGraph> graph;
 
     //==============================================================================
     void resized();
+
+    //==============================================================================
+    void unfocusKeyboardComponent();
+
+    //==============================================================================
+    void releaseGraph();
 
 private:
     //==============================================================================

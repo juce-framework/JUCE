@@ -243,7 +243,7 @@ private:
 
         static String::CharPointerType findEndOfFaceToken (String::CharPointerType t) noexcept
         {
-            return CharacterFunctions::findEndOfToken (t, CharPointer_ASCII ("/ \t"), String::empty.getCharPointer());
+            return CharacterFunctions::findEndOfToken (t, CharPointer_ASCII ("/ \t"), String().getCharPointer());
         }
     };
 

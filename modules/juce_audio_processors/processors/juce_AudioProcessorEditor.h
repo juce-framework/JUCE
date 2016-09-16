@@ -85,14 +85,22 @@ public:
     virtual int getControlParameterIndex (Component&);
 
     //==============================================================================
-    /** Make the editor resizable or fixed.
+    /** Marks the host's editor window as resizable
 
-        @param shouldBeResizable   whether it's resizable at all
+        @param allowHostToResize   whether the editor's parent window can be resized
+                                   by the user or the host. Even if this is false, you
+                                   can still resize your window yourself by calling
+                                   setBounds (for example, when a user clicks on a button
+                                   in your editor to drop out a panel) which will bypass any
+                                   resizable/constraints checks. If you are using
+                                   your own corner resizer than this will also bypass
+                                   any checks.
+        @param useBottomRightCornerResizer
         @see setResizeLimits, isResizable
     */
-    void setResizable (bool shouldBeResizable, bool useBottomRightCornerResizer);
+    void setResizable (bool allowHostToResize, bool useBottomRightCornerResizer);
 
-    /** Returns true if resizing is enabled.
+    /** Returns true if the host is allowed to resize editor's parent window
 
         @see setResizable
     */

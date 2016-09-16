@@ -260,7 +260,7 @@ public:
         audioSourcePlayer.setSource (&synthAudioSource);
 
         deviceManager.addAudioCallback (&audioSourcePlayer);
-        deviceManager.addMidiInputCallback (String::empty, &(synthAudioSource.midiCollector));
+        deviceManager.addMidiInputCallback (String(), &(synthAudioSource.midiCollector));
 
         setOpaque (true);
         setSize (640, 480);
@@ -269,7 +269,7 @@ public:
     ~AudioSynthesiserDemo()
     {
         audioSourcePlayer.setSource (nullptr);
-        deviceManager.removeMidiInputCallback (String::empty, &(synthAudioSource.midiCollector));
+        deviceManager.removeMidiInputCallback (String(), &(synthAudioSource.midiCollector));
         deviceManager.removeAudioCallback (&audioSourcePlayer);
         deviceManager.removeAudioCallback (&liveAudioDisplayComp);
     }

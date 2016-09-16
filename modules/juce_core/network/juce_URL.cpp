@@ -222,6 +222,13 @@ int URL::getPort() const
     return colonPos > 0 ? url.substring (colonPos + 1).getIntValue() : 0;
 }
 
+URL URL::withNewDomainAndPath (const String& newURL) const
+{
+    URL u (*this);
+    u.url = newURL;
+    return u;
+}
+
 URL URL::withNewSubPath (const String& newPath) const
 {
     const int startOfPath = URLHelpers::findStartOfPath (url);

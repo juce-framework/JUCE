@@ -106,10 +106,19 @@ public:
     */
     int getPort() const;
 
-    /** Returns a new version of this URL that uses a different sub-path.
+    /** Returns a new version of this URL with a different domain and path.
+
+        E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
+        "abc.com/zzz", it'll return "http://abc.com/zzz?x=1".
+        @see withNewSubPath
+    */
+    URL withNewDomainAndPath (const String& newFullPath) const;
+
+    /** Returns a new version of this URL with a different sub-path.
 
         E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
         "bar", it'll return "http://www.xyz.com/bar?x=1".
+        @see withNewDomainAndPath
     */
     URL withNewSubPath (const String& newPath) const;
 
@@ -274,7 +283,7 @@ public:
                                  if the parameter httpRequestCmd is not specified (or empty) then this
                                  parameter will determine which HTTP request command will be used
                                  (POST or GET).
-        @param progressCallback  if this is non-zero, it lets you supply a callback function
+        @param progressCallback  if this is not a nullptr, it lets you supply a callback function
                                  to keep track of the operation's progress. This can be useful
                                  for lengthy POST operations, so that you can provide user feedback.
         @param progressCallbackContext  if a callback is specified, this value will be passed to

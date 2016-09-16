@@ -50,18 +50,18 @@ public:
 
     //==============================================================================
     MPESetupComponent()
-        : masterChannelLabel (String::empty, "Master channel:"),
-          noteChannelsLabel (String::empty, "Nr. of note channels:"),
-          masterPitchbendRangeLabel (String::empty, "Master pitchbend range (semitones):"),
-          notePitchbendRangeLabel (String::empty, "Note pitchbend range (semitones):"),
+        : masterChannelLabel (String(), "Master channel:"),
+          noteChannelsLabel (String(), "Nr. of note channels:"),
+          masterPitchbendRangeLabel (String(), "Master pitchbend range (semitones):"),
+          notePitchbendRangeLabel (String(), "Note pitchbend range (semitones):"),
           addZoneButton ("Add this zone"),
           clearAllZonesButton ("Clear all zones"),
-          legacyStartChannelLabel (String::empty, "First channel:"),
-          legacyEndChannelLabel (String::empty, "Last channel:"),
-          legacyPitchbendRangeLabel (String::empty, "Pitchbend range (semitones):"),
+          legacyStartChannelLabel (String(), "First channel:"),
+          legacyEndChannelLabel (String(), "Last channel:"),
+          legacyPitchbendRangeLabel (String(), "Pitchbend range (semitones):"),
           legacyModeEnabledToggle ("Enable Legacy Mode"),
           voiceStealingEnabledToggle ("Enable synth voice stealing"),
-          numberOfVoicesLabel (String::empty, "Number of synth voices")
+          numberOfVoicesLabel (String(), "Number of synth voices")
     {
 
         initialiseComboBoxWithConsecutiveIntegers (masterChannel, masterChannelLabel, 1, 15, defaultMasterChannel);

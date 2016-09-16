@@ -4,6 +4,30 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 4.2.4
+  - Pre-release of live build engine on Windows
+  - Added FlexBox layout engine
+  - Removed dependency on external Steinberg SDK when building and/or hosting VST2 plug-ins
+  - Added support for MIDI network sessions in the iOS simulator
+  - Added support for symmetric skew to Slider, NormalisableRange and SliderPropertyComponent
+  - Projucer now asks the user what to do when it detects that the .jucer file was modified outside of the Projucer
+  - Improved support for Windows 10 touch devices
+  - Added begin/end iterator methods for ValueTree, for handy range-based-for loops over its children
+  - Added support for recent mingw-w64 compilers
+  - Added useful proportional Rectangle utility methods
+  - Significantly improved the performance of BigInteger
+  - Added support for expiring licenses to juce_tracktion_marketplace
+  - Added support for retina mouse cursors on OS X
+  - Added a new low-quality mode for the CameraDevice
+  - Added pkg-config support for Linux
+  - Projucer will now wrap your AAX plug-in in the bundle format expected Pro Tools on Windows
+  - Multiple bug-fixes for AudioUnit parameter ids
+  - Fixed a bug where AlertWindows weren’t always on top
+  - Multiple fixes for web InputStreams
+  - Various improvements to the live build engine
+  - Various minor improvements and bug fixes
+  - Various documentation improvements
+
 Version 4.2.3
   - Various VST3 improvements: resizing VST3 windows, plug-in compatibility issues
   - Use NSURLSession on newer OS X versions

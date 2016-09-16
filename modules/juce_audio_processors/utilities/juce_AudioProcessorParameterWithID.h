@@ -44,9 +44,10 @@ public:
     /** Provides access to the parameter's name. */
     const String name;
 
-private:
-    String label;
+    /** Provides access to the parameter's label. */
+    const String label;
 
+private:
     String getName (int) const override;
     String getLabel() const override;
 

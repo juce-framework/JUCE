@@ -805,7 +805,7 @@ public:
             if (! owner.isOpaque())
             {
                 lg.setFill (Colours::transparentBlack);
-                lg.fillRect (imageBounds, true);
+                lg.fillRect (compBounds, true);
                 lg.setFill (Colours::black);
             }
 
@@ -2489,7 +2489,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
 }
 
 void Component::internalMouseUp (MouseInputSource source, Point<float> relativePos,
-                                 Time time, const ModifierKeys oldModifiers)
+                                 Time time, const ModifierKeys oldModifiers, float pressure)
 {
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
         return;
@@ -2500,7 +2500,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
         repaint();
 
     const MouseEvent me (source, relativePos,
-                         oldModifiers, MouseInputSource::invalidPressure, this, this, time,
+                         oldModifiers, pressure, this, this, time,
                          getLocalPoint (nullptr, source.getLastMouseDownPosition()),
                          source.getLastMouseDownTime(),
                          source.getNumberOfMultipleClicks(),

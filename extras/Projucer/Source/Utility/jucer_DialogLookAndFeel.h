@@ -37,12 +37,21 @@ public:
     void drawToggleButton (Graphics& g, ToggleButton& button, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
     {
         g.setColour (Colours::white);
-        g.fillEllipse (4.0f, 4.0f, 13.0f, 13.0f);
+        Rectangle<float> box (4.0f, 4.0f, 13.0f, 13.0f);
+        g.fillRoundedRectangle (box, 3.0f);
 
         if (button.getToggleState())
         {
             g.setColour (Colours::black);
-            g.fillEllipse (6.0f, 6.0f, 9.0f, 9.0f);
+
+            Path tick;
+            tick.startNewSubPath (box.getX(), box.getCentreY() + 1.0f);
+            tick.lineTo (box.getCentreX() - 1.0f, box.getBottom());
+            tick.lineTo (box.getRight(), box.getY());
+
+            const AffineTransform trans (AffineTransform::scale (0.75, 0.75, box.getCentreX(), box.getCentreY()));
+
+            g.strokePath (tick, PathStrokeType (3.0f), trans);
         }
 
         g.setColour (button.findColour (ToggleButton::textColourId));

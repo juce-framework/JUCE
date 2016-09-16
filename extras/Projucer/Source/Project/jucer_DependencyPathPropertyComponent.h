@@ -90,7 +90,7 @@ private:
         if ((value.refersToSameSourceAs (globalSettingsValue) && isUsingGlobalSettings()))
         {
             sendChangeMessage (true);
-            setValue (String::empty); // make sure that the project-specific value is still blank
+            setValue (String()); // make sure that the project-specific value is still blank
         }
     }
 

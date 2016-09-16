@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="sBBIzr" name="JuceDemo" projectType="guiapp" version="3.0.0"
-              bundleIdentifier="com.yourcompany.JuceDemo" jucerVersion="4.2.3"
+              bundleIdentifier="com.yourcompany.JuceDemo" jucerVersion="4.2.4"
               defines="JUCE_UNIT_TESTS=1" includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
@@ -282,6 +282,7 @@
         <FILE id="F4wkwd" name="CryptographyDemo.cpp" compile="1" resource="0"
               file="Source/Demos/CryptographyDemo.cpp"/>
         <FILE id="E17XEZ" name="DialogsDemo.cpp" compile="1" resource="0" file="Source/Demos/DialogsDemo.cpp"/>
+        <FILE id="mYE1dA" name="FlexBoxDemo.cpp" compile="1" resource="0" file="Source/Demos/FlexBoxDemo.cpp"/>
         <FILE id="oM20ll" name="FontsDemo.cpp" compile="1" resource="0" file="Source/Demos/FontsDemo.cpp"/>
         <FILE id="emYkSr" name="GraphicsDemo.cpp" compile="1" resource="0"
               file="Source/Demos/GraphicsDemo.cpp"/>

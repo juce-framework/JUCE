@@ -167,7 +167,7 @@ MainContentComponent::MainContentComponent ()
     midiMonitor.setScrollbarsShown (true);
     midiMonitor.setCaretVisible (false);
     midiMonitor.setPopupMenuEnabled (false);
-    midiMonitor.setText (String::empty);
+    midiMonitor.setText (String());
     addAndMakeVisible (midiMonitor);
 
     if (! BluetoothMidiDevicePairingDialogue::isAvailable())

@@ -238,7 +238,7 @@ void FileChooserDialogBox::createNewFolder()
                                            TRANS("Please enter the name for the folder"),
                                            AlertWindow::NoIcon, this);
 
-        aw->addTextEditor ("Folder Name", String::empty, String::empty, false);
+        aw->addTextEditor ("Folder Name", String(), String(), false);
         aw->addButton (TRANS("Create Folder"), 1, KeyPress (KeyPress::returnKey));
         aw->addButton (TRANS("Cancel"),        0, KeyPress (KeyPress::escapeKey));
 

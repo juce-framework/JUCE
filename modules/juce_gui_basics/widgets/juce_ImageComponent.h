@@ -38,7 +38,7 @@ class JUCE_API  ImageComponent  : public Component,
 public:
     //==============================================================================
     /** Creates an ImageComponent. */
-    ImageComponent (const String& componentName = String::empty);
+    ImageComponent (const String& componentName = String());
 
     /** Destructor. */
     ~ImageComponent();

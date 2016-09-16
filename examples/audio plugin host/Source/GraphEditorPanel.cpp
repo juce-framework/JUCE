@@ -969,7 +969,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 
     if (draggingConnector != nullptr)
     {
-        draggingConnector->setTooltip (String::empty);
+        draggingConnector->setTooltip (String());
 
         int x = e2.x;
         int y = e2.y;
@@ -1013,7 +1013,7 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
     if (draggingConnector == nullptr)
         return;
 
-    draggingConnector->setTooltip (String::empty);
+    draggingConnector->setTooltip (String());
 
     const MouseEvent e2 (e.getEventRelativeTo (this));
 
@@ -1091,14 +1091,14 @@ private:
 //==============================================================================
 GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& formatManager,
                                                 AudioDeviceManager* deviceManager_)
-    : graph (formatManager), deviceManager (deviceManager_),
+    : graph (new FilterGraph (formatManager)), deviceManager (deviceManager_),
       graphPlayer (getAppProperties().getUserSettings()->getBoolValue ("doublePrecisionProcessing", false))
 {
-    addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
+    addAndMakeVisible (graphPanel = new GraphEditorPanel (*graph));
 
     deviceManager->addChangeListener (graphPanel);
 
-    graphPlayer.setProcessor (&graph.getGraph());
+    graphPlayer.setProcessor (&graph->getGraph());
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
@@ -1108,23 +1108,16 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& format
     addAndMakeVisible (statusBar = new TooltipBar());
 
     deviceManager->addAudioCallback (&graphPlayer);
-    deviceManager->addMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
+    deviceManager->addMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
 
     graphPanel->updateComponents();
 }
 
 GraphDocumentComponent::~GraphDocumentComponent()
 {
-    deviceManager->removeAudioCallback (&graphPlayer);
-    deviceManager->removeMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
-    deviceManager->removeChangeListener (graphPanel);
+    releaseGraph();
 
-    deleteAllChildren();
-
-    graphPlayer.setProcessor (nullptr);
     keyState.removeListener (&graphPlayer.getMidiMessageCollector());
-
-    graph.clear();
 }
 
 void GraphDocumentComponent::resized()
@@ -1140,4 +1133,21 @@ void GraphDocumentComponent::resized()
 void GraphDocumentComponent::createNewPlugin (const PluginDescription* desc, int x, int y)
 {
     graphPanel->createNewPlugin (desc, x, y);
+}
+
+void GraphDocumentComponent::unfocusKeyboardComponent()
+{
+    keyboardComp->unfocusAllComponents();
+}
+
+void GraphDocumentComponent::releaseGraph()
+{
+    deviceManager->removeAudioCallback (&graphPlayer);
+    deviceManager->removeMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
+    deviceManager->removeChangeListener (graphPanel);
+
+    deleteAllChildren();
+
+    graphPlayer.setProcessor (nullptr);
+    graph = nullptr;
 }

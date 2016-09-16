@@ -53,7 +53,8 @@
 
     The call-out will resize and position itself when the content changes size.
 */
-class JUCE_API  CallOutBox    : public Component
+class JUCE_API  CallOutBox    : public Component,
+                                private Timer
 {
 public:
     //==============================================================================
@@ -67,8 +68,8 @@ public:
         @param areaToPointTo        the area that the call-out's arrow should point towards. If
                                     a parentComponent is supplied, then this is relative to that
                                     parent; otherwise, it's a global screen coord.
-        @param parentComponent      if non-zero, this is the component to add the call-out to. If
-                                    this is a nullptr, the call-out will be added to the desktop.
+        @param parentComponent      if not a nullptr, this is the component to add the call-out to.
+                                    If this is a nullptr, the call-out will be added to the desktop.
     */
     CallOutBox (Component& contentComponent,
                 const Rectangle<int>& areaToPointTo,
@@ -111,8 +112,8 @@ public:
         @param areaToPointTo        the area that the call-out's arrow should point towards. If
                                     a parentComponent is supplied, then this is relative to that
                                     parent; otherwise, it's a global screen coord.
-        @param parentComponent      if non-zero, this is the component to add the call-out to. If
-                                    this is a nullptr, the call-out will be added to the desktop.
+        @param parentComponent      if not a nullptr, this is the component to add the call-out to.
+                                    If this is a nullptr, the call-out will be added to the desktop.
     */
     static CallOutBox& launchAsynchronously (Component* contentComponent,
                                              const Rectangle<int>& areaToPointTo,
@@ -173,7 +174,10 @@ private:
     Image background;
     bool dismissalMouseClicksAreAlwaysConsumed;
 
+    Time creationTime;
+
     void refreshPath();
+    void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox)
 };

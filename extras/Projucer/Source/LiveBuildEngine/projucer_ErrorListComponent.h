@@ -27,7 +27,7 @@ class ErrorListComp     : public TreePanelBase,
 {
 public:
     ErrorListComp (ErrorList& el)
-        : TreePanelBase (nullptr, String::empty),
+        : TreePanelBase (nullptr, String()),
           errorList (el)
     {
         setName ("Errors and Warnings");

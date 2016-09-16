@@ -34,7 +34,6 @@ PathSettingsTab::PathSettingsTab (DependencyPathOS os)
 
     StoredSettings& settings = getAppSettings();
 
-    vst2PathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::vst2Path, os), "VST SDK",  maxChars, false));
     vst3PathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::vst3Path, os), "VST3 SDK", maxChars, false));
 
    #if ! JUCE_LINUX
@@ -70,7 +69,6 @@ void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textP
 
 Identifier PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* component) const
 {
-    if (component == vst2PathComponent)       return Ids::vst2Path;
     if (component == vst3PathComponent)       return Ids::vst3Path;
     if (component == rtasPathComponent)       return Ids::rtasPath;
     if (component == aaxPathComponent)        return Ids::aaxPath;
@@ -79,7 +77,7 @@ Identifier PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* c
 
     // this property component does not have a key associated to it!
     jassertfalse;
-    return String::empty;
+    return String();
 }
 
 Component* PathSettingsTab::getContent()
@@ -288,7 +286,7 @@ struct AppearanceEditor
 
             StringArray names;
             names.add ("<Default Monospaced>");
-            names.add (String::empty);
+            names.add (String());
             names.addArray (getAppSettings().monospacedFontNames);
 
             return new ChoicePropertyComponent (Value (new FontNameValueSource (value)),

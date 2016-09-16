@@ -179,7 +179,7 @@ public:
     /** Returns one of the files in the list.
 
         @param index    should be less than getNumFiles(). If this is out-of-range, the
-                        return value will be File::nonexistent
+                        return value will be a default File() object
         @see getNumFiles, getFileInfo
     */
     File getFile (int index) const;

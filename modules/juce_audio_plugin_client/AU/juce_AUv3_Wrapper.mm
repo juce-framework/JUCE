@@ -33,7 +33,7 @@
 
 #if JUCE_MAC
  #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (! defined MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11)
-  #error AUv3 needs Deployment Target OS X 10.8 or higher to compile
+  #error AUv3 needs Deployment Target OS X 10.11 or higher to compile
  #endif
 #endif
 
@@ -845,6 +845,11 @@ private:
             AUParameterAddress address = static_cast<AUParameterAddress> (idx);
            #else
             AUParameterAddress address = generateAUParameterAddressForIndex (idx);
+
+            // Consider yourself very unlucky if you hit this assertion. The hash code of your
+            // parameter ids are not unique.
+            jassert (! paramMap.contains (static_cast<int64> (address)));
+
             paramAddresses.add (address);
             paramMap.set (static_cast<int64> (address), idx);
           #endif

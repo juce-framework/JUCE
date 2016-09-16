@@ -92,8 +92,8 @@ public:
 private:
     String getLayoutName() const
     {
-        if (AudioProcessor* processor = getAudioProcessor())
-            return processor->busArrangement.outputBuses.getReference (0).channels.getDescription();
+        if (AudioProcessor* p = getAudioProcessor())
+            return p->busArrangement.outputBuses.getReference (0).channels.getDescription();
 
         return "Unknown";
     }

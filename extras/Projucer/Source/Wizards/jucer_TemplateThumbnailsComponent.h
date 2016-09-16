@@ -254,7 +254,7 @@ public:
             appFolder = appFolder.getParentDirectory();
         }
 
-        return File::nonexistent;
+        return File();
     }
 
 private:

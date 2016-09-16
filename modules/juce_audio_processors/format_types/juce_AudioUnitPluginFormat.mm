@@ -399,18 +399,7 @@ public:
                               (int) (numOutputBusChannels * numOutputBusses),
                               rate, blockSize);
         setLatencySamples (0);
-
-        if (parameters.size() == 0)
-        {
-            // some plugins crash if initialiseAudioUnit() is called too soon (sigh..), so we'll
-            // only call it here if it seems like they it's one of the awkward plugins that can
-            // only create their parameters after it has been initialised.
-            if (! initialiseAudioUnit())
-                return false;
-
-            refreshParameterList();
-        }
-
+        refreshParameterList();
         setPluginCallbacks();
         return true;
     }
@@ -532,7 +521,7 @@ public:
             resetBusses();
 
             jassert (! prepared);
-            initialiseAudioUnit();
+            prepared = (AudioUnitInitialize (audioUnit) == noErr);
         }
     }
 
@@ -550,14 +539,6 @@ public:
         }
 
         incomingMidi.clear();
-    }
-
-    bool initialiseAudioUnit()
-    {
-        if (! prepared)
-            prepared = (AudioUnitInitialize (audioUnit) == noErr);
-
-        return prepared;
     }
 
     void resetBusses()
@@ -873,8 +854,6 @@ public:
 
         if (propertyList != 0)
         {
-            initialiseAudioUnit();
-
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global,
                                   0, &propertyList, sizeof (propertyList));
 
@@ -1072,7 +1051,6 @@ private:
         event.mEventType = kAudioUnitEvent_PropertyChange;
         event.mArgument.mProperty.mPropertyID = type;
         event.mArgument.mProperty.mAudioUnit = audioUnit;
-        event.mArgument.mProperty.mPropertyID = kAudioUnitProperty_PresentPreset;
         event.mArgument.mProperty.mScope = kAudioUnitScope_Global;
         event.mArgument.mProperty.mElement = 0;
         AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
@@ -1546,9 +1524,6 @@ private:
 
     bool createView (const bool createGenericViewIfNeeded)
     {
-        if (! plugin.initialiseAudioUnit())
-            return false;
-
         JUCE_IOS_MAC_VIEW* pluginView = nil;
         UInt32 dataSize = 0;
         Boolean isWritable = false;

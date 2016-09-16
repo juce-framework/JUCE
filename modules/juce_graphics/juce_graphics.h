@@ -33,7 +33,7 @@
 
   ID:               juce_graphics
   vendor:           juce
-  version:          4.2.3
+  version:          4.2.4
   name:             JUCE graphics classes
   description:      Classes for 2D vector graphics, image loading/saving, font handling, etc.
   website:          http://www.juce.com/juce
@@ -42,7 +42,7 @@
   dependencies:     juce_events
   OSXFrameworks:    Cocoa QuartzCore
   iOSFrameworks:    CoreGraphics CoreText QuartzCore
-  linuxLibs:        X11 Xinerama Xext freetype
+  linuxPackages:    x11 xinerama xext freetype2
 
  END_JUCE_MODULE_DECLARATION
 

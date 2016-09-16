@@ -33,14 +33,14 @@
 
   ID:               juce_events
   vendor:           juce
-  version:          4.2.3
+  version:          4.2.4
   name:             JUCE message and event handling classes
   description:      Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
   dependencies:     juce_core
-  linuxLibs:        X11
+  linuxPackages:    x11
 
  END_JUCE_MODULE_DECLARATION
 

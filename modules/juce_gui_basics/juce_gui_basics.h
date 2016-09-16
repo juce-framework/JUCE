@@ -33,7 +33,7 @@
 
   ID:               juce_gui_basics
   vendor:           juce
-  version:          4.2.3
+  version:          4.2.4
   name:             JUCE GUI core classes
   description:      Basic user-interface components and related classes.
   website:          http://www.juce.com/juce
@@ -42,7 +42,7 @@
   dependencies:     juce_events juce_graphics juce_data_structures
   OSXFrameworks:    Cocoa Carbon QuartzCore
   iOSFrameworks:    UIKit
-  linuxLibs:        X11 Xinerama Xext
+  linuxPackages:    x11 xinerama xext
 
  END_JUCE_MODULE_DECLARATION
 
@@ -153,6 +153,7 @@ class BubbleComponent;
 class KeyPressMappingSet;
 class ApplicationCommandManagerListener;
 class DrawableButton;
+class FlexBox;
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
@@ -280,6 +281,12 @@ class DrawableButton;
 #include "lookandfeel/juce_LookAndFeel_V2.h"
 #include "lookandfeel/juce_LookAndFeel_V1.h"
 #include "lookandfeel/juce_LookAndFeel_V3.h"
+
+// these classes are C++11-only
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS && JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
+#include "layout/juce_FlexItem.h"
+#include "layout/juce_FlexBox.h"
+#endif
 
 }
 

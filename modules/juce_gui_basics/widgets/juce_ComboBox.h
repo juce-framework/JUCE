@@ -57,7 +57,7 @@ public:
 
         @param componentName    the name to set for the component (see Component::setName())
     */
-    explicit ComboBox (const String& componentName = String::empty);
+    explicit ComboBox (const String& componentName = String());
 
     /** Destructor. */
     ~ComboBox();
@@ -427,6 +427,13 @@ private:
         bool isEnabled : 1, isHeading : 1;
     };
 
+    enum EditableState
+    {
+        editableUnknown,
+        labelIsNotEditable,
+        labelIsEditable
+    };
+
     OwnedArray<ItemInfo> items;
     Value currentId;
     int lastCurrentId;
@@ -435,6 +442,7 @@ private:
     ListenerList<Listener> listeners;
     ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
+    EditableState labelEditableState;
 
     ItemInfo* getItemForId (int) const noexcept;
     ItemInfo* getItemForIndex (int) const noexcept;

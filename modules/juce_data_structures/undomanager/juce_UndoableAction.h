@@ -90,7 +90,7 @@ public:
         If possible, this method should create and return a single action that does the same job as
         this one followed by the supplied action.
 
-        If it's not possible to merge the two actions, the method should return zero.
+        If it's not possible to merge the two actions, the method should return a nullptr.
     */
     virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { ignoreUnused (nextAction); return nullptr; }
 };

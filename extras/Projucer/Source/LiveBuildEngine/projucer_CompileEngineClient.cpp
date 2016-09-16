@@ -89,9 +89,15 @@ namespace ProjectProperties
 
     static File getCacheLocation (Project& project)
     {
+        String cacheFolderName = project.getProjectFilenameRoot() + "_" + project.getProjectUID();
+
+       #if JUCE_DEBUG
+        cacheFolderName += "_debug";
+       #endif
+
         return getProjucerTempFolder()
                 .getChildFile ("Intermediate Files")
-                .getChildFile (project.getProjectFilenameRoot() + "_" + project.getProjectUID());
+                .getChildFile (cacheFolderName);
     }
 }
 
@@ -481,7 +487,6 @@ private:
 
         if (project.getProjectType().isAudioPlugin())
         {
-            paths.add (getAppSettings().getGlobalPath (Ids::vst2Path, TargetOS::getThisOS()).toString());
             paths.add (getAppSettings().getGlobalPath (Ids::vst3Path, TargetOS::getThisOS()).toString());
         }
 

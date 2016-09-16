@@ -82,7 +82,7 @@ struct SourceCodeRange
     String toString() const
     {
         if (file.isEmpty() && range.isEmpty())
-            return String::empty;
+            return String();
 
         return file + ":" + String (range.getStart()) + ":" + String (range.getEnd());
     }

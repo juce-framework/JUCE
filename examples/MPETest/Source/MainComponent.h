@@ -41,8 +41,8 @@ public:
     {
         setLookAndFeel (&lookAndFeel);
         setSize (880, 720);
-        audioDeviceManager.initialise (0, 2, 0, true, String::empty, 0);
-        audioDeviceManager.addMidiInputCallback(String::empty, this);
+        audioDeviceManager.initialise (0, 2, 0, true, String(), 0);
+        audioDeviceManager.addMidiInputCallback (String(), this);
         audioDeviceManager.addAudioCallback (this);
 
         addAndMakeVisible (audioSetupComp);
@@ -65,7 +65,7 @@ public:
 
     ~MainComponent()
     {
-        audioDeviceManager.removeMidiInputCallback (String::empty, this);
+        audioDeviceManager.removeMidiInputCallback (String(), this);
     }
 
     //==============================================================================

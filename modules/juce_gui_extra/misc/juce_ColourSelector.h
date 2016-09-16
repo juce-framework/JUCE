@@ -80,7 +80,7 @@ public:
     Colour getCurrentColour() const;
 
     /** Changes the colour that is currently being shown. */
-    void setCurrentColour (Colour newColour);
+    void setCurrentColour (Colour newColour, NotificationType notificationType = sendNotification);
 
     //==============================================================================
     /** Tells the selector how many preset colour swatches you want to have on the component.
@@ -153,7 +153,7 @@ private:
     void setHue (float newH);
     void setSV (float newS, float newV);
     void updateHSV();
-    void update();
+    void update (NotificationType);
     void sliderValueChanged (Slider*) override;
     void paint (Graphics&) override;
     void resized() override;

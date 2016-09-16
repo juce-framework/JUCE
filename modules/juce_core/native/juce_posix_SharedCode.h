@@ -440,6 +440,11 @@ bool File::moveInternal (const File& dest) const
     return false;
 }
 
+bool File::replaceInternal (const File& dest) const
+{
+    return moveInternal (dest);
+}
+
 Result File::createDirectoryInternal (const String& fileName) const
 {
     return getResultForReturnValue (mkdir (fileName.toUTF8(), 0777));
@@ -586,7 +591,7 @@ String SystemStats::getEnvironmentVariable (const String& name, const String& de
 }
 
 //==============================================================================
-void MemoryMappedFile::openInternal (const File& file, AccessMode mode)
+void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exclusive)
 {
     jassert (mode == readOnly || mode == readWrite);
 
@@ -603,7 +608,7 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode)
     {
         void* m = mmap (0, (size_t) range.getLength(),
                         mode == readWrite ? (PROT_READ | PROT_WRITE) : PROT_READ,
-                        MAP_SHARED, fileHandle,
+                        exclusive ? MAP_PRIVATE : MAP_SHARED, fileHandle,
                         (off_t) range.getStart());
 
         if (m != MAP_FAILED)

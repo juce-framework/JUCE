@@ -188,7 +188,7 @@ void QuickTimeMovieComponent::closeMovie()
     [view setMovie: nil];
     [theMovie release];
     movie = 0;
-    movieFile = File::nonexistent;
+    movieFile = File();
 }
 
 bool QuickTimeMovieComponent::isMovieOpen() const

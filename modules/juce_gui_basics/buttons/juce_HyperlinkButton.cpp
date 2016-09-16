@@ -35,7 +35,7 @@ HyperlinkButton::HyperlinkButton (const String& linkText,
 }
 
 HyperlinkButton::HyperlinkButton()
-   : Button (String::empty),
+   : Button (String()),
      font (14.0f, Font::underlined),
      resizeFont (true),
      justification (Justification::centred)

@@ -27,25 +27,24 @@
 //==============================================================================
 namespace MouseCursorHelpers
 {
-    NSImage* createNSImage (const Image&);
-    NSImage* createNSImage (const Image& image)
+    NSImage* createNSImage (const Image&, float scaleFactor = 1.f);
+    NSImage* createNSImage (const Image& image, float scaleFactor)
     {
         JUCE_AUTORELEASEPOOL
         {
             NSImage* im = [[NSImage alloc] init];
-            [im setSize: NSMakeSize (image.getWidth(), image.getHeight())];
-            [im lockFocus];
+            const NSSize requiredSize = NSMakeSize (image.getWidth() / scaleFactor, image.getHeight() / scaleFactor);
 
+            [im setSize: requiredSize];
             CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-            CGImageRef imageRef = juce_createCoreGraphicsImage (image, colourSpace, false);
+            CGImageRef imageRef = juce_createCoreGraphicsImage (image, colourSpace, true);
             CGColorSpaceRelease (colourSpace);
 
-            CGContextRef cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
-            CGContextDrawImage (cg, convertToCGRect (image.getBounds()), imageRef);
-
+            NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
+            [imageRep setSize: requiredSize];
+            [im addRepresentation: imageRep];
+            [imageRep release];
             CGImageRelease (imageRef);
-            [im unlockFocus];
-
             return im;
         }
     }
@@ -92,6 +91,8 @@ namespace MouseCursorHelpers
                 }
             }
 
+            [originalImage release];
+
             NSDictionary* info = [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (cursorPath + "/info.plist")];
 
             const float hotspotX = (float) [[info valueForKey: nsStringLiteral ("hotx")] doubleValue];
@@ -104,7 +105,7 @@ namespace MouseCursorHelpers
 
 void* CustomMouseCursorInfo::create() const
 {
-    return MouseCursorHelpers::fromNSImage (MouseCursorHelpers::createNSImage (image),
+    return MouseCursorHelpers::fromNSImage (MouseCursorHelpers::createNSImage (image, scaleFactor),
                                             NSMakePoint (hotspot.x, hotspot.y));
 }
 

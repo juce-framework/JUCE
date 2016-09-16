@@ -76,7 +76,7 @@ class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox  : public 
 {
 public:
     MidiInputSelectorComponentListBox (AudioDeviceManager& dm, const String& noItems)
-        : ListBox (String::empty, nullptr),
+        : ListBox (String(), nullptr),
           deviceManager (dm),
           noItemsMessage (noItems)
     {
@@ -340,11 +340,11 @@ public:
               || comboBoxThatHasChanged == inputDeviceDropDown)
         {
             if (outputDeviceDropDown != nullptr)
-                config.outputDeviceName = outputDeviceDropDown->getSelectedId() < 0 ? String::empty
+                config.outputDeviceName = outputDeviceDropDown->getSelectedId() < 0 ? String()
                                                                                     : outputDeviceDropDown->getText();
 
             if (inputDeviceDropDown != nullptr)
-                config.inputDeviceName = inputDeviceDropDown->getSelectedId() < 0 ? String::empty
+                config.inputDeviceName = inputDeviceDropDown->getSelectedId() < 0 ? String()
                                                                                   : inputDeviceDropDown->getText();
 
             if (! type.hasSeparateInputsAndOutputs())
@@ -390,7 +390,7 @@ public:
     {
         if (AudioIODevice* const device = setup.manager->getCurrentAudioDevice())
         {
-            Component modalWindow (String::empty);
+            Component modalWindow;
             modalWindow.setOpaque (true);
             modalWindow.addToDesktop (0);
             modalWindow.enterModalState();
@@ -445,7 +445,7 @@ public:
                     addAndMakeVisible (outputChanList
                         = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioOutputType,
                                                       TRANS ("(no audio output channels found)")));
-                    outputChanLabel = new Label (String::empty, TRANS("Active output channels:"));
+                    outputChanLabel = new Label (String(), TRANS("Active output channels:"));
                     outputChanLabel->setJustificationType (Justification::centredRight);
                     outputChanLabel->attachToComponent (outputChanList, true);
                 }
@@ -466,7 +466,7 @@ public:
                     addAndMakeVisible (inputChanList
                         = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioInputType,
                                                       TRANS("(no audio input channels found)")));
-                    inputChanLabel = new Label (String::empty, TRANS("Active input channels:"));
+                    inputChanLabel = new Label (String(), TRANS("Active input channels:"));
                     inputChanLabel->setJustificationType (Justification::centredRight);
                     inputChanLabel->attachToComponent (inputChanList, true);
                 }
@@ -605,11 +605,11 @@ private:
         {
             if (outputDeviceDropDown == nullptr)
             {
-                outputDeviceDropDown = new ComboBox (String::empty);
+                outputDeviceDropDown = new ComboBox (String());
                 outputDeviceDropDown->addListener (this);
                 addAndMakeVisible (outputDeviceDropDown);
 
-                outputDeviceLabel = new Label (String::empty,
+                outputDeviceLabel = new Label (String(),
                                                type.hasSeparateInputsAndOutputs() ? TRANS("Output:")
                                                                                   : TRANS("Device:"));
                 outputDeviceLabel->attachToComponent (outputDeviceDropDown, true);
@@ -634,11 +634,11 @@ private:
         {
             if (inputDeviceDropDown == nullptr)
             {
-                inputDeviceDropDown = new ComboBox (String::empty);
+                inputDeviceDropDown = new ComboBox (String());
                 inputDeviceDropDown->addListener (this);
                 addAndMakeVisible (inputDeviceDropDown);
 
-                inputDeviceLabel = new Label (String::empty, TRANS("Input:"));
+                inputDeviceLabel = new Label (String(), TRANS("Input:"));
                 inputDeviceLabel->attachToComponent (inputDeviceDropDown, true);
 
                 addAndMakeVisible (inputLevelMeter
@@ -655,9 +655,9 @@ private:
     {
         if (sampleRateDropDown == nullptr)
         {
-            addAndMakeVisible (sampleRateDropDown = new ComboBox (String::empty));
+            addAndMakeVisible (sampleRateDropDown = new ComboBox (String()));
 
-            sampleRateLabel = new Label (String::empty, TRANS("Sample rate:"));
+            sampleRateLabel = new Label (String(), TRANS("Sample rate:"));
             sampleRateLabel->attachToComponent (sampleRateDropDown, true);
         }
         else
@@ -682,9 +682,9 @@ private:
     {
         if (bufferSizeDropDown == nullptr)
         {
-            addAndMakeVisible (bufferSizeDropDown = new ComboBox (String::empty));
+            addAndMakeVisible (bufferSizeDropDown = new ComboBox (String()));
 
-            bufferSizeLabel = new Label (String::empty, TRANS("Audio buffer size:"));
+            bufferSizeLabel = new Label (String(), TRANS("Audio buffer size:"));
             bufferSizeLabel->attachToComponent (bufferSizeDropDown, true);
         }
         else
@@ -724,7 +724,7 @@ public:
         //==============================================================================
         ChannelSelectorListBox (const AudioDeviceSetupDetails& setupDetails,
                                 const BoxType boxType, const String& noItemsText)
-            : ListBox (String::empty, nullptr),
+            : ListBox (String(), nullptr),
               setup (setupDetails), type (boxType), noItemsMessage (noItemsText)
         {
             refresh();
@@ -993,7 +993,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 
     if (types.size() > 1)
     {
-        deviceTypeDropDown = new ComboBox (String::empty);
+        deviceTypeDropDown = new ComboBox (String());
 
         for (int i = 0; i < types.size(); ++i)
             deviceTypeDropDown->addItem (types.getUnchecked(i)->getTypeName(), i + 1);
@@ -1001,7 +1001,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         addAndMakeVisible (deviceTypeDropDown);
         deviceTypeDropDown->addListener (this);
 
-        deviceTypeDropDownLabel = new Label (String::empty, TRANS("Audio device type:"));
+        deviceTypeDropDownLabel = new Label (String(), TRANS("Audio device type:"));
         deviceTypeDropDownLabel->setJustificationType (Justification::centredRight);
         deviceTypeDropDownLabel->attachToComponent (deviceTypeDropDown, true);
     }
@@ -1012,7 +1012,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
                             = new MidiInputSelectorComponentListBox (deviceManager,
                                                                      "(" + TRANS("No MIDI inputs available") + ")"));
 
-        midiInputsLabel = new Label (String::empty, TRANS ("Active MIDI inputs:"));
+        midiInputsLabel = new Label (String(), TRANS ("Active MIDI inputs:"));
         midiInputsLabel->setJustificationType (Justification::topRight);
         midiInputsLabel->attachToComponent (midiInputsList, true);
 
@@ -1032,7 +1032,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 
     if (showMidiOutputSelector)
     {
-        addAndMakeVisible (midiOutputSelector = new ComboBox (String::empty));
+        addAndMakeVisible (midiOutputSelector = new ComboBox (String()));
         midiOutputSelector->addListener (this);
 
         midiOutputLabel = new Label ("lm", TRANS("MIDI Output:"));

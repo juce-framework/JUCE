@@ -55,11 +55,9 @@ namespace Ids
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (modulePaths);
     DECLARE_ID (searchpaths);
-    DECLARE_ID (vstFolder);
     DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
-    DECLARE_ID (vst2Path);
     DECLARE_ID (vst3Path);
     DECLARE_ID (rtasPath);
     DECLARE_ID (aaxPath);
@@ -114,6 +112,7 @@ namespace Ids
     DECLARE_ID (jucerVersion);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
+    DECLARE_ID (internalPostBuildComamnd);
     DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (wholeProgramOptimisation);
@@ -177,6 +176,7 @@ namespace Ids
     DECLARE_ID (gradleWrapperVersion);
     DECLARE_ID (gradleToolchain);
     DECLARE_ID (gradleToolchainVersion);
+    DECLARE_ID (linuxExtraPkgConfig);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

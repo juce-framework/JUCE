@@ -236,7 +236,7 @@ Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
 
 String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS os)
 {
-    if (key == Ids::vst2Path || key == Ids::vst3Path)
+    if (key == Ids::vst3Path)
         return os == TargetOS::windows ? "c:\\SDKs\\VST3 SDK"
                                        : "~/SDKs/VST3 SDK";
 
@@ -275,11 +275,7 @@ bool StoredSettings::isGlobalPathValid (const Identifier& key, const String& pat
 {
     String fileToCheckFor;
 
-    if (key == Ids::vst2Path)
-    {
-        fileToCheckFor = "public.sdk/source/vst2.x/audioeffectx.h";
-    }
-    else if (key == Ids::vst3Path)
+    if (key == Ids::vst3Path)
     {
         fileToCheckFor = "base/source/baseiids.cpp";
     }

@@ -29,7 +29,7 @@ namespace
 {
     const char* const osxVersionDefault         = "default";
     const int oldestSDKVersion  = 5;
-    const int currentSDKVersion = 11;
+    const int currentSDKVersion = 12;
 
     const char* const osxArch_Default           = "default";
     const char* const osxArch_Native            = "Native";
@@ -124,7 +124,7 @@ public:
     bool isOSX() const override                      { return ! iOS; }
     bool isiOS() const override                      { return iOS; }
 
-    bool supportsVST() const override                { return true; }
+    bool supportsVST() const override                { return ! iOS; }
     bool supportsVST3() const override               { return ! iOS; }
     bool supportsAAX() const override                { return ! iOS; }
     bool supportsRTAS() const override               { return ! iOS; }
@@ -374,8 +374,8 @@ protected:
 
             if (iOS)
             {
-                const char* iosVersions[]      = { "Use Default",     "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", 0 };
-                const char* iosVersionValues[] = { osxVersionDefault, "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", 0 };
+                const char* iosVersions[]      = { "Use Default",     "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", 0 };
+                const char* iosVersionValues[] = { osxVersionDefault, "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", 0 };
 
                 props.add (new ChoicePropertyComponent (iosDeploymentTarget.getPropertyAsValue(), "iOS Deployment Target",
                                                         StringArray (iosVersions), Array<var> (iosVersionValues)),
@@ -550,7 +550,7 @@ public:
                     xcodeIsExecutable = true;
                     xcodeCreatePList = false;
                     xcodeFileType = "compiled.mach-o.executable";
-                    xcodeBundleExtension = String::empty;
+                    xcodeBundleExtension = String();
                     xcodeProductType = "com.apple.product-type.tool";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
@@ -957,11 +957,16 @@ public:
                 const String sdk (config.osxSDKVersion.get());
                 const String sdkCompat (config.osxDeploymentTarget.get());
 
+                // if the user doesn't set it, then use the last known version that works well with JUCE
+                String deploymentTarget = "10.11";
+
                 for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
                 {
                     if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
-                    if (sdkCompat == getSDKName (ver))   s.add ("MACOSX_DEPLOYMENT_TARGET = 10." + String (ver));
+                    if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
                 }
+
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + deploymentTarget);
 
                 s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
                 s.add ("SDKROOT_ppc = macosx10.5");
@@ -1093,7 +1098,7 @@ public:
         void getLinkerSettings (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths) const
         {
             if (xcodeIsBundle)
-                flags.add ("-bundle");
+                flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
             const Array<RelativePath>& extraLibs = config.isDebug() ? xcodeExtraLibrariesDebug
                                                                     : xcodeExtraLibrariesRelease;
@@ -1947,6 +1952,8 @@ private:
             const String iosVersion (config.iosDeploymentTarget.get());
             if (iosVersion.isNotEmpty() && iosVersion != osxVersionDefault)
                 s.add ("IPHONEOS_DEPLOYMENT_TARGET = " + iosVersion);
+            else
+                s.add ("IPHONEOS_DEPLOYMENT_TARGET = 9.3");
         }
         else
         {
@@ -2706,7 +2713,6 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),  Ids::vst2Path, TargetOS::osx)));
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
         aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
         rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));

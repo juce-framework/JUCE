@@ -109,8 +109,7 @@ public:
     void closeMovie();
 
     /** Returns the movie file that is currently open.
-
-        If there isn't one, this returns File::nonexistent
+        If there isn't one, this returns File()
     */
     File getCurrentMovieFile() const;
 

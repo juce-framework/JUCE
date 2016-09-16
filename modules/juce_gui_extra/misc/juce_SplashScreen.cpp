@@ -31,25 +31,40 @@ SplashScreen::SplashScreen (const String& title, const Image& image, bool useDro
     jassert (backgroundImage.isValid());
 
     setOpaque (! backgroundImage.hasAlphaChannel());
-    makeVisible (image.getWidth(), image.getHeight(), useDropShadow);
+
+   #if JUCE_IOS || JUCE_ANDROID
+    const bool useFullScreen = true;
+   #else
+    const bool useFullScreen = false;
+   #endif
+
+    makeVisible (image.getWidth(), image.getHeight(), useDropShadow, useFullScreen);
 }
 
 SplashScreen::SplashScreen (const String& title, int width, int height, bool useDropShadow)
     : Component (title),
       clickCountToDelete (0)
 {
-    makeVisible (width, height, useDropShadow);
+    makeVisible (width, height, useDropShadow, false);
 }
 
-void SplashScreen::makeVisible (int w, int h, bool useDropShadow)
+void SplashScreen::makeVisible (int w, int h, bool useDropShadow, bool fullscreen)
 {
     clickCountToDelete = Desktop::getInstance().getMouseButtonClickCounter();
     creationTime = Time::getCurrentTime();
 
+    const Rectangle<int> screenSize = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+    const int width  = (fullscreen ? screenSize.getWidth()   : w);
+    const int height = (fullscreen ? screenSize.getHeight()  : h);
+
     setAlwaysOnTop (true);
     setVisible (true);
-    centreWithSize (w, h);
+    centreWithSize (width, height);
     addToDesktop (useDropShadow ? ComponentPeer::windowHasDropShadow : 0);
+
+    if (fullscreen)
+        getPeer()->setFullScreen (true);
+
     toFront (false);
 }
 
@@ -69,10 +84,7 @@ void SplashScreen::deleteAfterDelay (RelativeTime timeout, bool removeOnMouseCli
 void SplashScreen::paint (Graphics& g)
 {
     g.setOpacity (1.0f);
-
-    g.drawImage (backgroundImage,
-                 0, 0, getWidth(), getHeight(),
-                 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+    g.drawImage (backgroundImage, getLocalBounds().toFloat(), RectanglePlacement (RectanglePlacement::fillDestination));
 }
 
 void SplashScreen::timerCallback()

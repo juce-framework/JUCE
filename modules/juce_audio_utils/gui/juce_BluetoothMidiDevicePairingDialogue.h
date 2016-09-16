@@ -42,7 +42,7 @@
     supported.
 */
 
-class BluetoothMidiDevicePairingDialogue
+class JUCE_API BluetoothMidiDevicePairingDialogue
 {
 public:
 

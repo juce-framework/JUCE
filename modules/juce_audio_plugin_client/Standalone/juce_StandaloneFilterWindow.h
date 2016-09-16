@@ -34,6 +34,9 @@
     computer's audio/MIDI devices using AudioDeviceManager and AudioProcessorPlayer.
 */
 class StandalonePluginHolder
+   #if JUCE_IOS || JUCE_ANDROID
+    : private Timer
+   #endif
 {
 public:
     /** Creates an instance of the default plugin.
@@ -61,10 +64,18 @@ public:
         setupAudioDevices (preferredDefaultDeviceName, preferredSetupOptions);
         reloadPluginState();
         startPlaying();
+
+       #if JUCE_IOS || JUCE_ANDROID
+        startTimer (500);
+       #endif
     }
 
     virtual ~StandalonePluginHolder()
     {
+       #if JUCE_IOS || JUCE_ANDROID
+        stopTimer();
+       #endif
+
         deletePlugin();
         shutDownAudioDevices();
     }
@@ -118,7 +129,7 @@ public:
         if (settings != nullptr)
             f = File (settings->getValue ("lastStateFile"));
 
-        if (f == File::nonexistent)
+        if (f == File())
             f = File::getSpecialLocation (File::userDocumentsDirectory);
 
         return f;
@@ -133,6 +144,7 @@ public:
     /** Pops up a dialog letting the user save the processor's state to a file. */
     void askUserToSaveState (const String& fileSuffix = String())
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         FileChooser fc (TRANS("Save current state"), getLastFile(), getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToSave (true))
@@ -147,11 +159,15 @@ public:
                                                   TRANS("Error whilst saving"),
                                                   TRANS("Couldn't write to the specified file!"));
         }
+       #else
+        ignoreUnused (fileSuffix);
+       #endif
     }
 
     /** Pops up a dialog letting the user re-load the processor's state from a file. */
     void askUserToLoadState (const String& fileSuffix = String())
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         FileChooser fc (TRANS("Load a saved state"), getLastFile(), getFilePatterns (fileSuffix));
 
         if (fc.browseForFileToOpen())
@@ -167,6 +183,9 @@ public:
                                                   TRANS("Error whilst loading"),
                                                   TRANS("Couldn't read from the specified file!"));
         }
+       #else
+        ignoreUnused (fileSuffix);
+       #endif
     }
 
     //==============================================================================
@@ -257,6 +276,10 @@ public:
     AudioDeviceManager deviceManager;
     AudioProcessorPlayer player;
 
+   #if JUCE_IOS || JUCE_ANDROID
+    StringArray lastMidiDevices;
+   #endif
+
 private:
     void setupAudioDevices (const String& preferredDefaultDeviceName,
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
@@ -274,6 +297,43 @@ private:
         deviceManager.removeMidiInputCallback (String(), &player);
         deviceManager.removeAudioCallback (&player);
     }
+
+   #if JUCE_IOS || JUCE_ANDROID
+    void timerCallback() override
+    {
+        StringArray midiInputDevices = MidiInput::getDevices();
+        if (midiInputDevices != lastMidiDevices)
+        {
+            {
+                const int n = lastMidiDevices.size();
+                for (int i = 0; i < n; ++i)
+                {
+                    const String& oldDevice = lastMidiDevices[i];
+
+                    if (! midiInputDevices.contains (oldDevice))
+                    {
+                        deviceManager.setMidiInputEnabled (oldDevice, false);
+                        deviceManager.removeMidiInputCallback (oldDevice, &player);
+                    }
+                }
+            }
+
+            {
+                const int n = midiInputDevices.size();
+                for (int i = 0; i < n; ++i)
+                {
+                    const String& newDevice = midiInputDevices[i];
+
+                    if (! lastMidiDevices.contains (newDevice))
+                    {
+                        deviceManager.addMidiInputCallback (newDevice, &player);
+                        deviceManager.setMidiInputEnabled (newDevice, true);
+                    }
+                }
+            }
+        }
+    }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandalonePluginHolder)
 };

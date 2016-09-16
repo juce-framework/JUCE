@@ -95,7 +95,7 @@ String TableHeaderComponent::getColumnName (const int columnId) const
     if (const ColumnInfo* const ci = getInfoForId (columnId))
         return ci->name;
 
-    return String::empty;
+    return String();
 }
 
 void TableHeaderComponent::setColumnName (const int columnId, const String& newName)

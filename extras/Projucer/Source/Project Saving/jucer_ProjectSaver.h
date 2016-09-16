@@ -104,6 +104,8 @@ public:
             return Result::fail (errors[0]);
         }
 
+        project.updateModificationTime();
+
         return Result::ok();
     }
 
@@ -285,7 +287,7 @@ private:
         if (xml != nullptr)
         {
             MemoryOutputStream mo;
-            xml->writeToStream (mo, String::empty);
+            xml->writeToStream (mo, String());
             replaceFileIfDifferent (projectFile, mo);
         }
     }
@@ -322,9 +324,9 @@ private:
 
         if (! foundCodeSection)
         {
-            userContent.add (String::empty);
+            userContent.add (String());
             userContent.add ("// (You can add your own code in this section, and the Projucer will not overwrite it)");
-            userContent.add (String::empty);
+            userContent.add (String());
         }
 
         return userContent.joinIntoString (newLine) + newLine;
@@ -432,8 +434,11 @@ private:
                         out << " #define   " << f->symbol << " 1";
                     else if (value == Project::configFlagDisabled)
                         out << " #define   " << f->symbol << " 0";
-                    else
+                    else if (f->defaultValue.isEmpty())
                         out << " //#define " << f->symbol;
+                    else
+                        out << " #define " << f->symbol << " " << f->defaultValue;
+
 
                     out << newLine
                         << "#endif" << newLine

@@ -31,6 +31,7 @@ DrawableRectangle::DrawableRectangle (const DrawableRectangle& other)
       bounds (other.bounds),
       cornerSize (other.cornerSize)
 {
+    rebuildPath();
 }
 
 DrawableRectangle::~DrawableRectangle()
