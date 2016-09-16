@@ -91,6 +91,8 @@ namespace MouseCursorHelpers
                 }
             }
 
+            [originalImage release];
+
             NSDictionary* info = [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (cursorPath + "/info.plist")];
 
             const float hotspotX = (float) [[info valueForKey: nsStringLiteral ("hotx")] doubleValue];
