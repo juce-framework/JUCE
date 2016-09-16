@@ -38,7 +38,9 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     message->incReferenceCount();
+    DBG ("about to postMessageToSystemQueue: " << String ((pointer_sized_uint) message));
     android.bridge.callVoidMethod (JuceBridge.postMessage, (jlong) (pointer_sized_uint) message);
+    DBG ("postMessage called: " << String ((pointer_sized_uint) message));
     return true;
 }
 
