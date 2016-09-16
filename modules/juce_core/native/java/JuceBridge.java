@@ -630,7 +630,7 @@ public class JuceBridge
     private MidiDeviceManager midiDeviceManager = null;
     private BluetoothManager bluetoothManager = null;
 
-    public JuceViewHolder createViewForComponent (String componentName, Context c)
+    public JuceViewHolder getViewForComponent (String componentName, Context c)
     {
         JuceViewHolder juceViewHolder;
         // Check if view exists in map before creating new
@@ -643,9 +643,9 @@ public class JuceBridge
         return juceViewHolder;
     }
 
-    public JuceViewHolder createViewForDefaultComponent (Context c)
+    public JuceViewHolder getViewForDefaultComponent (Context c)
     {
-        return createViewForComponent(null, c);
+        return getViewForComponent(null, c);
     }
 
     public JuceViewHolder newViewHolder (Context c)
