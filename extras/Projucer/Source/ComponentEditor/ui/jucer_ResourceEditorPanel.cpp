@@ -84,7 +84,7 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
     delButton.addListener (this);
     delButton.setEnabled (false);
 
-    addAndMakeVisible (listBox = new TableListBox (String::empty, this));
+    addAndMakeVisible (listBox = new TableListBox (String(), this));
     listBox->getHeader().addColumn ("name", 1, 150, 80, 400);
     listBox->getHeader().addColumn ("original file", 2, 350, 80, 800);
     listBox->getHeader().addColumn ("size", 3, 100, 40, 150);
@@ -247,8 +247,8 @@ void ResourceEditorPanel::buttonClicked (Button* b)
         document.getResources()
             .browseForResource ("Select a file to add as a resource",
                                 "*",
-                                File::nonexistent,
-                                String::empty);
+                                File(),
+                                String());
     }
     else if (b == &delButton)
     {

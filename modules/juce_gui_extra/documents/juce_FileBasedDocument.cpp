@@ -142,7 +142,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                                          const bool askUserForFileIfNotSpecified,
                                                          const bool showMessageOnFailure)
 {
-    if (newFile == File::nonexistent)
+    if (newFile == File())
     {
         if (askUserForFileIfNotSpecified)
             return saveAsInteractive (true);

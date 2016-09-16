@@ -39,7 +39,7 @@ public:
                                const String& propertyDescription,
                                bool isDirectory,
                                const String& wildcards = "*",
-                               const File& rootToUseForRelativePaths = File::nonexistent)
+                               const File& rootToUseForRelativePaths = File())
         : PropertyComponent (propertyDescription),
           innerComp (valueToControl, isDirectory, wildcards, rootToUseForRelativePaths)
     {
@@ -122,8 +122,8 @@ private:
 
         void setTo (const File& f)
         {
-            value = (root == File::nonexistent) ? f.getFullPathName()
-                                                : f.getRelativePathFrom (root);
+            value = (root == File()) ? f.getFullPathName()
+                                     : f.getRelativePathFrom (root);
         }
 
         Value value;

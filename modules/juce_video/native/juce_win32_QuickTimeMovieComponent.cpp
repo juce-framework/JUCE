@@ -101,7 +101,7 @@ void QuickTimeMovieComponent::createControlIfNeeded()
                 pimpl->qtControl->QuickTimeInitialize();
                 pimpl->qtControl->PutSizing (qtMovieFitsControl);
 
-                if (movieFile != File::nonexistent)
+                if (movieFile != File())
                     loadMovie (movieFile, controllerVisible);
             }
         }
@@ -118,7 +118,7 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
 {
     const ScopedPointer<InputStream> movieStreamDeleter (movieStream);
 
-    movieFile = File::nonexistent;
+    movieFile = File();
     movieLoaded = false;
     pimpl->qtMovie = 0;
     controllerVisible = isControllerVisible;
@@ -162,7 +162,7 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
 void QuickTimeMovieComponent::closeMovie()
 {
     stop();
-    movieFile = File::nonexistent;
+    movieFile = File();
     movieLoaded = false;
     pimpl->qtMovie = 0;
 

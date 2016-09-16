@@ -715,7 +715,7 @@ void ComponentLayout::fillInGeneratedCode (GeneratedCode& code) const
 String ComponentLayout::getComponentMemberVariableName (Component* comp) const
 {
     if (comp == nullptr)
-        return String::empty;
+        return String();
 
     String name (comp->getProperties() ["memberName"].toString());
 
@@ -730,7 +730,7 @@ void ComponentLayout::setComponentMemberVariableName (Component* comp, const Str
     jassert (comp != nullptr);
     const String oldName (getComponentMemberVariableName (comp));
 
-    comp->getProperties().set ("memberName", String::empty);
+    comp->getProperties().set ("memberName", String());
 
     const String n (getUnusedMemberName (CodeHelpers::makeValidIdentifier (newName, false, true, false), comp));
     comp->getProperties().set ("memberName", n);
@@ -775,7 +775,7 @@ String ComponentLayout::getUnusedMemberName (String nameRoot, Component* comp) c
 String ComponentLayout::getComponentVirtualClassName (Component* comp) const
 {
     if (comp == nullptr)
-        return String::empty;
+        return String();
 
     return comp->getProperties() ["virtualName"];
 }

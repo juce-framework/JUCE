@@ -1231,15 +1231,13 @@ void Project::createExporterForCurrentPlatform()
 String Project::getFileTemplate (const String& templateName)
 {
     int dataSize;
-    const char* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize);
 
-    if (data == nullptr)
-    {
-        jassertfalse;
-        return String::empty;
-    }
+    if (const char* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize))
+        return String::fromUTF8 (data, dataSize);
 
-    return String::fromUTF8 (data, dataSize);
+    jassertfalse;
+    return String();
+
 }
 
 //==============================================================================

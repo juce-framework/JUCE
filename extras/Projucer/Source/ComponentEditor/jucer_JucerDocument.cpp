@@ -173,7 +173,7 @@ void JucerDocument::setParentClasses (const String& classes)
                 s = s.fromFirstOccurrenceOf (" ", false, false);
 
                 if (s.trim().isEmpty())
-                    type = s = String::empty;
+                    type = s = String();
             }
 
             s = type + CodeHelpers::makeValidIdentifier (s.trim(), false, false, true);
@@ -378,11 +378,11 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
          && getTypeName().equalsIgnoreCase (xml.getStringAttribute ("documentType")))
     {
         className = xml.getStringAttribute ("className", defaultClassName);
-        templateFile = xml.getStringAttribute ("template", String::empty);
-        componentName = xml.getStringAttribute ("componentName", String::empty);
+        templateFile = xml.getStringAttribute ("template", String());
+        componentName = xml.getStringAttribute ("componentName", String());
         parentClasses = xml.getStringAttribute ("parentClasses", defaultParentClasses);
-        constructorParams = xml.getStringAttribute ("constructorParams", String::empty);
-        variableInitialisers = xml.getStringAttribute ("variableInitialisers", String::empty);
+        constructorParams = xml.getStringAttribute ("constructorParams", String());
+        variableInitialisers = xml.getStringAttribute ("variableInitialisers", String());
 
         fixedSize = xml.getBoolAttribute ("fixedSize", false);
         initialWidth = xml.getIntAttribute ("initialWidth", 300);
@@ -425,10 +425,10 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
         code.constructorCode << "setName (" + quotedString (componentName, false) + ");\n";
 
     // call these now, just to make sure they're the first two methods in the list.
-    code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
+    code.getCallbackCode (String(), "void", "paint (Graphics& g)", false)
         << "//[UserPrePaint] Add your own custom painting code here..\n//[/UserPrePaint]\n\n";
 
-    code.getCallbackCode (String::empty, "void", "resized()", false)
+    code.getCallbackCode (String(), "void", "resized()", false)
         << "//[UserPreResize] Add your own custom resize code here..\n//[/UserPreResize]\n\n";
 
     if (ComponentLayout* l = getComponentLayout())
@@ -449,10 +449,10 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     if (initialWidth > 0 || initialHeight > 0)
         code.constructorCode << "\nsetSize (" << initialWidth << ", " << initialHeight << ");\n";
 
-    code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false)
+    code.getCallbackCode (String(), "void", "paint (Graphics& g)", false)
         << "//[UserPaint] Add your own custom painting code here..\n//[/UserPaint]";
 
-    code.getCallbackCode (String::empty, "void", "resized()", false)
+    code.getCallbackCode (String(), "void", "resized()", false)
         << "//[UserResized] Add your own custom resize handling here..\n//[/UserResized]";
 
     // add optional methods
@@ -491,7 +491,7 @@ void JucerDocument::fillInPaintCode (GeneratedCode& code) const
 {
     for (int i = 0; i < getNumPaintRoutines(); ++i)
         getPaintRoutine (i)
-            ->fillInGeneratedCode (code, code.getCallbackCode (String::empty, "void", "paint (Graphics& g)", false));
+            ->fillInGeneratedCode (code, code.getCallbackCode (String(), "void", "paint (Graphics& g)", false));
 }
 
 void JucerDocument::setTemplateFile (const String& newFile)

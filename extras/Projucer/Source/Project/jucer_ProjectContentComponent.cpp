@@ -637,7 +637,7 @@ bool ProjectContentComponent::hasFileInRecentList (const File& f) const
 File ProjectContentComponent::getCurrentFile() const
 {
     return currentDocument != nullptr ? currentDocument->getFile()
-                                      : File::nonexistent;
+                                      : File();
 }
 
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, bool grabFocus)
@@ -1174,7 +1174,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         break;
 
     case CommandIDs::deleteSelectedItem:
-        result.setInfo ("Delete Selected File", String::empty, CommandCategories::general, 0);
+        result.setInfo ("Delete Selected File", String(), CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
         result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
         result.setActive (dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()) != nullptr);

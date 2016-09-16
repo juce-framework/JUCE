@@ -414,7 +414,7 @@ protected:
 
     public:
         PositionPropLabel (PositionPropertyBase& owner_)
-            : Label (String::empty, String::empty),
+            : Label (String(), String()),
               owner (owner_)
         {
             setEditable (true, true, false);

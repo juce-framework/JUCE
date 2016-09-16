@@ -65,7 +65,7 @@ try : TextPropertyComponent (propertyName, 1024, false),
     // which has set the project value to whatever is displayed in the label (this may be the
     // global/fallback value). In this case we have to reset the project value to blank:
     if (initialValueIsEmpty)
-        getValue().setValue (String::empty);
+        getValue().setValue (String());
 
     getValue().addListener (this);
     setColour (textColourId, getTextColourToDisplay());
@@ -114,7 +114,7 @@ void DependencyPathPropertyComponent::labelTextChanged (Label*)
 void DependencyPathPropertyComponent::editorShown (Label* /*label*/, TextEditor& editor)
 {
     if (! pathValueSource.isUsingProjectSettings())
-        editor.setText (String::empty, dontSendNotification);
+        editor.setText (String(), dontSendNotification);
 }
 
 void DependencyPathPropertyComponent::editorHidden (Label*, TextEditor&)

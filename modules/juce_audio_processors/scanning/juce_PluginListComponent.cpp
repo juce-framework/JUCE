@@ -336,7 +336,7 @@ public:
              bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
              const String& title, const String& text)
         : owner (plc), formatToScan (format), propertiesToUse (properties),
-          pathChooserWindow (TRANS("Select folders to scan..."), String::empty, AlertWindow::NoIcon),
+          pathChooserWindow (TRANS("Select folders to scan..."), String(), AlertWindow::NoIcon),
           progressWindow (title, text, AlertWindow::NoIcon),
           progress (0.0), numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
           finished (false)
@@ -422,7 +422,7 @@ private:
                                                 + TRANS ("Are you sure you want to scan the folder \"XYZ\"?")
                                                    .replace ("XYZ", f.getFullPathName()),
                                               TRANS ("Scan"),
-                                              String::empty,
+                                              String(),
                                               nullptr,
                                               ModalCallbackFunction::create (warnAboutStupidPathsCallback, this));
                 return;

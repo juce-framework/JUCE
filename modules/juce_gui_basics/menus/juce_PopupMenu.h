@@ -242,7 +242,7 @@ public:
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
                          CommandID commandID,
-                         const String& displayName = String::empty,
+                         const String& displayName = String(),
                          Drawable* iconToUse = nullptr);
 
 

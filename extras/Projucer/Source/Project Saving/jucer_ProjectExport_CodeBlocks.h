@@ -188,7 +188,7 @@ private:
         if (isCodeBlocks() && isWindows())
         {
             defines.set ("__MINGW__", "1");
-            defines.set ("__MINGW_EXTENSION", String::empty);
+            defines.set ("__MINGW_EXTENSION", String());
         }
         else
         {

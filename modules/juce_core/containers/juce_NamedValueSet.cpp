@@ -85,12 +85,22 @@ bool NamedValueSet::isEmpty() const noexcept
     return values.isEmpty();
 }
 
+static const var& getNullVarRef() noexcept
+{
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    return var::null;
+   #else
+    static var nullVar;
+    return nullVar;
+   #endif
+}
+
 const var& NamedValueSet::operator[] (const Identifier& name) const noexcept
 {
     if (const var* v = getVarPointer (name))
         return *v;
 
-    return var::null;
+    return getNullVarRef();
 }
 
 var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultReturnValue) const
@@ -189,7 +199,7 @@ const var& NamedValueSet::getValueAt (const int index) const noexcept
         return values.getReference (index).value;
 
     jassertfalse;
-    return var::null;
+    return getNullVarRef();
 }
 
 var* NamedValueSet::getVarPointerAt (int index) const noexcept

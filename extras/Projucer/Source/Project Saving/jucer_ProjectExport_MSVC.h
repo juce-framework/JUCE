@@ -767,7 +767,7 @@ protected:
            << newLine
            << "#endif" << newLine;
 
-        if (iconFile != File::nonexistent)
+        if (iconFile != File())
            mo << newLine
               << "IDI_ICON1 ICON DISCARDABLE " << iconFile.getFileName().quoted()
               << newLine
@@ -862,7 +862,7 @@ public:
 
                 if (group.getID() == ProjectSaver::getGeneratedGroupID())
                 {
-                    if (iconFile != File::nonexistent)
+                    if (iconFile != File())
                     {
                         group.addFileAtIndex (iconFile, -1, true);
                         group.findItemForFile (iconFile).getShouldAddToBinaryResourcesValue() = false;
@@ -884,7 +884,7 @@ public:
 
         {
             MemoryOutputStream mo;
-            writeSolutionFile (mo, getSolutionVersionString(), String::empty, getVCProjFile());
+            writeSolutionFile (mo, getSolutionVersionString(), String(), getVCProjFile());
 
             overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
         }
@@ -1493,7 +1493,7 @@ protected:
                 {
                     XmlElement* targetName = props->createNewChildElement ("TargetName");
                     setConditionAttribute (*targetName, config);
-                    targetName->addTextElement (config.getOutputFilename (String::empty, true));
+                    targetName->addTextElement (config.getOutputFilename (String(), true));
                 }
 
                 {
@@ -1660,7 +1660,7 @@ protected:
             }
         }
 
-        if (iconFile != File::nonexistent)
+        if (iconFile != File())
         {
             XmlElement* e = otherFilesGroup->createNewChildElement ("None");
             e->setAttribute ("Include", prependDot (iconFile.getFileName()));
@@ -1694,7 +1694,7 @@ protected:
         if (projectType.isStaticLibrary())                                      return "StaticLibrary";
 
         jassertfalse;
-        return String::empty;
+        return String();
     }
 
     static const char* getOptimisationLevelString (int level)
@@ -1777,7 +1777,7 @@ protected:
 
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 addFilesToFilter (projectItem.getChild(i),
-                                  (path.isEmpty() ? String::empty : (path + "\\")) + projectItem.getChild(i).getName(),
+                                  (path.isEmpty() ? String() : (path + "\\")) + projectItem.getChild(i).getName(),
                                   cpps, headers, otherFiles, groups);
         }
         else if (projectItem.shouldBeAddedToTargetProject())

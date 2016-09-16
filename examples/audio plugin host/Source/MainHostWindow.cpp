@@ -387,12 +387,12 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
         break;
 
     case CommandIDs::showPluginListEditor:
-        result.setInfo ("Edit the list of available plug-Ins...", String::empty, category, 0);
+        result.setInfo ("Edit the list of available plug-Ins...", String(), category, 0);
         result.addDefaultKeypress ('p', ModifierKeys::commandModifier);
         break;
 
     case CommandIDs::showAudioSettings:
-        result.setInfo ("Change the audio device settings", String::empty, category, 0);
+        result.setInfo ("Change the audio device settings", String(), category, 0);
         result.addDefaultKeypress ('a', ModifierKeys::commandModifier);
         break;
 
@@ -401,7 +401,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
         break;
 
     case CommandIDs::aboutBox:
-        result.setInfo ("About...", String::empty, category, 0);
+        result.setInfo ("About...", String(), category, 0);
         break;
 
     case CommandIDs::allWindowsForward:
@@ -437,7 +437,7 @@ bool MainHostWindow::perform (const InvocationInfo& info)
 
     case CommandIDs::saveAs:
         if (graphEditor != nullptr && graphEditor->graph != nullptr)
-            graphEditor->graph->saveAs (File::nonexistent, true, true, true);
+            graphEditor->graph->saveAs (File(), true, true, true);
         break;
 
     case CommandIDs::showPluginListEditor:
@@ -577,6 +577,6 @@ bool MainHostWindow::isDoublePrecisionProcessing()
 
 void MainHostWindow::updatePrecisionMenuItem (ApplicationCommandInfo& info)
 {
-    info.setInfo ("Double floating point precision rendering", String::empty, "General", 0);
+    info.setInfo ("Double floating point precision rendering", String(), "General", 0);
     info.setTicked (isDoublePrecisionProcessing());
 }

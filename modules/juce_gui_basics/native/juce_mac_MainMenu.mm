@@ -39,7 +39,7 @@ public:
 
     ~JuceMainMenuHandler()
     {
-        setMenu (nullptr, nullptr, String::empty);
+        setMenu (nullptr, nullptr, String());
 
         jassert (instance == this);
         instance = nullptr;

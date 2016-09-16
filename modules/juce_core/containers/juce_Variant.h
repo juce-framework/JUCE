@@ -70,8 +70,10 @@ public:
     /** Destructor. */
     ~var() noexcept;
 
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
     /** A static var object that can be used where you need an empty variant object. */
     static const var null;
+   #endif
 
     var (const var& valueToCopy);
     var (int value) noexcept;

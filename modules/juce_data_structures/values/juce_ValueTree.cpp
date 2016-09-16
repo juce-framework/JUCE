@@ -627,7 +627,9 @@ ValueTree::ValueTree() noexcept
 {
 }
 
+#if JUCE_ALLOW_STATIC_NULL_VARIABLES
 const ValueTree ValueTree::invalid;
+#endif
 
 ValueTree::ValueTree (const Identifier& type)  : object (new ValueTree::SharedObject (type))
 {
@@ -721,20 +723,30 @@ ValueTree ValueTree::getParent() const noexcept
 ValueTree ValueTree::getSibling (const int delta) const noexcept
 {
     if (object == nullptr || object->parent == nullptr)
-        return invalid;
+        return ValueTree();
 
     const int index = object->parent->indexOf (*this) + delta;
     return ValueTree (object->parent->children.getObjectPointer (index));
 }
 
+static const var& getNullVarRef() noexcept
+{
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    return var::null;
+   #else
+    static var nullVar;
+    return nullVar;
+   #endif
+}
+
 const var& ValueTree::operator[] (const Identifier& name) const noexcept
 {
-    return object == nullptr ? var::null : object->properties[name];
+    return object == nullptr ? getNullVarRef() : object->properties[name];
 }
 
 const var& ValueTree::getProperty (const Identifier& name) const noexcept
 {
-    return object == nullptr ? var::null : object->properties[name];
+    return object == nullptr ? getNullVarRef() : object->properties[name];
 }
 
 var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValue) const

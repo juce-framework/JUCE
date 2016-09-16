@@ -60,7 +60,7 @@ public:
         @param counterName      the name used when printing out the statistics
         @param runsPerPrintout  the number of start/stop iterations before calling
                                 printStatistics()
-        @param loggingFile      a file to dump the results to - if this is File::nonexistent,
+        @param loggingFile      a file to dump the results to - if this is File(),
                                 the results are just written to the debugger output
     */
     PerformanceCounter (const String& counterName,

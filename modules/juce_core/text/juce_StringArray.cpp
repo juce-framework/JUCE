@@ -127,7 +127,12 @@ const String& StringArray::operator[] (const int index) const noexcept
     if (isPositiveAndBelow (index, strings.size()))
         return strings.getReference (index);
 
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
     return String::empty;
+   #else
+    static String empty;
+    return empty;
+   #endif
 }
 
 String& StringArray::getReference (const int index) noexcept

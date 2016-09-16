@@ -550,7 +550,7 @@ public:
                     xcodeIsExecutable = true;
                     xcodeCreatePList = false;
                     xcodeFileType = "compiled.mach-o.executable";
-                    xcodeBundleExtension = String::empty;
+                    xcodeBundleExtension = String();
                     xcodeProductType = "com.apple.product-type.tool";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;

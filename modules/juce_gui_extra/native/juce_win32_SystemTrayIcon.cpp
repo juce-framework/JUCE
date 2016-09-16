@@ -226,7 +226,7 @@ void SystemTrayIconComponent::showInfoBubble (const String& title, const String&
 
 void SystemTrayIconComponent::hideInfoBubble()
 {
-    showInfoBubble (String::empty, String::empty);
+    showInfoBubble (String(), String());
 }
 
 void* SystemTrayIconComponent::getNativeHandle() const

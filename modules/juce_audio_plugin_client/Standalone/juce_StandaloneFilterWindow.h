@@ -129,7 +129,7 @@ public:
         if (settings != nullptr)
             f = File (settings->getValue ("lastStateFile"));
 
-        if (f == File::nonexistent)
+        if (f == File())
             f = File::getSpecialLocation (File::userDocumentsDirectory);
 
         return f;

@@ -158,7 +158,7 @@ String BinaryResources::browseForResource (const String& title,
         return name;
     }
 
-    return String::empty;
+    return String();
 }
 
 String BinaryResources::findUniqueName (const String& rootName) const

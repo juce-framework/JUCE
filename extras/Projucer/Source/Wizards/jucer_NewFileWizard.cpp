@@ -142,7 +142,7 @@ public:
                             TRANS ("Please enter the name for the new class"),
                             AlertWindow::NoIcon, nullptr);
 
-            aw.addTextEditor (getClassNameFieldName(), String::empty, String::empty, false);
+            aw.addTextEditor (getClassNameFieldName(), String(), String(), false);
             aw.addButton (TRANS ("Create Files"),  1, KeyPress (KeyPress::returnKey));
             aw.addButton (TRANS ("Cancel"),        0, KeyPress (KeyPress::escapeKey));
 

@@ -23,7 +23,7 @@
 */
 
 ToggleButton::ToggleButton()
-    : Button (String::empty)
+    : Button (String())
 {
     setClickingTogglesState (true);
 }
