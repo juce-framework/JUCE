@@ -5,10 +5,9 @@
               buildVST="1" buildVST3="1" buildAU="0" buildAUv3="1" buildRTAS="0"
               buildAAX="0" pluginName="AUv3 Synth" pluginDesc="AUv3 Synth"
               pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
-              pluginCode="AUv3" pluginChannelConfigs="{0,2}" pluginIsSynth="1"
-              pluginWantsMidiIn="1" pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0"
-              pluginEditorRequiresKeys="0" pluginAUExportPrefix="AUv3SynthAU"
-              pluginRTASCategory="" aaxIdentifier="com.roli.development.AUv3Synth"
+              pluginCode="AUv3" pluginChannelConfigs="" pluginIsSynth="1" pluginWantsMidiIn="1"
+              pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="AUv3SynthAU" pluginRTASCategory="" aaxIdentifier="com.roli.development.AUv3Synth"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.4"
               buildStandalone="1">
   <MAINGROUP id="h0gx6L" name="AUv3Synth">

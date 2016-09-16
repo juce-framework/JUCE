@@ -29,7 +29,6 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_PluginBusUtilities.h"
 
 #include <juce_audio_devices/juce_audio_devices.h>
 #include <juce_gui_extra/juce_gui_extra.h>

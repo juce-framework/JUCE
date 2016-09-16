@@ -247,7 +247,7 @@
  #define JucePlugin_Build_RTAS             0
 #endif
 #ifndef  JucePlugin_Build_AAX
- #define JucePlugin_Build_AAX              1
+ #define JucePlugin_Build_AAX              0
 #endif
 #ifndef  JucePlugin_Build_STANDALONE
  #define JucePlugin_Build_STANDALONE       0

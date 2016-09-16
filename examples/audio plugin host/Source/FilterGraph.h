@@ -35,7 +35,7 @@ const char* const filenameWildcard = "*.filtergraph";
 /**
     A collection of filters and some connections between them.
 */
-class FilterGraph   : public FileBasedDocument
+class FilterGraph   : public FileBasedDocument, public AudioProcessorListener
 {
 public:
     //==============================================================================
@@ -83,17 +83,23 @@ public:
 
 
     //==============================================================================
+    void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
+    void audioProcessorChanged (AudioProcessor*) override { changed(); }
 
+    //==============================================================================
     XmlElement* createXml() const;
     void restoreFromXml (const XmlElement& xml);
 
     //==============================================================================
     void newDocument();
-    String getDocumentTitle();
-    Result loadDocument (const File& file);
-    Result saveDocument (const File& file);
-    File getLastDocumentOpened();
-    void setLastDocumentOpened (const File& file);
+    String getDocumentTitle() override;
+    Result loadDocument (const File& file) override;
+    Result saveDocument (const File& file) override;
+    File getLastDocumentOpened() override;
+    void setLastDocumentOpened (const File& file) override;
+
+    //==============================================================================
+
 
     /** The special channel index used to refer to a filter's midi channel.
     */

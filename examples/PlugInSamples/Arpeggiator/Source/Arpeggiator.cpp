@@ -34,21 +34,12 @@ public:
 
     //==============================================================================
     Arpeggiator()
+        : AudioProcessor (BusesProperties()) // add no audio buses at all
     {
         addParameter (speed = new AudioParameterFloat ("speed", "Arpeggiator Speed", 0.0, 1.0, 0.5));
     }
 
     ~Arpeggiator() {}
-
-    //==============================================================================
-    bool setPreferredBusArrangement (bool isInputBus, int busIndex,
-                                     const AudioChannelSet& preferred) override
-    {
-        ignoreUnused (isInputBus, busIndex, preferred);
-
-        // we don't support any audio buses
-        return false;
-    }
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
@@ -109,14 +100,17 @@ public:
     }
 
     //==============================================================================
+    bool isMidiEffect() const override                  { return true; }
+
+    //==============================================================================
     AudioProcessorEditor* createEditor() override { return new GenericEditor (*this); }
     bool hasEditor() const override               { return true;   }
 
     //==============================================================================
     const String getName() const override               { return "Arpeggiator"; }
 
-    bool acceptsMidi() const override                   { return false; }
-    bool producesMidi() const override                  { return false; }
+    bool acceptsMidi() const override                   { return true; }
+    bool producesMidi() const override                  { return true; }
     double getTailLengthSeconds() const override        { return 0; }
 
     //==============================================================================

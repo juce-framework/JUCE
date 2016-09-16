@@ -333,14 +333,5 @@
 #ifndef  JucePlugin_AAXDisableMultiMono
  #define JucePlugin_AAXDisableMultiMono    0
 #endif
-#ifndef  JucePlugin_MaxNumInputChannels
- #define JucePlugin_MaxNumInputChannels    0
-#endif
-#ifndef  JucePlugin_MaxNumOutputChannels
- #define JucePlugin_MaxNumOutputChannels   2
-#endif
-#ifndef  JucePlugin_PreferredChannelConfigurations
- #define JucePlugin_PreferredChannelConfigurations  {0,2}
-#endif
 
 #endif  // __JUCE_APPCONFIG_NAPIAV__

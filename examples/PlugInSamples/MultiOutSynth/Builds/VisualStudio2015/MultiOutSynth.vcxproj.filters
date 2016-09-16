@@ -388,6 +388,9 @@
     <ClCompile Include="..\..\Source\MultiOutSynth.cpp">
       <Filter>MultiOutSynth\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
+      <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
     </ClCompile>
@@ -906,9 +909,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.cpp">
-      <Filter>Juce Modules\juce_audio_processors\processors</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.cpp">
       <Filter>Juce Modules\juce_audio_processors\processors</Filter>
@@ -2232,6 +2232,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h">
+      <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
     </ClInclude>
@@ -2796,9 +2799,6 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\CoreAudioUtilityClasses\MusicDeviceBase.h">
       <Filter>Juce Modules\juce_audio_plugin_client\AU\CoreAudioUtilityClasses</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AU_Shared.h">
-      <Filter>Juce Modules\juce_audio_plugin_client\AU</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h">
       <Filter>Juce Modules\juce_audio_plugin_client\RTAS</Filter>
     </ClInclude>
@@ -2820,9 +2820,6 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeSystemHeaders.h">
       <Filter>Juce Modules\juce_audio_plugin_client\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginBusUtilities.h">
-      <Filter>Juce Modules\juce_audio_plugin_client\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginHostType.h">
       <Filter>Juce Modules\juce_audio_plugin_client\utility</Filter>
     </ClInclude>
@@ -2841,6 +2838,9 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.h">
       <Filter>Juce Modules\juce_audio_processors\format</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_AU_Shared.h">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
@@ -2856,6 +2856,9 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTCommon.h">
+      <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTInterface.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
     </ClInclude>
@@ -2864,9 +2867,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h">
       <Filter>Juce Modules\juce_audio_processors\format_types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.h">
-      <Filter>Juce Modules\juce_audio_processors\processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPlayHead.h">
       <Filter>Juce Modules\juce_audio_processors\processors</Filter>
@@ -4189,6 +4189,9 @@
     </None>
     <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\AUResources.r">
       <Filter>Juce Modules\juce_audio_plugin_client\AU</Filter>
+    </None>
+    <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AUResources.r">
+      <Filter>Juce Modules\juce_audio_plugin_client</Filter>
     </None>
     <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU.r">
       <Filter>Juce Modules\juce_audio_plugin_client</Filter>
