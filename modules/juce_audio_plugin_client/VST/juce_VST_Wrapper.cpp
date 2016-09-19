@@ -764,7 +764,7 @@ public:
             const AudioChannelSet& channelSet = bus.getCurrentLayout();
             AudioChannelSet::ChannelType channelType = channelSet.getTypeOfChannel (channelIdx);
 
-            properties.flags = vstPinInfoFlagIsActive | vstPinInfoFlagIsStereo;
+            properties.flags = vstPinInfoFlagIsActive | vstPinInfoFlagValid;
             properties.configurationType = SpeakerMappings::channelSetToVstArrangementType (channelSet);
             String label = bus.getName();
 
