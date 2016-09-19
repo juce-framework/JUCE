@@ -86,7 +86,12 @@
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
+      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;
+mkdir &quot;$(OutDir)\$(TargetName).aaxplugin&quot;
+mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents&quot;
+mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot;
+copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
+c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot; &quot;c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -130,7 +135,12 @@
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;</Command>
+      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;
+mkdir &quot;$(OutDir)\$(TargetName).aaxplugin&quot;
+mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents&quot;
+mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot;
+copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
+c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot; &quot;c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

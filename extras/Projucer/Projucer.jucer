@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="4.2.3" version="4.2.3" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="4.2.4" version="4.2.4" bundleIdentifier="com.juce.theprojucer"
               defines="" includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
