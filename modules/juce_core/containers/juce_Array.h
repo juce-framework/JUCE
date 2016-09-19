@@ -844,7 +844,7 @@ public:
         array, behaviour is undefined.
 
         @param elementToRemove  a pointer to the element to remove
-        @see removeFirstMatchingValue, removeAllInstancesOf, removeRange
+        @see removeFirstMatchingValue, removeAllInstancesOf, removeRange, removeIf
     */
     void remove (const ElementType* elementToRemove)
     {
@@ -864,7 +864,7 @@ public:
         If the item isn't found, no action is taken.
 
         @param valueToRemove   the object to try to remove
-        @see remove, removeRange
+        @see remove, removeRange, removeIf
     */
     void removeFirstMatchingValue (ParameterType valueToRemove)
     {
@@ -881,21 +881,59 @@ public:
         }
     }
 
-    /** Removes an item from the array.
+    /** Removes items from the array.
 
         This will remove all occurrences of the given element from the array.
         If no such items are found, no action is taken.
 
         @param valueToRemove   the object to try to remove
-        @see remove, removeRange
+        @return how many objects were removed.
+        @see remove, removeRange, removeIf
     */
-    void removeAllInstancesOf (ParameterType valueToRemove)
+    int removeAllInstancesOf (ParameterType valueToRemove)
     {
+        int numRemoved = 0;
         const ScopedLockType lock (getLock());
 
         for (int i = numUsed; --i >= 0;)
+        {
             if (valueToRemove == data.elements[i])
+            {
                 removeInternal (i);
+                ++numRemoved;
+            }
+        }
+
+        return numRemoved;
+    }
+
+    /** Removes items from the array.
+
+        This will remove all objects from the array that match a condition.
+        If no such items are found, no action is taken.
+
+        @param predicate   the condition when to remove an item. Must be a callable
+                           type that takes an ElementType and returns a bool
+
+        @return how many objects were removed.
+        @see remove, removeRange, removeAllInstancesOf
+    */
+    template <typename PredicateType>
+    int removeIf (PredicateType predicate)
+    {
+        int numRemoved = 0;
+        const ScopedLockType lock (getLock());
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (predicate (data.elements[i]) == true)
+            {
+                removeInternal (i);
+                ++numRemoved;
+            }
+        }
+
+        return numRemoved;
     }
 
     /** Removes a range of elements from the array.
@@ -908,7 +946,7 @@ public:
 
         @param startIndex       the index of the first element to remove
         @param numberToRemove   how many elements should be removed
-        @see remove, removeFirstMatchingValue, removeAllInstancesOf
+        @see remove, removeFirstMatchingValue, removeAllInstancesOf, removeIf
     */
     void removeRange (int startIndex, int numberToRemove)
     {

@@ -460,12 +460,22 @@ int XmlElement::getNumAttributes() const noexcept
     return attributes.size();
 }
 
+static const String& getEmptyStringRef() noexcept
+{
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    return String::empty;
+   #else
+    static String empty;
+    return empty;
+   #endif
+}
+
 const String& XmlElement::getAttributeName (const int index) const noexcept
 {
     if (const XmlAttributeNode* const att = attributes [index])
         return att->name.toString();
 
-    return String::empty;
+    return getEmptyStringRef();
 }
 
 const String& XmlElement::getAttributeValue (const int index) const noexcept
@@ -473,7 +483,7 @@ const String& XmlElement::getAttributeValue (const int index) const noexcept
     if (const XmlAttributeNode* const att = attributes [index])
         return att->value;
 
-    return String::empty;
+    return getEmptyStringRef();
 }
 
 XmlElement::XmlAttributeNode* XmlElement::getAttribute (StringRef attributeName) const noexcept
@@ -496,7 +506,7 @@ const String& XmlElement::getStringAttribute (StringRef attributeName) const noe
     if (const XmlAttributeNode* att = getAttribute (attributeName))
         return att->value;
 
-    return String::empty;
+    return getEmptyStringRef();
 }
 
 String XmlElement::getStringAttribute (StringRef attributeName, const String& defaultReturnValue) const

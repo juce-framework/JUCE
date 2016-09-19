@@ -34,8 +34,8 @@
     getNextAudioBlock(). The base class provides a basic AudioDeviceManager object
     and runs audio through the default output device.
 */
-class AudioAppComponent   : public Component,
-                            public AudioSource
+class JUCE_API AudioAppComponent   : public Component,
+                                     public AudioSource
 {
 public:
     AudioAppComponent();

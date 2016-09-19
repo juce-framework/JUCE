@@ -969,7 +969,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 
     if (draggingConnector != nullptr)
     {
-        draggingConnector->setTooltip (String::empty);
+        draggingConnector->setTooltip (String());
 
         int x = e2.x;
         int y = e2.y;
@@ -1013,7 +1013,7 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
     if (draggingConnector == nullptr)
         return;
 
-    draggingConnector->setTooltip (String::empty);
+    draggingConnector->setTooltip (String());
 
     const MouseEvent e2 (e.getEventRelativeTo (this));
 
@@ -1108,7 +1108,7 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& format
     addAndMakeVisible (statusBar = new TooltipBar());
 
     deviceManager->addAudioCallback (&graphPlayer);
-    deviceManager->addMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
+    deviceManager->addMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
 
     graphPanel->updateComponents();
 }
@@ -1143,7 +1143,7 @@ void GraphDocumentComponent::unfocusKeyboardComponent()
 void GraphDocumentComponent::releaseGraph()
 {
     deviceManager->removeAudioCallback (&graphPlayer);
-    deviceManager->removeMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
+    deviceManager->removeMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
     deviceManager->removeChangeListener (graphPanel);
 
     deleteAllChildren();

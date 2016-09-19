@@ -147,7 +147,7 @@ public:
             default:                                jassertfalse; break;
         }
 
-        return String::empty;
+        return String();
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -275,7 +275,7 @@ public:
         TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
-        return tdc != 0 ? tdc->contentClassName : String::empty;
+        return tdc != 0 ? tdc->contentClassName : String();
     }
 
     static void setTabClassName (TabbedComponent* tc, int tabIndex, const String& newName)
@@ -295,7 +295,7 @@ public:
         TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
-        return tdc != 0 ? tdc->constructorParams : String::empty;
+        return tdc != 0 ? tdc->constructorParams : String();
     }
 
     static void setTabConstructorParams (TabbedComponent* tc, int tabIndex, const String& newParams)
@@ -315,7 +315,7 @@ public:
         TabDemoContentComp* const tdc = dynamic_cast<TabDemoContentComp*> (tc->getTabContentComponent (tabIndex));
         jassert (tdc != nullptr);
 
-        return tdc != 0 ? tdc->jucerComponentFile : String::empty;
+        return tdc != 0 ? tdc->jucerComponentFile : String();
     }
 
     static void setTabJucerFile (TabbedComponent* tc, int tabIndex, const String& newFile)

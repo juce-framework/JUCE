@@ -26,7 +26,7 @@ class MidiKeyboardUpDownButton  : public Button
 {
 public:
     MidiKeyboardUpDownButton (MidiKeyboardComponent& comp, const int d)
-        : Button (String::empty), owner (comp), delta (d)
+        : Button (String()), owner (comp), delta (d)
     {
     }
 

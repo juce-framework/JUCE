@@ -101,15 +101,15 @@ public:
 
         setImageKeepProportions (l, ib, xml.getBoolAttribute ("keepProportions", true), false);
 
-        setImageResource (l, ib, normalImage, xml.getStringAttribute ("resourceNormal", String::empty), false);
+        setImageResource (l, ib, normalImage, xml.getStringAttribute ("resourceNormal", String()), false);
         setImageOpacity (l, ib, normalImage, (float) xml.getDoubleAttribute ("opacityNormal", 1.0f), false);
         setImageColour (l, ib, normalImage, Colour::fromString (xml.getStringAttribute ("colourNormal", "0")), false);
 
-        setImageResource (l, ib, overImage, xml.getStringAttribute ("resourceOver", String::empty), false);
+        setImageResource (l, ib, overImage, xml.getStringAttribute ("resourceOver", String()), false);
         setImageOpacity (l, ib, overImage, (float) xml.getDoubleAttribute ("opacityOver", 1.0f), false);
         setImageColour (l, ib, overImage, Colour::fromString (xml.getStringAttribute ("colourOver", "0")), false);
 
-        setImageResource (l, ib, downImage, xml.getStringAttribute ("resourceDown", String::empty), false);
+        setImageResource (l, ib, downImage, xml.getStringAttribute ("resourceDown", String()), false);
         setImageOpacity (l, ib, downImage, (float) xml.getDoubleAttribute ("opacityDown", 1.0f), false);
         setImageColour (l, ib, downImage, Colour::fromString (xml.getStringAttribute ("colourDown", "0")), false);
 

@@ -221,9 +221,11 @@ public:
         setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
                                           : menu.lookAndFeel.get());
 
-        parentComponent = getLookAndFeel().getParentComponentForMenuOptions (options);
+        LookAndFeel& lf = getLookAndFeel();
 
-        setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque()
+        parentComponent = lf.getParentComponentForMenuOptions (options);
+
+        setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
         for (int i = 0; i < menu.items.size(); ++i)
@@ -259,11 +261,13 @@ public:
         {
             addToDesktop (ComponentPeer::windowIsTemporary
                           | ComponentPeer::windowIgnoresKeyPresses
-                          | getLookAndFeel().getMenuWindowFlags());
+                          | lf.getMenuWindowFlags());
 
             getActiveWindows().add (this);
             Desktop::getInstance().addGlobalMouseListener (this);
         }
+
+        lf.preparePopupMenuWindow (*this);
     }
 
     ~MenuWindow()

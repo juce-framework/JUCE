@@ -220,6 +220,15 @@ bool File::moveInternal (const File& dest) const
     return MoveFile (fullPath.toWideCharPointer(), dest.getFullPathName().toWideCharPointer()) != 0;
 }
 
+bool File::replaceInternal (const File& dest) const
+{
+    void* lpExclude = 0;
+    void* lpReserved = 0;
+
+    return ReplaceFile (dest.getFullPathName().toWideCharPointer(), fullPath.toWideCharPointer(),
+                        0, REPLACEFILE_IGNORE_MERGE_ERRORS, lpExclude, lpReserved) != 0;
+}
+
 Result File::createDirectoryInternal (const String& fileName) const
 {
     return CreateDirectory (fileName.toWideCharPointer(), 0) ? Result::ok()

@@ -97,7 +97,7 @@ public:
 
         if (shader != nullptr)
         {
-            statusLabel.setText (String::empty, dontSendNotification);
+            statusLabel.setText (String(), dontSendNotification);
 
             shader->fillRect (g.getInternalContext(), getLocalBounds());
         }

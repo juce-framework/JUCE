@@ -82,7 +82,7 @@ private:
         }
 
         String getRenamingName() const override     { return getDisplayName(); }
-        String getDisplayName() const override      { return (namespaceToShow != nullptr ? namespaceToShow->name : String::empty) + "::"; }
+        String getDisplayName() const override      { return (namespaceToShow != nullptr ? namespaceToShow->name : String()) + "::"; }
         void setName (const String&) override       {}
         bool isMissing() override                   { return false; }
         Icon getIcon() const override               { return Icon (getIcons().graph, getContrastingColour (Colours::darkred, 0.5f)); }

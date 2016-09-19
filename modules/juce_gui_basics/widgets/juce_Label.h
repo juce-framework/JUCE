@@ -44,8 +44,8 @@ public:
         @param componentName    the name to give the component
         @param labelText        the text to show in the label
     */
-    Label (const String& componentName = String::empty,
-           const String& labelText = String::empty);
+    Label (const String& componentName = String(),
+           const String& labelText = String());
 
     /** Destructor. */
     ~Label();

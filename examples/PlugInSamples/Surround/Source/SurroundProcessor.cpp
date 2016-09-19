@@ -109,7 +109,6 @@ public:
     const String getName() const override               { return "Surround PlugIn"; }
     bool acceptsMidi() const override                   { return false; }
     bool producesMidi() const override                  { return false; }
-    bool silenceInProducesSilenceOut() const override   { return true; }
     double getTailLengthSeconds() const override        { return 0; }
 
     //==============================================================================

@@ -836,8 +836,8 @@ struct OpenGLDemoClasses
                 controlsOverlay->statusLabel.setText (statusText, dontSendNotification);
 
 
-                newVertexShader = String::empty;
-                newFragmentShader = String::empty;
+                newVertexShader = String();
+                newFragmentShader = String();
             }
         }
 

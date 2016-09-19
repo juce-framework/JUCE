@@ -35,9 +35,9 @@ public:
                            const bool allowEditingOfFilename,
                            const String& fileBrowserWildcard = "*")
         : PropertyComponent (name),
-          filenameComp (name, File::nonexistent, allowEditingOfFilename,
+          filenameComp (name, File(), allowEditingOfFilename,
                         isDirectory, false, fileBrowserWildcard,
-                        String::empty, String::empty)
+                        String(), String())
     {
         addAndMakeVisible (filenameComp);
         filenameComp.addListener (this);

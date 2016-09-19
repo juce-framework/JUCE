@@ -138,7 +138,7 @@ public:
         if (ListBoxModel* m = owner.getModel())
             return m->getTooltipForRow (row);
 
-        return String::empty;
+        return String();
     }
 
     ScopedPointer<Component> customComponent;
@@ -964,5 +964,5 @@ void ListBoxModel::deleteKeyPressed (int) {}
 void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
 var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var(); }
-String ListBoxModel::getTooltipForRow (int)                             { return String::empty; }
+String ListBoxModel::getTooltipForRow (int)                             { return String(); }
 MouseCursor ListBoxModel::getMouseCursorForRow (int)                    { return MouseCursor::NormalCursor; }

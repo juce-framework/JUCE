@@ -77,7 +77,7 @@ Identifier PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* c
 
     // this property component does not have a key associated to it!
     jassertfalse;
-    return String::empty;
+    return String();
 }
 
 Component* PathSettingsTab::getContent()
@@ -286,7 +286,7 @@ struct AppearanceEditor
 
             StringArray names;
             names.add ("<Default Monospaced>");
-            names.add (String::empty);
+            names.add (String());
             names.addArray (getAppSettings().monospacedFontNames);
 
             return new ChoicePropertyComponent (Value (new FontNameValueSource (value)),

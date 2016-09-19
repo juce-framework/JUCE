@@ -761,7 +761,7 @@ void EnabledModuleList::addModuleFromUserSelectedFile()
 {
     static File lastLocation (findDefaultModulesFolder (project));
 
-    FileChooser fc ("Select a module to add...", lastLocation, String::empty, false);
+    FileChooser fc ("Select a module to add...", lastLocation, String(), false);
 
     if (fc.browseForDirectory())
     {

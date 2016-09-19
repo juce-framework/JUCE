@@ -179,7 +179,7 @@ public:
            return defaultInstallation;
       #endif
 
-        return File::nonexistent;
+        return File();
     }
 
 protected:

@@ -157,7 +157,7 @@ public:
     */
     static void setMacMainMenu (MenuBarModel* newMenuBarModel,
                                 const PopupMenu* extraAppleMenuItems = nullptr,
-                                const String& recentItemsMenuName = String::empty);
+                                const String& recentItemsMenuName = String());
 
     /** OSX ONLY - Returns the menu model that is currently being shown as
         the main menu bar.

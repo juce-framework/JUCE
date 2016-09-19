@@ -165,8 +165,20 @@ private:
                 config->getValue (Ids::useRuntimeLibDLL) = true;
 
             if (isVST3)
+            {
                 if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                    config->getValue (Ids::postbuildCommand) = "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                {
+                    const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+
+                    String script;
+                    if (previousBuildCommands.isNotEmpty())
+                        script += "\r\n";
+
+                    script += "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+
+                    config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
+                }
+            }
         }
     }
 
@@ -175,8 +187,39 @@ private:
         const RelativePath aaxLibsFolder = RelativePath (getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
 
         for (ProjectExporter::ConfigIterator config (*this); config.next();)
+        {
             if (config->getValue (Ids::useRuntimeLibDLL).getValue().isVoid())
                 config->getValue (Ids::useRuntimeLibDLL) = true;
+
+            if (config->getValue(Ids::postbuildCommand).toString().isEmpty())
+            {
+                const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+
+                const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
+                const String bundleDir      = "$(OutDir)\\$(TargetName).aaxplugin";
+                const String bundleContents = bundleDir + "\\Contents";
+                const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
+                const String executable     = macOSDir + String ("\\$(TargetName).aaxplugin");
+                const String bundleScript   = aaxPath.toString() + String ("\\Utilities\\CreatePackage.bat");
+                String iconFilePath         = getTargetFolder().getChildFile ("icon.ico").getFullPathName();
+
+                if (! File (iconFilePath).existsAsFile())
+                    iconFilePath = aaxPath.toString() + String ("\\Utilities\\PlugIn.ico");
+
+                String script;
+
+                if (previousBuildCommands.isNotEmpty())
+                    script += "\r\n";
+
+                script += String ("mkdir \"") + bundleDir      + String ("\"\r\n");
+                script += String ("mkdir \"") + bundleContents + String ("\"\r\n");
+                script += String ("mkdir \"") + macOSDir       + String ("\"\r\n");
+                script += String ("copy /Y \"$(OutDir)\\$(TargetFileName)\" \"") + executable + String ("\"\r\n");
+                script += bundleScript + String (" \"") + macOSDir + String ("\" \"") + iconFilePath + String ("\"");
+
+                config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
+            }
+        }
 
         msvcExtraPreprocessorDefs.set ("JucePlugin_AAXLibs_path",
                                        createRebasedPath (aaxLibsFolder));
@@ -210,10 +253,19 @@ private:
                 config->getValue (Ids::useRuntimeLibDLL) = true;
 
             if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                config->getValue (Ids::postbuildCommand)
-                = "copy /Y "
-                + modulePath.getChildFile ("juce_RTAS_WinResources.rsr").toWindowsStyle().quoted()
-                + " \"$(TargetPath)\".rsr";
+            {
+                const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+
+                String script;
+                if (previousBuildCommands.isNotEmpty())
+                    script += "\r\n";
+
+                script += "copy /Y "
+                       + modulePath.getChildFile("juce_RTAS_WinResources.rsr").toWindowsStyle().quoted()
+                       + " \"$(TargetPath)\".rsr";
+
+                config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
+            }
         }
 
         RelativePath juceWrapperFolder (project.getGeneratedCodeFolder(),
@@ -328,6 +380,8 @@ protected:
         String getPrebuildCommandString() const     { return config [Ids::prebuildCommand]; }
         Value getPostbuildCommand()                 { return getValue (Ids::postbuildCommand); }
         String getPostbuildCommandString() const    { return config [Ids::postbuildCommand]; }
+
+        Value getInternalPostbuildCommands()        { return getValue (Ids::internalPostBuildComamnd); }
 
         Value shouldGenerateDebugSymbolsValue()     { return getValue (Ids::alwaysGenerateDebugSymbols); }
         bool shouldGenerateDebugSymbols() const     { return config [Ids::alwaysGenerateDebugSymbols]; }
@@ -713,7 +767,7 @@ protected:
            << newLine
            << "#endif" << newLine;
 
-        if (iconFile != File::nonexistent)
+        if (iconFile != File())
            mo << newLine
               << "IDI_ICON1 ICON DISCARDABLE " << iconFile.getFileName().quoted()
               << newLine
@@ -808,7 +862,7 @@ public:
 
                 if (group.getID() == ProjectSaver::getGeneratedGroupID())
                 {
-                    if (iconFile != File::nonexistent)
+                    if (iconFile != File())
                     {
                         group.addFileAtIndex (iconFile, -1, true);
                         group.findItemForFile (iconFile).getShouldAddToBinaryResourcesValue() = false;
@@ -830,7 +884,7 @@ public:
 
         {
             MemoryOutputStream mo;
-            writeSolutionFile (mo, getSolutionVersionString(), String::empty, getVCProjFile());
+            writeSolutionFile (mo, getSolutionVersionString(), String(), getVCProjFile());
 
             overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
         }
@@ -1439,7 +1493,7 @@ protected:
                 {
                     XmlElement* targetName = props->createNewChildElement ("TargetName");
                     setConditionAttribute (*targetName, config);
-                    targetName->addTextElement (config.getOutputFilename (String::empty, true));
+                    targetName->addTextElement (config.getOutputFilename (String(), true));
                 }
 
                 {
@@ -1584,10 +1638,11 @@ protected:
                      ->createNewChildElement ("Command")
                      ->addTextElement (config.getPrebuildCommandString());
 
-            if (config.getPostbuildCommandString().isNotEmpty())
+            const String internalPostBuildScripts = config.config[Ids::internalPostBuildComamnd].toString();
+            if (config.getPostbuildCommandString().isNotEmpty() || internalPostBuildScripts.isNotEmpty())
                 group->createNewChildElement ("PostBuildEvent")
                      ->createNewChildElement ("Command")
-                     ->addTextElement (config.getPostbuildCommandString());
+                     ->addTextElement (config.getPostbuildCommandString() + internalPostBuildScripts);
         }
 
         ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
@@ -1605,7 +1660,7 @@ protected:
             }
         }
 
-        if (iconFile != File::nonexistent)
+        if (iconFile != File())
         {
             XmlElement* e = otherFilesGroup->createNewChildElement ("None");
             e->setAttribute ("Include", prependDot (iconFile.getFileName()));
@@ -1639,7 +1694,7 @@ protected:
         if (projectType.isStaticLibrary())                                      return "StaticLibrary";
 
         jassertfalse;
-        return String::empty;
+        return String();
     }
 
     static const char* getOptimisationLevelString (int level)
@@ -1722,7 +1777,7 @@ protected:
 
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 addFilesToFilter (projectItem.getChild(i),
-                                  (path.isEmpty() ? String::empty : (path + "\\")) + projectItem.getChild(i).getName(),
+                                  (path.isEmpty() ? String() : (path + "\\")) + projectItem.getChild(i).getName(),
                                   cpps, headers, otherFiles, groups);
         }
         else if (projectItem.shouldBeAddedToTargetProject())

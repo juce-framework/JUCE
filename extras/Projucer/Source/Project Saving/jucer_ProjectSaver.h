@@ -287,7 +287,7 @@ private:
         if (xml != nullptr)
         {
             MemoryOutputStream mo;
-            xml->writeToStream (mo, String::empty);
+            xml->writeToStream (mo, String());
             replaceFileIfDifferent (projectFile, mo);
         }
     }
@@ -324,9 +324,9 @@ private:
 
         if (! foundCodeSection)
         {
-            userContent.add (String::empty);
+            userContent.add (String());
             userContent.add ("// (You can add your own code in this section, and the Projucer will not overwrite it)");
-            userContent.add (String::empty);
+            userContent.add (String());
         }
 
         return userContent.joinIntoString (newLine) + newLine;

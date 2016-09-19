@@ -170,7 +170,7 @@ bool AppearanceSettings::readFromFile (const File& file)
 bool AppearanceSettings::writeToFile (const File& file) const
 {
     const ScopedPointer<XmlElement> xml (settings.createXml());
-    return xml != nullptr && xml->writeToFile (file, String::empty);
+    return xml != nullptr && xml->writeToFile (file, String());
 }
 
 Font AppearanceSettings::getDefaultCodeFont()

@@ -453,11 +453,11 @@ class ToolbarDemoComp   : public Component,
 {
 public:
     ToolbarDemoComp()
-        : depthLabel (String::empty, "Toolbar depth:"),
-          infoLabel (String::empty, "As well as showing off toolbars, this demo illustrates how to store "
-                                    "a set of SVG files in a Zip file, embed that in your application, and read "
-                                    "them back in at runtime.\n\nThe icon images here are taken from the open-source "
-                                    "Tango icon project."),
+        : depthLabel (String(), "Toolbar depth:"),
+          infoLabel (String(), "As well as showing off toolbars, this demo illustrates how to store "
+                               "a set of SVG files in a Zip file, embed that in your application, and read "
+                               "them back in at runtime.\n\nThe icon images here are taken from the open-source "
+                                "Tango icon project."),
           orientationButton ("Vertical/Horizontal"),
           customiseButton ("Customise...")
     {

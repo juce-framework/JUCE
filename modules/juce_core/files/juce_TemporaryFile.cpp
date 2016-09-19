@@ -86,7 +86,7 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
         // Have a few attempts at overwriting the file before giving up..
         for (int i = 5; --i >= 0;)
         {
-            if (temporaryFile.moveFileTo (targetFile))
+            if (temporaryFile.replaceFileIn (targetFile))
                 return true;
 
             Thread::sleep (100);

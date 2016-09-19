@@ -29,7 +29,7 @@ class Toolbar::Spacer  : public ToolbarItemComponent
 {
 public:
     Spacer (const int itemId_, const float fixedSize_, const bool drawBar_)
-        : ToolbarItemComponent (itemId_, String::empty, false),
+        : ToolbarItemComponent (itemId_, String(), false),
           fixedSize (fixedSize_),
           drawBar (drawBar_)
     {
@@ -709,9 +709,9 @@ private:
     public:
         CustomiserPanel (ToolbarItemFactory& tbf, Toolbar& bar, int optionFlags)
           : factory (tbf), toolbar (bar), palette (tbf, bar),
-            instructions (String::empty, TRANS ("You can drag the items above and drop them onto a toolbar to add them.")
-                                          + "\n\n"
-                                          + TRANS ("Items on the toolbar can also be dragged around to change their order, or dragged off the edge to delete them.")),
+            instructions (String(), TRANS ("You can drag the items above and drop them onto a toolbar to add them.")
+                                      + "\n\n"
+                                      + TRANS ("Items on the toolbar can also be dragged around to change their order, or dragged off the edge to delete them.")),
             defaultButton (TRANS ("Restore to default set of items"))
         {
             addAndMakeVisible (palette);

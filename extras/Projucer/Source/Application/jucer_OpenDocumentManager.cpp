@@ -62,7 +62,7 @@ public:
     Component* createEditor() override                       { return new ItemPreviewComponent (file); }
     Component* createViewer() override                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile) override   { file = newFile; }
-    String getState() const override                         { return String::empty; }
+    String getState() const override                         { return String(); }
     void restoreState (const String&) override               {}
 
     String getType() const override

@@ -321,7 +321,7 @@ int TabbedButtonBar::getNumTabs() const
 String TabbedButtonBar::getCurrentTabName() const
 {
     TabInfo* tab = tabs [currentTabIndex];
-    return tab == nullptr ? String::empty : tab->name;
+    return tab == nullptr ? String() : tab->name;
 }
 
 StringArray TabbedButtonBar::getTabNames() const

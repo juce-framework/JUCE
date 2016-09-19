@@ -684,6 +684,7 @@ private:
     bool menuActive;
     bool valueTextNeedsUpdating;
     bool consumeEscAndReturnKeys;
+    bool styleChanged;
 
     UndoManager undoManager;
     ScopedPointer<CaretComponent> caret;

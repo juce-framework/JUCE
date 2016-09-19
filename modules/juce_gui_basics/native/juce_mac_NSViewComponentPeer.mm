@@ -242,9 +242,9 @@ public:
     void setRepresentedFile (const File& file) override
     {
         if (! isSharedWindow)
-            [window setRepresentedFilename: juceStringToNS (file != File::nonexistent
+            [window setRepresentedFilename: juceStringToNS (file != File()
                                                                 ? file.getFullPathName()
-                                                                : String::empty)];
+                                                                : String())];
     }
 
     void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override

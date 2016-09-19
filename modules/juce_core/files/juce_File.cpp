@@ -68,7 +68,9 @@ File& File::operator= (File&& other) noexcept
 }
 #endif
 
+#if JUCE_ALLOW_STATIC_NULL_VARIABLES
 const File File::nonexistent;
+#endif
 
 //==============================================================================
 static String removeEllipsis (const String& path)
@@ -298,6 +300,21 @@ bool File::copyFileTo (const File& newFile) const
 {
     return (*this == newFile)
             || (exists() && newFile.deleteFile() && copyInternal (newFile));
+}
+
+bool File::replaceFileIn (const File& newFile) const
+{
+    if (newFile.fullPath == fullPath)
+        return true;
+
+    if (! newFile.exists())
+        return moveFileTo (newFile);
+
+    if (! replaceInternal (newFile))
+        return false;
+
+    deleteFile();
+    return true;
 }
 
 bool File::copyDirectoryTo (const File& newDirectory) const
@@ -994,9 +1011,9 @@ public:
         const File home (File::getSpecialLocation (File::userHomeDirectory));
         const File temp (File::getSpecialLocation (File::tempDirectory));
 
-        expect (! File::nonexistent.exists());
-        expect (! File::nonexistent.existsAsFile());
-        expect (! File::nonexistent.isDirectory());
+        expect (! File().exists());
+        expect (! File().existsAsFile());
+        expect (! File().isDirectory());
        #if ! JUCE_WINDOWS
         expect (File("/").isDirectory());
        #endif

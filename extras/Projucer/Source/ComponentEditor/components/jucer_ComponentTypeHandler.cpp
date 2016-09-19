@@ -196,7 +196,7 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
 
     for (int i = 0; i < colours.size(); ++i)
     {
-        const String col (xml.getStringAttribute (colours[i]->xmlTagName, String::empty));
+        const String col (xml.getStringAttribute (colours[i]->xmlTagName, String()));
 
         if (col.isNotEmpty())
             comp->setColour (colours[i]->colourId, Colour::fromString (col));
@@ -518,12 +518,12 @@ void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* com
     if (pos.rect.isPositionAbsolute())
         code.constructorCode += r + "\n";
     else
-        code.getCallbackCode (String::empty, "void", "resized()", false) += r;
+        code.getCallbackCode (String(), "void", "resized()", false) += r;
 }
 
 String ComponentTypeHandler::getCreationParameters (GeneratedCode&, Component*)
 {
-    return String::empty;
+    return String();
 }
 
 void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)

@@ -59,9 +59,9 @@ public:
 JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor& owner)
     : AudioProcessorEditor (owner),
       midiKeyboard (owner.keyboardState, MidiKeyboardComponent::horizontalKeyboard),
-      timecodeDisplayLabel (String::empty),
-      gainLabel (String::empty, "Throughput level:"),
-      delayLabel (String::empty, "Delay:")
+      timecodeDisplayLabel (String()),
+      gainLabel (String(), "Throughput level:"),
+      delayLabel (String(), "Delay:")
 {
     // add some sliders..
     addAndMakeVisible (gainSlider = new ParameterSlider (*owner.gainParam));

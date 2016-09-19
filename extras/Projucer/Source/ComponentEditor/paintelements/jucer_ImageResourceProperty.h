@@ -77,8 +77,8 @@ public:
             String resource (document.getResources()
                      .browseForResource ("Select an image file to add as a resource",
                                          "*.jpg;*.jpeg;*.png;*.gif;*.svg",
-                                         File::nonexistent,
-                                         String::empty));
+                                         File(),
+                                         String()));
 
             if (resource.isNotEmpty())
                 setResource (resource);
@@ -86,7 +86,7 @@ public:
         else
         {
             if (choices[newIndex] == getNoneText() && allowChoiceOfNoResource)
-                setResource (String::empty);
+                setResource (String());
             else
                 setResource (choices [newIndex]);
         }
@@ -110,7 +110,7 @@ public:
         choices.clear();
 
         choices.add ("-- create a new image resource -- ");
-        choices.add (String::empty);
+        choices.add (String());
 
         if (allowChoiceOfNoResource)
             choices.add (getNoneText());

@@ -62,7 +62,9 @@ AudioProcessor::AudioProcessor()
    #endif
     ignoreUnused (maxOutChannels);
 
- #if ! JucePlugin_IsMidiEffect
+ #if JucePlugin_IsMidiEffect
+    ignoreUnused (channelConfigs);
+ #else
    #if ! JucePlugin_IsSynth
     const int numInChannels = jmin (maxInChannels, (int) channelConfigs[0][0]);
 

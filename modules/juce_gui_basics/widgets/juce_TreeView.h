@@ -645,7 +645,7 @@ public:
         Once you've got a treeview component, you'll need to give it something to
         display, using the setRootItem() method.
     */
-    TreeView (const String& componentName = String::empty);
+    TreeView (const String& componentName = String());
 
     /** Destructor. */
     ~TreeView();
