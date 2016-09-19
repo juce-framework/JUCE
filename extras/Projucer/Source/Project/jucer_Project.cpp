@@ -574,6 +574,9 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (getPluginAUMainType(), "Plugin AU Main Type", 128, false),
                "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
 
+    props.add (new BooleanPropertyComponent (getPluginAUIsSandboxSafe(), "Plugin AU Sandbox Safe", "AU is compatible with Sandboxed Hosts"),
+               "Enable if your plugin is compatible with Sandboxing, for hosts such as GarageBand.");
+
     props.add (new TextPropertyComponent (getPluginVSTCategory(), "VST Category", 64, false),
                "In a VST, this is the value that is set as JucePlugin_VSTCategory. Leave it blank unless you want to use a custom value.");
 

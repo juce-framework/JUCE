@@ -1315,7 +1315,8 @@ public:
             addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeCode());
             addPlistDictionaryKey (dict, "subtype", owner.project.getPluginCode().toString().trim().substring (0, 4));
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
-
+            if (owner.project.getPluginAUIsSandboxSafe().getValue())
+                addPlistDictionaryKeyBool (dict, "sandboxSafe", true);
             xcodeExtraPListEntries.add (plistKey);
             xcodeExtraPListEntries.add (plistEntry);
         }

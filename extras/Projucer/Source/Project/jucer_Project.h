@@ -142,6 +142,7 @@ public:
     Value getPluginVSTCategory()                { return getProjectValue ("pluginVSTCategory"); }
     Value getPluginAUExportPrefix()             { return getProjectValue ("pluginAUExportPrefix"); }
     Value getPluginAUMainType()                 { return getProjectValue ("pluginAUMainType"); }
+    Value getPluginAUIsSandboxSafe()            { return getProjectValue ("pluginAUIsSandboxSafe"); }
     Value getPluginRTASCategory()               { return getProjectValue ("pluginRTASCategory"); }
     Value getPluginRTASBypassDisabled()         { return getProjectValue ("pluginRTASDisableBypass"); }
     Value getPluginRTASMultiMonoDisabled()      { return getProjectValue ("pluginRTASDisableMultiMono"); }
