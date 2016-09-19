@@ -1069,9 +1069,7 @@ public:
 
         // prepare buffers
         {
-            if (! pullInputAudio (ioActionFlags, inTimeStamp, nFrames))
-                return noErr;
-
+            pullInputAudio (ioActionFlags, inTimeStamp, nFrames);
             prepareOutputBuffers (nFrames);
             audioBuffer.reset();
         }
@@ -1516,23 +1514,21 @@ private:
     AudioUnitHelpers::ChannelRemapper mapper;
 
     //==============================================================================
-    bool pullInputAudio (AudioUnitRenderActionFlags& flags, const AudioTimeStamp& timestamp, const UInt32 nFrames) noexcept
+    void pullInputAudio (AudioUnitRenderActionFlags& flags, const AudioTimeStamp& timestamp, const UInt32 nFrames) noexcept
     {
         const unsigned int numInputBuses = GetScope (kAudioUnitScope_Input).GetNumberOfElements();
+        OSStatus err;
 
         for (unsigned int i = 0; i < numInputBuses; ++i)
         {
             if (AUInputElement* input = GetInput (i))
             {
-                if (input->PullInput (flags, timestamp, i, nFrames) != noErr)
-                    return false; // logic sometimes doesn't connect all the inputs immedietely
+                err = input->PullInput (flags, timestamp, i, nFrames);
 
-                if ((flags & kAudioUnitRenderAction_OutputIsSilence) != 0)
+                if ((flags & kAudioUnitRenderAction_OutputIsSilence) != 0 || err != noErr)
                     AudioUnitHelpers::clearAudioBuffer (input->GetBufferList());
             }
         }
-
-        return true;
     }
 
     void prepareOutputBuffers (const UInt32 nFrames) noexcept
