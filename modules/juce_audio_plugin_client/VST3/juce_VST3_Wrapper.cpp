@@ -444,6 +444,9 @@ public:
                 setParamNormalized (paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram()) / static_cast<Vst::ParamValue> (numPrograms - 1));
         }
 
+        if (Vst::IComponentHandler* handler = getComponentHandler())
+            handler->restartComponent (Vst::kParamValuesChanged);
+
         return Vst::EditController::setComponentState (stream);
     }
 
