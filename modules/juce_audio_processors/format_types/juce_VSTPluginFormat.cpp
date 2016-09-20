@@ -870,11 +870,7 @@ public:
                 int32 vstPrecision = isUsingDoublePrecision() ? vstProcessingSampleTypeDouble
                                                               : vstProcessingSampleTypeFloat;
 
-                // if you get an assertion here then your plug-in claims it supports double precision
-                // but returns an error when we try to change the precision
-                pointer_sized_int err = dispatch (plugInOpcodeSetSampleFloatType, 0, (pointer_sized_int) vstPrecision, 0, 0);
-                jassert (err > 0);
-                ignoreUnused (err);
+                dispatch (plugInOpcodeSetSampleFloatType, 0, (pointer_sized_int) vstPrecision, 0, 0);
             }
 
             tempBuffer.setSize (jmax (1, vstEffect->numInputChannels), samplesPerBlockExpected);
