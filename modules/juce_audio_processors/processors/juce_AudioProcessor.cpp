@@ -745,14 +745,11 @@ AudioProcessor::BusesProperties AudioProcessor::busesPropertiesFromLayoutArray (
 {
     BusesProperties ioProps;
 
-    for (int i = 0; i < config.size(); ++i)
-    {
-        if (config[i].inChannels > 0)
-            ioProps.addBus (true, String ("Input #") + String (i + 1), AudioChannelSet::canonicalChannelSet (config[i].inChannels));
+    if (config[0].inChannels > 0)
+        ioProps.addBus (true, String ("Input"), AudioChannelSet::canonicalChannelSet (config[0].inChannels));
 
-        if (config[i].outChannels > 0)
-            ioProps.addBus (false, String ("Output #") + String (i + 1), AudioChannelSet::canonicalChannelSet (config[i].inChannels));
-    }
+    if (config[0].outChannels > 0)
+        ioProps.addBus (false, String ("Output"), AudioChannelSet::canonicalChannelSet (config[0].outChannels));
 
     return ioProps;
 }
