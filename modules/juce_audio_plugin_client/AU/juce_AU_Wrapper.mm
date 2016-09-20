@@ -189,6 +189,7 @@ public:
             return err;
 
         mapper.alloc();
+        pulledSucceeded.calloc (static_cast<size_t> (juceFilter->getBusCount (true)));
 
         prepareToPlay();
 
@@ -199,6 +200,7 @@ public:
     {
         MusicDeviceBase::Cleanup();
 
+        pulledSucceeded.free();
         mapper.release();
 
         if (juceFilter != nullptr)
@@ -1086,9 +1088,7 @@ public:
             // use output pointers
             for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
             {
-                if (! GetAudioBufferList (false, busIdx, buffer, interleaved, numChannels))
-                    continue;
-
+                GetAudioBufferList (false, busIdx, buffer, interleaved, numChannels);
                 const int* outLayoutMap = mapper.get (false, busIdx);
 
                 for (int ch = 0; ch < numChannels; ++ch)
@@ -1099,22 +1099,35 @@ public:
             for (int busIdx = 0; chIdx < totalInChannels;)
             {
                 int channelIndexInBus = juceFilter->getOffsetInBusBufferForAbsoluteChannelIndex (true, chIdx, busIdx);
+                const bool badData = ! pulledSucceeded[busIdx];
 
-                if (! GetAudioBufferList (true, busIdx, buffer, interleaved, numChannels))
-                    continue;
+                if (! badData)
+                    GetAudioBufferList (true, busIdx, buffer, interleaved, numChannels);
 
                 const int* inLayoutMap = mapper.get (true, busIdx);
 
                 const int n = juceFilter->getChannelCountOfBus (true, busIdx);
                 for (int ch = channelIndexInBus; ch < n; ++ch)
-                    audioBuffer.setBuffer (chIdx++, interleaved ? nullptr : static_cast<float*> (buffer->mBuffers[inLayoutMap[ch]].mData));
+                    audioBuffer.setBuffer (chIdx++, interleaved || badData ? nullptr : static_cast<float*> (buffer->mBuffers[inLayoutMap[ch]].mData));
             }
         }
 
         // copy input
         {
             for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
-                audioBuffer.push (GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
+            {
+                if (pulledSucceeded[busIdx])
+                {
+                    audioBuffer.push (GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
+                }
+                else
+                {
+                    const int n = juceFilter->getChannelCountOfBus (true, busIdx);
+
+                    for (int ch = 0; ch < n; ++ch)
+                        zeromem (audioBuffer.push(), sizeof (float) * nFrames);
+                }
+            }
 
             // clear remaining channels
             for (int i = totalInChannels; i < totalOutChannels; ++i)
@@ -1504,6 +1517,7 @@ private:
     AUMIDIOutputCallbackStruct midiCallback;
     AudioTimeStamp lastTimeStamp;
     int totalInChannels, totalOutChannels;
+    HeapBlock<bool> pulledSucceeded;
 
     //==============================================================================
     Array<AUChannelInfo> channelInfo;
@@ -1517,24 +1531,17 @@ private:
     void pullInputAudio (AudioUnitRenderActionFlags& flags, const AudioTimeStamp& timestamp, const UInt32 nFrames) noexcept
     {
         const unsigned int numInputBuses = GetScope (kAudioUnitScope_Input).GetNumberOfElements();
-        OSStatus err;
 
         for (unsigned int i = 0; i < numInputBuses; ++i)
         {
             if (AUInputElement* input = GetInput (i))
             {
-                err = input->PullInput (flags, timestamp, i, nFrames);
+                const bool succeeded = (input->PullInput (flags, timestamp, i, nFrames) == noErr);
 
-                if (err != noErr)
-                {
-                    if (input->WillAllocateBuffer())
-                        input->PrepareBuffer (nFrames);
-                    else
-                        input->PrepareNullBuffer (nFrames);
-                }
-
-                if ((flags & kAudioUnitRenderAction_OutputIsSilence) != 0 || err != noErr)
+                if ((flags & kAudioUnitRenderAction_OutputIsSilence) != 0 && succeeded)
                     AudioUnitHelpers::clearAudioBuffer (input->GetBufferList());
+
+                pulledSucceeded[i] = succeeded;
             }
         }
     }
@@ -1608,21 +1615,17 @@ private:
         midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
     }
 
-    bool GetAudioBufferList (bool isInput, int busIdx, AudioBufferList*& bufferList, bool& interleaved, int& numChannels)
+    void GetAudioBufferList (bool isInput, int busIdx, AudioBufferList*& bufferList, bool& interleaved, int& numChannels)
     {
-        if (AUIOElement* element = GetElement (isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output, static_cast<UInt32> (busIdx))->AsIOElement())
-        {
-            bufferList = &element->GetBufferList();
+        AUIOElement* element = GetElement (isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output, static_cast<UInt32> (busIdx))->AsIOElement();
+        jassert (element != nullptr);
 
-            if (bufferList->mNumberBuffers > 0)
-            {
-                interleaved = AudioUnitHelpers::isAudioBufferInterleaved (*bufferList);
-                numChannels = static_cast<int> (interleaved ? bufferList->mBuffers[0].mNumberChannels : bufferList->mNumberBuffers);
-                return true;
-            }
-        }
+        bufferList = &element->GetBufferList();
 
-        return false;
+        jassert (bufferList->mNumberBuffers > 0);
+
+        interleaved = AudioUnitHelpers::isAudioBufferInterleaved (*bufferList);
+        numChannels = static_cast<int> (interleaved ? bufferList->mBuffers[0].mNumberChannels : bufferList->mNumberBuffers);
     }
 
     //==============================================================================
