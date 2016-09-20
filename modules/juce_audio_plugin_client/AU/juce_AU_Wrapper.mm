@@ -1526,7 +1526,10 @@ private:
                 err = input->PullInput (flags, timestamp, i, nFrames);
 
                 if ((flags & kAudioUnitRenderAction_OutputIsSilence) != 0 || err != noErr)
+                {
+                    input->PrepareBuffer (nFrames);
                     AudioUnitHelpers::clearAudioBuffer (input->GetBufferList());
+                }
             }
         }
     }
