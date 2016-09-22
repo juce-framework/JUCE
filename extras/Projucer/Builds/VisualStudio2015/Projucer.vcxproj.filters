@@ -277,6 +277,9 @@
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Application\jucer_DownloadCompileEngineThread.cpp">
+      <Filter>Projucer\Application</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_GlobalPreferences.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
@@ -1663,6 +1666,9 @@
       <Filter>Projucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_DocumentEditorComponent.h">
+      <Filter>Projucer\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\jucer_DownloadCompileEngineThread.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_EulaDialogue.h">

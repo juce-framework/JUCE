@@ -29,19 +29,28 @@ struct CompileEngineDLL
 {
     CompileEngineDLL()
     {
-        File f = findDLLFile();
-
-        if (f != File() && dll.open (f.getLinkedTarget().getFullPathName()))
-        {
-            #define INIT_LIVE_DLL_FN(name, returnType, params)    name = (name##_type) dll.getFunction (#name);
-            LIVE_DLL_FUNCTIONS (INIT_LIVE_DLL_FN);
-            #undef INIT_LIVE_DLL_FN
-        }
+        tryLoadDll();
     }
 
     ~CompileEngineDLL()
     {
         shutdown();
+    }
+
+    void tryLoadDll()
+    {
+        // never load the dynamic lib multiple times
+        if (! isLoaded())
+        {
+            File f = findDLLFile();
+
+            if (f != File() && dll.open (f.getLinkedTarget().getFullPathName()))
+            {
+               #define INIT_LIVE_DLL_FN(name, returnType, params)    name = (name##_type) dll.getFunction (#name);
+                LIVE_DLL_FUNCTIONS (INIT_LIVE_DLL_FN);
+               #undef INIT_LIVE_DLL_FN
+            }
+        }
     }
 
     void initialise (CrashCallbackFunction crashFn, QuitCallbackFunction quitFn, bool setupSignals)
@@ -87,86 +96,76 @@ struct CompileEngineDLL
        #endif
     }
 
-    static bool isDLLFile (const File& f)
+    static File getVersionedUserAppSupportFolder()
     {
-        return f.getFileName().equalsIgnoreCase (getDLLName()) && f.exists();
-    }
-
-    static File findDLLFile()
-    {
-        File appFile = File::getSpecialLocation (File::currentApplicationFile);
+        File userAppData (File::getSpecialLocation (File::userApplicationDataDirectory));
 
        #if JUCE_MAC
-        // Look in the app bundle..
-        for (DirectoryIterator i (appFile, true, "*", File::findFilesAndDirectories); i.next();)
-            if (isDLLFile (i.getFile()))
-                return i.getFile();
-
-        {
-            // Try in Application Support..
-            File f = File ("~/Library/Application Support/Projucer").getChildFile (getDLLName());
-            if (isDLLFile (f))
-                return f;
-
-            f = File ("/Library/Application Support/Projucer").getChildFile (getDLLName());
-            if (isDLLFile (f))
-                return f;
-        }
-
-       #elif JUCE_WINDOWS
-        {
-            // Look in the application folder
-            File f = appFile.getParentDirectory().getChildFile (getDLLName());
-            if (isDLLFile (f))
-                return f;
-        }
-       #elif JUCE_LINUX
-        // TODO?
-       #else
-        #error
+        userAppData = userAppData.getChildFile ("Application Support");
        #endif
 
-        {
-            // Look for a DLL in extras/Projucer/Builds
-            File f = appFile.getParentDirectory();
-
-            for (int i = 5; --i >= 0;)
-            {
-                if (f.getFileName().equalsIgnoreCase ("Builds")
-                     && f.getParentDirectory().getFileName().equalsIgnoreCase ("Projucer"))
-                {
-                    f = f.getSiblingFile (getDLLName());
-                    if (isDLLFile (f))
-                        return f;
-
-                    break;
-                }
-
-                f = f.getParentDirectory();
-            }
-        }
-
-        // See if there's one in the same folder as the app...
-        File f = appFile.getSiblingFile (getDLLName());
-        if (isDLLFile (f))
-            return f;
-
-        // Look in some common folders as a last resort..
-        f = File::getSpecialLocation (File::userHomeDirectory).getChildFile (getDLLName());
-        if (isDLLFile (f))
-            return f;
-
-        f = File::getSpecialLocation (File::userDocumentsDirectory).getChildFile (getDLLName());
-        if (isDLLFile (f))
-            return f;
-
-        return File();
+        return userAppData.getChildFile (String ("Projucer-") + ProjectInfo::versionString);
     }
 
 private:
     DynamicLibrary dll;
 
     enum { requiredVersion = 1 };
+
+    static File findDLLFile()
+    {
+        File dllFile;
+
+        if (tryFindDLLFileInAppFolder(dllFile))
+            return dllFile;
+
+       #if JUCE_MAC
+        if (tryFindDLLFileInAppBundle(dllFile))
+            return dllFile;
+       #endif
+
+        if (tryFindDLLFileInAppConfigFolder(dllFile))
+            return dllFile;
+
+        return File();
+    }
+
+   #if JUCE_MAC
+    static bool tryFindDLLFileInAppBundle(File &outFile)
+    {
+        File currentExecFile (File::getSpecialLocation (File::currentExecutableFile));
+        return tryFindDLLFileInFolder (currentExecFile.getParentDirectory(), outFile);
+    }
+   #endif
+
+    static bool tryFindDLLFileInAppFolder(File &outFile)
+    {
+        File currentAppFile (File::getSpecialLocation (File::currentApplicationFile));
+        return tryFindDLLFileInFolder (currentAppFile.getParentDirectory(), outFile);
+    }
+
+    static bool tryFindDLLFileInAppConfigFolder(File &outFile)
+    {
+        File userAppDataFolder (getVersionedUserAppSupportFolder());
+        return tryFindDLLFileInFolder (userAppDataFolder, outFile);
+    }
+
+    static bool tryFindDLLFileInFolder(File folder, File& outFile)
+    {
+        File file = folder.getChildFile (getDLLName());
+        if (isDLLFile (file))
+        {
+            outFile = file;
+            return true;
+        }
+
+        return false;
+    }
+
+    static bool isDLLFile (const File& f)
+    {
+        return f.getFileName().equalsIgnoreCase (getDLLName()) && f.exists();
+    }
 
     static void setPropertyCallback (const char* key, const char* value)
     {

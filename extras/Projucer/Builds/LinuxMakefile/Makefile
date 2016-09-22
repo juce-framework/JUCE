@@ -61,6 +61,7 @@ OBJECTS := \
   $(JUCE_OBJDIR)/jucer_AutoUpdater_ca658dc2.o \
   $(JUCE_OBJDIR)/jucer_CommandLine_f35de107.o \
   $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o \
+  $(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_8a38703f.o \
   $(JUCE_OBJDIR)/jucer_GlobalPreferences_b0f1bd3d.o \
   $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o \
   $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o \
@@ -152,6 +153,11 @@ $(JUCE_OBJDIR)/jucer_CommandLine_f35de107.o: ../../Source/Application/jucer_Comm
 $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o: ../../Source/Application/jucer_DocumentEditorComponent.cpp
 	-@mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_DocumentEditorComponent.cpp"
+	@$(CXX) $(JUCE_CXXFLAGS) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_8a38703f.o: ../../Source/Application/jucer_DownloadCompileEngineThread.cpp
+	-@mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_DownloadCompileEngineThread.cpp"
 	@$(CXX) $(JUCE_CXXFLAGS) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_GlobalPreferences_b0f1bd3d.o: ../../Source/Application/jucer_GlobalPreferences.cpp
