@@ -2023,7 +2023,11 @@ private:
                 WindowRef windowRef = HIViewGetWindow (parentHIView);
                 hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
 
-                [hostWindow retain];
+                // not really sure why this is needed in older OS X versions
+                // but JUCE plug-ins crash without it
+                if ((SystemStats::getOperatingSystemType() & 0xff) < 12)
+                    [hostWindow retain];
+
                 [hostWindow setCanHide: YES];
                 [hostWindow setReleasedWhenClosed: YES];
 
