@@ -483,13 +483,15 @@ String SystemClipboard::getTextFromClipboard()
 
 void Process::setDockIconVisible (bool isVisible)
 {
-   #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
-    [NSApp setActivationPolicy: isVisible ? NSApplicationActivationPolicyRegular
-                                          : NSApplicationActivationPolicyProhibited];
-   #else
-    ignoreUnused (isVisible);
-    jassertfalse; // sorry, not available in 10.5!
-   #endif
+    ProcessSerialNumber psn { 0, kCurrentProcess };
+    ProcessApplicationTransformState state = isVisible
+        ? kProcessTransformToForegroundApplication
+        : kProcessTransformToUIElementApplication;
+
+    OSStatus err = TransformProcessType (&psn, state);
+
+    jassert (err == 0);
+    ignoreUnused (err);
 }
 
 bool Desktop::isOSXDarkModeActive()
