@@ -26,7 +26,8 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* s,
                                             TimeSliceThread& thread,
                                             const bool deleteSourceWhenDeleted,
                                             const int bufferSizeSamples,
-                                            const int numChannels)
+                                            const int numChannels,
+                                            bool prefillBufferOnPrepareToPlay)
     : source (s, deleteSourceWhenDeleted),
       backgroundThread (thread),
       numberOfSamplesToBuffer (jmax (1024, bufferSizeSamples)),
@@ -36,7 +37,8 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* s,
       nextPlayPos (0),
       sampleRate (0),
       wasSourceLooping (false),
-      isPrepared (false)
+      isPrepared (false),
+      prefillBuffer (prefillBufferOnPrepareToPlay)
 {
     jassert (source != nullptr);
 
@@ -73,12 +75,13 @@ void BufferingAudioSource::prepareToPlay (int samplesPerBlockExpected, double ne
 
         backgroundThread.addTimeSliceClient (this);
 
-        while (bufferValidEnd - bufferValidStart < jmin (((int) newSampleRate) / 4,
-                                                         buffer.getNumSamples() / 2))
+        do
         {
             backgroundThread.moveToFrontOfQueue (this);
             Thread::sleep (5);
         }
+        while (prefillBuffer
+         && (bufferValidEnd - bufferValidStart < jmin (((int) newSampleRate) / 4, buffer.getNumSamples() / 2)));
     }
 }
 
