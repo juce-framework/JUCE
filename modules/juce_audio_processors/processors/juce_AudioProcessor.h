@@ -768,7 +768,7 @@ public:
     */
     template <int numLayouts>
     BusesLayout getNextBestLayoutInLayoutList (const BusesLayout& layouts,
-                                                   const short channelLayoutList[numLayouts][2])
+                                               const short (&channelLayoutList) [numLayouts][2])
     {
         return getNextBestLayoutInList (layouts, layoutListToArray (channelLayoutList));
     }
