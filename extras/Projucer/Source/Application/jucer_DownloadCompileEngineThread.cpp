@@ -137,7 +137,7 @@ URL DownloadCompileEngineThread::getDownloadUrl()
    #elif JUCE_WINDOWS
     urlStub << "windows_";
    #else
-    jassertfalse
+    jassertfalse;
    #endif
 
     return urlStub + ProjectInfo::versionString + ".zip";
