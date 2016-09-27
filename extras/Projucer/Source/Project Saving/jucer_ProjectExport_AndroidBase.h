@@ -35,7 +35,7 @@ public:
           androidMinimumSDK (settings, Ids::androidMinimumSDK, nullptr, "23"),
           androidTheme (settings, Ids::androidTheme, nullptr),
           androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
-          androidMicNeeded (settings, Ids::androidMicNeeded, nullptr, false),
+          androidMicNeeded (settings, Ids::microphonePermissionNeeded, nullptr, false),
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
