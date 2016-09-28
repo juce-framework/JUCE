@@ -302,7 +302,13 @@ public:
         vstEffect.latency = filter->getLatencySamples();
         vstEffect.effectPointer = this;
         vstEffect.plugInIdentifier = JucePlugin_VSTUniqueID;
+
+       #ifdef JucePlugin_VSTChunkStructureVersion
+        vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VSTChunkStructureVersion);
+       #else
         vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VersionCode);
+       #endif
+
         vstEffect.processAudioInplaceFunction = processReplacingCB;
         vstEffect.processDoubleAudioInplaceFunction = processDoubleReplacingCB;
 
