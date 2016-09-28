@@ -313,6 +313,12 @@ private:
     // Note that this method has changed, and no longer has a parameter to indicate
     // whether the jobs should be deleted - see the new method for details.
     void removeAllJobs (bool, int, bool);
+private:
+  int mTimeOut;
+  bool mThrowAssert;
+public:
+  void setTimeOut(int time) { mTimeOut = time; }
+  void setThrowAssert(bool val) { mThrowAssert = val; }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool)
 };
