@@ -63,7 +63,6 @@ public class JuceBridge
     private Context activityContext;
     private static JuceBridge instance;
     private Map<String, ComponentPeerView> componentPeerViewMap;
-    private Map<String, JuceViewHolder> juceViewHolderMap;
     private JuceViewHolder juceViewHolder;
 
     private static class Holder {
@@ -72,7 +71,7 @@ public class JuceBridge
 
     private JuceBridge()
     {
-        juceViewHolderMap = new HashMap<String, JuceViewHolder>();
+        componentPeerViewMap = new HashMap<String, ComponentPeerView>();
         permissionCallbackPtrMap = new HashMap<Integer, Long>();
     }
 
@@ -84,6 +83,7 @@ public class JuceBridge
     public synchronized void setActivityContext(Context c)
     {
         activityContext = c;
+        juceViewHolder = new JuceViewHolder(c);
     }
 
     public boolean appInitialised()
@@ -630,57 +630,30 @@ public class JuceBridge
     private MidiDeviceManager midiDeviceManager = null;
     private BluetoothManager bluetoothManager = null;
 
-    public JuceViewHolder getViewForComponent (String componentName, Context c)
+    public ComponentPeerView getPeerViewForComponent(String componentName)
     {
-        JuceViewHolder juceViewHolder;
-        // Check if view exists in map before creating new
-        if ((juceViewHolder = juceViewHolderMap.get (componentName)) == null)
-        {
-           juceViewHolder = new JuceViewHolder(c);
-            Log.d("JuceBridge", "Type of context is "+c.getClass().getName());
-            juceViewHolderMap.put(componentName, juceViewHolder);
-        }
-        return juceViewHolder;
+        return componentPeerViewMap.get (componentName);
     }
 
-    public JuceViewHolder getViewForDefaultComponent (Context c)
+    public ComponentPeerView getPeerViewForDefaultComponent()
     {
-        return getViewForComponent(null, c);
-    }
-
-    public JuceViewHolder newViewHolder (Context c)
-    {
-        return juceViewHolder = new JuceViewHolder(c);
+        return componentPeerViewMap.get (null);
     }
 
     public final ComponentPeerView createNewView (boolean opaque, long host, String componentName)
     {
-        ComponentPeerView v = null;
-        Log.d("JuceBridge", "Add view to JuceViewHolder with key="+componentName);
-        JuceViewHolder juceView = juceViewHolderMap.get(componentName);
-        if (juceView != null)
-        {
-            v = new ComponentPeerView (juceView.getContext(), opaque, host);
-            juceView.addView(v);
-        }
-        else
-        {
-            Log.d("JuceBridge", "No JuceViewHolder found for key=" + componentName);
-            Log.d("JuceBridge", "Trying null key");
-            juceView = juceViewHolderMap.get(null);
-            if (juceView != null)
-            {
-                v = new ComponentPeerView (juceView.getContext(), opaque, host);
-                juceView.addView(v);
-                Log.d("JuceBridge", "Added view to JuceViewHolder with null key");
-            }
-            else
-            {
-                Log.d("JuceBridge", "No JuceViewHolder found for null key");
-            }
-        }
+        ComponentPeerView v = new ComponentPeerView (activityContext, opaque, host);
+        componentPeerViewMap.put (componentName, v);
+        juceViewHolder.addView(v); // So the last created view becomes the default. TODO: make this optional
+
         return v;
     }
+
+    public JuceViewHolder getViewHolder()
+    {
+        return juceViewHolder;
+    }
+
     public final void deleteView (ComponentPeerView view)
     {
         ViewGroup group = (ViewGroup) (view.getParent());
