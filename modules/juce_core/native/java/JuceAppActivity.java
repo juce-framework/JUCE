@@ -26,7 +26,6 @@ package com.juce;
 
 import android.app.Activity;
 import android.os.Bundle;
-import java.util.*;
 import android.media.AudioManager;
 
 
@@ -43,7 +42,7 @@ public class JuceAppActivity   extends Activity
         juceBridge.setActivityContext(this);
         juceBridge.setScreenSaver(true);
         juceBridge.hideActionBar();
-        setContentView(juceBridge.createViewForDefaultComponent(this));
+        setContentView(juceBridge.getViewHolder());
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
