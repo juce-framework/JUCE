@@ -151,6 +151,41 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
     }
 }
 
+bool BufferingAudioSource::waitForNextAudioBlockReady (const AudioSourceChannelInfo& info, const uint32 timeout)
+{
+    if (!source || source->getTotalLength() <= 0)
+        return false;
+
+    if (nextPlayPos + info.numSamples < 0)
+        return true;
+
+    if (! isLooping() && nextPlayPos > getTotalLength())
+        return true;
+
+    const uint32 endTime = Time::getMillisecondCounter () + timeout;
+    uint32 now = Time::getMillisecondCounter();
+
+    while (now < endTime)
+    {
+        {
+            const ScopedLock sl (bufferStartPosLock);
+
+            const int validStart = static_cast<int> (jlimit (bufferValidStart, bufferValidEnd, nextPlayPos) - nextPlayPos);
+            const int validEnd   = static_cast<int> (jlimit (bufferValidStart, bufferValidEnd, nextPlayPos + info.numSamples) - nextPlayPos);
+
+            if (validStart <= 0 && validStart < validEnd && validEnd >= info.numSamples)
+                return true;
+        }
+
+        if (! bufferReadyEvent.wait (endTime - now))
+            return false;
+
+        now = Time::getMillisecondCounter();
+    }
+
+    return false;
+}
+
 int64 BufferingAudioSource::getNextReadPosition() const
 {
     jassert (source->getTotalLength() > 0);
@@ -243,6 +278,8 @@ bool BufferingAudioSource::readNextBufferChunk()
         bufferValidStart = newBVS;
         bufferValidEnd = newBVE;
     }
+
+    bufferReadyEvent.signal();
 
     return true;
 }
