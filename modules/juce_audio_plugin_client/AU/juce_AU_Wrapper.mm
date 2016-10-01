@@ -1076,6 +1076,8 @@ public:
             audioBuffer.reset();
         }
 
+        ioActionFlags &= ~kAudioUnitRenderAction_OutputIsSilence;
+
         const int numInputBuses  = static_cast<int> (GetScope (kAudioUnitScope_Input) .GetNumberOfElements());
         const int numOutputBuses = static_cast<int> (GetScope (kAudioUnitScope_Output).GetNumberOfElements());
 
