@@ -177,7 +177,7 @@ bool BufferingAudioSource::waitForNextAudioBlockReady (const AudioSourceChannelI
                 return true;
         }
 
-        if (! bufferReadyEvent.wait (endTime - now))
+        if (! bufferReadyEvent.wait (static_cast<int> (endTime - now)))
             return false;
 
         now = Time::getMillisecondCounter();
