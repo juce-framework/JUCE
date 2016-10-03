@@ -101,7 +101,7 @@ bool GLSubFrame::renderFrame(){
     OpenGLContext::NativeContext::Locker locker (*mNativeContext);
     mContext.currentRenderScale = scale;
     if(!mRenderer->renderGL())return false;
-    mContext.swapBuffers();
+    //mContext.swapBuffers();
     
     return true;
 }
