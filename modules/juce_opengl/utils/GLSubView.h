@@ -1,3 +1,7 @@
+/* Copyright 2016 nTopology Inc. All Rights Reserved.
+GLSubView.cpp
+Author: Abhi
+==============================================================================*/
 
 #pragma once
 

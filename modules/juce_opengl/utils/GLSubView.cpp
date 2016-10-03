@@ -1,8 +1,14 @@
+/* Copyright 2016 nTopology Inc. All Rights Reserved.
+GLSubView.cpp
+Author: Abhi
+==============================================================================*/
 
-//---------------------------------GLSubFrame------------------------------------------------------------
+//--GLSubFrame------------------------------------------------------------------
+//
+GLSubFrame::GLSubFrame(Renderer* r,Component *attach,Component* focus):
+  Thread ("OpenGLSub Rendering")
+{
 
-
-GLSubFrame::GLSubFrame(Renderer* r,Component *attach,Component* focus):Thread ("OpenGLSub Rendering"){
     
     hasInitialised = false;
     needsUpdate = 1;
@@ -19,8 +25,11 @@ GLSubFrame::GLSubFrame(Renderer* r,Component *attach,Component* focus):Thread ("
     mContext.setOpenGLVersionRequired(OpenGLContext::openGL3_2);
     
     mNativeContext= nullptr;
-    mNativeContext = new OpenGLContext::NativeContext (*mComp,mContext.openGLPixelFormat, mContext.contextToShareWith,
-                                       mContext.useMultisampling, mContext.versionRequired);
+    mNativeContext = new OpenGLContext::NativeContext (*mComp,
+                                                       mContext.openGLPixelFormat, 
+                                                       mContext.contextToShareWith,
+                                                       mContext.useMultisampling,
+                                                       mContext.versionRequired);
     
     if (mNativeContext->createdOk())
         mContext.nativeContext = mNativeContext;
@@ -31,10 +40,7 @@ GLSubFrame::GLSubFrame(Renderer* r,Component *attach,Component* focus):Thread ("
 	mContext.currentRenderScale = scale;
 
     start();
-
 }
-
-
 
 void GLSubFrame::run(){
     {
@@ -53,10 +59,8 @@ void GLSubFrame::run(){
             wait (-1);
     }
     
-    shutdownOnThread();
-    
+    shutdownOnThread();  
 }
-
 
 GLSubFrame::~GLSubFrame(){
     stop();
@@ -67,13 +71,11 @@ void GLSubFrame::start(){
         startThread (6);
 }
 
-
 void GLSubFrame::stop(){
     stopThread (10000);
     mContext.nativeContext = nullptr;
     hasInitialised = false;
 }
-
 
 void GLSubFrame::initOnThread(){
     mContext.makeActive();
@@ -82,7 +84,6 @@ void GLSubFrame::initOnThread(){
     mNativeContext->setSwapInterval (1);
     MessageManagerLock mml (Thread::getCurrentThread());
     mRenderer->initGL();
-
 }
 
 bool GLSubFrame::renderFrame(){
@@ -136,9 +137,8 @@ void GLSubFrame::triggerRepaint(){
     notify();
 }
 
-//---------------------------------GLSubView------------------------------------------------------------//
-
-
+//--GLSubView-------------------------------------------------------------------
+//
 GLSubView::GLSubView(int x,int y,int w,int h){
     //find desktop scale
     
@@ -167,7 +167,6 @@ GLSubView::~GLSubView(){
     delete[] mPixels;
 }
 
-
 void GLSubView::initGL(){
     auto& context = getGLContext();
     mFrameBuffer->initialise(mSubFrame->getGLContext(), mWidth, mHeight);
@@ -179,16 +178,31 @@ void GLSubView::initGL(){
     
     context.extensions.glGenRenderbuffers(1, &ColorBufferID);
     context.extensions.glBindRenderbuffer(GL_RENDERBUFFER, ColorBufferID);
-    context.extensions.glRenderbufferStorageMultisample(GL_RENDERBUFFER, nSamples, GL_RGBA8, mWidth, mHeight);
+    context.extensions.glRenderbufferStorageMultisample(GL_RENDERBUFFER, 
+                                                        nSamples, 
+                                                        GL_RGBA8,
+                                                        mWidth, 
+                                                        mHeight);
     
     context.extensions.glGenRenderbuffers (1, &depthOrStencilBuffer);
-    context.extensions.glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
-    context.extensions.glRenderbufferStorageMultisample (GL_RENDERBUFFER,nSamples, GL_DEPTH_COMPONENT24,mWidth,mHeight);
-    
-    context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ColorBufferID);
-    context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
-    
+    context.extensions.glBindRenderbuffer (GL_RENDERBUFFER,
+                                           depthOrStencilBuffer);
 
+    context.extensions.glRenderbufferStorageMultisample (GL_RENDERBUFFER,
+                                                         nSamples, 
+                                                         GL_DEPTH_COMPONENT24,
+                                                         mWidth,mHeight);
+    
+    context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, 
+                                                  GL_COLOR_ATTACHMENT0, 
+                                                  GL_RENDERBUFFER,
+                                                  ColorBufferID);
+
+    context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER,
+                                                  GL_DEPTH_ATTACHMENT, 
+                                                  GL_RENDERBUFFER, 
+                                                  depthOrStencilBuffer);
+    
     openGLCreated();
 }
 
@@ -216,7 +230,12 @@ bool GLSubView::renderGL(){
     //blit
     context.extensions.glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     context.extensions.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFrameBuffer->getFrameBufferID());
-    context.extensions.glBlitFramebuffer(0, 0, mWidth, mHeight, 0, 0, mWidth, mHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    context.extensions.glBlitFramebuffer(0,0,
+                                         mWidth, mHeight, 
+                                         0,0,
+                                         mWidth, mHeight, 
+                                         GL_COLOR_BUFFER_BIT, 
+                                         GL_NEAREST);
     
     std::unique_lock<std::mutex> lock(mutex);
     mFrameBuffer->readPixels(mPixels, Rectangle<int>{0,0,mWidth,mHeight});
