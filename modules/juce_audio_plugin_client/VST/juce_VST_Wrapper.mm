@@ -69,7 +69,7 @@ static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, vo
 
 static bool shouldManuallyCloseHostWindow()
 {
-    return getHostType().isCubase7orLater() || getHostType().isRenoise();
+    return getHostType().isCubase7orLater() || getHostType().isRenoise() || ((SystemStats::getOperatingSystemType() & 0xff) >= 12);
 }
 #endif
 

@@ -605,7 +605,8 @@ bool CompileEngineChildProcess::canLaunchApp() const
     return process != nullptr
             && runningAppProcess == nullptr
             && activityList.getNumActivities() == 0
-            && errorList.getNumErrors() == 0;
+            && errorList.getNumErrors() == 0
+            && project.getProjectType().isGUIApplication();
 }
 
 void CompileEngineChildProcess::launchApp()

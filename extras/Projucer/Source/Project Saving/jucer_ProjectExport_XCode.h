@@ -97,6 +97,8 @@ public:
     Value  getCustomXcassetsFolderValue()            { return getSetting (Ids::customXcassetsFolder); }
     String getCustomXcassetsFolderString() const     { return settings   [Ids::customXcassetsFolder]; }
 
+    Value  getMicrophonePermissionValue()            { return getSetting (Ids::microphonePermissionNeeded); }
+    bool   isMicrophonePermissionEnabled() const     { return settings   [Ids::microphonePermissionNeeded]; }
     Value  getInAppPurchasesValue()                  { return getSetting (Ids::iosInAppPurchases); }
     bool   isInAppPurchasesEnabled() const           { return settings   [Ids::iosInAppPurchases]; }
     Value  getBackgroundAudioValue()                 { return getSetting (Ids::iosBackgroundAudio); }
@@ -160,6 +162,10 @@ public:
 
             props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"),
                        "Enable this to disable the status bar in your app.");
+
+            props.add (new BooleanPropertyComponent (getMicrophonePermissionValue(), "Microphone access", "Enabled"),
+                       "Enable this to allow your app to use the microphone. "
+                       "The user of your app will be prompted to grant microphone access permissions.");
 
             props.add (new BooleanPropertyComponent (getInAppPurchasesValue(), "In-App purchases capability", "Enabled"),
                        "Enable this to grant your app the capability for in-app purchases. "
@@ -1164,6 +1170,8 @@ public:
             if (owner.iOS)
             {
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+                if (owner.isMicrophonePermissionEnabled())
+                    addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", "This app requires microphone input.");
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);

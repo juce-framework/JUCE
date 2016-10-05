@@ -55,13 +55,34 @@ public:
     /** Destructor. */
     ~IIRCoefficients() noexcept;
 
+    //==============================================================================
     /** Returns the coefficients for a low-pass filter. */
     static IIRCoefficients makeLowPass (double sampleRate,
                                         double frequency) noexcept;
 
+    /** Returns the coefficients for a low-pass filter with variable Q. */
+    static IIRCoefficients makeLowPass (double sampleRate,
+                                        double frequency,
+                                        double Q) noexcept;
+
+    //==============================================================================
     /** Returns the coefficients for a high-pass filter. */
     static IIRCoefficients makeHighPass (double sampleRate,
                                          double frequency) noexcept;
+
+    /** Returns the coefficients for a high-pass filter with variable Q. */
+    static IIRCoefficients makeHighPass (double sampleRate,
+                                         double frequency,
+                                         double Q) noexcept;
+
+    //==============================================================================
+    /** Returns the coefficients for a band-pass filter. */
+    static IIRCoefficients makeBandPass(double sampleRate, double frequency) noexcept;
+
+    /** Returns the coefficients for a band-pass filter with variable Q. */
+    static IIRCoefficients makeBandPass(double sampleRate,
+                                        double frequency,
+                                        double Q) noexcept;
 
     //==============================================================================
     /** Returns the coefficients for a low-pass shelf filter with variable Q and gain.

@@ -53,6 +53,19 @@ public:
     StandaloneFilterApp()
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Standalone;
+
+        PropertiesFile::Options options;
+
+        options.applicationName     = getApplicationName();
+        options.filenameSuffix      = ".settings";
+        options.osxLibrarySubFolder = "Application Support";
+       #if JUCE_LINUX
+        options.folderName          = "~/.config";
+       #else
+        options.folderName          = "";
+       #endif
+
+        appProperties.setStorageParameters (options);
     }
 
     const String getApplicationName() override              { return JucePlugin_Name; }
@@ -62,7 +75,7 @@ public:
 
     virtual StandaloneFilterWindow* createWindow()
     {
-        return new StandaloneFilterWindow (getApplicationName(), Colours::white, nullptr, true);
+        return new StandaloneFilterWindow (getApplicationName(), Colours::white, appProperties.getUserSettings(), false);
     }
 
     //==============================================================================
@@ -80,6 +93,7 @@ public:
     void shutdown() override
     {
         mainWindow = nullptr;
+        appProperties.saveIfNeeded();
     }
 
     //==============================================================================
@@ -89,6 +103,7 @@ public:
     }
 
 protected:
+    ApplicationProperties appProperties;
     ScopedPointer<StandaloneFilterWindow> mainWindow;
 };
 

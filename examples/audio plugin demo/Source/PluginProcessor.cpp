@@ -370,7 +370,7 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
             // Now reload our parameters..
             for (int i = 0; i < getNumParameters(); ++i)
                 if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters().getUnchecked(i)))
-                    p->setValueNotifyingHost ((float) xmlState->getDoubleAttribute (p->paramID, p->getValue()));
+                    p->setValue ((float) xmlState->getDoubleAttribute (p->paramID, p->getValue()));
         }
     }
 }

@@ -444,6 +444,9 @@ public:
                 setParamNormalized (paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram()) / static_cast<Vst::ParamValue> (numPrograms - 1));
         }
 
+        if (Vst::IComponentHandler* handler = getComponentHandler())
+            handler->restartComponent (Vst::kParamValuesChanged);
+
         return Vst::EditController::setComponentState (stream);
     }
 
@@ -1625,14 +1628,8 @@ public:
         }
 
         if (type == Vst::kAudio)
-        {
-            // don't allow disabling the main bus
-            if (state == 0 && index == 0)
-                return kResultFalse;
-
             if (AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
                 return (bus->enable (state != 0) ? kResultTrue : kResultFalse);
-        }
 
         return kResultFalse;
     }

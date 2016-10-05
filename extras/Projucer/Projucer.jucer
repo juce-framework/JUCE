@@ -112,6 +112,10 @@
             resource="0" file="Source/Application/jucer_DocumentEditorComponent.cpp"/>
       <FILE id="prPBQg" name="jucer_DocumentEditorComponent.h" compile="0"
             resource="0" file="Source/Application/jucer_DocumentEditorComponent.h"/>
+      <FILE id="TkXpt2" name="jucer_DownloadCompileEngineThread.cpp" compile="1"
+            resource="0" file="Source/Application/jucer_DownloadCompileEngineThread.cpp"/>
+      <FILE id="J37kAi" name="jucer_DownloadCompileEngineThread.h" compile="0"
+            resource="0" file="Source/Application/jucer_DownloadCompileEngineThread.h"/>
       <FILE id="Sm7ufE" name="jucer_EulaDialogue.h" compile="0" resource="0"
             file="Source/Application/jucer_EulaDialogue.h"/>
       <FILE id="eo4r70" name="jucer_FilePreviewComponent.h" compile="0" resource="0"

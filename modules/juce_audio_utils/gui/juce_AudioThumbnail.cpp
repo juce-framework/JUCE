@@ -30,19 +30,19 @@ struct AudioThumbnail::MinMaxValue
         values[1] = 0;
     }
 
-    inline void set (const char newMin, const char newMax) noexcept
+    inline void set (const int8 newMin, const int8 newMax) noexcept
     {
         values[0] = newMin;
         values[1] = newMax;
     }
 
-    inline char getMinValue() const noexcept        { return values[0]; }
-    inline char getMaxValue() const noexcept        { return values[1]; }
+    inline int8 getMinValue() const noexcept        { return values[0]; }
+    inline int8 getMaxValue() const noexcept        { return values[1]; }
 
     inline void setFloat (Range<float> newRange) noexcept
     {
-        values[0] = (char) jlimit (-128, 127, roundFloatToInt (newRange.getStart() * 127.0f));
-        values[1] = (char) jlimit (-128, 127, roundFloatToInt (newRange.getEnd()   * 127.0f));
+        values[0] = (int8) jlimit (-128, 127, roundFloatToInt (newRange.getStart() * 127.0f));
+        values[1] = (int8) jlimit (-128, 127, roundFloatToInt (newRange.getEnd()   * 127.0f));
 
         if (values[0] == values[1])
         {
@@ -68,7 +68,7 @@ struct AudioThumbnail::MinMaxValue
     inline void write (OutputStream& output)   { output.write (values, 2); }
 
 private:
-    char values[2];
+    int8 values[2];
 };
 
 //==============================================================================
@@ -287,8 +287,8 @@ public:
         {
             endSample = jmin (endSample, data.size() - 1);
 
-            char mx = -128;
-            char mn = 127;
+            int8 mx = -128;
+            int8 mn = 127;
 
             while (startSample <= endSample)
             {

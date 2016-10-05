@@ -52,7 +52,7 @@
 #include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 #include "../../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 
-#include "juce_AU_Shared.h"
+#include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
 

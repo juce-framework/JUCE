@@ -22,29 +22,36 @@
   ==============================================================================
 */
 
-AudioAppComponent::AudioAppComponent()
-{
-}
+#ifndef JUCER_DOWNLOADCOMPILEENGINETHREAD_H_INCLUDED
+#define JUCER_DOWNLOADCOMPILEENGINETHREAD_H_INCLUDED
 
-AudioAppComponent::~AudioAppComponent()
-{
-    // If you hit this then your derived class must call shutdown audio in
-    // destructor!
-    jassert (audioSourcePlayer.getCurrentSource() == nullptr);
-}
+#include "jucer_Application.h"
 
-void AudioAppComponent::setAudioChannels (int numInputChannels, int numOutputChannels, const XmlElement* const xml)
-{
-    String audioError = deviceManager.initialise (numInputChannels, numOutputChannels, xml, true);
-    jassert (audioError.isEmpty());
 
-    deviceManager.addAudioCallback (&audioSourcePlayer);
-    audioSourcePlayer.setSource (this);
-}
-
-void AudioAppComponent::shutdownAudio()
+//==============================================================================
+class DownloadCompileEngineThread   : public ThreadWithProgressWindow
 {
-    audioSourcePlayer.setSource (nullptr);
-    deviceManager.removeAudioCallback (&audioSourcePlayer);
-    deviceManager.closeAudioDevice();
-}
+public:
+    static bool downloadAndInstall();
+
+protected:
+    void run() override;
+    void threadComplete (bool userPressedCancel) override;
+
+private:
+    DownloadCompileEngineThread();
+
+    Result download (MemoryBlock& dest);
+    Result install (const MemoryBlock& data, File& targetFolder);
+
+    static URL getDownloadUrl();
+    static File getInstallFolder();
+    static bool withError(const String& msg);
+
+    Result result;
+    bool cancelledByUser;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadCompileEngineThread)
+};
+
+#endif   // JUCER_DOWNLOADCOMPILEENGINETHREAD_H_INCLUDED

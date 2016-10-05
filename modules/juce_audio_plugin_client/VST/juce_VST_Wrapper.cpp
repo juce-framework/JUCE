@@ -302,7 +302,13 @@ public:
         vstEffect.latency = filter->getLatencySamples();
         vstEffect.effectPointer = this;
         vstEffect.plugInIdentifier = JucePlugin_VSTUniqueID;
+
+       #ifdef JucePlugin_VSTChunkStructureVersion
+        vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VSTChunkStructureVersion);
+       #else
         vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VersionCode);
+       #endif
+
         vstEffect.processAudioInplaceFunction = processReplacingCB;
         vstEffect.processDoubleAudioInplaceFunction = processDoubleReplacingCB;
 
@@ -566,13 +572,13 @@ public:
                 host that we want midi. In the SDK this method is marked as deprecated, but
                 some hosts rely on this behaviour.
             */
-            if (vstEffect.flags & vstEffectFlagIsSynth || JucePlugin_WantsMidiInput)
+            if (vstEffect.flags & vstEffectFlagIsSynth || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect)
             {
                 if (hostCallback != nullptr)
                     hostCallback (&vstEffect, hostOpcodePlugInWantsMidi, 0, 1, 0, 0);
             }
 
-           #if JucePlugin_ProducesMidiOutput
+           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             outgoingEvents.ensureSize (512);
            #endif
         }
@@ -764,7 +770,7 @@ public:
             const AudioChannelSet& channelSet = bus.getCurrentLayout();
             AudioChannelSet::ChannelType channelType = channelSet.getTypeOfChannel (channelIdx);
 
-            properties.flags = vstPinInfoFlagIsActive | vstPinInfoFlagIsStereo;
+            properties.flags = vstPinInfoFlagIsActive | vstPinInfoFlagValid;
             properties.configurationType = SpeakerMappings::channelSetToVstArrangementType (channelSet);
             String label = bus.getName();
 
@@ -1697,7 +1703,7 @@ private:
 
     pointer_sized_int handlePreAudioProcessingEvents (VstOpCodeArguments args)
     {
-       #if JucePlugin_WantsMidiInput
+       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
         VSTMidiEventList::addEventsToMidiBuffer ((VstEventBlock*) args.ptr, midiEvents);
         return 1;
        #else
@@ -1859,7 +1865,7 @@ private:
              || strcmp (text, "receiveVstMidiEvent") == 0
              || strcmp (text, "receiveVstMidiEvents") == 0)
         {
-           #if JucePlugin_WantsMidiInput
+           #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
             return 1;
            #else
             return -1;
@@ -1870,7 +1876,7 @@ private:
              || strcmp (text, "sendVstMidiEvent") == 0
              || strcmp (text, "sendVstMidiEvents") == 0)
         {
-           #if JucePlugin_ProducesMidiOutput
+           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             return 1;
            #else
             return -1;
