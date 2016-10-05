@@ -1252,6 +1252,8 @@ struct HighResolutionTimer::Pimpl
     {
         if (thread != 0)
         {
+            shouldStop = true;
+
             while (thread != 0 && thread != pthread_self())
             {
                 // if the timer callback itself calls startTimer then we need
@@ -1290,6 +1292,10 @@ private:
         while (! shouldStop)
         {
             clock.wait();
+
+            if (shouldStop)
+                break;
+
             owner.hiResTimerCallback();
 
             if (lastPeriod != periodMs)
