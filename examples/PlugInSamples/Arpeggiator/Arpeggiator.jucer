@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="NXaszK" name="Arpeggiator" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.ROLI.Arpeggiator" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="1"
+              buildVST="1" buildVST3="0" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="Arpeggiator" pluginDesc="Arpeggiator" pluginManufacturer="ROLI Ltd."
               pluginManufacturerCode="ROLI" pluginCode="Arpg" pluginChannelConfigs=""
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"

@@ -38,14 +38,14 @@ String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
         case left:                return NEEDS_TRANS("Left");
         case right:               return NEEDS_TRANS("Right");
         case centre:              return NEEDS_TRANS("Centre");
-        case subbass:             return NEEDS_TRANS("Subbass");
+        case LFE:                 return NEEDS_TRANS("LFE");
         case leftSurround:        return NEEDS_TRANS("Left Surround");
         case rightSurround:       return NEEDS_TRANS("Right Surround");
         case leftCentre:          return NEEDS_TRANS("Left Centre");
         case rightCentre:         return NEEDS_TRANS("Right Centre");
-        case surround:            return NEEDS_TRANS("Surround");
-        case leftRearSurround:    return NEEDS_TRANS("Left Rear Surround");
-        case rightRearSurround:   return NEEDS_TRANS("Right Rear Surround");
+        case centreSurround:      return NEEDS_TRANS("Centre Surround");
+        case leftSurroundRear:    return NEEDS_TRANS("Left Surround Rear");
+        case rightSurroundRear:   return NEEDS_TRANS("Right Surround Rear");
         case topMiddle:           return NEEDS_TRANS("Top Middle");
         case topFrontLeft:        return NEEDS_TRANS("Top Front Left");
         case topFrontCentre:      return NEEDS_TRANS("Top Front Centre");
@@ -55,9 +55,9 @@ String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
         case topRearRight:        return NEEDS_TRANS("Top Rear Right");
         case wideLeft:            return NEEDS_TRANS("Wide Left");
         case wideRight:           return NEEDS_TRANS("Wide Right");
-        case subbass2:            return NEEDS_TRANS("Subbass 2");
-        case leftSurroundDirect:  return NEEDS_TRANS ("Left Surround Direct");
-        case rightSurroundDirect: return NEEDS_TRANS ("Right Surround Direct");
+        case LFE2:                return NEEDS_TRANS("LFE 2");
+        case leftSurroundSide:    return NEEDS_TRANS ("Left Surround Side");
+        case rightSurroundSide:   return NEEDS_TRANS ("Right Surround Side");
         case ambisonicW:          return NEEDS_TRANS("Ambisonic W");
         case ambisonicX:          return NEEDS_TRANS("Ambisonic X");
         case ambisonicY:          return NEEDS_TRANS("Ambisonic Y");
@@ -78,14 +78,14 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         case left:                return "L";
         case right:               return "R";
         case centre:              return "C";
-        case subbass:             return "Lfe";
+        case LFE:                 return "Lfe";
         case leftSurround:        return "Ls";
         case rightSurround:       return "Rs";
         case leftCentre:          return "Lc";
         case rightCentre:         return "Rc";
-        case surround:            return "S";
-        case leftRearSurround:    return "Lrs";
-        case rightRearSurround:   return "Rrs";
+        case centreSurround:      return "Cs";
+        case leftSurroundRear:    return "Lrs";
+        case rightSurroundRear:   return "Rrs";
         case topMiddle:           return "Tm";
         case topFrontLeft:        return "Tfl";
         case topFrontCentre:      return "Tfc";
@@ -95,9 +95,9 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         case topRearRight:        return "Trr";
         case wideLeft:            return "Wl";
         case wideRight:           return "Wr";
-        case subbass2:            return "Lfe2";
-        case leftSurroundDirect:  return "Lsd";
-        case rightSurroundDirect: return "Rsd";
+        case LFE2:                return "Lfe2";
+        case leftSurroundSide:    return "Lss";
+        case rightSurroundSide:   return "Rss";
         case ambisonicW:          return "W";
         case ambisonicX:          return "X";
         case ambisonicY:          return "Y";
@@ -130,24 +130,29 @@ String AudioChannelSet::getDescription() const
     if (*this == disabled())           return "Disabled";
     if (*this == mono())               return "Mono";
     if (*this == stereo())             return "Stereo";
+
     if (*this == createLCR())          return "LCR";
     if (*this == createLRS())          return "LRS";
     if (*this == createLCRS())         return "LCRS";
+
+    if (*this == create5point0())      return "5.1 Surround";
+    if (*this == create5point1())      return "5.1 Surround (+Lfe)";
+    if (*this == create6point0())      return "6.1 Surround";
+    if (*this == create6point1())      return "6.1 Surround (+Lfe)";
+    if (*this == create6point0Music()) return "6.1 (Music) Surround";
+    if (*this == create6point1Music()) return "6.1 (Music) Surround (+Lfe)";
+    if (*this == create7point0())      return "7.1 Surround";
+    if (*this == create7point1())      return "7.1 Surround (Lfe)";
+    if (*this == create7point0SDDS())  return "7.1 Surround SDDS";
+    if (*this == create7point1SDDS())  return "7.1 Surround SDDS (+Lfe)";
+
     if (*this == quadraphonic())       return "Quadraphonic";
     if (*this == pentagonal())         return "Pentagonal";
     if (*this == hexagonal())          return "Hexagonal";
     if (*this == octagonal())          return "Octagonal";
     if (*this == ambisonic())          return "Ambisonic";
-    if (*this == create5point0())      return "5.1 Surround";
-    if (*this == create5point1())      return "5.1 Surround (+Lfe)";
-    if (*this == create6point0())      return "6.1 Surround";
-    if (*this == create6point0Music()) return "6.1 (Music) Surround";
-    if (*this == create6point1())      return "6.1 Surround (+Lfe)";
-    if (*this == create7point0())      return "7.1 Surround (Rear)";
-    if (*this == create7point1())      return "7.1 Surround (Rear +Lfe)";
-    if (*this == create7point1AC3())   return "7.1 AC3 Surround (Rear + Lfe)";
-    if (*this == createFront7point0()) return "7.1 Surround (Front)";
-    if (*this == createFront7point1()) return "7.1 Surround (Front +Lfe)";
+
+
 
     return "Unknown";
 }
@@ -221,21 +226,21 @@ AudioChannelSet AudioChannelSet::stereo()             { return AudioChannelSet (
 AudioChannelSet AudioChannelSet::createLCR()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre)); }
 AudioChannelSet AudioChannelSet::createLRS()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << surround)); }
 AudioChannelSet AudioChannelSet::createLCRS()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::quadraphonic()       { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround)); }
-AudioChannelSet AudioChannelSet::pentagonal()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftRearSurround) | (1u << rightRearSurround) | (1u << centre)); }
-AudioChannelSet AudioChannelSet::hexagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftRearSurround) | (1u << rightRearSurround) | (1u << centre) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::octagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround) | (1u << centre) | (1u << surround) | (1u << wideLeft) | (1u << wideRight)); }
-AudioChannelSet AudioChannelSet::ambisonic()          { return AudioChannelSet ((1u << ambisonicW) | (1u << ambisonicX) | (1u << ambisonicY) | (1u << ambisonicZ)); }
 AudioChannelSet AudioChannelSet::create5point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround)); }
-AudioChannelSet AudioChannelSet::create5point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << leftSurround)  | (1u << rightSurround)); }
-AudioChannelSet AudioChannelSet::create6point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround)  | (1u << rightSurround) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::create6point0Music() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftRearSurround)  | (1u << rightRearSurround) | (1u << leftSurround) | (1u << rightSurround)); }
-AudioChannelSet AudioChannelSet::create6point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass)  | (1u << leftSurround)  | (1u << rightSurround) | (1u << surround)); }
-AudioChannelSet AudioChannelSet::create7point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftRearSurround)  | (1u << rightRearSurround)); }
-AudioChannelSet AudioChannelSet::create7point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << leftRearSurround)  | (1u << rightRearSurround) | (1u << leftSurround) | (1u << rightSurround)); }
-AudioChannelSet AudioChannelSet::create7point1AC3()   { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << leftSurround)  | (1u << rightSurround) | (1u << leftSurroundDirect) | (1u << rightSurroundDirect)); }
-AudioChannelSet AudioChannelSet::createFront7point0() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround)  | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre)); }
-AudioChannelSet AudioChannelSet::createFront7point1() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << subbass) | (1u << leftSurround)  | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre)); }
+AudioChannelSet AudioChannelSet::create5point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create6point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << centreSurround)); }
+AudioChannelSet AudioChannelSet::create6point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << centreSurround) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create6point0Music() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftSurroundSide) | (1u << rightSurroundSide)); }
+AudioChannelSet AudioChannelSet::create6point1Music() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create7point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
+AudioChannelSet AudioChannelSet::create7point0SDDS()  { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre)); }
+AudioChannelSet AudioChannelSet::create7point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create7point1SDDS()  { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::ambisonic()          { return AudioChannelSet ((1u << ambisonicW) | (1u << ambisonicX) | (1u << ambisonicY) | (1u << ambisonicZ)); }
+AudioChannelSet AudioChannelSet::quadraphonic()       { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround)); }
+AudioChannelSet AudioChannelSet::pentagonal()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
+AudioChannelSet AudioChannelSet::hexagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurroundRear) | (1u << rightSurroundRear) |  (1u << centre) | (1u << centreSurround)); }
+AudioChannelSet AudioChannelSet::octagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround) | (1u << centre) | (1u << centreSurround) | (1u << wideLeft) | (1u << wideRight)); }
 
 
 AudioChannelSet AudioChannelSet::discreteChannels (int numChannels)
@@ -257,4 +262,18 @@ AudioChannelSet AudioChannelSet::canonicalChannelSet (int numChannels)
     if (numChannels == 8) return AudioChannelSet::create7point1();
 
     return discreteChannels (numChannels);
+}
+
+AudioChannelSet AudioChannelSet::namedChannelSet (int numChannels)
+{
+    if (numChannels == 1) return AudioChannelSet::mono();
+    if (numChannels == 2) return AudioChannelSet::stereo();
+    if (numChannels == 3) return AudioChannelSet::createLCR();
+    if (numChannels == 4) return AudioChannelSet::quadraphonic();
+    if (numChannels == 5) return AudioChannelSet::create5point0();
+    if (numChannels == 6) return AudioChannelSet::create5point1();
+    if (numChannels == 7) return AudioChannelSet::create7point0();
+    if (numChannels == 8) return AudioChannelSet::create7point1();
+
+    return AudioChannelSet();
 }

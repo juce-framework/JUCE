@@ -145,6 +145,9 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\SurroundProcessor.cpp"/>
+    <ClCompile Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -619,9 +622,6 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.cpp">
@@ -1814,6 +1814,7 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\SurroundEditor.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.h"/>
@@ -2002,7 +2003,6 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\CoreAudioUtilityClasses\CAXException.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\CoreAudioUtilityClasses\ComponentBase.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\CoreAudioUtilityClasses\MusicDeviceBase.h"/>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AU_Shared.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\Standalone\juce_StandaloneFilterWindow.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_CarbonVisibility.h"/>
@@ -2010,22 +2010,22 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_FakeMouseMoveGenerator.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeModuleHeaders.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_IncludeSystemHeaders.h"/>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginBusUtilities.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginHostType.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_WindowsHooks.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormatManager.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_AU_Shared.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Common.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3Headers.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VST3PluginFormat.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTCommon.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTInterface.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTMidiEventList.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h"/>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPluginInstance.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.h"/>
@@ -2466,6 +2466,7 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
     <None Include="..\..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
     <None Include="..\..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
     <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AU\AUResources.r"/>
+    <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\AUResources.r"/>
     <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU.r"/>
     <None Include="..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS.r"/>
     <None Include="..\..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>

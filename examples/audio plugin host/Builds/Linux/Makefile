@@ -58,6 +58,7 @@ endif
 
 OBJECTS := \
   $(JUCE_OBJDIR)/FilterGraph_62e9c017.o \
+  $(JUCE_OBJDIR)/FilterIOConfiguration_1cc9b659.o \
   $(JUCE_OBJDIR)/GraphEditorPanel_3dbd4872.o \
   $(JUCE_OBJDIR)/HostStartup_5ce96f96.o \
   $(JUCE_OBJDIR)/InternalFilters_beb54bdf.o \
@@ -101,6 +102,11 @@ strip:
 $(JUCE_OBJDIR)/FilterGraph_62e9c017.o: ../../Source/FilterGraph.cpp
 	-@mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling FilterGraph.cpp"
+	@$(CXX) $(JUCE_CXXFLAGS) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/FilterIOConfiguration_1cc9b659.o: ../../Source/FilterIOConfiguration.cpp
+	-@mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling FilterIOConfiguration.cpp"
 	@$(CXX) $(JUCE_CXXFLAGS) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/GraphEditorPanel_3dbd4872.o: ../../Source/GraphEditorPanel.cpp

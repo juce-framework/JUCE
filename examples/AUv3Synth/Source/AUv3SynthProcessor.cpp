@@ -12,7 +12,8 @@ class AUv3SynthProcessor : public AudioProcessor
 {
 public:
     AUv3SynthProcessor ()
-        : currentRecording (1, 1), currentProgram (0)
+        : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true)),
+          currentRecording (1, 1), currentProgram (0)
     {
         // initialize parameters
         addParameter (isRecordingParam = new AudioParameterBool ("isRecording", "Is Recording", false));
@@ -27,6 +28,11 @@ public:
     }
 
     //==============================================================================
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
+    {
+        return (layouts.getMainInputChannels() == 2);
+    }
+
     void prepareToPlay (double sampleRate, int estimatedMaxSizeOfBuffer) override
     {
         ignoreUnused (estimatedMaxSizeOfBuffer);

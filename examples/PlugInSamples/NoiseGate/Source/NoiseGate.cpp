@@ -29,49 +29,24 @@ class NoiseGate  : public AudioProcessor
 {
 public:
     //==============================================================================
+    //==============================================================================
     NoiseGate()
+        : AudioProcessor (BusesProperties().withInput  ("Input",     AudioChannelSet::stereo())
+                                             .withOutput ("Output",    AudioChannelSet::stereo())
+                                             .withInput  ("Sidechain", AudioChannelSet::mono()))
     {
         addParameter (threshold = new AudioParameterFloat ("threshold", "Threshold", 0.0f, 1.0f, 0.5f));
         addParameter (alpha  = new AudioParameterFloat ("alpha",  "Alpha",   0.0f, 1.0f, 0.8f));
-
-        // add single side-chain bus
-        busArrangement.inputBuses.add (AudioProcessorBus ("Sidechain In",  AudioChannelSet::mono()));
-
-        // To be compatible with all VST2 DAWs, it's best to pass through the sidechain
-        if (isVST2())
-            busArrangement.outputBuses.add (AudioProcessorBus ("Sidechain Out",  AudioChannelSet::mono()));
     }
 
     ~NoiseGate() {}
 
     //==============================================================================
-    bool setPreferredBusArrangement (bool isInputBus, int busIndex, const AudioChannelSet& preferred) override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        const bool isMainBus   = (busIndex == 0);
-        const bool isSideChain = (busIndex == 1);
-
-        const int numChannels = preferred.size();
-
-        // do not allow disabling channels on main bus
-        if (numChannels == 0 && isMainBus) return false;
-
-        // VST2 does not natively support sidechains/aux buses.
-        // But many DAWs treat the third input of a plug-in
-        // as a sidechain. So limit the main bus to stereo!
-        if (isVST2())
-        {
-            if (isMainBus && numChannels != 2) return false;
-
-            // we only allow mono sidechains in VST-2
-            if (isSideChain && numChannels != 1)
-                return false;
-        }
-
-        // always have the same channel layout on both input and output on the main bus
-        if (isMainBus && ! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
-            return false;
-
-        return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
+        // the sidechain can take any layout, the main bus needs to be the same on the input and output
+        return (layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet() &&
+                (! layouts.getMainInputChannelSet().isDisabled()));
     }
 
     //==============================================================================
@@ -80,8 +55,8 @@ public:
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer&) override
     {
-        AudioSampleBuffer mainInputOutput = busArrangement.getBusBuffer (buffer, true, 0);
-        AudioSampleBuffer sideChainInput  = busArrangement.getBusBuffer (buffer, true, 1);
+        AudioSampleBuffer mainInputOutput = getBusBuffer(buffer, true, 0);
+        AudioSampleBuffer sideChainInput  = getBusBuffer(buffer, true, 1);
 
         float alphaCopy = *alpha;
         float thresholdCopy = *threshold;
@@ -105,9 +80,6 @@ public:
             if (sampleCountDown > 0)
                 --sampleCountDown;
         }
-
-        // VST-2 passes this through so clear the audio in this channel
-        sideChainInput.clear();
     }
 
     //==============================================================================

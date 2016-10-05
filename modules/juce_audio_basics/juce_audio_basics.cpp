@@ -83,6 +83,7 @@ namespace juce
 
 #include "buffers/juce_AudioDataConverters.cpp"
 #include "buffers/juce_FloatVectorOperations.cpp"
+#include "buffers/juce_AudioChannelSet.cpp"
 #include "effects/juce_IIRFilter.cpp"
 #include "effects/juce_LagrangeInterpolator.cpp"
 #include "effects/juce_CatmullRomInterpolator.cpp"

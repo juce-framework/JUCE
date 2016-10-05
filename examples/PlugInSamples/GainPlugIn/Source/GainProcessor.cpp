@@ -34,15 +34,10 @@ public:
 
     //==============================================================================
     GainProcessor()
+        : AudioProcessor (BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
+                                           .withOutput ("Output", AudioChannelSet::stereo()))
     {
         addParameter (gain = new AudioParameterFloat ("gain", "Gain", 0.0f, 1.0f, 0.5f));
-
-        // Some VST-2 DAWs want the maximum amount of channels to be enabled by default
-        if (wrapperType == wrapperType_VST)
-        {
-            busArrangement.inputBuses. getReference (0).channels = AudioChannelSet::discreteChannels (kVST2MaxChannels);
-            busArrangement.outputBuses.getReference (0).channels = AudioChannelSet::discreteChannels (kVST2MaxChannels);
-        }
     }
 
     ~GainProcessor() {}
@@ -85,24 +80,12 @@ public:
     }
 
     //==============================================================================
-    bool setPreferredBusArrangement (bool isInputBus, int busIndex,
-                                     const AudioChannelSet& preferred) override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        const int numChannels = preferred.size();
+        const AudioChannelSet& mainInLayout  = layouts.getChannelSet (true,  0);
+        const AudioChannelSet& mainOutLayout = layouts.getChannelSet (false, 0);
 
-        // do not allow disabling channels
-        if (numChannels == 0)
-            return false;
-
-        // limit the amount of channels for VST-2
-        if (wrapperType == wrapperType_VST && numChannels > kVST2MaxChannels)
-            return false;
-
-        // always have the same channel layout on both input and output on the main bus
-        if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
-            return false;
-
-        return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
+        return (mainInLayout == mainOutLayout && (! mainInLayout.isDisabled()));
     }
 
 private:
