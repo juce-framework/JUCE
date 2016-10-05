@@ -1252,10 +1252,13 @@ struct HighResolutionTimer::Pimpl
     {
         if (thread != 0)
         {
-            shouldStop = true;
-
             while (thread != 0 && thread != pthread_self())
+            {
+                // if the timer callback itself calls startTimer then we need
+                // to override this
+                shouldStop = true;
                 Thread::yield();
+            }
         }
     }
 
