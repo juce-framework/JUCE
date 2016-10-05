@@ -853,7 +853,12 @@ public:
 
         jassert (data.elements != nullptr);
         const int indexToRemove = int (elementToRemove - data.elements);
-        jassert (isPositiveAndBelow (indexToRemove, numUsed));
+
+        if (! isPositiveAndBelow (indexToRemove, numUsed))
+        {
+            jassertfalse;
+            return;
+        }
 
         removeInternal (indexToRemove);
     }
