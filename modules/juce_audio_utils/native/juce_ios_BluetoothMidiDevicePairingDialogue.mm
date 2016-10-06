@@ -73,11 +73,18 @@ public:
         setBounds (0, 0, getParentWidth(), getParentHeight());
         toFront (true);
 
-        nativeSelectorComponent.setView ([[[BluetoothSelectorView alloc] init] getView]);
+        selectorView = [[BluetoothSelectorView alloc] init];
+        nativeSelectorComponent.setView ([selectorView getView]);
         addAndMakeVisible (nativeSelectorComponent);
 
         enterModalState (true, nullptr, true);
     }
+
+    ~BluetoothMidiSelectorOverlay()
+    {
+        [selectorView release];
+    }
+
 
     void paint (Graphics& g) override
     {
@@ -108,6 +115,7 @@ private:
     }
 
     UIViewComponent nativeSelectorComponent;
+    BluetoothSelectorView* selectorView;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BluetoothMidiSelectorOverlay)
 };
