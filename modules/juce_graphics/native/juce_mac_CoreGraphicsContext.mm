@@ -387,9 +387,9 @@ void CoreGraphicsContext::setInterpolationQuality (Graphics::ResamplingQuality q
 {
     switch (quality)
     {
-        case Graphics::lowResamplingQuality:  CGContextSetInterpolationQuality (context, kCGInterpolationLow);  return;
-        case Graphics::highResamplingQuality: CGContextSetInterpolationQuality (context, kCGInterpolationHigh); return;
-        case Graphics::noResampling:          CGContextSetInterpolationQuality (context, kCGInterpolationNone); return;
+        case Graphics::lowResamplingQuality:    CGContextSetInterpolationQuality (context, kCGInterpolationNone);   return;
+        case Graphics::mediumResamplingQuality: CGContextSetInterpolationQuality (context, kCGInterpolationMedium); return;
+        case Graphics::highResamplingQuality:   CGContextSetInterpolationQuality (context, kCGInterpolationHigh);   return;
         default: return;
     }
 }

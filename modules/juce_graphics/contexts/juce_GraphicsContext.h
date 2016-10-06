@@ -469,7 +469,6 @@ public:
         lowResamplingQuality     = 0,    /**< Just uses a nearest-neighbour algorithm for resampling. */
         mediumResamplingQuality  = 1,    /**< Uses bilinear interpolation for upsampling and area-averaging for downsampling. */
         highResamplingQuality    = 2,    /**< Uses bicubic interpolation for upsampling and area-averaging for downsampling. */
-        noResampling             = 3     /**< No resampling is performed. */
     };
 
     /** Changes the quality that will be used when resampling images.
