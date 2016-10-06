@@ -81,7 +81,7 @@ private:
 
         nativeSelectorComponent.setBounds (Rectangle<int> (pw, ph)
                                              .withSizeKeepingCentre (jmin (400, pw - 14),
-                                                                     jmin (500, ph - 40)));
+                                                                     jmin (450, ph - 40)));
     }
 
     void close()
