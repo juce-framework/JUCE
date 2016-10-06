@@ -33,31 +33,6 @@
 
 #include <CoreAudioKit/CoreAudioKit.h>
 
-//==============================================================================
-@interface BluetoothSelectorView : NSObject
-
-@property (nonatomic, retain) CABTMIDICentralViewController *central;
-- (UIView*) getView;
-
-@end
-
-//==============================================================================
-@implementation BluetoothSelectorView
-
-- (instancetype) init
-{
-    self = [super init];
-    self.central = [[CABTMIDICentralViewController alloc] init];
-    return self;
-}
-
-- (UIView*) getView
-{
-    return self.central.view;
-}
-
-@end
-
 namespace juce
 {
 
@@ -73,8 +48,9 @@ public:
         setBounds (0, 0, getParentWidth(), getParentHeight());
         toFront (true);
 
-        selectorView = [[BluetoothSelectorView alloc] init];
-        nativeSelectorComponent.setView ([selectorView getView]);
+        controller = [[CABTMIDICentralViewController alloc] init];
+        nativeSelectorComponent.setView ([controller view]);
+
         addAndMakeVisible (nativeSelectorComponent);
 
         enterModalState (true, nullptr, true);
@@ -82,9 +58,9 @@ public:
 
     ~BluetoothMidiSelectorOverlay()
     {
-        [selectorView release];
+        nativeSelectorComponent.setView (nullptr);
+        [controller release];
     }
-
 
     void paint (Graphics& g) override
     {
@@ -114,8 +90,8 @@ private:
         setVisible (false);
     }
 
+    CABTMIDICentralViewController* controller;
     UIViewComponent nativeSelectorComponent;
-    BluetoothSelectorView* selectorView;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BluetoothMidiSelectorOverlay)
 };
