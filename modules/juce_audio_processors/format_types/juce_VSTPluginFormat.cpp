@@ -370,8 +370,11 @@ public:
     //==============================================================================
     ModuleHandle (const File& f, MainCall customMainCall)
         : file (f), moduleMain (customMainCall), customMain (nullptr)
+         #if JUCE_MAC || JUCE_IOS
+          , resHandle (0), bundleRef (0)
          #if JUCE_MAC
-           , resHandle (0), bundleRef (0), resFileId (0)
+          , resFileId (0)
+         #endif
          #endif
     {
         getActiveModules().add (this);
