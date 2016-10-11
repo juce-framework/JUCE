@@ -550,16 +550,21 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
 
     const auto& unlockStatus = *ProjucerLicenses::getInstance();
 
+    if (! unlockStatus.isLoggedIn())
+        return createDisabledBuildTabSubscribe ("Sign in with your ROLI account",
+                                                false, unlockStatus.isDLLPresent());
+
     if (! unlockStatus.hasLiveCodingLicence())
-        return createDisabledBuildTabSubscribe(unlockStatus.isLoggedIn(),
-                                               unlockStatus.isDLLPresent());
+        return createDisabledBuildTabSubscribe ("Subscribe to JUCE Pro or Indie",
+                                                true, unlockStatus.isDLLPresent());
 
     jassert (unlockStatus.isLoggedIn());
     jassert (unlockStatus.isDLLPresent());
     return new EnableBuildComp();
-};
+}
 
-Component* ProjectContentComponent::createDisabledBuildTabSubscribe(bool loggedIn, bool dllPresent)
+Component* ProjectContentComponent::createDisabledBuildTabSubscribe(String textPrefix, 
+                                                                    bool loggedIn, bool dllPresent)
 {
     bool showSubscribeButton = true;
     bool showSignInButton = dllPresent && ! loggedIn;
@@ -567,7 +572,7 @@ Component* ProjectContentComponent::createDisabledBuildTabSubscribe(bool loggedI
     bool showDownloadButton = ! dllPresent;
 
     return new ProjucerDisabledComp (
-        "Subscribe to JUCE Pro or Indie to use the Projucer's live-build features:",
+        textPrefix + " to use the Projucer's live-build features:",
         loggedIn, showSubscribeButton, showSignInButton, showSwitchAccountButton, showDownloadButton);
 }
 
