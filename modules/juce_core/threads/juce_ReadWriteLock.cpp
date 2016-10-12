@@ -148,3 +148,9 @@ void ReadWriteLock::exitWrite() const noexcept
         waitEvent.signal();
     }
 }
+
+//==============================================================================
+bool ReadWriteLock::isLocked() const noexcept
+{
+    return numWriters != 0;
+}
