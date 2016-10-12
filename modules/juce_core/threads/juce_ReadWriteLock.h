@@ -127,12 +127,6 @@ public:
     */
     void exitWrite() const noexcept;
 
-    //==============================================================================
-    /** Checks whether this object is locked.
-
-        @returns true if the object is currently locked.
-     */
-    bool isLocked() const noexcept;
 
 private:
     //==============================================================================
