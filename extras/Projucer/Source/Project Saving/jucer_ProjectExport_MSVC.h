@@ -174,7 +174,7 @@ private:
                     if (previousBuildCommands.isNotEmpty())
                         script += "\r\n";
 
-                    script += "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                    script += "copy /Y \"$(OutDir)$(TargetFileName)\" \"$(OutDir)$(TargetName).vst3\"";
 
                     config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
                 }
@@ -196,7 +196,7 @@ private:
                 const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
 
                 const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
-                const String bundleDir      = "$(OutDir)\\$(TargetName).aaxplugin";
+                const String bundleDir      = "$(OutDir)$(TargetName).aaxplugin";
                 const String bundleContents = bundleDir + "\\Contents";
                 const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
                 const String executable     = macOSDir + String ("\\$(TargetName).aaxplugin");
@@ -214,7 +214,7 @@ private:
                 script += String ("mkdir \"") + bundleDir      + String ("\"\r\n");
                 script += String ("mkdir \"") + bundleContents + String ("\"\r\n");
                 script += String ("mkdir \"") + macOSDir       + String ("\"\r\n");
-                script += String ("copy /Y \"$(OutDir)\\$(TargetFileName)\" \"") + executable + String ("\"\r\n");
+                script += String ("copy /Y \"$(OutDir)$(TargetFileName)\" \"") + executable + String ("\"\r\n");
                 script += bundleScript + String (" \"") + macOSDir + String ("\" \"") + iconFilePath + String ("\"");
 
                 config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
