@@ -80,7 +80,7 @@ private:
         const int ph = getParentHeight();
 
         nativeSelectorComponent.setBounds (Rectangle<int> (pw, ph)
-                                             .withSizeKeepingCentre (jmin (400, pw - 14),
+                                             .withSizeKeepingCentre (jmin (400, pw),
                                                                      jmin (450, ph - 40)));
     }
 
