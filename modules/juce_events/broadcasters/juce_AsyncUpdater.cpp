@@ -64,14 +64,11 @@ void AsyncUpdater::triggerAsyncUpdate()
     // If you're calling this before (or after) the MessageManager is
     // running, then you're not going to get any callbacks!
     jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
-    DBG ("AsyncUpdater::triggerAsyncUpdate - got past jassert");
 
     if (activeMessage->shouldDeliver.compareAndSetBool (1, 0))
     {
-        DBG ("About to activeMessage->post...");
         if (!activeMessage->post())
         {
-            DBG ("About to cancelPendingUpdate...");
             cancelPendingUpdate();  // if the message queue fails, this avoids getting
         }
     }                               // trapped waiting for the message to arrive
