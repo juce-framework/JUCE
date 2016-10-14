@@ -61,11 +61,7 @@ void ChangeBroadcaster::removeAllChangeListeners()
 void ChangeBroadcaster::sendChangeMessage()
 {
     if (changeListeners.size() > 0)
-    {
-        DBG ("ChangeBroadcaster::sendChangeMessage...");
         broadcastCallback.triggerAsyncUpdate();
-        DBG ("ChangeBroadcaster::sendChangeMessage called");
-    }
 }
 
 void ChangeBroadcaster::sendSynchronousChangeMessage()

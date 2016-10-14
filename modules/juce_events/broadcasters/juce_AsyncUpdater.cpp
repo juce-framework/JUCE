@@ -29,7 +29,6 @@ public:
 
     void messageCallback() override
     {
-        DBG ("AsyncUpdater::AsyncUpdaterMessage.messageCallback");
         if (shouldDeliver.compareAndSetBool (0, 1))
             owner.handleAsyncUpdate();
     }
