@@ -74,7 +74,10 @@ struct ModuleList
     StringArray getIDs() const;
     void sort();
 
+    Result tryToAddModuleFromFolder (const File&);
+
     Result addAllModulesInFolder (const File&);
+    Result addAllModulesInSubfoldersRecursively (const File&, int depth);
     Result scanAllKnownFolders (Project&);
 
     OwnedArray<ModuleDescription> modules;

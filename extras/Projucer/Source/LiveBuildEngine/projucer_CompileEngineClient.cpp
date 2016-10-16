@@ -149,7 +149,15 @@ public:
     {
        #if RUN_CLANG_IN_CHILD_PROCESS
         if (childProcess.isRunning())
+        {
+           #if JUCE_DEBUG
             killServerPolitely();
+           #else
+            // in release builds we don't want to wait
+            // for the server to clean up and shut down
+            killServerWithoutMercy();
+           #endif
+        }
        #endif
     }
 

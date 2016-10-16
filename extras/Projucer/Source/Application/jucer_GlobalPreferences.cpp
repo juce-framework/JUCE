@@ -322,7 +322,7 @@ void AppearanceSettings::showGlobalPreferences (ScopedPointer<Component>& ownerP
     if (ownerPointer != nullptr)
         ownerPointer->toFront (true);
     else
-        new FloatingToolWindow ("Global Preferences",
+        new FloatingToolWindow ("Preferences",
                                 "globalPreferencesEditorPos",
                                 new GlobalPreferencesComponent,
                                 ownerPointer,

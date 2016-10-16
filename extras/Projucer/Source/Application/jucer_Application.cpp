@@ -154,7 +154,10 @@ void ProjucerApplication::handleAsyncUpdate()
     initialiseWindows (getCommandLineParameters());
 
    #if JUCE_MAC
-    MenuBarModel::setMacMainMenu (menuModel, nullptr, "Open Recent");
+    PopupMenu extraAppleMenuItems;
+    createExtraAppleMenuItems (extraAppleMenuItems);
+
+    MenuBarModel::setMacMainMenu (menuModel, &extraAppleMenuItems, "Open Recent");
    #endif
 
     versionChecker = new LatestVersionChecker();
@@ -331,8 +334,11 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
     menu.addSeparator();
     menu.addCommandItem (commandManager, CommandIDs::openInIDE);
     menu.addCommandItem (commandManager, CommandIDs::saveAndOpenInIDE);
+    menu.addSeparator();
+    menu.addCommandItem (commandManager, CommandIDs::loginLogout);
 
     #if ! JUCE_MAC
+      menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
       menu.addSeparator();
       menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
     #endif
@@ -424,13 +430,14 @@ void ProjucerApplication::createWindowMenu (PopupMenu& menu)
 
 void ProjucerApplication::createToolsMenu (PopupMenu& menu)
 {
-    menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
-    menu.addSeparator();
     menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
     menu.addCommandItem (commandManager, CommandIDs::showSVGPathTool);
     menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
-    menu.addSeparator();
-    menu.addCommandItem (commandManager, CommandIDs::loginLogout);
+}
+
+void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
+{
+    menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
 }
 
 void ProjucerApplication::handleMainMenuCommand (int menuItemID)
@@ -489,7 +496,8 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         break;
 
     case CommandIDs::showGlobalPreferences:
-        result.setInfo ("Global Preferences...", "Shows the global preferences window.", CommandCategories::general, 0);
+        result.setInfo ("Preferences...", "Shows the preferences window.", CommandCategories::general, 0);
+        result.defaultKeypresses.add (KeyPress (',', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::closeAllDocuments:

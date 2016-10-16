@@ -469,7 +469,6 @@ public:
         lowResamplingQuality     = 0,    /**< Just uses a nearest-neighbour algorithm for resampling. */
         mediumResamplingQuality  = 1,    /**< Uses bilinear interpolation for upsampling and area-averaging for downsampling. */
         highResamplingQuality    = 2,    /**< Uses bicubic interpolation for upsampling and area-averaging for downsampling. */
-        noResampling             = 3     /**< No resampling is performed. */
     };
 
     /** Changes the quality that will be used when resampling images.
@@ -546,7 +545,7 @@ public:
     /** Draws an image to fit within a designated rectangle.
 
         @param imageToDraw              the source image to draw
-        @param destArea                 the target rectangle to fit it into
+        @param targetArea               the target rectangle to fit it into
         @param placementWithinTarget    this specifies how the image should be positioned
                                         within the target rectangle - see the RectanglePlacement
                                         class for more details about this.
