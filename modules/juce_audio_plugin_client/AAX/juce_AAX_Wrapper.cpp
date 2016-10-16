@@ -1186,7 +1186,7 @@ namespace AAXClasses
                         // value during initialisation.
                         pluginInstance->prepareToPlay (sampleRate, bufferSize);
                         maxBufferSize = bufferSize;
-                        sideChainBuffer.realloc (static_cast<size_t> (maxBufferSize));
+                        sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
                     }
                 }
 
@@ -1386,7 +1386,7 @@ namespace AAXClasses
                 hasSidechain = audioProcessor.getChannelLayoutOfBus (true, 1) == AudioChannelSet::mono();
 
                 if (hasSidechain)
-                    sideChainBuffer.realloc (static_cast<size_t> (maxBufferSize));
+                    sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
             }
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
