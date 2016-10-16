@@ -632,6 +632,8 @@ public:
     void colourChanged() override;
     /** @internal */
     void lookAndFeelChanged() override;
+    /** @inernal */
+    void parentHierarchyChanged() override;
     /** @internal */
     bool isTextInputActive() const override;
     /** @internal */
