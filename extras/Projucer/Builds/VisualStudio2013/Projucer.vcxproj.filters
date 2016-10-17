@@ -47,6 +47,9 @@
     <Filter Include="Projucer\BinaryData">
       <UniqueIdentifier>{FE290DF2-C600-4159-D484-7F48DB498EBE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Projucer\BinaryData\gradle">
+      <UniqueIdentifier>{661FA330-2192-FAA3-E7B2-FAF8EBB783C6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\BinaryData\templates">
       <UniqueIdentifier>{DD0D745A-044A-A337-0DBA-0816C2E7C767}</UniqueIdentifier>
     </Filter>
@@ -3308,6 +3311,18 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\BinaryData\gradle\gradle-wrapper.jar">
+      <Filter>Projucer\BinaryData\gradle</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew">
+      <Filter>Projucer\BinaryData\gradle</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew.bat">
+      <Filter>Projucer\BinaryData\gradle</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\gradle\LICENSE">
+      <Filter>Projucer\BinaryData\gradle</Filter>
+    </None>
     <None Include="..\..\Source\BinaryData\background_logo.svg">
       <Filter>Projucer\BinaryData</Filter>
     </None>
