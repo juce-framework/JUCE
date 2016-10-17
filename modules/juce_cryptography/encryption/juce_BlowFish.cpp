@@ -286,7 +286,7 @@ void BlowFish::decrypt (MemoryBlock& data) const
     const int newSize = decrypt (data.getData(), data.getSize());
 
     if (newSize >= 0)
-        data.setSize (newSize);
+        data.setSize (static_cast<size_t> (newSize));
     else
         jassertfalse;
 }
@@ -295,7 +295,7 @@ int BlowFish::encrypt (void* data, size_t size, size_t bufferSize) const noexcep
 {
     const int encryptedSize = pad (data, size, bufferSize);
 
-    if (encryptedSize >= 0 && apply (data, encryptedSize, &BlowFish::encrypt))
+    if (encryptedSize >= 0 && apply (data, static_cast<size_t> (encryptedSize), &BlowFish::encrypt))
         return encryptedSize;
 
     return -1;
@@ -324,7 +324,7 @@ bool BlowFish::apply (void* data, size_t size, void (BlowFish::*op) (uint32&, ui
 
     AlignedAccessHelper* ptr = reinterpret_cast<AlignedAccessHelper*> (data);
 
-    for (int i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
         (this->*op) (ptr[i].data[0], ptr[i].data[1]);
 
     return true;

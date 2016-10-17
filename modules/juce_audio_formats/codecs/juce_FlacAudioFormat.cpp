@@ -128,6 +128,7 @@ namespace FlacNamespace
  #define __STDC_LIMIT_MACROS 1
  #define flac_max jmax
  #define flac_min jmin
+ #undef DEBUG // (some flac code dumps debug trace if the app defines this macro)
  #include "flac/all.h"
  #include "flac/libFLAC/bitmath.c"
  #include "flac/libFLAC/bitreader.c"

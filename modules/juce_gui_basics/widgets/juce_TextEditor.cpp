@@ -1086,9 +1086,16 @@ void TextEditor::colourChanged()
 
 void TextEditor::lookAndFeelChanged()
 {
+    colourChanged();
+
     caret = nullptr;
     recreateCaret();
     repaint();
+}
+
+void TextEditor::parentHierarchyChanged()
+{
+    lookAndFeelChanged();
 }
 
 void TextEditor::enablementChanged()
