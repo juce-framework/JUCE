@@ -104,7 +104,6 @@
 #endif
 
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_PluginBusUtilities.h"
 
 #ifdef _MSC_VER
  #pragma pack (pop)
@@ -473,13 +472,13 @@ public:
         SFicPlugInStemFormats stems;
         GetProcessType()->GetStemFormats (&stems);
 
-        juceFilter->setPreferredBusArrangement (true, 0, AudioChannelSet::canonicalChannelSet (fNumInputs));
-        juceFilter->setPreferredBusArrangement (false, 0, AudioChannelSet::canonicalChannelSet (fNumOutputs));
+        juceFilter->getBus (true, 0)->setCurrentLayout (AudioChannelSet::canonicalChannelSet (fNumInputs));
+        juceFilter->getBus (false, 0)->setCurrentLayout (AudioChannelSet::canonicalChannelSet (fNumOutputs));
 
-        if (juceFilter->busArrangement.inputBuses.size() > 1)
+        if (juceFilter->getBusCount (true) > 1)
         {
             // Side chain bus starts turned off and may be turned on in ConnectInput.
-            juceFilter->setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
+            juceFilter->getBus (true, 1)->setCurrentLayout (AudioChannelSet::disabled());
         }
 
         juceFilter->setRateAndBufferSizeDetails (sampleRate, maxBlockSize);
@@ -637,7 +636,7 @@ public:
         if (portNum == fNumInputs && ret == noErr)
         {
             // Side chain connected
-            juceFilter->setPreferredBusArrangement (true, 1, AudioChannelSet::mono());
+            juceFilter->getBus (true, 1)->setCurrentLayout (AudioChannelSet::mono());
         }
         return ret;
     }
@@ -649,7 +648,7 @@ public:
         if (portNum == fNumInputs && ret == noErr)
         {
             // Side chain disconnected
-            juceFilter->setPreferredBusArrangement (true, 1, AudioChannelSet::disabled());
+            juceFilter->getBus (true, 1)->setCurrentLayout (AudioChannelSet::disabled());
         }
         return ret;
     }
@@ -918,6 +917,202 @@ private:
     };
 };
 
+// Directly copied from AAX Wrapper.
+// That's indeed some pretty bad style :(
+// Ideally the common code would move to a different file,
+// but that will make merges and branch maintenance more difficult.
+// That's a price one has to pay when maintaining a wrapper which ROLI doesn't want to..
+class CopyPasteFromAAX
+{
+public:
+    static AudioProcessor::BusesLayout getDefaultLayout (AudioProcessor& p, bool enableAll)
+    {
+        AudioProcessor::BusesLayout defaultLayout;
+
+        for (int dir = 0; dir < 2; ++dir)
+        {
+            const bool isInput = (dir == 0);
+            const int n = p.getBusCount (isInput);
+            Array<AudioChannelSet>& layouts = (isInput ? defaultLayout.inputBuses : defaultLayout.outputBuses);
+
+            for (int i = 0; i < n; ++i)
+                if (AudioProcessor::Bus* bus = p.getBus (isInput, i))
+                    layouts.add (enableAll || bus->isEnabledByDefault() ? bus->getDefaultLayout() : AudioChannelSet());
+        }
+
+        return defaultLayout;
+    }
+
+    static AudioProcessor::BusesLayout getDefaultLayout (AudioProcessor& p)
+    {
+        AudioProcessor::BusesLayout defaultLayout;
+
+        defaultLayout = getDefaultLayout (p, true);
+
+        if (! p.checkBusesLayoutSupported (defaultLayout))
+            defaultLayout = getDefaultLayout (p, false);
+
+        // Your processor must support the default layout
+        jassert (p.checkBusesLayoutSupported (defaultLayout));
+        return defaultLayout;
+    }
+
+    static bool fullBusesLayoutFromMainLayout (AudioProcessor& p,
+                                               const AudioChannelSet& mainInput, const AudioChannelSet& mainOutput,
+                                               AudioProcessor::BusesLayout& fullLayout)
+    {
+        bool success = p.setBusesLayout (getDefaultLayout (p, true));
+        jassert (success);
+        ignoreUnused (success);
+
+        const int numInputBuses  = p.getBusCount (true);
+        const int numOutputBuses = p.getBusCount (false);
+
+        if (AudioProcessor::Bus* bus = p.getBus (true, 0))
+            if (! bus->setCurrentLayout (mainInput))
+                return false;
+
+        if (AudioProcessor::Bus* bus = p.getBus (false, 0))
+            if (! bus->setCurrentLayout (mainOutput))
+                return false;
+
+        // did this change the input again
+        if (numInputBuses > 0 && p.getChannelLayoutOfBus (true, 0) != mainInput)
+            return false;
+
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+        if (! AudioProcessor::containsLayout (p.getBusesLayout(), configs))
+            return false;
+       #endif
+
+        bool foundValid = false;
+        {
+            AudioProcessor::BusesLayout onlyMains = p.getBusesLayout();
+
+            for (int i = 1; i < numInputBuses; ++i)
+                onlyMains.inputBuses.getReference  (i) = AudioChannelSet::disabled();
+
+            for (int i = 1; i < numOutputBuses; ++i)
+                onlyMains.outputBuses.getReference (i) = AudioChannelSet::disabled();
+
+            if (p.checkBusesLayoutSupported (onlyMains))
+            {
+                foundValid = true;
+                fullLayout = onlyMains;
+            }
+        }
+
+        if (numInputBuses > 1)
+        {
+            // can the first bus be a sidechain or disabled, if not then we can't use this layout combination
+            if (AudioProcessor::Bus* bus = p.getBus (true, 1))
+                if (! bus->setCurrentLayout (AudioChannelSet::mono()) && ! bus->setCurrentLayout (AudioChannelSet::disabled()))
+                    return foundValid;
+
+            // can all the other inputs be disabled, if not then we can't use this layout combination
+            for (int i = 2; i < numInputBuses; ++i)
+                if (AudioProcessor::Bus* bus = p.getBus (true, i))
+                    if (! bus->setCurrentLayout (AudioChannelSet::disabled()))
+                        return foundValid;
+
+            if (AudioProcessor::Bus* bus = p.getBus (true, 0))
+                if (! bus->setCurrentLayout (mainInput))
+                    return foundValid;
+
+            if (AudioProcessor::Bus* bus = p.getBus (false, 0))
+                if (! bus->setCurrentLayout (mainOutput))
+                    return foundValid;
+
+            // recheck if the format is correct
+            if ((numInputBuses  > 0 && p.getChannelLayoutOfBus (true,  0) != mainInput)
+                || (numOutputBuses > 0 && p.getChannelLayoutOfBus (false, 0) != mainOutput))
+                return foundValid;
+
+            const AudioChannelSet& sidechainBus = p.getChannelLayoutOfBus (true, 1);
+            if (sidechainBus != AudioChannelSet::mono() && sidechainBus != AudioChannelSet::disabled())
+                return foundValid;
+
+            for (int i = 2; i < numInputBuses; ++i)
+                if (p.getChannelLayoutOfBus (true, i) != AudioChannelSet::disabled())
+                    return foundValid;
+        }
+
+        const bool hasSidechain = (numInputBuses > 1 && p.getChannelLayoutOfBus (true, 1) == AudioChannelSet::mono());
+
+        if (hasSidechain)
+        {
+            AudioProcessor::BusesLayout onlyMainsAndSidechain = p.getBusesLayout();
+
+            for (int i = 1; i < numOutputBuses; ++i)
+                onlyMainsAndSidechain.outputBuses.getReference (i) = AudioChannelSet::disabled();
+
+            if (p.checkBusesLayoutSupported (onlyMainsAndSidechain))
+            {
+                foundValid = true;
+                fullLayout = onlyMainsAndSidechain;
+            }
+        }
+
+        if (numOutputBuses > 1)
+        {
+            AudioProcessor::BusesLayout copy = p.getBusesLayout();
+
+            int maxAuxBuses = jmin (16, numOutputBuses);
+            for (int i = 1; i < maxAuxBuses; ++i)
+                copy.outputBuses.getReference (i) = mainOutput;
+
+            for (int i = maxAuxBuses; i < numOutputBuses; ++i)
+                copy.outputBuses.getReference (i) = AudioChannelSet::disabled();
+
+            if (p.checkBusesLayoutSupported (copy))
+            {
+                fullLayout = copy;
+                foundValid = true;
+            }
+            else
+            {
+                for (int i = 1; i < maxAuxBuses; ++i)
+                    if (p.getChannelLayoutOfBus (false, i).isDisabled())
+                        return foundValid;
+
+                for (int i = maxAuxBuses; i < numOutputBuses; ++i)
+                    if (AudioProcessor::Bus* bus = p.getBus (false, i))
+                        if (! bus->setCurrentLayout (AudioChannelSet::disabled()))
+                            return foundValid;
+
+                if (AudioProcessor::Bus* bus = p.getBus (true, 0))
+                    if (! bus->setCurrentLayout (mainInput))
+                        return foundValid;
+
+                if (AudioProcessor::Bus* bus = p.getBus (false, 0))
+                    if (! bus->setCurrentLayout (mainOutput))
+                        return foundValid;
+
+                if ((numInputBuses  > 0 && p.getChannelLayoutOfBus (true,  0) != mainInput)
+                    || (numOutputBuses > 0 && p.getChannelLayoutOfBus (false, 0) != mainOutput))
+                    return foundValid;
+
+                if (numInputBuses > 1 )
+                {
+                    const AudioChannelSet& sidechainBus = p.getChannelLayoutOfBus (true, 1);
+                    if (sidechainBus != AudioChannelSet::mono() && sidechainBus != AudioChannelSet::disabled())
+                        return foundValid;
+                }
+
+                for (int i = maxAuxBuses; i < numOutputBuses; ++i)
+                    if (! p.getChannelLayoutOfBus (false, i).isDisabled())
+                        return foundValid;
+
+                fullLayout = p.getBusesLayout();
+                foundValid = true;
+            }
+        }
+
+        return foundValid;
+    }
+};
+
 //==============================================================================
 class JucePlugInGroup   : public CEffectGroupMIDI
 {
@@ -951,9 +1146,9 @@ public:
             case ePlugIn_StemFormat_5dot1:     return AudioChannelSet::create5point1();
             case ePlugIn_StemFormat_6dot0:     return AudioChannelSet::create6point0();
             case ePlugIn_StemFormat_6dot1:     return AudioChannelSet::create6point1();
-            case ePlugIn_StemFormat_7dot0SDDS: return AudioChannelSet::createFront7point0();
+            case ePlugIn_StemFormat_7dot0SDDS: return AudioChannelSet::create7point0SDDS();
             case ePlugIn_StemFormat_7dot0DTS:  return AudioChannelSet::create7point0();
-            case ePlugIn_StemFormat_7dot1SDDS: return AudioChannelSet::createFront7point1();
+            case ePlugIn_StemFormat_7dot1SDDS: return AudioChannelSet::create7point1SDDS();
             case ePlugIn_StemFormat_7dot1DTS:  return AudioChannelSet::create7point1();
             default:
                 break;
@@ -966,12 +1161,12 @@ public:
     void CreateEffectTypes()
     {
         ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
-        PluginBusUtilities busUtils (*plugin, false);
 
-        busUtils.init();
+        const int numInputBuses = plugin->getBusCount (true);
+        const int numOutputBuses = plugin->getBusCount (false);
 
-        const int numIns  = busUtils.getBusCount (true) > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
-        const int numOuts = busUtils.getBusCount (false) > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
+        const int numIns  = numInputBuses  > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
+        const int numOuts = numOutputBuses > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
 
         int configIndex = 0;
 
@@ -985,23 +1180,9 @@ public:
                 EPlugIn_StemFormat rtasOutFormat = numOuts > 0 ? (EPlugIn_StemFormat) outIdx : ePlugIn_StemFormat_Error;
                 const AudioChannelSet outLayout = channelSetFromStemFormat (rtasOutFormat);
 
-                bool success = true;
-
-                // Try setting this input and output layouts combo.
-                if (numIns > 0)
-                    success = busUtils.processor.setPreferredBusArrangement (true, 0, inLayout);
-
-                if (numOuts > 0 && success)
-                    success = busUtils.processor.setPreferredBusArrangement (false, 0, outLayout);
-
-                if (! success)
+                AudioProcessor::BusesLayout fullLayout;
+                if (! CopyPasteFromAAX::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
                     continue;
-
-                if (numIns > 0 && numOuts > 0 && (inLayout != busUtils.getChannelSet (true, 0) || (outLayout != busUtils.getChannelSet (false, 0))))
-                {
-                    // The input and output layouts we tried do not work together.
-                    continue;
-                }
 
                 CEffectType* const type
                     = new CEffectTypeRTAS ('jcaa' + (configIndex++),
@@ -1022,7 +1203,7 @@ public:
                 type->AddGestalt (pluginGestalt_DoesntSupportMultiMono);
                #endif
 
-                if (busUtils.getBusCount (true) > 1)
+                if (fullLayout.inputBuses.size() > 1)
                 {
                     // Note that the AAX wrapper has some more complicated checks for this.
                     // We (SR) don't require those for our needs, but if merging into main JUCE
