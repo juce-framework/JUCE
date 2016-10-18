@@ -39,7 +39,7 @@
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_audio_basics, juce_audio_formats, juce_events
+  dependencies:     juce_audio_basics, juce_events
   OSXFrameworks:    CoreAudio CoreMIDI DiscRecording
   iOSFrameworks:    CoreAudio CoreMIDI AudioToolbox AVFoundation
   linuxPackages:    alsa

@@ -49,6 +49,7 @@ namespace juce
 #include "gui/juce_AudioVisualiserComponent.cpp"
 #include "gui/juce_MidiKeyboardComponent.cpp"
 #include "gui/juce_AudioAppComponent.cpp"
+#include "players/juce_SoundPlayer.cpp"
 #include "players/juce_AudioProcessorPlayer.cpp"
 
 #if JUCE_MAC

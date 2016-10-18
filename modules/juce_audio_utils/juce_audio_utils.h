@@ -67,6 +67,7 @@ namespace juce
 #include "gui/juce_MidiKeyboardComponent.h"
 #include "gui/juce_AudioAppComponent.h"
 #include "gui/juce_BluetoothMidiDevicePairingDialogue.h"
+#include "players/juce_SoundPlayer.h"
 #include "players/juce_AudioProcessorPlayer.h"
 
 }
