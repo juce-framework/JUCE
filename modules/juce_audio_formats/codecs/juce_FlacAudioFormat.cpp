@@ -387,7 +387,8 @@ class FlacWriter  : public AudioFormatWriter
 {
 public:
     FlacWriter (OutputStream* const out, double rate, uint32 numChans, uint32 bits, int qualityOptionIndex)
-        : AudioFormatWriter (out, flacFormatName, rate, numChans, bits)
+        : AudioFormatWriter (out, flacFormatName, rate, numChans, bits),
+          streamStartPos (output != nullptr ? jmax (output->getPosition(), 0ll) : 0ll)
     {
         using namespace FlacNamespace;
         encoder = FLAC__stream_encoder_new();
@@ -495,7 +496,7 @@ public:
         packUint32 ((FLAC__uint32) info.total_samples, buffer + 14, 4);
         memcpy (buffer + 18, info.md5sum, 16);
 
-        const bool seekOk = output->setPosition (4);
+        const bool seekOk = output->setPosition (streamStartPos + 4);
         ignoreUnused (seekOk);
 
         // if this fails, you've given it an output stream that can't seek! It needs
@@ -545,6 +546,7 @@ public:
 
 private:
     FlacNamespace::FLAC__StreamEncoder* encoder;
+    int64 streamStartPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacWriter)
 };
