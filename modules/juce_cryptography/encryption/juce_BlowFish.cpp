@@ -400,7 +400,7 @@ public:
         expectGreaterThan (encryptedSize, (int) size);
         expectLessOrEqual (encryptedSize, (int) bufferSize);
 
-        int decryptedSize = blowFish.decrypt (data, encryptedSize);
+        int decryptedSize = blowFish.decrypt (data, static_cast<size_t> (encryptedSize));
         expectEquals ((int) size, decryptedSize);
 
         expectEqualData (data, copy.getData(), size, "Length/Content changed during encryption");
@@ -418,7 +418,7 @@ public:
 
     void encryptDecryptTest (const BlowFish& blowFish, const String& data)
     {
-        MemoryBlock block (data.toRawUTF8(), data.length());
+        MemoryBlock block (data.toRawUTF8(), static_cast<size_t> (data.length()));
         encryptDecryptTest (blowFish, block);
     }
 
@@ -429,8 +429,8 @@ public:
 
         for (int i = 0; i < 100; ++i)
         {
-            const int keySize = (random.nextInt(17) + 1) * sizeof (uint32);
-            MemoryBlock key (keySize);
+            const int keySize = (random.nextInt(17) + 1) * static_cast<int> (sizeof (uint32));
+            MemoryBlock key (static_cast<size_t> (keySize));
             fillMemoryBlockWithRandomData (key, random);
 
             BlowFish bf (key.getData(), keySize);
@@ -441,7 +441,7 @@ public:
 
             const int minSize = 8 + sizeof (void*);
             const int dataSize = random.nextInt (2048 - minSize) + minSize;
-            MemoryBlock data (dataSize);
+            MemoryBlock data (static_cast<size_t> (dataSize));
             fillMemoryBlockWithRandomData (data, random);
 
             encryptDecryptTest (bf, data);
@@ -450,7 +450,7 @@ public:
 
 
             // test unaligned data encryption/decryption
-            const uintptr_t nudge = random.nextInt (sizeof(void*) - 1);
+            const uintptr_t nudge = static_cast<uintptr_t> (random.nextInt (sizeof(void*) - 1));
             void* unalignedData = (void*) (reinterpret_cast<uintptr_t> (data.getData()) + nudge);
             size_t newSize = data.getSize() - nudge;
 
