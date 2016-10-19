@@ -632,7 +632,7 @@ public:
     void colourChanged() override;
     /** @internal */
     void lookAndFeelChanged() override;
-    /** @inernal */
+    /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
     bool isTextInputActive() const override;
