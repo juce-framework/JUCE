@@ -361,7 +361,7 @@ class VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
                          public Vst::IUnitHandler
 {
 public:
-    VST3HostContext ()  : plugin (nullptr)
+    VST3HostContext()  : plugin (nullptr)
     {
         appName = File::getSpecialLocation (File::currentApplicationFile).getFileNameWithoutExtension();
         attributeList = new AttributeList (this);
@@ -1627,7 +1627,7 @@ struct VST3ComponentHolder
     }
 
     // transfers ownership to the plugin instance!
-    AudioPluginInstance* createPluginInstance ();
+    AudioPluginInstance* createPluginInstance();
 
     bool fetchController (ComSmartPtr<Vst::IEditController>& editController)
     {
@@ -2364,7 +2364,7 @@ public:
 
         struct ParamValueQueue  : public Vst::IParamValueQueue
         {
-            ParamValueQueue () : paramID (static_cast<Vst::ParamID> (-1))
+            ParamValueQueue() : paramID (static_cast<Vst::ParamID> (-1))
             {
                 points.ensureStorageAllocated (1024);
             }
@@ -2686,7 +2686,7 @@ private:
         return paramInfo;
     }
 
-    void syncProgramNames ()
+    void syncProgramNames()
     {
         programNames.clear();
 
@@ -2767,12 +2767,13 @@ private:
 };
 
 //==============================================================================
-AudioPluginInstance* VST3Classes::VST3ComponentHolder::createPluginInstance ()
+AudioPluginInstance* VST3Classes::VST3ComponentHolder::createPluginInstance()
 {
-    if (! initialise()) return nullptr;
+    if (! initialise())
+        return nullptr;
+
     VST3PluginInstance* plugin = new VST3PluginInstance (this);
     host->setPlugin (plugin);
-
     return plugin;
 }
 

@@ -162,7 +162,7 @@ bool BufferingAudioSource::waitForNextAudioBlockReady (const AudioSourceChannelI
     if (! isLooping() && nextPlayPos > getTotalLength())
         return true;
 
-    const uint32 endTime = Time::getMillisecondCounter () + timeout;
+    const uint32 endTime = Time::getMillisecondCounter() + timeout;
     uint32 now = Time::getMillisecondCounter();
 
     while (now < endTime)
