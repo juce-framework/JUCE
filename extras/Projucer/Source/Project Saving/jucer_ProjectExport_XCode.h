@@ -250,7 +250,7 @@ public:
         writeInfoPlistFiles();
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
-        deleteRsrcFiles();
+        deleteRsrcFiles (getTargetFolder().getChildFile ("build"));
 
         if (! ProjucerApplication::getApp().isRunningCommandLine)
         {
@@ -1876,10 +1876,21 @@ private:
            target->writeInfoPlistFile();
     }
 
-    void deleteRsrcFiles() const
+    // Delete .rsrc files in folder but don't follow sym-links
+    void deleteRsrcFiles (const File& folder) const
     {
-        for (DirectoryIterator di (getTargetFolder().getChildFile ("build"), true, "*.rsrc", File::findFiles); di.next();)
-            di.getFile().deleteFile();
+        for (DirectoryIterator di (folder, false, "*", File::findFilesAndDirectories); di.next();)
+        {
+            const File& entry = di.getFile();
+
+            if (! entry.isSymbolicLink())
+            {
+                if (entry.existsAsFile() && entry.getFileExtension().toLowerCase() == ".rsrc")
+                    entry.deleteFile();
+                else if (entry.isDirectory())
+                    deleteRsrcFiles (entry);
+            }
+        }
     }
 
     String getHeaderSearchPaths (const BuildConfiguration& config) const
