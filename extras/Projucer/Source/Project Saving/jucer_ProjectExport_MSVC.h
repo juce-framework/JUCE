@@ -194,17 +194,20 @@ private:
             if (config->getValue(Ids::postbuildCommand).toString().isEmpty())
             {
                 const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+                const String aaxSDKPath = File::isAbsolutePath(aaxPath.toString())
+                                                          ? aaxPath.toString()
+                                                          : String ("..\\..\\") + aaxPath.toString();
 
                 const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
                 const String bundleDir      = "$(OutDir)$(TargetName).aaxplugin";
                 const String bundleContents = bundleDir + "\\Contents";
                 const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
                 const String executable     = macOSDir + String ("\\$(TargetName).aaxplugin");
-                const String bundleScript   = aaxPath.toString() + String ("\\Utilities\\CreatePackage.bat");
+                const String bundleScript   = aaxSDKPath + String ("\\Utilities\\CreatePackage.bat");
                 String iconFilePath         = getTargetFolder().getChildFile ("icon.ico").getFullPathName();
 
                 if (! File (iconFilePath).existsAsFile())
-                    iconFilePath = aaxPath.toString() + String ("\\Utilities\\PlugIn.ico");
+                    iconFilePath = aaxSDKPath + String ("\\Utilities\\PlugIn.ico");
 
                 String script;
 
