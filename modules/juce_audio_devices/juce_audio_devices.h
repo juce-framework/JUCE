@@ -118,21 +118,6 @@
 #endif
 
 //==============================================================================
-/** Config: JUCE_USE_CDREADER
-    Enables the AudioCDReader class (on supported platforms).
-*/
-#ifndef JUCE_USE_CDREADER
- #define JUCE_USE_CDREADER 0
-#endif
-
-/** Config: JUCE_USE_CDBURNER
-    Enables the AudioCDBurner class (on supported platforms).
-*/
-#ifndef JUCE_USE_CDBURNER
- #define JUCE_USE_CDBURNER 0
-#endif
-
-//==============================================================================
 namespace juce
 {
 
@@ -144,8 +129,6 @@ namespace juce
 #include "midi_io/juce_MidiOutput.h"
 #include "sources/juce_AudioSourcePlayer.h"
 #include "sources/juce_AudioTransportSource.h"
-#include "audio_cd/juce_AudioCDBurner.h"
-#include "audio_cd/juce_AudioCDReader.h"
 #include "audio_io/juce_AudioDeviceManager.h"
 
 }

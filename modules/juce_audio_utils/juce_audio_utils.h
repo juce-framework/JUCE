@@ -56,6 +56,21 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 //==============================================================================
+/** Config: JUCE_USE_CDREADER
+ Enables the AudioCDReader class (on supported platforms).
+ */
+#ifndef JUCE_USE_CDREADER
+#define JUCE_USE_CDREADER 0
+#endif
+
+/** Config: JUCE_USE_CDBURNER
+ Enables the AudioCDBurner class (on supported platforms).
+ */
+#ifndef JUCE_USE_CDBURNER
+#define JUCE_USE_CDBURNER 0
+#endif
+
+//==============================================================================
 namespace juce
 {
 
@@ -69,6 +84,8 @@ namespace juce
 #include "gui/juce_BluetoothMidiDevicePairingDialogue.h"
 #include "players/juce_SoundPlayer.h"
 #include "players/juce_AudioProcessorPlayer.h"
+#include "audio_cd/juce_AudioCDBurner.h"
+#include "audio_cd/juce_AudioCDReader.h"
 
 }
 
