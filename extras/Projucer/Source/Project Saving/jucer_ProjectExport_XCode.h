@@ -1310,13 +1310,24 @@ public:
             XmlElement plistEntry ("array");
             XmlElement* dict = plistEntry.createNewChildElement ("dict");
 
+            const String pluginManufacturerCode = owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4);
+            const String pluginSubType          = owner.project.getPluginCode()            .toString().trim().substring (0, 4);
+
+            if (pluginManufacturerCode.toLowerCase() == pluginManufacturerCode || pluginSubType.toLowerCase() == pluginSubType)
+            {
+                throw SaveError ("AudioUnit plugin code identifiers invalid!\n\n"
+                                 "You have used only lower case letters in your AU plugin code identifiers. "
+                                 "You must have at least one uppercase letter in both your AU plugin manufacturer "
+                                 "identifier code and your AU plugin subtype identifier code.");
+            }
+
             addPlistDictionaryKey (dict, "name", owner.project.getPluginManufacturer().toString()
                                    + ": " + owner.project.getPluginName().toString());
             addPlistDictionaryKey (dict, "description", owner.project.getPluginDesc().toString());
             addPlistDictionaryKey (dict, "factoryFunction", owner.project.getPluginAUExportPrefix().toString() + "Factory");
-            addPlistDictionaryKey (dict, "manufacturer", owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4));
+            addPlistDictionaryKey (dict, "manufacturer", pluginManufacturerCode);
             addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeCode());
-            addPlistDictionaryKey (dict, "subtype", owner.project.getPluginCode().toString().trim().substring (0, 4));
+            addPlistDictionaryKey (dict, "subtype", pluginSubType);
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
 
             xcodeExtraPListEntries.add (plistKey);
