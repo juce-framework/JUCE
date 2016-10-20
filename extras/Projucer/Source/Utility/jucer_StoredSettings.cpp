@@ -218,10 +218,10 @@ void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, con
 }
 
 //==============================================================================
-static bool doesSDKPathContainFile (const String& path, const String& fileToCheckFor)
+static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor)
 {
     String actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    return File::getCurrentWorkingDirectory().getChildFile (actualPath + "/" + fileToCheckFor).existsAsFile();
+    return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).existsAsFile();
 }
 
 Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
@@ -271,7 +271,7 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
     return String();
 }
 
-bool StoredSettings::isGlobalPathValid (const Identifier& key, const String& path)
+bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path)
 {
     String fileToCheckFor;
 
@@ -310,5 +310,5 @@ bool StoredSettings::isGlobalPathValid (const Identifier& key, const String& pat
         return false;
     }
 
-    return doesSDKPathContainFile (path, fileToCheckFor);
+    return doesSDKPathContainFile (relativeTo, path, fileToCheckFor);
 }

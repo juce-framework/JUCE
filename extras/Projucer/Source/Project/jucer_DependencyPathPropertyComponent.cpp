@@ -40,20 +40,27 @@ DependencyPathValueSource::DependencyPathValueSource (const Value& projectSettin
     globalSettingsValue.addListener (this);
 }
 
-bool DependencyPathValueSource::isValidPath() const
+bool DependencyPathValueSource::isValidPath (const File& relativeTo) const
 {
     // if we are on another OS than the one which this path setting is for,
     // we have no way of knowing whether the path is valid - so just assume it is:
     if (! appliesToThisOS())
         return true;
 
-    return getAppSettings().isGlobalPathValid (globalKey, getValue().toString());
+    return getAppSettings().isGlobalPathValid (relativeTo, globalKey, getValue().toString());
+}
+
+bool DependencyPathValueSource::isValidPath() const
+{
+    return isValidPath (File::getCurrentWorkingDirectory());
 }
 
 //==============================================================================
-DependencyPathPropertyComponent::DependencyPathPropertyComponent (const Value& value,
+DependencyPathPropertyComponent::DependencyPathPropertyComponent (const File& pathRelativeToUse,
+                                                                  const Value& value,
                                                                   const String& propertyName)
 try : TextPropertyComponent (propertyName, 1024, false),
+      pathRelativeTo (pathRelativeToUse),
       pathValue (value),
       pathValueSource (dynamic_cast<DependencyPathValueSource&> (pathValue.getValueSource()))
 {
@@ -100,11 +107,11 @@ void DependencyPathPropertyComponent::textWasEdited()
 Colour DependencyPathPropertyComponent::getTextColourToDisplay() const
 {
     if (! pathValueSource.isUsingProjectSettings())
-        return pathValueSource.isValidPath() ? Colours::grey
-                                              : Colours::lightpink;
+        return pathValueSource.isValidPath (pathRelativeTo) ? Colours::grey
+                                                            : Colours::lightpink;
 
-    return pathValueSource.isValidPath() ? Colours::black
-                                          : Colours::red;
+    return pathValueSource.isValidPath (pathRelativeTo) ? Colours::black
+                                                        : Colours::red;
 }
 
 void DependencyPathPropertyComponent::labelTextChanged (Label*)
