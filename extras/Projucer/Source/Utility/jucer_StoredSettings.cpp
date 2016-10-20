@@ -298,7 +298,7 @@ bool StoredSettings::isGlobalPathValid (const Identifier& key, const String& pat
     else if (key == Ids::androidNDKPath)
     {
        #if JUCE_WINDOWS
-        fileToCheckFor = "ndk-depends.exe";
+        fileToCheckFor = "ndk-depends.cmd";
        #else
         fileToCheckFor = "ndk-depends";
        #endif
