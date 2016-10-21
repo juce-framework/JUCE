@@ -45,7 +45,8 @@ public:
     }
 
     //==============================================================================
-    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain, buildToolsVersion;
+    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain, buildToolsVersion,
+                        gradleAppDependencies, gradleSettings;
 
     //==============================================================================
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
@@ -54,6 +55,9 @@ public:
           gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.8.1"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.2"),
+          gradleAppDependencies (settings, Ids::gradleAppDependencies, nullptr,
+                                 "compile \"com.android.support:support-v4:+\""),
+          gradleSettings (settings, Ids::gradleSettings, nullptr, "include ':app'"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {
         name = getName();
@@ -79,7 +83,19 @@ public:
         props.add (new TextWithDefaultPropertyComponent<String> (buildToolsVersion, "Android build tools version", 32),
                    "The Android build tools version that Android Studio should use to build this app");
     }
-
+    
+    void createOtherExporterProperties (PropertyListBuilder& props) override
+    {
+        AndroidProjectExporterBase::createOtherExporterProperties (props);
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleAppDependencies, "gradle app dependencies", 8192, true),
+                   "Declare the external dependencies of your project (app build.gradle)");
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleSettings, "gradle settings", 8192, true),
+                   "Declare the gradle settings for your project (settings.gradle)");
+    }
+                                                                            
+    
     void createLibraryModuleExporterProperties (PropertyListBuilder&) override
     {
         // gradle cannot do native library modules as far as we know...
@@ -110,7 +126,7 @@ public:
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
         const File targetFolder (getTargetFolder());
-
+        
         removeOldFiles (targetFolder);
 
         {
@@ -461,7 +477,7 @@ private:
     //==============================================================================
     String getSettingsGradleFileContent() const
     {
-        return "include ':app'";
+        return gradleSettings.get();
     }
 
     String getProjectBuildGradleFileContent() const
@@ -560,7 +576,7 @@ private:
         auto defaultConfig = new GradleObject ("defaultConfig.with");
 
         defaultConfig->add<GradleString> ("applicationId",             bundleIdentifier);
-        defaultConfig->add<GradleValue>  ("minSdkVersion.apiLevel",      minSdkVersion);
+        defaultConfig->add<GradleValue>  ("minSdkVersion.apiLevel",    minSdkVersion);
         defaultConfig->add<GradleValue>  ("targetSdkVersion.apiLevel", minSdkVersion);
 
         return defaultConfig;
@@ -726,7 +742,7 @@ private:
 
         for (const auto& path : config.getLibrarySearchPaths())
             ndkSettings->add<GradleLibrarySearchPath> (path);
-
+        
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID", "1");
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));

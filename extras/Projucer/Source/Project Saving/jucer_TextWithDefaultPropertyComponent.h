@@ -61,6 +61,7 @@ class TextWithDefaultPropertyComponent  : public PropertyComponent,
         {
             TextEditor* const ed = Label::createEditorComponent();
             ed->setInputRestrictions (maxChars);
+            ed->setMultiLine (isMultiLine);
             return ed;
         }
 
@@ -76,6 +77,8 @@ class TextWithDefaultPropertyComponent  : public PropertyComponent,
             setColour (textColourId,       owner.findColour (TextWithDefaultPropertyComponent::textColourId));
             repaint();
         }
+        
+        bool isMultiLine;
 
     private:
         TextWithDefaultPropertyComponent& owner;
@@ -84,19 +87,19 @@ class TextWithDefaultPropertyComponent  : public PropertyComponent,
 
 protected:
     //==========================================================================
-    TextWithDefaultPropertyComponent (const String& propertyName, int maxNumChars)
+    TextWithDefaultPropertyComponent (const String& propertyName, int maxNumChars, bool isMultiLine = false)
         : PropertyComponent (propertyName)
     {
-        createEditor (maxNumChars);
+        createEditor (maxNumChars, isMultiLine);
     }
 
 public:
     //==========================================================================
-    TextWithDefaultPropertyComponent (CachedValue<Type>& valueToControl, const String& propertyName, int maxNumChars)
+    TextWithDefaultPropertyComponent (CachedValue<Type>& valueToControl, const String& propertyName, int maxNumChars, bool isMultiLine = false)
         : PropertyComponent (propertyName),
           cachedValue (valueToControl)
     {
-        createEditor (maxNumChars);
+        createEditor (maxNumChars, isMultiLine);
         refresh();
     }
 
@@ -148,9 +151,15 @@ private:
 
     ScopedPointer<LabelComp> textEditor;
 
-    void createEditor (int maxNumChars)
+    void createEditor (int maxNumChars, bool isMultiLine)
     {
-        addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars));
+        addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars, isMultiLine));
+        
+        if (isMultiLine)
+        {
+            textEditor->setJustificationType (Justification::topLeft);
+            preferredHeight = 100;
+        }
     }
 
     void labelTextChanged (Label*) override {}
@@ -158,7 +167,11 @@ private:
     void editorShown (Label*, TextEditor& editor) override
     {
         if (cachedValue.isUsingDefault())
-            editor.setText (String(), dontSendNotification);
+        {
+            // Keep default value if this is a mult-line field
+            String initialValue = textEditor->isMultiLine ? getText() : String();
+            editor.setText (initialValue, dontSendNotification);
+        }
     }
 
     void editorHidden (Label*, TextEditor&) override {}
