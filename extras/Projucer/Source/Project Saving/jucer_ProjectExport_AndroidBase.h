@@ -182,6 +182,9 @@ public:
     {
         props.add (new TextPropertyComponent (androidTheme.getPropertyAsValue(), "Android Theme", 256, false),
                    "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
+        
+        props.add (new TextPropertyComponent (androidApplicationClass.getPropertyAsValue(), "Android Application Class", 256, false),
+                   "The name of your Application class, if your project extends it");
     }
 
     //==============================================================================

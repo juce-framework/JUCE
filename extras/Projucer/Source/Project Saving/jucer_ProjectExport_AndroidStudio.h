@@ -35,7 +35,11 @@ public:
 
     static const char* getName()                         { return "Android Studio"; }
     static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
-
+    
+    //==============================================================================
+    Value  getPackagingOptionsValue()                { return getSetting (Ids::androidPackagingOptions); }
+    String getPackagingOptionsString() const         { return settings [Ids::androidPackagingOptions]; }
+    
     static AndroidStudioProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
@@ -98,6 +102,9 @@ public:
         
         props.add (new TextWithDefaultPropertyComponent<String> (gradleRepositories, "gradle project repositories", 8192, true),
                    "Declare the repositories for your project dependencies (build.gradle)");
+        
+        props.add (new TextPropertyComponent (getPackagingOptionsValue(), "packaging options", 8192, true),
+                   "DSL object for configuring APK packaging options");
     }
                                                                             
     
@@ -562,6 +569,7 @@ private:
         model.addChildObject (getAndroidBuildConfigs());
         model.addChildObject (getAndroidSigningConfigs());
         model.addChildObject (getAndroidProductFlavours());
+        model.addChildObject (getAndroidPackagingOptions());
 
         return model.toString();
     }
@@ -827,6 +835,22 @@ private:
         flavour->add<GradleStatement> ("ndk.abiFilters.add(\"" + arch + "\")");
         return flavour;
     }
+            
+            
+    GradleObject* getAndroidPackagingOptions() const
+    {
+        auto packagingOptions = new GradleObject ("android.packagingOptions");
+        
+        StringArray packagingOptionLines;
+        packagingOptionLines.addTokens (getPackagingOptionsString(), "\n", "");
+        for (auto packagingOption : packagingOptionLines)
+        {
+            packagingOptions->add<GradleStatement> (packagingOption);
+        }
+
+        return packagingOptions;
+    }
+            
     //==============================================================================
     String getLocalPropertiesFileContent() const
     {
