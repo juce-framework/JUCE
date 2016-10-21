@@ -569,7 +569,8 @@ private:
         model.addChildObject (getAndroidBuildConfigs());
         model.addChildObject (getAndroidSigningConfigs());
         model.addChildObject (getAndroidProductFlavours());
-        model.addChildObject (getAndroidPackagingOptions());
+        if (getPackagingOptionsString().isNotEmpty())
+            model.addChildObject (getAndroidPackagingOptions());
 
         return model.toString();
     }
