@@ -45,8 +45,9 @@ public:
     }
 
     //==============================================================================
-    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain, buildToolsVersion,
-                        gradleAppDependencies, gradleSettings;
+    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain,
+                        buildToolsVersion, gradleAppDependencies, gradleSettings,
+                        gradleRepositories;
 
     //==============================================================================
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
@@ -58,6 +59,7 @@ public:
           gradleAppDependencies (settings, Ids::gradleAppDependencies, nullptr,
                                  "compile \"com.android.support:support-v4:+\""),
           gradleSettings (settings, Ids::gradleSettings, nullptr, "include ':app'"),
+          gradleRepositories (settings, Ids::gradleRepositories, nullptr, "jcenter()"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {
         name = getName();
@@ -89,10 +91,13 @@ public:
         AndroidProjectExporterBase::createOtherExporterProperties (props);
         
         props.add (new TextWithDefaultPropertyComponent<String> (gradleAppDependencies, "gradle app dependencies", 8192, true),
-                   "Declare the external dependencies of your project (app build.gradle)");
+                   "Declare the external dependencies of your project (app/build.gradle)");
         
         props.add (new TextWithDefaultPropertyComponent<String> (gradleSettings, "gradle settings", 8192, true),
                    "Declare the gradle settings for your project (settings.gradle)");
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleRepositories, "gradle project repositories", 8192, true),
+                   "Declare the repositories for your project dependencies (build.gradle)");
     }
                                                                             
     
@@ -494,13 +499,13 @@ private:
     {
         GradleObject buildScript ("buildscript");
 
-        buildScript.addChildObject (getGradleRepositories());
+        buildScript.addChildObject (getGradleBuildScriptRepositories());
         buildScript.addChildObject (getGradleDependencies());
 
         return buildScript.toString();
     }
 
-    GradleObject* getGradleRepositories() const
+    GradleObject* getGradleBuildScriptRepositories() const
     {
         auto repositories = new GradleObject ("repositories");
         repositories->add<GradleStatement> ("jcenter()");
@@ -514,6 +519,18 @@ private:
         dependencies->add<GradleStatement> ("classpath 'com.android.tools.build:gradle-experimental:"
                                             + gradleWrapperVersion.get() + "'");
         return dependencies;
+    }
+
+    GradleObject* getGradleRepositories() const
+    {
+        auto repositories = new GradleObject ("repositories");
+        StringArray repositoryLines;
+        repositoryLines.addTokens (gradleRepositories.get(), "\n", "");
+        for (auto repositoryLine : repositoryLines)
+        {
+            repositories->add<GradleStatement> (repositoryLine);
+        }
+        return repositories;
     }
 
     String getGradleAllProjects() const
