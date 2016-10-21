@@ -35,7 +35,7 @@ public:
 
     static const char* getName()                         { return "Android Studio"; }
     static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
-    
+
     //==============================================================================
     Value  getPackagingOptionsValue()                { return getSetting (Ids::androidPackagingOptions); }
     String getPackagingOptionsString() const         { return settings [Ids::androidPackagingOptions]; }
@@ -577,7 +577,12 @@ private:
     String getAppDependencies() const
     {
         GradleObject dependencies ("dependencies");
-        dependencies.add<GradleStatement> ("compile \"com.android.support:support-v4:+\"");
+        StringArray dependencyTokens;
+        dependencyTokens.addTokens (gradleAppDependencies.get(), "\n", "");
+        for (auto dependency : dependencyTokens)
+        {
+            dependencies.add<GradleStatement> (dependency);
+        }
         return dependencies.toString();
     }
 
@@ -586,7 +591,7 @@ private:
     {
         auto android = new GradleObject ("android");
 
-        android->add<GradleValue> ("compileSdkVersion", androidMinimumSDK.get().getIntValue());
+        android->add<GradleValue> ("compileSdkVersion", androidCompileSDK.get().getIntValue());
         android->add<GradleString> ("buildToolsVersion", buildToolsVersion.get());
         android->addChildObject (getAndroidDefaultConfig());
 
@@ -597,12 +602,13 @@ private:
     {
         const String bundleIdentifier  = project.getBundleIdentifier().toString().toLowerCase();
         const int minSdkVersion = androidMinimumSDK.get().getIntValue();
+        const int targetSdkVersion = androidTargetSDK.get().getIntValue();
 
         auto defaultConfig = new GradleObject ("defaultConfig.with");
 
         defaultConfig->add<GradleString> ("applicationId",             bundleIdentifier);
         defaultConfig->add<GradleValue>  ("minSdkVersion.apiLevel",    minSdkVersion);
-        defaultConfig->add<GradleValue>  ("targetSdkVersion.apiLevel", minSdkVersion);
+        defaultConfig->add<GradleValue>  ("targetSdkVersion.apiLevel", targetSdkVersion);
 
         return defaultConfig;
     }

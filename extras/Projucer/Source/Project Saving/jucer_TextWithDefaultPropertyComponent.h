@@ -35,8 +35,9 @@ class TextWithDefaultPropertyComponent  : public PropertyComponent,
                        public FileDragAndDropTarget
     {
     public:
-        LabelComp (TextWithDefaultPropertyComponent& tpc, const int charLimit)
+        LabelComp (TextWithDefaultPropertyComponent& tpc, const int charLimit, bool multiLine)
             : Label (String(), String()),
+              isMultiLine (multiLine),
               owner (tpc),
               maxChars (charLimit)
         {
