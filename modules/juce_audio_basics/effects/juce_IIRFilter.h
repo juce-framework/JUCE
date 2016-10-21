@@ -77,10 +77,28 @@ public:
 
     //==============================================================================
     /** Returns the coefficients for a band-pass filter. */
-    static IIRCoefficients makeBandPass(double sampleRate, double frequency) noexcept;
+    static IIRCoefficients makeBandPass (double sampleRate, double frequency) noexcept;
 
     /** Returns the coefficients for a band-pass filter with variable Q. */
-    static IIRCoefficients makeBandPass(double sampleRate,
+    static IIRCoefficients makeBandPass (double sampleRate,
+                                         double frequency,
+                                         double Q) noexcept;
+
+    //==============================================================================
+    /** Returns the coefficients for a notch filter. */
+    static IIRCoefficients makeNotchFilter (double sampleRate, double frequency) noexcept;
+
+    /** Returns the coefficients for a notch filter with variable Q. */
+    static IIRCoefficients makeNotchFilter (double sampleRate,
+                                            double frequency,
+                                            double Q) noexcept;
+
+    //==============================================================================
+    /** Returns the coefficients for an all-pass filter. */
+    static IIRCoefficients makeAllPass (double sampleRate, double frequency) noexcept;
+
+    /** Returns the coefficients for an all-pass filter with variable Q. */
+    static IIRCoefficients makeAllPass (double sampleRate,
                                         double frequency,
                                         double Q) noexcept;
 

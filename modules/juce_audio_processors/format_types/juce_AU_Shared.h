@@ -363,7 +363,7 @@ struct AudioUnitHelpers
             HeapBlock<int>& layoutMapStorage = isInput ? inputLayoutMapStorage : outputLayoutMapStorage;
             int**& layoutMap = isInput ? inputLayoutMap : outputLayoutMap;
 
-            const int totalInChannels  = processor.getTotalNumInputChannels ();
+            const int totalInChannels  = processor.getTotalNumInputChannels();
             const int totalOutChannels = processor.getTotalNumOutputChannels();
 
             layoutMapPtrStorage.calloc (static_cast<size_t> (numBuses));

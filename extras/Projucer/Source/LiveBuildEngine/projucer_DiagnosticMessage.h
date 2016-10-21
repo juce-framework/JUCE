@@ -107,7 +107,7 @@ struct DiagnosticReceiver
 {
     virtual ~DiagnosticReceiver() {}
     virtual void handleDiagnostic (const DiagnosticMessage&) = 0;
-    virtual void handleRecoverableErrorPCH (const DiagnosticMessage& m, String fileName) = 0;
+    virtual void handleRecoverableErrorPCH (const DiagnosticMessage& m, String pchFileName, String sourceFileName) = 0;
 };
 
 //==============================================================================

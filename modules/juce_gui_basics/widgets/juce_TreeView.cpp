@@ -1559,6 +1559,9 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         {
             if (isSelected())
                 g.fillAll (ownerView->findColour (TreeView::selectedItemBackgroundColourId));
+            else
+                g.fillAll ((getRowNumberInTree() % 2 == 0) ? ownerView->findColour (TreeView::oddItemsColourId)
+                                                           : ownerView->findColour (TreeView::evenItemsColourId));
 
             paintItem (g, itemWidth < 0 ? width - indent : itemWidth, itemHeight);
         }

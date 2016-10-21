@@ -1602,6 +1602,7 @@ private:
 
         OSStatus err = AudioUnitGetProperty (comp, kAudioUnitProperty_ElementCount, scope, 0, &count, &countSize);
         jassert (err == noErr);
+        ignoreUnused (err);
 
         return static_cast<int> (count);
     }

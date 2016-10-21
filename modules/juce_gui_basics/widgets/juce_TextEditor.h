@@ -633,6 +633,8 @@ public:
     /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
+    void parentHierarchyChanged() override;
+    /** @internal */
     bool isTextInputActive() const override;
     /** @internal */
     void setTemporaryUnderlining (const Array<Range<int> >&) override;

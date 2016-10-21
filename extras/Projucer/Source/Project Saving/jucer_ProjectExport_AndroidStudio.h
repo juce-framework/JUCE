@@ -50,8 +50,8 @@ public:
     //==============================================================================
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
         : AndroidProjectExporterBase (p, t),
-          gradleVersion (settings, Ids::gradleVersion, nullptr, "2.10"),
-          gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.7.0-rc1"),
+          gradleVersion (settings, Ids::gradleVersion, nullptr, "2.14.1"),
+          gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.8.1"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.2"),
           androidStudioExecutable (findAndroidStudioExecutable())
@@ -131,6 +131,13 @@ public:
         writeFile (targetFolder, "local.properties", getLocalPropertiesFileContent());
         writeFile (targetFolder, "gradle/wrapper/gradle-wrapper.properties", getGradleWrapperPropertiesFileContent());
 
+        writeBinaryFile (targetFolder, "gradle/wrapper/LICENSE-for-gradlewrapper.txt", BinaryData::LICENSE, BinaryData::LICENSESize);
+        writeBinaryFile (targetFolder, "gradle/wrapper/gradle-wrapper.jar", BinaryData::gradlewrapper_jar, BinaryData::gradlewrapper_jarSize);
+        writeBinaryFile (targetFolder, "gradlew",                           BinaryData::gradlew,           BinaryData::gradlewSize);
+        writeBinaryFile (targetFolder, "gradlew.bat",                       BinaryData::gradlew_bat,       BinaryData::gradlew_batSize);
+
+        targetFolder.getChildFile ("gradlew").setExecutePermission (true);
+
         writeAndroidManifest (targetFolder);
         writeStringsXML      (targetFolder);
         writeAppIcons        (targetFolder);
@@ -151,6 +158,13 @@ public:
     {
         MemoryOutputStream outStream;
         outStream << fileContent;
+        overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
+    }
+
+    void writeBinaryFile (const File& gradleProjectFolder, const String& filePath, const char* binaryData, const int binarySize) const
+    {
+        MemoryOutputStream outStream;
+        outStream.write (binaryData, static_cast<size_t> (binarySize));
         overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
     }
 

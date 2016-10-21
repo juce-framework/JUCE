@@ -39,7 +39,7 @@
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_core
+  dependencies:     juce_core, juce_events
 
  END_JUCE_MODULE_DECLARATION
 

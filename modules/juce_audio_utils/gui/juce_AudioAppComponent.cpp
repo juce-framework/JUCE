@@ -33,9 +33,9 @@ AudioAppComponent::~AudioAppComponent()
     jassert (audioSourcePlayer.getCurrentSource() == nullptr);
 }
 
-void AudioAppComponent::setAudioChannels (int numInputChannels, int numOutputChannels)
+void AudioAppComponent::setAudioChannels (int numInputChannels, int numOutputChannels, const XmlElement* const xml)
 {
-    String audioError = deviceManager.initialise (numInputChannels, numOutputChannels, nullptr, true);
+    String audioError = deviceManager.initialise (numInputChannels, numOutputChannels, xml, true);
     jassert (audioError.isEmpty());
 
     deviceManager.addAudioCallback (&audioSourcePlayer);

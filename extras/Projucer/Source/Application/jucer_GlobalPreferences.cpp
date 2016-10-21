@@ -60,7 +60,7 @@ void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textP
 {
     Identifier keyName = getKeyForPropertyComponent (textPropertyComponent);
 
-    Colour textColour = getAppSettings().isGlobalPathValid (keyName, textPropertyComponent->getText())
+    Colour textColour = getAppSettings().isGlobalPathValid (File::getCurrentWorkingDirectory(), keyName, textPropertyComponent->getText())
                             ? Colours::black
                             : Colours::red;
 
@@ -322,7 +322,7 @@ void AppearanceSettings::showGlobalPreferences (ScopedPointer<Component>& ownerP
     if (ownerPointer != nullptr)
         ownerPointer->toFront (true);
     else
-        new FloatingToolWindow ("Global Preferences",
+        new FloatingToolWindow ("Preferences",
                                 "globalPreferencesEditorPos",
                                 new GlobalPreferencesComponent,
                                 ownerPointer,

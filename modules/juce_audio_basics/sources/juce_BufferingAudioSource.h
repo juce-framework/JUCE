@@ -92,6 +92,12 @@ public:
     /** Implements the PositionableAudioSource method. */
     bool isLooping() const override             { return source->isLooping(); }
 
+    /** A useful function to block until the next the buffer info can be filled.
+
+        This is useful for offline rendering.
+    */
+    bool waitForNextAudioBlockReady (const AudioSourceChannelInfo& info, const uint32 timeout);
+
 private:
     //==============================================================================
     OptionalScopedPointer<PositionableAudioSource> source;
@@ -99,6 +105,7 @@ private:
     int numberOfSamplesToBuffer, numberOfChannels;
     AudioSampleBuffer buffer;
     CriticalSection bufferStartPosLock;
+    WaitableEvent bufferReadyEvent;
     int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;
     double volatile sampleRate;
     bool wasSourceLooping, isPrepared, prefillBuffer;

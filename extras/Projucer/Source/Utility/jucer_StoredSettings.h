@@ -67,7 +67,8 @@ public:
     //==============================================================================
     Value getGlobalPath (const Identifier& key, DependencyPathOS);
     String getFallbackPath (const Identifier& key, DependencyPathOS);
-    bool isGlobalPathValid (const Identifier& key, const String& path);
+
+    bool isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path);
 
 private:
     OwnedArray<PropertiesFile> propertyFiles;

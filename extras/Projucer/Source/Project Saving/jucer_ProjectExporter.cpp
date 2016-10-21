@@ -244,19 +244,19 @@ void ProjectExporter::createDependencyPathProperties (PropertyListBuilder& props
 {
     if (supportsVST3() && (project.shouldBuildVST3().getValue() || project.isVST3PluginHost()))
     {
-        props.add (new DependencyPathPropertyComponent (getVST3PathValue(), "VST3 SDK Folder"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getVST3PathValue(), "VST3 SDK Folder"),
                    "If you're building a VST3 plugin or host, this must be the folder containing the VST3 SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
     if (supportsAAX() && project.shouldBuildAAX().getValue())
     {
-        props.add (new DependencyPathPropertyComponent (getAAXPathValue(), "AAX SDK Folder"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getAAXPathValue(), "AAX SDK Folder"),
                    "If you're building an AAX plugin, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
     if (supportsRTAS() && project.shouldBuildRTAS().getValue())
     {
-        props.add (new DependencyPathPropertyComponent (getRTASPathValue(), "RTAS SDK Folder"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getRTASPathValue(), "RTAS SDK Folder"),
                    "If you're building an RTAS, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 }

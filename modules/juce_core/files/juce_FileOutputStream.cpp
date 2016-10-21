@@ -43,7 +43,7 @@ FileOutputStream::FileOutputStream (const File& f, const size_t bufferSizeToUse)
 
 FileOutputStream::~FileOutputStream()
 {
-    flush();
+    flushBuffer();
     closeHandle();
 }
 

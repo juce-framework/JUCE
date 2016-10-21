@@ -174,7 +174,7 @@ private:
                     if (previousBuildCommands.isNotEmpty())
                         script += "\r\n";
 
-                    script += "copy /Y \"$(OutDir)\\$(TargetFileName)\" \"$(OutDir)\\$(TargetName).vst3\"";
+                    script += "copy /Y \"$(OutDir)$(TargetFileName)\" \"$(OutDir)$(TargetName).vst3\"";
 
                     config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
                 }
@@ -194,28 +194,36 @@ private:
             if (config->getValue(Ids::postbuildCommand).toString().isEmpty())
             {
                 const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
+                const String aaxSDKPath = File::isAbsolutePath(aaxPath.toString())
+                                                          ? aaxPath.toString()
+                                                          : String ("..\\..\\") + aaxPath.toString();
 
                 const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
-                const String bundleDir      = "$(OutDir)\\$(TargetName).aaxplugin";
+                const String bundleDir      = "$(OutDir)$(TargetName).aaxplugin";
                 const String bundleContents = bundleDir + "\\Contents";
                 const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
                 const String executable     = macOSDir + String ("\\$(TargetName).aaxplugin");
-                const String bundleScript   = aaxPath.toString() + String ("\\Utilities\\CreatePackage.bat");
+                const String bundleScript   = aaxSDKPath + String ("\\Utilities\\CreatePackage.bat");
                 String iconFilePath         = getTargetFolder().getChildFile ("icon.ico").getFullPathName();
 
                 if (! File (iconFilePath).existsAsFile())
-                    iconFilePath = aaxPath.toString() + String ("\\Utilities\\PlugIn.ico");
+                    iconFilePath = aaxSDKPath + String ("\\Utilities\\PlugIn.ico");
 
                 String script;
 
                 if (previousBuildCommands.isNotEmpty())
                     script += "\r\n";
 
-                script += String ("mkdir \"") + bundleDir      + String ("\"\r\n");
-                script += String ("mkdir \"") + bundleContents + String ("\"\r\n");
-                script += String ("mkdir \"") + macOSDir       + String ("\"\r\n");
-                script += String ("copy /Y \"$(OutDir)\\$(TargetFileName)\" \"") + executable + String ("\"\r\n");
-                script += bundleScript + String (" \"") + macOSDir + String ("\" \"") + iconFilePath + String ("\"");
+                StringArray folders;
+                folders.add (bundleDir);
+                folders.add (bundleContents);
+                folders.add (macOSDir);
+
+                for (int i = 0; i < folders.size(); ++i)
+                    script += String ("if not exist \"") + folders[i] + String ("\" mkdir \"") + folders[i] + String ("\"\r\n");
+
+                script += String ("copy /Y \"$(OutDir)$(TargetFileName)\" \"") + executable + String ("\"\r\n");
+                script += String ("\"") + bundleScript + String ("\" \"") + macOSDir + String ("\" \"") + iconFilePath + String ("\"");
 
                 config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
             }

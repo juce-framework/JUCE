@@ -376,7 +376,7 @@ public:
     */
     ElementType remove (const int indexToRemove) noexcept
     {
-        return data.remove (indexToRemove);
+        return data.removeAndReturn (indexToRemove);
     }
 
     /** Removes an item from the set.
