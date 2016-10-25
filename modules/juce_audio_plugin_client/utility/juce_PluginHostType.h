@@ -200,6 +200,7 @@ private:
         if (hostPath.containsIgnoreCase     ("Live 7."))           return AbletonLive7;
         if (hostPath.containsIgnoreCase     ("Live 8."))           return AbletonLive8;
         if (hostFilename.containsIgnoreCase ("Live"))              return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("Adobe Audition"))    return AdobeAudition;
         if (hostFilename.containsIgnoreCase ("Adobe Premiere"))    return AdobePremierePro;
         if (hostFilename.contains           ("Logic"))             return AppleLogic;
         if (hostFilename.containsIgnoreCase ("Pro Tools"))         return DigidesignProTools;
