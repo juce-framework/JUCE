@@ -1511,7 +1511,7 @@ private:
     //==============================================================================
     BusesLayout getNextBestLayoutInList (const BusesLayout& layouts,
                                              const Array<InOutChannelPair>& channelLayouts) const;
-    static bool containsLayout (const BusesLayout& layouts, const Array<InOutChannelPair>& channelLayouts);
+    static bool JUCE_CALLTYPE containsLayout (const BusesLayout& layouts, const Array<InOutChannelPair>& channelLayouts);
 
     //==============================================================================
     void initialise (const BusesProperties& ioLayouts);
