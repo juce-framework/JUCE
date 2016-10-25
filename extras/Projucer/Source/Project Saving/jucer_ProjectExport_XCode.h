@@ -1326,7 +1326,7 @@ public:
             const String pluginManufacturerCode = owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4);
             const String pluginSubType          = owner.project.getPluginCode()            .toString().trim().substring (0, 4);
 
-            if (pluginManufacturerCode.toLowerCase() == pluginManufacturerCode || pluginSubType.toLowerCase() == pluginSubType)
+            if (pluginManufacturerCode.toLowerCase() == pluginManufacturerCode)
             {
                 throw SaveError ("AudioUnit plugin code identifiers invalid!\n\n"
                                  "You have used only lower case letters in your AU plugin code identifiers. "
