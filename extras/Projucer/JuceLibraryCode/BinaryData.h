@@ -118,7 +118,7 @@ namespace BinaryData
     const int            projectIconXcodeIOS_pngSize = 18111;
 
     extern const char*   projucer_EULA_txt;
-    const int            projucer_EULA_txtSize = 14390;
+    const int            projucer_EULA_txtSize = 14394;
 
     extern const char*   projucer_login_bg_svg;
     const int            projucer_login_bg_svgSize = 5046;
