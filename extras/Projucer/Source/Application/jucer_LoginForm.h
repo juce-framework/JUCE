@@ -43,7 +43,7 @@ public:
           errorLabel ("Error Label", String()),
           rememberLoginCheckbox (TRANS("Remember login")),
           forgotPasswordButton (TRANS("Forgotten your password?"),
-                                URL (getServerURL() + "reset_password?referer=projucer")),
+                                URL ("https://auth.roli.com/forgot-password?referer=projucer")),
           rememberLogin (true)
     {
         setLookAndFeel (&lookAndFeel);

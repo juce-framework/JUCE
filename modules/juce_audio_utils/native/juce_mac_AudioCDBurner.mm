@@ -82,12 +82,12 @@ private:
         sendSuperclassMessage (self, @selector (dealloc));
     }
 
-    static void cleanupTrackAfterBurn (id self, SEL, DRTrack*) {}
-    static BOOL cleanupTrackAfterVerification (id self, SEL, DRTrack*) { return true; }
+    static void cleanupTrackAfterBurn (id, SEL, DRTrack*) {}
+    static BOOL cleanupTrackAfterVerification (id, SEL, DRTrack*) { return true; }
 
     static uint64_t estimateLengthOfTrack (id self, SEL, DRTrack*)
     {
-        return getSource (self)->lengthInFrames;
+        return static_cast<uint64_t> (getSource (self)->lengthInFrames);
     }
 
     static BOOL prepareTrack (id self, SEL, DRTrack*, DRBurn*, NSDictionary*)
@@ -136,13 +136,13 @@ private:
                 source->readPosition += numSamples;
             }
 
-            return numSamples * 4;
+            return static_cast<uint32_t> (numSamples * 4);
         }
 
         return 0;
     }
 
-    static uint32_t producePreGapForTrack (id self, SEL, DRTrack*, char* buffer,
+    static uint32_t producePreGapForTrack (id, SEL, DRTrack*, char* buffer,
                                            uint32_t bufferLength, uint64_t /*address*/,
                                            uint32_t /*blockSize*/, uint32_t* /*flags*/)
     {
@@ -150,7 +150,7 @@ private:
         return bufferLength;
     }
 
-    static BOOL verifyDataForTrack (id self, SEL, DRTrack*, const char*,
+    static BOOL verifyDataForTrack (id, SEL, DRTrack*, const char*,
                                     uint32_t /*bufferLength*/, uint64_t /*address*/,
                                     uint32_t /*blockSize*/, uint32_t* /*flags*/)
     {
@@ -186,7 +186,7 @@ struct OpenDiskDevice
 
             {
                 NSMutableDictionary* p = [[track properties] mutableCopy];
-                [p setObject: [DRMSF msfWithFrames: numFrames] forKey: DRTrackLengthKey];
+                [p setObject: [DRMSF msfWithFrames: static_cast<UInt32> (numFrames)] forKey: DRTrackLengthKey];
                 [p setObject: [NSNumber numberWithUnsignedShort: 2352] forKey: DRBlockSizeKey];
                 [p setObject: [NSNumber numberWithInt: 0] forKey: DRDataFormKey];
                 [p setObject: [NSNumber numberWithInt: 0] forKey: DRBlockTypeKey];
@@ -268,7 +268,7 @@ class AudioCDBurner::Pimpl  : public Timer
 public:
     Pimpl (AudioCDBurner& b, int deviceIndex)  : owner (b)
     {
-        if (DRDevice* dev = [[DRDevice devices] objectAtIndex: deviceIndex])
+        if (DRDevice* dev = [[DRDevice devices] objectAtIndex: static_cast<NSUInteger> (deviceIndex)])
         {
             device = new OpenDiskDevice (dev);
             lastState = getDiskState();

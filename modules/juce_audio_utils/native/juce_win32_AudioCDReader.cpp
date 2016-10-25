@@ -295,7 +295,7 @@ private:
 //==============================================================================
 HANDLE createSCSIDeviceHandle (const char driveLetter)
 {
-    TCHAR devicePath[] = { '\\', '\\', '.', '\\', driveLetter, ':', 0, 0 };
+    TCHAR devicePath[] = { L'\\', L'\\', L'.', L'\\', static_cast<TCHAR> (driveLetter), L':', 0, 0 };
     DWORD flags = GENERIC_READ | GENERIC_WRITE;
     HANDLE h = CreateFile (devicePath, flags, FILE_SHARE_WRITE | FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
@@ -312,7 +312,7 @@ void findCDDevices (Array<CDDeviceDescription>& list)
 {
     for (char driveLetter = 'b'; driveLetter <= 'z'; ++driveLetter)
     {
-        TCHAR drivePath[] = { driveLetter, ':', '\\', 0, 0 };
+        TCHAR drivePath[] = { static_cast<TCHAR> (driveLetter), L':', L'\\', 0, 0 };
 
         if (GetDriveType (drivePath) == DRIVE_CDROM)
         {

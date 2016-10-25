@@ -404,11 +404,11 @@
             file="Source/Project/jucer_TreeItemTypes.h"/>
     </GROUP>
     <GROUP id="{28174A5F-D7AD-7240-6104-135D5D2DDB3C}" name="Project Saving">
-      <FILE id="DNX8ur" name="jucer_ProjectExport_AndroidAnt.h" compile="0"
+      <FILE id="rJVyvQ" name="jucer_ProjectExport_AndroidAnt.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidAnt.h"/>
       <FILE id="nB4AaL" name="jucer_ProjectExport_AndroidBase.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidBase.h"/>
-      <FILE id="lPQ16m" name="jucer_ProjectExport_AndroidStudio.h" compile="0"
+      <FILE id="eDGR9w" name="jucer_ProjectExport_AndroidStudio.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidStudio.h"/>
       <FILE id="lYuOMq" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_CodeBlocks.h"/>
@@ -521,6 +521,13 @@
             resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
     </GROUP>
     <GROUP id="{D4241EC8-2982-DB90-D1BE-72E57B735268}" name="BinaryData">
+      <GROUP id="{43550888-4716-639C-A179-DDB7011AED08}" name="gradle">
+        <FILE id="ns7TQR" name="gradle-wrapper.jar" compile="0" resource="1"
+              file="Source/BinaryData/gradle/gradle-wrapper.jar"/>
+        <FILE id="NbmM2l" name="gradlew" compile="0" resource="1" file="Source/BinaryData/gradle/gradlew"/>
+        <FILE id="Z24qJj" name="gradlew.bat" compile="0" resource="1" file="Source/BinaryData/gradle/gradlew.bat"/>
+        <FILE id="lDwfs7" name="LICENSE" compile="0" resource="1" file="Source/BinaryData/gradle/LICENSE"/>
+      </GROUP>
       <GROUP id="{8064F10D-D9BC-1C24-B322-A339C00D0B25}" name="templates">
         <FILE id="EfZy6b" name="jucer_AnimatedComponentTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/jucer_AnimatedComponentTemplate.cpp"/>

@@ -91,7 +91,12 @@ void BufferingAudioSource::releaseResources()
     backgroundThread.removeTimeSliceClient (this);
 
     buffer.setSize (numberOfChannels, 0);
-    source->releaseResources();
+
+    // MSVC2015 seems to need this if statement to not generate a warning during linking.
+    // As source is set in the constructor, there is no way that source could
+    // ever equal this, but it seems to make MSVC2015 happy.
+    if (source != this)
+        source->releaseResources();
 }
 
 void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
@@ -162,7 +167,7 @@ bool BufferingAudioSource::waitForNextAudioBlockReady (const AudioSourceChannelI
     if (! isLooping() && nextPlayPos > getTotalLength())
         return true;
 
-    const uint32 endTime = Time::getMillisecondCounter () + timeout;
+    const uint32 endTime = Time::getMillisecondCounter() + timeout;
     uint32 now = Time::getMillisecondCounter();
 
     while (now < endTime)

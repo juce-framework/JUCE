@@ -529,13 +529,14 @@ namespace AAXClasses
     };
 
     static void AAX_CALLBACK algorithmProcessCallback (JUCEAlgorithmContext* const instancesBegin[], const void* const instancesEnd);
+
     //==============================================================================
     class JuceAAX_Processor   : public AAX_CEffectParameters,
                                 public juce::AudioPlayHead,
                                 public AudioProcessorListener
     {
     public:
-        JuceAAX_Processor ()
+        JuceAAX_Processor()
             : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_AAX)),
               isPrepared (false),
               sampleRate (0), lastBufferSize (1024), maxBufferSize (1024)
@@ -551,7 +552,7 @@ namespace AAXClasses
         static AAX_CEffectParameters* AAX_CALLBACK Create()
         {
             PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
-            return new JuceAAX_Processor ();
+            return new JuceAAX_Processor();
         }
 
         AAX_Result Uninitialize() override
@@ -629,7 +630,7 @@ namespace AAXClasses
             juce::MemoryBlock& tempFilterData = getTemporaryChunkMemory();
 
             if (tempFilterData.getSize() == 0)
-                return 20700 /*AAX_ERROR_PLUGIN_API_INVALID_THREAD*/;
+                return 20700; // AAX_ERROR_PLUGIN_API_INVALID_THREAD
 
             oChunk->fSize = (int32_t) tempFilterData.getSize();
             tempFilterData.copyTo (oChunk->fData, 0, tempFilterData.getSize());

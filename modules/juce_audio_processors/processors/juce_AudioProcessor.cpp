@@ -224,7 +224,7 @@ bool AudioProcessor::setChannelLayoutOfBus (bool isInputBus, int busIdx, const A
     return false;
 }
 
-bool AudioProcessor::enableAllBuses ()
+bool AudioProcessor::enableAllBuses()
 {
     BusesLayout layouts;
     const int numInputs  = getBusCount (true);
@@ -382,7 +382,7 @@ void AudioProcessor::setPlayConfigDetails (const int newNumIns,
         success &= setChannelLayoutOfBus (false, 0, AudioChannelSet::canonicalChannelSet (newNumOuts));
 
     // if the user is using this method then they do not want any side-buses or aux outputs
-    success &= disableNonMainBuses ();
+    success &= disableNonMainBuses();
     jassert (success);
 
     // the processor may not support this arrangement at all
@@ -846,15 +846,14 @@ bool AudioProcessor::containsLayout (const BusesLayout& layouts, const Array<InO
     if (layouts.inputBuses.size() > 1 || layouts.outputBuses.size() > 1)
         return false;
 
-    const InOutChannelPair mainLayout
-      ( static_cast<int16> (layouts.getNumChannels (true, 0)),
-        static_cast<int16> (layouts.getNumChannels (false, 0)) );
+    const InOutChannelPair mainLayout (static_cast<int16> (layouts.getNumChannels (true, 0)),
+                                       static_cast<int16> (layouts.getNumChannels (false, 0)));
 
     return channelLayouts.contains (mainLayout);
 }
 
 //==============================================================================
-bool AudioProcessor::disableNonMainBuses ()
+bool AudioProcessor::disableNonMainBuses()
 {
     BusesLayout layouts = getBusesLayout();
 

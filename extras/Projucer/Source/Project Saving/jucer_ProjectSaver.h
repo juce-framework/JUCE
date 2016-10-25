@@ -624,33 +624,40 @@ private:
         // keep a copy of the basic generated files group, as each exporter may modify it.
         const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
 
-        for (Project::ExporterIterator exporter (project); exporter.next();)
+        try
         {
-            if (exporter->getTargetFolder().createDirectory())
+            for (Project::ExporterIterator exporter (project); exporter.next();)
             {
-                exporter->copyMainGroupFromProject();
-                exporter->settings = exporter->settings.createCopy();
+                if (exporter->getTargetFolder().createDirectory())
+                {
+                    exporter->copyMainGroupFromProject();
+                    exporter->settings = exporter->settings.createCopy();
 
-                exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
+                    exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
 
-                generatedFilesGroup.state = originalGeneratedGroup.createCopy();
-                exporter->addSettingsForProjectType (project.getProjectType());
+                    generatedFilesGroup.state = originalGeneratedGroup.createCopy();
+                    exporter->addSettingsForProjectType (project.getProjectType());
 
-                for (auto& module: modules)
-                    module->addSettingsForModuleToExporter (*exporter, *this);
+                    for (auto& module: modules)
+                        module->addSettingsForModuleToExporter (*exporter, *this);
 
-                if (project.getProjectType().isAudioPlugin())
-                    writePluginCharacteristicsFile();
+                    if (project.getProjectType().isAudioPlugin())
+                        writePluginCharacteristicsFile();
 
-                generatedFilesGroup.sortAlphabetically (true, true);
-                exporter->getAllGroups().add (generatedFilesGroup);
+                    generatedFilesGroup.sortAlphabetically (true, true);
+                    exporter->getAllGroups().add (generatedFilesGroup);
 
-                threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
+                    threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
+                }
+                else
+                {
+                    addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
+                }
             }
-            else
-            {
-                addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
-            }
+        }
+        catch (ProjectExporter::SaveError& saveError)
+        {
+            addError (saveError.message);
         }
 
         while (threadPool.getNumJobs() > 0)

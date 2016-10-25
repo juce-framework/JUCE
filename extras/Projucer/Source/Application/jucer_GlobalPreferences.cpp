@@ -60,7 +60,7 @@ void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textP
 {
     Identifier keyName = getKeyForPropertyComponent (textPropertyComponent);
 
-    Colour textColour = getAppSettings().isGlobalPathValid (keyName, textPropertyComponent->getText())
+    Colour textColour = getAppSettings().isGlobalPathValid (File::getCurrentWorkingDirectory(), keyName, textPropertyComponent->getText())
                             ? Colours::black
                             : Colours::red;
 

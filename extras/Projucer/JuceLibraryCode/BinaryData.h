@@ -9,6 +9,18 @@
 
 namespace BinaryData
 {
+    extern const char*   gradlewrapper_jar;
+    const int            gradlewrapper_jarSize = 53636;
+
+    extern const char*   gradlew;
+    const int            gradlewSize = 4971;
+
+    extern const char*   gradlew_bat;
+    const int            gradlew_batSize = 2404;
+
+    extern const char*   LICENSE;
+    const int            LICENSESize = 11325;
+
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
     const int            jucer_AnimatedComponentTemplate_cppSize = 1949;
 
@@ -148,7 +160,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 45;
+    const int namedResourceListSize = 49;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

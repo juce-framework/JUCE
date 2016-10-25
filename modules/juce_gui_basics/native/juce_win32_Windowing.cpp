@@ -973,7 +973,12 @@ public:
         if (isKeyDown (VK_SHIFT))   keyMods |= ModifierKeys::shiftModifier;
         if (isKeyDown (VK_CONTROL)) keyMods |= ModifierKeys::ctrlModifier;
         if (isKeyDown (VK_MENU))    keyMods |= ModifierKeys::altModifier;
-        if (isKeyDown (VK_RMENU))   keyMods &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
+
+        // workaround: Windows maps AltGr to left-Ctrl + right-Alt.
+        if (isKeyDown (VK_RMENU) && !isKeyDown (VK_RCONTROL))
+        {
+            keyMods = (keyMods & ~ModifierKeys::ctrlModifier) | ModifierKeys::altModifier;
+        }
 
         currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
     }

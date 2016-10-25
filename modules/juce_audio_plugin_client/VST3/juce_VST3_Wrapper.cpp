@@ -632,14 +632,14 @@ private:
             parameterToMidiControllerOffset = static_cast<Vst::ParamID> (usingManagedParameter ? paramMidiControllerOffset
                                                                                                : parameters.getParameterCount());
 
-            initialiseMidiControllerMappings ();
+            initialiseMidiControllerMappings();
            #endif
 
             audioProcessorChanged (pluginInstance);
         }
     }
 
-    void initialiseMidiControllerMappings ()
+    void initialiseMidiControllerMappings()
     {
         for (int c = 0, p = 0; c < numMIDIChannels; ++c)
         {
@@ -1942,7 +1942,7 @@ private:
                 processParameterChanges (*data.inputParameterChanges);
 
            #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
-            const int numMidiEventsComingIn = midiBuffer.getNumEvents ();
+            const int numMidiEventsComingIn = midiBuffer.getNumEvents();
            #endif
 
             if (pluginInstance->isSuspended())

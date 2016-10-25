@@ -602,7 +602,7 @@ public:
     bool enableAllBuses();
 
     /** Disables all non-main buses (aux and sidechains). */
-    bool disableNonMainBuses ();
+    bool disableNonMainBuses();
 
     //==============================================================================
     /** Returns the position of a bus's channels within the processBlock buffer.
@@ -1462,7 +1462,7 @@ private:
     {
         int16 inChannels, outChannels;
 
-        InOutChannelPair () noexcept : inChannels (0), outChannels (0) {}
+        InOutChannelPair() noexcept : inChannels (0), outChannels (0) {}
         InOutChannelPair (short inCh, short outCh) noexcept : inChannels (inCh), outChannels (outCh) {}
         InOutChannelPair (const InOutChannelPair& o) noexcept : inChannels (o.inChannels), outChannels (o.outChannels) {}
         InOutChannelPair (const short (&config)[2]) noexcept : inChannels (config[0]), outChannels (config[1]) {}

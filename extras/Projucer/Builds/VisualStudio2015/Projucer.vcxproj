@@ -1875,6 +1875,10 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\BinaryData\gradle\gradle-wrapper.jar"/>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew"/>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew.bat"/>
+    <None Include="..\..\Source\BinaryData\gradle\LICENSE"/>
     <None Include="..\..\Source\BinaryData\background_logo.svg"/>
     <None Include="..\..\Source\BinaryData\background_tile.png"/>
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>

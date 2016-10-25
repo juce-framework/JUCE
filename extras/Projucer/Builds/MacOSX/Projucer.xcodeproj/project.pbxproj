@@ -124,6 +124,7 @@
 		09697D1C3F7B90DD33A8090E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_SystemStats.mm"; path = "../../../../modules/juce_core/native/juce_mac_SystemStats.mm"; sourceTree = "SOURCE_ROOT"; };
 		09DE066936CF037E9709ADB1 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Projucer.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		0A596EE5FCD9A05F6A2333BC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdmainct.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdmainct.c"; sourceTree = "SOURCE_ROOT"; };
+		0B24F292A357ABFD9BCC6D7F = {isa = PBXFileReference; lastKnownFileType = file; name = gradlew; path = ../../Source/BinaryData/gradle/gradlew; sourceTree = "SOURCE_ROOT"; };
 		0B96A219A0CFF707E5A13B68 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_Fonts.mm"; path = "../../../../modules/juce_graphics/native/juce_mac_Fonts.mm"; sourceTree = "SOURCE_ROOT"; };
 		0BDFA0E402BA7E6B366E953C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ScrollBar.h"; path = "../../../../modules/juce_gui_basics/layout/juce_ScrollBar.h"; sourceTree = "SOURCE_ROOT"; };
 		0BEDB3FD70AB61D3E7891D74 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ComponentListener.cpp"; path = "../../../../modules/juce_gui_basics/components/juce_ComponentListener.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -157,6 +158,7 @@
 		125CD8A5E5B57840F5154ACD = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Viewport.cpp"; path = "../../../../modules/juce_gui_basics/layout/juce_Viewport.cpp"; sourceTree = "SOURCE_ROOT"; };
 		1268E54178897254E9A8B94C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TextLayout.cpp"; path = "../../../../modules/juce_graphics/fonts/juce_TextLayout.cpp"; sourceTree = "SOURCE_ROOT"; };
 		129CDB26CC63D4BC2EB1F2CC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_PerformanceCounter.cpp"; path = "../../../../modules/juce_core/time/juce_PerformanceCounter.cpp"; sourceTree = "SOURCE_ROOT"; };
+		129F2DE0FEF154F8F8C7A74E = {isa = PBXFileReference; lastKnownFileType = file.jar; name = "gradle-wrapper.jar"; path = "../../Source/BinaryData/gradle/gradle-wrapper.jar"; sourceTree = "SOURCE_ROOT"; };
 		1300F6577D67C5609550A25F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_DialogLookAndFeel.h"; path = "../../Source/Utility/jucer_DialogLookAndFeel.h"; sourceTree = "SOURCE_ROOT"; };
 		133F1E428260C5ADDF496DF9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ComponentLayout.cpp"; path = "../../Source/ComponentEditor/jucer_ComponentLayout.cpp"; sourceTree = "SOURCE_ROOT"; };
 		1353717582E55D6E4D074BA5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Files.cpp"; path = "../../../../modules/juce_core/native/juce_win32_Files.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -449,6 +451,7 @@
 		56E8C48ADDEBD48A49C885CB = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_SplashScreen.cpp"; path = "../../../../modules/juce_gui_extra/misc/juce_SplashScreen.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5708CF7899EA21D0B72CDC2A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_BlowFish.cpp"; path = "../../../../modules/juce_cryptography/encryption/juce_BlowFish.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5745ECDAA4216EE2AF97E5AF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Button.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_Button.h"; sourceTree = "SOURCE_ROOT"; };
+		576A92E1E0D8F453EC0FEB34 = {isa = PBXFileReference; lastKnownFileType = file.bat; name = gradlew.bat; path = ../../Source/BinaryData/gradle/gradlew.bat; sourceTree = "SOURCE_ROOT"; };
 		576D62C0C9C1BA4B7A514721 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_PositionPropertyBase.h"; path = "../../Source/ComponentEditor/properties/jucer_PositionPropertyBase.h"; sourceTree = "SOURCE_ROOT"; };
 		578AA1C9D44D2E3AEA5D0278 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ImagePreviewComponent.cpp"; path = "../../../../modules/juce_gui_basics/filebrowser/juce_ImagePreviewComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		58139D8D454051C59E77609B = {isa = PBXFileReference; lastKnownFileType = file.nib; name = RecentFilesMenuTemplate.nib; path = ../../Source/BinaryData/RecentFilesMenuTemplate.nib; sourceTree = "SOURCE_ROOT"; };
@@ -699,6 +702,7 @@
 		98F42686D9DAC974F2514217 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_EditingPanelBase.cpp"; path = "../../Source/ComponentEditor/ui/jucer_EditingPanelBase.cpp"; sourceTree = "SOURCE_ROOT"; };
 		990F2A6080B28137CCE2D7B9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Singleton.h"; path = "../../../../modules/juce_core/memory/juce_Singleton.h"; sourceTree = "SOURCE_ROOT"; };
 		99557681178F79E2A803C65C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DrawableShape.cpp"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawableShape.cpp"; sourceTree = "SOURCE_ROOT"; };
+		996E472B82A75531875A5E38 = {isa = PBXFileReference; lastKnownFileType = file; name = LICENSE; path = ../../Source/BinaryData/gradle/LICENSE; sourceTree = "SOURCE_ROOT"; };
 		9992E6950C64322A11E39ADF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectWizard_DLL.h"; path = "../../Source/Wizards/jucer_ProjectWizard_DLL.h"; sourceTree = "SOURCE_ROOT"; };
 		999BC36BBD71BD4117EFDFC4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_BubbleComponent.h"; path = "../../../../modules/juce_gui_basics/misc/juce_BubbleComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		99A9C369D8595E72707E866C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_XmlDocument.h"; path = "../../../../modules/juce_core/xml/juce_XmlDocument.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1357,6 +1361,11 @@
 					471C7B0A8B92320AF0C80839,
 					714267352CE5C4357ADBC231,
 					C09BBB58CA45B66D693E8C31, ); name = Wizards; sourceTree = "<group>"; };
+		645F98392B3C8E92EE64B533 = {isa = PBXGroup; children = (
+					129F2DE0FEF154F8F8C7A74E,
+					0B24F292A357ABFD9BCC6D7F,
+					576A92E1E0D8F453EC0FEB34,
+					996E472B82A75531875A5E38, ); name = gradle; sourceTree = "<group>"; };
 		C76CE0579AC77DF56E755836 = {isa = PBXGroup; children = (
 					468BFFBE4DA7835DD40C5FE8,
 					E3B56C5718D87CA0EFCB2662,
@@ -1380,6 +1389,7 @@
 					F7CAB5BC15EE351949D3F2C3,
 					73B9F17FE55A02C2BB87E008, ); name = templates; sourceTree = "<group>"; };
 		63EE1C3AC218E509130AF2BA = {isa = PBXGroup; children = (
+					645F98392B3C8E92EE64B533,
 					C76CE0579AC77DF56E755836,
 					BB9C1E6E54A16F795908C469,
 					301592EBAC0FFF6F5B268E99,
