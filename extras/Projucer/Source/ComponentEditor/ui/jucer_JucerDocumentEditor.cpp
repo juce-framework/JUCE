@@ -233,7 +233,7 @@ private:
     {
     public:
         ComponentInitialisersProperty (JucerDocument& doc)
-            : ComponentTextProperty <Component> ("Member intialisers", 2048, true, 0, doc)
+            : ComponentTextProperty <Component> ("Member initialisers", 16384, true, 0, doc)
         {
             preferredHeight = 24 * 3;
         }
