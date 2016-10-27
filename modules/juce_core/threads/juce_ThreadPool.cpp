@@ -148,6 +148,11 @@ int ThreadPool::getNumJobs() const
     return jobs.size();
 }
 
+int ThreadPool::getNumThreads() const
+{
+    return threads.size();
+}
+
 ThreadPoolJob* ThreadPool::getJob (const int index) const
 {
     const ScopedLock sl (lock);

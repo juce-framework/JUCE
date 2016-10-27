@@ -246,9 +246,11 @@ public:
                         int timeOutMilliseconds,
                         JobSelector* selectedJobsToRemove = nullptr);
 
-    /** Returns the number of jobs currently running or queued.
-    */
+    /** Returns the number of jobs currently running or queued. */
     int getNumJobs() const;
+
+    /** Returns the number of threads assigned to this thread pool. */
+    int getNumThreads() const;
 
     /** Returns one of the jobs in the queue.
 
