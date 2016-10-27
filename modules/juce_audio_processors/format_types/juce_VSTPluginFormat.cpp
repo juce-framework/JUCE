@@ -3039,7 +3039,7 @@ void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunct
 
 AudioPluginInstance* VSTPluginFormat::getPluginInstanceFromVstEffectInterface (void* aEffect)
 {
-	if (VstEffectInterface* vstAEffect = reinterpret_cast<VstEffectInterface*> (aEffect))
+    if (VstEffectInterface* vstAEffect = reinterpret_cast<VstEffectInterface*> (aEffect))
         if (VSTPluginInstance* instanceVST = reinterpret_cast<VSTPluginInstance*> (vstAEffect->hostSpace2))
             return dynamic_cast<AudioPluginInstance*> (instanceVST);
 
