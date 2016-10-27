@@ -242,7 +242,7 @@ inline CachedValue<Type>& CachedValue<Type>::operator= (const Type& newValue)
 template <typename Type>
 inline void CachedValue<Type>::setValue (const Type& newValue, UndoManager* undoManagerToUse)
 {
-    if (cachedValue != newValue)
+    if (cachedValue != newValue || isUsingDefault())
     {
         cachedValue = newValue;
         targetTree.setProperty (targetProperty, VariantConverter<Type>::toVar (newValue), undoManagerToUse);
