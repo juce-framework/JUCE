@@ -63,6 +63,24 @@ struct DiagnosticMessage
     bool isWarning() const noexcept     { return type == warning; }
     bool isNote() const noexcept        { return type == note; }
 
+    String toString() const
+    {
+        // todo: copy recursively from root
+        String res;
+
+        switch (type)
+        {
+            case error:   res << "error: "; break;
+            case warning: res << "warning: "; break;
+            case note:    res << "note: "; break;
+        };
+
+        res << range.file << ": ";
+        res << message << "\n";
+
+        return res;
+    }
+
     ValueTree toValueTree() const
     {
         ValueTree v (MessageTypes::DIAGNOSTIC);

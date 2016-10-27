@@ -237,6 +237,19 @@ private:
             }
         };
 
+        void showPopupMenu() override
+        {
+            PopupMenu menu;
+            menu.addItem (1, "Copy");
+            launchPopupMenu (menu);
+        }
+
+        void handlePopupMenuResult (int resultCode) override
+        {
+            if (resultCode == 1)
+                SystemClipboard::copyTextToClipboard (message.toString());
+        }
+
         void paintIcon (Graphics& g, Rectangle<int> area) override
         {
             getIcon().draw (g, area.toFloat(), isIconCrossedOut());
