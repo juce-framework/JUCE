@@ -277,3 +277,60 @@ AudioChannelSet AudioChannelSet::namedChannelSet (int numChannels)
 
     return AudioChannelSet();
 }
+
+Array<AudioChannelSet> AudioChannelSet::channelSetsWithNumberOfChannels (int numChannels)
+{
+    Array<AudioChannelSet> retval;
+
+    if (numChannels != 0)
+    {
+        retval.add (AudioChannelSet::discreteChannels (numChannels));
+
+        if      (numChannels == 1)
+        {
+            retval.add (AudioChannelSet::mono());
+        }
+        else if (numChannels == 2)
+        {
+            retval.add (AudioChannelSet::stereo());
+        }
+        else if (numChannels == 3)
+        {
+            retval.add (AudioChannelSet::createLCR());
+            retval.add (AudioChannelSet::createLRS());
+        }
+        else if (numChannels == 4)
+        {
+            retval.add (AudioChannelSet::quadraphonic());
+            retval.add (AudioChannelSet::createLCRS());
+            retval.add (AudioChannelSet::ambisonic());
+        }
+        else if (numChannels == 5)
+        {
+            retval.add (AudioChannelSet::create5point0());
+            retval.add (AudioChannelSet::pentagonal());
+        }
+        else if (numChannels == 6)
+        {
+            retval.add (AudioChannelSet::create5point1());
+            retval.add (AudioChannelSet::create6point0());
+            retval.add (AudioChannelSet::create6point0Music());
+            retval.add (AudioChannelSet::hexagonal());
+        }
+        else if (numChannels == 7)
+        {
+            retval.add (AudioChannelSet::create7point0());
+            retval.add (AudioChannelSet::create7point0SDDS());
+            retval.add (AudioChannelSet::create6point1());
+            retval.add (AudioChannelSet::create6point1Music());
+        }
+        else if (numChannels == 8)
+        {
+            retval.add (AudioChannelSet::create7point1());
+            retval.add (AudioChannelSet::create7point1SDDS());
+            retval.add (AudioChannelSet::octagonal());
+        }
+    }
+
+    return retval;
+}
