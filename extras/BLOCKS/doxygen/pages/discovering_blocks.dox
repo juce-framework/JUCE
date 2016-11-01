@@ -1,0 +1,56 @@
+/**
+@page discovering_blocks Discovering BLOCKS
+
+Any BLOCKS application would be pretty limited without the ability to discover the BLOCKS that are connected to your computer.
+This page gives an overview of the classes and methods available to aid BLOCKS discovery and provides sample code for getting notifications of any connections or disconnections.
+
+@section the_block_topology_object The BlockTopology object
+
+Groups of connected Lightpad and Control Blocks are described by a BlockTopology.
+
+A %BlockTopology contains an array of references to Block objects, which provide access to Lightpad and Control %Block functionality, and an array of BlockDeviceConnection objects, which describe the connections between devices.
+Once you have a %BlockTopology you have all the information required to visualise and interact with your Lightpads and Control Blocks.
+For more information about using %Block objects see the @ref the_block_object section.
+
+For Lightpads and Control Blocks a %BlockTopology can be obtained from a PhysicalTopologySource.
+
+@section the_physical_topology_source_object The PhysicalTopologySource object
+
+The current topology is provided by a %PhysicalTopologySource.
+When instantiated, a %PhysicalTopologySource monitors for any connections from your computer to any Lightpad and Control Blocks and the PhysicalTopologySource::getCurrentTopology() method returns the current %BlockTopology.
+
+In an environment where Lightpad and Control can be connected and disconnected dynamically it is convenient to register your code for <code>topologyChanged()</code> callbacks from a %PhysicalTopologySource.
+Then, when the current %BlockTopology changes, your application is able to react to the new configuration.
+You can do this by inheriting from the TopologySource::Listener class and registering as a listener to a %PhysicalTopologySource object.
+When you inherit from %TopologySource::Listener you must override the pure virtual method TopologySource::Listener::topologyChanged(), which is then called by a %PhysicalTopologySource on topology changes when you register as a listener.
+A simple example is shown below.
+
+BlockFinder.h:
+@include BlockFinder/BlockFinder.h
+
+BlockFinder.cpp:
+@include BlockFinder/BlockFinder.cpp
+
+When instantiated this class simply monitors for changes to the connected Lightpad and Control Blocks and prints some information about them to stdout.
+Once you have the current %BlockTopology object you have access to the available %Block objects and can start to interact with them.
+A more complex application would probably do much more in the <tt>topologyChanged()</tt> method---see the @ref example_applications page.
+
+@section the_block_object The Block object
+
+A Block object is the main entry point for communicating between your application and any Lightpad and Control Blocks that are connected to your computer.
+
+All the different %Block types are subclasses of %Block so they provide the same interface (see the %Block class documentation).
+About half of the %Block public member functions return information about the physical device it represents.
+In the example code above you can see that we use some of these methods to query each %Block about its current status.
+The more interesting %Block methods return pointers to objects you can use to control and receive events from individual BLOCKS.
+More detail about these methods can be obtained from the following pages:
+
+@ref getting_touch_events
+
+@ref getting_control_button_events
+
+@ref controlling_led_grids
+
+@ref controlling_led_strips
+*/
+

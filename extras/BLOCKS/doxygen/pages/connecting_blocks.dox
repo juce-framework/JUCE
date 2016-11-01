@@ -1,0 +1,33 @@
+/**
+@page connecting_blocks Connecting BLOCKS
+
+Lightpads can be conected to a computer either via USB or Bluetooth, and Control Blocks can be connected via Bluetooth or by snapping to an already connected Lightpad.
+Both devices communicate with your computer using System Exclusive (SysEx) MIDI messages.
+
+@section usb USB
+
+To connect a Lightpad to your computer over USB, you need to insert a USB-C cable into the top of the device and connect it to a USB port on your computer.
+When powered on by pressing the power button on the bottom edge, you will be able to send and receive data from the block over the USB connection.
+
+@section bluetooth Bluetooth
+
+The power button also functions as a toggle for the Bluetooth connection - when the blue light on the button is illuminated, the device is able to connect via Bluetooth and send and receive MIDI data.
+Pressing this button will turn the light off and disable the Bluetooth functionality.
+Currently MIDI over Bluetooth is only supported on Mac OS.
+
+@subsection mac_bluetooth MacOS
+
+To connect a BLOCKS device via Bluetooth on MacOS, follow these steps:
+
+- Open the "Audio Midi Setup" application (found in Applications/Utilities)
+- Click on the menu item: Window -> Show MIDI Studio
+- Double-click on the "Bluetooth" icon in the MIDI Studio window
+- Click the "Connect" button next to the block you want to connect to
+- Your device should show up in the MIDI Studio window with a Bluetooth icon and can now send and receive MIDI data over Bluetooth
+
+@section connecting_blocks_to_each_other Connecting BLOCKS together
+
+Lightpad and Control Blocks can be connected together in any number of combinations via their DNA edge connectors, sharing a common connection to your computer.
+To do this, simply snap your devices together and the magnetic connectors will handle the rest.
+*/
+

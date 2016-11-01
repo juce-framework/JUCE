@@ -1,0 +1,35 @@
+/**
+@page example_blocks_synth BlocksSynth
+
+In order to compile and run this application you need to first download the <a href="https://www.juce.com/">JUCE framework</a>, which can be obtained from GitHub <a href="https://github.com/julianstorer/JUCE">here</a>.
+
+@section blocks_synth_introduction Introduction
+
+BlocksSynth is a JUCE application that turns your Lightpad into a simple monophonic synthesiser capable of playing 4 different waveshapes - sine, square, sawtooth and triangle.
+
+Navigate to the <tt>JUCE/examples/BLOCKS/BlocksSynth/Builds/</tt> directory and open the code project in your IDE of choice. Run the application and connect your Lightpad (if you do not know how to do this, see @ref connecting_blocks) - it should now display a simple 5x5 grid where each pad plays a note in the chromatic scale using a sine wave starting from the bottom-left (C3). It is possible to play any of the 25 notes but for ease of use tonics (the root note of the scale) are highlighted in white and notes in the C-major scale are highlighted in green. When a note has been played it is possible to change the amplitude using touch pressure and to pitch bend between adjacent notes by sliding left and right. Pressing the mode button on the Lightpad will change to the waveshape selection screen where the currently selected waveshape is rendered on the LEDs and you can switch between the 4 different waveshapes by touching anywhere on the %Block surface.
+
+The concept of a BLOCKS topology and the methods for receiving callbacks from the Block object are covered in the @ref example_blocks_monitor example and the basic methods for displaying grids and setting LEDs on the %Block are covered in the @ref example_blocks_drawing example. This example will cover how to render more complex displays on the LEDGrid and how to do some simple audio synthesis using data from the Lightpad.
+
+@section blocks_synth_note_grid Note Grid
+
+In the synthesiser mode the Lightpad displays a 5x5 grid constructed using the DrumPadGridProgram class. The <code>SynthGrid</code> struct in <tt>MainComponent.h</tt> handles the setup and layout of this grid and sets the colours of the pads to white for tonics, green for notes in the C major scale and black for notes that are not in the C major scale. The <code>ColourGrid::getNoteNumberForPad()</code> method is called in the <code>MainContentComponent::touchChanged()</code> callback and returns the corresponding MIDI note number for a Touch coordinate on the Lightpad. This note number is then passed to the <code>Audio</code> class to be played on the synthesiser.
+
+\image html BlocksSynth_grid.JPG "Synthesiser note grid"
+
+@section blocks_synth_waveshape_display Waveshape Display
+
+In the waveshape selection mode the LEDGrid::Program is set to an instance of BitmapLEDProgram and uses a Timer to draw moving waveshapes onto the LEDs of the Lightpad. In the constructor of <code>MainContentComponent</code> the <code>MainContentComponent::generateWaveshapes</code> method is called - this function generates 45 Y coordinates scaled and offset to fit the LED grid of the Lightpad for each of the 4 waveshapes and stores them in 4 separate arrays: <code>sineWaveY</code>, <code>squareWaveY</code>, <code>sawWaveY</code> and <code>triangleWaveY</code>. Then in the <code>MainContentComponent::timerCallback</code> method, a for loop iterates over the 15 LEDs on the X-axis and draws an LED 'circle' using the <code>MainContentComponent::drawLEDCircle()</code> method at the corresponding Y coordinate for the selected waveshape. The read position of the array is offset using the <code>yOffset</code> variable which is incremented each timer callback and wraps back around when the end of the array is reached to draw a 'moving' waveshape.
+
+@section blocks_synth_audio Audio
+
+The <code>Audio</code> class handles the audio synthesis for this application and overrides the AudioIODeviceCallback::audioDeviceIOCallback() method to call the Synthesiser::renderNextBlock() method of a Synthesiser object. This object is initialised to be capable of rendering sine, square, sawtooth and triangle waves on separate MIDI channels in the constructor of <code>Audio</code>, and <code>Audio</code> contains methods for sending note on, note off, channel pressure and pitch wheel messages to the Synthesiser. When a note is triggered on the Lightpad, the <code>Audio::noteOn()</code> method is called with 3 arguments: a MIDI channel corresponding to the waveshape that should be generated, a MIDI note number and an initial velocity. Whilst the note is playing, the amplitude and pitch are modulated by calling the <code>Audio::pressureChange()</code> and <code>Audio::pitchChange()</code> methods from the <code>MainContentComponent::touchChanged</code> callback. The pressure value of the Touch instance is used to directly control the Synthesiser amplitude and the distance from the initial note trigger on the X-axis of the Lightpad is scaled to +/-1.0 and used to modulate the frequency of the currently playing note.
+The <tt>Oscillators.h</tt> file contains the waveshape rendering code. It contains an <code>Oscillator</code> base class which inherits from SynthesiserVoice and has a pure virtual <code>Oscillator::renderWaveShape()</code> method that is overridden by subclasses to render the 4 different waveshapes.
+
+\image html BlocksSynth_waveshape.gif "The sine wave dispayed in the waveshape selection mode"
+
+@section blocks_synth_summary Summary 
+
+This tutorial and the accompanying code project have expanded on the topics covered by previous tutorials, showing you how to display more complex programs on the %LEDGrid and how to control simple audio synthesis parameters using the Lightpad.
+
+*/
