@@ -4669,7 +4669,7 @@ static const unsigned char temp_binary_data_36[] =
 "9. Data\r\n"
 "\r\n"
 "9.1. We may collect and process information about your use of or Software through the Software, some of which may amount to your personal data. Personal data will be collected and processed in accordance with our Privacy Policy which can be reviewed "
-"at [INSERT LINK TO PRIVACY POLICY]. \r\n"
+"at https://www.juce.com/privacy-policy. \r\n"
 "\r\n"
 "10. Other important terms\r\n"
 "\r\n"
@@ -5313,7 +5313,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x20236af2:  numBytes = 7194; return projectIconVisualStudio_png;
         case 0xecc12a3d:  numBytes = 18281; return projectIconXcode_png;
         case 0x9d3ae124:  numBytes = 18111; return projectIconXcodeIOS_png;
-        case 0xd6bb7d1d:  numBytes = 14390; return projucer_EULA_txt;
+        case 0xd6bb7d1d:  numBytes = 14394; return projucer_EULA_txt;
         case 0xb7422947:  numBytes = 5046; return projucer_login_bg_svg;
         case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
         case 0x1f3b6d2f:  numBytes = 2963; return wizard_AnimatedApp_svg;

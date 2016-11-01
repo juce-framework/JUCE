@@ -251,6 +251,9 @@ public:
         function returns an empty set.*/
     static AudioChannelSet JUCE_CALLTYPE namedChannelSet (int numChannels);
 
+    /** Return an array of channel sets which have a given number of channels */
+    static Array<AudioChannelSet> channelSetsWithNumberOfChannels (int numChannels);
+
     //==============================================================================
     /** Represents different audio channel types. */
     enum ChannelType

@@ -1856,7 +1856,7 @@ private:
            #ifndef JucePlugin_PreferredChannelConfigurations
             for (layoutIndex = 0; (tag = AudioUnitHelpers::StreamOrder::auChannelStreamOrder[layoutIndex].auLayoutTag) != 0; ++layoutIndex)
                 if (bus->isLayoutSupported (AudioUnitHelpers::CALayoutTagToChannelSet (tag)))
-                    tags.add (tag);
+                    tags.addIfNotAlreadyThere (tag);
            #endif
 
             // add discrete layout tags
@@ -1869,10 +1869,10 @@ private:
 
                 const short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
                 if (AudioUnitHelpers::isLayoutSupported (*juceFilter, isInput, busNum, ch, configs))
-                    tags.add (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));
+                    tags.addIfNotAlreadyThere (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));
                #else
                 if (bus->isLayoutSupported (AudioChannelSet::discreteChannels (ch)))
-                    tags.add (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));
+                    tags.addIfNotAlreadyThere (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));
                #endif
             }
         }

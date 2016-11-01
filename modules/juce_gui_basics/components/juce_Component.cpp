@@ -409,7 +409,7 @@ struct Component::ComponentHelpers
 
             if (child.isVisible() && ! child.isTransformed())
             {
-                const Rectangle<int> newClip (clipRect.getIntersection (child.bounds));
+                const Rectangle<int> newClip (clipRect.getIntersection (child.boundsRelativeToParent));
 
                 if (! newClip.isEmpty())
                 {
@@ -665,7 +665,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
             Desktop::getInstance().addDesktopComponent (this);
 
-            bounds.setPosition (topLeft);
+            boundsRelativeToParent.setPosition (topLeft);
             peer->updateBounds();
 
             if (oldRenderingEngine >= 0)
@@ -1031,8 +1031,8 @@ bool Component::isAlwaysOnTop() const noexcept
 }
 
 //==============================================================================
-int Component::proportionOfWidth  (const float proportion) const noexcept   { return roundToInt (proportion * bounds.getWidth()); }
-int Component::proportionOfHeight (const float proportion) const noexcept   { return roundToInt (proportion * bounds.getHeight()); }
+int Component::proportionOfWidth  (const float proportion) const noexcept   { return roundToInt (proportion * boundsRelativeToParent.getWidth()); }
+int Component::proportionOfHeight (const float proportion) const noexcept   { return roundToInt (proportion * boundsRelativeToParent.getHeight()); }
 
 int Component::getParentWidth() const noexcept
 {
@@ -1135,7 +1135,7 @@ void Component::setBounds (const int x, const int y, int w, int h)
                 repaintParent();
         }
 
-        bounds.setBounds (x, y, w, h);
+        boundsRelativeToParent.setBounds (x, y, w, h);
 
         if (showing)
         {
@@ -2249,13 +2249,13 @@ void Component::setPositioner (Positioner* newPositioner)
 //==============================================================================
 Rectangle<int> Component::getLocalBounds() const noexcept
 {
-    return bounds.withZeroOrigin();
+    return boundsRelativeToParent.withZeroOrigin();
 }
 
 Rectangle<int> Component::getBoundsInParent() const noexcept
 {
-    return affineTransform == nullptr ? bounds
-                                      : bounds.transformedBy (*affineTransform);
+    return affineTransform == nullptr ? boundsRelativeToParent
+                                      : boundsRelativeToParent.transformedBy (*affineTransform);
 }
 
 //==============================================================================

@@ -40,7 +40,7 @@
   license:          GPL/Commercial
 
   dependencies:     juce_audio_basics, juce_events
-  OSXFrameworks:    CoreAudio CoreMIDI DiscRecording
+  OSXFrameworks:    CoreAudio CoreMIDI
   iOSFrameworks:    CoreAudio CoreMIDI AudioToolbox AVFoundation
   linuxPackages:    alsa
   mingwLibs:        winmm

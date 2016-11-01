@@ -379,10 +379,15 @@ public:
         as a parameter, so it also encodes '$' and ',' (which would otherwise
         be legal in a URL.
 
+        @param roundBracketsAreLegal  Technically round brackets are ok in URLs,
+                                      however, some servers (like AWS) also want
+                                      round brackets to be escaped.
+
         @see removeEscapeChars
     */
     static String addEscapeChars (const String& stringToAddEscapeCharsTo,
-                                  bool isParameter);
+                                  bool isParameter,
+                                  bool roundBracketsAreLegal = true);
 
     /** Replaces any escape character sequences in a string with their original
         character codes.

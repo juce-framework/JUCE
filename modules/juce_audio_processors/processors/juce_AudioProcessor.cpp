@@ -1163,19 +1163,33 @@ bool AudioProcessor::Bus::isNumberOfChannelsSupported (int channels) const
 {
     if (channels == 0) return isLayoutSupported(AudioChannelSet::disabled());
 
-    return isLayoutSupported (supportedLayoutWithChannels (channels));
+    const AudioChannelSet set = supportedLayoutWithChannels (channels);
+    return (! set.isDisabled()) && isLayoutSupported (set);
 }
 
 AudioChannelSet AudioProcessor::Bus::supportedLayoutWithChannels (int channels) const
 {
     if (channels == 0) return AudioChannelSet::disabled();
 
-    AudioChannelSet set;
-    if (! (set = AudioChannelSet::namedChannelSet  (channels)).isDisabled() && isLayoutSupported (set))
-        return set;
+    {
+        AudioChannelSet set;
+        if (! (set = AudioChannelSet::namedChannelSet  (channels)).isDisabled() && isLayoutSupported (set))
+            return set;
 
-    if (! (set = AudioChannelSet::discreteChannels (channels)).isDisabled() && isLayoutSupported (set))
-        return set;
+        if (! (set = AudioChannelSet::discreteChannels (channels)).isDisabled() && isLayoutSupported (set))
+            return set;
+    }
+
+    Array<AudioChannelSet> sets = AudioChannelSet::channelSetsWithNumberOfChannels (channels);
+    const int n = sets.size();
+
+    for (int i = 0; i < n; ++i)
+    {
+        const AudioChannelSet set = sets.getReference (i);
+
+        if (isLayoutSupported (set))
+            return set;
+    }
 
     return AudioChannelSet::disabled();
 }

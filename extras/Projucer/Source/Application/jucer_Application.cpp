@@ -157,7 +157,9 @@ void ProjucerApplication::handleAsyncUpdate()
     PopupMenu extraAppleMenuItems;
     createExtraAppleMenuItems (extraAppleMenuItems);
 
-    MenuBarModel::setMacMainMenu (menuModel, &extraAppleMenuItems, "Open Recent");
+    // workaround broken "Open Recent" submenu: not passing the
+    // submenu's title here avoids the defect in JuceMainMenuHandler::addMenuItem
+    MenuBarModel::setMacMainMenu (menuModel, &extraAppleMenuItems); //, "Open Recent");
    #endif
 
     versionChecker = new LatestVersionChecker();

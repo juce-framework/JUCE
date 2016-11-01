@@ -3037,6 +3037,15 @@ void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunct
         vst->extraFunctions = f;
 }
 
+AudioPluginInstance* VSTPluginFormat::getPluginInstanceFromVstEffectInterface (void* aEffect)
+{
+    if (VstEffectInterface* vstAEffect = reinterpret_cast<VstEffectInterface*> (aEffect))
+        if (VSTPluginInstance* instanceVST = reinterpret_cast<VSTPluginInstance*> (vstAEffect->hostSpace2))
+            return dynamic_cast<AudioPluginInstance*> (instanceVST);
+
+    return nullptr;
+}
+
 pointer_sized_int JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance* plugin, int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
 {
     if (VSTPluginInstance* vst = dynamic_cast<VSTPluginInstance*> (plugin))

@@ -1329,9 +1329,9 @@ public:
             if (pluginManufacturerCode.toLowerCase() == pluginManufacturerCode)
             {
                 throw SaveError ("AudioUnit plugin code identifiers invalid!\n\n"
-                                 "You have used only lower case letters in your AU plugin code identifiers. "
-                                 "You must have at least one uppercase letter in both your AU plugin manufacturer "
-                                 "identifier code and your AU plugin subtype identifier code.");
+                                 "You have used only lower case letters in your AU plugin manufacturer identifier. "
+                                 "You must have at least one uppercase letter in your AU plugin manufacturer "
+                                 "identifier code.");
             }
 
             addPlistDictionaryKey (dict, "name", owner.project.getPluginManufacturer().toString()

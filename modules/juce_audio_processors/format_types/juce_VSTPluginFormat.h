@@ -85,6 +85,11 @@ public:
     /** This simply calls directly to the VST's AEffect::dispatcher() function. */
     static pointer_sized_int JUCE_CALLTYPE dispatcher (AudioPluginInstance*, int32, int32, pointer_sized_int, void*, float);
 
+    /** Given a VstEffectInterface* (aka vst::AEffect*), this will return the juce AudioPluginInstance
+        that is being used to wrap it
+    */
+    static AudioPluginInstance* getPluginInstanceFromVstEffectInterface (void* aEffect);
+
     //==============================================================================
     String getName() const override                { return "VST"; }
     void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
