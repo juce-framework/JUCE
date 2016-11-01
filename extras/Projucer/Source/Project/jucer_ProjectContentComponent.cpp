@@ -441,7 +441,7 @@ struct ProjucerDisabledComp   : public Component,
     {
         if (btn == subscribeButton.get())
         {
-            URL ("http://www.juce.com/get-juce").launchInDefaultBrowser();
+            URL ("http://www.juce.com/get-juce#indie").launchInDefaultBrowser();
         }
         else if (btn == signInButton.get())
         {
