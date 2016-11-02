@@ -110,6 +110,7 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::lightgrey);
+        g.drawText ("Connect a Lightpad Block to draw.", getLocalBounds(), Justification::centred, false);
     }
 
     void resized() override {}

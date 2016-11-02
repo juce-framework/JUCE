@@ -41,10 +41,8 @@ public:
     void pitchWheelMoved (int newValue) override
     {
         // Change the phase increment based on pitch bend amount
-        if (newValue > 0)
-            phaseIncrement.setValue (((2.0 * double_Pi) * (frequency + (maxFreq * (newValue / 127.0)))) / sampleRate);
-        else
-            phaseIncrement.setValue (((2.0 * double_Pi) * (frequency + (minFreq * (newValue / 127.0)))) / sampleRate);
+        double frequencyOffset = ((newValue > 0 ? maxFreq : minFreq) * (newValue / 127.0));
+        phaseIncrement.setValue (((2.0 * double_Pi) * (frequency + frequencyOffset)) / sampleRate);
     }
 
     void controllerMoved (int, int) override
@@ -115,12 +113,7 @@ struct SineSound : public SynthesiserSound
 
     bool appliesToNote (int) override { return true; }
 
-    bool appliesToChannel (int midiChannel) override
-    {
-        if (midiChannel == 1)
-            return true;
-        return false;
-    }
+    bool appliesToChannel (int midiChannel) override { return (midiChannel == 1); }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SineSound)
@@ -133,15 +126,9 @@ struct SineVoice : public Oscillator
 {
     SineVoice() {};
 
-    bool canPlaySound (SynthesiserSound* sound) override
-    {
-        return dynamic_cast<SineSound*> (sound) != nullptr;
-    }
+    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SineSound*> (sound) != nullptr; }
 
-    double renderWaveShape (const double currentPhase) override
-    {
-        return sin (currentPhase);
-    }
+    double renderWaveShape (const double currentPhase) override { return sin (currentPhase); }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SineVoice)
@@ -157,12 +144,7 @@ struct SquareSound : public SynthesiserSound
 
     bool appliesToNote (int) override { return true; }
 
-    bool appliesToChannel (int midiChannel) override
-    {
-        if (midiChannel == 2)
-            return true;
-        return false;
-    }
+    bool appliesToChannel (int midiChannel) override { return (midiChannel == 2); }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SquareSound)
@@ -175,18 +157,9 @@ struct SquareVoice : public Oscillator
 {
     SquareVoice() {};
 
-    bool canPlaySound (SynthesiserSound* sound) override
-    {
-        return dynamic_cast<SquareSound*> (sound) != nullptr;
-    }
+    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SquareSound*> (sound) != nullptr; }
 
-    double renderWaveShape (const double currentPhase) override
-    {
-        if (currentPhase < (double_Pi))
-            return 0.0;
-        else
-            return 1.0;
-    }
+    double renderWaveShape (const double currentPhase) override { return (currentPhase < double_Pi ? 0.0 : 1.0); }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SquareVoice)
@@ -202,12 +175,7 @@ struct SawSound : public SynthesiserSound
 
     bool appliesToNote (int) override { return true; }
 
-    bool appliesToChannel (int midiChannel) override
-    {
-        if (midiChannel == 3)
-            return true;
-        return false;
-    }
+    bool appliesToChannel (int midiChannel) override { return (midiChannel == 3); }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SawSound)
@@ -220,15 +188,9 @@ struct SawVoice : public Oscillator
 {
     SawVoice() {}
 
-    bool canPlaySound (SynthesiserSound* sound) override
-    {
-        return dynamic_cast<SawSound*> (sound) != nullptr;
-    }
+    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<SawSound*> (sound) != nullptr; }
 
-    double renderWaveShape (const double currentPhase) override
-    {
-        return (1.0 / double_Pi) * currentPhase - 1.0;
-    }
+    double renderWaveShape (const double currentPhase) override { return (1.0 / double_Pi) * currentPhase - 1.0; }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SawVoice)
@@ -244,12 +206,7 @@ struct TriangleSound : public SynthesiserSound
 
     bool appliesToNote (int) override { return true; }
 
-    bool appliesToChannel (int midiChannel) override
-    {
-        if (midiChannel == 4)
-            return true;
-        return false;
-    }
+    bool appliesToChannel (int midiChannel) override { return (midiChannel == 4); }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TriangleSound)
@@ -262,17 +219,12 @@ struct TriangleVoice : public Oscillator
 {
     TriangleVoice() {}
 
-    bool canPlaySound (SynthesiserSound* sound) override
-    {
-        return dynamic_cast<TriangleSound*> (sound) != nullptr;
-    }
+    bool canPlaySound (SynthesiserSound* sound) override { return dynamic_cast<TriangleSound*> (sound) != nullptr; }
 
     double renderWaveShape (const double currentPhase) override
     {
-        if (currentPhase < double_Pi)
-            return -1.0 + (2.0 / double_Pi) * currentPhase;
-        else
-            return 3.0 - (2.0 / double_Pi) * currentPhase;
+        return (currentPhase < double_Pi ? -1.0 + (2.0 / double_Pi) * currentPhase
+                                         :  3.0 - (2.0 / double_Pi) * currentPhase);
     }
 
     //==============================================================================
