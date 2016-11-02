@@ -563,8 +563,8 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
     return new EnableBuildComp();
 }
 
-Component* ProjectContentComponent::createDisabledBuildTabSubscribe(String textPrefix, 
-                                                                    bool loggedIn, bool dllPresent)
+Component* ProjectContentComponent::createDisabledBuildTabSubscribe (String textPrefix,
+                                                                     bool loggedIn, bool dllPresent)
 {
     bool showSubscribeButton = true;
     bool showSignInButton = dllPresent && ! loggedIn;
