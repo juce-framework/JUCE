@@ -133,8 +133,8 @@ private:
    #if JUCE_MAC
     static bool tryFindDLLFileInAppBundle(File &outFile)
     {
-        File currentExecFile (File::getSpecialLocation (File::currentExecutableFile));
-        return tryFindDLLFileInFolder (currentExecFile.getParentDirectory(), outFile);
+        File currentAppFile (File::getSpecialLocation (File::currentApplicationFile));
+        return tryFindDLLFileInFolder (currentAppFile.getChildFile ("Contents"), outFile);
     }
    #endif
 
