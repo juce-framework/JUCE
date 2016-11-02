@@ -4,6 +4,19 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 4.3.0
+  - Added API and examples for ROLI Blocks
+  - Multiple Projucer live-build UI and diagnostics improvements
+  - JUCE now supports hosting multi-bus plug-ins
+  - BufferingAudioSource now supports pre-buffering (useful for offline processing)
+  - Added microphone permissions switch to Projucer for iOS targets
+  - Standalone wrappers now correctly save and restore midi settings
+  - Various performance improvements to BigInteger
+  - Fixed various FlexBox bugs
+  - Added a workaround for the broken “Open Recent…” menu on os x
+  - Various minor improvements and bug fixes
+  - Various documentation improvements
+
 Version 4.2.4
   - Pre-release of live build engine on Windows
   - Added FlexBox layout engine
