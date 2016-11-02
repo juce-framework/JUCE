@@ -375,14 +375,20 @@ public:
 
         This is the opposite of removeEscapeChars().
 
-        If isParameter is true, it means that the string is going to be used
-        as a parameter, so it also encodes '$' and ',' (which would otherwise
-        be legal in a URL.
+        @param stringToAddEscapeCharsTo The string to escape.
+        @param isParameter              If true then the string is going to be
+                                        used as a parameter, so it also encodes
+                                        '$' and ',' (which would otherwise be
+                                        legal in a URL.
+        @param roundBracketsAreLegal    Technically round brackets are ok in URLs,
+                                        however, some servers (like AWS) also want
+                                        round brackets to be escaped.
 
         @see removeEscapeChars
     */
     static String addEscapeChars (const String& stringToAddEscapeCharsTo,
-                                  bool isParameter);
+                                  bool isParameter,
+                                  bool roundBracketsAreLegal = true);
 
     /** Replaces any escape character sequences in a string with their original
         character codes.

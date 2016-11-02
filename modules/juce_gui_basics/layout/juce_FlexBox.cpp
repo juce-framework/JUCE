@@ -132,6 +132,7 @@ struct FlexBoxLayoutCalculation
         {
             auto currentLength = containerLineLength;
             int column = 0, row = 0;
+            bool firstRow = true;
 
             for (auto& item : itemStates)
             {
@@ -141,7 +142,10 @@ struct FlexBoxLayoutCalculation
 
                 if (flexitemLength > currentLength)
                 {
-                    if (++row >= numItems)
+                    if (! firstRow)
+                        row++;
+
+                    if (row >= numItems)
                         break;
 
                     column = 0;
@@ -153,6 +157,7 @@ struct FlexBoxLayoutCalculation
                 lineItems[row * numItems + column] = &item;
                 ++column;
                 lineInfo[row].numItems = jmax (lineInfo[row].numItems, column);
+                firstRow = false;
             }
         }
     }

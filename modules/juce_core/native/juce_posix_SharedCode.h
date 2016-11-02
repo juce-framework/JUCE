@@ -1255,7 +1255,12 @@ struct HighResolutionTimer::Pimpl
             shouldStop = true;
 
             while (thread != 0 && thread != pthread_self())
+            {
+                // if the timer callback itself calls startTimer then we need
+                // to override this
+                shouldStop = true;
                 Thread::yield();
+            }
         }
     }
 
@@ -1287,6 +1292,10 @@ private:
         while (! shouldStop)
         {
             clock.wait();
+
+            if (shouldStop)
+                break;
+
             owner.hiResTimerCallback();
 
             if (lastPeriod != periodMs)

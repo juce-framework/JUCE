@@ -1,0 +1,30 @@
+/**
+@page example_applications Example Applications
+
+@section downloading_the_example_code Downloading the example code
+
+These example applications demonstrate the functionality of the BLOCKS SDK.
+
+The example applications are all distributed as part of the <a href="https://www.juce.com/">JUCE framework</a>, which can be obtained from GitHub <a href="https://github.com/julianstorer/JUCE">here</a>.
+You will find the examples in the <tt>JUCE/examples/BLOCKS/</tt> directory.
+Each example comes with projects for Visual Studio, Xcode, etc in the <tt>Builds</tt> subdirectory or each example directory, and these should open, compile and run without any trouble in the respective IDEs.
+
+A quick guide to getting up and running with JUCE can be found <a href="https://www.juce.com/learn/getting-started">here</a>.
+
+<h1>Overview</h1>
+
+@subpage example_blocks_monitor
+
+BlocksMonitor is a simple JUCE application that shows currently connected Lightpad and Control %Block devices and visualises touches and button presses.
+It also displays some basic information about the Blocks.
+
+@subpage example_blocks_drawing
+
+BlocksDrawing is a JUCE application that allows you to use your Lightpad as a drawing surface.
+You can choose from a palette of 9 base colours and paint them on the 15x15 LED grid, blending between colours using touch pressure.
+
+@subpage example_blocks_synth
+
+BlocksSynth is a JUCE application that turns your Lightpad into a simple monophonic synthesiser capable of playing 4 different waveshapes - sine, square, sawtooth and triangle.
+*/
+

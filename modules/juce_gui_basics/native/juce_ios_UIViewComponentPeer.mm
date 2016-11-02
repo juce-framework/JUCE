@@ -48,6 +48,20 @@ namespace Orientations
         return Desktop::upright;
     }
 
+    static UIInterfaceOrientation convertFromJuce (Desktop::DisplayOrientation orientation)
+    {
+        switch (orientation)
+        {
+            case Desktop::upright:                          return UIInterfaceOrientationPortrait;
+            case Desktop::upsideDown:                       return UIInterfaceOrientationPortraitUpsideDown;
+            case Desktop::rotatedClockwise:                 return UIInterfaceOrientationLandscapeLeft;
+            case Desktop::rotatedAntiClockwise:             return UIInterfaceOrientationLandscapeRight;
+            default:                                        jassertfalse; // unknown orientation!
+        }
+
+        return UIInterfaceOrientationPortrait;
+    }
+
     static CGAffineTransform getCGTransformFor (const Desktop::DisplayOrientation orientation) noexcept
     {
         if (isUsingOldRotationMethod())
@@ -1029,7 +1043,30 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
     }
 }
 
-void Desktop::allowedOrientationsChanged() {}
+void Desktop::allowedOrientationsChanged()
+{
+    // if the current orientation isn't allowed anymore then switch orientations
+    if (! isOrientationEnabled (getCurrentOrientation()))
+    {
+        DisplayOrientation orientations[] = { upright, upsideDown, rotatedClockwise, rotatedAntiClockwise };
+
+        const int n = sizeof (orientations) / sizeof (DisplayOrientation);
+        int i;
+
+        for (i = 0; i < n; ++i)
+            if (isOrientationEnabled (orientations[i]))
+                break;
+
+
+        // you need to support at least one orientation
+        jassert (i < n);
+        i = jmin (n - 1, i);
+
+        NSNumber *value = [NSNumber numberWithInt:Orientations::convertFromJuce (orientations[i])];
+        [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+        [value release];
+    }
+}
 
 //==============================================================================
 void UIViewComponentPeer::repaint (const Rectangle<int>& area)

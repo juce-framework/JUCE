@@ -121,7 +121,7 @@ public:
     int getIndexOfMatchingKeyUp (int index) const noexcept;
 
     /** Returns the index of an event. */
-    int getIndexOf (MidiEventHolder* event) const noexcept;
+    int getIndexOf (const MidiEventHolder* event) const noexcept;
 
     /** Returns the index of the first event on or after the given timestamp.
         If the time is beyond the end of the sequence, this will return the

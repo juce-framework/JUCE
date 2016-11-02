@@ -2,11 +2,11 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="Plugin Host" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
-              bundleIdentifier="com.roli.pluginhost" jucerVersion="4.2.4" companyName="ROLI Ltd."
+              bundleIdentifier="com.roli.pluginhost" jucerVersion="4.3.0" companyName="ROLI Ltd."
               includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
-               objCExtraSuffix="M73TRi" vst3Folder="">
+               objCExtraSuffix="M73TRi" vst3Folder="" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
@@ -132,6 +132,10 @@
           file="Source/FilterGraph.cpp"/>
     <FILE id="auGSxnlTU" name="FilterGraph.h" compile="0" resource="0"
           file="Source/FilterGraph.h"/>
+    <FILE id="cnfPX5" name="FilterIOConfiguration.cpp" compile="1" resource="0"
+          file="Source/FilterIOConfiguration.cpp"/>
+    <FILE id="ZVUq7Q" name="FilterIOConfiguration.h" compile="0" resource="0"
+          file="Source/FilterIOConfiguration.h"/>
     <FILE id="2b09bSUt" name="GraphEditorPanel.cpp" compile="1" resource="0"
           file="Source/GraphEditorPanel.cpp"/>
     <FILE id="sj8Yug8cu" name="GraphEditorPanel.h" compile="0" resource="0"

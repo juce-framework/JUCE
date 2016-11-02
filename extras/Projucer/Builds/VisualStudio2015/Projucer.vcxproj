@@ -58,7 +58,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=4.2.4;JUCE_APP_VERSION_HEX=0x40204;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=4.3.0;JUCE_APP_VERSION_HEX=0x40300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -97,7 +97,7 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=4.2.4;JUCE_APP_VERSION_HEX=0x40204;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=4.3.0;JUCE_APP_VERSION_HEX=0x40300;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -135,6 +135,7 @@
     <ClCompile Include="..\..\Source\Application\jucer_AutoUpdater.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
+    <ClCompile Include="..\..\Source\Application\jucer_DownloadCompileEngineThread.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_GlobalPreferences.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
@@ -1326,6 +1327,7 @@
     <ClInclude Include="..\..\Source\Application\jucer_CommandLine.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
+    <ClInclude Include="..\..\Source\Application\jucer_DownloadCompileEngineThread.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_EulaDialogue.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_GlobalPreferences.h"/>
@@ -1873,6 +1875,10 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\BinaryData\gradle\gradle-wrapper.jar"/>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew"/>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew.bat"/>
+    <None Include="..\..\Source\BinaryData\gradle\LICENSE"/>
     <None Include="..\..\Source\BinaryData\background_logo.svg"/>
     <None Include="..\..\Source\BinaryData\background_tile.png"/>
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml"/>

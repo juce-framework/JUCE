@@ -179,6 +179,7 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 {
     // must set the sample rate before using this!
     jassert (sampleRate != 0);
+    const int targetChannels = outputAudio.getNumChannels();
 
     MidiBuffer::Iterator midiIterator (midiData);
     midiIterator.setNextSamplePosition (startSample);
@@ -193,7 +194,9 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
     {
         if (! midiIterator.getNextEvent (m, midiEventPos))
         {
-            renderVoices (outputAudio, startSample, numSamples);
+            if (targetChannels > 0)
+                renderVoices (outputAudio, startSample, numSamples);
+
             return;
         }
 
@@ -201,7 +204,9 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 
         if (samplesToNextMidiMessage >= numSamples)
         {
-            renderVoices (outputAudio, startSample, numSamples);
+            if (targetChannels > 0)
+                renderVoices (outputAudio, startSample, numSamples);
+
             handleMidiEvent (m);
             break;
         }
@@ -214,7 +219,9 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 
         firstEvent = false;
 
-        renderVoices (outputAudio, startSample, samplesToNextMidiMessage);
+        if (targetChannels > 0)
+            renderVoices (outputAudio, startSample, samplesToNextMidiMessage);
+
         handleMidiEvent (m);
         startSample += samplesToNextMidiMessage;
         numSamples  -= samplesToNextMidiMessage;

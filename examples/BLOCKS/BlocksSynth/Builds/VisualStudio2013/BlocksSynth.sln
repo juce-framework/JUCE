@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2013
+Project("{1ADF3DE4-36E9-080C-9E5A-03B9A3DA399C}") = "BlocksSynth", "BlocksSynth.vcxproj", "{95CDA882-A3D2-8344-A1B4-E341383A631E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95CDA882-A3D2-8344-A1B4-E341383A631E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{95CDA882-A3D2-8344-A1B4-E341383A631E}.Debug|Win32.Build.0 = Debug|Win32
+		{95CDA882-A3D2-8344-A1B4-E341383A631E}.Release|Win32.ActiveCfg = Release|Win32
+		{95CDA882-A3D2-8344-A1B4-E341383A631E}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

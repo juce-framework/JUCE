@@ -386,7 +386,7 @@ enum VstIndividualSpeakerType
     vstIndividualSpeakerTypeLeft,
     vstIndividualSpeakerTypeRight,
     vstIndividualSpeakerTypeCentre,
-    vstIndividualSpeakerTypeSubbass,
+    vstIndividualSpeakerTypeLFE,
     vstIndividualSpeakerTypeLeftSurround,
     vstIndividualSpeakerTypeRightSurround,
     vstIndividualSpeakerTypeLeftCentre,
@@ -402,7 +402,7 @@ enum VstIndividualSpeakerType
     vstIndividualSpeakerTypeTopRearLeft,
     vstIndividualSpeakerTypeTopRearCentre,
     vstIndividualSpeakerTypeTopRearRight,
-    vstIndividualSpeakerTypeSubbass2
+    vstIndividualSpeakerTypeLFE2
 };
 
 struct VstSpeakerConfiguration

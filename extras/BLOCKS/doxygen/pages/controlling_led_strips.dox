@@ -1,0 +1,18 @@
+/**
+@page controlling_led_strips Controlling LED strips
+
+Control Blocks have a strip of LEDs which can be controlled via an LEDRow object.
+
+A pointer to an %LEDRow object can be obtained from the Block::getLEDRow method of a Block---see the @ref discovering_blocks section for details of how to obtain a %Block object.
+Once you have an %LEDRow there are a few functions that you can use to interact with the strip of LEDs on a device.
+A code snippet showing how to turn the whole strip of LEDs on a %Block orange is shown below.
+@code{.cpp}
+void setWholeLEDRowOrange (Block& block)
+{
+    if (auto ledRow = block->getLEDRow())
+        for (int i = 0; i < ledRow.getNumLEDs(); ++i)
+            ledRow.setLEDColour (i, Colours::orange);
+}
+@endcode
+*/
+

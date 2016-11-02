@@ -33,13 +33,14 @@
 
   ID:               juce_audio_utils
   vendor:           juce
-  version:          4.2.4
+  version:          4.3.0
   name:             JUCE extra audio utility classes
   description:      Classes for audio-related GUI and miscellaneous tasks.
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
   dependencies:     juce_gui_extra, juce_audio_basics, juce_audio_processors, juce_audio_formats
+  OSXFrameworks:    DiscRecording
   iOSFrameworks:    CoreAudioKit
 
  END_JUCE_MODULE_DECLARATION
@@ -56,6 +57,21 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 //==============================================================================
+/** Config: JUCE_USE_CDREADER
+ Enables the AudioCDReader class (on supported platforms).
+ */
+#ifndef JUCE_USE_CDREADER
+#define JUCE_USE_CDREADER 0
+#endif
+
+/** Config: JUCE_USE_CDBURNER
+ Enables the AudioCDBurner class (on supported platforms).
+ */
+#ifndef JUCE_USE_CDBURNER
+#define JUCE_USE_CDBURNER 0
+#endif
+
+//==============================================================================
 namespace juce
 {
 
@@ -67,7 +83,10 @@ namespace juce
 #include "gui/juce_MidiKeyboardComponent.h"
 #include "gui/juce_AudioAppComponent.h"
 #include "gui/juce_BluetoothMidiDevicePairingDialogue.h"
+#include "players/juce_SoundPlayer.h"
 #include "players/juce_AudioProcessorPlayer.h"
+#include "audio_cd/juce_AudioCDBurner.h"
+#include "audio_cd/juce_AudioCDReader.h"
 
 }
 

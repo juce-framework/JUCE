@@ -125,7 +125,7 @@ You should print a copy of this Licence for future reference.
 
 9. Data
 
-9.1. We may collect and process information about your use of or Software through the Software, some of which may amount to your personal data. Personal data will be collected and processed in accordance with our Privacy Policy which can be reviewed at [INSERT LINK TO PRIVACY POLICY]. 
+9.1. We may collect and process information about your use of or Software through the Software, some of which may amount to your personal data. Personal data will be collected and processed in accordance with our Privacy Policy which can be reviewed at https://www.juce.com/privacy-policy. 
 
 10. Other important terms
 

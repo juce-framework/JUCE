@@ -2,14 +2,14 @@
 
 <JUCERPROJECT id="NXaszK" name="Arpeggiator" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.ROLI.Arpeggiator" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="1"
+              buildVST="1" buildVST3="0" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="Arpeggiator" pluginDesc="Arpeggiator" pluginManufacturer="ROLI Ltd."
               pluginManufacturerCode="ROLI" pluginCode="Arpg" pluginChannelConfigs=""
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="1" pluginSilenceInIsSilenceOut="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="ArpeggiatorAU"
               pluginRTASCategory="" aaxIdentifier="com.ROLI.Arpeggiator" pluginAAXCategory="AAX_EPlugInCategory_Effect"
-              jucerVersion="4.2.4" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              jucerVersion="4.3.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
               companyEmail="info@juce.com" buildAUv3="0">
   <MAINGROUP id="l0H2am" name="Arpeggiator">
     <GROUP id="{E91162B3-479D-3630-4B5F-0E76EE995FB8}" name="Source">

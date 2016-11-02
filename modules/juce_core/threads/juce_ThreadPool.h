@@ -152,10 +152,14 @@ public:
     //==============================================================================
     /** Creates a thread pool.
         Once you've created a pool, you can give it some jobs by calling addJob().
+
         @param numberOfThreads  the number of threads to run. These will be started
                                 immediately, and will run until the pool is deleted.
+        @param threadStackSize  the size of the stack of each thread. If this value
+                                is zero then the default stack size of the OS will
+                                be used.
     */
-    ThreadPool (int numberOfThreads);
+    ThreadPool (int numberOfThreads, size_t threadStackSize = 0);
 
     /** Creates a thread pool with one thread per CPU core.
         Once you've created a pool, you can give it some jobs by calling addJob().
@@ -246,9 +250,11 @@ public:
                         int timeOutMilliseconds,
                         JobSelector* selectedJobsToRemove = nullptr);
 
-    /** Returns the number of jobs currently running or queued.
-    */
+    /** Returns the number of jobs currently running or queued. */
     int getNumJobs() const;
+
+    /** Returns the number of threads assigned to this thread pool. */
+    int getNumThreads() const;
 
     /** Returns one of the jobs in the queue.
 
@@ -307,7 +313,7 @@ private:
     bool runNextJob (ThreadPoolThread&);
     ThreadPoolJob* pickNextJobToRun();
     void addToDeleteList (OwnedArray<ThreadPoolJob>&, ThreadPoolJob*) const;
-    void createThreads (int numThreads);
+    void createThreads (int numThreads, size_t threadStackSize = 0);
     void stopThreads();
 
     // Note that this method has changed, and no longer has a parameter to indicate

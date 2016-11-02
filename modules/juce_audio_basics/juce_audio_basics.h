@@ -33,7 +33,7 @@
 
   ID:               juce_audio_basics
   vendor:           juce
-  version:          4.2.4
+  version:          4.3.0
   name:             JUCE audio and MIDI data classes
   description:      Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:          http://www.juce.com/juce
@@ -62,6 +62,7 @@ namespace juce
 #include "buffers/juce_AudioDataConverters.h"
 #include "buffers/juce_FloatVectorOperations.h"
 #include "buffers/juce_AudioSampleBuffer.h"
+#include "buffers/juce_AudioChannelSet.h"
 #include "effects/juce_Decibels.h"
 #include "effects/juce_IIRFilter.h"
 #include "effects/juce_LagrangeInterpolator.h"

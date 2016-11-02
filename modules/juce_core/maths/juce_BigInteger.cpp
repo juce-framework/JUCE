@@ -158,12 +158,14 @@ BigInteger& BigInteger::operator= (const BigInteger& other)
     if (this != &other)
     {
         highestBit = other.getHighestBit();
-        allocatedSize = (size_t) jmax ((size_t) numPreallocatedInts, sizeNeededToHold (highestBit));
+        const size_t newAllocatedSize = (size_t) jmax ((size_t) numPreallocatedInts, sizeNeededToHold (highestBit));
 
-        if (allocatedSize <= numPreallocatedInts)
+        if (newAllocatedSize <= numPreallocatedInts)
             heapAllocation.free();
-        else
-            heapAllocation.malloc (allocatedSize);
+        else if (newAllocatedSize != allocatedSize)
+            heapAllocation.malloc (newAllocatedSize);
+
+        allocatedSize = newAllocatedSize;
 
         memcpy (getValues(), other.getValues(), sizeof (uint32) * allocatedSize);
         negative = other.negative;

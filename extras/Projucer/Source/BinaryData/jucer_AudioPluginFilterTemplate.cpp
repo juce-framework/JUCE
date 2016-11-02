@@ -13,6 +13,16 @@ FILTERHEADERS
 
 //==============================================================================
 FILTERCLASSNAME::FILTERCLASSNAME()
+#ifndef JucePlugin_PreferredChannelConfigurations
+     : AudioProcessor (BusesProperties()
+                     #if ! JucePlugin_IsMidiEffect
+                      #if ! JucePlugin_IsSynth
+                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
+                      #endif
+                       .withOutput ("Output", AudioChannelSet::stereo(), true)
+                     #endif
+                       )
+#endif
 {
 }
 
@@ -87,27 +97,26 @@ void FILTERCLASSNAME::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool FILTERCLASSNAME::setPreferredBusArrangement (bool isInput, int bus, const AudioChannelSet& preferredSet)
+bool FILTERCLASSNAME::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-    // Reject any bus arrangements that are not compatible with your plugin
-
-    const int numChannels = preferredSet.size();
-
-   #if JucePlugin_IsMidiEffect
-    if (numChannels != 0)
-        return false;
-   #elif JucePlugin_IsSynth
-    if (isInput || (numChannels != 1 && numChannels != 2))
-        return false;
-   #else
-    if (numChannels != 1 && numChannels != 2)
+  #if JucePlugin_IsMidiEffect
+    ignoreUnused (layouts);
+    return true;
+  #else
+    // This is the place where you check if the layout is supported.
+    // In this template code we only support mono or stereo.
+    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
+     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
         return false;
 
-    if (! AudioProcessor::setPreferredBusArrangement (! isInput, bus, preferredSet))
+    // This checks if the input layout matches the output layout
+   #if ! JucePlugin_IsSynth
+    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
    #endif
 
-    return AudioProcessor::setPreferredBusArrangement (isInput, bus, preferredSet);
+    return true;
+  #endif
 }
 #endif
 

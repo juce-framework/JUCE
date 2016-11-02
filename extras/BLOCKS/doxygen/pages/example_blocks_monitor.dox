@@ -1,0 +1,34 @@
+/**
+@page example_blocks_monitor BlocksMonitor
+
+In order to compile and run this application you need to first download the <a href="https://www.juce.com/">JUCE framework</a>, which can be obtained from GitHub <a href="https://github.com/julianstorer/JUCE">here</a>.
+
+@section blocks_monitor_introduction Introduction
+
+BlocksMonitor is a simple JUCE application that shows currently connected Lightpad and Control %Block devices and visualises touches and button presses. It also displays some basic information about the Blocks.
+
+Navigate to the <tt>JUCE/examples/BLOCKS/BlocksMonitor/Builds/</tt> directory and open the code project in your IDE of choice. Run the application and connect your Blocks (if you do not know how to do this, see @ref connecting_blocks). Any devices that you have connected should now show up in the application window and this display will be updated as you add and remove Blocks. Lightpads are represented as a black square and will display the current touches as coloured circles, the size of which depend on the touch pressure, and Control Blocks are shown as rectangles containing the LED row and clickable buttons on the hardware. If you hover the mouse cursor over a %Block, a tooltip will appear displaying the name, UID, serial number and current battery level.
+
+\image html BlocksMonitor.png "The BlocksMonitor application with a Lightpad and Control %Block connected"
+
+@section blocks_monitor_topology Topology
+
+One of the fundamental concepts of the BLOCKS API is topology - a topology is a set of physically connected Blocks and the connections between them. Knowing when the topology has changed and accessing a data structure containing the current topology is the basis of any Blocks application.
+
+To access the current topology, <code>MainContentComponent</code> inherits from the TopologySource::Listener base class and implements the TopologySource::Listener::topologyChanged() method, a callback which is used to inform listeners when any physical devices have been added or removed. In order to receive these callbacks, <code>MainContentComponent</code> contains an instance of the PhysicalTopologySource class and registers itself as a listener to this object in its constructor. When the <code>topologyChanged()</code> method is called, this object can be used to access the updated topology through the PhysicalTopologySource::getCurrentTopology() method which returns a BlockTopology struct containing an array of currently connected Block objects and an array of BlockDeviceConnection structs representing the connections between them.
+
+@section blocks_monitor_block_object The Block Object
+
+The array of %Block objects contained in the %BlockTopology struct can be used to access individual %Block objects and determine their type using the Block::getType() method. The application uses this information to construct an on-screen representation of the currently connected Blocks by creating either a <code>LightpadBlockComponent</code> or <code>ControlBlockComponent</code> object for each %Block in the current topology. Both of these classes derive from <code>BlockComponent</code>, a relatively simple base class that contains some virtual functions for painting the %Block on screen and handling callbacks from the touch surface and/or buttons on the %Block. In its constructor, <code>BlockComponent</code> takes a reference to the %Block object that it represents and adds itself as a listener to the touch surface (if it is a Lightpad) and buttons using the Block::getTouchSurface() and Block::getButtons() methods, respectively. It inherits from the TouchSurface::Listener and ControlButton::Listener classes and overrides the TouchSurface::Listener::touchChanged(), ControlButton::Listener::buttonPressed() and ControlButton::Listener::buttonReleased() methods to call its own virtual methods, which are implemented by the <code>LightpadBlockComponent</code> and <code>ControlBlockComponent</code> classes to update the on-screen components.
+
+To visualise touches on the Lightpad, <code>LightpadBlockComponent</code> contains an instance of the TouchList class called <code>touches</code> and calls the TouchList::updateTouch() method whenever it receives a touch surface listener callback in the <code>LightpadBlockComponent::handleTouchChange()</code> method. The <code>LightpadBlock::paint()</code> method then iterates over the current TouchSurface::Touch objects in the %TouchList and visualises them on the component at 25Hz.
+
+The <code>ControlBlockComponent</code> class represents a generic Control %Block with 15 LEDs, 8 circular buttons and 1 rounded rectangular button. When a button is pressed on the physical Control %Block, the <code>BlockComponent::handleButtonPressed()</code> function is called and this class uses the ControlButton::ButtonFunction variable to determine which button was pressed and should be activated on the on-screen component. The same process is repeated for when the button is released. This class also overrides the <code>BlockComponent::handleBatteryLevelUpdate()</code> method to update which LEDs should be on based on the battery level, which is accessed in the <code>BlockComponent</code> base class using the Block::getBatteryLevel() and Block::isBatteryCharging() methods.
+
+These callback methods are a simple and powerful way to get user input from the Blocks and use this data to drive some process in your application. In this example, the input is simply mirrored on the screen but it could be used to control any number of things such as audio synthesis (see the @ref example_blocks_synth example) and graphics (see the @ref example_blocks_drawing example).
+
+@section blocks_monitor_summary Summary
+
+This tutorial and the accompanying code has introduced the %BlockTopology and %Block objects, and demonstrated how to receive callbacks from connected Blocks when the touch surface or buttons are pressed, allowing you to use this input in your own applications.
+*/
+

@@ -147,7 +147,9 @@ private:
 
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
-    : lastUIWidth (400),
+    : AudioProcessor (BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
+                                       .withOutput ("Output", AudioChannelSet::stereo(), true)),
+      lastUIWidth (400),
       lastUIHeight (200),
       gainParam (nullptr),
       delayParam (nullptr),
@@ -181,6 +183,24 @@ void JuceDemoPluginAudioProcessor::initialiseSynth()
 }
 
 //==============================================================================
+bool JuceDemoPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+{
+    // Only mono/stereo and input/output must have same layout
+    const AudioChannelSet& mainInput  = layouts.getMainInputChannelSet();
+    const AudioChannelSet& mainOutput = layouts.getMainOutputChannelSet();
+
+    // input and output layout must be the same
+    if (mainInput != mainOutput) return false;
+
+    // do not allow disabling the main buses
+    if (mainInput.isDisabled()) return false;
+
+    // only allow stereo and mono
+    if (mainInput.size() > 2) return false;
+
+    return true;
+}
+
 void JuceDemoPluginAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
 {
     // Use this method as the place to do any pre-playback
@@ -350,7 +370,7 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
             // Now reload our parameters..
             for (int i = 0; i < getNumParameters(); ++i)
                 if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters().getUnchecked(i)))
-                    p->setValueNotifyingHost ((float) xmlState->getDoubleAttribute (p->paramID, p->getValue()));
+                    p->setValue ((float) xmlState->getDoubleAttribute (p->paramID, p->getValue()));
         }
     }
 }

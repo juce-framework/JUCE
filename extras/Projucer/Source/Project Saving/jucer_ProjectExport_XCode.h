@@ -97,6 +97,8 @@ public:
     Value  getCustomXcassetsFolderValue()            { return getSetting (Ids::customXcassetsFolder); }
     String getCustomXcassetsFolderString() const     { return settings   [Ids::customXcassetsFolder]; }
 
+    Value  getMicrophonePermissionValue()            { return getSetting (Ids::microphonePermissionNeeded); }
+    bool   isMicrophonePermissionEnabled() const     { return settings   [Ids::microphonePermissionNeeded]; }
     Value  getInAppPurchasesValue()                  { return getSetting (Ids::iosInAppPurchases); }
     bool   isInAppPurchasesEnabled() const           { return settings   [Ids::iosInAppPurchases]; }
     Value  getBackgroundAudioValue()                 { return getSetting (Ids::iosBackgroundAudio); }
@@ -160,6 +162,10 @@ public:
 
             props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"),
                        "Enable this to disable the status bar in your app.");
+
+            props.add (new BooleanPropertyComponent (getMicrophonePermissionValue(), "Microphone access", "Enabled"),
+                       "Enable this to allow your app to use the microphone. "
+                       "The user of your app will be prompted to grant microphone access permissions.");
 
             props.add (new BooleanPropertyComponent (getInAppPurchasesValue(), "In-App purchases capability", "Enabled"),
                        "Enable this to grant your app the capability for in-app purchases. "
@@ -244,7 +250,7 @@ public:
         writeInfoPlistFiles();
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
-        deleteRsrcFiles();
+        deleteRsrcFiles (getTargetFolder().getChildFile ("build"));
 
         if (! ProjucerApplication::getApp().isRunningCommandLine)
         {
@@ -1151,6 +1157,8 @@ public:
             if (owner.iOS)
             {
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+                if (owner.isMicrophonePermissionEnabled())
+                    addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", "This app requires microphone input.");
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
@@ -1302,13 +1310,24 @@ public:
             XmlElement plistEntry ("array");
             XmlElement* dict = plistEntry.createNewChildElement ("dict");
 
+            const String pluginManufacturerCode = owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4);
+            const String pluginSubType          = owner.project.getPluginCode()            .toString().trim().substring (0, 4);
+
+            if (pluginManufacturerCode.toLowerCase() == pluginManufacturerCode)
+            {
+                throw SaveError ("AudioUnit plugin code identifiers invalid!\n\n"
+                                 "You have used only lower case letters in your AU plugin manufacturer identifier. "
+                                 "You must have at least one uppercase letter in your AU plugin manufacturer "
+                                 "identifier code.");
+            }
+
             addPlistDictionaryKey (dict, "name", owner.project.getPluginManufacturer().toString()
                                    + ": " + owner.project.getPluginName().toString());
             addPlistDictionaryKey (dict, "description", owner.project.getPluginDesc().toString());
             addPlistDictionaryKey (dict, "factoryFunction", owner.project.getPluginAUExportPrefix().toString() + "Factory");
-            addPlistDictionaryKey (dict, "manufacturer", owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4));
+            addPlistDictionaryKey (dict, "manufacturer", pluginManufacturerCode);
             addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeCode());
-            addPlistDictionaryKey (dict, "subtype", owner.project.getPluginCode().toString().trim().substring (0, 4));
+            addPlistDictionaryKey (dict, "subtype", pluginSubType);
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
 
             xcodeExtraPListEntries.add (plistKey);
@@ -1857,10 +1876,21 @@ private:
            target->writeInfoPlistFile();
     }
 
-    void deleteRsrcFiles() const
+    // Delete .rsrc files in folder but don't follow sym-links
+    void deleteRsrcFiles (const File& folder) const
     {
-        for (DirectoryIterator di (getTargetFolder().getChildFile ("build"), true, "*.rsrc", File::findFiles); di.next();)
-            di.getFile().deleteFile();
+        for (DirectoryIterator di (folder, false, "*", File::findFilesAndDirectories); di.next();)
+        {
+            const File& entry = di.getFile();
+
+            if (! entry.isSymbolicLink())
+            {
+                if (entry.existsAsFile() && entry.getFileExtension().toLowerCase() == ".rsrc")
+                    entry.deleteFile();
+                else if (entry.isDirectory())
+                    deleteRsrcFiles (entry);
+            }
+        }
     }
 
     String getHeaderSearchPaths (const BuildConfiguration& config) const
