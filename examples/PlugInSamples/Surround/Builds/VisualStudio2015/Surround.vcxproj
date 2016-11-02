@@ -86,12 +86,12 @@
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;
-mkdir &quot;$(OutDir)\$(TargetName).aaxplugin&quot;
-mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents&quot;
-mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot;
-copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
-c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot; &quot;c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
+      <Command>copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).vst3&quot;
+if not exist &quot;$(OutDir)$(TargetName).aaxplugin&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin&quot;
+if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot;
+if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot;
+copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
+&quot;..\..\c:\SDKs\AAX\Utilities\CreatePackage.bat&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; &quot;..\..\c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,12 +135,12 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).vst3&quot;
-mkdir &quot;$(OutDir)\$(TargetName).aaxplugin&quot;
-mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents&quot;
-mkdir &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot;
-copy /Y &quot;$(OutDir)\$(TargetFileName)&quot; &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
-c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\Contents\x64&quot; &quot;c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
+      <Command>copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).vst3&quot;
+if not exist &quot;$(OutDir)$(TargetName).aaxplugin&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin&quot;
+if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot;
+if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot;
+copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
+&quot;..\..\c:\SDKs\AAX\Utilities\CreatePackage.bat&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; &quot;..\..\c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -238,9 +238,6 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\audio_cd\juce_AudioCDReader.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioDeviceManager.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -271,9 +268,6 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\native\juce_linux_ALSA.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\native\juce_linux_AudioCDReader.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\native\juce_linux_JackAudio.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -287,12 +281,6 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\native\juce_win32_ASIO.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\native\juce_win32_AudioCDBurner.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\native\juce_win32_AudioCDReader.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_devices\native\juce_win32_DirectSound.cpp">
@@ -1852,8 +1840,6 @@ c:\SDKs\AAX\Utilities\CreatePackage.bat &quot;$(OutDir)\$(TargetName).aaxplugin\
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h"/>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_devices\audio_cd\juce_AudioCDBurner.h"/>
-    <ClInclude Include="..\..\..\..\..\modules\juce_audio_devices\audio_cd\juce_AudioCDReader.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioDeviceManager.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODevice.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.h"/>
