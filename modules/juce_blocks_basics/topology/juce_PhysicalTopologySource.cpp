@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -1414,11 +1414,6 @@ struct PhysicalTopologySource::Internal
         {
             if (auto det = Detector::getFrom (block))
                 det->activeTouchSurfaces.removeFirstMatchingValue (this);
-        }
-
-        int getNumberOfKeywaves() const noexcept override
-        {
-            return blockImpl.modelData.numKeywaves;
         }
 
         void broadcastTouchChange (const TouchSurface::Touch& touchEvent)

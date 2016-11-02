@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -24,7 +24,7 @@
 
 
 /**
-    Represents an individual block device.
+    Represents an individual BLOCKS device.
 */
 class Block   : public juce::ReferenceCountedObject
 {
@@ -33,29 +33,8 @@ public:
     /** Destructor. */
     virtual ~Block();
 
-    /** The Block class is reference-counted, so always use a Block::Ptr to
-        keep references to them.
-    */
-    using Ptr = juce::ReferenceCountedObjectPtr<Block>;
+    /** The different block types.
 
-    /** The Block class is reference-counted, so Block::Array is a handy array
-        type when working with lists of them.
-    */
-    using Array = juce::ReferenceCountedArray<Block>;
-
-    /**
-    */
-    const juce::String serialNumber;
-
-    /** The UID for a Block. */
-    using UID = uint64;
-
-    /** This Block's UID. This will be globally unique, and remains constant for
-        a particular device.
-    */
-    const UID uid;
-
-    /** Preset types of block.
         @see Block::getType()
     */
     enum Type
@@ -64,35 +43,45 @@ public:
         lightPadBlock,
         liveBlock,
         loopBlock,
-        developerControlBlock,
-        seaboardBlock,
-        rotaryDialBlock
+        developerControlBlock
     };
 
-    /** Returns the type of this device. */
-    virtual Type getType() const = 0;
+    /** The Block class is reference-counted, so always use a Block::Ptr when
+        you are keeping references to them.
+    */
+    using Ptr = juce::ReferenceCountedObjectPtr<Block>;
 
-    /** Returns a textual description of this device type */
-    virtual juce::String getDeviceDescription() const = 0;
+    /** The Block class is reference-counted, so Block::Array is useful when
+        you are storing lists of them.
+    */
+    using Array = juce::ReferenceCountedArray<Block>;
 
-    /** Returns the battery level in the range 0 to 1.0 */
-    virtual float getBatteryLevel() const = 0;
+    /** The Block's serial number. */
+    const juce::String serialNumber;
 
-    /** Returns true if the battery is currently charging. */
-    virtual bool isBatteryCharging() const = 0;
+    using UID = uint64;
+
+    /** This Block's UID.
+
+        This will be globally unique, and remains constant for a particular device.
+    */
+    const UID uid;
 
     //==============================================================================
-    /** Returns the width of the device in logical device units. */
-    virtual int getWidth() const = 0;
+    /** Returns the type of this device.
 
-    /** Returns the height of the device in logical device units. */
-    virtual int getHeight() const = 0;
+        @see Block::Type
+    */
+    virtual Type getType() const = 0;
 
-    /** Returns the length of one logical device unit as physical millimeters. */
-    virtual float getMillimetersPerUnit() const = 0;
+    /** Returns a human-readable description of this device type. */
+    virtual juce::String getDeviceDescription() const = 0;
 
-    /** Returns true if the device is a physical hardware block (i.e. not a virtual block). */
-    virtual bool isHardwareBlock() const = 0;
+    /** Returns the battery level in the range 0.0 to 1.0. */
+    virtual float getBatteryLevel() const = 0;
+
+    /** Returns true if the battery is charging. */
+    virtual bool isBatteryCharging() const = 0;
 
     //==============================================================================
     /** Returns true if this block is connected and active. */
@@ -105,14 +94,20 @@ public:
     */
     virtual bool isMasterBlock() const = 0;
 
-    /** If this block has a pressure-sensitive surface, this will return an object to
-        access its data.
-        Note that the pointer returned does is owned by this object, and the caller must
-        neither delete it or use it after the lifetime of this Block object has finished.
-        If the device is not touch-sensitive, then this method will return nullptr.
-    */
-    virtual TouchSurface* getTouchSurface() const = 0;
+    //==============================================================================
+    /** Returns the width of the device in logical device units. */
+    virtual int getWidth() const = 0;
 
+    /** Returns the height of the device in logical device units. */
+    virtual int getHeight() const = 0;
+
+    /** Returns true if the device is a physical hardware block (i.e. not a virtual block). */
+    virtual bool isHardwareBlock() const = 0;
+
+    /** Returns the length of one logical device unit as physical millimeters. */
+    virtual float getMillimetersPerUnit() const = 0;
+
+    //==============================================================================
     /** If this block has a grid of LEDs, this will return an object to control it.
         Note that the pointer that is returned belongs to this object, and the caller must
         neither delete it or use it after the lifetime of this Block object has finished.
@@ -133,13 +128,21 @@ public:
     */
     virtual juce::Array<StatusLight*> getStatusLights() const = 0;
 
+    /** If this block has a pressure-sensitive surface, this will return an object to
+        access its data.
+        Note that the pointer returned does is owned by this object, and the caller must
+        neither delete it or use it after the lifetime of this Block object has finished.
+        If the device is not touch-sensitive, then this method will return nullptr.
+    */
+    virtual TouchSurface* getTouchSurface() const = 0;
+
     /** If this block has any control buttons, this will return an array of objects to control them.
         Note that the objects in the array belong to this Block object, and the caller must
         neither delete them or use them after the lifetime of this Block object has finished.
     */
     virtual juce::Array<ControlButton*> getButtons() const = 0;
 
-
+    //==============================================================================
     /** This returns true if the block supports generating graphics by drawing into a JUCE
         Graphics context. This should only be true for virtual on-screen blocks; hardware
         blocks will instead use the LED Grid for visuals.
@@ -200,10 +203,12 @@ public:
     using Timestamp = uint32;
 
 protected:
+    //==============================================================================
     Block (const juce::String& serialNumberToUse);
 
     juce::ListenerList<DataInputPortListener> dataInputPortListeners;
 
 private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Block)
 };
