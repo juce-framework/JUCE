@@ -2491,6 +2491,11 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
 void Component::internalMouseUp (MouseInputSource source, Point<float> relativePos,
                                  Time time, const ModifierKeys oldModifiers, float pressure)
 {
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+    if (oldModifiers.isAltDown() && oldModifiers.isCommandDown() && oldModifiers.isCtrlDown())
+        return;
+#endif
+
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
         return;
 
