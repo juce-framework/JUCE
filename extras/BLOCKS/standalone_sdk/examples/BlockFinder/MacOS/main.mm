@@ -11,7 +11,7 @@ int main (int argc, const char * argv[])
     BlockFinder finder;
 
     // Run an event loop.
-    while ([[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:2]]);
+    while ([[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]);
 
     return 0;
 }
