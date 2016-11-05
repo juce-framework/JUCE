@@ -46,10 +46,10 @@ public:
         }
 
         // Work out the maximum diplay area for each Block
-        const Rectangle<int> bounds = getLocalBounds().reduced (20);
+        auto bounds = getLocalBounds().reduced (20);
 
-        auto squareRoot = sqrt (numBlockComponents);
-        int gridSize = (int)squareRoot;
+        auto squareRoot = std::sqrt (numBlockComponents);
+        int gridSize = (int) squareRoot;
 
         if (squareRoot - gridSize > 0)
             gridSize++;
@@ -64,7 +64,7 @@ public:
         for (auto block : blockComponents)
         {
             Rectangle<int> blockBounds;
-            const Block::Type type = block->block->getType();
+            auto type = block->block->getType();
 
             // Can fit 2 ControlBlockComponents in the space of one LightpadBlockComponent
             if (type == Block::liveBlock || type == Block::loopBlock)
@@ -105,11 +105,11 @@ public:
         blockComponents.clear();
 
         // Get the array of currently connected Block objects from the PhysicalTopologySource
-        Block::Array blocksArray = topologySource.getCurrentTopology().blocks;
+        auto blocksArray = topologySource.getCurrentTopology().blocks;
 
         // Create a BlockComponent object for each Block object
         for (auto& block : blocksArray)
-            if (BlockComponent* blockComponent = createBlockComponent (block))
+            if (auto* blockComponent = createBlockComponent (block))
                 addAndMakeVisible (blockComponents.add (blockComponent));
 
         // Update the display
@@ -120,16 +120,16 @@ private:
     /** Creates a BlockComponent object for a new Block and adds it to the content component */
     BlockComponent* createBlockComponent (Block::Ptr newBlock)
     {
-        const Block::Type type = newBlock->getType();
+        auto type = newBlock->getType();
 
         if (type == Block::lightPadBlock)
             return new LightpadComponent (newBlock);
+
         if (type == Block::loopBlock || type == Block::liveBlock)
             return new ControlBlockComponent (newBlock);
 
         // should only be connecting a Lightpad or Control Block!
         jassertfalse;
-
         return nullptr;
     }
 

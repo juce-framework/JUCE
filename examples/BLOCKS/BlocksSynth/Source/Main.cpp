@@ -27,9 +27,8 @@ public:
     void shutdown() override                                    { mainWindow = nullptr; }
 
     //==============================================================================
-    class MainWindow    : public DocumentWindow
+    struct MainWindow    : public DocumentWindow
     {
-    public:
         MainWindow (String name)  : DocumentWindow (name,
                                                     Colours::lightgrey,
                                                     DocumentWindow::allButtons)
@@ -47,10 +46,8 @@ public:
             JUCEApplication::getInstance()->systemRequestedQuit();
         }
 
-    private:
         TooltipWindow tooltipWindow;
 
-        //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
 

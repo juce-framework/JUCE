@@ -5,6 +5,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Audio.h"
 
+//==============================================================================
 /**
     A struct that handles the setup and layout of the DrumPadGridProgram
 */
@@ -41,7 +42,7 @@ struct SynthGrid
         }
     }
 
-    int getNoteNumberForPad (int x, int y)
+    int getNoteNumberForPad (int x, int y) const
     {
         int xIndex = x / 3;
         int yIndex = y / 3;
@@ -64,6 +65,7 @@ struct SynthGrid
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthGrid)
 };
 
+//==============================================================================
 /**
     The main component
 */
@@ -74,7 +76,7 @@ class MainComponent   : public Component,
                         private Timer
 {
 public:
-    MainComponent() : layout (5, 5)
+    MainComponent()
     {
         setSize (600, 400);
 
@@ -93,7 +95,8 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::lightgrey);
-        g.drawText ("Connect a Lightpad Block to play.", getLocalBounds(), Justification::centred, false);
+        g.drawText ("Connect a Lightpad Block to play.",
+                    getLocalBounds(), Justification::centred, false);
     }
 
     void resized() override {}
@@ -106,7 +109,7 @@ public:
             detachActiveBlock();
 
         // Get the array of currently connected Block objects from the PhysicalTopologySource
-        Block::Array blocks = topologySource.getCurrentTopology().blocks;
+        auto blocks = topologySource.getCurrentTopology().blocks;
 
         // Iterate over the array of Block objects
         for (auto b : blocks)
@@ -180,10 +183,11 @@ private:
                 if (touchMessageTimesInLastSecond.size() > maxNumTouchMessagesPerSecond / 3)
                     return;
 
-                gridProgram->sendTouch (touch.x, touch.y, touch.z, layout.touchColour);
+                gridProgram->sendTouch (touch.x, touch.y, touch.z,
+                                        layout.touchColour);
 
                 // Send pitch change and pressure values to the Audio class
-                audio.pitchChange (midiChannel, (touch.x - touch.startX) / static_cast<float> (activeBlock->getWidth()));
+                audio.pitchChange (midiChannel, (touch.x - touch.startX) / activeBlock->getWidth());
                 audio.pressureChange (midiChannel, touch.z);
             }
 
@@ -215,26 +219,18 @@ private:
         // Clear all LEDs
         for (uint32 x = 0; x < 15; ++x)
             for (uint32 y = 0; y < 15; ++y)
-                bitmapProgram->setLED (x, y, Colours::black);
+                setLED (x, y, Colours::black);
 
         // Determine which array to use based on waveshapeMode
         int* waveshapeY = nullptr;
+
         switch (waveshapeMode)
         {
-            case 0:
-                waveshapeY = sineWaveY;
-                break;
-            case 1:
-                waveshapeY = squareWaveY;
-                break;
-            case 2:
-                waveshapeY = sawWaveY;
-                break;
-            case 3:
-                waveshapeY = triangleWaveY;
-                break;
-            default:
-                break;
+            case 0:   waveshapeY = sineWaveY;     break;
+            case 1:   waveshapeY = squareWaveY;   break;
+            case 2:   waveshapeY = sawWaveY;      break;
+            case 3:   waveshapeY = triangleWaveY; break;
+            default:  break;
         }
 
         // For each X co-ordinate
@@ -306,7 +302,9 @@ private:
             grid->setProgram (gridProgram);
 
             // Setup the grid layout
-            gridProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
+            gridProgram->setGridFills (layout.numColumns,
+                                       layout.numRows,
+                                       layout.gridFillArray);
         }
     }
 
@@ -341,6 +339,7 @@ private:
 
             // Saw wave output, set flags for when vertical line should be drawn
             sawWaveY[x] = 14 - ((x / 2) % 15);
+
             if (sawWaveY[x] == 0 && sawWaveY[x - 1] != -1)
                 sawWaveY[x] = -1;
 
@@ -361,42 +360,47 @@ private:
         }
     }
 
+    /** Simple wrapper function to set a LED colour */
+    void setLED (uint32 x, uint32 y, Colour colour)
+    {
+        if (bitmapProgram != nullptr)
+            bitmapProgram->setLED (x, y, colour);
+    }
+
     /** Draws a 'circle' on the Lightpad around an origin co-ordinate */
     void drawLEDCircle (uint32 x0, uint32 y0)
     {
-        bitmapProgram->setLED (x0, y0, waveshapeColour);
+        setLED (x0, y0, waveshapeColour);
 
         const uint32 minLedIndex = 0;
         const uint32 maxLedIndex = 14;
 
-        bitmapProgram->setLED (jmin (x0 + 1, maxLedIndex), y0, waveshapeColour.withBrightness (0.4f));
-        bitmapProgram->setLED (jmax (x0 - 1, minLedIndex), y0, waveshapeColour.withBrightness (0.4f));
-        bitmapProgram->setLED (x0, jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.4f));
-        bitmapProgram->setLED (x0, jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.4f));
+        setLED (jmin (x0 + 1, maxLedIndex), y0, waveshapeColour.withBrightness (0.4f));
+        setLED (jmax (x0 - 1, minLedIndex), y0, waveshapeColour.withBrightness (0.4f));
+        setLED (x0, jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.4f));
+        setLED (x0, jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.4f));
 
-        bitmapProgram->setLED (jmin (x0 + 1, maxLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
-        bitmapProgram->setLED (jmin (x0 + 1, maxLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
-        bitmapProgram->setLED (jmax (x0 - 1, minLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
-        bitmapProgram->setLED (jmax (x0 - 1, minLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
+        setLED (jmin (x0 + 1, maxLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
+        setLED (jmin (x0 + 1, maxLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
+        setLED (jmax (x0 - 1, minLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
+        setLED (jmax (x0 - 1, minLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
     }
 
-    /**
-     enum for the two modes
-     */
     enum BlocksSynthMode
     {
         waveformSelectionMode = 0,
         playMode
     };
+
     BlocksSynthMode currentMode = playMode;
 
     //==============================================================================
     Audio audio;
 
-    DrumPadGridProgram* gridProgram;
-    BitmapLEDProgram* bitmapProgram;
+    DrumPadGridProgram* gridProgram = nullptr;
+    BitmapLEDProgram* bitmapProgram = nullptr;
 
-    SynthGrid layout;
+    SynthGrid layout { 5, 5 };
     PhysicalTopologySource topologySource;
     Block::Ptr activeBlock;
 

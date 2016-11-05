@@ -4,6 +4,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+//==============================================================================
 /**
     A struct that handles the setup and layout of the DrumPadGridProgram
 */
@@ -70,28 +71,31 @@ struct ColourGrid
 
     //==============================================================================
     int numColumns, numRows;
-    float width, height;
 
     Array<DrumPadGridProgram::GridFill> gridFillArray;
-    Array<Colour> colourArray = { Colours::white, Colours::red, Colours::green, Colours::blue, Colours::hotpink,
-                                  Colours::orange, Colours::magenta, Colours::cyan, Colours::black };
+
+    Array<Colour> colourArray = { Colours::white, Colours::red, Colours::green,
+                                  Colours::blue, Colours::hotpink, Colours::orange,
+                                  Colours::magenta, Colours::cyan, Colours::black };
+
     Colour currentColour = Colours::hotpink;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourGrid)
 };
 
+//==============================================================================
 /**
     The main component
 */
 class MainComponent   : public Component,
-                               public TopologySource::Listener,
-                               private TouchSurface::Listener,
-                               private ControlButton::Listener,
-                               private Timer
+                        public TopologySource::Listener,
+                        private TouchSurface::Listener,
+                        private ControlButton::Listener,
+                        private Timer
 {
 public:
-    MainComponent() : layout (3, 3)
+    MainComponent()
     {
         setSize (600, 400);
 
@@ -110,7 +114,8 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::lightgrey);
-        g.drawText ("Connect a Lightpad Block to draw.", getLocalBounds(), Justification::centred, false);
+        g.drawText ("Connect a Lightpad Block to draw.",
+                    getLocalBounds(), Justification::centred, false);
     }
 
     void resized() override {}
@@ -176,7 +181,7 @@ private:
     }
 
     /** Overridden from ControlButton::Listener. Called when a button on the Lightpad is pressed */
-    void buttonPressed (ControlButton&, Block::Timestamp) override {};
+    void buttonPressed (ControlButton&, Block::Timestamp) override {}
 
     /** Overridden from ControlButton::Listener. Called when a button on the Lightpad is released */
     void buttonReleased (ControlButton&, Block::Timestamp) override
@@ -257,7 +262,9 @@ private:
             grid->setProgram (colourPaletteProgram);
 
             // Setup the grid layout
-            colourPaletteProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
+            colourPaletteProgram->setGridFills (layout.numColumns,
+                                                layout.numRows,
+                                                layout.gridFillArray);
         }
     }
 
@@ -265,20 +272,12 @@ private:
     void drawLEDs (uint32 x0, uint32 y0, float z, Colour drawColour)
     {
         // Check if the activeLeds array already contains an ActiveLED object for this LED
-        int index = -1;
-        for (int i = 0; i < activeLeds.size(); ++i)
-        {
-            if (activeLeds.getReference(i).occupies (x0, y0))
-            {
-                index = i;
-                break;
-            }
-        }
+        auto index = getLEDAt (x0, y0);
 
         // If the colour is black then just set the LED to black and return
         if (drawColour == Colours::black)
         {
-            if (index != -1)
+            if (index >= 0)
             {
                 canvasProgram->setLED (x0, y0, Colours::black);
                 activeLeds.remove (index);
@@ -289,7 +288,7 @@ private:
 
         // If there is no ActiveLED obejct for this LED then create one,
         // add it to the array, set the LED on the Block and return
-        if (index == -1)
+        if (index < 0)
         {
             ActiveLED led;
             led.x = x0;
@@ -333,37 +332,42 @@ private:
     */
     struct ActiveLED
     {
-        uint32 x;
-        uint32 y;
+        uint32 x, y;
         Colour colour;
         float brightness;
 
-        /** Returns true if this LED occupies the given co-ordiantes */
+        /** Returns true if this LED occupies the given co-ordinates */
         bool occupies (uint32 xPos, uint32 yPos) const
         {
-            if (xPos == x && yPos == y)
-                return true;
-
-            return false;
+            return xPos == x && yPos == y;
         }
     };
+
     Array<ActiveLED> activeLeds;
 
-    /**
-        enum for the two modes
-    */
+    int getLEDAt (uint32 x, uint32 y) const
+    {
+        for (int i = 0; i < activeLeds.size(); ++i)
+            if (activeLeds.getReference(i).occupies (x, y))
+                return i;
+
+        return -1;
+    }
+
+    //==============================================================================
     enum DisplayMode
     {
         colourPalette = 0,
         canvas
     };
+
     DisplayMode currentMode = colourPalette;
 
     //==============================================================================
-    BitmapLEDProgram* canvasProgram;
-    DrumPadGridProgram* colourPaletteProgram;
+    BitmapLEDProgram* canvasProgram = nullptr;
+    DrumPadGridProgram* colourPaletteProgram = nullptr;
 
-    ColourGrid layout;
+    ColourGrid layout { 3, 3 };
     PhysicalTopologySource topologySource;
     Block::Ptr activeBlock;
 
