@@ -1,0 +1,68 @@
+/**
+@page the_standalone_blocks_sdk The standalone BLOCKS SDK
+
+The easiest way to get started developing BLOCKS applications is to use <a href="https://github.com/julianstorer/JUCE">the JUCE framework</a>, but if you would prefer not to use JUCE directly the standalone BLOCKS SDK can be obtained from the <a href="https://github.com/WeAreROLI/BLOCKS-SDK">BLOCKS-SDK repository</a>.
+
+The most straightforward way to use the SDK is to compile the SDK source code into a static library.
+Then, in your BLOCKS application code, you can use the header files in the SDK to give you access to the BLOCKS classes and functions.
+Finally, when you want to compile your application, you must link against the static library to get all the BLOCKS functionality.
+
+@section standalone_building_library Building the SDK library
+
+The source code for the BLOCKS SDK library is contained within the SDK directory of the BLOCKS-SDK repository.
+Here you will find a header file that you can include in your own projects and the <tt>Build</tt> directory contains an XCode project, a Visual Studio project and a Linux Makefile for compiling the SDK source code into a static library.
+Open the appropriate project for your platform, select either the "Debug" or "Release" configuration, and build the project.
+For MacOS and Linux this will produce <tt>libBLOCKS-SDK.a</tt> in either a <tt>Debug/</tt> or <tt>Release/</tt> directory, and for Windows this will produce <tt>BLOCKS-SDK.lib</tt> in <tt>x64/Debug/</tt> or <tt>x64/Release/</tt>.
+
+@section standalone_using_header Using the SDK header file
+
+To use BLOCKS classes and functions in your application you must include the <tt>BlocksHeader.h</tt> file in your source code.
+You must also tell the compiler to look in the <tt>SDK/</tt> directory for additional header files, which you can configure inside your XCode or Visual Studio project.
+If you are using the command line to compile your application then you can see an example of how to do this in <tt>examples/BLOCKS-SDK/BlockFinder/Linux/Makefile</tt> (which is also appropriate for MacOS, despite being located inside the Linux directory).
+
+@section standalone_linking Linking against the SDK library
+
+You must also tell your compiler where to find the SDK static library before your BLOCKS application will compile, and include all of the dependencies for your platform, which are listed in the @ref standalone_dependencies section.
+Again, this is configured in your XCode or Visual Studio project, but if you are using the command line you can see an example of how to do this in <tt>examples/BLOCKS-SDK/BlockFinder/Linux/Makefile</tt> (which, again, is also appropriate for MacOS).
+
+@section standalone_example An example application
+
+The source code for this example can be found in the <a href="https://github.com/WeAreROLI/BLOCKS-SDK">BLOCKS-SDK repository</a> at <tt>examples/BlockFinder/</tt>, with the parts that are specific to different operating systems in the corresonding subdirectories.
+
+The main functionality of the application is contained within the following class:
+
+<tt>BlockFinder/BlockFinder.h</tt>:
+@include BlockFinder/BlockFinder.h
+
+<tt>BlockFinder/BlockFinder.cpp</tt>:
+@include BlockFinder/BlockFinder.cpp
+
+All this class does is create a PhysicalTopologySource and register for TopologySource::Listener::topologyChanged() callbacks---for more information about how this works you should see the @ref discovering_blocks section.
+When the topology changes we print some information about the available BLOCKS.
+
+The <tt>main</tt> function of the MacOS application is the easiest to understand.
+
+<tt>BlockFinder/MacOS/main.mm</tt>:
+@include BlockFinder/MacOS/main.mm
+
+Here we simply perform some JUCE initialisation, instantiate a BlockFinder class, then run the event loop.
+Whilst in the event loop, the <tt>finder</tt> object receives TopologySource::Listener::topologyChanged() callbacks and we see output printed to stdout when BLOCKS are connected or disconnected.
+
+@section standalone_dependencies Standalone SDK dependencies
+
+- A C++11 compatible compiler
+
+@subsection standalone_libraries_macos MacOS frameworks
+
+- Accelerate
+- AudioToolbox
+- CoreAudio
+- CoreMIDI
+
+@subsection standalone_libraries_linux Linux packages
+
+- x11
+- alsa
+- libcurl
+*/
+

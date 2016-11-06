@@ -79,14 +79,6 @@
  //#define JUCE_USE_ANDROID_OPENSLES
 #endif
 
-#ifndef    JUCE_USE_CDREADER
- #define   JUCE_USE_CDREADER 0
-#endif
-
-#ifndef    JUCE_USE_CDBURNER
- #define   JUCE_USE_CDBURNER 0
-#endif
-
 //==============================================================================
 // juce_audio_formats flags:
 
@@ -123,6 +115,17 @@
 
 #ifndef    JUCE_PLUGINHOST_AU
  #define   JUCE_PLUGINHOST_AU 1
+#endif
+
+//==============================================================================
+// juce_audio_utils flags:
+
+#ifndef    JUCE_USE_CDREADER
+ #define   JUCE_USE_CDREADER 0
+#endif
+
+#ifndef    JUCE_USE_CDBURNER
+ #define   JUCE_USE_CDBURNER 0
 #endif
 
 //==============================================================================

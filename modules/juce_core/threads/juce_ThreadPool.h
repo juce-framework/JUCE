@@ -156,7 +156,7 @@ public:
         @param numberOfThreads  the number of threads to run. These will be started
                                 immediately, and will run until the pool is deleted.
         @param threadStackSize  the size of the stack of each thread. If this value
-                                is zero then the default stack size of the OS will 
+                                is zero then the default stack size of the OS will
                                 be used.
     */
     ThreadPool (int numberOfThreads, size_t threadStackSize = 0);

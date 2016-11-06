@@ -1,0 +1,5 @@
+juce_audio_basics
+juce_audio_devices
+juce_blocks_basics
+juce_core
+juce_events

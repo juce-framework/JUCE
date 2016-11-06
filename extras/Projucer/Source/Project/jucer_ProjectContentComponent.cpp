@@ -441,7 +441,7 @@ struct ProjucerDisabledComp   : public Component,
     {
         if (btn == subscribeButton.get())
         {
-            URL ("http://www.juce.com/get-juce").launchInDefaultBrowser();
+            URL ("http://www.juce.com/get-juce#indie").launchInDefaultBrowser();
         }
         else if (btn == signInButton.get())
         {
@@ -563,8 +563,8 @@ Component* ProjectContentComponent::createBuildTab (CompileEngineChildProcess* c
     return new EnableBuildComp();
 }
 
-Component* ProjectContentComponent::createDisabledBuildTabSubscribe(String textPrefix, 
-                                                                    bool loggedIn, bool dllPresent)
+Component* ProjectContentComponent::createDisabledBuildTabSubscribe (String textPrefix,
+                                                                     bool loggedIn, bool dllPresent)
 {
     bool showSubscribeButton = true;
     bool showSignInButton = dllPresent && ! loggedIn;
