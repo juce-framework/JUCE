@@ -228,12 +228,13 @@ private:
         out << "  JUCE_CPPFLAGS := $(DEPFLAGS)";
         writeDefineFlags (out, config);
         writeHeaderPathFlags (out, config);
-        out << newLine;
+        out << " $(CPPFLAGS)"
+            << newLine;
     }
 
     void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  JUCE_LDFLAGS += $(LDFLAGS) $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR)";
+        out << "  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR)";
 
         {
             StringArray flags (makefileExtraLinkerFlags);
@@ -277,7 +278,9 @@ private:
         if (libraries.size() != 0)
             out << " -l" << replacePreprocessorTokens (config, libraries.joinIntoString (" -l")).trim();
 
-        out << " " << replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim()
+        out << " " << replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim();
+
+        out << " $(LDFLAGS)"
             << newLine;
     }
 
@@ -306,7 +309,7 @@ private:
 
         writeCppFlags (out, config);
 
-        out << "  JUCE_CFLAGS += $(CFLAGS) $(JUCE_CPPFLAGS) $(TARGET_ARCH)";
+        out << "  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH)";
 
         if (config.isDebug())
             out << " -g -ggdb";
@@ -316,6 +319,7 @@ private:
 
         out << " -O" << config.getGCCOptimisationFlag()
             << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
+            out << " $(CFLAGS)"
             << newLine;
 
         String cppStandardToUse (getCppStandardString());
@@ -323,8 +327,9 @@ private:
         if (cppStandardToUse.isEmpty())
             cppStandardToUse = "-std=c++11";
 
-        out << "  JUCE_CXXFLAGS += $(CXXFLAGS) $(JUCE_CFLAGS) "
+        out << "  JUCE_CXXFLAGS += $(JUCE_CFLAGS) "
             << cppStandardToUse
+            out << " $(CXXFLAGS)"
             << newLine;
 
         writeLinkerFlags (out, config);
