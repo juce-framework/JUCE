@@ -598,14 +598,20 @@ static int getMonthNumberForCompileDate (const String& m) noexcept
     return 0;
 }
 
+#ifndef BUILD_DATE
+# define BUILD_DATE __DATE__
+#endif
+#ifndef BUILD_TIME
+# define BUILD_TIME __TIME__
+#endif
 Time Time::getCompilationDate()
 {
     StringArray dateTokens, timeTokens;
 
-    dateTokens.addTokens (__DATE__, true);
+    dateTokens.addTokens (BUILD_DATE, true);
     dateTokens.removeEmptyStrings (true);
 
-    timeTokens.addTokens (__TIME__, ":", StringRef());
+    timeTokens.addTokens (BUILD_TIME, ":", StringRef());
 
     return Time (dateTokens[2].getIntValue(),
                  getMonthNumberForCompileDate (dateTokens[0]),

@@ -130,6 +130,9 @@ void ProjucerApplication::initialiseBasics()
     icons = new Icons();
 }
 
+#ifndef BUILD_DATE
+# define BUILD_DATE __DATE__
+#endif
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 {
     if (logger == nullptr)
@@ -142,7 +145,7 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 
         logger = FileLogger::createDateStampedLogger (folder, filePrefix, ".txt",
                                                       getApplicationName() + " " + getApplicationVersion()
-                                                        + "  ---  Build date: " __DATE__);
+                                                        + "  ---  Build date: " BUILD_DATE);
         Logger::setCurrentLogger (logger);
     }
 
