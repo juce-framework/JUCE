@@ -372,6 +372,15 @@ private:
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
             << newLine;
 
+        out << "# build with \"V=1\" for verbose builds" << newLine
+            << "ifeq ($(V), 1)" << newLine
+            << "V_AT =" << newLine
+            << "else" << newLine
+            << "V_AT = @" << newLine
+            << "endif" << newLine
+            << newLine;
+
+
         out << "# (this disables dependency generation if multiple architectures are set)" << newLine
             << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
             << newLine;
@@ -412,7 +421,7 @@ private:
             << "\t-@mkdir -p $(JUCE_BINDIR)" << newLine
             << "\t-@mkdir -p $(JUCE_LIBDIR)" << newLine
             << "\t-@mkdir -p $(JUCE_OUTDIR)" << newLine
-            << "\t@$(BLDCMD)" << newLine
+            << "\t$(V_AT)$(BLDCMD)" << newLine
             << newLine;
 
         if (useLinuxPackages)
@@ -434,7 +443,7 @@ private:
 
         out << "clean:" << newLine
             << "\t@echo Cleaning " << projectName << newLine
-            << "\t@$(CLEANCMD)" << newLine
+            << "\t$(V_AT)$(CLEANCMD)" << newLine
             << newLine;
 
         out << "strip:" << newLine
@@ -452,8 +461,8 @@ private:
                     << ": " << escapeSpaces (files.getReference(i).toUnixStyle()) << newLine
                     << "\t-@mkdir -p $(JUCE_OBJDIR)" << newLine
                     << "\t@echo \"Compiling " << files.getReference(i).getFileName() << "\"" << newLine
-                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t@$(CC) $(JUCE_CFLAGS) -o \"$@\" -c \"$<\""
-                                                                         : "\t@$(CXX) $(JUCE_CXXFLAGS) -o \"$@\" -c \"$<\"")
+                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) -o \"$@\" -c \"$<\""
+                                                                         : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) -o \"$@\" -c \"$<\"")
                     << newLine << newLine;
             }
         }
