@@ -58,10 +58,6 @@ static NSRect flippedScreenRect (NSRect r) noexcept
     return r;
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_opengl
-void componentPeerAboutToBeRemovedFromScreen (ComponentPeer&);
-#endif
-
 //==============================================================================
 class NSViewComponentPeer  : public ComponentPeer,
                              private AsyncUpdater
@@ -675,16 +671,6 @@ public:
     void redirectCopy  (NSObject*) { handleKeyPress (KeyPress ('c', ModifierKeys (ModifierKeys::commandModifier), 'c')); }
     void redirectPaste (NSObject*) { handleKeyPress (KeyPress ('v', ModifierKeys (ModifierKeys::commandModifier), 'v')); }
     void redirectCut   (NSObject*) { handleKeyPress (KeyPress ('x', ModifierKeys (ModifierKeys::commandModifier), 'x')); }
-
-    void redirectWillMoveToWindow (NSWindow* newWindow)
-    {
-       #if JUCE_MODULE_AVAILABLE_juce_opengl
-        if ([view window] == window && newWindow == nullptr)
-            componentPeerAboutToBeRemovedFromScreen (*this);
-       #else
-        ignoreUnused (newWindow);
-       #endif
-    }
 
     void sendMouseEvent (NSEvent* ev)
     {
@@ -1550,8 +1536,6 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (copy:),                         copy,                       "v@:@");
         addMethod (@selector (cut:),                          cut,                        "v@:@");
 
-        addMethod (@selector (viewWillMoveToWindow:),         willMoveToWindow,           "v@:@");
-
         addProtocol (@protocol (NSTextInput));
 
         registerClass();
@@ -1600,11 +1584,6 @@ private:
     static void copy           (id self, SEL, NSObject* s)   { if (NSViewComponentPeer* p = getOwner (self)) p->redirectCopy       (s);  }
     static void paste          (id self, SEL, NSObject* s)   { if (NSViewComponentPeer* p = getOwner (self)) p->redirectPaste      (s);  }
     static void cut            (id self, SEL, NSObject* s)   { if (NSViewComponentPeer* p = getOwner (self)) p->redirectCut        (s);  }
-
-    static void willMoveToWindow (id self, SEL, NSWindow* window)
-    {
-        if (NSViewComponentPeer* p = getOwner (self)) p->redirectWillMoveToWindow (window);
-    }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)        { return YES; }
     static BOOL wantsDefaultClipping (id, SEL)               { return YES; } // (this is the default, but may want to customise it in future)
