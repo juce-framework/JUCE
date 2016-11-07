@@ -1011,6 +1011,25 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noe
    #endif
 }
 
+FloatVectorOperations::ScopedNoDenormals::ScopedNoDenormals()
+{
+    // There is also C99 way of doing this,
+    // but its not widely supported:
+    //   fesetenv (...)
+   #if JUCE_USE_SSE_INTRINSICS
+    oldMXCSR = _mm_getcsr(); /*read the old MXCSR setting */
+    int newMXCSR = oldMXCSR | 0x8040; /* set DAZ and FZ bits */
+    _mm_setcsr (newMXCSR); /*write the new MXCSR setting to the MXCSR */
+   #endif
+}
+
+FloatVectorOperations::ScopedNoDenormals::~ScopedNoDenormals()
+{
+   #if JUCE_USE_SSE_INTRINSICS
+    _mm_setcsr (oldMXCSR);
+   #endif
+};
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

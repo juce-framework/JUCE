@@ -204,7 +204,18 @@ public:
         call before audio processing code where you really want to avoid denormalisation performance hits.
     */
     static void JUCE_CALLTYPE disableDenormalisedNumberSupport() noexcept;
-};
 
+    class ScopedNoDenormals
+    {
+        // Based on @chkn's code at
+        // https://forum.juce.com/t/state-of-the-art-denormal-prevention/16802
+    public:
+        ScopedNoDenormals();
+        ~ScopedNoDenormals();
+
+    private:
+        int oldMXCSR;
+    };
+};
 
 #endif   // JUCE_FLOATVECTOROPERATIONS_H_INCLUDED

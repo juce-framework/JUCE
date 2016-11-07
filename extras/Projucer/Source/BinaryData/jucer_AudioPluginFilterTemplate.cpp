@@ -122,6 +122,11 @@ bool FILTERCLASSNAME::isBusesLayoutSupported (const BusesLayout& layouts) const
 
 void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
+    // Disable denormal numbers support for the duration of processBlock.
+    // You probably do not want to remove this.
+    // See: https://en.wikipedia.org/wiki/Denormal_number
+    FloatVectorOperations::ScopedNoDenormals noDenormals;
+
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
 
