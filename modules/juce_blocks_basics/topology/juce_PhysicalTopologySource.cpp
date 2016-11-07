@@ -1416,6 +1416,11 @@ struct PhysicalTopologySource::Internal
                 det->activeTouchSurfaces.removeFirstMatchingValue (this);
         }
 
+        int getNumberOfKeywaves() const noexcept override
+        {
+            return blockImpl.modelData.numKeywaves;
+        }
+
         void broadcastTouchChange (const TouchSurface::Touch& touchEvent)
         {
             auto& status = touches.getValue (touchEvent);

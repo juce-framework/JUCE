@@ -43,7 +43,8 @@ public:
         lightPadBlock,
         liveBlock,
         loopBlock,
-        developerControlBlock
+        developerControlBlock,
+        seaboardBlock // on-screen seaboard view
     };
 
     /** The Block class is reference-counted, so always use a Block::Ptr when
