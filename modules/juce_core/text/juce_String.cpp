@@ -237,7 +237,9 @@ private:
     }
 };
 
+#if JUCE_ALLOW_STATIC_NULL_VARIABLES
 const String String::empty;
+#endif
 
 //==============================================================================
 String::String() noexcept  : text (&(emptyString.text))
@@ -2270,7 +2272,7 @@ public:
             beginTest ("Basics");
 
             expect (String().length() == 0);
-            expect (String() == String::empty);
+            expect (String() == String());
             String s1, s2 ("abcd");
             expect (s1.isEmpty() && ! s1.isNotEmpty());
             expect (s2.isNotEmpty() && ! s2.isEmpty());
@@ -2282,16 +2284,16 @@ public:
             expect (String ("abcdefg", 4) == L"abcd");
             expect (String ("abcdefg", 4) == String (L"abcdefg", 4));
             expect (String::charToString ('x') == "x");
-            expect (String::charToString (0) == String::empty);
+            expect (String::charToString (0) == String());
             expect (s2 + "e" == "abcde" && s2 + 'e' == "abcde");
             expect (s2 + L'e' == "abcde" && s2 + L"e" == "abcde");
             expect (s1.equalsIgnoreCase ("abcD") && s1 < "abce" && s1 > "abbb");
             expect (s1.startsWith ("ab") && s1.startsWith ("abcd") && ! s1.startsWith ("abcde"));
             expect (s1.startsWithIgnoreCase ("aB") && s1.endsWithIgnoreCase ("CD"));
             expect (s1.endsWith ("bcd") && ! s1.endsWith ("aabcd"));
-            expectEquals (s1.indexOf (String::empty), 0);
-            expectEquals (s1.indexOfIgnoreCase (String::empty), 0);
-            expect (s1.startsWith (String::empty) && s1.endsWith (String::empty) && s1.contains (String::empty));
+            expectEquals (s1.indexOf (String()), 0);
+            expectEquals (s1.indexOfIgnoreCase (String()), 0);
+            expect (s1.startsWith (String()) && s1.endsWith (String()) && s1.contains (String()));
             expect (s1.contains ("cd") && s1.contains ("ab") && s1.contains ("abcd"));
             expect (s1.containsChar ('a'));
             expect (! s1.containsChar ('x'));
@@ -2472,9 +2474,9 @@ public:
             }
 
             beginTest ("Numeric conversions");
-            expect (String::empty.getIntValue() == 0);
-            expect (String::empty.getDoubleValue() == 0.0);
-            expect (String::empty.getFloatValue() == 0.0f);
+            expect (String().getIntValue() == 0);
+            expect (String().getDoubleValue() == 0.0);
+            expect (String().getFloatValue() == 0.0f);
             expect (s.getIntValue() == 12345678);
             expect (s.getLargeIntValue() == (int64) 12345678);
             expect (s.getDoubleValue() == 12345678.0);
@@ -2511,11 +2513,11 @@ public:
             expect (s3.containsAnyOf (String (L"zzzFs")));
             expect (s3.startsWith ("abcd"));
             expect (s3.startsWithIgnoreCase (String (L"abCD")));
-            expect (s3.startsWith (String::empty));
+            expect (s3.startsWith (String()));
             expect (s3.startsWithChar ('a'));
             expect (s3.endsWith (String ("HIJ")));
             expect (s3.endsWithIgnoreCase (String (L"Hij")));
-            expect (s3.endsWith (String::empty));
+            expect (s3.endsWith (String()));
             expect (s3.endsWithChar (L'J'));
             expect (s3.indexOf ("HIJ") == 7);
             expect (s3.indexOf (String (L"HIJK")) == -1);
@@ -2565,28 +2567,28 @@ public:
             expect (! String ("xx?y").matchesWildcard ("xx?y?", true));
             expect (String ("xx?y").matchesWildcard ("xx??", true));
 
-            expectEquals (s5.fromFirstOccurrenceOf (String::empty, true, false), s5);
+            expectEquals (s5.fromFirstOccurrenceOf (String(), true, false), s5);
             expectEquals (s5.fromFirstOccurrenceOf ("xword2", true, false), s5.substring (100));
             expectEquals (s5.fromFirstOccurrenceOf (String (L"word2"), true, false), s5.substring (5));
             expectEquals (s5.fromFirstOccurrenceOf ("Word2", true, true), s5.substring (5));
             expectEquals (s5.fromFirstOccurrenceOf ("word2", false, false), s5.getLastCharacters (6));
             expectEquals (s5.fromFirstOccurrenceOf ("Word2", false, true), s5.getLastCharacters (6));
 
-            expectEquals (s5.fromLastOccurrenceOf (String::empty, true, false), s5);
+            expectEquals (s5.fromLastOccurrenceOf (String(), true, false), s5);
             expectEquals (s5.fromLastOccurrenceOf ("wordx", true, false), s5);
             expectEquals (s5.fromLastOccurrenceOf ("word", true, false), s5.getLastCharacters (5));
             expectEquals (s5.fromLastOccurrenceOf ("worD", true, true), s5.getLastCharacters (5));
             expectEquals (s5.fromLastOccurrenceOf ("word", false, false), s5.getLastCharacters (1));
             expectEquals (s5.fromLastOccurrenceOf ("worD", false, true), s5.getLastCharacters (1));
 
-            expect (s5.upToFirstOccurrenceOf (String::empty, true, false).isEmpty());
+            expect (s5.upToFirstOccurrenceOf (String(), true, false).isEmpty());
             expectEquals (s5.upToFirstOccurrenceOf ("word4", true, false), s5);
             expectEquals (s5.upToFirstOccurrenceOf ("word2", true, false), s5.substring (0, 10));
             expectEquals (s5.upToFirstOccurrenceOf ("Word2", true, true), s5.substring (0, 10));
             expectEquals (s5.upToFirstOccurrenceOf ("word2", false, false), s5.substring (0, 5));
             expectEquals (s5.upToFirstOccurrenceOf ("Word2", false, true), s5.substring (0, 5));
 
-            expectEquals (s5.upToLastOccurrenceOf (String::empty, true, false), s5);
+            expectEquals (s5.upToLastOccurrenceOf (String(), true, false), s5);
             expectEquals (s5.upToLastOccurrenceOf ("zword", true, false), s5);
             expectEquals (s5.upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
             expectEquals (s5.dropLastCharacters(1).upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
@@ -2604,9 +2606,9 @@ public:
             expect (s5.replaceCharacters ("wo", "xy") != s5);
             expectEquals (s5.replaceCharacters ("wo", "xy").replaceCharacters ("xy", "wo"), s5);
             expectEquals (s5.retainCharacters ("1wordxya"), String ("wordwordword"));
-            expect (s5.retainCharacters (String::empty).isEmpty());
+            expect (s5.retainCharacters (String()).isEmpty());
             expect (s5.removeCharacters ("1wordxya") == " 2 3");
-            expectEquals (s5.removeCharacters (String::empty), s5);
+            expectEquals (s5.removeCharacters (String()), s5);
             expect (s5.initialSectionContainingOnly ("word") == L"word");
             expect (String ("word").initialSectionContainingOnly ("word") == L"word");
             expectEquals (s5.initialSectionNotContaining (String ("xyz ")), String ("word"));
@@ -2647,9 +2649,9 @@ public:
             expectEquals (s.joinIntoString ("-"), String ("4-3-2-1-0"));
             s.remove (2);
             expectEquals (s.joinIntoString ("--"), String ("4--3--1--0"));
-            expectEquals (s.joinIntoString (String::empty), String ("4310"));
+            expectEquals (s.joinIntoString (StringRef()), String ("4310"));
             s.clear();
-            expectEquals (s.joinIntoString ("x"), String::empty);
+            expectEquals (s.joinIntoString ("x"), String());
 
             StringArray toks;
             toks.addTokens ("x,,", ";,", "");

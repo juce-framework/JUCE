@@ -262,9 +262,9 @@ public:
 
         Random r = getRandom();
 
-        testDiff (String::empty, String::empty);
-        testDiff ("x", String::empty);
-        testDiff (String::empty, "x");
+        testDiff (String(), String());
+        testDiff ("x", String());
+        testDiff (String(), "x");
         testDiff ("x", "x");
         testDiff ("x", "y");
         testDiff ("xxx", "x");

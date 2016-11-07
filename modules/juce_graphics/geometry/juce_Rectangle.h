@@ -539,6 +539,53 @@ public:
     }
 
     //==============================================================================
+    /** Returns the nearest point to the specified point that lies within this rectangle. */
+    Point<ValueType> getConstrainedPoint (Point<ValueType> point) const noexcept
+    {
+        return Point<ValueType> (jlimit (pos.x, pos.x + w, point.x),
+                                 jlimit (pos.y, pos.y + h, point.y));
+    }
+
+    /** Returns a point within this rectangle, specified as proportional coordinates.
+        The relative X and Y values should be between 0 and 1, where 0 is the left or
+        top of this rectangle, and 1 is the right or bottom. (Out-of-bounds values
+        will return a point outside the rectangle).
+    */
+    template <typename FloatType>
+    Point<ValueType> getRelativePoint (FloatType relativeX, FloatType relativeY) const noexcept
+    {
+        return Point<ValueType> (pos.x + static_cast<ValueType> (w * relativeX),
+                                 pos.y + static_cast<ValueType> (h * relativeY));
+    }
+
+    /** Returns a proportion of the width of this rectangle. */
+    template <typename FloatType>
+    ValueType proportionOfWidth (FloatType proportion) const noexcept
+    {
+        return static_cast<ValueType> (w * proportion);
+    }
+
+    /** Returns a proportion of the height of this rectangle. */
+    template <typename FloatType>
+    ValueType proportionOfHeight (FloatType proportion) const noexcept
+    {
+        return static_cast<ValueType> (h * proportion);
+    }
+
+    /** Returns a rectangle based on some proportional coordinates relative to this one.
+        So for example getProportion ({ 0.25f, 0.25f, 0.5f, 0.5f }) would return a rectangle
+        of half the original size, with the same centre.
+    */
+    template <typename FloatType>
+    Rectangle getProportion (Rectangle<FloatType> proportionalRect) const noexcept
+    {
+        return Rectangle (pos.x + static_cast<ValueType> (w * proportionalRect.pos.x),
+                          pos.y + static_cast<ValueType> (h * proportionalRect.pos.y),
+                          proportionOfWidth  (proportionalRect.w),
+                          proportionOfHeight (proportionalRect.h));
+    }
+
+    //==============================================================================
     /** Returns true if the two rectangles are identical. */
     bool operator== (const Rectangle& other) const noexcept     { return pos == other.pos && w == other.w && h == other.h; }
 
@@ -562,24 +609,6 @@ public:
     {
         return pos.x <= other.pos.x && pos.y <= other.pos.y
             && pos.x + w >= other.pos.x + other.w && pos.y + h >= other.pos.y + other.h;
-    }
-
-    /** Returns the nearest point to the specified point that lies within this rectangle. */
-    Point<ValueType> getConstrainedPoint (Point<ValueType> point) const noexcept
-    {
-        return Point<ValueType> (jlimit (pos.x, pos.x + w, point.x),
-                                 jlimit (pos.y, pos.y + h, point.y));
-    }
-
-    /** Returns a point within this rectangle, specified as proportional coordinates.
-        The relative X and Y values should be between 0 and 1, where 0 is the left or
-        top of this rectangle, and 1 is the right or bottom. (Out-of-bounds values
-        will return a point outside the rectangle).
-    */
-    Point<ValueType> getRelativePoint (double relativeX, double relativeY) const noexcept
-    {
-        return Point<ValueType> (pos.x + static_cast<ValueType> (w * relativeX),
-                                 pos.y + static_cast<ValueType> (h * relativeY));
     }
 
     /** Returns true if any part of another rectangle overlaps this one. */

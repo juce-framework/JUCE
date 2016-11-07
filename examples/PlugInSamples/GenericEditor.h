@@ -99,7 +99,12 @@ public:
     void sliderValueChanged (Slider* slider) override
     {
         if (AudioProcessorParameter* param = getParameterForSlider (slider))
-            param->setValueNotifyingHost ((float) slider->getValue());
+        {
+            if (slider->isMouseButtonDown())
+                param->setValueNotifyingHost ((float) slider->getValue());
+            else
+                param->setValue ((float) slider->getValue());
+        }
     }
 
     void sliderDragStarted (Slider* slider) override

@@ -81,8 +81,8 @@ void CPUInformation::initialise() noexcept
     has3DNow = (b & (1u << 31)) != 0;
     hasSSE3  = (c & (1u <<  0)) != 0;
     hasSSSE3 = (c & (1u <<  9)) != 0;
-    hasSSE41 = (c & (1u << 20)) != 0;
-    hasSSE42 = (c & (1u << 19)) != 0;
+    hasSSE41 = (c & (1u << 19)) != 0;
+    hasSSE42 = (c & (1u << 20)) != 0;
     hasAVX   = (c & (1u << 28)) != 0;
 
     SystemStatsHelpers::doCPUID (a, b, c, d, 7);

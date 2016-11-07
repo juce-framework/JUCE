@@ -27,7 +27,7 @@ class TextPropertyComponent::LabelComp  : public Label,
 {
 public:
     LabelComp (TextPropertyComponent& tpc, const int charLimit, const bool multiline)
-        : Label (String::empty, String::empty),
+        : Label (String(), String()),
           owner (tpc),
           maxChars (charLimit),
           isMultiline (multiline)

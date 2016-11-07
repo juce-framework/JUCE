@@ -122,7 +122,7 @@ public:
     SharedObjectType& get() const noexcept              { return *sharedObject; }
 
     /** Returns the object that this pointer references.
-        The pointer returned may be zero, of course.
+        The pointer returned may be a nullptr, of course.
     */
     SharedObjectType& getObject() const noexcept        { return *sharedObject; }
 

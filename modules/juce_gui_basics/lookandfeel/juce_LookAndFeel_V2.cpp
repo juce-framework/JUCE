@@ -93,6 +93,8 @@ LookAndFeel_V2::LookAndFeel_V2()
         TreeView::backgroundColourId,               0x00000000,
         TreeView::dragAndDropIndicatorColourId,     0x80ff0000,
         TreeView::selectedItemBackgroundColourId,   0x00000000,
+        TreeView::oddItemsColourId,                 0x00000000,
+        TreeView::evenItemsColourId,                0x00000000,
 
         PopupMenu::backgroundColourId,              0xffffffff,
         PopupMenu::textColourId,                    0xff000000,
@@ -1080,6 +1082,8 @@ Component* LookAndFeel_V2::getParentComponentForMenuOptions (const PopupMenu::Op
     return options.getParentComponent();
 }
 
+void LookAndFeel_V2::preparePopupMenuWindow (Component&) {}
+
 //==============================================================================
 void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)
 {
@@ -1174,7 +1178,7 @@ Font LookAndFeel_V2::getComboBoxFont (ComboBox& box)
 
 Label* LookAndFeel_V2::createComboBoxTextBox (ComboBox&)
 {
-    return new Label (String::empty, String::empty);
+    return new Label (String(), String());
 }
 
 void LookAndFeel_V2::positionComboBoxText (ComboBox& box, Label& label)
@@ -1452,13 +1456,13 @@ void LookAndFeel_V2::drawRotarySlider (Graphics& g, int x, int y, int width, int
 
 Button* LookAndFeel_V2::createSliderButton (Slider&, const bool isIncrement)
 {
-    return new TextButton (isIncrement ? "+" : "-", String::empty);
+    return new TextButton (isIncrement ? "+" : "-", String());
 }
 
 class LookAndFeel_V2::SliderLabelComp  : public Label
 {
 public:
-    SliderLabelComp() : Label (String::empty, String::empty) {}
+    SliderLabelComp() : Label (String(), String()) {}
 
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) {}
 };
@@ -1726,6 +1730,9 @@ void LookAndFeel_V2::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
                                                  int w, int h, int titleSpaceX, int titleSpaceW,
                                                  const Image* icon, bool drawTitleTextOnLeft)
 {
+    if (w * h == 0)
+        return;
+
     const bool isActive = window.isActiveWindow();
 
     g.setGradientFill (ColourGradient (window.getBackgroundColour(),

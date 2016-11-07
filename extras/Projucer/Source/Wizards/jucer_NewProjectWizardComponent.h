@@ -34,9 +34,9 @@ public:
     ModulesFolderPathBox (File initialFileOrDirectory)
         : currentPathBox ("currentPathBox"),
           openFolderButton (TRANS("...")),
-          modulesLabel (String::empty, TRANS("Modules Folder") + ":")
+          modulesLabel (String(), TRANS("Modules Folder") + ":")
     {
-        if (initialFileOrDirectory == File::nonexistent)
+        if (initialFileOrDirectory == File())
             initialFileOrDirectory = findDefaultModulesFolder();
 
         setModulesFolder (initialFileOrDirectory);
@@ -263,14 +263,14 @@ public:
     WizardComp()
         : platformTargets(),
           projectName (TRANS("Project name")),
-          nameLabel (String::empty, TRANS("Project Name") + ":"),
-          typeLabel (String::empty, TRANS("Project Type") + ":"),
+          nameLabel (String(), TRANS("Project Name") + ":"),
+          typeLabel (String(), TRANS("Project Type") + ":"),
           fileBrowser (FileBrowserComponent::saveMode
                          | FileBrowserComponent::canSelectDirectories
                          | FileBrowserComponent::doNotClearFileNameOnRootChange,
                        NewProjectWizardClasses::getLastWizardFolder(), nullptr, nullptr),
-          fileOutline (String::empty, TRANS("Project Folder") + ":"),
-          targetsOutline (String::empty, TRANS("Target Platforms") + ":"),
+          fileOutline (String(), TRANS("Project Folder") + ":"),
+          targetsOutline (String(), TRANS("Target Platforms") + ":"),
           createButton (TRANS("Create") + "..."),
           cancelButton (TRANS("Cancel")),
           modulesPathBox (findDefaultModulesFolder())

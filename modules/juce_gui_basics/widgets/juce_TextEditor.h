@@ -633,6 +633,8 @@ public:
     /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
+    void parentHierarchyChanged() override;
+    /** @internal */
     bool isTextInputActive() const override;
     /** @internal */
     void setTemporaryUnderlining (const Array<Range<int> >&) override;
@@ -684,6 +686,7 @@ private:
     bool menuActive;
     bool valueTextNeedsUpdating;
     bool consumeEscAndReturnKeys;
+    bool styleChanged;
 
     UndoManager undoManager;
     ScopedPointer<CaretComponent> caret;

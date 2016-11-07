@@ -36,7 +36,7 @@ public:
         choices.add (getDefaultSans());
         choices.add (getDefaultSerif());
         choices.add (getDefaultMono());
-        choices.add (String::empty);
+        choices.add (String());
 
         static StringArray fontNames;
 
@@ -90,7 +90,7 @@ public:
 
     static String getTypefaceNameCode (const String& typefaceName)
     {
-        if (typefaceName == getDefaultFont())   return String::empty;
+        if (typefaceName == getDefaultFont())   return String();
         if (typefaceName == getDefaultSans())   return "Font::getDefaultSansSerifFontName(), ";
         if (typefaceName == getDefaultSerif())  return "Font::getDefaultSerifFontName(), ";
         if (typefaceName == getDefaultMono())   return "Font::getDefaultMonospacedFontName(), ";

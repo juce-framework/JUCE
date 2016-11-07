@@ -275,7 +275,7 @@ class ButtonTestComponent   : public Button
 {
 public:
     ButtonTestComponent (ButtonDocument* const doc, const bool fillBackground)
-        : Button (String::empty),
+        : Button (String()),
           document (doc),
           alwaysFillBackground (fillBackground)
     {

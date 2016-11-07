@@ -55,14 +55,14 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        ComboBox defaultBox (String::empty);
+        ComboBox defaultBox;
 
         ComboBox* const c = dynamic_cast<ComboBox*> (comp);
         jassert (c != nullptr);
 
         c->setEditableText (xml.getBoolAttribute ("editable", defaultBox.isTextEditable()));
         c->setJustificationType (Justification (xml.getIntAttribute ("layout", defaultBox.getJustificationType().getFlags())));
-        c->getProperties().set ("items", xml.getStringAttribute ("items", String::empty));
+        c->getProperties().set ("items", xml.getStringAttribute ("items", String()));
         c->setTextWhenNothingSelected (xml.getStringAttribute ("textWhenNonSelected", defaultBox.getTextWhenNothingSelected()));
         c->setTextWhenNoChoicesAvailable (xml.getStringAttribute ("textWhenNoItems", defaultBox.getTextWhenNoChoicesAvailable()));
 

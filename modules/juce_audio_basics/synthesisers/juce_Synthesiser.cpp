@@ -88,6 +88,7 @@ Synthesiser::Synthesiser()
     : sampleRate (0),
       lastNoteOnCounter (0),
       minimumSubBlockSize (32),
+      subBlockSubdivisionIsStrict (false),
       shouldStealNotes (true)
 {
     for (int i = 0; i < numElementsInArray (lastPitchWheelValues); ++i)
@@ -147,10 +148,11 @@ void Synthesiser::setNoteStealingEnabled (const bool shouldSteal)
     shouldStealNotes = shouldSteal;
 }
 
-void Synthesiser::setMinimumRenderingSubdivisionSize (int numSamples) noexcept
+void Synthesiser::setMinimumRenderingSubdivisionSize (int numSamples, bool shouldBeStrict) noexcept
 {
     jassert (numSamples > 0); // it wouldn't make much sense for this to be less than 1
     minimumSubBlockSize = numSamples;
+    subBlockSubdivisionIsStrict = shouldBeStrict;
 }
 
 //==============================================================================
@@ -177,6 +179,7 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 {
     // must set the sample rate before using this!
     jassert (sampleRate != 0);
+    const int targetChannels = outputAudio.getNumChannels();
 
     MidiBuffer::Iterator midiIterator (midiData);
     midiIterator.setNextSamplePosition (startSample);
@@ -191,7 +194,9 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
     {
         if (! midiIterator.getNextEvent (m, midiEventPos))
         {
-            renderVoices (outputAudio, startSample, numSamples);
+            if (targetChannels > 0)
+                renderVoices (outputAudio, startSample, numSamples);
+
             return;
         }
 
@@ -199,12 +204,14 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 
         if (samplesToNextMidiMessage >= numSamples)
         {
-            renderVoices (outputAudio, startSample, numSamples);
+            if (targetChannels > 0)
+                renderVoices (outputAudio, startSample, numSamples);
+
             handleMidiEvent (m);
             break;
         }
 
-        if (samplesToNextMidiMessage < (firstEvent ? 1 : minimumSubBlockSize))
+        if (samplesToNextMidiMessage < ((firstEvent && ! subBlockSubdivisionIsStrict) ? 1 : minimumSubBlockSize))
         {
             handleMidiEvent (m);
             continue;
@@ -212,7 +219,9 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 
         firstEvent = false;
 
-        renderVoices (outputAudio, startSample, samplesToNextMidiMessage);
+        if (targetChannels > 0)
+            renderVoices (outputAudio, startSample, samplesToNextMidiMessage);
+
         handleMidiEvent (m);
         startSample += samplesToNextMidiMessage;
         numSamples  -= samplesToNextMidiMessage;

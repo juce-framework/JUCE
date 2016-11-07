@@ -34,8 +34,8 @@ struct ModifierKeyProvider
 struct ModifierKeyReceiver
 {
     virtual ~ModifierKeyReceiver() {}
-    virtual void setModifierKeyProvider (ModifierKeyProvider* provider) = 0;
-    virtual void removeModifierKeyProvider () = 0;
+    virtual void setModifierKeyProvider (ModifierKeyProvider*) = 0;
+    virtual void removeModifierKeyProvider() = 0;
 };
 
 #endif

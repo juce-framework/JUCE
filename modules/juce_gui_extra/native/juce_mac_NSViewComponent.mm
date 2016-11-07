@@ -177,6 +177,7 @@ public:
 
     NSView* const view;
 
+    typedef ReferenceCountedObjectPtr<NSViewAttachment> Ptr;
 private:
     Component& owner;
     ComponentPeer* currentPeer;
@@ -199,10 +200,14 @@ void NSViewComponent::setView (void* const view)
 {
     if (view != getView())
     {
+        NSViewAttachment::Ptr old = attachment;
+
         attachment = nullptr;
 
         if (view != nullptr)
             attachment = attachViewToComponent (*this, view);
+
+        old = nullptr;
     }
 }
 

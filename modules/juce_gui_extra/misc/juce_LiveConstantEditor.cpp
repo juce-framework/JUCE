@@ -141,6 +141,7 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
     valueEditor.setText (v.getStringValue (wasHex), dontSendNotification);
     valueEditor.addListener (this);
     sourceEditor.setReadOnly (true);
+    sourceEditor.setFont (sourceEditor.getFont().withHeight (13.0f));
     resetButton.addListener (this);
 }
 
@@ -433,10 +434,9 @@ Component* createColourEditor (LivePropertyEditorBase& editor)
 }
 
 //==============================================================================
-class SliderComp   : public Component,
-                     private Slider::Listener
+struct SliderComp   : public Component,
+                      private Slider::Listener
 {
-public:
     SliderComp (LivePropertyEditorBase& e, bool useFloat)
         : editor (e), isFloat (useFloat)
     {
@@ -446,7 +446,7 @@ public:
         slider.addListener (this);
     }
 
-    void updateRange()
+    virtual void updateRange()
     {
         double v = isFloat ? parseDouble (editor.value.getStringValue (false))
                            : (double) parseInt (editor.value.getStringValue (false));
@@ -457,30 +457,43 @@ public:
         slider.setValue (v, dontSendNotification);
     }
 
-private:
-    LivePropertyEditorBase& editor;
-    Slider slider;
-    bool isFloat;
-
-    void sliderValueChanged (Slider*)
+    void sliderValueChanged (Slider*) override
     {
         editor.applyNewValue (isFloat ? getAsString ((double) slider.getValue(), editor.wasHex)
                                       : getAsString ((int64)  slider.getValue(), editor.wasHex));
 
     }
 
-    void sliderDragStarted (Slider*)  {}
-    void sliderDragEnded (Slider*)    { updateRange(); }
+    void sliderDragStarted (Slider*) override  {}
+    void sliderDragEnded (Slider*) override    { updateRange(); }
 
-    void resized()
+    void resized() override
     {
         slider.setBounds (getLocalBounds().removeFromTop (25));
     }
+
+    LivePropertyEditorBase& editor;
+    Slider slider;
+    bool isFloat;
 };
 
+//==============================================================================
+struct BoolSliderComp  : public SliderComp
+{
+    BoolSliderComp (LivePropertyEditorBase& e) : SliderComp (e, false) {}
+
+    void updateRange() override
+    {
+        slider.setRange (0.0, 1.0, dontSendNotification);
+        slider.setValue (editor.value.getStringValue (false) == "true", dontSendNotification);
+    }
+
+    void sliderValueChanged (Slider*) override  { editor.applyNewValue (slider.getValue() > 0.5 ? "true" : "false"); }
+};
 
 Component* createIntegerSlider (LivePropertyEditorBase& editor) { return new SliderComp (editor, false); }
 Component* createFloatSlider   (LivePropertyEditorBase& editor) { return new SliderComp (editor, true);  }
+Component* createBoolSlider    (LivePropertyEditorBase& editor) { return new BoolSliderComp (editor); }
 
 }
 

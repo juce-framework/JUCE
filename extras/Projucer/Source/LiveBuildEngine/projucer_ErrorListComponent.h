@@ -27,7 +27,7 @@ class ErrorListComp     : public TreePanelBase,
 {
 public:
     ErrorListComp (ErrorList& el)
-        : TreePanelBase (nullptr, String::empty),
+        : TreePanelBase (nullptr, String()),
           errorList (el)
     {
         setName ("Errors and Warnings");
@@ -236,6 +236,19 @@ private:
                 resized();
             }
         };
+
+        void showPopupMenu() override
+        {
+            PopupMenu menu;
+            menu.addItem (1, "Copy");
+            launchPopupMenu (menu);
+        }
+
+        void handlePopupMenuResult (int resultCode) override
+        {
+            if (resultCode == 1)
+                SystemClipboard::copyTextToClipboard (message.toString());
+        }
 
         void paintIcon (Graphics& g, Rectangle<int> area) override
         {

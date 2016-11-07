@@ -27,7 +27,7 @@ class UTF8Component  : public Component,
 {
 public:
     UTF8Component()
-        : desc (String::empty,
+        : desc (String(),
                 "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, "
                 "ready to cut-and-paste into your source-code...")
     {

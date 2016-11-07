@@ -202,7 +202,7 @@ public:
             break;
         }
 
-        return String::empty;
+        return String();
     }
 
     void restoreFromString (const String& s)

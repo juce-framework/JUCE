@@ -545,6 +545,25 @@ NumericType square (NumericType n) noexcept
     return n * n;
 }
 
+//==============================================================================
+/** Writes a number of bits into a memory buffer at a given bit index.
+    The buffer is treated as a sequence of 8-bit bytes, and the value is encoded in little-endian order,
+    so for example if startBit = 10, and numBits = 11 then the lower 6 bits of the value would be written
+    into bits 2-8 of targetBuffer[1], and the upper 5 bits of value into bits 0-5 of targetBuffer[2].
+
+    @see readLittleEndianBitsInBuffer
+*/
+void writeLittleEndianBitsInBuffer (void* targetBuffer, uint32 startBit, uint32 numBits, uint32 value) noexcept;
+
+/** Reads a number of bits from a buffer at a given bit index.
+    The buffer is treated as a sequence of 8-bit bytes, and the value is encoded in little-endian order,
+    so for example if startBit = 10, and numBits = 11 then the lower 6 bits of the result would be read
+    from bits 2-8 of sourceBuffer[1], and the upper 5 bits of the result from bits 0-5 of sourceBuffer[2].
+
+    @see writeLittleEndianBitsInBuffer
+*/
+uint32 readLittleEndianBitsInBuffer (const void* sourceBuffer, uint32 startBit, uint32 numBits) noexcept;
+
 
 //==============================================================================
 #if JUCE_INTEL || defined (DOXYGEN)

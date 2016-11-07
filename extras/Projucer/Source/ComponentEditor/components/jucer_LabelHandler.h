@@ -68,7 +68,7 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        Label defaultLabel (String::empty, String::empty);
+        Label defaultLabel;
 
         Font font;
         font.setHeight ((float) xml.getDoubleAttribute ("fontsize", 15.0));

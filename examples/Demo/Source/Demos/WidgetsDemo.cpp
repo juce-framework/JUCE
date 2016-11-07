@@ -25,9 +25,10 @@
 #include "../JuceDemoHeader.h"
 
 
-static void showBubbleMessage (Component* targetComponent, const String& textToShow)
+static void showBubbleMessage (Component* targetComponent, const String& textToShow,
+                               ScopedPointer<BubbleMessageComponent>& bmc)
 {
-    BubbleMessageComponent* bmc = new BubbleMessageComponent();
+    bmc = new BubbleMessageComponent();
 
     if (Desktop::canUseSemiTransparentWindows())
     {
@@ -42,7 +43,7 @@ static void showBubbleMessage (Component* targetComponent, const String& textToS
     AttributedString text (textToShow);
     text.setJustification (Justification::centred);
 
-    bmc->showAt (targetComponent, text, 2000, true, true);
+    bmc->showAt (targetComponent, text, 2000, true, false);
 }
 
 //==============================================================================
@@ -390,6 +391,7 @@ struct ButtonsPage   : public Component,
 
 private:
     OwnedArray<Component> components;
+    ScopedPointer<BubbleMessageComponent> bubbleMessage;
 
     // This little function avoids a bit of code-duplication by adding a component to
     // our list as well as calling addAndMakeVisible on it..
@@ -406,7 +408,8 @@ private:
         showBubbleMessage (button,
                            "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
                            "at a component or somewhere on the screen.\n\n"
-                           "The message bubbles will disappear after a timeout period, or when the mouse is clicked.");
+                           "The message bubbles will disappear after a timeout period, or when the mouse is clicked.",
+                           bubbleMessage);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonsPage)
@@ -450,11 +453,11 @@ class ToolbarDemoComp   : public Component,
 {
 public:
     ToolbarDemoComp()
-        : depthLabel (String::empty, "Toolbar depth:"),
-          infoLabel (String::empty, "As well as showing off toolbars, this demo illustrates how to store "
-                                    "a set of SVG files in a Zip file, embed that in your application, and read "
-                                    "them back in at runtime.\n\nThe icon images here are taken from the open-source "
-                                    "Tango icon project."),
+        : depthLabel (String(), "Toolbar depth:"),
+          infoLabel (String(), "As well as showing off toolbars, this demo illustrates how to store "
+                               "a set of SVG files in a Zip file, embed that in your application, and read "
+                               "them back in at runtime.\n\nThe icon images here are taken from the open-source "
+                                "Tango icon project."),
           orientationButton ("Vertical/Horizontal"),
           customiseButton ("Customise...")
     {
@@ -1510,8 +1513,11 @@ public:
                                "This is a custom tab component\n"
                                "\n"
                                "You can use these to implement things like close-buttons "
-                               "or status displays for your tabs.");
+                               "or status displays for your tabs.",
+                               bubbleMessage);
         }
+    private:
+        ScopedPointer<BubbleMessageComponent> bubbleMessage;
     };
 };
 

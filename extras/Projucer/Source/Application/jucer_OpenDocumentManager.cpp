@@ -62,7 +62,7 @@ public:
     Component* createEditor() override                       { return new ItemPreviewComponent (file); }
     Component* createViewer() override                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile) override   { file = newFile; }
-    String getState() const override                         { return String::empty; }
+    String getState() const override                         { return String(); }
     void restoreState (const String&) override               {}
 
     String getType() const override
@@ -333,7 +333,7 @@ OpenDocumentManager::Document* RecentDocumentList::getPrevious()
     if (! canGoToPrevious())
         return nullptr;
 
-    nextDocs.insert (0, previousDocs.remove (previousDocs.size() - 1));
+    nextDocs.insert (0, previousDocs.removeAndReturn (previousDocs.size() - 1));
     return previousDocs.getLast();
 }
 
@@ -342,7 +342,7 @@ OpenDocumentManager::Document* RecentDocumentList::getNext()
     if (! canGoToNext())
         return nullptr;
 
-    OpenDocumentManager::Document* d = nextDocs.remove (0);
+    OpenDocumentManager::Document* d = nextDocs.removeAndReturn (0);
     previousDocs.add (d);
     return d;
 }

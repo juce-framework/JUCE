@@ -33,7 +33,7 @@
 
   ID:               juce_audio_processors
   vendor:           juce
-  version:          4.2.3
+  version:          4.3.0
   name:             JUCE audio processor classes
   description:      Classes for loading and playing VST, AU, or internally-generated audio processors.
   website:          http://www.juce.com/juce
@@ -57,8 +57,7 @@
 
 //==============================================================================
 /** Config: JUCE_PLUGINHOST_VST
-    Enables the VST audio plugin hosting classes. This requires the Steinberg VST SDK to be
-    installed on your machine.
+    Enables the VST audio plugin hosting classes.
 
     @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_VST3
 */
@@ -93,6 +92,10 @@
  #define JUCE_SUPPORT_CARBON 1
 #endif
 
+#ifndef JUCE_SUPPORT_LEGACY_AUDIOPROCESSOR
+ #define JUCE_SUPPORT_LEGACY_AUDIOPROCESSOR 1
+#endif
+
 //==============================================================================
 //==============================================================================
 namespace juce
@@ -103,7 +106,6 @@ class AudioProcessor;
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
 #include "processors/juce_AudioProcessorParameter.h"
-#include "processors/juce_AudioChannelSet.h"
 #include "processors/juce_AudioProcessor.h"
 #include "processors/juce_PluginDescription.h"
 #include "processors/juce_AudioPluginInstance.h"

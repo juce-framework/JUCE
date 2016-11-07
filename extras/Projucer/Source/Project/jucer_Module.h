@@ -74,7 +74,10 @@ struct ModuleList
     StringArray getIDs() const;
     void sort();
 
+    Result tryToAddModuleFromFolder (const File&);
+
     Result addAllModulesInFolder (const File&);
+    Result addAllModulesInSubfoldersRecursively (const File&, int depth);
     Result scanAllKnownFolders (Project&);
 
     OwnedArray<ModuleDescription> modules;
@@ -118,6 +121,7 @@ public:
 
 private:
     mutable Array<File> sourceFiles;
+    OwnedArray<Project::ConfigFlag> configFlags;
 
     void addBrowseableCode (ProjectExporter&, const Array<File>& compiled, const File& localModuleFolder) const;
 };

@@ -356,9 +356,9 @@ private:
     {
         switch (type)
         {
-            case xml:   codeDocument.replaceAllContent (BinaryData::treedemo_xml);          break;
-            case json:  codeDocument.replaceAllContent (BinaryData::juce_module_info);      break;
-            default:    codeDocument.replaceAllContent (String::empty);                     break;
+            case xml:   codeDocument.replaceAllContent (BinaryData::treedemo_xml);      break;
+            case json:  codeDocument.replaceAllContent (BinaryData::juce_module_info);  break;
+            default:    codeDocument.replaceAllContent (String());                      break;
         }
     }
 

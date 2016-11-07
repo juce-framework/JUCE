@@ -26,8 +26,8 @@ FileSearchPathListComponent::FileSearchPathListComponent()
     : addButton ("+"),
       removeButton ("-"),
       changeButton (TRANS ("change...")),
-      upButton (String::empty, DrawableButton::ImageOnButtonBackground),
-      downButton (String::empty, DrawableButton::ImageOnButtonBackground)
+      upButton (String(), DrawableButton::ImageOnButtonBackground),
+      downButton (String(), DrawableButton::ImageOnButtonBackground)
 {
     listBox.setModel (this);
     addAndMakeVisible (listBox);
@@ -222,10 +222,10 @@ void FileSearchPathListComponent::buttonClicked (Button* button)
     {
         File start (defaultBrowseTarget);
 
-        if (start == File::nonexistent)
+        if (start == File())
             start = path [0];
 
-        if (start == File::nonexistent)
+        if (start == File())
             start = File::getCurrentWorkingDirectory();
 
        #if JUCE_MODAL_LOOPS_PERMITTED

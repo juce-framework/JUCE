@@ -29,7 +29,7 @@ namespace
 {
     const char* const osxVersionDefault         = "default";
     const int oldestSDKVersion  = 5;
-    const int currentSDKVersion = 11;
+    const int currentSDKVersion = 12;
 
     const char* const osxArch_Default           = "default";
     const char* const osxArch_Native            = "Native";
@@ -97,6 +97,8 @@ public:
     Value  getCustomXcassetsFolderValue()            { return getSetting (Ids::customXcassetsFolder); }
     String getCustomXcassetsFolderString() const     { return settings   [Ids::customXcassetsFolder]; }
 
+    Value  getMicrophonePermissionValue()            { return getSetting (Ids::microphonePermissionNeeded); }
+    bool   isMicrophonePermissionEnabled() const     { return settings   [Ids::microphonePermissionNeeded]; }
     Value  getInAppPurchasesValue()                  { return getSetting (Ids::iosInAppPurchases); }
     bool   isInAppPurchasesEnabled() const           { return settings   [Ids::iosInAppPurchases]; }
     Value  getBackgroundAudioValue()                 { return getSetting (Ids::iosBackgroundAudio); }
@@ -124,7 +126,7 @@ public:
     bool isOSX() const override                      { return ! iOS; }
     bool isiOS() const override                      { return iOS; }
 
-    bool supportsVST() const override                { return true; }
+    bool supportsVST() const override                { return ! iOS; }
     bool supportsVST3() const override               { return ! iOS; }
     bool supportsAAX() const override                { return ! iOS; }
     bool supportsRTAS() const override               { return ! iOS; }
@@ -160,6 +162,10 @@ public:
 
             props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"),
                        "Enable this to disable the status bar in your app.");
+
+            props.add (new BooleanPropertyComponent (getMicrophonePermissionValue(), "Microphone access", "Enabled"),
+                       "Enable this to allow your app to use the microphone. "
+                       "The user of your app will be prompted to grant microphone access permissions.");
 
             props.add (new BooleanPropertyComponent (getInAppPurchasesValue(), "In-App purchases capability", "Enabled"),
                        "Enable this to grant your app the capability for in-app purchases. "
@@ -244,7 +250,7 @@ public:
         writeInfoPlistFiles();
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
-        deleteRsrcFiles();
+        deleteRsrcFiles (getTargetFolder().getChildFile ("build"));
 
         if (! ProjucerApplication::getApp().isRunningCommandLine)
         {
@@ -374,8 +380,8 @@ protected:
 
             if (iOS)
             {
-                const char* iosVersions[]      = { "Use Default",     "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", 0 };
-                const char* iosVersionValues[] = { osxVersionDefault, "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", 0 };
+                const char* iosVersions[]      = { "Use Default",     "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", 0 };
+                const char* iosVersionValues[] = { osxVersionDefault, "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", 0 };
 
                 props.add (new ChoicePropertyComponent (iosDeploymentTarget.getPropertyAsValue(), "iOS Deployment Target",
                                                         StringArray (iosVersions), Array<var> (iosVersionValues)),
@@ -550,7 +556,7 @@ public:
                     xcodeIsExecutable = true;
                     xcodeCreatePList = false;
                     xcodeFileType = "compiled.mach-o.executable";
-                    xcodeBundleExtension = String::empty;
+                    xcodeBundleExtension = String();
                     xcodeProductType = "com.apple.product-type.tool";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
@@ -957,11 +963,16 @@ public:
                 const String sdk (config.osxSDKVersion.get());
                 const String sdkCompat (config.osxDeploymentTarget.get());
 
+                // if the user doesn't set it, then use the last known version that works well with JUCE
+                String deploymentTarget = "10.11";
+
                 for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
                 {
                     if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
-                    if (sdkCompat == getSDKName (ver))   s.add ("MACOSX_DEPLOYMENT_TARGET = 10." + String (ver));
+                    if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
                 }
+
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + deploymentTarget);
 
                 s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
                 s.add ("SDKROOT_ppc = macosx10.5");
@@ -1093,7 +1104,7 @@ public:
         void getLinkerSettings (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths) const
         {
             if (xcodeIsBundle)
-                flags.add ("-bundle");
+                flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
             const Array<RelativePath>& extraLibs = config.isDebug() ? xcodeExtraLibrariesDebug
                                                                     : xcodeExtraLibrariesRelease;
@@ -1146,6 +1157,8 @@ public:
             if (owner.iOS)
             {
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+                if (owner.isMicrophonePermissionEnabled())
+                    addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", "This app requires microphone input.");
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
@@ -1297,13 +1310,24 @@ public:
             XmlElement plistEntry ("array");
             XmlElement* dict = plistEntry.createNewChildElement ("dict");
 
+            const String pluginManufacturerCode = owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4);
+            const String pluginSubType          = owner.project.getPluginCode()            .toString().trim().substring (0, 4);
+
+            if (pluginManufacturerCode.toLowerCase() == pluginManufacturerCode)
+            {
+                throw SaveError ("AudioUnit plugin code identifiers invalid!\n\n"
+                                 "You have used only lower case letters in your AU plugin manufacturer identifier. "
+                                 "You must have at least one uppercase letter in your AU plugin manufacturer "
+                                 "identifier code.");
+            }
+
             addPlistDictionaryKey (dict, "name", owner.project.getPluginManufacturer().toString()
                                    + ": " + owner.project.getPluginName().toString());
             addPlistDictionaryKey (dict, "description", owner.project.getPluginDesc().toString());
             addPlistDictionaryKey (dict, "factoryFunction", owner.project.getPluginAUExportPrefix().toString() + "Factory");
-            addPlistDictionaryKey (dict, "manufacturer", owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4));
+            addPlistDictionaryKey (dict, "manufacturer", pluginManufacturerCode);
             addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeCode());
-            addPlistDictionaryKey (dict, "subtype", owner.project.getPluginCode().toString().trim().substring (0, 4));
+            addPlistDictionaryKey (dict, "subtype", pluginSubType);
             addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
 
             xcodeExtraPListEntries.add (plistKey);
@@ -1852,10 +1876,21 @@ private:
            target->writeInfoPlistFile();
     }
 
-    void deleteRsrcFiles() const
+    // Delete .rsrc files in folder but don't follow sym-links
+    void deleteRsrcFiles (const File& folder) const
     {
-        for (DirectoryIterator di (getTargetFolder().getChildFile ("build"), true, "*.rsrc", File::findFiles); di.next();)
-            di.getFile().deleteFile();
+        for (DirectoryIterator di (folder, false, "*", File::findFilesAndDirectories); di.next();)
+        {
+            const File& entry = di.getFile();
+
+            if (! entry.isSymbolicLink())
+            {
+                if (entry.existsAsFile() && entry.getFileExtension().toLowerCase() == ".rsrc")
+                    entry.deleteFile();
+                else if (entry.isDirectory())
+                    deleteRsrcFiles (entry);
+            }
+        }
     }
 
     String getHeaderSearchPaths (const BuildConfiguration& config) const
@@ -1947,6 +1982,8 @@ private:
             const String iosVersion (config.iosDeploymentTarget.get());
             if (iosVersion.isNotEmpty() && iosVersion != osxVersionDefault)
                 s.add ("IPHONEOS_DEPLOYMENT_TARGET = " + iosVersion);
+            else
+                s.add ("IPHONEOS_DEPLOYMENT_TARGET = 9.3");
         }
         else
         {
@@ -2706,7 +2743,6 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder),  Ids::vst2Path, TargetOS::osx)));
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
         aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
         rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));

@@ -425,7 +425,7 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     r << '\n';
 
     if (somePointsAreRelative)
-        code.getCallbackCode (String::empty, "void", "resized()", false)
+        code.getCallbackCode (String(), "void", "resized()", false)
             << pathVariable << ".clear();\n" << r;
     else
         code.constructorCode << r;

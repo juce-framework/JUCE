@@ -73,6 +73,7 @@ public:
     void createColourSchemeItems (PopupMenu&);
     void createWindowMenu (PopupMenu&);
     void createToolsMenu (PopupMenu&);
+    void createExtraAppleMenuItems (PopupMenu&);
     void handleMainMenuCommand (int menuItemID);
 
     //==============================================================================

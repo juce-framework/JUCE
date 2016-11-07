@@ -36,7 +36,10 @@
 namespace juce
 {
     #include "marketplace/juce_OnlineUnlockStatus.cpp"
+
+   #if JUCE_MODULE_AVAILABLE_juce_data_structures
     #include "marketplace/juce_TracktionMarketplaceStatus.cpp"
+   #endif
 
    #if JUCE_MODULE_AVAILABLE_juce_gui_extra
     #include "marketplace/juce_OnlineUnlockForm.cpp"

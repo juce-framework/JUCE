@@ -63,6 +63,24 @@ struct DiagnosticMessage
     bool isWarning() const noexcept     { return type == warning; }
     bool isNote() const noexcept        { return type == note; }
 
+    String toString() const
+    {
+        // todo: copy recursively from root
+        String res;
+
+        switch (type)
+        {
+            case error:   res << "error: "; break;
+            case warning: res << "warning: "; break;
+            case note:    res << "note: "; break;
+        };
+
+        res << range.file << ": ";
+        res << message << "\n";
+
+        return res;
+    }
+
     ValueTree toValueTree() const
     {
         ValueTree v (MessageTypes::DIAGNOSTIC);
@@ -107,6 +125,7 @@ struct DiagnosticReceiver
 {
     virtual ~DiagnosticReceiver() {}
     virtual void handleDiagnostic (const DiagnosticMessage&) = 0;
+    virtual void handleRecoverableErrorPCH (const DiagnosticMessage& m, String pchFileName, String sourceFileName) = 0;
 };
 
 //==============================================================================
@@ -114,8 +133,8 @@ struct DiagnosticList
 {
     // after some research, it seems that notes never come on their own
     // i.e. they always have a warning / error preceding them
-    // so we can use this to keep notes and their associated notes together
-    // by keeping track of the last message
+    // so we can keep notes and their associated diagnostics
+    // together by keeping track of the last message
     DiagnosticMessage lastMessage;
 
     ValueTree list { MessageTypes::DIAGNOSTIC_LIST };
@@ -149,6 +168,33 @@ struct DiagnosticList
 
         for (int i = 0; i < l.list.getNumChildren(); ++i)
             list.addChild (l.list.getChild(i).createCopy(), -1, nullptr);
+    }
+
+    void remove (DiagnosticMessage m)
+    {
+        auto n = m.toValueTree();
+
+        for (int i = 0; i < list.getNumChildren(); ++i)
+        {
+            if (list.getChild (i).isEquivalentTo (n))
+            {
+                list.removeChild (i, nullptr);
+                return;
+            }
+        }
+
+        jassertfalse;
+    }
+
+    bool hasRecoveryWarning (DiagnosticMessage m) const
+    {
+        auto n = m.toValueTree();
+
+        for (int i = 0; i < list.getNumChildren(); ++i)
+            if (list.getChild (i).isEquivalentTo (n))
+                return true;
+
+        return false;
     }
 
     const ValueTree& toValueTree() const noexcept

@@ -93,7 +93,7 @@ public:
             return false;
 
         ((GenericComponent*) comp)->actualClassName = xml.getStringAttribute ("class", "Component");
-        ((GenericComponent*) comp)->constructorParams = xml.getStringAttribute ("params", String::empty);
+        ((GenericComponent*) comp)->constructorParams = xml.getStringAttribute ("params", String());
         return true;
     }
 

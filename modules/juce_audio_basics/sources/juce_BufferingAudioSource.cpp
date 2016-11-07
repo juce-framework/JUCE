@@ -26,7 +26,8 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* s,
                                             TimeSliceThread& thread,
                                             const bool deleteSourceWhenDeleted,
                                             const int bufferSizeSamples,
-                                            const int numChannels)
+                                            const int numChannels,
+                                            bool prefillBufferOnPrepareToPlay)
     : source (s, deleteSourceWhenDeleted),
       backgroundThread (thread),
       numberOfSamplesToBuffer (jmax (1024, bufferSizeSamples)),
@@ -36,7 +37,8 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* s,
       nextPlayPos (0),
       sampleRate (0),
       wasSourceLooping (false),
-      isPrepared (false)
+      isPrepared (false),
+      prefillBuffer (prefillBufferOnPrepareToPlay)
 {
     jassert (source != nullptr);
 
@@ -73,12 +75,13 @@ void BufferingAudioSource::prepareToPlay (int samplesPerBlockExpected, double ne
 
         backgroundThread.addTimeSliceClient (this);
 
-        while (bufferValidEnd - bufferValidStart < jmin (((int) newSampleRate) / 4,
-                                                         buffer.getNumSamples() / 2))
+        do
         {
             backgroundThread.moveToFrontOfQueue (this);
             Thread::sleep (5);
         }
+        while (prefillBuffer
+         && (bufferValidEnd - bufferValidStart < jmin (((int) newSampleRate) / 4, buffer.getNumSamples() / 2)));
     }
 }
 
@@ -88,7 +91,12 @@ void BufferingAudioSource::releaseResources()
     backgroundThread.removeTimeSliceClient (this);
 
     buffer.setSize (numberOfChannels, 0);
-    source->releaseResources();
+
+    // MSVC2015 seems to need this if statement to not generate a warning during linking.
+    // As source is set in the constructor, there is no way that source could
+    // ever equal this, but it seems to make MSVC2015 happy.
+    if (source != this)
+        source->releaseResources();
 }
 
 void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
@@ -146,6 +154,41 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
         nextPlayPos += info.numSamples;
     }
+}
+
+bool BufferingAudioSource::waitForNextAudioBlockReady (const AudioSourceChannelInfo& info, const uint32 timeout)
+{
+    if (!source || source->getTotalLength() <= 0)
+        return false;
+
+    if (nextPlayPos + info.numSamples < 0)
+        return true;
+
+    if (! isLooping() && nextPlayPos > getTotalLength())
+        return true;
+
+    const uint32 endTime = Time::getMillisecondCounter() + timeout;
+    uint32 now = Time::getMillisecondCounter();
+
+    while (now < endTime)
+    {
+        {
+            const ScopedLock sl (bufferStartPosLock);
+
+            const int validStart = static_cast<int> (jlimit (bufferValidStart, bufferValidEnd, nextPlayPos) - nextPlayPos);
+            const int validEnd   = static_cast<int> (jlimit (bufferValidStart, bufferValidEnd, nextPlayPos + info.numSamples) - nextPlayPos);
+
+            if (validStart <= 0 && validStart < validEnd && validEnd >= info.numSamples)
+                return true;
+        }
+
+        if (! bufferReadyEvent.wait (static_cast<int> (endTime - now)))
+            return false;
+
+        now = Time::getMillisecondCounter();
+    }
+
+    return false;
 }
 
 int64 BufferingAudioSource::getNextReadPosition() const
@@ -240,6 +283,8 @@ bool BufferingAudioSource::readNextBufferChunk()
         bufferValidStart = newBVS;
         bufferValidEnd = newBVE;
     }
+
+    bufferReadyEvent.signal();
 
     return true;
 }

@@ -2,13 +2,13 @@
 
 <JUCERPROJECT id="jXbtGS" name="GainPlugIn" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.ROLI.GainPlugIn" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="1"
+              buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="GainPlugIn" pluginDesc="GainPlugIn" pluginManufacturer="ROLI Ltd."
               pluginManufacturerCode="ROLI" pluginCode="Gain" pluginChannelConfigs=""
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="GainPlugInAU" pluginRTASCategory="" aaxIdentifier="com.ROLI.GainPlugIn"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.3"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.3.0"
               pluginIsMidiEffectPlugin="0" buildAUv3="0">
   <MAINGROUP id="sXaVAU" name="GainPlugIn">
     <GROUP id="{57500C1B-EA6F-4A79-EE51-1D02CA8A8350}" name="Source">

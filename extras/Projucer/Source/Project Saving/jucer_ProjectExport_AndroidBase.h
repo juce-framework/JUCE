@@ -35,7 +35,7 @@ public:
           androidMinimumSDK (settings, Ids::androidMinimumSDK, nullptr, "23"),
           androidTheme (settings, Ids::androidTheme, nullptr),
           androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
-          androidMicNeeded (settings, Ids::androidMicNeeded, nullptr, false),
+          androidMicNeeded (settings, Ids::microphonePermissionNeeded, nullptr, false),
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
@@ -129,10 +129,10 @@ public:
         props.add (new TextWithDefaultPropertyComponent<String> (androidVersionCode, "Android Version Code", 32),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
-        props.add (new DependencyPathPropertyComponent (sdkPath, "Android SDK Path"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), sdkPath, "Android SDK Path"),
                    "The path to the Android SDK folder on the target build machine");
 
-        props.add (new DependencyPathPropertyComponent (ndkPath, "Android NDK Path"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), ndkPath, "Android NDK Path"),
                    "The path to the Android NDK folder on the target build machine");
 
         props.add (new TextWithDefaultPropertyComponent<String> (androidMinimumSDK, "Minimum SDK version", 32),

@@ -26,6 +26,7 @@
 #include "GraphEditorPanel.h"
 #include "InternalFilters.h"
 #include "MainHostWindow.h"
+#include "FilterIOConfiguration.h"
 
 
 //==============================================================================
@@ -34,9 +35,11 @@ static Array <PluginWindow*> activePluginWindows;
 
 PluginWindow::PluginWindow (Component* const pluginEditor,
                             AudioProcessorGraph::Node* const o,
-                            WindowFormatType t)
+                            WindowFormatType t,
+                            AudioProcessorGraph& audioGraph)
     : DocumentWindow (pluginEditor->getName(), Colours::lightblue,
                       DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+      graph (audioGraph),
       owner (o),
       type (t)
 {
@@ -154,7 +157,8 @@ private:
 
 //==============================================================================
 PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* const node,
-                                          WindowFormatType type)
+                                          WindowFormatType type,
+                                          AudioProcessorGraph& audioGraph)
 {
     jassert (node != nullptr);
 
@@ -180,6 +184,8 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* const node,
             ui = new GenericAudioProcessorEditor (processor);
         else if (type == Programs)
             ui = new ProgramAudioProcessorEditor (processor);
+        else if (type == AudioIO)
+            ui = new FilterIOConfigurationWindow (processor);
     }
 
     if (ui != nullptr)
@@ -187,7 +193,7 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* const node,
         if (AudioPluginInstance* const plugin = dynamic_cast<AudioPluginInstance*> (processor))
             ui->setName (plugin->getName());
 
-        return new PluginWindow (ui, node, type);
+        return new PluginWindow (ui, node, type, audioGraph);
     }
 
     return nullptr;
@@ -221,6 +227,7 @@ public:
         : filterID (filterID_),
           index (index_),
           isInput (isInput_),
+          busIdx (0),
           graph (graph_)
     {
         if (const AudioProcessorGraph::Node::Ptr node = graph.getNodeForId (filterID_))
@@ -234,17 +241,18 @@ public:
             }
             else
             {
-                const AudioProcessor::AudioBusArrangement& busArrangement = node->getProcessor()->busArrangement;
+                const AudioProcessor& processor = *node->getProcessor();
 
-                const Array<AudioProcessor::AudioProcessorBus>& buses = isInput ? busArrangement.inputBuses
-                                                                                : busArrangement.outputBuses;
+                int channel;
+                channel = processor.getOffsetInBusBufferForAbsoluteChannelIndex (isInput, index, busIdx);
 
-                if (buses.size() > 0)
-                    tip = AudioChannelSet::getChannelTypeName (buses.getReference(0).channels.getTypeOfChannel (index));
+                if (const AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
+                    tip = bus->getName() + String (": ")
+                          + AudioChannelSet::getAbbreviatedChannelTypeName (bus->getCurrentLayout().getTypeOfChannel (channel));
+                else
+                    tip = (isInput ? "Main Input: "
+                           : "Main Output: ") + String (index + 1);
 
-                if (tip.isEmpty())
-                    tip = (isInput ? "Input "
-                                   : "Output ") + String (index + 1);
             }
 
             setTooltip (tip);
@@ -263,7 +271,9 @@ public:
 
         p.addRectangle (w * 0.4f, isInput ? (0.5f * h) : 0.0f, w * 0.2f, h * 0.5f);
 
-        g.setColour (index == FilterGraph::midiChannelNumber ? Colours::red : Colours::green);
+        Colour colour = (index == FilterGraph::midiChannelNumber ? Colours::red : Colours::green);
+
+        g.setColour (colour.withRotatedHue (static_cast<float> (busIdx) / 5.0f));
         g.fillPath (p);
     }
 
@@ -289,6 +299,7 @@ public:
     const uint32 filterID;
     const int index;
     const bool isInput;
+    int busIdx;
 
 private:
     FilterGraph& graph;
@@ -342,7 +353,9 @@ public:
             m.addItem (3, "Show plugin UI");
             m.addItem (4, "Show all programs");
             m.addItem (5, "Show all parameters");
-            m.addItem (6, "Test state save/load");
+            m.addSeparator();
+            m.addItem (6, "Configure Audio I/O");
+            m.addItem (7, "Test state save/load");
 
             const int r = m.show();
 
@@ -362,7 +375,7 @@ public:
                     AudioProcessor* const processor = f->getProcessor();
                     jassert (processor != nullptr);
 
-                    if (r == 6)
+                    if (r == 7)
                     {
                         MemoryBlock state;
                         processor->getStateInformation (state);
@@ -377,11 +390,12 @@ public:
                         {
                             case 4: type = PluginWindow::Programs; break;
                             case 5: type = PluginWindow::Parameters; break;
+                            case 6: type = PluginWindow::AudioIO; break;
 
                             default: break;
                         };
 
-                        if (PluginWindow* const w = PluginWindow::getWindowFor (f, type))
+                        if (PluginWindow* const w = PluginWindow::getWindowFor (f, type, graph.getGraph()))
                             w->toFront (true);
                     }
                 }
@@ -415,7 +429,7 @@ public:
         else if (e.getNumberOfClicks() == 2)
         {
             if (const AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
-                if (PluginWindow* const w = PluginWindow::getWindowFor (f, PluginWindow::Normal))
+                if (PluginWindow* const w = PluginWindow::getWindowFor (f, PluginWindow::Normal, graph.getGraph()))
                     w->toFront (true);
         }
     }
@@ -450,16 +464,31 @@ public:
 
     void resized() override
     {
-        for (int i = 0; i < getNumChildComponents(); ++i)
+        if (AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
         {
-            if (PinComponent* const pc = dynamic_cast<PinComponent*> (getChildComponent(i)))
+            if (AudioProcessor* const processor = f->getProcessor())
             {
-                const int total = pc->isInput ? numIns : numOuts;
-                const int index = pc->index == FilterGraph::midiChannelNumber ? (total - 1) : pc->index;
+                for (int i = 0; i < getNumChildComponents(); ++i)
+                {
+                    if (PinComponent* const pc = dynamic_cast<PinComponent*> (getChildComponent(i)))
+                    {
+                        const bool isInput = pc->isInput;
+                        int busIdx, channelIdx;
 
-                pc->setBounds (proportionOfWidth ((1 + index) / (total + 1.0f)) - pinSize / 2,
-                               pc->isInput ? 0 : (getHeight() - pinSize),
-                               pinSize, pinSize);
+                        channelIdx =
+                            processor->getOffsetInBusBufferForAbsoluteChannelIndex (isInput, pc->index, busIdx);
+
+                        const int total = isInput ? numIns : numOuts;
+                        const int index = pc->index == FilterGraph::midiChannelNumber ? (total - 1) : pc->index;
+
+                        const float totalSpaces = static_cast<float> (total) + (static_cast<float> (jmax (0, processor->getBusCount (isInput) - 1)) * 0.5f);
+                        const float indexPos = static_cast<float> (index) + (static_cast<float> (busIdx) * 0.5f);
+
+                        pc->setBounds (proportionOfWidth ((1.0f + indexPos) / (totalSpaces + 1.0f)) - pinSize / 2,
+                                       pc->isInput ? 0 : (getHeight() - pinSize),
+                                       pinSize, pinSize);
+                    }
+                }
             }
         }
     }
@@ -490,11 +519,11 @@ public:
             return;
         }
 
-        numIns = f->getProcessor()->getMainBusNumInputChannels();
+        numIns = f->getProcessor()->getTotalNumInputChannels();
         if (f->getProcessor()->acceptsMidi())
             ++numIns;
 
-        numOuts = f->getProcessor()->getMainBusNumOutputChannels();
+        numOuts = f->getProcessor()->getTotalNumOutputChannels();
         if (f->getProcessor()->producesMidi())
             ++numOuts;
 
@@ -525,13 +554,13 @@ public:
             deleteAllChildren();
 
             int i;
-            for (i = 0; i < f->getProcessor()->getMainBusNumInputChannels(); ++i)
+            for (i = 0; i < f->getProcessor()->getTotalNumInputChannels(); ++i)
                 addAndMakeVisible (new PinComponent (graph, filterID, i, true));
 
             if (f->getProcessor()->acceptsMidi())
                 addAndMakeVisible (new PinComponent (graph, filterID, FilterGraph::midiChannelNumber, true));
 
-            for (i = 0; i < f->getProcessor()->getMainBusNumOutputChannels(); ++i)
+            for (i = 0; i < f->getProcessor()->getTotalNumOutputChannels(); ++i)
                 addAndMakeVisible (new PinComponent (graph, filterID, i, false));
 
             if (f->getProcessor()->producesMidi())
@@ -969,7 +998,7 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 
     if (draggingConnector != nullptr)
     {
-        draggingConnector->setTooltip (String::empty);
+        draggingConnector->setTooltip (String());
 
         int x = e2.x;
         int y = e2.y;
@@ -1013,7 +1042,7 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
     if (draggingConnector == nullptr)
         return;
 
-    draggingConnector->setTooltip (String::empty);
+    draggingConnector->setTooltip (String());
 
     const MouseEvent e2 (e.getEventRelativeTo (this));
 
@@ -1091,14 +1120,14 @@ private:
 //==============================================================================
 GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& formatManager,
                                                 AudioDeviceManager* deviceManager_)
-    : graph (formatManager), deviceManager (deviceManager_),
+    : graph (new FilterGraph (formatManager)), deviceManager (deviceManager_),
       graphPlayer (getAppProperties().getUserSettings()->getBoolValue ("doublePrecisionProcessing", false))
 {
-    addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
+    addAndMakeVisible (graphPanel = new GraphEditorPanel (*graph));
 
     deviceManager->addChangeListener (graphPanel);
 
-    graphPlayer.setProcessor (&graph.getGraph());
+    graphPlayer.setProcessor (&graph->getGraph());
 
     keyState.addListener (&graphPlayer.getMidiMessageCollector());
 
@@ -1108,23 +1137,16 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& format
     addAndMakeVisible (statusBar = new TooltipBar());
 
     deviceManager->addAudioCallback (&graphPlayer);
-    deviceManager->addMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
+    deviceManager->addMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
 
     graphPanel->updateComponents();
 }
 
 GraphDocumentComponent::~GraphDocumentComponent()
 {
-    deviceManager->removeAudioCallback (&graphPlayer);
-    deviceManager->removeMidiInputCallback (String::empty, &graphPlayer.getMidiMessageCollector());
-    deviceManager->removeChangeListener (graphPanel);
+    releaseGraph();
 
-    deleteAllChildren();
-
-    graphPlayer.setProcessor (nullptr);
     keyState.removeListener (&graphPlayer.getMidiMessageCollector());
-
-    graph.clear();
 }
 
 void GraphDocumentComponent::resized()
@@ -1140,4 +1162,21 @@ void GraphDocumentComponent::resized()
 void GraphDocumentComponent::createNewPlugin (const PluginDescription* desc, int x, int y)
 {
     graphPanel->createNewPlugin (desc, x, y);
+}
+
+void GraphDocumentComponent::unfocusKeyboardComponent()
+{
+    keyboardComp->unfocusAllComponents();
+}
+
+void GraphDocumentComponent::releaseGraph()
+{
+    deviceManager->removeAudioCallback (&graphPlayer);
+    deviceManager->removeMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
+    deviceManager->removeChangeListener (graphPanel);
+
+    deleteAllChildren();
+
+    graphPlayer.setProcessor (nullptr);
+    graph = nullptr;
 }
