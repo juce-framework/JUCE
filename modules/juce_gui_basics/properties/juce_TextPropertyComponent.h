@@ -38,8 +38,10 @@ protected:
     //==============================================================================
     /** Creates a text property component.
 
-        The maxNumChars is used to set the length of string allowable, and isMultiLine
-        sets whether the text editor allows carriage returns.
+        @param propertyName  The name of the property
+        @param maxNumChars   If not zero, then this specifies the maximum allowable length of
+                             the string. If zero, then the string will have no length limit.
+        @param isMultiLine   isMultiLine sets whether the text editor allows carriage returns.
 
         @see TextEditor
     */
@@ -50,8 +52,11 @@ protected:
 public:
     /** Creates a text property component.
 
-        The maxNumChars is used to set the length of string allowable, and isMultiLine
-        sets whether the text editor allows carriage returns.
+        @param valueToControl The Value that is controlled by the TextPropertyCOmponent
+        @param propertyName   The name of the property
+        @param maxNumChars    If not zero, then this specifies the maximum allowable length of
+                              the string. If zero, then the string will have no length limit.
+        @param isMultiLine    isMultiLine sets whether the text editor allows carriage returns.
 
         @see TextEditor
     */

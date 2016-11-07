@@ -43,7 +43,7 @@ public:
           errorLabel ("Error Label", String()),
           rememberLoginCheckbox (TRANS("Remember login")),
           forgotPasswordButton (TRANS("Forgotten your password?"),
-                                URL (getServerURL() + "reset_password?referer=projucer")),
+                                URL ("https://auth.roli.com/forgot-password?referer=projucer")),
           rememberLogin (true)
     {
         setLookAndFeel (&lookAndFeel);
@@ -286,6 +286,13 @@ private:
         {
             parentDialog->exitModalState (0);
             ProjucerApplication::getApp().updateAllBuildTabs();
+
+            if (ProjucerLicenses::getInstance()->hasFreeToUseLicense())
+            {
+                AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                  "Free to use license info",
+                                                  "The free-to-use license expires on 31st January 2017 Midnight GMT");
+            }
         }
     }
 

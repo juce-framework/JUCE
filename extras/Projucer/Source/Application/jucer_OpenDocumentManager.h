@@ -62,7 +62,7 @@ public:
         virtual void fileHasBeenRenamed (const File& newFile) = 0;
         virtual String getState() const = 0;
         virtual void restoreState (const String& state) = 0;
-        virtual File getCounterpartFile() const   { return File::nonexistent; }
+        virtual File getCounterpartFile() const   { return File(); }
     };
 
     //==============================================================================

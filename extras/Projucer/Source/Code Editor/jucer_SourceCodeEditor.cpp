@@ -639,7 +639,7 @@ void CppCodeEditorComponent::insertComponentClass()
 
     const char* classNameField = "Class Name";
 
-    aw.addTextEditor (classNameField, String::empty, String::empty, false);
+    aw.addTextEditor (classNameField, String(), String(), false);
     aw.addButton (TRANS ("Insert Code"),  1, KeyPress (KeyPress::returnKey));
     aw.addButton (TRANS ("Cancel"),       0, KeyPress (KeyPress::escapeKey));
 

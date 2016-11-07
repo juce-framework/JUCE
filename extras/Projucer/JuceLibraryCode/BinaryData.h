@@ -9,6 +9,18 @@
 
 namespace BinaryData
 {
+    extern const char*   gradlewrapper_jar;
+    const int            gradlewrapper_jarSize = 53636;
+
+    extern const char*   gradlew;
+    const int            gradlewSize = 4971;
+
+    extern const char*   gradlew_bat;
+    const int            gradlew_batSize = 2404;
+
+    extern const char*   LICENSE;
+    const int            LICENSESize = 11325;
+
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
     const int            jucer_AnimatedComponentTemplate_cppSize = 1949;
 
@@ -22,10 +34,10 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 994;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 5047;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 5475;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2289;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2259;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2151;
@@ -106,7 +118,7 @@ namespace BinaryData
     const int            projectIconXcodeIOS_pngSize = 18111;
 
     extern const char*   projucer_EULA_txt;
-    const int            projucer_EULA_txtSize = 14390;
+    const int            projucer_EULA_txtSize = 14394;
 
     extern const char*   projucer_login_bg_svg;
     const int            projucer_login_bg_svgSize = 5046;
@@ -148,7 +160,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 45;
+    const int namedResourceListSize = 49;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

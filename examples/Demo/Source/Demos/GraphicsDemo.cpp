@@ -395,7 +395,7 @@ class ImagesRenderingDemo  : public GraphicsDemoBase
 {
 public:
     ImagesRenderingDemo (ControllersComponent& cc, bool argb_, bool tiled_)
-        : GraphicsDemoBase (cc, String ("Images") + (argb_ ? ": ARGB" : ": RGB") + (tiled_ ? " Tiled" : String::empty )),
+        : GraphicsDemoBase (cc, String ("Images") + (argb_ ? ": ARGB" : ": RGB") + (tiled_ ? " Tiled" : String() )),
           isArgb (argb_), isTiled (tiled_)
     {
         argbImage = ImageFileFormat::loadFrom (BinaryData::juce_icon_png, (size_t) BinaryData::juce_icon_pngSize);

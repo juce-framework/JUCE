@@ -50,7 +50,7 @@ public:
         The viewport is initially empty - use the setViewedComponent() method to
         add a child component for it to manage.
     */
-    explicit Viewport (const String& componentName = String::empty);
+    explicit Viewport (const String& componentName = String());
 
     /** Destructor. */
     ~Viewport();

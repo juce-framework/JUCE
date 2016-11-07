@@ -242,27 +242,21 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
 void ProjectExporter::createDependencyPathProperties (PropertyListBuilder& props)
 {
-    if (supportsVST() && (project.shouldBuildVST().getValue() || project.isVSTPluginHost()))
-    {
-        props.add (new DependencyPathPropertyComponent (getVSTPathValue (false), "VST SDK Folder"),
-                   "If you're building a VST plugin or host, this must be the folder containing the VST SDK. This can be an absolute path, or a path relative to the Projucer project file.");
-    }
-
     if (supportsVST3() && (project.shouldBuildVST3().getValue() || project.isVST3PluginHost()))
     {
-        props.add (new DependencyPathPropertyComponent (getVSTPathValue (true), "VST3 SDK Folder"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getVST3PathValue(), "VST3 SDK Folder"),
                    "If you're building a VST3 plugin or host, this must be the folder containing the VST3 SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
     if (supportsAAX() && project.shouldBuildAAX().getValue())
     {
-        props.add (new DependencyPathPropertyComponent (getAAXPathValue(), "AAX SDK Folder"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getAAXPathValue(), "AAX SDK Folder"),
                    "If you're building an AAX plugin, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
     if (supportsRTAS() && project.shouldBuildRTAS().getValue())
     {
-        props.add (new DependencyPathPropertyComponent (getRTASPathValue(), "RTAS SDK Folder"),
+        props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getRTASPathValue(), "RTAS SDK Folder"),
                    "If you're building an RTAS, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 }
@@ -306,14 +300,8 @@ void ProjectExporter::addSettingsForProjectType (const ProjectType& type)
 
 void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
-    if (supportsVST())
-    {
-        if (project.shouldBuildVST().getValue())
-            makefileTargetSuffix = ".so";
-
-        if (project.shouldBuildVST().getValue() || project.isVSTPluginHost())
-            addVSTFolderToPath (false);
-    }
+    if (supportsVST() && project.shouldBuildVST().getValue())
+        makefileTargetSuffix = ".so";
 
     if (supportsVST3())
     {
@@ -321,7 +309,7 @@ void ProjectExporter::addVSTPathsIfPluginOrHost()
             makefileTargetSuffix = ".so";
 
         if (project.shouldBuildVST3().getValue() || project.isVST3PluginHost())
-            addVSTFolderToPath (true);
+            addVST3FolderToPath();
     }
 }
 
@@ -336,12 +324,12 @@ void ProjectExporter::addCommonAudioPluginSettings()
     // Note: RTAS paths are platform-dependent, impl -> addPlatformSpecificSettingsForProjectType
  }
 
-void ProjectExporter::addVSTFolderToPath (bool isVST3)
+void ProjectExporter::addVST3FolderToPath()
 {
-    const String vstFolder (getVSTPathValue (isVST3).toString());
+    const String vst3Folder (getVST3PathValue().toString());
 
-    if (vstFolder.isNotEmpty())
-        addToExtraSearchPaths (RelativePath (vstFolder, RelativePath::projectFolder), 0);
+    if (vst3Folder.isNotEmpty())
+        addToExtraSearchPaths (RelativePath (vst3Folder, RelativePath::projectFolder), 0);
 }
 
 void ProjectExporter::addAAXFoldersToPath()
@@ -831,7 +819,7 @@ String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
     const StringArray libraryPaths (getLibrarySearchPaths());
 
     for (int i = 0; i < libraryPaths.size(); ++i)
-        s << " -L" << escapeSpaces (libraryPaths[i]);
+        s << " -L" << escapeSpaces (libraryPaths[i]).replace ("~", "$(HOME)");
 
     return s;
 }
@@ -845,5 +833,5 @@ String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& confi
     if (libraries.size() != 0)
         return replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim();
 
-    return String::empty;
+    return String();
 }

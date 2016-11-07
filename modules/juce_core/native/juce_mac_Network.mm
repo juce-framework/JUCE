@@ -130,12 +130,24 @@ public:
 
     ~URLConnectionState()
     {
-        stop();
-        [data release];
+        signalThreadShouldExit();
+
+        {
+            const ScopedLock sl (dataLock);
+            isBeingDeleted = true;
+            [task cancel];
+            DelegateClass::setState (delegate, nullptr);
+        }
+
+        stopThread (10000);
+        [task release];
         [request release];
         [headers release];
         [session release];
+
+        const ScopedLock sl (dataLock);
         [delegate release];
+        [data release];
     }
 
     bool start (URL::OpenStreamProgressCallback* callback, void* context)
@@ -145,24 +157,13 @@ public:
         while (isThreadRunning() && ! initialised)
         {
             if (callback != nullptr)
-                callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]);
+                if (! callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
+                    return false;
 
             Thread::sleep (1);
         }
 
         return true;
-    }
-
-    void stop()
-    {
-        {
-            const ScopedLock sl (dataLock);
-            [task cancel];
-        }
-
-        stopThread (10000);
-        [task release];
-        task = nil;
     }
 
     int read (char* dest, int numBytes)
@@ -199,6 +200,9 @@ public:
     {
         {
             const ScopedLock sl (dataLock);
+            if (isBeingDeleted)
+                return;
+
             [data setLength: 0];
         }
 
@@ -225,10 +229,18 @@ public:
         }
     }
 
-    void didBecomeInvalidWithError (NSError* error)
+    void didComplete (NSError* error)
     {
-        DBG (nsStringToJuce ([error description])); ignoreUnused (error);
-        hasFailed = true;
+        const ScopedLock sl (dataLock);
+        if (isBeingDeleted)
+            return;
+
+       #if JUCE_DEBUG
+        if (error != nullptr)
+            DBG (nsStringToJuce ([error description]));
+       #endif
+
+        hasFailed = (error != nullptr);
         initialised = true;
         signalThreadShouldExit();
     }
@@ -236,6 +248,9 @@ public:
     void didReceiveData (NSData* newData)
     {
         const ScopedLock sl (dataLock);
+        if (isBeingDeleted)
+            return;
+
         [data appendData: newData];
         initialised = true;
     }
@@ -245,10 +260,15 @@ public:
         latestTotalBytes = static_cast<int> (totalBytesWritten);
     }
 
-    void willPerformHTTPRedirection (NSURLRequest* aRequest, void (^completionHandler)(NSURLRequest *))
+    void willPerformHTTPRedirection (NSURLRequest* urlRequest, void (^completionHandler)(NSURLRequest *))
     {
-        NSURLRequest* newRequest = (numRedirects++ < numRedirectsToFollow ? aRequest : nullptr);
-        completionHandler (newRequest);
+        {
+            const ScopedLock sl (dataLock);
+            if (isBeingDeleted)
+                return;
+        }
+
+        completionHandler (numRedirects++ < numRedirectsToFollow ? urlRequest : nil);
     }
 
     void run() override
@@ -268,12 +288,7 @@ public:
         [task resume];
 
         while (! threadShouldExit())
-        {
             wait (5);
-
-            if (task.state != NSURLSessionTaskStateRunning)
-                break;
-        }
 
         hasFinished = true;
         initialised = true;
@@ -288,7 +303,7 @@ public:
     NSMutableData* data = nil;
     NSDictionary* headers = nil;
     int statusCode = 0;
-    bool initialised = false, hasFailed = false, hasFinished = false;
+    bool initialised = false, hasFailed = false, hasFinished = false, isBeingDeleted = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
@@ -309,6 +324,9 @@ private:
                                                                             didSendBodyData,           "v@:@@qqq");
             addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
                                                                             willPerformHTTPRedirection, "v@:@@@@@");
+
+            addMethod (@selector (URLSession:task:didCompleteWithError:), didCompleteWithError,   "v@:@@@");
+
             registerClass();
         }
 
@@ -318,28 +336,33 @@ private:
     private:
         static void didReceiveResponse (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSURLResponse* response, id completionHandler)
         {
-            getState (self)->didReceiveResponse (response, completionHandler);
+            if (auto state = getState (self)) state->didReceiveResponse (response, completionHandler);
         }
 
         static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSError* error)
         {
-            getState (self)->didBecomeInvalidWithError (error);
+            if (auto state = getState (self)) state->didComplete (error);
         }
 
         static void didReceiveData (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSData* newData)
         {
-            getState (self)->didReceiveData (newData);
+            if (auto state = getState (self)) state->didReceiveData (newData);
         }
 
         static void didSendBodyData (id self, SEL, NSURLSession*, NSURLSessionTask*, int64_t, int64_t totalBytesWritten, int64_t)
         {
-            getState (self)->didSendBodyData (totalBytesWritten);
+            if (auto state = getState (self)) state->didSendBodyData (totalBytesWritten);
         }
 
         static void willPerformHTTPRedirection (id self, SEL, NSURLSession*, NSURLSessionTask*, NSHTTPURLResponse*,
                                                 NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
         {
-            getState (self)->willPerformHTTPRedirection (request, completionHandler);
+            if (auto state = getState (self)) state->willPerformHTTPRedirection (request, completionHandler);
+        }
+
+        static void didCompleteWithError (id self, SEL, NSURLConnection*, NSURLSessionTask*, NSError* error)
+        {
+            if (auto state = getState (self)) state->didComplete (error);
         }
     };
 
@@ -385,10 +408,10 @@ public:
     {
         stop();
         [connection release];
-        [data release];
         [request release];
         [headers release];
         [delegate release];
+        [data release];
     }
 
     bool start (URL::OpenStreamProgressCallback* callback, void* context)
@@ -398,7 +421,8 @@ public:
         while (isThreadRunning() && ! initialised)
         {
             if (callback != nullptr)
-                callback (context, latestTotalBytes, (int) [[request HTTPBody] length]);
+                if (! callback (context, latestTotalBytes, (int) [[request HTTPBody] length]))
+                    return false;
 
             Thread::sleep (1);
         }

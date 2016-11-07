@@ -151,7 +151,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             tempMenu = new TemporaryMainMenuWithStandardCommands();
 
         StringArray* filters = new StringArray();
-        filters->addTokens (filter.replaceCharacters (",:", ";;"), ";", String::empty);
+        filters->addTokens (filter.replaceCharacters (",:", ";;"), ";", String());
         filters->trim();
         filters->removeEmptyStrings();
 

@@ -51,6 +51,22 @@ public:
                                                  const String& machineNumbers,
                                                  const RSAKey& privateKey);
 
+    /** Similar to the above key file generation method but with an expiry time.
+        You must supply a Time after which this key file should no longer be considered as active.
+
+        N.B. when an app is unlocked with an expiring key file, OnlineUnlockStatus::isUnlocked will
+        still return false. You must then check OnlineUnlockStatus::getExpiryTime to see if this
+        expiring key file is still in date and act accordingly.
+
+        @see OnlineUnlockStatus
+    */
+    static String JUCE_CALLTYPE generateExpiringKeyFile (const String& appName,
+                                                         const String& userEmail,
+                                                         const String& userName,
+                                                         const String& machineNumbers,
+                                                         const Time expiryTime,
+                                                         const RSAKey& privateKey);
+
     //==============================================================================
     /** This is a simple implementation of a key-generator that you could easily wrap in
         a command-line main() function for use on your server.

@@ -82,3 +82,12 @@ void MenuBarModel::applicationCommandListChanged()
 {
     menuItemsChanged();
 }
+
+void MenuBarModel::handleMenuBarActivate (bool isActive)
+{
+    menuBarActivated (isActive);
+    listeners.call (&MenuBarModel::Listener::menuBarActivated, this, isActive);
+}
+
+void MenuBarModel::menuBarActivated (bool) {}
+void MenuBarModel::Listener::menuBarActivated (MenuBarModel*, bool) {}

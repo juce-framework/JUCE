@@ -64,8 +64,8 @@ public:
                                               tell the user what's going on
         @param initialFileOrDirectory         the file or directory that should be selected
                                               when the dialog box opens. If this parameter is
-                                              set to File::nonexistent, a sensible default
-                                              directory will be used instead.
+                                              set to File(), a sensible default directory will
+                                              be used instead.
         @param filePatternsAllowed            a set of file patterns to specify which files
                                               can be selected - each pattern should be
                                               separated by a comma or semi-colon, e.g. "*" or
@@ -82,8 +82,8 @@ public:
         @see browseForFileToOpen, browseForFileToSave, browseForDirectory
     */
     FileChooser (const String& dialogBoxTitle,
-                 const File& initialFileOrDirectory = File::nonexistent,
-                 const String& filePatternsAllowed = String::empty,
+                 const File& initialFileOrDirectory = File(),
+                 const String& filePatternsAllowed = String(),
                  bool useOSNativeDialogBox = true,
                  bool treatFilePackagesAsDirectories = false);
 

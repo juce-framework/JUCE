@@ -80,7 +80,7 @@ int MidiMessageSequence::getIndexOfMatchingKeyUp (const int index) const noexcep
     return -1;
 }
 
-int MidiMessageSequence::getIndexOf (MidiEventHolder* const event) const noexcept
+int MidiMessageSequence::getIndexOf (const MidiEventHolder* const event) const noexcept
 {
     return list.indexOf (event);
 }

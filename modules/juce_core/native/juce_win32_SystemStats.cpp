@@ -41,10 +41,28 @@ void Logger::outputDebugString (const String& text)
 #pragma intrinsic (__cpuid)
 #pragma intrinsic (__rdtsc)
 
+#if JUCE_MINGW
+static void callCPUID (int result[4], uint32 type)
+{
+  uint32 la = result[0], lb = result[1], lc = result[2], ld = result[3];
+
+  asm ("mov %%ebx, %%esi \n\t"
+       "cpuid \n\t"
+       "xchg %%esi, %%ebx"
+       : "=a" (la), "=S" (lb), "=c" (lc), "=d" (ld) : "a" (type)
+        #if JUCE_64BIT
+     , "b" (lb), "c" (lc), "d" (ld)
+        #endif
+       );
+
+  result[0] = la; result[1] = lb; result[2] = lc; result[3] = ld;
+}
+#else
 static void callCPUID (int result[4], int infoType)
 {
     __cpuid (result, infoType);
 }
+#endif
 
 String SystemStats::getCpuVendor()
 {

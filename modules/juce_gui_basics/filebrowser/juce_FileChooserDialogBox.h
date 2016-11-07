@@ -37,10 +37,10 @@
 
     @code
     {
-        WildcardFileFilter wildcardFilter ("*.foo", String::empty, "Foo files");
+        WildcardFileFilter wildcardFilter ("*.foo", String(), "Foo files");
 
         FileBrowserComponent browser (FileBrowserComponent::canSelectFiles,
-                                      File::nonexistent,
+                                      File(),
                                       &wildcardFilter,
                                       nullptr);
 

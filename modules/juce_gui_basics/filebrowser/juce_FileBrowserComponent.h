@@ -74,7 +74,7 @@ public:
                                         specify the component's behaviour. The flags must contain either openMode
                                         or saveMode, and canSelectFiles and/or canSelectDirectories.
         @param initialFileOrDirectory   The file or directory that should be selected when the component begins.
-                                        If this is File::nonexistent, a default directory will be chosen.
+                                        If this is File(), a default directory will be chosen.
         @param fileFilter               an optional filter to use to determine which files are shown.
                                         If this is nullptr then all files are displayed. Note that a pointer
                                         is kept internally to this object, so make sure that it is not deleted

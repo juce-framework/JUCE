@@ -23,7 +23,7 @@
 */
 
 MultiDocumentPanelWindow::MultiDocumentPanelWindow (Colour backgroundColour)
-    : DocumentWindow (String::empty, backgroundColour,
+    : DocumentWindow (String(), backgroundColour,
                       DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
 {
 }

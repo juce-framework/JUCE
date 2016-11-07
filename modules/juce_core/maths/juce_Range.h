@@ -172,6 +172,15 @@ public:
         return Range (start, start + newLength);
     }
 
+    /** Returns a range which has its start moved down and its end moved up by the
+        given amount.
+        @returns The returned range will be (start - amount, end + amount)
+    */
+    Range expanded (ValueType amount) const noexcept
+    {
+        return Range (start - amount, end + amount);
+    }
+
     //==============================================================================
     /** Adds an amount to the start and end of the range. */
     inline Range operator+= (const ValueType amountToAdd) noexcept

@@ -82,6 +82,8 @@ public:
         return os == TargetOS::getThisOS();
     }
 
+    bool isValidPath (const File& relativeTo) const;
+
     bool isValidPath() const;
 
 private:
@@ -90,7 +92,7 @@ private:
         if ((value.refersToSameSourceAs (globalSettingsValue) && isUsingGlobalSettings()))
         {
             sendChangeMessage (true);
-            setValue (String::empty); // make sure that the project-specific value is still blank
+            setValue (String()); // make sure that the project-specific value is still blank
         }
     }
 
@@ -143,7 +145,8 @@ class DependencyPathPropertyComponent : public TextPropertyComponent,
                                         private Label::Listener
 {
 public:
-    DependencyPathPropertyComponent (const Value& value,
+    DependencyPathPropertyComponent (const File& pathRelativeToUse,
+                                     const Value& value,
                                      const String& propertyName);
 
 
@@ -157,6 +160,10 @@ private:
 
     /** This function handles path changes because the global path changed. */
     void valueChanged (Value& value) override;
+
+    /** If the dependency path is relative, relative to which directory should
+        we check if an object is available. */
+    File pathRelativeTo;
 
     /** the value that represents this dependency path setting. */
     Value pathValue;

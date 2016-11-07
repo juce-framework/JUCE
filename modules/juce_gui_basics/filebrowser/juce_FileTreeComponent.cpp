@@ -172,7 +172,7 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        if (file != File::nonexistent)
+        if (file != File())
         {
             updateIcon (true);
 
@@ -285,7 +285,7 @@ File FileTreeComponent::getSelectedFile (const int index) const
     if (const FileListTreeItem* const item = dynamic_cast<const FileListTreeItem*> (getSelectedItem (index)))
         return item->file;
 
-    return File::nonexistent;
+    return File();
 }
 
 void FileTreeComponent::deselectAllFiles()

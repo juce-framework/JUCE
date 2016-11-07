@@ -188,7 +188,7 @@ private:
         if (isCodeBlocks() && isWindows())
         {
             defines.set ("__MINGW__", "1");
-            defines.set ("__MINGW_EXTENSION", String::empty);
+            defines.set ("__MINGW_EXTENSION", String());
         }
         else
         {
@@ -433,7 +433,6 @@ private:
         DependencyPathOS pathOS = isLinux() ? TargetOS::linux
                                             : TargetOS::windows;
 
-        vst2Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vstFolder), Ids::vst2Path, pathOS)));
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
 
         if (! isLinux())

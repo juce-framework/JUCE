@@ -36,7 +36,7 @@ class TextWithDefaultPropertyComponent  : public PropertyComponent,
     {
     public:
         LabelComp (TextWithDefaultPropertyComponent& tpc, const int charLimit)
-            : Label (String::empty, String::empty),
+            : Label (String(), String()),
               owner (tpc),
               maxChars (charLimit)
         {
@@ -158,7 +158,7 @@ private:
     void editorShown (Label*, TextEditor& editor) override
     {
         if (cachedValue.isUsingDefault())
-            editor.setText (String::empty, dontSendNotification);
+            editor.setText (String(), dontSendNotification);
     }
 
     void editorHidden (Label*, TextEditor&) override {}

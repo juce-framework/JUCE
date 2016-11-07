@@ -1257,9 +1257,9 @@ namespace EdgeTableFillers
             uint32 c = 256 * 128;
             c += src[0] * ((256 - subPixelX) * (256 - subPixelY));
             src += this->srcData.pixelStride;
-            c += src[1] * (subPixelX * (256 - subPixelY));
+            c += src[0] * (subPixelX * (256 - subPixelY));
             src += this->srcData.lineStride;
-            c += src[1] * (subPixelX * subPixelY);
+            c += src[0] * (subPixelX * subPixelY);
             src -= this->srcData.pixelStride;
 
             c += src[0] * ((256 - subPixelX) * subPixelY);

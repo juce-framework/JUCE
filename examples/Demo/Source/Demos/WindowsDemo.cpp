@@ -212,6 +212,15 @@ public:
 
     ~WindowsDemo()
     {
+        if (dialogWindow != nullptr)
+        {
+            dialogWindow->exitModalState (0);
+
+            // we are shutting down: can't wait for the message manager
+            // to eventually delete this
+            delete dialogWindow;
+        }
+
         closeAllWindows();
 
         closeWindowsButton.removeListener (this);
@@ -239,6 +248,7 @@ private:
     // null when the component that it points to is deleted.
     Array< Component::SafePointer<Component> > windows;
     TextButton showWindowsButton, closeWindowsButton;
+    SafePointer<DialogWindow> dialogWindow;
 
     void showAllWindows()
     {
@@ -282,8 +292,10 @@ private:
         options.useNativeTitleBar             = false;
         options.resizable                     = true;
 
-        DialogWindow* dw = options.launchAsync();
-        dw->centreWithSize (300, 200);
+        dialogWindow = options.launchAsync();
+
+        if (dialogWindow != nullptr)
+            dialogWindow->centreWithSize (300, 200);
     }
 
     void showDocumentWindow (bool native)

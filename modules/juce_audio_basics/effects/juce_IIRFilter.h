@@ -55,13 +55,52 @@ public:
     /** Destructor. */
     ~IIRCoefficients() noexcept;
 
+    //==============================================================================
     /** Returns the coefficients for a low-pass filter. */
     static IIRCoefficients makeLowPass (double sampleRate,
                                         double frequency) noexcept;
 
+    /** Returns the coefficients for a low-pass filter with variable Q. */
+    static IIRCoefficients makeLowPass (double sampleRate,
+                                        double frequency,
+                                        double Q) noexcept;
+
+    //==============================================================================
     /** Returns the coefficients for a high-pass filter. */
     static IIRCoefficients makeHighPass (double sampleRate,
                                          double frequency) noexcept;
+
+    /** Returns the coefficients for a high-pass filter with variable Q. */
+    static IIRCoefficients makeHighPass (double sampleRate,
+                                         double frequency,
+                                         double Q) noexcept;
+
+    //==============================================================================
+    /** Returns the coefficients for a band-pass filter. */
+    static IIRCoefficients makeBandPass (double sampleRate, double frequency) noexcept;
+
+    /** Returns the coefficients for a band-pass filter with variable Q. */
+    static IIRCoefficients makeBandPass (double sampleRate,
+                                         double frequency,
+                                         double Q) noexcept;
+
+    //==============================================================================
+    /** Returns the coefficients for a notch filter. */
+    static IIRCoefficients makeNotchFilter (double sampleRate, double frequency) noexcept;
+
+    /** Returns the coefficients for a notch filter with variable Q. */
+    static IIRCoefficients makeNotchFilter (double sampleRate,
+                                            double frequency,
+                                            double Q) noexcept;
+
+    //==============================================================================
+    /** Returns the coefficients for an all-pass filter. */
+    static IIRCoefficients makeAllPass (double sampleRate, double frequency) noexcept;
+
+    /** Returns the coefficients for an all-pass filter with variable Q. */
+    static IIRCoefficients makeAllPass (double sampleRate,
+                                        double frequency,
+                                        double Q) noexcept;
 
     //==============================================================================
     /** Returns the coefficients for a low-pass shelf filter with variable Q and gain.

@@ -329,6 +329,25 @@ public:
     ValueTree getSibling (int delta) const noexcept;
 
     //==============================================================================
+    struct Iterator
+    {
+        Iterator (const ValueTree&, bool isEnd) noexcept;
+        Iterator& operator++() noexcept;
+
+        bool operator!= (const Iterator&) const noexcept;
+        ValueTree operator*() const;
+
+    private:
+        void* internal;
+    };
+
+    /** Returns a start iterator for the children in this tree. */
+    Iterator begin() const noexcept;
+
+    /** Returns an end iterator for the children in this tree. */
+    Iterator end() const noexcept;
+
+    //==============================================================================
     /** Creates an XmlElement that holds a complete image of this node and all its children.
 
         If this node is invalid, this may return nullptr. Otherwise, the XML that is produced can
@@ -504,10 +523,13 @@ public:
         }
     }
 
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
     /** An invalid ValueTree that can be used if you need to return one as an error condition, etc.
-        This invalid object is equivalent to ValueTree created with its default constructor.
+        This invalid object is equivalent to ValueTree created with its default constructor, but
+        you should always prefer to avoid it and use ValueTree() or {} instead.
     */
     static const ValueTree invalid;
+   #endif
 
     /** Returns the total number of references to the shared underlying data structure that this
         ValueTree is using.

@@ -46,7 +46,7 @@ public:
     bool needsSaving() const override                        { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
     bool hasFileBeenModifiedExternally() override            { return modDetector.hasBeenModified(); }
     void fileHasBeenRenamed (const File& newFile) override   { modDetector.fileHasBeenRenamed (newFile); }
-    String getState() const override                         { return lastState != nullptr ? lastState->toString() : String::empty; }
+    String getState() const override                         { return lastState != nullptr ? lastState->toString() : String(); }
     void restoreState (const String& state) override         { lastState = new CodeEditorComponent::State (state); }
 
     File getCounterpartFile() const override

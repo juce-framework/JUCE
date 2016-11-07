@@ -95,6 +95,8 @@ namespace FlacNamespace
 
  #if JUCE_MSVC
   #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 4005 4334 181 111)
+ #else
+  #define HAVE_LROUND 1
  #endif
 
  #if JUCE_MAC
@@ -122,10 +124,11 @@ namespace FlacNamespace
   #define FLAC__HAS_X86INTRIN 1
  #endif
 
-#undef __STDC_LIMIT_MACROS
+ #undef __STDC_LIMIT_MACROS
  #define __STDC_LIMIT_MACROS 1
  #define flac_max jmax
  #define flac_min jmin
+ #undef DEBUG // (some flac code dumps debug trace if the app defines this macro)
  #include "flac/all.h"
  #include "flac/libFLAC/bitmath.c"
  #include "flac/libFLAC/bitreader.c"
@@ -384,7 +387,8 @@ class FlacWriter  : public AudioFormatWriter
 {
 public:
     FlacWriter (OutputStream* const out, double rate, uint32 numChans, uint32 bits, int qualityOptionIndex)
-        : AudioFormatWriter (out, flacFormatName, rate, numChans, bits)
+        : AudioFormatWriter (out, flacFormatName, rate, numChans, bits),
+          streamStartPos (output != nullptr ? jmax (output->getPosition(), 0ll) : 0ll)
     {
         using namespace FlacNamespace;
         encoder = FLAC__stream_encoder_new();
@@ -492,7 +496,7 @@ public:
         packUint32 ((FLAC__uint32) info.total_samples, buffer + 14, 4);
         memcpy (buffer + 18, info.md5sum, 16);
 
-        const bool seekOk = output->setPosition (4);
+        const bool seekOk = output->setPosition (streamStartPos + 4);
         ignoreUnused (seekOk);
 
         // if this fails, you've given it an output stream that can't seek! It needs
@@ -542,6 +546,7 @@ public:
 
 private:
     FlacNamespace::FLAC__StreamEncoder* encoder;
+    int64 streamStartPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacWriter)
 };

@@ -35,8 +35,8 @@ class MovieComponentWithFileBrowser  : public Component,
 public:
     MovieComponentWithFileBrowser()
         : isDragOver (false),
-          fileChooser ("movie", File::nonexistent, true, false, false,
-                       "*", String::empty, "(choose a video file to play)")
+          fileChooser ("movie", File(), true, false, false,
+                       "*", String(), "(choose a video file to play)")
     {
         addAndMakeVisible (videoComp);
 

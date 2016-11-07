@@ -133,8 +133,10 @@ Possible values:
     OSXFrameworks:  (Optional) A list (space or comma-separated) of OSX frameworks that are needed
                     by this module
     iOSFrameworks:  (Optional) Like OSXFrameworks, but for iOS targets
-    linuxLibs:      (Optional) A list (space or comma-separated) of static libs that should be linked in a
+    linuxLibs:      (Optional) A list (space or comma-separated) of static or dynamic libs that should be linked in a
                     linux build (these are passed to the linker via the -l flag)
+    linuxPackages:  (Optional) A list (space or comma-separated) pkg-config packages that should be used to pass
+                    compiler (CFLAGS) and linker (LDFLAGS) flags
     mingwLibs:      (Optional) A list (space or comma-separated) of static libs that should be linked in a
                     win32 mingw build (these are passed to the linker via the -l flag)
 

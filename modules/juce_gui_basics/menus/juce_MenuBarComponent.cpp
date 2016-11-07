@@ -143,6 +143,11 @@ void MenuBarComponent::setOpenItem (int index)
 {
     if (currentPopupIndex != index)
     {
+        if (currentPopupIndex < 0 && index >= 0)
+            model->handleMenuBarActivate (true);
+        else if (currentPopupIndex >= 0 && index < 0)
+            model->handleMenuBarActivate (false);
+
         repaintMenuItem (currentPopupIndex);
         currentPopupIndex = index;
         repaintMenuItem (currentPopupIndex);

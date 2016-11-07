@@ -1,0 +1,15 @@
+Please include:
+
+  1) detailed steps on how to reproduce the bug, preferably with already
+     existing JUCE code such as the demo plugin or the demo code
+  2) the expected behaviour
+  3) the operating system
+  4) the architecture (32-bit or 64-bit)
+  5) a stack trace - if the bug causes a crash
+  6) the plugin format (VST2, VST3, AU, AAX, RTAS) - if applicable
+  7) which DAW you observed the bug in - if applicable
+
+Make sure you have pulled the latest commits from the JUCE repo and re-compiled
+the Projucer before you submit your bug. If it's a major bug, which must be
+hot-fixed immediately, then we will also accept bug reports for tagged release
+versions.

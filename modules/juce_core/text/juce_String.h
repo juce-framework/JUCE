@@ -147,13 +147,15 @@ public:
     ~String() noexcept;
 
     //==============================================================================
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
     /** This is a static empty string object that can be used if you need a reference to one.
         The value of String::empty is exactly the same as String(), and in almost all cases
-        it's better to avoid String::empty and just use String() instead, so that the compiler
+        it's better to avoid String::empty and just use String() or {} instead, so that the compiler
         only has to reason about locally-constructed objects, rather than taking into account
         the fact that you're referencing a global shared static memory address.
     */
     static const String empty;
+   #endif
 
     /** This is the character encoding type used internally to store the string.
 

@@ -1,0 +1,299 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E2F016B31DB93C320054ECA4 /* juce_audio_basics.mm in Sources */ = {isa = PBXBuildFile; fileRef = E2F016B21DB93C320054ECA4 /* juce_audio_basics.mm */; };
+		E2F016B51DB93C3D0054ECA4 /* juce_audio_devices.mm in Sources */ = {isa = PBXBuildFile; fileRef = E2F016B41DB93C3D0054ECA4 /* juce_audio_devices.mm */; };
+		E2F016B71DB93C480054ECA4 /* juce_blocks_basics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2F016B61DB93C480054ECA4 /* juce_blocks_basics.cpp */; };
+		E2F016B91DB93C540054ECA4 /* juce_core.mm in Sources */ = {isa = PBXBuildFile; fileRef = E2F016B81DB93C540054ECA4 /* juce_core.mm */; };
+		E2F016BB1DB93C5C0054ECA4 /* juce_events.mm in Sources */ = {isa = PBXBuildFile; fileRef = E2F016BA1DB93C5C0054ECA4 /* juce_events.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E2BD1B8A1DB62B4000C4F301 /* libBLOCKS-SDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libBLOCKS-SDK.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2F016B21DB93C320054ECA4 /* juce_audio_basics.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_audio_basics.mm; path = ../../juce_audio_basics/juce_audio_basics.mm; sourceTree = "<group>"; };
+		E2F016B41DB93C3D0054ECA4 /* juce_audio_devices.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_audio_devices.mm; path = ../../juce_audio_devices/juce_audio_devices.mm; sourceTree = "<group>"; };
+		E2F016B61DB93C480054ECA4 /* juce_blocks_basics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_blocks_basics.cpp; path = ../../juce_blocks_basics/juce_blocks_basics.cpp; sourceTree = "<group>"; };
+		E2F016B81DB93C540054ECA4 /* juce_core.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_core.mm; path = ../../juce_core/juce_core.mm; sourceTree = "<group>"; };
+		E2F016BA1DB93C5C0054ECA4 /* juce_events.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_events.mm; path = ../../juce_events/juce_events.mm; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E2BD1B871DB62B4000C4F301 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E2BD1B811DB62B4000C4F301 = {
+			isa = PBXGroup;
+			children = (
+				E2F016B21DB93C320054ECA4 /* juce_audio_basics.mm */,
+				E2F016B41DB93C3D0054ECA4 /* juce_audio_devices.mm */,
+				E2F016B61DB93C480054ECA4 /* juce_blocks_basics.cpp */,
+				E2F016B81DB93C540054ECA4 /* juce_core.mm */,
+				E2F016BA1DB93C5C0054ECA4 /* juce_events.mm */,
+				E2BD1B8B1DB62B4000C4F301 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E2BD1B8B1DB62B4000C4F301 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E2BD1B8A1DB62B4000C4F301 /* libBLOCKS-SDK.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		E2BD1B881DB62B4000C4F301 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		E2BD1B891DB62B4000C4F301 /* BLOCKS-SDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E2BD1B8E1DB62B4000C4F301 /* Build configuration list for PBXNativeTarget "BLOCKS-SDK" */;
+			buildPhases = (
+				E2BD1B861DB62B4000C4F301 /* Sources */,
+				E2BD1B871DB62B4000C4F301 /* Frameworks */,
+				E2BD1B881DB62B4000C4F301 /* Headers */,
+				E2ECDF741DB62D7E006D016F /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "BLOCKS-SDK";
+			productName = "BLOCKS-SDK";
+			productReference = E2BD1B8A1DB62B4000C4F301 /* libBLOCKS-SDK.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E2BD1B821DB62B4000C4F301 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = "ROLI Ltd.";
+				TargetAttributes = {
+					E2BD1B891DB62B4000C4F301 = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = E2BD1B851DB62B4000C4F301 /* Build configuration list for PBXProject "BLOCKS-SDK" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = E2BD1B811DB62B4000C4F301;
+			productRefGroup = E2BD1B8B1DB62B4000C4F301 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E2BD1B891DB62B4000C4F301 /* BLOCKS-SDK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		E2ECDF741DB62D7E006D016F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p ${PROJECT_DIR}/${CONFIGURATION}\ncp ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_NAME} ${PROJECT_DIR}/${CONFIGURATION}";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E2BD1B861DB62B4000C4F301 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E2F016B31DB93C320054ECA4 /* juce_audio_basics.mm in Sources */,
+				E2F016B51DB93C3D0054ECA4 /* juce_audio_devices.mm in Sources */,
+				E2F016B71DB93C480054ECA4 /* juce_blocks_basics.cpp in Sources */,
+				E2F016B91DB93C540054ECA4 /* juce_core.mm in Sources */,
+				E2F016BB1DB93C5C0054ECA4 /* juce_events.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E2BD1B8C1DB62B4000C4F301 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		E2BD1B8D1DB62B4000C4F301 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		E2BD1B8F1DB62B4000C4F301 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_STANDALONE_APPLICATION=1",
+					"DEBUG=1",
+				);
+				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				HEADER_SEARCH_PATHS = ../..;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		E2BD1B901DB62B4000C4F301 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_STANDALONE_APPLICATION=1",
+					"NDEBUG=1",
+				);
+				GCC_WARN_UNDECLARED_SELECTOR = NO;
+				HEADER_SEARCH_PATHS = ../..;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E2BD1B851DB62B4000C4F301 /* Build configuration list for PBXProject "BLOCKS-SDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E2BD1B8C1DB62B4000C4F301 /* Debug */,
+				E2BD1B8D1DB62B4000C4F301 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E2BD1B8E1DB62B4000C4F301 /* Build configuration list for PBXNativeTarget "BLOCKS-SDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E2BD1B8F1DB62B4000C4F301 /* Debug */,
+				E2BD1B901DB62B4000C4F301 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E2BD1B821DB62B4000C4F301 /* Project object */;
+}

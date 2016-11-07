@@ -62,33 +62,131 @@ IIRCoefficients::IIRCoefficients (double c1, double c2, double c3,
 IIRCoefficients IIRCoefficients::makeLowPass (const double sampleRate,
                                               const double frequency) noexcept
 {
-    jassert (sampleRate > 0);
+    return makeLowPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+}
+
+IIRCoefficients IIRCoefficients::makeLowPass (const double sampleRate,
+                                              const double frequency,
+                                              const double Q) noexcept
+{
+    jassert (sampleRate > 0.0);
+    jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
 
     const double n = 1.0 / std::tan (double_Pi * frequency / sampleRate);
     const double nSquared = n * n;
-    const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
+    const double c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1,
                             c1 * 2.0,
                             c1,
                             1.0,
                             c1 * 2.0 * (1.0 - nSquared),
-                            c1 * (1.0 - std::sqrt (2.0) * n + nSquared));
+                            c1 * (1.0 - 1.0 / Q * n + nSquared));
 }
 
 IIRCoefficients IIRCoefficients::makeHighPass (const double sampleRate,
                                                const double frequency) noexcept
 {
+    return makeHighPass (sampleRate, frequency, 1.0 / std::sqrt(2.0));
+}
+
+IIRCoefficients IIRCoefficients::makeHighPass (const double sampleRate,
+                                               const double frequency,
+                                               const double Q) noexcept
+{
+    jassert (sampleRate > 0.0);
+    jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
+
     const double n = std::tan (double_Pi * frequency / sampleRate);
     const double nSquared = n * n;
-    const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
+    const double c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1,
                             c1 * -2.0,
                             c1,
                             1.0,
                             c1 * 2.0 * (nSquared - 1.0),
-                            c1 * (1.0 - std::sqrt (2.0) * n + nSquared));
+                            c1 * (1.0 - 1.0 / Q * n + nSquared));
+}
+
+IIRCoefficients IIRCoefficients::makeBandPass (const double sampleRate,
+                                               const double frequency) noexcept
+{
+    return makeBandPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+}
+
+IIRCoefficients IIRCoefficients::makeBandPass (const double sampleRate,
+                                               const double frequency,
+                                               const double Q) noexcept
+{
+    jassert (sampleRate > 0.0);
+    jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
+
+    const double n = 1.0 / std::tan (double_Pi * frequency / sampleRate);
+    const double nSquared = n * n;
+    const double c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+
+    return IIRCoefficients (c1 * n / Q,
+                            0.0,
+                            -c1 * n / Q,
+                            1.0,
+                            c1 * 2.0 * (1.0 - nSquared),
+                            c1 * (1.0 - 1.0 / Q * n + nSquared));
+}
+
+IIRCoefficients IIRCoefficients::makeNotchFilter (const double sampleRate,
+                                                  const double frequency) noexcept
+{
+    return makeNotchFilter (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+}
+
+IIRCoefficients IIRCoefficients::makeNotchFilter (const double sampleRate,
+                                                  const double frequency,
+                                                  const double Q) noexcept
+{
+    jassert (sampleRate > 0.0);
+    jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
+
+    const double n = 1.0 / std::tan (double_Pi * frequency / sampleRate);
+    const double nSquared = n * n;
+    const double c1 = 1.0 / (1.0 + n / Q + nSquared);
+
+    return IIRCoefficients (c1 * (1.0 + nSquared),
+                            2.0 * c1 * (1.0 - nSquared),
+                            c1 * (1.0 + nSquared),
+                            1.0,
+                            c1 * 2.0 * (1.0 - nSquared),
+                            c1 * (1.0 - n / Q + nSquared));
+}
+
+IIRCoefficients IIRCoefficients::makeAllPass (const double sampleRate,
+                                              const double frequency) noexcept
+{
+    return makeAllPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+}
+
+IIRCoefficients IIRCoefficients::makeAllPass (const double sampleRate,
+                                              const double frequency,
+                                              const double Q) noexcept
+{
+    jassert (sampleRate > 0.0);
+    jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
+
+    const double n = 1.0 / std::tan (double_Pi * frequency / sampleRate);
+    const double nSquared = n * n;
+    const double c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+
+    return IIRCoefficients (c1 * (1.0 - n / Q + nSquared),
+                            c1 * 2.0 * (1.0 - nSquared),
+                            1.0,
+                            1.0,
+                            c1 * 2.0 * (1.0 - nSquared),
+                            c1 * (1.0 - n / Q + nSquared));
 }
 
 IIRCoefficients IIRCoefficients::makeLowShelf (const double sampleRate,
@@ -96,8 +194,9 @@ IIRCoefficients IIRCoefficients::makeLowShelf (const double sampleRate,
                                                const double Q,
                                                const float gainFactor) noexcept
 {
-    jassert (sampleRate > 0);
-    jassert (Q > 0);
+    jassert (sampleRate > 0.0);
+    jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
 
     const double A = jmax (0.0f, std::sqrt (gainFactor));
     const double aminus1 = A - 1.0;
@@ -120,8 +219,9 @@ IIRCoefficients IIRCoefficients::makeHighShelf (const double sampleRate,
                                                 const double Q,
                                                 const float gainFactor) noexcept
 {
-    jassert (sampleRate > 0);
-    jassert (Q > 0);
+    jassert (sampleRate > 0.0);
+    jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
 
     const double A = jmax (0.0f, std::sqrt (gainFactor));
     const double aminus1 = A - 1.0;
@@ -140,15 +240,16 @@ IIRCoefficients IIRCoefficients::makeHighShelf (const double sampleRate,
 }
 
 IIRCoefficients IIRCoefficients::makePeakFilter (const double sampleRate,
-                                                 const double centreFrequency,
+                                                 const double frequency,
                                                  const double Q,
                                                  const float gainFactor) noexcept
 {
-    jassert (sampleRate > 0);
-    jassert (Q > 0);
+    jassert (sampleRate > 0.0);
+    jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
+    jassert (Q > 0.0);
 
     const double A = jmax (0.0f, std::sqrt (gainFactor));
-    const double omega = (double_Pi * 2.0 * jmax (centreFrequency, 2.0)) / sampleRate;
+    const double omega = (double_Pi * 2.0 * jmax (frequency, 2.0)) / sampleRate;
     const double alpha = 0.5 * std::sin (omega) / Q;
     const double c2 = -2.0 * std::cos (omega);
     const double alphaTimesA = alpha * A;
@@ -164,12 +265,12 @@ IIRCoefficients IIRCoefficients::makePeakFilter (const double sampleRate,
 
 //==============================================================================
 IIRFilter::IIRFilter() noexcept
-    : v1 (0), v2 (0), active (false)
+    : v1 (0.0), v2 (0.0), active (false)
 {
 }
 
 IIRFilter::IIRFilter (const IIRFilter& other) noexcept
-    : v1 (0), v2 (0), active (other.active)
+    : v1 (0.0), v2 (0.0), active (other.active)
 {
     const SpinLock::ScopedLockType sl (other.processLock);
     coefficients = other.coefficients;
@@ -198,7 +299,7 @@ void IIRFilter::setCoefficients (const IIRCoefficients& newCoefficients) noexcep
 void IIRFilter::reset() noexcept
 {
     const SpinLock::ScopedLockType sl (processLock);
-    v1 = v2 = 0;
+    v1 = v2 = 0.0;
 }
 
 float IIRFilter::processSingleSampleRaw (const float in) noexcept

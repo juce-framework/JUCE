@@ -43,7 +43,11 @@ CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* con
                                 .getDisplayContaining (area.getCentre()).userArea);
 
         addToDesktop (ComponentPeer::windowIsTemporary);
+
+        startTimer (100);
     }
+
+    creationTime = Time::getCurrentTime();
 }
 
 CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* const parent,float gap, float cornerSize,LookAndFeel *laf)
@@ -172,7 +176,14 @@ void CallOutBox::inputAttemptWhenModal()
         // if you click on the area that originally popped-up the callout, you expect it
         // to get rid of the box, but deleting the box here allows the click to pass through and
         // probably re-trigger it, so we need to dismiss the box asynchronously to consume the click..
-        dismiss();
+
+        // For touchscreens, we make sure not to dismiss the CallOutBox immediately,
+        // as Windows still sends touch events before the CallOutBox had a chance
+        // to really open.
+
+        RelativeTime elapsed = Time::getCurrentTime() - creationTime;
+        if (elapsed.inMilliseconds() > 200)
+            dismiss();
     }
     else
     {
@@ -282,4 +293,10 @@ void CallOutBox::refreshPath()
                        getLocalBounds().toFloat(),
                        targetPoint - getPosition().toFloat(),
                        mCornerSize, arrowSize * 0.7f);
+}
+
+void CallOutBox::timerCallback()
+{
+    toFront (true);
+    stopTimer();
 }

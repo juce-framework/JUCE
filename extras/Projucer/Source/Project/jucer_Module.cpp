@@ -168,22 +168,39 @@ StringArray ModuleList::getIDs() const
     return results;
 }
 
-Result ModuleList::addAllModulesInFolder (const File& path)
+Result ModuleList::tryToAddModuleFromFolder (const File& path)
 {
     ModuleDescription m (path);
-
     if (m.isValid())
     {
         modules.add (new ModuleDescription (m));
+        return Result::ok();
     }
-    else
+
+    return Result::fail (path.getFullPathName() + " is not a valid module");
+}
+
+Result ModuleList::addAllModulesInFolder (const File& path)
+{
+    if (! tryToAddModuleFromFolder (path))
+    {
+        const int subfolders = 2;
+        return addAllModulesInSubfoldersRecursively (path, subfolders);
+    }
+
+    return Result::ok();
+}
+
+Result ModuleList::addAllModulesInSubfoldersRecursively (const File& path, int depth)
+{
+    if (depth > 0)
     {
         for (DirectoryIterator iter (path, false, "*", File::findDirectories); iter.next();)
         {
-            Result r = addAllModulesInFolder (iter.getFile().getLinkedTarget());
+            const File& childPath = iter.getFile().getLinkedTarget();
 
-            if (r.failed())
-                return r;
+            if (! tryToAddModuleFromFolder (childPath))
+                addAllModulesInSubfoldersRecursively (childPath, depth - 1);
         }
     }
 
@@ -338,6 +355,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
     else if (exporter.isLinux())
     {
         parseAndAddLibs (exporter.linuxLibs, moduleInfo.moduleInfo ["linuxLibs"].toString());
+        parseAndAddLibs (exporter.linuxPackages, moduleInfo.moduleInfo ["linuxPackages"].toString());
     }
     else if (exporter.isCodeBlocks() && exporter.isWindows())
     {
@@ -760,7 +778,7 @@ void EnabledModuleList::addModuleFromUserSelectedFile()
 {
     static File lastLocation (findDefaultModulesFolder (project));
 
-    FileChooser fc ("Select a module to add...", lastLocation, String::empty, false);
+    FileChooser fc ("Select a module to add...", lastLocation, String(), false);
 
     if (fc.browseForDirectory())
     {

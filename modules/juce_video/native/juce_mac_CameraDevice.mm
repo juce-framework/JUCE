@@ -30,7 +30,8 @@ extern Image juce_createImageFromCIImage (CIImage*, int w, int h);
 
 struct CameraDevice::Pimpl
 {
-    Pimpl (const String&, const int index, int /*minWidth*/, int /*minHeight*/, int /*maxWidth*/, int /*maxHeight*/)
+    Pimpl (const String&, const int index, int /*minWidth*/, int /*minHeight*/, int /*maxWidth*/, int /*maxHeight*/,
+           bool useHighQuality)
         : input (nil),
           audioDevice (nil),
           audioInput (nil),
@@ -66,8 +67,9 @@ struct CameraDevice::Pimpl
                 if (err == nil)
                 {
                     resetFile();
+                    imageOutput = useHighQuality ? [[QTCaptureDecompressedVideoOutput alloc] init] :
+                                                   [[QTCaptureVideoPreviewOutput alloc] init];
 
-                    imageOutput = [[QTCaptureDecompressedVideoOutput alloc] init];
                     [imageOutput setDelegate: callbackDelegate];
 
                     if (err == nil)
@@ -263,7 +265,7 @@ struct CameraDevice::Pimpl
     QTCaptureDeviceInput* audioInput;
     QTCaptureSession* session;
     QTCaptureMovieFileOutput* fileOutput;
-    QTCaptureDecompressedVideoOutput* imageOutput;
+    QTCaptureOutput* imageOutput;
     NSObject* callbackDelegate;
     String openingError;
     int64 firstPresentationTime, averageTimeOffset;

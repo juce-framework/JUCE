@@ -69,6 +69,14 @@
  //#define JUCE_USE_CURL
 #endif
 
+#ifndef    JUCE_CATCH_UNHANDLED_EXCEPTIONS
+ //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS
+#endif
+
+#ifndef    JUCE_ALLOW_STATIC_NULL_VARIABLES
+ //#define JUCE_ALLOW_STATIC_NULL_VARIABLES
+#endif
+
 //==============================================================================
 // juce_graphics flags:
 

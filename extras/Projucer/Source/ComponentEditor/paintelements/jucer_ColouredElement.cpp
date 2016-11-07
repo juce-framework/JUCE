@@ -377,7 +377,7 @@ public:
     String getResource() const
     {
         if (element == nullptr)
-            return String::empty;
+            return String();
 
         if (isForStroke)
             return element->getStrokeType().fill.imageResourceName;
@@ -893,12 +893,12 @@ void ColouredElement::addColourAttributes (XmlElement* const e) const
 
 bool ColouredElement::loadColourAttributes (const XmlElement& xml)
 {
-    fillType.restoreFromString (xml.getStringAttribute ("fill", String::empty));
+    fillType.restoreFromString (xml.getStringAttribute ("fill", String()));
 
     isStrokePresent = showOutline && xml.getBoolAttribute ("hasStroke", false);
 
-    strokeType.restoreFromString (xml.getStringAttribute ("stroke", String::empty));
-    strokeType.fill.restoreFromString (xml.getStringAttribute ("strokeColour", String::empty));
+    strokeType.restoreFromString (xml.getStringAttribute ("stroke", String()));
+    strokeType.fill.restoreFromString (xml.getStringAttribute ("strokeColour", String()));
 
     return true;
 }

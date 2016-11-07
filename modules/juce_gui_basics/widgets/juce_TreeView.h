@@ -645,7 +645,7 @@ public:
         Once you've got a treeview component, you'll need to give it something to
         display, using the setRootItem() method.
     */
-    TreeView (const String& componentName = String::empty);
+    TreeView (const String& componentName = String());
 
     /** Destructor. */
     ~TreeView();
@@ -844,7 +844,9 @@ public:
         backgroundColourId             = 0x1000500, /**< A background colour to fill the component with. */
         linesColourId                  = 0x1000501, /**< The colour to draw the lines with.*/
         dragAndDropIndicatorColourId   = 0x1000502, /**< The colour to use for the drag-and-drop target position indicator. */
-        selectedItemBackgroundColourId = 0x1000503  /**< The colour to use to fill the background of any selected items. */
+        selectedItemBackgroundColourId = 0x1000503, /**< The colour to use to fill the background of any selected items. */
+        oddItemsColourId               = 0x1000504, /**< The colour to use to fill the backround of the odd numbered items. */
+        evenItemsColourId              = 0x1000505  /**< The colour to use to fill the backround of the even numbered items. */
     };
 
     //==============================================================================

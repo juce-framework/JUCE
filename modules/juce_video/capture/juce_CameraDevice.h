@@ -58,10 +58,15 @@ public:
         The size constraints allow the method to choose between different resolutions if
         the camera supports this. If the resolution cam't be specified (e.g. on the Mac)
         then these will be ignored.
+
+        On Mac, if highQuality is false, then the camera will be opened in preview mode
+        which will allow the OS to drop frames if the computer cannot keep up in processing
+        the frames.
     */
     static CameraDevice* openDevice (int deviceIndex,
                                      int minWidth = 128, int minHeight = 64,
-                                     int maxWidth = 1024, int maxHeight = 768);
+                                     int maxWidth = 1024, int maxHeight = 768,
+                                     bool highQuality = true);
 
     //==============================================================================
     /** Returns the name of this device */
@@ -147,7 +152,7 @@ private:
     friend struct ViewerComponent;
 
     CameraDevice (const String& name, int index,
-                  int minWidth, int minHeight, int maxWidth, int maxHeight);
+                  int minWidth, int minHeight, int maxWidth, int maxHeight, bool highQuality);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice)
 };

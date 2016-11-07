@@ -642,7 +642,7 @@ void LatestVersionChecker::checkForNewVersion()
         startTimer (100);
 }
 
- void LatestVersionChecker::processResult (var reply, const String& downloadPath)
+ bool LatestVersionChecker::processResult (var reply, const String& downloadPath)
  {
      if (statusCode == 303)
      {
@@ -657,7 +657,7 @@ void LatestVersionChecker::checkForNewVersion()
                  String extraHeaders;
 
                  URL newVersionToDownload = getLatestVersionURL (extraHeaders, downloadPath);
-                 askUserAboutNewVersion (version, releaseNotes, newVersionToDownload, extraHeaders);
+                 return askUserAboutNewVersion (version, releaseNotes, newVersionToDownload, extraHeaders);
              }
          }
      }
@@ -677,12 +677,17 @@ void LatestVersionChecker::checkForNewVersion()
                  AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                               TRANS("JUCE Updater"),
                                               message);
+
+                 return false;
              }
          }
      }
+
+     // try again
+     return true;
 }
 
-void LatestVersionChecker::askUserAboutNewVersion (const LatestVersionChecker::JuceVersionTriple& version,
+bool LatestVersionChecker::askUserAboutNewVersion (const LatestVersionChecker::JuceVersionTriple& version,
                                                    const String& releaseNotes,
                                                    URL& newVersionToDownload,
                                                    const String& extraHeaders)
@@ -715,7 +720,11 @@ void LatestVersionChecker::askUserAboutNewVersion (const LatestVersionChecker::J
             if (ModalComponentManager* mm = ModalComponentManager::getInstance())
                 mm->attachCallback (modalDialog, callback);
         }
+
+        return false;
     }
+
+    return true;
 }
 
 void LatestVersionChecker::modalStateFinished (int result,
@@ -723,6 +732,7 @@ void LatestVersionChecker::modalStateFinished (int result,
                                                const String& extraHeaders,
                                                File appParentFolder)
 {
+
     if (result == 1 || result == 2)
     {
         if (result == 1 || ! allowCustomLocation())
@@ -800,11 +810,14 @@ void LatestVersionChecker::timerCallback()
 
     if (hasAttemptedToReadWebsite)
     {
+        bool restartTimer = true;
         if (jsonReply.isObject())
-            processResult (jsonReply, newRelativeDownloadPath);
+            restartTimer = processResult (jsonReply, newRelativeDownloadPath);
 
         hasAttemptedToReadWebsite = false;
-        startTimer (7200000);
+
+        if (restartTimer)
+            startTimer (7200000);
     }
     else
     {

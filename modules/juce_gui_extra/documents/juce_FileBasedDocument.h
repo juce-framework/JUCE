@@ -203,7 +203,7 @@ public:
     //==============================================================================
     /** Returns the file that this document was last successfully saved or loaded from.
 
-        When the document object is created, this will be set to File::nonexistent.
+        When the document object is created, this will be set to File().
 
         It is changed when one of the load or save methods is used, or when setFile()
         is used to explicitly set it.
@@ -249,8 +249,8 @@ protected:
         This method works very well in conjunction with a RecentlyOpenedFilesList
         object to manage your recent-files list.
 
-        As a default value, it's ok to return File::nonexistent, and the document
-        object will use a sensible one instead.
+        As a default value, it's ok to return File(), and the document object will
+        use a sensible one instead.
 
         @see RecentlyOpenedFilesList
     */

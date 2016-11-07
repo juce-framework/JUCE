@@ -59,7 +59,11 @@ profile
 **/CodeBlocks/obj
 **/CodeBlocks/*.depend
 **/CodeBlocks/*.layout
-doxygen/doc
+
 extras/Introjucer/Builds/VisualStudio2015/The Introjucer.VC.db
 examples/Demo/Builds/VisualStudio2015/JuceDemo.VC.db
+
+**/Builds/AndroidStudio
+**/doxygen/doc
+**/doxygen/build
 extras/Projucer/JUCECompileEngine.dylib

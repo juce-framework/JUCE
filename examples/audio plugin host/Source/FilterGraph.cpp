@@ -45,11 +45,14 @@ FilterGraph::FilterGraph (AudioPluginFormatManager& formatManager_)
     addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::midiInputFilter),   0.25f, 0.1f);
     addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioOutputFilter), 0.5f,  0.9f);
 
+    graph.addListener (this);
+
     setChangedFlag (false);
 }
 
 FilterGraph::~FilterGraph()
 {
+    graph.addListener (this);
     graph.clear();
 }
 
@@ -108,6 +111,7 @@ void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String
     }
     else
     {
+        instance->enableAllBuses();
         AudioProcessorGraph::Node* node = graph.addNode (instance);
 
         if (node != nullptr)
@@ -256,7 +260,7 @@ Result FilterGraph::saveDocument (const File& file)
 {
     ScopedPointer<XmlElement> xml (createXml());
 
-    if (! xml->writeToFile (file, String::empty))
+    if (! xml->writeToFile (file, String()))
         return Result::fail ("Couldn't write to the file");
 
     return Result::ok();
@@ -375,7 +379,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
             {
                 jassert (node->getProcessor() != nullptr);
 
-                if (PluginWindow* const w = PluginWindow::getWindowFor (node, type))
+                if (PluginWindow* const w = PluginWindow::getWindowFor (node, type, graph))
                     w->toFront (true);
             }
         }

@@ -101,6 +101,17 @@ struct ProjucerLicenses  : private DeletedAtShutdown
         return isDLLPresent() && dll.projucer_hasLiveCodingLicence();
     }
 
+    bool hasFreeToUseLicense() const
+    {
+        return isDLLPresent() && dll.projucer_hasLicense ("ProjucerFreeToUse");
+    }
+
+    bool retryLoadDll()
+    {
+        dll.tryLoadDll();
+        return dll.isLoaded();
+    }
+
 private:
     CompileEngineDLL dll;
     LoginCallback* userCallback = nullptr;

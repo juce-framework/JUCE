@@ -26,7 +26,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
                                             const File& initialFileOrDirectory,
                                             const FileFilter* fileFilter_,
                                             FilePreviewComponent* previewComp_)
-   : FileFilter (String::empty),
+   : FileFilter (String()),
      fileFilter (fileFilter_),
      flags (flags_),
      previewComp (previewComp_),
@@ -44,7 +44,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     String filename;
 
-    if (initialFileOrDirectory == File::nonexistent)
+    if (initialFileOrDirectory == File())
     {
         currentRoot = File::getCurrentWorkingDirectory();
     }
@@ -391,7 +391,7 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
         setRoot (f);
 
         if ((flags & canSelectDirectories) != 0 && (flags & doNotClearFileNameOnRootChange) == 0)
-            filenameBox.setText (String::empty);
+            filenameBox.setText (String());
     }
     else
     {
@@ -535,8 +535,8 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
         rootNames.add (name);
     }
 
-    rootPaths.add (String::empty);
-    rootNames.add (String::empty);
+    rootPaths.add (String());
+    rootNames.add (String());
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
     rootNames.add (TRANS("Documents"));
@@ -559,8 +559,8 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
     rootNames.add (TRANS("Desktop"));
 
-    rootPaths.add (String::empty);
-    rootNames.add (String::empty);
+    rootPaths.add (String());
+    rootNames.add (String());
 
     Array<File> volumes;
     File vol ("/Volumes");

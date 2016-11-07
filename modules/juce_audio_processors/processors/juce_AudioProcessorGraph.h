@@ -392,6 +392,8 @@ private:
     MidiBuffer* currentMidiInputBuffer;
     MidiBuffer currentMidiOutputBuffer;
 
+    bool isPrepared;
+
     void handleAsyncUpdate() override;
     void clearRenderingSequence();
     void buildRenderingSequence();

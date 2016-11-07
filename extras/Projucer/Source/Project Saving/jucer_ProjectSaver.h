@@ -104,6 +104,8 @@ public:
             return Result::fail (errors[0]);
         }
 
+        project.updateModificationTime();
+
         return Result::ok();
     }
 
@@ -285,7 +287,7 @@ private:
         if (xml != nullptr)
         {
             MemoryOutputStream mo;
-            xml->writeToStream (mo, String::empty);
+            xml->writeToStream (mo, String());
             replaceFileIfDifferent (projectFile, mo);
         }
     }
@@ -322,9 +324,9 @@ private:
 
         if (! foundCodeSection)
         {
-            userContent.add (String::empty);
+            userContent.add (String());
             userContent.add ("// (You can add your own code in this section, and the Projucer will not overwrite it)");
-            userContent.add (String::empty);
+            userContent.add (String());
         }
 
         return userContent.joinIntoString (newLine) + newLine;
@@ -432,8 +434,11 @@ private:
                         out << " #define   " << f->symbol << " 1";
                     else if (value == Project::configFlagDisabled)
                         out << " #define   " << f->symbol << " 0";
-                    else
+                    else if (f->defaultValue.isEmpty())
                         out << " //#define " << f->symbol;
+                    else
+                        out << " #define " << f->symbol << " " << f->defaultValue;
+
 
                     out << newLine
                         << "#endif" << newLine
@@ -619,33 +624,40 @@ private:
         // keep a copy of the basic generated files group, as each exporter may modify it.
         const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
 
-        for (Project::ExporterIterator exporter (project); exporter.next();)
+        try
         {
-            if (exporter->getTargetFolder().createDirectory())
+            for (Project::ExporterIterator exporter (project); exporter.next();)
             {
-                exporter->copyMainGroupFromProject();
-                exporter->settings = exporter->settings.createCopy();
+                if (exporter->getTargetFolder().createDirectory())
+                {
+                    exporter->copyMainGroupFromProject();
+                    exporter->settings = exporter->settings.createCopy();
 
-                exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
+                    exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
 
-                generatedFilesGroup.state = originalGeneratedGroup.createCopy();
-                exporter->addSettingsForProjectType (project.getProjectType());
+                    generatedFilesGroup.state = originalGeneratedGroup.createCopy();
+                    exporter->addSettingsForProjectType (project.getProjectType());
 
-                for (auto& module: modules)
-                    module->addSettingsForModuleToExporter (*exporter, *this);
+                    for (auto& module: modules)
+                        module->addSettingsForModuleToExporter (*exporter, *this);
 
-                if (project.getProjectType().isAudioPlugin())
-                    writePluginCharacteristicsFile();
+                    if (project.getProjectType().isAudioPlugin())
+                        writePluginCharacteristicsFile();
 
-                generatedFilesGroup.sortAlphabetically (true, true);
-                exporter->getAllGroups().add (generatedFilesGroup);
+                    generatedFilesGroup.sortAlphabetically (true, true);
+                    exporter->getAllGroups().add (generatedFilesGroup);
 
-                threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
+                    threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
+                }
+                else
+                {
+                    addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
+                }
             }
-            else
-            {
-                addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
-            }
+        }
+        catch (ProjectExporter::SaveError& saveError)
+        {
+            addError (saveError.message);
         }
 
         while (threadPool.getNumJobs() > 0)

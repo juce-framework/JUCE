@@ -44,7 +44,7 @@ public:
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
         e->setAttribute ("title", g->getText());
 
-        GroupComponent defaultComp (String::empty, String::empty);
+        GroupComponent defaultComp;
 
         if (g->getTextLabelPosition().getFlags() != defaultComp.getTextLabelPosition().getFlags())
             e->setAttribute ("textpos", g->getTextLabelPosition().getFlags());
@@ -82,7 +82,7 @@ public:
 
         String s;
 
-        GroupComponent defaultComp (String::empty, String::empty);
+        GroupComponent defaultComp;
 
         if (g->getTextLabelPosition().getFlags() != defaultComp.getTextLabelPosition().getFlags())
         {
