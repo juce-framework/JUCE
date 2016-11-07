@@ -77,6 +77,7 @@ namespace zlibNamespace
   #endif
  #else
   #include JUCE_ZLIB_INCLUDE_PATH
+  #define z_uInt uInt
  #endif
 }
 
