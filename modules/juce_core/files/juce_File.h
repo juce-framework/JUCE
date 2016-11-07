@@ -434,6 +434,9 @@ public:
 
         If it already exists or is a directory, this method will do nothing.
 
+        If the parent directories of the File do not exist then this method will
+        recursively create the parent directories.
+
         @returns    a result to indicate whether the file was created successfully,
                     or an error message if it failed.
         @see createDirectory

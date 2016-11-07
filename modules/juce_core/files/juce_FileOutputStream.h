@@ -43,8 +43,8 @@ public:
     /** Creates a FileOutputStream.
 
         If the file doesn't exist, it will first be created. If the file can't be
-        created or opened, the failedToOpen() method will return
-        true.
+        created or opened (for example, because the parent directory of the file
+        does not exist), the failedToOpen() method will return true.
 
         If the file already exists when opened, the stream's write-postion will
         be set to the end of the file. To overwrite an existing file,
