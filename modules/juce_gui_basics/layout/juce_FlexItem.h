@@ -134,9 +134,24 @@ public:
     /** Returns a copy of this object with a new width. */
     FlexItem withWidth (float newWidth) const noexcept;
 
+    /** Returns a copy of this object with a new minimum width. */
+    FlexItem withMinWidth (float newMinWidth) const noexcept;
+
+    /** Returns a copy of this object with a new maximum width. */
+    FlexItem withMaxWidth (float newMaxWidth) const noexcept;
+
     /** Returns a copy of this object with a new height. */
     FlexItem withHeight (float newHeight) const noexcept;
 
+    /** Returns a copy of this object with a new minimum height. */
+    FlexItem withMinHeight (float newMinHeight) const noexcept;
+
+    /** Returns a copy of this object with a new maximum height. */
+    FlexItem withMaxHeight (float newMaxHeight) const noexcept;
+
     /** Returns a copy of this object with a new margin. */
     FlexItem withMargin (Margin) const noexcept;
+
+    /** Returns a copy of this object with a new order. */
+    FlexItem withOrder (int newOrder) const noexcept;
 };
