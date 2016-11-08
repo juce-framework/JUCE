@@ -332,7 +332,7 @@ public:
             {
                 newBufferSizes.add ((int) (ranges[0].mMinimum + 15) & ~15);
 
-                for (int i = 32; i < 2048; i += 32)
+                for (int i = 32; i <= 2048; i += 32)
                 {
                     for (int j = size / (int) sizeof (AudioValueRange); --j >= 0;)
                     {
