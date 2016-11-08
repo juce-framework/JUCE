@@ -175,7 +175,6 @@ StringArray getCleanedStringArray (StringArray s)
 {
     s.trim();
     s.removeEmptyStrings();
-    s.removeDuplicates (false);
     return s;
 }
 
