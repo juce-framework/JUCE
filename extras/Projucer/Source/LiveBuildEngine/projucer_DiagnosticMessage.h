@@ -121,14 +121,6 @@ struct DiagnosticMessage
 };
 
 //==============================================================================
-struct DiagnosticReceiver
-{
-    virtual ~DiagnosticReceiver() {}
-    virtual void handleDiagnostic (const DiagnosticMessage&) = 0;
-    virtual void handleRecoverableErrorPCH (const DiagnosticMessage& m, String pchFileName, String sourceFileName) = 0;
-};
-
-//==============================================================================
 struct DiagnosticList
 {
     // after some research, it seems that notes never come on their own
