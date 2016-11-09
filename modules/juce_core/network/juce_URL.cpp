@@ -361,6 +361,8 @@ WebInputStream* URL::createInputStream (const bool usePostCommand,
 
         OpenStreamProgressCallback* const callback;
         void* const data;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressCallbackCaller);
     };
 
     ScopedPointer<ProgressCallbackCaller> callbackCaller =
