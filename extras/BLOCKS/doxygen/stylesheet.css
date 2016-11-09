@@ -29,7 +29,7 @@ h4 {
     font-smoothing: antialiased
 }
 hr {
-    border-top: 2px solid #ebebeb;
+    border-top: 2px solid #fbfbfb;
     margin: 20px 0
 }
 .link-list {
@@ -2075,7 +2075,7 @@ body,
 input {
     font-family: Open Sans, Helvetica, sans-serif;
     color: #323d47;
-    background: #ebebeb
+    background: #fbfbfb
 }
 a {
     color: #4665a2
@@ -2111,7 +2111,7 @@ hr {
     border: 1px solid #f59cad
 }
 a.SelectItem:hover {
-    background: #ebebeb;
+    background: #fbfbfb;
     color: #000
 }
 #MSearchResultsWindow {
@@ -2145,11 +2145,11 @@ a.SelectItem:hover {
     height: 3px;
     border-style: double;
     border-width: 6px 0;
-    border-color: #ebebeb;
+    border-color: #fbfbfb;
     margin-left: 2px
 }
 div.header {
-    background: #ebebeb;
+    background: #fbfbfb;
     border: 0
 }
 h2.groupheader {
