@@ -75,7 +75,7 @@ struct DiagnosticMessage
             case note:    res << "note: "; break;
         };
 
-        res << range.file << ": ";
+        res << mainFile << ": ";
         res << message << "\n";
 
         return res;
