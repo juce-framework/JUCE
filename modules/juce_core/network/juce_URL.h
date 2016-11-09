@@ -29,7 +29,7 @@
 #ifndef JUCE_URL_H_INCLUDED
 #define JUCE_URL_H_INCLUDED
 
-
+class WebInputStream;
 //==============================================================================
 /**
     Represents a URL and has a bunch of useful functions to manipulate it.
@@ -274,6 +274,13 @@ public:
 
     /** Attempts to open a stream that can read from this URL.
 
+        This method is a convenience wrapper for creating a new WebInputStream and setting some
+        commonly used options. The returned WebInputStream will have already been connected and
+        reading can start instantly.
+
+        Note that this method will block until the first byte of data has been received or an
+        error has occurred.
+
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.
 
@@ -305,15 +312,15 @@ public:
         @returns    an input stream that the caller must delete, or a null pointer if there was an
                     error trying to open it.
      */
-    InputStream* createInputStream (bool doPostLikeRequest,
-                                    OpenStreamProgressCallback* progressCallback = nullptr,
-                                    void* progressCallbackContext = nullptr,
-                                    String extraHeaders = String(),
-                                    int connectionTimeOutMs = 0,
-                                    StringPairArray* responseHeaders = nullptr,
-                                    int* statusCode = nullptr,
-                                    int numRedirectsToFollow = 5,
-                                    String httpRequestCmd = String()) const;
+    WebInputStream* createInputStream (bool doPostLikeRequest,
+                                       OpenStreamProgressCallback* progressCallback = nullptr,
+                                       void* progressCallbackContext = nullptr,
+                                       String extraHeaders = String(),
+                                       int connectionTimeOutMs = 0,
+                                       StringPairArray* responseHeaders = nullptr,
+                                       int* statusCode = nullptr,
+                                       int numRedirectsToFollow = 5,
+                                       String httpRequestCmd = String()) const;
 
 
     //==============================================================================
@@ -409,6 +416,8 @@ public:
 
 private:
     //==============================================================================
+    friend class WebInputStream;
+
     String url;
     MemoryBlock postData;
     StringArray parameterNames, parameterValues;
@@ -433,6 +442,5 @@ private:
 
     JUCE_LEAK_DETECTOR (URL)
 };
-
 
 #endif   // JUCE_URL_H_INCLUDED

@@ -238,6 +238,7 @@ namespace juce
 #include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
 #include "network/juce_URL.cpp"
+#include "network/juce_WebInputStream.cpp"
 
 //==============================================================================
 /*

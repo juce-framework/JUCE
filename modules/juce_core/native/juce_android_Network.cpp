@@ -63,19 +63,38 @@ JUCE_API bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& tar
     return false;
 }
 
+/* Pimpl (String address, bool isPost, const MemoryBlock& postData,
+ URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
+ const String& headers, int timeOutMs, StringPairArray* responseHeaders,
+ const int numRedirectsToFollow, const String& httpRequest)
+ : statusCode (0)
 
+*/
 //==============================================================================
-class WebInputStream  : public InputStream
+class WebInputStream::Pimpl
 {
 public:
-    WebInputStream (String address, bool isPost, const MemoryBlock& postData,
-                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers, int timeOutMs, StringPairArray* responseHeaders,
-                    const int numRedirectsToFollow, const String& httpRequest)
-        : statusCode (0)
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool shouldBePost)
+        : statusCode (0), owner (pimplOwner), url (urlToCopy), isPost (shouldBePost),
+          numRedirectsToFollow (5), timeOutMs (0), httpRequest (isPost ? "POST" : "GET")
+    {}
+
+    ~Pimpl()
     {
+        if (stream != 0)
+            stream.callVoidMethod (HTTPStream.release);
+    }
+
+    bool connect (WebInputStream::Listener* listener)
+    {
+        String address = url.toString (! isPost);
+
         if (! address.contains ("://"))
             address = "http://" + address;
+
+        MemoryBlock postData;
+        if (isPost)
+            WebInputStream::createHeadersAndPostData (url, headers, postData);
 
         JNIEnv* env = getEnv();
 
@@ -126,36 +145,47 @@ public:
                 headerLines.addLines (juceString (env, headersString));
             }
 
-            if (responseHeaders != 0)
+            for (int i = 0; i < headerLines.size(); ++i)
             {
-                for (int i = 0; i < headerLines.size(); ++i)
-                {
-                    const String& header = headerLines[i];
-                    const String key (header.upToFirstOccurrenceOf (": ", false, false));
-                    const String value (header.fromFirstOccurrenceOf (": ", false, false));
-                    const String previousValue ((*responseHeaders) [key]);
+                const String& header = headerLines[i];
+                const String key (header.upToFirstOccurrenceOf (": ", false, false));
+                const String value (header.fromFirstOccurrenceOf (": ", false, false));
+                const String previousValue (responseHeaders[key]);
 
-                    responseHeaders->set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
-                }
+                responseHeaders.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
             }
         }
     }
 
-    ~WebInputStream()
+    //==============================================================================
+    // WebInputStream methods
+    void withExtraHeaders (const String& extraHeaders)
     {
-        if (stream != 0)
-            stream.callVoidMethod (HTTPStream.release);
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
+
+        headers << extraHeaders;
+
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
     }
+
+    void withCustomRequestCommand (const String& customRequestCommand)    { httpRequest = customRequestCommand; }
+    void withConnectionTimeout (int timeoutInMs)                          { timeOutMs = timeoutInMs; }
+    void withNumRedirectsToFollow (int maxRedirectsToFollow)              { numRedirectsToFollow = maxRedirectsToFollow; }
+    StringPairArray getRequestHeaders() const                             { return WebInputStream::parseHttpHeaders (headers); }
+    StringPairArray getResponseHeaders() const                            { return responseHeaders; }
+    int getStatusCode() const                                             { return statusCode; }
 
     //==============================================================================
     bool isError() const                         { return stream == nullptr; }
 
-    bool isExhausted() override                  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.isExhausted); }
-    int64 getTotalLength() override              { return stream != nullptr ? stream.callLongMethod (HTTPStream.getTotalLength) : 0; }
-    int64 getPosition() override                 { return stream != nullptr ? stream.callLongMethod (HTTPStream.getPosition) : 0; }
-    bool setPosition (int64 wantedPos) override  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.setPosition, (jlong) wantedPos); }
+    bool isExhausted()                           { return stream != nullptr && stream.callBooleanMethod (HTTPStream.isExhausted); }
+    int64 getTotalLength()                       { return stream != nullptr ? stream.callLongMethod (HTTPStream.getTotalLength) : 0; }
+    int64 getPosition()                          { return stream != nullptr ? stream.callLongMethod (HTTPStream.getPosition) : 0; }
+    bool setPosition (int64 wantedPos)           { return stream != nullptr && stream.callBooleanMethod (HTTPStream.setPosition, (jlong) wantedPos); }
 
-    int read (void* buffer, int bytesToRead) override
+    int read (void* buffer, int bytesToRead)
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 
@@ -176,9 +206,16 @@ public:
     }
 
     //==============================================================================
-    GlobalRef stream;
     int statusCode;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
+    WebInputStream& owner;
+    const URL url;
+    bool isPost;
+    int numRedirectsToFollow, timeOutMs;
+    String httpRequest, headers;
+    StringPairArray responseHeaders;
+
+    GlobalRef stream;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };

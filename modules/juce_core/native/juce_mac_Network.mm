@@ -150,14 +150,14 @@ public:
         [data release];
     }
 
-    bool start (URL::OpenStreamProgressCallback* callback, void* context)
+    bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
     {
         startThread();
 
         while (isThreadRunning() && ! initialised)
         {
-            if (callback != nullptr)
-                if (! callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
+            if (listener != nullptr)
+                if (! listener->postDataSendProgress (inputStream, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
                     return false;
 
             Thread::sleep (1);
@@ -414,14 +414,14 @@ public:
         [data release];
     }
 
-    bool start (URL::OpenStreamProgressCallback* callback, void* context)
+    bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
     {
         startThread();
 
         while (isThreadRunning() && ! initialised)
         {
-            if (callback != nullptr)
-                if (! callback (context, latestTotalBytes, (int) [[request HTTPBody] length]))
+            if (listener != nullptr)
+                if (! listener->postDataSendProgress (inputStream, latestTotalBytes, (int) [[request HTTPBody] length]))
                     return false;
 
             Thread::sleep (1);
@@ -621,49 +621,75 @@ private:
 
 
 //==============================================================================
-class WebInputStream  : public InputStream
+class WebInputStream::Pimpl
 {
 public:
-    WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
-                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
-                    const int numRedirectsToFollow_, const String& httpRequestCmd_)
-      : statusCode (0), address (address_), headers (headers_), postData (postData_), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_),
-        numRedirectsToFollow (numRedirectsToFollow_), httpRequestCmd (httpRequestCmd_)
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool shouldBePost)
+      : statusCode (0), owner (pimplOwner), url (urlToUse), position (0),
+        finished (false), isPost (shouldBePost), timeOutMs (0),
+        numRedirectsToFollow (5), httpRequestCmd (shouldBePost ? "POST" : "GET")
     {
-        JUCE_AUTORELEASEPOOL
-        {
-            createConnection (progressCallback, progressCallbackContext);
-
-            if (connection != nullptr && connection->headers != nil)
-            {
-                statusCode = connection->statusCode;
-
-                if (responseHeaders != nullptr)
-                {
-                    NSEnumerator* enumerator = [connection->headers keyEnumerator];
-
-                    while (NSString* key = [enumerator nextObject])
-                        responseHeaders->set (nsStringToJuce (key),
-                                              nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
-                }
-            }
-        }
     }
 
-    ~WebInputStream()
+    ~Pimpl()
     {
         connection = nullptr;
     }
 
+    bool connect (WebInputStream::Listener* webInputListener)
+    {
+        createConnection ();
+        if (! connection->start (owner, webInputListener))
+        {
+            connection = nullptr;
+            return false;
+        }
+
+
+        if (connection != nullptr && connection->headers != nil)
+        {
+            statusCode = connection->statusCode;
+
+            NSEnumerator* enumerator = [connection->headers keyEnumerator];
+
+            while (NSString* key = [enumerator nextObject])
+                responseHeaders.set (nsStringToJuce (key),
+                                     nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    //==============================================================================
+    // WebInputStream methods
+    void withExtraHeaders (const String& extraHeaders)
+    {
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
+
+        headers << extraHeaders;
+
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
+    }
+
+    void withCustomRequestCommand (const String& customRequestCommand)    { httpRequestCmd = customRequestCommand; }
+    void withConnectionTimeout (int timeoutInMs)                          { timeOutMs = timeoutInMs; }
+    void withNumRedirectsToFollow (int maxRedirectsToFollow)              { numRedirectsToFollow = maxRedirectsToFollow; }
+    StringPairArray getRequestHeaders() const                             { return WebInputStream::parseHttpHeaders (headers); }
+    StringPairArray getResponseHeaders() const                            { return responseHeaders; }
+    int getStatusCode() const                                             { return statusCode; }
+
+
     //==============================================================================
     bool isError() const                { return (connection == nullptr || connection->headers == nullptr); }
-    int64 getTotalLength() override     { return connection == nullptr ? -1 : connection->contentLength; }
-    bool isExhausted() override         { return finished; }
-    int64 getPosition() override        { return position; }
+    int64 getTotalLength()              { return connection == nullptr ? -1 : connection->contentLength; }
+    bool isExhausted()                  { return finished; }
+    int64 getPosition()                 { return position; }
 
-    int read (void* buffer, int bytesToRead) override
+    int read (void* buffer, int bytesToRead)
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 
@@ -682,20 +708,21 @@ public:
         }
     }
 
-    bool setPosition (int64 wantedPos) override
+    bool setPosition (int64 wantedPos)
     {
         if (wantedPos != position)
         {
             finished = false;
 
             if (wantedPos < position)
-            {
-                connection = nullptr;
-                position = 0;
-                createConnection (0, 0);
-            }
+                return false;
 
-            skipNextBytes (wantedPos - position);
+            int64 numBytesToSkip = wantedPos - position;
+            const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+            HeapBlock<char> temp ((size_t) skipBufferSize);
+
+            while (numBytesToSkip > 0 && ! isExhausted())
+                numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
         }
 
         return true;
@@ -704,21 +731,24 @@ public:
     int statusCode;
 
 private:
+    WebInputStream& owner;
+    const URL& url;
     ScopedPointer<URLConnectionState> connection;
-    String address, headers;
+    String headers;
     MemoryBlock postData;
     int64 position;
     bool finished;
     const bool isPost;
-    const int timeOutMs;
-    const int numRedirectsToFollow;
+    int timeOutMs;
+    int numRedirectsToFollow;
     String httpRequestCmd;
+    StringPairArray responseHeaders;
 
-    void createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
+    void createConnection()
     {
         jassert (connection == nullptr);
 
-        if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
+        if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (url.toString (! isPost))]
                                                                cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                                            timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)])
         {
@@ -737,16 +767,18 @@ private:
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
             }
 
-            if (isPost && postData.getSize() > 0)
-                [req setHTTPBody: [NSData dataWithBytes: postData.getData()
-                                                 length: postData.getSize()]];
+            if (isPost)
+            {
+                WebInputStream::createHeadersAndPostData (url, headers, postData);
+
+                if (postData.getSize() > 0)
+                    [req setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                     length: postData.getSize()]];
+            }
 
             connection = new URLConnectionState (req, numRedirectsToFollow);
-
-            if (! connection->start (progressCallback, progressCallbackContext))
-                connection = nullptr;
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
