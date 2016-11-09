@@ -168,6 +168,9 @@ protected:
     virtual bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                        StringArray& files, bool& canMoveFiles);
 
+    virtual bool shouldDropTextWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
+                                                      String& text);
+
     /** Subclasses can override this to be told when a drag starts. */
     virtual void dragOperationStarted();
 

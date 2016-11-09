@@ -190,9 +190,96 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
+struct TextDragDataProvider   : public ObjCClass<NSObject>
 {
-    jassertfalse;    // not implemented!
+    TextDragDataProvider()  : ObjCClass<NSObject> ("JUCE_NSTextDragDataProvider_")
+    {
+        addIvar<NSObject*> ("text");
+        addMethod (@selector (pasteboard:item:provideDataForType:),  pasteboardItemProvideDataForType, "v@:@@@");
+        addProtocol (@protocol (NSPasteboardItemDataProvider));
+        registerClass();
+    }
+    
+    static void setText (id self, NSObject* c)
+    {
+        [c retain];
+        object_setInstanceVariable (self, "text", c);
+    }
+    
+private:
+    static void pasteboardItemProvideDataForType(id self, SEL, NSPasteboard *sender, NSPasteboardItem * item, NSString *type)
+    {
+        //sender has accepted the drag and now we need to send the data for the type we promised
+        if ( [type compare: NSPasteboardTypeString] == NSOrderedSame )
+        {
+            NSString const *text = getIvar<NSString*> (self, "text");
+
+            [sender setData:[text dataUsingEncoding:NSUTF8StringEncoding] forType:NSPasteboardTypeString];
+
+            [getIvar<NSString*> (self, "text") release];
+        }
+    }
+        
+    JUCE_DECLARE_NON_COPYABLE (TextDragDataProvider)
+};
+
+bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+{
+    MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource(0);
+    
+    if (draggingSource == nullptr)
+    {
+        jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
+        return false;
+    }
+    
+    Component* sourceComp = draggingSource->getComponentUnderMouse();
+    
+    if (sourceComp == nullptr)
+    {
+        jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
+        return false;
+    }
+    
+    JUCE_AUTORELEASEPOOL
+    {
+        if (NSView* view = (NSView*) sourceComp->getWindowHandle())
+        {
+            if (NSEvent* event = [[view window] currentEvent])
+            {
+                NSPoint eventPos = [event locationInWindow];
+                NSRect dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
+                                           fromView: nil];
+                
+                // catch mouse down events in order to start drag
+                static TextDragDataProvider ddpCls;
+                id delegate = [ddpCls.createInstance() init];
+                TextDragDataProvider::setText( delegate, juceStringToNS ( text ) );
+                
+                NSPasteboardItem *pbItem = [NSPasteboardItem new];
+                [pbItem setDataProvider:delegate forTypes:[NSArray arrayWithObjects:NSPasteboardTypeString, nil]];
+                
+                //create a new NSDraggingItem with our pasteboard item.
+                NSDraggingItem *dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter:pbItem];
+                [pbItem release];
+                
+                NSRect draggingRect = dragRect;
+                
+                NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: nil];
+                [dragItem setDraggingFrame:draggingRect contents:image];
+                
+                //create a dragging session with our drag item and ourself as the source.
+                NSDraggingSession *draggingSession = [view beginDraggingSessionWithItems:[NSArray arrayWithObject:dragItem] event:event source:delegate];
+                //causes the dragging item to slide back to the source if the drag fails.
+                draggingSession.animatesToStartingPositionsOnCancelOrFail = YES;
+                
+                draggingSession.draggingFormation = NSDraggingFormationNone;
+            
+                return true;
+            }
+        }
+    }
+    
     return false;
 }
 
