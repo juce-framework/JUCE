@@ -362,7 +362,9 @@ WebInputStream* URL::createInputStream (const bool usePostCommand,
         OpenStreamProgressCallback* const callback;
         void* const data;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressCallbackCaller);
+        // workaround a MSVC 2013 compiler warning
+        ProgressCallbackCaller (const ProgressCallbackCaller& o) : callback (o.callback), data (o.data) { jassertfalse; }
+        ProgressCallbackCaller& operator= (const ProgressCallbackCaller&) { jassertfalse; return *this; }
     };
 
     ScopedPointer<ProgressCallbackCaller> callbackCaller =
