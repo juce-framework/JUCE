@@ -341,6 +341,8 @@ public:
          insideControlPanelModalLoop (false),
          shouldUsePreferredSize (false)
     {
+		::CoInitialize (nullptr);
+
         name = devName;
         inBuffers.calloc (4);
         outBuffers.calloc (4);
