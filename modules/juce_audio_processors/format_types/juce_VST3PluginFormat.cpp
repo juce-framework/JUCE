@@ -1139,10 +1139,10 @@ struct DLLHandle
        #else
         if (bundleRef != nullptr)
         {
+            releaseFactory();
+
             if (ExitModuleFn exitFn = (ExitModuleFn) getFunction ("bundleExit"))
                 exitFn();
-
-            releaseFactory();
 
             CFRelease (bundleRef);
             bundleRef = nullptr;
