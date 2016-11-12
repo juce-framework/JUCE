@@ -4,6 +4,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Audio.h"
+#include "WaveshapeProgram.h"
 
 //==============================================================================
 /**
