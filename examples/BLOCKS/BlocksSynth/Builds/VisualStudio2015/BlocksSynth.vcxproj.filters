@@ -1920,6 +1920,9 @@
     <ClInclude Include="..\..\Source\MainComponent.h">
       <Filter>BlocksSynth\Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\WaveshapeProgram.h">
+      <Filter>BlocksSynth\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
     </ClInclude>
