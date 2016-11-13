@@ -14,29 +14,27 @@
 class WaveshapeProgram : public LEDGrid::Program
 {
 public:
-    WaveshapeProgram (LEDGrid& lg, int waveshape) : Program (lg)
+    WaveshapeProgram (LEDGrid& lg) : Program (lg)
     {
-        setWaveshapeType (waveshape);
-        generateWaveshapes();
     }
 
     void generateWaveshapes()
     {
-        int sineWaveY[45];
-        int squareWaveY[45];
-        int sawWaveY[45];
-        int triangleWaveY[45];
-        
+        uint8 sineWaveY[45];
+        uint8 squareWaveY[45];
+        uint8 sawWaveY[45];
+        uint8 triangleWaveY[45];
+
         // Set current phase position to 0 and work out the required phase increment for one cycle
         double currentPhase = 0.0;
         double phaseInc = (1.0 / 30.0) * (2.0 * double_Pi);
-        
+
         for (int x = 0; x < 30; ++x)
         {
             // Scale and offset the sin output to the Lightpad display
             double sineOutput = sin (currentPhase);
             sineWaveY[x] = roundToInt ((sineOutput * 6.5) + 7.0);
-            
+
             // Square wave output, set flags for when vertical line should be drawn
             if (currentPhase < double_Pi)
             {
@@ -49,19 +47,19 @@ public:
             {
                 if (squareWaveY[x - 1] == 1)
                     squareWaveY[x - 1] = 20;
-                
+
                 squareWaveY[x] = 13;
             }
-            
+
             // Saw wave output, set flags for when vertical line should be drawn
             sawWaveY[x] = 14 - ((x / 2) % 15);
-            
+
             if (sawWaveY[x] == 0 && sawWaveY[x - 1] != 20)
                 sawWaveY[x] = 20;
-            
+
             // Triangle wave output
             triangleWaveY[x] = x < 15 ? x : 14 - (x % 15);
-            
+
             // Add half cycle to end of array so it loops correctly
             if (x < 15)
             {
@@ -70,30 +68,39 @@ public:
                 sawWaveY[x + 30] = sawWaveY[x];
                 triangleWaveY[x + 30] = triangleWaveY[x];
             }
-            
+
             // Increment the current phase
             currentPhase += phaseInc;
         }
-        
+
         for (int i = 0; i < 45; ++i)
         {
-            ledGrid.setDataBits ((sineWaveOffset * 8)     + (32 * i), 32, sineWaveY[i]);
-            jassert (ledGrid.getDataByte (sineWaveOffset + (i * 4)) == sineWaveY[i]);
-            
-            ledGrid.setDataBits ((squareWaveOffset * 8)   + (32 * i), 32, squareWaveY[i]);
-            jassert (ledGrid.getDataByte (squareWaveOffset + (i * 4)) == squareWaveY[i]);
-            
-            ledGrid.setDataBits ((sawWaveOffset * 8)      + (32 * i), 32, sawWaveY[i]);
-            jassert (ledGrid.getDataByte (sawWaveOffset + (i * 4)) == sawWaveY[i]);
-            
-            ledGrid.setDataBits ((triangleWaveOffset * 8) + (32 * i), 32, triangleWaveY[i]);
-            jassert (ledGrid.getDataByte (triangleWaveOffset + (i * 4)) == triangleWaveY[i]);
+            ledGrid.setDataByte (sineWaveOffset + i, sineWaveY[i]);
+            int sineByte = ledGrid.getDataByte (sineWaveOffset + i);
+            jassert (sineByte == sineWaveY[i]);
+
+            ledGrid.setDataByte (squareWaveOffset + i, squareWaveY[i]);
+            int squareByte = ledGrid.getDataByte (squareWaveOffset + i);
+            jassert (squareByte == squareWaveY[i]);
+
+            ledGrid.setDataByte (sawWaveOffset + i, sawWaveY[i]);
+            int sawByte = ledGrid.getDataByte (sawWaveOffset + i);
+            jassert (sawByte == sawWaveY[i]);
+
+            ledGrid.setDataByte (triangleWaveOffset + i, triangleWaveY[i]);
+            int triangleByte = ledGrid.getDataByte (triangleWaveOffset + i);
+            jassert (triangleByte == triangleWaveY[i]);
         }
     }
-    
-    void setWaveshapeType (int type)
+
+    void setWaveshapeType (uint8 type)
     {
-        ledGrid.setDataBits (0, 4, type);
+        ledGrid.setDataByte (0, type);
+    }
+
+    uint32 getHeapSize() override
+    {
+        return totalDataSize;
     }
 
     String getLittleFootProgram() override
@@ -101,27 +108,27 @@ public:
         return R"littlefoot(
 
         int yOffset;
-        
+
         int min (int a, int b)
         {
             if (a > b)
                 return b;
-            
+
             return a;
         }
-        
+
         int max (int a, int b)
         {
             if (a > b)
                 return a;
-            
+
             return b;
         }
-        
+
         void drawLEDCircle (int x0, int y0)
         {
-            setLED (x0, y0, 0xffffffff);
-            
+            setLED (x0, y0, 0xffff0000);
+
             int minLedIndex = 0;
             int maxLedIndex = 14;
 
@@ -135,20 +142,19 @@ public:
             setLED (max (x0 - 1, minLedIndex), min (y0 + 1, maxLedIndex), 0xff1a0000);
             setLED (max (x0 - 1, minLedIndex), max (y0 - 1, minLedIndex), 0xff1a0000);
         }
-        
+
         void repaint()
         {
             // Clear LEDs to black
             fillRect (0xff000000, 0, 0, 15, 15);
 
             // Get the waveshape type
-            int type = getHeapInt (0);
-            int offset = 4 + (type * 180) + yOffset;
-            
+            int type = getHeapByte (0);
+            int offset = 1 + (type * 45) + yOffset;
+
             for (int x = 0; x < 15; ++x)
             {
-                // Find the corresponding Y co-ordinate for the current waveshape
-                int y = getHeapInt (offset + (x * 4));
+                int y = getHeapByte (offset + x);
 
                 // Draw a vertical line if flag is set or draw an LED circle
                 if (y == 20)
@@ -162,28 +168,22 @@ public:
                 }
             }
 
-            // Increment the offset to draw a 'moving' waveshape
-            yOffset += 4;
-            if (yOffset == (4 * 30))
-                yOffset -= (4 * 30);
+            if (++yOffset == 30)
+                yOffset = 0;
+
         }
 
         )littlefoot";
     }
 
-    uint32 getHeapSize() override
-    {
-        return totalDataSize;
-    }
-
 private:
-    static constexpr uint32 waveshapeType      = 0;   // 4 bytes
-    static constexpr uint32 sineWaveOffset     = 4;   // 4 byte * 45
-    static constexpr uint32 squareWaveOffset   = 184; // 4 byte * 45
-    static constexpr uint32 sawWaveOffset      = 364; // 4 byte * 45
-    static constexpr uint32 triangleWaveOffset = 544; // 4 byte * 45
+    static constexpr uint32 waveshapeType      = 0;   // 1 byte
+    static constexpr uint32 sineWaveOffset     = 1;   // 1 byte * 45
+    static constexpr uint32 squareWaveOffset   = 46;  // 1 byte * 45
+    static constexpr uint32 sawWaveOffset      = 91;  // 1 byte * 45
+    static constexpr uint32 triangleWaveOffset = 136; // 1 byte * 45
 
-    static constexpr uint32 totalDataSize = triangleWaveOffset + (4 * 45);
+    static constexpr uint32 totalDataSize = triangleWaveOffset + 45;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveshapeProgram)
