@@ -159,16 +159,25 @@ public:
     {
         beginTest ("Call single listener");
         listeners.add (&listener1);
-        std::vector<int> expectedCounterValues = { 1, 2, 3, 4, 5, 6, 7 };
+        std::vector<int> expectedCounterValues;
+        for (int i = 1; i < 8; ++i)
+            expectedCounterValues.push_back (i);
+
         callHelper (expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
         beginTest ("Call multiple listeners");
         listeners.add (&listener2);
-        expectedCounterValues = { -1, -2, -3, -4, -5, -6, -7 };
+        expectedCounterValues.clear();
+        for (int i = 1; i < 8; ++i)
+            expectedCounterValues.push_back (-i);
+
         callHelper (expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
         beginTest ("Call listeners excluding");
-        expectedCounterValues = { 1, 2, 3, 4, 5, 6, 7 };
+        expectedCounterValues.clear();
+        for (int i = 1; i < 8; ++i)
+            expectedCounterValues.push_back (i);
+
         callExcludingHelper (listener2, expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     }
 
