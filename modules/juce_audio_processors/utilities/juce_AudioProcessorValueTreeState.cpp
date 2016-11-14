@@ -112,7 +112,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     void copyValueToValueTree()
     {
         if (state.isValid())
-            state.setProperty (owner.valuePropertyID, value, owner.undoManager);
+            state.setPropertyExcludingListener (this, owner.valuePropertyID, value, owner.undoManager);
     }
 
     void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
@@ -397,7 +397,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
                                                                 private Slider::Listener
 {
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Slider& sl)
-        : AttachedControlBase (s, p), slider (sl)
+        : AttachedControlBase (s, p), slider (sl), ignoreCallbacks (false)
     {
         NormalisableRange<float> range (s.getParameterRange (paramID));
         slider.setRange (range.start, range.end, range.interval);
@@ -418,19 +418,28 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
 
     void setValue (float newValue) override
     {
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        ignoreCallbacks = true;
         slider.setValue (newValue, sendNotificationSync);
     }
 
     void sliderValueChanged (Slider* s) override
     {
-        if (! ModifierKeys::getCurrentModifiers().isRightButtonDown())
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        if ((! ignoreCallbacks) && (! ModifierKeys::getCurrentModifiers().isRightButtonDown()))
             setNewUnnormalisedValue ((float) s->getValue());
+
+        ignoreCallbacks = false;
     }
 
     void sliderDragStarted (Slider*) override { beginParameterChange(); }
     void sliderDragEnded   (Slider*) override { endParameterChange();   }
 
     Slider& slider;
+    bool ignoreCallbacks;
+    CriticalSection selfCallbackMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -447,7 +456,7 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
                                                                   private ComboBox::Listener
 {
     Pimpl (AudioProcessorValueTreeState& s, const String& p, ComboBox& c)
-        : AttachedControlBase (s, p), combo (c)
+        : AttachedControlBase (s, p), combo (c), ignoreCallbacks (false)
     {
         sendInitialUpdate();
         combo.addListener (this);
@@ -461,17 +470,28 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
 
     void setValue (float newValue) override
     {
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        ignoreCallbacks = true;
         combo.setSelectedItemIndex (roundToInt (newValue), sendNotificationSync);
     }
 
     void comboBoxChanged (ComboBox* comboBox) override
     {
-        beginParameterChange();
-        setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
-        endParameterChange();
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        if (! ignoreCallbacks)
+        {
+            beginParameterChange();
+            setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
+            endParameterChange();
+        }
+        ignoreCallbacks = false;
     }
 
     ComboBox& combo;
+    bool ignoreCallbacks;
+    CriticalSection selfCallbackMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -488,7 +508,7 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
                                                                 private Button::Listener
 {
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Button& b)
-        : AttachedControlBase (s, p), button (b)
+        : AttachedControlBase (s, p), button (b), ignoreCallbacks (false)
     {
         sendInitialUpdate();
         button.addListener (this);
@@ -502,17 +522,28 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
 
     void setValue (float newValue) override
     {
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        ignoreCallbacks = true;
         button.setToggleState (newValue >= 0.5f, sendNotificationSync);
     }
 
     void buttonClicked (Button* b) override
     {
-        beginParameterChange();
-        setNewUnnormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
-        endParameterChange();
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        if (! ignoreCallbacks)
+        {
+            beginParameterChange();
+            setNewUnnormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
+            endParameterChange();
+        }
+        ignoreCallbacks = false;
     }
 
     Button& button;
+    bool ignoreCallbacks;
+    CriticalSection selfCallbackMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
