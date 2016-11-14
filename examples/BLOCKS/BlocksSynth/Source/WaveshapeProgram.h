@@ -2,6 +2,9 @@
 #ifndef WAVESHAPEPROGRAM_H_INCLUDED
 #define WAVESHAPEPROGRAM_H_INCLUDED
 
+/**
+    A Program to draw moving waveshapes onto the LEDGrid
+*/
 class WaveshapeProgram : public LEDGrid::Program
 {
 public:
