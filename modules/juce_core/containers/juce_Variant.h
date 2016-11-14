@@ -84,6 +84,7 @@ public:
     var (const wchar_t* value);
     var (const String& value);
     var (const Array<var>& value);
+    var (const StringArray& value);
     var (ReferenceCountedObject* object);
     var (NativeFunction method) noexcept;
     var (const void* binaryData, size_t dataSize);
