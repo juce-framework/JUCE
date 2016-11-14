@@ -152,7 +152,7 @@ private:
             if (waveshapeMode > 3)
                 waveshapeMode = 0;
 
-            waveshapeProgram->setWaveshapeType (waveshapeMode);
+            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
         }
         else if (currentMode == playMode)
         {
@@ -246,7 +246,7 @@ private:
             grid->setProgram (waveshapeProgram);
 
             // Initialise the program
-            waveshapeProgram->setWaveshapeType (waveshapeMode);
+            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
             waveshapeProgram->generateWaveshapes();
         }
         else if (currentMode == playMode)

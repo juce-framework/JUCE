@@ -81,7 +81,7 @@ public:
     virtual bool canPlaySound (SynthesiserSound*) override = 0;
 
     /** Subclasses should override this to render a waveshape */
-    virtual double renderWaveShape (double currentPhase) = 0;
+    virtual double renderWaveShape (const double currentPhase) = 0;
 
 private:
     LinearSmoothedValue<double> amplitude, phaseIncrement;

@@ -39,7 +39,7 @@ public:
         {
             // Scale and offset the sin output to the Lightpad display
             double sineOutput = sin (currentPhase);
-            sineWaveY[x] = roundToInt ((sineOutput * 6.5) + 7.0);
+            sineWaveY[x] = static_cast<uint8> (roundToInt ((sineOutput * 6.5) + 7.0));
 
             // Square wave output, set flags for when vertical line should be drawn
             if (currentPhase < double_Pi)
@@ -64,7 +64,7 @@ public:
                 sawWaveY[x] = 255;
 
             // Triangle wave output
-            triangleWaveY[x] = x < 15 ? x : 14 - (x % 15);
+            triangleWaveY[x] = x < 15 ? static_cast<uint8> (x) : static_cast<uint8> (14 - (x % 15));
 
             // Add half cycle to end of array so it loops correctly
             if (x < 15)
