@@ -969,17 +969,16 @@ public:
 
                 // if the user doesn't set it, then use the last known version that works well with JUCE
                 String deploymentTarget = "10.11";
-                String sdkTarget = "10.11";
+
                 int oldestAllowedSDKVersion = (type == AudioUnitv3PlugIn || type == StandalonePlugIn) ? minimumAUv3SDKVersion : oldestSDKVersion;
                 
                 for (int ver = oldestAllowedSDKVersion; ver <= currentSDKVersion; ++ver)
                 {
-                    if (sdk == getSDKName (ver))         sdkTarget = "10." + String (ver);
+                    if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
                     if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
                 }
 
                 s.add ("MACOSX_DEPLOYMENT_TARGET = " + deploymentTarget);
-                s.add ("SDKROOT = macosx" + sdkTarget);
 
                 s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
                 s.add ("SDKROOT_ppc = macosx10.5");
