@@ -57,10 +57,10 @@ struct SynthGrid
 
     Array<DrumPadGridProgram::GridFill> gridFillArray;
     Colour baseGridColour = Colours::green;
-    Colour touchColour = Colours::cyan;
+    Colour touchColour    = Colours::red;
 
     Array<int> tonics = { 4, 12, 20 };
-    Array<int> notes = { 1, 3, 6, 7, 9, 11, 14, 15, 17, 19, 22, 24 };
+    Array<int> notes  = { 1, 3, 6, 7, 9, 11, 14, 15, 17, 19, 22, 24 };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthGrid)
@@ -73,8 +73,7 @@ struct SynthGrid
 class MainComponent   : public Component,
                         public TopologySource::Listener,
                         private TouchSurface::Listener,
-                        private ControlButton::Listener,
-                        private Timer
+                        private ControlButton::Listener
 {
 public:
     MainComponent()
@@ -145,7 +144,7 @@ private:
     /** Overridden from TouchSurface::Listener. Called when a Touch is received on the Lightpad */
     void touchChanged (TouchSurface&, const TouchSurface::Touch& touch) override
     {
-        if (currentMode == waveformSelectionMode && touch.isTouchStart && allowTouch)
+        if (currentMode == waveformSelectionMode && touch.isTouchStart)
         {
             // Change the displayed waveshape to the next one
             ++waveshapeMode;
@@ -154,9 +153,6 @@ private:
                 waveshapeMode = 0;
 
             waveshapeProgram->setWaveshapeType (waveshapeMode);
-
-            allowTouch = false;
-            startTimer (500);
         }
         else if (currentMode == playMode)
         {
@@ -243,12 +239,13 @@ private:
     {
         if (currentMode == waveformSelectionMode)
         {
-            // Create a new BitmapLEDProgram for the LEDGrid
+            // Create a new WaveshapeProgram for the LEDGrid
             waveshapeProgram = new WaveshapeProgram (*grid);
 
             // Set the LEDGrid program
             grid->setProgram (waveshapeProgram);
 
+            // Initialise the program
             waveshapeProgram->setWaveshapeType (waveshapeMode);
             waveshapeProgram->generateWaveshapes();
         }
@@ -265,11 +262,6 @@ private:
                                        layout.numRows,
                                        layout.gridFillArray);
         }
-    }
-
-    void timerCallback() override
-    {
-        allowTouch = true;
     }
 
     enum BlocksSynthMode
@@ -292,14 +284,10 @@ private:
 
     Array<juce::Time> touchMessageTimesInLastSecond;
 
-    Colour waveshapeColour = Colours::red;
-
     int waveshapeMode = 0;
 
     float scaleX = 0.0;
     float scaleY = 0.0;
-
-    bool allowTouch = true;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

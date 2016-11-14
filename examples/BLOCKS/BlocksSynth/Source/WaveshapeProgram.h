@@ -14,10 +14,16 @@
 class WaveshapeProgram : public LEDGrid::Program
 {
 public:
-    WaveshapeProgram (LEDGrid& lg) : Program (lg)
+    WaveshapeProgram (LEDGrid& lg) : Program (lg) {}
+
+    /** Sets the waveshape type to display on the grid */
+    void setWaveshapeType (uint8 type)
     {
+        ledGrid.setDataByte (0, type);
     }
 
+    /** Generates the Y coordinates for 1.5 cycles of each of the four waveshapes and stores them
+        at the correct offsets in the shared data heap. */
     void generateWaveshapes()
     {
         uint8 sineWaveY[45];
@@ -39,14 +45,14 @@ public:
             if (currentPhase < double_Pi)
             {
                 if (x == 0)
-                    squareWaveY[x] = 20;
+                    squareWaveY[x] = 255;
                 else
                     squareWaveY[x] = 1;
             }
             else
             {
                 if (squareWaveY[x - 1] == 1)
-                    squareWaveY[x - 1] = 20;
+                    squareWaveY[x - 1] = 255;
 
                 squareWaveY[x] = 13;
             }
@@ -54,8 +60,8 @@ public:
             // Saw wave output, set flags for when vertical line should be drawn
             sawWaveY[x] = 14 - ((x / 2) % 15);
 
-            if (sawWaveY[x] == 0 && sawWaveY[x - 1] != 20)
-                sawWaveY[x] = 20;
+            if (sawWaveY[x] == 0 && sawWaveY[x - 1] != 255)
+                sawWaveY[x] = 255;
 
             // Triangle wave output
             triangleWaveY[x] = x < 15 ? x : 14 - (x % 15);
@@ -73,29 +79,14 @@ public:
             currentPhase += phaseInc;
         }
 
+        // Store the values for each of the waveshapes at the correct offsets in the shared data heap
         for (int i = 0; i < 45; ++i)
         {
-            ledGrid.setDataByte (sineWaveOffset + i, sineWaveY[i]);
-            int sineByte = ledGrid.getDataByte (sineWaveOffset + i);
-            jassert (sineByte == sineWaveY[i]);
-
-            ledGrid.setDataByte (squareWaveOffset + i, squareWaveY[i]);
-            int squareByte = ledGrid.getDataByte (squareWaveOffset + i);
-            jassert (squareByte == squareWaveY[i]);
-
-            ledGrid.setDataByte (sawWaveOffset + i, sawWaveY[i]);
-            int sawByte = ledGrid.getDataByte (sawWaveOffset + i);
-            jassert (sawByte == sawWaveY[i]);
-
+            ledGrid.setDataByte (sineWaveOffset     + i, sineWaveY[i]);
+            ledGrid.setDataByte (squareWaveOffset   + i, squareWaveY[i]);
+            ledGrid.setDataByte (sawWaveOffset      + i, sawWaveY[i]);
             ledGrid.setDataByte (triangleWaveOffset + i, triangleWaveY[i]);
-            int triangleByte = ledGrid.getDataByte (triangleWaveOffset + i);
-            jassert (triangleByte == triangleWaveY[i]);
         }
-    }
-
-    void setWaveshapeType (uint8 type)
-    {
-        ledGrid.setDataByte (0, type);
     }
 
     uint32 getHeapSize() override
@@ -150,14 +141,17 @@ public:
 
             // Get the waveshape type
             int type = getHeapByte (0);
+
+            // Calculate the heap offset
             int offset = 1 + (type * 45) + yOffset;
 
             for (int x = 0; x < 15; ++x)
             {
+                // Get the corresponding Y coordinate for each X coordinate
                 int y = getHeapByte (offset + x);
 
                 // Draw a vertical line if flag is set or draw an LED circle
-                if (y == 20)
+                if (y == 255)
                 {
                     for (int i = 0; i < 15; ++i)
                         drawLEDCircle (x, i);
@@ -168,15 +162,19 @@ public:
                 }
             }
 
+            // Increment and wrap the Y offset to draw a 'moving' waveshape
             if (++yOffset == 30)
                 yOffset = 0;
-
         }
 
         )littlefoot";
     }
 
 private:
+    //==============================================================================
+    /** Shared data heap is laid out as below. There is room for the waveshape type and
+        the Y coordinates for 1.5 cycles of each of the four waveshapes. */
+
     static constexpr uint32 waveshapeType      = 0;   // 1 byte
     static constexpr uint32 sineWaveOffset     = 1;   // 1 byte * 45
     static constexpr uint32 squareWaveOffset   = 46;  // 1 byte * 45
