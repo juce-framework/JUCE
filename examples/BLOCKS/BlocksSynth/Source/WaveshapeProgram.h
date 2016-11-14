@@ -1,12 +1,3 @@
-/*
-  ==============================================================================
-
-    WaveshapeProgram.h
-    Created: 12 Nov 2016 9:28:17am
-    Author:  Edward Davies
-
-  ==============================================================================
-*/
 
 #ifndef WAVESHAPEPROGRAM_H_INCLUDED
 #define WAVESHAPEPROGRAM_H_INCLUDED
