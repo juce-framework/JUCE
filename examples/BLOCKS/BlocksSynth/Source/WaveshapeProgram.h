@@ -80,7 +80,7 @@ public:
         }
 
         // Store the values for each of the waveshapes at the correct offsets in the shared data heap
-        for (int i = 0; i < 45; ++i)
+        for (uint8 i = 0; i < 45; ++i)
         {
             ledGrid.setDataByte (sineWaveOffset     + i, sineWaveY[i]);
             ledGrid.setDataByte (squareWaveOffset   + i, squareWaveY[i]);
