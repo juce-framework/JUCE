@@ -205,8 +205,8 @@ public:
                    "string (for example, \"S7B6T5XJ2Q\") that describes the distribution certificate Apple issued to you. "
                    "You can find this string in the OS X app Keychain Access under \"Certificates\".");
         
-        props.add (new BooleanPropertyComponent (getSetting ("KeepCustomXcodeTargets"), "Keep custom Xcode targets", "Enabled"),
-                   "Enable this to keep any Xcode targets you have created yourself, e.g. for debugging or to launch a plug-in in various hosts. If disabled, all targets are replaced by a default set.");
+        props.add (new BooleanPropertyComponent (getSetting ("keepCustomXcodeSchemes"), "Keep custom Xcode schemes", "Enabled"),
+                   "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in various hosts. If disabled, all schemes are replaced by a default set.");
     }
 
     bool launchProject() override
@@ -2439,7 +2439,7 @@ private:
     //==============================================================================
     void removeMismatchedXcuserdata() const
     {
-        if (settings ["KeepCustomXcodeTargets"])
+        if (settings ["keepCustomXcodeSchemes"])
             return;
         
         File xcuserdata = getProjectBundle().getChildFile ("xcuserdata");
