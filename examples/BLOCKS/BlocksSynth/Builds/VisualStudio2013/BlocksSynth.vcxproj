@@ -1595,6 +1595,7 @@
     <ClInclude Include="..\..\Source\Oscillators.h"/>
     <ClInclude Include="..\..\Source\Audio.h"/>
     <ClInclude Include="..\..\Source\MainComponent.h"/>
+    <ClInclude Include="..\..\Source\WaveshapeProgram.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h"/>

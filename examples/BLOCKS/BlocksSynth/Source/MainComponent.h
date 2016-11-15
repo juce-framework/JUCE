@@ -4,6 +4,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Audio.h"
+#include "WaveshapeProgram.h"
 
 //==============================================================================
 /**
@@ -56,10 +57,10 @@ struct SynthGrid
 
     Array<DrumPadGridProgram::GridFill> gridFillArray;
     Colour baseGridColour = Colours::green;
-    Colour touchColour = Colours::cyan;
+    Colour touchColour    = Colours::red;
 
     Array<int> tonics = { 4, 12, 20 };
-    Array<int> notes = { 1, 3, 6, 7, 9, 11, 14, 15, 17, 19, 22, 24 };
+    Array<int> notes  = { 1, 3, 6, 7, 9, 11, 14, 15, 17, 19, 22, 24 };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthGrid)
@@ -82,8 +83,6 @@ public:
 
         // Register MainContentComponent as a listener to the PhysicalTopologySource object
         topologySource.addListener (this);
-
-        generateWaveshapes();
     };
 
     ~MainComponent()
@@ -146,13 +145,18 @@ private:
     /** Overridden from TouchSurface::Listener. Called when a Touch is received on the Lightpad */
     void touchChanged (TouchSurface&, const TouchSurface::Touch& touch) override
     {
-        if (currentMode == waveformSelectionMode && touch.isTouchStart)
+        if (currentMode == waveformSelectionMode && touch.isTouchStart && allowTouch)
         {
             // Change the displayed waveshape to the next one
             ++waveshapeMode;
 
             if (waveshapeMode > 3)
                 waveshapeMode = 0;
+
+            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
+
+            allowTouch = false;
+            startTimer (250);
         }
         else if (currentMode == playMode)
         {
@@ -214,48 +218,6 @@ private:
         setLEDProgram (activeBlock->getLEDGrid());
     }
 
-    void timerCallback() override
-    {
-        // Clear all LEDs
-        for (uint32 x = 0; x < 15; ++x)
-            for (uint32 y = 0; y < 15; ++y)
-                setLED (x, y, Colours::black);
-
-        // Determine which array to use based on waveshapeMode
-        int* waveshapeY = nullptr;
-
-        switch (waveshapeMode)
-        {
-            case 0:   waveshapeY = sineWaveY;     break;
-            case 1:   waveshapeY = squareWaveY;   break;
-            case 2:   waveshapeY = sawWaveY;      break;
-            case 3:   waveshapeY = triangleWaveY; break;
-            default:  break;
-        }
-
-        // For each X co-ordinate
-        for (uint32 x = 0; x < 15; ++x)
-        {
-            // Find the corresponding Y co-ordinate for the current waveshape
-            int y = waveshapeY[x + yOffset];
-
-            // Draw a vertical line if flag is set or draw an LED circle
-            if (y == -1)
-            {
-                for (uint32 i = 0; i < 15; ++i)
-                    drawLEDCircle (x, i);
-            }
-            else if (x % 2 == 0)
-            {
-                drawLEDCircle (x, static_cast<uint32> (y));
-            }
-        }
-
-        // Increment the offset to draw a 'moving' waveshape
-        if (++yOffset == 30)
-            yOffset -= 30;
-    }
-
     /** Clears the old touch times */
     void clearOldTouchTimes (const Time now)
     {
@@ -281,20 +243,18 @@ private:
     {
         if (currentMode == waveformSelectionMode)
         {
-            // Create a new BitmapLEDProgram for the LEDGrid
-            bitmapProgram = new BitmapLEDProgram (*grid);
+            // Create a new WaveshapeProgram for the LEDGrid
+            waveshapeProgram = new WaveshapeProgram (*grid);
 
             // Set the LEDGrid program
-            grid->setProgram (bitmapProgram);
+            grid->setProgram (waveshapeProgram);
 
-            // Redraw at 25Hz
-            startTimerHz (25);
+            // Initialise the program
+            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
+            waveshapeProgram->generateWaveshapes();
         }
         else if (currentMode == playMode)
         {
-            // Stop the redraw timer
-            stopTimer();
-
             // Create a new DrumPadGridProgram for the LEDGrid
             gridProgram = new DrumPadGridProgram (*grid);
 
@@ -308,83 +268,8 @@ private:
         }
     }
 
-    /** Generates the X and Y co-ordiantes for 1.5 cycles of each of the 4 waveshapes and stores them in arrays */
-    void generateWaveshapes()
-    {
-        // Set current phase position to 0 and work out the required phase increment for one cycle
-        double currentPhase = 0.0;
-        double phaseInc = (1.0 / 30.0) * (2.0 * double_Pi);
-
-        for (int x = 0; x < 30; ++x)
-        {
-            // Scale and offset the sin output to the Lightpad display
-            double sineOutput = sin (currentPhase);
-            sineWaveY[x] = roundToInt ((sineOutput * 6.5) + 7.0);
-
-            // Square wave output, set flags for when vertical line should be drawn
-            if (currentPhase < double_Pi)
-            {
-                if (x == 0)
-                    squareWaveY[x] = -1;
-                else
-                    squareWaveY[x] = 1;
-            }
-            else
-            {
-                if (squareWaveY[x - 1] == 1)
-                    squareWaveY[x - 1] = -1;
-
-                squareWaveY[x] = 13;
-            }
-
-            // Saw wave output, set flags for when vertical line should be drawn
-            sawWaveY[x] = 14 - ((x / 2) % 15);
-
-            if (sawWaveY[x] == 0 && sawWaveY[x - 1] != -1)
-                sawWaveY[x] = -1;
-
-            // Triangle wave output
-            triangleWaveY[x] = x < 15 ? x : 14 - (x % 15);
-
-            // Add half cycle to end of array so it loops correctly
-            if (x < 15)
-            {
-                sineWaveY[x + 30] = sineWaveY[x];
-                squareWaveY[x + 30] = squareWaveY[x];
-                sawWaveY[x + 30] = sawWaveY[x];
-                triangleWaveY[x + 30] = triangleWaveY[x];
-            }
-
-            // Increment the current phase
-            currentPhase += phaseInc;
-        }
-    }
-
-    /** Simple wrapper function to set a LED colour */
-    void setLED (uint32 x, uint32 y, Colour colour)
-    {
-        if (bitmapProgram != nullptr)
-            bitmapProgram->setLED (x, y, colour);
-    }
-
-    /** Draws a 'circle' on the Lightpad around an origin co-ordinate */
-    void drawLEDCircle (uint32 x0, uint32 y0)
-    {
-        setLED (x0, y0, waveshapeColour);
-
-        const uint32 minLedIndex = 0;
-        const uint32 maxLedIndex = 14;
-
-        setLED (jmin (x0 + 1, maxLedIndex), y0, waveshapeColour.withBrightness (0.4f));
-        setLED (jmax (x0 - 1, minLedIndex), y0, waveshapeColour.withBrightness (0.4f));
-        setLED (x0, jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.4f));
-        setLED (x0, jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.4f));
-
-        setLED (jmin (x0 + 1, maxLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
-        setLED (jmin (x0 + 1, maxLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
-        setLED (jmax (x0 - 1, minLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
-        setLED (jmax (x0 - 1, minLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
-    }
+    /** Stops touch events from triggering multiple waveshape mode changes */
+    void timerCallback() override { allowTouch = true; }
 
     enum BlocksSynthMode
     {
@@ -397,8 +282,8 @@ private:
     //==============================================================================
     Audio audio;
 
-    DrumPadGridProgram* gridProgram = nullptr;
-    BitmapLEDProgram* bitmapProgram = nullptr;
+    DrumPadGridProgram* gridProgram      = nullptr;
+    WaveshapeProgram*   waveshapeProgram = nullptr;
 
     SynthGrid layout { 5, 5 };
     PhysicalTopologySource topologySource;
@@ -406,18 +291,12 @@ private:
 
     Array<juce::Time> touchMessageTimesInLastSecond;
 
-    Colour waveshapeColour = Colours::red;
-
-    int sineWaveY[45];
-    int squareWaveY[45];
-    int sawWaveY[45];
-    int triangleWaveY[45];
-
     int waveshapeMode = 0;
-    uint32 yOffset = 0;
 
     float scaleX = 0.0;
     float scaleY = 0.0;
+
+    bool allowTouch = true;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

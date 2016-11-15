@@ -9,8 +9,10 @@
         <FILE id="SfPbCK" name="Oscillators.h" compile="0" resource="0" file="Source/Oscillators.h"/>
         <FILE id="K6DQIH" name="Audio.h" compile="0" resource="0" file="Source/Audio.h"/>
       </GROUP>
-      <FILE id="atp2Hj" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="r82Xw7" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="atp2Hj" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="HmjVmY" name="WaveshapeProgram.h" compile="0" resource="0"
+            file="Source/WaveshapeProgram.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
