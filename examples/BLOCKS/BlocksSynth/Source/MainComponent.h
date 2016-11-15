@@ -73,7 +73,8 @@ struct SynthGrid
 class MainComponent   : public Component,
                         public TopologySource::Listener,
                         private TouchSurface::Listener,
-                        private ControlButton::Listener
+                        private ControlButton::Listener,
+                        private Timer
 {
 public:
     MainComponent()
@@ -144,7 +145,7 @@ private:
     /** Overridden from TouchSurface::Listener. Called when a Touch is received on the Lightpad */
     void touchChanged (TouchSurface&, const TouchSurface::Touch& touch) override
     {
-        if (currentMode == waveformSelectionMode && touch.isTouchStart)
+        if (currentMode == waveformSelectionMode && touch.isTouchStart && allowTouch)
         {
             // Change the displayed waveshape to the next one
             ++waveshapeMode;
@@ -153,6 +154,9 @@ private:
                 waveshapeMode = 0;
 
             waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
+
+            allowTouch = false;
+            startTimer (250);
         }
         else if (currentMode == playMode)
         {
@@ -264,6 +268,9 @@ private:
         }
     }
 
+    /** Stops touch events from triggering multiple waveshape mode changes */
+    void timerCallback() override { allowTouch = true; }
+
     enum BlocksSynthMode
     {
         waveformSelectionMode = 0,
@@ -288,6 +295,8 @@ private:
 
     float scaleX = 0.0;
     float scaleY = 0.0;
+
+    bool allowTouch = true;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
