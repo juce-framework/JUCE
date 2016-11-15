@@ -1539,10 +1539,31 @@ public:
     }
 
     //==============================================================================
+    int getNumAudioBuses (bool isInput) const
+    {
+        int busCount = pluginInstance->getBusCount (isInput);
+
+      #ifdef JucePlugin_PreferredChannelConfigurations
+        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+        const int numConfigs = sizeof (configs) / sizeof (short[2]);
+
+        bool hasOnlyZeroChannels = true;
+
+        for (int i = 0; i < numConfigs && hasOnlyZeroChannels == true; ++i)
+            if (configs[i][isInput ? 0 : 1] != 0)
+                hasOnlyZeroChannels = false;
+
+        busCount = jmin (busCount, hasOnlyZeroChannels ? 0 : 1);
+       #endif
+
+        return busCount;
+    }
+
+    //==============================================================================
     Steinberg::int32 PLUGIN_API getBusCount (Vst::MediaType type, Vst::BusDirection dir) override
     {
         if (type == Vst::kAudio)
-            return pluginInstance->getBusCount (dir == Vst::kInput);
+            return getNumAudioBuses (dir == Vst::kInput);
 
         if (type == Vst::kEvent)
         {
@@ -1561,6 +1582,9 @@ public:
     {
         if (type == Vst::kAudio)
         {
+            if (index < 0 || index >= getNumAudioBuses (dir == Vst::kInput))
+                return kResultFalse;
+
             if (const AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
             {
                 info.mediaType = Vst::kAudio;
@@ -1628,8 +1652,30 @@ public:
         }
 
         if (type == Vst::kAudio)
+        {
+            if (index < 0 || index >= getNumAudioBuses (dir == Vst::kInput))
+                return kResultFalse;
+
             if (AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+            {
+               #ifdef JucePlugin_PreferredChannelConfigurations
+                AudioProcessor::BusesLayout newLayout = pluginInstance->getBusesLayout();
+                AudioChannelSet targetLayout
+                    = (state != 0 ? bus->getLastEnabledLayout() : AudioChannelSet::disabled());
+
+                (dir == Vst::kInput ? newLayout.inputBuses : newLayout.outputBuses).getReference (index) = targetLayout;
+
+                short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+                AudioProcessor::BusesLayout compLayout
+                    = pluginInstance->getNextBestLayoutInLayoutList (newLayout, configs);
+
+                if ((dir == Vst::kInput ? compLayout.inputBuses : compLayout.outputBuses).getReference (index) != targetLayout)
+                    return kResultFalse;
+               #endif
+
                 return (bus->enable (state != 0) ? kResultTrue : kResultFalse);
+            }
+        }
 
         return kResultFalse;
     }
