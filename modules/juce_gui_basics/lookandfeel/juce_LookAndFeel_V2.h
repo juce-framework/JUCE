@@ -66,6 +66,8 @@ public:
 
     void drawAlertBox (Graphics&, AlertWindow&, const Rectangle<int>& textArea, TextLayout&) override;
     int getAlertBoxWindowFlags() override;
+
+    int getAlertWindowButtonWidth (TextButton&) override;
     int getAlertWindowButtonHeight() override;
 
     /** Override this function to supply a custom font for the alert window title.

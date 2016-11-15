@@ -489,6 +489,11 @@ int LookAndFeel_V2::getAlertBoxWindowFlags()
             | ComponentPeer::windowHasDropShadow;
 }
 
+int LookAndFeel_V2::getAlertWindowButtonWidth (TextButton& b)
+{
+    return getTextButtonWidthToFitText (b, getAlertWindowButtonHeight());
+}
+
 int LookAndFeel_V2::getAlertWindowButtonHeight()
 {
     return 28;

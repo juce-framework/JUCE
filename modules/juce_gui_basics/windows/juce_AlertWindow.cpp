@@ -98,7 +98,9 @@ void AlertWindow::addButton (const String& name,
     b->addShortcut (shortcutKey1);
     b->addShortcut (shortcutKey2);
     b->addListener (this);
-    b->changeWidthToFitText (getLookAndFeel().getAlertWindowButtonHeight());
+
+    b->setSize (getLookAndFeel().getAlertWindowButtonWidth (*b),
+                getLookAndFeel().getAlertWindowButtonHeight());
 
     addAndMakeVisible (b, 0);
 

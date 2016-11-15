@@ -435,6 +435,7 @@ public:
 
         virtual int getAlertBoxWindowFlags() = 0;
 
+        virtual int getAlertWindowButtonWidth (TextButton&) = 0;
         virtual int getAlertWindowButtonHeight() = 0;
 
         virtual Font getAlertWindowTitleFont() = 0;
