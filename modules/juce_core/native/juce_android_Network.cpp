@@ -81,8 +81,16 @@ public:
 
     ~Pimpl()
     {
+        cancel();
+    }
+
+    void cancel()
+    {
         if (stream != 0)
+        {
             stream.callVoidMethod (HTTPStream.release);
+            stream.clear();
+        }
     }
 
     bool connect (WebInputStream::Listener* listener)
@@ -154,7 +162,11 @@ public:
 
                 responseHeaders.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
             }
+
+            return true;
         }
+
+        return false;
     }
 
     //==============================================================================
@@ -219,3 +231,8 @@ private:
     GlobalRef stream;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
+
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+}

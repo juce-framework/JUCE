@@ -322,6 +322,81 @@ public:
                                        int numRedirectsToFollow = 5,
                                        String httpRequestCmd = String()) const;
 
+    //==============================================================================
+    /** Represents a download task.
+
+        Returned by downloadToFile to allow querying and controling the download task.
+    */
+    class DownloadTask
+    {
+    public:
+        struct Listener
+        {
+            virtual ~Listener();
+
+            /** Called when the download has finished. Be aware that this callback may
+                come on an arbitrary thread. */
+            virtual void finished (DownloadTask* task, bool success) = 0;
+
+            /** Called periodically by the OS to indicate download progress.
+                Beware that this callback may come on an arbitrary thread.
+            */
+            virtual void progress (DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
+        };
+
+
+        /** Releases the resources of the download task, unregisters the listener
+            and cancels the download if necessary. */
+        virtual ~DownloadTask();
+
+        /** Returns the total length of the download task. This may return -1 if the length
+            was not returned by the server. */
+        inline int64 getTotalLength() const               { return contentLength; }
+
+        /** Returns the number of bytes that have been downloaded so far. */
+        inline int64 getLengthDownloaded() const          { return downloaded; }
+
+        /** Returns true if the download finished or there was an error. */
+        inline bool isFinished() const                    { return finished; }
+
+        /** Returns the status code of the server's response. This will only be valid
+            after the download has finished.
+
+            @see isFinished
+        */
+        inline int statusCode() const                     { return httpCode; }
+
+        /** Returns true if there was an error. */
+        inline bool hadError() const                      { return error; }
+
+    protected:
+        int64 contentLength, downloaded;
+        bool finished, error;
+        int httpCode;
+
+        DownloadTask ();
+
+    private:
+        friend class URL;
+
+        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*);
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadTask)
+    };
+
+    /** Download the URL to a file.
+
+     This method attempts to download the URL to a given file location.
+
+     Using this method to download files on mobile is less flexible but more reliable
+     than using createInputStream or WebInputStreams as it will attempt to download the file
+     using a native OS background network task. Such tasks automatically deal with
+     network re-connections and continuing your download while your app is suspended but are
+     limited to simple GET requests.
+     */
+    DownloadTask* downloadToFile (const File& targetLocation,
+                                  String extraHeaders = String(),
+                                  DownloadTask::Listener* listener = nullptr);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.

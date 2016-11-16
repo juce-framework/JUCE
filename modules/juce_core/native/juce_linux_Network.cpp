@@ -138,6 +138,14 @@ public:
         return (statusCode != 0);
     }
 
+    void cancel()
+    {
+        statusCode = -1;
+        finished = true;
+
+        closeSocket();
+    }
+
     //==============================================================================w
     bool isError() const                 { return socketHandle < 0; }
     bool isExhausted()                   { return finished; }
@@ -556,4 +564,9 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
+
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+}
 #endif

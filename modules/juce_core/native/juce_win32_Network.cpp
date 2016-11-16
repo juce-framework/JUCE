@@ -185,6 +185,11 @@ public:
         return (int) bytesRead;
     }
 
+    void cancel()
+    {
+        close();
+    }
+
     bool setPosition (int64 wantedPos)
     {
         if (isError())
@@ -231,11 +236,11 @@ private:
 
     void close()
     {
-        if (request != 0)
-        {
-            InternetCloseHandle (request);
-            request = 0;
-        }
+        HINTERNET requestCopy = request;
+
+        request = 0;
+        if (requestCopy != 0)
+            InternetCloseHandle (requestCopy);
 
         if (connection != 0)
         {
@@ -547,4 +552,9 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     }
 
     return mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS;
+}
+
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
 }

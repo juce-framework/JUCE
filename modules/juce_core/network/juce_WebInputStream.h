@@ -146,6 +146,9 @@ class JUCE_API WebInputStream : public InputStream
     /** Returns true if there was an error during the connection attempt */
     bool isError() const;
 
+    /** Will cancel a blocking read. */
+    void cancel();
+
     //==============================================================================
     /** Returns the total number of bytes available for reading in this stream.
 

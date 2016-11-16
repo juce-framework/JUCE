@@ -150,6 +150,12 @@ public:
         [data release];
     }
 
+    void cancel()
+    {
+        signalThreadShouldExit();
+        stopThread (10000);
+    }
+
     bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
     {
         startThread();
@@ -370,6 +376,200 @@ private:
 };
 
 //==============================================================================
+#if JUCE_IOS
+struct BackgroundDownloadTask  : public URL::DownloadTask
+{
+    BackgroundDownloadTask (const URL& urlToUse,
+                            const File& targetLocationToUse,
+                            String extraHeadersToUse,
+                            URL::DownloadTask::Listener* listenerToUse)
+         : targetLocation (targetLocationToUse), listener (listenerToUse),
+           delegate (nullptr), session (nullptr), downloadTask (nullptr),
+           connectFinished (false), calledComplete (0)
+    {
+        downloaded = -1;
+
+        static DelegateClass cls;
+        delegate = [cls.createInstance() init];
+        DelegateClass::setState (delegate, this);
+
+        String uniqueIdentifier = String (urlToUse.toString (true).hashCode64()) + String (Random().nextInt64());
+        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:juceStringToNS (urlToUse.toString (true))]];
+
+        StringArray headerLines;
+        headerLines.addLines (extraHeadersToUse);
+        headerLines.removeEmptyStrings (true);
+
+        for (int i = 0; i < headerLines.size(); ++i)
+        {
+            String key   = headerLines[i].upToFirstOccurrenceOf (":", false, false).trim();
+            String value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+            if (key.isNotEmpty() && value.isNotEmpty())
+                [request addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+        }
+
+        session =
+            [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:juceStringToNS (uniqueIdentifier)]
+                                          delegate:delegate
+                                     delegateQueue:nullptr];
+
+        if (session != nullptr)
+            downloadTask = [session downloadTaskWithRequest:request];
+
+        [request release];
+    }
+
+    ~BackgroundDownloadTask()
+    {
+        [session release];
+        [delegate release];
+    }
+
+    bool initOK()
+    {
+        return (downloadTask != nullptr);
+    }
+
+    bool connect()
+    {
+        [downloadTask resume];
+        while (downloaded == -1 && finished == false)
+            Thread::sleep (1);
+
+        connectFinished = true;
+        return ! error;
+    }
+
+    //==============================================================================
+    File targetLocation;
+    URL::DownloadTask::Listener* listener;
+    NSObject<NSURLSessionDelegate>* delegate;
+    NSURLSession* session;
+    NSURLSessionDownloadTask* downloadTask;
+    bool connectFinished;
+    Atomic<int> calledComplete;
+
+    void didWriteData (int64 totalBytesWritten, int64 totalBytesExpectedToWrite)
+    {
+        downloaded = totalBytesWritten;
+
+        if (contentLength == -1)
+            contentLength = totalBytesExpectedToWrite;
+
+        if (connectFinished && error == false && finished == false && listener != nullptr)
+            listener->progress (this, totalBytesWritten, contentLength);
+    }
+
+   void didFinishDownloadingToURL (NSURL* location)
+   {
+       NSFileManager* fileManager = [[NSFileManager alloc] init];
+       error = ([fileManager moveItemAtURL:location
+                                     toURL:[NSURL fileURLWithPath:juceStringToNS (targetLocation.getFullPathName())]
+                                     error:nullptr] == NO);
+       httpCode = 200;
+       finished = true;
+
+       if (listener != nullptr && calledComplete.exchange (1) == 0)
+       {
+           if (contentLength > 0 && downloaded < contentLength)
+           {
+               downloaded = contentLength;
+               listener->progress (this, downloaded, contentLength);
+           }
+
+           listener->didComplete (this, !error);
+       }
+   }
+
+   void didCompleteWithError (NSError* nsError)
+   {
+       if (calledComplete.exchange (1) == 0)
+       {
+           httpCode = -1;
+
+           if (nsError != nullptr)
+           {
+               // see https://developer.apple.com/reference/foundation/nsurlsessiondownloadtask?language=objc
+               switch ([nsError code])
+               {
+                   case NSURLErrorUserAuthenticationRequired:
+                       httpCode = 401;
+                       break;
+                   case NSURLErrorNoPermissionsToReadFile:
+                       httpCode = 403;
+                       break;
+                   case NSURLErrorFileDoesNotExist:
+                       httpCode = 404;
+                       break;
+                   default:
+                       httpCode = 500;
+               }
+           }
+
+           error = true;
+           finished = true;
+
+           if (listener != nullptr)
+               listener->didComplete (this, ! error);
+       }
+   }
+
+    //==============================================================================
+    struct DelegateClass  : public ObjCClass<NSObject<NSURLSessionDelegate> >
+    {
+        DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate> > ("JUCE_URLDelegate_")
+        {
+            addIvar<BackgroundDownloadTask*> ("state");
+
+            addMethod (@selector (URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:),
+                       didWriteData,        "v@:@@qqq");
+            addMethod (@selector (URLSession:downloadTask:didFinishDownloadingToURL:),
+                       didFinishDownloadingToURL,        "v@:@@@");
+            addMethod (@selector (URLSession:task:didCompleteWithError:),
+                       didCompleteWithError,        "v@:@@@");
+
+            registerClass();
+        }
+
+        static void setState (id self, BackgroundDownloadTask* state)  { object_setInstanceVariable (self, "state", state); }
+        static BackgroundDownloadTask* getState (id self)              { return getIvar<BackgroundDownloadTask*> (self, "state"); }
+
+    private:
+        static void didWriteData (id self, SEL, NSURLSession*, NSURLSessionDownloadTask*, int64_t, int64_t totalBytesWritten, int64_t totalBytesExpectedToWrite)
+        {
+            if (auto state = getState (self)) state->didWriteData (totalBytesWritten, totalBytesExpectedToWrite);
+        }
+
+        static void didFinishDownloadingToURL (id self, SEL, NSURLSession*, NSURLSessionDownloadTask*, NSURL* location)
+        {
+            if (auto state = getState (self)) state->didFinishDownloadingToURL (location);
+        }
+
+        static void didCompleteWithError (id self, SEL, NSURLSession*, NSURLSessionTask*, NSError* nsError)
+        {
+            if (auto state = getState (self)) state->didCompleteWithError (nsError);
+        }
+    };
+};
+
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    ScopedPointer<BackgroundDownloadTask> downloadTask = new BackgroundDownloadTask (*this, targetLocation, extraHeaders, listener);
+
+    if (downloadTask->initOK() && downloadTask->connect())
+        return downloadTask.release();
+
+    return nullptr;
+}
+#else
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+}
+#endif
+
+//==============================================================================
 #else
 
 // This version is only used for backwards-compatibility with older OSX targets,
@@ -438,6 +638,12 @@ public:
         }
 
         stopThread (10000);
+    }
+
+    void cancel()
+    {
+        hasFinished = hasFailed = true;
+        stop();
     }
 
     int read (char* dest, int numBytes)
@@ -615,6 +821,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
 
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+}
+
 #pragma clang diagnostic pop
 
 #endif
@@ -726,6 +937,15 @@ public:
         }
 
         return true;
+    }
+
+    void cancel()
+    {
+        if (finished || isError())
+            return;
+
+        if (connection != nullptr)
+            connection->cancel();
     }
 
     int statusCode;
