@@ -318,13 +318,13 @@ private:
 };
 
 /** Compares the values of two var objects, using the var::equals() comparison. */
-bool operator== (const var&, const var&) noexcept;
+JUCE_API bool operator== (const var&, const var&) noexcept;
 /** Compares the values of two var objects, using the var::equals() comparison. */
-bool operator!= (const var&, const var&) noexcept;
-bool operator== (const var&, const String&);
-bool operator!= (const var&, const String&);
-bool operator== (const var&, const char*);
-bool operator!= (const var&, const char*);
+JUCE_API bool operator!= (const var&, const var&) noexcept;
+JUCE_API bool operator== (const var&, const String&);
+JUCE_API bool operator!= (const var&, const String&);
+JUCE_API bool operator== (const var&, const char*);
+JUCE_API bool operator!= (const var&, const char*);
 
 //==============================================================================
 /** This template-overloaded class can be used to convert between var and custom types. */

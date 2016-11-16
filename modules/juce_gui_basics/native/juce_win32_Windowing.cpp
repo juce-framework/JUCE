@@ -3040,7 +3040,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
     return new HWNDComponentPeer (*this, styleFlags, (HWND) parentHWND, false);
 }
 
-ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
+JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
 {
     return new HWNDComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks,
                                   (HWND) parentHWND, true);
