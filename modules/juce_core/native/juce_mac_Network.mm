@@ -478,7 +478,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
                listener->progress (this, downloaded, contentLength);
            }
 
-           listener->didComplete (this, !error);
+           listener->finished (this, !error);
        }
    }
 
@@ -511,7 +511,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
            finished = true;
 
            if (listener != nullptr)
-               listener->didComplete (this, ! error);
+               listener->finished (this, ! error);
        }
    }
 
