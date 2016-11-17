@@ -683,6 +683,13 @@ private:
         if (isPositiveAndBelow (paramIndex, n))
         {
             const String& juceParamID = pluginFilter->getParameterID (paramIndex);
+
+            Vst::ParamID paramHash = static_cast<Vst::ParamID> (juceParamID.hashCode());
+           #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+            // studio one doesn't like negative parameters
+            paramHash &= ~(1 << (sizeof (Vst::ParamID) * 8 - 1));
+           #endif
+
             return managedParameter ? static_cast<Vst::ParamID> (juceParamID.hashCode())
                                     : static_cast<Vst::ParamID> (juceParamID.getIntValue());
         }

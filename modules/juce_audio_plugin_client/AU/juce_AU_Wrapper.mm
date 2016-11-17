@@ -1698,7 +1698,15 @@ private:
         if (isPositiveAndBelow (paramIndex, n))
         {
             const String& juceParamID = juceFilter->getParameterID (paramIndex);
-            return usingManagedParameter ? static_cast<AudioUnitParameterID> (juceParamID.hashCode())
+
+            AudioUnitParameterID paramHash = static_cast<AudioUnitParameterID> (juceParamID.hashCode());
+
+           #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+            // studio one doesn't like negative parameters
+            paramHash &= ~(1 << (sizeof (AudioUnitParameterID) * 8 - 1));
+           #endif
+
+            return usingManagedParameter ? paramHash
                                          : static_cast<AudioUnitParameterID> (juceParamID.getIntValue());
         }
 

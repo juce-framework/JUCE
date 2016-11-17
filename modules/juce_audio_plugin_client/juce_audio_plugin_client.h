@@ -64,6 +64,19 @@
  #define JUCE_FORCE_USE_LEGACY_PARAM_IDS 0
 #endif
 
+/** Config: JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+
+    Enable this if you want JUCE to use parameter ids which are compatible
+    to Studio One. Studio One ignores any parameter ids which are negative.
+    Enabling this option will make JUCE generate only positive parameter ids.
+    Note that if you have already released a plug-in prio to JUCE 4.3.0 then
+    enabling this will change your parameter ids making your plug-in
+    incompatible to old automation data.
+ */
+#ifndef JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+ #define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS 1
+#endif
+
 namespace juce
 {
  #include "utility/juce_PluginHostType.h"
