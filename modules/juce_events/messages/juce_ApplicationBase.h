@@ -252,7 +252,7 @@ public:
    #ifndef DOXYGEN
     // The following methods are for internal use only...
     static int main();
-    static int main (int argc, const char* argv[]);
+    static int main (int argc, const char* argv[], void*);
 
     static void appWillTerminateByForce();
     typedef JUCEApplicationBase* (*CreateInstanceFunction)();
