@@ -83,7 +83,7 @@ public:
           textWasInserted (false),
           isStretchingTop (false), isStretchingLeft (false),
           isStretchingBottom (false), isStretchingRight (false),
-          notificationCenter (nil)
+          notificationCenter (nil), lastRepaintTime (Time::getMillisecondCounter())
     {
         appFocusChangeCallback = appFocusChanged;
         isEventBlockedByModalComps = checkEventBlockedByModalComps;
@@ -908,8 +908,12 @@ public:
         // already a timer running -> stop
         if (isTimerRunning()) return;
 
-        int64 msSinceLastRepaint = Time::getCurrentTime().toMilliseconds() - lastRepaintTime.toMilliseconds();
-        static int minimumRepaintInterval = 1000 / 30; // 30fps
+        const uint32 now = Time::getMillisecondCounter();
+        uint32 msSinceLastRepaint =
+            (lastRepaintTime >= now ? now - lastRepaintTime
+                                    : (std::numeric_limits<uint32>::max() - lastRepaintTime) + now);
+
+        static uint32 minimumRepaintInterval = 1000 / 30; // 30fps
 
         // When windows are being resized, artificially throttling high-frequency repaints helps
         // to stop the event queue getting clogged, and keeps everything working smoothly.
@@ -917,7 +921,7 @@ public:
         if (shouldThrottle
             && msSinceLastRepaint < minimumRepaintInterval)
         {
-            startTimer (static_cast<int> (static_cast<int64> (minimumRepaintInterval) - msSinceLastRepaint));
+            startTimer (static_cast<int> (minimumRepaintInterval - msSinceLastRepaint));
             return;
         }
 
@@ -935,7 +939,7 @@ public:
         for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
             [view setNeedsDisplayInRect: makeNSRect (*i)];
 
-        lastRepaintTime = Time::getCurrentTime();
+        lastRepaintTime = Time::getMillisecondCounter();
         deferredRepaints.clear();
     };
 
@@ -1364,7 +1368,7 @@ public:
     NSNotificationCenter* notificationCenter;
 
     RectangleList<float> deferredRepaints;
-    Time lastRepaintTime;
+    uint32 lastRepaintTime;
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
