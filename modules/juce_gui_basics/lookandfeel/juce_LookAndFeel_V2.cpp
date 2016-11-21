@@ -489,9 +489,17 @@ int LookAndFeel_V2::getAlertBoxWindowFlags()
             | ComponentPeer::windowHasDropShadow;
 }
 
-int LookAndFeel_V2::getAlertWindowButtonWidth (TextButton& b)
+Array<int> LookAndFeel_V2::getWidthsForTextButtons (AlertWindow&, const Array<TextButton*>& buttons)
 {
-    return getTextButtonWidthToFitText (b, getAlertWindowButtonHeight());
+    const int n = buttons.size();
+    Array<int> buttonWidths;
+
+    const int buttonHeight = getAlertWindowButtonHeight();
+
+    for (int i = 0; i < n; ++i)
+        buttonWidths.add (getTextButtonWidthToFitText (*buttons.getReference (i), buttonHeight));
+
+    return buttonWidths;
 }
 
 int LookAndFeel_V2::getAlertWindowButtonHeight()
