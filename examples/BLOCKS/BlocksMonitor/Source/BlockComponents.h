@@ -35,6 +35,9 @@ public:
         // If this is a Lightpad then redraw it at 25Hz
         if (block->getType() == Block::lightPadBlock)
             startTimerHz (25);
+
+        // Make sure the component can't go offscreen if it is draggable
+        constrainer.setMinimumOnscreenAmounts (50, 50, 50, 50);
     }
 
     ~BlockComponent()
@@ -109,6 +112,76 @@ public:
         return -1;
     }
 
+    Point<float> getOffsetForPort (Block::ConnectionPort port)
+    {
+        using e = Block::ConnectionPort::DeviceEdge;
+
+        switch (rotation)
+        {
+            case 0:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { static_cast<float> (port.index), 0.0f };
+                    case e::east:
+                        return { static_cast<float> (block->getWidth()), static_cast<float> (port.index) };
+                    case e::south:
+                        return { static_cast<float> (port.index), static_cast<float> (block->getHeight()) };
+                    case e::west:
+                        return { 0.0f, static_cast<float> (port.index) };
+                }
+            }
+            case 90:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { 0.0f, static_cast<float> (port.index) };
+                    case e::east:
+                        return { static_cast<float> (-1.0f - port.index), static_cast<float> (block->getWidth()) };
+                    case e::south:
+                        return { static_cast<float> (0.0f - block->getHeight()), static_cast<float> (port.index) };
+                    case e::west:
+                        return { static_cast<float> (-1.0f - port.index), 0.0f };
+                }
+            }
+            case 180:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { static_cast<float> (-1.0f - port.index), 0.0f };
+                    case e::east:
+                        return { static_cast<float> (0.0f - block->getWidth()), static_cast<float> (-1.0f - port.index) };
+                    case e::south:
+                        return { static_cast<float> (-1.0f - port.index), static_cast<float> (0.0f - block->getHeight()) };
+                    case e::west:
+                        return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                }
+            }
+            case 270:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                    case e::east:
+                        return { static_cast<float> (port.index), static_cast<float> (0 - block->getWidth()) };
+                    case e::south:
+                        return { static_cast<float> (block->getHeight()), static_cast<float> (-1.0f - port.index) };
+                    case e::west:
+                        return { static_cast<float> (port.index), 0.0f };
+                }
+            }
+        }
+
+        return Point<float>();
+    }
+
+    int rotation = 0;
+    Point<float> topLeft = { 0.0f, 0.0f };
+
 private:
     /** Used to call repaint() periodically */
     void timerCallback() override   { repaint(); }
@@ -121,6 +194,26 @@ private:
 
     /** Overridden from ControlButton::Listener */
     void buttonReleased (ControlButton& b, Block::Timestamp t) override      { handleButtonReleased (b.getType(), t); }
+
+    /** Overridden from MouseListener. Prepares the master Block component for dragging. */
+    void mouseDown (const MouseEvent& e) override
+    {
+        if (block->isMasterBlock())
+            componentDragger.startDraggingComponent (this, e);
+    }
+
+    /** Overridden from MouseListener. Drags the master Block component */
+    void mouseDrag (const MouseEvent& e) override
+    {
+        if (block->isMasterBlock())
+        {
+            componentDragger.dragComponent (this, e, &constrainer);
+            getParentComponent()->resized();
+        }
+    }
+
+    ComponentDragger componentDragger;
+    ComponentBoundsConstrainer constrainer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockComponent)
 };
