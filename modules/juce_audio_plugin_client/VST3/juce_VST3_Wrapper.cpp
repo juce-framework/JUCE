@@ -690,7 +690,7 @@ private:
             paramHash &= ~(1 << (sizeof (Vst::ParamID) * 8 - 1));
            #endif
 
-            return managedParameter ? static_cast<Vst::ParamID> (juceParamID.hashCode())
+            return managedParameter ? paramHash
                                     : static_cast<Vst::ParamID> (juceParamID.getIntValue());
         }
 
