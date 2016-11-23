@@ -564,7 +564,8 @@ namespace IconConverters
 }
 
 //==============================================================================
-class HWNDComponentPeer  : public ComponentPeer
+class HWNDComponentPeer  : public ComponentPeer,
+                           private Timer
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     , public ModifierKeyReceiver
    #endif
@@ -2559,10 +2560,16 @@ private:
             case WM_WINDOWPOSCHANGING:     return handlePositionChanging (*(WINDOWPOS*) lParam);
 
             case WM_WINDOWPOSCHANGED:
-                if (handlePositionChanged())
-                    return 0;
+            {
+                const WINDOWPOS& wPos = *reinterpret_cast<WINDOWPOS*> (lParam);
 
-                break;
+                if ((wPos.flags & SWP_NOMOVE) != 0 && (wPos.flags & SWP_NOSIZE) != 0)
+                    startTimer(100);
+                else
+                    if (handlePositionChanged())
+                        return 0;
+            }
+            break;
 
             //==============================================================================
             case WM_KEYDOWN:
@@ -3025,6 +3032,12 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE (IMEHandler)
     };
+
+    void timerCallback() override
+    {
+        handlePositionChanged();
+        stopTimer();
+    }
 
     IMEHandler imeHandler;
 
