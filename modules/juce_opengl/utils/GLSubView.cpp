@@ -144,8 +144,8 @@ GLSubView::GLSubView(int x,int y,int w,int h){
     
     auto lastScreenBounds = getTopLevelComponent()->getScreenBounds();
     mScale = Desktop::getInstance().getDisplays().getDisplayContaining (lastScreenBounds.getCentre()).scale;
-	mWidth = w*mScale;
-	mHeight = h*mScale;
+    mWidth = int(w * mScale);
+    mHeight = int(h * mScale);
     
     setRepaintsOnMouseActivity(false);
 
@@ -261,7 +261,7 @@ void GLSubView::paint(juce::Graphics &g){
     std::unique_lock<std::mutex> lock(mutex);
     Image::BitmapData bitmap(*mImage,0,0,mWidth,mHeight,Image::BitmapData::writeOnly);
     memcpy(bitmap.data, mPixels, sizeof(uint8) * 4 * mWidth * mHeight);
-    auto affine = AffineTransform::verticalFlip(getHeight());
+    auto affine = AffineTransform::verticalFlip(float(getHeight()));
     g.addTransform(affine);
     g.drawImage(*mImage, 0, 0,getWidth(),getHeight(),0,0,mWidth,mHeight,false);
     lock.unlock();
