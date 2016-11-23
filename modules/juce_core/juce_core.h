@@ -305,6 +305,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "network/juce_NamedPipe.h"
 #include "network/juce_Socket.h"
 #include "network/juce_URL.h"
+#include "network/juce_WebInputStream.h"
 #include "time/juce_PerformanceCounter.h"
 #include "unit_tests/juce_UnitTest.h"
 #include "xml/juce_XmlDocument.h"

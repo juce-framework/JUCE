@@ -164,7 +164,7 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
 #else
 
 #if JUCE_IOS
- extern int juce_iOSMain (int argc, const char* argv[]);
+ extern int juce_iOSMain (int argc, const char* argv[], void* classPtr);
 #endif
 
 #if JUCE_MAC
@@ -201,7 +201,7 @@ StringArray JUCEApplicationBase::getCommandLineParameterArray()
     return StringArray (juce_argv + 1, juce_argc - 1);
 }
 
-int JUCEApplicationBase::main (int argc, const char* argv[])
+int JUCEApplicationBase::main (int argc, const char* argv[], void* customDelegate)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -213,8 +213,10 @@ int JUCEApplicationBase::main (int argc, const char* argv[])
        #endif
 
        #if JUCE_IOS
-        return juce_iOSMain (argc, argv);
+        return juce_iOSMain (argc, argv, customDelegate);
        #else
+        ignoreUnused (customDelegate);
+
         return JUCEApplicationBase::main();
        #endif
     }

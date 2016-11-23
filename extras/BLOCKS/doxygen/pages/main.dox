@@ -40,6 +40,13 @@ Lightpad and Control Blocks have control buttons, either a mode button on their 
 This section explains how to control the LED grid on a Lightpad.
 
 <br>
+@subpage the_littlefoot_language
+
+Advanced SDK users can specify specialised programs to run on Lightpad Blocks.
+These programs must be written in the LittleFoot language, which is described
+in this section.
+
+<br>
 @subpage controlling_led_strips
 
 Control Blocks have a strip of lights running along one side and this section provides instructions for controling the individual LEDs.

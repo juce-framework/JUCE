@@ -35,20 +35,48 @@
 #endif
 
 //==============================================================================
-class WebInputStream  : public InputStream
+class WebInputStream::Pimpl
 {
 public:
-    WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
-                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
-                    int numRedirectsToFollow, const String& httpRequestCmd_)
-      : statusCode (0), connection (0), request (0),
-        address (address_), headers (headers_), postData (postData_), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), httpRequestCmd (httpRequestCmd_)
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool shouldBePost)
+        : statusCode (0), owner (pimplOwner), url (urlToCopy), connection (0), request (0),
+          position (0), finished (false), isPost (shouldBePost), timeOutMs (0),
+          httpRequestCmd (isPost ? "POST" : "GET"), numRedirectsToFollow (5)
+    {}
+
+    ~Pimpl()
     {
+        close();
+    }
+
+    //==============================================================================
+    // WebInputStream methods
+    void withExtraHeaders (const String& extraHeaders)
+    {
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
+
+        headers << extraHeaders;
+
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
+    }
+
+    void withCustomRequestCommand (const String& customRequestCommand)    { httpRequestCmd = customRequestCommand; }
+    void withConnectionTimeout (int timeoutInMs)                          { timeOutMs = timeoutInMs; }
+    void withNumRedirectsToFollow (int maxRedirectsToFollow)              { numRedirectsToFollow = maxRedirectsToFollow; }
+    StringPairArray getRequestHeaders() const                             { return WebInputStream::parseHttpHeaders (headers); }
+    StringPairArray getResponseHeaders() const                            { return responseHeaders; }
+    int getStatusCode() const                                             { return statusCode; }
+
+    //==============================================================================
+    bool connect (WebInputStream::Listener* listener)
+    {
+        String address = url.toString (! isPost);
+
         while (numRedirectsToFollow-- >= 0)
         {
-            createConnection (progressCallback, progressCallbackContext);
+            createConnection (address, listener);
 
             if (! isError())
             {
@@ -77,7 +105,7 @@ public:
                     }
 
                     if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-                        break;
+                        return false;
 
                     bufferSizeBytes += 4096;
                 }
@@ -114,20 +142,15 @@ public:
                     }
                 }
 
-                if (responseHeaders != nullptr)
-                    responseHeaders->addArray (dataHeaders);
+                responseHeaders.addArray (dataHeaders);
             }
 
             break;
         }
+
+        return (request != 0);
     }
 
-    ~WebInputStream()
-    {
-        close();
-    }
-
-    //==============================================================================
     bool isError() const        { return request == 0; }
     bool isExhausted()          { return finished; }
     int64 getPosition()         { return position; }
@@ -162,6 +185,11 @@ public:
         return (int) bytesRead;
     }
 
+    void cancel()
+    {
+        close();
+    }
+
     bool setPosition (int64 wantedPos)
     {
         if (isError())
@@ -176,13 +204,14 @@ public:
                 return true;
 
             if (wantedPos < position)
-            {
-                close();
-                position = 0;
-                createConnection (0, 0);
-            }
+                return false;
 
-            skipNextBytes (wantedPos - position);
+            int64 numBytesToSkip = wantedPos - position;
+            const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+            HeapBlock<char> temp ((size_t) skipBufferSize);
+
+            while (numBytesToSkip > 0 && ! isExhausted())
+                numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
         }
 
         return true;
@@ -192,22 +221,26 @@ public:
 
 private:
     //==============================================================================
+    WebInputStream& owner;
+    const URL url;
     HINTERNET connection, request;
-    String address, headers;
+    String headers;
     MemoryBlock postData;
     int64 position;
     bool finished;
     const bool isPost;
     int timeOutMs;
     String httpRequestCmd;
+    int numRedirectsToFollow;
+    StringPairArray responseHeaders;
 
     void close()
     {
-        if (request != 0)
-        {
-            InternetCloseHandle (request);
-            request = 0;
-        }
+        HINTERNET requestCopy = request;
+
+        request = 0;
+        if (requestCopy != 0)
+            InternetCloseHandle (requestCopy);
 
         if (connection != 0)
         {
@@ -216,8 +249,7 @@ private:
         }
     }
 
-    void createConnection (URL::OpenStreamProgressCallback* progressCallback,
-                           void* progressCallbackContext)
+    void createConnection (const String& address, WebInputStream::Listener* listener)
     {
         static HINTERNET sessionHandle = InternetOpen (_T("juce"), INTERNET_OPEN_TYPE_PRECONFIG, 0, 0, 0);
 
@@ -244,14 +276,17 @@ private:
             uc.lpszPassword = password;
             uc.dwPasswordLength = passwordNumChars;
 
+            if (isPost)
+                WebInputStream::createHeadersAndPostData (url, headers, postData);
+
             if (InternetCrackUrl (address.toWideCharPointer(), 0, 0, &uc))
-                openConnection (uc, sessionHandle, progressCallback, progressCallbackContext);
+                openConnection (uc, sessionHandle, address, listener);
         }
     }
 
     void openConnection (URL_COMPONENTS& uc, HINTERNET sessionHandle,
-                         URL::OpenStreamProgressCallback* progressCallback,
-                         void* progressCallbackContext)
+                         const String& address,
+                         WebInputStream::Listener* listener)
     {
         int disable = 1;
         InternetSetOption (sessionHandle, INTERNET_OPTION_DISABLE_AUTODIAL, &disable, sizeof (disable));
@@ -280,7 +315,7 @@ private:
                 request = FtpOpenFile (connection, uc.lpszUrlPath, GENERIC_READ,
                                        FTP_TRANSFER_TYPE_BINARY | INTERNET_FLAG_NEED_FILE, 0);
             else
-                openHTTPConnection (uc, progressCallback, progressCallbackContext);
+                openHTTPConnection (uc, address, listener);
         }
     }
 
@@ -289,8 +324,7 @@ private:
         InternetSetOption (sessionHandle, option, &timeOutMs, sizeof (timeOutMs));
     }
 
-    void openHTTPConnection (URL_COMPONENTS& uc, URL::OpenStreamProgressCallback* progressCallback,
-                             void* progressCallbackContext)
+    void openHTTPConnection (URL_COMPONENTS& uc, const String& address, WebInputStream::Listener* listener)
     {
         const TCHAR* mimeTypes[] = { _T("*/*"), nullptr };
 
@@ -341,8 +375,8 @@ private:
 
                     bytesSent += bytesDone;
 
-                    if (progressCallback != nullptr
-                          && ! progressCallback (progressCallbackContext, bytesSent, (int) postData.getSize()))
+                    if (listener != nullptr
+                          && ! listener->postDataSendProgress (owner, bytesSent, (int) postData.getSize()))
                         break;
                 }
             }
@@ -359,7 +393,7 @@ private:
         InternetSetOption (request, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, sizeof (dwFlags));
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
 
@@ -518,4 +552,9 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     }
 
     return mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS;
+}
+
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
 }

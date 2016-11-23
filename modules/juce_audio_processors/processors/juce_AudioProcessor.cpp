@@ -775,7 +775,10 @@ AudioProcessor::BusesLayout AudioProcessor::getNextBestLayoutInList (const Buses
             hasInputs = true;
             break;
         }
+    }
 
+    for (int i = 0; i < numChannelConfigs; ++i)
+    {
         if (legacyLayouts[i].outChannels > 0)
         {
             hasOutputs = true;

@@ -96,6 +96,10 @@ public:
     /** Forces a touch-off message for all active touches. */
     virtual void cancelAllActiveTouches() noexcept = 0;
 
+    /** For the on-screen seaboard view, this will return the number of keys.
+        For other types of touch-surface, it will return 0. */
+    virtual int getNumberOfKeywaves() const = 0;
+
     //==============================================================================
     /** Receives callbacks when a touch moves or changes pressure. */
     struct Listener

@@ -60,7 +60,7 @@ static NSRect flippedScreenRect (NSRect r) noexcept
 
 //==============================================================================
 class NSViewComponentPeer  : public ComponentPeer,
-                             private AsyncUpdater
+                             private Timer
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -79,7 +79,7 @@ public:
           textWasInserted (false),
           isStretchingTop (false), isStretchingLeft (false),
           isStretchingBottom (false), isStretchingRight (false),
-          notificationCenter (nil)
+          notificationCenter (nil), lastRepaintTime (Time::getMillisecondCounter())
     {
         appFocusChangeCallback = appFocusChanged;
         isEventBlockedByModalComps = checkEventBlockedByModalComps;
@@ -875,7 +875,7 @@ public:
         }
     }
 
-    void handleAsyncUpdate() override
+    void repaint (const Rectangle<int>& area) override
     {
        #if JucePlugin_Build_AAX || JucePlugin_Build_RTAS || JucePlugin_Build_AUv3 || JucePlugin_Build_AU || JucePlugin_Build_VST3 || JucePlugin_Build_VST
         const bool shouldThrottle = true;
@@ -883,25 +883,6 @@ public:
         const bool shouldThrottle = areAnyWindowsInLiveResize();
        #endif
 
-        // When windows are being resized, artificially throttling high-frequency repaints helps
-        // to stop the event queue getting clogged, and keeps everything working smoothly.
-        // For some reason Logic also needs this throttling to recored parameter events correctly.
-        if (shouldThrottle
-              && Time::getCurrentTime() < lastRepaintTime + RelativeTime::milliseconds (1000 / 30))
-        {
-            triggerAsyncUpdate();
-            return;
-        }
-
-        for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
-            [view setNeedsDisplayInRect: makeNSRect (*i)];
-
-        lastRepaintTime = Time::getCurrentTime();
-        deferredRepaints.clear();
-    }
-
-    void repaint (const Rectangle<int>& area) override
-    {
         // In 10.11 changes were made to the way the OS handles repaint regions, and it seems that it can
         // no longer be trusted to coalesce all the regions, or to even remember them all without losing
         // a few when there's a lot of activity.
@@ -909,8 +890,44 @@ public:
         // asynchronously asking the OS to repaint them.
         deferredRepaints.add ((float) area.getX(), (float) ([view frame].size.height - area.getBottom()),
                               (float) area.getWidth(), (float) area.getHeight());
-        triggerAsyncUpdate();
+
+        // already a timer running -> stop
+        if (isTimerRunning()) return;
+
+        const uint32 now = Time::getMillisecondCounter();
+        uint32 msSinceLastRepaint =
+            (lastRepaintTime >= now ? now - lastRepaintTime
+                                    : (std::numeric_limits<uint32>::max() - lastRepaintTime) + now);
+
+        static uint32 minimumRepaintInterval = 1000 / 30; // 30fps
+
+        // When windows are being resized, artificially throttling high-frequency repaints helps
+        // to stop the event queue getting clogged, and keeps everything working smoothly.
+        // For some reason Logic also needs this throttling to recored parameter events correctly.
+        if (shouldThrottle
+            && msSinceLastRepaint < minimumRepaintInterval)
+        {
+            startTimer (static_cast<int> (minimumRepaintInterval - msSinceLastRepaint));
+            return;
+        }
+
+        setNeedsDisplayRectangles();
     }
+
+    void timerCallback() override
+    {
+        setNeedsDisplayRectangles();
+        stopTimer();
+    }
+
+    void setNeedsDisplayRectangles()
+    {
+        for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
+            [view setNeedsDisplayInRect: makeNSRect (*i)];
+
+        lastRepaintTime = Time::getMillisecondCounter();
+        deferredRepaints.clear();
+    };
 
     void invokePaint (LowLevelGraphicsContext& context)
     {
@@ -1337,7 +1354,7 @@ public:
     NSNotificationCenter* notificationCenter;
 
     RectangleList<float> deferredRepaints;
-    Time lastRepaintTime;
+    uint32 lastRepaintTime;
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;

@@ -109,10 +109,12 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 namespace juce
 {
 
-int juce_iOSMain (int argc, const char* argv[]);
-int juce_iOSMain (int argc, const char* argv[])
+int juce_iOSMain (int argc, const char* argv[], void* customDelgatePtr);
+int juce_iOSMain (int argc, const char* argv[], void* customDelagetPtr)
 {
-    return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
+    Class delegateClass = (customDelagetPtr != nullptr ? reinterpret_cast<Class> (customDelagetPtr) : [JuceAppStartupDelegate class]);
+
+    return UIApplicationMain (argc, const_cast<char**> (argv), nil, NSStringFromClass (delegateClass));
 }
 
 //==============================================================================

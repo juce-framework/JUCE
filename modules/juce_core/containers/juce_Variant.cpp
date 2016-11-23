@@ -456,6 +456,17 @@ var::var (const wchar_t* const v)     : type (&VariantType_String::instance) { n
 var::var (const void* v, size_t sz)   : type (&VariantType_Binary::instance) { value.binaryValue = new MemoryBlock (v, sz); }
 var::var (const MemoryBlock& v)       : type (&VariantType_Binary::instance) { value.binaryValue = new MemoryBlock (v); }
 
+var::var (const StringArray& v)       : type (&VariantType_Array::instance)
+{
+    Array<var> strings;
+
+    const int n = v.size();
+    for (int i = 0; i < n; ++i)
+        strings.add (var (v[i]));
+
+    value.objectValue = new VariantType_Array::RefCountedArray(strings);
+}
+
 var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::instance)
 {
     value.objectValue = object;

@@ -435,6 +435,7 @@ public:
 
         virtual int getAlertBoxWindowFlags() = 0;
 
+        virtual Array<int> getWidthsForTextButtons (AlertWindow&, const Array<TextButton*>&) = 0;
         virtual int getAlertWindowButtonHeight() = 0;
 
         virtual Font getAlertWindowTitleFont() = 0;

@@ -29,7 +29,7 @@
 #ifndef JUCE_URL_H_INCLUDED
 #define JUCE_URL_H_INCLUDED
 
-
+class WebInputStream;
 //==============================================================================
 /**
     Represents a URL and has a bunch of useful functions to manipulate it.
@@ -274,6 +274,13 @@ public:
 
     /** Attempts to open a stream that can read from this URL.
 
+        This method is a convenience wrapper for creating a new WebInputStream and setting some
+        commonly used options. The returned WebInputStream will have already been connected and
+        reading can start instantly.
+
+        Note that this method will block until the first byte of data has been received or an
+        error has occurred.
+
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.
 
@@ -305,16 +312,91 @@ public:
         @returns    an input stream that the caller must delete, or a null pointer if there was an
                     error trying to open it.
      */
-    InputStream* createInputStream (bool doPostLikeRequest,
-                                    OpenStreamProgressCallback* progressCallback = nullptr,
-                                    void* progressCallbackContext = nullptr,
-                                    String extraHeaders = String(),
-                                    int connectionTimeOutMs = 0,
-                                    StringPairArray* responseHeaders = nullptr,
-                                    int* statusCode = nullptr,
-                                    int numRedirectsToFollow = 5,
-                                    String httpRequestCmd = String()) const;
+    WebInputStream* createInputStream (bool doPostLikeRequest,
+                                       OpenStreamProgressCallback* progressCallback = nullptr,
+                                       void* progressCallbackContext = nullptr,
+                                       String extraHeaders = String(),
+                                       int connectionTimeOutMs = 0,
+                                       StringPairArray* responseHeaders = nullptr,
+                                       int* statusCode = nullptr,
+                                       int numRedirectsToFollow = 5,
+                                       String httpRequestCmd = String()) const;
 
+    //==============================================================================
+    /** Represents a download task.
+
+        Returned by downloadToFile to allow querying and controling the download task.
+    */
+    class DownloadTask
+    {
+    public:
+        struct Listener
+        {
+            virtual ~Listener();
+
+            /** Called when the download has finished. Be aware that this callback may
+                come on an arbitrary thread. */
+            virtual void finished (DownloadTask* task, bool success) = 0;
+
+            /** Called periodically by the OS to indicate download progress.
+                Beware that this callback may come on an arbitrary thread.
+            */
+            virtual void progress (DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
+        };
+
+
+        /** Releases the resources of the download task, unregisters the listener
+            and cancels the download if necessary. */
+        virtual ~DownloadTask();
+
+        /** Returns the total length of the download task. This may return -1 if the length
+            was not returned by the server. */
+        inline int64 getTotalLength() const               { return contentLength; }
+
+        /** Returns the number of bytes that have been downloaded so far. */
+        inline int64 getLengthDownloaded() const          { return downloaded; }
+
+        /** Returns true if the download finished or there was an error. */
+        inline bool isFinished() const                    { return finished; }
+
+        /** Returns the status code of the server's response. This will only be valid
+            after the download has finished.
+
+            @see isFinished
+        */
+        inline int statusCode() const                     { return httpCode; }
+
+        /** Returns true if there was an error. */
+        inline bool hadError() const                      { return error; }
+
+    protected:
+        int64 contentLength, downloaded;
+        bool finished, error;
+        int httpCode;
+
+        DownloadTask ();
+
+    private:
+        friend class URL;
+
+        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*);
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadTask)
+    };
+
+    /** Download the URL to a file.
+
+     This method attempts to download the URL to a given file location.
+
+     Using this method to download files on mobile is less flexible but more reliable
+     than using createInputStream or WebInputStreams as it will attempt to download the file
+     using a native OS background network task. Such tasks automatically deal with
+     network re-connections and continuing your download while your app is suspended but are
+     limited to simple GET requests.
+     */
+    DownloadTask* downloadToFile (const File& targetLocation,
+                                  String extraHeaders = String(),
+                                  DownloadTask::Listener* listener = nullptr);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
@@ -409,6 +491,8 @@ public:
 
 private:
     //==============================================================================
+    friend class WebInputStream;
+
     String url;
     MemoryBlock postData;
     StringArray parameterNames, parameterValues;
@@ -433,6 +517,5 @@ private:
 
     JUCE_LEAK_DETECTOR (URL)
 };
-
 
 #endif   // JUCE_URL_H_INCLUDED

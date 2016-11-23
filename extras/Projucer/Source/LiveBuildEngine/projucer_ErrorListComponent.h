@@ -139,15 +139,25 @@ private:
     {
         CompileUnitTreeItem (const String& filename)   : compileUnit (filename) {}
 
-        String getRenamingName() const override          { return getDisplayName(); }
-        String getDisplayName() const override           { return File (compileUnit).exists() ? File (compileUnit).getFileName() : compileUnit; }
-        void setName (const String&) override            {}
-        bool isMissing() override                        { return false; }
-        Icon getIcon() const override                    { return Icon (getIcons().bug, getContrastingColour (0.8f)); }
-        bool canBeSelected() const override              { return true; }
-        bool mightContainSubItems() override             { return true; }
-        String getUniqueName() const override            { return String::toHexString (compileUnit.hashCode64()); }
-        void addSubItems() override {}
+        void setName (const String&) override    {}
+        void addSubItems() override              {}
+        bool isMissing() override                { return false; }
+        Icon getIcon() const override            { return Icon (getIcons().bug, getContrastingColour (0.8f)); }
+        bool canBeSelected() const override      { return true; }
+        bool mightContainSubItems() override     { return true; }
+        String getUniqueName() const override    { return String::toHexString (compileUnit.hashCode64()); }
+
+        String getRenamingName() const override  { return getDisplayName(); }
+        String getDisplayName() const override
+        {
+            if (File::isAbsolutePath(compileUnit))
+            {
+                File f (compileUnit);
+                return f.exists() ? f.getFileName() : compileUnit;
+            }
+
+            return compileUnit;
+        }
 
         void showOverlays()
         {
@@ -183,7 +193,7 @@ private:
         void showDocument() override
         {
             if (ProjectContentComponent* pcc = getProjectContentComponent())
-                if (File (compileUnit).exists())
+                if (File::isAbsolutePath (compileUnit) && File (compileUnit).exists())
                     pcc->showEditorForFile (File (compileUnit), true);
         }
 

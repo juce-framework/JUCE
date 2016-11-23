@@ -103,6 +103,30 @@ public:
         }
     }
 
+    template <typename Method, typename ParamType>
+    void callListenersExcluding (ValueTree::Listener* listenerToExclude,
+                                 Method method, ValueTree& tree, ParamType& param2) const
+    {
+        const int numListeners = valueTreesWithListeners.size();
+
+        if (numListeners == 1)
+        {
+            valueTreesWithListeners.getUnchecked(0)->listeners.callExcluding (*listenerToExclude, method, tree, param2);
+        }
+        else if (numListeners > 0)
+        {
+            const SortedSet<ValueTree*> listenersCopy (valueTreesWithListeners);
+
+            for (int i = 0; i < numListeners; ++i)
+            {
+                ValueTree* const v = listenersCopy.getUnchecked(i);
+
+                if (i == 0 || valueTreesWithListeners.contains (v))
+                    v->listeners.callExcluding (*listenerToExclude, method, tree, param2);
+            }
+        }
+    }
+
     template <typename Method, typename ParamType1, typename ParamType2>
     void callListeners (Method method, ValueTree& tree, ParamType1& param2, ParamType2& param3) const
     {
@@ -126,12 +150,15 @@ public:
         }
     }
 
-    void sendPropertyChangeMessage (const Identifier& property)
+    void sendPropertyChangeMessage (const Identifier& property, ValueTree::Listener* listenerToExclude = nullptr)
     {
         ValueTree tree (this);
 
         for (ValueTree::SharedObject* t = this; t != nullptr; t = t->parent)
-            t->callListeners (&ValueTree::Listener::valueTreePropertyChanged, tree, property);
+            if (listenerToExclude == nullptr)
+                t->callListeners (&ValueTree::Listener::valueTreePropertyChanged, tree, property);
+            else
+                t->callListenersExcluding (listenerToExclude, &ValueTree::Listener::valueTreePropertyChanged, tree, property);
     }
 
     void sendChildAddedMessage (ValueTree child)
@@ -169,23 +196,24 @@ public:
         callListeners (&ValueTree::Listener::valueTreeParentChanged, tree);
     }
 
-    void setProperty (const Identifier& name, const var& newValue, UndoManager* const undoManager)
+    void setProperty (const Identifier& name, const var& newValue, UndoManager* const undoManager,
+                      ValueTree::Listener* listenerToExclude = nullptr)
     {
         if (undoManager == nullptr)
         {
             if (properties.set (name, newValue))
-                sendPropertyChangeMessage (name);
+                sendPropertyChangeMessage (name, listenerToExclude);
         }
         else
         {
             if (const var* const existingValue = properties.getVarPointer (name))
             {
                 if (*existingValue != newValue)
-                    undoManager->perform (new SetPropertyAction (this, name, newValue, *existingValue, false, false));
+                    undoManager->perform (new SetPropertyAction (this, name, newValue, *existingValue, false, false, listenerToExclude));
             }
             else
             {
-                undoManager->perform (new SetPropertyAction (this, name, newValue, var(), true, false));
+                undoManager->perform (new SetPropertyAction (this, name, newValue, var(), true, false, listenerToExclude));
             }
         }
     }
@@ -459,9 +487,11 @@ public:
     {
     public:
         SetPropertyAction (SharedObject* const so, const Identifier& propertyName,
-                           const var& newVal, const var& oldVal, bool isAdding, bool isDeleting)
+                           const var& newVal, const var& oldVal, bool isAdding, bool isDeleting,
+                           ValueTree::Listener* listenerToExclude = nullptr)
             : target (so), name (propertyName), newValue (newVal), oldValue (oldVal),
-              isAddingNewProperty (isAdding), isDeletingProperty (isDeleting)
+              isAddingNewProperty (isAdding), isDeletingProperty (isDeleting),
+              excludeListener (listenerToExclude)
         {
         }
 
@@ -472,7 +502,7 @@ public:
             if (isDeletingProperty)
                 target->removeProperty (name, nullptr);
             else
-                target->setProperty (name, newValue, nullptr);
+                target->setProperty (name, newValue, nullptr, excludeListener);
 
             return true;
         }
@@ -511,6 +541,7 @@ public:
         const var newValue;
         var oldValue;
         const bool isAddingNewProperty : 1, isDeletingProperty : 1;
+        ValueTree::Listener* excludeListener;
 
         JUCE_DECLARE_NON_COPYABLE (SetPropertyAction)
     };
@@ -763,11 +794,16 @@ const var* ValueTree::getPropertyPointer (const Identifier& name) const noexcept
 
 ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager)
 {
+    return setPropertyExcludingListener (nullptr, name, newValue, undoManager);
+}
+
+ValueTree& ValueTree::setPropertyExcludingListener (Listener* listenerToExclude, const Identifier& name, const var& newValue, UndoManager* undoManager)
+{
     jassert (name.toString().isNotEmpty()); // Must have a valid property name!
     jassert (object != nullptr); // Trying to add a property to a null ValueTree will fail!
 
     if (object != nullptr)
-        object->setProperty (name, newValue, undoManager);
+        object->setProperty (name, newValue, undoManager, listenerToExclude);
 
     return *this;
 }

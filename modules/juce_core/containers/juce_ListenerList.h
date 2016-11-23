@@ -152,14 +152,38 @@ public:
         callChecked (static_cast<const DummyBailOutChecker&> (DummyBailOutChecker()), callbackFunction);
     }
 
+    /** Calls a member function, with no parameters, on all but the specified listener in the list.
+        This can be useful if the caller is also a listener and needs to exclude itself.
+    */
+    void callExcluding (ListenerClass& listenerToExclude, void (ListenerClass::*callbackFunction) ())
+    {
+        callCheckedExcluding (listenerToExclude,
+                              static_cast<const DummyBailOutChecker&> (DummyBailOutChecker()), callbackFunction);
+    }
+
     /** Calls a member function on each listener in the list, with no parameters and a bail-out-checker.
-        See the class description for info about writing a bail-out checker. */
+        See the class description for info about writing a bail-out checker.
+    */
     template <class BailOutCheckerType>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) ())
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) ();
+    }
+
+    /** Calls a member function on all but the specified listener in the list with a bail-out-checker.
+        This can be useful if the caller is also a listener and needs to exclude itself. See the class
+        description for info about writing a bail-out checker.
+    */
+    template <class BailOutCheckerType>
+    void callCheckedExcluding (ListenerClass& listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) ())
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) ();
     }
 
     //==============================================================================
@@ -171,8 +195,21 @@ public:
             (iter.getListener()->*callbackFunction) (param1);
     }
 
-    /** Calls a member function on each listener in the list, with one parameter and a bail-out-checker.
-        See the class description for info about writing a bail-out checker. */
+    /** Calls a member function, with 1 parameter, on all but the specified listener in the list.
+        This can be useful if the caller is also a listener and needs to exclude itself.
+    */
+    template <LL_TEMPLATE(1)>
+    void callExcluding (ListenerClass& listenerToExclude,
+                        void (ListenerClass::*callbackFunction) (P1), LL_PARAM(1))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1);
+    }
+
+    /** Calls a member function on each listener in the list, with 1 parameter and a bail-out-checker.
+        See the class description for info about writing a bail-out checker.
+    */
     template <class BailOutCheckerType, LL_TEMPLATE(1)>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1),
@@ -180,6 +217,21 @@ public:
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1);
+    }
+
+    /** Calls a member function, with 1 parameter, on all but the specified listener in the list
+        with a bail-out-checker. This can be useful if the caller is also a listener and needs to
+        exclude itself. See the class description for info about writing a bail-out checker.
+    */
+    template <class BailOutCheckerType, LL_TEMPLATE(1)>
+    void callCheckedExcluding (ListenerClass& listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) (P1),
+                               LL_PARAM(1))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1);
     }
 
     //==============================================================================
@@ -192,8 +244,22 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2);
     }
 
+    /** Calls a member function, with 2 parameters, on all but the specified listener in the list.
+        This can be useful if the caller is also a listener and needs to exclude itself.
+    */
+    template <LL_TEMPLATE(1), LL_TEMPLATE(2)>
+    void callExcluding (ListenerClass& listenerToExclude,
+                        void (ListenerClass::*callbackFunction) (P1, P2),
+                        LL_PARAM(1), LL_PARAM(2))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2);
+    }
+
     /** Calls a member function on each listener in the list, with 2 parameters and a bail-out-checker.
-        See the class description for info about writing a bail-out checker. */
+        See the class description for info about writing a bail-out checker.
+    */
     template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2)>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2),
@@ -201,6 +267,21 @@ public:
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2);
+    }
+
+    /** Calls a member function, with 2 parameters, on all but the specified listener in the list
+        with a bail-out-checker. This can be useful if the caller is also a listener and needs to
+        exclude itself. See the class description for info about writing a bail-out checker.
+    */
+    template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2)>
+    void callCheckedExcluding (ListenerClass& listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) (P1, P2),
+                               LL_PARAM(1), LL_PARAM(2))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2);
     }
 
     //==============================================================================
@@ -213,8 +294,22 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2, param3);
     }
 
+    /** Calls a member function, with 3 parameters, on all but the specified listener in the list.
+        This can be useful if the caller is also a listener and needs to exclude itself.
+    */
+    template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3)>
+    void callExcluding (ListenerClass& listenerToExclude,
+                        void (ListenerClass::*callbackFunction) (P1, P2, P3),
+                        LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3);
+    }
+
     /** Calls a member function on each listener in the list, with 3 parameters and a bail-out-checker.
-        See the class description for info about writing a bail-out checker. */
+        See the class description for info about writing a bail-out checker.
+    */
     template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3)>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2, P3),
@@ -222,6 +317,21 @@ public:
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2, param3);
+    }
+
+    /** Calls a member function, with 3 parameters, on all but the specified listener in the list
+        with a bail-out-checker. This can be useful if the caller is also a listener and needs to
+        exclude itself. See the class description for info about writing a bail-out checker.
+    */
+    template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3)>
+    void callCheckedExcluding (ListenerClass& listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) (P1, P2, P3),
+                               LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3);
     }
 
     //==============================================================================
@@ -234,8 +344,22 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
     }
 
+    /** Calls a member function, with 4 parameters, on all but the specified listener in the list.
+        This can be useful if the caller is also a listener and needs to exclude itself.
+    */
+    template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4)>
+    void callExcluding (ListenerClass& listenerToExclude,
+                        void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
+                        LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
+    }
+
     /** Calls a member function on each listener in the list, with 4 parameters and a bail-out-checker.
-        See the class description for info about writing a bail-out checker. */
+        See the class description for info about writing a bail-out checker.
+    */
     template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4)>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
@@ -243,6 +367,21 @@ public:
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
+    }
+
+    /** Calls a member function, with 4 parameters, on all but the specified listener in the list
+        with a bail-out-checker. This can be useful if the caller is also a listener and needs to
+        exclude itself. See the class description for info about writing a bail-out checker.
+    */
+    template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4)>
+    void callCheckedExcluding (ListenerClass& listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
+                               LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
     }
 
     //==============================================================================
@@ -255,8 +394,22 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
     }
 
+    /** Calls a member function, with 5 parameters, on all but the specified listener in the list.
+        This can be useful if the caller is also a listener and needs to exclude itself.
+    */
+    template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5)>
+    void callExcluding (ListenerClass& listenerToExclude,
+                        void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
+                        LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
+    }
+
     /** Calls a member function on each listener in the list, with 5 parameters and a bail-out-checker.
-        See the class description for info about writing a bail-out checker. */
+        See the class description for info about writing a bail-out checker.
+    */
     template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5)>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
@@ -266,8 +419,23 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
     }
 
+    /** Calls a member function, with 5 parameters, on all but the specified listener in the list
+        with a bail-out-checker. This can be useful if the caller is also a listener and needs to
+        exclude itself. See the class description for info about writing a bail-out checker.
+    */
+    template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5)>
+    void callCheckedExcluding (ListenerClass& listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
+                               LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
+    }
+
     //==============================================================================
-    /** Calls a member function on each listener in the list, with 5 parameters. */
+    /** Calls a member function on each listener in the list, with 6 parameters. */
     template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
     void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
                LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5), LL_PARAM(6))
@@ -276,8 +444,22 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
     }
 
-    /** Calls a member function on each listener in the list, with 5 parameters and a bail-out-checker.
-        See the class description for info about writing a bail-out checker. */
+    /** Calls a member function, with 6 parameters, on all but the specified listener in the list.
+        This can be useful if the caller is also a listener and needs to exclude itself.
+    */
+    template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
+    void callExcluding (ListenerClass& listenerToExclude,
+                        void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
+                        LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5), LL_PARAM(6))
+    {
+        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
+    }
+
+    /** Calls a member function on each listener in the list, with 6 parameters and a bail-out-checker.
+        See the class description for info about writing a bail-out checker.
+    */
     template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
@@ -287,6 +469,20 @@ public:
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
     }
 
+    /** Calls a member function, with 5 parameters, on all but the specified listener in the list
+        with a bail-out-checker. This can be useful if the caller is also a listener and needs to
+        exclude itself. See the class description for info about writing a bail-out checker.
+    */
+    template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5), LL_TEMPLATE(6)>
+    void callCheckedExcluding (ListenerClass& listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5, P6),
+                               LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5), LL_PARAM(6))
+    {
+        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+            if (iter.getListener() != &listenerToExclude)
+                (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5, param6);
+    }
 
     //==============================================================================
     /** A dummy bail-out checker that always returns false.

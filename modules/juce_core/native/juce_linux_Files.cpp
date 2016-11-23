@@ -202,9 +202,9 @@ bool Process::openDocument (const String& fileName, const String& parameters)
     String cmdString (fileName.replace (" ", "\\ ",false));
     cmdString << " " << parameters;
 
-    if (URL::isProbablyAWebsiteURL (fileName)
-         || cmdString.startsWithIgnoreCase ("file:")
-         || URL::isProbablyAnEmailAddress (fileName)
+    if (/*URL::isProbablyAWebsiteURL (fileName)
+          ||*/ cmdString.startsWithIgnoreCase ("file:")
+         /*|| URL::isProbablyAnEmailAddress (fileName)*/
          || File::createFileWithoutCheckingPath (fileName).isDirectory()
          || ! isFileExecutable (fileName))
     {

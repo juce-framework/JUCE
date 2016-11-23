@@ -167,10 +167,13 @@ bool BufferingAudioSource::waitForNextAudioBlockReady (const AudioSourceChannelI
     if (! isLooping() && nextPlayPos > getTotalLength())
         return true;
 
-    const uint32 endTime = Time::getMillisecondCounter() + timeout;
     uint32 now = Time::getMillisecondCounter();
+    const uint32 startTime = now;
 
-    while (now < endTime)
+    uint32 elapsed = (now >= startTime ? now - startTime
+                                       : (std::numeric_limits<uint32>::max() - startTime) + now);
+
+    while (elapsed <= timeout)
     {
         {
             const ScopedLock sl (bufferStartPosLock);
@@ -182,10 +185,14 @@ bool BufferingAudioSource::waitForNextAudioBlockReady (const AudioSourceChannelI
                 return true;
         }
 
-        if (! bufferReadyEvent.wait (static_cast<int> (endTime - now)))
+
+
+        if (elapsed < timeout  && (! bufferReadyEvent.wait (static_cast<int> (timeout - elapsed))))
             return false;
 
         now = Time::getMillisecondCounter();
+        elapsed = (now >= startTime ? now - startTime
+                                    : (std::numeric_limits<uint32>::max() - startTime) + now);
     }
 
     return false;

@@ -1,0 +1,24 @@
+/**
+@page the_littlefoot_language The LittleFoot Language
+
+@section littlefoot_description A description of the LittleFoot language
+
+A description of the LittleFoot language is contained in the SDK source code at <tt>juce_blocks_basics/littlefoot/LittleFoot Language README.txt</tt>:
+@includedoc "LittleFoot Language README.txt"
+
+@section littlefoot_example A LittleFoot example
+
+The %BitmapLEDProgram class is a simple example of a LittleFoot program.
+
+<tt>%juce_blocks_basics/visualisers/juce_BitmapLEDProgram.h</tt>
+@include juce_blocks_basics/visualisers/juce_BitmapLEDProgram.h
+
+<tt>juce_blocks_basics/visualisers/juce_BitmapLEDProgram.cpp</tt>
+@include juce_blocks_basics/visualisers/juce_BitmapLEDProgram.cpp
+
+The repaint() method of the LittleFoot program is called at approximately 25 Hz, and each time it simply inspects the heap (the shared area of memory used to communicate between your application code and your LittleFoot program) and sets the LEDs based on the heap's content.
+To update the heap, and hence the LEDS, your application code calls BitmapLEDProgram::setLED.
+
+A more advanced example can be found in the source code of the DrumPadGridProgram class or in the @ref example_blocks_synth example.
+*/
+

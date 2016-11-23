@@ -206,16 +206,22 @@ private:
 
     void addPorts (int numNorth, int numEast, int numSouth, int numWest)
     {
-        addPorts (Block::ConnectionPort::DeviceEdge::north, numNorth);
-        addPorts (Block::ConnectionPort::DeviceEdge::east,  numEast);
-        addPorts (Block::ConnectionPort::DeviceEdge::south, numSouth);
-        addPorts (Block::ConnectionPort::DeviceEdge::west,  numWest);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::north, numNorth);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::east,  numEast);
+        addPortsSW (Block::ConnectionPort::DeviceEdge::south, numSouth);
+        addPortsSW (Block::ConnectionPort::DeviceEdge::west,  numWest);
     }
 
-    void addPorts (Block::ConnectionPort::DeviceEdge edge, int num)
+    void addPortsNE (Block::ConnectionPort::DeviceEdge edge, int num)
     {
         for (int i = 0; i < num; ++i)
             ports.add ({ edge, i});
+    }
+
+    void addPortsSW (Block::ConnectionPort::DeviceEdge edge, int num)
+    {
+        for (int i = 0; i < num; ++i)
+            ports.add ({ edge, num - i - 1});
     }
 };
 

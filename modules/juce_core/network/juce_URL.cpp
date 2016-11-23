@@ -26,6 +26,104 @@
   ==============================================================================
 */
 
+//==============================================================================
+struct FallbackDownloadTask  : public URL::DownloadTask,
+                               public Thread
+{
+    FallbackDownloadTask (FileOutputStream* outputStreamToUse,
+                          size_t bufferSizeToUse,
+                          WebInputStream* streamToUse,
+                          URL::DownloadTask::Listener* listenerToUse)
+        : Thread ("DownloadTask thread"),
+          fileStream (outputStreamToUse),
+          bufferSize (bufferSizeToUse),
+          buffer (bufferSize),
+          stream (streamToUse),
+          listener (listenerToUse)
+    {
+        contentLength = stream->getTotalLength();
+        httpCode      = stream->getStatusCode();
+
+        startThread ();
+    }
+
+    ~FallbackDownloadTask()
+    {
+        signalThreadShouldExit();
+        stream->cancel();
+        waitForThreadToExit (-1);
+    }
+
+    //==============================================================================
+    void run() override
+    {
+        while (! stream->isExhausted() && ! stream->isError() && ! threadShouldExit())
+        {
+            if (listener != nullptr)
+                listener->progress (this, downloaded, contentLength);
+
+            const int max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
+                                                                      : static_cast<int> (contentLength - downloaded));
+
+            const int actual = stream->read (buffer.getData(), max);
+
+            if (threadShouldExit() || stream->isError())
+                break;
+
+            if (! fileStream->write (buffer.getData(), static_cast<size_t> (actual)))
+            {
+                error = true;
+                break;
+            }
+
+            downloaded += actual;
+        }
+
+        if (threadShouldExit() || (stream != nullptr && stream->isError()))
+            error = true;
+
+        finished = true;
+
+        if (listener != nullptr && ! threadShouldExit())
+            listener->finished (this, ! error);
+    }
+
+    //==============================================================================
+    ScopedPointer<FileOutputStream> fileStream;
+    size_t bufferSize;
+    HeapBlock<char> buffer;
+    ScopedPointer<WebInputStream> stream;
+    URL::DownloadTask::Listener* listener;
+};
+
+void URL::DownloadTask::Listener::progress (DownloadTask*, int64, int64) {}
+URL::DownloadTask::Listener::~Listener() {}
+
+//==============================================================================
+URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlToUse,
+                                                                const File& targetFileToUse,
+                                                                const String& extraHeadersToUse,
+                                                                Listener* listenerToUse)
+{
+    const size_t bufferSize = 0x8000;
+    targetFileToUse.deleteFile();
+
+    if (ScopedPointer<FileOutputStream> outputStream = targetFileToUse.createOutputStream (bufferSize))
+    {
+        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, false);
+        stream->withExtraHeaders (extraHeadersToUse);
+
+        if (stream->connect (nullptr))
+            return new FallbackDownloadTask (outputStream.release(), bufferSize, stream.release(), listenerToUse);
+    }
+
+    return nullptr;
+}
+
+URL::DownloadTask::DownloadTask() : contentLength (-1), downloaded (0), finished (false), error (false), httpCode (-1) {}
+URL::DownloadTask::~DownloadTask() {}
+
+//==============================================================================
 URL::URL()
 {
 }
@@ -133,7 +231,7 @@ namespace URLHelpers
         int i = 0;
 
         while (CharacterFunctions::isLetterOrDigit (url[i])
-                || url[i] == '+' || url[i] == '-' || url[i] == '.')
+               || url[i] == '+' || url[i] == '-' || url[i] == '.')
             ++i;
 
         return url.substring (i).startsWith ("://") ? i + 1 : 0;
@@ -197,8 +295,8 @@ String URL::getDomain() const
     const int end2 = url.indexOfChar (start, ':');
 
     const int end = (end1 < 0 && end2 < 0) ? std::numeric_limits<int>::max()
-                                           : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
-                                                                     : jmin (end1, end2));
+                            : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
+                               : jmin (end1, end2));
     return url.substring (start, end);
 }
 
@@ -207,7 +305,7 @@ String URL::getSubPath() const
     const int startOfPath = URLHelpers::findStartOfPath (url);
 
     return startOfPath <= 0 ? String()
-                            : url.substring (startOfPath);
+        : url.substring (startOfPath);
 }
 
 String URL::getScheme() const
@@ -316,11 +414,11 @@ bool URL::isProbablyAWebsiteURL (const String& possibleURL)
             return true;
 
     if (possibleURL.containsChar ('@')
-         || possibleURL.containsChar (' '))
+        || possibleURL.containsChar (' '))
         return false;
 
     const String topLevelDomain (possibleURL.upToFirstOccurrenceOf ("/", false, false)
-                                            .fromLastOccurrenceOf (".", false, false));
+                                 .fromLastOccurrenceOf (".", false, false));
 
     return topLevelDomain.isNotEmpty() && topLevelDomain.length() <= 3;
 }
@@ -330,45 +428,69 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
     const int atSign = possibleEmailAddress.indexOfChar ('@');
 
     return atSign > 0
-            && possibleEmailAddress.lastIndexOfChar ('.') > (atSign + 1)
-            && ! possibleEmailAddress.endsWithChar ('.');
+        && possibleEmailAddress.lastIndexOfChar ('.') > (atSign + 1)
+        && ! possibleEmailAddress.endsWithChar ('.');
 }
 
 //==============================================================================
-InputStream* URL::createInputStream (const bool usePostCommand,
-                                     OpenStreamProgressCallback* const progressCallback,
-                                     void* const progressCallbackContext,
-                                     String headers,
-                                     const int timeOutMs,
-                                     StringPairArray* const responseHeaders,
-                                     int* statusCode,
-                                     const int numRedirectsToFollow,
-                                     String httpRequestCmd) const
+WebInputStream* URL::createInputStream (const bool usePostCommand,
+                                        OpenStreamProgressCallback* const progressCallback,
+                                        void* const progressCallbackContext,
+                                        String headers,
+                                        const int timeOutMs,
+                                        StringPairArray* const responseHeaders,
+                                        int* statusCode,
+                                        const int numRedirectsToFollow,
+                                        String httpRequestCmd) const
 {
-    MemoryBlock headersAndPostData;
+    ScopedPointer<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
 
-    if (! headers.endsWithChar ('\n'))
-        headers << "\r\n";
+    struct ProgressCallbackCaller : WebInputStream::Listener
+    {
+        ProgressCallbackCaller (OpenStreamProgressCallback* const progressCallbackToUse,
+                                void* const progressCallbackContextToUse)
+            : callback (progressCallbackToUse), data (progressCallbackContextToUse)
+        {}
 
-    if (usePostCommand)
-        createHeadersAndPostData (headers, headersAndPostData);
+        bool postDataSendProgress (WebInputStream&, int bytesSent, int totalBytes) override
+        {
+            return callback(data, bytesSent, totalBytes);
+        }
 
-    if (! headers.endsWithChar ('\n'))
-        headers << "\r\n";
+        OpenStreamProgressCallback* const callback;
+        void* const data;
 
-    if (httpRequestCmd.isEmpty())
-        httpRequestCmd = usePostCommand ? "POST" : "GET";
+        // workaround a MSVC 2013 compiler warning
+        ProgressCallbackCaller (const ProgressCallbackCaller& o) : callback (o.callback), data (o.data) { jassertfalse; }
+        ProgressCallbackCaller& operator= (const ProgressCallbackCaller&) { jassertfalse; return *this; }
+    };
 
-    ScopedPointer<WebInputStream> wi (new WebInputStream (toString (! usePostCommand),
-                                                          usePostCommand, headersAndPostData,
-                                                          progressCallback, progressCallbackContext,
-                                                          headers, timeOutMs, responseHeaders,
-                                                          numRedirectsToFollow, httpRequestCmd));
+    ScopedPointer<ProgressCallbackCaller> callbackCaller =
+        (progressCallback != nullptr ? new ProgressCallbackCaller (progressCallback, progressCallbackContext) : nullptr);
+
+    if (headers.isNotEmpty())
+        wi->withExtraHeaders (headers);
+
+    if (timeOutMs != 0)
+        wi->withConnectionTimeout (timeOutMs);
+
+    if (httpRequestCmd.isNotEmpty())
+        wi->withCustomRequestCommand (httpRequestCmd);
+
+    wi->withNumRedirectsToFollow (numRedirectsToFollow);
+
+    bool success = wi->connect (callbackCaller);
 
     if (statusCode != nullptr)
-        *statusCode = wi->statusCode;
+        *statusCode = wi->getStatusCode();
 
-    return wi->isError() ? nullptr : wi.release();
+    if (responseHeaders != nullptr)
+        *responseHeaders = wi->getResponseHeaders();
+
+    if (! success || wi->isError())
+        return nullptr;
+
+    return wi.release();
 }
 
 //==============================================================================

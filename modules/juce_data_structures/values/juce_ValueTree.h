@@ -483,6 +483,11 @@ public:
     /** Removes a listener that was previously added with addListener(). */
     void removeListener (Listener* listener);
 
+    /** Changes a named property of the node, but will not notify a specified listener of the change.
+        @see setProperty
+    */
+    ValueTree& setPropertyExcludingListener (Listener* listenerToExclude, const Identifier& name, const var& newValue, UndoManager* undoManager);
+
     /** Causes a property-change callback to be triggered for the specified property,
         calling any listeners that are registered.
     */

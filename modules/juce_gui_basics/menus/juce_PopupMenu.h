@@ -554,8 +554,13 @@ public:
 
             Be careful not to add any items to a menu while it is being iterated,
             or things could get out of step.
+
+            @param menu                 the menu that needs to be scanned
+
+            @param searchRecursively    if true, all submenus will be recursed into to
+                                        do an exhaustive search
         */
-        MenuItemIterator (const PopupMenu& menu);
+        MenuItemIterator (const PopupMenu& menu, bool searchRecursively = false);
 
         /** Destructor. */
         ~MenuItemIterator();
@@ -568,12 +573,15 @@ public:
         /** Returns a reference to the description of the current item.
             It is only valid to call this after next() has returned true!
         */
-        const Item& getItem() const noexcept;
+        Item& getItem() const noexcept;
 
     private:
         //==============================================================================
-        const PopupMenu& menu;
-        int index;
+        bool searchRecursively;
+
+        Array <int> index;
+        Array <const PopupMenu*> menus;
+        PopupMenu::Item *currentItem;
 
         MenuItemIterator& operator= (const MenuItemIterator&);
         JUCE_LEAK_DETECTOR (MenuItemIterator)
