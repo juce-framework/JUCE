@@ -545,7 +545,7 @@ public:
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
     {
-        CFDataRef cfData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) data, (CFIndex) dataSize, kCFAllocatorNull);
+        CFDataRef cfData = CFDataCreate (kCFAllocatorDefault, (const UInt8*) data, (CFIndex) dataSize);
         CGDataProviderRef provider = CGDataProviderCreateWithCFData (cfData);
         CFRelease (cfData);
 
