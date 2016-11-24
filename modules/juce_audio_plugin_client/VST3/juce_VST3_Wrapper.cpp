@@ -787,7 +787,11 @@ private:
                 rect = *newSize;
 
                 if (component != nullptr)
+                {
                     component->setSize (rect.getWidth(), rect.getHeight());
+                    if (ComponentPeer* const peer = component->getPeer())
+                        peer->updateBounds();
+                }
 
                 return kResultTrue;
             }
