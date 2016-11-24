@@ -385,7 +385,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
                             URL::DownloadTask::Listener* listenerToUse)
          : targetLocation (targetLocationToUse), listener (listenerToUse),
            delegate (nullptr), session (nullptr), downloadTask (nullptr),
-           connectFinished (false), calledComplete (0)
+           connectFinished (false), hasBeenDestroyed (false), calledComplete (0)
     {
         downloaded = -1;
 
@@ -422,7 +422,16 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
     ~BackgroundDownloadTask()
     {
-        [session release];
+        if (httpCode != -1)
+            httpCode = 500;
+
+        finished = true;
+        connectionEvent.signal();
+
+        [session invalidateAndCancel];
+        while (! hasBeenDestroyed)
+            destroyEvent.wait();
+
         [delegate release];
     }
 
@@ -435,7 +444,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     {
         [downloadTask resume];
         while (downloaded == -1 && finished == false)
-            Thread::sleep (1);
+            connectionEvent.wait();
 
         connectFinished = true;
         return ! error;
@@ -447,8 +456,9 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     NSObject<NSURLSessionDelegate>* delegate;
     NSURLSession* session;
     NSURLSessionDownloadTask* downloadTask;
-    bool connectFinished;
+    bool connectFinished, hasBeenDestroyed;
     Atomic<int> calledComplete;
+    WaitableEvent connectionEvent, destroyEvent;
 
     void didWriteData (int64 totalBytesWritten, int64 totalBytesExpectedToWrite)
     {
@@ -459,6 +469,8 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
         if (connectFinished && error == false && finished == false && listener != nullptr)
             listener->progress (this, totalBytesWritten, contentLength);
+
+        connectionEvent.signal();
     }
 
    void didFinishDownloadingToURL (NSURL* location)
@@ -469,6 +481,8 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
                                      error:nullptr] == NO);
        httpCode = 200;
        finished = true;
+
+       connectionEvent.signal();
 
        if (listener != nullptr && calledComplete.exchange (1) == 0)
        {
@@ -513,7 +527,15 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
            if (listener != nullptr)
                listener->finished (this, ! error);
        }
-   }
+
+       connectionEvent.signal();
+    }
+
+    void didBecomeInvalidWithError()
+    {
+        hasBeenDestroyed = true;
+        destroyEvent.signal();
+    }
 
     //==============================================================================
     struct DelegateClass  : public ObjCClass<NSObject<NSURLSessionDelegate> >
@@ -528,6 +550,8 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
                        didFinishDownloadingToURL,        "v@:@@@");
             addMethod (@selector (URLSession:task:didCompleteWithError:),
                        didCompleteWithError,        "v@:@@@");
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),
+                       didBecomeInvalidWithError,   "v@:@@@");
 
             registerClass();
         }
@@ -549,6 +573,11 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
         static void didCompleteWithError (id self, SEL, NSURLSession*, NSURLSessionTask*, NSError* nsError)
         {
             if (auto state = getState (self)) state->didCompleteWithError (nsError);
+        }
+
+        static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSURLSessionTask*, NSError*)
+        {
+            if (auto state = getState (self)) state->didBecomeInvalidWithError ();
         }
     };
 };
