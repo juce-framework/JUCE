@@ -366,7 +366,7 @@ public:
         @returns     0 if the two strings are identical; negative if this string comes before
                      the other one alphabetically, or positive if it comes after it.
     */
-    int compareNatural (StringRef other) const noexcept;
+    int compareNatural (StringRef other, bool isCaseSensitive = false) const noexcept;
 
     /** Tests whether the string begins with another string.
         If the parameter is an empty string, this will always return true.

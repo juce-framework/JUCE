@@ -672,7 +672,7 @@ static int stringCompareLeft (String::CharPointerType s1, String::CharPointerTyp
     }
 }
 
-static int naturalStringCompare (String::CharPointerType s1, String::CharPointerType s2) noexcept
+static int naturalStringCompare (String::CharPointerType s1, String::CharPointerType s2, bool isCaseSensitive) noexcept
 {
     bool firstLoop = true;
 
@@ -701,7 +701,7 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
         juce_wchar c1 = s1.getAndAdvance();
         juce_wchar c2 = s2.getAndAdvance();
 
-        if (c1 != c2)
+        if (c1 != c2 && ! isCaseSensitive)
         {
             c1 = CharacterFunctions::toUpperCase (c1);
             c2 = CharacterFunctions::toUpperCase (c2);
@@ -727,9 +727,9 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
     }
 }
 
-int String::compareNatural (StringRef other) const noexcept
+int String::compareNatural (StringRef other, bool isCaseSensitive) const noexcept
 {
-    return naturalStringCompare (getCharPointer(), other.text);
+    return naturalStringCompare (getCharPointer(), other.text, isCaseSensitive);
 }
 
 //==============================================================================

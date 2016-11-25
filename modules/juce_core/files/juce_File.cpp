@@ -229,9 +229,9 @@ bool File::areFileNamesCaseSensitive()
 static int compareFilenames (const String& name1, const String& name2) noexcept
 {
    #if NAMES_ARE_CASE_SENSITIVE
-    return name1.compare (name2);
+    return name1.compareNatural (name2, true);
    #else
-    return name1.compareIgnoreCase (name2);
+    return name1.compareNatural (name2, false);
    #endif
 }
 
