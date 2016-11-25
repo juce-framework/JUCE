@@ -381,7 +381,7 @@ AudioIODeviceType* AudioDeviceManager::findType (const String& inputName, const 
     return nullptr;
 }
 
-void AudioDeviceManager::getAudioDeviceSetup (AudioDeviceSetup& setup)
+void AudioDeviceManager::getAudioDeviceSetup (AudioDeviceSetup& setup) const
 {
     setup = currentSetup;
 }

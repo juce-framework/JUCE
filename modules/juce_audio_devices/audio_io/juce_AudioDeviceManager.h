@@ -211,7 +211,7 @@ public:
     /** Returns the current device properties that are in use.
         @see setAudioDeviceSetup
     */
-    void getAudioDeviceSetup (AudioDeviceSetup& result);
+    void getAudioDeviceSetup (AudioDeviceSetup& result) const;
 
     /** Changes the current device or its settings.
 
