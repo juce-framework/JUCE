@@ -541,11 +541,15 @@ public:
           fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
           isMemoryFont (true),
+          dataCopy (data, dataSize),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
     {
-        CFDataRef cfData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) data, (CFIndex) dataSize, kCFAllocatorNull);
+        // We can't use CFDataCreate here as this triggers a false positive in ASAN
+        // so copy the data manually and use CFDataCreateWithBytesNoCopy
+        CFDataRef cfData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) dataCopy.getData(),
+                                                        (CFIndex) dataCopy.getSize(), kCFAllocatorNull);
         CGDataProviderRef provider = CGDataProviderCreateWithCFData (cfData);
         CFRelease (cfData);
 
@@ -709,6 +713,7 @@ public:
     bool isMemoryFont;
 
 private:
+    MemoryBlock dataCopy;
     CFDictionaryRef attributedStringAtts;
     float ascent, unitsToHeightScaleFactor;
     AffineTransform pathTransform;

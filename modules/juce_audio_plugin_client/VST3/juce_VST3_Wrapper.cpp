@@ -705,7 +705,7 @@ private:
    #endif
 
     //==============================================================================
-    class JuceVST3Editor : public Vst::EditorView
+    class JuceVST3Editor : public Vst::EditorView, private Timer
     {
     public:
         JuceVST3Editor (JuceVST3EditController& ec, AudioProcessor& p)
@@ -757,6 +757,10 @@ private:
             systemWindow = parent;
             attachedToParent();
 
+            // Life's too short to faff around with wave lab
+            if (getHostType().isWavelab())
+                startTimer (200);
+
             return kResultTrue;
         }
 
@@ -787,7 +791,11 @@ private:
                 rect = *newSize;
 
                 if (component != nullptr)
+                {
                     component->setSize (rect.getWidth(), rect.getHeight());
+                    if (ComponentPeer* const peer = component->getPeer())
+                        peer->updateBounds();
+                }
 
                 return kResultTrue;
             }
@@ -839,6 +847,15 @@ private:
         }
 
     private:
+        void timerCallback() override
+        {
+            stopTimer ();
+
+            ViewRect rect;
+            getSize (&rect);
+            onSize (&rect);
+        }
+
         //==============================================================================
         class ContentWrapperComponent  : public Component
         {
