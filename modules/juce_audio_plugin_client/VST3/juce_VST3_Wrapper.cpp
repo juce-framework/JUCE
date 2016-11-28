@@ -851,9 +851,9 @@ private:
         {
             stopTimer ();
 
-            ViewRect rect;
-            getSize (&rect);
-            onSize (&rect);
+            ViewRect viewRect;
+            getSize (&viewRect);
+            onSize (&viewRect);
         }
 
         //==============================================================================
