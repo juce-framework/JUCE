@@ -182,7 +182,7 @@ private:
     //==============================================================================
     String hostName;
     int volatile portNumber, handle;
-    bool connected, isListener;
+    bool connected, isListener, isLocalConnection;
     mutable CriticalSection readLock;
 
     StreamingSocket (const String& hostname, int portNumber, int handle);

@@ -327,11 +327,34 @@ namespace SocketHelpers
         return nullptr;
     }
 
+    static String getIPAddress (const struct sockaddr *sa)
+    {
+        MemoryBlock block;
+
+        switch(sa->sa_family) {
+            case AF_INET:
+                block.setSize(INET_ADDRSTRLEN, true);
+                inet_ntop(AF_INET, &(((struct sockaddr_in *)sa)->sin_addr),
+                          static_cast<char*>(block.getData()),
+                          static_cast<socklen_t>(block.getSize()));
+                break;
+            case AF_INET6:
+                block.setSize(INET6_ADDRSTRLEN, true);
+                inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)sa)->sin6_addr),
+                          static_cast<char*>(block.getData()),
+                          static_cast<socklen_t>(block.getSize()));
+                break;
+        }
+
+        return block.toString();
+    }
+
     static bool connectSocket (int volatile& handle,
                                CriticalSection& readLock,
                                const String& hostName,
                                const int portNumber,
-                               const int timeOutMillisecs) noexcept
+                               const int timeOutMillisecs,
+                               bool& isLocalConnection) noexcept
     {
         bool success = false;
 
@@ -364,6 +387,14 @@ namespace SocketHelpers
                     if (success)
                     {
                         handle = (int) newHandle;
+                        isLocalConnection = false;
+
+                        Array<IPAddress> ips;
+                        IPAddress::findAllAddresses(ips);
+                        for (int count = 0; count < ips.size(); ++count)
+                            if (ips[count].toString() == getIPAddress(i->ai_addr))
+                                isLocalConnection = true;
+
                         break;
                     }
 
@@ -416,7 +447,8 @@ StreamingSocket::StreamingSocket()
     : portNumber (0),
       handle (-1),
       connected (false),
-      isListener (false)
+      isListener (false),
+      isLocalConnection(false)
 {
     SocketHelpers::initSockets();
 }
@@ -426,7 +458,8 @@ StreamingSocket::StreamingSocket (const String& host, int portNum, int h)
       portNumber (portNum),
       handle (h),
       connected (true),
-      isListener (false)
+      isListener (false),
+      isLocalConnection(false)
 {
     jassert (SocketHelpers::isValidPortNumber (portNum));
 
@@ -501,7 +534,8 @@ bool StreamingSocket::connect (const String& remoteHostName,
     isListener = false;
 
     connected = SocketHelpers::connectSocket (handle, readLock, remoteHostName,
-                                              remotePortNumber, timeOutMillisecs);
+                                              remotePortNumber, timeOutMillisecs,
+                                              isLocalConnection);
 
     if (! (connected && SocketHelpers::resetSocketOptions (handle, false, false)))
     {
@@ -533,6 +567,7 @@ bool StreamingSocket::createListener (const int newPortNumber, const String& loc
     hostName = "listener";
     portNumber = newPortNumber;
     isListener = true;
+    isLocalConnection = false;
 
     handle = (int) socket (AF_INET, SOCK_STREAM, 0);
 
@@ -576,7 +611,7 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
 
 bool StreamingSocket::isLocal() const noexcept
 {
-    return hostName == "127.0.0.1";
+    return isLocalConnection;
 }
 
 
