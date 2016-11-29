@@ -1721,6 +1721,8 @@ struct VST3ComponentHolder
                                      info, info2, infoW,
                                      totalNumInputChannels,
                                      totalNumOutputChannels);
+
+            return;
         }
 
         jassertfalse;
