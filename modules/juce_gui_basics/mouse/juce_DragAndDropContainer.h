@@ -169,10 +169,10 @@ protected:
                                                        StringArray& files, bool& canMoveFiles);
 
     /** Subclasses can override this to be told when a drag starts. */
-    virtual void dragOperationStarted();
+    virtual void dragOperationStarted (const DragAndDropTarget::SourceDetails& sourceDetails);
 
     /** Subclasses can override this to be told when a drag finishes. */
-    virtual void dragOperationEnded();
+    virtual void dragOperationEnded (const DragAndDropTarget::SourceDetails& sourceDetails);
 
 private:
     //==============================================================================
@@ -181,6 +181,8 @@ private:
     friend struct ContainerDeletePolicy<DragImageComponent>;
     ScopedPointer<DragImageComponent> dragImageComponent;
 
+    JUCE_DEPRECATED_WITH_BODY (virtual void dragOperationStarted (), {});
+    JUCE_DEPRECATED_WITH_BODY (virtual void dragOperationEnded (), {});
     JUCE_DEPRECATED_WITH_BODY (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&), { return false; })
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer)
