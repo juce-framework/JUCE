@@ -23,6 +23,4 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_opengl/juce_opengl.h>
 
-using namespace juce;
-
 #endif   // __APPHEADERFILE_G0NL76__
