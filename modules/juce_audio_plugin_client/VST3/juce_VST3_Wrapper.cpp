@@ -1385,6 +1385,8 @@ public:
         FUnknownPtr<IBStream> stateRefHolder (state); // just in case the caller hasn't properly ref-counted the stream object
 
         if (state->seek (0, IBStream::kIBSeekSet, nullptr) == kResultTrue)
+            if (getHostType().isFruityLoops())
+                return readFromUnknownStream (state) ? kResultTrue : kResultFalse;
             if (readFromMemoryStream (state) || readFromUnknownStream (state))
                 return kResultTrue;
 
