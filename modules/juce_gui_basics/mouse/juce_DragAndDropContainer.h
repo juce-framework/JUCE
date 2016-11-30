@@ -181,8 +181,13 @@ private:
     friend struct ContainerDeletePolicy<DragImageComponent>;
     ScopedPointer<DragImageComponent> dragImageComponent;
 
-    JUCE_DEPRECATED_WITH_BODY (virtual void dragOperationStarted (), {});
-    JUCE_DEPRECATED_WITH_BODY (virtual void dragOperationEnded (), {});
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // This is just here to cause a compile error in old code that hasn't been changed to use the new
+    // version of this method.
+    virtual int dragOperationStarted()              { return 0; }
+    virtual int dragOperationEnded()                { return 0; }
+   #endif
+
     JUCE_DEPRECATED_WITH_BODY (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&), { return false; })
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer)
