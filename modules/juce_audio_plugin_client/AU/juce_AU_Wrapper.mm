@@ -998,6 +998,11 @@ public:
         bool isInput;
         int busNr;
 
+        // DSP Quattro incorrectly uses global scope for the ValidFormat call
+        if (scope == kAudioUnitScope_Global)
+            return ValidFormat (kAudioUnitScope_Input,  element, format)
+                || ValidFormat (kAudioUnitScope_Output, element, format);
+
         if (elementToBusIdx (scope, element, isInput, busNr) != noErr)
             return false;
 
