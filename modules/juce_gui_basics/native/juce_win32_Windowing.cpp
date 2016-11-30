@@ -1304,11 +1304,12 @@ private:
                 case WM_NCMOUSEHOVER:
                 case WM_MOUSEHOVER:
                 case WM_TOUCH:
+               #ifdef WM_POINTERUPDATE
                 case WM_POINTERUPDATE:
                 case WM_POINTERDOWN:
                 case WM_POINTERUP:
+               #endif
                     return isHWNDBlockedByModalComponents (m.hwnd);
-
                 case WM_NCLBUTTONDOWN:
                 case WM_NCLBUTTONDBLCLK:
                 case WM_NCRBUTTONDOWN:
@@ -2035,6 +2036,7 @@ private:
         return true;
     }
 
+   #ifdef WM_POINTERUPDATE
     TOUCHINPUT emulateTouchEventFromPointer (LPARAM lParam, WPARAM wParam)
     {
         TOUCHINPUT touchInput;
@@ -2045,6 +2047,7 @@ private:
 
         return touchInput;
     }
+   #endif
 
     //==============================================================================
     void sendModifierKeyChangeIfNeeded()
@@ -2535,16 +2538,19 @@ private:
                 return 1;
 
             //==============================================================================
+           #ifdef WM_POINTERUPDATE
             case WM_POINTERUPDATE:      handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, false); return 0;
+            case WM_POINTERDOWN:        handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), true, false);  return 0;
+            case WM_POINTERUP:          handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, true);  return 0;
+           #endif
+
             case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;
             case WM_MOUSELEAVE:         doMouseExit(); return 0;
 
-            case WM_POINTERDOWN:        handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), true, false); return 0;
             case WM_LBUTTONDOWN:
             case WM_MBUTTONDOWN:
             case WM_RBUTTONDOWN:        doMouseDown (getPointFromLParam (lParam), wParam); return 0;
 
-            case WM_POINTERUP:          handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, true); return 0;
             case WM_LBUTTONUP:
             case WM_MBUTTONUP:
             case WM_RBUTTONUP:          doMouseUp (getPointFromLParam (lParam), wParam); return 0;

@@ -56,6 +56,7 @@
 #include <iostream>
 #include <functional>
 #include <algorithm>
+#include <limits>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

@@ -78,6 +78,8 @@
   #pragma warning (push, 0) // disable all warnings whilst including system headers
  #endif
 
+ #define NOMINMAX
+
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
  #if JUCE_MINGW
