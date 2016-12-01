@@ -405,6 +405,10 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::handleXmlReply (XmlElement 
         const String keyText (keyNode->getAllSubText().trim());
         r.succeeded = keyText.length() > 10 && applyKeyFile (keyText);
     }
+    else
+    {
+        r.succeeded = false;
+    }
 
     if (xml.hasTagName ("MESSAGE"))
         r.informativeMessage = xml.getStringAttribute ("message").trim();
@@ -425,6 +429,7 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::handleXmlReply (XmlElement 
 OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::handleFailedConnection()
 {
     UnlockResult r;
+    r.succeeded = false;
 
     r.errorMessage = TRANS("Couldn't connect to XYZ").replace ("XYZ", getWebsiteName()) + "...\n\n";
 
