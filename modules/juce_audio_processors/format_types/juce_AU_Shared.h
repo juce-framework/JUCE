@@ -324,8 +324,8 @@ struct AudioUnitHelpers
 
         void alloc()
         {
-            const int numInputBuses  = processor.getBusCount (true);
-            const int numOutputBuses = processor.getBusCount (false);
+            const int numInputBuses  = AudioUnitHelpers::getBusCount (&processor, true);
+            const int numOutputBuses = AudioUnitHelpers::getBusCount (&processor, false);
 
             initializeChannelMapArray (true, numInputBuses);
             initializeChannelMapArray (false, numOutputBuses);
@@ -611,10 +611,10 @@ struct AudioUnitHelpers
     {
         Array<AUChannelInfo> channelInfo;
 
-        const bool hasMainInputBus  = (processor.getBusCount (true)  > 0);
-        const bool hasMainOutputBus = (processor.getBusCount (false) > 0);
+        const bool hasMainInputBus  = (AudioUnitHelpers::getBusCount (&processor, true)  > 0);
+        const bool hasMainOutputBus = (AudioUnitHelpers::getBusCount (&processor, false) > 0);
 
-        if ((! hasMainInputBus)  && (! hasMainOutputBus))
+        if ((! hasMainInputBus) && (! hasMainOutputBus))
         {
             // midi effect plug-in: no audio
             AUChannelInfo info;
@@ -742,6 +742,73 @@ struct AudioUnitHelpers
         }
 
         return channelInfo;
+    }
+
+    //==============================================================================
+    static int getBusCount (const AudioProcessor* juceFilter, bool isInput)
+    {
+        int busCount = juceFilter->getBusCount (isInput);
+
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+        const int numConfigs = sizeof (configs) / sizeof (short[2]);
+
+        bool hasOnlyZeroChannels = true;
+
+        for (int i = 0; i < numConfigs && hasOnlyZeroChannels == true; ++i)
+            if (configs[i][isInput ? 0 : 1] != 0)
+                hasOnlyZeroChannels = false;
+
+        busCount = jmin (busCount, hasOnlyZeroChannels ? 0 : 1);
+       #endif
+
+        return busCount;
+    }
+
+    static bool setBusesLayout (AudioProcessor* juceFilter, const AudioProcessor::BusesLayout& requestedLayouts)
+    {
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        AudioProcessor::BusesLayout copy (requestedLayouts);
+
+        for (int dir = 0; dir < 2; ++dir)
+        {
+            const bool isInput = (dir == 0);
+
+            const int actualBuses = juceFilter->getBusCount (isInput);
+            const int auNumBuses  = getBusCount (juceFilter, isInput);
+            Array<AudioChannelSet>& buses = (isInput ? copy.inputBuses : copy.outputBuses);
+
+            for (int i = auNumBuses; i < actualBuses; ++i)
+                buses.add (AudioChannelSet::disabled());
+        }
+
+        return juceFilter->setBusesLayout (copy);
+       #else
+        return juceFilter->setBusesLayout (requestedLayouts);
+       #endif
+    }
+
+    static AudioProcessor::BusesLayout getBusesLayout (const AudioProcessor* juceFilter)
+    {
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        AudioProcessor::BusesLayout layout = juceFilter->getBusesLayout();
+
+        for (int dir = 0; dir < 2; ++dir)
+        {
+            const bool isInput = (dir == 0);
+
+            const int actualBuses = juceFilter->getBusCount (isInput);
+            const int auNumBuses  = getBusCount (juceFilter, isInput);
+            Array<AudioChannelSet>& buses = (isInput ? layout.inputBuses : layout.outputBuses);
+
+            for (int i = auNumBuses; i < actualBuses; ++i)
+                buses.removeLast();
+        }
+
+        return layout;
+       #else
+        return juceFilter->getBusesLayout();
+       #endif
     }
 };
 
