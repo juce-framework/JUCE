@@ -39,6 +39,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 {
     OverlayComp (OnlineUnlockForm& f)  : Thread (String()), form (f)
     {
+        result.succeeded = false;
         email = form.emailBox.getText();
         password = form.passwordBox.getText();
         addAndMakeVisible (spinner);
