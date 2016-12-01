@@ -33,9 +33,11 @@
 #endif
 
 #if (_WIN32 || _WIN64)
- // old VS2008 needs this to include the VST3 SDK
- #ifndef nullptr
-  #define nullptr (0)
+ #if (_MSC_VER <= 1500)
+  // old VS2008 needs this to include the VST3 SDK
+  #ifndef nullptr
+   #define nullptr (0)
+  #endif
  #endif
 #endif
 
