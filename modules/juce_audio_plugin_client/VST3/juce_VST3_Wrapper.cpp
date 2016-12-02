@@ -983,6 +983,10 @@ namespace
     template <typename FloatType> struct AudioBusPointerHelper {};
     template <> struct AudioBusPointerHelper<float>  { static inline float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
     template <> struct AudioBusPointerHelper<double> { static inline double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
+
+    template <typename FloatType> struct ChooseBufferHelper {};
+    template <> struct ChooseBufferHelper<float>  { static inline AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
+    template <> struct ChooseBufferHelper<double> { static inline AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
 }
 
 
@@ -1142,6 +1146,9 @@ public:
         if (! state)
         {
             getPluginInstance().releaseResources();
+
+            deallocateChannelListAndBuffers (channelListFloat,  emptyBufferFloat);
+            deallocateChannelListAndBuffers (channelListDouble, emptyBufferDouble);
         }
         else
         {
@@ -1156,8 +1163,8 @@ public:
                             ? (int) processSetup.maxSamplesPerBlock
                             : bufferSize;
 
-            allocateChannelLists (channelListFloat);
-            allocateChannelLists (channelListDouble);
+            allocateChannelListAndBuffers (channelListFloat,  emptyBufferFloat);
+            allocateChannelListAndBuffers (channelListDouble, emptyBufferDouble);
 
             preparePlugin (sampleRate, bufferSize);
         }
@@ -1947,6 +1954,9 @@ private:
     Array<float*> channelListFloat;
     Array<double*> channelListDouble;
 
+    AudioBuffer<float>  emptyBufferFloat;
+    AudioBuffer<double> emptyBufferDouble;
+
     bool isMidiInputBusEnabled, isMidiOutputBusEnabled;
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
@@ -1965,51 +1975,109 @@ private:
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
     {
         int totalInputChans = 0;
+        bool tmpBufferNeedsClearing = false;
 
         const int plugInInputChannels  = pluginInstance->getTotalNumInputChannels();
         const int plugInOutputChannels = pluginInstance->getTotalNumOutputChannels();
 
-        if (data.inputs != nullptr)
+        // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
+        int vstInputs;
+        for (vstInputs = 0; vstInputs < data.numInputs; ++vstInputs)
+            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr)
+                break;
+
+        int vstOutputs;
+        for (vstOutputs = 0; vstOutputs < data.numOutputs; ++vstOutputs)
+            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr)
+                break;
+
         {
-            for (int bus = 0; bus < data.numInputs && totalInputChans < plugInInputChannels; ++bus)
+            const int n = jmax (vstInputs, getNumAudioBuses (true));
+
+            for (int bus = 0; bus < n && totalInputChans < plugInInputChannels; ++bus)
             {
-                if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
+                if (bus < vstInputs)
                 {
-                    const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
+                    if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
+                    {
+                        const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
+
+                        for (int i = 0; i < numChans; ++i)
+                            if (busChannels[i] != nullptr)
+                                channelList.set (totalInputChans++, busChannels[i]);
+                    }
+                }
+                else
+                {
+                    const int numChans = jmin (pluginInstance->getChannelCountOfBus (true, bus), plugInInputChannels - totalInputChans);
 
                     for (int i = 0; i < numChans; ++i)
-                        if (busChannels[i] != nullptr)
-                            channelList.set (totalInputChans++, busChannels[i]);
+                    {
+                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalInputChans, data.numSamples))
+                        {
+                            tmpBufferNeedsClearing = true;
+                            channelList.set (totalInputChans++, tmpBuffer);
+                        }
+                        else
+                            return;
+                    }
                 }
             }
         }
 
         int totalOutputChans = 0;
 
-        if (data.outputs != nullptr)
         {
-            for (int bus = 0; bus < data.numOutputs && totalOutputChans < plugInOutputChannels; ++bus)
+            const int n = jmax (vstOutputs, getNumAudioBuses (false));
+
+            for (int bus = 0; bus < n && totalOutputChans < plugInOutputChannels; ++bus)
             {
-                if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
+                if (bus < vstOutputs)
                 {
-                    const int numChans = jmin ((int) data.outputs[bus].numChannels, plugInOutputChannels - totalOutputChans);
+                    if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
+                    {
+                        const int numChans = jmin ((int) data.outputs[bus].numChannels, plugInOutputChannels - totalOutputChans);
+
+                        for (int i = 0; i < numChans; ++i)
+                        {
+                            if (busChannels[i] != nullptr)
+                            {
+                                if (totalOutputChans >= totalInputChans)
+                                {
+                                    FloatVectorOperations::clear (busChannels[i], data.numSamples);
+                                    channelList.set (totalOutputChans, busChannels[i]);
+                                }
+
+                                ++totalOutputChans;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    const int numChans = jmin (pluginInstance->getChannelCountOfBus (false, bus), plugInOutputChannels - totalOutputChans);
 
                     for (int i = 0; i < numChans; ++i)
                     {
-                        if (busChannels[i] != nullptr)
+                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalOutputChans, data.numSamples))
                         {
                             if (totalOutputChans >= totalInputChans)
                             {
-                                FloatVectorOperations::clear (busChannels[i], data.numSamples);
-                                channelList.set (totalOutputChans, busChannels[i]);
+                                tmpBufferNeedsClearing = true;
+                                channelList.set (totalOutputChans, tmpBuffer);
                             }
 
                             ++totalOutputChans;
                         }
+                        else
+                            return;
                     }
                 }
             }
         }
+
+        if (tmpBufferNeedsClearing)
+            ChooseBufferHelper<FloatType>::impl (emptyBufferFloat, emptyBufferDouble).clear();
 
         AudioBuffer<FloatType> buffer;
 
@@ -2089,16 +2157,41 @@ private:
 
     //==============================================================================
     template <typename FloatType>
-    void allocateChannelLists (Array<FloatType*>& channelList)
+    void allocateChannelListAndBuffers (Array<FloatType*>& channelList, AudioBuffer<FloatType>& buffer)
     {
         channelList.clearQuick();
         channelList.insertMultiple (0, nullptr, 128);
+
+        const AudioProcessor& p = getPluginInstance();
+        buffer.setSize (jmax (p.getTotalNumInputChannels(), p.getTotalNumOutputChannels()), p.getBlockSize() * 4);
+        buffer.clear();
+    }
+
+    template <typename FloatType>
+    void deallocateChannelListAndBuffers (Array<FloatType*>& channelList, AudioBuffer<FloatType>& buffer)
+    {
+        channelList.clearQuick();
+        channelList.resize (0);
+        buffer.setSize (0, 0);
     }
 
     template <typename FloatType>
     static FloatType** getPointerForAudioBus (Vst::AudioBusBuffers& data) noexcept
     {
         return AudioBusPointerHelper<FloatType>::impl (data);
+    }
+
+    template <typename FloatType>
+    FloatType* getTmpBufferForChannel (int channel, int numSamples) noexcept
+    {
+        AudioBuffer<FloatType>& buffer = ChooseBufferHelper<FloatType>::impl (emptyBufferFloat, emptyBufferDouble);
+
+        // we can't do anything if the host requests to render many more samples than the
+        // block size, we need to bail out
+        if (numSamples > buffer.getNumSamples() || channel >= buffer.getNumChannels())
+            return nullptr;
+
+        return buffer.getWritePointer (channel);
     }
 
     void preparePlugin (double sampleRate, int bufferSize)
