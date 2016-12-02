@@ -178,6 +178,21 @@ MidiFile::~MidiFile()
 {
 }
 
+MidiFile::MidiFile (const MidiFile& other)
+    : timeFormat (other.timeFormat)
+{
+    tracks.addCopiesOf (other.tracks);
+}
+
+MidiFile& MidiFile::operator= (const MidiFile& other)
+{
+    timeFormat = other.timeFormat;
+    tracks.clear();
+    tracks.addCopiesOf (other.tracks);
+
+    return *this;
+}
+
 void MidiFile::clear()
 {
     tracks.clear();

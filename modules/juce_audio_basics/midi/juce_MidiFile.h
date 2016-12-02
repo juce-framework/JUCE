@@ -50,6 +50,12 @@ public:
     /** Destructor. */
     ~MidiFile();
 
+    /** Creates a copy of another MidiFile. */
+    MidiFile (const MidiFile& other);
+
+    /** Copies from another MidiFile object */
+    MidiFile& operator= (const MidiFile& other);
+
     //==============================================================================
     /** Returns the number of tracks in the file.
         @see getTrack, addTrack
@@ -173,7 +179,7 @@ private:
     void readNextTrack (const uint8*, int size);
     void writeTrack (OutputStream&, int trackNum);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiFile)
+    JUCE_LEAK_DETECTOR (MidiFile)
 };
 
 
