@@ -297,7 +297,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
         {
             CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.001, true);
 
-            NSEvent* e = [NSApp nextEventMatchingMask: NSAnyEventMask
+            NSEvent* e = [NSApp nextEventMatchingMask: NSEventMaskAny
                                             untilDate: [NSDate dateWithTimeIntervalSinceNow: 0.001]
                                                inMode: NSDefaultRunLoopMode
                                               dequeue: YES];

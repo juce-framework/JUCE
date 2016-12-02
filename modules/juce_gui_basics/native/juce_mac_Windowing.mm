@@ -89,8 +89,8 @@ private:
         [alert setMessageText:     juceStringToNS (title)];
         [alert setInformativeText: juceStringToNS (message)];
 
-        [alert setAlertStyle: iconType == AlertWindow::WarningIcon ? NSCriticalAlertStyle
-                                                                   : NSInformationalAlertStyle];
+        [alert setAlertStyle: iconType == AlertWindow::WarningIcon ? NSAlertStyleCritical
+                                                                   : NSAlertStyleInformational];
         addButton (alert, button1);
         addButton (alert, button2);
         addButton (alert, button3);
@@ -419,7 +419,7 @@ Image juce_createIconForFile (const File& file)
         selectImageForDrawing (result);
         [image drawAtPoint: NSMakePoint (0, 0)
                   fromRect: NSMakeRect (0, 0, [image size].width, [image size].height)
-                 operation: NSCompositeSourceOver fraction: 1.0f];
+                 operation: NSCompositingOperationSourceOver fraction: 1.0f];
         releaseImageAfterDrawing();
 
         return result;
