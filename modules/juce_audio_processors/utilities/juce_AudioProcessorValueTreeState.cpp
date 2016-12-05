@@ -29,14 +29,12 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                                                    private ValueTree::Listener
 {
     Parameter (AudioProcessorValueTreeState& s,
-               String parameterID, String paramName, String labelText,
+               const String& parameterID, const String& paramName, const String& labelText,
                NormalisableRange<float> r, float defaultVal,
                std::function<String (float)> valueToText,
                std::function<float (const String&)> textToValue)
-        : AudioProcessorParameterWithID (parameterID, paramName),
-          owner (s), label (labelText),
-          valueToTextFunction (valueToText),
-          textToValueFunction (textToValue),
+        : AudioProcessorParameterWithID (parameterID, paramName, labelText),
+          owner (s), valueToTextFunction (valueToText), textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
           listenersNeedCalling (true)
     {
@@ -52,7 +50,6 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     float getValue() const override                             { return range.convertTo0to1 (value); }
     float getDefaultValue() const override                      { return range.convertTo0to1 (defaultValue); }
-    String getLabel() const override                            { return label; }
 
     float getValueForText (const String& text) const override
     {
@@ -149,7 +146,6 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     AudioProcessorValueTreeState& owner;
     ValueTree state;
-    String label;
     ListenerList<AudioProcessorValueTreeState::Listener> listeners;
     std::function<String (float)> valueToTextFunction;
     std::function<float (const String&)> textToValueFunction;
@@ -176,9 +172,9 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& p, U
 
 AudioProcessorValueTreeState::~AudioProcessorValueTreeState() {}
 
-AudioProcessorParameter* AudioProcessorValueTreeState::createAndAddParameter (String paramID, String paramName, String labelText,
-                                                                              NormalisableRange<float> r, float defaultVal,
-                                                                              std::function<String (float)> valueToTextFunction,
+AudioProcessorParameter* AudioProcessorValueTreeState::createAndAddParameter (const String& paramID, const String& paramName,
+                                                                              const String& labelText, NormalisableRange<float> r,
+                                                                              float defaultVal, std::function<String (float)> valueToTextFunction,
                                                                               std::function<float (const String&)> textToValueFunction)
 {
     // All parameters must be created before giving this manager a ValueTree state!

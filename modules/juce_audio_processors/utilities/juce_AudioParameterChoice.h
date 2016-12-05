@@ -34,9 +34,10 @@ public:
     /** Creates a AudioParameterChoice with an ID, name, and list of items.
         On creation, its value is set to the default index.
     */
-    AudioParameterChoice (String parameterID, String name,
+    AudioParameterChoice (const String& parameterID, const String& name,
                           const StringArray& choices,
-                          int defaultItemIndex);
+                          int defaultItemIndex,
+                          const String& label = String());
 
     /** Destructor. */
     ~AudioParameterChoice();
