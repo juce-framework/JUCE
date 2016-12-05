@@ -75,22 +75,14 @@ class ListenerListTests : public UnitTest
 public:
     ListenerListTests() : UnitTest ("ListenerList") {}
 
-    template <typename T>
-    void callHelper (std::vector<int>& expectedCounterValues, T v)
+    template <typename... Args>
+    void callHelper (std::vector<int>& expectedCounterValues)
     {
-        counter = 0;
-        listeners.call (&ListenerBase::f, v);
-        expect (counter == expectedCounterValues[1]);
-
         counter = 0;
         listeners.call (&ListenerBase::f);
         expect (counter == expectedCounterValues[0]);
 
         ListenerList<ListenerBase>::DummyBailOutChecker boc;
-
-        counter = 0;
-        listeners.callChecked (boc, &ListenerBase::f, v);
-        expect (counter == expectedCounterValues[1]);
 
         counter = 0;
         listeners.callChecked (boc, &ListenerBase::f);
@@ -114,23 +106,15 @@ public:
         callHelper (expectedCounterValues, args...);
     }
 
-    template <typename T>
+    template <typename... Args>
     void callExcludingHelper (ListenerBase& listenerToExclude,
-                              std::vector<int>& expectedCounterValues, T v)
+                              std::vector<int>& expectedCounterValues)
     {
-        counter = 0;
-        listeners.callExcluding (listenerToExclude, &ListenerBase::f, v);
-        expect (counter == expectedCounterValues[1]);
-
         counter = 0;
         listeners.callExcluding (listenerToExclude, &ListenerBase::f);
         expect (counter == expectedCounterValues[0]);
 
         ListenerList<ListenerBase>::DummyBailOutChecker boc;
-
-        counter = 0;
-        listeners.callCheckedExcluding (listenerToExclude, boc, &ListenerBase::f, v);
-        expect (counter == expectedCounterValues[1]);
 
         counter = 0;
         listeners.callCheckedExcluding (listenerToExclude, boc, &ListenerBase::f);

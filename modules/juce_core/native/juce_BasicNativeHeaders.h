@@ -42,6 +42,46 @@
   #include <sys/fcntl.h>
  #else
   #import <Cocoa/Cocoa.h>
+  #if (! defined MAC_OS_X_VERSION_10_12) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12
+   #define NSEventModifierFlagCommand       NSCommandKeyMask
+   #define NSEventModifierFlagControl       NSControlKeyMask
+   #define NSEventModifierFlagHelp          NSHelpKeyMask
+   #define NSEventModifierFlagNumericPad    NSNumericPadKeyMask
+   #define NSEventModifierFlagOption        NSAlternateKeyMask
+   #define NSEventModifierFlagShift         NSShiftKeyMask
+   #define NSCompositingOperationSourceOver NSCompositeSourceOver
+   #define NSEventMaskApplicationDefined    NSApplicationDefinedMask
+   #define NSEventTypeApplicationDefined    NSApplicationDefined
+   #define NSEventTypeCursorUpdate          NSCursorUpdate
+   #define NSEventTypeMouseMoved            NSMouseMoved
+   #define NSEventTypeLeftMouseDown         NSLeftMouseDown
+   #define NSEventTypeRightMouseDown        NSRightMouseDown
+   #define NSEventTypeOtherMouseDown        NSOtherMouseDown
+   #define NSEventTypeLeftMouseUp           NSLeftMouseUp
+   #define NSEventTypeRightMouseUp          NSRightMouseUp
+   #define NSEventTypeOtherMouseUp          NSOtherMouseUp
+   #define NSEventTypeLeftMouseDragged      NSLeftMouseDragged
+   #define NSEventTypeRightMouseDragged     NSRightMouseDragged
+   #define NSEventTypeOtherMouseDragged     NSOtherMouseDragged
+   #define NSEventTypeScrollWheel           NSScrollWheel
+   #define NSEventTypeKeyDown               NSKeyDown
+   #define NSEventTypeKeyUp                 NSKeyUp
+   #define NSEventTypeFlagsChanged          NSFlagsChanged
+   #define NSEventMaskAny                   NSAnyEventMask
+   #define NSWindowStyleMaskBorderless      NSBorderlessWindowMask
+   #define NSWindowStyleMaskClosable        NSClosableWindowMask
+   #define NSWindowStyleMaskFullScreen      NSFullScreenWindowMask
+   #define NSWindowStyleMaskMiniaturizable  NSMiniaturizableWindowMask
+   #define NSWindowStyleMaskResizable       NSResizableWindowMask
+   #define NSWindowStyleMaskTitled          NSTitledWindowMask
+   #define NSAlertStyleCritical             NSCriticalAlertStyle
+   #define NSControlSizeRegular             NSRegularControlSize
+   #define NSEventTypeMouseEntered          NSMouseEntered
+   #define NSEventTypeMouseExited           NSMouseExited
+   #define NSAlertStyleInformational        NSInformationalAlertStyle
+   #define NSEventTypeTabletPoint           NSTabletPoint
+   #define NSEventTypeTabletProximity       NSTabletProximity
+  #endif
   #import <CoreAudio/HostTime.h>
   #include <sys/dir.h>
  #endif
@@ -78,12 +118,14 @@
   #pragma warning (push, 0) // disable all warnings whilst including system headers
  #endif
 
+ #define NOMINMAX
+
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
  #if JUCE_MINGW
   #define _WIN32_WINNT 0x0501
  #else
-  #define _WIN32_WINNT 0x0600
+  #define _WIN32_WINNT 0x0602
  #endif
  #define _UNICODE 1
  #define UNICODE 1

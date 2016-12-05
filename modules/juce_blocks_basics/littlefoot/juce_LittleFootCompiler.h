@@ -985,10 +985,16 @@ private:
     //==============================================================================
     struct Statement  : public AllocatedObject
     {
+        struct Visitor
+        {
+            virtual ~Visitor() {}
+            virtual void operator()(StatementPtr) = 0;
+        };
+
         Statement (const CodeLocation& l, BlockPtr parent) noexcept : location (l), parentBlock (parent) {}
         virtual void emit (CodeGenerator&, Type, int /*stackDepth*/) const {}
         virtual bool alwaysReturns() const                  { return false; }
-        virtual void visitSubStatements (std::function<void(StatementPtr)>) const {}
+        virtual void visitSubStatements (Visitor&) const {}
         virtual Statement* simplify (SyntaxTreeBuilder&)    { return this; }
 
         CodeLocation location;
@@ -1077,15 +1083,25 @@ private:
 
         static int countMaxNumLocalVariables (StatementPtr s) noexcept
         {
-            int num = 0;
+            struct Counter : Statement::Visitor
+            {
+                void operator() (StatementPtr sub) override
+                {
+                    num = jmax (num, countMaxNumLocalVariables (sub));
+                }
+
+                int num = 0;
+            };
+
+            Counter counter;
 
             if (s != nullptr)
-                s->visitSubStatements ([&] (StatementPtr sub) { num = jmax (num, countMaxNumLocalVariables (sub)); });
+                s->visitSubStatements (counter);
 
             if (auto block = dynamic_cast<BlockPtr> (s))
-                num += block->variables.size();
+                counter.num += block->variables.size();
 
-            return num;
+            return counter.num;
         }
     };
 
@@ -1109,7 +1125,7 @@ private:
             return ! statements.isEmpty() && statements.getLast()->alwaysReturns();
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             for (auto s : statements)
                 visit (s);
@@ -1234,7 +1250,7 @@ private:
             return trueBranch->alwaysReturns() && falseBranch != nullptr && falseBranch->alwaysReturns();
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (condition); visit (trueBranch); visit (falseBranch);
         }
@@ -1282,7 +1298,7 @@ private:
             return type;
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (condition); visit (trueBranch); visit (falseBranch);
         }
@@ -1340,7 +1356,7 @@ private:
             cg.continueTarget = oldContinueTarget;
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (condition); visit (initialiser); visit (iterator); visit (body);
         }
@@ -1374,7 +1390,7 @@ private:
 
         bool alwaysReturns() const override     { return true; }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (returnValue);
         }
@@ -1508,7 +1524,7 @@ private:
             return  Type::int_;
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (source);
         }
@@ -1627,7 +1643,7 @@ private:
             return getResultType (lhs->getType (cg), rhs->getType (cg));
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (lhs); visit (rhs);
         }
@@ -1748,7 +1764,7 @@ private:
             return parentBlock->getVariableType (target, location);
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (newValue);
         }
@@ -1896,7 +1912,7 @@ private:
             location.throwError ("Cannot find matching function: " + desc.quoted());
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             for (auto& arg : arguments)
                 visit (arg);
@@ -1915,7 +1931,7 @@ private:
             location.throwError ("Arrays are not implemented yet!");
         }
 
-        void visitSubStatements (std::function<void(StatementPtr)> visit) const override
+        void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (object); visit (index);
         }

@@ -165,6 +165,18 @@ public:
     /** Re-sets the pitchbend range in semitones (0-96) to be used for notes when in legacy mode. */
     void setLegacyModePitchbendRange (int pitchbendRange);
 
+    //==============================================================================
+    typedef MPEInstrument::TrackingMode TrackingMode;
+
+    /** Set the MPE tracking mode for the pressure dimension. */
+    void setPressureTrackingMode (TrackingMode modeToUse);
+
+    /** Set the MPE tracking mode for the pitchbend dimension. */
+    void setPitchbendTrackingMode (TrackingMode modeToUse);
+
+    /** Set the MPE tracking mode for the timbre dimension. */
+    void setTimbreTrackingMode (TrackingMode modeToUse);
+
 protected:
     //==============================================================================
     /** Implement this method to render your audio inside.

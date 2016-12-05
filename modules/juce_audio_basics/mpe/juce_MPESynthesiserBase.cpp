@@ -83,6 +83,22 @@ void MPESynthesiserBase::setLegacyModePitchbendRange (int pitchbendRange)
 }
 
 //==============================================================================
+void MPESynthesiserBase::setPressureTrackingMode (TrackingMode modeToUse)
+{
+    instrument->setPressureTrackingMode (modeToUse);
+}
+
+void MPESynthesiserBase::setPitchbendTrackingMode (TrackingMode modeToUse)
+{
+    instrument->setPitchbendTrackingMode (modeToUse);
+}
+
+void MPESynthesiserBase::setTimbreTrackingMode (TrackingMode modeToUse)
+{
+    instrument->setTimbreTrackingMode (modeToUse);
+}
+
+//==============================================================================
 void MPESynthesiserBase::handleMidiEvent (const MidiMessage& m)
 {
     instrument->processNextMidiEvent (m);

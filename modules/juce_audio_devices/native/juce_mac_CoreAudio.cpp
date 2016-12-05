@@ -34,7 +34,8 @@
 
  // The AudioHardwareService stuff was deprecated in 10.11 but there's no replacement yet,
  // so we'll have to silence the warnings here and revisit it in a future OS version..
- #if defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_11
+ #if ((defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_12) \
+   || (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_11))
   #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #endif
 #endif

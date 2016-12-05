@@ -1304,8 +1304,12 @@ private:
                 case WM_NCMOUSEHOVER:
                 case WM_MOUSEHOVER:
                 case WM_TOUCH:
+               #ifdef WM_POINTERUPDATE
+                case WM_POINTERUPDATE:
+                case WM_POINTERDOWN:
+                case WM_POINTERUP:
+               #endif
                     return isHWNDBlockedByModalComponents (m.hwnd);
-
                 case WM_NCLBUTTONDOWN:
                 case WM_NCLBUTTONDBLCLK:
                 case WM_NCRBUTTONDOWN:
@@ -2032,6 +2036,19 @@ private:
         return true;
     }
 
+   #ifdef WM_POINTERUPDATE
+    TOUCHINPUT emulateTouchEventFromPointer (LPARAM lParam, WPARAM wParam)
+    {
+        TOUCHINPUT touchInput;
+
+        touchInput.dwID = GET_POINTERID_WPARAM (wParam);
+        touchInput.x = GET_X_LPARAM (lParam) * 100;
+        touchInput.y = GET_Y_LPARAM (lParam) * 100;
+
+        return touchInput;
+    }
+   #endif
+
     //==============================================================================
     void sendModifierKeyChangeIfNeeded()
     {
@@ -2521,6 +2538,12 @@ private:
                 return 1;
 
             //==============================================================================
+           #ifdef WM_POINTERUPDATE
+            case WM_POINTERUPDATE:      handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, false); return 0;
+            case WM_POINTERDOWN:        handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), true, false);  return 0;
+            case WM_POINTERUP:          handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, true);  return 0;
+           #endif
+
             case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;
             case WM_MOUSELEAVE:         doMouseExit(); return 0;
 

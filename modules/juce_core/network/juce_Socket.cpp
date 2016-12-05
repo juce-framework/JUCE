@@ -169,6 +169,17 @@ namespace SocketHelpers
         return -1;
     }
 
+    static String getConnectedAddress (const SocketHandle handle) noexcept
+    {
+        struct sockaddr_in addr;
+        socklen_t len = sizeof (addr);
+
+        if (getpeername (handle, (struct sockaddr*) &addr, &len) >= 0)
+            return inet_ntoa (addr.sin_addr);
+
+        return String ("0.0.0.0");
+    }
+
     static int readSocket (const SocketHandle handle,
                            void* const destBuffer, const int maxBytesToRead,
                            bool volatile& connected,
@@ -576,7 +587,19 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
 
 bool StreamingSocket::isLocal() const noexcept
 {
-    return hostName == "127.0.0.1";
+    if (! isConnected())
+        return false;
+
+    Array<IPAddress> localAddresses;
+    IPAddress::findAllAddresses (localAddresses);
+    IPAddress currentIP (SocketHelpers::getConnectedAddress (handle));
+
+    const int n = localAddresses.size();
+    for (int i = 0; i < n; ++i)
+        if (localAddresses.getReference (i) == currentIP)
+            return true;
+
+    return (hostName == "127.0.0.1");
 }
 
 

@@ -169,10 +169,10 @@ protected:
                                                        StringArray& files, bool& canMoveFiles);
 
     /** Subclasses can override this to be told when a drag starts. */
-    virtual void dragOperationStarted();
+    virtual void dragOperationStarted (const DragAndDropTarget::SourceDetails& sourceDetails);
 
     /** Subclasses can override this to be told when a drag finishes. */
-    virtual void dragOperationEnded();
+    virtual void dragOperationEnded (const DragAndDropTarget::SourceDetails& sourceDetails);
 
 private:
     //==============================================================================
@@ -180,6 +180,13 @@ private:
     friend class DragImageComponent;
     friend struct ContainerDeletePolicy<DragImageComponent>;
     ScopedPointer<DragImageComponent> dragImageComponent;
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // This is just here to cause a compile error in old code that hasn't been changed to use the new
+    // version of this method.
+    virtual int dragOperationStarted()              { return 0; }
+    virtual int dragOperationEnded()                { return 0; }
+   #endif
 
     JUCE_DEPRECATED_WITH_BODY (virtual bool shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&), { return false; })
 

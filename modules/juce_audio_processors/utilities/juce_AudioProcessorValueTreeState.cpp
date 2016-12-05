@@ -420,8 +420,10 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     {
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
-        ignoreCallbacks = true;
-        slider.setValue (newValue, sendNotificationSync);
+        {
+            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+            slider.setValue (newValue, sendNotificationSync);
+        }
     }
 
     void sliderValueChanged (Slider* s) override
@@ -430,8 +432,6 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
 
         if ((! ignoreCallbacks) && (! ModifierKeys::getCurrentModifiers().isRightButtonDown()))
             setNewUnnormalisedValue ((float) s->getValue());
-
-        ignoreCallbacks = false;
     }
 
     void sliderDragStarted (Slider*) override { beginParameterChange(); }
@@ -472,8 +472,10 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
     {
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
-        ignoreCallbacks = true;
-        combo.setSelectedItemIndex (roundToInt (newValue), sendNotificationSync);
+        {
+            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+            combo.setSelectedItemIndex (roundToInt (newValue), sendNotificationSync);
+        }
     }
 
     void comboBoxChanged (ComboBox* comboBox) override
@@ -486,7 +488,6 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
             setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
             endParameterChange();
         }
-        ignoreCallbacks = false;
     }
 
     ComboBox& combo;
@@ -524,8 +525,10 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
     {
         const ScopedLock selfCallbackLock (selfCallbackMutex);
 
-        ignoreCallbacks = true;
-        button.setToggleState (newValue >= 0.5f, sendNotificationSync);
+        {
+            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+            button.setToggleState (newValue >= 0.5f, sendNotificationSync);
+        }
     }
 
     void buttonClicked (Button* b) override
@@ -538,7 +541,6 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
             setNewUnnormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
             endParameterChange();
         }
-        ignoreCallbacks = false;
     }
 
     Button& button;

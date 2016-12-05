@@ -459,6 +459,9 @@ struct Runner
     uint16 getProgramHeapSize() const noexcept          { return heapSize; }
 
     /** */
+    bool isProgramValid() const noexcept                { return heapStart != nullptr; }
+
+    /** */
     void setDataByte (uint32 index, uint8 value) noexcept
     {
         if (index < programAndHeapSpace)
@@ -501,7 +504,7 @@ struct Runner
     /** */
     int32 setHeapInt (uint32 byteOffset, uint32 value) noexcept
     {
-        if (byteOffset < (uint32) (getProgramHeapSize() - 3))
+        if (byteOffset + 3 < getProgramHeapSize())
             Program::writeInt32 (getProgramHeapStart() + byteOffset, (int32) value);
 
         return 0;
@@ -510,7 +513,7 @@ struct Runner
     /** */
     int32 getHeapInt (uint32 byteOffset) const noexcept
     {
-        return byteOffset < getProgramHeapSize() - 3 ? Program::readInt32 (getProgramHeapStart() + byteOffset) : 0;
+        return byteOffset + 3 < getProgramHeapSize() ? Program::readInt32 (getProgramHeapStart() + byteOffset) : 0;
     }
 
     //==============================================================================

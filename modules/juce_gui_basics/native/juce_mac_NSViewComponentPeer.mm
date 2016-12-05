@@ -371,7 +371,7 @@ public:
     bool isKioskMode() const override
     {
        #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
-        if (hasNativeTitleBar() && ([window styleMask] & NSFullScreenWindowMask) != 0)
+        if (hasNativeTitleBar() && ([window styleMask] & NSWindowStyleMaskFullScreen) != 0)
             return true;
        #endif
 
@@ -715,7 +715,7 @@ public:
                             break; // (these all seem to generate unwanted garbage unicode strings)
 
                         default:
-                            if (([ev modifierFlags] & NSCommandKeyMask) != 0
+                            if (([ev modifierFlags] & NSEventModifierFlagCommand) != 0
                                  || (keyCode >= NSF1FunctionKey && keyCode <= NSF35FunctionKey))
                                 textCharacter = 0;
                             break;
@@ -744,7 +744,7 @@ public:
         updateKeysDown (ev, true);
         bool used = handleKeyEvent (ev, true);
 
-        if (([ev modifierFlags] & NSCommandKeyMask) != 0)
+        if (([ev modifierFlags] & NSEventModifierFlagCommand) != 0)
         {
             // for command keys, the key-up event is thrown away, so simulate one..
             updateKeysDown (ev, false);
@@ -1084,10 +1084,10 @@ public:
     {
         int m = 0;
 
-        if ((flags & NSShiftKeyMask) != 0)        m |= ModifierKeys::shiftModifier;
-        if ((flags & NSControlKeyMask) != 0)      m |= ModifierKeys::ctrlModifier;
-        if ((flags & NSAlternateKeyMask) != 0)    m |= ModifierKeys::altModifier;
-        if ((flags & NSCommandKeyMask) != 0)      m |= ModifierKeys::commandModifier;
+        if ((flags & NSEventModifierFlagShift) != 0)        m |= ModifierKeys::shiftModifier;
+        if ((flags & NSEventModifierFlagControl) != 0)      m |= ModifierKeys::ctrlModifier;
+        if ((flags & NSEventModifierFlagOption) != 0)       m |= ModifierKeys::altModifier;
+        if ((flags & NSEventModifierFlagCommand) != 0)      m |= ModifierKeys::commandModifier;
 
         currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (m);
     }
@@ -1160,7 +1160,7 @@ public:
         else
             keyCode = (int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode);
 
-        if (([ev modifierFlags] & NSNumericPadKeyMask) != 0)
+        if (([ev modifierFlags] & NSEventModifierFlagNumericPad) != 0)
         {
             const int numPadConversions[] = { '0', KeyPress::numberPad0, '1', KeyPress::numberPad1,
                                               '2', KeyPress::numberPad2, '3', KeyPress::numberPad3,
@@ -1191,7 +1191,7 @@ public:
     {
         @try
         {
-            if (e.type != NSMouseEntered && e.type != NSMouseExited)
+            if (e.type != NSEventTypeMouseEntered && e.type != NSEventTypeMouseExited)
                 return (float) e.pressure;
         }
         @catch (NSException* e) {}
@@ -1215,12 +1215,12 @@ public:
 
     static unsigned int getNSWindowStyleMask (const int flags) noexcept
     {
-        unsigned int style = (flags & windowHasTitleBar) != 0 ? NSTitledWindowMask
-                                                              : NSBorderlessWindowMask;
+        unsigned int style = (flags & windowHasTitleBar) != 0 ? NSWindowStyleMaskTitled
+                                                              : NSWindowStyleMaskBorderless;
 
-        if ((flags & windowHasMinimiseButton) != 0)  style |= NSMiniaturizableWindowMask;
-        if ((flags & windowHasCloseButton) != 0)     style |= NSClosableWindowMask;
-        if ((flags & windowIsResizable) != 0)        style |= NSResizableWindowMask;
+        if ((flags & windowHasMinimiseButton) != 0)  style |= NSWindowStyleMaskMiniaturizable;
+        if ((flags & windowHasCloseButton) != 0)     style |= NSWindowStyleMaskClosable;
+        if ((flags & windowIsResizable) != 0)        style |= NSWindowStyleMaskResizable;
         return style;
     }
 
@@ -1419,34 +1419,34 @@ private:
 
         switch ([e type])
         {
-            case NSKeyDown:
-            case NSKeyUp:
+            case NSEventTypeKeyDown:
+            case NSEventTypeKeyUp:
                 isKey = isInputAttempt = true;
                 break;
 
-            case NSLeftMouseDown:
-            case NSRightMouseDown:
-            case NSOtherMouseDown:
+            case NSEventTypeLeftMouseDown:
+            case NSEventTypeRightMouseDown:
+            case NSEventTypeOtherMouseDown:
                 isInputAttempt = true;
                 break;
 
-            case NSLeftMouseDragged:
-            case NSRightMouseDragged:
-            case NSLeftMouseUp:
-            case NSRightMouseUp:
-            case NSOtherMouseUp:
-            case NSOtherMouseDragged:
+            case NSEventTypeLeftMouseDragged:
+            case NSEventTypeRightMouseDragged:
+            case NSEventTypeLeftMouseUp:
+            case NSEventTypeRightMouseUp:
+            case NSEventTypeOtherMouseUp:
+            case NSEventTypeOtherMouseDragged:
                 if (Desktop::getInstance().getDraggingMouseSource(0) != nullptr)
                     return false;
                 break;
 
-            case NSMouseMoved:
-            case NSMouseEntered:
-            case NSMouseExited:
-            case NSCursorUpdate:
-            case NSScrollWheel:
-            case NSTabletPoint:
-            case NSTabletProximity:
+            case NSEventTypeMouseMoved:
+            case NSEventTypeMouseEntered:
+            case NSEventTypeMouseExited:
+            case NSEventTypeCursorUpdate:
+            case NSEventTypeScrollWheel:
+            case NSEventTypeTabletPoint:
+            case NSEventTypeTabletProximity:
                 break;
 
             default:
@@ -2058,7 +2058,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
         if (shouldBeEnabled)
         {
             if (peer->hasNativeTitleBar())
-                [peer->window setStyleMask: NSBorderlessWindowMask];
+                [peer->window setStyleMask: NSWindowStyleMaskBorderless];
 
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];

@@ -70,7 +70,7 @@ public:
                     current->itemDragExit (sourceDetails);
         }
 
-        owner.dragOperationEnded();
+        owner.dragOperationEnded (sourceDetails);
     }
 
     void paint (Graphics& g) override
@@ -469,7 +469,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
             peer->performAnyPendingRepaintsNow();
        #endif
 
-        dragOperationStarted();
+        dragOperationStarted (dragImageComponent->sourceDetails);
     }
 }
 
@@ -500,8 +500,8 @@ bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const DragAndDr
     return false;
 }
 
-void DragAndDropContainer::dragOperationStarted()  {}
-void DragAndDropContainer::dragOperationEnded()    {}
+void DragAndDropContainer::dragOperationStarted (const DragAndDropTarget::SourceDetails&)  {}
+void DragAndDropContainer::dragOperationEnded (const DragAndDropTarget::SourceDetails&)    {}
 
 //==============================================================================
 DragAndDropTarget::SourceDetails::SourceDetails (const var& desc, Component* comp, Point<int> pos) noexcept
