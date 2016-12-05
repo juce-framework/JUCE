@@ -226,12 +226,12 @@ bool File::areFileNamesCaseSensitive()
    #endif
 }
 
-static int compareFilenames (const String& name1, const String& name2, bool shouldSortNaturally = false) noexcept
+static int compareFilenames (const String& name1, const String& name2) noexcept
 {
    #if NAMES_ARE_CASE_SENSITIVE
-    return (shouldSortNaturally ? name1.compareNatural (name2, true)  : name1.compare (name2));
+    return name1.compare (name2);
    #else
-    return (shouldSortNaturally ? name1.compareNatural (name2, false) : name1.compareIgnoreCase (name2));
+    return name1.compareIgnoreCase (name2);
    #endif
 }
 
