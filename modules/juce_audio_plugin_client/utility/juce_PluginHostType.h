@@ -43,6 +43,7 @@ public:
         AdobePremierePro,
         AppleLogic,
         Ardour,
+        BitwigStudio,
         CakewalkSonar8,
         CakewalkSonarGeneric,
         DaVinciResolve,
@@ -85,6 +86,7 @@ public:
     bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     bool isArdour() const noexcept            { return type == Ardour; }
+    bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
     bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubaseGeneric; }
     bool isCubase7orLater() const noexcept    { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     bool isCubaseBridged() const noexcept     { return type == SteinbergCubase5Bridged; }
@@ -123,6 +125,7 @@ public:
             case AdobeAudition:            return "Adobe Audition";
             case AdobePremierePro:         return "Adobe Premiere";
             case AppleLogic:               return "Apple Logic";
+            case BitwigStudio:             return "Bitwig Studio";
             case CakewalkSonar8:           return "Cakewalk Sonar 8";
             case CakewalkSonarGeneric:     return "Cakewalk Sonar";
             case DaVinciResolve:           return "DaVinci Resolve";
@@ -224,6 +227,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Tracktion"))         return TracktionGeneric;
         if (hostFilename.containsIgnoreCase ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase ("Resolve"))           return DaVinciResolve;
+        if (hostFilename.startsWith         ("Bitwig"))            return BitwigStudio;
 
        #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase ("Live 6."))           return AbletonLive6;
@@ -263,9 +267,12 @@ private:
         if (hostFilename.startsWithIgnoreCase ("Sam"))             return MagixSamplitude;
         if (hostFilename.containsIgnoreCase ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase ("Resolve"))           return DaVinciResolve;
+        if (hostPath.containsIgnoreCase     ("Bitwig Studio"))     return BitwigStudio;
 
        #elif JUCE_LINUX
         if (hostFilename.containsIgnoreCase ("Ardour"))            return Ardour;
+        if (hostFilename.startsWith         ("Bitwig"))            return BitwigStudio;
+
        #elif JUCE_IOS
        #else
         #error
