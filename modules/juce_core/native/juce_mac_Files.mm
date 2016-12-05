@@ -58,7 +58,7 @@ void File::findFileSystemRoots (Array<File>& destArray)
 
 
 //==============================================================================
-namespace FileHelpers
+namespace MacFileHelpers
 {
     static bool isFileOnDriveType (const File& f, const char* const* types)
     {
@@ -134,14 +134,14 @@ bool File::isOnCDRomDrive() const
 {
     static const char* const cdTypes[] = { "cd9660", "cdfs", "cddafs", "udf", nullptr };
 
-    return FileHelpers::isFileOnDriveType (*this, cdTypes);
+    return MacFileHelpers::isFileOnDriveType (*this, cdTypes);
 }
 
 bool File::isOnHardDisk() const
 {
     static const char* const nonHDTypes[] = { "nfs", "smbfs", "ramfs", nullptr };
 
-    return ! (isOnCDRomDrive() || FileHelpers::isFileOnDriveType (*this, nonHDTypes));
+    return ! (isOnCDRomDrive() || MacFileHelpers::isFileOnDriveType (*this, nonHDTypes));
 }
 
 bool File::isOnRemovableDrive() const
@@ -168,7 +168,7 @@ bool File::isOnRemovableDrive() const
 
 bool File::isHidden() const
 {
-    return FileHelpers::isHiddenFile (getFullPathName());
+    return MacFileHelpers::isHiddenFile (getFullPathName());
 }
 
 //==============================================================================
@@ -360,7 +360,7 @@ public:
                 updateStatInfoForFile (fullPath, isDir, fileSize, modTime, creationTime, isReadOnly);
 
                 if (isHidden != nullptr)
-                    *isHidden = FileHelpers::isHiddenFile (fullPath);
+                    *isHidden = MacFileHelpers::isHiddenFile (fullPath);
 
                 return true;
             }
@@ -441,7 +441,7 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
         }
 
         if (file.exists())
-            return FileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
+            return MacFileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
 
         return false;
       #endif
