@@ -459,6 +459,9 @@ struct Runner
     uint16 getProgramHeapSize() const noexcept          { return heapSize; }
 
     /** */
+    bool isProgramValid() const noexcept                { return heapStart != nullptr; }
+
+    /** */
     void setDataByte (uint32 index, uint8 value) noexcept
     {
         if (index < programAndHeapSpace)

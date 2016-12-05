@@ -211,6 +211,21 @@ juce_ImplementSingleton (SharedMessageThread)
 static Array<void*> activePlugins;
 
 //==============================================================================
+// Ableton Live host specific commands
+struct AbletonLiveHostSpecific
+{
+    enum
+    {
+        KCantBeSuspended = (1 << 2)
+    };
+
+    uint32 magic;        // 'AbLi'
+    int cmd;             // 5 = realtime properties
+    size_t commandSize;  // sizeof (int)
+    int flags;           // KCantBeSuspended = (1 << 2)
+};
+
+//==============================================================================
 /**
     This is an AudioEffectX object that holds and wraps our AudioProcessor...
 */
@@ -576,6 +591,18 @@ public:
             {
                 if (hostCallback != nullptr)
                     hostCallback (&vstEffect, hostOpcodePlugInWantsMidi, 0, 1, 0, 0);
+            }
+
+            if (getHostType().isAbletonLive() && filter->getTailLengthSeconds() == DBL_MAX && hostCallback != nullptr)
+            {
+                AbletonLiveHostSpecific hostCmd;
+
+                hostCmd.magic = 'AbLi';
+                hostCmd.cmd = 5;
+                hostCmd.commandSize = sizeof (int);
+                hostCmd.flags = AbletonLiveHostSpecific::KCantBeSuspended;
+
+                hostCallback (&vstEffect, hostOpcodeManufacturerSpecific, 0, 0, &hostCmd, 0.0f);
             }
 
            #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect

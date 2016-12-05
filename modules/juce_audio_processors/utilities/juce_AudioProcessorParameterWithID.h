@@ -33,7 +33,9 @@ public:
     /** Creation of this object requires providing a name and ID which will be
         constant for its lifetime.
     */
-    AudioProcessorParameterWithID (String parameterID, String name);
+    AudioProcessorParameterWithID (const String& parameterID,
+                                   const String& name,
+                                   const String& label = String());
 
     /** Destructor. */
     ~AudioProcessorParameterWithID();

@@ -380,14 +380,11 @@ void Project::valueTreeParentChanged (ValueTree&)                   {}
 bool Project::hasProjectBeenModified()
 {
     Time newModificationTime = getFile().getLastModificationTime();
+    Time oldModificationTime = modificationTime;
 
-    if (newModificationTime != modificationTime)
-    {
-        modificationTime = newModificationTime;
-        return true;
-    }
+    modificationTime = newModificationTime;
 
-    return false;
+    return (newModificationTime.toMilliseconds() > (oldModificationTime.toMilliseconds() + 1000LL));
 }
 
 //==============================================================================

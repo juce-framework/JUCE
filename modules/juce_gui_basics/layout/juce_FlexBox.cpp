@@ -808,7 +808,7 @@ FlexItem::FlexItem (FlexBox& fb) noexcept                       : associatedFlex
 
 FlexItem::Margin::Margin() noexcept                                     : left(), right(), top(), bottom() {}
 FlexItem::Margin::Margin (float v) noexcept                             : left (v), right (v), top (v), bottom (v) {}
-FlexItem::Margin::Margin (float l, float r, float t, float b) noexcept  : left (l), right (r), top (t), bottom (b) {}
+FlexItem::Margin::Margin (float t, float r, float b, float l) noexcept  : left (l), right (r), top (t), bottom (b) {}
 
 //==============================================================================
 FlexItem FlexItem::withFlex (float newFlexGrow) const noexcept

@@ -991,6 +991,26 @@ public:
     void addToDock() const;
    #endif
 
+    //==============================================================================
+    struct NaturalFileComparator
+    {
+        NaturalFileComparator (bool shouldPutFoldersFirst) noexcept : foldersFirst (shouldPutFoldersFirst) {}
+
+        int compareElements (const File& firstFile, const File& secondFile) const
+        {
+            if (foldersFirst && (firstFile.isDirectory() != secondFile.isDirectory()))
+                return firstFile.isDirectory() ? -1 : 1;
+
+           #if NAMES_ARE_CASE_SENSITIVE
+            return firstFile.getFullPathName().compareNatural (secondFile.getFullPathName(), true);
+           #else
+            return firstFile.getFullPathName().compareNatural (secondFile.getFullPathName(), false);
+           #endif
+        }
+
+        const bool foldersFirst;
+    };
+
 private:
     //==============================================================================
     String fullPath;

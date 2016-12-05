@@ -369,20 +369,21 @@ bool MidiFile::writeTo (OutputStream& out, int midiFileType)
 {
     jassert (midiFileType >= 0 && midiFileType <= 2);
 
-    out.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MThd"));
-    out.writeIntBigEndian (6);
-    out.writeShortBigEndian ((short) midiFileType);
-    out.writeShortBigEndian ((short) tracks.size());
-    out.writeShortBigEndian (timeFormat);
+    if (! out.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MThd"))) return false;
+    if (! out.writeIntBigEndian (6))                                      return false;
+    if (! out.writeShortBigEndian ((short) midiFileType))                 return false;
+    if (! out.writeShortBigEndian ((short) tracks.size()))                return false;
+    if (! out.writeShortBigEndian (timeFormat))                           return false;
 
     for (int i = 0; i < tracks.size(); ++i)
-        writeTrack (out, i);
+        if (! writeTrack (out, i))
+            return false;
 
     out.flush();
     return true;
 }
 
-void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
+bool MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
 {
     MemoryOutputStream out;
     const MidiMessageSequence& ms = *tracks.getUnchecked (trackNum);
@@ -437,7 +438,10 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
         out.write (m.getRawData(), (size_t) m.getRawDataSize());
     }
 
-    mainOut.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MTrk"));
-    mainOut.writeIntBigEndian ((int) out.getDataSize());
+    if (! mainOut.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MTrk"))) return false;
+    if (! mainOut.writeIntBigEndian ((int) out.getDataSize()))                return false;
+
     mainOut << out;
+
+    return true;
 }

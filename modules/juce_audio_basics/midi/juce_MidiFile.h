@@ -177,7 +177,7 @@ private:
     short timeFormat;
 
     void readNextTrack (const uint8*, int size);
-    void writeTrack (OutputStream&, int trackNum);
+    bool writeTrack (OutputStream&, int trackNum);
 
     JUCE_LEAK_DETECTOR (MidiFile)
 };
