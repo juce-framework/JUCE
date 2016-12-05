@@ -996,7 +996,7 @@ public:
     {
         NaturalFileComparator (bool shouldPutFoldersFirst) noexcept : foldersFirst (shouldPutFoldersFirst) {}
 
-        int compareElements (const File& firstFile, const File& secondFile)
+        int compareElements (const File& firstFile, const File& secondFile) const
         {
             if (foldersFirst && (firstFile.isDirectory() != secondFile.isDirectory()))
                 return firstFile.isDirectory() ? -1 : 1;
