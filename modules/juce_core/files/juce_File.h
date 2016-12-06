@@ -1008,7 +1008,7 @@ public:
            #endif
         }
 
-        const bool foldersFirst;
+        bool foldersFirst;
     };
 
 private:
