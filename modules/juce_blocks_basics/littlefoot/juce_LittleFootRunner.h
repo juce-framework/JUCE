@@ -633,7 +633,7 @@ struct Runner
         int32 tos; // top of stack
         ErrorCode error;
 
-        template <typename Type1, typename... Args> void pushArguments (Type1 arg1, Args... args) noexcept   { pushArguments (args...); push32 (arg1); }
+        template <typename Type1, typename... Args> void pushArguments (Type1 arg1, Args... args) noexcept   { pushArguments (args...); pushArguments (arg1); }
         void pushArguments (int32 arg1) noexcept    { push32 (arg1); }
         void pushArguments (float arg1) noexcept    { push32 (Program::floatToInt (arg1)); }
 
