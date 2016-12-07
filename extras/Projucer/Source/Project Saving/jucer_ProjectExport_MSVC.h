@@ -1505,6 +1505,12 @@ protected:
                 }
 
                 {
+                    XmlElement* targetExt = props->createNewChildElement ("TargetExt");
+                    setConditionAttribute (*targetExt, config);
+                    targetExt->addTextElement (msvcTargetSuffix);
+                }
+
+                {
                     XmlElement* manifest = props->createNewChildElement ("GenerateManifest");
                     setConditionAttribute (*manifest, config);
                     manifest->addTextElement (config.shouldGenerateManifest() ? "true" : "false");
