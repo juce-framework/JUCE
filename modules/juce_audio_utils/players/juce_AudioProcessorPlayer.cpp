@@ -156,9 +156,9 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
             {
                 if (processor->isUsingDoublePrecision())
                 {
-                    conversionBuffer.makeCopyOf (buffer);
+                    conversionBuffer.makeCopyOf (buffer, true);
                     processor->processBlock (conversionBuffer, incomingMidi);
-                    buffer.makeCopyOf (conversionBuffer);
+                    buffer.makeCopyOf (conversionBuffer, true);
                 }
                 else
                 {
