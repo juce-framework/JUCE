@@ -91,10 +91,9 @@ class JUCE_API WebInputStream : public InputStream
 
         Returns a reference to itself so that several methods can be chained.
 
-        @param numRedirectsToFollow specifies the number of redirects that will
-                                    be followed before returning a response
-                                    (ignored for Android which follows up to 5
-                                    redirects)
+        @param numRedirects specifies the number of redirects that will be followed
+                            before returning a response (ignored for Android which
+                            follows up to 5 redirects)
     */
     WebInputStream& withNumRedirectsToFollow (int numRedirects);
 
