@@ -178,7 +178,7 @@ class JUCE_API WebInputStream : public InputStream
         @returns    the actual number of bytes that were read, which may be less than
                     maxBytesToRead if the stream is exhausted before it gets that far
     */
-    int read (void* buffer, int bytesToRead) override;
+    int read (void* destBuffer, int maxBytesToRead) override;
 
     /** Returns true if the stream has no more data to read. */
     bool isExhausted() override;
