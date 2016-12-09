@@ -63,8 +63,10 @@ private:
 #endif
 
 //==============================================================================
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 101200
 enum
 {
     /** Custom AudioUnit property used to indicate MPE support */
-    kAudioUnitProperty_SupportsMPE = 75001
+    kAudioUnitProperty_SupportsMPE = 58
 };
+#endif

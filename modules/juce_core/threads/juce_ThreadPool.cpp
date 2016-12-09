@@ -29,8 +29,8 @@
 class ThreadPool::ThreadPoolThread  : public Thread
 {
 public:
-    ThreadPoolThread (ThreadPool& p)
-       : Thread ("Pool"), currentJob (nullptr), pool (p)
+    ThreadPoolThread (ThreadPool& p, size_t stackSize = 0)
+       : Thread ("Pool", stackSize), currentJob (nullptr), pool (p)
     {
     }
 
@@ -85,11 +85,11 @@ ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 }
 
 //==============================================================================
-ThreadPool::ThreadPool (const int numThreads)
+ThreadPool::ThreadPool (const int numThreads, size_t threadStackSize)
 {
     jassert (numThreads > 0); // not much point having a pool without any threads!
 
-    createThreads (numThreads);
+    createThreads (numThreads, threadStackSize);
 }
 
 ThreadPool::ThreadPool()
@@ -103,10 +103,10 @@ ThreadPool::~ThreadPool()
     stopThreads();
 }
 
-void ThreadPool::createThreads (int numThreads)
+void ThreadPool::createThreads (int numThreads, size_t threadStackSize)
 {
     for (int i = jmax (1, numThreads); --i >= 0;)
-        threads.add (new ThreadPoolThread (*this));
+        threads.add (new ThreadPoolThread (*this, threadStackSize));
 
     for (int i = threads.size(); --i >= 0;)
         threads.getUnchecked(i)->startThread();
@@ -146,6 +146,11 @@ void ThreadPool::addJob (ThreadPoolJob* const job, const bool deleteJobWhenFinis
 int ThreadPool::getNumJobs() const
 {
     return jobs.size();
+}
+
+int ThreadPool::getNumThreads() const
+{
+    return threads.size();
 }
 
 ThreadPoolJob* ThreadPool::getJob (const int index) const

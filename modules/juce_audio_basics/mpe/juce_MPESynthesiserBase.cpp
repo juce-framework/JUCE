@@ -25,7 +25,8 @@
 MPESynthesiserBase::MPESynthesiserBase()
     : instrument (new MPEInstrument),
       sampleRate (0),
-      minimumSubBlockSize (32)
+      minimumSubBlockSize (32),
+      subBlockSubdivisionIsStrict (false)
 {
     instrument->addListener (this);
 }
@@ -123,7 +124,7 @@ void MPESynthesiserBase::renderNextBlock (AudioBuffer<floatType>& outputAudio,
             break;
         }
 
-        if (samplesToNextMidiMessage < (firstEvent ? 1 : minimumSubBlockSize))
+        if (samplesToNextMidiMessage < ((firstEvent && ! subBlockSubdivisionIsStrict) ? 1 : minimumSubBlockSize))
         {
             handleMidiEvent (m);
             continue;
@@ -157,8 +158,9 @@ void MPESynthesiserBase::setCurrentPlaybackSampleRate (const double newRate)
 }
 
 //==============================================================================
-void MPESynthesiserBase::setMinimumRenderingSubdivisionSize (int numSamples) noexcept
+void MPESynthesiserBase::setMinimumRenderingSubdivisionSize (int numSamples, bool shouldBeStrict) noexcept
 {
     jassert (numSamples > 0); // it wouldn't make much sense for this to be less than 1
     minimumSubBlockSize = numSamples;
+    subBlockSubdivisionIsStrict = shouldBeStrict;
 }

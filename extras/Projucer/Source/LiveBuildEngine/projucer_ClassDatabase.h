@@ -219,7 +219,7 @@ struct ClassDatabase
             if (isAbstract)             return "This class is abstract";
             if (noDefaultConstructor)   return "This class has no default constructor";
             if (inAnonymousNamespace)   return "This class is declared inside an anonymous namespace";
-            return String::empty;
+            return String();
         }
 
         bool isDisallowed (const InstantiationFlags& disallowedFlags) const

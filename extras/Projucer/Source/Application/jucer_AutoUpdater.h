@@ -65,9 +65,9 @@ public:
     URL getLatestVersionURL (String& headers) const;
 
     void checkForNewVersion();
-    void processResult (var reply, const String& downloadPath);
+    bool processResult (var reply, const String& downloadPath);
 
-    void askUserAboutNewVersion (const JuceVersionTriple& version,
+    bool askUserAboutNewVersion (const JuceVersionTriple& version,
                                  const String& releaseNotes,
                                  URL& newVersionToDownload,
                                  const String& extraHeaders);

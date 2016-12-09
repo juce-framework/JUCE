@@ -91,10 +91,16 @@ public:
     inline void setDoublePrecision (bool doublePrecision) { graphPlayer.setDoublePrecisionProcessing (doublePrecision); }
 
     //==============================================================================
-    FilterGraph graph;
+    ScopedPointer<FilterGraph> graph;
 
     //==============================================================================
     void resized();
+
+    //==============================================================================
+    void unfocusKeyboardComponent();
+
+    //==============================================================================
+    void releaseGraph();
 
 private:
     //==============================================================================
@@ -102,7 +108,10 @@ private:
     AudioProcessorPlayer graphPlayer;
     MidiKeyboardState keyState;
 
+public:
     GraphEditorPanel* graphPanel;
+
+private:
     Component* keyboardComp;
     Component* statusBar;
 
@@ -120,13 +129,14 @@ public:
         Generic,
         Programs,
         Parameters,
+        AudioIO,
         NumTypes
     };
 
-    PluginWindow (Component* pluginEditor, AudioProcessorGraph::Node*, WindowFormatType);
+    PluginWindow (Component* pluginEditor, AudioProcessorGraph::Node*, WindowFormatType, AudioProcessorGraph&);
     ~PluginWindow();
 
-    static PluginWindow* getWindowFor (AudioProcessorGraph::Node*, WindowFormatType);
+    static PluginWindow* getWindowFor (AudioProcessorGraph::Node*, WindowFormatType, AudioProcessorGraph&);
 
     static void closeCurrentlyOpenWindowsFor (const uint32 nodeId);
     static void closeAllCurrentlyOpenWindows();
@@ -135,6 +145,7 @@ public:
     void closeButtonPressed() override;
 
 private:
+    AudioProcessorGraph& graph;
     AudioProcessorGraph::Node* owner;
     WindowFormatType type;
 

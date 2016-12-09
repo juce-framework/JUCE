@@ -248,7 +248,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
     clear();
     MemoryBlock data;
 
-    const int maxSensibleMidiFileSize = 2 * 1024 * 1024;
+    const int maxSensibleMidiFileSize = 200 * 1024 * 1024;
 
     // (put a sanity-check on the file size, as midi files are generally small)
     if (sourceStream.readIntoMemoryBlock (data, maxSensibleMidiFileSize))

@@ -221,9 +221,11 @@ public:
         setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
                                           : menu.lookAndFeel.get());
 
-        parentComponent = getLookAndFeel().getParentComponentForMenuOptions (options);
+        LookAndFeel& lf = getLookAndFeel();
 
-        setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque()
+        parentComponent = lf.getParentComponentForMenuOptions (options);
+
+        setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
         for (int i = 0; i < menu.items.size(); ++i)
@@ -259,11 +261,13 @@ public:
         {
             addToDesktop (ComponentPeer::windowIsTemporary
                           | ComponentPeer::windowIgnoresKeyPresses
-                          | getLookAndFeel().getMenuWindowFlags());
+                          | lf.getMenuWindowFlags());
 
             getActiveWindows().add (this);
             Desktop::getInstance().addGlobalMouseListener (this);
         }
+
+        lf.preparePopupMenuWindow (*this);
     }
 
     ~MenuWindow()
@@ -321,11 +325,23 @@ public:
                 *managerOfChosenCommand = item->commandManager;
             }
 
-            exitModalState (item != nullptr ? item->itemID : 0);
+            exitModalState (getResultItemID (item));
 
             if (makeInvisible && (deletionChecker != nullptr))
                 setVisible (false);
         }
+    }
+
+    static int getResultItemID (const PopupMenu::Item* item)
+    {
+        if (item == nullptr)
+            return 0;
+
+        if (CustomCallback* cc = item->customCallback)
+            if (! cc->menuItemTriggered())
+                return 0;
+
+        return item->itemID;
     }
 
     void dismissMenu (const PopupMenu::Item* const item)
@@ -1279,6 +1295,7 @@ PopupMenu::Item::Item (const Item& other)
     subMenu (createCopyIfNotNull (other.subMenu.get())),
     image (other.image != nullptr ? other.image->createCopy() : nullptr),
     customComponent (other.customComponent),
+    customCallback (other.customCallback),
     commandManager (other.commandManager),
     shortcutKeyDescription (other.shortcutKeyDescription),
     colour (other.colour),
@@ -1296,6 +1313,7 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     subMenu = createCopyIfNotNull (other.subMenu.get());
     image = (other.image != nullptr ? other.image->createCopy() : nullptr);
     customComponent = other.customComponent;
+    customCallback = other.customCallback;
     commandManager = other.commandManager;
     shortcutKeyDescription = other.shortcutKeyDescription;
     colour = other.colour;
@@ -1776,6 +1794,10 @@ void PopupMenu::CustomComponent::triggerMenuItem()
         jassertfalse;
     }
 }
+
+//==============================================================================
+PopupMenu::CustomCallback::CustomCallback() {}
+PopupMenu::CustomCallback::~CustomCallback() {}
 
 //==============================================================================
 PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& m)  : menu (m), index (0) {}

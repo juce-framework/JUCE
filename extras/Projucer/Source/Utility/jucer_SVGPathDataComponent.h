@@ -27,7 +27,7 @@ class SVGPathDataComponent  : public Component,
 {
 public:
     SVGPathDataComponent()
-        : desc (String::empty,
+        : desc (String(),
                 "Paste an SVG path string into the top box, and it'll be converted to some C++ "
                 "code that will load it as a Path object..")
     {

@@ -26,6 +26,7 @@ public:
     ~JuceDemoPluginAudioProcessor();
 
     //==============================================================================
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
     void reset() override;
@@ -56,10 +57,10 @@ public:
     double getTailLengthSeconds() const override                                { return 0.0; }
 
     //==============================================================================
-    int getNumPrograms() override                                               { return 1; }
+    int getNumPrograms() override                                               { return 0; }
     int getCurrentProgram() override                                            { return 0; }
     void setCurrentProgram (int /*index*/) override                             {}
-    const String getProgramName (int /*index*/) override                        { return "Default"; }
+    const String getProgramName (int /*index*/) override                        { return String(); }
     void changeProgramName (int /*index*/, const String& /*name*/) override     {}
 
     //==============================================================================

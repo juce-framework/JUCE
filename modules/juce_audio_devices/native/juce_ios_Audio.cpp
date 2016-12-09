@@ -438,6 +438,8 @@ public:
 
     void handleStatusChange (bool enabled, const char* reason)
     {
+        const ScopedLock myScopedLock (callbackLock);
+
         JUCE_IOS_AUDIO_LOG ("handleStatusChange: enabled: " << (int) enabled << ", reason: " << reason);
 
         isRunning = enabled;
@@ -454,6 +456,8 @@ public:
 
     void handleRouteChange (const char* reason)
     {
+        const ScopedLock myScopedLock (callbackLock);
+
         JUCE_IOS_AUDIO_LOG ("handleRouteChange: reason: " << reason);
 
         fixAudioRouteIfSetToReceiver();
@@ -525,9 +529,9 @@ private:
         if (audioInputIsAvailable && numInputChannels > 0)
             err = AudioUnitRender (audioUnit, flags, time, 1, numFrames, data);
 
-        const ScopedLock sl (callbackLock);
+        const ScopedTryLock stl (callbackLock);
 
-        if (callback != nullptr)
+        if (stl.isLocked() && callback != nullptr)
         {
             if ((int) numFrames > floatData.getNumSamples())
                 prepareFloatBuffers ((int) numFrames);
@@ -778,8 +782,24 @@ void AudioSessionHolder::handleStatusChange (bool enabled, const char* reason) c
 
 void AudioSessionHolder::handleRouteChange (const char* reason) const
 {
-    for (auto device: activeDevices)
-        device->handleRouteChange (reason);
+    struct RouteChangeMessage : public CallbackMessage
+    {
+        RouteChangeMessage (Array<iOSAudioIODevice*> devs, const char* r)
+          : devices (devs), changeReason (r)
+        {
+        }
+
+        void messageCallback() override
+        {
+            for (auto device: devices)
+                device->handleRouteChange (changeReason);
+        }
+
+        Array<iOSAudioIODevice*> devices;
+        const char* changeReason;
+    };
+
+    (new RouteChangeMessage (activeDevices, reason))->post();
 }
 
 #undef JUCE_NSERROR_CHECK

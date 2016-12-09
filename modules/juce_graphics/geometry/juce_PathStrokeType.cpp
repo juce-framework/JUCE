@@ -680,9 +680,9 @@ void PathStrokeType::createDashedStroke (Path& destPath,
         const bool isSolid = ((dashNum & 1) == 0);
         const float dashLen = dashLengths [dashNum++ % numDashLengths];
 
-        jassert (dashLen > 0); // must be a positive increment!
+        jassert (dashLen >= 0); // must be a positive increment!
         if (dashLen <= 0)
-            break;
+            continue;
 
         pos += dashLen;
 

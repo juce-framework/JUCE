@@ -80,12 +80,12 @@ public:
     int64 nextInt64() noexcept;
 
     /** Returns the next random floating-point number.
-        @returns a random value in the range 0 to 1.0
+        @returns a random value in the range 0 (inclusive) to 1.0 (exclusive)
     */
     float nextFloat() noexcept;
 
     /** Returns the next random floating-point number.
-        @returns a random value in the range 0 to 1.0
+        @returns a random value in the range 0 (inclusive) to 1.0 (exclusive)
     */
     double nextDouble() noexcept;
 

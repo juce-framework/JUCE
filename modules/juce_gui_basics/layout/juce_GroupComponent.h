@@ -41,8 +41,8 @@ public:
         @param componentName    the name to give the component
         @param labelText        the text to show at the top of the outline
     */
-    GroupComponent (const String& componentName = String::empty,
-                    const String& labelText = String::empty);
+    GroupComponent (const String& componentName = String(),
+                    const String& labelText = String());
 
     /** Destructor. */
     ~GroupComponent();

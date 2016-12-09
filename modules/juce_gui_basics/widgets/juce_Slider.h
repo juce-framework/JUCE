@@ -244,27 +244,36 @@ public:
         slider's length; if the factor is > 1.0, the upper end of the range
         will be expanded instead. A factor of 1.0 doesn't skew it at all.
 
+        If symmetricSkew is true, the skew factor applies from the middle of the slider
+        to each of its ends.
+
         To set the skew position by using a mid-point, use the setSkewFactorFromMidPoint()
         method instead.
 
-        @see getSkewFactor, setSkewFactorFromMidPoint
+        @see getSkewFactor, setSkewFactorFromMidPoint, isSymmetricSkew
     */
-    void setSkewFactor (double factor);
+    void setSkewFactor (double factor, bool symmetricSkew = false);
 
     /** Sets up a skew factor to alter the way values are distributed.
 
         This allows you to specify the slider value that should appear in the
         centre of the slider's visible range.
 
-        @see setSkewFactor, getSkewFactor
+        @see setSkewFactor, getSkewFactor, isSymmetricSkew
      */
     void setSkewFactorFromMidPoint (double sliderValueToShowAtMidPoint);
 
     /** Returns the current skew factor.
         See setSkewFactor for more info.
-        @see setSkewFactor, setSkewFactorFromMidPoint
+        @see setSkewFactor, setSkewFactorFromMidPoint, isSymmetricSkew
     */
     double getSkewFactor() const noexcept;
+
+    /** Returns the whether the skew is symmetric from the midpoint to both sides.
+        See setSkewFactor for more info.
+        @see getSkewFactor, setSkewFactor, setSkewFactorFromMidPoint
+     */
+    bool isSymmetricSkew() const noexcept;
 
     //==============================================================================
     /** Used by setIncDecButtonsMode().

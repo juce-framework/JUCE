@@ -149,6 +149,7 @@ bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool mute)   { return SystemVol
 struct CoreAudioClasses
 {
 
+class CoreAudioIODeviceType;
 class CoreAudioIODevice;
 
 //==============================================================================
@@ -847,6 +848,11 @@ private:
                 intern->deviceDetailsChanged();
                 break;
 
+            case kAudioObjectPropertyOwnedObjects:
+                intern->stop (false);
+                intern->owner.deviceType.triggerAsyncAudioDeviceListChange();
+                break;
+
             case kAudioDevicePropertyBufferSizeRange:
             case kAudioDevicePropertyVolumeScalar:
             case kAudioDevicePropertyMute:
@@ -902,10 +908,12 @@ private:
 class CoreAudioIODevice   : public AudioIODevice
 {
 public:
-    CoreAudioIODevice (const String& deviceName,
+    CoreAudioIODevice (CoreAudioIODeviceType& dt,
+                       const String& deviceName,
                        AudioDeviceID inputDeviceId, const int inputIndex_,
                        AudioDeviceID outputDeviceId, const int outputIndex_)
         : AudioIODevice (deviceName, "CoreAudio"),
+          deviceType (dt),
           inputIndex (inputIndex_),
           outputIndex (outputIndex_),
           isOpen_ (false),
@@ -1060,6 +1068,12 @@ public:
         return lastError;
     }
 
+    void audioDeviceListChanged()
+    {
+        deviceType.audioDeviceListChanged();
+    }
+
+    CoreAudioIODeviceType& deviceType;
     int inputIndex, outputIndex;
 
 private:
@@ -1745,7 +1759,8 @@ private:
 
 
 //==============================================================================
-class CoreAudioIODeviceType  : public AudioIODeviceType
+class CoreAudioIODeviceType  : public AudioIODeviceType,
+                               private AsyncUpdater
 {
 public:
     CoreAudioIODeviceType()
@@ -1771,7 +1786,7 @@ public:
     }
 
     //==============================================================================
-    void scanForDevices()
+    void scanForDevices() override
     {
         hasScanned = true;
 
@@ -1827,7 +1842,7 @@ public:
         outputDeviceNames.appendNumbersToDuplicates (false, true);
     }
 
-    StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1835,7 +1850,7 @@ public:
                               : outputDeviceNames;
     }
 
-    int getDefaultDeviceIndex (bool forInput) const
+    int getDefaultDeviceIndex (bool forInput) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1870,7 +1885,7 @@ public:
         return 0;
     }
 
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1894,10 +1909,10 @@ public:
         return -1;
     }
 
-    bool hasSeparateInputsAndOutputs() const    { return true; }
+    bool hasSeparateInputsAndOutputs() const override    { return true; }
 
     AudioIODevice* createDevice (const String& outputDeviceName,
-                                 const String& inputDeviceName)
+                                 const String& inputDeviceName) override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1913,15 +1928,15 @@ public:
         String combinedName (outputDeviceName.isEmpty() ? inputDeviceName : outputDeviceName);
 
         if (inputDeviceID == outputDeviceID)
-            return new CoreAudioIODevice (combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
+            return new CoreAudioIODevice (*this, combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
 
         ScopedPointer<CoreAudioIODevice> in, out;
 
         if (inputDeviceID != 0)
-            in = new CoreAudioIODevice (inputDeviceName, inputDeviceID, inputIndex, 0, -1);
+            in = new CoreAudioIODevice (*this, inputDeviceName, inputDeviceID, inputIndex, 0, -1);
 
         if (outputDeviceID != 0)
-            out = new CoreAudioIODevice (outputDeviceName, 0, -1, outputDeviceID, outputIndex);
+            out = new CoreAudioIODevice (*this, outputDeviceName, 0, -1, outputDeviceID, outputIndex);
 
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();
@@ -1930,6 +1945,17 @@ public:
         combo->addDevice (in.release(),  true, false);
         combo->addDevice (out.release(), false, true);
         return combo.release();
+    }
+
+    void audioDeviceListChanged()
+    {
+        scanForDevices();
+        callDeviceChangeListeners();
+    }
+
+    void triggerAsyncAudioDeviceListChange()
+    {
+        triggerAsyncUpdate();
     }
 
     //==============================================================================
@@ -1969,16 +1995,15 @@ private:
         return total;
     }
 
-    void audioDeviceListChanged()
-    {
-        scanForDevices();
-        callDeviceChangeListeners();
-    }
-
     static OSStatus hardwareListenerProc (AudioDeviceID, UInt32, const AudioObjectPropertyAddress*, void* clientData)
     {
         static_cast<CoreAudioIODeviceType*> (clientData)->audioDeviceListChanged();
         return noErr;
+    }
+
+    void handleAsyncUpdate() override
+    {
+        audioDeviceListChanged();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODeviceType)

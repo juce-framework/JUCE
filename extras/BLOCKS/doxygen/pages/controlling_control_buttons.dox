@@ -1,0 +1,18 @@
+/**
+@page controlling_control_buttons Controlling control buttons
+
+In addition to sending button pressed and button released events, ControlButton objects can allow your application code to change the colour of the LED behind the corresponding physical button on a BLOCKS device.
+
+An array of pointers to the available %ControlButton objects can be obtained from the Block::getButtons method of a Block---see the @ref discovering_blocks section for details of how to obtain a %Block object.
+Once you have a %ControlButton, the functions involving the LED are ControlButton::hasLight and ControlButton::setLightColour, which are descriptively named.
+A code snippet showing how to turn all the available buttons of a %Block red is shown below.
+@code{.cpp}
+void setAllButtonsRed (Block& block)
+{
+    for (auto button : block->getButtons())
+        if (button->hasLight())
+            button->setLightColour (Colours::red);
+}
+@endcode
+*/
+

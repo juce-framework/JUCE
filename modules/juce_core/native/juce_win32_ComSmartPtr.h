@@ -29,9 +29,23 @@
 #ifndef JUCE_WIN32_COMSMARTPTR_H_INCLUDED
 #define JUCE_WIN32_COMSMARTPTR_H_INCLUDED
 
-#if ! (defined (_MSC_VER) || defined (__uuidof))
+#if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
+#ifdef __uuidof
+ #undef __uuidof
+#endif
+
 template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return CLSID(); } };
 #define __uuidof(x)  UUIDGetter<x>::get()
+
+ template <>
+ struct UUIDGetter<::IUnknown>
+ {
+     static CLSID get()
+     {
+       GUID g = { 0, 0, 0, { 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 } };
+       return g;
+     }
+ };
 #endif
 
 inline GUID uuidFromString (const char* const s) noexcept
@@ -135,7 +149,7 @@ protected:
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
-        if (refId == IID_IUnknown)
+        if (refId == __uuidof (IUnknown))
             return castToType <IUnknown> (result);
 
         *result = 0;

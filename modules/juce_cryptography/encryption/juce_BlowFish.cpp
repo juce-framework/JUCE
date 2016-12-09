@@ -269,3 +269,196 @@ void BlowFish::decrypt (uint32& data1, uint32& data2) const noexcept
     data1 = r ^ p[0];
     data2 = l ^ p[1];
 }
+
+void BlowFish::encrypt (MemoryBlock& data) const
+{
+    const size_t size = data.getSize();
+    data.setSize (size + (8u - (size % 8u)));
+
+    int success = encrypt (data.getData(), size, data.getSize());
+
+    ignoreUnused (success);
+    jassert (success >= 0);
+}
+
+void BlowFish::decrypt (MemoryBlock& data) const
+{
+    const int newSize = decrypt (data.getData(), data.getSize());
+
+    if (newSize >= 0)
+        data.setSize (static_cast<size_t> (newSize));
+    else
+        jassertfalse;
+}
+
+int BlowFish::encrypt (void* data, size_t size, size_t bufferSize) const noexcept
+{
+    const int encryptedSize = pad (data, size, bufferSize);
+
+    if (encryptedSize >= 0 && apply (data, static_cast<size_t> (encryptedSize), &BlowFish::encrypt))
+        return encryptedSize;
+
+    return -1;
+}
+
+int BlowFish::decrypt (void* data, size_t size) const noexcept
+{
+    if (apply (data, size, &BlowFish::decrypt))
+        return unpad (data, size);
+
+    return -1;
+}
+
+bool BlowFish::apply (void* data, size_t size, void (BlowFish::*op) (uint32&, uint32&) const noexcept) const
+{
+    union AlignedAccessHelper
+    {
+        int8   byte[sizeof(uint32) * 2];
+        uint32 data[2];
+    };
+
+    if ((size % 8u) != 0u)
+        return false;
+
+    const size_t n = size / 8u;
+
+    AlignedAccessHelper* ptr = reinterpret_cast<AlignedAccessHelper*> (data);
+
+    for (size_t i = 0; i < n; ++i)
+        (this->*op) (ptr[i].data[0], ptr[i].data[1]);
+
+    return true;
+}
+
+int BlowFish::pad (void* data, size_t size, size_t bufferSize) noexcept
+{
+    // add padding according to https://tools.ietf.org/html/rfc2898#section-6.1.1
+    const uint8 paddingSize = 8u - (size % 8u);
+    const size_t n = size + paddingSize;
+
+    if (n > bufferSize)
+        return -1;
+
+    uint8* dst = reinterpret_cast<uint8*> (data);
+    for (size_t i = size; i < n; ++i)
+        dst[i] = paddingSize;
+
+    return static_cast<int> (n);
+}
+
+int BlowFish::unpad (const void* data, size_t size) noexcept
+{
+    if (size == 0)
+        return -1;
+
+    // remove padding according to https://tools.ietf.org/html/rfc2898#section-6.1.1
+    uint8 paddingSize = reinterpret_cast<const uint8*>(data)[size - 1u];
+
+    if (paddingSize == 0 || paddingSize > 8 || paddingSize > size)
+        return -1;
+
+    return static_cast<int> (size - static_cast<size_t>(paddingSize));
+}
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class BlowFishTests  : public UnitTest
+{
+public:
+    BlowFishTests() : UnitTest ("BlowFish") {}
+
+    static void fillMemoryBlockWithRandomData (MemoryBlock& block, Random& random)
+    {
+        const size_t n = block.getSize() / sizeof (int32);
+
+        uint8* dst = reinterpret_cast<uint8*> (block.getData());
+        for (size_t i = 0; i < n; ++i)
+            dst[i] = static_cast<uint8> (random.nextInt(255));
+    }
+
+    void expectEqualData (const void* dataA, const void* dataB, size_t size, const String& failureMessage)
+    {
+        const uint8* a = reinterpret_cast<const uint8*> (dataA);
+        const uint8* b = reinterpret_cast<const uint8*> (dataB);
+
+        for (size_t i = 0; i < size; ++i)
+            expectEquals ((int) a[i], (int) b[i], failureMessage);
+    }
+
+    void expectEqualMemoryBlocks (const MemoryBlock& a, const MemoryBlock& b, const String& failureMessage)
+    {
+        expectEquals ((int) a.getSize(), (int) b.getSize(), failureMessage);
+        expectEqualData (a.getData(), b.getData(), a.getSize(), failureMessage);
+    }
+
+    void encryptDecryptTest (const BlowFish& blowFish, void* data, size_t size, size_t bufferSize)
+    {
+        MemoryBlock copy (data, size);
+
+        int encryptedSize = blowFish.encrypt (data, size, bufferSize);
+        expectGreaterThan (encryptedSize, (int) size);
+        expectLessOrEqual (encryptedSize, (int) bufferSize);
+
+        int decryptedSize = blowFish.decrypt (data, static_cast<size_t> (encryptedSize));
+        expectEquals ((int) size, decryptedSize);
+
+        expectEqualData (data, copy.getData(), size, "Length/Content changed during encryption");
+    }
+
+    void encryptDecryptTest (const BlowFish& blowFish, MemoryBlock& data)
+    {
+        MemoryBlock copy (data);
+
+        blowFish.encrypt (data);
+        blowFish.decrypt (data);
+
+        expectEqualMemoryBlocks (data, copy, "Length/Content changed during encryption");
+    }
+
+    void encryptDecryptTest (const BlowFish& blowFish, const String& data)
+    {
+        MemoryBlock block (data.toRawUTF8(), static_cast<size_t> (data.length()));
+        encryptDecryptTest (blowFish, block);
+    }
+
+    void runTest() override
+    {
+        beginTest ("BlowFish");
+        Random random = getRandom();
+
+        for (int i = 0; i < 100; ++i)
+        {
+            const int keySize = (random.nextInt(17) + 1) * static_cast<int> (sizeof (uint32));
+            MemoryBlock key (static_cast<size_t> (keySize));
+            fillMemoryBlockWithRandomData (key, random);
+
+            BlowFish bf (key.getData(), keySize);
+
+            encryptDecryptTest (bf, "");
+            encryptDecryptTest (bf, "a");
+            encryptDecryptTest (bf, "Hello World!");
+
+            const int minSize = 8 + sizeof (void*);
+            const int dataSize = random.nextInt (2048 - minSize) + minSize;
+            MemoryBlock data (static_cast<size_t> (dataSize));
+            fillMemoryBlockWithRandomData (data, random);
+
+            encryptDecryptTest (bf, data);
+            encryptDecryptTest (bf, data.getData(), data.getSize() - 8, data.getSize());
+            encryptDecryptTest (bf, data.getData(), 0, 8);
+
+
+            // test unaligned data encryption/decryption
+            const uintptr_t nudge = static_cast<uintptr_t> (random.nextInt (sizeof(void*) - 1));
+            void* unalignedData = (void*) (reinterpret_cast<uintptr_t> (data.getData()) + nudge);
+            size_t newSize = data.getSize() - nudge;
+
+            encryptDecryptTest (bf, unalignedData, newSize - 8, newSize);
+        }
+    }
+};
+
+static BlowFishTests blowFishUnitTests;
+
+#endif

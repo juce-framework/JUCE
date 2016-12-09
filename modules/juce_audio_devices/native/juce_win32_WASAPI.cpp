@@ -96,10 +96,17 @@ bool check (HRESULT hr)
 }
 
 #if JUCE_MINGW
+
  #define JUCE_COMCLASS(name, guid) \
     struct name; \
     template<> struct UUIDGetter<name>   { static CLSID get() { return uuidFromString (guid); } }; \
     struct name
+
+ #ifdef __uuidof
+  #undef __uuidof
+ #endif
+
+ #define __uuidof(cls) UUIDGetter<cls>::get()
 
  struct PROPERTYKEY
  {

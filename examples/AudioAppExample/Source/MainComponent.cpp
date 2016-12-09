@@ -27,8 +27,8 @@ public:
     {
         setSize (800, 600);
 
-        // specify the number of input and output channels that we want to open
-        setAudioChannels (2, 2);
+        // Specify the number of input and output channels that we want to open.
+        setAudioChannels (0, 2);
     }
 
     ~MainContentComponent()
@@ -90,7 +90,7 @@ public:
                         lastMousePosition.y - radius / 2.0f,
                         radius, radius);
 
-        // draw a representative sinewave
+        // Draw a representative sine wave.
         Path wavePath;
         wavePath.startNewSubPath (0, centreY);
 

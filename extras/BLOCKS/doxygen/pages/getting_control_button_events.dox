@@ -1,0 +1,40 @@
+/**
+@page getting_control_button_events Getting control button events
+
+Control button events are communicated from Lightpad and Control Blocks to your application via ControlButton objects.
+
+You can obtain an array of %ControlButton pointers associated with a specific Lightpad or Control %Block from its corresponding Block object using the Block::getButtons method---see the @ref discovering_blocks page for an example of how to obtain %Block objects.
+Each pointer to a %ControlButton will be valid for the lifetime of the %Block object.
+
+Once you have a %ControlButton you must register as a ControlButton::Listener to receive button pressed and button released callbacks.
+The process for doing this is to have one of your application's classes inherit from %ControlButton::Listener and override the pure virtual methods ControlButton::Listener::buttonPressed and ControlButton::Listener::buttonReleased.
+Then, when you register your derived class as a listener to a particular %ControlButton, your overriden methods will be called when the corresponding button is pressed and released.
+
+Registering a class derived from %ControlButton::Listener with multiple %ControlButton objects is done as follows:
+@code{.cpp}
+class ControlButtonListenerExample : public ControlButton::Listener
+{
+public:
+    ControlButtonListenerExample (Block& block)
+    {
+        for (auto button : block->getButtons())
+            button->addListener (this);
+    }
+
+    virtual void buttonPressed (ControlButton&, sourceControlButton, Block::Timestamp timestamp) override
+    {
+        // Do something when the sourceControlButton is pressed!
+    }
+
+    virtual void buttonReleased (ControlButton&, sourceControlButton, Block::Timestamp timestamp) override
+    {
+        // Do something when the sourceControlButton is released!
+    }
+};
+@endcode
+
+When your overriden <code>buttonPressed</code> or <code>buttonReleased</code> methods are called you have access to two paramters: a reference to the %ControlButton that generated this event and timestamp for the event.
+
+You will find multiple examples of control button listeners in the @ref example_applications pages.
+*/
+

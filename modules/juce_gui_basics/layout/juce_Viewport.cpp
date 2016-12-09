@@ -110,8 +110,13 @@ int Viewport::getMaximumVisibleHeight() const   { return contentHolder.getHeight
 Point<int> Viewport::viewportPosToCompPos (Point<int> pos) const
 {
     jassert (contentComp != nullptr);
-    return Point<int> (jmax (jmin (0, contentHolder.getWidth()  - contentComp->getWidth()),  jmin (0, -(pos.x))),
-                       jmax (jmin (0, contentHolder.getHeight() - contentComp->getHeight()), jmin (0, -(pos.y))));
+
+    Rectangle<int> contentBounds = contentHolder.getLocalArea (contentComp, contentComp->getLocalBounds());
+    Point<int> p (jmax (jmin (0, contentHolder.getWidth()  - contentBounds.getWidth()),  jmin (0, -(pos.x))),
+                  jmax (jmin (0, contentHolder.getHeight() - contentBounds.getHeight()), jmin (0, -(pos.y))));
+
+
+    return p.transformedBy (contentComp->getTransform().inverted());
 }
 
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)

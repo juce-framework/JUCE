@@ -404,78 +404,28 @@ public:
     */
     void playTestSound();
 
-    /** Plays a sound from a file. */
-    void playSound (const File& file);
-
-    /** Convenient method to play sound from a JUCE resource. */
-    void playSound (const void* resourceData, size_t resourceSize);
-
-    /** Plays the sound from an audio format reader.
-
-        If deleteWhenFinished is true then the format reader will be
-        automatically deleted once the sound has finished playing.
-    */
-    void playSound (AudioFormatReader* buffer, bool deleteWhenFinished = false);
-
-    /** Plays the sound from a positionable audio source.
-
-        This will output the sound coming from a positionable audio source.
-        This gives you slightly more control over the sound playback compared
-        to  the other playSound methods. For example, if you would like to
-        stop the sound prematurely you can call this method with a
-        TransportAudioSource and then call audioSource->stop. Note that,
-        you must call audioSource->start to start the playback, if your
-        audioSource is a TransportAudioSource.
-
-        The audio device manager will not hold any references to this audio
-        source once the audio source has stopped playing for any reason,
-        for example when the sound has finished playing or when you have
-        called audioSource->stop. Therefore, calling audioSource->start() on
-        a finished audioSource will not restart the sound again. If this is
-        desired simply call playSound with the same audioSource again.
-
-        @param audioSource   the audio source to play
-        @param deleteWhenFinished If this is true then the audio source will
-                                  be deleted once the device manager has finished playing.
-    */
-    void playSound (PositionableAudioSource* audioSource, bool deleteWhenFinished = false);
-
-    /** Plays the sound from an audio sample buffer.
-
-        This will output the sound contained in an audio sample buffer. If
-        deleteWhenFinished is true then the audio sample buffer will be
-        automatically deleted once the sound has finished playing.
-
-        If playOnAllOutputChannels is true, then if there are more output channels
-        than buffer channels, then the ones that are available will be re-used on
-        multiple outputs so that something is sent to all output channels. If it
-        is false, then the buffer will just be played on the first output channels.
-    */
-    void playSound (AudioSampleBuffer* buffer,
-                    bool deleteWhenFinished = false,
-                    bool playOnAllOutputChannels = false);
-
     //==============================================================================
-    /** Turns on level-measuring.
-
-        When enabled, the device manager will measure the peak input level
-        across all channels, and you can get this level by calling getCurrentInputLevel().
-
-        This is mainly intended for audio setup UI panels to use to create a mic
-        level display, so that the user can check that they've selected the right
-        device.
-
-        A simple filter is used to make the level decay smoothly, but this is
-        only intended for giving rough feedback, and not for any kind of accurate
-        measurement.
+    /** Turns on level-measuring for input channels.
+        @see getCurrentInputLevel()
     */
-    void enableInputLevelMeasurement (bool enableMeasurement);
+    void enableInputLevelMeasurement (bool enableMeasurement) noexcept;
+
+    /** Turns on level-measuring for output channels.
+        @see getCurrentOutputLevel()
+    */
+    void enableOutputLevelMeasurement (bool enableMeasurement) noexcept;
 
     /** Returns the current input level.
         To use this, you must first enable it by calling enableInputLevelMeasurement().
-        See enableInputLevelMeasurement() for more info.
+        @see enableInputLevelMeasurement()
     */
-    double getCurrentInputLevel() const;
+    double getCurrentInputLevel() const noexcept;
+
+    /** Returns the current output level.
+        To use this, you must first enable it by calling enableOutputLevelMeasurement().
+        @see enableOutputLevelMeasurement()
+    */
+    double getCurrentOutputLevel() const noexcept;
 
     /** Returns the a lock that can be used to synchronise access to the audio callback.
         Obviously while this is locked, you're blocking the audio thread from running, so
@@ -502,8 +452,6 @@ private:
     BigInteger inputChannels, outputChannels;
     ScopedPointer<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
-    Atomic<int> inputLevelMeasurementEnabledCount;
-    double inputLevel;
     AudioSampleBuffer tempBuffer;
 
     struct MidiCallbackInfo
@@ -520,7 +468,23 @@ private:
     ScopedPointer<MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
+    ScopedPointer<AudioSampleBuffer> testSound;
+    int testSoundPosition;
+
     double cpuUsageMs, timeToCpuScale;
+
+    struct LevelMeter
+    {
+        LevelMeter() noexcept;
+        void updateLevel (const float* const*, int numChannels, int numSamples) noexcept;
+        void setEnabled (bool) noexcept;
+        double getCurrentLevel() const noexcept;
+
+        Atomic<int> enabled;
+        double level;
+    };
+
+    LevelMeter inputLevelMeter, outputLevelMeter;
 
     //==============================================================================
     class CallbackHandler;

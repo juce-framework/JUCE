@@ -89,9 +89,15 @@ namespace ProjectProperties
 
     static File getCacheLocation (Project& project)
     {
+        String cacheFolderName = project.getProjectFilenameRoot() + "_" + project.getProjectUID();
+
+       #if JUCE_DEBUG
+        cacheFolderName += "_debug";
+       #endif
+
         return getProjucerTempFolder()
                 .getChildFile ("Intermediate Files")
-                .getChildFile (project.getProjectFilenameRoot() + "_" + project.getProjectUID());
+                .getChildFile (cacheFolderName);
     }
 }
 
@@ -143,7 +149,15 @@ public:
     {
        #if RUN_CLANG_IN_CHILD_PROCESS
         if (childProcess.isRunning())
+        {
+           #if JUCE_DEBUG
             killServerPolitely();
+           #else
+            // in release builds we don't want to wait
+            // for the server to clean up and shut down
+            killServerWithoutMercy();
+           #endif
+        }
        #endif
     }
 
@@ -481,7 +495,6 @@ private:
 
         if (project.getProjectType().isAudioPlugin())
         {
-            paths.add (getAppSettings().getGlobalPath (Ids::vst2Path, TargetOS::getThisOS()).toString());
             paths.add (getAppSettings().getGlobalPath (Ids::vst3Path, TargetOS::getThisOS()).toString());
         }
 
@@ -600,7 +613,8 @@ bool CompileEngineChildProcess::canLaunchApp() const
     return process != nullptr
             && runningAppProcess == nullptr
             && activityList.getNumActivities() == 0
-            && errorList.getNumErrors() == 0;
+            && errorList.getNumErrors() == 0
+            && project.getProjectType().isGUIApplication();
 }
 
 void CompileEngineChildProcess::launchApp()

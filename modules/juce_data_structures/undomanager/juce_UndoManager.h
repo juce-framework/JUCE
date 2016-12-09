@@ -229,13 +229,15 @@ private:
     //==============================================================================
     struct ActionSet;
     friend struct ContainerDeletePolicy<ActionSet>;
-    OwnedArray<ActionSet> transactions;
+    OwnedArray<ActionSet> transactions, stashedFutureTransactions;
     String newTransactionName;
     int totalUnitsStored, maxNumUnitsToKeep, minimumTransactionsToKeep, nextIndex;
     bool newTransaction, reentrancyCheck;
     ActionSet* getCurrentSet() const noexcept;
     ActionSet* getNextSet() const noexcept;
-    void clearFutureTransactions();
+    void moveFutureTransactionsToStash();
+    void restoreStashedFutureTransactions();
+    void dropOldTransactionsIfTooLarge();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UndoManager)
 };

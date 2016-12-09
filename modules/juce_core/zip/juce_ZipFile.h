@@ -91,7 +91,7 @@ public:
     int getNumEntries() const noexcept;
 
     /** Returns a structure that describes one of the entries in the zip file.
-        This may return zero if the index is out of range.
+        This may return a nullptr if the index is out of range.
         @see ZipFile::ZipEntry
     */
     const ZipEntry* getEntry (int index) const noexcept;
@@ -120,7 +120,7 @@ public:
     /** Creates a stream that can read from one of the zip file's entries.
 
         The stream that is returned must be deleted by the caller (and
-        zero might be returned if a stream can't be opened for some reason).
+        a nullptr might be returned if a stream can't be opened for some reason).
 
         The stream must not be used after the ZipFile object that created
         has been deleted.
@@ -135,7 +135,7 @@ public:
     /** Creates a stream that can read from one of the zip file's entries.
 
         The stream that is returned must be deleted by the caller (and
-        zero might be returned if a stream can't be opened for some reason).
+        a nullptr might be returned if a stream can't be opened for some reason).
 
         The stream must not be used after the ZipFile object that created
         has been deleted.

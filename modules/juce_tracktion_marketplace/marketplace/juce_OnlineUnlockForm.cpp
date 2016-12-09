@@ -39,6 +39,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 {
     OverlayComp (OnlineUnlockForm& f)  : Thread (String()), form (f)
     {
+        result.succeeded = false;
         email = form.emailBox.getText();
         password = form.passwordBox.getText();
         addAndMakeVisible (spinner);
@@ -207,12 +208,12 @@ void OnlineUnlockForm::resized()
     passwordBox.setInputRestrictions (64);
     passwordBox.setFont (font);
 
-    r.removeFromBottom (30);
+    r.removeFromBottom (20);
     emailBox.setBounds (r.removeFromBottom (boxHeight));
     emailBox.setInputRestrictions (512);
     emailBox.setFont (font);
 
-    r.removeFromBottom (30);
+    r.removeFromBottom (20);
 
     message.setBounds (r);
 

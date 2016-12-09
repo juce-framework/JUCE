@@ -126,7 +126,15 @@ public:
         changed by a cracker in order to unlock your app, so the more places you call this
         method, the more hassle it will be for them to find and crack them all.
     */
-    inline var isUnlocked() const       { return status[unlockedProp]; }
+    inline var isUnlocked() const               { return status[unlockedProp]; }
+
+    /** Returns the Time when the keyfile expires.
+
+        If a the key file obtained has an expiry time, isUnlocked will return false and this
+        will return a non-zero time. The interpretation of this is up to your app but could
+        be used for subscription based models or trial periods.
+    */
+    inline Time getExpiryTime() const           { return Time (static_cast<int64> (status[expiryTimeProp])); }
 
     /** Optionally allows the app to provide the user's email address if
         it is known.
@@ -244,6 +252,7 @@ private:
     UnlockResult handleFailedConnection();
 
     static const char* unlockedProp;
+    static const char* expiryTimeProp;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OnlineUnlockStatus)
 };

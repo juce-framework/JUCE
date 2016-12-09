@@ -38,7 +38,7 @@ static ComboBox& createFileCreationOptionComboBox (Component& setupComp,
     c->addItemList (fileOptions, 1);
     c->setSelectedId (1, dontSendNotification);
 
-    Label* l = new Label (String::empty, TRANS("Files to Auto-Generate") + ":");
+    Label* l = new Label (String(), TRANS("Files to Auto-Generate") + ":");
     l->attachToComponent (c, true);
     itemsCreated.add (l);
 

@@ -24,7 +24,7 @@
 
 namespace MouseCursorHelpers
 {
-    extern NSImage* createNSImage (const Image&);
+    extern NSImage* createNSImage (const Image&, float scaleFactor = 1.f);
 }
 
 extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelMenuId,

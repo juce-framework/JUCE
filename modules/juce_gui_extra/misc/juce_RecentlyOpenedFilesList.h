@@ -118,10 +118,10 @@ public:
         If dontAddNonExistentFiles is true, then each file will be checked and only those
         that exist will be added.
 
-        If filesToAvoid is non-zero, then it is considered to be a zero-terminated array of
-        pointers to file objects. Any files that appear in this list will not be added to the
-        menu - the reason for this is that you might have a number of files already open, so
-        might not want these to be shown in the menu.
+        If filesToAvoid is not a nullptr, then it is considered to be a zero-terminated array
+        of pointers to file objects. Any files that appear in this list will not be added to
+        the menu - the reason for this is that you might have a number of files already open,
+        so might not want these to be shown in the menu.
 
         It returns the number of items that were added.
     */

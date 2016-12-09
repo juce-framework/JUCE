@@ -29,10 +29,15 @@
 /**
  */
 class SurroundProcessor  : public AudioProcessor,
-                           public ChannelClickListener
+                           public ChannelClickListener,
+                           private AsyncUpdater
 {
 public:
-    SurroundProcessor() {}
+    SurroundProcessor()
+        : AudioProcessor(BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
+                                          .withOutput ("Output", AudioChannelSet::stereo()))
+    {}
+
     ~SurroundProcessor() {}
 
     //==============================================================================
@@ -41,10 +46,12 @@ public:
         channelClicked = 0;
         sampleOffset = static_cast<int> (std::ceil (sampleRate));
 
-        const int numChannels = busArrangement.inputBuses.getReference(0).channels.size();
+        const int numChannels = getChannelCountOfBus (true, 0);
         channelActive.resize (numChannels);
         alphaCoeffs.resize (numChannels);
         reset();
+
+        triggerAsyncUpdate();
 
         ignoreUnused (samplesPerBlock);
     }
@@ -73,11 +80,14 @@ public:
         const int fillSamples = jmin (static_cast<int> (std::ceil (getSampleRate())) - sampleOffset,
                                       buffer.getNumSamples());
 
-        float* const channelBuffer = buffer.getWritePointer (channelClicked);
-        const float freq = (float) (440.0 / getSampleRate());
+        if (isPositiveAndBelow (channelClicked, buffer.getNumChannels()))
+        {
+            float* const channelBuffer = buffer.getWritePointer (channelClicked);
+            const float freq = (float) (440.0 / getSampleRate());
 
-        for (int i = 0; i < fillSamples; ++i)
-            channelBuffer[i] += std::sin (2.0f * float_Pi * freq * static_cast<float> (sampleOffset++));
+            for (int i = 0; i < fillSamples; ++i)
+                channelBuffer[i] += std::sin (2.0f * float_Pi * freq * static_cast<float> (sampleOffset++));
+        }
     }
 
     //==============================================================================
@@ -85,18 +95,12 @@ public:
     bool hasEditor() const override               { return true;   }
 
     //==============================================================================
-    bool setPreferredBusArrangement (bool isInputBus, int busIndex,
-                                     const AudioChannelSet& preferred) override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        if  (! preferred.isDiscreteLayout())
-        {
-            if (! AudioProcessor::setPreferredBusArrangement (! isInputBus, busIndex, preferred))
-                return false;
-
-            return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
-        }
-
-        return false;
+        return ((! layouts.getMainInputChannelSet() .isDiscreteLayout())
+             && (! layouts.getMainOutputChannelSet().isDiscreteLayout())
+             && (layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet())
+             && (! layouts.getMainInputChannelSet().isDisabled()));
     }
 
     void reset() override
@@ -109,7 +113,6 @@ public:
     const String getName() const override               { return "Surround PlugIn"; }
     bool acceptsMidi() const override                   { return false; }
     bool producesMidi() const override                  { return false; }
-    bool silenceInProducesSilenceOut() const override   { return true; }
     double getTailLengthSeconds() const override        { return 0; }
 
     //==============================================================================
@@ -132,6 +135,13 @@ public:
     bool isChannelActive (int channelIndex) override
     {
         return channelActive [channelIndex] > 0;
+    }
+
+    void handleAsyncUpdate() override
+    {
+        if (AudioProcessorEditor* editor = getActiveEditor())
+            if (SurroundEditor* surroundEditor = dynamic_cast<SurroundEditor*> (editor))
+                surroundEditor->updateGUI();
     }
 
 private:

@@ -368,7 +368,7 @@ public:
         if (xml.hasTagName (getTagName()))
         {
             position.restoreFromXml (xml, position);
-            resourceName = xml.getStringAttribute ("resource", String::empty);
+            resourceName = xml.getStringAttribute ("resource", String());
             opacity = xml.getDoubleAttribute ("opacity", 1.0);
             mode = (StretchMode) xml.getIntAttribute ("mode", (int) stretched);
 
@@ -405,7 +405,7 @@ private:
             if (element != nullptr)
                 return element->getResource();
 
-            return String::empty;
+            return String();
         }
     };
 

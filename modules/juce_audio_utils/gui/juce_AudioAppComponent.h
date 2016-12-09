@@ -34,15 +34,15 @@
     getNextAudioBlock(). The base class provides a basic AudioDeviceManager object
     and runs audio through the default output device.
 */
-class AudioAppComponent   : public Component,
-                            public AudioSource
+class JUCE_API AudioAppComponent   : public Component,
+                                     public AudioSource
 {
 public:
     AudioAppComponent();
     ~AudioAppComponent();
 
     /** A subclass should call this from their constructor, to set up the audio. */
-    void setAudioChannels (int numInputChannels, int numOutputChannels);
+    void setAudioChannels (int numInputChannels, int numOutputChannels, const XmlElement* const storedSettings = nullptr);
 
     /** Tells the source to prepare for playing.
 

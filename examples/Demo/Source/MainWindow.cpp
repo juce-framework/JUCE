@@ -367,32 +367,32 @@ private:
             }
 
             case MainAppWindow::useLookAndFeelV1:
-                result.setInfo ("Use LookAndFeel_V1", String::empty, generalCategory, 0);
+                result.setInfo ("Use LookAndFeel_V1", String(), generalCategory, 0);
                 result.addDefaultKeypress ('i', ModifierKeys::commandModifier);
                 result.setTicked (isLookAndFeelSelected<LookAndFeel_V1>());
                 break;
 
             case MainAppWindow::useLookAndFeelV2:
-                result.setInfo ("Use LookAndFeel_V2", String::empty, generalCategory, 0);
+                result.setInfo ("Use LookAndFeel_V2", String(), generalCategory, 0);
                 result.addDefaultKeypress ('o', ModifierKeys::commandModifier);
                 result.setTicked (isLookAndFeelSelected<LookAndFeel_V2>());
                 break;
 
             case MainAppWindow::useLookAndFeelV3:
-                result.setInfo ("Use LookAndFeel_V3", String::empty, generalCategory, 0);
+                result.setInfo ("Use LookAndFeel_V3", String(), generalCategory, 0);
                 result.addDefaultKeypress ('p', ModifierKeys::commandModifier);
                 result.setTicked (isLookAndFeelSelected<LookAndFeel_V3>());
                 break;
 
             case MainAppWindow::toggleRepaintDebugging:
-                result.setInfo ("Toggle repaint display", String::empty, generalCategory, 0);
+                result.setInfo ("Toggle repaint display", String(), generalCategory, 0);
                 result.addDefaultKeypress ('r', ModifierKeys());
                 result.setTicked (juceDemoRepaintDebuggingActive);
                 break;
 
             case MainAppWindow::useNativeTitleBar:
             {
-                result.setInfo ("Use native window title bar", String::empty, generalCategory, 0);
+                result.setInfo ("Use native window title bar", String(), generalCategory, 0);
                 result.addDefaultKeypress ('n', ModifierKeys::commandModifier);
                 bool nativeTitlebar = false;
 
@@ -405,7 +405,7 @@ private:
 
            #if ! JUCE_LINUX
             case MainAppWindow::goToKioskMode:
-                result.setInfo ("Show full-screen kiosk mode", String::empty, generalCategory, 0);
+                result.setInfo ("Show full-screen kiosk mode", String(), generalCategory, 0);
                 result.addDefaultKeypress ('f', ModifierKeys::commandModifier);
                 result.setTicked (Desktop::getInstance().getKioskModeComponent() != 0);
                 break;

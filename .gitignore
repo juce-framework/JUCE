@@ -52,5 +52,6 @@ profile
 **/CodeBlocks/*.depend
 **/CodeBlocks/*.layout
 **/Builds/AndroidStudio
-doxygen/doc
+**/doxygen/doc
+**/doxygen/build
 extras/Projucer/JUCECompileEngine.dylib

@@ -1,0 +1,58 @@
+/**
+@mainpage Documentation
+
+Welcome to the BLOCKS SDK documentation.
+<br>
+
+Here you will find all the information required to start creating BLOCKS applications.
+A brief summary of the main sections is below.
+
+<br>
+@subpage downloading_the_sdk
+
+This section describes how to obtain the SDK source code, either via the <a href="https://github.com/julianstorer/JUCE">JUCE framework</a> or @ref the_standalone_blocks_sdk.
+
+<br>
+@subpage connecting_blocks
+
+Lightpad and Control Blocks communicate with a computer over USB-C or Bluetooth, and communicate with each other via magnetic connections on their sides.
+This section contains instructions for configuring your setup so that all the components can communicate with each other.
+
+<br>
+@subpage discovering_blocks
+
+Once you have connected your device to your computer you need to be able to discover it from your application.
+This section outlines the procedure for Lightpad and Control %Block discovery and provides some simple example code which monitors for new connections.
+
+<br>
+@subpage getting_touch_events
+
+This section explains how to capture touch events from a compatible device and, building on the @ref discovering_blocks section, displays some example code.
+
+<br>
+@subpage getting_control_button_events
+
+Lightpad and Control Blocks have control buttons, either a mode button on their side or labelled buttons on top, and this section shows you how to obtain button pressed and button released events.
+
+<br>
+@subpage controlling_led_grids
+
+This section explains how to control the LED grid on a Lightpad.
+
+<br>
+@subpage controlling_led_strips
+
+Control Blocks have a strip of lights running along one side and this section provides instructions for controling the individual LEDs.
+
+<br>
+@subpage controlling_control_buttons
+
+As well as providing button pressed and button released events, control buttons also have LEDs.
+This section explains how to change the colour of different buttons.
+
+<br>
+@subpage the_standalone_blocks_sdk
+
+The easiest way to get started using the SDK is via the <a href="https://github.com/julianstorer/JUCE">JUCE framework</a>, but if you want to integrate BLOCKS functionality into your existing application then it may be more convenient to use @ref the_standalone_blocks_sdk.
+This section gives an overview of building and using the BLOCKS SDK as a library.
+*/

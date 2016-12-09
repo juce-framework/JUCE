@@ -238,7 +238,7 @@ void PropertyPanel::addProperties (const Array<PropertyComponent*>& newPropertie
     if (isEmpty())
         repaint();
 
-    propertyHolderComponent->insertSection (-1, new SectionComponent (String::empty, newProperties, true));
+    propertyHolderComponent->insertSection (-1, new SectionComponent (String(), newProperties, true));
     updatePropHolderLayout();
 }
 

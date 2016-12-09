@@ -190,7 +190,7 @@ struct CppParserHelpers
             if (CPlusPlusCodeTokeniser::isReservedKeyword (ed.getText().replaceSection (ed.getHighlightedRegion().getStart(),
                                                                                         ed.getHighlightedRegion().getLength(),
                                                                                         s)))
-                return String::empty;
+                return String();
 
             return s;
         }

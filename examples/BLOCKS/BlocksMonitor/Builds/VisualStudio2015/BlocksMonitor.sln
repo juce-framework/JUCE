@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+Project("{2A58BC08-D4BC-752C-26E3-197C4DF6FFF2}") = "BlocksMonitor", "BlocksMonitor.vcxproj", "{C732A69E-6750-67A4-2834-8CD8A6CDC360}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C732A69E-6750-67A4-2834-8CD8A6CDC360}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C732A69E-6750-67A4-2834-8CD8A6CDC360}.Debug|Win32.Build.0 = Debug|Win32
+		{C732A69E-6750-67A4-2834-8CD8A6CDC360}.Release|Win32.ActiveCfg = Release|Win32
+		{C732A69E-6750-67A4-2834-8CD8A6CDC360}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -162,6 +162,7 @@ public:
     void getIdealPopupMenuItemSize (const String& text, bool isSeparator, int standardMenuItemHeight,
                                     int& idealWidth, int& idealHeight) override;
     int getMenuWindowFlags() override;
+    void preparePopupMenuWindow (Component&) override;
 
     void drawMenuBarBackground (Graphics&, int width, int height, bool isMouseOverBar, MenuBarComponent&) override;
     int getMenuBarItemWidth (MenuBarComponent&, int itemIndex, const String& itemText) override;

@@ -47,7 +47,7 @@ public:
         : PropertyComponent ("extra callbacks", 250),
           document (doc)
     {
-        addAndMakeVisible (listBox = new ListBox (String::empty, this));
+        addAndMakeVisible (listBox = new ListBox (String(), this));
         listBox->setRowHeight (22);
 
         document.addChangeListener (this);
@@ -233,7 +233,7 @@ private:
     {
     public:
         ComponentInitialisersProperty (JucerDocument& doc)
-            : ComponentTextProperty <Component> ("Member intialisers", 2048, true, 0, doc)
+            : ComponentTextProperty <Component> ("Member initialisers", 16384, true, 0, doc)
         {
             preferredHeight = 24 * 3;
         }
@@ -817,20 +817,20 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
         break;
 
     case StandardApplicationCommandIDs::cut:
-        result.setInfo (TRANS ("Cut"), String::empty, "Editing", 0);
+        result.setInfo (TRANS ("Cut"), String(), "Editing", 0);
         result.setActive (isSomethingSelected());
         result.defaultKeypresses.add (KeyPress ('x', cmd, 0));
         break;
 
     case StandardApplicationCommandIDs::copy:
-        result.setInfo (TRANS ("Copy"), String::empty, "Editing", 0);
+        result.setInfo (TRANS ("Copy"), String(), "Editing", 0);
         result.setActive (isSomethingSelected());
         result.defaultKeypresses.add (KeyPress ('c', cmd, 0));
         break;
 
     case StandardApplicationCommandIDs::paste:
         {
-            result.setInfo (TRANS ("Paste"), String::empty, "Editing", 0);
+            result.setInfo (TRANS ("Paste"), String(), "Editing", 0);
             result.defaultKeypresses.add (KeyPress ('v', cmd, 0));
 
             bool canPaste = false;
@@ -851,18 +851,18 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
         break;
 
     case StandardApplicationCommandIDs::del:
-        result.setInfo (TRANS ("Delete"), String::empty, "Editing", 0);
+        result.setInfo (TRANS ("Delete"), String(), "Editing", 0);
         result.setActive (isSomethingSelected());
         break;
 
     case StandardApplicationCommandIDs::selectAll:
-        result.setInfo (TRANS ("Select All"), String::empty, "Editing", 0);
+        result.setInfo (TRANS ("Select All"), String(), "Editing", 0);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress ('a', cmd, 0));
         break;
 
     case StandardApplicationCommandIDs::deselectAll:
-        result.setInfo (TRANS ("Deselect All"), String::empty, "Editing", 0);
+        result.setInfo (TRANS ("Deselect All"), String(), "Editing", 0);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress ('d', cmd, 0));
         break;

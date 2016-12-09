@@ -457,8 +457,8 @@ public:
         Also, it's much easier and neater to use this method indirectly via the
         forEachXmlChildElement macro.
 
-        @returns    the sibling element that follows this one, or zero if this is the last
-                    element in its parent
+        @returns    the sibling element that follows this one, or a nullptr if
+                    this is the last element in its parent
 
         @see getNextElement, isTextElement, forEachXmlChildElement
     */

@@ -48,7 +48,8 @@ protected:
                              double rangeMin,
                              double rangeMax,
                              double interval,
-                             double skewFactor = 1.0);
+                             double skewFactor = 1.0,
+                             bool symmetricSkew = false);
 
 public:
     //==============================================================================
@@ -68,7 +69,8 @@ public:
                              double rangeMin,
                              double rangeMax,
                              double interval,
-                             double skewFactor = 1.0);
+                             double skewFactor = 1.0,
+                             bool symmetricSkew = false);
 
     /** Destructor. */
     ~SliderPropertyComponent();

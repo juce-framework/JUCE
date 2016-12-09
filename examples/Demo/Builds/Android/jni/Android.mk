@@ -27,6 +27,7 @@ LOCAL_SRC_FILES := \
   ../../../Source/Demos/ComponentTransformsDemo.cpp\
   ../../../Source/Demos/CryptographyDemo.cpp\
   ../../../Source/Demos/DialogsDemo.cpp\
+  ../../../Source/Demos/FlexBoxDemo.cpp\
   ../../../Source/Demos/FontsDemo.cpp\
   ../../../Source/Demos/GraphicsDemo.cpp\
   ../../../Source/Demos/ImagesDemo.cpp\

@@ -39,15 +39,24 @@ public:
 
     //==============================================================================
     MultiOutSynth()
+        : AudioProcessor (BusesProperties()
+                          .withOutput ("Output #1",  AudioChannelSet::stereo(), true)
+                          .withOutput ("Output #2",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #3",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #4",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #5",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #6",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #7",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #8",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #9",  AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #10", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #11", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #12", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #13", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #14", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #15", AudioChannelSet::stereo(), false)
+                          .withOutput ("Output #16", AudioChannelSet::stereo(), false))
     {
-        // The base class constructor will already add a main stereo output bus
-        // If you want to add your own main channel then simply call clear the
-        // output buses (busArrangement.outputBuses.clear()) and then add your own
-
-        // Add additional output buses but disable these by default
-        for (int busNr = 1; busNr < maxMidiChannel; ++busNr)
-            busArrangement.outputBuses.add (AudioProcessorBus (String ("Output #") += String (busNr + 1), AudioChannelSet::disabled()));
-
         // initialize other stuff (not related to buses)
         formatManager.registerBasicFormats();
 
@@ -65,21 +74,8 @@ public:
     ~MultiOutSynth() {}
 
     //==============================================================================
-    bool setPreferredBusArrangement (bool isInputBus, int busIndex,
-                                     const AudioChannelSet& preferred) override
-    {
-        const int numChannels = preferred.size();
-        const bool isMainBus = (busIndex == 0);
-
-        // do not allow disabling the main output bus
-        if (isMainBus && preferred.isDisabled()) return false;
-
-        // only support mono or stereo (or disabling) buses
-        if (numChannels > 2) return false;
-
-        // pass the call on to the base class
-        return AudioProcessor::setPreferredBusArrangement (isInputBus, busIndex, preferred);
-    }
+    bool canAddBus    (bool isInput) const override   { return (! isInput && getBusCount (false) < maxMidiChannel); }
+    bool canRemoveBus (bool isInput) const override   { return (! isInput && getBusCount (false) > 1); }
 
     //==============================================================================
     void prepareToPlay (double newSampleRate, int samplesPerBlock) override
@@ -94,13 +90,13 @@ public:
 
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiBuffer) override
     {
-        for (int busNr = 0; busNr < maxMidiChannel; ++busNr)
+        const int busCount = getBusCount (false);
+        for (int busNr = 0; busNr < busCount; ++busNr)
         {
             MidiBuffer midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
-            AudioSampleBuffer audioBusBuffer = busArrangement.getBusBuffer (buffer, false, busNr);
+            AudioSampleBuffer audioBusBuffer = getBusBuffer (buffer, false, busNr);
 
-            if (! busArrangement.outputBuses.getReference (busNr).channels.isDisabled())
-                synth [busNr]->renderNextBlock (audioBusBuffer, midiChannelBuffer, 0, audioBusBuffer.getNumSamples());
+            synth [busNr]->renderNextBlock (audioBusBuffer, midiChannelBuffer, 0, audioBusBuffer.getNumSamples());
         }
     }
 

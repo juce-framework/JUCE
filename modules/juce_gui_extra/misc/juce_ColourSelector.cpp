@@ -336,7 +336,7 @@ ColourSelector::ColourSelector (const int sectionsToShow, const int edge, const 
         addAndMakeVisible (hueSelector = new HueSelectorComp (*this, h,  gapAroundColourSpaceComponent));
     }
 
-    update();
+    update (dontSendNotification);
 }
 
 ColourSelector::~ColourSelector()
@@ -351,14 +351,14 @@ Colour ColourSelector::getCurrentColour() const
     return ((flags & showAlphaChannel) != 0) ? colour : colour.withAlpha ((uint8) 0xff);
 }
 
-void ColourSelector::setCurrentColour (Colour c)
+void ColourSelector::setCurrentColour (Colour c, NotificationType notification)
 {
     if (c != colour)
     {
         colour = ((flags & showAlphaChannel) != 0) ? c : c.withAlpha ((uint8) 0xff);
 
         updateHSV();
-        update();
+        update (notification);
     }
 }
 
@@ -370,7 +370,7 @@ void ColourSelector::setHue (float newH)
     {
         h = newH;
         colour = Colour (h, s, v, colour.getFloatAlpha());
-        update();
+        update (sendNotification);
     }
 }
 
@@ -384,7 +384,7 @@ void ColourSelector::setSV (float newS, float newV)
         s = newS;
         v = newV;
         colour = Colour (h, s, v, colour.getFloatAlpha());
-        update();
+        update (sendNotification);
     }
 }
 
@@ -394,14 +394,14 @@ void ColourSelector::updateHSV()
     colour.getHSB (h, s, v);
 }
 
-void ColourSelector::update()
+void ColourSelector::update (NotificationType notification)
 {
     if (sliders[0] != nullptr)
     {
-        sliders[0]->setValue ((int) colour.getRed());
-        sliders[1]->setValue ((int) colour.getGreen());
-        sliders[2]->setValue ((int) colour.getBlue());
-        sliders[3]->setValue ((int) colour.getAlpha());
+        sliders[0]->setValue ((int) colour.getRed(),   notification);
+        sliders[1]->setValue ((int) colour.getGreen(), notification);
+        sliders[2]->setValue ((int) colour.getBlue(),  notification);
+        sliders[3]->setValue ((int) colour.getAlpha(), notification);
     }
 
     if (colourSpace != nullptr)
@@ -413,7 +413,11 @@ void ColourSelector::update()
     if ((flags & showColourAtTop) != 0)
         repaint (previewArea);
 
-    sendChangeMessage();
+    if (notification != dontSendNotification)
+        sendChangeMessage();
+
+    if (notification == sendNotificationSync)
+        dispatchPendingMessages();
 }
 
 //==============================================================================

@@ -3513,7 +3513,7 @@ private:
             if (Atoms::isMimeTypeFile (dragAndDropCurrentMimeType))
             {
                 for (int i = 0; i < lines.size(); ++i)
-                    dragInfo.files.add (URL::removeEscapeChars (lines[i].replace ("file://", String::empty, true)));
+                    dragInfo.files.add (URL::removeEscapeChars (lines[i].replace ("file://", String(), true)));
 
                 dragInfo.files.trim();
                 dragInfo.files.removeEmptyStrings();
@@ -4159,7 +4159,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
                                                           Component* associatedComponent,
                                                           ModalComponentManager::Callback* callback)
 {
-    AlertWindow::showMessageBoxAsync (iconType, title, message, String::empty, associatedComponent, callback);
+    AlertWindow::showMessageBoxAsync (iconType, title, message, String(), associatedComponent, callback);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
@@ -4167,7 +4167,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       Component* associatedComponent,
                                                       ModalComponentManager::Callback* callback)
 {
-    return AlertWindow::showOkCancelBox (iconType, title, message, String::empty, String::empty,
+    return AlertWindow::showOkCancelBox (iconType, title, message, String(), String(),
                                          associatedComponent, callback);
 }
 
@@ -4177,7 +4177,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         ModalComponentManager::Callback* callback)
 {
     return AlertWindow::showYesNoCancelBox (iconType, title, message,
-                                            String::empty, String::empty, String::empty,
+                                            String(), String(), String(),
                                             associatedComponent, callback);
 }
 

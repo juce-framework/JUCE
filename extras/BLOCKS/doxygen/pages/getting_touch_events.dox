@@ -1,0 +1,36 @@
+/**
+@page getting_touch_events Getting touch events
+
+Touch events are communicated from BLOCKS devices to your application code via TouchSurface objects.
+
+You can obtain a pointer to the %TouchSurface associated with a specific BLOCKS device from its corresponding Block object using the Block::getTouchSurface() method---see the @ref discovering_blocks page for an example of how to obtain %Block objects.
+For devices without a touch surface (such as the Control Block) this method will return <code>nullptr</code>, but if the device is capable of sending touch events then the pointer to the %TouchSurface will be valid for the lifetime of the %Block object.
+
+Once you have a %TouchSurface you must register as a TouchSurface::Listener to get touch events.
+The process for doing this is to have one of your application's classes inherit from %TouchSurface::Listener and override the pure virtual method TouchSurface::Listener::touchChanged.
+Then, when you register your derived class as a listener to a particular %TouchSurface, your overriden method will be called when the corresponding device is touched.
+
+A safe way of registering a class derived from %TouchSurface::Listener with a %TouchSurface is as follows.
+@code{.cpp}
+class TouchSurfaceListenerExample : public TouchSurface::Listener
+{
+public:
+    TouchSurfaceListenerExample (Block& block)
+    {
+        if (auto touchSurface = block->getTouchSurface())
+            touchSurface->addListener (this);
+    }
+
+    virtual void touchChanged (TouchSurface& sourceTouchSurface, const TouchSurface::Touch& touchEvent) override
+    {
+        // Do something with touchEvent here!
+    }
+};
+@endcode
+
+When your overriden <code>touchChanged</code> method is called you have access to two paramters: a reference to the %TouchSurface that generated this event and a reference to a TouchSurface::Touch.
+The %TouchSurface::Touch class contains member variables describing the postion, pressure, velocity, timestamp and more.
+
+You will find multiple examples of using TouchSurfaces in the @ref example_applications pages.
+*/
+
