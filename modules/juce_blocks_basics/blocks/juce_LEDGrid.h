@@ -132,6 +132,9 @@ public:
     /** Gets a byte from the heap. */
     virtual uint8 getDataByte (size_t offset) = 0;
 
+    /** Sets the current program as the block's default state. */
+    virtual void saveProgramAsDefault() = 0;
+
     //==============================================================================
     struct Renderer
     {
