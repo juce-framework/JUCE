@@ -502,6 +502,9 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new BooleanPropertyComponent (shouldIncludeBinaryInAppConfig(), "Include Binary",
                                              "Include BinaryData.h in the AppConfig.h file"));
 
+    props.add (new TextPropertyComponent (binaryDataNamespace(), "BinaryData Namespace", 256, false),
+                                          "The namespace containing the binary assests. If left empty this defaults to \"BinaryData\".");
+
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");

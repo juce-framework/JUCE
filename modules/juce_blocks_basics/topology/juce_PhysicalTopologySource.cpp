@@ -1162,6 +1162,11 @@ struct PhysicalTopologySource::Internal
             }
         }
 
+        void saveProgramAsDefault()
+        {
+            sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
+        }
+
         void handleSharedDataACK (uint32 packetCounter) noexcept
         {
             pingFromDevice();
@@ -1644,6 +1649,7 @@ struct PhysicalTopologySource::Internal
         Program* getProgram() const override                                        { return program.get(); }
 
         void sendProgramEvent (const ProgramEventMessage& m) override               { blockImpl.sendProgramEvent (m); }
+        void saveProgramAsDefault() override                                        { blockImpl.saveProgramAsDefault(); }
         void setDataByte (size_t offset, uint8 value) override                      { blockImpl.setDataByte (offset, value); }
         void setDataBytes (size_t offset, const void* data, size_t num) override    { blockImpl.setDataBytes (offset, data, num); }
         void setDataBits (uint32 startBit, uint32 numBits, uint32 value) override   { blockImpl.setDataBits (startBit, numBits, value); }

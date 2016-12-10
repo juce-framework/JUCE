@@ -98,7 +98,9 @@ File PropertiesFile::Options::getDefaultFile() const
                                                     : applicationName);
    #endif
 
-    return dir.getChildFile (applicationName + "." + filenameSuffix);
+    return (filenameSuffix.startsWithChar (L'.')
+               ? dir.getChildFile (applicationName).withFileExtension (filenameSuffix)
+               : dir.getChildFile (applicationName + "." + filenameSuffix));
 }
 
 

@@ -1595,12 +1595,17 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
 
 MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (const File& file)
 {
-    if (FileInputStream* fin = file.createInputStream())
+    return createMemoryMappedReader (file.createInputStream());
+}
+
+MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (FileInputStream* fin)
+{
+    if (fin != nullptr)
     {
         WavAudioFormatReader reader (fin);
 
         if (reader.lengthInSamples > 0)
-            return new MemoryMappedWavReader (file, reader);
+            return new MemoryMappedWavReader (fin->getFile(), reader);
     }
 
     return nullptr;

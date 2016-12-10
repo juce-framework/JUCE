@@ -183,7 +183,8 @@ enum DeviceCommands
     requestTopologyMessage      = 0x01,
     endAPIMode                  = 0x02,
     ping                        = 0x03,
-    debugMode                   = 0x04
+    debugMode                   = 0x04,
+    saveProgramAsDefault        = 0x05
 };
 
 using DeviceCommand = IntegerWithBitSize<9>;

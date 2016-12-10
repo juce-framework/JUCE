@@ -146,8 +146,6 @@ public:
 
         This is handy if the message loop is about to block for a couple of
         seconds while busy and you want to give the user feedback about this.
-
-        @see MessageManager::setTimeBeforeShowingWaitCursor
     */
     static void showWaitCursor();
 

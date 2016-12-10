@@ -78,9 +78,9 @@ void SynthesiserVoice::renderNextBlock (AudioBuffer<double>& outputBuffer,
                                    outputBuffer.getNumChannels(),
                                    startSample, numSamples);
 
-    tempBuffer.makeCopyOf (subBuffer);
+    tempBuffer.makeCopyOf (subBuffer, true);
     renderNextBlock (tempBuffer, 0, numSamples);
-    subBuffer.makeCopyOf (tempBuffer);
+    subBuffer.makeCopyOf (tempBuffer, true);
 }
 
 //==============================================================================
