@@ -71,7 +71,7 @@ public:
             ".settings") then the suffix of applicationName will be replaced with your suffix
             ("MyApp.exe" -> "MyApp.settings"). If your filenameSuffix does NOT include the dot,
             then the suffix will be appended to the applicationName ("MyApp.exe" ->
-            "MyApp.settings.exe").
+            "MyApp.exe.settings").
         */
         String filenameSuffix;
 
