@@ -79,6 +79,8 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             downloaded += actual;
         }
 
+        fileStream->flush();
+
         if (threadShouldExit() || (stream != nullptr && stream->isError()))
             error = true;
 
