@@ -109,6 +109,10 @@
  //#define JUCE_FORCE_USE_LEGACY_PARAM_IDS
 #endif
 
+#ifndef    JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+ //#define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+#endif
+
 //==============================================================================
 // juce_audio_processors flags:
 
