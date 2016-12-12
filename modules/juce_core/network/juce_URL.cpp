@@ -84,6 +84,9 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
         if (threadShouldExit() || (stream != nullptr && stream->isError()))
             error = true;
 
+        if (contentLength > 0 && downloaded < contentLength)
+            error = true;
+
         finished = true;
 
         if (listener != nullptr && ! threadShouldExit())
