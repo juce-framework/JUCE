@@ -2492,7 +2492,10 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
                                  Time time, const ModifierKeys oldModifiers, float pressure)
 {
 #ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
-    if (oldModifiers.isAltDown() && oldModifiers.isCommandDown() && oldModifiers.isCtrlDown())
+    // Under Pro Tools,
+    // Cmd+Ctrl+Click switch automation lane if component is enabled for automation
+    // Cmd+Ctrl+Alt+Click opens dialog for Enable/Disable automation of component.
+    if (oldModifiers.isCommandDown() && oldModifiers.isCtrlDown())
         return;
 #endif
 
