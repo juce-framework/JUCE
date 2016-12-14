@@ -263,6 +263,13 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "setLED/viii",
     "blendLED/viii",
     "fillRect/viiiii",
+    "blendRect/viiiii",
+    "sendMIDI/vi",
+    "sendMIDI/vii",
+    "sendMIDI/viii",
+    "addPressurePoint/vifff",
+    "drawPressureMap/v",
+    "fadePressureMap/v",
     "enableDebug/viii",
     nullptr
 };
