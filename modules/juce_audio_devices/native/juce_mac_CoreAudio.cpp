@@ -163,20 +163,11 @@ class CoreAudioIODevice;
 class CoreAudioInternal  : private Timer
 {
 public:
-    CoreAudioInternal (CoreAudioIODevice& d, AudioDeviceID id)
+    CoreAudioInternal (CoreAudioIODevice& d, AudioDeviceID id, bool input, bool output)
        : owner (d),
-         inputLatency (0),
-         outputLatency (0),
-         bitDepth (32),
-         callback (nullptr),
-         audioProcID (0),
          deviceID (id),
-         started (false),
-         sampleRate (0),
-         bufferSize (512),
-         numInputChans (0),
-         numOutputChans (0),
-         callbacksAllowed (true)
+         isInputDevice  (input),
+         isOutputDevice (output)
     {
         jassert (deviceID != 0);
 
@@ -443,11 +434,11 @@ public:
         const int newOutputLatency = getLatencyFromDevice (kAudioDevicePropertyScopeOutput);
 
         Array<CallbackDetailsForChannel> newInChans, newOutChans;
-        StringArray newInNames  (getChannelInfo (true,  newInChans));
-        StringArray newOutNames (getChannelInfo (false, newOutChans));
+        auto newInNames  = isInputDevice  ? getChannelInfo (true,  newInChans)  : StringArray();
+        auto newOutNames = isOutputDevice ? getChannelInfo (false, newOutChans) : StringArray();
 
-        const int newBitDepth  = jmax (getBitDepthFromDevice (kAudioDevicePropertyScopeInput),
-                                       getBitDepthFromDevice (kAudioDevicePropertyScopeOutput));
+        const int newBitDepth = jmax (getBitDepthFromDevice (kAudioDevicePropertyScopeInput),
+                                      getBitDepthFromDevice (kAudioDevicePropertyScopeOutput));
 
         {
             const ScopedLock sl (callbackLock);
@@ -805,24 +796,27 @@ public:
 
     //==============================================================================
     CoreAudioIODevice& owner;
-    int inputLatency, outputLatency;
-    int bitDepth;
+    int inputLatency  = 0;
+    int outputLatency = 0;
+    int bitDepth = 32;
     BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
     Array<double> sampleRates;
     Array<int> bufferSizes;
-    AudioIODeviceCallback* callback;
-    AudioDeviceIOProcID audioProcID;
+    AudioIODeviceCallback* callback = nullptr;
+    AudioDeviceIOProcID audioProcID = 0;
 
 private:
     CriticalSection callbackLock;
     AudioDeviceID deviceID;
-    bool started;
-    double sampleRate;
-    int bufferSize;
+    bool started = false;
+    double sampleRate = 0;
+    int bufferSize = 512;
     HeapBlock<float> audioBuffer;
-    int numInputChans, numOutputChans;
-    bool callbacksAllowed;
+    int numInputChans  = 0;
+    int numOutputChans = 0;
+    bool callbacksAllowed = true;
+    const bool isInputDevice, isOutputDevice;
 
     Array<CallbackDetailsForChannel> inputChannelInfo, outputChannelInfo;
     HeapBlock<float*> tempInputBuffers, tempOutputBuffers;
@@ -931,11 +925,11 @@ public:
         if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
         {
             jassert (inputDeviceId != 0);
-            device = new CoreAudioInternal (*this, inputDeviceId);
+            device = new CoreAudioInternal (*this, inputDeviceId, true, outputDeviceId != 0);
         }
         else
         {
-            device = new CoreAudioInternal (*this, outputDeviceId);
+            device = new CoreAudioInternal (*this, outputDeviceId, false, true);
         }
 
         internal = device;
