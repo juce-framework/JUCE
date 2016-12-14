@@ -97,6 +97,7 @@ void StoredSettings::updateAppearanceSettings()
 
 void StoredSettings::updateRecentFiles()
 {
+    getGlobalProperties().setValue ("recentFilesMaxNum", recentFiles.getMaxNumberOfItems());
     getGlobalProperties().setValue ("recentFiles", recentFiles.toString());
 }
 
@@ -133,6 +134,7 @@ void StoredSettings::reload()
         projectDefaults = ValueTree::fromXml (*projectDefaultsXml);
 
     // recent files...
+    recentFiles.setMaxNumberOfItems (getGlobalProperties().getValue ("recentFilesMaxNum", "10").getIntValue());
     recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
 
