@@ -2071,6 +2071,7 @@ PREDEFINED             = WIN32=1 \
                          JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS=1 \
                          JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES=1 \
                          JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL=1 \
+                         JUCE_COMPILER_SUPPORTS_LAMBDAS=1 \
                          JUCE_MODAL_LOOPS_PERMITTED=1
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
