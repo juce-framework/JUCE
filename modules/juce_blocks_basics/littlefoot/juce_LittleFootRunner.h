@@ -351,10 +351,10 @@ struct Program
     static int32 floatToInt (float value) noexcept          { int32 v; copyFloatMem (&v, &value); return v; }
 
     static int16 readInt16 (const uint8* d) noexcept        { return (int16) (d[0] + (((uint16) d[1]) << 8)); }
-    static int32 readInt32 (const uint8* d) noexcept        { return (int32) ((uint32) readInt16 (d) + (((uint32) readInt16 (d + 2)) << 16)); }
+    static int32 readInt32 (const uint8* d) noexcept        { return (int32) ((uint32) (uint16) readInt16 (d) + (((uint32) (uint16) readInt16 (d + 2)) << 16)); }
 
-    static void writeInt16 (uint8* d, int16 v) noexcept     { d[0] = v & 0xff; d[1] = (uint8) (v >> 8); }
-    static void writeInt32 (uint8* d, int32 v) noexcept     { writeInt16 (d, (int16) (v & 0xffff)); writeInt16 (d + 2, (int16) (v >> 16)); }
+    static void writeInt16 (uint8* d, int16 v) noexcept     { d[0] = (uint8) v; d[1] = (uint8) (v >> 8); }
+    static void writeInt32 (uint8* d, int32 v) noexcept     { d[0] = (uint8) v; d[1] = (uint8) (v >> 8); d[2] = (uint8) (v >> 16); d[3] = (uint8) (v >> 24); }
 
     //==============================================================================
     static constexpr uint32 programHeaderSize = 10;
