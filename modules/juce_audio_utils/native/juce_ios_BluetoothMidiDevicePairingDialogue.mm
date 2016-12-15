@@ -42,7 +42,7 @@ class BluetoothMidiSelectorOverlay  : public Component
 public:
     BluetoothMidiSelectorOverlay (ModalComponentManager::Callback* exitCallbackToUse)
     {
-        ScopedPointer<ModalComponentManager::Callback> exitCallback;
+        ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
 
         setAlwaysOnTop (true);
         setVisible (true);
