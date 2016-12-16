@@ -194,9 +194,9 @@ private:
             if (config->getValue(Ids::postbuildCommand).toString().isEmpty())
             {
                 const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
-                const String aaxSDKPath = File::isAbsolutePath(aaxPath.toString())
-                                                          ? aaxPath.toString()
-                                                          : String ("..\\..\\") + aaxPath.toString();
+                const String aaxSDKPath = FileHelpers::isAbsolutePath (aaxPath.toString()) ? aaxPath.toString()
+                                                                                           : String ("..\\..\\")
+                                                                                               + aaxPath.toString();
 
                 const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
                 const String bundleDir      = "$(OutDir)$(TargetName).aaxplugin";
