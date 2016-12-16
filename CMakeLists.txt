@@ -22,11 +22,14 @@ list(APPEND sources
 
 add_library(juce STATIC ${sources})
 
+target_link_libraries(juce PUBLIC zlibstatic)
+
 target_compile_definitions(juce PUBLIC
     _USE_MATH_DEFINES
     JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
     JUCE_WINDOWS
     JUCE_STANDALONE_APPLICATION
+    JUCE_INCLUDE_ZLIB_CODE=0
 )
 
 target_include_directories(juce PUBLIC

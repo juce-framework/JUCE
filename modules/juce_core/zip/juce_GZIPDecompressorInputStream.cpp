@@ -78,11 +78,14 @@ namespace zlibNamespace
  #else
   #include JUCE_ZLIB_INCLUDE_PATH
  #endif
+
+ typedef uInt z_uInt;
 }
 
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
 
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
