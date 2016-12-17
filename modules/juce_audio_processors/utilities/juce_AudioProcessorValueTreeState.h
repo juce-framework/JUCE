@@ -25,7 +25,7 @@
 #ifndef JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
 #define JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS || defined (DOXYGEN)
+#if JUCE_COMPILER_SUPPORTS_LAMBDAS
 
 /**
     This class contains a ValueTree which is used to manage an AudioProcessor's entire state.
