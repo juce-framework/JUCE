@@ -63,7 +63,11 @@ public:
         JUCE_DECLARE_NON_COPYABLE (NativeFunctionArgs)
     };
 
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    using NativeFunction = std::function<var (const NativeFunctionArgs&)>;
+   #else
     typedef var (*NativeFunction) (const NativeFunctionArgs&);
+   #endif
 
     //==============================================================================
     /** Creates a void variant. */
@@ -309,7 +313,7 @@ private:
         char stringValue [sizeof (String)];
         ReferenceCountedObject* objectValue;
         MemoryBlock* binaryValue;
-        NativeFunction methodValue;
+        NativeFunction* methodValue;
     };
 
     const VariantType* type;

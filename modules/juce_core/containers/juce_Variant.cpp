@@ -401,6 +401,9 @@ public:
     VariantType_Method() noexcept {}
     static const VariantType_Method instance;
 
+    void cleanUp (ValueUnion& data) const noexcept override                      { if (data.methodValue != nullptr ) delete data.methodValue; }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const override  { dest.methodValue = new NativeFunction (*source.methodValue); }
+
     String toString (const ValueUnion&) const override               { return "Method"; }
     bool toBool (const ValueUnion& data) const noexcept override     { return data.methodValue != nullptr; }
     bool isMethod() const noexcept override                          { return true; }
@@ -450,7 +453,7 @@ var::var (const int v) noexcept       : type (&VariantType_Int::instance)    { v
 var::var (const int64 v) noexcept     : type (&VariantType_Int64::instance)  { value.int64Value = v; }
 var::var (const bool v) noexcept      : type (&VariantType_Bool::instance)   { value.boolValue = v; }
 var::var (const double v) noexcept    : type (&VariantType_Double::instance) { value.doubleValue = v; }
-var::var (NativeFunction m) noexcept  : type (&VariantType_Method::instance) { value.methodValue = m; }
+var::var (NativeFunction m) noexcept  : type (&VariantType_Method::instance) { value.methodValue = new NativeFunction (m); }
 var::var (const Array<var>& v)        : type (&VariantType_Array::instance)  { value.objectValue = new VariantType_Array::RefCountedArray(v); }
 var::var (const String& v)            : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
 var::var (const char* const v)        : type (&VariantType_String::instance) { new (value.stringValue) String (v); }
@@ -615,7 +618,7 @@ var var::getProperty (const Identifier& propertyName, const var& defaultReturnVa
 
 var::NativeFunction var::getNativeFunction() const
 {
-    return isMethod() ? value.methodValue : nullptr;
+    return isMethod() && (value.methodValue != nullptr) ? *value.methodValue : nullptr;
 }
 
 var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
