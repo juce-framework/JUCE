@@ -51,10 +51,10 @@ struct OpenGLDemoClasses
     {
         Attributes (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
         {
-            position      = createAttribute (openGLContext, shader, "position");
-            normal        = createAttribute (openGLContext, shader, "normal");
-            sourceColour  = createAttribute (openGLContext, shader, "sourceColour");
-            texureCoordIn = createAttribute (openGLContext, shader, "texureCoordIn");
+            position       = createAttribute (openGLContext, shader, "position");
+            normal         = createAttribute (openGLContext, shader, "normal");
+            sourceColour   = createAttribute (openGLContext, shader, "sourceColour");
+            textureCoordIn = createAttribute (openGLContext, shader, "textureCoordIn");
         }
 
         void enable (OpenGLContext& openGLContext)
@@ -77,10 +77,10 @@ struct OpenGLDemoClasses
                 openGLContext.extensions.glEnableVertexAttribArray (sourceColour->attributeID);
             }
 
-            if (texureCoordIn != nullptr)
+            if (textureCoordIn != nullptr)
             {
-                openGLContext.extensions.glVertexAttribPointer (texureCoordIn->attributeID, 2, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 10));
-                openGLContext.extensions.glEnableVertexAttribArray (texureCoordIn->attributeID);
+                openGLContext.extensions.glVertexAttribPointer (textureCoordIn->attributeID, 2, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 10));
+                openGLContext.extensions.glEnableVertexAttribArray (textureCoordIn->attributeID);
             }
         }
 
@@ -89,10 +89,10 @@ struct OpenGLDemoClasses
             if (position != nullptr)       openGLContext.extensions.glDisableVertexAttribArray (position->attributeID);
             if (normal != nullptr)         openGLContext.extensions.glDisableVertexAttribArray (normal->attributeID);
             if (sourceColour != nullptr)   openGLContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
-            if (texureCoordIn != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (texureCoordIn->attributeID);
+            if (textureCoordIn != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
-        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, texureCoordIn;
+        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
 
     private:
         static OpenGLShaderProgram::Attribute* createAttribute (OpenGLContext& openGLContext,
@@ -869,7 +869,7 @@ struct OpenGLDemoClasses
                 "attribute vec4 position;\n"
                 "attribute vec4 normal;\n"
                 "attribute vec4 sourceColour;\n"
-                "attribute vec2 texureCoordIn;\n"
+                "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
@@ -882,7 +882,7 @@ struct OpenGLDemoClasses
                 "void main()\n"
                 "{\n"
                 "    destinationColour = sourceColour;\n"
-                "    textureCoordOut = texureCoordIn;\n"
+                "    textureCoordOut = textureCoordIn;\n"
                 "\n"
                 "    vec4 light = viewMatrix * lightPosition;\n"
                 "    lightIntensity = dot (light, normal);\n"
@@ -922,7 +922,7 @@ struct OpenGLDemoClasses
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
                 "attribute vec4 sourceColour;\n"
-                "attribute vec2 texureCoordIn;\n"
+                "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
@@ -933,7 +933,7 @@ struct OpenGLDemoClasses
                 "void main()\n"
                 "{\n"
                 "    destinationColour = sourceColour;\n"
-                "    textureCoordOut = texureCoordIn;\n"
+                "    textureCoordOut = textureCoordIn;\n"
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
                 "}\n",
 
@@ -960,7 +960,7 @@ struct OpenGLDemoClasses
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
                 "attribute vec4 sourceColour;\n"
-                "attribute vec2 texureCoordIn;\n"
+                "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
@@ -971,7 +971,7 @@ struct OpenGLDemoClasses
                 "void main()\n"
                 "{\n"
                 "    destinationColour = sourceColour;\n"
-                "    textureCoordOut = texureCoordIn;\n"
+                "    textureCoordOut = textureCoordIn;\n"
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
                 "}\n",
 
@@ -996,7 +996,7 @@ struct OpenGLDemoClasses
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
                 "attribute vec4 sourceColour;\n"
-                "attribute vec2 texureCoordIn;\n"
+                "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
@@ -1043,7 +1043,7 @@ struct OpenGLDemoClasses
 
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
-                "attribute vec2 texureCoordIn;\n"
+                "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
@@ -1052,7 +1052,7 @@ struct OpenGLDemoClasses
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    textureCoordOut = texureCoordIn;\n"
+                "    textureCoordOut = textureCoordIn;\n"
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
                 "}\n",
 
