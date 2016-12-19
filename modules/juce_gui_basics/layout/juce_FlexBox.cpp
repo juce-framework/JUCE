@@ -842,3 +842,4 @@ FlexItem FlexItem::withHeight (float newHeight) const noexcept       { auto fi =
 
 FlexItem FlexItem::withMargin (Margin m) const noexcept              { auto fi = *this; fi.margin = m; return fi; }
 FlexItem FlexItem::withOrder (int newOrder) const noexcept           { auto fi = *this; fi.order = newOrder; return fi; }
+FlexItem FlexItem::withAlignSelf (AlignSelf a) const noexcept        { auto fi = *this; fi.alignSelf = a; return fi; }
