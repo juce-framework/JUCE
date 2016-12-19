@@ -1344,7 +1344,11 @@ public:
                #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
                 setSize (cw, ch);
                #else
-                XResizeWindow (display, (Window) getWindowHandle(), (unsigned int) cw, (unsigned int) ch);
+                const double scale = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).scale;
+                Rectangle<int> childBounds (child->getWidth(), child->getHeight());
+                childBounds *= scale;
+
+                XResizeWindow (display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
                #endif
 
                #if JUCE_MAC
