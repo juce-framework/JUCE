@@ -93,8 +93,7 @@ public:
     };
 
 private:
-
-    static void runtimPermissionsCallback (bool wasGranted);
+    static void runtimePermissionsCallback (bool wasGranted);
 
     ScopedPointer<ContentComponent> contentComponent;
     ScopedPointer<Component> taskbarIcon;
