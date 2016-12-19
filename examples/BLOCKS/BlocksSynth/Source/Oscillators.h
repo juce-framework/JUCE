@@ -87,11 +87,11 @@ private:
     LinearSmoothedValue<double> amplitude, phaseIncrement;
 
     double frequency = 0;
-	double phasePos = 0.0f;
-	double sampleRate = 44100.0;
+    double phasePos = 0.0f;
+    double sampleRate = 44100.0;
 
     int initialNote = 0;
-	double maxFreq = 0, minFreq = 0;
+    double maxFreq = 0, minFreq = 0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oscillator)
