@@ -30,6 +30,7 @@ namespace
     const char* const osxVersionDefault         = "default";
     const int oldestSDKVersion  = 5;
     const int currentSDKVersion = 12;
+    const int minimumAUv3SDKVersion = 11;
 
     const char* const osxArch_Default           = "default";
     const char* const osxArch_Native            = "Native";
@@ -966,7 +967,9 @@ public:
                 // if the user doesn't set it, then use the last known version that works well with JUCE
                 String deploymentTarget = "10.11";
 
-                for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
+                int oldestAllowedSDKVersion = (type == AudioUnitv3PlugIn || type == StandalonePlugIn) ? minimumAUv3SDKVersion : oldestSDKVersion;
+
+                for (int ver = oldestAllowedSDKVersion; ver <= currentSDKVersion; ++ver)
                 {
                     if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
                     if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
