@@ -106,7 +106,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     static bool isFunction (const var& v) noexcept            { return dynamic_cast<FunctionObject*> (v.getObject()) != nullptr; }
     static bool isNumeric (const var& v) noexcept             { return v.isInt() || v.isDouble() || v.isInt64() || v.isBool(); }
     static bool isNumericOrUndefined (const var& v) noexcept  { return isNumeric (v) || v.isUndefined(); }
-    static int64 getOctalValue (const String& s)              { BigInteger b; b.parseString (s, 8); return b.toInt64(); }
+    static int64 getOctalValue (const String& s)              { BigInteger b; b.parseString (s.initialSectionContainingOnly ("01234567"), 8); return b.toInt64(); }
     static Identifier getPrototypeIdentifier()                { static const Identifier i ("prototype"); return i; }
     static var* getPropertyPointer (DynamicObject* o, const Identifier& i) noexcept   { return o->getProperties().getVarPointer (i); }
 
