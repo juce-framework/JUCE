@@ -1554,7 +1554,7 @@ private:
     VstTimingInformation vstHostTime;
 
     //==============================================================================
-    static VstEffectInterface* constructEffect(const ModuleHandle::Ptr& module)
+    static VstEffectInterface* constructEffect (const ModuleHandle::Ptr& module)
     {
         VstEffectInterface* effect = nullptr;
         try

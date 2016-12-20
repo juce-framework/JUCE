@@ -345,11 +345,6 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     AudioPluginInstance* instance = formatManager.createPluginInstance (pd, graph.getSampleRate(), graph.getBlockSize(), errorMessage);
 
     if (instance == nullptr)
-    {
-        // xxx handle ins + outs
-    }
-
-    if (instance == nullptr)
         return;
 
     AudioProcessorGraph::Node::Ptr node (graph.addNode (instance, (uint32) xml.getIntAttribute ("uid")));
