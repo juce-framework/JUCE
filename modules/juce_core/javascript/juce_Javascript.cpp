@@ -714,7 +714,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             }
 
             var function (object->getResult (s));
-            return invokeFunction (s, function, var (s.scope));
+            return invokeFunction (s, function, var (s.scope.get()));
         }
 
         var invokeFunction (const Scope& s, const var& function, const var& thisObject) const
