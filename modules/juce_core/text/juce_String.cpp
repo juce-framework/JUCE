@@ -1871,7 +1871,9 @@ String String::formatted (const String pf, ... )
         const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
        #elif JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
-        const int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
+        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
+        if (num >= bufferSize)
+            num = -1;
        #else
         HeapBlock<wchar_t> temp (bufferSize);
         const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
