@@ -1072,7 +1072,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             ExpPtr lhs (parseLogicOperator());
 
-            if (matchIf (TokenTypes::question))          return parseTerneryOperator (lhs);
+            if (matchIf (TokenTypes::question))          return parseTernaryOperator (lhs);
             if (matchIf (TokenTypes::assign))            { ExpPtr rhs (parseExpression()); return new Assignment (location, lhs, rhs); }
             if (matchIf (TokenTypes::plusEquals))        return parseInPlaceOpExpression<AdditionOp> (lhs);
             if (matchIf (TokenTypes::minusEquals))       return parseInPlaceOpExpression<SubtractionOp> (lhs);
@@ -1485,7 +1485,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return a.release();
         }
 
-        Expression* parseTerneryOperator (ExpPtr& condition)
+        Expression* parseTernaryOperator (ExpPtr& condition)
         {
             ScopedPointer<ConditionalOp> e (new ConditionalOp (location));
             e->condition = condition;

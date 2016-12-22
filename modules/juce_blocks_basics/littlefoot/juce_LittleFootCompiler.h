@@ -504,7 +504,7 @@ private:
         {
             auto lhs = parseLogicOperator();
 
-            if (matchIf (Token::question))          return parseTerneryOperator (lhs);
+            if (matchIf (Token::question))          return parseTernaryOperator (lhs);
             if (matchIf (Token::plusEquals))        return parseInPlaceOpExpression (lhs, Token::plus);
             if (matchIf (Token::minusEquals))       return parseInPlaceOpExpression (lhs, Token::minus);
             if (matchIf (Token::timesEquals))       return parseInPlaceOpExpression (lhs, Token::times);
@@ -522,9 +522,9 @@ private:
             return lhs;
         }
 
-        ExpPtr parseTerneryOperator (ExpPtr condition)
+        ExpPtr parseTernaryOperator (ExpPtr condition)
         {
-            auto e = allocate<TerneryOp> (location, blockBeingParsed);
+            auto e = allocate<TernaryOp> (location, blockBeingParsed);
             e->condition = condition;
             e->trueBranch = parseExpression();
             match (Token::colon);
@@ -1277,9 +1277,9 @@ private:
         StatementPtr trueBranch, falseBranch;
     };
 
-    struct TerneryOp  : public Expression
+    struct TernaryOp  : public Expression
     {
-        TerneryOp (const CodeLocation& l, BlockPtr parent)  : Expression (l, parent) {}
+        TernaryOp (const CodeLocation& l, BlockPtr parent)  : Expression (l, parent) {}
 
         void emit (CodeGenerator& cg, Type requiredType, int stackDepth) const override
         {
@@ -1298,8 +1298,8 @@ private:
         {
             auto type = trueBranch->getType (cg);
 
-            if (type == Type::void_)                location.throwError ("The ternery operator cannot take void arguments");
-            if (type != falseBranch->getType (cg))  location.throwError ("Expected both branches of this ternery operator to have the same type");
+            if (type == Type::void_)                location.throwError ("The ternary operator cannot take void arguments");
+            if (type != falseBranch->getType (cg))  location.throwError ("Expected both branches of this ternary operator to have the same type");
 
             return type;
         }
