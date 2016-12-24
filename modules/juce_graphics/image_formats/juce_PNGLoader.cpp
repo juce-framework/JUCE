@@ -446,12 +446,13 @@ namespace PNGHelpers
             for (size_t y = 0; y < height; ++y)
                 rows[y] = (png_bytep) (tempBuffer + lineStride * y);
 
-            png_bytep trans_alpha;
-            int num_trans;
-            png_color_16p trans_color;
-            png_get_tRNS(pngReadStruct, pngInfoStruct,  &trans_alpha, &num_trans, &trans_color);
+            png_bytep trans_alpha = nullptr;
+            png_color_16p trans_color = nullptr;
+            int num_trans = 0;
+            png_get_tRNS (pngReadStruct, pngInfoStruct, &trans_alpha, &num_trans, &trans_color);
+
             if (readImageData (pngReadStruct, pngInfoStruct, errorJumpBuf, rows))
-                return createImageFromData ((colorType & PNG_COLOR_MASK_ALPHA) != 0 || num_trans,
+                return createImageFromData ((colorType & PNG_COLOR_MASK_ALPHA) != 0 || num_trans != 0,
                                             (int) width, (int) height, rows);
         }
 
