@@ -190,6 +190,39 @@ public:
     */
     ~AudioBuffer() noexcept {}
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
+    AudioBuffer (AudioBuffer&& other) noexcept
+        : numChannels (other.numChannels),
+          size (other.size),
+          allocatedBytes (other.allocatedBytes),
+          channels (other.channels),
+          allocatedData (static_cast<HeapBlock<char, true>&&> (other.allocatedData)),
+          isClear (other.isClear)
+    {
+        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+        other.numChannels = 0;
+        other.size = 0;
+        other.allocatedBytes = 0;
+    }
+
+    /** Move assignment */
+    AudioBuffer& operator= (AudioBuffer&& other) noexcept
+    {
+        numChannels = other.numChannels;
+        size = other.size;
+        allocatedBytes = other.allocatedBytes;
+        channels = other.channels;
+        allocatedData = static_cast<HeapBlock<char, true>&&> (other.allocatedData);
+        isClear = other.isClear;
+        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+        other.numChannels = 0;
+        other.size = 0;
+        other.allocatedBytes = 0;
+        return *this;
+    }
+   #endif
+
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
         @see getSampleData
