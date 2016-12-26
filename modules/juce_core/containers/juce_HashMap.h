@@ -382,19 +382,21 @@ public:
 
         @see HashMap
     */
-    class Iterator
+    struct Iterator
     {
-    public:
-        //==============================================================================
-        Iterator (const HashMap& hashMapToIterate)
+        Iterator (const HashMap& hashMapToIterate) noexcept
             : hashMap (hashMapToIterate), entry (nullptr), index (0)
+        {}
+
+        Iterator (const Iterator& other) noexcept
+            : hashMap (other.hashMap), entry (other.entry), index (other.index)
         {}
 
         /** Moves to the next item, if one is available.
             When this returns true, you can get the item's key and value using getKey() and
             getValue(). If it returns false, the iteration has finished and you should stop.
         */
-        bool next()
+        bool next() noexcept
         {
             if (entry != nullptr)
                 entry = entry->nextEntry;
@@ -433,19 +435,30 @@ public:
             index = 0;
         }
 
+        Iterator& operator++() noexcept                         { next(); return *this; }
+        ValueType operator*() const                             { return getValue(); }
+        bool operator!= (const Iterator& other) const noexcept  { return entry != other.entry || index != other.index; }
+        void resetToEnd() noexcept                              { index = hashMap.getNumSlots(); }
+
     private:
         //==============================================================================
         const HashMap& hashMap;
         HashEntry* entry;
         int index;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Iterator)
+        JUCE_LEAK_DETECTOR (Iterator)
     };
+
+    /** Returns a start iterator for the values in this tree. */
+    Iterator begin() const noexcept             { Iterator i (*this); i.next(); return i; }
+
+    /** Returns an end iterator for the values in this tree. */
+    Iterator end() const noexcept               { Iterator i (*this); i.resetToEnd(); return i; }
 
 private:
     //==============================================================================
     enum { defaultHashTableSize = 101 };
-    friend class Iterator;
+    friend struct Iterator;
 
     HashFunctionType hashFunctionToUse;
     Array<HashEntry*> hashSlots;
