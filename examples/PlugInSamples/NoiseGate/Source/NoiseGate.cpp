@@ -33,7 +33,7 @@ public:
     NoiseGate()
         : AudioProcessor (BusesProperties().withInput  ("Input",     AudioChannelSet::stereo())
                                              .withOutput ("Output",    AudioChannelSet::stereo())
-                                             .withInput  ("Sidechain", AudioChannelSet::mono()))
+                                             .withInput  ("Sidechain", AudioChannelSet::stereo()))
     {
         addParameter (threshold = new AudioParameterFloat ("threshold", "Threshold", 0.0f, 1.0f, 0.5f));
         addParameter (alpha  = new AudioParameterFloat ("alpha",  "Alpha",   0.0f, 1.0f, 0.8f));

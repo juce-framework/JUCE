@@ -101,9 +101,9 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
 
     const AffineTransform trans (shape.getTransformToScaleToFit (r, maintainShapeProportions));
 
-    g.setColour (isButtonDown ? downColour
-                              : isMouseOverButton ? overColour
-                                                  : normalColour);
+    g.setColour (isButtonDown || getToggleState() ? downColour
+                                                  : isMouseOverButton ? overColour
+                                                                      : normalColour);
     g.fillPath (shape, trans);
 
     if (outlineWidth > 0.0f)

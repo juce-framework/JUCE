@@ -554,7 +554,11 @@ private:
 
         if (resourceFile.getNumFiles() > 0)
         {
-            resourceFile.setClassName ("BinaryData");
+            auto dataNamespace = project.binaryDataNamespace().toString().trim();
+            if (dataNamespace.isEmpty())
+                dataNamespace = "BinaryData";
+
+            resourceFile.setClassName (dataNamespace);
 
             Array<File> binaryDataFiles;
 

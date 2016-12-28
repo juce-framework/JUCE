@@ -25,7 +25,7 @@
 #ifndef JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
 #define JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS || defined (DOXYGEN)
+#if JUCE_COMPILER_SUPPORTS_LAMBDAS
 
 /**
     This class contains a ValueTree which is used to manage an AudioProcessor's entire state.
@@ -77,9 +77,9 @@ public:
         @param textToValueFunction  The inverse of valueToTextFunction
         @returns the parameter object that was created
     */
-    AudioProcessorParameter* createAndAddParameter (String parameterID,
-                                                    String parameterName,
-                                                    String labelText,
+    AudioProcessorParameter* createAndAddParameter (const String& parameterID,
+                                                    const String& parameterName,
+                                                    const String& labelText,
                                                     NormalisableRange<float> valueRange,
                                                     float defaultValue,
                                                     std::function<String (float)> valueToTextFunction,

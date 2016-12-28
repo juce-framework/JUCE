@@ -1,27 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -1215,13 +1217,24 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 #if ! JUCE_ANDROID
 struct HighResolutionTimer::Pimpl
 {
-    Pimpl (HighResolutionTimer& t)  : owner (t), thread (0), shouldStop (false)
+    Pimpl (HighResolutionTimer& t)  : owner (t), thread (0), destroyThread (false), isRunning (false)
     {
+        pthread_condattr_t attr;
+        pthread_condattr_init (&attr);
+
+       #if ! (JUCE_MAC || JUCE_IOS)
+        pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+       #endif
+
+        pthread_cond_init (&stopCond, &attr);
+        pthread_condattr_destroy (&attr);
+        pthread_mutex_init (&timerMutex, nullptr);
     }
 
     ~Pimpl()
     {
-        jassert (thread == 0);
+        jassert (! isRunning);
+        stop();
     }
 
     void start (int newPeriod)
@@ -1233,7 +1246,8 @@ struct HighResolutionTimer::Pimpl
                 stop();
 
                 periodMs = newPeriod;
-                shouldStop = false;
+                destroyThread = false;
+                isRunning = true;
 
                 if (pthread_create (&thread, nullptr, timerThread, this) == 0)
                     setThreadToRealtime (thread, (uint64) newPeriod);
@@ -1243,25 +1257,34 @@ struct HighResolutionTimer::Pimpl
             else
             {
                 periodMs = newPeriod;
-                shouldStop = false;
+                isRunning = true;
+                destroyThread = false;
             }
         }
     }
 
     void stop()
     {
-        if (thread != 0)
-        {
-            shouldStop = true;
+        isRunning = false;
 
-            while (thread != 0 && thread != pthread_self())
-            {
-                // if the timer callback itself calls startTimer then we need
-                // to override this
-                shouldStop = true;
-                Thread::yield();
-            }
+        if (thread == 0)
+            return;
+
+        if (thread == pthread_self())
+        {
+            periodMs = 3600000;
+            return;
         }
+
+        isRunning = false;
+        destroyThread = true;
+
+        pthread_mutex_lock (&timerMutex);
+        pthread_cond_signal (&stopCond);
+        pthread_mutex_unlock (&timerMutex);
+
+        pthread_join (thread, nullptr);
+        thread = 0;
     }
 
     HighResolutionTimer& owner;
@@ -1269,7 +1292,11 @@ struct HighResolutionTimer::Pimpl
 
 private:
     pthread_t thread;
-    bool volatile shouldStop;
+    pthread_cond_t stopCond;
+    pthread_mutex_t timerMutex;
+
+    bool volatile destroyThread;
+    bool volatile isRunning;
 
     static void* timerThread (void* param)
     {
@@ -1289,14 +1316,18 @@ private:
         int lastPeriod = periodMs;
         Clock clock (lastPeriod);
 
-        while (! shouldStop)
-        {
-            clock.wait();
+        pthread_mutex_lock (&timerMutex);
 
-            if (shouldStop)
+        while (! destroyThread)
+        {
+            clock.next();
+            while (! destroyThread && clock.wait (stopCond, timerMutex));
+
+            if (destroyThread)
                 break;
 
-            owner.hiResTimerCallback();
+            if (isRunning)
+                owner.hiResTimerCallback();
 
             if (lastPeriod != periodMs)
             {
@@ -1306,7 +1337,9 @@ private:
         }
 
         periodMs = 0;
-        thread = 0;
+
+        pthread_mutex_unlock (&timerMutex);
+        pthread_exit (nullptr);
     }
 
     struct Clock
@@ -1314,21 +1347,41 @@ private:
        #if JUCE_MAC || JUCE_IOS
         Clock (double millis) noexcept
         {
-            mach_timebase_info_data_t timebase;
             (void) mach_timebase_info (&timebase);
             delta = (((uint64_t) (millis * 1000000.0)) * timebase.denom) / timebase.numer;
             time = mach_absolute_time();
         }
 
-        void wait() noexcept
+        bool wait (pthread_cond_t& cond, pthread_mutex_t& mutex) noexcept
         {
-            time += delta;
-            mach_wait_until (time);
+            struct timespec left;
+
+            if (! hasExpired (left))
+                return (pthread_cond_timedwait_relative_np (&cond, &mutex, &left) != ETIMEDOUT);
+
+            return false;
         }
 
         uint64_t time, delta;
+        mach_timebase_info_data_t timebase;
 
-       #else
+        bool hasExpired(struct timespec& time_left) noexcept
+        {
+            uint64_t now = mach_absolute_time();
+
+            if (now < time)
+            {
+                uint64_t left = time - now;
+                uint64_t nanos = (left * static_cast<uint64_t> (timebase.numer)) / static_cast<uint64_t> (timebase.denom);
+                time_left.tv_sec = static_cast<__darwin_time_t> (nanos / 1000000000ULL);
+                time_left.tv_nsec = static_cast<long> (nanos - (static_cast<uint64_t> (time_left.tv_sec) * 1000000000ULL));
+
+                return false;
+            }
+
+            return true;
+        }
+      #else
         Clock (double millis) noexcept  : delta ((uint64) (millis * 1000000))
         {
             struct timespec t;
@@ -1336,19 +1389,40 @@ private:
             time = (uint64) (1000000000 * (int64) t.tv_sec + (int64) t.tv_nsec);
         }
 
-        void wait() noexcept
+        bool wait (pthread_cond_t& cond, pthread_mutex_t& mutex) noexcept
         {
-            time += delta;
+            struct timespec absExpire;
 
-            struct timespec t;
-            t.tv_sec  = (time_t) (time / 1000000000);
-            t.tv_nsec = (long)   (time % 1000000000);
+            if (! hasExpired (absExpire))
+                return (pthread_cond_timedwait (&cond, &mutex, &absExpire) != ETIMEDOUT);
 
-            clock_nanosleep (CLOCK_MONOTONIC, TIMER_ABSTIME, &t, nullptr);
+            return false;
         }
 
         uint64 time, delta;
+
+        bool hasExpired(struct timespec& expiryTime) noexcept
+        {
+            struct timespec t;
+            clock_gettime (CLOCK_MONOTONIC, &t);
+            uint64 now = (uint64) (1000000000 * (int64) t.tv_sec + (int64) t.tv_nsec);
+
+            if (now < time)
+            {
+                expiryTime.tv_sec  = (time_t) (time / 1000000000);
+                expiryTime.tv_nsec = (long)   (time % 1000000000);
+
+                return false;
+            }
+
+            return true;
+        }
        #endif
+
+        void next() noexcept
+        {
+            time += delta;
+        }
     };
 
     static bool setThreadToRealtime (pthread_t thread, uint64 periodMs)

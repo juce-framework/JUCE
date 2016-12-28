@@ -34,9 +34,10 @@ public:
     /** Creates a AudioParameterFloat with an ID, name, and range.
         On creation, its value is set to the default value.
     */
-    AudioParameterFloat (String parameterID, String name,
+    AudioParameterFloat (const String& parameterID, const String& name,
                          NormalisableRange<float> normalisableRange,
-                         float defaultValue);
+                         float defaultValue,
+                         const String& label = String());
 
     /** Creates a AudioParameterFloat with an ID, name, and range.
         On creation, its value is set to the default value.

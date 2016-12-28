@@ -33,7 +33,8 @@ public:
     /** Creates a AudioParameterBool with an ID and name.
         On creation, its value is set to the default value.
     */
-    AudioParameterBool (String parameterID, String name, bool defaultValue);
+    AudioParameterBool (const String& parameterID, const String& name, bool defaultValue,
+                        const String& label = String());
 
     /** Destructor. */
     ~AudioParameterBool();

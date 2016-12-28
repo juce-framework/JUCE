@@ -362,8 +362,10 @@ private:
 class BluetoothMidiSelectorOverlay  : public Component
 {
 public:
-    BluetoothMidiSelectorOverlay()
+    BluetoothMidiSelectorOverlay (ModalComponentManager::Callback* exitCallbackToUse)
     {
+        ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
+
         setAlwaysOnTop (true);
         setVisible (true);
         addToDesktop (ComponentPeer::windowHasDropShadow);
@@ -371,7 +373,7 @@ public:
         toFront (true);
 
         addAndMakeVisible (bluetoothDevicesList);
-        enterModalState (true, nullptr, true);
+        enterModalState (true, exitCallback.release(), true);
     }
 
     void paint (Graphics& g) override
@@ -424,8 +426,10 @@ private:
 };
 
 //==============================================================================
-bool BluetoothMidiDevicePairingDialogue::open()
+bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallbackPtr)
 {
+    ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackPtr);
+
     if (! RuntimePermissions::isGranted (RuntimePermissions::bluetoothMidi))
     {
         // If you hit this assert, you probably forgot to get RuntimePermissions::bluetoothMidi.
@@ -435,7 +439,7 @@ bool BluetoothMidiDevicePairingDialogue::open()
         return false;
     }
 
-    BluetoothMidiSelectorOverlay* overlay = new BluetoothMidiSelectorOverlay;
+    BluetoothMidiSelectorOverlay* overlay = new BluetoothMidiSelectorOverlay (exitCallback.release());
     return true;
 }
 

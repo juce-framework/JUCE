@@ -37,9 +37,22 @@ public:
     String getRenamingName() const override   { return getDisplayName(); }
     void setName (const String&) override     {}
     bool isMissing() override                 { return hasMissingDependencies(); }
-    Icon getIcon() const override             { return Icon (getIcons().jigsaw, getContrastingColour (Colours::red, 0.5f)); }
     void showDocument() override              { showSettingsPage (new ModuleSettingsPanel (project, moduleID)); }
     void deleteItem() override                { project.getModules().removeModule (moduleID); }
+
+    Icon getIcon() const override
+    {
+        auto iconColour = Colours::yellow;
+        auto info = project.getModules().getModuleInfo (moduleID);
+        if (info.isValid() && info.getVendor() == "juce")
+        {
+            if (info.getLicense() == "ISC")
+                iconColour = Colours::lightblue;
+            else if (info.getLicense() == "GPL/Commercial")
+                iconColour = Colours::orange;
+        }
+        return Icon (getIcons().jigsaw, getContrastingColour (iconColour, 0.5f));
+    }
 
     void showPopupMenu() override
     {
@@ -303,7 +316,7 @@ public:
     String getDisplayName() const override  { return "Modules"; }
     void setName (const String&) override   {}
     bool isMissing() override               { return false; }
-    Icon getIcon() const override           { return Icon (getIcons().graph, getContrastingColour (Colours::red, 0.5f)); }
+    Icon getIcon() const override           { return Icon (getIcons().graph, getContrastingColour (Colours::orange, 0.5f)); }
 
     void showDocument() override
     {

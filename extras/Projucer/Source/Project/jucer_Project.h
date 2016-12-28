@@ -113,6 +113,7 @@ public:
     File getBinaryDataHeaderFile() const                { return getBinaryDataCppFile (0).withFileExtension (".h"); }
     Value getMaxBinaryFileSize()                        { return getProjectValue (Ids::maxBinaryFileSize); }
     Value shouldIncludeBinaryInAppConfig()              { return getProjectValue (Ids::includeBinaryInAppConfig); }
+    Value binaryDataNamespace()                         { return getProjectValue (Ids::binaryDataNamespace); }
 
     //==============================================================================
     String getAppConfigFilename() const                 { return "AppConfig.h"; }

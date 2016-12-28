@@ -559,13 +559,13 @@ AudioDeviceManager& MainAppWindow::getSharedAudioDeviceManager()
     if (sharedAudioDeviceManager == nullptr)
     {
         sharedAudioDeviceManager = new AudioDeviceManager();
-        RuntimePermissions::request (RuntimePermissions::recordAudio, runtimPermissionsCallback);
+        RuntimePermissions::request (RuntimePermissions::recordAudio, runtimePermissionsCallback);
     }
 
     return *sharedAudioDeviceManager;
 }
 
-void MainAppWindow::runtimPermissionsCallback (bool wasGranted)
+void MainAppWindow::runtimePermissionsCallback (bool wasGranted)
 {
     int numInputChannels = wasGranted ? 2 : 0;
     sharedAudioDeviceManager->initialise (numInputChannels, 2, nullptr, true, String(), nullptr);

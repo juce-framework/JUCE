@@ -25,7 +25,10 @@
 // This file contains the implementations of the various AudioParameter[XYZ] classes..
 
 
-AudioProcessorParameterWithID::AudioProcessorParameterWithID (String pid, String nm)  : paramID (pid), name (nm) {}
+AudioProcessorParameterWithID::AudioProcessorParameterWithID (const String& idToUse,
+                                                              const String& nameToUse,
+                                                              const String& labelToUse)
+    : paramID (idToUse), name (nameToUse), label (labelToUse) {}
 AudioProcessorParameterWithID::~AudioProcessorParameterWithID() {}
 
 String AudioProcessorParameterWithID::getName (int maximumStringLength) const     { return name.substring (0, maximumStringLength); }
@@ -33,8 +36,11 @@ String AudioProcessorParameterWithID::getLabel() const                          
 
 
 //==============================================================================
-AudioParameterFloat::AudioParameterFloat (String pid, String nm, NormalisableRange<float> r, float def)
-   : AudioProcessorParameterWithID (pid, nm), range (r), value (def), defaultValue (def)
+AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& nameToUse,
+                                          NormalisableRange<float> r, float def,
+                                          const String& labelToUse)
+   : AudioProcessorParameterWithID (idToUse, nameToUse, labelToUse),
+     range (r), value (def), defaultValue (def)
 {
 }
 
@@ -66,8 +72,10 @@ AudioParameterFloat& AudioParameterFloat::operator= (float newValue)
 }
 
 //==============================================================================
-AudioParameterInt::AudioParameterInt (String pid, String nm, int mn, int mx, int def)
-   : AudioProcessorParameterWithID (pid, nm),
+AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameToUse,
+                                      int mn, int mx, int def,
+                                      const String& labelToUse)
+   : AudioProcessorParameterWithID (idToUse, nameToUse, labelToUse),
      minValue (mn), maxValue (mx),
      value ((float) def),
      defaultValue (convertTo0to1 (def))
@@ -98,8 +106,9 @@ AudioParameterInt& AudioParameterInt::operator= (int newValue)
 
 
 //==============================================================================
-AudioParameterBool::AudioParameterBool (String pid, String nm, bool def)
-   : AudioProcessorParameterWithID (pid, nm),
+AudioParameterBool::AudioParameterBool (const String& idToUse, const String& nameToUse,
+                                        bool def, const String& labelToUse)
+   : AudioProcessorParameterWithID (idToUse, nameToUse, labelToUse),
      value (def ? 1.0f : 0.0f),
      defaultValue (value)
 {
@@ -124,8 +133,9 @@ AudioParameterBool& AudioParameterBool::operator= (bool newValue)
 
 
 //==============================================================================
-AudioParameterChoice::AudioParameterChoice (String pid, String nm, const StringArray& c, int def)
-   : AudioProcessorParameterWithID (pid, nm), choices (c),
+AudioParameterChoice::AudioParameterChoice (const String& idToUse, const String& nameToUse,
+                                            const StringArray& c, int def, const String& labelToUse)
+   : AudioProcessorParameterWithID (idToUse, nameToUse, labelToUse), choices (c),
      value ((float) def),
      defaultValue (convertTo0to1 (def))
 {

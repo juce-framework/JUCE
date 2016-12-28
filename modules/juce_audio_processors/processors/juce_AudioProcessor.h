@@ -73,7 +73,7 @@ protected:
     }
    #else
     template <int numLayouts>
-    AudioProcessor (const short channelLayoutList[numLayouts][2])
+    AudioProcessor (const short (&channelLayoutList) [numLayouts][2])
     {
         initialise (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)));
     }
