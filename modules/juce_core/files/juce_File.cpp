@@ -627,18 +627,21 @@ File File::getNonexistentChildFile (const String& suggestedPrefix,
             }
         }
 
-        // also use brackets if it ends in a digit.
-        putNumbersInBrackets = putNumbersInBrackets
-                                 || CharacterFunctions::isDigit (prefix.getLastCharacter());
-
         do
         {
             String newName (prefix);
 
             if (putNumbersInBrackets)
+            {
                 newName << '(' << ++number << ')';
+            }
             else
+            {
+                if (CharacterFunctions::isDigit (prefix.getLastCharacter()))
+                    newName << '_'; // pad with an underscore if the name already ends in a digit
+
                 newName << ++number;
+            }
 
             f = getChildFile (newName + suffix);
 
