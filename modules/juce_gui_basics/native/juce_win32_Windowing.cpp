@@ -564,6 +564,77 @@ namespace IconConverters
 }
 
 //==============================================================================
+class
+#if (! JUCE_MINGW)
+  __declspec (uuid ("37c994e7-432b-4834-a2f7-dce1f13b834b"))
+#endif
+    ITipInvocation : public IUnknown
+{
+public:
+    static const CLSID clsid;
+
+    virtual ::HRESULT STDMETHODCALLTYPE Toggle (::HWND wnd) = 0;
+};
+
+#if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
+template <>
+struct UUIDGetter<ITipInvocation>
+{
+    static CLSID get()
+    {
+        GUID g = {0x37c994e7, 0x432b, 0x4834, {0xa2, 0xf7, 0xdc, 0xe1, 0xf1, 0x3b, 0x83, 0x4b}};
+        return g;
+    }
+};
+#endif
+
+const CLSID ITipInvocation::clsid = {0x4CE576FA, 0x83DC, 0x4f88, {0x95, 0x1C, 0x9D, 0x07, 0x82, 0xB4, 0xE3, 0x76}};
+//==============================================================================
+class OnScreenKeyboard : private Timer
+{
+public:
+
+    void activate()
+    {
+        shouldBeActive = true;
+        startTimer (10);
+    }
+
+    void deactivate()
+    {
+        shouldBeActive = false;
+        startTimer (10);
+    }
+
+    juce_DeclareSingleton_SingleThreaded (OnScreenKeyboard, true)
+
+private:
+
+    OnScreenKeyboard()
+        : isActive (false), shouldBeActive (false), reentrant (false)
+    {
+        tipInvocation.CoCreateInstance (ITipInvocation::clsid, CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+
+        if (reentrant || tipInvocation == nullptr) return;
+        const ScopedValueSetter<bool> setter (reentrant, true, false);
+
+        if (isActive == shouldBeActive) return;
+        isActive = shouldBeActive;
+        tipInvocation->Toggle (::GetDesktopWindow());
+    }
+
+    bool isActive, shouldBeActive, reentrant;
+    ComSmartPtr<ITipInvocation> tipInvocation;
+};
+
+juce_ImplementSingleton_SingleThreaded (OnScreenKeyboard)
+
+//==============================================================================
 class HWNDComponentPeer  : public ComponentPeer,
                            private Timer
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
@@ -924,11 +995,14 @@ public:
 
         ShowCaret (hwnd);
         SetCaretPos (0, 0);
+
+        OnScreenKeyboard::getInstance()->activate();
     }
 
     void dismissPendingTextInput() override
     {
         imeHandler.handleSetContext (hwnd, false);
+        OnScreenKeyboard::getInstance()->deactivate();
     }
 
     void repaint (const Rectangle<int>& area) override
