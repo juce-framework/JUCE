@@ -48,7 +48,7 @@ public:
         created or opened (for example, because the parent directory of the file
         does not exist), the failedToOpen() method will return true.
 
-        If the file already exists when opened, the stream's write-postion will
+        If the file already exists when opened, the stream's write-position will
         be set to the end of the file. To overwrite an existing file,
         use File::deleteFile() before opening the stream, or use setPosition(0)
         after it's opened (although this won't truncate the file).
