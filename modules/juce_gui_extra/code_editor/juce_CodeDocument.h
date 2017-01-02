@@ -59,7 +59,7 @@ public:
     class JUCE_API  Position
     {
     public:
-        /** Creates an uninitialised postion.
+        /** Creates an uninitialised position.
             Don't attempt to call any methods on this until you've given it an owner document
             to refer to!
         */

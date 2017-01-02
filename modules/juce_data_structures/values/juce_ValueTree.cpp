@@ -57,6 +57,11 @@ public:
         }
     }
 
+    SharedObject* getRoot() noexcept
+    {
+        return parent == nullptr ? this : parent->getRoot();
+    }
+
     template <typename Method>
     void callListeners (Method method, ValueTree& tree) const
     {
@@ -483,9 +488,8 @@ public:
     }
 
     //==============================================================================
-    class SetPropertyAction  : public UndoableAction
+    struct SetPropertyAction  : public UndoableAction
     {
-    public:
         SetPropertyAction (SharedObject* const so, const Identifier& propertyName,
                            const var& newVal, const var& oldVal, bool isAdding, bool isDeleting,
                            ValueTree::Listener* listenerToExclude = nullptr)
@@ -547,9 +551,8 @@ public:
     };
 
     //==============================================================================
-    class AddOrRemoveChildAction  : public UndoableAction
+    struct AddOrRemoveChildAction  : public UndoableAction
     {
-    public:
         AddOrRemoveChildAction (SharedObject* parentObject, int index, SharedObject* newChild)
             : target (parentObject),
               child (newChild != nullptr ? newChild : parentObject->children.getObjectPointer (index)),
@@ -600,9 +603,8 @@ public:
     };
 
     //==============================================================================
-    class MoveChildAction  : public UndoableAction
+    struct MoveChildAction  : public UndoableAction
     {
-    public:
         MoveChildAction (SharedObject* parentObject, int fromIndex, int toIndex) noexcept
             : parent (parentObject), startIndex (fromIndex), endIndex (toIndex)
         {
@@ -748,6 +750,12 @@ Identifier ValueTree::getType() const noexcept
 ValueTree ValueTree::getParent() const noexcept
 {
     return ValueTree (object != nullptr ? object->parent
+                                        : static_cast<SharedObject*> (nullptr));
+}
+
+ValueTree ValueTree::getRoot() const noexcept
+{
+    return ValueTree (object != nullptr ? object->getRoot()
                                         : static_cast<SharedObject*> (nullptr));
 }
 

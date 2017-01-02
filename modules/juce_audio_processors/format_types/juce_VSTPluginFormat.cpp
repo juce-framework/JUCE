@@ -1125,75 +1125,28 @@ public:
     {
         switch (opcode)
         {
-            case hostOpcodeParameterChanged:         sendParamChangeMessageToListeners (index, opt); break;
-            case hostOpcodePreAudioProcessingEvents: handleMidiFromPlugin ((const VstEventBlock*) ptr); break;
+            case hostOpcodeParameterChanged:            sendParamChangeMessageToListeners (index, opt); break;
+            case hostOpcodePreAudioProcessingEvents:    handleMidiFromPlugin ((const VstEventBlock*) ptr); break;
+            case hostOpcodeGetTimingInfo:               return getVSTTime();
+            case hostOpcodeIdle:                        handleIdle(); break;
+            case hostOpcodeWindowSize:                  setWindowSize (index, (int) value); return 1;
+            case hostOpcodeUpdateView:                  triggerAsyncUpdate(); break;
+            case hostOpcodeIOModified:                  setLatencySamples (vstEffect->latency); break;
+            case hostOpcodeNeedsIdle:                   startTimer (50); break;
 
-           #if JUCE_MSVC
-            #pragma warning (push)
-            #pragma warning (disable: 4311)
-           #endif
-            case hostOpcodeGetTimingInfo: return (pointer_sized_int) &vstHostTime;
-           #if JUCE_MSVC
-            #pragma warning (pop)
-           #endif
+            case hostOpcodeGetSampleRate:               return (pointer_sized_int) (getSampleRate() > 0 ? getSampleRate() : defaultVSTSampleRateValue);
+            case hostOpcodeGetBlockSize:                return (pointer_sized_int) (getBlockSize() > 0  ? getBlockSize()  : defaultVSTBlockSizeValue);
+            case hostOpcodePlugInWantsMidi:             wantsMidiMessages = true; break;
+            case hostOpcodeGetDirectory:                return getVstDirectory();
 
-            case hostOpcodeIdle:
-                if (insideVSTCallback == 0 && MessageManager::getInstance()->isThisTheMessageThread())
-                {
-                    const IdleCallRecursionPreventer icrp;
+            case hostOpcodeTempoAt:                     return (pointer_sized_int) (extraFunctions != nullptr ? extraFunctions->getTempoAt ((int64) value) : 0);
+            case hostOpcodeGetAutomationState:          return (pointer_sized_int) (extraFunctions != nullptr ? extraFunctions->getAutomationState() : 0);
 
-                   #if JUCE_MAC
-                    if (getActiveEditor() != nullptr)
-                        dispatch (plugInOpcodeEditorIdle, 0, 0, 0, 0);
-                   #endif
+            case hostOpcodeParameterChangeGestureBegin: beginParameterChangeGesture (index); break;
+            case hostOpcodeParameterChangeGestureEnd:   endParameterChangeGesture (index); break;
 
-                    Timer::callPendingTimersSynchronously();
-
-                    handleUpdateNowIfNeeded();
-
-                    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                        if (ComponentPeer* p = ComponentPeer::getPeer(i))
-                            p->performAnyPendingRepaintsNow();
-                }
-                break;
-
-            case hostOpcodeWindowSize:
-                if (AudioProcessorEditor* ed = getActiveEditor())
-                {
-                   #if JUCE_LINUX
-                    const MessageManagerLock mmLock;
-                   #endif
-                     ed->setSize (index, (int) value);
-                }
-
-                return 1;
-
-            case hostOpcodeUpdateView:      triggerAsyncUpdate(); break;
-            case hostOpcodeIOModified:          setLatencySamples (vstEffect->latency); break;
-            case hostOpcodeNeedsIdle:           startTimer (50); break;
-
-            case hostOpcodeGetSampleRate:       return (pointer_sized_int) (getSampleRate() > 0 ? getSampleRate() : defaultVSTSampleRateValue);
-            case hostOpcodeGetBlockSize:        return (pointer_sized_int) (getBlockSize() > 0  ? getBlockSize()  : defaultVSTBlockSizeValue);
-            case hostOpcodePlugInWantsMidi:     wantsMidiMessages = true; break;
-            case hostOpcodeGetDirectory:        return getVstDirectory();
-
-            case hostOpcodeTempoAt:
-                if (extraFunctions != nullptr)
-                    return (pointer_sized_int) extraFunctions->getTempoAt ((int64) value);
-
-                break;
-
-            case hostOpcodeGetAutomationState:
-                if (extraFunctions != nullptr)
-                    return (pointer_sized_int) extraFunctions->getAutomationState();
-
-                break;
-
-            case hostOpcodePinConnected:
-                return isValidChannel (index, value == 0) ? 0 : 1; // (yes, 0 = true)
-
-            case hostOpcodeGetCurrentAudioProcessingLevel:
-                return isNonRealtime() ? 4 : 0;
+            case hostOpcodePinConnected:                    return isValidChannel (index, value == 0) ? 0 : 1; // (yes, 0 = true)
+            case hostOpcodeGetCurrentAudioProcessingLevel:  return isNonRealtime() ? 4 : 0;
 
             // none of these are handled (yet)...
             case hostOpcodeSetTime:
@@ -1214,8 +1167,6 @@ public:
             case hostOpcodeGetLanguage:
             case hostOpcodeOpenEditorWindow:
             case hostOpcodeCloseEditorWindow:
-            case hostOpcodeParameterChangeGestureBegin:
-            case hostOpcodeParameterChangeGestureEnd:
                 break;
 
             default:
@@ -1226,50 +1177,23 @@ public:
     }
 
     // handles non plugin-specific callbacks..
-    static pointer_sized_int handleGeneralCallback (int32 opcode, int32 /*index*/, pointer_sized_int /*value*/, void *ptr, float /*opt*/)
+    static pointer_sized_int handleGeneralCallback (int32 opcode, int32 /*index*/, pointer_sized_int /*value*/, void* ptr, float /*opt*/)
     {
         switch (opcode)
         {
-            case hostOpcodeCanHostDo:
-            {
-                static const char* canDos[] = { "supplyIdle",
-                                                "sendVstEvents",
-                                                "sendVstMidiEvent",
-                                                "sendVstTimeInfo",
-                                                "receiveVstEvents",
-                                                "receiveVstMidiEvent",
-                                                "supportShell",
-                                                "sizeWindow",
-                                                "shellCategory" };
-
-                for (int i = 0; i < numElementsInArray (canDos); ++i)
-                    if (strcmp (canDos[i], (const char*) ptr) == 0)
-                        return 1;
-
-                return 0;
-            }
-
-            case hostOpcodeVstVersion:                       return 2400;
-            case hostOpcodeCurrentId:                        return shellUIDToCreate;
-            case hostOpcodeGetNumberOfAutomatableParameters: return 0;
-            case hostOpcodeGetAutomationState:               return 1;
-            case hostOpcodeGetManufacturerVersion:           return 0x0101;
+            case hostOpcodeCanHostDo:                         return handleCanDo ((const char*) ptr);
+            case hostOpcodeVstVersion:                        return 2400;
+            case hostOpcodeCurrentId:                         return shellUIDToCreate;
+            case hostOpcodeGetNumberOfAutomatableParameters:  return 0;
+            case hostOpcodeGetAutomationState:                return 1;
+            case hostOpcodeGetManufacturerVersion:            return 0x0101;
 
             case hostOpcodeGetManufacturerName:
-            case hostOpcodeGetProductName:
-            {
-                String hostName ("Juce VST Host");
+            case hostOpcodeGetProductName:                    return getHostName ((char*) ptr);
 
-                if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
-                    hostName = app->getApplicationName();
-
-                hostName.copyToUTF8 ((char*) ptr, (size_t) jmin (vstMaxManufacturerStringLength, vstMaxPlugInNameStringLength) - 1);
-                break;
-            }
-
-            case hostOpcodeGetSampleRate:           return (pointer_sized_int) defaultVSTSampleRateValue;
-            case hostOpcodeGetBlockSize:            return (pointer_sized_int) defaultVSTBlockSizeValue;
-            case hostOpcodeSetOutputSampleRate:     return 0;
+            case hostOpcodeGetSampleRate:                     return (pointer_sized_int) defaultVSTSampleRateValue;
+            case hostOpcodeGetBlockSize:                      return (pointer_sized_int) defaultVSTBlockSizeValue;
+            case hostOpcodeSetOutputSampleRate:               return 0;
 
             default:
                 DBG ("*** Unhandled VST Callback: " + String ((int) opcode));
@@ -1552,6 +1476,81 @@ private:
     MidiBuffer incomingMidi;
     VSTMidiEventList midiEventsToSend;
     VstTimingInformation vstHostTime;
+
+    static pointer_sized_int handleCanDo (const char* name)
+    {
+        static const char* canDos[] = { "supplyIdle",
+                                        "sendVstEvents",
+                                        "sendVstMidiEvent",
+                                        "sendVstTimeInfo",
+                                        "receiveVstEvents",
+                                        "receiveVstMidiEvent",
+                                        "supportShell",
+                                        "sizeWindow",
+                                        "shellCategory" };
+
+        for (int i = 0; i < numElementsInArray (canDos); ++i)
+            if (strcmp (canDos[i], name) == 0)
+                return 1;
+
+        return 0;
+    }
+
+    static pointer_sized_int getHostName (char* name)
+    {
+        String hostName ("Juce VST Host");
+
+        if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
+            hostName = app->getApplicationName();
+
+        hostName.copyToUTF8 (name, (size_t) jmin (vstMaxManufacturerStringLength, vstMaxPlugInNameStringLength) - 1);
+        return 1;
+    }
+
+    pointer_sized_int getVSTTime() noexcept
+    {
+       #if JUCE_MSVC
+        #pragma warning (push)
+        #pragma warning (disable: 4311)
+       #endif
+
+        return (pointer_sized_int) &vstHostTime;
+
+       #if JUCE_MSVC
+        #pragma warning (pop)
+       #endif
+    }
+
+    void handleIdle()
+    {
+        if (insideVSTCallback == 0 && MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            const IdleCallRecursionPreventer icrp;
+
+           #if JUCE_MAC
+            if (getActiveEditor() != nullptr)
+                dispatch (plugInOpcodeEditorIdle, 0, 0, 0, 0);
+           #endif
+
+            Timer::callPendingTimersSynchronously();
+            handleUpdateNowIfNeeded();
+
+            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (ComponentPeer* p = ComponentPeer::getPeer(i))
+                    p->performAnyPendingRepaintsNow();
+        }
+    }
+
+    void setWindowSize (int width, int height)
+    {
+        if (AudioProcessorEditor* ed = getActiveEditor())
+        {
+           #if JUCE_LINUX
+            const MessageManagerLock mmLock;
+           #endif
+            ed->setSize (width, height);
+        }
+    }
 
     //==============================================================================
     static VstEffectInterface* constructEffect (const ModuleHandle::Ptr& module)
