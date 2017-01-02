@@ -63,9 +63,54 @@
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
 
-#if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
+#if JUCE_VST3_CAN_REPLACE_VST2
  #include <pluginterfaces/base/funknown.h>
- namespace juce { extern Steinberg::FUID getJuceVST3ComponentIID(); }
+
+ #if JucePlugin_Build_VST3
+  // Use function from VST3 wrapper in polymorphic builds.
+  namespace juce { extern Steinberg::FUID getJuceVST3ComponentIID(); }
+ #else
+  // Note: Code below copied from juce_VST3_Wrapper.cpp
+  // This is a temporary solution until main JUCE fix macOS VST2/VST3 compatability bugs.
+  #include <pluginterfaces/base/funknown.cpp>
+
+  static Steinberg::FUID getFUIDForVST2ID (bool forControllerUID)
+  {
+      char uidString[33];
+
+      const int vstfxid = (('V' << 16) | ('S' << 8) | (forControllerUID ? 'E' : 'T'));
+      char vstfxidStr[7] = { 0 };
+      sprintf (vstfxidStr, "%06X", vstfxid);
+      strcpy (uidString, vstfxidStr);
+
+      char uidStr[9] = { 0 };
+      sprintf (uidStr, "%08X", JucePlugin_VSTUniqueID);
+      strcat (uidString, uidStr);
+
+      char nameidStr[3] = { 0 };
+      const size_t len = strlen (JucePlugin_Name);
+
+      for (size_t i = 0; i <= 8; ++i)
+      {
+          juce::uint8 c = i < len ? static_cast<juce::uint8> (JucePlugin_Name[i]) : 0;
+
+          if (c >= 'A' && c <= 'Z')
+              c += 'a' - 'A';
+
+          sprintf (nameidStr, "%02X", c);
+          strcat (uidString, nameidStr);
+      }
+
+      Steinberg::FUID newOne;
+      newOne.fromString (uidString);
+      return newOne;
+  }
+
+  static Steinberg::FUID getJuceVST3ComponentIID()
+  {
+      return getFUIDForVST2ID (false);
+  }
+ #endif
 #endif
 
 #ifdef _MSC_VER
@@ -1882,7 +1927,7 @@ private:
 
     pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
     {
-       #if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
+       #if JUCE_VST3_CAN_REPLACE_VST2
         if ((args.index == 'stCA' || args.index == 'stCa') && args.value == 'FUID' && args.ptr != nullptr)
         {
             memcpy (args.ptr, getJuceVST3ComponentIID(), 16);
