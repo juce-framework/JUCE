@@ -56,12 +56,12 @@ public:
 
         Note that the object passed in will not be owned or deleted by the logger, so
         the caller must make sure that it is not deleted while still being used.
-        A null pointer can be passed-in to disable any logging.
+        A null pointer can be passed-in to reset the system to the default logger.
     */
     static void JUCE_CALLTYPE setCurrentLogger (Logger* newLogger) noexcept;
 
-    /** Returns the current logger, or nullptr if none has been set. */
-    static Logger* getCurrentLogger() noexcept;
+    /** Returns the current logger, or nullptr if no custom logger has been set. */
+    static Logger* JUCE_CALLTYPE getCurrentLogger() noexcept;
 
     /** Writes a string to the current logger.
 
