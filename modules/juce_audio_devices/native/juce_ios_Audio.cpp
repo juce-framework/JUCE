@@ -274,6 +274,8 @@ public:
             rate = jmax (rate, supportedRate);
         }
 
+        trySampleRate (sampleRate);
+
         for (auto r : rates)
         {
             ignoreUnused (r);
