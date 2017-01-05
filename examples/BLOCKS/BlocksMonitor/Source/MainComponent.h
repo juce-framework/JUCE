@@ -1,4 +1,3 @@
-
 #ifndef MAINCOMPONENT_H_INCLUDED
 #define MAINCOMPONENT_H_INCLUDED
 
@@ -37,6 +36,13 @@ public:
         addAndMakeVisible (noBlocksLabel);
         addAndMakeVisible (zoomOutButton);
         addAndMakeVisible (zoomInButton);
+
+       #if JUCE_IOS
+        connectButton.setButtonText ("Connect");
+        connectButton.addListener (this);
+        connectButton.setAlwaysOnTop (true);
+        addAndMakeVisible (connectButton);
+       #endif
     }
 
     void paint (Graphics& g) override
@@ -46,6 +52,10 @@ public:
 
     void resized() override
     {
+       #if JUCE_IOS
+        connectButton.setBounds (getRight() - 100, 20, 80, 30);
+       #endif
+
         noBlocksLabel.setVisible (false);
         const int numBlockComponents = blockComponents.size();
 
@@ -199,9 +209,19 @@ private:
     /** Zooms the display in or out */
     void buttonClicked (Button* button) override
     {
-        blockUnitInPixels *= (button == &zoomOutButton ? 1.05f : (button == &zoomInButton ? 0.95f : 1.0f));
+       #if JUCE_IOS
+        if (button == &connectButton)
+        {
+            BluetoothMidiDevicePairingDialogue::open();
+            return;
+        }
+       #endif
 
-        resized();
+        if (button == &zoomOutButton || button == &zoomInButton)
+        {
+            blockUnitInPixels *= (button == &zoomOutButton ? 1.05f : 0.95f);
+            resized();
+        }
     }
 
     /** Calculates the position and rotation of each connected Block relative to the master Block */
@@ -414,6 +434,10 @@ private:
 
     int blockUnitInPixels;
     bool isInitialResized;
+
+   #if JUCE_IOS
+    TextButton connectButton;
+   #endif
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

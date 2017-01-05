@@ -1,4 +1,3 @@
-
 #ifndef MAINCOMPONENT_H_INCLUDED
 #define MAINCOMPONENT_H_INCLUDED
 
@@ -74,6 +73,9 @@ class MainComponent   : public Component,
                         public TopologySource::Listener,
                         private TouchSurface::Listener,
                         private ControlButton::Listener,
+                       #if JUCE_IOS
+                        private Button::Listener,
+                       #endif
                         private Timer
 {
 public:
@@ -83,6 +85,12 @@ public:
 
         // Register MainContentComponent as a listener to the PhysicalTopologySource object
         topologySource.addListener (this);
+
+       #if JUCE_IOS
+        connectButton.setButtonText ("Connect");
+        connectButton.addListener (this);
+        addAndMakeVisible (connectButton);
+       #endif
     };
 
     ~MainComponent()
@@ -98,7 +106,12 @@ public:
                     getLocalBounds(), Justification::centred, false);
     }
 
-    void resized() override {}
+    void resized() override
+    {
+       #if JUCE_IOS
+        connectButton.setBounds (getRight() - 100, 20, 80, 30);
+       #endif
+    }
 
     /** Overridden from TopologySource::Listener, called when the topology changes */
     void topologyChanged() override
@@ -218,6 +231,14 @@ private:
         setLEDProgram (activeBlock->getLEDGrid());
     }
 
+   #if JUCE_IOS
+    void buttonClicked (Button* b) override
+    {
+        if (b == &connectButton)
+            BluetoothMidiDevicePairingDialogue::open();
+    }
+   #endif
+
     /** Clears the old touch times */
     void clearOldTouchTimes (const Time now)
     {
@@ -297,6 +318,11 @@ private:
     float scaleY = 0.0;
 
     bool allowTouch = true;
+
+    //==============================================================================
+   #if JUCE_IOS
+    TextButton connectButton;
+   #endif
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

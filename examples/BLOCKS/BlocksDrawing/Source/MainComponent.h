@@ -1,8 +1,8 @@
-
 #ifndef MAINCOMPONENT_H_INCLUDED
 #define MAINCOMPONENT_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "LightpadComponent.h"
 
 //==============================================================================
 /**
@@ -33,7 +33,7 @@ struct ColourGrid
                 DrumPadGridProgram::GridFill fill;
                 Colour colourToUse = colourArray.getUnchecked (counter);
 
-                fill.colour = colourToUse.withBrightness (colourToUse == currentColour ? 1.0 : 0.1);
+                fill.colour = colourToUse.withBrightness (colourToUse == currentColour ? 1.0f : 0.1f);
 
                 if (colourToUse == Colours::black)
                     fill.fillType = DrumPadGridProgram::GridFill::FillType::hollow;
@@ -92,37 +92,118 @@ class MainComponent   : public Component,
                         public TopologySource::Listener,
                         private TouchSurface::Listener,
                         private ControlButton::Listener,
+                        private LightpadComponent::Listener,
+                        private Button::Listener,
+                        private Slider::Listener,
                         private Timer
 {
 public:
     MainComponent()
     {
-        setSize (600, 400);
-
         activeLeds.clear();
 
         // Register MainContentComponent as a listener to the PhysicalTopologySource object
         topologySource.addListener (this);
+
+        infoLabel.setText ("Connect a Lightpad Block to draw.", dontSendNotification);
+        infoLabel.setJustificationType (Justification::centred);
+        addAndMakeVisible (infoLabel);
+
+        addAndMakeVisible (lightpadComponent);
+        lightpadComponent.setVisible (false);
+        lightpadComponent.addListener (this);
+
+        clearButton.setButtonText ("Clear");
+        clearButton.addListener (this);
+        clearButton.setAlwaysOnTop (true);
+        addAndMakeVisible (clearButton);
+
+        brightnessSlider.setRange (0.0, 1.0);
+        brightnessSlider.setValue (1.0);
+        brightnessSlider.setAlwaysOnTop (true);
+        brightnessSlider.setTextBoxStyle (Slider::TextEntryBoxPosition::NoTextBox, false, 0, 0);
+        brightnessSlider.addListener (this);
+        addAndMakeVisible (brightnessSlider);
+
+        brightnessLED.setAlwaysOnTop (true);
+        brightnessLED.setColour (layout.currentColour.withBrightness (static_cast<float> (brightnessSlider.getValue())));
+        addAndMakeVisible (brightnessLED);
+
+       #if JUCE_IOS
+        connectButton.setButtonText ("Connect");
+        connectButton.addListener (this);
+        connectButton.setAlwaysOnTop (true);
+        addAndMakeVisible (connectButton);
+       #endif
+
+		setSize (600, 600);
     }
 
     ~MainComponent()
     {
         if (activeBlock != nullptr)
             detachActiveBlock();
+
+        lightpadComponent.removeListener (this);
     }
 
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::lightgrey);
-        g.drawText ("Connect a Lightpad Block to draw.",
-                    getLocalBounds(), Justification::centred, false);
     }
 
-    void resized() override {}
+    void resized() override
+    {
+        infoLabel.centreWithSize (getWidth(), 100);
+
+        Rectangle<int> bounds = getLocalBounds().reduced (20);
+
+        // top buttons
+        Rectangle<int> topButtonArea = bounds.removeFromTop (getHeight() / 20);
+
+        topButtonArea.removeFromLeft (20);
+        clearButton.setBounds (topButtonArea.removeFromLeft (80));
+
+       #if JUCE_IOS
+        topButtonArea.removeFromRight (20);
+        connectButton.setBounds (topButtonArea.removeFromRight (80));
+       #endif
+
+        bounds.removeFromTop (20);
+
+        // brightness controls
+        Rectangle<int> brightnessControlBounds;
+
+        Desktop::DisplayOrientation orientation = Desktop::getInstance().getCurrentOrientation();
+
+        if (orientation == Desktop::DisplayOrientation::upright || orientation == Desktop::DisplayOrientation::upsideDown)
+        {
+            brightnessControlBounds = bounds.removeFromBottom (getHeight() / 10);
+
+            brightnessSlider.setSliderStyle (Slider::SliderStyle::LinearHorizontal);
+            brightnessLED.setBounds (brightnessControlBounds.removeFromLeft (getHeight() / 10));
+            brightnessSlider.setBounds (brightnessControlBounds);
+        }
+        else
+        {
+            brightnessControlBounds = bounds.removeFromRight (getWidth() / 10);
+
+            brightnessSlider.setSliderStyle (Slider::SliderStyle::LinearVertical);
+            brightnessLED.setBounds (brightnessControlBounds.removeFromTop (getWidth() / 10));
+            brightnessSlider.setBounds (brightnessControlBounds);
+        }
+
+        // lightpad component
+        int sideLength = jmin (bounds.getWidth() - 40, bounds.getHeight() - 40);
+        lightpadComponent.centreWithSize (sideLength, sideLength);
+    }
 
     /** Overridden from TopologySource::Listener. Called when the topology changes */
     void topologyChanged() override
     {
+        lightpadComponent.setVisible (false);
+        infoLabel.setVisible (true);
+
         // Reset the activeBlock object
         if (activeBlock != nullptr)
             detachActiveBlock();
@@ -150,11 +231,15 @@ public:
                 if (auto grid = activeBlock->getLEDGrid())
                 {
                     // Work out scale factors to translate X and Y touches to LED indexes
-                    scaleX = (float) (grid->getNumColumns() - 1) / activeBlock->getWidth();
-                    scaleY = (float) (grid->getNumRows() - 1)    / activeBlock->getHeight();
+                    scaleX = (float) (grid->getNumColumns()) / activeBlock->getWidth();
+                    scaleY = (float) (grid->getNumRows())    / activeBlock->getHeight();
 
                     setLEDProgram (grid);
                 }
+
+                // Make the on screen Lighpad component visible
+                lightpadComponent.setVisible (true);
+                infoLabel.setVisible (false);
 
                 break;
             }
@@ -172,16 +257,20 @@ private:
         if (currentMode == colourPalette)
         {
             if (layout.setActiveColourForTouch (xLed, yLed))
+            {
                 colourPaletteProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
+                brightnessLED.setColour (layout.currentColour.withBrightness (layout.currentColour == Colours::black ? 0.0f
+                                                                                                                     : static_cast<float> (brightnessSlider.getValue())));
+            }
         }
         else if (currentMode == canvas)
         {
-            drawLEDs ((uint32) xLed, (uint32) yLed, touch.z, layout.currentColour);
+            drawLED ((uint32) xLed, (uint32) yLed, touch.z, layout.currentColour);
         }
     }
 
     /** Overridden from ControlButton::Listener. Called when a button on the Lightpad is pressed */
-    void buttonPressed (ControlButton&, Block::Timestamp) override {}
+    void buttonPressed (ControlButton&, Block::Timestamp) override { }
 
     /** Overridden from ControlButton::Listener. Called when a button on the Lightpad is released */
     void buttonReleased (ControlButton&, Block::Timestamp) override
@@ -202,17 +291,33 @@ private:
         }
     }
 
+    void buttonClicked (Button* b) override
+    {
+       #if JUCE_IOS
+        if (b == &connectButton)
+        {
+            BluetoothMidiDevicePairingDialogue::open();
+            return;
+        }
+	   #else
+		ignoreUnused (b);
+       #endif
+
+        clearLEDs();
+    }
+
+    void sliderValueChanged (Slider* s) override
+    {
+        if (s == &brightnessSlider)
+            brightnessLED.setColour (layout.currentColour.withBrightness (layout.currentColour == Colours::black ? 0.0f
+                                                                                                                 : static_cast<float> (brightnessSlider.getValue())));
+    }
+
     void timerCallback() override
     {
         if (doublePress)
         {
-            // Clear the LED grid
-            for (uint32 x = 0; x < 15; ++x)
-                for (uint32 y = 0; y < 15; ++ y)
-                    canvasProgram->setLED (x, y, Colours::black);
-
-            // Clear the ActiveLED array
-            activeLeds.clear();
+            clearLEDs();
 
             // Reset the doublePress flag
             doublePress = false;
@@ -225,6 +330,12 @@ private:
         }
 
         stopTimer();
+    }
+
+    void ledClicked (int x, int y, float z) override
+    {
+        drawLED ((uint32) x, (uint32) y, z == 0.0f ?     static_cast<float> (brightnessSlider.getValue())
+                                                   : z * static_cast<float> (brightnessSlider.getValue()), layout.currentColour);
     }
 
     /** Removes TouchSurface and ControlButton listeners and sets activeBlock to nullptr */
@@ -242,6 +353,9 @@ private:
     /** Sets the LEDGrid Program for the selected mode */
     void setLEDProgram (LEDGrid* grid)
     {
+        canvasProgram = nullptr;
+        colourPaletteProgram = nullptr;
+
         if (currentMode == canvas)
         {
             // Create a new BitmapLEDProgram for the LEDGrid
@@ -268,8 +382,26 @@ private:
         }
     }
 
+    void clearLEDs()
+    {
+        // Clear the LED grid
+        for (uint32 x = 0; x < 15; ++x)
+        {
+            for (uint32 y = 0; y < 15; ++ y)
+            {
+                if (canvasProgram != nullptr)
+                    canvasProgram->setLED (x, y, Colours::black);
+
+                lightpadComponent.setLEDColour (x, y, Colours::black);
+            }
+        }
+
+        // Clear the ActiveLED array
+        activeLeds.clear();
+    }
+
     /** Sets an LED on the Lightpad for a given touch co-ordinate and pressure */
-    void drawLEDs (uint32 x0, uint32 y0, float z, Colour drawColour)
+    void drawLED (uint32 x0, uint32 y0, float z, Colour drawColour)
     {
         // Check if the activeLeds array already contains an ActiveLED object for this LED
         auto index = getLEDAt (x0, y0);
@@ -279,7 +411,11 @@ private:
         {
             if (index >= 0)
             {
-                canvasProgram->setLED (x0, y0, Colours::black);
+                if (canvasProgram != nullptr)
+                    canvasProgram->setLED (x0, y0, Colours::black);
+
+                lightpadComponent.setLEDColour (x0, y0, Colours::black);
+
                 activeLeds.remove (index);
             }
 
@@ -297,7 +433,11 @@ private:
             led.brightness = z;
 
             activeLeds.add (led);
-            canvasProgram->setLED (led.x, led.y, led.colour.withBrightness (led.brightness));
+
+            if (canvasProgram != nullptr)
+                canvasProgram->setLED (led.x, led.y, led.colour.withBrightness (led.brightness));
+
+            lightpadComponent.setLEDColour (led.x, led.y, led.colour.withBrightness (led.brightness));
 
             return;
         }
@@ -314,7 +454,11 @@ private:
 
 
         // Set the LED on the Block and change the ActiveLED object in the activeLeds array
-        canvasProgram->setLED (currentLed.x, currentLed.y, currentLed.colour.withBrightness (currentLed.brightness));
+        if (canvasProgram != nullptr)
+            canvasProgram->setLED (currentLed.x, currentLed.y, currentLed.colour.withBrightness (currentLed.brightness));
+
+        lightpadComponent.setLEDColour (currentLed.x, currentLed.y, currentLed.colour.withBrightness (currentLed.brightness));
+
         activeLeds.set (index, currentLed);
     }
 
@@ -323,7 +467,10 @@ private:
     {
         // Iterate over the activeLeds array and set the LEDs on the Block
         for (auto led : activeLeds)
+        {
             canvasProgram->setLED (led.x, led.y, led.colour.withBrightness (led.brightness));
+            lightpadComponent.setLEDColour (led.x, led.y, led.colour.withBrightness (led.brightness));
+        }
     }
 
     /**
@@ -342,7 +489,6 @@ private:
             return xPos == x && yPos == y;
         }
     };
-
     Array<ActiveLED> activeLeds;
 
     int getLEDAt (uint32 x, uint32 y) const
@@ -360,7 +506,6 @@ private:
         colourPalette = 0,
         canvas
     };
-
     DisplayMode currentMode = colourPalette;
 
     //==============================================================================
@@ -375,6 +520,17 @@ private:
     float scaleY = 0.0;
 
     bool doublePress = false;
+
+    //==============================================================================
+    Label infoLabel;
+    LightpadComponent lightpadComponent;
+    TextButton clearButton;
+    LEDComponent brightnessLED;
+    Slider brightnessSlider;
+
+   #if JUCE_IOS
+    TextButton connectButton;
+   #endif
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
