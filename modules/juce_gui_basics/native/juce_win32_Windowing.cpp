@@ -611,7 +611,7 @@ public:
 private:
 
     OnScreenKeyboard()
-        : isActive (false), shouldBeActive (false), reentrant (false)
+        : shouldBeActive (false), reentrant (false)
     {
         tipInvocation.CoCreateInstance (ITipInvocation::clsid, CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
     }
@@ -623,12 +623,35 @@ private:
         if (reentrant || tipInvocation == nullptr) return;
         const ScopedValueSetter<bool> setter (reentrant, true, false);
 
+        const bool isActive = isVisible();
         if (isActive == shouldBeActive) return;
-        isActive = shouldBeActive;
-        tipInvocation->Toggle (::GetDesktopWindow());
+
+        if (! isActive)
+        {
+            tipInvocation->Toggle(::GetDesktopWindow());
+        }
+        else
+        {
+            ::HWND hwnd = ::FindWindow (L"IPTip_Main_Window", NULL);
+
+            if (hwnd != nullptr)
+                ::PostMessage(hwnd, WM_SYSCOMMAND, (int) SC_CLOSE, 0);
+        }
     }
 
-    bool isActive, shouldBeActive, reentrant;
+    bool isVisible()
+    {
+        ::HWND hwnd = ::FindWindow (L"IPTip_Main_Window", NULL);
+        if (hwnd != nullptr)
+        {
+            ::LONG style = ::GetWindowLong (hwnd, GWL_STYLE);
+            return ((style & WS_DISABLED) == 0 && (style & WS_VISIBLE) != 0);
+        }
+
+        return false;
+    }
+
+    bool shouldBeActive, reentrant;
     ComSmartPtr<ITipInvocation> tipInvocation;
 };
 
