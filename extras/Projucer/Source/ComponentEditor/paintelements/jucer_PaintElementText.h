@@ -73,6 +73,7 @@ public:
         props.add (new FontNameProperty (this));
         props.add (new FontStyleProperty (this));
         props.add (new FontSizeProperty (this));
+        props.add (new FontKerningProperty (this));
         props.add (new TextJustificationProperty (this));
         props.add (new TextToPathProperty (this));
     }
@@ -112,6 +113,7 @@ public:
         e->setAttribute ("text", text);
         e->setAttribute ("fontname", typefaceName);
         e->setAttribute ("fontsize", roundToInt (font.getHeight() * 100.0) / 100.0);
+        e->setAttribute ("kerning", roundToInt (font.getExtraKerningFactor() * 1000.0) / 1000.0);
         e->setAttribute ("bold", font.isBold());
         e->setAttribute ("italic", font.isItalic());
         e->setAttribute ("justification", justification.getFlags());
@@ -131,6 +133,7 @@ public:
             font.setHeight ((float) xml.getDoubleAttribute ("fontsize", 15.0));
             font.setBold (xml.getBoolAttribute ("bold", false));
             font.setItalic (xml.getBoolAttribute ("italic", false));
+            font.setExtraKerningFactor ((float) xml.getDoubleAttribute ("kerning", 0.0));
             justification = Justification (xml.getIntAttribute ("justification", Justification::centred));
 
             return true;
@@ -507,7 +510,45 @@ private:
     private:
         PaintElementText* const element;
     };
-
+    
+    //==============================================================================
+    class FontKerningProperty  : public SliderPropertyComponent,
+                                 public ChangeListener
+    {
+    public:
+        FontKerningProperty (PaintElementText* const e)
+            : SliderPropertyComponent ("kerning", -0.5, 0.5, 0.001),
+              element (e)
+        {
+            element->getDocument()->addChangeListener (this);
+        }
+        
+        ~FontKerningProperty()
+        {
+            element->getDocument()->removeChangeListener (this);
+        }
+        
+        void setValue (double newValue)
+        {
+            element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+            
+            Font f (element->getFont());
+            f.setExtraKerningFactor((float) newValue);
+            
+            element->setFont (f, true);
+        }
+        
+        double getValue() const
+        {
+            return element->getFont().getExtraKerningFactor();
+        }
+        
+        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
+        
+    private:
+        PaintElementText* const element;
+    };
+    
     //==============================================================================
     class TextJustificationProperty  : public JustificationProperty,
                                        public ChangeListener
