@@ -73,6 +73,7 @@ public:
         statusIcon = MouseCursorHelpers::createNSImage (newImage);
         setIconSize();
         SystemTrayViewClass::setImage (view, statusIcon);
+        [statusItem setView: view];
     }
 
     void setHighlighted (bool shouldHighlight)
