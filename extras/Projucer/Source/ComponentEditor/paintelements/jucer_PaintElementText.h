@@ -439,7 +439,7 @@ private:
               element (e)
         {
             element->getDocument()->addChangeListener (this);
-            updateStylesList (element->getFont());
+            updateStylesList (element->getTypefaceName());
         }
         
         ~FontTypefaceStyleProperty()
@@ -447,7 +447,7 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
         
-        void updateStylesList (const Font& newFont)
+        void updateStylesList (const String& name)
         {
             if (getNumChildComponents())
             {
@@ -457,7 +457,7 @@ private:
             }
             
             choices.clear();
-            choices.addArray (newFont.getAvailableStyles());
+            choices.addArray (Font::findAllTypefaceStyles(name));
             refresh();
         }
         
@@ -475,7 +475,7 @@ private:
         
         void changeListenerCallback (ChangeBroadcaster*)
         {
-            updateStylesList (element->getFont());
+            updateStylesList (element->getTypefaceName());
         }
         
     private:
