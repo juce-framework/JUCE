@@ -140,11 +140,7 @@ public:
             font.setItalic (xml.getBoolAttribute ("italic", false));
             font.setExtraKerningFactor ((float) xml.getDoubleAttribute ("kerning", 0.0));
             justification = Justification (xml.getIntAttribute ("justification", Justification::centred));
-            String style = xml.getStringAttribute ("typefaceStyle", "Regular");
-            if (font.getAvailableStyles().contains (style))
-            {
-                font.setTypefaceStyle (style);
-            }
+            font.setTypefaceStyle (xml.getStringAttribute ("typefaceStyle", "Regular"));
             
             return true;
         }
