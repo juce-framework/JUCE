@@ -71,8 +71,9 @@ public:
 
         props.add (new TextProperty (this));
         props.add (new FontNameProperty (this));
-        props.add (new FontStyleProperty (this));
+        props.add (new FontTypefaceStyleProperty (this));
         props.add (new FontSizeProperty (this));
+        props.add (new FontStyleFlagsProperty (this));
         props.add (new FontKerningProperty (this));
         props.add (new TextJustificationProperty (this));
         props.add (new TextToPathProperty (this));
@@ -117,7 +118,11 @@ public:
         e->setAttribute ("bold", font.isBold());
         e->setAttribute ("italic", font.isItalic());
         e->setAttribute ("justification", justification.getFlags());
-
+        if (font.getTypefaceStyle() != "Regular")
+        {
+            e->setAttribute ("typefaceStyle", font.getTypefaceStyle());
+        }
+        
         return e;
     }
 
@@ -135,7 +140,12 @@ public:
             font.setItalic (xml.getBoolAttribute ("italic", false));
             font.setExtraKerningFactor ((float) xml.getDoubleAttribute ("kerning", 0.0));
             justification = Justification (xml.getIntAttribute ("justification", Justification::centred));
-
+            String style = xml.getStringAttribute ("typefaceStyle", "Regular");
+            if (font.getAvailableStyles().contains (style))
+            {
+                font.setTypefaceStyle (style);
+            }
+            
             return true;
         }
 
@@ -422,14 +432,67 @@ private:
     private:
         PaintElementText* const element;
     };
-
+    
     //==============================================================================
-    class FontStyleProperty  : public ChoicePropertyComponent,
-                               public ChangeListener
+    class FontTypefaceStyleProperty  : public ChoicePropertyComponent,
+                                       public ChangeListener
     {
     public:
-        FontStyleProperty (PaintElementText* const e)
-            : ChoicePropertyComponent ("style"),
+        FontTypefaceStyleProperty (PaintElementText* const e)
+            : ChoicePropertyComponent ("font style"),
+              element (e)
+        {
+            element->getDocument()->addChangeListener (this);
+            updateStylesList (element->getFont());
+        }
+        
+        ~FontTypefaceStyleProperty()
+        {
+            element->getDocument()->removeChangeListener (this);
+        }
+        
+        void updateStylesList (const Font& newFont)
+        {
+            if (getNumChildComponents())
+            {
+                ((ComboBox*)getChildComponent(0))->clear();
+                getChildComponent(0)->setVisible(false);
+                removeAllChildren();
+            }
+            
+            choices.clear();
+            choices.addArray (newFont.getAvailableStyles());
+            refresh();
+        }
+        
+        void setIndex (int newIndex)
+        {
+            Font f (element->getFont());
+            f.setTypefaceStyle (choices[newIndex]);
+            element->setFont(f, true);
+        }
+        
+        int getIndex() const
+        {
+            return choices.indexOf(element->getFont().getTypefaceStyle());
+        }
+        
+        void changeListenerCallback (ChangeBroadcaster*)
+        {
+            updateStylesList (element->getFont());
+        }
+        
+    private:
+        PaintElementText* const element;
+    };
+    
+    //==============================================================================
+    class FontStyleFlagsProperty  : public ChoicePropertyComponent,
+                                    public ChangeListener
+    {
+    public:
+        FontStyleFlagsProperty (PaintElementText* const e)
+            : ChoicePropertyComponent ("style flags"),
               element (e)
         {
             element->getDocument()->addChangeListener (this);
@@ -440,7 +503,7 @@ private:
             choices.add ("bold + italic");
         }
 
-        ~FontStyleProperty()
+        ~FontStyleFlagsProperty()
         {
             element->getDocument()->removeChangeListener (this);
         }

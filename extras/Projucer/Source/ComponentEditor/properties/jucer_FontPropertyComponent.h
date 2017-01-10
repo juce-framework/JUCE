@@ -85,7 +85,12 @@ public:
         if (typefaceName == getDefaultSerif()) return Font (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags());
         if (typefaceName == getDefaultMono())  return Font (Font::getDefaultMonospacedFontName(), font.getHeight(), font.getStyleFlags());
 
-        return Font (typefaceName, font.getHeight(), font.getStyleFlags()).withExtraKerningFactor(font.getExtraKerningFactor());
+        Font f = Font (typefaceName, font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (font.getExtraKerningFactor());
+        if (f.getAvailableStyles().contains (font.getTypefaceStyle()))
+        {
+            f.setTypefaceStyle (font.getTypefaceStyle());
+        }
+        return f;
     }
 
     static String getTypefaceNameCode (const String& typefaceName)
@@ -116,6 +121,10 @@ public:
           << ", "
           << getFontStyleCode (font)
           << ")";
+        if (font.getTypefaceStyle() != "Regular")
+        {
+            s << ".withTypefaceStyle (" << CodeHelpers::stringLiteral (font.getTypefaceStyle()) << ")";
+        }
         if (font.getExtraKerningFactor() != 0)
         {
             s << ".withExtraKerningFactor (" << CodeHelpers::floatLiteral (font.getExtraKerningFactor(), 3) << ")";
