@@ -114,12 +114,12 @@ public:
           << getTypefaceNameCode (typefaceName)
           << CodeHelpers::floatLiteral (font.getHeight(), 2)
           << ", "
-          << getFontStyleCode (font);
+          << getFontStyleCode (font)
+          << ")";
         if (font.getExtraKerningFactor() != 0)
         {
             s << ".withExtraKerningFactor (" << CodeHelpers::floatLiteral (font.getExtraKerningFactor(), 3) << ")";
         }
-        s << ")";
         return s;
     }
 };
