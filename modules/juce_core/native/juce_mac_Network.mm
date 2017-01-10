@@ -883,7 +883,9 @@ public:
 
     bool connect (WebInputStream::Listener* webInputListener, int numRetries = 0)
     {
+        ignoreUnused (numRetries);
         createConnection();
+
         if (! connection->start (owner, webInputListener))
         {
             // Workaround for deployment targets below 10.10 where HTTPS POST requests with keep-alive fail with the NSURLErrorNetworkConnectionLost error code.
