@@ -33,14 +33,15 @@
     It has its own internal class of parameter object which are linked to values
     within its ValueTree, and which are each identified by a string ID.
 
-    To use: Create a AudioProcessorValueTreeState, and give it some parameters
-    using createParameter().
-
     You can get access to the underlying ValueTree object via the state member variable,
     so you can add extra properties to it as necessary.
 
     It also provides some utility child classes for connecting parameters directly to
     GUI controls like sliders.
+
+    To use:
+    1) Create an AudioProcessorValueTreeState, and give it some parameters using createParameter().
+    2) Initialise the state member variable with a type name.
 */
 class JUCE_API  AudioProcessorValueTreeState  : private Timer,
                                                 private ValueTree::Listener
