@@ -1018,6 +1018,15 @@ private:
         {
             [req setHTTPMethod: [NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()]];
 
+            if (isPost)
+            {
+                WebInputStream::createHeadersAndPostData (url, headers, postData);
+
+                if (postData.getSize() > 0)
+                    [req setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                     length: postData.getSize()]];
+            }
+
             StringArray headerLines;
             headerLines.addLines (headers);
             headerLines.removeEmptyStrings (true);
@@ -1029,15 +1038,6 @@ private:
 
                 if (key.isNotEmpty() && value.isNotEmpty())
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
-            }
-
-            if (isPost)
-            {
-                WebInputStream::createHeadersAndPostData (url, headers, postData);
-
-                if (postData.getSize() > 0)
-                    [req setHTTPBody: [NSData dataWithBytes: postData.getData()
-                                                     length: postData.getSize()]];
             }
 
             connection = new URLConnectionState (req, numRedirectsToFollow);
