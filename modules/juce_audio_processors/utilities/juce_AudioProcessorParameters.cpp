@@ -27,19 +27,21 @@
 
 AudioProcessorParameterWithID::AudioProcessorParameterWithID (const String& idToUse,
                                                               const String& nameToUse,
-                                                              const String& labelToUse)
-    : paramID (idToUse), name (nameToUse), label (labelToUse) {}
+                                                              const String& labelToUse,
+                                                              AudioProcessorParameter::Category categoryToUse)
+    : paramID (idToUse), name (nameToUse), label (labelToUse), category (categoryToUse) {}
 AudioProcessorParameterWithID::~AudioProcessorParameterWithID() {}
 
-String AudioProcessorParameterWithID::getName (int maximumStringLength) const     { return name.substring (0, maximumStringLength); }
-String AudioProcessorParameterWithID::getLabel() const                            { return label; }
+String AudioProcessorParameterWithID::getName (int maximumStringLength) const        { return name.substring (0, maximumStringLength); }
+String AudioProcessorParameterWithID::getLabel() const                               { return label; }
+AudioProcessorParameter::Category AudioProcessorParameterWithID::getCategory() const { return category; }
 
 
 //==============================================================================
 AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& nameToUse,
                                           NormalisableRange<float> r, float def,
-                                          const String& labelToUse)
-   : AudioProcessorParameterWithID (idToUse, nameToUse, labelToUse),
+                                          const String& labelToUse, Category categoryToUse)
+   : AudioProcessorParameterWithID (idToUse, nameToUse, labelToUse, categoryToUse),
      range (r), value (def), defaultValue (def)
 {
 }

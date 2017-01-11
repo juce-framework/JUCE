@@ -648,6 +648,14 @@ bool AudioProcessor::isMetaParameter (int index) const
     return false;
 }
 
+AudioProcessorParameter::Category AudioProcessor::getParameterCategory (int index) const
+{
+    if (AudioProcessorParameter* p = managedParameters[index])
+        return p->getCategory();
+
+    return AudioProcessorParameter::generic;
+}
+
 AudioProcessorParameter* AudioProcessor::getParamChecked (int index) const noexcept
 {
     AudioProcessorParameter* p = managedParameters[index];
@@ -1301,9 +1309,10 @@ void AudioProcessorParameter::endChangeGesture()
     processor->endParameterChangeGesture (parameterIndex);
 }
 
-bool AudioProcessorParameter::isOrientationInverted() const { return false; }
-bool AudioProcessorParameter::isAutomatable() const         { return true; }
-bool AudioProcessorParameter::isMetaParameter() const       { return false; }
+bool AudioProcessorParameter::isOrientationInverted() const                    { return false; }
+bool AudioProcessorParameter::isAutomatable() const                            { return true; }
+bool AudioProcessorParameter::isMetaParameter() const                          { return false; }
+AudioProcessorParameter::Category AudioProcessorParameter::getCategory() const { return generic; }
 int AudioProcessorParameter::getNumSteps() const            { return AudioProcessor::getDefaultNumParameterSteps(); }
 
 String AudioProcessorParameter::getText (float value, int /*maximumStringLength*/) const

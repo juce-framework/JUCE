@@ -221,7 +221,12 @@ public:
             info.defaultNormalizedValue = p.getParameterDefaultValue (index);
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
             info.unitId = Vst::kRootUnitId;
-            info.flags = p.isParameterAutomatable (index) ? Vst::ParameterInfo::kCanAutomate : 0;
+
+            // is this a meter?
+            if (((p.getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+                info.flags = Vst::ParameterInfo::kIsReadOnly;
+            else
+                info.flags = p.isParameterAutomatable (index) ? Vst::ParameterInfo::kCanAutomate : 0;
         }
 
         virtual ~Param() {}

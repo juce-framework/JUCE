@@ -1750,7 +1750,11 @@ private:
 
     pointer_sized_int handleIsParameterAutomatable (VstOpCodeArguments args)
     {
-        return (filter != nullptr && filter->isParameterAutomatable (args.index)) ? 1 : 0;
+        if (filter == nullptr)
+            return 0;
+
+        const bool isMeter = (((filter->getParameterCategory (args.index) & 0xffff0000) >> 16) == 2);
+        return (filter->isParameterAutomatable (args.index) && (! isMeter) ? 1 : 0);
     }
 
     pointer_sized_int handleParameterValueForText (VstOpCodeArguments args)

@@ -913,6 +913,7 @@ private:
             const String identifier (idx);
             const String name = processor.getParameterName (idx);
 
+            AudioUnitParameterUnit unit = kAudioUnitParameterUnit_Generic;
             AudioUnitParameterOptions flags = (UInt32) (kAudioUnitParameterFlag_IsWritable
                                                       | kAudioUnitParameterFlag_IsReadable
                                                       | kAudioUnitParameterFlag_HasCFNameString
@@ -928,6 +929,14 @@ private:
 
             if (processor.isMetaParameter (idx))
                 flags |= kAudioUnitParameterFlag_IsGlobalMeta;
+
+            // is this a meter?
+            if (((processor.getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            {
+                flags &= ~kAudioUnitParameterFlag_IsWritable;
+                flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;
+                unit = kAudioUnitParameterUnit_LinearGain;
+            }
 
            #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
             AUParameterAddress address = static_cast<AUParameterAddress> (idx);

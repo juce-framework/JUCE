@@ -1099,6 +1099,14 @@ public:
     */
     virtual bool isMetaParameter (int parameterIndex) const;
 
+    /** Should return the parameter's category.
+        By default, this returns the "generic" category.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::isMetaParameter() instead.
+     */
+    virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const;
+
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.
 

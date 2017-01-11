@@ -299,29 +299,33 @@ namespace AAXClasses
         PluginInstanceInfo* pluginInstance;
         int32_t* isPrepared;
         int32_t* sideChainBuffers;
+
+        float* const* meterTapBuffers;
     };
 
     struct JUCEAlgorithmIDs
     {
         enum
         {
-            inputChannels   = AAX_FIELD_INDEX (JUCEAlgorithmContext, inputChannels),
-            outputChannels  = AAX_FIELD_INDEX (JUCEAlgorithmContext, outputChannels),
-            bufferSize      = AAX_FIELD_INDEX (JUCEAlgorithmContext, bufferSize),
-            bypass          = AAX_FIELD_INDEX (JUCEAlgorithmContext, bypass),
+            inputChannels     = AAX_FIELD_INDEX (JUCEAlgorithmContext, inputChannels),
+            outputChannels    = AAX_FIELD_INDEX (JUCEAlgorithmContext, outputChannels),
+            bufferSize        = AAX_FIELD_INDEX (JUCEAlgorithmContext, bufferSize),
+            bypass            = AAX_FIELD_INDEX (JUCEAlgorithmContext, bypass),
 
            #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-            midiNodeIn      = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeIn),
+            midiNodeIn        = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeIn),
            #endif
 
            #if JucePlugin_ProducesMidiOutput || JucePlugin_IsSynth || JucePlugin_IsMidiEffect
-            midiNodeOut     = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeOut),
+            midiNodeOut       = AAX_FIELD_INDEX (JUCEAlgorithmContext, midiNodeOut),
            #endif
 
-            pluginInstance  = AAX_FIELD_INDEX (JUCEAlgorithmContext, pluginInstance),
-            preparedFlag    = AAX_FIELD_INDEX (JUCEAlgorithmContext, isPrepared),
+            pluginInstance    = AAX_FIELD_INDEX (JUCEAlgorithmContext, pluginInstance),
+            preparedFlag      = AAX_FIELD_INDEX (JUCEAlgorithmContext, isPrepared),
 
-            sideChainBuffers  = AAX_FIELD_INDEX (JUCEAlgorithmContext, sideChainBuffers)
+            sideChainBuffers  = AAX_FIELD_INDEX (JUCEAlgorithmContext, sideChainBuffers),
+
+            meterTapBuffers   = AAX_FIELD_INDEX (JUCEAlgorithmContext, meterTapBuffers)
         };
     };
 
@@ -655,7 +659,8 @@ namespace AAXClasses
             const int numParameters = pluginInstance->getNumParameters();
 
             for (int i = 0; i < numParameters; ++i)
-                SetParameterNormalizedValue (getAAXParamIDFromJuceIndex (i), (double) pluginInstance->getParameter(i));
+                if (AAX_CParamID paramID = getAAXParamIDFromJuceIndex(i))
+                    SetParameterNormalizedValue (paramID, (double) pluginInstance->getParameter(i));
 
             return AAX_SUCCESS;
         }
@@ -893,7 +898,8 @@ namespace AAXClasses
 
         void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue) override
         {
-            SetParameterNormalizedValue (getAAXParamIDFromJuceIndex (parameterIndex), (double) newValue);
+            if (AAX_CParamID paramID = getAAXParamIDFromJuceIndex (parameterIndex))
+                SetParameterNormalizedValue (paramID, (double) newValue);
         }
 
         void audioProcessorChanged (AudioProcessor* processor) override
@@ -904,12 +910,14 @@ namespace AAXClasses
 
         void audioProcessorParameterChangeGestureBegin (AudioProcessor* /*processor*/, int parameterIndex) override
         {
-            TouchParameter (getAAXParamIDFromJuceIndex (parameterIndex));
+            if (AAX_CParamID paramID = getAAXParamIDFromJuceIndex (parameterIndex))
+                TouchParameter (paramID);
         }
 
         void audioProcessorParameterChangeGestureEnd (AudioProcessor* /*processor*/, int parameterIndex) override
         {
-            ReleaseParameter (getAAXParamIDFromJuceIndex (parameterIndex));
+            if (AAX_CParamID paramID = getAAXParamIDFromJuceIndex (parameterIndex))
+                ReleaseParameter (paramID);
         }
 
         AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size) override
@@ -932,15 +940,20 @@ namespace AAXClasses
 
         void process (const float* const* inputs, float* const* outputs, const int sideChainBufferIdx,
                       const int bufferSize, const bool bypass,
-                      AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
+                      AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut,
+                      float* const meterBuffers)
         {
-            const int numIns  = pluginInstance->getTotalNumInputChannels();
-            const int numOuts = pluginInstance->getTotalNumOutputChannels();
+            const int numIns    = pluginInstance->getTotalNumInputChannels();
+            const int numOuts   = pluginInstance->getTotalNumOutputChannels();
+            const int numMeters = aaxMeters.size();
 
             if (pluginInstance->isSuspended())
             {
                 for (int i = 0; i < numOuts; ++i)
                     FloatVectorOperations::clear (outputs[i], bufferSize);
+
+                if (meterBuffers != nullptr)
+                    FloatVectorOperations::clear (meterBuffers, numMeters);
             }
             else
             {
@@ -980,6 +993,12 @@ namespace AAXClasses
                         channels[i] = const_cast<float*> (getAudioBufferForInput (inputs, sidechain, mainNumIns, i));
 
                     process (channels, numIns, bufferSize, bypass, midiNodeIn, midiNodesOut);
+                }
+
+                if (meterBuffers != nullptr)
+                {
+                    for (int i = 0; i < numMeters; ++i)
+                        meterBuffers[i] = pluginInstance->getParameter (aaxMeters[i]);
                 }
             }
         }
@@ -1253,6 +1272,8 @@ namespace AAXClasses
 
             for (int parameterIndex = 0; parameterIndex < numParameters; ++parameterIndex)
             {
+                const AudioProcessorParameter::Category category = audioProcessor.getParameterCategory (parameterIndex);
+
                 aaxParamIDs.add (usingManagedParameters ? audioProcessor.getParameterID (parameterIndex)
                                                         : String (parameterIndex));
 
@@ -1260,6 +1281,13 @@ namespace AAXClasses
                 AAX_CParamID paramID = aaxParamIDs.getReference (parameterIndex).getCharPointer();
 
                 paramMap.set (AAXClasses::getAAXParamHash (paramID), parameterIndex);
+
+                // is this a meter?
+                if (((category & 0xffff0000) >> 16) == 2)
+                {
+                    aaxMeters.add (parameterIndex);
+                    continue;
+                }
 
                 AAX_IParameter* parameter
                     = new AAX_CParameter<float> (paramID,
@@ -1441,9 +1469,12 @@ namespace AAXClasses
                 if (sideChainBufferIdx <= 0)
                     sideChainBufferIdx = -1;
 
+                float* const meterTapBuffers = (i.meterTapBuffers != nullptr ? *i.meterTapBuffers : nullptr);
+
                 i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels, sideChainBufferIdx,
                                                       *(i.bufferSize), *(i.bypass) != 0,
-                                                      getMidiNodeIn(i), getMidiNodeOut(i));
+                                                      getMidiNodeIn(i), getMidiNodeOut(i),
+                                                      meterTapBuffers);
             }
         }
 
@@ -1511,6 +1542,8 @@ namespace AAXClasses
         Array<String> aaxParamIDs;
         HashMap<int32, int> paramMap;
 
+        Array<int> aaxMeters;
+
         struct ChunkMemoryBlock  : public ReferenceCountedObject
         {
             juce::MemoryBlock data;
@@ -1547,7 +1580,7 @@ namespace AAXClasses
         if (const JuceAAX_Processor* params = dynamic_cast<const JuceAAX_Processor*> (GetEffectParameters()))
             return params->getParamIndexFromID (paramID);
 
-            return -1;
+        return -1;
     }
 
     AAX_CParamID JuceAAX_GUI::getAAXParamIDFromJuceIndex (int index) const noexcept
@@ -1555,7 +1588,7 @@ namespace AAXClasses
         if (const JuceAAX_Processor* params = dynamic_cast<const JuceAAX_Processor*> (GetEffectParameters()))
             return params->getAAXParamIDFromJuceIndex (index);
 
-            return nullptr;
+        return nullptr;
     }
 
     //==============================================================================
@@ -1578,7 +1611,57 @@ namespace AAXClasses
     };
 
     //==============================================================================
-    static void createDescriptor (AAX_IComponentDescriptor& desc, int configIndex, const AudioProcessor::BusesLayout& fullLayout, AudioProcessor& processor)
+    static int addAAXMeters (AudioProcessor& p, AAX_IEffectDescriptor& descriptor)
+    {
+        const int n = p.getNumParameters();
+
+        int meterIdx = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            const AudioProcessorParameter::Category category = p.getParameterCategory (i);
+
+            // is this a meter?
+            if (((category & 0xffff0000) >> 16) == 2)
+            {
+                if (AAX_IPropertyMap* meterProperties = descriptor.NewPropertyMap())
+                {
+                    AAX_EMeterType aaxMeterType;
+
+                    switch (category)
+                    {
+                        case AudioProcessorParameter::inputMeter:
+                            aaxMeterType = AAX_eMeterType_Input;
+                            break;
+                        case AudioProcessorParameter::outputMeter:
+                            aaxMeterType = AAX_eMeterType_Output;
+                            break;
+                        case AudioProcessorParameter::compressorLimiterGainReductionMeter:
+                            aaxMeterType = AAX_eMeterType_CLGain;
+                            break;
+                        case AudioProcessorParameter::expanderGateGainReductionMeter:
+                            aaxMeterType = AAX_eMeterType_EGGain;
+                            break;
+                        case AudioProcessorParameter::analysisMeter:
+                            aaxMeterType = AAX_eMeterType_Analysis;
+                            break;
+                        default:
+                            aaxMeterType = AAX_eMeterType_Other;
+                    }
+
+                    meterProperties->AddProperty (AAX_eProperty_Meter_Type,        aaxMeterType);
+                    meterProperties->AddProperty (AAX_eProperty_Meter_Orientation, AAX_eMeterOrientation_TopRight);
+                    descriptor.AddMeterDescription ('Metr' + static_cast<AAX_CTypeID> (meterIdx++),
+                                                    p.getParameterName (i).toRawUTF8(), meterProperties);
+                }
+            }
+        }
+
+        return meterIdx;
+    }
+
+    static void createDescriptor (AAX_IComponentDescriptor& desc, int configIndex,
+                                  const AudioProcessor::BusesLayout& fullLayout, AudioProcessor& processor,
+                                  const int numMeters)
     {
         AAX_EStemFormat aaxInputFormat  = getFormatForAudioChannelSet (fullLayout.getMainInputChannelSet(),  false);
         AAX_EStemFormat aaxOutputFormat = getFormatForAudioChannelSet (fullLayout.getMainOutputChannelSet(), false);
@@ -1610,6 +1693,13 @@ namespace AAXClasses
 
         check (desc.AddPrivateData (JUCEAlgorithmIDs::pluginInstance, sizeof (PluginInstanceInfo)));
         check (desc.AddPrivateData (JUCEAlgorithmIDs::preparedFlag, sizeof (int32_t)));
+
+        HeapBlock<AAX_CTypeID> meterIDs (static_cast<size_t> (numMeters));
+
+        for (int i = 0; i < numMeters; ++i)
+            meterIDs[i] = 'Metr' + static_cast<AAX_CTypeID> (i);
+
+        check (desc.AddMeters (JUCEAlgorithmIDs::meterTapBuffers, meterIDs.getData(), static_cast<uint32_t> (numMeters)));
 
         // Create a property map
         AAX_IPropertyMap* const properties = desc.NewPropertyMap();
@@ -1657,7 +1747,6 @@ namespace AAXClasses
 
         const int maxAuxBuses = jmax (0, jmin (15, fullLayout.outputBuses.size() - 1));
 
-
         // add the output buses
         // This is incrdibly dumb: the output bus format must be well defined
         // for every main bus in/out format pair. This means that there cannot
@@ -1690,6 +1779,8 @@ namespace AAXClasses
         descriptor.AddName (JucePlugin_Name);
         descriptor.AddCategory (JucePlugin_AAXCategory);
 
+        const int numMeters = addAAXMeters (*plugin, descriptor);
+
        #ifdef JucePlugin_AAXPageTableFile
         // optional page table setting - define this macro in your project if you want
         // to set this value - see Avid documentation for details about its format.
@@ -1705,7 +1796,7 @@ namespace AAXClasses
 
         if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
         {
-            createDescriptor (*desc, 0, plugin->getBusesLayout(), *plugin);
+            createDescriptor (*desc, 0, plugin->getBusesLayout(), *plugin, numMeters);
             check (descriptor.AddComponent (desc));
         }
 
@@ -1731,7 +1822,7 @@ namespace AAXClasses
 
                 if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
                 {
-                    createDescriptor (*desc, configIndex++, fullLayout, *plugin);
+                    createDescriptor (*desc, configIndex++, fullLayout, *plugin, numMeters);
                     check (descriptor.AddComponent (desc));
                 }
             }
