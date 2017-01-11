@@ -52,6 +52,7 @@ public:
     bool loadFromXml (const XmlElement& xml);
 
     void fillInGeneratedCode (GeneratedCode& code) const;
+    void applyCustomPaintSnippets (StringArray&);
 
 private:
     ScopedPointer<ComponentLayout> components;

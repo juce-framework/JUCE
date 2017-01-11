@@ -580,3 +580,9 @@ void PaintRoutine::fillInGeneratedCode (GeneratedCode& code, String& paintMethod
     for (int i = 0; i < elements.size(); ++i)
         elements[i]->fillInGeneratedCode (code, paintMethodCode);
 }
+
+void PaintRoutine::applyCustomPaintSnippets (StringArray& snippets)
+{
+    for (int i = 0; i < elements.size(); ++i)
+        elements[i]->applyCustomPaintSnippets (snippets);
+}

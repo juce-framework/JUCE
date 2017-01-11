@@ -34,6 +34,17 @@
 //==============================================================================
 /**
 */
+class JucerDocumentTabs : public TabbedComponent
+{
+public:
+    JucerDocumentTabs(JucerDocument* const);
+    
+    void currentTabChanged (const int, const String&);
+    
+private:
+    JucerDocument* const document;
+};
+
 class JucerDocumentEditor   : public Component,
                               public ApplicationCommandTarget,
                               public ChangeListener
@@ -72,7 +83,7 @@ public:
 
 private:
     ScopedPointer<JucerDocument> document;
-    TabbedComponent tabbedComponent;
+    JucerDocumentTabs tabbedComponent;
     ComponentLayoutPanel* compLayoutPanel;
 
     bool isSomethingSelected() const;

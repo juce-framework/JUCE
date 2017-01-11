@@ -430,24 +430,41 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     else
         code.constructorCode << r;
 
+    String s;
+    s << "{\n"
+      << "    AffineTransform transform;\n"
+      << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+      << customPaintCode
+      << "    //[/UserPaintCustomArguments]\n";
+    
     if (! fillType.isInvisible())
     {
-        fillType.fillInGeneratedCode (code, paintMethodCode);
-
-        paintMethodCode << "g.fillPath (" << pathVariable << ");\n";
+        s << "    ";
+        fillType.fillInGeneratedCode (code, s);
+        s << "    g.fillPath (" << pathVariable << ", transform);\n";
     }
 
     if (isStrokePresent && ! strokeType.isInvisible())
     {
-        String s;
-
+        s << "    ";
         strokeType.fill.fillInGeneratedCode (code, s);
-        s << "g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ");\n";
-
-        paintMethodCode += s;
+        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", transform);\n";
     }
+    
+    s << "}\n\n";
 
-    paintMethodCode += "\n";
+    paintMethodCode += s;
+}
+
+void PaintElementPath::applyCustomPaintSnippets (StringArray& snippets)
+{
+    customPaintCode.clear();
+    
+    if (! snippets.isEmpty())
+    {
+        customPaintCode = snippets[0];
+        snippets.remove(0);
+    }
 }
 
 //==============================================================================

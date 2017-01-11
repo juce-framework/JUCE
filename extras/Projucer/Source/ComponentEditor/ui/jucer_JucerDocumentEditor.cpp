@@ -309,9 +309,19 @@ static SourceCodeEditor* createCodeEditor (const File& file, SourceCodeDocument&
 }
 
 //==============================================================================
+JucerDocumentTabs::JucerDocumentTabs(JucerDocument* const doc) : TabbedComponent(TabbedButtonBar::TabsAtTop), document(doc)
+{
+}
+
+void JucerDocumentTabs::currentTabChanged (const int, const String&)
+{
+    document->refreshCustomCodeFromDocument();
+}
+
+//==============================================================================
 JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
     : document (doc),
-      tabbedComponent (TabbedButtonBar::TabsAtTop),
+      tabbedComponent (doc),
       compLayoutPanel (0),
       lastViewportX (0),
       lastViewportY (0),

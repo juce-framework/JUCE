@@ -115,37 +115,42 @@ public:
     //==============================================================================
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
     {
+        String x, y, w, h, s;
+        positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
+        s << "{\n"
+          << "    float x = " << castToFloat (x) << ", y = " << castToFloat (y) << ", "
+          <<           "width = " << castToFloat (w) << ", height = " << castToFloat (h) << ";\n"
+          << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+          << customPaintCode
+          << "    //[/UserPaintCustomArguments]\n";
+  
         if (! fillType.isInvisible())
         {
-            String x, y, w, h, s;
-            positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
-
-            fillType.fillInGeneratedCode (code, paintMethodCode);
-            s << "g.fillRoundedRectangle ("
-              << castToFloat (x) << ", "
-              << castToFloat (y) << ", "
-              << castToFloat (w) << ", "
-              << castToFloat (h) << ", "
-              << CodeHelpers::floatLiteral (cornerSize, 3) << ");\n\n";
-
-            paintMethodCode += s;
+            s << "    ";
+            fillType.fillInGeneratedCode (code, s);
+            s << "    g.fillRoundedRectangle (x, y, width, height, " << CodeHelpers::floatLiteral (cornerSize, 3)  << ");\n";
         }
 
         if (isStrokePresent && ! strokeType.isInvisible())
         {
-            String x, y, w, h, s;
-            positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
+            s << "    ";
+            strokeType.fill.fillInGeneratedCode (code, s);
+            s << "    g.drawRoundedRectangle (x, y, width, height, " << CodeHelpers::floatLiteral (cornerSize, 3)  << ", " << CodeHelpers::floatLiteral (strokeType.stroke.getStrokeThickness(), 3) << ");\n";
+        }
+        
+        s << "}\n\n";
+        
+        paintMethodCode += s;
+    }
 
-            strokeType.fill.fillInGeneratedCode (code, paintMethodCode);
-            s << "g.drawRoundedRectangle ("
-              << castToFloat (x) << ", "
-              << castToFloat (y) << ", "
-              << castToFloat (w) << ", "
-              << castToFloat (h) << ", "
-              << CodeHelpers::floatLiteral (cornerSize, 3) << ", "
-              << CodeHelpers::floatLiteral (strokeType.stroke.getStrokeThickness(), 3) << ");\n\n";
-
-            paintMethodCode += s;
+    void applyCustomPaintSnippets (StringArray& snippets)
+    {
+        customPaintCode.clear();
+        
+        if (! snippets.isEmpty())
+        {
+            customPaintCode = snippets[0];
+            snippets.remove(0);
         }
     }
 
@@ -190,7 +195,8 @@ public:
 
 private:
     double cornerSize;
-
+    String customPaintCode;
+    
     //==============================================================================
     class CornerSizeProperty  : public SliderPropertyComponent,
                                 public ChangeListener

@@ -93,6 +93,8 @@ public:
     void changeListenerCallback (ChangeBroadcaster*);
     void parentHierarchyChanged();
 
+    virtual void applyCustomPaintSnippets (StringArray&) {}
+
     int borderThickness;
 
 protected:

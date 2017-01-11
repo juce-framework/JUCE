@@ -94,8 +94,14 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
     {
-        String r;
-
+        String x, y, w, h, r;
+        positionToCode (position, getDocument()->getComponentLayout(), x, y, w, h);
+        r << "{\n"
+          << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
+          << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+          << customPaintCode
+          << "    //[/UserPaintCustomArguments]\n";
+        
         if (opacity > 0)
         {
             if (dynamic_cast<const DrawableImage*> (getDrawable()) != 0)
@@ -105,36 +111,32 @@ public:
                 code.addImageResourceLoader (imageVariable, resourceName);
 
                 if (opacity >= 254.0 / 255.0)
-                    r << "g.setColour (Colours::black);\n";
+                    r << "    g.setColour (Colours::black);\n";
                 else
-                    r << "g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
+                    r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
 
-                String x, y, w, h;
-                positionToCode (position, getDocument()->getComponentLayout(), x, y, w, h);
 
                 if (mode == stretched)
                 {
-                    r << "g.drawImage (" << imageVariable << ",\n             "
-                      << x << ", " << y << ", " << w << ", " << h
-                      << ",\n             0, 0, "
-                      << imageVariable << ".getWidth(), "
-                      << imageVariable << ".getHeight());\n\n";
+                    r << "    g.drawImage (" << imageVariable << ",\n"
+                      << "                 x, y, width, height,\n"
+                      << "                 0, 0, " << imageVariable << ".getWidth(), " << imageVariable << ".getHeight());\n";
                 }
                 else
                 {
-                    r << "g.drawImageWithin (" << imageVariable << ",\n                   "
-                      << x << ", " << y << ", " << w << ", " << h
-                      << ",\n                   ";
+                    r << "    g.drawImageWithin (" << imageVariable << ",\n"
+                      << "                       x, y, width, height,\n"
+                      << "                       ";
 
                     if (mode == proportionalReducingOnly)
                         r << "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize";
                     else
                         r << "RectanglePlacement::centred";
 
-                    r << ",\n                   false);\n\n";
+                    r << ",\n"
+                      << "                       false);\n";
                 }
 
-                paintMethodCode += r;
             }
             else
             {
@@ -153,28 +155,35 @@ public:
                         << imageVariable << " = nullptr;\n";
 
                     if (opacity >= 254.0 / 255.0)
-                        r << "g.setColour (Colours::black);\n";
+                        r << "    g.setColour (Colours::black);\n";
                     else
-                        r << "g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
+                        r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
 
-                    String x, y, w, h;
-                    positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
-
-                    r << "jassert (" << imageVariable << " != 0);\n"
-                      << "if (" << imageVariable << " != 0)\n    "
-                      << imageVariable  << "->drawWithin (g, Rectangle<float> ("
-                      << x << ", " << y << ", " << w << ", " << h
-                      << "),\n"
-                      << String::repeatedString (" ", imageVariable.length() + 18)
+                    r << "    jassert (" << imageVariable << " != 0);\n"
+                      << "    if (" << imageVariable << " != 0)\n"
+                      << "        " << imageVariable  << "->drawWithin (g, Rectangle<float> (x, y, width, height),\n"
+                      << "    " << String::repeatedString (" ", imageVariable.length() + 18)
                       << (mode == stretched ? "RectanglePlacement::stretchToFit"
                                             : (mode == proportionalReducingOnly ? "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize"
                                                                                 : "RectanglePlacement::centred"))
-                      << ", " << CodeHelpers::floatLiteral (opacity, 3)
-                      << ");\n\n";
-
-                    paintMethodCode += r;
+                      << ", " << CodeHelpers::floatLiteral (opacity, 3) << ");\n";
                 }
             }
+        }
+        
+        r << "}\n\n";
+        
+        paintMethodCode += r;
+    }
+
+    void applyCustomPaintSnippets (StringArray& snippets)
+    {
+        customPaintCode.clear();
+        
+        if (! snippets.isEmpty())
+        {
+            customPaintCode = snippets[0];
+            snippets.remove(0);
         }
     }
 
@@ -384,6 +393,7 @@ private:
     String resourceName;
     double opacity;
     StretchMode mode;
+    String customPaintCode;
 
     //==============================================================================
     class ImageElementResourceProperty    : public ImageResourceProperty <PaintElementImage>
