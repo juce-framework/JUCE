@@ -94,16 +94,16 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
     {
-        String x, y, w, h, r;
-        positionToCode (position, getDocument()->getComponentLayout(), x, y, w, h);
-        r << "{\n"
-          << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
-          << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
-          << customPaintCode
-          << "    //[/UserPaintCustomArguments]\n";
-        
         if (opacity > 0)
         {
+            String x, y, w, h, r;
+            positionToCode (position, getDocument()->getComponentLayout(), x, y, w, h);
+            r << "{\n"
+              << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
+              << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+              << customPaintCode
+              << "    //[/UserPaintCustomArguments]\n";
+            
             if (dynamic_cast<const DrawableImage*> (getDrawable()) != 0)
             {
                 const String imageVariable ("cachedImage_" + resourceName.replace ("::", "_") + "_" + String (code.getUniqueSuffix()));
@@ -169,18 +169,18 @@ public:
                       << ", " << CodeHelpers::floatLiteral (opacity, 3) << ");\n";
                 }
             }
+            
+            r << "}\n\n";
+            
+            paintMethodCode += r;
         }
-        
-        r << "}\n\n";
-        
-        paintMethodCode += r;
     }
 
     void applyCustomPaintSnippets (StringArray& snippets)
     {
         customPaintCode.clear();
         
-        if (! snippets.isEmpty())
+        if (! snippets.isEmpty() && opacity > 0)
         {
             customPaintCode = snippets[0];
             snippets.remove(0);

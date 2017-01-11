@@ -81,34 +81,32 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
     {
-        String x, y, w, h, r;
-        positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
-        r << "{\n"
-        << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
-        << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
-        << customPaintCode
-        << "    //[/UserPaintCustomArguments]\n";
-        
         if (! fillType.isInvisible())
         {
-            r << "    ";
-            fillType.fillInGeneratedCode (code, r);
+            String x, y, w, h, r;
+            positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
+            r << "{\n"
+              << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
+              << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+              << customPaintCode
+              << "    //[/UserPaintCustomArguments]\n"
+              << "    ";
+            fillType.fillInGeneratedCode (position, code, r);
             r << "    g.setFont (" << FontPropertyComponent::getCompleteFontCode (font, typefaceName) << ");\n"
               << "    g.drawText (" << quotedString (text, code.shouldUseTransMacro()) << ",\n"
               << "                x, y, width, height,\n"
-              << "                " << CodeHelpers::justificationToCode (justification) << ", true);\n";
+              << "                " << CodeHelpers::justificationToCode (justification) << ", true);\n"
+              << "}\n\n";
+            
+            paintMethodCode += r;
         }
-        
-        r << "}\n\n";
-        
-        paintMethodCode += r;
     }
 
     void applyCustomPaintSnippets (StringArray& snippets)
     {
         customPaintCode.clear();
         
-        if (! snippets.isEmpty())
+        if (! snippets.isEmpty() && ! fillType.isInvisible())
         {
             customPaintCode = snippets[0];
             snippets.remove(0);

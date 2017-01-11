@@ -61,6 +61,9 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
     {
+        if (fillType.isInvisible() && (strokeType.isInvisible() || ! isStrokePresent))
+            return;
+        
         String x, y, w, h, s;
         positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
         s << "{\n"
@@ -73,14 +76,14 @@ public:
         if (! fillType.isInvisible())
         {
             s << "    ";
-            fillType.fillInGeneratedCode (code, s);
+            fillType.fillInGeneratedCode (position, code, s);
             s << "    g.fillEllipse (x, y, width, height);\n";
         }
 
         if (isStrokePresent && ! strokeType.isInvisible())
         {
             s << "    ";
-            strokeType.fill.fillInGeneratedCode (code, s);
+            strokeType.fill.fillInGeneratedCode (position, code, s);
             s << "    g.drawEllipse (x, y, width, height, " << CodeHelpers::floatLiteral (strokeType.stroke.getStrokeThickness(), 3) << ");\n";
         }
         
@@ -93,7 +96,7 @@ public:
     {
         customPaintCode.clear();
         
-        if (! snippets.isEmpty())
+        if (! snippets.isEmpty() && (! fillType.isInvisible() || (isStrokePresent && ! strokeType.isInvisible())))
         {
             customPaintCode = snippets[0];
             snippets.remove(0);

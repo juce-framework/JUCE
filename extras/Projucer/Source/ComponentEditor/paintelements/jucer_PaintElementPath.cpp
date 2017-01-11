@@ -432,23 +432,24 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
 
     String s;
     s << "{\n"
-      << "    AffineTransform transform;\n"
+      << "    float x = 0, y = 0;\n"
       << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
       << customPaintCode
       << "    //[/UserPaintCustomArguments]\n";
     
+    RelativePositionedRectangle zero;
     if (! fillType.isInvisible())
     {
         s << "    ";
-        fillType.fillInGeneratedCode (code, s);
-        s << "    g.fillPath (" << pathVariable << ", transform);\n";
+        fillType.fillInGeneratedCode (zero, code, s);
+        s << "    g.fillPath (" << pathVariable << ", AffineTransform::translation(x, y));\n";
     }
 
     if (isStrokePresent && ! strokeType.isInvisible())
     {
         s << "    ";
-        strokeType.fill.fillInGeneratedCode (code, s);
-        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", transform);\n";
+        strokeType.fill.fillInGeneratedCode (zero, code, s);
+        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", AffineTransform::translation(x, y));\n";
     }
     
     s << "}\n\n";
@@ -460,7 +461,7 @@ void PaintElementPath::applyCustomPaintSnippets (StringArray& snippets)
 {
     customPaintCode.clear();
     
-    if (! snippets.isEmpty())
+    if (! snippets.isEmpty() && (! fillType.isInvisible() || (isStrokePresent && ! strokeType.isInvisible())))
     {
         customPaintCode = snippets[0];
         snippets.remove(0);
