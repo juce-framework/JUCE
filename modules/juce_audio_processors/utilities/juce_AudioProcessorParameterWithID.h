@@ -36,7 +36,7 @@ public:
     AudioProcessorParameterWithID (const String& parameterID,
                                    const String& name,
                                    const String& label = String(),
-                                   Category category = AudioProcessorParameter::generic);
+                                   Category category = AudioProcessorParameter::genericParameter);
 
     /** Destructor. */
     ~AudioProcessorParameterWithID();

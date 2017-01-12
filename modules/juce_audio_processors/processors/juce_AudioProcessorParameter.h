@@ -145,10 +145,10 @@ public:
 
     enum Category
     {
-        generic    = (0 << 16) | 0,        /** If your parameter is not a meter then you should use this category */
+        genericParameter = (0 << 16) | 0,        /** If your parameter is not a meter then you should use this category */
 
-        inputGain  = (1 << 16) | 0,        /** Currently not used */
-        outputGain = (1 << 16) | 1,
+        inputGain        = (1 << 16) | 0,        /** Currently not used */
+        outputGain       = (1 << 16) | 1,
 
         /** The following categories tell the host that this parameter is a meter level value
          and therefore read-only. Most hosts will display these type of parameters as

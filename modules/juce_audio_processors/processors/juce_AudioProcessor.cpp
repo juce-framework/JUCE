@@ -653,7 +653,7 @@ AudioProcessorParameter::Category AudioProcessor::getParameterCategory (int inde
     if (AudioProcessorParameter* p = managedParameters[index])
         return p->getCategory();
 
-    return AudioProcessorParameter::generic;
+    return AudioProcessorParameter::genericParameter;
 }
 
 AudioProcessorParameter* AudioProcessor::getParamChecked (int index) const noexcept
@@ -1312,7 +1312,7 @@ void AudioProcessorParameter::endChangeGesture()
 bool AudioProcessorParameter::isOrientationInverted() const                    { return false; }
 bool AudioProcessorParameter::isAutomatable() const                            { return true; }
 bool AudioProcessorParameter::isMetaParameter() const                          { return false; }
-AudioProcessorParameter::Category AudioProcessorParameter::getCategory() const { return generic; }
+AudioProcessorParameter::Category AudioProcessorParameter::getCategory() const { return genericParameter; }
 int AudioProcessorParameter::getNumSteps() const            { return AudioProcessor::getDefaultNumParameterSteps(); }
 
 String AudioProcessorParameter::getText (float value, int /*maximumStringLength*/) const
