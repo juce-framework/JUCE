@@ -2250,11 +2250,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)
 };
 
-#if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
- Steinberg::FUID getJuceVST3ComponentIID();
- Steinberg::FUID getJuceVST3ComponentIID()   { return JuceVST3Component::iid; }
-#endif
-
 const char* JuceVST3Component::kJucePrivateDataIdentifier = "JUCEPrivateData";
 
 //==============================================================================
@@ -2270,42 +2265,15 @@ DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_Manufa
 DEF_CLASS_IID (JuceAudioProcessor)
 
 #if JUCE_VST3_CAN_REPLACE_VST2
- // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.
- static FUID getFUIDForVST2ID (bool forControllerUID)
+ FUID getFUIDForVST2ID (bool forControllerUID)
  {
-     char uidString[33];
-
-     const int vstfxid = (('V' << 16) | ('S' << 8) | (forControllerUID ? 'E' : 'T'));
-     char vstfxidStr[7] = { 0 };
-     sprintf (vstfxidStr, "%06X", vstfxid);
-     strcpy (uidString, vstfxidStr);
-
-     char uidStr[9] = { 0 };
-     sprintf (uidStr, "%08X", JucePlugin_VSTUniqueID);
-     strcat (uidString, uidStr);
-
-     char nameidStr[3] = { 0 };
-     const size_t len = strlen (JucePlugin_Name);
-
-     for (size_t i = 0; i <= 8; ++i)
-     {
-         juce::uint8 c = i < len ? static_cast<juce::uint8> (JucePlugin_Name[i]) : 0;
-
-         if (c >= 'A' && c <= 'Z')
-             c += 'a' - 'A';
-
-         sprintf (nameidStr, "%02X", c);
-         strcat (uidString, nameidStr);
-     }
-
-     FUID newOne;
-     newOne.fromString (uidString);
-     return newOne;
+     TUID uuid;
+     extern JUCE_API void getUUIDForVST2ID (bool, uint8[16]);
+     getUUIDForVST2ID (forControllerUID, (uint8*) uuid);
+     return FUID (uuid);
  }
-
  const Steinberg::FUID JuceVST3Component     ::iid (getFUIDForVST2ID (false));
  const Steinberg::FUID JuceVST3EditController::iid (getFUIDForVST2ID (true));
-
 #else
  DECLARE_CLASS_IID (JuceVST3EditController, 0xABCDEF01, 0x1234ABCD, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
  DEF_CLASS_IID (JuceVST3EditController)
