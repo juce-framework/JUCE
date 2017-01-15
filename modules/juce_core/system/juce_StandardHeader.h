@@ -78,7 +78,6 @@
 
 #if JUCE_LINUX
  #include <cstring>
- #include <limits>
  #include <signal.h>
 
  #if __INTEL_COMPILER
