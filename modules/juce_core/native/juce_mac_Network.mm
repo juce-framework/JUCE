@@ -622,6 +622,7 @@ public:
           connection (nil),
           data ([[NSMutableData data] retain]),
           headers (nil),
+          nsUrlErrorCode (0),
           statusCode (0),
           initialised (false),
           hasFailed (false),
@@ -745,6 +746,7 @@ public:
     void didFailWithError (NSError* error)
     {
         DBG (nsStringToJuce ([error description])); ignoreUnused (error);
+        nsUrlErrorCode = [error code];
         hasFailed = true;
         initialised = true;
         signalThreadShouldExit();
@@ -789,6 +791,7 @@ public:
     NSURLConnection* connection;
     NSMutableData* data;
     NSDictionary* headers;
+    NSInteger nsUrlErrorCode;
     int statusCode;
     bool initialised, hasFailed, hasFinished;
     const int numRedirectsToFollow;
@@ -878,15 +881,25 @@ public:
         connection = nullptr;
     }
 
-    bool connect (WebInputStream::Listener* webInputListener)
+    bool connect (WebInputStream::Listener* webInputListener, int numRetries = 0)
     {
-        createConnection ();
+        ignoreUnused (numRetries);
+        createConnection();
+
         if (! connection->start (owner, webInputListener))
         {
+            // Workaround for deployment targets below 10.10 where HTTPS POST requests with keep-alive fail with the NSURLErrorNetworkConnectionLost error code.
+           #if ! (JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10))
+            if (numRetries == 0 && connection->nsUrlErrorCode == NSURLErrorNetworkConnectionLost)
+            {
+                connection = nullptr;
+                return connect (webInputListener, ++numRetries);
+            }
+           #endif
+
             connection = nullptr;
             return false;
         }
-
 
         if (connection != nullptr && connection->headers != nil)
         {
@@ -1005,6 +1018,15 @@ private:
         {
             [req setHTTPMethod: [NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()]];
 
+            if (isPost)
+            {
+                WebInputStream::createHeadersAndPostData (url, headers, postData);
+
+                if (postData.getSize() > 0)
+                    [req setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                     length: postData.getSize()]];
+            }
+
             StringArray headerLines;
             headerLines.addLines (headers);
             headerLines.removeEmptyStrings (true);
@@ -1016,15 +1038,6 @@ private:
 
                 if (key.isNotEmpty() && value.isNotEmpty())
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
-            }
-
-            if (isPost)
-            {
-                WebInputStream::createHeadersAndPostData (url, headers, postData);
-
-                if (postData.getSize() > 0)
-                    [req setHTTPBody: [NSData dataWithBytes: postData.getData()
-                                                     length: postData.getSize()]];
             }
 
             connection = new URLConnectionState (req, numRedirectsToFollow);

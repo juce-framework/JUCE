@@ -354,9 +354,9 @@ URL URL::getChildURL (const String& subPath) const
     return u;
 }
 
-void URL::createHeadersAndPostData (String& headers, MemoryBlock& headersAndPostData) const
+void URL::createHeadersAndPostData (String& headers, MemoryBlock& postDataToWrite) const
 {
-    MemoryOutputStream data (headersAndPostData, false);
+    MemoryOutputStream data (postDataToWrite, false);
 
     if (filesToUpload.size() > 0)
     {

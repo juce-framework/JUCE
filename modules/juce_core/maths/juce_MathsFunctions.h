@@ -452,7 +452,7 @@ inline int roundToInt (int value) noexcept
     This is a slightly slower and slightly more accurate version of roundDoubleToInt(). It works
     fine for values above zero, but negative numbers are rounded the wrong way.
 */
-inline int roundToIntAccurate (const double value) noexcept
+inline int roundToIntAccurate (double value) noexcept
 {
    #ifdef __INTEL_COMPILER
     #pragma float_control (pop)
@@ -472,7 +472,7 @@ inline int roundToIntAccurate (const double value) noexcept
     even numbers will be rounded up or down differently. For a more accurate conversion,
     see roundDoubleToIntAccurate().
 */
-inline int roundDoubleToInt (const double value) noexcept
+inline int roundDoubleToInt (double value) noexcept
 {
     return roundToInt (value);
 }
@@ -487,7 +487,7 @@ inline int roundDoubleToInt (const double value) noexcept
     rounding values whose floating point component is exactly 0.5, odd numbers and
     even numbers will be rounded up or down differently.
 */
-inline int roundFloatToInt (const float value) noexcept
+inline int roundFloatToInt (float value) noexcept
 {
     return roundToInt (value);
 }
@@ -511,6 +511,12 @@ inline int nextPowerOfTwo (int n) noexcept
     n |= (n >> 16);
     return n + 1;
 }
+
+/** Returns the index of the highest set bit in a (non-zero) number.
+    So for n=3 this would return 1, for n=7 it returns 2, etc.
+    An input value of 0 is illegal!
+*/
+int findHighestSetBit (uint32 n) noexcept;
 
 /** Returns the number of bits in a 32-bit integer. */
 inline int countNumberOfBits (uint32 n) noexcept

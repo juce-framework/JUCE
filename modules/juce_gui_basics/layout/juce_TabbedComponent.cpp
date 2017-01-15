@@ -174,6 +174,12 @@ void TabbedComponent::removeTab (const int tabIndex)
     }
 }
 
+void TabbedComponent::moveTab (const int currentIndex, const int newIndex, const bool animate)
+{
+    contentComponents.move (currentIndex, newIndex);
+    tabs->moveTab (currentIndex, newIndex, animate);
+}
+
 int TabbedComponent::getNumTabs() const
 {
     return tabs->getNumTabs();

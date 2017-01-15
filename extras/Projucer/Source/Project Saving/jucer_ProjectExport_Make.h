@@ -117,11 +117,12 @@ public:
         if (type.isStaticLibrary())
             makefileTargetSuffix = ".a";
 
-        else if (type.isDynamicLibrary())
-            makefileTargetSuffix = ".so";
-
-        else if (type.isAudioPlugin())
+        else if (type.isAudioPlugin() || type.isDynamicLibrary())
+        {
             makefileIsDLL = true;
+            if (type.isDynamicLibrary())
+                makefileTargetSuffix = ".so";
+        }
     }
 
 protected:

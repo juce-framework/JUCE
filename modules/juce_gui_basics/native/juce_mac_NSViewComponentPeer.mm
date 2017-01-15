@@ -877,12 +877,6 @@ public:
 
     void repaint (const Rectangle<int>& area) override
     {
-       #if JucePlugin_Build_AAX || JucePlugin_Build_RTAS || JucePlugin_Build_AUv3 || JucePlugin_Build_AU || JucePlugin_Build_VST3 || JucePlugin_Build_VST
-        const bool shouldThrottle = true;
-       #else
-        const bool shouldThrottle = areAnyWindowsInLiveResize();
-       #endif
-
         // In 10.11 changes were made to the way the OS handles repaint regions, and it seems that it can
         // no longer be trusted to coalesce all the regions, or to even remember them all without losing
         // a few when there's a lot of activity.
@@ -891,27 +885,30 @@ public:
         deferredRepaints.add ((float) area.getX(), (float) ([view frame].size.height - area.getBottom()),
                               (float) area.getWidth(), (float) area.getHeight());
 
-        // already a timer running -> stop
-        if (isTimerRunning()) return;
+        if (isTimerRunning())
+            return;
 
         const uint32 now = Time::getMillisecondCounter();
-        uint32 msSinceLastRepaint =
-            (lastRepaintTime >= now ? now - lastRepaintTime
-                                    : (std::numeric_limits<uint32>::max() - lastRepaintTime) + now);
+        uint32 msSinceLastRepaint = (lastRepaintTime >= now) ? now - lastRepaintTime
+                                                             : (std::numeric_limits<uint32>::max() - lastRepaintTime) + now;
 
         static uint32 minimumRepaintInterval = 1000 / 30; // 30fps
 
         // When windows are being resized, artificially throttling high-frequency repaints helps
         // to stop the event queue getting clogged, and keeps everything working smoothly.
         // For some reason Logic also needs this throttling to recored parameter events correctly.
-        if (shouldThrottle
-            && msSinceLastRepaint < minimumRepaintInterval)
+        if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
         {
             startTimer (static_cast<int> (minimumRepaintInterval - msSinceLastRepaint));
             return;
         }
 
         setNeedsDisplayRectangles();
+    }
+
+    static bool shouldThrottleRepaint()
+    {
+        return areAnyWindowsInLiveResize() || ! JUCEApplication::isStandaloneApp();
     }
 
     void timerCallback() override

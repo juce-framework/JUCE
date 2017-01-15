@@ -369,8 +369,10 @@ bool Time::setSystemTimeToThisTime() const
 
     // do this twice because of daylight saving conversion problems - the
     // first one sets it up, the second one kicks it in.
-    return SetLocalTime (&st) != 0
-            && SetLocalTime (&st) != 0;
+    // NB: the local variable is here to avoid analysers warning about having
+    // two identical sub-expressions in the return statement
+    bool firstCallToSetTimezone = SetLocalTime (&st) != 0;
+    return firstCallToSetTimezone && SetLocalTime (&st) != 0;
 }
 
 int SystemStats::getPageSize()

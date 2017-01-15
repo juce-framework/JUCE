@@ -799,6 +799,7 @@ public:
              && index < juceFilter->getNumParameters()
              && index >= 0)
         {
+            outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
             outParameterInfo.flags = (UInt32) (kAudioUnitParameterFlag_IsWritable
                                                 | kAudioUnitParameterFlag_IsReadable
                                                 | kAudioUnitParameterFlag_HasCFNameString
@@ -816,6 +817,14 @@ public:
             if (juceFilter->isMetaParameter (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
+            // is this a meter?
+            if (((juceFilter->getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            {
+                outParameterInfo.flags &= ~kAudioUnitParameterFlag_IsWritable;
+                outParameterInfo.flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;
+                outParameterInfo.unit = kAudioUnitParameterUnit_LinearGain;
+            }
+
             MusicDeviceBase::FillInParameterName (outParameterInfo, name.toCFString(), true);
 
             outParameterInfo.minValue = 0.0f;
@@ -823,7 +832,6 @@ public:
             outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index);
             jassert (outParameterInfo.defaultValue >= outParameterInfo.minValue
                       && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
-            outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
 
             return noErr;
         }

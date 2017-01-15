@@ -40,9 +40,11 @@
 #if JUCE_WINDOWS
  typedef int       juce_socklen_t;
  typedef SOCKET    SocketHandle;
+ static const SocketHandle invalidSocket = INVALID_SOCKET;
 #else
  typedef socklen_t juce_socklen_t;
  typedef int       SocketHandle;
+ static const SocketHandle invalidSocket = -1;
 #endif
 
 //==============================================================================
@@ -354,7 +356,7 @@ namespace SocketHelpers
             {
                 const SocketHandle newHandle = socket (i->ai_family, i->ai_socktype, 0);
 
-                if (newHandle >= 0)
+                if (newHandle != invalidSocket)
                 {
                     setSocketBlockingState (newHandle, false);
                     const int result = ::connect (newHandle, i->ai_addr, (socklen_t) i->ai_addrlen);
