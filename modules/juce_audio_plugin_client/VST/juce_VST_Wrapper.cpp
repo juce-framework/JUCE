@@ -1797,7 +1797,7 @@ private:
         VstSpeakerConfiguration* pluginInput  = reinterpret_cast<VstSpeakerConfiguration*> (args.value);
         VstSpeakerConfiguration* pluginOutput = reinterpret_cast<VstSpeakerConfiguration*> (args.ptr);
 
-        if (pluginHasSidechainsOrAuxs() || filter->isMidiEffect())
+        if (filter->isMidiEffect())
             return 0;
 
         const int numIns  = filter->getBusCount (true);
