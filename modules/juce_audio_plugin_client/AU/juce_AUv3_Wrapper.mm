@@ -931,7 +931,7 @@ private:
                 flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
             // is this a meter?
-            if (((processor.getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            if (((processor.getParameterCategory (idx) & 0xffff0000) >> 16) == 2)
             {
                 flags &= ~kAudioUnitParameterFlag_IsWritable;
                 flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;
