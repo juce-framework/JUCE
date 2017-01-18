@@ -1136,7 +1136,7 @@ bool AudioProcessor::Bus::enable (bool shouldEnable)
 
 int AudioProcessor::Bus::getMaxSupportedChannels (int limit) const
 {
-    for (int ch = limit; ch > 1; --ch)
+    for (int ch = limit; ch > 0; --ch)
         if (isNumberOfChannelsSupported (ch))
             return ch;
 
