@@ -590,7 +590,7 @@ public:
             {
                 AbletonLiveHostSpecific hostCmd;
 
-                hostCmd.magic = 'AbLi';
+                hostCmd.magic = 0x41624c69; // 'AbLi'
                 hostCmd.cmd = 5;
                 hostCmd.commandSize = sizeof (int);
                 hostCmd.flags = AbletonLiveHostSpecific::KCantBeSuspended;
