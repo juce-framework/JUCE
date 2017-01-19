@@ -432,8 +432,16 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
 
     String s;
     s << "{\n"
-      << "    float x = 0, y = 0;\n"
-      << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+      << "    float x = 0, y = 0;\n";
+    if (! fillType.isInvisible())
+    {
+        s << "    " << fillType.generateVariablesCode ("fill");
+    }
+    if (isStrokePresent && ! strokeType.isInvisible())
+    {
+        s << "    " << strokeType.fill.generateVariablesCode ("stroke");
+    }
+    s << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
       << customPaintCode
       << "    //[/UserPaintCustomArguments]\n";
     
@@ -441,14 +449,14 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     if (! fillType.isInvisible())
     {
         s << "    ";
-        fillType.fillInGeneratedCode (zero, code, s);
+        fillType.fillInGeneratedCode ("fill", zero, code, s);
         s << "    g.fillPath (" << pathVariable << ", AffineTransform::translation(x, y));\n";
     }
 
     if (isStrokePresent && ! strokeType.isInvisible())
     {
         s << "    ";
-        strokeType.fill.fillInGeneratedCode (zero, code, s);
+        strokeType.fill.fillInGeneratedCode ("stroke", zero, code, s);
         s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", AffineTransform::translation(x, y));\n";
     }
     

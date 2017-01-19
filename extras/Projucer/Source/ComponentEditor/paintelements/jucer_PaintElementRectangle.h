@@ -81,22 +81,30 @@ public:
         String x, y, w, h, s;
         positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
         s << "{\n"
-          << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
-          << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+          << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n";
+        if (! fillType.isInvisible())
+        {
+            s << "    " << fillType.generateVariablesCode ("fill");
+        }
+        if (isStrokePresent && ! strokeType.isInvisible())
+        {
+            s << "    " << strokeType.fill.generateVariablesCode ("stroke");
+        }
+        s << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
           << customPaintCode
           << "    //[/UserPaintCustomArguments]\n";
         
         if (! fillType.isInvisible())
         {
             s << "    ";
-            fillType.fillInGeneratedCode (position, code, s);
+            fillType.fillInGeneratedCode ("fill", position, code, s);
             s << "    g.fillRect (x, y, width, height);\n";
         }
 
         if (isStrokePresent && ! strokeType.isInvisible())
         {
             s << "    ";
-            strokeType.fill.fillInGeneratedCode (position, code, s);
+            strokeType.fill.fillInGeneratedCode ("stroke", position, code, s);
             s << "    g.drawRect (x, y, width, height, " << roundToInt (strokeType.stroke.getStrokeThickness()) << ");\n\n";
         }
         

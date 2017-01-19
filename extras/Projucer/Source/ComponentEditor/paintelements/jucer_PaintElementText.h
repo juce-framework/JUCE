@@ -87,11 +87,12 @@ public:
             positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
             r << "{\n"
               << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
+              << "    " << fillType.generateVariablesCode ("fill")
               << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
               << customPaintCode
               << "    //[/UserPaintCustomArguments]\n"
               << "    ";
-            fillType.fillInGeneratedCode (position, code, r);
+            fillType.fillInGeneratedCode ("fill", position, code, r);
             r << "    g.setFont (" << FontPropertyComponent::getCompleteFontCode (font, typefaceName) << ");\n"
               << "    g.drawText (" << quotedString (text, code.shouldUseTransMacro()) << ",\n"
               << "                x, y, width, height,\n"

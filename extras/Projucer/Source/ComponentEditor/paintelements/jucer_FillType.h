@@ -115,15 +115,44 @@ public:
                                                mode == radialGradient));
         }
     }
-
-    void fillInGeneratedCode (RelativePositionedRectangle relativeTo, GeneratedCode& code, String& paintMethodCode) const
+    
+    String generateVariablesCode (String type) const
+    {
+        String s;
+        switch (mode)
+        {
+            case solidColour:
+                s << "Colour " << type << "Colour = " << CodeHelpers::colourToCode (colour) << ";\n";
+                break;
+                
+            case linearGradient:
+            case radialGradient:
+            {
+                s << "Colour " << type << "Colour1 = " << CodeHelpers::colourToCode (gradCol1) << ", " << type << "Colour2 = " << CodeHelpers::colourToCode (gradCol2) << ";\n";
+                break;
+            }
+                
+            case imageBrush:
+            {
+                break;
+            }
+                
+            default:
+                jassertfalse;
+                break;
+        }
+        
+        return s;
+    }
+    
+    void fillInGeneratedCode (String type, RelativePositionedRectangle relativeTo, GeneratedCode& code, String& paintMethodCode) const
     {
         String s;
 
         switch (mode)
         {
         case solidColour:
-            s << "g.setColour (" << CodeHelpers::colourToCode (colour) << ");\n";
+            s << "g.setColour (" << type << "Colour);\n";
             break;
 
         case linearGradient:
@@ -138,10 +167,10 @@ public:
 
                 const String indent (String::repeatedString (" ", s.length()));
 
-                s << CodeHelpers::colourToCode (gradCol1) << ",\n"
+                s << type << "Colour1,\n"
                   << indent << castToFloat (x1) << " - " << castToFloat (x0) << " + x,\n"
                   << indent << castToFloat (y1) << " - " << castToFloat (y0) << " + y,\n"
-                  << indent << CodeHelpers::colourToCode (gradCol2) << ",\n"
+                  << indent << type << "Colour2,\n"
                   << indent << castToFloat (x2) << " - " << castToFloat (x0) << " + x,\n"
                   << indent << castToFloat (y2) << " - " << castToFloat (y0) << " + y,\n"
                   << indent << CodeHelpers::boolLiteral (mode == radialGradient) << "));\n";
