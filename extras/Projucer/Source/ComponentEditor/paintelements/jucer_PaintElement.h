@@ -160,7 +160,7 @@ public:
     void changeListenerCallback (ChangeBroadcaster*)
     {
         jassert (propToRefresh != nullptr);
-        if (propToRefresh != nullptr)
+        if (propToRefresh != nullptr && owner != nullptr)
             propToRefresh->refresh();
     }
 
