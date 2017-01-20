@@ -1756,11 +1756,13 @@ void Component::exitModalState (const int returnValue)
             mcm.endModal (this, returnValue);
             mcm.bringModalComponentsToFront();
 
-            // If the mouse is over another Component when we exit the modal state then send a mouse enter event
-            if (MouseInputSource* mouse = Desktop::getInstance().getMouseSource (0))
+            // If any of the mouse sources are over another Component when we exit the modal state then send a mouse enter event
+            const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
+
+            for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
             {
-                if (Component* c = mouse->getComponentUnderMouse())
-                    c->internalMouseEnter (*mouse, mouse->getScreenPosition(), Time::getCurrentTime());
+                if (Component* c = mi->getComponentUnderMouse())
+                    c->internalMouseEnter (*mi, mi->getScreenPosition(), Time::getCurrentTime());
             }
         }
         else
