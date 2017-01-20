@@ -56,6 +56,7 @@ public:
         MuseReceptorGeneric,
         Reaper,
         Renoise,
+        Sadie,
         SteinbergCubase4,
         SteinbergCubase5,
         SteinbergCubase5Bridged,
@@ -102,6 +103,7 @@ public:
     bool isReceptor() const noexcept          { return type == MuseReceptorGeneric; }
     bool isReaper() const noexcept            { return type == Reaper; }
     bool isRenoise() const noexcept           { return type == Renoise; }
+    bool isSadie() const noexcept             { return type == Sadie; }
     bool isSamplitude() const noexcept        { return type == MagixSamplitude; }
     bool isSonar() const noexcept             { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
     bool isSteinbergTestHost() const noexcept { return type == SteinbergTestHost; }
@@ -138,6 +140,7 @@ public:
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
             case Renoise:                  return "Renoise";
+            case Sadie:                    return "Sadie";
             case SteinbergCubase4:         return "Steinberg Cubase 4";
             case SteinbergCubase5:         return "Steinberg Cubase 5";
             case SteinbergCubase5Bridged:  return "Steinberg Cubase 5 Bridged";
@@ -268,6 +271,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase     ("Bitwig Studio"))     return BitwigStudio;
+        if (hostFilename.containsIgnoreCase ("Sadie"))             return Sadie;
 
        #elif JUCE_LINUX
         if (hostFilename.containsIgnoreCase ("Ardour"))            return Ardour;
