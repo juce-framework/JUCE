@@ -320,7 +320,7 @@ namespace PNGHelpers
 
     static void JUCE_CDECL errorCallback (png_structp p, png_const_charp)
     {
-        longjmp (*(jmp_buf*) p->error_ptr, 1);
+        setjmp(png_jmpbuf(p));
     }
 
     static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
@@ -442,8 +442,12 @@ namespace PNGHelpers
             for (size_t y = 0; y < height; ++y)
                 rows[y] = (png_bytep) (tempBuffer + lineStride * y);
 
+            png_bytep trans_alpha;
+            int num_trans;
+            png_color_16p trans_color;
+            png_get_tRNS(pngReadStruct, pngInfoStruct,  &trans_alpha, &num_trans, &trans_color);
             if (readImageData (pngReadStruct, pngInfoStruct, errorJumpBuf, rows))
-                return createImageFromData ((colorType & PNG_COLOR_MASK_ALPHA) != 0 || pngInfoStruct->num_trans > 0,
+                return createImageFromData ((colorType & PNG_COLOR_MASK_ALPHA) != 0 || num_trans,
                                             (int) width, (int) height, rows);
         }
 
