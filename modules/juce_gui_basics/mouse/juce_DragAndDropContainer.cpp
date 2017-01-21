@@ -294,9 +294,9 @@ private:
                 target->itemDragMove (details);
     }
 
-    struct ExternalDragAndDropMessage  : public CallbackMessage
+    struct ExternalDragAndDropMessageFiles  : public CallbackMessage
     {
-        ExternalDragAndDropMessage (const StringArray& f, bool canMove)
+        ExternalDragAndDropMessageFiles (const StringArray& f, bool canMove)
             : files (f), canMoveFiles (canMove)
         {}
 
@@ -310,6 +310,21 @@ private:
         bool canMoveFiles;
     };
 
+    struct ExternalDragAndDropMessageText  : public CallbackMessage
+    {
+        ExternalDragAndDropMessageText (const String& t)
+        : text (t)
+        {}
+        
+        void messageCallback() override
+        {
+            DragAndDropContainer::performExternalDragDropOfText (text);
+        }
+        
+    private:
+        String text;
+    };
+
     void checkForExternalDrag (DragAndDropTarget::SourceDetails& details, Point<int> screenPos)
     {
         if (! hasCheckedForExternalDrag)
@@ -318,13 +333,20 @@ private:
             {
                 hasCheckedForExternalDrag = true;
                 StringArray files;
+                String text;
                 bool canMoveFiles = false;
 
                 if (owner.shouldDropFilesWhenDraggedExternally (details, files, canMoveFiles)
                       && files.size() > 0
                       && ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
                 {
-                    (new ExternalDragAndDropMessage (files, canMoveFiles))->post();
+                    (new ExternalDragAndDropMessageFiles (files, canMoveFiles))->post();
+                }
+                else if (owner.shouldDropTextWhenDraggedExternally (details, text)
+                        && text.length() > 0
+                        && ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
+                {
+                    (new ExternalDragAndDropMessageText (text))->post();
                     deleteSelf();
                 }
             }
@@ -496,6 +518,12 @@ DragAndDropContainer* DragAndDropContainer::findParentDragContainerFor (Componen
 }
 
 bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails&, StringArray&, bool&)
+{
+    return false;
+}
+
+bool DragAndDropContainer::shouldDropTextWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
+                                                  String& text)
 {
     return false;
 }
