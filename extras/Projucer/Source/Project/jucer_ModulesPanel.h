@@ -44,6 +44,7 @@ public:
         addAndMakeVisible (table);
         table.updateContent();
         table.setRowHeight (20);
+        table.setMultipleSelectionEnabled(true);
 
         addAndMakeVisible (setCopyModeButton);
         addAndMakeVisible (copyPathButton);
@@ -154,6 +155,7 @@ private:
     ValueTree modulesValueTree;
     TableListBox table;
     TextButton setCopyModeButton, copyPathButton;
+    std::map<String, Value> copyPathBuffer;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override                { itemChanged(); }
@@ -180,31 +182,58 @@ private:
             project.getModules().setLocalCopyModeForAllModules (res == 1);
     }
 
+    enum SetPathMenuOptions
+    {
+        kCopyPathsToAllModules = 1,
+        kCopyPaths,
+        kPastePaths
+    };
+    
     void showSetPathsMenu()
     {
         EnabledModuleList& moduleList = project.getModules();
 
         const String moduleToCopy (moduleList.getModuleID (table.getSelectedRow()));
-
+        
         if (moduleToCopy.isNotEmpty())
         {
             PopupMenu m;
-            m.addItem (1, "Copy the paths from the module '" + moduleToCopy + "' to all other modules");
+            m.addItem (kCopyPathsToAllModules, "Copy the paths from the module '" + moduleToCopy + "' to all other modules");
+            m.addItem (kCopyPaths, "Copy paths from selected module", table.getNumSelectedRows() == 1);
+            m.addItem (kPastePaths, "Paste paths to selected modules", !copyPathBuffer.empty());
 
             int res = m.showAt (&copyPathButton);
 
-            if (res != 0)
+            switch (SetPathMenuOptions(res))
             {
-                for (Project::ExporterIterator exporter (project); exporter.next();)
-                {
-                    for (int i = 0; i < moduleList.getNumModules(); ++i)
+                case kCopyPathsToAllModules:
+                    for (Project::ExporterIterator exporter (project); exporter.next();)
                     {
-                        String modID = moduleList.getModuleID (i);
-
-                        if (modID != moduleToCopy)
-                            exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).getValue();
+                        for (int i = 0; i < moduleList.getNumModules(); ++i)
+                        {
+                            String modID = moduleList.getModuleID (i);
+                            
+                            if (modID != moduleToCopy)
+                                exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).getValue();
+                        }
                     }
-                }
+                    break;
+                case kCopyPaths:
+                    copyPathBuffer.clear();
+                    
+                    for (Project::ExporterIterator exporter (project); exporter.next();)
+                        copyPathBuffer[exporter->getName()] = exporter->getPathForModuleValue(moduleToCopy);
+                    break;
+                case kPastePaths:
+                    for (int selectionId = 0; selectionId < table.getNumSelectedRows(); ++selectionId)
+                    {
+                        int rowNumber = table.getSelectedRow(selectionId);
+                        String modID = moduleList.getModuleID (rowNumber);
+                        
+                        for (Project::ExporterIterator exporter (project); exporter.next();)
+                            exporter->getPathForModuleValue (modID) = copyPathBuffer[exporter->getName()].getValue();
+                    }
+                    break;
             }
 
             table.repaint();
