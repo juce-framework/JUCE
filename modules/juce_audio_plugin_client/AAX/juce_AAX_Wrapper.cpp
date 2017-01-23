@@ -877,7 +877,7 @@ namespace AAXClasses
                     case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 29.97002997; break;
                     case AAX_eFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
                     case AAX_eFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
-                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.976; break;
+                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.97602397; break;
                     default:                           break;
                 }
 
