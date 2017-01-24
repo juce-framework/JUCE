@@ -1088,7 +1088,7 @@ public:
                 String def (defines.getAllKeys()[i]);
                 const String value (defines.getAllValues()[i]);
                 if (value.isNotEmpty())
-                    def << "=" << value.replace ("\"", "\\\"");
+                    def << "=" << value.replace ("\"", "\\\\\\\"");
 
                 defsList.add ("\"" + def + "\"");
             }

@@ -590,7 +590,7 @@ public:
             {
                 AbletonLiveHostSpecific hostCmd;
 
-                hostCmd.magic = 'AbLi';
+                hostCmd.magic = 0x41624c69; // 'AbLi'
                 hostCmd.cmd = 5;
                 hostCmd.commandSize = sizeof (int);
                 hostCmd.flags = AbletonLiveHostSpecific::KCantBeSuspended;
@@ -1797,7 +1797,7 @@ private:
         VstSpeakerConfiguration* pluginInput  = reinterpret_cast<VstSpeakerConfiguration*> (args.value);
         VstSpeakerConfiguration* pluginOutput = reinterpret_cast<VstSpeakerConfiguration*> (args.ptr);
 
-        if (pluginHasSidechainsOrAuxs() || filter->isMidiEffect())
+        if (filter->isMidiEffect())
             return 0;
 
         const int numIns  = filter->getBusCount (true);
@@ -1822,20 +1822,6 @@ private:
 
         if (pluginOutput != nullptr && pluginOutput->numberOfChannels > 0 && numOuts == 0)
             return 0;
-
-        if (pluginInput != nullptr && pluginInput->type >= 0)
-        {
-            // inconsistent request?
-            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput).size() != pluginInput->numberOfChannels)
-                return 0;
-        }
-
-        if (pluginOutput != nullptr && pluginOutput->type >= 0)
-        {
-            // inconsistent request?
-            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput).size() != pluginOutput->numberOfChannels)
-                return 0;
-        }
 
         AudioProcessor::BusesLayout layouts = filter->getBusesLayout();
 

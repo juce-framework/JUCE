@@ -46,7 +46,8 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 - (void) applicationWillEnterForeground: (UIApplication*) application;
 - (void) applicationDidBecomeActive: (UIApplication*) application;
 - (void) applicationWillResignActive: (UIApplication*) application;
-
+- (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*)identifier
+   completionHandler: (void (^)(void))completionHandler;
 @end
 
 @implementation JuceAppStartupDelegate
@@ -102,6 +103,13 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
     for (int i = appBecomingInactiveCallbacks.size(); --i >= 0;)
         appBecomingInactiveCallbacks.getReference(i)->appBecomingInactive();
+}
+
+- (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*)identifier
+   completionHandler: (void (^)(void))completionHandler
+{
+    URL::DownloadTask::juce_iosURLSessionNotify (nsStringToJuce (identifier));
+    completionHandler();
 }
 
 @end

@@ -723,7 +723,7 @@ private:
                                   kAudioUnitScope_Global, 0, &framesPerSlice, &dataSize) == noErr
             && dataSize == sizeof (framesPerSlice) && static_cast<int> (framesPerSlice) != actualBufferSize)
         {
-            prepareFloatBuffers (framesPerSlice);
+            prepareFloatBuffers (static_cast<int> (framesPerSlice));
         }
 
         AudioUnitAddPropertyListener (audioUnit, kAudioUnitProperty_StreamFormat, handleStreamFormatChangeCallback, this);
