@@ -73,7 +73,7 @@ protected:
     }
    #else
     template <int numLayouts>
-    AudioProcessor (const short channelLayoutList[numLayouts][2])
+    AudioProcessor (const short (&channelLayoutList) [numLayouts][2])
     {
         initialise (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)));
     }
@@ -290,40 +290,32 @@ public:
         int getNumChannels (bool isInput, int busIndex) const noexcept
         {
             const Array<AudioChannelSet>& bus = (isInput ? inputBuses : outputBuses);
-            return isPositiveAndBelow(busIndex, bus.size()) ? bus.getReference (busIndex).size() : 0;
+            return isPositiveAndBelow (busIndex, bus.size()) ? bus.getReference (busIndex).size() : 0;
         }
 
         /** Get the channel set of a particular bus */
         AudioChannelSet& getChannelSet (bool isInput, int busIndex)
         {
-            Array<AudioChannelSet>& sets = isInput ? inputBuses : outputBuses;
-            jassert (isPositiveAndBelow (busIndex, sets.size()));
-
-            return sets.getReference (busIndex);
+            return (isInput ? inputBuses : outputBuses).getReference (busIndex);
         }
 
         /** Get the channel set of a particular bus */
         AudioChannelSet getChannelSet (bool isInput, int busIndex) const noexcept
         {
-            const Array<AudioChannelSet>& sets = isInput ? inputBuses : outputBuses;
-
-            if (isPositiveAndBelow (busIndex, sets.size()))
-                return sets.getReference (busIndex);
-            else
-                return AudioChannelSet();
+            return (isInput ? inputBuses : outputBuses) [busIndex];
         }
 
         /** Get the input channel layout on the main bus. */
-        AudioChannelSet getMainInputChannelSet()  const noexcept { return getChannelSet (true,  0); }
+        AudioChannelSet getMainInputChannelSet()  const noexcept    { return getChannelSet (true,  0); }
 
         /** Get the output channel layout on the main bus. */
-        AudioChannelSet getMainOutputChannelSet() const noexcept { return getChannelSet (false, 0); }
+        AudioChannelSet getMainOutputChannelSet() const noexcept    { return getChannelSet (false, 0); }
 
         /** Get the number of input channels on the main bus. */
-        int getMainInputChannels()  const noexcept               { return getNumChannels (true, 0); }
+        int getMainInputChannels()  const noexcept                  { return getNumChannels (true, 0); }
 
         /** Get the number of output channels on the main bus. */
-        int getMainOutputChannels() const noexcept               { return getNumChannels (false, 0); }
+        int getMainOutputChannels() const noexcept                  { return getNumChannels (false, 0); }
 
         bool operator== (const BusesLayout& other) const noexcept   { return inputBuses == other.inputBuses && outputBuses == other.outputBuses; }
         bool operator!= (const BusesLayout& other) const noexcept   { return inputBuses != other.inputBuses || outputBuses != other.outputBuses; }
@@ -346,39 +338,35 @@ public:
         int getBusIndex() const;
 
         /** Returns true if the current bus is the main input or output bus. */
-        bool isMain() const                                         { return getBusIndex() == 0; }
+        bool isMain() const                                             { return getBusIndex() == 0; }
 
         //==============================================================================
         /** The bus's name. */
-        const String &getName() const noexcept                      { return name; }
+        const String &getName() const noexcept                          { return name; }
 
         /** Get the default layout of this bus.
-
             @see AudioChannelSet
-         */
-        const AudioChannelSet& getDefaultLayout() const noexcept    { return dfltLayout; }
+        */
+        const AudioChannelSet& getDefaultLayout() const noexcept        { return dfltLayout; }
 
         //==============================================================================
         /** The bus's current layout. This will be AudioChannelSet::disabled() if the current
             layout is dfisabled.
 
             @see AudioChannelSet
-         */
-        const AudioChannelSet& getCurrentLayout() const noexcept      { return layout; }
+        */
+        const AudioChannelSet& getCurrentLayout() const noexcept        { return layout; }
 
         /** Return the bus's last active channel layout.
-
             If the bus is currently enabled then the result will be identical to getCurrentLayout
             otherwise it will return the last enabled layout.
 
             @see AudioChannelSet
-         */
-        const AudioChannelSet& getLastEnabledLayout() const noexcept { return lastLayout; }
+        */
+        const AudioChannelSet& getLastEnabledLayout() const noexcept    { return lastLayout; }
 
         /** Sets the bus's current layout.
-
             If the AudioProcessor does not support this layout then this will return false.
-
             @see AudioChannelSet
         */
         bool setCurrentLayout (const AudioChannelSet& layout);
@@ -392,19 +380,26 @@ public:
         bool setCurrentLayoutWithoutEnabling (const AudioChannelSet& layout);
 
         /** Return the number of channels of the current bus. */
-        inline int getNumberOfChannels() const noexcept                    { return cachedChannelCount; }
+        inline int getNumberOfChannels() const noexcept                 { return cachedChannelCount; }
 
         /** Set the number of channles of this bus. This will return false if the AudioProcessor
-            does not support this layout. */
+            does not support this layout.
+        */
         bool setNumberOfChannels (int channels);
 
         //==============================================================================
         /** Checks if a particular layout is supported.
 
-            @param set The AudioChannelSet which is to be probed.
+            @param set           The AudioChannelSet which is to be probed.
+            @param currentLayout If non-null, pretend that the current layout of the AudioProcessor is
+                                 currentLayout. On exit, currentLayout will be modified to
+                                 to represent the buses layouts of the AudioProcessor as if the layout
+                                 of the reciever had been succesfully changed. This is useful as changing
+                                 the layout of the reciever may change the bus layout of other buses.
+
             @see AudioChannelSet
-         */
-        bool isLayoutSupported (const AudioChannelSet& set) const;
+        */
+        bool isLayoutSupported (const AudioChannelSet& set, BusesLayout* currentLayout = nullptr) const;
 
         /** Checks if this bus can support a given number of channels. */
         bool isNumberOfChannelsSupported (int channels) const;
@@ -414,7 +409,7 @@ public:
 
         /** Returns the maximum number of channels that this bus can support.
             @param limit The maximum value to return.
-         */
+        */
         int getMaxSupportedChannels (int limit = AudioChannelSet::maxChannelsOfNamedLayout) const;
 
         /** Returns the resulting layouts of all buses after changing the layout of this bus.
@@ -442,14 +437,14 @@ public:
         /** Returns the position of a bus's channels within the processBlock buffer.
             This can be called in processBlock to figure out which channel of the master AudioSampleBuffer
             maps onto a specific bus's channel.
-         */
+        */
         int getChannelIndexInProcessBlockBuffer (int channelIndex) const noexcept;
 
 
         /** Returns an AudioBuffer containing a set of channel pointers for a specific bus.
             This can be called in processBlock to get a buffer containing a sub-group of the master
             AudioSampleBuffer which contains all the plugin channels.
-         */
+        */
         template <typename FloatType>
         AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer) const
         {
@@ -458,6 +453,7 @@ public:
             busDirAndIndex (isIn, busIdx);
             return owner.getBusBuffer (processBlockBuffer, isIn, busIdx);
         }
+
     private:
         friend class AudioProcessor;
         Bus (AudioProcessor&, const String&, const AudioChannelSet&, bool);
@@ -470,24 +466,24 @@ public:
         bool enabledByDefault;
         int cachedChannelCount;
 
-        JUCE_DECLARE_NON_COPYABLE (Bus);
+        JUCE_DECLARE_NON_COPYABLE (Bus)
     };
 
     //==============================================================================
     /** Returns the number of buses on the input or output side */
-    int getBusCount (bool isInput) const noexcept                             { return (isInput ? inputBuses : outputBuses).size(); }
+    int getBusCount (bool isInput) const noexcept                   { return (isInput ? inputBuses : outputBuses).size(); }
 
     /** Returns the audio bus with a given index and direction.
 
         If busIdx is invalid then this method will return a nullptr.
     */
-    Bus* getBus (bool isInput, int busIdx) noexcept             { return (isInput ? inputBuses : outputBuses)[busIdx]; }
+    Bus* getBus (bool isInput, int busIdx) noexcept                 { return (isInput ? inputBuses : outputBuses)[busIdx]; }
 
     /** Returns the audio bus with a given index and direction.
 
         If busIdx is invalid then this method will return a nullptr.
     */
-    const Bus* getBus (bool isInput, int busIdx) const noexcept { return const_cast<AudioProcessor*> (this)->getBus (isInput, busIdx); }
+    const Bus* getBus (bool isInput, int busIdx) const noexcept     { return const_cast<AudioProcessor*> (this)->getBus (isInput, busIdx); }
 
     //==============================================================================
     /**  Callback to query if a bus can currently be added.
@@ -499,8 +495,8 @@ public:
          The default implementation will always return false.
 
          @see addBus
-     */
-    virtual bool canAddBus (bool /*inputBus*/) const                        { return false; }
+    */
+    virtual bool canAddBus (bool isInput) const                     { ignoreUnused (isInput); return false; }
 
     /**  Callback to query if the last bus can currently be removed.
 
@@ -512,8 +508,8 @@ public:
          and delete the bus.
 
          The default implementation will always return false.
-     */
-    virtual bool canRemoveBus (bool /*inputBus*/) const     { return false; }
+    */
+    virtual bool canRemoveBus (bool isInput) const                  { ignoreUnused (isInput); return false; }
 
     /** Dynamically request an additional bus.
 
@@ -546,7 +542,7 @@ public:
         a bus can currently be removed and, if yes, will go ahead and remove it.
 
         @see addBus, canRemoveBus
-     */
+    */
     bool removeBus (bool isInput);
 
     //==============================================================================
@@ -556,18 +552,17 @@ public:
         this method will return false. You can use the checkBusesLayoutSupported
         and getNextBestLayout methods to probe which layouts this audio
         processor supports.
-     */
-    bool setBusesLayout (const BusesLayout& arr);
+    */
+    bool setBusesLayout (const BusesLayout&);
 
     /** Set the channel layouts of this audio processor without changing the
         enablement state of the buses.
 
         If the layout is not supported by this audio processor then
         this method will return false. You can use the checkBusesLayoutSupported
-        and getNextBestLayout methods to probe which layouts this audio
-        processor supports.
+        methods to probe which layouts this audio processor supports.
     */
-    bool setBusesLayoutWithoutEnabling (const BusesLayout& arr);
+    bool setBusesLayoutWithoutEnabling (const BusesLayout&);
 
     /** Provides the current channel layouts of this audio processor. */
     BusesLayout getBusesLayout() const;
@@ -576,20 +571,20 @@ public:
 
         If the index, direction combination is invalid then this will return an
         AudioChannelSet with no channels.
-     */
-    AudioChannelSet getChannelLayoutOfBus (bool isInput, int busIdx) const noexcept;
+    */
+    AudioChannelSet getChannelLayoutOfBus (bool isInput, int busIndex) const noexcept;
 
     /** Set the channel layout of the bus with a given index and direction.
 
         If the index, direction combination is invalid or the layout is not
         supported by the audio processor then this method will return false.
-     */
+    */
     bool setChannelLayoutOfBus (bool isInput, int busIdx, const AudioChannelSet& layout);
 
     /** Provides the number of channels of the bus with a given index and direction.
 
         If the index, direction combination is invalid then this will return zero.
-     */
+    */
     inline int getChannelCountOfBus (bool isInput, int busIdx) const noexcept
     {
         if (const Bus* bus = getBus (isInput, busIdx))
@@ -635,10 +630,9 @@ public:
 
     //==============================================================================
     /** Returns true if the Audio processor is likely to support a given layout.
-
         This can be called regardless if the processor is currently running.
     */
-    bool checkBusesLayoutSupported (const BusesLayout& layouts) const;
+    bool checkBusesLayoutSupported (const BusesLayout&) const;
 
     //==============================================================================
     /** Returns true if the Audio processor supports double precision floating point processing.
@@ -675,7 +669,7 @@ public:
 
         @see getProcessingPrecision, supportsDoublePrecisionProcessing
     */
-    void setProcessingPrecision (ProcessingPrecision precision) noexcept;
+    void setProcessingPrecision (ProcessingPrecision newPrecision) noexcept;
 
     //==============================================================================
     /** Returns the current AudioPlayHead object that should be used to find
@@ -708,7 +702,7 @@ public:
         getMainBusNumInputChannels if your processor does not have any sidechains
         or aux buses.
      */
-    int getTotalNumInputChannels()  const noexcept           { return cachedTotalIns; }
+    int getTotalNumInputChannels()  const noexcept              { return cachedTotalIns; }
 
     /** Returns the total number of output channels.
 
@@ -722,13 +716,13 @@ public:
         getMainBusNumOutputChannels if your processor does not have any sidechains
         or aux buses.
      */
-    int getTotalNumOutputChannels() const noexcept           { return cachedTotalOuts; }
+    int getTotalNumOutputChannels() const noexcept              { return cachedTotalOuts; }
 
     /** Returns the number of input channels on the main bus. */
-    inline int getMainBusNumInputChannels()   const noexcept { return getChannelCountOfBus (true,  0); }
+    inline int getMainBusNumInputChannels()   const noexcept    { return getChannelCountOfBus (true,  0); }
 
     /** Returns the number of output channels on the main bus. */
-    inline int getMainBusNumOutputChannels()  const noexcept { return getChannelCountOfBus (false, 0); }
+    inline int getMainBusNumOutputChannels()  const noexcept    { return getChannelCountOfBus (false, 0); }
 
     //==============================================================================
     /** Returns true if the channel layout map contains a certain layout.
@@ -749,6 +743,7 @@ public:
         return containsLayout (layouts, layoutListToArray (channelLayoutList));
     }
    #endif
+
     template <int numLayouts>
     static bool containsLayout (const BusesLayout& layouts, const short (&channelLayoutList) [numLayouts][2])
     {
@@ -1109,6 +1104,14 @@ public:
     */
     virtual bool isMetaParameter (int parameterIndex) const;
 
+    /** Should return the parameter's category.
+        By default, this returns the "generic" category.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::isMetaParameter() instead.
+     */
+    virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const;
+
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.
 
@@ -1347,7 +1350,7 @@ protected:
 
         @see checkBusesLayoutSupported
     */
-    virtual bool isBusesLayoutSupported (const BusesLayout& /*layouts*/) const    { return true; }
+    virtual bool isBusesLayoutSupported (const BusesLayout&) const          { return true; }
 
     /** Callback to check if a certain bus layout can now be applied
 
@@ -1404,10 +1407,10 @@ protected:
         /** The layouts of the output buses */
         Array<BusProperties> outputLayouts;
 
-        void addBus (bool isInput, const String& name, const AudioChannelSet& dfltLayout, bool isActivatedByDefault = true);
+        void addBus (bool isInput, const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true);
 
-        BusesProperties withInput  (const String& name, const AudioChannelSet& dfltLayout, bool isActivatedByDefault = true) const;
-        BusesProperties withOutput (const String& name, const AudioChannelSet& dfltLayout, bool isActivatedByDefault = true) const;
+        BusesProperties withInput  (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
+        BusesProperties withOutput (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
     };
 
     /** Callback to query if adding/removing buses currently possible.
@@ -1433,7 +1436,7 @@ protected:
         "Input #busIdx" for input buses and "Output #busIdx" for output buses
         where busIdx is the index for newly created buses. The default layout
         in this case will be the layout of the previous bus of the same direction.
-     */
+    */
     virtual bool canApplyBusCountChange (bool isInput, bool isAddingBuses,
                                          BusProperties& outNewBusProperties);
 
@@ -1452,16 +1455,16 @@ private:
     {
         int16 inChannels, outChannels;
 
-        InOutChannelPair() noexcept : inChannels (0), outChannels (0) {}
-        InOutChannelPair (short inCh, short outCh) noexcept : inChannels (inCh), outChannels (outCh) {}
+        InOutChannelPair() noexcept                           : inChannels (0), outChannels (0) {}
         InOutChannelPair (const InOutChannelPair& o) noexcept : inChannels (o.inChannels), outChannels (o.outChannels) {}
-        InOutChannelPair (const short (&config)[2]) noexcept : inChannels (config[0]), outChannels (config[1]) {}
+        InOutChannelPair (int16 inCh, int16 outCh) noexcept   : inChannels (inCh), outChannels (outCh) {}
+        InOutChannelPair (const int16 (&config)[2]) noexcept  : inChannels (config[0]), outChannels (config[1]) {}
 
-        InOutChannelPair& operator= (const InOutChannelPair& o) { inChannels = o.inChannels; outChannels = o.outChannels; return *this; }
+        InOutChannelPair& operator= (const InOutChannelPair& o) noexcept    { inChannels = o.inChannels; outChannels = o.outChannels; return *this; }
 
         bool operator== (const InOutChannelPair& other) const noexcept
         {
-            return (other.inChannels == inChannels && other.outChannels == outChannels);
+            return other.inChannels == inChannels && other.outChannels == outChannels;
         }
     };
 
@@ -1498,14 +1501,12 @@ private:
     //==============================================================================
     static BusesProperties busesPropertiesFromLayoutArray (const Array<InOutChannelPair>&);
 
-    //==============================================================================
-    BusesLayout getNextBestLayoutInList (const BusesLayout& layouts,
-                                             const Array<InOutChannelPair>& channelLayouts) const;
-    static bool containsLayout (const BusesLayout& layouts, const Array<InOutChannelPair>& channelLayouts);
+    BusesLayout getNextBestLayoutInList (const BusesLayout&, const Array<InOutChannelPair>&) const;
+    static bool containsLayout (const BusesLayout&, const Array<InOutChannelPair>&);
 
     //==============================================================================
-    void initialise (const BusesProperties& ioLayouts);
-    void createBus (bool inputBus, const BusProperties&);
+    void initialise (const BusesProperties&);
+    void createBus (bool isInput, const BusProperties&);
 
     //==============================================================================
     Array<AudioProcessorListener*> listeners;
@@ -1520,8 +1521,7 @@ private:
     CriticalSection callbackLock, listenerLock;
 
     friend class Bus;
-    mutable OwnedArray<Bus> inputBuses;
-    mutable OwnedArray<Bus> outputBuses;
+    mutable OwnedArray<Bus> inputBuses, outputBuses;
 
     String cachedInputSpeakerArrString;
     String cachedOutputSpeakerArrString;
@@ -1537,9 +1537,9 @@ private:
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
     void updateSpeakerFormatStrings();
-    bool applyBusLayouts (const BusesLayout& arr);
+    bool applyBusLayouts (const BusesLayout&);
     void audioIOChanged (bool busNumberChanged, bool channelNumChanged);
-    BusesLayout getNextBestLayout (const BusesLayout& layouts) const;
+    void getNextBestLayout (const BusesLayout&, BusesLayout&) const;
 
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);

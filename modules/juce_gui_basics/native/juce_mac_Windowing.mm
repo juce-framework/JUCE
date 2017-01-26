@@ -89,8 +89,8 @@ private:
         [alert setMessageText:     juceStringToNS (title)];
         [alert setInformativeText: juceStringToNS (message)];
 
-        [alert setAlertStyle: iconType == AlertWindow::WarningIcon ? NSCriticalAlertStyle
-                                                                   : NSInformationalAlertStyle];
+        [alert setAlertStyle: iconType == AlertWindow::WarningIcon ? NSAlertStyleCritical
+                                                                   : NSAlertStyleInformational];
         addButton (alert, button1);
         addButton (alert, button2);
         addButton (alert, button3);
@@ -142,46 +142,86 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool /*canMoveFiles*/)
+static NSRect getDragRect (NSView* view, NSEvent* event)
 {
-    if (files.size() == 0)
-        return false;
+    auto eventPos = [event locationInWindow];
 
-    MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource(0);
+    return [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
+                    fromView: nil];
+}
 
-    if (draggingSource == nullptr)
+NSView* getNSViewForDragEvent()
+{
+    if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
+        if (auto* sourceComp = draggingSource->getComponentUnderMouse())
+            return (NSView*) sourceComp->getWindowHandle();
+
+    jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
+    return nil;
+}
+
+struct TextDragDataProviderClass   : public ObjCClass<NSObject>
+{
+    TextDragDataProviderClass()  : ObjCClass<NSObject> ("JUCE_NSTextDragDataProvider_")
     {
-        jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
-        return false;
+        addIvar<String*> ("text");
+        addMethod (@selector (dealloc), dealloc, "v@:");
+        addMethod (@selector (pasteboard:item:provideDataForType:), provideDataForType, "v@:@@@");
+        addProtocol (@protocol (NSPasteboardItemDataProvider));
+        registerClass();
     }
 
-    Component* sourceComp = draggingSource->getComponentUnderMouse();
-
-    if (sourceComp == nullptr)
+    static void setText (id self, const String& text)
     {
-        jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
-        return false;
+        object_setInstanceVariable (self, "text", new String (text));
     }
 
-    JUCE_AUTORELEASEPOOL
+private:
+    static void dealloc (id self, SEL)
     {
-        if (NSView* view = (NSView*) sourceComp->getWindowHandle())
+        delete getIvar<String*> (self, "text");
+        sendSuperclassMessage (self, @selector (dealloc));
+    }
+
+    static void provideDataForType (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)
+    {
+        if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
+            if (auto* text = getIvar<String*> (self, "text"))
+                [sender setData: [juceStringToNS (*text) dataUsingEncoding: NSUTF8StringEncoding]
+                        forType: NSPasteboardTypeString];
+    }
+};
+
+bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+{
+    if (text.isEmpty())
+        return false;
+
+    if (auto* view = getNSViewForDragEvent())
+    {
+        JUCE_AUTORELEASEPOOL
         {
-            if (NSEvent* event = [[view window] currentEvent])
+            if (auto* event = [[view window] currentEvent])
             {
-                NSPoint eventPos = [event locationInWindow];
-                NSRect dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
-                                           fromView: nil];
+                static TextDragDataProviderClass dataProviderClass;
+                id delegate = [dataProviderClass.createInstance() init];
+                TextDragDataProviderClass::setText (delegate, text);
 
-                for (int i = 0; i < files.size(); ++i)
-                {
-                    if (! [view dragFile: juceStringToNS (files[i])
-                                fromRect: dragRect
-                               slideBack: YES
-                                   event: event])
-                        return false;
-                }
+                auto* pasteboardItem = [[NSPasteboardItem new] autorelease];
+                [pasteboardItem setDataProvider: delegate
+                                       forTypes: [NSArray arrayWithObjects: NSPasteboardTypeString, nil]];
 
+                auto* dragItem = [[[NSDraggingItem alloc] initWithPasteboardWriter: pasteboardItem] autorelease];
+
+                NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: nsEmptyString()];
+                [dragItem setDraggingFrame: getDragRect (view, event) contents: image];
+
+                auto* draggingSession = [view beginDraggingSessionWithItems: [NSArray arrayWithObject: dragItem]
+                                                                      event: event
+                                                                     source: delegate];
+
+                draggingSession.animatesToStartingPositionsOnCancelOrFail = YES;
+                draggingSession.draggingFormation = NSDraggingFormationNone;
                 return true;
             }
         }
@@ -190,9 +230,31 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, bool /*canMoveFiles*/)
 {
-    jassertfalse;    // not implemented!
+    if (files.isEmpty())
+        return false;
+
+    if (auto* view = getNSViewForDragEvent())
+    {
+        JUCE_AUTORELEASEPOOL
+        {
+            if (auto* event = [[view window] currentEvent])
+            {
+                auto dragRect = getDragRect (view, event);
+
+                for (int i = 0; i < files.size(); ++i)
+                    if (! [view dragFile: juceStringToNS (files[i])
+                                fromRect: dragRect
+                               slideBack: YES
+                                   event: event])
+                        return false;
+
+                return true;
+            }
+        }
+    }
+
     return false;
 }
 
@@ -206,8 +268,8 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     JUCE_AUTORELEASEPOOL
     {
-        const NSPoint p ([NSEvent mouseLocation]);
-        return Point<float> ((float) p.x, (float) (getMainScreenHeight() - p.y));
+        auto p = [NSEvent mouseLocation];
+        return { (float) p.x, (float) (getMainScreenHeight() - p.y) };
     }
 }
 
@@ -419,7 +481,7 @@ Image juce_createIconForFile (const File& file)
         selectImageForDrawing (result);
         [image drawAtPoint: NSMakePoint (0, 0)
                   fromRect: NSMakeRect (0, 0, [image size].width, [image size].height)
-                 operation: NSCompositeSourceOver fraction: 1.0f];
+                 operation: NSCompositingOperationSourceOver fraction: 1.0f];
         releaseImageAfterDrawing();
 
         return result;

@@ -22,8 +22,9 @@
   ==============================================================================
 */
 
-bool BluetoothMidiDevicePairingDialogue::open()
+bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
 {
+    ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
     // not implemented on Windows yet!
     // You should check whether the dialogue is available on your system
     // using isAvailable() before calling open().

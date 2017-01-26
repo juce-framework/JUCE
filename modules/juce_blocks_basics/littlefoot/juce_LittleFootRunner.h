@@ -4,20 +4,26 @@
    This file is part of the JUCE library.
    Copyright (c) 2016 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   ------------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -345,10 +351,10 @@ struct Program
     static int32 floatToInt (float value) noexcept          { int32 v; copyFloatMem (&v, &value); return v; }
 
     static int16 readInt16 (const uint8* d) noexcept        { return (int16) (d[0] + (((uint16) d[1]) << 8)); }
-    static int32 readInt32 (const uint8* d) noexcept        { return (int32) ((uint32) readInt16 (d) + (((uint32) readInt16 (d + 2)) << 16)); }
+    static int32 readInt32 (const uint8* d) noexcept        { return (int32) ((uint32) (uint16) readInt16 (d) + (((uint32) (uint16) readInt16 (d + 2)) << 16)); }
 
-    static void writeInt16 (uint8* d, int16 v) noexcept     { d[0] = v & 0xff; d[1] = (uint8) (v >> 8); }
-    static void writeInt32 (uint8* d, int32 v) noexcept     { writeInt16 (d, (int16) (v & 0xffff)); writeInt16 (d + 2, (int16) (v >> 16)); }
+    static void writeInt16 (uint8* d, int16 v) noexcept     { d[0] = (uint8) v; d[1] = (uint8) (v >> 8); }
+    static void writeInt32 (uint8* d, int32 v) noexcept     { d[0] = (uint8) v; d[1] = (uint8) (v >> 8); d[2] = (uint8) (v >> 16); d[3] = (uint8) (v >> 24); }
 
     //==============================================================================
     static constexpr uint32 programHeaderSize = 10;
@@ -459,6 +465,9 @@ struct Runner
     uint16 getProgramHeapSize() const noexcept          { return heapSize; }
 
     /** */
+    bool isProgramValid() const noexcept                { return heapStart != nullptr; }
+
+    /** */
     void setDataByte (uint32 index, uint8 value) noexcept
     {
         if (index < programAndHeapSpace)
@@ -501,7 +510,7 @@ struct Runner
     /** */
     int32 setHeapInt (uint32 byteOffset, uint32 value) noexcept
     {
-        if (byteOffset < (uint32) (getProgramHeapSize() - 3))
+        if (byteOffset + 3 < getProgramHeapSize())
             Program::writeInt32 (getProgramHeapStart() + byteOffset, (int32) value);
 
         return 0;
@@ -510,7 +519,7 @@ struct Runner
     /** */
     int32 getHeapInt (uint32 byteOffset) const noexcept
     {
-        return byteOffset < getProgramHeapSize() - 3 ? Program::readInt32 (getProgramHeapStart() + byteOffset) : 0;
+        return byteOffset + 3 < getProgramHeapSize() ? Program::readInt32 (getProgramHeapStart() + byteOffset) : 0;
     }
 
     //==============================================================================
@@ -630,7 +639,7 @@ struct Runner
         int32 tos; // top of stack
         ErrorCode error;
 
-        template <typename Type1, typename... Args> void pushArguments (Type1 arg1, Args... args) noexcept   { pushArguments (args...); push32 (arg1); }
+        template <typename Type1, typename... Args> void pushArguments (Type1 arg1, Args... args) noexcept   { pushArguments (args...); pushArguments (arg1); }
         void pushArguments (int32 arg1) noexcept    { push32 (arg1); }
         void pushArguments (float arg1) noexcept    { push32 (Program::floatToInt (arg1)); }
 

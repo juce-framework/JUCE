@@ -41,8 +41,10 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Surround</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.dll</TargetExt>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Surround</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.dll</TargetExt>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
     <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
@@ -91,7 +93,7 @@ if not exist &quot;$(OutDir)$(TargetName).aaxplugin&quot; mkdir &quot;$(OutDir)$
 if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot;
 if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot;
 copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
-&quot;..\..\c:\SDKs\AAX\Utilities\CreatePackage.bat&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; &quot;..\..\c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
+&quot;&quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot;&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; &quot;&quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,7 +142,7 @@ if not exist &quot;$(OutDir)$(TargetName).aaxplugin&quot; mkdir &quot;$(OutDir)$
 if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents&quot;
 if not exist &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; mkdir &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot;
 copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64\$(TargetName).aaxplugin&quot;
-&quot;..\..\c:\SDKs\AAX\Utilities\CreatePackage.bat&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; &quot;..\..\c:\SDKs\AAX\Utilities\PlugIn.ico&quot;</Command>
+&quot;&quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot;&quot; &quot;$(OutDir)$(TargetName).aaxplugin\Contents\x64&quot; &quot;&quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -651,6 +653,9 @@ copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).aaxp
     <ClCompile Include="..\..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -784,6 +789,9 @@ copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).aaxp
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_core\network\juce_URL.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_core\network\juce_WebInputStream.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_core\streams\juce_BufferedInputStream.cpp">
@@ -2096,6 +2104,7 @@ copy /Y &quot;$(OutDir)$(TargetFileName)&quot; &quot;$(OutDir)$(TargetName).aaxp
     <ClInclude Include="..\..\..\..\..\modules\juce_core\network\juce_NamedPipe.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_core\network\juce_Socket.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_core\network\juce_URL.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_core\network\juce_WebInputStream.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_core\streams\juce_BufferedInputStream.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_core\streams\juce_FileInputSource.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_core\streams\juce_InputSource.h"/>

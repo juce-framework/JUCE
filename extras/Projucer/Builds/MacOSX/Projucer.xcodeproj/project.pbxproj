@@ -300,6 +300,7 @@
 		3276A099EB6880D55D2D52C0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_BufferedInputStream.cpp"; path = "../../../../modules/juce_core/streams/juce_BufferedInputStream.cpp"; sourceTree = "SOURCE_ROOT"; };
 		32D9A904B4186B64A61FA8CC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TimeSliceThread.cpp"; path = "../../../../modules/juce_core/threads/juce_TimeSliceThread.cpp"; sourceTree = "SOURCE_ROOT"; };
 		33267FA61241D957E4304728 = {isa = PBXFileReference; lastKnownFileType = text.txt; name = "changes to libjpeg for JUCE.txt"; path = "../../../../modules/juce_graphics/image_formats/jpglib/changes to libjpeg for JUCE.txt"; sourceTree = "SOURCE_ROOT"; };
+		3352AE3C5B7BBB6E6BE308F9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_WebInputStream.cpp"; path = "../../../../modules/juce_core/network/juce_WebInputStream.cpp"; sourceTree = "SOURCE_ROOT"; };
 		336D0A9B4D15CF866BCE3DFF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ComponentDragger.h"; path = "../../../../modules/juce_gui_basics/mouse/juce_ComponentDragger.h"; sourceTree = "SOURCE_ROOT"; };
 		3419904525A3F1FF0CC50687 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FileBasedDocument.cpp"; path = "../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3514E78B58A08F4C98F54C5A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ComponentLayoutPanel.h"; path = "../../Source/ComponentEditor/ui/jucer_ComponentLayoutPanel.h"; sourceTree = "SOURCE_ROOT"; };
@@ -489,6 +490,7 @@
 		631983AA62673015F8D7453B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_StoredSettings.cpp"; path = "../../Source/Utility/jucer_StoredSettings.cpp"; sourceTree = "SOURCE_ROOT"; };
 		635290DEB1D564927D7A450C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "projucer_CompileEngineServer.cpp"; path = "../../Source/LiveBuildEngine/projucer_CompileEngineServer.cpp"; sourceTree = "SOURCE_ROOT"; };
 		6367309B2092121B86FE3AA0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_posix_NamedPipe.cpp"; path = "../../../../modules/juce_core/native/juce_posix_NamedPipe.cpp"; sourceTree = "SOURCE_ROOT"; };
+		63A924F701EA7ABD2DAFA2D6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ListenerList.cpp"; path = "../../../../modules/juce_core/containers/juce_ListenerList.cpp"; sourceTree = "SOURCE_ROOT"; };
 		63B72B34BC9AC448422EF1A0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DocumentWindow.cpp"; path = "../../../../modules/juce_gui_basics/windows/juce_DocumentWindow.cpp"; sourceTree = "SOURCE_ROOT"; };
 		63B74F9D9F43393F6427501C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_WebBrowserComponent.h"; path = "../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		641B57E5FAE6BEFDB6462921 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ResourceEditorPanel.h"; path = "../../Source/ComponentEditor/ui/jucer_ResourceEditorPanel.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1082,6 +1084,7 @@
 		F08EB921DB62255A4B6DE85A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RectangleList.h"; path = "../../../../modules/juce_graphics/geometry/juce_RectangleList.h"; sourceTree = "SOURCE_ROOT"; };
 		F100CFF192886B7699632A62 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_Network.mm"; path = "../../../../modules/juce_core/native/juce_mac_Network.mm"; sourceTree = "SOURCE_ROOT"; };
 		F1164F66F799CEA74174328A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Logger.cpp"; path = "../../../../modules/juce_core/logging/juce_Logger.cpp"; sourceTree = "SOURCE_ROOT"; };
+		F16722821DB72C079716CBEA = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_WebInputStream.h"; path = "../../../../modules/juce_core/network/juce_WebInputStream.h"; sourceTree = "SOURCE_ROOT"; };
 		F18AE75F1831D13FF53A8CCC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_PaintElementRectangle.h"; path = "../../Source/ComponentEditor/paintelements/jucer_PaintElementRectangle.h"; sourceTree = "SOURCE_ROOT"; };
 		F1974B6EDBA502BC36671D7C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ModifierKeys.cpp"; path = "../../../../modules/juce_gui_basics/keyboard/juce_ModifierKeys.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F1BEFCAF20EA392DE762B876 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_String.h"; path = "../../../../modules/juce_core/text/juce_String.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1435,6 +1438,7 @@
 					7E3ACAD10381DA0D81093329,
 					24CA69C0CC466CD524021099,
 					4F88933C6D2AB8A83EB14E16,
+					63A924F701EA7ABD2DAFA2D6,
 					19BA84DFC81467A0CD6DC44D,
 					90BD70D106A80947463BCB1A,
 					B4AA53EF291A383B3C50048A,
@@ -1549,7 +1553,9 @@
 					6CD1E57C60BC2917A46BF4AD,
 					C2ECD077AC4C784A67BC3DDE,
 					FF04AE9E4F2AAA29AC549461,
-					EBF7B2DEDAEEB28C1873F580, ); name = network; sourceTree = "<group>"; };
+					EBF7B2DEDAEEB28C1873F580,
+					3352AE3C5B7BBB6E6BE308F9,
+					F16722821DB72C079716CBEA, ); name = network; sourceTree = "<group>"; };
 		CE726671300191C325E9A55E = {isa = PBXGroup; children = (
 					3276A099EB6880D55D2D52C0,
 					B89AC6F01153CC6E222EE72E,
@@ -2393,8 +2399,8 @@
 					"_DEBUG=1",
 					"DEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=4.3.0",
-					"JUCE_APP_VERSION_HEX=0x40300", );
+					"JUCE_APP_VERSION=4.3.1",
+					"JUCE_APP_VERSION_HEX=0x40301", );
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");
 				INFOPLIST_FILE = Info-App.plist;
@@ -2417,8 +2423,8 @@
 					"_NDEBUG=1",
 					"NDEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=4.3.0",
-					"JUCE_APP_VERSION_HEX=0x40300", );
+					"JUCE_APP_VERSION=4.3.1",
+					"JUCE_APP_VERSION_HEX=0x40301", );
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "$(inherited)");

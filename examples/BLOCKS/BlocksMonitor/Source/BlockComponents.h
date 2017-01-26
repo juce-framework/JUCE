@@ -1,4 +1,3 @@
-
 #ifndef BLOCKCOMPONENTS_H_INCLUDED
 #define BLOCKCOMPONENTS_H_INCLUDED
 
@@ -15,7 +14,6 @@ class BlockComponent : public Component,
                        private Timer
 {
 public:
-    /** Constructor */
     BlockComponent (Block::Ptr blockToUse)
         : block (blockToUse)
     {
@@ -36,9 +34,11 @@ public:
         // If this is a Lightpad then redraw it at 25Hz
         if (block->getType() == Block::lightPadBlock)
             startTimerHz (25);
+
+        // Make sure the component can't go offscreen if it is draggable
+        constrainer.setMinimumOnscreenAmounts (50, 50, 50, 50);
     }
 
-    /** Destructor */
     ~BlockComponent()
     {
         // Remove any listeners
@@ -53,19 +53,16 @@ public:
     void updateStatsAndTooltip()
     {
         // Get the battery level of this Block and inform any subclasses
-        const float batteryLevel = block->getBatteryLevel();
+        auto batteryLevel = block->getBatteryLevel();
         handleBatteryLevelUpdate (batteryLevel);
 
-        // Format the tooltip string
-        const String ttString = "Name = "          + block->getDeviceDescription() + "\n"
-                              + "UID = "           + String (block->uid) + "\n"
-                              + "Serial number = " + block->serialNumber + "\n"
-                              + "Battery level = " + String ((int) (batteryLevel * 100)) + "%"
-                              + (block->isBatteryCharging() ? "++" : "--");
-
-        // Update the tooltip string if it has changed
-        if (ttString != getTooltip())
-            setTooltip (ttString);
+        // Update the tooltip
+        setTooltip ("Name = "          + block->getDeviceDescription() + "\n"
+                  + "UID = "           + String (block->uid) + "\n"
+                  + "Serial number = " + block->serialNumber + "\n"
+                  + "Battery level = " + String ((int) (batteryLevel * 100)) + "%"
+                  + (block->isBatteryCharging() ? "++"
+                                                : "--"));
     }
 
     /** Subclasses should override this to paint the Block object on the screen */
@@ -88,31 +85,105 @@ public:
 
     //==============================================================================
     /** Returns an integer index corresponding to a physical position on the hardware
-     for each type of Control Block. */
+        for each type of Control Block. */
     static int controlButtonFunctionToIndex (ControlButton::ButtonFunction f)
     {
-        static std::initializer_list<ControlButton::ButtonFunction> map[] =
-           {{ControlButton::mode, ControlButton::button0},
-            {ControlButton::volume, ControlButton::button1},
-            {ControlButton::scale, ControlButton::button2, ControlButton::click},
-            {ControlButton::chord, ControlButton::button3, ControlButton::snap},
-            {ControlButton::arp,ControlButton:: button4, ControlButton::back},
-            {ControlButton::sustain, ControlButton::button5, ControlButton::playOrPause},
-            {ControlButton::octave, ControlButton::button6, ControlButton::record},
-            {ControlButton::love, ControlButton::button7, ControlButton::learn},
-            {ControlButton::up},
-            {ControlButton::down}};
+        using CB = ControlButton;
 
-        for (size_t i = 0; i < (sizeof (map) / sizeof (map[0])); ++i)
-            if (std::find (map[i].begin(), map[i].end(), f) != map[i].end())
-                return static_cast<int> (i);
+        static Array<ControlButton::ButtonFunction> map[] =
+        {
+            { CB::mode,     CB::button0 },
+            { CB::volume,   CB::button1 },
+            { CB::scale,    CB::button2,    CB::click },
+            { CB::chord,    CB::button3,    CB::snap },
+            { CB::arp,      CB::button4,    CB::back },
+            { CB::sustain,  CB::button5,    CB::playOrPause },
+            { CB::octave,   CB::button6,    CB::record },
+            { CB::love,     CB::button7,    CB::learn },
+            { CB::up },
+            { CB::down }
+        };
+
+        for (int i = 0; i < numElementsInArray (map); ++i)
+            if (map[i].contains (f))
+                return i;
 
         return -1;
     }
 
+    Point<float> getOffsetForPort (Block::ConnectionPort port)
+    {
+        using e = Block::ConnectionPort::DeviceEdge;
+
+        switch (rotation)
+        {
+            case 0:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { static_cast<float> (port.index), 0.0f };
+                    case e::east:
+                        return { static_cast<float> (block->getWidth()), static_cast<float> (port.index) };
+                    case e::south:
+                        return { static_cast<float> (port.index), static_cast<float> (block->getHeight()) };
+                    case e::west:
+                        return { 0.0f, static_cast<float> (port.index) };
+                }
+            }
+            case 90:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { 0.0f, static_cast<float> (port.index) };
+                    case e::east:
+                        return { static_cast<float> (-1.0f - port.index), static_cast<float> (block->getWidth()) };
+                    case e::south:
+                        return { static_cast<float> (0.0f - block->getHeight()), static_cast<float> (port.index) };
+                    case e::west:
+                        return { static_cast<float> (-1.0f - port.index), 0.0f };
+                }
+            }
+            case 180:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { static_cast<float> (-1.0f - port.index), 0.0f };
+                    case e::east:
+                        return { static_cast<float> (0.0f - block->getWidth()), static_cast<float> (-1.0f - port.index) };
+                    case e::south:
+                        return { static_cast<float> (-1.0f - port.index), static_cast<float> (0.0f - block->getHeight()) };
+                    case e::west:
+                        return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                }
+            }
+            case 270:
+            {
+                switch (port.edge)
+                {
+                    case e::north:
+                        return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                    case e::east:
+                        return { static_cast<float> (port.index), static_cast<float> (0 - block->getWidth()) };
+                    case e::south:
+                        return { static_cast<float> (block->getHeight()), static_cast<float> (-1.0f - port.index) };
+                    case e::west:
+                        return { static_cast<float> (port.index), 0.0f };
+                }
+            }
+        }
+
+        return Point<float>();
+    }
+
+    int rotation = 0;
+    Point<float> topLeft = { 0.0f, 0.0f };
+
 private:
     /** Used to call repaint() periodically */
-    void timerCallback() override { repaint(); }
+    void timerCallback() override   { repaint(); }
 
     /** Overridden from TouchSurface::Listener */
     void touchChanged (TouchSurface&, const TouchSurface::Touch& t) override { handleTouchChange (t); }
@@ -123,14 +194,34 @@ private:
     /** Overridden from ControlButton::Listener */
     void buttonReleased (ControlButton& b, Block::Timestamp t) override      { handleButtonReleased (b.getType(), t); }
 
-    //==============================================================================
+    /** Overridden from MouseListener. Prepares the master Block component for dragging. */
+    void mouseDown (const MouseEvent& e) override
+    {
+        if (block->isMasterBlock())
+            componentDragger.startDraggingComponent (this, e);
+    }
+
+    /** Overridden from MouseListener. Drags the master Block component */
+    void mouseDrag (const MouseEvent& e) override
+    {
+        if (block->isMasterBlock())
+        {
+            componentDragger.dragComponent (this, e, &constrainer);
+            getParentComponent()->resized();
+        }
+    }
+
+    ComponentDragger componentDragger;
+    ComponentBoundsConstrainer constrainer;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockComponent)
 };
 
+//==============================================================================
 /**
     Class that renders a Lightpad on the screen
 */
-class LightpadComponent : public BlockComponent
+class LightpadComponent   : public BlockComponent
 {
 public:
     LightpadComponent (Block::Ptr blockToUse)
@@ -154,23 +245,25 @@ public:
         g.fillAll (Colours::black);
 
         // size ration between physical and on-screen blocks
-        const Point<float> ratio (r.getWidth() / block->getWidth(),
-                                  r.getHeight() / block->getHeight());
-        const float maxCircleSize = block->getWidth() / 3.0f;
+        Point<float> ratio (r.getWidth()  / block->getWidth(),
+                            r.getHeight() / block->getHeight());
+
+        float maxCircleSize = block->getWidth() / 3.0f;
 
         // iterate over the list of current touches and draw them on the onscreen Block
         for (auto touch : touches)
         {
-            const float circleSize           = touch.touch.z * maxCircleSize;
-            const Point<float> touchPosition = Point<float> (touch.touch.x, touch.touch.y);
+            float circleSize = touch.touch.z * maxCircleSize;
 
-            const Colour c = colourArray[touch.touch.index];
-            const Rectangle<float> blob =
-                (Rectangle<float> (circleSize, circleSize).withCentre (touchPosition)) * ratio;
+            Point<float> touchPosition (touch.touch.x,
+                                        touch.touch.y);
 
-            const ColourGradient cg = ColourGradient (colourArray[touch.touch.index],     blob.getCentreX(), blob.getCentreY(),
-                                                      Colours::transparentBlack,          blob.getRight(),   blob.getBottom(),
-                                                      true);
+            auto blob = Rectangle<float> (circleSize, circleSize)
+                           .withCentre (touchPosition) * ratio;
+
+            ColourGradient cg (colourArray[touch.touch.index],  blob.getCentreX(), blob.getCentreY(),
+                               Colours::transparentBlack,       blob.getRight(),   blob.getBottom(),
+                               true);
 
             g.setGradientFill (cg);
             g.fillEllipse (blob);
@@ -181,21 +274,26 @@ public:
 
 private:
     /** An Array of colours to use for touches */
-    Array<Colour> colourArray = { Colours::red, Colours::blue, Colours::green,
-                                  Colours::yellow, Colours::white, Colours::hotpink,
+    Array<Colour> colourArray = { Colours::red,
+                                  Colours::blue,
+                                  Colours::green,
+                                  Colours::yellow,
+                                  Colours::white,
+                                  Colours::hotpink,
                                   Colours::mediumpurple };
 
     /** A list of current Touch events */
     TouchList<TouchSurface::Touch> touches;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LightpadComponent)
 };
 
+
+//==============================================================================
 /**
     Class that renders a Control Block on the screen
 */
-class ControlBlockComponent : public BlockComponent
+class ControlBlockComponent   : public BlockComponent
 {
 public:
     ControlBlockComponent (Block::Ptr blockToUse)
@@ -205,13 +303,12 @@ public:
         addAndMakeVisible (roundedRectangleButton);
 
         // Display the battery level on the LEDRow
-        int numLedsToTurnOn = static_cast<int> (static_cast<float> (numLeds) * block->getBatteryLevel());
+        auto numLedsToTurnOn = static_cast<int> (numLeds * block->getBatteryLevel());
 
         // add LEDs
-        LEDComponent* ledComponent;
         for (int i = 0; i < numLeds; ++i)
         {
-            ledComponent = new LEDComponent();
+            auto ledComponent = new LEDComponent();
             ledComponent->setOnState (i < numLedsToTurnOn);
 
             addAndMakeVisible (leds.add (ledComponent));
@@ -238,9 +335,9 @@ public:
         auto buttonRow1 = row.removeFromTop (rowHeight * 2).withSizeKeepingCentre (r.getWidth(), buttonWidth);
         auto buttonRow2 = row.removeFromTop (rowHeight * 2).withSizeKeepingCentre (r.getWidth(), buttonWidth);
 
-        for (int i = 0; i < numLeds; ++i)
+        for (auto* led : leds)
         {
-            leds.getUnchecked (i)->setBounds (ledRow.removeFromLeft (ledWidth).reduced (2));
+            led->setBounds (ledRow.removeFromLeft (ledWidth).reduced (2));
             ledRow.removeFromLeft (5);
         }
 
@@ -261,7 +358,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        const auto r = getLocalBounds().toFloat();
+        auto r = getLocalBounds().toFloat();
 
         // Fill a black rectangle for the Control Block
         g.setColour (Colours::black);
@@ -281,7 +378,7 @@ public:
     void handleBatteryLevelUpdate (float batteryLevel) override
     {
         // Update the number of LEDs that are on to represent the battery level
-        int numLedsOn = static_cast<int> (static_cast<float> (numLeds) * batteryLevel);
+        int numLedsOn = static_cast<int> (numLeds * batteryLevel);
 
         if (numLedsOn != previousNumLedsOn)
             for (int i = 0; i < numLeds; ++i)
@@ -292,22 +389,22 @@ public:
     }
 
 private:
+    //==============================================================================
     /**
         Base class that renders a Control Block button
     */
-    struct ControlBlockSubComponent : public Component,
-                                      public TooltipClient
+    struct ControlBlockSubComponent   : public Component,
+                                        public TooltipClient
     {
         ControlBlockSubComponent (Colour componentColourToUse)
-            : componentColour (componentColourToUse),
-              onState (false)
+            : componentColour (componentColourToUse)
         {}
 
         /** Subclasses should override this to paint the button on the screen */
         virtual void paint (Graphics&) override = 0;
 
         /** Sets the colour of the button */
-        void setColour  (Colour c)  { componentColour = c; }
+        void setColour (Colour c)   { componentColour = c; }
 
         /** Sets the on state of the button */
         void setOnState (bool isOn)
@@ -320,15 +417,15 @@ private:
         String getTooltip() override
         {
             for (Component* comp = this; comp != nullptr; comp = comp->getParentComponent())
-                if (SettableTooltipClient* sttc = dynamic_cast<SettableTooltipClient*> (comp))
+                if (auto* sttc = dynamic_cast<SettableTooltipClient*> (comp))
                     return sttc->getTooltip();
 
-            return String();
+            return {};
         }
 
         //==============================================================================
         Colour componentColour;
-        bool onState;
+        bool onState = false;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlBlockSubComponent)
@@ -372,8 +469,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            const auto r = getLocalBounds().toFloat();
-
+            auto r = getLocalBounds().toFloat();
 
             g.setColour (componentColour.withAlpha (0.2f));
             g.fillRoundedRectangle (r.toFloat(), 20.0f);
@@ -382,11 +478,11 @@ private:
             // is a button pressed?
             if (doubleButtonOnState[0] || doubleButtonOnState[1])
             {
-                const float semiButtonWidth = r.getWidth() / 2.0f;
-                const auto semiButtonBounds = r.withWidth (semiButtonWidth)
-                                               .withX (doubleButtonOnState[1] ? semiButtonWidth : 0)
-                                               .reduced (5.0f, 2.0f);
+                auto semiButtonWidth = r.getWidth() / 2.0f;
 
+                auto semiButtonBounds = r.withWidth (semiButtonWidth)
+                                         .withX (doubleButtonOnState[1] ? semiButtonWidth : 0)
+                                         .reduced (5.0f, 2.0f);
 
                 g.fillEllipse (semiButtonBounds);
             }
@@ -399,7 +495,7 @@ private:
         }
 
     private:
-        bool doubleButtonOnState[2] = {false, false};
+        bool doubleButtonOnState[2] = { false, false };
     };
 
     /** Displays a button press or release interaction for a button at a given index */

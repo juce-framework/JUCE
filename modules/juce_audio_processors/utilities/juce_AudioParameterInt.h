@@ -35,9 +35,10 @@ public:
         Note that the min and max range values are inclusive.
         On creation, its value is set to the default value.
     */
-    AudioParameterInt (String parameterID, String name,
+    AudioParameterInt (const String& parameterID, const String& name,
                        int minValue, int maxValue,
-                       int defaultValue);
+                       int defaultValue,
+                       const String& label = String());
 
     /** Destructor. */
     ~AudioParameterInt();

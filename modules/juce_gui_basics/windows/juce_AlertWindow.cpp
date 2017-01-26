@@ -98,7 +98,18 @@ void AlertWindow::addButton (const String& name,
     b->addShortcut (shortcutKey1);
     b->addShortcut (shortcutKey2);
     b->addListener (this);
-    b->changeWidthToFitText (getLookAndFeel().getAlertWindowButtonHeight());
+
+    Array<TextButton*> buttonsArray (buttons.begin(), buttons.size());
+
+    const int buttonHeight        = getLookAndFeel().getAlertWindowButtonHeight();
+    const Array<int> buttonWidths = getLookAndFeel().getWidthsForTextButtons (*this, buttonsArray);
+
+    jassert (buttonWidths.size() == buttons.size());
+
+    const int n = buttonWidths.size();
+
+    for (int i = 0; i < n; ++i)
+        buttons.getUnchecked (i)->setSize (buttonWidths.getReference (i), buttonHeight);
 
     addAndMakeVisible (b, 0);
 

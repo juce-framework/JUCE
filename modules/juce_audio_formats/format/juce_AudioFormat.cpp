@@ -54,3 +54,9 @@ MemoryMappedAudioFormatReader* AudioFormat::createMemoryMappedReader (const File
 {
     return nullptr;
 }
+
+MemoryMappedAudioFormatReader* AudioFormat::createMemoryMappedReader (FileInputStream* fin)
+{
+    delete fin;
+    return nullptr;
+}

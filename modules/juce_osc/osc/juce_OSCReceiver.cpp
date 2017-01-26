@@ -210,8 +210,12 @@ namespace
         }
 
         //==============================================================================
-        OSCBundle readBundle()
+        OSCBundle readBundle (size_t maxBytesToRead = std::numeric_limits<size_t>::max())
         {
+            // maxBytesToRead is only passed in here in case this bundle is a nested
+            // bundle, so we know when to consider the next element *not* part of this
+            // bundle anymore (but part of the outer bundle) and return.
+
             if (input.getNumBytesRemaining() < 16)
                 throw OSCFormatError ("OSC input stream exhausted while reading bundle");
 
@@ -220,8 +224,17 @@ namespace
 
             OSCBundle bundle (readTimeTag());
 
-            while (! isExhausted())
+            size_t bytesRead = 16; // already read "#bundle" and timeTag
+            size_t pos = getPosition();
+
+            while (! isExhausted() && bytesRead < maxBytesToRead)
+            {
                 bundle.addElement (readElement());
+
+                const size_t newPos = getPosition();
+                bytesRead += newPos - pos;
+                pos = newPos;
+            }
 
             return bundle;
         }
@@ -274,7 +287,9 @@ namespace
         OSCBundle readBundleWithCheckedSize (size_t size)
         {
             const size_t begin = (size_t) getPosition();
-            OSCBundle bundle (readBundle());
+            const size_t maxBytesToRead = size - 4; // we've already read 4 bytes (the bundle size)
+
+            OSCBundle bundle (readBundle (maxBytesToRead));
 
             if (getPosition() - begin != size)
                 throw OSCFormatError ("OSC input stream format error: wrong element content size encountered while reading");

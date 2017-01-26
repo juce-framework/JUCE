@@ -75,7 +75,7 @@ struct DiagnosticMessage
             case note:    res << "note: "; break;
         };
 
-        res << range.file << ": ";
+        res << mainFile << ": ";
         res << message << "\n";
 
         return res;
@@ -118,14 +118,6 @@ struct DiagnosticMessage
     }
 
     bool operator!= (const DiagnosticMessage& other) const noexcept    { return ! operator== (other); }
-};
-
-//==============================================================================
-struct DiagnosticReceiver
-{
-    virtual ~DiagnosticReceiver() {}
-    virtual void handleDiagnostic (const DiagnosticMessage&) = 0;
-    virtual void handleRecoverableErrorPCH (const DiagnosticMessage& m, String pchFileName, String sourceFileName) = 0;
 };
 
 //==============================================================================

@@ -1,10 +1,11 @@
-
 #ifndef MAINCOMPONENT_H_INCLUDED
 #define MAINCOMPONENT_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Audio.h"
+#include "WaveshapeProgram.h"
 
+//==============================================================================
 /**
     A struct that handles the setup and layout of the DrumPadGridProgram
 */
@@ -41,7 +42,7 @@ struct SynthGrid
         }
     }
 
-    int getNoteNumberForPad (int x, int y)
+    int getNoteNumberForPad (int x, int y) const
     {
         int xIndex = x / 3;
         int yIndex = y / 3;
@@ -55,15 +56,16 @@ struct SynthGrid
 
     Array<DrumPadGridProgram::GridFill> gridFillArray;
     Colour baseGridColour = Colours::green;
-    Colour touchColour = Colours::cyan;
+    Colour touchColour    = Colours::red;
 
     Array<int> tonics = { 4, 12, 20 };
-    Array<int> notes = { 1, 3, 6, 7, 9, 11, 14, 15, 17, 19, 22, 24 };
+    Array<int> notes  = { 1, 3, 6, 7, 9, 11, 14, 15, 17, 19, 22, 24 };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthGrid)
 };
 
+//==============================================================================
 /**
     The main component
 */
@@ -71,17 +73,24 @@ class MainComponent   : public Component,
                         public TopologySource::Listener,
                         private TouchSurface::Listener,
                         private ControlButton::Listener,
+                       #if JUCE_IOS
+                        private Button::Listener,
+                       #endif
                         private Timer
 {
 public:
-    MainComponent() : layout (5, 5)
+    MainComponent()
     {
         setSize (600, 400);
 
         // Register MainContentComponent as a listener to the PhysicalTopologySource object
         topologySource.addListener (this);
 
-        generateWaveshapes();
+       #if JUCE_IOS
+        connectButton.setButtonText ("Connect");
+        connectButton.addListener (this);
+        addAndMakeVisible (connectButton);
+       #endif
     };
 
     ~MainComponent()
@@ -93,10 +102,16 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::lightgrey);
-        g.drawText ("Connect a Lightpad Block to play.", getLocalBounds(), Justification::centred, false);
+        g.drawText ("Connect a Lightpad Block to play.",
+                    getLocalBounds(), Justification::centred, false);
     }
 
-    void resized() override {}
+    void resized() override
+    {
+       #if JUCE_IOS
+        connectButton.setBounds (getRight() - 100, 20, 80, 30);
+       #endif
+    }
 
     /** Overridden from TopologySource::Listener, called when the topology changes */
     void topologyChanged() override
@@ -106,7 +121,7 @@ public:
             detachActiveBlock();
 
         // Get the array of currently connected Block objects from the PhysicalTopologySource
-        Block::Array blocks = topologySource.getCurrentTopology().blocks;
+        auto blocks = topologySource.getCurrentTopology().blocks;
 
         // Iterate over the array of Block objects
         for (auto b : blocks)
@@ -143,13 +158,18 @@ private:
     /** Overridden from TouchSurface::Listener. Called when a Touch is received on the Lightpad */
     void touchChanged (TouchSurface&, const TouchSurface::Touch& touch) override
     {
-        if (currentMode == waveformSelectionMode && touch.isTouchStart)
+        if (currentMode == waveformSelectionMode && touch.isTouchStart && allowTouch)
         {
             // Change the displayed waveshape to the next one
             ++waveshapeMode;
 
             if (waveshapeMode > 3)
                 waveshapeMode = 0;
+
+            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
+
+            allowTouch = false;
+            startTimer (250);
         }
         else if (currentMode == playMode)
         {
@@ -180,10 +200,11 @@ private:
                 if (touchMessageTimesInLastSecond.size() > maxNumTouchMessagesPerSecond / 3)
                     return;
 
-                gridProgram->sendTouch (touch.x, touch.y, touch.z, layout.touchColour);
+                gridProgram->sendTouch (touch.x, touch.y, touch.z,
+                                        layout.touchColour);
 
                 // Send pitch change and pressure values to the Audio class
-                audio.pitchChange (midiChannel, (touch.x - touch.startX) / static_cast<float> (activeBlock->getWidth()));
+                audio.pitchChange (midiChannel, (touch.x - touch.startX) / activeBlock->getWidth());
                 audio.pressureChange (midiChannel, touch.z);
             }
 
@@ -210,55 +231,13 @@ private:
         setLEDProgram (activeBlock->getLEDGrid());
     }
 
-    void timerCallback() override
+   #if JUCE_IOS
+    void buttonClicked (Button* b) override
     {
-        // Clear all LEDs
-        for (uint32 x = 0; x < 15; ++x)
-            for (uint32 y = 0; y < 15; ++y)
-                bitmapProgram->setLED (x, y, Colours::black);
-
-        // Determine which array to use based on waveshapeMode
-        int* waveshapeY = nullptr;
-        switch (waveshapeMode)
-        {
-            case 0:
-                waveshapeY = sineWaveY;
-                break;
-            case 1:
-                waveshapeY = squareWaveY;
-                break;
-            case 2:
-                waveshapeY = sawWaveY;
-                break;
-            case 3:
-                waveshapeY = triangleWaveY;
-                break;
-            default:
-                break;
-        }
-
-        // For each X co-ordinate
-        for (uint32 x = 0; x < 15; ++x)
-        {
-            // Find the corresponding Y co-ordinate for the current waveshape
-            int y = waveshapeY[x + yOffset];
-
-            // Draw a vertical line if flag is set or draw an LED circle
-            if (y == -1)
-            {
-                for (uint32 i = 0; i < 15; ++i)
-                    drawLEDCircle (x, i);
-            }
-            else if (x % 2 == 0)
-            {
-                drawLEDCircle (x, static_cast<uint32> (y));
-            }
-        }
-
-        // Increment the offset to draw a 'moving' waveshape
-        if (++yOffset == 30)
-            yOffset -= 30;
+        if (b == &connectButton)
+            BluetoothMidiDevicePairingDialogue::open();
     }
+   #endif
 
     /** Clears the old touch times */
     void clearOldTouchTimes (const Time now)
@@ -285,20 +264,18 @@ private:
     {
         if (currentMode == waveformSelectionMode)
         {
-            // Create a new BitmapLEDProgram for the LEDGrid
-            bitmapProgram = new BitmapLEDProgram (*grid);
+            // Create a new WaveshapeProgram for the LEDGrid
+            waveshapeProgram = new WaveshapeProgram (*grid);
 
             // Set the LEDGrid program
-            grid->setProgram (bitmapProgram);
+            grid->setProgram (waveshapeProgram);
 
-            // Redraw at 25Hz
-            startTimerHz (25);
+            // Initialise the program
+            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
+            waveshapeProgram->generateWaveshapes();
         }
         else if (currentMode == playMode)
         {
-            // Stop the redraw timer
-            stopTimer();
-
             // Create a new DrumPadGridProgram for the LEDGrid
             gridProgram = new DrumPadGridProgram (*grid);
 
@@ -306,114 +283,46 @@ private:
             grid->setProgram (gridProgram);
 
             // Setup the grid layout
-            gridProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
+            gridProgram->setGridFills (layout.numColumns,
+                                       layout.numRows,
+                                       layout.gridFillArray);
         }
     }
 
-    /** Generates the X and Y co-ordiantes for 1.5 cycles of each of the 4 waveshapes and stores them in arrays */
-    void generateWaveshapes()
-    {
-        // Set current phase position to 0 and work out the required phase increment for one cycle
-        double currentPhase = 0.0;
-        double phaseInc = (1.0 / 30.0) * (2.0 * double_Pi);
+    /** Stops touch events from triggering multiple waveshape mode changes */
+    void timerCallback() override { allowTouch = true; }
 
-        for (int x = 0; x < 30; ++x)
-        {
-            // Scale and offset the sin output to the Lightpad display
-            double sineOutput = sin (currentPhase);
-            sineWaveY[x] = roundToInt ((sineOutput * 6.5) + 7.0);
-
-            // Square wave output, set flags for when vertical line should be drawn
-            if (currentPhase < double_Pi)
-            {
-                if (x == 0)
-                    squareWaveY[x] = -1;
-                else
-                    squareWaveY[x] = 1;
-            }
-            else
-            {
-                if (squareWaveY[x - 1] == 1)
-                    squareWaveY[x - 1] = -1;
-
-                squareWaveY[x] = 13;
-            }
-
-            // Saw wave output, set flags for when vertical line should be drawn
-            sawWaveY[x] = 14 - ((x / 2) % 15);
-            if (sawWaveY[x] == 0 && sawWaveY[x - 1] != -1)
-                sawWaveY[x] = -1;
-
-            // Triangle wave output
-            triangleWaveY[x] = x < 15 ? x : 14 - (x % 15);
-
-            // Add half cycle to end of array so it loops correctly
-            if (x < 15)
-            {
-                sineWaveY[x + 30] = sineWaveY[x];
-                squareWaveY[x + 30] = squareWaveY[x];
-                sawWaveY[x + 30] = sawWaveY[x];
-                triangleWaveY[x + 30] = triangleWaveY[x];
-            }
-
-            // Increment the current phase
-            currentPhase += phaseInc;
-        }
-    }
-
-    /** Draws a 'circle' on the Lightpad around an origin co-ordinate */
-    void drawLEDCircle (uint32 x0, uint32 y0)
-    {
-        bitmapProgram->setLED (x0, y0, waveshapeColour);
-
-        const uint32 minLedIndex = 0;
-        const uint32 maxLedIndex = 14;
-
-        bitmapProgram->setLED (jmin (x0 + 1, maxLedIndex), y0, waveshapeColour.withBrightness (0.4f));
-        bitmapProgram->setLED (jmax (x0 - 1, minLedIndex), y0, waveshapeColour.withBrightness (0.4f));
-        bitmapProgram->setLED (x0, jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.4f));
-        bitmapProgram->setLED (x0, jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.4f));
-
-        bitmapProgram->setLED (jmin (x0 + 1, maxLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
-        bitmapProgram->setLED (jmin (x0 + 1, maxLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
-        bitmapProgram->setLED (jmax (x0 - 1, minLedIndex), jmin (y0 + 1, maxLedIndex), waveshapeColour.withBrightness (0.1f));
-        bitmapProgram->setLED (jmax (x0 - 1, minLedIndex), jmax (y0 - 1, minLedIndex), waveshapeColour.withBrightness (0.1f));
-    }
-
-    /**
-     enum for the two modes
-     */
     enum BlocksSynthMode
     {
         waveformSelectionMode = 0,
         playMode
     };
+
     BlocksSynthMode currentMode = playMode;
 
     //==============================================================================
     Audio audio;
 
-    DrumPadGridProgram* gridProgram;
-    BitmapLEDProgram* bitmapProgram;
+    DrumPadGridProgram* gridProgram      = nullptr;
+    WaveshapeProgram*   waveshapeProgram = nullptr;
 
-    SynthGrid layout;
+    SynthGrid layout { 5, 5 };
     PhysicalTopologySource topologySource;
     Block::Ptr activeBlock;
 
     Array<juce::Time> touchMessageTimesInLastSecond;
 
-    Colour waveshapeColour = Colours::red;
-
-    int sineWaveY[45];
-    int squareWaveY[45];
-    int sawWaveY[45];
-    int triangleWaveY[45];
-
     int waveshapeMode = 0;
-    uint32 yOffset = 0;
 
     float scaleX = 0.0;
     float scaleY = 0.0;
+
+    bool allowTouch = true;
+
+    //==============================================================================
+   #if JUCE_IOS
+    TextButton connectButton;
+   #endif
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

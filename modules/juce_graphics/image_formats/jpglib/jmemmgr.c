@@ -1030,7 +1030,7 @@ jinit_memory_mgr (j_common_ptr cinfo)
   my_mem_ptr mem;
   long max_to_use;
   int pool;
-  size_t test_mac;
+//  size_t test_mac;
 
   cinfo->mem = NULL;		/* for safety if init fails */
 
@@ -1048,10 +1048,10 @@ jinit_memory_mgr (j_common_ptr cinfo)
    * Again, an "unreachable code" warning may be ignored here.
    * But a "constant too large" warning means you need to fix MAX_ALLOC_CHUNK.
    */
-  test_mac = (size_t) MAX_ALLOC_CHUNK;
-  if ((long) test_mac != MAX_ALLOC_CHUNK ||
-      (MAX_ALLOC_CHUNK % SIZEOF(ALIGN_TYPE)) != 0)
-    ERREXIT(cinfo, JERR_BAD_ALLOC_CHUNK);
+//  test_mac = (size_t) MAX_ALLOC_CHUNK;
+//  if ((long) test_mac != MAX_ALLOC_CHUNK ||
+//      (MAX_ALLOC_CHUNK % SIZEOF(ALIGN_TYPE)) != 0)
+//    ERREXIT(cinfo, JERR_BAD_ALLOC_CHUNK);
 
   max_to_use = jpeg_mem_init(cinfo); /* system-dependent initialization */
 

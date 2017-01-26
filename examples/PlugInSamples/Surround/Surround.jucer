@@ -9,7 +9,7 @@
               pluginIsMidiEffectPlugin="0" pluginSilenceInIsSilenceOut="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="SurroundAU"
               pluginRTASCategory="" aaxIdentifier="com.ROLI.Surround" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="4.3.0" buildAUv3="0">
+              jucerVersion="4.3.1" buildAUv3="0">
   <MAINGROUP id="dEAH7t" name="Surround">
     <GROUP id="{1CB41212-BD0E-AC71-15E8-C40AD59BD2EE}" name="Source">
       <FILE id="sLk2ic" name="SurroundProcessor.cpp" compile="1" resource="0"

@@ -111,6 +111,7 @@ public:
     {
         Margin() noexcept;              /**< Creates a margin of size zero. */
         Margin (float size) noexcept;   /**< Creates a margin with this size on all sides. */
+        Margin (float top, float right, float bottom, float left) noexcept;   /**< Creates a margin with these sizes. */
 
         float left;   /**< Left margin size */
         float right;  /**< Right margin size */
@@ -134,9 +135,27 @@ public:
     /** Returns a copy of this object with a new width. */
     FlexItem withWidth (float newWidth) const noexcept;
 
+    /** Returns a copy of this object with a new minimum width. */
+    FlexItem withMinWidth (float newMinWidth) const noexcept;
+
+    /** Returns a copy of this object with a new maximum width. */
+    FlexItem withMaxWidth (float newMaxWidth) const noexcept;
+
     /** Returns a copy of this object with a new height. */
     FlexItem withHeight (float newHeight) const noexcept;
 
+    /** Returns a copy of this object with a new minimum height. */
+    FlexItem withMinHeight (float newMinHeight) const noexcept;
+
+    /** Returns a copy of this object with a new maximum height. */
+    FlexItem withMaxHeight (float newMaxHeight) const noexcept;
+
     /** Returns a copy of this object with a new margin. */
     FlexItem withMargin (Margin) const noexcept;
+
+    /** Returns a copy of this object with a new order. */
+    FlexItem withOrder (int newOrder) const noexcept;
+
+    /** Returns a copy of this object with a new alignSelf value. */
+    FlexItem withAlignSelf (AlignSelf newAlignSelf) const noexcept;
 };

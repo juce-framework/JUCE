@@ -2,22 +2,28 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   ------------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -34,7 +40,8 @@
 
  // The AudioHardwareService stuff was deprecated in 10.11 but there's no replacement yet,
  // so we'll have to silence the warnings here and revisit it in a future OS version..
- #if defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_11
+ #if ((defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_12) \
+   || (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_11))
   #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #endif
 #endif
@@ -156,20 +163,11 @@ class CoreAudioIODevice;
 class CoreAudioInternal  : private Timer
 {
 public:
-    CoreAudioInternal (CoreAudioIODevice& d, AudioDeviceID id)
+    CoreAudioInternal (CoreAudioIODevice& d, AudioDeviceID id, bool input, bool output)
        : owner (d),
-         inputLatency (0),
-         outputLatency (0),
-         bitDepth (32),
-         callback (nullptr),
-         audioProcID (0),
          deviceID (id),
-         started (false),
-         sampleRate (0),
-         bufferSize (512),
-         numInputChans (0),
-         numOutputChans (0),
-         callbacksAllowed (true)
+         isInputDevice  (input),
+         isOutputDevice (output)
     {
         jassert (deviceID != 0);
 
@@ -332,7 +330,7 @@ public:
             {
                 newBufferSizes.add ((int) (ranges[0].mMinimum + 15) & ~15);
 
-                for (int i = 32; i < 2048; i += 32)
+                for (int i = 32; i <= 2048; i += 32)
                 {
                     for (int j = size / (int) sizeof (AudioValueRange); --j >= 0;)
                     {
@@ -436,11 +434,11 @@ public:
         const int newOutputLatency = getLatencyFromDevice (kAudioDevicePropertyScopeOutput);
 
         Array<CallbackDetailsForChannel> newInChans, newOutChans;
-        StringArray newInNames  (getChannelInfo (true,  newInChans));
-        StringArray newOutNames (getChannelInfo (false, newOutChans));
+        auto newInNames  = isInputDevice  ? getChannelInfo (true,  newInChans)  : StringArray();
+        auto newOutNames = isOutputDevice ? getChannelInfo (false, newOutChans) : StringArray();
 
-        const int newBitDepth  = jmax (getBitDepthFromDevice (kAudioDevicePropertyScopeInput),
-                                       getBitDepthFromDevice (kAudioDevicePropertyScopeOutput));
+        const int newBitDepth = jmax (getBitDepthFromDevice (kAudioDevicePropertyScopeInput),
+                                      getBitDepthFromDevice (kAudioDevicePropertyScopeOutput));
 
         {
             const ScopedLock sl (callbackLock);
@@ -798,24 +796,27 @@ public:
 
     //==============================================================================
     CoreAudioIODevice& owner;
-    int inputLatency, outputLatency;
-    int bitDepth;
+    int inputLatency  = 0;
+    int outputLatency = 0;
+    int bitDepth = 32;
     BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
     Array<double> sampleRates;
     Array<int> bufferSizes;
-    AudioIODeviceCallback* callback;
-    AudioDeviceIOProcID audioProcID;
+    AudioIODeviceCallback* callback = nullptr;
+    AudioDeviceIOProcID audioProcID = 0;
 
 private:
     CriticalSection callbackLock;
     AudioDeviceID deviceID;
-    bool started;
-    double sampleRate;
-    int bufferSize;
+    bool started = false;
+    double sampleRate = 0;
+    int bufferSize = 512;
     HeapBlock<float> audioBuffer;
-    int numInputChans, numOutputChans;
-    bool callbacksAllowed;
+    int numInputChans  = 0;
+    int numOutputChans = 0;
+    bool callbacksAllowed = true;
+    const bool isInputDevice, isOutputDevice;
 
     Array<CallbackDetailsForChannel> inputChannelInfo, outputChannelInfo;
     HeapBlock<float*> tempInputBuffers, tempOutputBuffers;
@@ -924,11 +925,11 @@ public:
         if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
         {
             jassert (inputDeviceId != 0);
-            device = new CoreAudioInternal (*this, inputDeviceId);
+            device = new CoreAudioInternal (*this, inputDeviceId, true, outputDeviceId != 0);
         }
         else
         {
-            device = new CoreAudioInternal (*this, outputDeviceId);
+            device = new CoreAudioInternal (*this, outputDeviceId, false, true);
         }
 
         internal = device;

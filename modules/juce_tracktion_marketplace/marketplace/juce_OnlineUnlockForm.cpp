@@ -113,6 +113,8 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
     Spinner spinner;
     OnlineUnlockStatus::UnlockResult result;
     String email, password;
+
+    JUCE_LEAK_DETECTOR (OnlineUnlockForm::OverlayComp)
 };
 
 static juce_wchar getDefaultPasswordChar() noexcept

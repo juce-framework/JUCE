@@ -29,14 +29,12 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                                                    private ValueTree::Listener
 {
     Parameter (AudioProcessorValueTreeState& s,
-               String parameterID, String paramName, String labelText,
+               const String& parameterID, const String& paramName, const String& labelText,
                NormalisableRange<float> r, float defaultVal,
                std::function<String (float)> valueToText,
                std::function<float (const String&)> textToValue)
-        : AudioProcessorParameterWithID (parameterID, paramName),
-          owner (s), label (labelText),
-          valueToTextFunction (valueToText),
-          textToValueFunction (textToValue),
+        : AudioProcessorParameterWithID (parameterID, paramName, labelText),
+          owner (s), valueToTextFunction (valueToText), textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
           listenersNeedCalling (true)
     {
@@ -52,7 +50,6 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     float getValue() const override                             { return range.convertTo0to1 (value); }
     float getDefaultValue() const override                      { return range.convertTo0to1 (defaultValue); }
-    String getLabel() const override                            { return label; }
 
     float getValueForText (const String& text) const override
     {
@@ -112,7 +109,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     void copyValueToValueTree()
     {
         if (state.isValid())
-            state.setProperty (owner.valuePropertyID, value, owner.undoManager);
+            state.setPropertyExcludingListener (this, owner.valuePropertyID, value, owner.undoManager);
     }
 
     void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
@@ -149,7 +146,6 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     AudioProcessorValueTreeState& owner;
     ValueTree state;
-    String label;
     ListenerList<AudioProcessorValueTreeState::Listener> listeners;
     std::function<String (float)> valueToTextFunction;
     std::function<float (const String&)> textToValueFunction;
@@ -176,14 +172,16 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& p, U
 
 AudioProcessorValueTreeState::~AudioProcessorValueTreeState() {}
 
-AudioProcessorParameter* AudioProcessorValueTreeState::createAndAddParameter (String paramID, String paramName, String labelText,
-                                                                              NormalisableRange<float> r, float defaultVal,
-                                                                              std::function<String (float)> valueToTextFunction,
+AudioProcessorParameter* AudioProcessorValueTreeState::createAndAddParameter (const String& paramID, const String& paramName,
+                                                                              const String& labelText, NormalisableRange<float> r,
+                                                                              float defaultVal, std::function<String (float)> valueToTextFunction,
                                                                               std::function<float (const String&)> textToValueFunction)
 {
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
+   #if ! JUCE_LINUX
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
+   #endif
 
     Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
                                   defaultVal, valueToTextFunction, textToValueFunction);
@@ -397,7 +395,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
                                                                 private Slider::Listener
 {
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Slider& sl)
-        : AttachedControlBase (s, p), slider (sl)
+        : AttachedControlBase (s, p), slider (sl), ignoreCallbacks (false)
     {
         NormalisableRange<float> range (s.getParameterRange (paramID));
         slider.setRange (range.start, range.end, range.interval);
@@ -418,12 +416,19 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
 
     void setValue (float newValue) override
     {
-        slider.setValue (newValue, sendNotificationSync);
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        {
+            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+            slider.setValue (newValue, sendNotificationSync);
+        }
     }
 
     void sliderValueChanged (Slider* s) override
     {
-        if (! ModifierKeys::getCurrentModifiers().isRightButtonDown())
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        if ((! ignoreCallbacks) && (! ModifierKeys::getCurrentModifiers().isRightButtonDown()))
             setNewUnnormalisedValue ((float) s->getValue());
     }
 
@@ -431,6 +436,8 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     void sliderDragEnded   (Slider*) override { endParameterChange();   }
 
     Slider& slider;
+    bool ignoreCallbacks;
+    CriticalSection selfCallbackMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -447,7 +454,7 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
                                                                   private ComboBox::Listener
 {
     Pimpl (AudioProcessorValueTreeState& s, const String& p, ComboBox& c)
-        : AttachedControlBase (s, p), combo (c)
+        : AttachedControlBase (s, p), combo (c), ignoreCallbacks (false)
     {
         sendInitialUpdate();
         combo.addListener (this);
@@ -461,17 +468,29 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
 
     void setValue (float newValue) override
     {
-        combo.setSelectedItemIndex (roundToInt (newValue), sendNotificationSync);
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        {
+            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+            combo.setSelectedItemIndex (roundToInt (newValue), sendNotificationSync);
+        }
     }
 
     void comboBoxChanged (ComboBox* comboBox) override
     {
-        beginParameterChange();
-        setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
-        endParameterChange();
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        if (! ignoreCallbacks)
+        {
+            beginParameterChange();
+            setNewUnnormalisedValue ((float) comboBox->getSelectedId() - 1.0f);
+            endParameterChange();
+        }
     }
 
     ComboBox& combo;
+    bool ignoreCallbacks;
+    CriticalSection selfCallbackMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -488,7 +507,7 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
                                                                 private Button::Listener
 {
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Button& b)
-        : AttachedControlBase (s, p), button (b)
+        : AttachedControlBase (s, p), button (b), ignoreCallbacks (false)
     {
         sendInitialUpdate();
         button.addListener (this);
@@ -502,17 +521,29 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
 
     void setValue (float newValue) override
     {
-        button.setToggleState (newValue >= 0.5f, sendNotificationSync);
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        {
+            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+            button.setToggleState (newValue >= 0.5f, sendNotificationSync);
+        }
     }
 
     void buttonClicked (Button* b) override
     {
-        beginParameterChange();
-        setNewUnnormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
-        endParameterChange();
+        const ScopedLock selfCallbackLock (selfCallbackMutex);
+
+        if (! ignoreCallbacks)
+        {
+            beginParameterChange();
+            setNewUnnormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
+            endParameterChange();
+        }
     }
 
     Button& button;
+    bool ignoreCallbacks;
+    CriticalSection selfCallbackMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };

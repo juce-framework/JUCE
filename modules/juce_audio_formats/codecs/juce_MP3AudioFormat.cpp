@@ -2020,7 +2020,7 @@ private:
             for (int i = 0; i < jsbound; ++i)
             {
                 const int16 step = allocTable->bits;
-                allocTable += (1 << step);
+                allocTable += (static_cast<intptr_t> (1) << step);
                 si.allocation[i][0] = getBitsUint8 (step);
                 si.allocation[i][1] = getBitsUint8 (step);
             }
@@ -2029,7 +2029,7 @@ private:
             {
                 const int16 step = allocTable->bits;
                 const uint8 b0 = getBitsUint8 (step);
-                allocTable += (1 << step);
+                allocTable += (static_cast<intptr_t> (1) << step);
                 si.allocation[i][0] = b0;
                 si.allocation[i][1] = b0;
             }
@@ -2045,7 +2045,7 @@ private:
             for (int i = 0; i < sblimit; ++i)
             {
                 const int16 step = allocTable->bits;
-                allocTable += (1 << step);
+                allocTable += (static_cast<intptr_t> (1) << step);
                 si.allocation[i][0] = getBitsUint8 (step);
             }
 
@@ -2131,7 +2131,7 @@ private:
                 }
             }
 
-            allocTable += (1 << step);
+            allocTable += (static_cast<intptr_t> (1) << step);
         }
 
         for (int i = jsbound; i < frame.layer2SubBandLimit; ++i)
@@ -2182,7 +2182,7 @@ private:
                 fraction[0][0][i] = fraction[0][1][i] = fraction[0][2][i] = 0;
                 fraction[1][0][i] = fraction[1][1][i] = fraction[1][2][i] = 0;
             }
-            allocTable += (1 << step);
+            allocTable += (static_cast<intptr_t> (1) << step);
         }
 
         for (int ch = 0; ch < frame.numChannels; ++ch)

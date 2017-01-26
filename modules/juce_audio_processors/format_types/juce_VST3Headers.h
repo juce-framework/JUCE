@@ -45,6 +45,7 @@
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wsign-compare"
  #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
+ #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #undef DEVELOPMENT

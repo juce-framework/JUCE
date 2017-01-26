@@ -37,67 +37,72 @@
 }
 @end
 
+extern "C" GLvoid glResolveMultisampleFramebufferAPPLE();
+
 namespace juce
 {
 
 class OpenGLContext::NativeContext
 {
 public:
-    NativeContext (Component& component,
+    NativeContext (Component& c,
                    const OpenGLPixelFormat& pixFormat,
                    void* contextToShare,
                    bool multisampling,
                    OpenGLVersion version)
-        : context (nil), openGLversion (version),
-          frameBufferHandle (0), colorBufferHandle (0),
-          depthBufferHandle (0), msaaColorHandle (0), msaaBufferHandle (0),
-          lastWidth (0), lastHeight (0), needToRebuildBuffers (false),
-          swapFrames (0), useDepthBuffer (pixFormat.depthBufferBits > 0),
+        : component (c), openGLversion (version),
+          useDepthBuffer (pixFormat.depthBufferBits > 0),
           useMSAA (multisampling)
     {
         JUCE_AUTORELEASEPOOL
         {
-            ComponentPeer* const peer = component.getPeer();
-            jassert (peer != nullptr);
-
-            const Rectangle<int> bounds (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
-            lastWidth  = bounds.getWidth();
-            lastHeight = bounds.getHeight();
-
-            view = [[JuceGLView alloc] initWithFrame: convertToCGRect (bounds)];
-            view.opaque = YES;
-            view.hidden = NO;
-            view.backgroundColor = [UIColor blackColor];
-            view.userInteractionEnabled = NO;
-
-            glLayer = (CAEAGLLayer*) [view layer];
-            glLayer.contentsScale = (CGFloat) Desktop::getInstance().getDisplays().getMainDisplay().scale;
-            glLayer.opaque = true;
-
-            [((UIView*) peer->getNativeHandle()) addSubview: view];
-
-           #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
-            if (version == openGL3_2 && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
+            if (auto* peer = component.getPeer())
             {
-                if (! createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
+                auto bounds = peer->getAreaCoveredBy (component);
+
+                view = [[JuceGLView alloc] initWithFrame: convertToCGRect (bounds)];
+                view.opaque = YES;
+                view.hidden = NO;
+                view.backgroundColor = [UIColor blackColor];
+                view.userInteractionEnabled = NO;
+
+                glLayer = (CAEAGLLayer*) [view layer];
+                glLayer.opaque = true;
+
+                updateWindowPosition (bounds);
+
+                [((UIView*) peer->getNativeHandle()) addSubview: view];
+
+                if (version == openGL3_2 && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
                 {
-                    releaseContext();
+                    if (! createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
+                    {
+                        releaseContext();
+                        createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
+                    }
+                }
+                else
+                {
                     createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
+                }
+
+                if (context != nil)
+                {
+                    // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
+                    // so causes myserious timing-related failures.
+                    [EAGLContext setCurrentContext: context];
+                    createGLBuffers();
+                    deactivateCurrentContext();
+                }
+                else
+                {
+                    jassertfalse;
                 }
             }
             else
-           #endif
             {
-                createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
+                jassertfalse;
             }
-
-            jassert (context != nil);
-
-            // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
-            // so causes myserious timing-related failures.
-            [EAGLContext setCurrentContext: context];
-            createGLBuffers();
-            deactivateCurrentContext();
         }
     }
 
@@ -148,17 +153,15 @@ public:
             glBindFramebuffer (GL_DRAW_FRAMEBUFFER, frameBufferHandle);
             glBindFramebuffer (GL_READ_FRAMEBUFFER, msaaBufferHandle);
 
-           #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
             if (openGLversion >= openGL3_2)
             {
-                glBlitFramebuffer (0, 0, lastWidth, lastHeight, 0, 0, lastWidth, lastHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                glBlitFramebuffer (0, 0, lastBounds.getWidth(), lastBounds.getHeight(),
+                                   0, 0, lastBounds.getWidth(), lastBounds.getHeight(),
+                                   GL_COLOR_BUFFER_BIT, GL_NEAREST);
             }
             else
-           #endif
             {
-               #ifdef GL_APPLE_framebuffer_multisample
                 glResolveMultisampleFramebufferAPPLE();
-               #endif
             }
         }
 
@@ -175,19 +178,20 @@ public:
         }
     }
 
-    void updateWindowPosition (const Rectangle<int>& bounds)
+    void updateWindowPosition (Rectangle<int> bounds)
     {
         view.frame = convertToCGRect (bounds);
+        glLayer.contentsScale = (CGFloat) (Desktop::getInstance().getDisplays().getMainDisplay().scale
+                                            / component.getDesktopScaleFactor());
 
-        if (lastWidth != bounds.getWidth() || lastHeight != bounds.getHeight())
+        if (lastBounds != bounds)
         {
-            lastWidth  = bounds.getWidth();
-            lastHeight = bounds.getHeight();
+            lastBounds = bounds;
             needToRebuildBuffers = true;
         }
     }
 
-    bool setSwapInterval (const int numFramesPerSwap) noexcept
+    bool setSwapInterval (int numFramesPerSwap) noexcept
     {
         swapFrames = numFramesPerSwap;
         return false;
@@ -198,17 +202,19 @@ public:
     struct Locker { Locker (NativeContext&) {} };
 
 private:
-    JuceGLView* view;
-    CAEAGLLayer* glLayer;
-    EAGLContext* context;
+    Component& component;
+    JuceGLView* view = nil;
+    CAEAGLLayer* glLayer = nil;
+    EAGLContext* context = nil;
     const OpenGLVersion openGLversion;
-    GLuint frameBufferHandle, colorBufferHandle, depthBufferHandle,
-           msaaColorHandle, msaaBufferHandle;
+    const bool useDepthBuffer, useMSAA;
 
-    int volatile lastWidth, lastHeight;
-    bool volatile needToRebuildBuffers;
-    int swapFrames;
-    bool useDepthBuffer, useMSAA;
+    GLuint frameBufferHandle = 0, colorBufferHandle = 0, depthBufferHandle = 0,
+           msaaColorHandle = 0, msaaBufferHandle = 0;
+
+    Rectangle<int> lastBounds;
+    int swapFrames = 0;
+    bool needToRebuildBuffers = false;
 
     bool createContext (EAGLRenderingAPI type, void* contextToShare)
     {

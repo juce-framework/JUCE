@@ -564,7 +564,102 @@ namespace IconConverters
 }
 
 //==============================================================================
-class HWNDComponentPeer  : public ComponentPeer
+class
+#if (! JUCE_MINGW)
+  __declspec (uuid ("37c994e7-432b-4834-a2f7-dce1f13b834b"))
+#endif
+    ITipInvocation : public IUnknown
+{
+public:
+    static const CLSID clsid;
+
+    virtual ::HRESULT STDMETHODCALLTYPE Toggle (::HWND wnd) = 0;
+};
+
+#if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
+template <>
+struct UUIDGetter<ITipInvocation>
+{
+    static CLSID get()
+    {
+        GUID g = {0x37c994e7, 0x432b, 0x4834, {0xa2, 0xf7, 0xdc, 0xe1, 0xf1, 0x3b, 0x83, 0x4b}};
+        return g;
+    }
+};
+#endif
+
+const CLSID ITipInvocation::clsid = {0x4CE576FA, 0x83DC, 0x4f88, {0x95, 0x1C, 0x9D, 0x07, 0x82, 0xB4, 0xE3, 0x76}};
+//==============================================================================
+class OnScreenKeyboard : private Timer
+{
+public:
+
+    void activate()
+    {
+        shouldBeActive = true;
+        startTimer (10);
+    }
+
+    void deactivate()
+    {
+        shouldBeActive = false;
+        startTimer (10);
+    }
+
+    juce_DeclareSingleton_SingleThreaded (OnScreenKeyboard, true)
+
+private:
+
+    OnScreenKeyboard()
+        : shouldBeActive (false), reentrant (false)
+    {
+        tipInvocation.CoCreateInstance (ITipInvocation::clsid, CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+
+        if (reentrant || tipInvocation == nullptr) return;
+        const ScopedValueSetter<bool> setter (reentrant, true, false);
+
+        const bool isActive = isVisible();
+        if (isActive == shouldBeActive) return;
+
+        if (! isActive)
+        {
+            tipInvocation->Toggle(::GetDesktopWindow());
+        }
+        else
+        {
+            ::HWND hwnd = ::FindWindow (L"IPTip_Main_Window", NULL);
+
+            if (hwnd != nullptr)
+                ::PostMessage(hwnd, WM_SYSCOMMAND, (int) SC_CLOSE, 0);
+        }
+    }
+
+    bool isVisible()
+    {
+        ::HWND hwnd = ::FindWindow (L"IPTip_Main_Window", NULL);
+        if (hwnd != nullptr)
+        {
+            ::LONG style = ::GetWindowLong (hwnd, GWL_STYLE);
+            return ((style & WS_DISABLED) == 0 && (style & WS_VISIBLE) != 0);
+        }
+
+        return false;
+    }
+
+    bool shouldBeActive, reentrant;
+    ComSmartPtr<ITipInvocation> tipInvocation;
+};
+
+juce_ImplementSingleton_SingleThreaded (OnScreenKeyboard)
+
+//==============================================================================
+class HWNDComponentPeer  : public ComponentPeer,
+                           private Timer
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     , public ModifierKeyReceiver
    #endif
@@ -923,11 +1018,14 @@ public:
 
         ShowCaret (hwnd);
         SetCaretPos (0, 0);
+
+        OnScreenKeyboard::getInstance()->activate();
     }
 
     void dismissPendingTextInput() override
     {
         imeHandler.handleSetContext (hwnd, false);
+        OnScreenKeyboard::getInstance()->deactivate();
     }
 
     void repaint (const Rectangle<int>& area) override
@@ -1303,8 +1401,12 @@ private:
                 case WM_NCMOUSEHOVER:
                 case WM_MOUSEHOVER:
                 case WM_TOUCH:
+               #ifdef WM_POINTERUPDATE
+                case WM_POINTERUPDATE:
+                case WM_POINTERDOWN:
+                case WM_POINTERUP:
+               #endif
                     return isHWNDBlockedByModalComponents (m.hwnd);
-
                 case WM_NCLBUTTONDOWN:
                 case WM_NCLBUTTONDBLCLK:
                 case WM_NCRBUTTONDOWN:
@@ -2031,6 +2133,19 @@ private:
         return true;
     }
 
+   #ifdef WM_POINTERUPDATE
+    TOUCHINPUT emulateTouchEventFromPointer (LPARAM lParam, WPARAM wParam)
+    {
+        TOUCHINPUT touchInput;
+
+        touchInput.dwID = GET_POINTERID_WPARAM (wParam);
+        touchInput.x = GET_X_LPARAM (lParam) * 100;
+        touchInput.y = GET_Y_LPARAM (lParam) * 100;
+
+        return touchInput;
+    }
+   #endif
+
     //==============================================================================
     void sendModifierKeyChangeIfNeeded()
     {
@@ -2520,6 +2635,12 @@ private:
                 return 1;
 
             //==============================================================================
+           #ifdef WM_POINTERUPDATE
+            case WM_POINTERUPDATE:      handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, false); return 0;
+            case WM_POINTERDOWN:        handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), true, false);  return 0;
+            case WM_POINTERUP:          handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, true);  return 0;
+           #endif
+
             case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;
             case WM_MOUSELEAVE:         doMouseExit(); return 0;
 
@@ -2559,10 +2680,16 @@ private:
             case WM_WINDOWPOSCHANGING:     return handlePositionChanging (*(WINDOWPOS*) lParam);
 
             case WM_WINDOWPOSCHANGED:
-                if (handlePositionChanged())
-                    return 0;
+            {
+                const WINDOWPOS& wPos = *reinterpret_cast<WINDOWPOS*> (lParam);
 
-                break;
+                if ((wPos.flags & SWP_NOMOVE) != 0 && (wPos.flags & SWP_NOSIZE) != 0)
+                    startTimer(100);
+                else
+                    if (handlePositionChanged())
+                        return 0;
+            }
+            break;
 
             //==============================================================================
             case WM_KEYDOWN:
@@ -3026,6 +3153,12 @@ private:
         JUCE_DECLARE_NON_COPYABLE (IMEHandler)
     };
 
+    void timerCallback() override
+    {
+        handlePositionChanged();
+        stopTimer();
+    }
+
     IMEHandler imeHandler;
 
     //==============================================================================
@@ -3040,7 +3173,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
     return new HWNDComponentPeer (*this, styleFlags, (HWND) parentHWND, false);
 }
 
-ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
+JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
 {
     return new HWNDComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks,
                                   (HWND) parentHWND, true);
@@ -3112,17 +3245,10 @@ bool JUCE_CALLTYPE Process::isForegroundProcess()
     if (fg == 0)
         return true;
 
-    // when running as a plugin in IE8, the browser UI runs in a different process to the plugin, so
-    // process ID isn't a reliable way to check if the foreground window belongs to us - instead, we
-    // have to see if any of our windows are children of the foreground window
-    fg = GetAncestor (fg, GA_ROOT);
+    DWORD processID = 0;
+    GetWindowThreadProcessId (fg, &processID);
 
-    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-        if (HWNDComponentPeer* const wp = dynamic_cast<HWNDComponentPeer*> (ComponentPeer::getPeer (i)))
-            if (wp->isInside (fg))
-                return true;
-
-    return false;
+    return (processID == GetCurrentProcessId());
 }
 
 // N/A on Windows as far as I know.

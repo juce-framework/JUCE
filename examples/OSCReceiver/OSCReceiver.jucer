@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="pdocPt" name="OSCReceiver" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.OSCReceiver" includeBinaryInAppConfig="1"
-              jucerVersion="4.3.0">
+              jucerVersion="4.3.1">
   <MAINGROUP id="Y6Q0O9" name="OSCReceiver">
     <GROUP id="{9F303ECD-83DE-CA91-97B4-C083DA897F49}" name="Source">
       <FILE id="HHuoMc" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>

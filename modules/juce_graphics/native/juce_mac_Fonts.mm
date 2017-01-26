@@ -389,15 +389,26 @@ namespace CoreTextTypeLayout
     static void drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
                                  const CGContextRef& context, const float flipHeight)
     {
-        CTFrameRef frame = createCTFrame (text, CGRectMake ((CGFloat) area.getX(), flipHeight - (CGFloat) area.getBottom(),
-                                                            (CGFloat) area.getWidth(), (CGFloat) area.getHeight()));
+        Rectangle<float> ctFrameArea;
 
         const int verticalJustification = text.getJustification().getOnlyVerticalFlags();
+
+        // Ugly hack to fix a bug in OS X Sierra where the CTFrame needs to be slightly
+        // larger than the font height - otherwise the CTFrame will be invalid
+        if (verticalJustification == Justification::verticallyCentred)
+            ctFrameArea = area.withSizeKeepingCentre (area.getWidth(), area.getHeight() * 1.1f);
+        else if (verticalJustification == Justification::bottom)
+            ctFrameArea = area.withTop (area.getY() - (area.getHeight() * 0.1f));
+        else
+            ctFrameArea = area.withHeight (area.getHeight() * 1.1f);
+
+        CTFrameRef frame = createCTFrame (text, CGRectMake ((CGFloat) ctFrameArea.getX(), flipHeight - (CGFloat) ctFrameArea.getBottom(),
+                                                            (CGFloat) ctFrameArea.getWidth(), (CGFloat) ctFrameArea.getHeight()));
 
         if (verticalJustification == Justification::verticallyCentred
              || verticalJustification == Justification::bottom)
         {
-            float adjust = area.getHeight() - findCTFrameHeight (frame);
+            float adjust = ctFrameArea.getHeight() - findCTFrameHeight (frame);
 
             if (verticalJustification == Justification::verticallyCentred)
                 adjust *= 0.5f;
@@ -541,11 +552,15 @@ public:
           fontHeightToPointsFactor (1.0f),
           renderingTransform (CGAffineTransformIdentity),
           isMemoryFont (true),
+          dataCopy (data, dataSize),
           attributedStringAtts (nullptr),
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
     {
-        CFDataRef cfData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) data, (CFIndex) dataSize, kCFAllocatorNull);
+        // We can't use CFDataCreate here as this triggers a false positive in ASAN
+        // so copy the data manually and use CFDataCreateWithBytesNoCopy
+        CFDataRef cfData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) dataCopy.getData(),
+                                                        (CFIndex) dataCopy.getSize(), kCFAllocatorNull);
         CGDataProviderRef provider = CGDataProviderCreateWithCFData (cfData);
         CFRelease (cfData);
 
@@ -709,6 +724,7 @@ public:
     bool isMemoryFont;
 
 private:
+    MemoryBlock dataCopy;
     CFDictionaryRef attributedStringAtts;
     float ascent, unitsToHeightScaleFactor;
     AffineTransform pathTransform;

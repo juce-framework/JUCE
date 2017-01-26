@@ -7,17 +7,13 @@
 /**
     Base class for oscillators
 */
-class Oscillator : public SynthesiserVoice
+class Oscillator   : public SynthesiserVoice
 {
 public:
     Oscillator()
     {
         amplitude.reset (getSampleRate(), 0.1);
         phaseIncrement.reset (getSampleRate(), 0.1);
-    }
-
-    virtual ~Oscillator()
-    {
     }
 
     void startNote (int midiNoteNumber, float velocity, SynthesiserSound*, int) override
@@ -57,7 +53,7 @@ public:
 
     void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
     {
-        while(--numSamples >= 0)
+        while (--numSamples >= 0)
         {
             double output = getSample() * amplitude.getNextValue();
 
@@ -82,22 +78,20 @@ public:
     }
 
     /** Subclasses should override this to say whether they can play the given sound */
-    virtual bool canPlaySound (SynthesiserSound* sound) override = 0;
+    virtual bool canPlaySound (SynthesiserSound*) override = 0;
 
     /** Subclasses should override this to render a waveshape */
     virtual double renderWaveShape (const double currentPhase) = 0;
 
 private:
-    LinearSmoothedValue<double> amplitude;
-    LinearSmoothedValue<double> phaseIncrement;
+    LinearSmoothedValue<double> amplitude, phaseIncrement;
 
-    double frequency;
-	double phasePos = 0.0f;
-	double sampleRate = 44100.0;
+    double frequency = 0;
+    double phasePos = 0.0f;
+    double sampleRate = 44100.0;
 
-    int initialNote;
-	double maxFreq;
-	double minFreq;
+    int initialNote = 0;
+    double maxFreq = 0, minFreq = 0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oscillator)

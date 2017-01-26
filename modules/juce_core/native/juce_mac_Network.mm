@@ -1,27 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -150,14 +152,20 @@ public:
         [data release];
     }
 
-    bool start (URL::OpenStreamProgressCallback* callback, void* context)
+    void cancel()
+    {
+        signalThreadShouldExit();
+        stopThread (10000);
+    }
+
+    bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
     {
         startThread();
 
         while (isThreadRunning() && ! initialised)
         {
-            if (callback != nullptr)
-                if (! callback (context, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
+            if (listener != nullptr)
+                if (! listener->postDataSendProgress (inputStream, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
                     return false;
 
             Thread::sleep (1);
@@ -370,6 +378,270 @@ private:
 };
 
 //==============================================================================
+#if JUCE_IOS
+struct BackgroundDownloadTask  : public URL::DownloadTask
+{
+    BackgroundDownloadTask (const URL& urlToUse,
+                            const File& targetLocationToUse,
+                            String extraHeadersToUse,
+                            URL::DownloadTask::Listener* listenerToUse)
+         : targetLocation (targetLocationToUse), listener (listenerToUse),
+           delegate (nullptr), session (nullptr), downloadTask (nullptr),
+           connectFinished (false), hasBeenDestroyed (false), calledComplete (0),
+           uniqueIdentifier (String (urlToUse.toString (true).hashCode64()) + String (Random().nextInt64()))
+    {
+        downloaded = -1;
+
+        static DelegateClass cls;
+        delegate = [cls.createInstance() init];
+        DelegateClass::setState (delegate, this);
+
+        activeSessions.set (uniqueIdentifier, this);
+        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:juceStringToNS (urlToUse.toString (true))]];
+
+        StringArray headerLines;
+        headerLines.addLines (extraHeadersToUse);
+        headerLines.removeEmptyStrings (true);
+
+        for (int i = 0; i < headerLines.size(); ++i)
+        {
+            String key   = headerLines[i].upToFirstOccurrenceOf (":", false, false).trim();
+            String value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+            if (key.isNotEmpty() && value.isNotEmpty())
+                [request addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+        }
+
+        session =
+            [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:juceStringToNS (uniqueIdentifier)]
+                                          delegate:delegate
+                                     delegateQueue:nullptr];
+
+        if (session != nullptr)
+            downloadTask = [session downloadTaskWithRequest:request];
+
+        [request release];
+    }
+
+    ~BackgroundDownloadTask()
+    {
+        activeSessions.remove (uniqueIdentifier);
+
+        if (httpCode != -1)
+            httpCode = 500;
+
+        finished = true;
+        connectionEvent.signal();
+
+        [session invalidateAndCancel];
+        while (! hasBeenDestroyed)
+            destroyEvent.wait();
+
+        [delegate release];
+    }
+
+    bool initOK()
+    {
+        return (downloadTask != nullptr);
+    }
+
+    bool connect()
+    {
+        [downloadTask resume];
+        while (downloaded == -1 && finished == false)
+            connectionEvent.wait();
+
+        connectFinished = true;
+        return ! error;
+    }
+
+    //==============================================================================
+    File targetLocation;
+    URL::DownloadTask::Listener* listener;
+    NSObject<NSURLSessionDelegate>* delegate;
+    NSURLSession* session;
+    NSURLSessionDownloadTask* downloadTask;
+    bool connectFinished, hasBeenDestroyed;
+    Atomic<int> calledComplete;
+    WaitableEvent connectionEvent, destroyEvent;
+    String uniqueIdentifier;
+
+    static HashMap<String, BackgroundDownloadTask*, DefaultHashFunctions, CriticalSection> activeSessions;
+
+    void didWriteData (int64 totalBytesWritten, int64 totalBytesExpectedToWrite)
+    {
+        downloaded = totalBytesWritten;
+
+        if (contentLength == -1)
+            contentLength = totalBytesExpectedToWrite;
+
+        if (connectFinished && error == false && finished == false && listener != nullptr)
+            listener->progress (this, totalBytesWritten, contentLength);
+
+        connectionEvent.signal();
+    }
+
+   void didFinishDownloadingToURL (NSURL* location)
+   {
+       NSFileManager* fileManager = [[NSFileManager alloc] init];
+       error = ([fileManager moveItemAtURL:location
+                                     toURL:[NSURL fileURLWithPath:juceStringToNS (targetLocation.getFullPathName())]
+                                     error:nullptr] == NO);
+       httpCode = 200;
+       finished = true;
+
+       connectionEvent.signal();
+
+       if (listener != nullptr && calledComplete.exchange (1) == 0)
+       {
+           if (contentLength > 0 && downloaded < contentLength)
+           {
+               downloaded = contentLength;
+               listener->progress (this, downloaded, contentLength);
+           }
+
+           listener->finished (this, !error);
+       }
+   }
+
+   void didCompleteWithError (NSError* nsError)
+   {
+       if (calledComplete.exchange (1) == 0)
+       {
+           httpCode = -1;
+
+           if (nsError != nullptr)
+           {
+               // see https://developer.apple.com/reference/foundation/nsurlsessiondownloadtask?language=objc
+               switch ([nsError code])
+               {
+                   case NSURLErrorUserAuthenticationRequired:
+                       httpCode = 401;
+                       break;
+                   case NSURLErrorNoPermissionsToReadFile:
+                       httpCode = 403;
+                       break;
+                   case NSURLErrorFileDoesNotExist:
+                       httpCode = 404;
+                       break;
+                   default:
+                       httpCode = 500;
+               }
+           }
+
+           error = true;
+           finished = true;
+
+           if (listener != nullptr)
+               listener->finished (this, ! error);
+       }
+
+       connectionEvent.signal();
+    }
+
+    void didBecomeInvalidWithError()
+    {
+        hasBeenDestroyed = true;
+        destroyEvent.signal();
+    }
+
+    //==============================================================================
+    void notify()
+    {
+        if (downloadTask == nullptr) return;
+
+        if (NSError* error = [downloadTask error])
+        {
+            didCompleteWithError (error);
+        }
+        else
+        {
+            const int64 contentLength = [downloadTask countOfBytesExpectedToReceive];
+
+            if ([downloadTask state] == NSURLSessionTaskStateCompleted)
+                didWriteData (contentLength, contentLength);
+            else
+                didWriteData ([downloadTask countOfBytesReceived], contentLength);
+        }
+    }
+
+    static void invokeNotify (const String& identifier)
+    {
+        ScopedLock lock (activeSessions.getLock());
+
+        if (BackgroundDownloadTask* task = activeSessions[identifier])
+            task->notify();
+    }
+
+    //==============================================================================
+    struct DelegateClass  : public ObjCClass<NSObject<NSURLSessionDelegate> >
+    {
+        DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate> > ("JUCE_URLDelegate_")
+        {
+            addIvar<BackgroundDownloadTask*> ("state");
+
+            addMethod (@selector (URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:),
+                       didWriteData,        "v@:@@qqq");
+            addMethod (@selector (URLSession:downloadTask:didFinishDownloadingToURL:),
+                       didFinishDownloadingToURL,        "v@:@@@");
+            addMethod (@selector (URLSession:task:didCompleteWithError:),
+                       didCompleteWithError,        "v@:@@@");
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),
+                       didBecomeInvalidWithError,   "v@:@@@");
+
+            registerClass();
+        }
+
+        static void setState (id self, BackgroundDownloadTask* state)  { object_setInstanceVariable (self, "state", state); }
+        static BackgroundDownloadTask* getState (id self)              { return getIvar<BackgroundDownloadTask*> (self, "state"); }
+
+    private:
+        static void didWriteData (id self, SEL, NSURLSession*, NSURLSessionDownloadTask*, int64_t, int64_t totalBytesWritten, int64_t totalBytesExpectedToWrite)
+        {
+            if (auto state = getState (self)) state->didWriteData (totalBytesWritten, totalBytesExpectedToWrite);
+        }
+
+        static void didFinishDownloadingToURL (id self, SEL, NSURLSession*, NSURLSessionDownloadTask*, NSURL* location)
+        {
+            if (auto state = getState (self)) state->didFinishDownloadingToURL (location);
+        }
+
+        static void didCompleteWithError (id self, SEL, NSURLSession*, NSURLSessionTask*, NSError* nsError)
+        {
+            if (auto state = getState (self)) state->didCompleteWithError (nsError);
+        }
+
+        static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSURLSessionTask*, NSError*)
+        {
+            if (auto state = getState (self)) state->didBecomeInvalidWithError ();
+        }
+    };
+};
+
+HashMap<String, BackgroundDownloadTask*, DefaultHashFunctions, CriticalSection> BackgroundDownloadTask::activeSessions;
+
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    ScopedPointer<BackgroundDownloadTask> downloadTask = new BackgroundDownloadTask (*this, targetLocation, extraHeaders, listener);
+
+    if (downloadTask->initOK() && downloadTask->connect())
+        return downloadTask.release();
+
+    return nullptr;
+}
+
+void URL::DownloadTask::juce_iosURLSessionNotify (const String& identifier)
+{
+    BackgroundDownloadTask::invokeNotify (identifier);
+}
+#else
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+}
+#endif
+
+//==============================================================================
 #else
 
 // This version is only used for backwards-compatibility with older OSX targets,
@@ -415,14 +687,14 @@ public:
         [data release];
     }
 
-    bool start (URL::OpenStreamProgressCallback* callback, void* context)
+    bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
     {
         startThread();
 
         while (isThreadRunning() && ! initialised)
         {
-            if (callback != nullptr)
-                if (! callback (context, latestTotalBytes, (int) [[request HTTPBody] length]))
+            if (listener != nullptr)
+                if (! listener->postDataSendProgress (inputStream, latestTotalBytes, (int) [[request HTTPBody] length]))
                     return false;
 
             Thread::sleep (1);
@@ -439,6 +711,12 @@ public:
         }
 
         stopThread (10000);
+    }
+
+    void cancel()
+    {
+        hasFinished = hasFailed = true;
+        stop();
     }
 
     int read (char* dest, int numBytes)
@@ -618,55 +896,96 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
 
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+}
+
 #pragma clang diagnostic pop
 
 #endif
 
 
 //==============================================================================
-class WebInputStream  : public InputStream
+class WebInputStream::Pimpl
 {
 public:
-    WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
-                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
-                    const int numRedirectsToFollow_, const String& httpRequestCmd_)
-      : statusCode (0), address (address_), headers (headers_), postData (postData_), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_),
-        numRedirectsToFollow (numRedirectsToFollow_), httpRequestCmd (httpRequestCmd_)
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool shouldBePost)
+      : statusCode (0), owner (pimplOwner), url (urlToUse), position (0),
+        finished (false), isPost (shouldBePost), timeOutMs (0),
+        numRedirectsToFollow (5), httpRequestCmd (shouldBePost ? "POST" : "GET")
     {
-        JUCE_AUTORELEASEPOOL
-        {
-            createConnection (progressCallback, progressCallbackContext);
-
-            if (connection != nullptr && connection->headers != nil)
-            {
-                statusCode = connection->statusCode;
-
-                if (responseHeaders != nullptr)
-                {
-                    NSEnumerator* enumerator = [connection->headers keyEnumerator];
-
-                    while (NSString* key = [enumerator nextObject])
-                        responseHeaders->set (nsStringToJuce (key),
-                                              nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
-                }
-            }
-        }
     }
 
-    ~WebInputStream()
+    ~Pimpl()
     {
         connection = nullptr;
     }
 
+    bool connect (WebInputStream::Listener* webInputListener, int numRetries = 0)
+    {
+        ignoreUnused (numRetries);
+        createConnection();
+
+        if (! connection->start (owner, webInputListener))
+        {
+            // Workaround for deployment targets below 10.10 where HTTPS POST requests with keep-alive fail with the NSURLErrorNetworkConnectionLost error code.
+           #if ! (JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10))
+            if (numRetries == 0 && connection->nsUrlErrorCode == NSURLErrorNetworkConnectionLost)
+            {
+                connection = nullptr;
+                return connect (webInputListener, ++numRetries);
+            }
+           #endif
+
+            connection = nullptr;
+            return false;
+        }
+
+        if (connection != nullptr && connection->headers != nil)
+        {
+            statusCode = connection->statusCode;
+
+            NSEnumerator* enumerator = [connection->headers keyEnumerator];
+
+            while (NSString* key = [enumerator nextObject])
+                responseHeaders.set (nsStringToJuce (key),
+                                     nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    //==============================================================================
+    // WebInputStream methods
+    void withExtraHeaders (const String& extraHeaders)
+    {
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
+
+        headers << extraHeaders;
+
+        if (! headers.endsWithChar ('\n') && headers.isNotEmpty())
+            headers << "\r\n";
+    }
+
+    void withCustomRequestCommand (const String& customRequestCommand)    { httpRequestCmd = customRequestCommand; }
+    void withConnectionTimeout (int timeoutInMs)                          { timeOutMs = timeoutInMs; }
+    void withNumRedirectsToFollow (int maxRedirectsToFollow)              { numRedirectsToFollow = maxRedirectsToFollow; }
+    StringPairArray getRequestHeaders() const                             { return WebInputStream::parseHttpHeaders (headers); }
+    StringPairArray getResponseHeaders() const                            { return responseHeaders; }
+    int getStatusCode() const                                             { return statusCode; }
+
+
     //==============================================================================
     bool isError() const                { return (connection == nullptr || connection->headers == nullptr); }
-    int64 getTotalLength() override     { return connection == nullptr ? -1 : connection->contentLength; }
-    bool isExhausted() override         { return finished; }
-    int64 getPosition() override        { return position; }
+    int64 getTotalLength()              { return connection == nullptr ? -1 : connection->contentLength; }
+    bool isExhausted()                  { return finished; }
+    int64 getPosition()                 { return position; }
 
-    int read (void* buffer, int bytesToRead) override
+    int read (void* buffer, int bytesToRead)
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 
@@ -685,47 +1004,66 @@ public:
         }
     }
 
-    bool setPosition (int64 wantedPos) override
+    bool setPosition (int64 wantedPos)
     {
         if (wantedPos != position)
         {
             finished = false;
 
             if (wantedPos < position)
-            {
-                connection = nullptr;
-                position = 0;
-                createConnection (0, 0);
-            }
+                return false;
 
-            skipNextBytes (wantedPos - position);
+            int64 numBytesToSkip = wantedPos - position;
+            const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+            HeapBlock<char> temp ((size_t) skipBufferSize);
+
+            while (numBytesToSkip > 0 && ! isExhausted())
+                numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
         }
 
         return true;
     }
 
+    void cancel()
+    {
+        if (connection != nullptr)
+            connection->cancel();
+    }
+
     int statusCode;
 
 private:
+    WebInputStream& owner;
+    const URL& url;
     ScopedPointer<URLConnectionState> connection;
-    String address, headers;
+    String headers;
     MemoryBlock postData;
     int64 position;
     bool finished;
     const bool isPost;
-    const int timeOutMs;
-    const int numRedirectsToFollow;
+    int timeOutMs;
+    int numRedirectsToFollow;
     String httpRequestCmd;
+    StringPairArray responseHeaders;
 
-    void createConnection (URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
+    void createConnection()
     {
         jassert (connection == nullptr);
 
-        if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
+        if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (url.toString (! isPost))]
                                                                cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                                            timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)])
         {
             [req setHTTPMethod: [NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()]];
+
+            if (isPost)
+            {
+                WebInputStream::createHeadersAndPostData (url, headers, postData);
+
+                if (postData.getSize() > 0)
+                    [req setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                     length: postData.getSize()]];
+            }
 
             StringArray headerLines;
             headerLines.addLines (headers);
@@ -740,29 +1078,9 @@ private:
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
             }
 
-            if (isPost && postData.getSize() > 0)
-                [req setHTTPBody: [NSData dataWithBytes: postData.getData()
-                                                 length: postData.getSize()]];
-
             connection = new URLConnectionState (req, numRedirectsToFollow);
-
-            if (! connection->start (progressCallback, progressCallbackContext))
-            {
-                // Workaround for deployment targets below 10.10 where HTTPS POST requests with keep-alive fail with the NSURLErrorNetworkConnectionLost error code
-               #if ! (JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10))
-                if (connection->nsUrlErrorCode == NSURLErrorNetworkConnectionLost)
-                {
-                    connection = new URLConnectionState (req, numRedirectsToFollow);
-
-                    if (connection->start (progressCallback, progressCallbackContext))
-                        return;
-                }
-               #endif
-
-                connection = nullptr;
-            }
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };

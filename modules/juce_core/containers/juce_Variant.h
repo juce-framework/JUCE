@@ -1,27 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -61,7 +63,11 @@ public:
         JUCE_DECLARE_NON_COPYABLE (NativeFunctionArgs)
     };
 
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    using NativeFunction = std::function<var (const NativeFunctionArgs&)>;
+   #else
     typedef var (*NativeFunction) (const NativeFunctionArgs&);
+   #endif
 
     //==============================================================================
     /** Creates a void variant. */
@@ -84,6 +90,7 @@ public:
     var (const wchar_t* value);
     var (const String& value);
     var (const Array<var>& value);
+    var (const StringArray& value);
     var (ReferenceCountedObject* object);
     var (NativeFunction method) noexcept;
     var (const void* binaryData, size_t dataSize);
@@ -306,7 +313,7 @@ private:
         char stringValue [sizeof (String)];
         ReferenceCountedObject* objectValue;
         MemoryBlock* binaryValue;
-        NativeFunction methodValue;
+        NativeFunction* methodValue;
     };
 
     const VariantType* type;
@@ -317,13 +324,13 @@ private:
 };
 
 /** Compares the values of two var objects, using the var::equals() comparison. */
-bool operator== (const var&, const var&) noexcept;
+JUCE_API bool operator== (const var&, const var&) noexcept;
 /** Compares the values of two var objects, using the var::equals() comparison. */
-bool operator!= (const var&, const var&) noexcept;
-bool operator== (const var&, const String&);
-bool operator!= (const var&, const String&);
-bool operator== (const var&, const char*);
-bool operator!= (const var&, const char*);
+JUCE_API bool operator!= (const var&, const var&) noexcept;
+JUCE_API bool operator== (const var&, const String&);
+JUCE_API bool operator!= (const var&, const String&);
+JUCE_API bool operator== (const var&, const char*);
+JUCE_API bool operator!= (const var&, const char*);
 
 //==============================================================================
 /** This template-overloaded class can be used to convert between var and custom types. */

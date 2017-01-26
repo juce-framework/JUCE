@@ -1,27 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -31,26 +33,26 @@ namespace
     inline uint32 bitToMask  (const int bit) noexcept           { return (uint32) 1 << (bit & 31); }
     inline size_t bitToIndex (const int bit) noexcept           { return (size_t) (bit >> 5); }
     inline size_t sizeNeededToHold (int highestBit) noexcept    { return (size_t) (highestBit >> 5) + 1; }
+}
 
-    inline int highestBitInInt (uint32 n) noexcept
-    {
-        jassert (n != 0); // (the built-in functions may not work for n = 0)
+int findHighestSetBit (uint32 n) noexcept
+{
+    jassert (n != 0); // (the built-in functions may not work for n = 0)
 
-      #if JUCE_GCC || JUCE_CLANG
-        return 31 - __builtin_clz (n);
-      #elif JUCE_MSVC
-        unsigned long highest;
-        _BitScanReverse (&highest, n);
-        return (int) highest;
-      #else
-        n |= (n >> 1);
-        n |= (n >> 2);
-        n |= (n >> 4);
-        n |= (n >> 8);
-        n |= (n >> 16);
-        return countBitsInInt32 (n >> 1);
-      #endif
-    }
+  #if JUCE_GCC || JUCE_CLANG
+    return 31 - __builtin_clz (n);
+  #elif JUCE_MSVC
+    unsigned long highest;
+    _BitScanReverse (&highest, n);
+    return (int) highest;
+  #else
+    n |= (n >> 1);
+    n |= (n >> 2);
+    n |= (n >> 4);
+    n |= (n >> 8);
+    n |= (n >> 16);
+    return countNumberOfBits (n >> 1);
+  #endif
 }
 
 //==============================================================================
@@ -391,7 +393,7 @@ int BigInteger::getHighestBit() const noexcept
 
     for (int i = (int) bitToIndex (highestBit); i >= 0; --i)
         if (uint32 n = values[i])
-            return highestBitInInt (n) + (i << 5);
+            return findHighestSetBit (n) + (i << 5);
 
     return -1;
 }

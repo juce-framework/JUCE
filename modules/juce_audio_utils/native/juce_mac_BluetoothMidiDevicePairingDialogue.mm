@@ -22,8 +22,9 @@
   ==============================================================================
 */
 
-bool BluetoothMidiDevicePairingDialogue::open()
+bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
 {
+    ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
     // Do not call this on OSX. Instead, you should pair Bluetooth MIDI devices
     // using the "Audio MIDI Setup" app (located in /Applications/Utilities).
     jassertfalse;

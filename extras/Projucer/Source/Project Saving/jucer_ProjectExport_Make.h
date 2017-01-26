@@ -117,11 +117,12 @@ public:
         if (type.isStaticLibrary())
             makefileTargetSuffix = ".a";
 
-        else if (type.isDynamicLibrary())
-            makefileTargetSuffix = ".so";
-
-        else if (type.isAudioPlugin())
+        else if (type.isAudioPlugin() || type.isDynamicLibrary())
+        {
             makefileIsDLL = true;
+            if (type.isDynamicLibrary())
+                makefileTargetSuffix = ".so";
+        }
     }
 
 protected:
@@ -228,12 +229,12 @@ private:
         out << "  JUCE_CPPFLAGS := $(DEPFLAGS)";
         writeDefineFlags (out, config);
         writeHeaderPathFlags (out, config);
-        out << newLine;
+        out << " $(CPPFLAGS)" << newLine;
     }
 
     void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        out << "  JUCE_LDFLAGS += $(LDFLAGS) $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR)";
+        out << "  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR)";
 
         {
             StringArray flags (makefileExtraLinkerFlags);
@@ -278,7 +279,7 @@ private:
             out << " -l" << replacePreprocessorTokens (config, libraries.joinIntoString (" -l")).trim();
 
         out << " " << replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim()
-            << newLine;
+            << " $(LDFLAGS)" << newLine;
     }
 
     void writeConfig (OutputStream& out, const BuildConfiguration& config) const
@@ -306,7 +307,7 @@ private:
 
         writeCppFlags (out, config);
 
-        out << "  JUCE_CFLAGS += $(CFLAGS) $(JUCE_CPPFLAGS) $(TARGET_ARCH)";
+        out << "  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH)";
 
         if (config.isDebug())
             out << " -g -ggdb";
@@ -316,16 +317,15 @@ private:
 
         out << " -O" << config.getGCCOptimisationFlag()
             << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
-            << newLine;
+            << " $(CFLAGS)" << newLine;
 
         String cppStandardToUse (getCppStandardString());
 
         if (cppStandardToUse.isEmpty())
             cppStandardToUse = "-std=c++11";
 
-        out << "  JUCE_CXXFLAGS += $(CXXFLAGS) $(JUCE_CFLAGS) "
-            << cppStandardToUse
-            << newLine;
+        out << "  JUCE_CXXFLAGS += $(JUCE_CFLAGS) "
+            << cppStandardToUse << " $(CXXFLAGS)" << newLine;
 
         writeLinkerFlags (out, config);
 
@@ -365,6 +365,14 @@ private:
     {
         out << "# Automatically generated makefile, created by the Projucer" << newLine
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
+            << newLine;
+
+        out << "# build with \"V=1\" for verbose builds" << newLine
+            << "ifeq ($(V), 1)" << newLine
+            << "V_AT =" << newLine
+            << "else" << newLine
+            << "V_AT = @" << newLine
+            << "endif" << newLine
             << newLine;
 
         out << "# (this disables dependency generation if multiple architectures are set)" << newLine
@@ -407,7 +415,7 @@ private:
             << "\t-@mkdir -p $(JUCE_BINDIR)" << newLine
             << "\t-@mkdir -p $(JUCE_LIBDIR)" << newLine
             << "\t-@mkdir -p $(JUCE_OUTDIR)" << newLine
-            << "\t@$(BLDCMD)" << newLine
+            << "\t$(V_AT)$(BLDCMD)" << newLine
             << newLine;
 
         if (useLinuxPackages)
@@ -429,7 +437,7 @@ private:
 
         out << "clean:" << newLine
             << "\t@echo Cleaning " << projectName << newLine
-            << "\t@$(CLEANCMD)" << newLine
+            << "\t$(V_AT)$(CLEANCMD)" << newLine
             << newLine;
 
         out << "strip:" << newLine
@@ -447,8 +455,8 @@ private:
                     << ": " << escapeSpaces (files.getReference(i).toUnixStyle()) << newLine
                     << "\t-@mkdir -p $(JUCE_OBJDIR)" << newLine
                     << "\t@echo \"Compiling " << files.getReference(i).getFileName() << "\"" << newLine
-                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t@$(CC) $(JUCE_CFLAGS) -o \"$@\" -c \"$<\""
-                                                                         : "\t@$(CXX) $(JUCE_CXXFLAGS) -o \"$@\" -c \"$<\"")
+                    << (files.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) -o \"$@\" -c \"$<\""
+                                                                         : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) -o \"$@\" -c \"$<\"")
                     << newLine << newLine;
             }
         }

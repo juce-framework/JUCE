@@ -282,7 +282,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
         while (*filename != 0)
         {
-            results.add (File (String (files) + "\\" + String (filename)));
+            results.add (File (String (files)).getChildFile (String (filename)));
             filename += wcslen (filename) + 1;
         }
     }

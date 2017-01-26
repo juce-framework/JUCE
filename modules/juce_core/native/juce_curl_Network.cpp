@@ -1,57 +1,50 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
 
-class WebInputStream  : public InputStream
+class WebInputStream::Pimpl
 {
 public:
-    WebInputStream (const String& address, bool isPost, const MemoryBlock& postData,
-                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers, int timeOutMs, StringPairArray* responseHeaders,
-                    const int maxRedirects, const String& httpRequest)
-        : multi (nullptr), curl (nullptr), headerList (nullptr), lastError (CURLE_OK),
-          contentLength (-1), streamPos (0),
+    Pimpl (WebInputStream& ownerStream, const URL& urlToCopy, bool shouldUsePost)
+        : owner (ownerStream), url (urlToCopy),
+          multi (nullptr), curl (nullptr), headerList (nullptr), lastError (CURLE_OK),
+          timeOutMs (0), maxRedirects (5), isPost (shouldUsePost),
+          httpRequest (isPost ? "POST" : "GET"),
+          contentLength (-1), streamPos (0), statusCode (-1),
           finished (false), skipBytes (0),
-          postBuffer (nullptr), postPosition (0)
+          postBuffer (nullptr), postPosition (0), listener (nullptr)
     {
-        statusCode = -1;
-
-        if (init() && setOptions (address, timeOutMs, (responseHeaders != nullptr),
-                                  maxRedirects, headers, isPost, httpRequest, postData.getSize()))
-        {
-            connect (responseHeaders, isPost, postData, progressCallback, progressCallbackContext);
-        }
-        else
-        {
+        if (! init())
             cleanup();
-        }
     }
 
-    ~WebInputStream()
+    ~Pimpl()
     {
         cleanup();
     }
@@ -59,16 +52,16 @@ public:
     //==============================================================================
     // Input Stream overrides
     bool isError() const                 { return curl == nullptr || lastError != CURLE_OK; }
-    bool isExhausted() override          { return (isError() || finished) && curlBuffer.getSize() == 0; }
-    int64 getPosition() override         { return streamPos; }
-    int64 getTotalLength() override      { return contentLength; }
+    bool isExhausted()                   { return (isError() || finished) && curlBuffer.getSize() == 0; }
+    int64 getPosition()                  { return streamPos; }
+    int64 getTotalLength()               { return contentLength; }
 
-    int read (void* buffer, int bytesToRead) override
+    int read (void* buffer, int bytesToRead)
     {
         return readOrSkip (buffer, bytesToRead, false);
     }
 
-    bool setPosition (int64 wantedPos) override
+    bool setPosition (int64 wantedPos)
     {
         const int amountToSkip = static_cast<int> (wantedPos - getPosition());
 
@@ -84,9 +77,25 @@ public:
     }
 
     //==============================================================================
-    int statusCode;
+    // WebInputStream methods
+    void withExtraHeaders (const String& extraHeaders)
+    {
+        if (! requestHeaders.endsWithChar ('\n') && requestHeaders.isNotEmpty())
+            requestHeaders << "\r\n";
 
-private:
+        requestHeaders << extraHeaders;
+
+        if (! requestHeaders.endsWithChar ('\n') && requestHeaders.isNotEmpty())
+            requestHeaders << "\r\n";
+    }
+
+    void withCustomRequestCommand (const String& customRequestCommand)    { httpRequest = customRequestCommand; }
+    void withConnectionTimeout (int timeoutInMs)                          { timeOutMs = timeoutInMs; }
+    void withNumRedirectsToFollow (int maxRedirectsToFollow)              { maxRedirects = maxRedirectsToFollow; }
+    StringPairArray getRequestHeaders() const                             { return WebInputStream::parseHttpHeaders (requestHeaders); }
+    StringPairArray getResponseHeaders() const                            { return WebInputStream::parseHttpHeaders (responseHeaders); }
+    int getStatusCode() const                                             { return statusCode; }
+
     //==============================================================================
     bool init()
     {
@@ -128,32 +137,45 @@ private:
         }
     }
 
-    //==============================================================================
-    bool setOptions (const String& address, int timeOutMs, bool wantsHeaders,
-                     const int maxRedirects, const String& headers,
-                     bool isPost, const String& httpRequest, size_t postSize)
+    void cancel()
     {
+        cleanup();
+    }
+
+    //==============================================================================
+    bool setOptions ()
+    {
+        const String address = url.toString (! isPost);
+
         curl_version_info_data* data = curl_version_info (CURLVERSION_NOW);
         jassert (data != nullptr);
+
+        if (! requestHeaders.endsWithChar ('\n'))
+            requestHeaders << "\r\n";
+
+        if (isPost)
+            WebInputStream::createHeadersAndPostData (url, requestHeaders, headersAndPostData);
+
+        if (! requestHeaders.endsWithChar ('\n'))
+            requestHeaders << "\r\n";
 
         String userAgent = String ("curl/") + data->version;
 
         if (curl_easy_setopt (curl, CURLOPT_URL, address.toRawUTF8()) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_WRITEDATA, this) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, StaticCurlWrite) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_MAXREDIRS, static_cast<long> (maxRedirects)) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_USERAGENT, userAgent.toRawUTF8()) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, (maxRedirects > 0 ? 1 : 0)) == CURLE_OK
-             && curl_easy_setopt (curl, CURLOPT_COOKIEFILE, "") == CURLE_OK)
+            && curl_easy_setopt (curl, CURLOPT_WRITEDATA, this) == CURLE_OK
+            && curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, StaticCurlWrite) == CURLE_OK
+            && curl_easy_setopt (curl, CURLOPT_MAXREDIRS, static_cast<long> (maxRedirects)) == CURLE_OK
+            && curl_easy_setopt (curl, CURLOPT_USERAGENT, userAgent.toRawUTF8()) == CURLE_OK
+            && curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, (maxRedirects > 0 ? 1 : 0)) == CURLE_OK)
         {
             if (isPost)
             {
                 if (curl_easy_setopt (curl, CURLOPT_READDATA, this) != CURLE_OK
-                     || curl_easy_setopt (curl, CURLOPT_READFUNCTION, StaticCurlRead) != CURLE_OK)
+                    || curl_easy_setopt (curl, CURLOPT_READFUNCTION, StaticCurlRead) != CURLE_OK)
                     return false;
 
                 if (curl_easy_setopt (curl, CURLOPT_POST, 1) != CURLE_OK
-                     || curl_easy_setopt (curl, CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t> (postSize)) != CURLE_OK)
+                    || curl_easy_setopt (curl, CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t> (headersAndPostData.getSize())) != CURLE_OK)
                     return false;
             }
 
@@ -165,39 +187,17 @@ private:
                     return false;
             }
 
-            // do we want to parse the headers
-            if (wantsHeaders)
-            {
-                if (curl_easy_setopt (curl, CURLOPT_HEADERDATA, this) != CURLE_OK
-                     || curl_easy_setopt (curl, CURLOPT_HEADERFUNCTION, StaticCurlHeader) != CURLE_OK)
-                    return false;
-            }
-
-            if (headers.isNotEmpty())
-            {
-                const StringArray headerLines = StringArray::fromLines (headers);
-
-                // fromLines will always return at least one line if the string is not empty
-                jassert (headerLines.size() > 0);
-                headerList = curl_slist_append (headerList, headerLines [0].toRawUTF8());
-
-                for (int i = 1; (i < headerLines.size() && headerList != nullptr); ++i)
-                    headerList = curl_slist_append (headerList, headerLines [i].toRawUTF8());
-
-                if (headerList == nullptr)
-                    return false;
-
-                if (curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headerList) != CURLE_OK)
-                    return false;
-            }
+            if (curl_easy_setopt (curl, CURLOPT_HEADERDATA, this) != CURLE_OK
+                || curl_easy_setopt (curl, CURLOPT_HEADERFUNCTION, StaticCurlHeader) != CURLE_OK)
+                return false;
 
             if (timeOutMs > 0)
             {
                 long timeOutSecs = ((long) timeOutMs + 999) / 1000;
 
                 if (curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT, timeOutSecs) != CURLE_OK
-                     || curl_easy_setopt (curl, CURLOPT_LOW_SPEED_LIMIT, 100) != CURLE_OK
-                     || curl_easy_setopt (curl, CURLOPT_LOW_SPEED_TIME, timeOutSecs) != CURLE_OK)
+                    || curl_easy_setopt (curl, CURLOPT_LOW_SPEED_LIMIT, 100) != CURLE_OK
+                    || curl_easy_setopt (curl, CURLOPT_LOW_SPEED_TIME, timeOutSecs) != CURLE_OK)
                     return false;
             }
 
@@ -207,11 +207,42 @@ private:
         return false;
     }
 
-    void connect (StringPairArray* responseHeaders, bool isPost, const MemoryBlock& postData,
-                  URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext)
+    bool connect (WebInputStream::Listener* webInputListener)
     {
+        if (! setOptions ())
+        {
+            cleanup();
+            return false;
+        }
+
+        listener = webInputListener;
+
+        if (requestHeaders.isNotEmpty())
+        {
+            const StringArray headerLines = StringArray::fromLines (requestHeaders);
+
+            // fromLines will always return at least one line if the string is not empty
+            jassert (headerLines.size() > 0);
+            headerList = curl_slist_append (headerList, headerLines [0].toRawUTF8());
+
+            for (int i = 1; (i < headerLines.size() && headerList != nullptr); ++i)
+                headerList = curl_slist_append (headerList, headerLines [i].toRawUTF8());
+
+            if (headerList == nullptr)
+            {
+                cleanup();
+                return false;
+            }
+
+            if (curl_easy_setopt (curl, CURLOPT_HTTPHEADER, headerList) != CURLE_OK)
+            {
+                cleanup();
+                return false;
+            }
+        }
+
         if (isPost)
-            postBuffer = &postData;
+            postBuffer = &headersAndPostData;
 
         size_t lastPos = static_cast<size_t> (-1);
 
@@ -222,17 +253,15 @@ private:
             singleStep();
 
             // call callbacks if this is a post request
-            if (isPost && progressCallback != nullptr && lastPos != postPosition)
+            if (isPost && listener != nullptr && lastPos != postPosition)
             {
                 lastPos = postPosition;
 
-                if (! progressCallback (progressCallbackContext,
-                                        static_cast<int> (lastPos),
-                                        static_cast<int> (postData.getSize())))
+                if (! listener->postDataSendProgress (owner, static_cast<int> (lastPos), static_cast<int> (headersAndPostData.getSize())))
                 {
                     // user has decided to abort the transaction
                     cleanup();
-                    return;
+                    return false;
                 }
             }
         }
@@ -241,14 +270,12 @@ private:
         if (curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &responseCode) == CURLE_OK)
             statusCode = static_cast<int> (responseCode);
 
-        // parse headers
-        if (responseHeaders != nullptr)
-            parseHttpHeaders (*responseHeaders);
-
         // get content length size
         double curlLength;
         if (curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &curlLength) == CURLE_OK)
             contentLength = static_cast<int64> (curlLength);
+
+        return true;
     }
 
     void finish()
@@ -380,28 +407,6 @@ private:
         return static_cast<int> (pos);
     }
 
-
-    //==============================================================================
-    void parseHttpHeaders (StringPairArray& responseHeaders)
-    {
-        StringArray headerLines = StringArray::fromLines (curlHeaders);
-
-        // ignore the first line as this is the status line
-        for (int i = 1; i < headerLines.size(); ++i)
-        {
-            const String& headersEntry = headerLines[i];
-
-            if (headersEntry.isNotEmpty())
-            {
-                const String key (headersEntry.upToFirstOccurrenceOf (": ", false, false));
-                const String value (headersEntry.fromFirstOccurrenceOf (": ", false, false));
-                const String previousValue (responseHeaders [key]);
-                responseHeaders.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
-            }
-        }
-    }
-
-
     //==============================================================================
     // CURL callbacks
     size_t curlWriteCallback (char* ptr, size_t size, size_t nmemb)
@@ -445,9 +450,9 @@ private:
         String header (ptr, len);
 
         if (! header.contains (":") && header.startsWithIgnoreCase ("HTTP/"))
-            curlHeaders.clear();
+            responseHeaders.clear();
         else
-            curlHeaders += header;
+            responseHeaders += header;
 
         return len;
     }
@@ -457,33 +462,49 @@ private:
     // Static method wrappers
     static size_t StaticCurlWrite (char* ptr, size_t size, size_t nmemb, void* userdata)
     {
-        WebInputStream* wi = reinterpret_cast<WebInputStream*> (userdata);
+        WebInputStream::Pimpl* wi = reinterpret_cast<WebInputStream::Pimpl*> (userdata);
         return wi->curlWriteCallback (ptr, size, nmemb);
     }
 
     static size_t StaticCurlRead (char* ptr, size_t size, size_t nmemb, void* userdata)
     {
-        WebInputStream* wi = reinterpret_cast<WebInputStream*> (userdata);
+        WebInputStream::Pimpl* wi = reinterpret_cast<WebInputStream::Pimpl*> (userdata);
         return wi->curlReadCallback (ptr, size, nmemb);
     }
 
     static size_t StaticCurlHeader (char* ptr, size_t size, size_t nmemb, void* userdata)
     {
-        WebInputStream* wi = reinterpret_cast<WebInputStream*> (userdata);
+        WebInputStream::Pimpl* wi = reinterpret_cast<WebInputStream::Pimpl*> (userdata);
         return wi->curlHeaderCallback (ptr, size, nmemb);
     }
 
-private:
+    //==============================================================================
+    WebInputStream& owner;
+    const URL url;
+
+    //==============================================================================
+    // curl stuff
     CURLM* multi;
     CURL* curl;
     struct curl_slist* headerList;
     int lastError;
 
     //==============================================================================
+    // Options
+    int timeOutMs;
+    int maxRedirects;
+    const bool isPost;
+    String httpRequest;
+
+    //==============================================================================
     // internal buffers and buffer positions
     int64 contentLength, streamPos;
     MemoryBlock curlBuffer;
-    String curlHeaders;
+    MemoryBlock headersAndPostData;
+    String responseHeaders, requestHeaders;
+    int statusCode;
+
+    //==============================================================================
     bool finished;
     size_t skipBytes;
 
@@ -492,5 +513,14 @@ private:
     const MemoryBlock* postBuffer;
     size_t postPosition;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
+    //==============================================================================
+    WebInputStream::Listener* listener;
+
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
+
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+{
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+}

@@ -2,22 +2,28 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   ------------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -183,6 +189,39 @@ public:
         This will free any memory allocated by the buffer.
     */
     ~AudioBuffer() noexcept {}
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
+    AudioBuffer (AudioBuffer&& other) noexcept
+        : numChannels (other.numChannels),
+          size (other.size),
+          allocatedBytes (other.allocatedBytes),
+          channels (other.channels),
+          allocatedData (static_cast<HeapBlock<char, true>&&> (other.allocatedData)),
+          isClear (other.isClear)
+    {
+        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+        other.numChannels = 0;
+        other.size = 0;
+        other.allocatedBytes = 0;
+    }
+
+    /** Move assignment */
+    AudioBuffer& operator= (AudioBuffer&& other) noexcept
+    {
+        numChannels = other.numChannels;
+        size = other.size;
+        allocatedBytes = other.allocatedBytes;
+        channels = other.channels;
+        allocatedData = static_cast<HeapBlock<char, true>&&> (other.allocatedData);
+        isClear = other.isClear;
+        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+        other.numChannels = 0;
+        other.size = 0;
+        other.allocatedBytes = 0;
+        return *this;
+    }
+   #endif
 
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.

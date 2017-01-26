@@ -1139,10 +1139,10 @@ struct DLLHandle
        #else
         if (bundleRef != nullptr)
         {
+            releaseFactory();
+
             if (ExitModuleFn exitFn = (ExitModuleFn) getFunction ("bundleExit"))
                 exitFn();
-
-            releaseFactory();
 
             CFRelease (bundleRef);
             bundleRef = nullptr;
@@ -1721,6 +1721,8 @@ struct VST3ComponentHolder
                                      info, info2, infoW,
                                      totalNumInputChannels,
                                      totalNumOutputChannels);
+
+            return;
         }
 
         jassertfalse;
@@ -2285,20 +2287,24 @@ public:
 
         if (head != nullptr)
         {
-            ComSmartPtr<Steinberg::MemoryStream> s (createMemoryStreamForState (*head, "IComponent"));
+            ComSmartPtr<Steinberg::MemoryStream> componentStream (createMemoryStreamForState (*head, "IComponent"));
 
-            if (s != nullptr && holder->component != nullptr)
-                holder->component->setState (s);
+            if (componentStream != nullptr && holder->component != nullptr)
+                holder->component->setState (componentStream);
 
             if (editController != nullptr)
             {
-                if (s != nullptr)
-                    editController->setComponentState (s);
+                if (componentStream != nullptr)
+                {
+                    int64 result;
+                    componentStream->seek (0, IBStream::kIBSeekSet, &result);
+                    editController->setComponentState (componentStream);
+                }
 
-                s = createMemoryStreamForState (*head, "IEditController");
+                ComSmartPtr<Steinberg::MemoryStream> controllerStream = createMemoryStreamForState (*head, "IEditController");
 
-                if (s != nullptr)
-                    editController->setState (s);
+                if (controllerStream != nullptr)
+                    editController->setState (controllerStream);
             }
         }
     }

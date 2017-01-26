@@ -1,4 +1,3 @@
-
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainComponent.h"
 
@@ -31,6 +30,10 @@ public:
             centreWithSize (getWidth(), getHeight());
             setResizable (true, true);
             setVisible (true);
+
+           #if JUCE_IOS
+            setFullScreen (true);
+           #endif
         }
 
         void closeButtonPressed() override

@@ -2774,12 +2774,18 @@ private:
 
         if (XModifierKeymap* const mapping = XGetModifierMapping (display))
         {
-            for (int i = 0; i < 8; i++)
+            const int numMods       = 8;
+            const int maxKeysPerMod = mapping->max_keypermod;
+
+            for (int i = 0; i < numMods; i++)
             {
-                if (mapping->modifiermap [i << 1] == altLeftCode)
-                    Keys::AltMask = 1 << i;
-                else if (mapping->modifiermap [i << 1] == numLockCode)
-                    Keys::NumLockMask = 1 << i;
+                for (int j = 0; j < maxKeysPerMod; ++j)
+                {
+                    const int index = (i * maxKeysPerMod) + j;
+
+                    if      (mapping->modifiermap[index] == altLeftCode) Keys::AltMask     = 1 << i;
+                    else if (mapping->modifiermap[index] == numLockCode) Keys::NumLockMask = 1 << i;
+                }
             }
 
             XFreeModifiermap (mapping);
@@ -2966,9 +2972,6 @@ private:
         if ((styleFlags & windowIgnoresMouseClicks) == 0)
             buttonMask |= ButtonPressMask | ButtonReleaseMask;
 
-        XGrabButton (display, AnyButton, AnyModifier, windowH, False,
-                     buttonMask, GrabModeAsync, GrabModeAsync, None, None);
-
         // Set the window context to identify the window handle object
         if (XSaveContext (display, (XID) windowH, windowHandleXContext, (XPointer) this))
         {
@@ -3040,7 +3043,7 @@ private:
         return NoEventMask | KeyPressMask | KeyReleaseMask
                  | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
                  | ExposureMask | StructureNotifyMask | FocusChangeMask
-                 | ((styleFlags & windowIgnoresMouseClicks) != 0 ? (ButtonPressMask | ButtonReleaseMask) : 0);
+                 | ((styleFlags & windowIgnoresMouseClicks) != 0 ? 0 : (ButtonPressMask | ButtonReleaseMask));
     }
 
     template <typename EventType>

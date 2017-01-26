@@ -73,6 +73,7 @@ public:
         statusIcon = MouseCursorHelpers::createNSImage (newImage);
         setIconSize();
         SystemTrayViewClass::setImage (view, statusIcon);
+        [statusItem setView: view];
     }
 
     void setHighlighted (bool shouldHighlight)
@@ -85,8 +86,8 @@ public:
     {
         NSEventType type = [e type];
 
-        const bool isLeft  = (type == NSLeftMouseDown  || type == NSLeftMouseUp);
-        const bool isRight = (type == NSRightMouseDown || type == NSRightMouseUp);
+        const bool isLeft  = (type == NSEventTypeLeftMouseDown  || type == NSEventTypeLeftMouseUp);
+        const bool isRight = (type == NSEventTypeRightMouseDown || type == NSEventTypeRightMouseUp);
 
         if (owner.isCurrentlyBlockedByAnotherModalComponent())
         {
@@ -98,7 +99,7 @@ public:
         {
             ModifierKeys eventMods (ModifierKeys::getCurrentModifiersRealtime());
 
-            if (([e modifierFlags] & NSCommandKeyMask) != 0)
+            if (([e modifierFlags] & NSEventModifierFlagCommand) != 0)
                 eventMods = eventMods.withFlags (ModifierKeys::commandModifier);
 
             const Time now (Time::getCurrentTime());
@@ -121,7 +122,7 @@ public:
                                            pressure, &owner, &owner, now,
                                            Point<float>(), now, 1, false));
             }
-            else if (type == NSMouseMoved)
+            else if (type == NSEventTypeMouseMoved)
             {
                 owner.mouseMove (MouseEvent (mouseSource, Point<float>(), eventMods,
                                              pressure, &owner, &owner, now,
@@ -214,7 +215,7 @@ private:
                                             bounds.origin.y + ((bounds.size.height - imageSize.height) / 2.0f),
                                             imageSize.width, imageSize.height)
                       fromRect: NSZeroRect
-                     operation: NSCompositeSourceOver
+                     operation: NSCompositingOperationSourceOver
                       fraction: 1.0f];
             }
         }

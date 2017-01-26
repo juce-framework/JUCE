@@ -117,7 +117,9 @@ class JuceAU   : public AudioProcessorHolder,
 public:
     JuceAU (AudioUnit component)
         : AudioProcessorHolder(activePlugins.size() + activeUIs.size() == 0),
-          MusicDeviceBase (component, (UInt32) juceFilter->getBusCount (true), (UInt32) juceFilter->getBusCount (false)),
+          MusicDeviceBase (component,
+                           (UInt32) AudioUnitHelpers::getBusCount (juceFilter, true),
+                           (UInt32) AudioUnitHelpers::getBusCount (juceFilter, false)),
           isBypassed (false),
           mapper (*juceFilter)
     {
@@ -189,7 +191,7 @@ public:
             return err;
 
         mapper.alloc();
-        pulledSucceeded.calloc (static_cast<size_t> (juceFilter->getBusCount (true)));
+        pulledSucceeded.calloc (static_cast<size_t> (AudioUnitHelpers::getBusCount (juceFilter, true)));
 
         prepareToPlay();
 
@@ -263,6 +265,11 @@ public:
     //==============================================================================
     bool BusCountWritable (AudioUnitScope scope) override
     {
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        ignoreUnused (scope);
+
+        return false;
+       #else
         bool isInput;
 
         if (scopeToDirection (scope, isInput) != noErr)
@@ -274,8 +281,9 @@ public:
         if (isInput) return false;
        #endif
 
-        const int busCount = juceFilter->getBusCount (isInput);
+        const int busCount = AudioUnitHelpers::getBusCount (juceFilter, isInput);
         return (juceFilter->canAddBus (isInput) || (busCount > 0 && juceFilter->canRemoveBus (isInput)));
+       #endif
     }
 
     OSStatus SetBusCount (AudioUnitScope scope, UInt32 count) override
@@ -286,9 +294,12 @@ public:
         if ((err = scopeToDirection (scope, isInput)) != noErr)
             return err;
 
-        if (count != (UInt32) juceFilter->getBusCount (isInput))
+        if (count != (UInt32) AudioUnitHelpers::getBusCount (juceFilter, isInput))
         {
-            const int busCount = juceFilter->getBusCount (isInput);
+           #ifdef JucePlugin_PreferredChannelConfigurations
+            return kAudioUnitErr_PropertyNotWritable;
+           #else
+            const int busCount = AudioUnitHelpers::getBusCount (juceFilter, isInput);
 
             if  ((! juceFilter->canAddBus (isInput)) && ((busCount == 0) || (! juceFilter->canRemoveBus (isInput))))
                 return kAudioUnitErr_PropertyNotWritable;
@@ -328,7 +339,7 @@ public:
             if (err != noErr)
             {
                 // restore bus state
-                const int newBusCount = juceFilter->getBusCount (isInput);
+                const int newBusCount = AudioUnitHelpers::getBusCount (juceFilter, isInput);
                 for (int i = newBusCount; i != busCount; i += (busCount > newBusCount ? 1 : -1))
                 {
                     if (busCount > newBusCount)
@@ -346,6 +357,7 @@ public:
 
             if (err != noErr)
                 return err;
+           #endif
         }
 
         return noErr;
@@ -788,6 +800,7 @@ public:
              && juceFilter != nullptr
              && index < juceFilter->getNumParameters())
         {
+            outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
             outParameterInfo.flags = (UInt32) (kAudioUnitParameterFlag_IsWritable
                                                 | kAudioUnitParameterFlag_IsReadable
                                                 | kAudioUnitParameterFlag_HasCFNameString
@@ -806,6 +819,14 @@ public:
             if (juceFilter->isMetaParameter (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
+            // is this a meter?
+            if (((juceFilter->getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            {
+                outParameterInfo.flags &= ~kAudioUnitParameterFlag_IsWritable;
+                outParameterInfo.flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;
+                outParameterInfo.unit = kAudioUnitParameterUnit_LinearGain;
+            }
+
             MusicDeviceBase::FillInParameterName (outParameterInfo, name.toCFString(), true);
 
             outParameterInfo.minValue = 0.0f;
@@ -813,7 +834,6 @@ public:
             outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index);
             jassert (outParameterInfo.defaultValue >= outParameterInfo.minValue
                       && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
-            outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
 
             return noErr;
         }
@@ -862,7 +882,7 @@ public:
     ComponentResult Version() override                   { return JucePlugin_VersionCode; }
     bool SupportsTail() override                         { return true; }
     Float64 GetTailTime() override                       { return juceFilter->getTailLengthSeconds(); }
-    double getSampleRate()                               { return juceFilter->getBusCount (false) > 0 ? GetOutput(0)->GetStreamFormat().mSampleRate : 44100.0; }
+    double getSampleRate()                               { return AudioUnitHelpers::getBusCount (juceFilter, false) > 0 ? GetOutput(0)->GetStreamFormat().mSampleRate : 44100.0; }
 
     Float64 GetLatency() override
     {
@@ -997,6 +1017,11 @@ public:
     {
         bool isInput;
         int busNr;
+
+        // DSP Quattro incorrectly uses global scope for the ValidFormat call
+        if (scope == kAudioUnitScope_Global)
+            return ValidFormat (kAudioUnitScope_Input,  element, format)
+                || ValidFormat (kAudioUnitScope_Output, element, format);
 
         if (elementToBusIdx (scope, element, isInput, busNr) != noErr)
             return false;
@@ -1647,7 +1672,7 @@ private:
         busIdx = static_cast<int> (element);
 
         if ((err = scopeToDirection (scope, isInput)) != noErr) return err;
-        if (isPositiveAndBelow (busIdx, juceFilter->getBusCount (isInput))) return noErr;
+        if (isPositiveAndBelow (busIdx, AudioUnitHelpers::getBusCount (juceFilter, isInput))) return noErr;
 
         return kAudioUnitErr_InvalidElement;
     }
@@ -1698,7 +1723,15 @@ private:
         if (isPositiveAndBelow (paramIndex, n))
         {
             const String& juceParamID = juceFilter->getParameterID (paramIndex);
-            return usingManagedParameter ? static_cast<AudioUnitParameterID> (juceParamID.hashCode())
+
+            AudioUnitParameterID paramHash = static_cast<AudioUnitParameterID> (juceParamID.hashCode());
+
+           #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+            // studio one doesn't like negative parameters
+            paramHash &= ~(1 << (sizeof (AudioUnitParameterID) * 8 - 1));
+           #endif
+
+            return usingManagedParameter ? paramHash
                                          : static_cast<AudioUnitParameterID> (juceParamID.getIntValue());
         }
 
@@ -1723,8 +1756,8 @@ private:
     OSStatus syncAudioUnitWithProcessor()
     {
         OSStatus err = noErr;
-        const int enabledInputs  = juceFilter->getBusCount (true);
-        const int enabledOutputs = juceFilter->getBusCount (false);
+        const int enabledInputs  = AudioUnitHelpers::getBusCount (juceFilter, true);
+        const int enabledOutputs = AudioUnitHelpers::getBusCount (juceFilter, false);
 
         if ((err =  MusicDeviceBase::SetBusCount (kAudioUnitScope_Input,  static_cast<UInt32> (enabledInputs))) != noErr)
             return err;
@@ -1745,8 +1778,8 @@ private:
 
     OSStatus syncProcessorWithAudioUnit()
     {
-        const int numInputBuses  = juceFilter->getBusCount (true);
-        const int numOutputBuses = juceFilter->getBusCount (false);
+        const int numInputBuses  = AudioUnitHelpers::getBusCount (juceFilter, true);
+        const int numOutputBuses = AudioUnitHelpers::getBusCount (juceFilter, false);
 
         const int numInputElements  = static_cast<int> (GetScope(kAudioUnitScope_Input). GetNumberOfElements());
         const int numOutputElements = static_cast<int> (GetScope(kAudioUnitScope_Output).GetNumberOfElements());
@@ -1781,7 +1814,7 @@ private:
             return kAudioUnitErr_FormatNotSupported;
        #endif
 
-        if (! juceFilter->setBusesLayout (requestedLayouts))
+        if (! AudioUnitHelpers::setBusesLayout (juceFilter, requestedLayouts))
             return kAudioUnitErr_FormatNotSupported;
 
         // update total channel count
@@ -1885,7 +1918,7 @@ private:
         Array<Array<AudioChannelLayoutTag> >& layouts = isInput ? supportedInputLayouts : supportedOutputLayouts;
         layouts.clear();
 
-        const int numBuses = juceFilter->getBusCount (isInput);
+        const int numBuses = AudioUnitHelpers::getBusCount (juceFilter, isInput);
         for (int busNr = 0; busNr < numBuses; ++busNr)
         {
             Array<AudioChannelLayoutTag> busLayouts;
@@ -1899,8 +1932,8 @@ private:
     {
         currentInputLayout.clear(); currentOutputLayout.clear();
 
-        currentInputLayout. resize (juceFilter->getBusCount (true));
-        currentOutputLayout.resize (juceFilter->getBusCount (false));
+        currentInputLayout. resize (AudioUnitHelpers::getBusCount (juceFilter, true));
+        currentOutputLayout.resize (AudioUnitHelpers::getBusCount (juceFilter, false));
 
         addSupportedLayoutTagsForDirection (true);
         addSupportedLayoutTagsForDirection (false);

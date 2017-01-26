@@ -293,9 +293,9 @@ struct ProcessBufferOp   : public AudioGraphRenderingOp<ProcessBufferOp>
             // precision then we need to convert between buffer formats. Note, that
             // this will only happen if the processor does not support double
             // precision processing.
-            tempBuffer.makeCopyOf (buffer);
+            tempBuffer.makeCopyOf (buffer, true);
             processor->processBlock (tempBuffer, midiMessages);
-            buffer.makeCopyOf (tempBuffer);
+            buffer.makeCopyOf (tempBuffer, true);
         }
     }
 

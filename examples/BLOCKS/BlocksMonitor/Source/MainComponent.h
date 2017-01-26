@@ -1,4 +1,3 @@
-
 #ifndef MAINCOMPONENT_H_INCLUDED
 #define MAINCOMPONENT_H_INCLUDED
 
@@ -10,7 +9,8 @@
 */
 class MainComponent   : public Component,
                         public TopologySource::Listener,
-                        private Timer
+                        private Timer,
+                        private Button::Listener
 {
 public:
     MainComponent()
@@ -19,12 +19,30 @@ public:
 
         noBlocksLabel.setText ("No BLOCKS connected...", dontSendNotification);
         noBlocksLabel.setJustificationType (Justification::centred);
-        addAndMakeVisible (noBlocksLabel);
+
+        zoomOutButton.setButtonText ("+");
+        zoomOutButton.addListener (this);
+        zoomOutButton.setAlwaysOnTop (true);
+
+        zoomInButton.setButtonText ("-");
+        zoomInButton.addListener (this);
+        zoomInButton.setAlwaysOnTop (true);
 
         // Register MainComponent as a listener to the PhysicalTopologySource object
         topologySource.addListener (this);
 
         startTimer (10000);
+
+        addAndMakeVisible (noBlocksLabel);
+        addAndMakeVisible (zoomOutButton);
+        addAndMakeVisible (zoomInButton);
+
+       #if JUCE_IOS
+        connectButton.setButtonText ("Connect");
+        connectButton.addListener (this);
+        connectButton.setAlwaysOnTop (true);
+        addAndMakeVisible (connectButton);
+       #endif
     }
 
     void paint (Graphics& g) override
@@ -34,6 +52,10 @@ public:
 
     void resized() override
     {
+       #if JUCE_IOS
+        connectButton.setBounds (getRight() - 100, 20, 80, 30);
+       #endif
+
         noBlocksLabel.setVisible (false);
         const int numBlockComponents = blockComponents.size();
 
@@ -45,56 +67,84 @@ public:
             return;
         }
 
-        // Work out the maximum diplay area for each Block
-        const Rectangle<int> bounds = getLocalBounds().reduced (20);
+        zoomOutButton.setBounds (10, getHeight() - 40, 40, 30);
+        zoomInButton.setBounds  (zoomOutButton.getRight(), zoomOutButton.getY(), 40, 30);
 
-        auto squareRoot = sqrt (numBlockComponents);
-        int gridSize = (int)squareRoot;
-
-        if (squareRoot - gridSize > 0)
-            gridSize++;
-
-        int sideLength = bounds.getWidth() / gridSize;
-
-        int xCounter = 0;
-        int yCounter = 0;
-        bool hasSpaceForControlBlock = false;
-        Rectangle<int> lastControlBlockBounds;
-
-        for (auto block : blockComponents)
+        if (isInitialResized)
         {
-            Rectangle<int> blockBounds;
-            const Block::Type type = block->block->getType();
-
-            // Can fit 2 ControlBlockComponents in the space of one LightpadBlockComponent
-            if (type == Block::liveBlock || type == Block::loopBlock)
+            // Work out the area needed in terms of Block units
+            Rectangle<float> maxArea;
+            for (auto blockComponent : blockComponents)
             {
-                if (hasSpaceForControlBlock)
-                {
-                    blockBounds = lastControlBlockBounds.withY (lastControlBlockBounds.getY() + (int)(sideLength * 0.5));
-                    hasSpaceForControlBlock = false;
-                }
-                else
-                {
-                    blockBounds = Rectangle<int> (bounds.getX() + (xCounter * sideLength), bounds.getY() + (yCounter * sideLength),
-                                                  sideLength, (int)(sideLength * 0.5));
-                    hasSpaceForControlBlock = true;
-                    lastControlBlockBounds = blockBounds;
-                }
-            }
-            else
-            {
-                blockBounds = Rectangle<int> (bounds.getX() + (xCounter * sideLength), bounds.getY() + (yCounter * sideLength),
-                                              sideLength, sideLength);
+                auto topLeft = blockComponent->topLeft;
+                int rotation = blockComponent->rotation;
+                int blockSize = 0;
+
+                if (rotation == 180)
+                    blockSize = blockComponent->block->getWidth();
+                else if (rotation == 90)
+                    blockSize = blockComponent->block->getHeight();
+
+                if (topLeft.x - blockSize < maxArea.getX())
+                    maxArea.setX (topLeft.x - blockSize);
+
+                blockSize = 0;
+                if (rotation == 0)
+                    blockSize = blockComponent->block->getWidth();
+                else if (rotation == 270)
+                    blockSize = blockComponent->block->getHeight();
+
+                if (topLeft.x + blockSize > maxArea.getRight())
+                    maxArea.setWidth (topLeft.x + blockSize);
+
+                blockSize = 0;
+                if (rotation == 180)
+                    blockSize = blockComponent->block->getHeight();
+                else if (rotation == 270)
+                    blockSize = blockComponent->block->getWidth();
+
+                if (topLeft.y - blockSize < maxArea.getY())
+                    maxArea.setY (topLeft.y - blockSize);
+
+                blockSize = 0;
+                if (rotation == 0)
+                    blockSize = blockComponent->block->getHeight();
+                else if (rotation == 90)
+                    blockSize = blockComponent->block->getWidth();
+
+                if (topLeft.y + blockSize > maxArea.getBottom())
+                    maxArea.setHeight (topLeft.y + blockSize);
             }
 
-            block->setBounds (blockBounds.reduced (5));
+            float totalWidth  = std::abs (maxArea.getX()) + maxArea.getWidth();
+            float totalHeight = std::abs (maxArea.getY()) + maxArea.getHeight();
 
-            if (++xCounter >= gridSize)
-            {
-                yCounter++;
-                xCounter = 0;
-            }
+            blockUnitInPixels = static_cast<int> (jmin ((getHeight() / totalHeight) - 50, (getWidth() / totalWidth) - 50));
+
+            masterBlockComponent->centreWithSize (masterBlockComponent->block->getWidth()  * blockUnitInPixels,
+                                                  masterBlockComponent->block->getHeight() * blockUnitInPixels);
+
+            isInitialResized = false;
+        }
+        else
+        {
+            masterBlockComponent->setSize (masterBlockComponent->block->getWidth() * blockUnitInPixels, masterBlockComponent->block->getHeight() * blockUnitInPixels);
+        }
+
+        for (auto blockComponent : blockComponents)
+        {
+            if (blockComponent == masterBlockComponent)
+                continue;
+
+            blockComponent->setBounds (masterBlockComponent->getX() + static_cast<int> (blockComponent->topLeft.x * blockUnitInPixels),
+                                       masterBlockComponent->getY() + static_cast<int> (blockComponent->topLeft.y * blockUnitInPixels),
+                                       blockComponent->block->getWidth()  * blockUnitInPixels,
+                                       blockComponent->block->getHeight() * blockUnitInPixels);
+
+            if (blockComponent->rotation != 0)
+                blockComponent->setTransform (AffineTransform::rotation (blockComponent->rotation * (static_cast<float> (double_Pi) / 180.0f),
+                                                                         static_cast<float> (blockComponent->getX()),
+                                                                         static_cast<float> (blockComponent->getY())));
         }
     }
 
@@ -103,16 +153,32 @@ public:
     {
         // Clear the array of Block components
         blockComponents.clear();
+        masterBlockComponent = nullptr;
 
-        // Get the array of currently connected Block objects from the PhysicalTopologySource
-        Block::Array blocksArray = topologySource.getCurrentTopology().blocks;
+        // Get the current topology
+        auto topology = topologySource.getCurrentTopology();
 
-        // Create a BlockComponent object for each Block object
-        for (auto& block : blocksArray)
-            if (BlockComponent* blockComponent = createBlockComponent (block))
+        // Create a BlockComponent object for each Block object and store a pointer to the master
+        for (auto& block : topology.blocks)
+        {
+            if (auto* blockComponent = createBlockComponent (block))
+            {
                 addAndMakeVisible (blockComponents.add (blockComponent));
 
+                if (blockComponent->block->isMasterBlock())
+                    masterBlockComponent = blockComponent;
+            }
+        }
+
+        // Must have a master Block!
+        if (topology.blocks.size() > 0)
+            jassert (masterBlockComponent != nullptr);
+
+        // Calculate the relative position and rotation for each Block
+        positionBlocks (topology);
+
         // Update the display
+        isInitialResized = true;
         resized();
     }
 
@@ -120,16 +186,16 @@ private:
     /** Creates a BlockComponent object for a new Block and adds it to the content component */
     BlockComponent* createBlockComponent (Block::Ptr newBlock)
     {
-        const Block::Type type = newBlock->getType();
+        auto type = newBlock->getType();
 
         if (type == Block::lightPadBlock)
             return new LightpadComponent (newBlock);
+
         if (type == Block::loopBlock || type == Block::liveBlock)
             return new ControlBlockComponent (newBlock);
 
-        // should only be connecting a Lightpad or Control Block!
+        // Should only be connecting a Lightpad or Control Block!
         jassertfalse;
-
         return nullptr;
     }
 
@@ -140,11 +206,238 @@ private:
             c->updateStatsAndTooltip();
     }
 
+    /** Zooms the display in or out */
+    void buttonClicked (Button* button) override
+    {
+       #if JUCE_IOS
+        if (button == &connectButton)
+        {
+            BluetoothMidiDevicePairingDialogue::open();
+            return;
+        }
+       #endif
+
+        if (button == &zoomOutButton || button == &zoomInButton)
+        {
+            blockUnitInPixels *= (button == &zoomOutButton ? 1.05f : 0.95f);
+            resized();
+        }
+    }
+
+    /** Calculates the position and rotation of each connected Block relative to the master Block */
+    void positionBlocks (BlockTopology topology)
+    {
+        Array<BlockComponent*> blocksConnectedToMaster;
+
+        float maxDelta = std::numeric_limits<float>::max();
+        int maxLoops = 50;
+
+        // Store all the connections to the master Block
+        Array<BlockDeviceConnection> masterBlockConnections;
+        for (auto connection : topology.connections)
+            if (connection.device1 == masterBlockComponent->block->uid || connection.device2 == masterBlockComponent->block->uid)
+                masterBlockConnections.add (connection);
+
+        // Position all the Blocks that are connected to the master Block
+        while (maxDelta > 0.001f && --maxLoops)
+        {
+            maxDelta = 0.0f;
+
+            // Loop through each connection on the master Block
+            for (auto connection : masterBlockConnections)
+            {
+                // Work out whether the master Block is device 1 or device 2 in the BlockDeviceConnection struct
+                bool isDevice1 = true;
+                if (masterBlockComponent->block->uid == connection.device2)
+                    isDevice1 = false;
+
+                // Get the connected ports
+                auto masterPort = isDevice1 ? connection.connectionPortOnDevice1 : connection.connectionPortOnDevice2;
+                auto otherPort  = isDevice1 ? connection.connectionPortOnDevice2 : connection.connectionPortOnDevice1;
+
+                for (auto otherBlockComponent : blockComponents)
+                {
+                    // Get the other block
+                    if (otherBlockComponent->block->uid == (isDevice1 ? connection.device2 : connection.device1))
+                    {
+                        blocksConnectedToMaster.addIfNotAlreadyThere (otherBlockComponent);
+
+                        // Get the rotation of the other Block relative to the master Block
+                        otherBlockComponent->rotation = getRotation (masterPort.edge, otherPort.edge);
+
+                        // Get the offsets for the connected ports
+                        auto masterBlockOffset = masterBlockComponent->getOffsetForPort (masterPort);
+                        auto otherBlockOffset  = otherBlockComponent->topLeft + otherBlockComponent->getOffsetForPort (otherPort);
+
+                        // Work out the distance between the two connected ports
+                        auto delta = masterBlockOffset - otherBlockOffset;
+
+                        // Move the other block half the distance to the connection
+                        otherBlockComponent->topLeft += delta / 2.0f;
+
+                        // Work out whether we are close enough for the loop to end
+                        maxDelta = jmax (maxDelta, std::abs (delta.x), std::abs (delta.y));
+                    }
+                }
+            }
+        }
+
+        // Check if there are any Blocks that have not been positioned yet
+        Array<BlockComponent*> unpositionedBlocks;
+
+        for (auto blockComponent : blockComponents)
+            if (blockComponent != masterBlockComponent && ! blocksConnectedToMaster.contains (blockComponent))
+                unpositionedBlocks.add (blockComponent);
+
+        if (unpositionedBlocks.size() > 0)
+        {
+            // Reset the loop conditions
+            maxDelta = std::numeric_limits<float>::max();
+            maxLoops = 50;
+
+            // Position all the remaining Blocks
+            while (maxDelta > 0.001f && --maxLoops)
+            {
+                maxDelta = 0.0f;
+
+                // Loop through each unpositioned Block
+                for (auto blockComponent : unpositionedBlocks)
+                {
+                    // Store all the connections to this Block
+                    Array<BlockDeviceConnection> blockConnections;
+                    for (auto connection : topology.connections)
+                        if (connection.device1 == blockComponent->block->uid || connection.device2 == blockComponent->block->uid)
+                            blockConnections.add (connection);
+
+                    // Loop through each connection on this Block
+                    for (auto connection : blockConnections)
+                    {
+                        // Work out whether this Block is device 1 or device 2 in the BlockDeviceConnection struct
+                        bool isDevice1 = true;
+                        if (blockComponent->block->uid == connection.device2)
+                            isDevice1 = false;
+
+                        // Get the connected ports
+                        auto thisPort  = isDevice1 ? connection.connectionPortOnDevice1 : connection.connectionPortOnDevice2;
+                        auto otherPort = isDevice1 ? connection.connectionPortOnDevice2 : connection.connectionPortOnDevice1;
+
+                        // Get the other Block
+                        for (auto otherBlockComponent : blockComponents)
+                        {
+                            if (otherBlockComponent->block->uid == (isDevice1 ? connection.device2 : connection.device1))
+                            {
+                                // Get the rotation
+                                int rotation = getRotation (otherPort.edge, thisPort.edge) + otherBlockComponent->rotation;
+                                if (rotation > 360)
+                                    rotation -= 360;
+
+                                blockComponent->rotation = rotation;
+
+                                // Get the offsets for the connected ports
+                                auto otherBlockOffset = (otherBlockComponent->topLeft + otherBlockComponent->getOffsetForPort (otherPort));
+                                auto thisBlockOffset  = (blockComponent->topLeft + blockComponent->getOffsetForPort (thisPort));
+
+                                // Work out the distance between the two connected ports
+                                auto delta = otherBlockOffset - thisBlockOffset;
+
+                                // Move this block half the distance to the connection
+                                blockComponent->topLeft += delta / 2.0f;
+
+                                // Work out whether we are close enough for the loop to end
+                                maxDelta = jmax (maxDelta, std::abs (delta.x), std::abs (delta.y));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** Returns a rotation in degrees based on the connected edges of two blocks */
+    int getRotation (Block::ConnectionPort::DeviceEdge staticEdge, Block::ConnectionPort::DeviceEdge rotatedEdge)
+    {
+        using edge = Block::ConnectionPort::DeviceEdge;
+
+        switch (staticEdge)
+        {
+            case edge::north:
+            {
+                switch (rotatedEdge)
+                {
+                    case edge::north:
+                        return 180;
+                    case edge::south:
+                        return 0;
+                    case edge::east:
+                        return 90;
+                    case edge::west:
+                        return 270;
+                }
+            }
+            case edge::south:
+            {
+                switch (rotatedEdge)
+                {
+                    case edge::north:
+                        return 0;
+                    case edge::south:
+                        return 180;
+                    case edge::east:
+                        return 270;
+                    case edge::west:
+                        return 90;
+                }
+            }
+            case edge::east:
+            {
+                switch (rotatedEdge)
+                {
+                    case edge::north:
+                        return 270;
+                    case edge::south:
+                        return 90;
+                    case edge::east:
+                        return 180;
+                    case edge::west:
+                        return 0;
+                }
+            }
+
+            case edge::west:
+            {
+                switch (rotatedEdge)
+                {
+                    case edge::north:
+                        return 90;
+                    case edge::south:
+                        return 270;
+                    case edge::east:
+                        return 0;
+                    case edge::west:
+                        return 180;
+                }
+            }
+        }
+
+        return 0;
+    }
+
     //==============================================================================
     PhysicalTopologySource topologySource;
     OwnedArray<BlockComponent> blockComponents;
+    BlockComponent* masterBlockComponent = nullptr;
 
     Label noBlocksLabel;
+
+    TextButton zoomOutButton;
+    TextButton zoomInButton;
+
+    int blockUnitInPixels;
+    bool isInitialResized;
+
+   #if JUCE_IOS
+    TextButton connectButton;
+   #endif
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

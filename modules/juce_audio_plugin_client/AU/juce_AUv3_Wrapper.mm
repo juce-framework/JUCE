@@ -542,7 +542,7 @@ public:
         for (int dir = 0; dir < 2; ++dir)
         {
             const bool isInput = (dir == 0);
-            const int n = processor.getBusCount (isInput);
+            const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
             Array<AudioChannelSet>& channelSets = (isInput ? layouts.inputBuses : layouts.outputBuses);
 
             AUAudioUnitBusArray* auBuses = (isInput ? [getAudioUnit() inputBusses] : [getAudioUnit() outputBusses]);
@@ -578,7 +578,7 @@ public:
         }
        #endif
 
-        if (! processor.setBusesLayout (layouts))
+        if (! AudioUnitHelpers::setBusesLayout (&getAudioProcessor(), layouts))
         {
             if (outError != nullptr)
                 *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_FormatNotSupported userInfo:nullptr];
@@ -596,7 +596,7 @@ public:
 
         audioBuffer.prepare (totalInChannels, totalOutChannels, static_cast<int> (maxFrames));
 
-        double sampleRate = (jmax (processor.getBusCount (true), processor.getBusCount (false)) > 0 ?
+        double sampleRate = (jmax (AudioUnitHelpers::getBusCount (&processor, true), AudioUnitHelpers::getBusCount (&processor, false)) > 0 ?
                              [[[([inputBusses count] > 0 ? inputBusses : outputBusses) objectAtIndexedSubscript: 0] format] sampleRate] : 44100.0);
 
         processor.setRateAndBufferSizeDetails (sampleRate, static_cast<int> (maxFrames));
@@ -869,7 +869,7 @@ private:
     {
         ScopedPointer<NSMutableArray<AUAudioUnitBus*> > array = [[NSMutableArray<AUAudioUnitBus*> alloc] init];
         AudioProcessor& processor = getAudioProcessor();
-        const int n = processor.getBusCount (isInput);
+        const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
 
         for (int i = 0; i < n; ++i)
         {
@@ -913,6 +913,7 @@ private:
             const String identifier (idx);
             const String name = processor.getParameterName (idx);
 
+            AudioUnitParameterUnit unit = kAudioUnitParameterUnit_Generic;
             AudioUnitParameterOptions flags = (UInt32) (kAudioUnitParameterFlag_IsWritable
                                                       | kAudioUnitParameterFlag_IsReadable
                                                       | kAudioUnitParameterFlag_HasCFNameString
@@ -928,6 +929,14 @@ private:
 
             if (processor.isMetaParameter (idx))
                 flags |= kAudioUnitParameterFlag_IsGlobalMeta;
+
+            // is this a meter?
+            if (((processor.getParameterCategory (idx) & 0xffff0000) >> 16) == 2)
+            {
+                flags &= ~kAudioUnitParameterFlag_IsWritable;
+                flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;
+                unit = kAudioUnitParameterUnit_LinearGain;
+            }
 
            #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
             AUParameterAddress address = static_cast<AUParameterAddress> (idx);
@@ -996,7 +1005,7 @@ private:
         OwnedArray<BusBuffer>& busBuffers = isInput ? inBusBuffers : outBusBuffers;
         busBuffers.clear();
 
-        const int n = getAudioProcessor().getBusCount (isInput);
+        const int n = AudioUnitHelpers::getBusCount (&getAudioProcessor(), isInput);
         const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
         for (int busIdx = 0; busIdx < n; ++busIdx)

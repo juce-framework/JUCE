@@ -1,27 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -42,6 +44,46 @@
   #include <sys/fcntl.h>
  #else
   #import <Cocoa/Cocoa.h>
+  #if (! defined MAC_OS_X_VERSION_10_12) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12
+   #define NSEventModifierFlagCommand       NSCommandKeyMask
+   #define NSEventModifierFlagControl       NSControlKeyMask
+   #define NSEventModifierFlagHelp          NSHelpKeyMask
+   #define NSEventModifierFlagNumericPad    NSNumericPadKeyMask
+   #define NSEventModifierFlagOption        NSAlternateKeyMask
+   #define NSEventModifierFlagShift         NSShiftKeyMask
+   #define NSCompositingOperationSourceOver NSCompositeSourceOver
+   #define NSEventMaskApplicationDefined    NSApplicationDefinedMask
+   #define NSEventTypeApplicationDefined    NSApplicationDefined
+   #define NSEventTypeCursorUpdate          NSCursorUpdate
+   #define NSEventTypeMouseMoved            NSMouseMoved
+   #define NSEventTypeLeftMouseDown         NSLeftMouseDown
+   #define NSEventTypeRightMouseDown        NSRightMouseDown
+   #define NSEventTypeOtherMouseDown        NSOtherMouseDown
+   #define NSEventTypeLeftMouseUp           NSLeftMouseUp
+   #define NSEventTypeRightMouseUp          NSRightMouseUp
+   #define NSEventTypeOtherMouseUp          NSOtherMouseUp
+   #define NSEventTypeLeftMouseDragged      NSLeftMouseDragged
+   #define NSEventTypeRightMouseDragged     NSRightMouseDragged
+   #define NSEventTypeOtherMouseDragged     NSOtherMouseDragged
+   #define NSEventTypeScrollWheel           NSScrollWheel
+   #define NSEventTypeKeyDown               NSKeyDown
+   #define NSEventTypeKeyUp                 NSKeyUp
+   #define NSEventTypeFlagsChanged          NSFlagsChanged
+   #define NSEventMaskAny                   NSAnyEventMask
+   #define NSWindowStyleMaskBorderless      NSBorderlessWindowMask
+   #define NSWindowStyleMaskClosable        NSClosableWindowMask
+   #define NSWindowStyleMaskFullScreen      NSFullScreenWindowMask
+   #define NSWindowStyleMaskMiniaturizable  NSMiniaturizableWindowMask
+   #define NSWindowStyleMaskResizable       NSResizableWindowMask
+   #define NSWindowStyleMaskTitled          NSTitledWindowMask
+   #define NSAlertStyleCritical             NSCriticalAlertStyle
+   #define NSControlSizeRegular             NSRegularControlSize
+   #define NSEventTypeMouseEntered          NSMouseEntered
+   #define NSEventTypeMouseExited           NSMouseExited
+   #define NSAlertStyleInformational        NSInformationalAlertStyle
+   #define NSEventTypeTabletPoint           NSTabletPoint
+   #define NSEventTypeTabletProximity       NSTabletProximity
+  #endif
   #import <CoreAudio/HostTime.h>
   #include <sys/dir.h>
  #endif
@@ -78,12 +120,14 @@
   #pragma warning (push, 0) // disable all warnings whilst including system headers
  #endif
 
+ #define NOMINMAX
+
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
  #if JUCE_MINGW
   #define _WIN32_WINNT 0x0501
  #else
-  #define _WIN32_WINNT 0x0600
+  #define _WIN32_WINNT 0x0602
  #endif
  #define _UNICODE 1
  #define UNICODE 1

@@ -40,8 +40,10 @@ namespace juce
 class BluetoothMidiSelectorOverlay  : public Component
 {
 public:
-    BluetoothMidiSelectorOverlay()
+    BluetoothMidiSelectorOverlay (ModalComponentManager::Callback* exitCallbackToUse)
     {
+        ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
+
         setAlwaysOnTop (true);
         setVisible (true);
         addToDesktop (ComponentPeer::windowHasDropShadow);
@@ -53,7 +55,7 @@ public:
 
         addAndMakeVisible (nativeSelectorComponent);
 
-        enterModalState (true, nullptr, true);
+        enterModalState (true, exitCallback.release(), true);
     }
 
     ~BluetoothMidiSelectorOverlay()
@@ -96,11 +98,13 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BluetoothMidiSelectorOverlay)
 };
 
-bool BluetoothMidiDevicePairingDialogue::open()
+bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
 {
+    ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
+
     if (isAvailable())
     {
-        new BluetoothMidiSelectorOverlay();
+        new BluetoothMidiSelectorOverlay (cb.release());
         return true;
     }
 
@@ -115,7 +119,11 @@ bool BluetoothMidiDevicePairingDialogue::isAvailable()
 //==============================================================================
 #else
 
-bool BluetoothMidiDevicePairingDialogue::open()         { return false; }
-bool BluetoothMidiDevicePairingDialogue::isAvailable()  { return false; }
+bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
+{
+    ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
+    return false;
+}
+bool BluetoothMidiDevicePairingDialogue::isAvailable()                                         { return false; }
 
 #endif

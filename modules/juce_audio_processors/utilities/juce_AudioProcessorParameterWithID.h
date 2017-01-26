@@ -33,7 +33,10 @@ public:
     /** Creation of this object requires providing a name and ID which will be
         constant for its lifetime.
     */
-    AudioProcessorParameterWithID (String parameterID, String name);
+    AudioProcessorParameterWithID (const String& parameterID,
+                                   const String& name,
+                                   const String& label = String(),
+                                   Category category = AudioProcessorParameter::genericParameter);
 
     /** Destructor. */
     ~AudioProcessorParameterWithID();
@@ -47,9 +50,13 @@ public:
     /** Provides access to the parameter's label. */
     const String label;
 
+    /** Provides access to the parameter's category. */
+    const Category category;
+
 private:
     String getName (int) const override;
     String getLabel() const override;
+    Category getCategory() const override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameterWithID)
 };

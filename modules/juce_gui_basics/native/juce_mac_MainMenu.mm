@@ -389,9 +389,9 @@ private:
 
         if ([menu indexOfItem: item] >= 0)
         {
-            NSEvent* f35Event = [NSEvent keyEventWithType: NSKeyDown
+            NSEvent* f35Event = [NSEvent keyEventWithType: NSEventTypeKeyDown
                                                  location: NSZeroPoint
-                                            modifierFlags: NSCommandKeyMask
+                                            modifierFlags: NSEventModifierFlagCommand
                                                 timestamp: 0
                                              windowNumber: 0
                                                   context: [NSGraphicsContext currentContext]
@@ -412,10 +412,10 @@ private:
     static unsigned int juceModsToNSMods (const ModifierKeys mods)
     {
         unsigned int m = 0;
-        if (mods.isShiftDown())    m |= NSShiftKeyMask;
-        if (mods.isCtrlDown())     m |= NSControlKeyMask;
-        if (mods.isAltDown())      m |= NSAlternateKeyMask;
-        if (mods.isCommandDown())  m |= NSCommandKeyMask;
+        if (mods.isShiftDown())    m |= NSEventModifierFlagShift;
+        if (mods.isCtrlDown())     m |= NSEventModifierFlagControl;
+        if (mods.isAltDown())      m |= NSEventModifierFlagOption;
+        if (mods.isCommandDown())  m |= NSEventModifierFlagCommand;
         return m;
     }
 
@@ -481,13 +481,13 @@ private:
                 // our own components, which may have wanted to intercept it. So, rather than dispatching directly, we'll feed it back
                 // into the focused component and let it trigger the menu item indirectly.
                 NSEvent* e = [NSApp currentEvent];
-                if ([e type] == NSKeyDown || [e type] == NSKeyUp)
+                if ([e type] == NSEventTypeKeyDown || [e type] == NSEventTypeKeyUp)
                 {
                     if (juce::Component* focused = juce::Component::getCurrentlyFocusedComponent())
                     {
                         if (juce::NSViewComponentPeer* peer = dynamic_cast<juce::NSViewComponentPeer*> (focused->getPeer()))
                         {
-                            if ([e type] == NSKeyDown)
+                            if ([e type] == NSEventTypeKeyDown)
                                 peer->redirectKeyDown (e);
                             else
                                 peer->redirectKeyUp (e);
@@ -621,16 +621,16 @@ namespace MainMenuHelpers
         [NSApp setServicesMenu: servicesMenu];
         [menu addItem: [NSMenuItem separatorItem]];
 
-        createMenuItem (menu, "Hide " + appName, @selector (hide:), nsStringLiteral ("h"));
+        createMenuItem (menu, TRANS("Hide") + String (" ") + appName, @selector (hide:), nsStringLiteral ("h"));
 
-        [createMenuItem (menu, "Hide Others", @selector (hideOtherApplications:), nsStringLiteral ("h"))
-            setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
+        [createMenuItem (menu, TRANS("Hide Others"), @selector (hideOtherApplications:), nsStringLiteral ("h"))
+            setKeyEquivalentModifierMask: NSEventModifierFlagCommand | NSEventModifierFlagOption];
 
-        createMenuItem (menu, "Show All", @selector (unhideAllApplications:), nsEmptyString());
+        createMenuItem (menu, TRANS("Show All"), @selector (unhideAllApplications:), nsEmptyString());
 
         [menu addItem: [NSMenuItem separatorItem]];
 
-        createMenuItem (menu, "Quit " + appName, @selector (terminate:), nsStringLiteral ("q"));
+        createMenuItem (menu, TRANS("Quit") + String (" ") + appName, @selector (terminate:), nsStringLiteral ("q"));
     }
 
     // Since our app has no NIB, this initialises a standard app menu...

@@ -64,7 +64,7 @@ void componentPeerAboutToBeRemovedFromScreen (ComponentPeer&);
 
 //==============================================================================
 class NSViewComponentPeer  : public ComponentPeer,
-                             private AsyncUpdater
+                             private Timer
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -83,7 +83,7 @@ public:
           textWasInserted (false),
           isStretchingTop (false), isStretchingLeft (false),
           isStretchingBottom (false), isStretchingRight (false),
-          notificationCenter (nil)
+          notificationCenter (nil), lastRepaintTime (Time::getMillisecondCounter())
     {
         appFocusChangeCallback = appFocusChanged;
         isEventBlockedByModalComps = checkEventBlockedByModalComps;
@@ -375,7 +375,7 @@ public:
     bool isKioskMode() const override
     {
        #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
-        if (hasNativeTitleBar() && ([window styleMask] & NSFullScreenWindowMask) != 0)
+        if (hasNativeTitleBar() && ([window styleMask] & NSWindowStyleMaskFullScreen) != 0)
             return true;
        #endif
 
@@ -729,7 +729,7 @@ public:
                             break; // (these all seem to generate unwanted garbage unicode strings)
 
                         default:
-                            if (([ev modifierFlags] & NSCommandKeyMask) != 0
+                            if (([ev modifierFlags] & NSEventModifierFlagCommand) != 0
                                  || (keyCode >= NSF1FunctionKey && keyCode <= NSF35FunctionKey))
                                 textCharacter = 0;
                             break;
@@ -758,7 +758,7 @@ public:
         updateKeysDown (ev, true);
         bool used = handleKeyEvent (ev, true);
 
-        if (([ev modifierFlags] & NSCommandKeyMask) != 0)
+        if (([ev modifierFlags] & NSEventModifierFlagCommand) != 0)
         {
             // for command keys, the key-up event is thrown away, so simulate one..
             updateKeysDown (ev, false);
@@ -889,31 +889,6 @@ public:
         }
     }
 
-    void handleAsyncUpdate() override
-    {
-       #if JucePlugin_Build_AAX || JucePlugin_Build_RTAS || JucePlugin_Build_AUv3 || JucePlugin_Build_AU || JucePlugin_Build_VST3 || JucePlugin_Build_VST
-        const bool shouldThrottle = true;
-       #else
-        const bool shouldThrottle = areAnyWindowsInLiveResize();
-       #endif
-
-        // When windows are being resized, artificially throttling high-frequency repaints helps
-        // to stop the event queue getting clogged, and keeps everything working smoothly.
-        // For some reason Logic also needs this throttling to recored parameter events correctly.
-        if (shouldThrottle
-              && Time::getCurrentTime() < lastRepaintTime + RelativeTime::milliseconds (1000 / 30))
-        {
-            triggerAsyncUpdate();
-            return;
-        }
-
-        for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
-            [view setNeedsDisplayInRect: makeNSRect (*i)];
-
-        lastRepaintTime = Time::getCurrentTime();
-        deferredRepaints.clear();
-    }
-
     void repaint (const Rectangle<int>& area) override
     {
         // In 10.11 changes were made to the way the OS handles repaint regions, and it seems that it can
@@ -923,8 +898,47 @@ public:
         // asynchronously asking the OS to repaint them.
         deferredRepaints.add ((float) area.getX(), (float) ([view frame].size.height - area.getBottom()),
                               (float) area.getWidth(), (float) area.getHeight());
-        triggerAsyncUpdate();
+
+        if (isTimerRunning())
+            return;
+
+        const uint32 now = Time::getMillisecondCounter();
+        uint32 msSinceLastRepaint = (lastRepaintTime >= now) ? now - lastRepaintTime
+                                                             : (std::numeric_limits<uint32>::max() - lastRepaintTime) + now;
+
+        static uint32 minimumRepaintInterval = 1000 / 30; // 30fps
+
+        // When windows are being resized, artificially throttling high-frequency repaints helps
+        // to stop the event queue getting clogged, and keeps everything working smoothly.
+        // For some reason Logic also needs this throttling to recored parameter events correctly.
+        if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
+        {
+            startTimer (static_cast<int> (minimumRepaintInterval - msSinceLastRepaint));
+            return;
+        }
+
+        setNeedsDisplayRectangles();
     }
+
+    static bool shouldThrottleRepaint()
+    {
+        return areAnyWindowsInLiveResize() || ! JUCEApplication::isStandaloneApp();
+    }
+
+    void timerCallback() override
+    {
+        setNeedsDisplayRectangles();
+        stopTimer();
+    }
+
+    void setNeedsDisplayRectangles()
+    {
+        for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
+            [view setNeedsDisplayInRect: makeNSRect (*i)];
+
+        lastRepaintTime = Time::getMillisecondCounter();
+        deferredRepaints.clear();
+    };
 
     void invokePaint (LowLevelGraphicsContext& context)
     {
@@ -1081,10 +1095,10 @@ public:
     {
         int m = 0;
 
-        if ((flags & NSShiftKeyMask) != 0)        m |= ModifierKeys::shiftModifier;
-        if ((flags & NSControlKeyMask) != 0)      m |= ModifierKeys::ctrlModifier;
-        if ((flags & NSAlternateKeyMask) != 0)    m |= ModifierKeys::altModifier;
-        if ((flags & NSCommandKeyMask) != 0)      m |= ModifierKeys::commandModifier;
+        if ((flags & NSEventModifierFlagShift) != 0)        m |= ModifierKeys::shiftModifier;
+        if ((flags & NSEventModifierFlagControl) != 0)      m |= ModifierKeys::ctrlModifier;
+        if ((flags & NSEventModifierFlagOption) != 0)       m |= ModifierKeys::altModifier;
+        if ((flags & NSEventModifierFlagCommand) != 0)      m |= ModifierKeys::commandModifier;
 
         currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (m);
     }
@@ -1157,7 +1171,7 @@ public:
         else
             keyCode = (int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode);
 
-        if (([ev modifierFlags] & NSNumericPadKeyMask) != 0)
+        if (([ev modifierFlags] & NSEventModifierFlagNumericPad) != 0)
         {
             const int numPadConversions[] = { '0', KeyPress::numberPad0, '1', KeyPress::numberPad1,
                                               '2', KeyPress::numberPad2, '3', KeyPress::numberPad3,
@@ -1188,7 +1202,7 @@ public:
     {
         @try
         {
-            if (e.type != NSMouseEntered && e.type != NSMouseExited)
+            if (e.type != NSEventTypeMouseEntered && e.type != NSEventTypeMouseExited)
                 return (float) e.pressure;
         }
         @catch (NSException* e) {}
@@ -1212,12 +1226,12 @@ public:
 
     static unsigned int getNSWindowStyleMask (const int flags) noexcept
     {
-        unsigned int style = (flags & windowHasTitleBar) != 0 ? NSTitledWindowMask
-                                                              : NSBorderlessWindowMask;
+        unsigned int style = (flags & windowHasTitleBar) != 0 ? NSWindowStyleMaskTitled
+                                                              : NSWindowStyleMaskBorderless;
 
-        if ((flags & windowHasMinimiseButton) != 0)  style |= NSMiniaturizableWindowMask;
-        if ((flags & windowHasCloseButton) != 0)     style |= NSClosableWindowMask;
-        if ((flags & windowIsResizable) != 0)        style |= NSResizableWindowMask;
+        if ((flags & windowHasMinimiseButton) != 0)  style |= NSWindowStyleMaskMiniaturizable;
+        if ((flags & windowHasCloseButton) != 0)     style |= NSWindowStyleMaskClosable;
+        if ((flags & windowIsResizable) != 0)        style |= NSWindowStyleMaskResizable;
         return style;
     }
 
@@ -1351,7 +1365,7 @@ public:
     NSNotificationCenter* notificationCenter;
 
     RectangleList<float> deferredRepaints;
-    Time lastRepaintTime;
+    uint32 lastRepaintTime;
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
@@ -1416,34 +1430,34 @@ private:
 
         switch ([e type])
         {
-            case NSKeyDown:
-            case NSKeyUp:
+            case NSEventTypeKeyDown:
+            case NSEventTypeKeyUp:
                 isKey = isInputAttempt = true;
                 break;
 
-            case NSLeftMouseDown:
-            case NSRightMouseDown:
-            case NSOtherMouseDown:
+            case NSEventTypeLeftMouseDown:
+            case NSEventTypeRightMouseDown:
+            case NSEventTypeOtherMouseDown:
                 isInputAttempt = true;
                 break;
 
-            case NSLeftMouseDragged:
-            case NSRightMouseDragged:
-            case NSLeftMouseUp:
-            case NSRightMouseUp:
-            case NSOtherMouseUp:
-            case NSOtherMouseDragged:
+            case NSEventTypeLeftMouseDragged:
+            case NSEventTypeRightMouseDragged:
+            case NSEventTypeLeftMouseUp:
+            case NSEventTypeRightMouseUp:
+            case NSEventTypeOtherMouseUp:
+            case NSEventTypeOtherMouseDragged:
                 if (Desktop::getInstance().getDraggingMouseSource(0) != nullptr)
                     return false;
                 break;
 
-            case NSMouseMoved:
-            case NSMouseEntered:
-            case NSMouseExited:
-            case NSCursorUpdate:
-            case NSScrollWheel:
-            case NSTabletPoint:
-            case NSTabletProximity:
+            case NSEventTypeMouseMoved:
+            case NSEventTypeMouseEntered:
+            case NSEventTypeMouseExited:
+            case NSEventTypeCursorUpdate:
+            case NSEventTypeScrollWheel:
+            case NSEventTypeTabletPoint:
+            case NSEventTypeTabletProximity:
                 break;
 
             default:
@@ -2062,7 +2076,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
         if (shouldBeEnabled)
         {
             if (peer->hasNativeTitleBar())
-                [peer->window setStyleMask: NSBorderlessWindowMask];
+                [peer->window setStyleMask: NSWindowStyleMaskBorderless];
 
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];

@@ -184,7 +184,11 @@ private:
 
     void addAAXPluginSettings()
     {
-        const RelativePath aaxLibsFolder = RelativePath (getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
+        const RelativePath aaxSDKFolder = RelativePath (getAAXPathValue().toString(),
+                                                        RelativePath::projectFolder);
+        msvcExtraPreprocessorDefs.set ("JucePlugin_AAXLibs_path",
+                                       createRebasedPath (aaxSDKFolder.getChildFile ("Libs")));
+        const RelativePath aaxSDKUtilitiesFolder = aaxSDKFolder.getChildFile ("Utilities");
 
         for (ProjectExporter::ConfigIterator config (*this); config.next();)
         {
@@ -194,20 +198,17 @@ private:
             if (config->getValue(Ids::postbuildCommand).toString().isEmpty())
             {
                 const String previousBuildCommands = config->getValue (Ids::internalPostBuildComamnd).toString();
-                const String aaxSDKPath = File::isAbsolutePath(aaxPath.toString())
-                                                          ? aaxPath.toString()
-                                                          : String ("..\\..\\") + aaxPath.toString();
 
                 const bool is64Bit = (config->getValue (Ids::winArchitecture) == "x64");
                 const String bundleDir      = "$(OutDir)$(TargetName).aaxplugin";
                 const String bundleContents = bundleDir + "\\Contents";
                 const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
                 const String executable     = macOSDir + String ("\\$(TargetName).aaxplugin");
-                const String bundleScript   = aaxSDKPath + String ("\\Utilities\\CreatePackage.bat");
-                String iconFilePath         = getTargetFolder().getChildFile ("icon.ico").getFullPathName();
+                const String bundleScript   = createRebasedPath (aaxSDKUtilitiesFolder.getChildFile ("CreatePackage.bat"));
 
+                String iconFilePath         = getTargetFolder().getChildFile ("icon.ico").getFullPathName();
                 if (! File (iconFilePath).existsAsFile())
-                    iconFilePath = aaxSDKPath + String ("\\Utilities\\PlugIn.ico");
+                    iconFilePath = createRebasedPath (aaxSDKUtilitiesFolder.getChildFile ("PlugIn.ico"));
 
                 String script;
 
@@ -228,9 +229,6 @@ private:
                 config->getValue (Ids::internalPostBuildComamnd) = previousBuildCommands + script;
             }
         }
-
-        msvcExtraPreprocessorDefs.set ("JucePlugin_AAXLibs_path",
-                                       createRebasedPath (aaxLibsFolder));
     }
 
     void addRTASPluginSettings()
@@ -1502,6 +1500,12 @@ protected:
                     XmlElement* targetName = props->createNewChildElement ("TargetName");
                     setConditionAttribute (*targetName, config);
                     targetName->addTextElement (config.getOutputFilename (String(), true));
+                }
+
+                {
+                    XmlElement* targetExt = props->createNewChildElement ("TargetExt");
+                    setConditionAttribute (*targetExt, config);
+                    targetExt->addTextElement (msvcTargetSuffix);
                 }
 
                 {

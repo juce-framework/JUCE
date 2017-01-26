@@ -202,6 +202,12 @@ public:
     /** Returns a rectangle which has the same size and x-position as this one, but with a different y-position. */
     Rectangle withY (ValueType newY) const noexcept                                                 { return Rectangle (pos.x, newY, w, h); }
 
+    /** Returns a rectangle which has the same size and y-position as this one, but whose right-hand edge has the given position. */
+    Rectangle withRightX (ValueType newRightX) const noexcept                                       { return Rectangle (newRightX - w, pos.y, w, h); }
+
+    /** Returns a rectangle which has the same size and x-position as this one, but whose bottom edge has the given position. */
+    Rectangle withBottomY (ValueType newBottomY) const noexcept                                     { return Rectangle (pos.x, newBottomY - h, w, h); }
+
     /** Returns a rectangle with the same size as this one, but a new position. */
     Rectangle withPosition (ValueType newX, ValueType newY) const noexcept                          { return Rectangle (newX, newY, w, h); }
 

@@ -806,8 +806,9 @@ FlexItem::FlexItem (float w, float h, FlexBox& fb) noexcept     : FlexItem (w, h
 FlexItem::FlexItem (Component& c) noexcept                      : associatedComponent (&c) {}
 FlexItem::FlexItem (FlexBox& fb) noexcept                       : associatedFlexBox (&fb) {}
 
-FlexItem::Margin::Margin() noexcept           : left(), right(), top(), bottom() {}
-FlexItem::Margin::Margin (float v) noexcept   : left (v), right (v), top (v), bottom (v) {}
+FlexItem::Margin::Margin() noexcept                                     : left(), right(), top(), bottom() {}
+FlexItem::Margin::Margin (float v) noexcept                             : left (v), right (v), top (v), bottom (v) {}
+FlexItem::Margin::Margin (float t, float r, float b, float l) noexcept  : left (l), right (r), top (t), bottom (b) {}
 
 //==============================================================================
 FlexItem FlexItem::withFlex (float newFlexGrow) const noexcept
@@ -831,6 +832,14 @@ FlexItem FlexItem::withFlex (float newFlexGrow, float newFlexShrink, float newFl
     return fi;
 }
 
-FlexItem FlexItem::withWidth (float newWidth) const noexcept    { auto fi = *this; fi.width = newWidth; return fi; }
-FlexItem FlexItem::withHeight (float newHeight) const noexcept  { auto fi = *this; fi.height = newHeight; return fi; }
-FlexItem FlexItem::withMargin (Margin m) const noexcept         { auto fi = *this; fi.margin = m; return fi; }
+FlexItem FlexItem::withWidth (float newWidth) const noexcept         { auto fi = *this; fi.width = newWidth; return fi; }
+FlexItem FlexItem::withMinWidth (float newMinWidth) const noexcept   { auto fi = *this; fi.minWidth = newMinWidth; return fi; }
+FlexItem FlexItem::withMaxWidth (float newMaxWidth) const noexcept   { auto fi = *this; fi.maxWidth = newMaxWidth; return fi; }
+
+FlexItem FlexItem::withMinHeight (float newMinHeight) const noexcept { auto fi = *this; fi.minHeight = newMinHeight; return fi; };
+FlexItem FlexItem::withMaxHeight (float newMaxHeight) const noexcept { auto fi = *this; fi.maxHeight = newMaxHeight; return fi; };
+FlexItem FlexItem::withHeight (float newHeight) const noexcept       { auto fi = *this; fi.height = newHeight; return fi; }
+
+FlexItem FlexItem::withMargin (Margin m) const noexcept              { auto fi = *this; fi.margin = m; return fi; }
+FlexItem FlexItem::withOrder (int newOrder) const noexcept           { auto fi = *this; fi.order = newOrder; return fi; }
+FlexItem FlexItem::withAlignSelf (AlignSelf a) const noexcept        { auto fi = *this; fi.alignSelf = a; return fi; }
