@@ -1755,6 +1755,15 @@ void Component::exitModalState (const int returnValue)
             ModalComponentManager& mcm = *ModalComponentManager::getInstance();
             mcm.endModal (this, returnValue);
             mcm.bringModalComponentsToFront();
+
+            // If any of the mouse sources are over another Component when we exit the modal state then send a mouse enter event
+            const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
+
+            for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
+            {
+                if (Component* c = mi->getComponentUnderMouse())
+                    c->internalMouseEnter (*mi, mi->getScreenPosition(), Time::getCurrentTime());
+            }
         }
         else
         {
@@ -2406,6 +2415,13 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
 
 void Component::internalMouseExit (MouseInputSource source, Point<float> relativePos, Time time)
 {
+    if (isCurrentlyBlockedByAnotherModalComponent())
+    {
+        // if something else is modal, always just show a normal mouse cursor
+        source.showMouseCursor (MouseCursor::NormalCursor);
+        return;
+    }
+
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 

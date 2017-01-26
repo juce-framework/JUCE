@@ -383,6 +383,12 @@ public:
 
         static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*);
 
+    public:
+       #if JUCE_IOS
+        /** internal **/
+        static void juce_iosURLSessionNotify (const String&);
+       #endif
+    private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadTask)
     };
 

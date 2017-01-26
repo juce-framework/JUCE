@@ -39,10 +39,12 @@
  #define __cdecl
 #endif
 
-namespace
+namespace Vst2
 {
 #include "juce_VSTInterface.h"
 }
+
+using namespace Vst2;
 
 #include "juce_VSTCommon.h"
 

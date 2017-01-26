@@ -308,6 +308,9 @@ public:
     /** Returns the abbreviated name of a channel type. For example, this method may return "Ls". */
     static String getAbbreviatedChannelTypeName (ChannelType);
 
+    /** Returns the channel type from an abbreviated name. */
+    static ChannelType getChannelTypeFromAbbreviation (const String& abbreviation);
+
     //==============================================================================
     enum
     {
@@ -341,6 +344,11 @@ public:
         the string may be "L R C Lfe Ls Rs". If the speaker arrangement is unknown,
         the returned string will be empty.*/
     String getSpeakerArrangementAsString() const;
+
+    /** Returns an AudioChannelSet from a string returned by getSpeakerArrangementAsString
+
+        @see getSpeakerArrangementAsString */
+    static AudioChannelSet fromAbbreviatedString (const String& set);
 
     /** Returns the description of the current layout. For example, this method may return
         "Quadraphonic". Note that the returned string may not be unique. */

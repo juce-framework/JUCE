@@ -59,15 +59,6 @@
 
 #include "../../juce_audio_processors/format_types/juce_VSTInterface.h"
 
-#ifndef JUCE_VST3_CAN_REPLACE_VST2
- #define JUCE_VST3_CAN_REPLACE_VST2 1
-#endif
-
-#if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
- #include <pluginterfaces/base/funknown.h>
- namespace juce { extern Steinberg::FUID getJuceVST3ComponentIID(); }
-#endif
-
 #ifdef _MSC_VER
  #pragma warning (pop)
 #endif
@@ -113,6 +104,8 @@ namespace juce
  #if JUCE_LINUX
   extern Display* display;
  #endif
+
+  extern JUCE_API pointer_sized_int handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
 }
 
 
@@ -597,7 +590,7 @@ public:
             {
                 AbletonLiveHostSpecific hostCmd;
 
-                hostCmd.magic = 'AbLi';
+                hostCmd.magic = 0x41624c69; // 'AbLi'
                 hostCmd.cmd = 5;
                 hostCmd.commandSize = sizeof (int);
                 hostCmd.flags = AbletonLiveHostSpecific::KCantBeSuspended;
@@ -1160,7 +1153,7 @@ public:
             case plugInOpcodeGetManufacturerProductName:  return handleGetPlugInName (args);
             case plugInOpcodeGetManufacturerName:         return handleGetManufacturerName (args);
             case plugInOpcodeGetManufacturerVersion:      return handleGetManufacturerVersion (args);
-            case plugInOpcodeManufacturerSpecific:        return handleManufacturerSpecific (args);
+            case plugInOpcodeManufacturerSpecific:        return handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt);
             case plugInOpcodeCanPlugInDo:                 return handleCanPlugInDo (args);
             case plugInOpcodeGetTailSize:                 return handleGetTailSize (args);
             case plugInOpcodeKeyboardFocusRequired:       return handleKeyboardFocusRequired (args);
@@ -1750,7 +1743,11 @@ private:
 
     pointer_sized_int handleIsParameterAutomatable (VstOpCodeArguments args)
     {
-        return (filter != nullptr && filter->isParameterAutomatable (args.index)) ? 1 : 0;
+        if (filter == nullptr)
+            return 0;
+
+        const bool isMeter = (((filter->getParameterCategory (args.index) & 0xffff0000) >> 16) == 2);
+        return (filter->isParameterAutomatable (args.index) && (! isMeter) ? 1 : 0);
     }
 
     pointer_sized_int handleParameterValueForText (VstOpCodeArguments args)
@@ -1800,7 +1797,7 @@ private:
         VstSpeakerConfiguration* pluginInput  = reinterpret_cast<VstSpeakerConfiguration*> (args.value);
         VstSpeakerConfiguration* pluginOutput = reinterpret_cast<VstSpeakerConfiguration*> (args.ptr);
 
-        if (pluginHasSidechainsOrAuxs() || filter->isMidiEffect())
+        if (filter->isMidiEffect())
             return 0;
 
         const int numIns  = filter->getBusCount (true);
@@ -1825,20 +1822,6 @@ private:
 
         if (pluginOutput != nullptr && pluginOutput->numberOfChannels > 0 && numOuts == 0)
             return 0;
-
-        if (pluginInput != nullptr && pluginInput->type >= 0)
-        {
-            // inconsistent request?
-            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput).size() != pluginInput->numberOfChannels)
-                return 0;
-        }
-
-        if (pluginOutput != nullptr && pluginOutput->type >= 0)
-        {
-            // inconsistent request?
-            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput).size() != pluginOutput->numberOfChannels)
-                return 0;
-        }
 
         AudioProcessor::BusesLayout layouts = filter->getBusesLayout();
 
@@ -1878,20 +1861,6 @@ private:
     pointer_sized_int handleGetManufacturerVersion (VstOpCodeArguments)
     {
         return convertHexVersionToDecimal (JucePlugin_VersionCode);
-    }
-
-    pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
-    {
-       #if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2
-        if ((args.index == 'stCA' || args.index == 'stCa') && args.value == 'FUID' && args.ptr != nullptr)
-        {
-            memcpy (args.ptr, getJuceVST3ComponentIID(), 16);
-            return 1;
-        }
-       #else
-        ignoreUnused (args);
-       #endif
-        return 0;
     }
 
     pointer_sized_int handleCanPlugInDo (VstOpCodeArguments args)

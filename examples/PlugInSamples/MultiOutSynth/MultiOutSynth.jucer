@@ -9,7 +9,7 @@
               pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="MultiOutSynthAU" pluginRTASCategory=""
               aaxIdentifier="com.ROLI.MultiOutSynth" pluginAAXCategory="AAX_ePlugInCategory_SWGenerators"
-              jucerVersion="4.3.0" companyName="ROLI Ltd." companyWebsite="www.roli.com"
+              jucerVersion="4.3.1" companyName="ROLI Ltd." companyWebsite="www.roli.com"
               companyEmail="info@juce.com" pluginIsMidiEffectPlugin="0" buildAUv3="0">
   <MAINGROUP id="uGSDhi" name="MultiOutSynth">
     <GROUP id="{78464AFF-72EB-5BDD-4FD3-6C8C6CF5DFA3}" name="Source">

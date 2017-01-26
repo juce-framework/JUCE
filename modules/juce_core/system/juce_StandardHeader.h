@@ -38,7 +38,7 @@
 */
 #define JUCE_MAJOR_VERSION      4
 #define JUCE_MINOR_VERSION      3
-#define JUCE_BUILDNUMBER        0
+#define JUCE_BUILDNUMBER        1
 
 /** Current Juce version number.
 
@@ -78,7 +78,6 @@
 
 #if JUCE_LINUX
  #include <cstring>
- #include <limits>
  #include <signal.h>
 
  #if __INTEL_COMPILER

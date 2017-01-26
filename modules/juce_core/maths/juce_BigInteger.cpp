@@ -33,26 +33,26 @@ namespace
     inline uint32 bitToMask  (const int bit) noexcept           { return (uint32) 1 << (bit & 31); }
     inline size_t bitToIndex (const int bit) noexcept           { return (size_t) (bit >> 5); }
     inline size_t sizeNeededToHold (int highestBit) noexcept    { return (size_t) (highestBit >> 5) + 1; }
+}
 
-    inline int highestBitInInt (uint32 n) noexcept
-    {
-        jassert (n != 0); // (the built-in functions may not work for n = 0)
+int findHighestSetBit (uint32 n) noexcept
+{
+    jassert (n != 0); // (the built-in functions may not work for n = 0)
 
-      #if JUCE_GCC || JUCE_CLANG
-        return 31 - __builtin_clz (n);
-      #elif JUCE_MSVC
-        unsigned long highest;
-        _BitScanReverse (&highest, n);
-        return (int) highest;
-      #else
-        n |= (n >> 1);
-        n |= (n >> 2);
-        n |= (n >> 4);
-        n |= (n >> 8);
-        n |= (n >> 16);
-        return countBitsInInt32 (n >> 1);
-      #endif
-    }
+  #if JUCE_GCC || JUCE_CLANG
+    return 31 - __builtin_clz (n);
+  #elif JUCE_MSVC
+    unsigned long highest;
+    _BitScanReverse (&highest, n);
+    return (int) highest;
+  #else
+    n |= (n >> 1);
+    n |= (n >> 2);
+    n |= (n >> 4);
+    n |= (n >> 8);
+    n |= (n >> 16);
+    return countNumberOfBits (n >> 1);
+  #endif
 }
 
 //==============================================================================
@@ -393,7 +393,7 @@ int BigInteger::getHighestBit() const noexcept
 
     for (int i = (int) bitToIndex (highestBit); i >= 0; --i)
         if (uint32 n = values[i])
-            return highestBitInInt (n) + (i << 5);
+            return findHighestSetBit (n) + (i << 5);
 
     return -1;
 }

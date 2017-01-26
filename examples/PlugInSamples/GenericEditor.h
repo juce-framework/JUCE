@@ -43,6 +43,10 @@ public:
         {
             if (const AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*>(params[i]))
             {
+                const bool isLevelMeter = (((param->category & 0xffff0000) >> 16) == 2);
+                if (isLevelMeter)
+                    continue;
+
                 Slider* aSlider;
 
                 paramSliders.add (aSlider = new Slider (param->name));

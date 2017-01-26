@@ -37,7 +37,8 @@ public:
     AudioParameterFloat (const String& parameterID, const String& name,
                          NormalisableRange<float> normalisableRange,
                          float defaultValue,
-                         const String& label = String());
+                         const String& label = String(),
+                         Category category = AudioProcessorParameter::genericParameter);
 
     /** Creates a AudioParameterFloat with an ID, name, and range.
         On creation, its value is set to the default value.
