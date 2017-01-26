@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="c3KrlE" name="OpenGLAppExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.OpenGLAppExample" includeBinaryInAppConfig="1"
-              jucerVersion="4.3.0">
+              jucerVersion="4.3.1">
   <MAINGROUP id="amjEXL" name="OpenGLAppExample">
     <GROUP id="{28FE2D12-A88D-07E2-72CF-CD04014CF225}" name="Source">
       <GROUP id="{666960E2-D311-806A-1FE7-A27057939840}" name="Resources">

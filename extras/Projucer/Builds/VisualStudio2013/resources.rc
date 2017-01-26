@@ -7,16 +7,16 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  4,3,0,0
+FILEVERSION  4,3,1,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "FileDescription",  "Projucer\0"
-      VALUE "FileVersion",  "4.3.0\0"
+      VALUE "FileVersion",  "4.3.1\0"
       VALUE "ProductName",  "Projucer\0"
-      VALUE "ProductVersion",  "4.3.0\0"
+      VALUE "ProductVersion",  "4.3.1\0"
     END
   END
 

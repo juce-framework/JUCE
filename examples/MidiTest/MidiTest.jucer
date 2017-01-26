@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="wHE0ay" name="MidiTest" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.MidiTest" includeBinaryInAppConfig="1"
-              jucerVersion="4.3.0">
+              jucerVersion="4.3.1">
   <MAINGROUP id="s3xxCh" name="MidiTest">
     <GROUP id="{7D29F5BC-1B05-AE8F-9202-5CF152AB1103}" name="Source">
       <FILE id="kpmJ3T" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>

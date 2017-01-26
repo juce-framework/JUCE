@@ -9,7 +9,7 @@
               pluginIsMidiEffectPlugin="1" pluginSilenceInIsSilenceOut="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="ArpeggiatorAU"
               pluginRTASCategory="" aaxIdentifier="com.ROLI.Arpeggiator" pluginAAXCategory="AAX_EPlugInCategory_Effect"
-              jucerVersion="4.3.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              jucerVersion="4.3.1" companyName="ROLI Ltd." companyWebsite="www.juce.com"
               companyEmail="info@juce.com" buildAUv3="0">
   <MAINGROUP id="l0H2am" name="Arpeggiator">
     <GROUP id="{E91162B3-479D-3630-4B5F-0E76EE995FB8}" name="Source">

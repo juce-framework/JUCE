@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="gWI5Ir" name="JUCE Network Graphics Demo" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              includeBinaryInAppConfig="1" jucerVersion="4.3.0">
+              includeBinaryInAppConfig="1" jucerVersion="4.3.1">
   <MAINGROUP id="OT9rJ2" name="JUCE Network Graphics Demo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>

@@ -8,7 +8,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="GainPlugInAU" pluginRTASCategory="" aaxIdentifier="com.ROLI.GainPlugIn"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.3.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.3.1"
               pluginIsMidiEffectPlugin="0" buildAUv3="0">
   <MAINGROUP id="sXaVAU" name="GainPlugIn">
     <GROUP id="{57500C1B-EA6F-4A79-EE51-1D02CA8A8350}" name="Source">
