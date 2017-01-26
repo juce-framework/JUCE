@@ -83,12 +83,15 @@ private:
         ParamSlider (AudioProcessor& p, int paramIndex)  : owner (p), index (paramIndex)
         {
             const int steps = owner.getParameterNumSteps (index);
+            const AudioProcessorParameter::Category category = p.getParameterCategory (index);
+            const bool isLevelMeter = (((category & 0xffff0000) >> 16) == 2);
 
             if (steps > 1 && steps < 0x7fffffff)
                 setRange (0.0, 1.0, 1.0 / (steps - 1.0));
             else
                 setRange (0.0, 1.0);
 
+            setEnabled (! isLevelMeter);
             setSliderStyle (Slider::LinearBar);
             setTextBoxIsEditable (false);
             setScrollWheelEnabled (true);

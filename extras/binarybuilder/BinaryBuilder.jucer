@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceFolder="../../../juce" jucerVersion="4.3.0" bundleIdentifier="com.rawmaterialsoftware.binarybuilder"
+              juceFolder="../../../juce" jucerVersion="4.3.1" bundleIdentifier="com.rawmaterialsoftware.binarybuilder"
               includeBinaryInAppConfig="1" version="1.0.0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"

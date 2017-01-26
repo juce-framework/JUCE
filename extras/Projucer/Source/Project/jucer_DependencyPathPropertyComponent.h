@@ -46,10 +46,10 @@ public:
     var getValue() const override
     {
         if (isUsingProjectSettings())
-            return projectSettingsValue;
+            return projectSettingsValue.getValue();
 
         if (isUsingGlobalSettings())
-            return globalSettingsValue;
+            return globalSettingsValue.getValue();
 
         return fallbackValue;
     }

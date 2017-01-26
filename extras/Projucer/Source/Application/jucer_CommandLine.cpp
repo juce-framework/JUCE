@@ -598,6 +598,64 @@ namespace
     }
 
     //==============================================================================
+    static void encodeBinary (const StringArray& args)
+    {
+        checkArgumentCount (args, 3);
+        const File source (getFileCheckingForExistence (args[1]));
+        const File target (getFile (args[2]));
+
+        MemoryOutputStream literal;
+        size_t dataSize = 0;
+
+        {
+            MemoryBlock data;
+            FileInputStream input (source);
+            input.readIntoMemoryBlock (data);
+            CodeHelpers::writeDataAsCppLiteral (data, literal, true, true);
+            dataSize = data.getSize();
+        }
+
+        auto variableName = CodeHelpers::makeBinaryDataIdentifierName (source);
+
+        MemoryOutputStream header, cpp;
+
+        header << "// Auto-generated binary data by the Projucer" << newLine
+               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << newLine
+               << newLine;
+
+        cpp << header.toString();
+
+        if (target.hasFileExtension (headerFileExtensions))
+        {
+            header << "static constexpr unsigned char " << variableName << "[] =" << newLine
+                   << literal.toString() << newLine
+                   << newLine;
+
+            replaceFile (target, header.toString(), "Writing: ");
+        }
+        else if (target.hasFileExtension (cppFileExtensions))
+        {
+            header << "extern const char*  " << variableName << ";" << newLine
+                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << newLine
+                   << newLine;
+
+            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << newLine
+                << newLine
+                << "static constexpr unsigned char " << variableName << "_local[] =" << newLine
+                << literal.toString() << newLine
+                << newLine
+                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << newLine;
+
+            replaceFile (target, cpp.toString(), "Writing: ");
+            replaceFile (target.withFileExtension (".h"), header.toString(), "Writing: ");
+        }
+        else
+        {
+            throw CommandLineError ("You need to specify a .h or .cpp file as the target");
+        }
+    }
+
+    //==============================================================================
     static void showHelp()
     {
         hideDockIcon();
@@ -649,6 +707,9 @@ namespace
                   << std::endl
                   << " " << appName << " --obfuscated-string-code string_to_obfuscate" << std::endl
                   << "    Generates a C++ function which returns the given string, but in an obfuscated way." << std::endl
+                  << std::endl
+                  << " " << appName << " --encode-binary source_binary_file target_cpp_file" << std::endl
+                  << "    Converts a binary file to a C++ file containing its contents as a block of data. Provide a .h file as the target if you want a single output file, or a .cpp file if you want a pair of .h/.cpp files." << std::endl
                   << std::endl;
     }
 }
@@ -680,6 +741,7 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "tidy-divider-comments"))    { tidyDividerComments (args); return 0; }
         if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args); return 0; }
         if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args); return 0; }
+        if (matchArgument (command, "encode-binary"))            { encodeBinary (args); return 0; }
     }
     catch (const CommandLineError& error)
     {
