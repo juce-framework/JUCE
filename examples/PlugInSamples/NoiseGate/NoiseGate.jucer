@@ -8,7 +8,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="NoiseGateAU" pluginRTASCategory="" aaxIdentifier="com.roli.NoiseGate"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.3.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.3.1"
               pluginIsMidiEffectPlugin="0" buildAUv3="0">
   <MAINGROUP id="FVYuyg" name="NoiseGate">
     <GROUP id="{6EB662B0-ED81-2504-8B90-DCBFA5675DFC}" name="Source">

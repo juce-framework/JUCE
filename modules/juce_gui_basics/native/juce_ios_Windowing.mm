@@ -108,6 +108,7 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 - (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*)identifier
    completionHandler: (void (^)(void))completionHandler
 {
+    ignoreUnused (application);
     URL::DownloadTask::juce_iosURLSessionNotify (nsStringToJuce (identifier));
     completionHandler();
 }
