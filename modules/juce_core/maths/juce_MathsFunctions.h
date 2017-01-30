@@ -589,9 +589,6 @@ uint32 readLittleEndianBitsInBuffer (const void* sourceBuffer, uint32 startBit, 
 */
 namespace TypeHelpers
 {
-   #if JUCE_VC8_OR_EARLIER
-    #define PARAMETER_TYPE(type) const type&
-   #else
     /** The ParameterType struct is used to find the best type to use when passing some kind
         of object as a parameter.
 
@@ -628,8 +625,6 @@ namespace TypeHelpers
         @see ParameterType
     */
     #define PARAMETER_TYPE(a)    typename TypeHelpers::ParameterType<a>::type
-   #endif
-
 
     /** These templates are designed to take a type, and if it's a double, they return a double
         type; for anything else, they return a float type.

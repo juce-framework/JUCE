@@ -53,13 +53,13 @@ class AnimatedPosition  : private Timer
 public:
     AnimatedPosition()
         : position(), grabbedPos(), releaseVelocity(),
-          range (-std::numeric_limits<double>::max(),
-                  std::numeric_limits<double>::max())
+          range (std::numeric_limits<double>::min(),
+                 std::numeric_limits<double>::max())
     {
     }
 
     /** Sets a range within which the value will be constrained. */
-    void setLimits (Range<double> newRange)
+    void setLimits (Range<double> newRange) noexcept
     {
         range = newRange;
     }

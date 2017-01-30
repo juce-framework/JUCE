@@ -74,16 +74,10 @@ template <class ListenerClass,
           class ArrayType = Array<ListenerClass*> >
 class ListenerList
 {
-    // Horrible macros required to support VC7..
-    #ifndef DOXYGEN
-     #if JUCE_VC8_OR_EARLIER
-       #define LL_TEMPLATE(a)   typename P##a, typename Q##a
-       #define LL_PARAM(a)      Q##a& param##a
-     #else
-       #define LL_TEMPLATE(a)   typename P##a
-       #define LL_PARAM(a)      PARAMETER_TYPE(P##a) param##a
-     #endif
-    #endif
+   #ifndef DOXYGEN
+    #define LL_TEMPLATE(a)   typename P##a
+    #define LL_PARAM(a)      typename TypeHelpers::ParameterType<P##a>::type param##a
+   #endif
 
 public:
     //==============================================================================

@@ -586,7 +586,9 @@ public:
                     hostCallback (&vstEffect, hostOpcodePlugInWantsMidi, 0, 1, 0, 0);
             }
 
-            if (getHostType().isAbletonLive() && filter->getTailLengthSeconds() == DBL_MAX && hostCallback != nullptr)
+            if (getHostType().isAbletonLive()
+                 && hostCallback != nullptr
+                 && filter->getTailLengthSeconds() == std::numeric_limits<double>::max())
             {
                 AbletonLiveHostSpecific hostCmd;
 

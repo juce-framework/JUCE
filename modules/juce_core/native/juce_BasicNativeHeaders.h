@@ -169,7 +169,7 @@
 
  #if JUCE_MSVC
   #pragma warning (pop)
-  #pragma warning (4: 4511 4512 4100 /*4365*/)  // (enable some warnings that are turned off in VC8)
+  #pragma warning (4: 4511 4512 4100)
  #endif
 
  #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
