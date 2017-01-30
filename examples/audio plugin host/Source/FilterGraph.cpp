@@ -77,6 +77,15 @@ const AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForId (const uint32 uid
     return graph.getNodeForId (uid);
 }
 
+bool FilterGraph::hasFilter(const String name)
+{
+    for (int i = 0; i < graph.getNumNodes(); i++) {
+        if (graph.getNode(i)->getProcessor()->getName().equalsIgnoreCase(name))
+            return true;
+    }
+    return false;
+}
+
 void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
 {
     if (desc != nullptr)

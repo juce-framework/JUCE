@@ -49,6 +49,8 @@ public:
     const AudioProcessorGraph::Node::Ptr getNode (const int index) const noexcept;
     const AudioProcessorGraph::Node::Ptr getNodeForId (const uint32 uid) const noexcept;
 
+    bool hasFilter(const String name);
+        
     void addFilter (const PluginDescription* desc, double x, double y);
 
     void addFilterCallback (AudioPluginInstance* instance, const String& error, double x, double y);

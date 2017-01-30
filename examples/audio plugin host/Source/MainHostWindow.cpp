@@ -319,8 +319,13 @@ void MainHostWindow::createPlugin (const PluginDescription* desc, int x, int y)
 
 void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
 {
-    for (int i = 0; i < internalTypes.size(); ++i)
-        m.addItem (i + 1, internalTypes.getUnchecked(i)->name);
+    GraphDocumentComponent* const graphEditor = getGraphEditor();
+
+    for (int i = 0; i < internalTypes.size(); ++i) {
+        String name = internalTypes.getUnchecked(i)->name;
+		// add new menu item, but disable if this filter altready exists
+        m.addItem(i + 1, name, !graphEditor->graph->hasFilter(name));
+    }
 
     m.addSeparator();
 
