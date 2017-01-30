@@ -24,7 +24,6 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
-#include "jucer_ProjectType.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Project Saving/jucer_ProjectSaver.h"
 #include "../Application/jucer_OpenDocumentManager.h"
@@ -147,13 +146,13 @@ void Project::setMissingAudioPluginDefaultValues()
 {
     const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (getTitle(), false, true, false));
 
-    setValueIfVoid (shouldBuildVST(),                   true);
-    setValueIfVoid (shouldBuildVST3(),                  false);
-    setValueIfVoid (shouldBuildAU(),                    true);
-    setValueIfVoid (shouldBuildAUv3(),                  false);
-    setValueIfVoid (shouldBuildRTAS(),                  false);
-    setValueIfVoid (shouldBuildAAX(),                   false);
-    setValueIfVoid (shouldBuildStandalone(),            false);
+    setValueIfVoid (getShouldBuildVSTAsValue(),                   true);
+    setValueIfVoid (getShouldBuildVST3AsValue(),                  false);
+    setValueIfVoid (getShouldBuildAUAsValue(),                    true);
+    setValueIfVoid (getShouldBuildAUv3AsValue(),                  false);
+    setValueIfVoid (getShouldBuildRTASAsValue(),                  false);
+    setValueIfVoid (getShouldBuildAAXAsValue(),                   false);
+    setValueIfVoid (getShouldBuildStandalonePluginAsValue(),      false);
 
     setValueIfVoid (getPluginName(),                    getTitle());
     setValueIfVoid (getPluginDesc(),                    getTitle());
@@ -222,10 +221,19 @@ void Project::removeDefunctExporters()
 
     for (;;)
     {
-        ValueTree oldVC6Exporter (exporters.getChildWithName ("MSVC6"));
+        ValueTree oldVC6Exporter        (exporters.getChildWithName ("MSVC6"));
+        ValueTree oldAndroidAntExporter (exporters.getChildWithName ("ANDROID"));
 
-        if (oldVC6Exporter.isValid())
+        if      (oldVC6Exporter.isValid())
             exporters.removeChild (oldVC6Exporter, nullptr);
+        else if (oldAndroidAntExporter.isValid())
+        {
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         TRANS("Android Ant Exporter"),
+                                         TRANS("The Android Ant Exporter is deprecated. The exporter will be removed from this project."));
+
+            exporters.removeChild (oldAndroidAntExporter, nullptr);
+        }
         else
             break;
     }
@@ -436,6 +444,98 @@ const ProjectType& Project::getProjectType() const
     return *guiType;
 }
 
+bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept
+{
+    const ProjectType& projectType = getProjectType();
+
+    if (! projectType.supportsTargetType (targetType))
+        return false;
+
+    switch (targetType)
+    {
+        case ProjectType::Target::VSTPlugIn:
+            return shouldBuildVST();
+        case ProjectType::Target::VST3PlugIn:
+            return shouldBuildVST3();
+        case ProjectType::Target::AAXPlugIn:
+            return shouldBuildAAX();
+        case ProjectType::Target::RTASPlugIn:
+            return shouldBuildRTAS();
+        case ProjectType::Target::AudioUnitPlugIn:
+            return shouldBuildAU();
+        case ProjectType::Target::AudioUnitv3PlugIn:
+            return shouldBuildAUv3();
+        case ProjectType::Target::StandalonePlugIn:
+            return shouldBuildStandalonePlugin();
+        case ProjectType::Target::AggregateTarget:
+        case ProjectType::Target::SharedCodeTarget:
+            return projectType.isAudioPlugin();
+        case ProjectType::Target::unspecified:
+            return false;
+        default:
+            break;
+    }
+
+    return true;
+}
+
+ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
+{
+    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return ProjectType::Target::AudioUnitPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return ProjectType::Target::AudioUnitv3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return ProjectType::Target::AAXPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return ProjectType::Target::RTASPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return ProjectType::Target::VSTPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return ProjectType::Target::VST3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return ProjectType::Target::StandalonePlugIn;
+
+    return (returnSharedTargetIfNoValidSuffix ? ProjectType::Target::SharedCodeTarget : ProjectType::Target::unspecified);
+}
+
+const char* ProjectType::Target::getName() const noexcept
+{
+    switch (type)
+    {
+        case GUIApp:            return "App";
+        case ConsoleApp:        return "ConsoleApp";
+        case StaticLibrary:     return "Static Library";
+        case DynamicLibrary:    return "Dynamic Library";
+        case VSTPlugIn:         return "VST";
+        case VST3PlugIn:        return "VST3";
+        case AudioUnitPlugIn:   return "AU";
+        case StandalonePlugIn:  return "Standalone Plugin";
+        case AudioUnitv3PlugIn: return "AUv3 AppExtension";
+        case AAXPlugIn:         return "AAX";
+        case RTASPlugIn:        return "RTAS";
+        case SharedCodeTarget:  return "Shared Code";
+        case AggregateTarget:   return "All";
+        default:                return "undefined";
+    }
+}
+
+ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() const noexcept
+{
+    switch (type)
+    {
+        case GUIApp:            return executable;
+        case ConsoleApp:        return executable;
+        case StaticLibrary:     return staticLibrary;
+        case DynamicLibrary:    return sharedLibraryOrDLL;
+        case VSTPlugIn:         return pluginBundle;
+        case VST3PlugIn:        return pluginBundle;
+        case AudioUnitPlugIn:   return pluginBundle;
+        case StandalonePlugIn:  return executable;
+        case AudioUnitv3PlugIn: return macOSAppex;
+        case AAXPlugIn:         return pluginBundle;
+        case RTASPlugIn:        return pluginBundle;
+        case SharedCodeTarget:  return staticLibrary;
+        default:
+            break;
+    }
+
+    return unknown;
+}
+
 //==============================================================================
 void Project::createPropertyEditors (PropertyListBuilder& props)
 {
@@ -515,25 +615,20 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new BooleanPropertyComponent (shouldBuildVST(), "Build VST", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildVSTAsValue(), "Build VST", "Enabled"),
                "Whether the project should produce a VST plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildVST3(), "Build VST3", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildVST3AsValue(), "Build VST3", "Enabled"),
                "Whether the project should produce a VST3 plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildAU(), "Build AudioUnit", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildAUAsValue(), "Build AudioUnit", "Enabled"),
                "Whether the project should produce an AudioUnit plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildAUv3(), "Build AudioUnit v3", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildAUv3AsValue(), "Build AudioUnit v3", "Enabled"),
                "Whether the project should produce an AudioUnit version 3 plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildRTAS(), "Build RTAS", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildRTASAsValue(), "Build RTAS", "Enabled"),
                "Whether the project should produce an RTAS plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildAAX(), "Build AAX", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildAAXAsValue(), "Build AAX", "Enabled"),
                "Whether the project should produce an AAX plugin.");
-
-    /* TODO: this property editor is temporarily disabled because right now we build standalone if and only if
-       we also build AUv3. However as soon as targets are supported on non-Xcode exporters as well, we should
-       re-enable this option and allow to build the standalone plug-in independently from AUv3.
-    */
-    // props.add (new BooleanPropertyComponent (shouldBuildStandalone(), "Build Standalone", "Enabled"),
-    //            "Whether the project should produce a standalone version of the plugin. Required for AUv3.");
+    props.add (new BooleanPropertyComponent (getShouldBuildStandalonePluginAsValue(), "Build Standalone Plug-In", "Enabled"),
+               "Whether the project should produce a standalone version of your plugin.");
 
     props.add (new TextPropertyComponent (getPluginName(), "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");

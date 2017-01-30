@@ -173,15 +173,11 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
 
 //==============================================================================
 ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
-    : makefileIsDLL (false),
-      msvcIsDLL (false),
-      msvcIsWindowsSubsystem (true),
-      settings (state),
+    : settings (state),
       project (p),
       projectType (p.getProjectType()),
       projectName (p.getTitle()),
-      projectFolder (p.getProjectFolder()),
-      modulesGroup (nullptr)
+      projectFolder (p.getProjectFolder())
 {
 }
 
@@ -242,19 +238,19 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
 void ProjectExporter::createDependencyPathProperties (PropertyListBuilder& props)
 {
-    if (supportsVST3() && (project.shouldBuildVST3().getValue() || project.isVST3PluginHost()))
+    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost())
     {
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getVST3PathValue(), "VST3 SDK Folder"),
                    "If you're building a VST3 plugin or host, this must be the folder containing the VST3 SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
-    if (supportsAAX() && project.shouldBuildAAX().getValue())
+    if (shouldBuildTargetType (ProjectType::Target::AAXPlugIn) && project.shouldBuildAAX())
     {
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getAAXPathValue(), "AAX SDK Folder"),
                    "If you're building an AAX plugin, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
-    if (supportsRTAS() && project.shouldBuildRTAS().getValue())
+    if (shouldBuildTargetType (ProjectType::Target::RTASPlugIn) && project.shouldBuildRTAS())
     {
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getRTASPathValue(), "RTAS SDK Folder"),
                    "If you're building an RTAS, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
@@ -300,25 +296,17 @@ void ProjectExporter::addSettingsForProjectType (const ProjectType& type)
 
 void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
-    if (supportsVST() && project.shouldBuildVST().getValue())
-        makefileTargetSuffix = ".so";
-
-    if (supportsVST3())
-    {
-        if (project.shouldBuildVST3().getValue())
-            makefileTargetSuffix = ".so";
-
-        if (project.shouldBuildVST3().getValue() || project.isVST3PluginHost())
-            addVST3FolderToPath();
-    }
+    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost())
+        addVST3FolderToPath();
 }
 
 void ProjectExporter::addCommonAudioPluginSettings()
 {
-    if (isLinux() && (getProject().shouldBuildVST().getValue() || getProject().shouldBuildVST3().getValue()))
+    if (isLinux()
+      && (shouldBuildTargetType (ProjectType::Target::VSTPlugIn) || shouldBuildTargetType (ProjectType::Target::VST3PlugIn)))
         makefileExtraLinkerFlags.add ("-Wl,--no-undefined");
 
-    if (supportsAAX() && getProject().shouldBuildAAX().getValue())
+    if (shouldBuildTargetType (ProjectType::Target::AAXPlugIn))
         addAAXFoldersToPath();
 
     // Note: RTAS paths are platform-dependent, impl -> addPlatformSpecificSettingsForProjectType
@@ -347,11 +335,13 @@ void ProjectExporter::addAAXFoldersToPath()
 }
 
 //==============================================================================
-StringPairArray ProjectExporter::getAllPreprocessorDefs (const ProjectExporter::BuildConfiguration& config) const
+StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const
 {
     StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
                                                  parsePreprocessorDefs (getExporterPreprocessorDefsString())));
     addDefaultPreprocessorDefs (defs);
+    addTargetSpecificPreprocessorDefs (defs, targetType);
+
     return defs;
 }
 
@@ -363,6 +353,31 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs() const
     return defs;
 }
 
+void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, const ProjectType::Target::Type targetType) const
+{
+    if (targetType == ProjectType::Target::SharedCodeTarget)
+    {
+        defs.set ("JucePlugin_Build_VST",        (shouldBuildTargetType (ProjectType::Target::VSTPlugIn)         ? "1" : "0"));
+        defs.set ("JucePlugin_Build_VST3",       (shouldBuildTargetType (ProjectType::Target::VST3PlugIn)        ? "1" : "0"));
+        defs.set ("JucePlugin_Build_AU",         (shouldBuildTargetType (ProjectType::Target::AudioUnitPlugIn)   ? "1" : "0"));
+        defs.set ("JucePlugin_Build_AUv3",       (shouldBuildTargetType (ProjectType::Target::AudioUnitv3PlugIn) ? "1" : "0"));
+        defs.set ("JucePlugin_Build_RTAS",       (shouldBuildTargetType (ProjectType::Target::RTASPlugIn)        ? "1" : "0"));
+        defs.set ("JucePlugin_Build_AAX",        (shouldBuildTargetType (ProjectType::Target::AAXPlugIn)         ? "1" : "0"));
+        defs.set ("JucePlugin_Build_Standalone", (shouldBuildTargetType (ProjectType::Target::StandalonePlugIn)  ? "1" : "0"));
+        defs.set ("JUCE_SHARED_CODE", "1");
+    }
+    else if (targetType != ProjectType::Target::unspecified)
+    {
+        defs.set ("JucePlugin_Build_VST",        (targetType == ProjectType::Target::VSTPlugIn         ? "1" : "0"));
+        defs.set ("JucePlugin_Build_VST3",       (targetType == ProjectType::Target::VST3PlugIn        ? "1" : "0"));
+        defs.set ("JucePlugin_Build_AU",         (targetType == ProjectType::Target::AudioUnitPlugIn   ? "1" : "0"));
+        defs.set ("JucePlugin_Build_AUv3",       (targetType == ProjectType::Target::AudioUnitv3PlugIn ? "1" : "0"));
+        defs.set ("JucePlugin_Build_RTAS",       (targetType == ProjectType::Target::RTASPlugIn        ? "1" : "0"));
+        defs.set ("JucePlugin_Build_AAX",        (targetType == ProjectType::Target::AAXPlugIn         ? "1" : "0"));
+        defs.set ("JucePlugin_Build_Standalone", (targetType == ProjectType::Target::StandalonePlugIn  ? "1" : "0"));
+    }
+}
+
 void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
 {
     defs.set (getExporterIdentifierMacro(), "1");
@@ -370,9 +385,10 @@ void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
     defs.set ("JUCE_APP_VERSION_HEX", project.getVersionAsHex());
 }
 
-String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildConfiguration& config, const String& sourceString) const
+String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildConfiguration& config,
+                                                   const String& sourceString) const
 {
-    return replacePreprocessorDefs (getAllPreprocessorDefs (config), sourceString);
+    return replacePreprocessorDefs (getAllPreprocessorDefs (config, ProjectType::Target::unspecified), sourceString);
 }
 
 void ProjectExporter::copyMainGroupFromProject()
@@ -393,14 +409,24 @@ Project::Item& ProjectExporter::getModulesGroup()
     return *modulesGroup;
 }
 
+void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList, const RelativePath& pathFromProjectFolder, int index)
+{
+    const auto localPath = RelativePath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
+
+    const auto path = isVisualStudio() ? localPath.toWindowsStyle() : localPath.toUnixStyle();
+
+    if (! pathList.contains (path))
+        pathList.insert (index, path);
+}
+
+void ProjectExporter::addToModuleLibPaths (const RelativePath& pathFromProjectFolder)
+{
+    addProjectPathToBuildPathList (moduleLibSearchPaths, pathFromProjectFolder);
+}
+
 void ProjectExporter::addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index)
 {
-    RelativePath localPath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
-
-    const String path (isVisualStudio() ? localPath.toWindowsStyle() : localPath.toUnixStyle());
-
-    if (! extraSearchPaths.contains (path))
-        extraSearchPaths.insert (index, path);
+    addProjectPathToBuildPathList (extraSearchPaths, pathFromProjectFolder, index);
 }
 
 Value ProjectExporter::getPathForModuleValue (const String& moduleID)
@@ -810,16 +836,24 @@ StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 
 StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 {
-    return getSearchPathsFromString (getLibrarySearchPathString());
+    auto separator = exporter.isVisualStudio() ? "\\" : "/";
+    auto s = getSearchPathsFromString (getLibrarySearchPathString());
+    for (auto path : exporter.moduleLibSearchPaths)
+        s.add (path + separator + getLibrarySubdirPath());
+
+    return s;
 }
 
 String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
 {
     String s;
-    const StringArray libraryPaths (getLibrarySearchPaths());
+    const auto libraryPaths = getSearchPathsFromString (getLibrarySearchPathString());
 
-    for (int i = 0; i < libraryPaths.size(); ++i)
-        s << " -L" << escapeSpaces (libraryPaths[i]).replace ("~", "$(HOME)");
+    for (auto path : libraryPaths)
+        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)");
+
+    for (auto path : exporter.moduleLibSearchPaths)
+        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)") << "/" << getLibrarySubdirPath();
 
     return s;
 }

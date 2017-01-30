@@ -113,13 +113,25 @@ public:
     bool isOSX() const override                      { return false; }
     bool isiOS() const override                      { return false; }
 
-    bool supportsVST() const override                { return false; }
-    bool supportsVST3() const override               { return false; }
-    bool supportsAAX() const override                { return false; }
-    bool supportsRTAS() const override               { return false; }
-    bool supportsAU()   const override               { return false; }
-    bool supportsAUv3() const override               { return false; }
-    bool supportsStandalone() const override         { return false;  }
+    bool supportsTargetType (ProjectType::Target::Type type) const override
+    {
+        switch (type)
+        {
+            case ProjectType::Target::StandalonePlugIn:
+            case ProjectType::Target::GUIApp:
+            case ProjectType::Target::ConsoleApp:
+            case ProjectType::Target::StaticLibrary:
+            case ProjectType::Target::SharedCodeTarget:
+            case ProjectType::Target::AggregateTarget:
+            case ProjectType::Target::VSTPlugIn:
+            case ProjectType::Target::DynamicLibrary:
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
 
     void createExporterProperties (PropertyListBuilder&) override
     {
@@ -138,9 +150,30 @@ public:
     }
 
     //==============================================================================
-    void addPlatformSpecificSettingsForProjectType (const ProjectType& type) override
+    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override
     {
-        createDynamicLibrary = type.isAudioPlugin() || type.isDynamicLibrary();
+        // add shared code target first as order matters for Codeblocks
+        if (shouldBuildTargetType (ProjectType::Target::SharedCodeTarget))
+            targets.add (new CodeBlocksTarget (*this, ProjectType::Target::SharedCodeTarget));
+
+        //ProjectType::Target::SharedCodeTarget
+        callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
+                                    {
+                                        if (targetType == ProjectType::Target::SharedCodeTarget)
+                                            return;
+
+                                        if (auto* target = new CodeBlocksTarget (*this, targetType))
+                                        {
+                                            if (targetType == ProjectType::Target::AggregateTarget)
+                                                targets.insert (0, target);
+                                            else
+                                                targets.add (target);
+                                        }
+                                    });
+
+        // If you hit this assert, you tried to generate a project for an exporter
+        // that does not support any of your targets!
+        jassert (targets.size() > 0);
     }
 
 private:
@@ -151,20 +184,111 @@ private:
         CodeBlocksBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e)
         {
+            if (getArchitectureType().toString().isEmpty())
+                getArchitectureType() = static_cast<const char* const> ("-m64");
         }
+
+        Value getArchitectureType()
+        {
+            const auto archID = exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
+                                                     : Ids::linuxCodeBlocksArchitecture;
+            return getValue (archID);
+        }
+        var getArchitectureTypeVar() const
+        {
+            const auto archID = exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
+                                                     : Ids::linuxCodeBlocksArchitecture;
+            return config [archID];
+        }
+
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addGCCOptimisationProperty (props);
+
+            static const char* const archNames[] = { "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" };
+            const var archFlags[]                = { "-m32",          "-m64",          "-march=armv6", "-march=armv7" };
+
+            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
+                                                    StringArray (archNames, numElementsInArray (archNames)),
+                                                    Array<var> (archFlags, numElementsInArray (archFlags))));
         }
 
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
+        String getLibrarySubdirPath () const override
+        {
+            const String archFlag = getArchitectureTypeVar();
+
+            const auto prefix = String ("-march=");
+            if (archFlag.startsWith (prefix))
+                return String ("/") + archFlag.substring (prefix.length());
+            else if (archFlag == "-m64")
+                return "/x86_64";
+            else if (archFlag == "-m32")
+                return "/i386";
+
+            jassertfalse;
+            return String();
+        }
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
         return new CodeBlocksBuildConfiguration (project, tree, *this);
     }
+
+    //==============================================================================
+    class CodeBlocksTarget : public ProjectType::Target
+    {
+    public:
+        CodeBlocksTarget (CodeBlocksProjectExporter&, ProjectType::Target::Type typeToUse)
+            : ProjectType::Target (typeToUse)
+        {}
+
+        String getTargetNameForConfiguration (const BuildConfiguration& config) const
+        {
+            if (type == ProjectType::Target::AggregateTarget)
+                return config.getName();
+
+            return getName() + String (" | ") + config.getName();
+        }
+
+        String getTargetSuffix() const
+        {
+            const ProjectType::Target::TargetFileType fileType = getTargetFileType();
+
+            switch (fileType)
+            {
+                case executable:
+                    return "";
+                case staticLibrary:
+                    return ".a";
+                case sharedLibraryOrDLL:
+                    return ".so";
+                case pluginBundle:
+                    switch (type)
+                {
+                    case VST3PlugIn:
+                        return ".vst3";
+                    case VSTPlugIn:
+                        return ".so";
+                    default:
+                        break;
+                }
+
+                    return ".so";
+                default:
+                    break;
+            }
+
+            return String();
+        }
+
+        bool isDynamicLibrary() const
+        {
+            return (type == DynamicLibrary || type == VST3PlugIn || type == VSTPlugIn || type == AAXPlugIn);
+        }
+    };
 
     //==============================================================================
     void addVersion (XmlElement& xml) const
@@ -181,7 +305,7 @@ private:
         xml.createNewChildElement ("Option")->setAttribute ("compiler", "gcc");
     }
 
-    StringArray getDefines (const BuildConfiguration& config) const
+    StringArray getDefines (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
         StringPairArray defines;
 
@@ -205,7 +329,7 @@ private:
             defines.set ("NDEBUG", "1");
         }
 
-        defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
+        defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config, target.type));
 
         StringArray defs;
         for (int i = 0; i < defines.size(); ++i)
@@ -214,9 +338,12 @@ private:
         return getCleanedStringArray (defs);
     }
 
-    StringArray getCompilerFlags (const BuildConfiguration& config) const
+    StringArray getCompilerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
         StringArray flags;
+        if (const auto codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
+            flags.add (codeBlocksConfig->getArchitectureTypeVar());
+
         flags.add ("-O" + config.getGCCOptimisationFlag());
         flags.add ("-std=c++11");
         flags.add ("-mstackrealign");
@@ -228,7 +355,7 @@ private:
                          " \n", "\"'");
 
         {
-            const StringArray defines (getDefines (config));
+            const StringArray defines (getDefines (config, target));
 
             for (int i = 0; i < defines.size(); ++i)
             {
@@ -243,7 +370,7 @@ private:
 
         if (config.exporter.isLinux())
         {
-            if (createDynamicLibrary)
+            if (target.isDynamicLibrary() || getProject().getProjectType().isAudioPlugin())
                 flags.add ("-fPIC");
 
             if (linuxPackages.size() > 0)
@@ -263,9 +390,12 @@ private:
         return getCleanedStringArray (flags);
     }
 
-    StringArray getLinkerFlags (const BuildConfiguration& config) const
+    StringArray getLinkerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
         StringArray flags (makefileExtraLinkerFlags);
+
+        if (const auto codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
+            flags.add (codeBlocksConfig->getArchitectureTypeVar());
 
         if (! config.isDebug())
             flags.add ("-s");
@@ -273,9 +403,12 @@ private:
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(),
                          " \n", "\"'");
 
+        if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+            flags.add ("-l" + config.getTargetBinaryNameString());
+
         if (config.exporter.isLinux() && linuxPackages.size() > 0)
         {
-            if (createDynamicLibrary)
+            if (target.isDynamicLibrary())
                 flags.add ("-shared");
 
             auto pkgconfigLibs = String ("`pkg-config --libs");
@@ -303,80 +436,119 @@ private:
         return getCleanedStringArray (paths);
     }
 
-    static int getTypeIndex (const ProjectType& type)
+    static int getTypeIndex (const ProjectType::Target::Type& type)
     {
-        if (type.isGUIApplication()) return 0;
-        if (type.isCommandLineApp()) return 1;
-        if (type.isStaticLibrary())  return 2;
-        if (type.isDynamicLibrary()) return 3;
-        if (type.isAudioPlugin())    return 3;
+        switch (type)
+        {
+            case ProjectType::Target::GUIApp:
+            case ProjectType::Target::StandalonePlugIn:
+                return 0;
+            case ProjectType::Target::ConsoleApp:
+                return 1;
+            case ProjectType::Target::StaticLibrary:
+            case ProjectType::Target::SharedCodeTarget:
+                return 2;
+            case ProjectType::Target::DynamicLibrary:
+            case ProjectType::Target::VSTPlugIn:
+            case ProjectType::Target::VST3PlugIn:
+                return 3;
+            default:
+                break;
+        }
+
         return 0;
     }
 
-    void createBuildTarget (XmlElement& xml, const BuildConfiguration& config) const
+    String getOutputPathForTarget (CodeBlocksTarget& target, const BuildConfiguration& config) const
     {
-        xml.setAttribute ("title", config.getName());
+        String outputPath;
+        if (config.getTargetBinaryRelativePathString().isNotEmpty())
+        {
+            RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
+            binaryPath = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder);
+            outputPath = config.getTargetBinaryRelativePathString();
+        }
+        else
+        {
+            outputPath ="bin/" + File::createLegalFileName (config.getName().trim());
+        }
+
+        return outputPath + "/" + replacePreprocessorTokens (config, config.getTargetBinaryNameString() + target.getTargetSuffix());
+    }
+
+    String getSharedCodePath (const BuildConfiguration& config) const
+    {
+        const String outputPath = getOutputPathForTarget (getTargetWithType (ProjectType::Target::SharedCodeTarget), config);
+        RelativePath path (outputPath, RelativePath::buildTargetFolder);
+
+        const String autoPrefixedFilename = "lib" + path.getFileName();
+        return path.getParentDirectory().getChildFile (autoPrefixedFilename).toUnixStyle();
+    }
+
+    void createBuildTarget (XmlElement& xml, CodeBlocksTarget& target, const BuildConfiguration& config) const
+    {
+        xml.setAttribute ("title", target.getTargetNameForConfiguration (config));
 
         {
             XmlElement* output = xml.createNewChildElement ("Option");
 
-            String outputPath;
-            if (config.getTargetBinaryRelativePathString().isNotEmpty())
-            {
-                RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
-                binaryPath = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder);
-                outputPath = config.getTargetBinaryRelativePathString();
-            }
-            else
-            {
-                outputPath ="bin/" + File::createLegalFileName (config.getName().trim());
-            }
+            output->setAttribute ("output", getOutputPathForTarget (target, config));
 
-            output->setAttribute ("output", outputPath + "/" + replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
+            const bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
+                                  || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
 
-            output->setAttribute ("prefix_auto", 1);
-            output->setAttribute ("extension_auto", 1);
+            output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
+            output->setAttribute ("extension_auto", 0);
         }
 
         xml.createNewChildElement ("Option")
              ->setAttribute ("object_output", "obj/" + File::createLegalFileName (config.getName().trim()));
 
-        xml.createNewChildElement ("Option")->setAttribute ("type", getTypeIndex (project.getProjectType()));
+        xml.createNewChildElement ("Option")->setAttribute ("type", getTypeIndex (target.type));
         xml.createNewChildElement ("Option")->setAttribute ("compiler", "gcc");
+
+        if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+            xml.createNewChildElement ("Option")->setAttribute ("external_deps", getSharedCodePath (config));
 
         {
             XmlElement* const compiler = xml.createNewChildElement ("Compiler");
 
             {
-                const StringArray compilerFlags (getCompilerFlags (config));
+                const StringArray compilerFlags (getCompilerFlags (config, target));
 
-                for (int i = 0; i < compilerFlags.size(); ++i)
-                    setAddOption (*compiler, "option", compilerFlags[i]);
+                for (auto flag : compilerFlags)
+                    setAddOption (*compiler, "option", flag);
             }
 
             {
                 const StringArray includePaths (getIncludePaths (config));
 
-                for (int i = 0; i < includePaths.size(); ++i)
-                    setAddOption (*compiler, "directory", includePaths[i]);
+                for (auto path : includePaths)
+                    setAddOption (*compiler, "directory", path);
             }
         }
 
         {
             XmlElement* const linker = xml.createNewChildElement ("Linker");
 
-            const StringArray linkerFlags (getLinkerFlags (config));
-            for (int i = 0; i < linkerFlags.size(); ++i)
-                setAddOption (*linker, "option", linkerFlags[i]);
+            const StringArray linkerFlags (getLinkerFlags (config, target));
+            for (auto flag : linkerFlags)
+                setAddOption (*linker, "option", flag);
 
             const StringArray& libs = isWindows() ? mingwLibs : linuxLibs;
 
-            for (int i = 0; i < libs.size(); ++i)
-                setAddOption (*linker, "library", libs[i]);
+            for (auto lib : libs)
+                setAddOption (*linker, "library", lib);
 
-            const StringArray librarySearchPaths (config.getLibrarySearchPaths());
-            for (int i = 0; i < librarySearchPaths.size(); ++i)
-                setAddOption (*linker, "directory", replacePreprocessorDefs (getAllPreprocessorDefs(), librarySearchPaths[i]));
+            StringArray librarySearchPaths (config.getLibrarySearchPaths());
+
+            if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+                librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
+
+            for (auto path : librarySearchPaths)
+            {
+                setAddOption (*linker, "directory", replacePreprocessorDefs (getAllPreprocessorDefs(), path));
+            }
         }
     }
 
@@ -385,7 +557,36 @@ private:
         XmlElement* const build = xml.createNewChildElement ("Build");
 
         for (ConstConfigIterator config (*this); config.next();)
-            createBuildTarget (*build->createNewChildElement ("Target"), *config);
+        {
+            for (auto target : targets)
+                if (target->type != ProjectType::Target::AggregateTarget)
+                    createBuildTarget (*build->createNewChildElement ("Target"), *target, *config);
+        }
+    }
+
+    void addVirtualTargets (XmlElement& xml) const
+    {
+        XmlElement* const virtualTargets = xml.createNewChildElement ("VirtualTargets");
+
+        for (ConstConfigIterator config (*this); config.next();)
+        {
+            StringArray allTargets;
+
+            for (auto target : targets)
+                if (target->type != ProjectType::Target::AggregateTarget)
+                    allTargets.add (target->getTargetNameForConfiguration (*config));
+
+            for (auto target : targets)
+            {
+                if (target->type == ProjectType::Target::AggregateTarget)
+                {
+                    auto* configTarget = virtualTargets->createNewChildElement ("Add");
+
+                    configTarget->setAttribute ("alias", config->getName());
+                    configTarget->setAttribute ("targets", allTargets.joinIntoString (";"));
+                }
+            }
+        }
     }
 
     void addProjectCompilerOptions (XmlElement& xml) const
@@ -416,6 +617,54 @@ private:
             setAddOption (*linker, "library", replacePreprocessorDefs (getAllPreprocessorDefs(), libs[i]));
     }
 
+    CodeBlocksTarget& getTargetWithType (ProjectType::Target::Type type) const
+    {
+        CodeBlocksTarget* nonAggregrateTarget = nullptr;
+
+        for (auto* target : targets)
+        {
+            if (target->type == type)
+                return *target;
+
+            if (target->type != ProjectType::Target::AggregateTarget)
+                nonAggregrateTarget = target;
+        }
+
+        // this project has no valid targets
+        jassert (nonAggregrateTarget != nullptr);
+
+        return *nonAggregrateTarget;
+    }
+
+    // Returns SharedCode target for multi-target projects, otherwise it returns
+    // the single target
+    CodeBlocksTarget& getMainTarget() const
+    {
+        if (getProject().getProjectType().isAudioPlugin())
+            return getTargetWithType (ProjectType::Target::SharedCodeTarget);
+
+        for (auto* target : targets)
+            if (target->type != ProjectType::Target::AggregateTarget)
+                return *target;
+
+        jassertfalse;
+
+        return *targets[0];
+    }
+
+    CodeBlocksTarget& getTargetForProjectItem (const Project::Item& projectItem) const
+    {
+        if (getProject().getProjectType().isAudioPlugin())
+        {
+            if (! projectItem.shouldBeCompiled())
+                return getTargetWithType (ProjectType::Target::SharedCodeTarget);
+
+            return getTargetWithType (getProject().getTargetTypeFromFilePath (projectItem.getFile(), true));
+        }
+
+        return getMainTarget();
+    }
+
     void addCompileUnits (const Project::Item& projectItem, XmlElement& xml) const
     {
         if (projectItem.isGroup())
@@ -430,10 +679,16 @@ private:
             XmlElement* unit = xml.createNewChildElement ("Unit");
             unit->setAttribute ("filename", file.toUnixStyle());
 
+            for (ConstConfigIterator config (*this); config.next();)
+            {
+                const String& targetName = getTargetForProjectItem (projectItem).getTargetNameForConfiguration (*config);
+                unit->createNewChildElement ("Option")->setAttribute ("target", targetName);
+            }
+
             if (! projectItem.shouldBeCompiled())
             {
-                unit->createNewChildElement("Option")->setAttribute ("compile", 0);
-                unit->createNewChildElement("Option")->setAttribute ("link", 0);
+                unit->createNewChildElement ("Option")->setAttribute ("compile", 0);
+                unit->createNewChildElement ("Option")->setAttribute ("link", 0);
             }
         }
     }
@@ -448,6 +703,7 @@ private:
     {
         addOptions (xml);
         addBuild (xml);
+        addVirtualTargets (xml);
         addProjectCompilerOptions (xml);
         addProjectLinkerOptions (xml);
         addCompileUnits (xml);
@@ -473,7 +729,8 @@ private:
     }
 
     CodeBlocksOS os;
-    bool createDynamicLibrary = false;
+
+    OwnedArray<CodeBlocksTarget> targets;
 
     JUCE_DECLARE_NON_COPYABLE (CodeBlocksProjectExporter)
 };

@@ -51,7 +51,7 @@ public:
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
         : AndroidProjectExporterBase (p, t),
           gradleVersion (settings, Ids::gradleVersion, nullptr, "2.14.1"),
-          gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.8.1"),
+          gradleWrapperVersion (settings, Ids::androidPluginVersion, nullptr, "0.8.1"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.2"),
           androidStudioExecutable (findAndroidStudioExecutable())

@@ -58,13 +58,19 @@ public:
     bool isOSX() const override                  { return false; }
     bool isiOS() const override                  { return false; }
 
-    bool supportsVST() const override            { return false; }
-    bool supportsVST3() const override           { return false; }
-    bool supportsAAX() const override            { return false; }
-    bool supportsRTAS() const override           { return false; }
-    bool supportsAU()   const override           { return false; }
-    bool supportsAUv3() const override           { return false; }
-    bool supportsStandalone() const override     { return false;  }
+    bool supportsTargetType (ProjectType::Target::Type type) const override
+    {
+        switch (type)
+        {
+            case ProjectType::Target::GUIApp:
+            case ProjectType::Target::StaticLibrary:
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
 
     //==============================================================================
     void create (const OwnedArray<LibraryModule>& modules) const override

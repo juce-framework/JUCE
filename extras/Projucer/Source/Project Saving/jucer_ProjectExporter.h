@@ -84,14 +84,21 @@ public:
     virtual bool isOSX() const     = 0;
     virtual bool isiOS() const     = 0;
 
+    //==============================================================================
     // cross-platform audio plug-ins supported by exporter
-    virtual bool supportsVST()  const  = 0;
-    virtual bool supportsVST3() const  = 0;
-    virtual bool supportsAAX()  const  = 0;
-    virtual bool supportsRTAS() const  = 0;
-    virtual bool supportsAU()   const  = 0;
-    virtual bool supportsAUv3() const  = 0;
-    virtual bool supportsStandalone() const  = 0; // as in Standalong plug-in type, not GUIApp or ConsoleApp
+    virtual bool supportsTargetType (ProjectType::Target::Type type) const = 0;
+
+    inline bool shouldBuildTargetType (ProjectType::Target::Type type) const
+    {
+        return project.shouldBuildTargetType (type) && supportsTargetType (type);
+    }
+
+    inline void callForAllSupportedTargets (std::function<void (ProjectType::Target::Type)> callback)
+    {
+        for (int i = 0; i < ProjectType::Target::unspecified; ++i)
+            if (shouldBuildTargetType (static_cast<ProjectType::Target::Type> (i)))
+                callback (static_cast<ProjectType::Target::Type> (i));
+    }
 
     //==============================================================================
     bool mayCompileOnCurrentOS() const
@@ -150,6 +157,7 @@ public:
 
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
     void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index = -1);
+    void addToModuleLibPaths   (const RelativePath& pathFromProjectFolder);
 
     Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
     Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
@@ -187,19 +195,16 @@ public:
     Project::Item& getModulesGroup();
 
     //==============================================================================
-    String makefileTargetSuffix;
-    bool makefileIsDLL;
     StringArray linuxLibs, linuxPackages, makefileExtraLinkerFlags;
 
     //==============================================================================
-    String msvcTargetSuffix;
     StringPairArray msvcExtraPreprocessorDefs;
-    bool msvcIsDLL, msvcIsWindowsSubsystem;
     String msvcDelayLoadedDLLs;
-    StringArray mingwLibs;
+    StringArray mingwLibs, windowsLibs;
 
     //==============================================================================
     StringArray extraSearchPaths;
+    StringArray moduleLibSearchPaths;
 
     //==============================================================================
     class BuildConfiguration  : public ReferenceCountedObject
@@ -213,6 +218,8 @@ public:
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
         virtual var getDefaultOptimisationLevel() const = 0;
+        virtual String getLibrarySubdirPath() const         { return String(); }
+
 
         //==============================================================================
         Value getNameValue()                                { return getValue (Ids::name); }
@@ -316,9 +323,11 @@ public:
     String getExporterPreprocessorDefsString() const    { return getSettingString (Ids::extraDefs); }
 
     // includes exporter, project + config defs
-    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config) const;
+    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const;
     // includes exporter + project defs..
     StringPairArray getAllPreprocessorDefs() const;
+
+    void addTargetSpecificPreprocessorDefs (StringPairArray& defs, const ProjectType::Target::Type targetType) const;
 
     String replacePreprocessorTokens (const BuildConfiguration&, const String& sourceString) const;
 
@@ -345,7 +354,7 @@ protected:
 
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;
-    Project::Item* modulesGroup;
+    Project::Item* modulesGroup = nullptr;
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
 
@@ -408,6 +417,7 @@ private:
     void addCommonAudioPluginSettings();
     void addVST3FolderToPath();
     void addAAXFoldersToPath();
+    void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
 };

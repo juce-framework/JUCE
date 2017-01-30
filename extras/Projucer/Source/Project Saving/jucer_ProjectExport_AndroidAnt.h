@@ -36,11 +36,19 @@ public:
     bool isAndroidStudio() const override        { return false; }
     bool isAndroidAnt() const override           { return true; }
 
-    bool supportsVST() const override            { return false; }
-    bool supportsVST3() const override           { return false; }
-    bool supportsAAX() const override            { return false; }
-    bool supportsRTAS() const override           { return false; }
-    bool supportsStandalone() const override     { return false;  }
+    bool supportsTargetType (ProjectType::Target::Type type) const override
+    {
+        switch (type)
+        {
+            case ProjectType::Target::GUIApp:
+            case ProjectType::Target::StaticLibrary:
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
 
     //==============================================================================
     static const char* getName()                 { return "Android Ant Project"; }
@@ -340,7 +348,7 @@ private:
 
         flags << " -std=gnu++11";
 
-        defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
+        defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs ());
         return flags + createGCCPreprocessorFlags (defines);
     }
 
