@@ -323,7 +323,7 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
 
     for (int i = 0; i < internalTypes.size(); ++i) {
         String name = internalTypes.getUnchecked(i)->name;
-		// add new menu item, but disable if this filter altready exists
+        // add new menu item, but disable if this filter altready exists
         m.addItem(i + 1, name, !graphEditor->graph->hasFilter(name));
     }
 
