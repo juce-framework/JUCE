@@ -1512,7 +1512,9 @@ namespace AAXClasses
                 if (sideChainBufferIdx <= 0)
                     sideChainBufferIdx = -1;
 
-                float* const meterTapBuffers = (i.meterTapBuffers != nullptr ? *i.meterTapBuffers : nullptr);
+                const int numMeters = i.pluginInstance->parameters.aaxMeters.size();
+
+                float* const meterTapBuffers = (i.meterTapBuffers != nullptr && numMeters > 0 ? *i.meterTapBuffers : nullptr);
 
                 i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels, sideChainBufferIdx,
                                                       *(i.bufferSize), *(i.bypass) != 0,
