@@ -108,7 +108,8 @@ public:
     /** Sets the colour of one of the LEDComponents */
     void setLEDColour (int x, int y, Colour c)
     {
-        jassert (isPositiveAndBelow (x, 15) && isPositiveAndBelow (y, 15));
+        x = jmin (x, 14);
+        y = jmin (y, 14);
 
         leds.getUnchecked ((x * 15) + y)->setColour (c);
     }
