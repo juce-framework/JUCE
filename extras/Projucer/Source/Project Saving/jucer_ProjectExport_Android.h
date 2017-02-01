@@ -383,11 +383,17 @@ private:
 
             if (! first)
             {
-                const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (* getConfiguration(0));
-                mo << "ELSE(JUCE_BUILD_CONFIGFURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
-                mo << "    MESSAGE( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
-                mo << "ENDIF(JUCE_BUILD_CONFIGFURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine << newLine;
+                ProjectExporter::BuildConfiguration::Ptr config (getConfiguration(0));
 
+                if (config)
+                {
+                    if (const auto* cfg = dynamic_cast<const AndroidBuildConfiguration*> (config.get()))
+                    {
+                        mo << "ELSE(JUCE_BUILD_CONFIGFURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+                        mo << "    MESSAGE( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
+                        mo << "ENDIF(JUCE_BUILD_CONFIGFURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine << newLine;
+                    }
+                }
             }
         }
 
