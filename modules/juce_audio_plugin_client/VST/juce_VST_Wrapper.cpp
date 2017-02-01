@@ -105,7 +105,7 @@ namespace juce
   extern Display* display;
  #endif
 
-  extern JUCE_API pointer_sized_int handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
+  extern JUCE_API bool handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
 }
 
 
