@@ -25,7 +25,6 @@
 #ifndef JUCE_DIRECTSHOWCOMPONENT_H_INCLUDED
 #define JUCE_DIRECTSHOWCOMPONENT_H_INCLUDED
 
-#if JUCE_DIRECTSHOW || DOXYGEN
 
 //==============================================================================
 /**
@@ -212,5 +211,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectShowComponent)
 };
 
-#endif
 #endif   // JUCE_DIRECTSHOWCOMPONENT_H_INCLUDED

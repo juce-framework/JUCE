@@ -41,7 +41,7 @@
   license:          GPL/Commercial
 
   dependencies:     juce_data_structures juce_cryptography
-  OSXFrameworks:    QTKit QuickTime
+  OSXFrameworks:    AVFoundation CoreMedia
 
  END_JUCE_MODULE_DECLARATION
 
@@ -99,8 +99,14 @@
 namespace juce
 {
 
-#include "playback/juce_DirectShowComponent.h"
-#include "playback/juce_QuickTimeMovieComponent.h"
+#if JUCE_DIRECTSHOW || DOXYGEN
+ #include "playback/juce_DirectShowComponent.h"
+#endif
+
+#if JUCE_MAC || DOXYGEN
+ #include "playback/juce_MovieComponent.h"
+#endif
+
 #include "capture/juce_CameraDevice.h"
 
 }
