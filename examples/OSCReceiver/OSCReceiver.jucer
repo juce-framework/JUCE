@@ -83,15 +83,15 @@
       </MODULEPATHS>
     </XCODE_IPHONE>
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.oscreceiver.OSCReceiver"
-                   androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
-                   targetFolder="Builds/AndroidStudio" androidScreenOrientation="unspecified"
+                   androidInternetNeeded="1" androidBluetoothNeeded="0" androidCpp11="1"
+                   targetFolder="Builds/Android" androidScreenOrientation="unspecified"
                    gradleToolchain="clang" gradleToolchainVersion="3.6" androidSDKPath=""
                    androidNDKPath="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="OSCReceiver"/>
-        <CONFIGURATION name="Release" androidArchitectures="armeabi armeabi-v7a x86"
-                       isDebug="0" optimisation="3" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
+                       targetName="OSCReceiver"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>

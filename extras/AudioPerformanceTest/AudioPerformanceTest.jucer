@@ -96,10 +96,10 @@
     </LINUX_MAKE>
     <ANDROIDSTUDIO androidActivityClass="com.juce.audioperformancetest.AudioPerformanceTest"
                    androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
-                   androidScreenOrientation="unspecified" targetFolder="Builds/AndroidStudio"
+                   androidScreenOrientation="unspecified" targetFolder="Builds/Android"
                    androidSDKPath="" androidNDKPath="" extraCompilerFlags="-mfpu=neon -mfloat-abi=hard -ffast-math -funroll-loops --param max-unroll-times=8 -mhard-float -D_NDK_MATH_NO_SOFTFP=1 -DJUCE_DISABLE_ASSERTIONS=1"
                    extraDefs="" extraLinkerFlags="" externalLibraries="" gradleToolchain="clang"
-                   gradleToolchainVersion="3.6" buildToolsVersion="23.0.1">
+                   gradleToolchainVersion="3.6" androidMinimumSDK="23">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="arm64-v8a" isDebug="1" optimisation="1"
                        targetName="AudioPerformanceTest"/>
