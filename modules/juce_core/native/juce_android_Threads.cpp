@@ -97,7 +97,7 @@ void* threadEntryProc (AndroidThreadData* priv)
     return nullptr;
 }
 
-JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024JuceThread), runThread,
+JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_BRIDGE_CLASSNAME, _00024JuceThread), runThread,
                    void, (JNIEnv* env, jobject device, jlong host))
 {
     // This thread does not have a JNIEnv assigned to it yet. So assign it now.
@@ -114,7 +114,7 @@ void Thread::launchThread()
     ScopedPointer<AndroidThreadData> threadPrivateData = new AndroidThreadData (this);
     const LocalRef<jstring> jName (javaString (threadName));
 
-    jobject juceNewThread = android.activity.callObjectMethod (JuceAppActivity.createNewThread,
+    jobject juceNewThread = android.bridge.callObjectMethod (JuceBridge.createNewThread,
                                                                (jlong) threadPrivateData.get(),
                                                                jName.get(), (jlong) threadStackSize);
 

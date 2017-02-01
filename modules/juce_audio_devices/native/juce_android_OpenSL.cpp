@@ -272,7 +272,7 @@ private:
     static String audioManagerGetProperty (const String& property)
     {
         const LocalRef<jstring> jProperty (javaString (property));
-        const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (JuceAppActivity.audioManagerGetProperty,
+        const LocalRef<jstring> text ((jstring) android.bridge.callObjectMethod (JuceBridge.audioManagerGetProperty,
                                                                                    jProperty.get()));
         if (text.get() != 0)
             return juceString (text);
@@ -283,7 +283,7 @@ private:
     static bool androidHasSystemFeature (const String& property)
     {
         const LocalRef<jstring> jProperty (javaString (property));
-        return android.activity.callBooleanMethod (JuceAppActivity.hasSystemFeature, jProperty.get());
+        return android.bridge.callBooleanMethod (JuceBridge.hasSystemFeature, jProperty.get());
     }
 
     static double getNativeSampleRate()
@@ -353,7 +353,7 @@ private:
         const int THREAD_PRIORITY_AUDIO = -16;
         jint priority = THREAD_PRIORITY_AUDIO;
 
-        if (priority != android.activity.callIntMethod (JuceAppActivity.setCurrentThreadPriority, (jint) priority))
+        if (priority != android.bridge.callIntMethod (JuceBridge.setCurrentThreadPriority, (jint) priority))
             DBG ("Unable to set audio thread priority: priority is still " << priority);
     }
 

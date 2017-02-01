@@ -569,7 +569,7 @@ void FileOutputStream::flushInternal()
         // when the device is acting as a USB drive, and unless it's explicitly
         // refreshed, it'll get out of step with the real file.
         const LocalRef<jstring> t (javaString (file.getFullPathName()));
-        android.activity.callVoidMethod (JuceAppActivity.scanFile, t.get());
+        android.bridge.callVoidMethod (JuceBridge.scanFile, t.get());
        #endif
     }
 }

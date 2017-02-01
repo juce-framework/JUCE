@@ -139,7 +139,7 @@ public:
         JNIEnv* const env = getEnv();
 
         // First check whether there's an embedded asset with this font name:
-        typeface = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.getTypeFaceFromAsset,
+        typeface = GlobalRef (android.bridge.callObjectMethod (JuceBridge.getTypeFaceFromAsset,
                                                                  javaString ("fonts/" + name).get()));
 
         if (typeface.get() == nullptr)
@@ -172,7 +172,7 @@ public:
         LocalRef<jbyteArray> bytes (env->NewByteArray (size));
         env->SetByteArrayRegion (bytes, 0, size, (const jbyte*) data);
 
-        typeface = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.getTypeFaceFromByteArray, bytes.get()));
+        typeface = GlobalRef (android.bridge.callObjectMethod (JuceBridge.getTypeFaceFromByteArray, bytes.get()));
 
         initialise (env);
     }
@@ -253,7 +253,7 @@ public:
         JNIEnv* env = getEnv();
 
         jobject matrix = GraphicsHelpers::createMatrix (env, AffineTransform::scale (referenceFontToUnits).followedBy (t));
-        jintArray maskData = (jintArray) android.activity.callObjectMethod (JuceAppActivity.renderGlyph, (jchar) glyphNumber, paint.get(), matrix, rect.get());
+        jintArray maskData = (jintArray) android.bridge.callObjectMethod (JuceBridge.renderGlyph, (jchar) glyphNumber, paint.get(), matrix, rect.get());
 
         env->DeleteLocalRef (matrix);
 
