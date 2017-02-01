@@ -75,7 +75,6 @@ public:
     virtual bool isCodeBlocks() const    = 0;
     virtual bool isMakefile() const      = 0;
     virtual bool isAndroidStudio() const = 0;
-    virtual bool isAndroidAnt() const    = 0;
 
     // operating system targeted by exporter
     virtual bool isAndroid() const = 0;
@@ -241,7 +240,8 @@ public:
 
         Value getBuildConfigPreprocessorDefs()              { return getValue (Ids::defines); }
         String getBuildConfigPreprocessorDefsString() const { return config [Ids::defines]; }
-        StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
+        StringPairArray getAllPreprocessorDefs() const;    // includes inherited definitions
+        StringPairArray getUniquePreprocessorDefs() const; // returns pre-processor definitions that are not already in the project pre-processor defs
 
         Value getHeaderSearchPathValue()                    { return getValue (Ids::headerPath); }
         String getHeaderSearchPathString() const            { return config [Ids::headerPath]; }

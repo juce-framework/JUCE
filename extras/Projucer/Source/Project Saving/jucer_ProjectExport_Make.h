@@ -300,7 +300,6 @@ public:
     bool isCodeBlocks() const override                  { return false; }
     bool isMakefile() const override                    { return true; }
     bool isAndroidStudio() const override               { return false; }
-    bool isAndroidAnt() const override                  { return false; }
 
     bool isAndroid() const override                     { return false; }
     bool isWindows() const override                     { return false; }

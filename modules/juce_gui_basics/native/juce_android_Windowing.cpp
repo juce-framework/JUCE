@@ -106,7 +106,7 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
  METHOD (invalidate,    "invalidate",       "(IIII)V") \
  METHOD (containsPoint, "containsPoint",    "(II)Z") \
  METHOD (showKeyboard,  "showKeyboard",     "(Ljava/lang/String;)V") \
- METHOD (setSystemUiVisibility, "setSystemUiVisibility", "(I)V") \
+ METHOD (setSystemUiVisibility, "setSystemUiVisibilityCompat", "(I)V") \
 
 DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
