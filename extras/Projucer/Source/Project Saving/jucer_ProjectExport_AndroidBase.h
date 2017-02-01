@@ -31,9 +31,12 @@ public:
           androidScreenOrientation (settings, Ids::androidScreenOrientation, nullptr, "unspecified"),
           androidActivityClass (settings, Ids::androidActivityClass, nullptr, createDefaultClassName()),
           androidActivitySubClassName (settings, Ids::androidActivitySubClassName, nullptr),
+          androidApplicationClass (settings, Ids::androidApplicationClass, nullptr),
           androidVersionCode (settings, Ids::androidVersionCode, nullptr, "1"),
-          androidMinimumSDK (settings, Ids::androidMinimumSDK, nullptr, "23"),
           androidTheme (settings, Ids::androidTheme, nullptr),
+          androidMinimumSDK (settings, Ids::androidMinimumSDK, nullptr, "23"),
+          androidCompileSDK (settings, Ids::androidCompileSDK, nullptr, "23"),
+          androidTargetSDK (settings, Ids::androidTargetSDK, nullptr, "23"),
           androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
           androidMicNeeded (settings, Ids::microphonePermissionNeeded, nullptr, false),
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
@@ -103,7 +106,8 @@ public:
 
     //==============================================================================
     CachedValue<String> androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
-                        androidVersionCode, androidMinimumSDK, androidTheme;
+                        androidApplicationClass, androidVersionCode, androidTheme,
+                        androidMinimumSDK, androidCompileSDK, androidTargetSDK;
 
     CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded;
     CachedValue<String> androidOtherPermissions;
@@ -137,6 +141,12 @@ public:
 
         props.add (new TextWithDefaultPropertyComponent<String> (androidMinimumSDK, "Minimum SDK version", 32),
                    "The number of the minimum version of the Android SDK that the app requires");
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (androidCompileSDK, "Compile SDK version", 32),
+                   "The version of the Android SDK to compile your app with (use latest version)");
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (androidTargetSDK, "Target SDK version", 32),
+                   "The API Level that the application targets");
     }
 
     //==============================================================================
@@ -178,10 +188,13 @@ public:
     }
 
     //==============================================================================
-    void createOtherExporterProperties (PropertyListBuilder& props)
+    virtual void createOtherExporterProperties (PropertyListBuilder& props)
     {
         props.add (new TextPropertyComponent (androidTheme.getPropertyAsValue(), "Android Theme", 256, false),
                    "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
+        
+        props.add (new TextPropertyComponent (androidApplicationClass.getPropertyAsValue(), "Android Application Class", 256, false),
+                   "The name of your Application class, if your project extends it");
     }
 
     //==============================================================================
@@ -424,7 +437,7 @@ public:
 
         XmlElement* sdk = manifest->createNewChildElement ("uses-sdk");
         sdk->setAttribute ("android:minSdkVersion", androidMinimumSDK.get());
-        sdk->setAttribute ("android:targetSdkVersion", androidMinimumSDK.get());
+        sdk->setAttribute ("android:targetSdkVersion", androidTargetSDK.get());
 
         {
             const StringArray permissions (getPermissionsRequired());
@@ -442,6 +455,9 @@ public:
 
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
+        
+        if (androidApplicationClass.get().isNotEmpty())
+            app->setAttribute ("android:name", androidApplicationClass.get());
 
         if (androidTheme.get().isNotEmpty())
             app->setAttribute ("android:theme", androidTheme.get());

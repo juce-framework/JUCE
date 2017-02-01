@@ -36,6 +36,10 @@ public:
     static const char* getName()                         { return "Android Studio"; }
     static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
 
+    //==============================================================================
+    Value  getPackagingOptionsValue()                { return getSetting (Ids::androidPackagingOptions); }
+    String getPackagingOptionsString() const         { return settings [Ids::androidPackagingOptions]; }
+    
     static AndroidStudioProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
@@ -45,7 +49,9 @@ public:
     }
 
     //==============================================================================
-    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain, buildToolsVersion;
+    CachedValue<String> gradleVersion, gradleWrapperVersion, gradleToolchain,
+                        buildToolsVersion, gradleAppDependencies, gradleSettings,
+                        gradleRepositories;
 
     //==============================================================================
     AndroidStudioProjectExporter (Project& p, const ValueTree& t)
@@ -54,6 +60,10 @@ public:
           gradleWrapperVersion (settings, Ids::gradleWrapperVersion, nullptr, "0.8.1"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "23.0.2"),
+          gradleAppDependencies (settings, Ids::gradleAppDependencies, nullptr,
+                                 "compile \"com.android.support:support-v4:+\""),
+          gradleSettings (settings, Ids::gradleSettings, nullptr, "include ':app'"),
+          gradleRepositories (settings, Ids::gradleRepositories, nullptr, "jcenter()"),
           androidStudioExecutable (findAndroidStudioExecutable())
     {
         name = getName();
@@ -79,7 +89,25 @@ public:
         props.add (new TextWithDefaultPropertyComponent<String> (buildToolsVersion, "Android build tools version", 32),
                    "The Android build tools version that Android Studio should use to build this app");
     }
-
+    
+    void createOtherExporterProperties (PropertyListBuilder& props) override
+    {
+        AndroidProjectExporterBase::createOtherExporterProperties (props);
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleAppDependencies, "gradle app dependencies", 8192, true),
+                   "Declare the external dependencies of your project (app/build.gradle)");
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleSettings, "gradle settings", 8192, true),
+                   "Declare the gradle settings for your project (settings.gradle)");
+        
+        props.add (new TextWithDefaultPropertyComponent<String> (gradleRepositories, "gradle project repositories", 8192, true),
+                   "Declare the repositories for your project dependencies (build.gradle)");
+        
+        props.add (new TextPropertyComponent (getPackagingOptionsValue(), "packaging options", 8192, true),
+                   "DSL object for configuring APK packaging options");
+    }
+                                                                            
+    
     void createLibraryModuleExporterProperties (PropertyListBuilder&) override
     {
         // gradle cannot do native library modules as far as we know...
@@ -110,7 +138,7 @@ public:
     void create (const OwnedArray<LibraryModule>& modules) const override
     {
         const File targetFolder (getTargetFolder());
-
+        
         removeOldFiles (targetFolder);
 
         {
@@ -461,7 +489,7 @@ private:
     //==============================================================================
     String getSettingsGradleFileContent() const
     {
-        return "include ':app'";
+        return gradleSettings.get();
     }
 
     String getProjectBuildGradleFileContent() const
@@ -478,13 +506,13 @@ private:
     {
         GradleObject buildScript ("buildscript");
 
-        buildScript.addChildObject (getGradleRepositories());
+        buildScript.addChildObject (getGradleBuildScriptRepositories());
         buildScript.addChildObject (getGradleDependencies());
 
         return buildScript.toString();
     }
 
-    GradleObject* getGradleRepositories() const
+    GradleObject* getGradleBuildScriptRepositories() const
     {
         auto repositories = new GradleObject ("repositories");
         repositories->add<GradleStatement> ("jcenter()");
@@ -498,6 +526,18 @@ private:
         dependencies->add<GradleStatement> ("classpath 'com.android.tools.build:gradle-experimental:"
                                             + gradleWrapperVersion.get() + "'");
         return dependencies;
+    }
+
+    GradleObject* getGradleRepositories() const
+    {
+        auto repositories = new GradleObject ("repositories");
+        StringArray repositoryLines;
+        repositoryLines.addTokens (gradleRepositories.get(), "\n", "");
+        for (auto repositoryLine : repositoryLines)
+        {
+            repositories->add<GradleStatement> (repositoryLine);
+        }
+        return repositories;
     }
 
     String getGradleAllProjects() const
@@ -529,6 +569,8 @@ private:
         model.addChildObject (getAndroidBuildConfigs());
         model.addChildObject (getAndroidSigningConfigs());
         model.addChildObject (getAndroidProductFlavours());
+        if (getPackagingOptionsString().isNotEmpty())
+            model.addChildObject (getAndroidPackagingOptions());
 
         return model.toString();
     }
@@ -536,7 +578,12 @@ private:
     String getAppDependencies() const
     {
         GradleObject dependencies ("dependencies");
-        dependencies.add<GradleStatement> ("compile \"com.android.support:support-v4:+\"");
+        StringArray dependencyTokens;
+        dependencyTokens.addTokens (gradleAppDependencies.get(), "\n", "");
+        for (auto dependency : dependencyTokens)
+        {
+            dependencies.add<GradleStatement> (dependency);
+        }
         return dependencies.toString();
     }
 
@@ -545,7 +592,7 @@ private:
     {
         auto android = new GradleObject ("android");
 
-        android->add<GradleValue> ("compileSdkVersion", androidMinimumSDK.get().getIntValue());
+        android->add<GradleValue> ("compileSdkVersion", androidCompileSDK.get().getIntValue());
         android->add<GradleString> ("buildToolsVersion", buildToolsVersion.get());
         android->addChildObject (getAndroidDefaultConfig());
 
@@ -556,12 +603,13 @@ private:
     {
         const String bundleIdentifier  = project.getBundleIdentifier().toString().toLowerCase();
         const int minSdkVersion = androidMinimumSDK.get().getIntValue();
+        const int targetSdkVersion = androidTargetSDK.get().getIntValue();
 
         auto defaultConfig = new GradleObject ("defaultConfig.with");
 
         defaultConfig->add<GradleString> ("applicationId",             bundleIdentifier);
-        defaultConfig->add<GradleValue>  ("minSdkVersion.apiLevel",      minSdkVersion);
-        defaultConfig->add<GradleValue>  ("targetSdkVersion.apiLevel", minSdkVersion);
+        defaultConfig->add<GradleValue>  ("minSdkVersion.apiLevel",    minSdkVersion);
+        defaultConfig->add<GradleValue>  ("targetSdkVersion.apiLevel", targetSdkVersion);
 
         return defaultConfig;
     }
@@ -726,7 +774,7 @@ private:
 
         for (const auto& path : config.getLibrarySearchPaths())
             ndkSettings->add<GradleLibrarySearchPath> (path);
-
+        
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID", "1");
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         ndkSettings->add<GradlePreprocessorDefine> ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
@@ -794,6 +842,22 @@ private:
         flavour->add<GradleStatement> ("ndk.abiFilters.add(\"" + arch + "\")");
         return flavour;
     }
+            
+            
+    GradleObject* getAndroidPackagingOptions() const
+    {
+        auto packagingOptions = new GradleObject ("android.packagingOptions");
+        
+        StringArray packagingOptionLines;
+        packagingOptionLines.addTokens (getPackagingOptionsString(), "\n", "");
+        for (auto packagingOption : packagingOptionLines)
+        {
+            packagingOptions->add<GradleStatement> (packagingOption);
+        }
+
+        return packagingOptions;
+    }
+            
     //==============================================================================
     String getLocalPropertiesFileContent() const
     {

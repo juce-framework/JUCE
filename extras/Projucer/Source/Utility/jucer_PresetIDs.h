@@ -150,6 +150,7 @@ namespace Ids
     DECLARE_ID (microphonePermissionNeeded);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
+    DECLARE_ID (androidApplicationClass);
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
@@ -157,6 +158,8 @@ namespace Ids
     DECLARE_ID (androidArchitectures);
     DECLARE_ID (androidBluetoothNeeded);
     DECLARE_ID (androidMinimumSDK);
+    DECLARE_ID (androidCompileSDK);
+    DECLARE_ID (androidTargetSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);
     DECLARE_ID (androidKeyStorePass);
@@ -166,6 +169,7 @@ namespace Ids
     DECLARE_ID (androidStaticLibraries);
     DECLARE_ID (androidSharedLibraries);
     DECLARE_ID (androidScreenOrientation);
+    DECLARE_ID (androidPackagingOptions);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
@@ -176,6 +180,9 @@ namespace Ids
     DECLARE_ID (gradleWrapperVersion);
     DECLARE_ID (gradleToolchain);
     DECLARE_ID (gradleToolchainVersion);
+    DECLARE_ID (gradleAppDependencies);
+    DECLARE_ID (gradleSettings);
+    DECLARE_ID (gradleRepositories);
     DECLARE_ID (linuxExtraPkgConfig);
     DECLARE_ID (font);
     DECLARE_ID (colour);
