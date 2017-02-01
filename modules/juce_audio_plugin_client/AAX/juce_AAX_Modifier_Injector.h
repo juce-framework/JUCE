@@ -36,5 +36,3 @@ struct ModifierKeyReceiver
     virtual void setModifierKeyProvider (ModifierKeyProvider*) = 0;
     virtual void removeModifierKeyProvider() = 0;
 };
-
-#endif
