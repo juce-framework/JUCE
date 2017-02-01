@@ -189,7 +189,7 @@ void MovieComponent::setPosition (double seconds)
 
 void MovieComponent::setVolume (float newVolume)
 {
-    pimpl->player.volume = (CGFloat) newVolume;
+    pimpl->player.volume = static_cast<float> (newVolume);
 }
 
 float MovieComponent::getVolume() const
