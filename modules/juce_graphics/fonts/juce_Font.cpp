@@ -277,7 +277,6 @@ Font& Font::operator= (const Font& other) noexcept
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Font::Font (Font&& other) noexcept
     : font (static_cast<ReferenceCountedObjectPtr<SharedFontInternal>&&> (other.font))
 {
@@ -288,7 +287,6 @@ Font& Font::operator= (Font&& other) noexcept
     font = static_cast<ReferenceCountedObjectPtr<SharedFontInternal>&&> (other.font);
     return *this;
 }
-#endif
 
 Font::~Font() noexcept
 {

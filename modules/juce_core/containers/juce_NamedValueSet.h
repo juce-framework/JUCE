@@ -50,10 +50,11 @@ public:
     /** Replaces this set with a copy of another set. */
     NamedValueSet& operator= (const NamedValueSet&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     NamedValueSet (NamedValueSet&&) noexcept;
+
+    /** Move assignment operator */
     NamedValueSet& operator= (NamedValueSet&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~NamedValueSet() noexcept;
@@ -68,7 +69,6 @@ public:
         NamedValue (const Identifier& n, const var& v)  : name (n), value (v) {}
         NamedValue (const NamedValue& other) : name (other.name), value (other.value) {}
 
-    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
         NamedValue (NamedValue&& other) noexcept
         : name (static_cast<Identifier&&> (other.name)),
           value (static_cast<var&&> (other.value))
@@ -87,7 +87,6 @@ public:
             value = static_cast<var&&> (other.value);
             return *this;
         }
-     #endif
 
         bool operator== (const NamedValue& other) const noexcept   { return name == other.name && value == other.value; }
         bool operator!= (const NamedValue& other) const noexcept   { return ! operator== (other); }
@@ -124,13 +123,11 @@ public:
     */
     bool set (const Identifier& name, const var& newValue);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
                     value was already set the value passed-in.
     */
     bool set (const Identifier& name, var&& newValue);
-   #endif
 
     /** Returns true if the set contains an item with the specified name. */
     bool contains (const Identifier& name) const noexcept;

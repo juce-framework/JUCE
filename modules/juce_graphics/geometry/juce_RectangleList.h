@@ -64,18 +64,18 @@ public:
         return *this;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     RectangleList (RectangleList&& other) noexcept
         : rects (static_cast<Array<RectangleType>&&> (other.rects))
     {
     }
 
+    /** Move assignment operator */
     RectangleList& operator= (RectangleList&& other) noexcept
     {
         rects = static_cast<Array<RectangleType>&&> (other.rects);
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns true if the region is empty. */

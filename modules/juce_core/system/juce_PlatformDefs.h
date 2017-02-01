@@ -172,30 +172,6 @@
 #define JUCE_STRINGIFY(item)  JUCE_STRINGIFY_MACRO_HELPER (item)
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_STATIC_ASSERT
-  /** A compile-time assertion macro.
-     If the expression parameter is false, the macro will cause a compile error. (The actual error
-     message that the compiler generates may be completely bizarre and seem to have no relation to
-     the place where you put the static_assert though!)
-  */
-  #define static_jassert(expression) static_assert(expression, #expression);
-#else
- #ifndef DOXYGEN
-  namespace juce
-  {
-     template <bool b> struct JuceStaticAssert;
-     template <>       struct JuceStaticAssert<true> { static void dummy() {} };
-  }
- #endif
-
-  /** A compile-time assertion macro.
-      If the expression parameter is false, the macro will cause a compile error. (The actual error
-      message that the compiler generates may be completely bizarre and seem to have no relation to
-      the place where you put the static_assert though!)
-  */
-  #define static_jassert(expression)      juce::JuceStaticAssert<expression>::dummy();
-#endif
-
 /** This is a shorthand macro for declaring stubs for a class's copy constructor and operator=.
 
     For example, instead of

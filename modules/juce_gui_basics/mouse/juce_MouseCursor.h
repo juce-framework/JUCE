@@ -111,10 +111,11 @@ public:
     /** Destructor. */
     ~MouseCursor();
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     MouseCursor (MouseCursor&&) noexcept;
+
+    /** Move assignment operator */
     MouseCursor& operator= (MouseCursor&&) noexcept;
-   #endif
 
     /** Checks whether two mouse cursors are the same.
 

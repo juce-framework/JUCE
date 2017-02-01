@@ -90,10 +90,11 @@ public:
     /** Copies from another file object. */
     File& operator= (const File& otherFile);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     File (File&&) noexcept;
+
+    /** Move assignment operator */
     File& operator= (File&&) noexcept;
-   #endif
 
     //==============================================================================
    #if JUCE_ALLOW_STATIC_NULL_VARIABLES

@@ -70,10 +70,11 @@ public:
     */
     MemoryBlock& operator= (const MemoryBlock&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     MemoryBlock (MemoryBlock&&) noexcept;
+
+    /** Move assignment operator */
     MemoryBlock& operator= (MemoryBlock&&) noexcept;
-   #endif
 
     //==============================================================================
     /** Compares two memory blocks.

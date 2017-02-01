@@ -137,19 +137,19 @@ public:
         std::free (data);
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     HeapBlock (HeapBlock&& other) noexcept
         : data (other.data)
     {
         other.data = nullptr;
     }
 
+    /** Move assignment operator */
     HeapBlock& operator= (HeapBlock&& other) noexcept
     {
         std::swap (data, other.data);
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns a raw pointer to the allocated data.

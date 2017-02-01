@@ -84,14 +84,12 @@ public:
             new (data.elements + i) ElementType (other.data.elements[i]);
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     Array (Array<ElementType, TypeOfCriticalSectionToUse>&& other) noexcept
         : data (static_cast<ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data)),
           numUsed (other.numUsed)
     {
         other.numUsed = 0;
     }
-   #endif
 
     /** Initalises from a null-terminated C array of values.
 
@@ -146,7 +144,6 @@ public:
         return *this;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     Array& operator= (Array&& other) noexcept
     {
         const ScopedLockType lock (getLock());
@@ -156,7 +153,6 @@ public:
         other.numUsed = 0;
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Compares this array to another one.
@@ -403,7 +399,6 @@ public:
         new (data.elements + numUsed++) ElementType (newElement);
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Appends a new element at the end of the array.
 
         @param newElement       the new object to add to the array
@@ -415,7 +410,6 @@ public:
         data.ensureAllocatedSize (numUsed + 1);
         new (data.elements + numUsed++) ElementType (static_cast<ElementType&&> (newElement));
     }
-   #endif
 
     /** Inserts a new element into the array at a given position.
 

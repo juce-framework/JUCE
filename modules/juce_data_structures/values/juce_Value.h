@@ -63,10 +63,8 @@ public:
     /** Creates a Value that is set to the specified value. */
     explicit Value (const var& initialValue);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     Value (Value&&) noexcept;
-    Value& operator= (Value&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~Value();
@@ -100,6 +98,9 @@ public:
         change asynchronously.
     */
     Value& operator= (const var& newValue);
+
+    /** Move assignment operator */
+    Value& operator= (Value&&) noexcept;
 
     /** Makes this object refer to the same underlying ValueSource as another one.
 

@@ -76,11 +76,8 @@ public:
     RelativeCoordinate (const Expression& expression);
     RelativeCoordinate (const RelativeCoordinate&);
     RelativeCoordinate& operator= (const RelativeCoordinate&);
-
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     RelativeCoordinate (RelativeCoordinate&&) noexcept;
     RelativeCoordinate& operator= (RelativeCoordinate&&) noexcept;
-   #endif
 
     /** Creates an absolute position from the parent origin on either the X or Y axis.
 

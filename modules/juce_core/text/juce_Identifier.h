@@ -72,13 +72,11 @@ public:
     /** Creates a copy of another identifier. */
     Identifier& operator= (const Identifier& other) noexcept;
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Creates a copy of another identifier. */
     Identifier (Identifier&& other) noexcept;
 
     /** Creates a copy of another identifier. */
     Identifier& operator= (Identifier&& other) noexcept;
-   #endif
 
     /** Destructor */
     ~Identifier() noexcept;

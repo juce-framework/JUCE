@@ -109,14 +109,12 @@ public:
     var& operator= (ReferenceCountedObject* object);
     var& operator= (NativeFunction method);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     var (var&&) noexcept;
     var (String&&);
     var (MemoryBlock&&);
     var (Array<var>&&);
     var& operator= (var&&) noexcept;
     var& operator= (String&&);
-   #endif
 
     void swapWith (var& other) noexcept;
 

@@ -92,9 +92,8 @@ public:
     /** Makes this object reference another node. */
     ValueTree& operator= (const ValueTree&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     ValueTree (ValueTree&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~ValueTree();

@@ -63,10 +63,11 @@ public:
     /** Copies another expression. */
     Expression& operator= (const Expression&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     Expression (Expression&&) noexcept;
+
+    /** Move assignment operator */
     Expression& operator= (Expression&&) noexcept;
-   #endif
 
     /** Creates a simple expression with a specified constant value. */
     explicit Expression (double constant);

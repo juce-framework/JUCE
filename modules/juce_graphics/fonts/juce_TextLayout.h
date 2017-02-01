@@ -45,10 +45,8 @@ public:
     TextLayout();
     TextLayout (const TextLayout&);
     TextLayout& operator= (const TextLayout&);
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     TextLayout (TextLayout&&) noexcept;
     TextLayout& operator= (TextLayout&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~TextLayout();

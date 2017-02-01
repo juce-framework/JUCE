@@ -93,16 +93,17 @@ public:
     /** Creates a copy of another WeakReference. */
     WeakReference (const WeakReference& other) noexcept         : holder (other.holder) {}
 
+    /** Move constructor */
+    WeakReference (WeakReference&& other) noexcept              : holder (static_cast<SharedRef&&> (other.holder)) {}
+
     /** Copies another pointer to this one. */
     WeakReference& operator= (const WeakReference& other)       { holder = other.holder; return *this; }
 
     /** Copies another pointer to this one. */
     WeakReference& operator= (ObjectType* const newObject)      { holder = getRef (newObject); return *this; }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    WeakReference (WeakReference&& other) noexcept              : holder (static_cast<SharedRef&&> (other.holder)) {}
+    /** Move assignment operator */
     WeakReference& operator= (WeakReference&& other) noexcept   { holder = static_cast<SharedRef&&> (other.holder); return *this; }
-   #endif
 
     /** Returns the object that this pointer refers to, or null if the object no longer exists. */
     ObjectType* get() const noexcept                            { return holder != nullptr ? holder->get() : nullptr; }

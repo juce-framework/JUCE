@@ -47,10 +47,11 @@ public:
     PositionedGlyph (const PositionedGlyph&);
     PositionedGlyph& operator= (const PositionedGlyph&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     PositionedGlyph (PositionedGlyph&&) noexcept;
+
+    /** Move assignment operator */
     PositionedGlyph& operator= (PositionedGlyph&&) noexcept;
-   #endif
 
     ~PositionedGlyph();
 
