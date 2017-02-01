@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ELEMENTCOMPARATOR_H_INCLUDED
-#define JUCE_ELEMENTCOMPARATOR_H_INCLUDED
+#pragma once
 
 #ifndef DOXYGEN
 
@@ -192,6 +191,3 @@ public:
         return (first < second) ? -1 : ((second < first) ? 1 : 0);
     }
 };
-
-
-#endif   // JUCE_ELEMENTCOMPARATOR_H_INCLUDED

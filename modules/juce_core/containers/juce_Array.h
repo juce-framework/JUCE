@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ARRAY_H_INCLUDED
-#define JUCE_ARRAY_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -1232,6 +1231,3 @@ private:
             data.shrinkToNoMoreThan (jmax (numUsed, jmax (minimumAllocatedSize, 64 / (int) sizeof (ElementType))));
     }
 };
-
-
-#endif   // JUCE_ARRAY_H_INCLUDED

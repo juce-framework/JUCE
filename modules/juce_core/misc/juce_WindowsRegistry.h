@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_WINDOWSREGISTRY_H_INCLUDED
-#define JUCE_WINDOWSREGISTRY_H_INCLUDED
+#pragma once
 
 #if JUCE_WINDOWS || DOXYGEN
 
@@ -140,4 +139,3 @@ private:
 };
 
 #endif
-#endif   // JUCE_WINDOWSREGISTRY_H_INCLUDED

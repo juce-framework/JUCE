@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PRIMES_H_INCLUDED
-#define JUCE_PRIMES_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -68,6 +67,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Primes)
 };
-
-
-#endif   // JUCE_PRIMES_H_INCLUDED

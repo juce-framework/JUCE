@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FONT_H_INCLUDED
-#define JUCE_FONT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -473,5 +472,3 @@ private:
 
     JUCE_LEAK_DETECTOR (Font)
 };
-
-#endif   // JUCE_FONT_H_INCLUDED

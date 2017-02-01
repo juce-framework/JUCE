@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIINPUT_H_INCLUDED
-#define JUCE_MIDIINPUT_H_INCLUDED
+#pragma once
 
 class MidiInput;
 
@@ -180,6 +179,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInput)
 };
-
-
-#endif   // JUCE_MIDIINPUT_H_INCLUDED

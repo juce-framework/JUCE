@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCSENDER_H_INCLUDED
-#define JUCE_OSCSENDER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -152,5 +151,3 @@ private:
      return sendToIPAddress (targetIPAddress, targetPortNumber, OSCMessage (address, std::forward<Args> (args)...));
  }
 #endif // JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-
-#endif // JUCE_OSCSENDER_H_INCLUDED

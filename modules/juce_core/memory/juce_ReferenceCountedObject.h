@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
-#define JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -416,6 +415,3 @@ bool operator!= (ReferenceCountedObjectClass* object1, const ReferenceCountedObj
 {
     return object1 != object2.get();
 }
-
-
-#endif   // JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED

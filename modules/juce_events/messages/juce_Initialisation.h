@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_INITIALISATION_H_INCLUDED
-#define JUCE_INITIALISATION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -164,5 +163,3 @@ public:
  #endif
 
 #endif
-
-#endif   // JUCE_INITIALISATION_H_INCLUDED

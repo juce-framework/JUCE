@@ -50,8 +50,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_OPENGL_H_INCLUDED
-#define JUCE_OPENGL_H_INCLUDED
+#pragma once
 
 #include <juce_gui_extra/juce_gui_extra.h>
 
@@ -182,5 +181,3 @@ class OpenGLShaderProgram;
 #include "utils/juce_OpenGLAppComponent.h"
 
 }
-
-#endif   // JUCE_OPENGL_H_INCLUDED

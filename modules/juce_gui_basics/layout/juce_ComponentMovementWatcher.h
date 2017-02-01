@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
-#define JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -90,6 +89,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentMovementWatcher)
 };
-
-
-#endif   // JUCE_COMPONENTMOVEMENTWATCHER_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIODATACONVERTERS_H_INCLUDED
-#define JUCE_AUDIODATACONVERTERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -717,6 +716,3 @@ private:
     AudioDataConverters();
     JUCE_DECLARE_NON_COPYABLE (AudioDataConverters)
 };
-
-
-#endif   // JUCE_AUDIODATACONVERTERS_H_INCLUDED

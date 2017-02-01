@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEMPORARYFILE_H_INCLUDED
-#define JUCE_TEMPORARYFILE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -167,5 +166,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryFile)
 };
-
-#endif   // JUCE_TEMPORARYFILE_H_INCLUDED

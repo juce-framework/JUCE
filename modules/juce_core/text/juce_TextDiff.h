@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTDIFF_H_INCLUDED
-#define JUCE_TEXTDIFF_H_INCLUDED
+#pragma once
 
 
 /**
@@ -77,6 +76,3 @@ public:
     */
     Array<Change> changes;
 };
-
-
-#endif   // JUCE_TEXTDIFF_H_INCLUDED

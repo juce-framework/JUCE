@@ -56,8 +56,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_DEVICES_H_INCLUDED
-#define JUCE_AUDIO_DEVICES_H_INCLUDED
+#pragma once
 
 #include <juce_events/juce_events.h>
 #include <juce_audio_basics/juce_audio_basics.h>
@@ -138,5 +137,3 @@ namespace juce
 #include "audio_io/juce_AudioDeviceManager.h"
 
 }
-
-#endif   // JUCE_AUDIO_DEVICES_H_INCLUDED

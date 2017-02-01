@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_GLYPHARRANGEMENT_H_INCLUDED
-#define JUCE_GLYPHARRANGEMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -322,6 +321,3 @@ private:
 
     JUCE_LEAK_DETECTOR (GlyphArrangement)
 };
-
-
-#endif   // JUCE_GLYPHARRANGEMENT_H_INCLUDED

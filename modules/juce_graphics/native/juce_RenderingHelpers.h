@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RENDERINGHELPERS_H_INCLUDED
-#define JUCE_RENDERINGHELPERS_H_INCLUDED
+#pragma once
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -2685,5 +2684,3 @@ protected:
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
-
-#endif   // JUCE_RENDERINGHELPERS_H_INCLUDED

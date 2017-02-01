@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_POSITIONABLEAUDIOSOURCE_H_INCLUDED
-#define JUCE_POSITIONABLEAUDIOSOURCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -79,6 +78,3 @@ public:
     /** Tells the source whether you'd like it to play in a loop. */
     virtual void setLooping (bool shouldLoop)       { ignoreUnused (shouldLoop); }
 };
-
-
-#endif   // JUCE_POSITIONABLEAUDIOSOURCE_H_INCLUDED

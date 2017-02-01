@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MPEZONE_H_INCLUDED
-#define JUCE_MPEZONE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -147,6 +146,3 @@ private:
     int perNotePitchbendRange;
     int masterPitchbendRange;
 };
-
-
-#endif // JUCE_MPEZONE_H_INCLUDED

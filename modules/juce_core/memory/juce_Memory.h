@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MEMORY_H_INCLUDED
-#define JUCE_MEMORY_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /** Fills a block of memory with zeros. */
@@ -141,6 +140,3 @@ inline void writeUnaligned (void* dstPtr, Type value) noexcept
 #ifndef juce_UseDebuggingNewOperator
  #define juce_UseDebuggingNewOperator
 #endif
-
-
-#endif   // JUCE_MEMORY_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTLAYOUT_H_INCLUDED
-#define JUCE_TEXTLAYOUT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -190,5 +189,3 @@ private:
 
     JUCE_LEAK_DETECTOR (TextLayout)
 };
-
-#endif   // JUCE_TEXTLAYOUT_H_INCLUDED

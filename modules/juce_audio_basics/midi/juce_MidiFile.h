@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIFILE_H_INCLUDED
-#define JUCE_MIDIFILE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -187,6 +186,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MidiFile)
 };
-
-
-#endif   // JUCE_MIDIFILE_H_INCLUDED

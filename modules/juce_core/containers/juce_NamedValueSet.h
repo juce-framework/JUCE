@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_NAMEDVALUESET_H_INCLUDED
-#define JUCE_NAMEDVALUESET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -180,6 +179,3 @@ private:
     //==============================================================================
     Array<NamedValue> values;
 };
-
-
-#endif   // JUCE_NAMEDVALUESET_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUSECURSOR_H_INCLUDED
-#define JUCE_MOUSECURSOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -177,5 +176,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MouseCursor)
 };
-
-#endif   // JUCE_MOUSECURSOR_H_INCLUDED

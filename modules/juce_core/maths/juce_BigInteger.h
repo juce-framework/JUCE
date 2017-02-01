@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BIGINTEGER_H_INCLUDED
-#define JUCE_BIGINTEGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -351,6 +350,3 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
  // For backwards compatibility, BitArray is defined as an alias for BigInteger.
  typedef BigInteger BitArray;
 #endif
-
-
-#endif   // JUCE_BIGINTEGER_H_INCLUDED

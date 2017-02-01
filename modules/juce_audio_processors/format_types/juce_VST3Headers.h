@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VST3HEADERS_H_INCLUDED
-#define JUCE_VST3HEADERS_H_INCLUDED
+#pragma once
 
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 #if _MSC_VER
@@ -177,5 +176,3 @@ namespace Steinberg
 #undef DEF_CLASS2
 #undef DEF_CLASS_W
 #undef END_FACTORY
-
-#endif   // JUCE_VST3HEADERS_H_INCLUDED

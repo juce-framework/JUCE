@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
-#define JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -206,6 +205,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer)
 };
-
-
-#endif   // JUCE_DRAGANDDROPCONTAINER_H_INCLUDED

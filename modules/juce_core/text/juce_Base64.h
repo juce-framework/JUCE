@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BASE64_H_INCLUDED
-#define JUCE_BASE64_H_INCLUDED
+#pragma once
 
 
 /**
@@ -56,6 +55,3 @@ struct JUCE_API Base64
     /** Converts a string's UTF-8 representation to a base-64 string. */
     static String toBase64 (const String& textToEncode);
 };
-
-
-#endif   // JUCE_BASE64_H_INCLUDED

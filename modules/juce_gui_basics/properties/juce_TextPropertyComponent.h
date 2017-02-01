@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED
-#define JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -144,5 +143,3 @@ private:
  /** This typedef is just for compatibility with old code and VC6 - newer code should use TextPropertyComponent::Listener instead. */
  typedef TextPropertyComponent::Listener TextPropertyComponentListener;
 #endif
-
-#endif   // JUCE_TEXTPROPERTYCOMPONENT_H_INCLUDED

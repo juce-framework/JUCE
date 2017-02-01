@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RELATIVERECTANGLE_H_INCLUDED
-#define JUCE_RELATIVERECTANGLE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -102,6 +101,3 @@ public:
     // The actual rectangle coords...
     RelativeCoordinate left, right, top, bottom;
 };
-
-
-#endif   // JUCE_RELATIVERECTANGLE_H_INCLUDED

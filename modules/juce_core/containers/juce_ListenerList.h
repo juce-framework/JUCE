@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LISTENERLIST_H_INCLUDED
-#define JUCE_LISTENERLIST_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -549,6 +548,3 @@ private:
     #undef LL_TEMPLATE
     #undef LL_PARAM
 };
-
-
-#endif   // JUCE_LISTENERLIST_H_INCLUDED

@@ -49,8 +49,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_GUI_BASICS_H_INCLUDED
-#define JUCE_GUI_BASICS_H_INCLUDED
+#pragma once
 
 #include <juce_graphics/juce_graphics.h>
 #include <juce_data_structures/juce_data_structures.h>
@@ -289,5 +288,3 @@ class FlexBox;
 #endif
 
 }
-
-#endif   // JUCE_GUI_BASICS_H_INCLUDED

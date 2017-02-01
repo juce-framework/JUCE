@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_HEAPBLOCK_H_INCLUDED
-#define JUCE_HEAPBLOCK_H_INCLUDED
+#pragma once
 
 #if ! (defined (DOXYGEN) || JUCE_EXCEPTIONS_DISABLED)
 namespace HeapBlockHelper
@@ -309,6 +308,3 @@ private:
     JUCE_PREVENT_HEAP_ALLOCATION // Creating a 'new HeapBlock' would be missing the point!
    #endif
 };
-
-
-#endif   // JUCE_HEAPBLOCK_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_NORMALISABLERANGE_H_INCLUDED
-#define JUCE_NORMALISABLERANGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -194,6 +193,3 @@ private:
         jassert (skew > ValueType());
     }
 };
-
-
-#endif   // JUCE_NORMALISABLERANGE_H_INCLUDED

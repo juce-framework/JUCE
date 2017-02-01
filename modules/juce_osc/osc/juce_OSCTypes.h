@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCTYPE_H_INCLUDED
-#define JUCE_OSCTYPE_H_INCLUDED
+#pragma once
 
 //==============================================================================
 
@@ -94,6 +93,3 @@ struct OSCInternalError : public OSCException
 {
     OSCInternalError (const String& desc) : OSCException (desc) {}
 };
-
-
-#endif // JUCE_OSCTYPE_H_INCLUDED

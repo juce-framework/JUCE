@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STRINGARRAY_H_INCLUDED
-#define JUCE_STRINGARRAY_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -432,6 +431,3 @@ public:
 private:
     JUCE_LEAK_DETECTOR (StringArray)
 };
-
-
-#endif   // JUCE_STRINGARRAY_H_INCLUDED

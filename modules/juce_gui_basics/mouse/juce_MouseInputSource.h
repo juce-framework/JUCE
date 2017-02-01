@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUSEINPUTSOURCE_H_INCLUDED
-#define JUCE_MOUSEINPUTSOURCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -198,6 +197,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MouseInputSource)
 };
-
-
-#endif   // JUCE_MOUSEINPUTSOURCE_H_INCLUDED

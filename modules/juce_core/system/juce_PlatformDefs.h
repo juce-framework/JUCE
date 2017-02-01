@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PLATFORMDEFS_H_INCLUDED
-#define JUCE_PLATFORMDEFS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /*  This file defines miscellaneous macros for debugging, assertions, etc.
@@ -300,5 +299,3 @@
 #else
  #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS
 #endif
-
-#endif   // JUCE_PLATFORMDEFS_H_INCLUDED

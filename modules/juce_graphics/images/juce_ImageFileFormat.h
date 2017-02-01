@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IMAGEFILEFORMAT_H_INCLUDED
-#define JUCE_IMAGEFILEFORMAT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -211,6 +210,3 @@ public:
     Image decodeImage (InputStream&) override;
     bool writeImageToStream (const Image&, OutputStream&) override;
 };
-
-
-#endif   // JUCE_IMAGEFILEFORMAT_H_INCLUDED

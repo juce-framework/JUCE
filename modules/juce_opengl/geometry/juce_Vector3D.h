@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VECTOR3D_H_INCLUDED
-#define JUCE_VECTOR3D_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -76,6 +75,3 @@ public:
 
     Type x, y, z;
 };
-
-
-#endif   // JUCE_VECTOR3D_H_INCLUDED

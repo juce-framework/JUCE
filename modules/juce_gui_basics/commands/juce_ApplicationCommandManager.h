@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED
-#define JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -347,7 +346,3 @@ public:
     */
     virtual void applicationCommandListChanged() = 0;
 };
-
-
-
-#endif   // JUCE_APPLICATIONCOMMANDMANAGER_H_INCLUDED

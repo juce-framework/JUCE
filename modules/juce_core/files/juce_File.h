@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILE_H_INCLUDED
-#define JUCE_FILE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -1030,5 +1029,3 @@ private:
     bool setFileReadOnlyInternal (bool) const;
     bool setFileExecutableInternal (bool) const;
 };
-
-#endif   // JUCE_FILE_H_INCLUDED

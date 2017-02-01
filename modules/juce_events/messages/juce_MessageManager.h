@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MESSAGEMANAGER_H_INCLUDED
-#define JUCE_MESSAGEMANAGER_H_INCLUDED
+#pragma once
 
 class MessageManagerLock;
 class ThreadPoolJob;
@@ -338,6 +337,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MessageManagerLock)
 };
-
-
-#endif   // JUCE_MESSAGEMANAGER_H_INCLUDED

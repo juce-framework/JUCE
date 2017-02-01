@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IIRFILTER_H_INCLUDED
-#define JUCE_IIRFILTER_H_INCLUDED
+#pragma once
 
 class IIRFilter;
 
@@ -214,6 +213,3 @@ protected:
     IIRFilter& operator= (const IIRFilter&);
     JUCE_LEAK_DETECTOR (IIRFilter)
 };
-
-
-#endif   // JUCE_IIRFILTER_H_INCLUDED

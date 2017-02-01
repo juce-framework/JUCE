@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPROCESSORLISTENER_H_INCLUDED
-#define JUCE_AUDIOPROCESSORLISTENER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -102,5 +101,3 @@ public:
     virtual void audioProcessorParameterChangeGestureEnd (AudioProcessor* processor,
                                                           int parameterIndex);
 };
-
-#endif   // JUCE_AUDIOPROCESSORLISTENER_H_INCLUDED

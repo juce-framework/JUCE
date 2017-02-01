@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RELATIVECOORDINATE_H_INCLUDED
-#define JUCE_RELATIVECOORDINATE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -174,6 +173,3 @@ private:
     //==============================================================================
     Expression term;
 };
-
-
-#endif   // JUCE_RELATIVECOORDINATE_H_INCLUDED

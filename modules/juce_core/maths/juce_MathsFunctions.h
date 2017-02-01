@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MATHSFUNCTIONS_H_INCLUDED
-#define JUCE_MATHSFUNCTIONS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /*
@@ -635,5 +634,3 @@ namespace TypeHelpers
 
 
 //==============================================================================
-
-#endif   // JUCE_MATHSFUNCTIONS_H_INCLUDED

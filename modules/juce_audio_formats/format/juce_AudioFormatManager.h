@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOFORMATMANAGER_H_INCLUDED
-#define JUCE_AUDIOFORMATMANAGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -138,6 +137,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatManager)
 };
-
-
-#endif   // JUCE_AUDIOFORMATMANAGER_H_INCLUDED

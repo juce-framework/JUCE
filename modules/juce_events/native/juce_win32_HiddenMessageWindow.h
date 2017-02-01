@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_WIN32_HIDDENMESSAGEWINDOW_H_INCLUDED
-#define JUCE_WIN32_HIDDENMESSAGEWINDOW_H_INCLUDED
+#pragma once
 
 //==============================================================================
 class HiddenMessageWindow
@@ -139,5 +138,3 @@ private:
         systemDeviceChanged();
     }
 };
-
-#endif   // JUCE_WIN32_HIDDENMESSAGEWINDOW_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STRINGREF_H_INCLUDED
-#define JUCE_STRINGREF_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -137,6 +136,3 @@ inline String operator+ (String s1, StringRef s2)           { return s1 += Strin
 inline String operator+ (StringRef s1, const String& s2)    { return String (s1.text) + s2; }
 inline String operator+ (const char* s1, StringRef s2)      { return String (s1) + String (s2.text); }
 inline String operator+ (StringRef s1, const char* s2)      { return String (s1.text) + String (s2); }
-
-
-#endif   // JUCE_STRINGREF_H_INCLUDED

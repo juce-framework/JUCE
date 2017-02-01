@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RESULT_H_INCLUDED
-#define JUCE_RESULT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -119,6 +118,3 @@ private:
     operator int() const;
     operator void*() const;
 };
-
-
-#endif   // JUCE_RESULT_H_INCLUDED

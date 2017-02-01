@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED
-#define JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -136,6 +135,3 @@ private:
 
 /** Copies all the data that has been written to a MemoryOutputStream into another stream. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead);
-
-
-#endif   // JUCE_MEMORYOUTPUTSTREAM_H_INCLUDED

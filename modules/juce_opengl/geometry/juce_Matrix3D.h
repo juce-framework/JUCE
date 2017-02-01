@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MATRIX3D_H_INCLUDED
-#define JUCE_MATRIX3D_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -149,6 +148,3 @@ public:
     /** The 4x4 matrix values. These are stored in the standard OpenGL order. */
     Type mat[16];
 };
-
-
-#endif   // JUCE_MATRIX3D_H_INCLUDED

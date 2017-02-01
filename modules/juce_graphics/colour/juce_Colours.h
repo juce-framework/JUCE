@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COLOURS_H_INCLUDED
-#define JUCE_COLOURS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -103,5 +102,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Colours)
 };
-
-#endif   // JUCE_COLOURS_H_INCLUDED

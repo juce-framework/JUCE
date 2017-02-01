@@ -48,8 +48,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_VIDEO_H_INCLUDED
-#define JUCE_VIDEO_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -110,5 +109,3 @@ namespace juce
 #include "capture/juce_CameraDevice.h"
 
 }
-
-#endif   // JUCE_VIDEO_H_INCLUDED

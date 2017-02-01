@@ -48,8 +48,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_PROCESSORS_H_INCLUDED
-#define JUCE_AUDIO_PROCESSORS_H_INCLUDED
+#pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_basics/juce_audio_basics.h>
@@ -129,5 +128,3 @@ class AudioProcessor;
 #include "utilities/juce_AudioParameterChoice.h"
 
 }
-
-#endif   // JUCE_AUDIO_PROCESSORS_H_INCLUDED

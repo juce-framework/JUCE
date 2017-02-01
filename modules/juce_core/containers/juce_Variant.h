@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VARIANT_H_INCLUDED
-#define JUCE_VARIANT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -346,6 +345,3 @@ struct VariantConverter<String>
     static String fromVar (const var& v)           { return v.toString(); }
     static var toVar (const String& s)             { return s; }
 };
-
-
-#endif   // JUCE_VARIANT_H_INCLUDED

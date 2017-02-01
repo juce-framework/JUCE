@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_POPUPMENU_H_INCLUDED
-#define JUCE_POPUPMENU_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -739,5 +738,3 @@ private:
 
     JUCE_LEAK_DETECTOR (PopupMenu)
 };
-
-#endif   // JUCE_POPUPMENU_H_INCLUDED

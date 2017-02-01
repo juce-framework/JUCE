@@ -47,8 +47,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_GUI_EXTRA_H_INCLUDED
-#define JUCE_GUI_EXTRA_H_INCLUDED
+#pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -99,5 +98,3 @@ namespace juce
 #include "misc/juce_AnimatedAppComponent.h"
 
 }
-
-#endif   // JUCE_GUI_EXTRA_H_INCLUDED

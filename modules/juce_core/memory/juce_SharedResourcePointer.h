@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SHAREDRESOURCEPOINTER_H_INCLUDED
-#define JUCE_SHAREDRESOURCEPOINTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -163,6 +162,3 @@ private:
 
     JUCE_LEAK_DETECTOR (SharedResourcePointer)
 };
-
-
-#endif   // JUCE_SHAREDRESOURCEPOINTER_H_INCLUDED

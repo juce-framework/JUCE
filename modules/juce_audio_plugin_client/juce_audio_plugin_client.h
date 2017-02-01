@@ -46,8 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED
-#define JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED
+#pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_basics/juce_audio_basics.h>
@@ -82,5 +81,3 @@ namespace juce
  #include "utility/juce_PluginHostType.h"
  #include "VST/juce_VSTCallbackHandler.h"
 }
-
-#endif   // JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIMESSAGE_H_INCLUDED
-#define JUCE_MIDIMESSAGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -937,5 +936,3 @@ private:
     inline uint8* getData() const noexcept        { return isHeapAllocated() ? packedData.allocatedData : (uint8*) packedData.asBytes; }
     uint8* allocateSpace (int);
 };
-
-#endif   // JUCE_MIDIMESSAGE_H_INCLUDED

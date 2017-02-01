@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MPEMESSAGES_H_INCLUDED
-#define JUCE_MPEMESSAGES_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -96,7 +95,3 @@ public:
     */
     static const int zoneLayoutMessagesRpnNumber = 6;
 };
-
-
-
-#endif // JUCE_MPEMESSAGES_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VALUETREE_H_INCLUDED
-#define JUCE_VALUETREE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -575,6 +574,3 @@ private:
 
     explicit ValueTree (SharedObject*) noexcept;
 };
-
-
-#endif   // JUCE_VALUETREE_H_INCLUDED

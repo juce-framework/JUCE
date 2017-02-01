@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RECTANGLEPLACEMENT_H_INCLUDED
-#define JUCE_RECTANGLEPLACEMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -168,5 +167,3 @@ private:
     //==============================================================================
     int flags;
 };
-
-#endif   // JUCE_RECTANGLEPLACEMENT_H_INCLUDED

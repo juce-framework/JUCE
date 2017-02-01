@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IDENTIFIER_H_INCLUDED
-#define JUCE_IDENTIFIER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -135,6 +134,3 @@ public:
 private:
     String name;
 };
-
-
-#endif   // JUCE_IDENTIFIER_H_INCLUDED

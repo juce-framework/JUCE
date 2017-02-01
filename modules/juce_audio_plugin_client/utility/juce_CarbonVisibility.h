@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CARBONVISIBILITY_H_INCLUDED
-#define JUCE_CARBONVISIBILITY_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #if JUCE_SUPPORT_CARBON && JUCE_MAC_WINDOW_VISIBITY_BODGE
@@ -75,5 +74,3 @@ inline void removeWindowHidingHooks (Component* comp)
  inline void attachWindowHidingHooks (void*, void*, void*) {}
  inline void removeWindowHidingHooks (void*) {}
 #endif
-
-#endif   // JUCE_CARBONVISIBILITY_H_INCLUDED

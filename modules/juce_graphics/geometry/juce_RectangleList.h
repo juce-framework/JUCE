@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RECTANGLELIST_H_INCLUDED
-#define JUCE_RECTANGLELIST_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -657,6 +656,3 @@ private:
     //==============================================================================
     Array<RectangleType> rects;
 };
-
-
-#endif   // JUCE_RECTANGLELIST_H_INCLUDED

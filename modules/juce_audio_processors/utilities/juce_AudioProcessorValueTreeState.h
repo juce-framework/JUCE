@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
-#define JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
+#pragma once
 
 #if JUCE_COMPILER_SUPPORTS_LAMBDAS
 
@@ -228,5 +227,3 @@ private:
 };
 
 #endif
-
-#endif  // JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED

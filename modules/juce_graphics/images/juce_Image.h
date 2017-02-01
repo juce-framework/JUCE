@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IMAGE_H_INCLUDED
-#define JUCE_IMAGE_H_INCLUDED
+#pragma once
 
 class ImageType;
 class ImagePixelData;
@@ -537,6 +536,3 @@ public:
     ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
     int getTypeID() const override;
 };
-
-
-#endif   // JUCE_IMAGE_H_INCLUDED

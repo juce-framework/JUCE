@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TOOLBARITEMPALETTE_H_INCLUDED
-#define JUCE_TOOLBARITEMPALETTE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -71,6 +70,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemPalette)
 };
-
-
-#endif   // JUCE_TOOLBARITEMPALETTE_H_INCLUDED

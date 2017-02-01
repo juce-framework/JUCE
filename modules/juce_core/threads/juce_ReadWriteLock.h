@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_READWRITELOCK_H_INCLUDED
-#define JUCE_READWRITELOCK_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -149,6 +148,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ReadWriteLock)
 };
-
-
-#endif   // JUCE_READWRITELOCK_H_INCLUDED

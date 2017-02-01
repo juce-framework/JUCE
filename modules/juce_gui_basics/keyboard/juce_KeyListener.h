@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_KEYLISTENER_H_INCLUDED
-#define JUCE_KEYLISTENER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -71,6 +70,3 @@ public:
     */
     virtual bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
 };
-
-
-#endif   // JUCE_KEYLISTENER_H_INCLUDED

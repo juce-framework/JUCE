@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IMAGEEFFECTFILTER_H_INCLUDED
-#define JUCE_IMAGEEFFECTFILTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -65,5 +64,3 @@ public:
     virtual ~ImageEffectFilter() {}
 
 };
-
-#endif   // JUCE_IMAGEEFFECTFILTER_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MACADDRESS_H_INCLUDED
-#define JUCE_MACADDRESS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -88,6 +87,3 @@ public:
 private:
     uint8 address[6];
 };
-
-
-#endif   // JUCE_MACADDRESS_H_INCLUDED

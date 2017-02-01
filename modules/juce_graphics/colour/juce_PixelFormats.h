@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PIXELFORMATS_H_INCLUDED
-#define JUCE_PIXELFORMATS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -752,5 +751,3 @@ private:
 #if JUCE_MSVC
  #pragma pack (pop)
 #endif
-
-#endif   // JUCE_PIXELFORMATS_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_EXPRESSION_H_INCLUDED
-#define JUCE_EXPRESSION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -258,5 +257,3 @@ private:
 
     explicit Expression (Term*);
 };
-
-#endif   // JUCE_EXPRESSION_H_INCLUDED

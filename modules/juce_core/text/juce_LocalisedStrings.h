@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOCALISEDSTRINGS_H_INCLUDED
-#define JUCE_LOCALISEDSTRINGS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -244,6 +243,3 @@ JUCE_API String translate (CharPointer_UTF8 stringLiteral);
     @see LocalisedStrings
 */
 JUCE_API String translate (const String& stringLiteral, const String& resultIfNotFound);
-
-
-#endif   // JUCE_LOCALISEDSTRINGS_H_INCLUDED

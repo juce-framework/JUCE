@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPENGLHELPERS_H_INCLUDED
-#define JUCE_OPENGLHELPERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -68,6 +67,3 @@ public:
     */
     static String translateFragmentShaderToV3 (const String&);
 };
-
-
-#endif   // JUCE_OPENGLHELPERS_H_INCLUDED

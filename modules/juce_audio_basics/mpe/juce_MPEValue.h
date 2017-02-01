@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MPEVALUE_H_INCLUDED
-#define JUCE_MPEVALUE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -97,6 +96,3 @@ private:
     MPEValue (int normalisedValue);
     int normalisedValue;
 };
-
-
-#endif // JUCE_MPEVALUE_H_INCLUDED

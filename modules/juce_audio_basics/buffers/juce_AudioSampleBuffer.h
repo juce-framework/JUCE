@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
-#define JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -1105,6 +1104,3 @@ private:
     @see AudioBuffer
 */
 typedef AudioBuffer<float> AudioSampleBuffer;
-
-
-#endif   // JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED

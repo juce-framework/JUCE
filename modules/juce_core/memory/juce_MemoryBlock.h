@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MEMORYBLOCK_H_INCLUDED
-#define JUCE_MEMORYBLOCK_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -259,6 +258,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MemoryBlock)
 };
-
-
-#endif   // JUCE_MEMORYBLOCK_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RELATIVEPOINTPATH_H_INCLUDED
-#define JUCE_RELATIVEPOINTPATH_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -186,6 +185,3 @@ private:
     RelativePointPath& operator= (const RelativePointPath&);
     JUCE_LEAK_DETECTOR (RelativePointPath)
 };
-
-
-#endif   // JUCE_RELATIVEPOINTPATH_H_INCLUDED

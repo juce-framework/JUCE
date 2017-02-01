@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED
-#define JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -143,6 +142,3 @@ private:
   #define JUCE_LEAK_DETECTOR(OwnerClass)
  #endif
 #endif
-
-
-#endif   // JUCE_LEAKEDOBJECTDETECTOR_H_INCLUDED

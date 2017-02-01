@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COMPILERSUPPORT_H_INCLUDED
-#define JUCE_COMPILERSUPPORT_H_INCLUDED
+#pragma once
 
 /* This file has some checks to see whether the compiler supports various C++11/14 features,
    When these aren't available, the code defines a few workarounds, so that we can still use
@@ -156,5 +155,3 @@
   #define override
  #endif
 #endif
-
-#endif   // JUCE_COMPILERSUPPORT_H_INCLUDED

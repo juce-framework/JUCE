@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MD5_H_INCLUDED
-#define JUCE_MD5_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -114,6 +113,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MD5)
 };
-
-
-#endif   // JUCE_MD5_H_INCLUDED

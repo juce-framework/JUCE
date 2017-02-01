@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_WEAKREFERENCE_H_INCLUDED
-#define JUCE_WEAKREFERENCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -210,6 +209,3 @@ private:
         return (o != nullptr) ? o->masterReference.getSharedPointer (o) : nullptr;
     }
 };
-
-
-#endif   // JUCE_WEAKREFERENCE_H_INCLUDED

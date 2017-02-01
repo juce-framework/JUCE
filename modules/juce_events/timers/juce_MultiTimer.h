@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MULTITIMER_H_INCLUDED
-#define JUCE_MULTITIMER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -128,5 +127,3 @@ private:
     Timer* getCallback (int) const noexcept;
     MultiTimer& operator= (const MultiTimer&);
 };
-
-#endif   // JUCE_MULTITIMER_H_INCLUDED

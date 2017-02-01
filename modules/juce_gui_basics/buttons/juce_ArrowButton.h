@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ARROWBUTTON_H_INCLUDED
-#define JUCE_ARROWBUTTON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -59,6 +58,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrowButton)
 };
-
-
-#endif   // JUCE_ARROWBUTTON_H_INCLUDED

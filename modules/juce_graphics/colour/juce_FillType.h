@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILLTYPE_H_INCLUDED
-#define JUCE_FILLTYPE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -145,6 +144,3 @@ public:
 private:
     JUCE_LEAK_DETECTOR (FillType)
 };
-
-
-#endif   // JUCE_FILLTYPE_H_INCLUDED

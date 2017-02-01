@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STRING_H_INCLUDED
-#define JUCE_STRING_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -1389,6 +1388,3 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Str
 
 /** Writes a string to an OutputStream as UTF8. */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef stringToWrite);
-
-
-#endif   // JUCE_STRING_H_INCLUDED

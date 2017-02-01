@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TARGETPLATFORM_H_INCLUDED
-#define JUCE_TARGETPLATFORM_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /*  This file figures out which platform is being built, and defines some macros
@@ -212,5 +211,3 @@
 #else
   #error unknown compiler
 #endif
-
-#endif   // JUCE_TARGETPLATFORM_H_INCLUDED

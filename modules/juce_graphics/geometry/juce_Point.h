@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_POINT_H_INCLUDED
-#define JUCE_POINT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -238,6 +237,3 @@ public:
 /** Multiplies the point's coordinates by a scalar value. */
 template <typename ValueType>
 Point<ValueType> operator* (ValueType value, Point<ValueType> p) noexcept       { return p * value; }
-
-
-#endif   // JUCE_POINT_H_INCLUDED

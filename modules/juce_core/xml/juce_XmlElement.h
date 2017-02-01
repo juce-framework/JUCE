@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_XMLELEMENT_H_INCLUDED
-#define JUCE_XMLELEMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -771,6 +770,3 @@ private:
 
     JUCE_LEAK_DETECTOR (XmlElement)
 };
-
-
-#endif   // JUCE_XMLELEMENT_H_INCLUDED

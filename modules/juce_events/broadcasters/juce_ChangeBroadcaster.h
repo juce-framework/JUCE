@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CHANGEBROADCASTER_H_INCLUDED
-#define JUCE_CHANGEBROADCASTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -106,6 +105,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ChangeBroadcaster)
 };
-
-
-#endif   // JUCE_CHANGEBROADCASTER_H_INCLUDED

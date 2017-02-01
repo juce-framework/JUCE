@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LABEL_H_INCLUDED
-#define JUCE_LABEL_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -350,5 +349,3 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
 typedef Label::Listener LabelListener;
-
-#endif   // JUCE_LABEL_H_INCLUDED

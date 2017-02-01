@@ -54,8 +54,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_BASICS_H_INCLUDED
-#define JUCE_AUDIO_BASICS_H_INCLUDED
+#pragma once
 
 #include <juce_core/juce_core.h>
 
@@ -103,5 +102,3 @@ namespace juce
 #include "synthesisers/juce_Synthesiser.h"
 
 }
-
-#endif   // JUCE_AUDIO_BASICS_H_INCLUDED

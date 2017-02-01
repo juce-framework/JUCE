@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SCOPEDPOINTER_H_INCLUDED
-#define JUCE_SCOPEDPOINTER_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -258,5 +257,3 @@ template <typename Type>
 void deleteAndZero (ScopedPointer<Type>&)  { static_assert (sizeof (Type) == 12345,
                                                             "Attempt to call deleteAndZero() on a ScopedPointer"); }
 #endif
-
-#endif   // JUCE_SCOPEDPOINTER_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BASICNATIVEHEADERS_H_INCLUDED
-#define JUCE_BASICNATIVEHEADERS_H_INCLUDED
+#pragma once
 
 #undef T
 
@@ -265,5 +264,3 @@
 #undef min
 #undef direct
 #undef check
-
-#endif   // JUCE_BASICNATIVEHEADERS_H_INCLUDED

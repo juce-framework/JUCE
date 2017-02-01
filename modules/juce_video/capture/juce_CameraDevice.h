@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CAMERADEVICE_H_INCLUDED
-#define JUCE_CAMERADEVICE_H_INCLUDED
+#pragma once
 
 #if JUCE_USE_CAMERA || DOXYGEN
 
@@ -163,4 +162,3 @@ private:
 #endif
 
 #endif
-#endif   // JUCE_CAMERADEVICE_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SCOPEDXLOCK_H_INCLUDED
-#define JUCE_SCOPEDXLOCK_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -53,4 +52,3 @@ public:
 };
 
 #endif
-#endif   // JUCE_SCOPEDXLOCK_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TOOLBARBUTTON_H_INCLUDED
-#define JUCE_TOOLBARBUTTON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -92,6 +91,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarButton)
 };
-
-
-#endif   // JUCE_TOOLBARBUTTON_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPENGLGRAPHICSCONTEXT_H_INCLUDED
-#define JUCE_OPENGLGRAPHICSCONTEXT_H_INCLUDED
+#pragma once
 
 
 /** Creates a graphics context object that will render into the given OpenGL target.
@@ -91,6 +90,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLGraphicsContextCustomShader)
 };
-
-
-#endif   // JUCE_OPENGLGRAPHICSCONTEXT_H_INCLUDED

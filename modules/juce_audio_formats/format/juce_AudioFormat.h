@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOFORMAT_H_INCLUDED
-#define JUCE_AUDIOFORMAT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -174,6 +173,3 @@ private:
     String formatName;
     StringArray fileExtensions;
 };
-
-
-#endif   // JUCE_AUDIOFORMAT_H_INCLUDED

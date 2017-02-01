@@ -53,8 +53,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_EVENTS_H_INCLUDED
-#define JUCE_EVENTS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_core/juce_core.h>
@@ -88,5 +87,3 @@ namespace juce
 #endif
 
 }
-
-#endif   // JUCE_EVENTS_H_INCLUDED

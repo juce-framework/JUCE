@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PATH_H_INCLUDED
-#define JUCE_PATH_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -828,5 +827,3 @@ private:
 
     JUCE_LEAK_DETECTOR (Path)
 };
-
-#endif   // JUCE_PATH_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TABBEDCOMPONENT_H_INCLUDED
-#define JUCE_TABBEDCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -220,6 +219,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent)
 };
-
-
-#endif   // JUCE_TABBEDCOMPONENT_H_INCLUDED

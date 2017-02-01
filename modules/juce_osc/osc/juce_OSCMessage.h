@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCMESSAGE_H_INCLUDED
-#define JUCE_OSCMESSAGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -168,5 +167,3 @@ private:
      addArguments (std::forward<Arg1> (arg1), std::forward<Args> (args)...);
  }
 #endif
-
-#endif // JUCE_OSCMESSAGE_H_INCLUDED

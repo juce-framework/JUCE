@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CHARPOINTER_UTF8_H_INCLUDED
-#define JUCE_CHARPOINTER_UTF8_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -568,5 +567,3 @@ public:
 private:
     CharType* data;
 };
-
-#endif   // JUCE_CHARPOINTER_UTF8_H_INCLUDED
