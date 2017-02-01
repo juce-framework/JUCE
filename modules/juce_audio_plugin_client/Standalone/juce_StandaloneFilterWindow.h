@@ -368,6 +368,11 @@ public:
 
         createEditorComp();
 
+       #if JUCE_IOS || JUCE_ANDROID
+        setFullScreen (true);
+        Desktop::getInstance().setKioskModeComponent (this, false);
+       #else
+
         if (PropertySet* props = pluginHolder->settings)
         {
             const int x = props->getIntValue ("windowX", -100);
@@ -382,15 +387,18 @@ public:
         {
             centreWithSize (getWidth(), getHeight());
         }
+       #endif
     }
 
     ~StandaloneFilterWindow()
     {
+       #if (! JUCE_IOS) && (! JUCE_ANDROID)
         if (PropertySet* props = pluginHolder->settings)
         {
             props->setValue ("windowX", getX());
             props->setValue ("windowY", getY());
         }
+       #endif
 
         pluginHolder->stopPlaying();
         deleteEditorComp();
