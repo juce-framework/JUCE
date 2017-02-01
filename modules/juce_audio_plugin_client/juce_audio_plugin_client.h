@@ -80,6 +80,7 @@
 namespace juce
 {
  #include "utility/juce_PluginHostType.h"
+ #include "VST/juce_VSTCallbackHandler.h"
 }
 
 #endif   // JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED

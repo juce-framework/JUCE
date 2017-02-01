@@ -1155,7 +1155,7 @@ public:
             case plugInOpcodeGetManufacturerProductName:  return handleGetPlugInName (args);
             case plugInOpcodeGetManufacturerName:         return handleGetManufacturerName (args);
             case plugInOpcodeGetManufacturerVersion:      return handleGetManufacturerVersion (args);
-            case plugInOpcodeManufacturerSpecific:        return handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt);
+            case plugInOpcodeManufacturerSpecific:        return handleManufacturerSpecific (args);
             case plugInOpcodeCanPlugInDo:                 return handleCanPlugInDo (args);
             case plugInOpcodeGetTailSize:                 return handleGetTailSize (args);
             case plugInOpcodeKeyboardFocusRequired:       return handleKeyboardFocusRequired (args);
@@ -1863,6 +1863,17 @@ private:
     pointer_sized_int handleGetManufacturerVersion (VstOpCodeArguments)
     {
         return convertHexVersionToDecimal (JucePlugin_VersionCode);
+    }
+
+    pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
+    {
+        if (handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
+            return 1;
+
+        if (auto vstFilter = dynamic_cast<VSTCallbackHandler*> (filter))
+            return vstFilter->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
+
+        return 0;
     }
 
     pointer_sized_int handleCanPlugInDo (VstOpCodeArguments args)
