@@ -102,7 +102,9 @@ namespace juce
   #include "native/juce_mac_CameraDevice.mm"
  #endif
 
- #include "native/juce_mac_MovieComponent.mm"
+ #if JUCE_MAC
+  #include "native/juce_mac_MovieComponent.mm"
+ #endif
 
 #elif JUCE_WINDOWS
 
