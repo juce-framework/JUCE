@@ -50,8 +50,6 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
     addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
     addType (types, MSVCProjectExporterVC2012::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
     addType (types, MSVCProjectExporterVC2010::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2008::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2005::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
     addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
     addType (types, AndroidProjectExporter::getName(),           BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
     addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
@@ -72,12 +70,10 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 3:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
         case 4:     exp = new MSVCProjectExporterVC2012    (project, ValueTree (MSVCProjectExporterVC2012    ::getValueTreeTypeName())); break;
         case 5:     exp = new MSVCProjectExporterVC2010    (project, ValueTree (MSVCProjectExporterVC2010    ::getValueTreeTypeName())); break;
-        case 6:     exp = new MSVCProjectExporterVC2008    (project, ValueTree (MSVCProjectExporterVC2008    ::getValueTreeTypeName())); break;
-        case 7:     exp = new MSVCProjectExporterVC2005    (project, ValueTree (MSVCProjectExporterVC2005    ::getValueTreeTypeName())); break;
-        case 8:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
-        case 9:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter ::getValueTreeTypeName())); break;
-        case 10:    exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
-        case 11:    exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
+        case 6:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
+        case 7:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter ::getValueTreeTypeName())); break;
+        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
+        case 9:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
         default:    jassertfalse; return 0;
     }
 
@@ -118,9 +114,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const Str
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
-    ProjectExporter*       exp = MSVCProjectExporterVC2005    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2008    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2010    ::createForSettings (project, settings);
+    ProjectExporter*       exp = MSVCProjectExporterVC2010    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2012    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
@@ -143,8 +137,6 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             XCodeProjectExporter::getValueTreeTypeName (false),
             XCodeProjectExporter::getValueTreeTypeName (true),
            #elif JUCE_WINDOWS
-            MSVCProjectExporterVC2005::getValueTreeTypeName(),
-            MSVCProjectExporterVC2008::getValueTreeTypeName(),
             MSVCProjectExporterVC2010::getValueTreeTypeName(),
             MSVCProjectExporterVC2012::getValueTreeTypeName(),
             MSVCProjectExporterVC2013::getValueTreeTypeName(),
@@ -513,7 +505,7 @@ static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExpo
     return (p1.isVisualStudio() && p2.isVisualStudio())
         || (p1.isXcode() && p2.isXcode())
         || (p1.isMakefile() && p2.isMakefile())
-        || (p1.isAndroid() && p2.isAndroid())
+        || (p1.isAndroidStudio() && p2.isAndroidStudio())
         || (p1.isCodeBlocks() && p2.isCodeBlocks() && p1.isWindows() != p2.isLinux());
 }
 
