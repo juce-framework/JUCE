@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ANIMATEDPOSITION_H_INCLUDED
-#define JUCE_ANIMATEDPOSITION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -53,13 +52,13 @@ class AnimatedPosition  : private Timer
 public:
     AnimatedPosition()
         : position(), grabbedPos(), releaseVelocity(),
-          range (-std::numeric_limits<double>::max(),
-                  std::numeric_limits<double>::max())
+          range (std::numeric_limits<double>::min(),
+                 std::numeric_limits<double>::max())
     {
     }
 
     /** Sets a range within which the value will be constrained. */
-    void setLimits (Range<double> newRange)
+    void setLimits (Range<double> newRange) noexcept
     {
         range = newRange;
     }
@@ -204,6 +203,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnimatedPosition)
 };
-
-
-#endif   // JUCE_ANIMATEDPOSITION_H_INCLUDED

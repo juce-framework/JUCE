@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
-#define JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -190,7 +189,6 @@ public:
     */
     ~AudioBuffer() noexcept {}
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Move constructor */
     AudioBuffer (AudioBuffer&& other) noexcept
         : numChannels (other.numChannels),
@@ -221,7 +219,6 @@ public:
         other.allocatedBytes = 0;
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
@@ -1107,6 +1104,3 @@ private:
     @see AudioBuffer
 */
 typedef AudioBuffer<float> AudioSampleBuffer;
-
-
-#endif   // JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED

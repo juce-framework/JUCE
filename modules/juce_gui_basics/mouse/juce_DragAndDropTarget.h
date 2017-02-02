@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAGANDDROPTARGET_H_INCLUDED
-#define JUCE_DRAGANDDROPTARGET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -148,5 +147,3 @@ private:
     virtual int itemDropped (const String&, Component*, int, int) { return 0; }
    #endif
 };
-
-#endif   // JUCE_DRAGANDDROPTARGET_H_INCLUDED

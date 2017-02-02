@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_NATIVEMESSAGEBOX_H_INCLUDED
-#define JUCE_NATIVEMESSAGEBOX_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -162,5 +161,3 @@ private:
     NativeMessageBox() JUCE_DELETED_FUNCTION;
     JUCE_DECLARE_NON_COPYABLE (NativeMessageBox)
 };
-
-#endif   // JUCE_NATIVEMESSAGEBOX_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TOGGLEBUTTON_H_INCLUDED
-#define JUCE_TOGGLEBUTTON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -84,6 +83,3 @@ protected:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleButton)
 };
-
-
-#endif   // JUCE_TOGGLEBUTTON_H_INCLUDED

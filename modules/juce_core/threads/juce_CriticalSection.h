@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CRITICALSECTION_H_INCLUDED
-#define JUCE_CRITICALSECTION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -263,6 +262,3 @@ typedef CriticalSection::ScopedUnlockType  ScopedUnlock;
     @see CriticalSection::tryEnter, ScopedLock, ScopedUnlock, ScopedReadLock
 */
 typedef CriticalSection::ScopedTryLockType  ScopedTryLock;
-
-
-#endif   // JUCE_CRITICALSECTION_H_INCLUDED

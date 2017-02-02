@@ -471,7 +471,7 @@ Component::Component (const String& name) noexcept
 
 Component::~Component()
 {
-    static_jassert (sizeof (flags) <= sizeof (componentFlags));
+    static_assert (sizeof (flags) <= sizeof (componentFlags), "componentFlags has too many bits!");
 
     componentListeners.call (&ComponentListener::componentBeingDeleted, *this);
 

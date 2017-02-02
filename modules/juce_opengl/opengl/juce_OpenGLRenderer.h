@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPENGLRENDERER_H_INCLUDED
-#define JUCE_OPENGLRENDERER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -69,6 +68,3 @@ public:
     */
     virtual void openGLContextClosing() = 0;
 };
-
-
-#endif   // JUCE_OPENGLRENDERER_H_INCLUDED

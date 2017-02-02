@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIMESSAGE_H_INCLUDED
-#define JUCE_MIDIMESSAGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -115,10 +114,11 @@ public:
     /** Copies this message from another one. */
     MidiMessage& operator= (const MidiMessage& other);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     MidiMessage (MidiMessage&&) noexcept;
+
+    /** Move assignment operator */
     MidiMessage& operator= (MidiMessage&&) noexcept;
-   #endif
 
     //==============================================================================
     /** Returns a pointer to the raw midi data.
@@ -936,5 +936,3 @@ private:
     inline uint8* getData() const noexcept        { return isHeapAllocated() ? packedData.allocatedData : (uint8*) packedData.asBytes; }
     uint8* allocateSpace (int);
 };
-
-#endif   // JUCE_MIDIMESSAGE_H_INCLUDED

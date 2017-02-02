@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_KEYPRESS_H_INCLUDED
-#define JUCE_KEYPRESS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -249,6 +248,3 @@ private:
 
     JUCE_LEAK_DETECTOR (KeyPress)
 };
-
-
-#endif   // JUCE_KEYPRESS_H_INCLUDED

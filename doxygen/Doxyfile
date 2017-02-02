@@ -2055,8 +2055,6 @@ PREDEFINED             = WIN32=1 \
                          JUCE_LINUX=1 \
                          DOXYGEN=1 \
                          JUCE_COMPILER_SUPPORTS_NOEXCEPT=1 \
-                         JUCE_COMPILER_SUPPORTS_NULLPTR=1 \
-                         JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS=1 \
                          JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS=1 \
                          JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES=1 \
                          JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL=1 \

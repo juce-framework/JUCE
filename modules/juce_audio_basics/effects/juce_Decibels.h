@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DECIBELS_H_INCLUDED
-#define JUCE_DECIBELS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -105,6 +104,3 @@ private:
     Decibels(); // This class can't be instantiated, it's just a holder for static methods..
     JUCE_DECLARE_NON_COPYABLE (Decibels)
 };
-
-
-#endif   // JUCE_DECIBELS_H_INCLUDED

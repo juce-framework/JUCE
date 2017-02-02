@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DESKTOP_H_INCLUDED
-#define JUCE_DESKTOP_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -462,6 +461,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop)
 };
-
-
-#endif   // JUCE_DESKTOP_H_INCLUDED

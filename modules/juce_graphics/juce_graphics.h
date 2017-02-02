@@ -49,8 +49,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_GRAPHICS_H_INCLUDED // %%
-#define JUCE_GRAPHICS_H_INCLUDED
+#pragma once // %%
 
 #include <juce_core/juce_core.h>
 #include <juce_events/juce_events.h>
@@ -141,5 +140,3 @@ class LowLevelGraphicsContext;
 #endif
 
 }
-
-#endif   // JUCE_GRAPHICS_H_INCLUDED

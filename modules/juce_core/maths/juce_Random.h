@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RANDOM_H_INCLUDED
-#define JUCE_RANDOM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -140,6 +139,3 @@ private:
 
     JUCE_LEAK_DETECTOR (Random)
 };
-
-
-#endif   // JUCE_RANDOM_H_INCLUDED

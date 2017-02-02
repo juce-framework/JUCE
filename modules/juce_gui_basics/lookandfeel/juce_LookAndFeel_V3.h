@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOOKANDFEEL_V3_H_INCLUDED
-#define JUCE_LOOKANDFEEL_V3_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -91,6 +90,3 @@ private:
     Image backgroundTexture;
     Colour backgroundTextureBaseColour;
 };
-
-
-#endif   // JUCE_LOOKANDFEEL_V3_H_INCLUDED

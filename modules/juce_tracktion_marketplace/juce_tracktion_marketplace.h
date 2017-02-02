@@ -46,8 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
-#define JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
+#pragma once
 
 /**
     The Tracktion Marketplace module is a simple user-registration system for
@@ -83,6 +82,3 @@ namespace juce
     #include "marketplace/juce_OnlineUnlockForm.h"
    #endif
 }
-
-
-#endif   // JUCE_TRACKTION_MARKETPLACE_H_INCLUDED

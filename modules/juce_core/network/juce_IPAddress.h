@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IPADDRESS_H_INCLUDED
-#define JUCE_IPADDRESS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -79,6 +78,3 @@ public:
     /** The elements of the IP address. */
     uint8 address[4];
 };
-
-
-#endif   // JUCE_IPADDRESS_H_INCLUDED

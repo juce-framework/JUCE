@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SPLASHSCREEN_H_INCLUDED
-#define JUCE_SPLASHSCREEN_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -150,6 +149,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SplashScreen)
 };
-
-
-#endif   // JUCE_SPLASHSCREEN_H_INCLUDED

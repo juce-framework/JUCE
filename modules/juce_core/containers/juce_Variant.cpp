@@ -358,9 +358,7 @@ public:
     struct RefCountedArray  : public ReferenceCountedObject
     {
         RefCountedArray (const Array<var>& a)  : array (a)  { incReferenceCount(); }
-       #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
         RefCountedArray (Array<var>&& a)  : array (static_cast<Array<var>&&> (a)) { incReferenceCount(); }
-       #endif
         Array<var> array;
     };
 };
@@ -527,7 +525,6 @@ var& var::operator= (const Array<var>& v)        { var v2 (v); swapWith (v2); re
 var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); return *this; }
 var& var::operator= (NativeFunction v)           { var v2 (v); swapWith (v2); return *this; }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 var::var (var&& other) noexcept
     : type (other.type),
       value (other.value)
@@ -563,7 +560,6 @@ var& var::operator= (String&& v)
     new (value.stringValue) String (static_cast<String&&> (v));
     return *this;
 }
-#endif
 
 //==============================================================================
 bool var::equals (const var& other) const noexcept

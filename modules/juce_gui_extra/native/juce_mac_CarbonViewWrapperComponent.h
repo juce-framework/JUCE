@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
-#define JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -340,5 +339,3 @@ void* getCarbonWindow (Component* possibleCarbonComponent)
 
     return nullptr;
 }
-
-#endif   // JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_H_INCLUDED

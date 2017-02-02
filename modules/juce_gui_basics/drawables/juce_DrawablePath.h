@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAWABLEPATH_H_INCLUDED
-#define JUCE_DRAWABLEPATH_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -140,6 +139,3 @@ private:
     DrawablePath& operator= (const DrawablePath&);
     JUCE_LEAK_DETECTOR (DrawablePath)
 };
-
-
-#endif   // JUCE_DRAWABLEPATH_H_INCLUDED

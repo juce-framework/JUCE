@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_EDGETABLE_H_INCLUDED
-#define JUCE_EDGETABLE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -215,6 +214,3 @@ private:
 
     JUCE_LEAK_DETECTOR (EdgeTable)
 };
-
-
-#endif   // JUCE_EDGETABLE_H_INCLUDED

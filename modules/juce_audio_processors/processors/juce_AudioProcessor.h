@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
-#define JUCE_AUDIOPROCESSOR_H_INCLUDED
+#pragma once
 
 struct PluginBusUtilities;
 
@@ -1559,6 +1558,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
-
-
-#endif   // JUCE_AUDIOPROCESSOR_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOOKANDFEEL_V1_H_INCLUDED
-#define JUCE_LOOKANDFEEL_V1_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -96,6 +95,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel_V1)
 };
-
-
-#endif   // JUCE_LOOKANDFEEL_V1_H_INCLUDED

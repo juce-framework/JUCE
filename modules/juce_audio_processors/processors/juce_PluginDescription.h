@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PLUGINDESCRIPTION_H_INCLUDED
-#define JUCE_PLUGINDESCRIPTION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -151,6 +150,3 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR (PluginDescription)
 };
-
-
-#endif   // JUCE_PLUGINDESCRIPTION_H_INCLUDED

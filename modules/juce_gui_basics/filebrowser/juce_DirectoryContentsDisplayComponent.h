@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_H_INCLUDED
-#define JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -106,6 +105,3 @@ protected:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsDisplayComponent)
 };
-
-
-#endif   // JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_H_INCLUDED

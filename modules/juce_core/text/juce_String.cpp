@@ -226,16 +226,17 @@ private:
     {
         // Let me know if any of these assertions fail on your system!
        #if JUCE_NATIVE_WCHAR_IS_UTF8
-        static_jassert (sizeof (wchar_t) == 1);
+        static_assert (sizeof (wchar_t) == 1, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF16
-        static_jassert (sizeof (wchar_t) == 2);
+        static_assert (sizeof (wchar_t) == 2, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF32
-        static_jassert (sizeof (wchar_t) == 4);
+        static_assert (sizeof (wchar_t) == 4, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #else
         #error "native wchar_t size is unknown"
        #endif
 
-        static_jassert (sizeof (EmptyString) == sizeof (StringHolder));
+        static_assert (sizeof (EmptyString) == sizeof (StringHolder),
+                       "StringHolder is not large enough to hold an empty String");
     }
 };
 
@@ -276,7 +277,6 @@ String& String::operator= (const String& other) noexcept
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 String::String (String&& other) noexcept   : text (other.text)
 {
     other.text = &(emptyString.text);
@@ -287,7 +287,6 @@ String& String::operator= (String&& other) noexcept
     std::swap (text, other.text);
     return *this;
 }
-#endif
 
 inline String::PreallocationBytes::PreallocationBytes (const size_t num) noexcept : numBytes (num) {}
 

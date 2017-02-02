@@ -1596,7 +1596,9 @@ private:
     {
         BusesProperties returnValue;
 
-        VstSpeakerConfiguration* inArr = nullptr, *outArr = nullptr;
+        HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
+
+        VstSpeakerConfiguration* inArr = inArrBlock.getData(), *outArr = outArrBlock.getData();
         if (effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)
             inArr = outArr = nullptr;
 

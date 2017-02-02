@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_APPLICATION_H_INCLUDED
-#define JUCE_APPLICATION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -187,6 +186,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (JUCEApplication)
 };
-
-
-#endif   // JUCE_APPLICATION_H_INCLUDED

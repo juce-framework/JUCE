@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCADDRESS_H_INCLUDED
-#define JUCE_OSCADDRESS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -145,6 +144,3 @@ private:
     String asString;
     bool wasInitialisedWithWildcards;
 };
-
-
-#endif // JUCE_OSCADDRESS_H_INCLUDED

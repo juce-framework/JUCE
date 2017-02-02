@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FLOATVECTOROPERATIONS_H_INCLUDED
-#define JUCE_FLOATVECTOROPERATIONS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -223,5 +222,3 @@ public:
         int oldMXCSR;
     };
 };
-
-#endif   // JUCE_FLOATVECTOROPERATIONS_H_INCLUDED

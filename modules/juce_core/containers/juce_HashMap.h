@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_HASHMAP_H_INCLUDED
-#define JUCE_HASHMAP_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -477,6 +476,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashMap)
 };
-
-
-#endif   // JUCE_HASHMAP_H_INCLUDED

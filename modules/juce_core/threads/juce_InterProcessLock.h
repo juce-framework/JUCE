@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_INTERPROCESSLOCK_H_INCLUDED
-#define JUCE_INTERPROCESSLOCK_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -125,6 +124,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (InterProcessLock)
 };
-
-
-#endif   // JUCE_INTERPROCESSLOCK_H_INCLUDED

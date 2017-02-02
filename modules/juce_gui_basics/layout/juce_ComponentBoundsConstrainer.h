@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED
-#define JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -192,6 +191,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBoundsConstrainer)
 };
-
-
-#endif   // JUCE_COMPONENTBOUNDSCONSTRAINER_H_INCLUDED

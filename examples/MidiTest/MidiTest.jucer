@@ -101,13 +101,14 @@
     </XCODE_IPHONE>
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.miditest.MidiTest" androidInternetNeeded="0"
                    androidBluetoothNeeded="1" androidCpp11="1" androidScreenOrientation="unspecified"
-                   targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
-                   androidMicNeeded="1" gradleToolchain="clang" gradleToolchainVersion="3.6">
+                   targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
+                   androidMicNeeded="1" gradleToolchain="clang" gradleToolchainVersion="3.6"
+                   androidMinimumSDK="23">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="MidiTest"/>
-        <CONFIGURATION name="Release" androidArchitectures="armeabi armeabi-v7a x86"
-                       isDebug="0" optimisation="3" targetName="MidiTest"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
+                       targetName="MidiTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>

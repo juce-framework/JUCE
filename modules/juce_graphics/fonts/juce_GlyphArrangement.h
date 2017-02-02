@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_GLYPHARRANGEMENT_H_INCLUDED
-#define JUCE_GLYPHARRANGEMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -47,10 +46,11 @@ public:
     PositionedGlyph (const PositionedGlyph&);
     PositionedGlyph& operator= (const PositionedGlyph&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     PositionedGlyph (PositionedGlyph&&) noexcept;
+
+    /** Move assignment operator */
     PositionedGlyph& operator= (PositionedGlyph&&) noexcept;
-   #endif
 
     ~PositionedGlyph();
 
@@ -321,6 +321,3 @@ private:
 
     JUCE_LEAK_DETECTOR (GlyphArrangement)
 };
-
-
-#endif   // JUCE_GLYPHARRANGEMENT_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RESIZABLECORNERCOMPONENT_H_INCLUDED
-#define JUCE_RESIZABLECORNERCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -86,6 +85,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableCornerComponent)
 };
-
-
-#endif   // JUCE_RESIZABLECORNERCOMPONENT_H_INCLUDED

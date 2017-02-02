@@ -151,7 +151,7 @@ void JUCE_API getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
 #endif
 
 #if JucePlugin_Build_VST
-pointer_sized_int JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
+bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
 {
    #if VST3_REPLACEMENT_AVAILABLE
     if ((index == 'stCA' || index == 'stCa') && value == 'FUID' && ptr != nullptr)
@@ -159,12 +159,12 @@ pointer_sized_int JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, po
         uint8 fuid[16];
         getUUIDForVST2ID  (false, fuid);
         ::memcpy (ptr, fuid, 16);
-        return 1;
+        return true;
     }
    #else
     ignoreUnused (index, value, ptr);
    #endif
-    return 0;
+    return false;
 }
 #endif
 

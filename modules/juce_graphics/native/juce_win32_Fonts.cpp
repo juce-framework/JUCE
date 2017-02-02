@@ -73,7 +73,7 @@ namespace TTFNameExtractor
             for (int i = 0; i < numChars; ++i)
                 buffer[i] = ByteOrder::swapIfLittleEndian (buffer[i]);
 
-            static_jassert (sizeof (CharPointer_UTF16::CharType) == sizeof (uint16));
+            static_assert (sizeof (CharPointer_UTF16::CharType) == sizeof (uint16), "Sanity check UTF-16 type");
             result = CharPointer_UTF16 ((CharPointer_UTF16::CharType*) buffer.getData());
         }
         else

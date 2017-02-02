@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
-#define JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -107,6 +106,3 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedAudioFormatReader)
 };
-
-
-#endif   // JUCE_MEMORYMAPPEDAUDIOFORMATREADER_H_INCLUDED

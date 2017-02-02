@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COMPONENT_H_INCLUDED
-#define JUCE_COMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -2358,6 +2357,3 @@ protected:
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
    #endif
 };
-
-
-#endif   // JUCE_COMPONENT_H_INCLUDED

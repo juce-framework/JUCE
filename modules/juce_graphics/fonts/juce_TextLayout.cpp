@@ -153,7 +153,6 @@ TextLayout::TextLayout (const TextLayout& other)
     lines.addCopiesOf (other.lines);
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 TextLayout::TextLayout (TextLayout&& other) noexcept
     : lines (static_cast<OwnedArray<Line>&&> (other.lines)),
       width (other.width), height (other.height),
@@ -169,7 +168,6 @@ TextLayout& TextLayout::operator= (TextLayout&& other) noexcept
     justification = other.justification;
     return *this;
 }
-#endif
 
 TextLayout& TextLayout::operator= (const TextLayout& other)
 {

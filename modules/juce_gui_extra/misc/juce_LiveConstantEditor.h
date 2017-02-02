@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LIVECONSTANTEDITOR_H_INCLUDED
-#define JUCE_LIVECONSTANTEDITOR_H_INCLUDED
+#pragma once
 
 #if JUCE_ENABLE_LIVE_CONSTANT_EDITOR && ! DOXYGEN
 
@@ -302,6 +301,3 @@ namespace LiveConstantEditor
  #define JUCE_LIVE_CONSTANT(initialValue) \
     (initialValue)
 #endif
-
-
-#endif   // JUCE_LIVECONSTANTEDITOR_H_INCLUDED

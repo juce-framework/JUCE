@@ -285,7 +285,6 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 MidiMessage::MidiMessage (MidiMessage&& other) noexcept
    : timeStamp (other.timeStamp), size (other.size)
 {
@@ -301,7 +300,6 @@ MidiMessage& MidiMessage::operator= (MidiMessage&& other) noexcept
     other.size = 0;
     return *this;
 }
-#endif
 
 MidiMessage::~MidiMessage() noexcept
 {

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ACTIVEXCONTROLCOMPONENT_H_INCLUDED
-#define JUCE_ACTIVEXCONTROLCOMPONENT_H_INCLUDED
+#pragma once
 
 #if JUCE_WINDOWS || DOXYGEN
 
@@ -118,5 +117,3 @@ private:
 };
 
 #endif
-
-#endif   // JUCE_ACTIVEXCONTROLCOMPONENT_H_INCLUDED

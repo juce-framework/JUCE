@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IMAGE_H_INCLUDED
-#define JUCE_IMAGE_H_INCLUDED
+#pragma once
 
 class ImageType;
 class ImagePixelData;
@@ -116,10 +115,11 @@ public:
     */
     Image& operator= (const Image&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     Image (Image&&) noexcept;
+
+    /** Move assignment operator */
     Image& operator= (Image&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~Image();
@@ -536,6 +536,3 @@ public:
     ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
     int getTypeID() const override;
 };
-
-
-#endif   // JUCE_IMAGE_H_INCLUDED

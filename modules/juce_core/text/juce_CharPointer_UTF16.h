@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CHARPOINTER_UTF16_H_INCLUDED
-#define JUCE_CHARPOINTER_UTF16_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -522,6 +521,3 @@ private:
         return n;
     }
 };
-
-
-#endif   // JUCE_CHARPOINTER_UTF16_H_INCLUDED

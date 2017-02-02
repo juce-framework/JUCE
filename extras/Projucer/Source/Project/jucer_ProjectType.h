@@ -49,6 +49,55 @@ public:
     virtual bool isCommandLineApp() const       { return false; }
     virtual bool isAudioPlugin() const          { return false; }
 
+    //==============================================================================
+    struct Target
+    {
+        enum Type
+        {
+            GUIApp            = 0,
+            ConsoleApp        = 1,
+            StaticLibrary     = 2,
+            DynamicLibrary    = 3,
+
+            VSTPlugIn         = 10,
+            VST3PlugIn        = 11,
+            AAXPlugIn         = 12,
+            RTASPlugIn        = 13,
+            AudioUnitPlugIn   = 14,
+            AudioUnitv3PlugIn = 15,
+            StandalonePlugIn  = 16,
+
+            SharedCodeTarget  = 20, // internal
+            AggregateTarget   = 21,
+
+            unspecified       = 30
+        };
+
+        enum TargetFileType
+        {
+            executable            = 0,
+            staticLibrary         = 1,
+            sharedLibraryOrDLL    = 2,
+            pluginBundle          = 3,
+            macOSAppex            = 4,
+            unknown               = 5
+        };
+
+        //==============================================================================
+        Target (Type targetType) : type (targetType) {}
+
+        const char* getName() const noexcept;
+        TargetFileType getTargetFileType() const noexcept;
+
+        const Type type;
+
+    private:
+        //==============================================================================
+        Target& operator= (const Target&) JUCE_DELETED_FUNCTION;
+    };
+
+    virtual bool supportsTargetType (Target::Type /*targetType*/) const     { return false; }
+
 protected:
     ProjectType (const String& type, const String& desc);
 
@@ -86,32 +135,36 @@ struct ProjectType_GUIApp  : public ProjectType
 {
     ProjectType_GUIApp()  : ProjectType (getTypeName(), "GUI Application") {}
 
-    static const char* getTypeName() noexcept   { return "guiapp"; }
-    bool isGUIApplication() const  override     { return true; }
+    static const char* getTypeName() noexcept                          { return "guiapp"; }
+    bool isGUIApplication() const  override                            { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::GUIApp); }
 };
 
 struct ProjectType_ConsoleApp  : public ProjectType
 {
     ProjectType_ConsoleApp()  : ProjectType (getTypeName(), "Console Application") {}
 
-    static const char* getTypeName() noexcept   { return "consoleapp"; }
-    bool isCommandLineApp() const  override     { return true; }
+    static const char* getTypeName() noexcept                          { return "consoleapp"; }
+    bool isCommandLineApp() const  override                            { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::ConsoleApp); }
 };
 
 struct ProjectType_StaticLibrary  : public ProjectType
 {
     ProjectType_StaticLibrary()  : ProjectType (getTypeName(), "Static Library") {}
 
-    static const char* getTypeName() noexcept   { return "library"; }
-    bool isStaticLibrary() const  override      { return true; }
+    static const char* getTypeName() noexcept                          { return "library"; }
+    bool isStaticLibrary() const  override                             { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::StaticLibrary); }
 };
 
 struct ProjectType_DLL  : public ProjectType
 {
     ProjectType_DLL()  : ProjectType (getTypeName(), "Dynamic Library") {}
 
-    static const char* getTypeName() noexcept   { return "dll"; }
-    bool isDynamicLibrary() const override      { return true; }
+    static const char* getTypeName() noexcept                          { return "dll"; }
+    bool isDynamicLibrary() const override                             { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::DynamicLibrary); }
 };
 
 struct ProjectType_AudioPlugin  : public ProjectType
@@ -120,6 +173,27 @@ struct ProjectType_AudioPlugin  : public ProjectType
 
     static const char* getTypeName() noexcept   { return "audioplug"; }
     bool isAudioPlugin() const override         { return true; }
+
+    bool supportsTargetType (Target::Type targetType) const override
+    {
+        switch (targetType)
+        {
+            case Target::VSTPlugIn:
+            case Target::VST3PlugIn:
+            case Target::AAXPlugIn:
+            case Target::RTASPlugIn:
+            case Target::AudioUnitPlugIn:
+            case Target::AudioUnitv3PlugIn:
+            case Target::StandalonePlugIn:
+            case Target::SharedCodeTarget:
+            case Target::AggregateTarget:
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
 };
 
 //==============================================================================

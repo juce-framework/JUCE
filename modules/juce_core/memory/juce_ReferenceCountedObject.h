@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
-#define JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -248,13 +247,11 @@ public:
         incIfNotNull (refCountedObject);
     }
 
-   #if JUCE_COMPILER_SUPPORTS_NULLPTR
     /** Creates a pointer to a null object. */
     ReferenceCountedObjectPtr (decltype (nullptr)) noexcept
         : referencedObject (nullptr)
     {
     }
-   #endif
 
     /** Copies another pointer.
         This will increment the object's reference-count.
@@ -312,7 +309,6 @@ public:
         return *this;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     /** Takes-over the object from another pointer. */
     ReferenceCountedObjectPtr (ReferenceCountedObjectPtr&& other) noexcept
         : referencedObject (other.referencedObject)
@@ -326,7 +322,6 @@ public:
         std::swap (referencedObject, other.referencedObject);
         return *this;
     }
-   #endif
 
     /** Destructor.
         This will decrement the object's reference-count, which will cause the
@@ -420,6 +415,3 @@ bool operator!= (ReferenceCountedObjectClass* object1, const ReferenceCountedObj
 {
     return object1 != object2.get();
 }
-
-
-#endif   // JUCE_REFERENCECOUNTEDOBJECT_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_INPUTSTREAM_H_INCLUDED
-#define JUCE_INPUTSTREAM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -264,5 +263,3 @@ protected:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream)
 };
-
-#endif   // JUCE_INPUTSTREAM_H_INCLUDED

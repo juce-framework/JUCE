@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IMAGEPREVIEWCOMPONENT_H_INCLUDED
-#define JUCE_IMAGEPREVIEWCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -61,6 +60,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePreviewComponent)
 };
-
-
-#endif   // JUCE_IMAGEPREVIEWCOMPONENT_H_INCLUDED

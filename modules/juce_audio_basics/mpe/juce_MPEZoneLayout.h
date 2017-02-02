@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MPEZONELAYOUT_H_INCLUDED
-#define JUCE_MPEZONELAYOUT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -166,6 +165,3 @@ private:
     void processZoneLayoutRpnMessage (MidiRPNMessage);
     void processPitchbendRangeRpnMessage (MidiRPNMessage);
 };
-
-
-#endif // JUCE_MPEZONELAYOUT_H_INCLUDED

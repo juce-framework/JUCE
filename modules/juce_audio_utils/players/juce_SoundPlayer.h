@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SOUNDPLAYER_H_INCLUDED
-#define JUCE_SOUNDPLAYER_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -125,6 +124,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundPlayer)
 };
-
-
-#endif   // JUCE_SOUNDPLAYER_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPENGLCONTEXT_H_INCLUDED
-#define JUCE_OPENGLCONTEXT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -293,6 +292,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLContext)
 };
-
-
-#endif   // JUCE_OPENGLCONTEXT_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTDRAGANDDROPTARGET_H_INCLUDED
-#define JUCE_TEXTDRAGANDDROPTARGET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -100,6 +99,3 @@ public:
     */
     virtual void textDropped (const String& text, int x, int y) = 0;
 };
-
-
-#endif   // JUCE_TEXTDRAGANDDROPTARGET_H_INCLUDED

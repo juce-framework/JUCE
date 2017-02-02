@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SHA256_H_INCLUDED
-#define JUCE_SHA256_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -102,6 +101,3 @@ private:
 
     JUCE_LEAK_DETECTOR (SHA256)
 };
-
-
-#endif   // JUCE_SHA256_H_INCLUDED

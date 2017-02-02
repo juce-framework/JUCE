@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAWABLERECTANGLE_H_INCLUDED
-#define JUCE_DRAWABLERECTANGLE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -98,6 +97,3 @@ private:
     DrawableRectangle& operator= (const DrawableRectangle&);
     JUCE_LEAK_DETECTOR (DrawableRectangle)
 };
-
-
-#endif   // JUCE_DRAWABLERECTANGLE_H_INCLUDED

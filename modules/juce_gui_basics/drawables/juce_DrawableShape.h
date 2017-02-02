@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAWABLESHAPE_H_INCLUDED
-#define JUCE_DRAWABLESHAPE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -187,6 +186,3 @@ private:
 
     DrawableShape& operator= (const DrawableShape&);
 };
-
-
-#endif   // JUCE_DRAWABLESHAPE_H_INCLUDED

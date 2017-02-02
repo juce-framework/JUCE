@@ -46,8 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_CRYPTOGRAPHY_H_INCLUDED
-#define JUCE_CRYPTOGRAPHY_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_core/juce_core.h>
@@ -63,5 +62,3 @@ namespace juce
 #include "hashing/juce_Whirlpool.h"
 
 }
-
-#endif   // JUCE_CRYPTOGRAPHY_H_INCLUDED

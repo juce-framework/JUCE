@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_UIVIEWCOMPONENT_H_INCLUDED
-#define JUCE_UIVIEWCOMPONENT_H_INCLUDED
+#pragma once
 
 #if JUCE_IOS || DOXYGEN
 
@@ -83,4 +82,3 @@ private:
 };
 
 #endif
-#endif   // JUCE_UIVIEWCOMPONENT_H_INCLUDED

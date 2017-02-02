@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SYSTEMSTATS_H_INCLUDED
-#define JUCE_SYSTEMSTATS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -208,6 +207,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (SystemStats)
 };
-
-
-#endif   // JUCE_SYSTEMSTATS_H_INCLUDED

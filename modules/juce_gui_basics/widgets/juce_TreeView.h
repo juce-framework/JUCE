@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TREEVIEW_H_INCLUDED
-#define JUCE_TREEVIEW_H_INCLUDED
+#pragma once
 
 class TreeView;
 
@@ -936,5 +935,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView)
 };
-
-#endif   // JUCE_TREEVIEW_H_INCLUDED

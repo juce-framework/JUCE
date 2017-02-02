@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_APPLICATIONBASE_H_INCLUDED
-#define JUCE_APPLICATIONBASE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -306,6 +305,3 @@ private:
  #define JUCE_TRY
  #define JUCE_CATCH_EXCEPTION
 #endif
-
-
-#endif   // JUCE_APPLICATIONBASE_H_INCLUDED

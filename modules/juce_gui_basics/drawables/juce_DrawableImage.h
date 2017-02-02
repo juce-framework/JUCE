@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAWABLEIMAGE_H_INCLUDED
-#define JUCE_DRAWABLEIMAGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -133,6 +132,3 @@ private:
     DrawableImage& operator= (const DrawableImage&);
     JUCE_LEAK_DETECTOR (DrawableImage)
 };
-
-
-#endif   // JUCE_DRAWABLEIMAGE_H_INCLUDED

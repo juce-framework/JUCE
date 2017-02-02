@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RESAMPLINGAUDIOSOURCE_H_INCLUDED
-#define JUCE_RESAMPLINGAUDIOSOURCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -108,6 +107,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResamplingAudioSource)
 };
-
-
-#endif   // JUCE_RESAMPLINGAUDIOSOURCE_H_INCLUDED

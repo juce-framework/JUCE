@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILEDRAGANDDROPTARGET_H_INCLUDED
-#define JUCE_FILEDRAGANDDROPTARGET_H_INCLUDED
+#pragma once
 
 /**
     Components derived from this class can have files dropped onto them by an external application.
@@ -99,6 +98,3 @@ public:
     */
     virtual void filesDropped (const StringArray& files, int x, int y) = 0;
 };
-
-
-#endif   // JUCE_FILEDRAGANDDROPTARGET_H_INCLUDED

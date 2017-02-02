@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ANDROID_JNIHELPERS_H_INCLUDED
-#define JUCE_ANDROID_JNIHELPERS_H_INCLUDED
+#pragma once
 
 #if ! (defined (JUCE_ANDROID_ACTIVITY_CLASSNAME) && defined (JUCE_ANDROID_ACTIVITY_CLASSPATH))
  #error "The JUCE_ANDROID_ACTIVITY_CLASSNAME and JUCE_ANDROID_ACTIVITY_CLASSPATH macros must be set!"
@@ -351,5 +350,3 @@ DECLARE_JNI_CLASS (JuceThread, "java/lang/Thread");
 
 DECLARE_JNI_CLASS (RectClass, "android/graphics/Rect");
 #undef JNI_CLASS_MEMBERS
-
-#endif   // JUCE_ANDROID_JNIHELPERS_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PROPERTYSET_H_INCLUDED
-#define JUCE_PROPERTYSET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -208,6 +207,3 @@ private:
 
     JUCE_LEAK_DETECTOR (PropertySet)
 };
-
-
-#endif   // JUCE_PROPERTYSET_H_INCLUDED

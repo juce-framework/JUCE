@@ -1133,7 +1133,7 @@ struct StateHelpers
 
         ~ShaderQuadQueue() noexcept
         {
-            static_jassert (sizeof (VertexInfo) == 8);
+            static_assert (sizeof (VertexInfo) == 8, "Sanity check VertexInfo size");
             context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
             context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
             context.extensions.glDeleteBuffers (2, buffers);

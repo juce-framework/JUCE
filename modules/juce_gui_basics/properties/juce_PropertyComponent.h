@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PROPERTYCOMPONENT_H_INCLUDED
-#define JUCE_PROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -138,6 +137,3 @@ protected:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyComponent)
 };
-
-
-#endif   // JUCE_PROPERTYCOMPONENT_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUSEEVENT_H_INCLUDED
-#define JUCE_MOUSEEVENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -375,6 +374,3 @@ struct MouseWheelDetails
         the wheel being released. */
     bool isInertial;
 };
-
-
-#endif   // JUCE_MOUSEEVENT_H_INCLUDED

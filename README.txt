@@ -1,3 +1,17 @@
+GIT "develop" BRANCH DISCLAIMER
+===============================
+
+The source code available in the develop branch is provided for
+testing purposes. JUCE offers no guarantee that the source code
+will be integrated to the JUCE framework. The source code can be
+used for commercial and open source releases following the terms
+of the JUCE license. Many of the new features presented here will
+ultimately be released as part of JUCE 5 and using them in closed
+source application will require a paid license. Please contact
+info@juce.com for any questions or visit the JUCE forum at
+forum.juce.com. 
+
+
 # The JUCE Library
 
 JUCE (Jules' Utility Class Extensions) is an all-encompassing 

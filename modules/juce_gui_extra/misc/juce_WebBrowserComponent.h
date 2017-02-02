@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_WEBBROWSERCOMPONENT_H_INCLUDED
-#define JUCE_WEBBROWSERCOMPONENT_H_INCLUDED
+#pragma once
 
 #if JUCE_WEB_BROWSER || DOXYGEN
 
@@ -133,4 +132,3 @@ private:
 
 
 #endif
-#endif   // JUCE_WEBBROWSERCOMPONENT_H_INCLUDED

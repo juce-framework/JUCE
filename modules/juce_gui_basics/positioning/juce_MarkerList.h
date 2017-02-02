@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MARKERLIST_H_INCLUDED
-#define JUCE_MARKERLIST_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -179,6 +178,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MarkerList)
 };
-
-
-#endif   // JUCE_MARKERLIST_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTLAYOUT_H_INCLUDED
-#define JUCE_TEXTLAYOUT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -45,10 +44,8 @@ public:
     TextLayout();
     TextLayout (const TextLayout&);
     TextLayout& operator= (const TextLayout&);
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     TextLayout (TextLayout&&) noexcept;
     TextLayout& operator= (TextLayout&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~TextLayout();
@@ -192,5 +189,3 @@ private:
 
     JUCE_LEAK_DETECTOR (TextLayout)
 };
-
-#endif   // JUCE_TEXTLAYOUT_H_INCLUDED

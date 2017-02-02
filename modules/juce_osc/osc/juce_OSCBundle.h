@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCBUNDLE_H_INCLUDED
-#define JUCE_OSCBUNDLE_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -128,6 +127,3 @@ private:
     Array<OSCBundle::Element> elements;
     OSCTimeTag timeTag;
 };
-
-
-#endif // JUCE_OSCBUNDLE_H_INCLUDED

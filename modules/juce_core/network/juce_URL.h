@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_URL_H_INCLUDED
-#define JUCE_URL_H_INCLUDED
+#pragma once
 
 class WebInputStream;
 //==============================================================================
@@ -525,5 +524,3 @@ private:
 
     JUCE_LEAK_DETECTOR (URL)
 };
-
-#endif   // JUCE_URL_H_INCLUDED

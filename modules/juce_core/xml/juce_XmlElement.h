@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_XMLELEMENT_H_INCLUDED
-#define JUCE_XMLELEMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -166,10 +165,11 @@ public:
     /** Creates a (deep) copy of another element. */
     XmlElement& operator= (const XmlElement&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    XmlElement (XmlElement&&) noexcept;
+    /** Move assignment operator */
     XmlElement& operator= (XmlElement&&) noexcept;
-   #endif
+
+    /** Move constructor */
+    XmlElement (XmlElement&&) noexcept;
 
     /** Deleting an XmlElement will also delete all of its child elements. */
     ~XmlElement() noexcept;
@@ -770,6 +770,3 @@ private:
 
     JUCE_LEAK_DETECTOR (XmlElement)
 };
-
-
-#endif   // JUCE_XMLELEMENT_H_INCLUDED

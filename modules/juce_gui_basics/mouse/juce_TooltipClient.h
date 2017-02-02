@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TOOLTIPCLIENT_H_INCLUDED
-#define JUCE_TOOLTIPCLIENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -80,6 +79,3 @@ protected:
 private:
     String tooltipString;
 };
-
-
-#endif   // JUCE_TOOLTIPCLIENT_H_INCLUDED

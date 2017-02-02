@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPLAYHEAD_H_INCLUDED
-#define JUCE_AUDIOPLAYHEAD_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -139,6 +138,3 @@ public:
     */
     virtual bool getCurrentPosition (CurrentPositionInfo& result) = 0;
 };
-
-
-#endif   // JUCE_AUDIOPLAYHEAD_H_INCLUDED

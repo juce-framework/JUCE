@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STRING_H_INCLUDED
-#define JUCE_STRING_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -54,9 +53,8 @@ public:
     /** Creates a copy of another string. */
     String (const String& other) noexcept;
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     String (String&& other) noexcept;
-   #endif
 
     /** Creates a string from a zero-terminated ascii text string.
 
@@ -200,9 +198,8 @@ public:
     /** Replaces this string's contents with another string. */
     String& operator= (const String& other) noexcept;
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Moves the contents of another string to the receiver */
     String& operator= (String&& other) noexcept;
-   #endif
 
     /** Appends another string at the end of this one. */
     String& operator+= (const String& stringToAppend);
@@ -1391,6 +1388,3 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Str
 
 /** Writes a string to an OutputStream as UTF8. */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef stringToWrite);
-
-
-#endif   // JUCE_STRING_H_INCLUDED

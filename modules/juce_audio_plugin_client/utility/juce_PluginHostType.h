@@ -275,6 +275,7 @@ private:
         if (hostFilename.startsWith         ("Bitwig"))            return BitwigStudio;
 
        #elif JUCE_IOS
+       #elif JUCE_ANDROID
        #else
         #error
        #endif
