@@ -598,7 +598,7 @@ private:
         ImageType* createType() const override                      { return new SoftwareImageType(); }
         LowLevelGraphicsContext* createLowLevelContext() override   { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
 
-        void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
+        void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode) override
         {
             bm.lineStride = width * sizeof (jint);
             bm.pixelStride = sizeof (jint);
@@ -606,7 +606,7 @@ private:
             bm.data = (uint8*) (data + x + y * width);
         }
 
-        ImagePixelData::Ptr clone()
+        ImagePixelData::Ptr clone() override
         {
             PreallocatedImage* s = new PreallocatedImage (width, height, 0, hasAlpha);
             s->allocatedData.malloc (sizeof (jint) * width * height);
