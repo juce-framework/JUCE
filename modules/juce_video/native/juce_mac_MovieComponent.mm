@@ -216,7 +216,7 @@ void MovieComponent::resized()
     JUCE_AUTORELEASEPOOL
     {
         auto frame = CGRectMake (0, 0, (CGFloat) getWidth(), (CGFloat) getHeight());
-        [pimpl->view setFrame: frame];
+        [pimpl->view setFrame: NSRectFromCGRect (frame)];
         [pimpl->playerLayer setFrame: frame];
     }
 }
