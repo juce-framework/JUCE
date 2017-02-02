@@ -42,7 +42,7 @@ struct MovieComponent::Pimpl
 
             auto frame = CGRectMake (0, 0, nativeSize.width, nativeSize.height);
 
-            view = [[NSView alloc] initWithFrame: frame];
+            view = [[NSView alloc] initWithFrame: NSRectFromCGRect (frame)];
             [view setHidden: NO];
             [view setNeedsDisplay: YES];
             [view setWantsLayer: YES];
