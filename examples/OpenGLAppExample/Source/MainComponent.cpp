@@ -142,7 +142,11 @@ public:
             "\n"
             "void main()\n"
             "{\n"
+          #if JUCE_OPENGL_ES
+            "    lowp vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+          #else
             "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+          #endif
             "    gl_FragColor = colour;\n"
             "}\n";
 
