@@ -1325,6 +1325,19 @@ String String::replace (StringRef stringToReplace, StringRef stringToInsert, con
     return result;
 }
 
+String String::replaceFirstOccurrenceOf (StringRef stringToReplace, StringRef stringToInsert, const bool ignoreCase) const
+{
+    const int stringToReplaceLen = stringToReplace.length();
+
+    int i = 0;
+
+    if ((i = (ignoreCase ? indexOfIgnoreCase (stringToReplace)
+                         : indexOf (stringToReplace))) >= 0)
+        return replaceSection (i, stringToReplaceLen, stringToInsert);
+
+    return *this;
+}
+
 class StringCreationHelper
 {
 public:
