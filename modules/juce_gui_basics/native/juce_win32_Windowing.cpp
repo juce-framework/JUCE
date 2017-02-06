@@ -590,7 +590,8 @@ struct UUIDGetter<ITipInvocation>
 
 const CLSID ITipInvocation::clsid = {0x4CE576FA, 0x83DC, 0x4f88, {0x95, 0x1C, 0x9D, 0x07, 0x82, 0xB4, 0xE3, 0x76}};
 //==============================================================================
-class OnScreenKeyboard : private Timer
+class OnScreenKeyboard :   public DeletedAtShutdown,
+                           private Timer
 {
 public:
 
