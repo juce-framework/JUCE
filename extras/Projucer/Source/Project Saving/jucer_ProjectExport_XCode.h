@@ -283,8 +283,11 @@ public:
     }
 
     //==============================================================================
-    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override
+    void addPlatformSpecificSettingsForProjectType (const ProjectType& type) override
     {
+        if (type.isAudioPlugin() && project.shouldBuildRTAS() && supportsTargetType (ProjectType::Target::RTASPlugIn))
+            addRTASPluginSettings();
+
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
                                         if (XCodeTarget* target = new XCodeTarget (targetType, *this))
