@@ -1601,7 +1601,7 @@ protected:
             : MSVCBuildConfiguration (p, settings, e)
         {
             if (getArchitectureType().toString().isEmpty())
-                getArchitectureType() = get32BitArchName();
+                getArchitectureType() = get64BitArchName();
         }
 
         //==============================================================================

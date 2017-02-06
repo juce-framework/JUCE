@@ -54,29 +54,6 @@
         <MODULEPATH id="juce_audio_basics" path="../../../modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
-    <VS2013 targetFolder="Builds/VisualStudio2013">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="BlocksMonitor"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="BlocksMonitor"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_opengl" path="../../../modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../../modules"/>
-        <MODULEPATH id="juce_events" path="../../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../../modules"/>
-        <MODULEPATH id="juce_core" path="../../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../../modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../../modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../../modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../../modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../../modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../../modules"/>
-      </MODULEPATHS>
-    </VS2013>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
