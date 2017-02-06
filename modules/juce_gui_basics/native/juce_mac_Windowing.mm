@@ -22,6 +22,26 @@
   ==============================================================================
 */
 
+} // namespace juce
+
+@interface NSDraggingSourceHelper : NSObject <NSDraggingSource>
+{
+}
+@end
+
+@implementation NSDraggingSourceHelper
+
+-(NSDragOperation) draggingSession: (NSDraggingSession *)session sourceOperationMaskForDraggingContext: (NSDraggingContext)context
+{
+    juce::ignoreUnused (session, context);
+    return NSDragOperationCopy;
+}
+
+@end
+
+namespace juce {
+
+//==============================================================================
 void LookAndFeel::playAlertSound()
 {
     NSBeep();
@@ -241,14 +261,30 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
         {
             if (auto* event = [[view window] currentEvent])
             {
-                auto dragRect = getDragRect (view, event);
+                auto* dragItems = [[[NSMutableArray alloc] init] autorelease];
+                for (auto& filename : files)
+                {
+                    auto* nsFilename = juceStringToNS (filename);
+                    auto* fileURL = [NSURL fileURLWithPath: nsFilename];
+                    auto* dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter: fileURL];
 
-                for (int i = 0; i < files.size(); ++i)
-                    if (! [view dragFile: juceStringToNS (files[i])
-                                fromRect: dragRect
-                               slideBack: YES
-                                   event: event])
-                        return false;
+                    auto eventPos = [event locationInWindow];
+                    auto dragRect = [view convertRect: NSMakeRect (eventPos.x - 16.0f, eventPos.y - 16.0f, 32.0f, 32.0f)
+                                             fromView: nil];
+                    auto *dragImage = [[NSWorkspace sharedWorkspace] iconForFile: nsFilename];
+                    [dragItem setDraggingFrame: dragRect
+                                      contents: dragImage];
+
+                    [dragItems addObject: dragItem];
+                    [dragItem release];
+                }
+
+                auto* helper = [[NSDraggingSourceHelper alloc] autorelease];
+
+                if (! [view beginDraggingSessionWithItems: dragItems
+                                                    event: event
+                                                   source: helper])
+                    return false;
 
                 return true;
             }

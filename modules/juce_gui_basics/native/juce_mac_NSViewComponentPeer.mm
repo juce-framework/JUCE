@@ -1865,7 +1865,7 @@ struct JuceNSWindowClass   : public ObjCClass<NSWindow>
         addIvar<NSViewComponentPeer*> ("owner");
 
         addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,        "c@:");
-        addMethod (@selector (canBecomeMainWindow),           canBecomeMainWindow,        "c@:");
+        addMethod (@selector (canBecomeMainWindow),           canBecomeMainWindow,       "c@:");
         addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,           "v@:");
         addMethod (@selector (windowShouldClose:),            windowShouldClose,         "c@:@");
         addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
