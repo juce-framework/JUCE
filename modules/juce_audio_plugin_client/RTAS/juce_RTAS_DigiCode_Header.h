@@ -25,9 +25,6 @@
 #pragma once
 
 #if JucePlugin_Build_RTAS
-
-//==============================================================================
-#if JucePlugin_Build_RTAS
 #ifdef _MSC_VER
 
   #define kCompileAsCodeResource    0
@@ -66,6 +63,5 @@
 
   #include <MacAlwaysInclude.h>
 
-#endif
 #endif
 #endif
