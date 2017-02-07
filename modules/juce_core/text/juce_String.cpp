@@ -1328,12 +1328,11 @@ String String::replace (StringRef stringToReplace, StringRef stringToInsert, con
 String String::replaceFirstOccurrenceOf (StringRef stringToReplace, StringRef stringToInsert, const bool ignoreCase) const
 {
     const int stringToReplaceLen = stringToReplace.length();
+    const int index = ignoreCase ? indexOfIgnoreCase (stringToReplace)
+                                 : indexOf (stringToReplace);
 
-    int i = 0;
-
-    if ((i = (ignoreCase ? indexOfIgnoreCase (stringToReplace)
-                         : indexOf (stringToReplace))) >= 0)
-        return replaceSection (i, stringToReplaceLen, stringToInsert);
+    if (index >= 0)
+        return replaceSection (index, stringToReplaceLen, stringToInsert);
 
     return *this;
 }
