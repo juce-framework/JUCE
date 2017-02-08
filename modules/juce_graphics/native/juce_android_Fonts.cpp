@@ -169,8 +169,8 @@ public:
     {
         JNIEnv* const env = getEnv();
 
-        LocalRef<jbyteArray> bytes (env->NewByteArray (size));
-        env->SetByteArrayRegion (bytes, 0, size, (const jbyte*) data);
+        LocalRef<jbyteArray> bytes (env->NewByteArray ((jsize) size));
+        env->SetByteArrayRegion (bytes, 0, (jsize) size, (const jbyte*) data);
 
         typeface = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.getTypeFaceFromByteArray, bytes.get()));
 
@@ -207,7 +207,7 @@ public:
 
         const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
 
-        HeapBlock<jfloat> localWidths (numDone);
+        HeapBlock<jfloat> localWidths (static_cast<size_t> (numDone));
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
         env->DeleteLocalRef (widths);
 
@@ -226,7 +226,7 @@ public:
 
         const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
 
-        HeapBlock<jfloat> localWidths (numDone);
+        HeapBlock<jfloat> localWidths (static_cast<size_t> (numDone));
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
         env->DeleteLocalRef (widths);
 

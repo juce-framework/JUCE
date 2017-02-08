@@ -56,7 +56,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject))
 {
     setEnv (env);
 
@@ -64,7 +64,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* e
         app->suspended();
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* env, jobject))
 {
     setEnv (env);
 
@@ -72,7 +72,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* en
         app->resumed();
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env, jobject))
 {
     setEnv (env);
 
@@ -213,7 +213,7 @@ public:
             class ViewMover  : public CallbackMessage
             {
             public:
-                ViewMover (const GlobalRef& v, const Rectangle<int>& r)  : view (v), bounds (r) {}
+                ViewMover (const GlobalRef& v, const Rectangle<int>& boundsToUse)  : view (v), bounds (boundsToUse) {}
 
                 void messageCallback() override
                 {
@@ -262,7 +262,7 @@ public:
         return screenPosition - getScreenPosition().toFloat();
     }
 
-    void setMinimised (bool shouldBeMinimised) override
+    void setMinimised (bool /*shouldBeMinimised*/) override
     {
         // n/a
     }
@@ -337,7 +337,7 @@ public:
         stopTimer();
     }
 
-    void setIcon (const Image& newIcon) override
+    void setIcon (const Image& /*newIcon*/) override
     {
         // n/a
     }
@@ -357,7 +357,7 @@ public:
         return BorderSize<int>();
     }
 
-    bool setAlwaysOnTop (bool alwaysOnTop) override
+    bool setAlwaysOnTop (bool /*alwaysOnTop*/) override
     {
         // TODO
         return false;
@@ -419,10 +419,10 @@ public:
 
     void handleKeyDownCallback (int k, int kc)
     {
-        handleKeyPress (k, kc);
+        handleKeyPress (k, static_cast<juce_wchar> (kc));
     }
 
-    void handleKeyUpCallback (int k, int kc)
+    void handleKeyUpCallback (int /*k*/, int /*kc*/)
     {
     }
 
@@ -549,7 +549,7 @@ public:
         // TODO
     }
 
-    void setAlpha (float newAlpha) override
+    void setAlpha (float /*newAlpha*/) override
     {
         // TODO
     }
@@ -578,7 +578,7 @@ private:
             : ImagePixelData (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
         {
             if (hasAlpha_)
-                zeromem (data_, width * height * sizeof (jint));
+                zeromem (data_, static_cast<size_t> (width * height) * sizeof (jint));
         }
 
         ~PreallocatedImage()
@@ -598,10 +598,10 @@ private:
         ImageType* createType() const override                      { return new SoftwareImageType(); }
         LowLevelGraphicsContext* createLowLevelContext() override   { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
 
-        void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+        void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/) override
         {
-            bm.lineStride = width * sizeof (jint);
-            bm.pixelStride = sizeof (jint);
+            bm.lineStride = width * static_cast<int> (sizeof (jint));
+            bm.pixelStride = static_cast<int> (sizeof (jint));
             bm.pixelFormat = Image::ARGB;
             bm.data = (uint8*) (data + x + y * width);
         }
@@ -609,9 +609,9 @@ private:
         ImagePixelData::Ptr clone() override
         {
             PreallocatedImage* s = new PreallocatedImage (width, height, 0, hasAlpha);
-            s->allocatedData.malloc (sizeof (jint) * width * height);
+            s->allocatedData.malloc (sizeof (jint) * static_cast<size_t> (width * height));
             s->data = s->allocatedData;
-            memcpy (s->data, data, sizeof (jint) * width * height);
+            memcpy (s->data, data, sizeof (jint) * static_cast<size_t> (width * height));
             return s;
         }
 
@@ -639,14 +639,14 @@ int64 AndroidComponentPeer::touchesDown = 0;
           peer->juceMethodInvocation; \
   }
 
-JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
-JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject view, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject view, jlong host),                                          handleMovedOrResized())
-JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject view, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
-JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject view, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
-JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject view, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject /*view*/, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
+JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject /*view*/, jlong host),                                          handleMovedOrResized())
+JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject /*view*/, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
+JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -688,7 +688,7 @@ void MouseInputSource::setRawMousePosition (Point<float>)
 }
 
 //==============================================================================
-bool KeyPress::isKeyCurrentlyDown (const int keyCode)
+bool KeyPress::isKeyCurrentlyDown (const int /*keyCode*/)
 {
     // TODO
     return false;
@@ -711,18 +711,18 @@ JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
 JUCE_API void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent,
+                                                          Component* /*associatedComponent*/,
                                                           ModalComponentManager::Callback* callback)
 {
     android.activity.callVoidMethod (JuceAppActivity.showMessageBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
 }
 
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                       const String& title, const String& message,
-                                                      Component* associatedComponent,
+                                                      Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
@@ -732,9 +732,9 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
     return false;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                         const String& title, const String& message,
-                                                        Component* associatedComponent,
+                                                        Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
@@ -744,7 +744,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
     return 0;
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEnv* env, jobject activity,
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEnv* env, jobject /*activity*/,
                                                                            jlong callbackAsLong, jint result))
 {
     setEnv (env);
@@ -830,7 +830,7 @@ void Desktop::Displays::findDisplays (float masterScale)
     displays.add (d);
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject activity,
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject /*activity*/,
                                                                           jint screenWidth, jint screenHeight,
                                                                           jint dpi))
 {
@@ -844,7 +844,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File& /*file*/)
 {
     return Image();
 }
@@ -859,12 +859,12 @@ void MouseCursor::showInWindow (ComponentPeer*) const   {}
 void MouseCursor::showInAllWindows() const  {}
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMove)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/)
 {
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
 {
     return false;
 }

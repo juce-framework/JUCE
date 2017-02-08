@@ -50,16 +50,16 @@ DECLARE_JNI_CLASS (HTTPStream, JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream");
 
 
 //==============================================================================
-void MACAddress::findAllAddresses (Array<MACAddress>& result)
+void MACAddress::findAllAddresses (Array<MACAddress>& /*result*/)
 {
     // TODO
 }
 
 
-JUCE_API bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,
-                                                               const String& emailSubject,
-                                                               const String& bodyText,
-                                                               const StringArray& filesToAttach)
+JUCE_API bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /*targetEmailAddress*/,
+                                                               const String& /*emailSubject*/,
+                                                               const String& /*bodyText*/,
+                                                               const StringArray& /*filesToAttach*/)
 {
     // TODO
     return false;
@@ -95,7 +95,7 @@ public:
         }
     }
 
-    bool connect (WebInputStream::Listener* listener)
+    bool connect (WebInputStream::Listener* /*listener*/)
     {
         String address = url.toString (! isPost);
 
@@ -112,8 +112,8 @@ public:
 
         if (postData.getSize() > 0)
         {
-            postDataArray = env->NewByteArray (postData.getSize());
-            env->SetByteArrayRegion (postDataArray, 0, postData.getSize(), (const jbyte*) postData.getData());
+            postDataArray = env->NewByteArray (static_cast<jsize> (postData.getSize()));
+            env->SetByteArrayRegion (postDataArray, 0, static_cast<jsize> (postData.getSize()), (const jbyte*) postData.getData());
         }
 
         LocalRef<jobject> responseHeaderBuffer (env->NewObject (StringBuffer, StringBuffer.constructor));

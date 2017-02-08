@@ -192,7 +192,7 @@ private:
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g,
-                           int width, int height, bool rowIsSelected) override
+                           int width, int height, bool) override
     {
         if (isPositiveAndBelow (rowNumber, devices.size()))
         {
@@ -210,14 +210,13 @@ private:
 
             g.setColour (getDeviceNameFontColour (device.connectionStatus));
             g.drawText (device.name,
-                        xmargin, ymargin,
-                        deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin),
+                        Rectangle<float> (xmargin, ymargin, deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topLeft, true);
 
             g.setColour (getDeviceStatusFontColour (device.connectionStatus));
             g.drawText (statusString,
-                        deviceNameWidth + xmargin, ymargin,
-                        width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin),
+                        Rectangle<float> (deviceNameWidth + xmargin, ymargin,
+                                          width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topRight, true);
 
             g.setColour (Colours::grey);
@@ -439,7 +438,7 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
         return false;
     }
 
-    BluetoothMidiSelectorOverlay* overlay = new BluetoothMidiSelectorOverlay (exitCallback.release());
+    new BluetoothMidiSelectorOverlay (exitCallback.release());
     return true;
 }
 

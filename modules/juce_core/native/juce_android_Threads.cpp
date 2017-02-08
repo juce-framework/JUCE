@@ -98,7 +98,7 @@ void* threadEntryProc (AndroidThreadData* priv)
 }
 
 JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024JuceThread), runThread,
-                   void, (JNIEnv* env, jobject device, jlong host))
+                   void, (JNIEnv* env, jobject /*device*/, jlong host))
 {
     // This thread does not have a JNIEnv assigned to it yet. So assign it now.
     setEnv (env);

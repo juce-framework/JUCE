@@ -43,7 +43,7 @@ class OpenGLContext::NativeContext
 {
 public:
     NativeContext (Component& comp,
-                   const OpenGLPixelFormat& pixelFormat,
+                   const OpenGLPixelFormat& /*pixelFormat*/,
                    void* /*contextToShareWith*/,
                    bool /*useMultisampling*/,
                    OpenGLVersion)

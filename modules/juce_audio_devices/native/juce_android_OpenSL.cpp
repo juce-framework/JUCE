@@ -393,22 +393,22 @@ private:
             if (engineObject != nullptr)    (*engineObject)->Destroy (engineObject);
         }
 
-        Player* createPlayer (const int numChannels, const int sampleRate, const int numBuffers, const int bufferSize)
+        Player* createPlayer (const int numChannels, const int sampleRateToUse, const int numBuffers, const int bufferSize)
         {
             if (numChannels <= 0)
                 return nullptr;
 
-            ScopedPointer<Player> player (new Player (numChannels, sampleRate, *this, numBuffers, bufferSize));
-            return player->openedOk() ? player.release() : nullptr;
+            ScopedPointer<Player> newPlayer (new Player (numChannels, sampleRateToUse, *this, numBuffers, bufferSize));
+            return newPlayer->openedOk() ? newPlayer.release() : nullptr;
         }
 
-        Recorder* createRecorder (const int numChannels, const int sampleRate, const int numBuffers, const int bufferSize)
+        Recorder* createRecorder (const int numChannels, const int sampleRateToUse, const int numBuffers, const int bufferSize)
         {
             if (numChannels <= 0)
                 return nullptr;
 
-            ScopedPointer<Recorder> recorder (new Recorder (numChannels, sampleRate, *this, numBuffers, bufferSize));
-            return recorder->openedOk() ? recorder.release() : nullptr;
+            ScopedPointer<Recorder> newRecorder (new Recorder (numChannels, sampleRateToUse, *this, numBuffers, bufferSize));
+            return newRecorder->openedOk() ? newRecorder.release() : nullptr;
         }
 
         SLObjectItf engineObject;
@@ -431,7 +431,7 @@ private:
     {
         BufferList (const int numChannels_, const int numBuffers_, const int numSamples_)
             : numChannels (numChannels_), numBuffers (numBuffers_), numSamples (numSamples_),
-              bufferSpace (numChannels_ * numSamples * numBuffers), nextBlock (0)
+              bufferSpace (static_cast<size_t> (numChannels_ * numSamples * numBuffers)), nextBlock (0)
         {
         }
 
@@ -459,7 +459,7 @@ private:
         void bufferReturned() noexcept      { --numBlocksOut; dataArrived.signal(); }
         void bufferSent() noexcept          { ++numBlocksOut; dataArrived.signal(); }
 
-        int getBufferSizeBytes() const noexcept     { return numChannels * numSamples * sizeof (int16); }
+        int getBufferSizeBytes() const noexcept     { return numChannels * numSamples * static_cast<int> (sizeof (int16)); }
 
         const int numChannels, numBuffers, numSamples;
 
@@ -473,7 +473,7 @@ private:
     //==============================================================================
     struct Player
     {
-        Player (int numChannels, int sampleRate, Engine& engine, int playerNumBuffers, int playerBufferSize)
+        Player (int numChannels, int playerSampleRate, Engine& slEngine, int playerNumBuffers, int playerBufferSize)
             : playerObject (nullptr), playerPlay (nullptr), playerBufferQueue (nullptr),
               bufferList (numChannels, playerNumBuffers, playerBufferSize)
         {
@@ -481,7 +481,7 @@ private:
             {
                 SL_DATAFORMAT_PCM,
                 (SLuint32) numChannels,
-                (SLuint32) (sampleRate * 1000),
+                (SLuint32) (playerSampleRate * 1000),
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 (numChannels == 1) ? SL_SPEAKER_FRONT_CENTER : (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT),
@@ -492,19 +492,19 @@ private:
                                                                    static_cast<SLuint32> (bufferList.numBuffers) };
             SLDataSource audioSrc = { &bufferQueue, &pcmFormat };
 
-            SLDataLocator_OutputMix outputMix = { SL_DATALOCATOR_OUTPUTMIX, engine.outputMixObject };
+            SLDataLocator_OutputMix outputMix = { SL_DATALOCATOR_OUTPUTMIX, slEngine.outputMixObject };
             SLDataSink audioSink = { &outputMix, nullptr };
 
             // (SL_IID_BUFFERQUEUE is not guaranteed to remain future-proof, so use SL_IID_ANDROIDSIMPLEBUFFERQUEUE)
-            const SLInterfaceID interfaceIDs[] = { *engine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE };
+            const SLInterfaceID interfaceIDs[] = { *slEngine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE };
             const SLboolean flags[] = { SL_BOOLEAN_TRUE };
 
-            check ((*engine.engineInterface)->CreateAudioPlayer (engine.engineInterface, &playerObject, &audioSrc, &audioSink,
-                                                                 1, interfaceIDs, flags));
+            check ((*slEngine.engineInterface)->CreateAudioPlayer (slEngine.engineInterface, &playerObject, &audioSrc, &audioSink,
+                                                                   1, interfaceIDs, flags));
 
             check ((*playerObject)->Realize (playerObject, SL_BOOLEAN_FALSE));
-            check ((*playerObject)->GetInterface (playerObject, *engine.SL_IID_PLAY, &playerPlay));
-            check ((*playerObject)->GetInterface (playerObject, *engine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &playerBufferQueue));
+            check ((*playerObject)->GetInterface (playerObject, *slEngine.SL_IID_PLAY, &playerPlay));
+            check ((*playerObject)->GetInterface (playerObject, *slEngine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &playerBufferQueue));
             check ((*playerBufferQueue)->RegisterCallback (playerBufferQueue, staticCallback, this));
         }
 
@@ -572,7 +572,7 @@ private:
 
         void enqueueBuffer (int16* buffer) noexcept
         {
-            check ((*playerBufferQueue)->Enqueue (playerBufferQueue, buffer, bufferList.getBufferSizeBytes()));
+            check ((*playerBufferQueue)->Enqueue (playerBufferQueue, buffer, static_cast<SLuint32> (bufferList.getBufferSizeBytes())));
             bufferList.bufferSent();
         }
 
@@ -588,7 +588,7 @@ private:
     //==============================================================================
     struct Recorder
     {
-        Recorder (int numChannels, int sampleRate, Engine& engine, const int numBuffers, const int numSamples)
+        Recorder (int numChannels, int recorderSampleRate, Engine& slEngine, const int numBuffers, const int numSamples)
             : recorderObject (nullptr), recorderRecord (nullptr),
               recorderBufferQueue (nullptr), configObject (nullptr),
               bufferList (numChannels, numBuffers, numSamples)
@@ -597,7 +597,7 @@ private:
             {
                 SL_DATAFORMAT_PCM,
                 (SLuint32) numChannels,
-                (SLuint32) (sampleRate * 1000), // (sample rate units are millihertz)
+                (SLuint32) (recorderSampleRate * 1000), // (sample rate units are millihertz)
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 SL_PCMSAMPLEFORMAT_FIXED_16,
                 (numChannels == 1) ? SL_SPEAKER_FRONT_CENTER : (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT),
@@ -611,19 +611,19 @@ private:
                                                                    static_cast<SLuint32> (bufferList.numBuffers) };
             SLDataSink audioSink = { &bufferQueue, &pcmFormat };
 
-            const SLInterfaceID interfaceIDs[] = { *engine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE };
+            const SLInterfaceID interfaceIDs[] = { *slEngine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE };
             const SLboolean flags[] = { SL_BOOLEAN_TRUE };
 
-            if (check ((*engine.engineInterface)->CreateAudioRecorder (engine.engineInterface, &recorderObject, &audioSrc,
-                                                                       &audioSink, 1, interfaceIDs, flags)))
+            if (check ((*slEngine.engineInterface)->CreateAudioRecorder (slEngine.engineInterface, &recorderObject, &audioSrc,
+                                                                         &audioSink, 1, interfaceIDs, flags)))
             {
                 if (check ((*recorderObject)->Realize (recorderObject, SL_BOOLEAN_FALSE)))
                 {
-                    check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_RECORD, &recorderRecord));
-                    check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recorderBufferQueue));
+                    check ((*recorderObject)->GetInterface (recorderObject, *slEngine.SL_IID_RECORD, &recorderRecord));
+                    check ((*recorderObject)->GetInterface (recorderObject, *slEngine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recorderBufferQueue));
                     // not all android versions seem to have a config object
                     SLresult result = (*recorderObject)->GetInterface (recorderObject,
-                                                                       *engine.SL_IID_ANDROIDCONFIGURATION, &configObject);
+                                                                       *slEngine.SL_IID_ANDROIDCONFIGURATION, &configObject);
                     if (result != SL_RESULT_SUCCESS)
                         configObject = nullptr;
 
@@ -707,7 +707,7 @@ private:
 
         void enqueueBuffer (int16* buffer) noexcept
         {
-            check ((*recorderBufferQueue)->Enqueue (recorderBufferQueue, buffer, bufferList.getBufferSizeBytes()));
+            check ((*recorderBufferQueue)->Enqueue (recorderBufferQueue, buffer, static_cast<SLuint32> (bufferList.getBufferSizeBytes())));
             bufferList.bufferSent();
         }
 
@@ -746,9 +746,9 @@ public:
 
     //==============================================================================
     void scanForDevices() override {}
-    StringArray getDeviceNames (bool wantInputNames) const override              { return StringArray (openSLTypeName); }
-    int getDefaultDeviceIndex (bool forInput) const override                     { return 0; }
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const override    { return device != nullptr ? 0 : -1; }
+    StringArray getDeviceNames (bool) const override                             { return StringArray (openSLTypeName); }
+    int getDefaultDeviceIndex (bool) const override                              { return 0; }
+    int getIndexOfDevice (AudioIODevice* device, bool) const override            { return device != nullptr ? 0 : -1; }
     bool hasSeparateInputsAndOutputs() const override                            { return false; }
 
     AudioIODevice* createDevice (const String& outputDeviceName,
