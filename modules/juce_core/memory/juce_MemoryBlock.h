@@ -103,6 +103,11 @@ public:
     template <typename Type>
     char& operator[] (const Type offset) const noexcept             { return data [offset]; }
 
+    /** Returns an iterator for the data. */
+    char* begin() const noexcept                                    { return data; }
+
+    /** Returns an end-iterator for the data. */
+    char* end() const noexcept                                      { return begin() + getSize(); }
 
     //==============================================================================
     /** Returns the block's current allocated size, in bytes. */
