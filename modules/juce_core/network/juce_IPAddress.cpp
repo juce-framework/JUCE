@@ -251,7 +251,7 @@ bool IPAddress::operator!= (const IPAddress& other) const noexcept
     return ! operator== (other);
 }
 
-#if ! JUCE_WINDOWS
+#if (! JUCE_WINDOWS) && (! JUCE_ANDROID)
 static void addAddress (const sockaddr_in* addr_in, Array<IPAddress>& result)
 {
     in_addr_t addr = addr_in->sin_addr.s_addr;

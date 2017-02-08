@@ -238,3 +238,62 @@ URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extra
 {
     return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
 }
+
+//==============================================================================
+static void addAddress (const sockaddr_in* addr_in, Array<IPAddress>& result)
+{
+    in_addr_t addr = addr_in->sin_addr.s_addr;
+
+    if (addr != INADDR_NONE)
+        result.addIfNotAlreadyThere (IPAddress (ntohl (addr)));
+}
+
+static void findIPAddresses (int sock, Array<IPAddress>& result)
+{
+    ifconf cfg;
+    HeapBlock<char> buffer;
+    int bufferSize = 1024;
+
+    do
+    {
+        bufferSize *= 2;
+        buffer.calloc ((size_t) bufferSize);
+
+        cfg.ifc_len = bufferSize;
+        cfg.ifc_buf = buffer;
+
+        if (ioctl (sock, SIOCGIFCONF, &cfg) < 0 && errno != EINVAL)
+            return;
+
+    } while (bufferSize < cfg.ifc_len + 2 * (int) (IFNAMSIZ + sizeof (struct sockaddr_in6)));
+
+   #if JUCE_MAC || JUCE_IOS
+    while (cfg.ifc_len >= (int) (IFNAMSIZ + sizeof (struct sockaddr_in)))
+    {
+        if (cfg.ifc_req->ifr_addr.sa_family == AF_INET) // Skip non-internet addresses
+            addAddress ((const sockaddr_in*) &cfg.ifc_req->ifr_addr, result);
+
+        cfg.ifc_len -= IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
+        cfg.ifc_buf += IFNAMSIZ + cfg.ifc_req->ifr_addr.sa_len;
+    }
+   #else
+    for (size_t i = 0; i < (size_t) cfg.ifc_len / (size_t) sizeof (struct ifreq); ++i)
+    {
+        const ifreq& item = cfg.ifc_req[i];
+
+        if (item.ifr_addr.sa_family == AF_INET)
+            addAddress ((const sockaddr_in*) &item.ifr_addr, result);
+    }
+   #endif
+}
+
+void IPAddress::findAllAddresses (Array<IPAddress>& result, bool /*includeIPv6*/)
+{
+    const int sock = socket (AF_INET, SOCK_DGRAM, 0); // a dummy socket to execute the IO control
+
+    if (sock >= 0)
+    {
+        findIPAddresses (sock, result);
+        ::close (sock);
+    }
+}
