@@ -384,9 +384,7 @@ protected:
                 osxVersionNames.add ("Use Default");
                 versionValues.add (osxVersionDefault);
 
-                int oldestAllowedSDKVersion = project.shouldBuildAUv3() ? minimumAUv3SDKVersion : oldestSDKVersion;
-
-                for (int ver = oldestAllowedSDKVersion; ver <= currentSDKVersion; ++ver)
+                for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
                 {
                     sdkVersionNames.add (getSDKName (ver));
                     osxVersionNames.add (getOSXVersionName (ver));
@@ -870,10 +868,14 @@ public:
                 const String sdk (config.osxSDKVersion.get());
                 const String sdkCompat (config.osxDeploymentTarget.get());
 
+                // The AUv3 target always needs to be at least 10.11
+                int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
+                                                                                       : oldestSDKVersion);
+
                 // if the user doesn't set it, then use the last known version that works well with JUCE
                 String deploymentTarget = "10.11";
 
-                for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
+                for (int ver = oldestAllowedDeploymentTarget; ver <= currentSDKVersion; ++ver)
                 {
                     if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
                     if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
