@@ -24,7 +24,7 @@
 
 #include "../JuceDemoHeader.h"
 
-#if JUCE_QUICKTIME || JUCE_DIRECTSHOW
+#if JUCE_MAC || JUCE_DIRECTSHOW
 
 //==============================================================================
 // so that we can easily have two video windows each with a file browser, wrap this up as a class..
@@ -50,7 +50,7 @@ public:
         fileChooser.setCurrentFile (file, true);
     }
 
-    void paintOverChildren (Graphics& g)
+    void paintOverChildren (Graphics& g) override
     {
         if (isDragOver)
         {
@@ -59,28 +59,28 @@ public:
         }
     }
 
-    void resized()
+    void resized() override
     {
         videoComp.setBoundsWithCorrectAspectRatio (Rectangle<int> (0, 0, getWidth(), getHeight() - 30),
                                                    Justification::centred);
         fileChooser.setBounds (0, getHeight() - 24, getWidth(), 24);
     }
 
-    bool isInterestedInDragSource (const SourceDetails&)  { return true; }
+    bool isInterestedInDragSource (const SourceDetails&) override   { return true; }
 
-    void itemDragEnter (const SourceDetails&)
+    void itemDragEnter (const SourceDetails&) override
     {
         isDragOver = true;
         repaint();
     }
 
-    void itemDragExit (const SourceDetails&)
+    void itemDragExit (const SourceDetails&) override
     {
         isDragOver = false;
         repaint();
     }
 
-    void itemDropped (const SourceDetails& dragSourceDetails)
+    void itemDropped (const SourceDetails& dragSourceDetails) override
     {
         setFile (dragSourceDetails.description.toString());
         isDragOver = false;
@@ -88,8 +88,8 @@ public:
     }
 
 private:
-   #if JUCE_QUICKTIME
-    QuickTimeMovieComponent videoComp;
+   #if JUCE_MAC
+    MovieComponent videoComp;
    #elif JUCE_DIRECTSHOW
     DirectShowComponent videoComp;
    #endif
@@ -100,11 +100,7 @@ private:
     void filenameComponentChanged (FilenameComponent*) override
     {
         // this is called when the user changes the filename in the file chooser box
-       #if JUCE_QUICKTIME
-        if (videoComp.loadMovie (fileChooser.getCurrentFile(), true))
-       #elif JUCE_DIRECTSHOW
         if (videoComp.loadMovie (fileChooser.getCurrentFile()))
-       #endif
         {
             // loaded the file ok, so let's start it playing..
 
@@ -114,8 +110,7 @@ private:
         else
         {
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              "Couldn't load the file!",
-                                              r.getErrorMessage());
+                                              "Couldn't load the file!", String());
         }
     }
 

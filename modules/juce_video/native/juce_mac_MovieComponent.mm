@@ -54,7 +54,11 @@ struct MovieComponent::Pimpl
             player = [[AVPlayer alloc] initWithURL: url];
             player.actionAtItemEnd = AVPlayerActionAtItemEndPause;
             player.masterClock = CMClockGetHostTimeClock();
-            player.automaticallyWaitsToMinimizeStalling = NO;
+
+            if ([player respondsToSelector: @selector (setAutomaticallyWaitsToMinimizeStalling:)])
+                [player performSelector: @selector (setAutomaticallyWaitsToMinimizeStalling:)
+                             withObject: nil];
+
             [player pause];
 
             playerLayer = [[AVPlayerLayer playerLayerWithPlayer: player] retain];
