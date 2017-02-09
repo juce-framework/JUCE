@@ -213,33 +213,6 @@ public class AudioPerformanceTest   extends Activity
     {
         BluetoothManager()
         {
-            ScanFilter.Builder scanFilterBuilder = new ScanFilter.Builder();
-            scanFilterBuilder.setServiceUuid (ParcelUuid.fromString (bluetoothLEMidiServiceUUID));
-
-            ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
-            scanSettingsBuilder.setCallbackType (ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
-                               .setScanMode (ScanSettings.SCAN_MODE_LOW_POWER)
-                               .setScanMode (ScanSettings.MATCH_MODE_STICKY);
-
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-            if (bluetoothAdapter == null)
-            {
-                Log.d ("JUCE", "BluetoothManager error: could not get default Bluetooth adapter");
-                return;
-            }
-
-            BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-
-            if (bluetoothLeScanner == null)
-            {
-                Log.d ("JUCE", "BluetoothManager error: could not get Bluetooth LE scanner");
-                return;
-            }
-
-            bluetoothLeScanner.startScan (Arrays.asList (scanFilterBuilder.build()),
-                                          scanSettingsBuilder.build(),
-                                          this);
         }
 
         public String[] getMidiBluetoothAddresses()
@@ -256,6 +229,44 @@ public class AudioPerformanceTest   extends Activity
         public boolean isBluetoothDevicePaired (String address)
         {
             return getAndroidMidiDeviceManager().isBluetoothDevicePaired (address);
+        }
+
+        public void startStopScan (boolean shouldStart)
+        {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            if (bluetoothAdapter == null)
+            {
+                Log.d ("JUCE", "BluetoothManager error: could not get default Bluetooth adapter");
+                return;
+            }
+
+            BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+
+            if (bluetoothLeScanner == null)
+            {
+                Log.d ("JUCE", "BluetoothManager error: could not get Bluetooth LE scanner");
+                return;
+            }
+
+            if (shouldStart)
+            {
+                ScanFilter.Builder scanFilterBuilder = new ScanFilter.Builder();
+                scanFilterBuilder.setServiceUuid (ParcelUuid.fromString (bluetoothLEMidiServiceUUID));
+
+                ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
+                scanSettingsBuilder.setCallbackType (ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+                                   .setScanMode (ScanSettings.SCAN_MODE_LOW_POWER)
+                                   .setScanMode (ScanSettings.MATCH_MODE_STICKY);
+
+                bluetoothLeScanner.startScan (Arrays.asList (scanFilterBuilder.build()),
+                                              scanSettingsBuilder.build(),
+                                              this);
+            }
+            else
+            {
+                bluetoothLeScanner.stopScan (this);
+            }
         }
 
         public boolean pairBluetoothMidiDevice(String address)
@@ -616,27 +627,42 @@ public class AudioPerformanceTest   extends Activity
             return info.getPorts();
         }
 
-        public String getHumanReadableNameForPort (MidiDeviceInfo.PortInfo port, int portIndexToUseInName)
+        public String getHumanReadableNameForPort (MidiDeviceInfo.PortInfo port, int portIndexToUseInName, boolean addPortNumberToName)
         {
-            String portName = port.getName();
+            if (addPortNumberToName)
+            {
+                String portName = port.getName();
 
-            if (portName.equals (""))
-                portName = ((port.getType() == MidiDeviceInfo.PortInfo.TYPE_OUTPUT) ? "Out " : "In ")
-                              + Integer.toString (portIndexToUseInName);
+                if (portName.equals(""))
+                    portName = ((port.getType() == MidiDeviceInfo.PortInfo.TYPE_OUTPUT) ? "Out " : "In ")
+                            + Integer.toString(portIndexToUseInName);
 
-            return getHumanReadableDeviceName() + " " + portName;
+                return getHumanReadableDeviceName() + " " + portName;
+            }
+
+            return getHumanReadableDeviceName();
         }
 
         public String getHumanReadableNameForPort (int portType, int androidPortID, int portIndexToUseInName)
         {
             MidiDeviceInfo.PortInfo[] ports = info.getPorts();
 
+            int numTotalPorts = 0;
+
+            for (MidiDeviceInfo.PortInfo port : ports)
+            {
+                if (port.getType() == portType)
+                {
+                    numTotalPorts++;
+                }
+            }
+
             for (MidiDeviceInfo.PortInfo port : ports)
             {
                 if (port.getType() == portType)
                 {
                     if (port.getPortNumber() == androidPortID)
-                        return getHumanReadableNameForPort (port, portIndexToUseInName);
+                        return getHumanReadableNameForPort (port, portIndexToUseInName, (numTotalPorts > 1));
                 }
             }
 
@@ -899,6 +925,15 @@ public class AudioPerformanceTest   extends Activity
                 int portIdx = 0;
                 MidiDeviceInfo.PortInfo[] ports = physicalMidiDevice.getPorts();
 
+                int numberOfPorts = 0;
+                for (MidiDeviceInfo.PortInfo port : ports)
+                {
+                    if (port.getType() == portType)
+                    {
+                        numberOfPorts++;
+                    }
+                }
+
                 for (MidiDeviceInfo.PortInfo port : ports)
                 {
                     if (port.getType() == portType)
@@ -910,7 +945,8 @@ public class AudioPerformanceTest   extends Activity
                         listOfReturnedDevices.add (path);
 
                         deviceNames.add (physicalMidiDevice.getHumanReadableNameForPort (port,
-                                                                                         path.portIndexToUseInName));
+                                                                                         path.portIndexToUseInName,
+                                                                                         (numberOfPorts > 1)));
                     }
                 }
             }

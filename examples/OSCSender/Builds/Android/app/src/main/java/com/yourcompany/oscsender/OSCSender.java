@@ -216,6 +216,10 @@ public class OSCSender   extends Activity
             return false;
         }
 
+        public void startStopScan (boolean shouldStart)
+        {
+        }
+
         public boolean pairBluetoothMidiDevice(String address)
         {
             return false;
