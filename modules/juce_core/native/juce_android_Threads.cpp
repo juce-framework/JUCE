@@ -66,6 +66,13 @@ JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority prior)
 
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
 {
+    StringArray lines;
+    File ("/proc/self/status").readLines (lines);
+
+    for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+        if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase ("TracerPid"))
+            return (lines[i].fromFirstOccurrenceOf (":", false, false).trim().getIntValue() > 0);
+
     return false;
 }
 
