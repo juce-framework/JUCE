@@ -2431,7 +2431,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 0440; ";
+        attributes << "{ LastUpgradeCheck = 0820; ";
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())
         {
