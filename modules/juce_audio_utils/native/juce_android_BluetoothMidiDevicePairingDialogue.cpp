@@ -28,7 +28,8 @@
  METHOD (pairBluetoothMidiDevice, "pairBluetoothMidiDevice", "(Ljava/lang/String;)Z") \
  METHOD (unpairBluetoothMidiDevice, "unpairBluetoothMidiDevice", "(Ljava/lang/String;)V") \
  METHOD (getHumanReadableStringForBluetoothAddress, "getHumanReadableStringForBluetoothAddress", "(Ljava/lang/String;)Ljava/lang/String;") \
- METHOD (isBluetoothDevicePaired, "isBluetoothDevicePaired", "(Ljava/lang/String;)Z")
+ METHOD (isBluetoothDevicePaired, "isBluetoothDevicePaired", "(Ljava/lang/String;)Z") \
+ METHOD (startStopScan, "startStopScan", "(Z)V")
 
 DECLARE_JNI_CLASS (AndroidBluetoothManager, JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager");
 #undef JNI_CLASS_MEMBERS
@@ -36,6 +37,15 @@ DECLARE_JNI_CLASS (AndroidBluetoothManager, JUCE_ANDROID_ACTIVITY_CLASSPATH "$Bl
 //==============================================================================
 struct AndroidBluetoothMidiInterface
 {
+    static void startStopScan (bool startScanning)
+    {
+        JNIEnv* env = getEnv();
+        LocalRef<jobject> btManager (android.activity.callObjectMethod (JuceAppActivity.getAndroidBluetoothManager));
+
+        if (btManager.get() != nullptr)
+            env->CallVoidMethod (btManager.get(), AndroidBluetoothManager.startStopScan, (jboolean) (startScanning ? 1 : 0));
+    }
+
     static StringArray getBluetoothMidiDevicesNearby()
     {
         StringArray retval;
@@ -172,7 +182,6 @@ public:
         setRowHeight (40);
         setModel (this);
         setOutlineThickness (1);
-        updateDeviceList();
         startTimer (timerPeriodInMs);
     }
 
@@ -365,6 +374,8 @@ public:
     {
         ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
 
+        AndroidBluetoothMidiInterface::startStopScan (true);
+
         setAlwaysOnTop (true);
         setVisible (true);
         addToDesktop (ComponentPeer::windowHasDropShadow);
@@ -373,6 +384,11 @@ public:
 
         addAndMakeVisible (bluetoothDevicesList);
         enterModalState (true, exitCallback.release(), true);
+    }
+
+    ~BluetoothMidiSelectorOverlay()
+    {
+        AndroidBluetoothMidiInterface::startStopScan (false);
     }
 
     void paint (Graphics& g) override
