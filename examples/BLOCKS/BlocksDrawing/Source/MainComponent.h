@@ -136,7 +136,7 @@ public:
         addAndMakeVisible (connectButton);
        #endif
 
-		setSize (600, 600);
+        setSize (600, 600);
     }
 
     ~MainComponent()
@@ -299,8 +299,8 @@ private:
             BluetoothMidiDevicePairingDialogue::open();
             return;
         }
-	   #else
-		ignoreUnused (b);
+       #else
+        ignoreUnused (b);
        #endif
 
         clearLEDs();
