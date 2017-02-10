@@ -421,17 +421,20 @@ namespace
     {
         checkArgumentCount (args, 2);
 
-        const File target (getFileCheckingForExistence (args[1]));
+        for (auto it = args.begin() + 1; it < args.end(); ++it)
+        {
+            const File target (getFileCheckingForExistence (*it));
 
-        Array<File> files;
+            Array<File> files;
 
-        if (target.isDirectory())
-            files = findAllSourceFiles (target);
-        else
-            files.add (target);
+            if (target.isDirectory())
+                files = findAllSourceFiles (target);
+            else
+                files.add (target);
 
-        for (int i = 0; i < files.size(); ++i)
-            cleanWhitespace (files.getReference(i), options);
+            for (int i = 0; i < files.size(); ++i)
+                cleanWhitespace (files.getReference(i), options);
+        }
     }
 
     static void cleanWhitespace (const StringArray& args, bool replaceTabs)
