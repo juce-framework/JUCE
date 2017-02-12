@@ -423,11 +423,11 @@ public:
             return String();
         }
 
-        void addExtraSearchPaths (Array<RelativePath>& searchPaths) const
+        void addExtraSearchPaths (StringArray& searchPaths) const
         {
             if (type == RTASPlugIn)
             {
-                const RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::projectFolder);
+                const RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::buildTargetFolder);
                 static const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses/Interfaces",
@@ -456,7 +456,7 @@ public:
                                            "xplat/AVX/avx2/avx2sdk/inc" };
 
                 for (int i = 0; i < numElementsInArray (p); ++i)
-                    searchPaths.add (rtasFolder.getChildFile (p[i]));
+                    searchPaths.add (rtasFolder.getChildFile (p[i]).toWindowsStyle());
             }
         }
 
@@ -1242,6 +1242,7 @@ public:
                     }
 
                     StringArray includePaths (getOwner().getHeaderSearchPaths (config));
+                    addExtraSearchPaths (includePaths);
                     includePaths.add ("%(AdditionalIncludeDirectories)");
                     cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                     cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
