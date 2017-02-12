@@ -304,9 +304,17 @@ public:
             if  ((! juceFilter->canAddBus (isInput)) && ((busCount == 0) || (! juceFilter->canRemoveBus (isInput))))
                 return kAudioUnitErr_PropertyNotWritable;
 
+            // we need to already create the underlying elements so that we can change their formats
+            err = MusicDeviceBase::SetBusCount (scope, count);
+
+            if (err != noErr)
+                return err;
+
             // however we do need to update the format tag: we need to do the same thing in SetFormat, for example
             const int requestedNumBus = static_cast<int> (count);
             {
+                (isInput ? currentInputLayout : currentOutputLayout).resize (requestedNumBus);
+
                 int busNr;
 
                 for (busNr = (busCount - 1); busNr != (requestedNumBus - 1); busNr += (requestedNumBus > busCount ? 1 : -1))
@@ -331,10 +339,6 @@ public:
                 err = (busNr == (requestedNumBus - 1) ? noErr : kAudioUnitErr_FormatNotSupported);
             }
 
-            // we need to already create the underlying elements so that we can change their formats
-            if (err == noErr)
-                err = MusicDeviceBase::SetBusCount (scope, count);
-
             // was there an error?
             if (err != noErr)
             {
@@ -347,6 +351,9 @@ public:
                     else
                         juceFilter->removeBus (isInput);
                 }
+
+                (isInput ? currentInputLayout : currentOutputLayout).resize (busCount);
+                MusicDeviceBase::SetBusCount (scope, static_cast<UInt32> (busCount));
 
                 return kAudioUnitErr_FormatNotSupported;
             }

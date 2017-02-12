@@ -126,7 +126,10 @@ public:
                 const var runtimeValues[] = { var(), var (false), var (true) };
 
                 props.add (new ChoicePropertyComponent (getUsingRuntimeLibDLL(), "Runtime Library",
-                                                        StringArray (runtimeNames), Array<var> (runtimeValues, numElementsInArray (runtimeValues))));
+                                                        StringArray (runtimeNames), Array<var> (runtimeValues, numElementsInArray (runtimeValues))),
+                           "If the static runtime is selected then your app/plug-in will not be dependent upon users having Microsoft's redistributable "
+                           "C++ runtime installed. However, if you are linking libraries from different sources you must select the same type of runtime "
+                           "used by the libraries.");
             }
 
             {

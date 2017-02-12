@@ -2754,7 +2754,7 @@
 					56C1AB4D5E9F6E55C4A4D18C,
 					9C76B98AD0B6E256C4C90D77,
 					9CAA70AAF55A5D696C59AA51, ); buildRules = ( ); dependencies = (  ); name = "OpenGLAppExample (App)"; productName = OpenGLAppExample; productReference = 7451C664E0B1FF42F028813E; productType = "com.apple.product-type.application"; };
-		92078120DD024E75D724B8AB = {isa = PBXProject; buildConfigurationList = 46FEBDB3E8E7421830E627F2; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { 9F2051B91F59B036C151A2F9 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5EB8D0E327356FA2D5323013; projectDirPath = ""; projectRoot = ""; targets = (9F2051B91F59B036C151A2F9); };
+		92078120DD024E75D724B8AB = {isa = PBXProject; buildConfigurationList = 46FEBDB3E8E7421830E627F2; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 9F2051B91F59B036C151A2F9 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5EB8D0E327356FA2D5323013; projectDirPath = ""; projectRoot = ""; targets = (9F2051B91F59B036C151A2F9); };
 	};
 	rootObject = 92078120DD024E75D724B8AB;
 }

@@ -121,6 +121,7 @@
 
  #define NOMINMAX
 
+ #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
  #if JUCE_MINGW
@@ -141,6 +142,8 @@
  #include <ctime>
  #include <wininet.h>
  #include <nb30.h>
+ #include <winsock2.h>
+ #include <ws2tcpip.h>
  #include <iphlpapi.h>
  #include <mapi.h>
  #include <float.h>

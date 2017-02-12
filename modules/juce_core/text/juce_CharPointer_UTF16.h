@@ -99,7 +99,7 @@ public:
     /** Moves this pointer along to the next character in the string. */
     CharPointer_UTF16 operator++() noexcept
     {
-        const juce_wchar n = *data++;
+        const juce_wchar n = static_cast<juce_wchar> (*data++);
 
         if (n >= 0xd800 && n <= 0xdfff && ((uint32) (uint16) *data) >= 0xdc00)
             ++data;
@@ -110,7 +110,7 @@ public:
     /** Moves this pointer back to the previous character in the string. */
     CharPointer_UTF16 operator--() noexcept
     {
-        const juce_wchar n = *--data;
+        const juce_wchar n = static_cast<juce_wchar> (*--data);
 
         if (n >= 0xdc00 && n <= 0xdfff)
             --data;

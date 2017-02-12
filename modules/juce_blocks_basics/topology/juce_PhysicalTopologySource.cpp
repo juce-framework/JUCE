@@ -132,7 +132,8 @@ struct PhysicalTopologySource::Internal
 
             listeners.call (&Listener::connectionBeingDeleted, *this);
 
-            midiInput->stop();
+            if (midiInput != nullptr)
+                midiInput->stop();
         }
 
         struct Listener

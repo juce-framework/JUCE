@@ -1636,7 +1636,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         static Identifier getClassName()  { static const Identifier i ("String"); return i; }
 
-        static var fromCharCode (Args a)  { return String::charToString (getInt (a, 0)); }
+        static var fromCharCode (Args a)  { return String::charToString (static_cast<juce_wchar> (getInt (a, 0))); }
         static var substring (Args a)     { return a.thisObject.toString().substring (getInt (a, 0), getInt (a, 1)); }
         static var indexOf (Args a)       { return a.thisObject.toString().indexOf (getString (a, 0)); }
         static var charCodeAt (Args a)    { return (int) a.thisObject.toString() [getInt (a, 0)]; }

@@ -1328,12 +1328,11 @@ String String::replace (StringRef stringToReplace, StringRef stringToInsert, con
 String String::replaceFirstOccurrenceOf (StringRef stringToReplace, StringRef stringToInsert, const bool ignoreCase) const
 {
     const int stringToReplaceLen = stringToReplace.length();
+    const int index = ignoreCase ? indexOfIgnoreCase (stringToReplace)
+                                 : indexOf (stringToReplace);
 
-    int i = 0;
-
-    if ((i = (ignoreCase ? indexOfIgnoreCase (stringToReplace)
-                         : indexOf (stringToReplace))) >= 0)
-        return replaceSection (i, stringToReplaceLen, stringToInsert);
+    if (index >= 0)
+        return replaceSection (index, stringToReplaceLen, stringToInsert);
 
     return *this;
 }
@@ -1884,7 +1883,7 @@ String String::formatted (const String pf, ... )
        #elif JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
         int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
-        if (num >= bufferSize)
+        if (num >= static_cast<int> (bufferSize))
             num = -1;
        #else
         HeapBlock<wchar_t> temp (bufferSize);
@@ -1927,7 +1926,7 @@ int String::getTrailingIntValue() const noexcept
             break;
         }
 
-        n += mult * (*t - '0');
+        n += static_cast<juce_wchar> (mult) * (*t - '0');
         mult *= 10;
     }
 

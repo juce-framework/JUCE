@@ -346,6 +346,11 @@ public:
         owner.addMouseListener (this, true);
     }
 
+    ~ListBoxMouseMoveSelector()
+    {
+        owner.removeMouseListener (this);
+    }
+
     void mouseMove (const MouseEvent& e) override
     {
         const MouseEvent e2 (e.getEventRelativeTo (&owner));

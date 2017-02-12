@@ -401,7 +401,7 @@ private:
 
         mo << "add_library( ${BINARY_NAME}" << newLine;
         mo << newLine;
-        mo << "    SHARED" << newLine;
+        mo << "    " << (getProject().getProjectType().isStaticLibrary() ? "STATIC" : "SHARED") << newLine;
         mo << newLine;
         addCompileUnits (mo, excludeFromBuild);
         mo << ")" << newLine << newLine;
@@ -508,6 +508,10 @@ private:
 
             mo << "            externalNativeBuild {" << newLine;
             mo << "                cmake {"           << newLine;
+
+            if (getProject().getProjectType().isStaticLibrary())
+                mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
+
             mo << "                    arguments \"-DJUCE_BUILD_CONFIGFURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""  << newLine;
             mo << "                    cFlags    \"-O"  << cfg.getGCCOptimisationFlag() << "\"" << newLine;
             mo << "                    cppFlags  \"-O"  << cfg.getGCCOptimisationFlag() << "\"" << newLine;
@@ -561,6 +565,7 @@ private:
 
         mo << "        externalNativeBuild {"                                     << newLine;
         mo << "            cmake {"                                               << newLine;
+
         mo << "                arguments " << cmakeDefs.joinIntoString (", ")     << newLine;
 
         if (cFlags.size() > 0)

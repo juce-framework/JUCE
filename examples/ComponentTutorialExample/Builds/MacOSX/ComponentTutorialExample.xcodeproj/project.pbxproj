@@ -1849,7 +1849,7 @@
 					7065518BA4A719BD600955DB,
 					A0BD0396A9AB3F7FCF37AD62,
 					8F57F6817BE0F4126A95541F, ); buildRules = ( ); dependencies = (  ); name = "ComponentTutorialExample (App)"; productName = ComponentTutorialExample; productReference = 48DBB774ADD58780B75FD130; productType = "com.apple.product-type.application"; };
-		3B89677F666BF40854CDE8D3 = {isa = PBXProject; buildConfigurationList = D2C0D08571281A97A8437C77; attributes = { LastUpgradeCheck = 0440; TargetAttributes = { FDDAB81F5F4DA48E7807E65A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D0953BB62CDDA1D6C60E6893; projectDirPath = ""; projectRoot = ""; targets = (FDDAB81F5F4DA48E7807E65A); };
+		3B89677F666BF40854CDE8D3 = {isa = PBXProject; buildConfigurationList = D2C0D08571281A97A8437C77; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { FDDAB81F5F4DA48E7807E65A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D0953BB62CDDA1D6C60E6893; projectDirPath = ""; projectRoot = ""; targets = (FDDAB81F5F4DA48E7807E65A); };
 	};
 	rootObject = 3B89677F666BF40854CDE8D3;
 }
