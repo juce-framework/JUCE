@@ -427,7 +427,7 @@ public:
         {
             if (type == RTASPlugIn)
             {
-                const RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::buildTargetFolder);
+                const RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::projectFolder);
                 static const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses/Interfaces",
@@ -456,7 +456,7 @@ public:
                                            "xplat/AVX/avx2/avx2sdk/inc" };
 
                 for (int i = 0; i < numElementsInArray (p); ++i)
-                    searchPaths.add (rtasFolder.getChildFile (p[i]).toWindowsStyle());
+                    searchPaths.add (getOwner().rebaseFromProjectFolderToBuildTarget (rtasFolder.getChildFile (p[i])).toWindowsStyle());
             }
         }
 
