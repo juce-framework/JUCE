@@ -243,14 +243,13 @@ struct Viewport::DragToScrollListener   : private MouseListener,
 
     void mouseUp (const MouseEvent&) override
     {
-        if (--numTouches == 0)
+        if (--numTouches <= 0)
         {
             offsetX.endDrag();
             offsetY.endDrag();
             isDragging = false;
+            numTouches = 0;
         }
-
-        jassert (numTouches >= 0);
     }
 
     Viewport& viewport;
