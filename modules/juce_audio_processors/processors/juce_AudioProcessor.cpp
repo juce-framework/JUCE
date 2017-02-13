@@ -1335,7 +1335,7 @@ int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mai
             jassertfalse;
         }
 
-        uniqueFormatId = (uniqueFormatId * 16) + aaxFormatIndex;
+        uniqueFormatId = (uniqueFormatId << 8) | aaxFormatIndex;
     }
 
     return (idForAudioSuite ? 0x6a796161 /* 'jyaa' */ : 0x6a636161 /* 'jcaa' */) + uniqueFormatId;
