@@ -1302,6 +1302,45 @@ AudioProcessor::BusesProperties AudioProcessor::BusesProperties::withOutput (con
     return retval;
 }
 
+//==============================================================================
+int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mainInputLayout,
+                                                      const AudioChannelSet& mainOutputLayout,
+                                                      const bool idForAudioSuite) const
+{
+    int uniqueFormatId = 0;
+    for (int dir = 0; dir < 2; ++dir)
+    {
+        const bool isInput = (dir == 0);
+        const AudioChannelSet& set = (isInput ? mainInputLayout : mainOutputLayout);
+        int aaxFormatIndex = 0;
+
+        if      (set == AudioChannelSet::disabled())           aaxFormatIndex = 0;
+        else if (set == AudioChannelSet::mono())               aaxFormatIndex = 1;
+        else if (set == AudioChannelSet::stereo())             aaxFormatIndex = 2;
+        else if (set == AudioChannelSet::createLCR())          aaxFormatIndex = 3;
+        else if (set == AudioChannelSet::createLCRS())         aaxFormatIndex = 4;
+        else if (set == AudioChannelSet::quadraphonic())       aaxFormatIndex = 5;
+        else if (set == AudioChannelSet::create5point0())      aaxFormatIndex = 6;
+        else if (set == AudioChannelSet::create5point1())      aaxFormatIndex = 7;
+        else if (set == AudioChannelSet::create6point0())      aaxFormatIndex = 8;
+        else if (set == AudioChannelSet::create6point1())      aaxFormatIndex = 9;
+        else if (set == AudioChannelSet::create7point0())      aaxFormatIndex = 10;
+        else if (set == AudioChannelSet::create7point1())      aaxFormatIndex = 11;
+        else if (set == AudioChannelSet::create7point0SDDS())  aaxFormatIndex = 12;
+        else if (set == AudioChannelSet::create7point1SDDS())  aaxFormatIndex = 13;
+        else
+        {
+            // AAX does not support this format and the wrapper should not have
+            // called this method with this layout
+            jassertfalse;
+        }
+
+        uniqueFormatId = (uniqueFormatId * 16) + aaxFormatIndex;
+    }
+
+    return (idForAudioSuite ? 0x6a796161 /* 'jyaa' */ : 0x6a636161 /* 'jcaa' */) + uniqueFormatId;
+}
+
 
 //==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}
