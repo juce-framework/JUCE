@@ -51,7 +51,18 @@ public:
         g.setColour (Colours::black);
         g.setFont (15.0f);
 
-        g.drawText (tree["name"].toString(),
+        String txt = tree["name"].toString();
+        if (tree.getType().isValid() && tree.getType() != Identifier ("Item"))
+            txt += String (txt.isEmpty() ? "" : " ") + "(" + tree.getType() + ")";
+        for (int i = 0; i < tree.getNumProperties(); ++i)
+        {
+            const Identifier prop = tree.getPropertyName (i);
+            if (prop == Identifier ("name"))
+                continue;
+            txt += " " + prop + "=" + tree.getProperty (prop).toString();
+        }
+
+        g.drawText (txt,
                     4, 0, width - 4, height,
                     Justification::centredLeft, true);
     }
@@ -72,6 +83,17 @@ public:
     bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override
     {
         return dragSourceDetails.description == "Drag Demo";
+    }
+
+    bool isInterestedInFileDrag (const StringArray&) override
+    {
+        return true;
+    }
+
+    void filesDropped (const StringArray& files, int insertIndex) override
+    {
+        for (int i = 0; i < files.size(); ++i)
+            tree.addChild (ValueTree::fromXml (*ScopedPointer<XmlElement> (XmlDocument::parse (File (files[i])))), insertIndex + i, &undoManager);
     }
 
     void itemDropped (const DragAndDropTarget::SourceDetails&, int insertIndex) override
@@ -248,7 +270,7 @@ public:
 
     bool keyPressed (const KeyPress& key) override
     {
-        if (key == KeyPress::deleteKey)
+        if (key == KeyPress::deleteKey || key == KeyPress::backspaceKey)
         {
             deleteSelectedItems();
             return true;
