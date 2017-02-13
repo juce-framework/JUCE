@@ -73,7 +73,9 @@ public:
         The image's internal type will be of the NativeImageType class - to specify a
         different type, use the other constructor, which takes an ImageType to use.
 
-        @param format           the number of colour channels in the image
+        @param format           the preferred pixel format. Note that this is only a *hint* which
+                                is passed to the ImageType class - different ImageTypes may not support
+                                all formats, so may substitute e.g. ARGB for RGB.
         @param imageWidth       the desired width of the image, in pixels - this value must be
                                 greater than zero (otherwise a width of 1 will be used)
         @param imageHeight      the desired width of the image, in pixels - this value must be
@@ -86,7 +88,9 @@ public:
 
     /** Creates an image with a specified size and format.
 
-        @param format           the number of colour channels in the image
+        @param format           the preferred pixel format. Note that this is only a *hint* which
+                                is passed to the ImageType class - different ImageTypes may not support
+                                all formats, so may substitute e.g. ARGB for RGB.
         @param imageWidth       the desired width of the image, in pixels - this value must be
                                 greater than zero (otherwise a width of 1 will be used)
         @param imageHeight      the desired width of the image, in pixels - this value must be
@@ -494,7 +498,7 @@ public:
     virtual ~ImageType();
 
     /** Creates a new image of this type, and the specified parameters. */
-    virtual ImagePixelData::Ptr create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const = 0;
+    virtual ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool shouldClearImage) const = 0;
 
     /** Must return a unique number to identify this type. */
     virtual int getTypeID() const = 0;
