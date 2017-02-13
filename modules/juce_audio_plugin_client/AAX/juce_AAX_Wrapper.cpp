@@ -1953,4 +1953,9 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
     return AAX_ERROR_NULL_OBJECT;
 }
 
+//==============================================================================
+#if _MSC_VER || JUCE_MINGW
+extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
+#endif
+
 #endif
