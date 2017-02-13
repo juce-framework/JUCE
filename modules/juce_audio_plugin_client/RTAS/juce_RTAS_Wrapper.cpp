@@ -31,6 +31,10 @@
  // (this is a workaround for a build problem in VC9)
  #define _DO_NOT_DECLARE_INTERLOCKED_INTRINSICS_IN_MEMORY
  #include <intrin.h>
+
+ #ifndef JucePlugin_WinBag_path
+  #error "You need to define the JucePlugin_WinBag_path value!"
+ #endif
 #endif
 
 #include "juce_RTAS_DigiCode_Header.h"

@@ -423,8 +423,9 @@ public:
             return String();
         }
 
-        void addExtraSearchPaths (Array<RelativePath>& searchPaths) const
+        StringArray getExtraSearchPaths() const
         {
+            StringArray searchPaths;
             if (type == RTASPlugIn)
             {
                 const RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::projectFolder);
@@ -456,8 +457,10 @@ public:
                                            "xplat/AVX/avx2/avx2sdk/inc" };
 
                 for (int i = 0; i < numElementsInArray (p); ++i)
-                    searchPaths.add (rtasFolder.getChildFile (p[i]));
+                    searchPaths.add (createRebasedPath (rtasFolder.getChildFile (p[i])));
             }
+
+            return searchPaths;
         }
 
         String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config) const
@@ -1242,7 +1245,9 @@ public:
                     }
 
                     StringArray includePaths (getOwner().getHeaderSearchPaths (config));
+                    includePaths.addArray (getExtraSearchPaths());
                     includePaths.add ("%(AdditionalIncludeDirectories)");
+
                     cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                     cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
 
