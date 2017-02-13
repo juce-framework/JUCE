@@ -1692,10 +1692,10 @@ private:
                     {
                         case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
                         case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps30:       setHostTimeFrameRate (3, 30.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 29.97, position.timeInSeconds); break;
-                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
                         default: break;
                     }
 

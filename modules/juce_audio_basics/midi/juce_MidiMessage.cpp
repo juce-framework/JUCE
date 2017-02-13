@@ -784,7 +784,7 @@ double MidiMessage::getTempoMetaEventTickLength (const short timeFormat) const n
         {
             case 24: framesPerSecond = 24.0;   break;
             case 25: framesPerSecond = 25.0;   break;
-            case 29: framesPerSecond = 29.97;  break;
+            case 29: framesPerSecond = 30.0 * 1000.0 / 1001.0;  break;
             case 30: framesPerSecond = 30.0;   break;
             default: framesPerSecond = 30.0;   break;
         }
