@@ -46,7 +46,6 @@
   license:          ISC
 
   dependencies:     juce_core
-  linuxPackages:    x11
 
  END_JUCE_MODULE_DECLARATION
 
@@ -80,7 +79,11 @@ namespace juce
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
-#include "native/juce_ScopedXLock.h"
+
+#if JUCE_LINUX
+ #include "native/juce_linux_EventLoop.h"
+#endif
+
 
 #if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW && JUCE_WINDOWS
  #include "native/juce_win32_HiddenMessageWindow.h"

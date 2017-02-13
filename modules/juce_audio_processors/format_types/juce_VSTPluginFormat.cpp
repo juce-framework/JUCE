@@ -224,14 +224,11 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface* effec
 //==============================================================================
 #if JUCE_LINUX
 
-extern Display* display;
-extern XContext windowHandleXContext;
-
 namespace
 {
     static bool xErrorTriggered = false;
 
-    static int temporaryErrorHandler (Display*, XErrorEvent*)
+    static int temporaryErrorHandler (::Display*, XErrorEvent*)
     {
         xErrorTriggered = true;
         return 0;
@@ -249,8 +246,13 @@ namespace
         unsigned char* data;
         Atom userType;
 
-        XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
-                            &userType,  &userSize, &userCount, &bytes, &data);
+        {
+            ScopedXDisplay xDisplay;
+            ::Display* display = xDisplay.get();
+
+            XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+                                &userType,  &userSize, &userCount, &bytes, &data);
+        }
 
         XSetErrorHandler (oldErrorHandler);
 
@@ -263,7 +265,12 @@ namespace
         Window* childWindows;
         unsigned int numChildren = 0;
 
-        XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+        {
+            ScopedXDisplay xDisplay;
+            ::Display* display = xDisplay.get();
+
+            XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+        }
 
         if (numChildren > 0)
             return childWindows [0];
@@ -2025,6 +2032,7 @@ public:
        #elif JUCE_LINUX
         pluginWindow = None;
         pluginProc = None;
+        display = XWindowSystem::getInstance()->displayRef();
 
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
@@ -2053,6 +2061,8 @@ public:
         carbonWrapper = nullptr;
         #endif
         cocoaWrapper = nullptr;
+       #elif JUCE_LINUX
+        display = XWindowSystem::getInstance()->displayUnref();
        #endif
 
         activeVSTWindows.removeFirstMatchingValue (this);
@@ -2253,6 +2263,7 @@ private:
     void* originalWndProc;
     int sizeCheckCount;
    #elif JUCE_LINUX
+    ::Display* display;
     Window pluginWindow;
     EventProcPtr pluginProc;
    #endif

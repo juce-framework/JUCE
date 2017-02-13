@@ -22,22 +22,23 @@
   ==============================================================================
 */
 
-extern ::Display* display;
-
 //==============================================================================
 class SystemTrayIconComponent::Pimpl
 {
 public:
     Pimpl (const Image& im, Window windowH)  : image (im)
     {
-        ScopedXLock xlock;
+        ScopedXDisplay xDisplay;
+        ::Display* display = xDisplay.get();
+
+        ScopedXLock xlock (display);
 
         Screen* const screen = XDefaultScreenOfDisplay (display);
         const int screenNumber = XScreenNumberOfScreen (screen);
 
         String screenAtom ("_NET_SYSTEM_TRAY_S");
         screenAtom << screenNumber;
-        Atom selectionAtom = XInternAtom (display, screenAtom.toUTF8(), false);
+        Atom selectionAtom = Atoms::getCreating (display, screenAtom.toUTF8());
 
         XGrabServer (display);
         Window managerWin = XGetSelectionOwner (display, selectionAtom);
@@ -53,7 +54,7 @@ public:
             XEvent ev = { 0 };
             ev.xclient.type = ClientMessage;
             ev.xclient.window = managerWin;
-            ev.xclient.message_type = XInternAtom (display, "_NET_SYSTEM_TRAY_OPCODE", False);
+            ev.xclient.message_type = Atoms::getCreating (display, "_NET_SYSTEM_TRAY_OPCODE");
             ev.xclient.format = 32;
             ev.xclient.data.l[0] = CurrentTime;
             ev.xclient.data.l[1] = 0 /*SYSTEM_TRAY_REQUEST_DOCK*/;
@@ -67,11 +68,11 @@ public:
 
         // For older KDE's ...
         long atomData = 1;
-        Atom trayAtom = XInternAtom (display, "KWM_DOCKWINDOW", false);
+        Atom trayAtom = Atoms::getCreating (display, "KWM_DOCKWINDOW");
         XChangeProperty (display, windowH, trayAtom, trayAtom, 32, PropModeReplace, (unsigned char*) &atomData, 1);
 
         // For more recent KDE's...
-        trayAtom = XInternAtom (display, "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR", false);
+        trayAtom = Atoms::getCreating (display, "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR");
         XChangeProperty (display, windowH, trayAtom, XA_WINDOW, 32, PropModeReplace, (unsigned char*) &windowH, 1);
 
         // A minimum size must be specified for GNOME and Xfce, otherwise the icon is displayed with a width of 1

@@ -282,8 +282,9 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #include "native/juce_win32_FileChooser.cpp"
 
 #elif JUCE_LINUX
- #include "native/juce_linux_Clipboard.cpp"
- #include "native/juce_linux_Windowing.cpp"
+ #include "native/juce_linux_X11.cpp"
+ #include "native/juce_linux_X11_Clipboard.cpp"
+ #include "native/juce_linux_X11_Windowing.cpp"
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID

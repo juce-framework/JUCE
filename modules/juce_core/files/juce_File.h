@@ -810,6 +810,7 @@ public:
             On Windows, this might be "\Documents and Settings\username\Application Data".
             On the Mac, it might be "~/Library". If you're going to store your settings in here,
             always create your own sub-folder to put them in, to avoid making a mess.
+            On GNU/Linux it is "~/.config".
         */
         userApplicationDataDirectory,
 
@@ -818,6 +819,8 @@ public:
 
             On the Mac it'll be "/Library", on Windows, it could be something like
             "\Documents and Settings\All Users\Application Data".
+
+            On GNU/Linux it is "/opt".
 
             Depending on the setup, this folder may be read-only.
         */

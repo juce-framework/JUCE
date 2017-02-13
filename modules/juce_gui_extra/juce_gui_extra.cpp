@@ -124,9 +124,9 @@ namespace juce
 //==============================================================================
 #elif JUCE_LINUX
  #if JUCE_WEB_BROWSER
-  #include "native/juce_linux_WebBrowserComponent.cpp"
+  #include "native/juce_linux_X11_WebBrowserComponent.cpp"
  #endif
- #include "native/juce_linux_SystemTrayIcon.cpp"
+ #include "native/juce_linux_X11_SystemTrayIcon.cpp"
 
 //==============================================================================
 #elif JUCE_ANDROID
