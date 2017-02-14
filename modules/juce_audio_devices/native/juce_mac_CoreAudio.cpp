@@ -1560,16 +1560,32 @@ private:
     {
         const ScopedLock sl (callbackLock);
 
-        currentSampleRate = device->getCurrentSampleRate();
-        bool sampleRateChanges = false;
+        auto newSampleRate = device->getCurrentSampleRate();
+        auto commonRates = getAvailableSampleRates();
+        if (! commonRates.contains (newSampleRate))
+        {
+            commonRates.sort();
+            if (newSampleRate < commonRates.getFirst() || newSampleRate > commonRates.getLast())
+                newSampleRate = jlimit (commonRates.getFirst(), commonRates.getLast(), newSampleRate);
+            else
+                for (auto it = commonRates.begin(); it < commonRates.end() - 1; ++it)
+                    if (it[0] < newSampleRate && it[1] > newSampleRate)
+                    {
+                        newSampleRate = newSampleRate - it[0] < it[1] - newSampleRate ? it[0] : it[1];
+                        break;
+                    }
+        }
+        currentSampleRate = newSampleRate;
+
+        bool anySampleRateChanges = false;
         for (int i = 0; i < devices.size(); ++i)
             if (devices.getUnchecked(i)->getCurrentSampleRate() != currentSampleRate)
             {
                 devices.getUnchecked(i)->setCurrentSampleRate (currentSampleRate);
-                sampleRateChanges = true;
+                anySampleRateChanges = true;
             }
 
-        if (sampleRateChanges)
+        if (anySampleRateChanges)
             owner.audioDeviceListChanged();
 
         if (callback != nullptr)
