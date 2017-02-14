@@ -106,7 +106,12 @@
 #elif JUCE_ANDROID
  #include <android/native_window.h>
  #include <android/native_window_jni.h>
- #include <GLES2/gl2.h>
+ #if JUCE_ANDROID_GL_ES_VERSION_3_0
+  #define JUCE_OPENGL3 1
+  #include <GLES3/gl3.h>
+ #else
+  #include <GLES2/gl2.h>
+ #endif
  #include <EGL/egl.h>
 #endif
 

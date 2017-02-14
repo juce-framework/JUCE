@@ -1038,6 +1038,9 @@ private:
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
 
+        if (supportsGLv3())
+            defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
+
         return defines;
     }
 
@@ -1072,7 +1075,7 @@ private:
 
         libraries.add ("log");
         libraries.add ("android");
-        libraries.add (androidMinimumSDK.get().getIntValue() >= 18 ? "GLESv3" : "GLESv2");
+        libraries.add (supportsGLv3() ? "GLESv3" : "GLESv2");
         libraries.add ("EGL");
 
         return libraries;
@@ -1262,6 +1265,11 @@ private:
             escapedArray.add ("\"" + element.replace ("\\", "\\\\").replace ("\"", "\\\"") + "\"");
 
         return escapedArray.joinIntoString (", ");
+    }
+
+    bool supportsGLv3() const
+    {
+        return (androidMinimumSDK.get().getIntValue() >= 18);
     }
 
     //==============================================================================
