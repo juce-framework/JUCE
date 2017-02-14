@@ -349,6 +349,7 @@ private:
             mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
         }
 
+        const StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
         if (getNumConfigurations() > 0)
         {
             bool first = true;
@@ -376,7 +377,20 @@ private:
                     mo << "    add_definitions(" << getEscapedPreprocessorDefs (cfgDefines).joinIntoString (" ") << ")" << newLine;
 
                 writeCmakePathLines (mo, "    ", "include_directories( AFTER", cfgHeaderPaths);
-                writeCmakePathLines (mo, "    ", "link_directories(", cfgLibraryPaths);
+
+                if (userLibraries.size() > 0)
+                {
+                    for (auto& lib : userLibraries)
+                    {
+                        String findLibraryCmd;
+                        findLibraryCmd << "find_library(" << lib.toLowerCase().replaceCharacter (L' ', L'_')
+                            << " \"" << lib << "\" PATHS";
+
+                        writeCmakePathLines (mo, "    ", findLibraryCmd, cfgLibraryPaths, "    NO_CMAKE_FIND_ROOT_PATH)");
+                    }
+
+                    mo << newLine;
+                }
 
                 first = false;
             }
@@ -414,8 +428,7 @@ private:
             mo << newLine;
         }
 
-        const StringArray& libraries = getProjectLibraries();
-
+        StringArray libraries (getAndroidLibraries());
         if (libraries.size() > 0)
         {
             for (auto& lib : libraries)
@@ -424,6 +437,7 @@ private:
             mo << newLine;
         }
 
+        libraries.addArray (userLibraries);
         mo << "target_link_libraries( ${BINARY_NAME}";
         if (libraries.size() > 0)
         {
@@ -1081,14 +1095,6 @@ private:
         return libraries;
     }
 
-    StringArray getProjectLibraries() const
-    {
-        StringArray libraries (getAndroidLibraries());
-        libraries.addArray (StringArray::fromLines (getExternalLibrariesString()));
-
-        return libraries;
-    }
-
     //==============================================================================
     StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
     {
@@ -1108,7 +1114,8 @@ private:
         return relative.toUnixStyle();
     }
 
-    void writeCmakePathLines (MemoryOutputStream& mo, const String& prefix, const String& firstLine, const StringArray& paths) const
+    void writeCmakePathLines (MemoryOutputStream& mo, const String& prefix, const String& firstLine, const StringArray& paths,
+                              const String& suffix = ")") const
     {
         if (paths.size() > 0)
         {
@@ -1117,7 +1124,7 @@ private:
             for (auto& path : paths)
                 mo << prefix << "    \"" << escapeDirectoryForCmake (path) << "\"" << newLine;
 
-            mo << prefix << ")" << newLine << newLine;
+            mo << prefix << suffix << newLine << newLine;
         }
     }
 
