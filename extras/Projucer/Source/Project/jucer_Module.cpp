@@ -94,12 +94,14 @@ File ModuleDescription::getHeader() const
 {
     const char* extensions[] = { ".h", ".hpp", ".hxx" };
 
-    for (int i = 0; i < numElementsInArray (extensions); ++i)
-    {
-        File header (moduleFolder.getChildFile (moduleFolder.getFileName() + extensions[i]));
+    if (moduleFolder != File()) {
+        for (int i = 0; i < numElementsInArray (extensions); ++i)
+        {
+            File header (moduleFolder.getChildFile (moduleFolder.getFileName() + extensions[i]));
 
-        if (header.existsAsFile())
-            return header;
+            if (header.existsAsFile())
+                return header;
+        }
     }
 
     return File();
