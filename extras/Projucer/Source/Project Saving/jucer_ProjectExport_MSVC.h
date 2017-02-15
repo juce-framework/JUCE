@@ -499,6 +499,20 @@ public:
             return libraries.joinIntoString (";");
         }
 
+        String getModuleDefinitions () const
+        {
+            String moduleDefintions = getOwner().msvcModuleDefinitionsFile;
+
+            if (type == RTASPlugIn)
+            {
+                RelativePath modulePath ( getOwner().rebaseFromProjectFolderToBuildTarget (RelativePath (getOwner().getPathForModuleString ("juce_audio_plugin_client"), RelativePath::projectFolder).getChildFile ("juce_audio_plugin_client").getChildFile ("RTAS")));
+
+                moduleDefintions += modulePath.getChildFile ("juce_RTAS_WinExports.def").toWindowsStyle();
+            }
+
+            return moduleDefintions;
+        }
+
         String getDelayLoadedDLLs() const
         {
             String delayLoadedDLLs = getOwner().msvcDelayLoadedDLLs;
@@ -1320,9 +1334,10 @@ public:
                     if (delayLoadedDLLs.isNotEmpty())
                         link->createNewChildElement ("DelayLoadDLLs")->addTextElement (delayLoadedDLLs);
 
-                    if (config.config [Ids::msvcModuleDefinitionFile].toString().isNotEmpty())
-                        link->createNewChildElement ("ModuleDefinitionFile")
-                            ->addTextElement (config.config [Ids::msvcModuleDefinitionFile].toString());
+                    const String moduleDefinitions (getModuleDefinitions());
+                    if (moduleDefinitions.isNotEmpty())
+                        link->createNewChildElement ("ModuleDefinitionFile")->addTextElement (moduleDefinitions);
+
                 }
 
                 {
