@@ -92,14 +92,17 @@ ModuleDescription::ModuleDescription (const File& folder)
 
 File ModuleDescription::getHeader() const
 {
-    const char* extensions[] = { ".h", ".hpp", ".hxx" };
-
-    for (int i = 0; i < numElementsInArray (extensions); ++i)
+    if (moduleFolder != File())
     {
-        File header (moduleFolder.getChildFile (moduleFolder.getFileName() + extensions[i]));
+        const char* extensions[] = { ".h", ".hpp", ".hxx" };
 
-        if (header.existsAsFile())
-            return header;
+        for (int i = 0; i < numElementsInArray (extensions); ++i)
+        {
+            File header (moduleFolder.getChildFile (moduleFolder.getFileName() + extensions[i]));
+
+            if (header.existsAsFile())
+                return header;
+        }
     }
 
     return File();
