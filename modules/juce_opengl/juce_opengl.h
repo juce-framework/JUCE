@@ -33,7 +33,7 @@
 
   ID:               juce_opengl
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE OpenGL classes
   description:      Classes for rendering OpenGL in a JUCE window.
   website:          http://www.juce.com/juce
@@ -50,8 +50,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_OPENGL_H_INCLUDED
-#define JUCE_OPENGL_H_INCLUDED
+#pragma once
 
 #include <juce_gui_extra/juce_gui_extra.h>
 
@@ -107,7 +106,12 @@
 #elif JUCE_ANDROID
  #include <android/native_window.h>
  #include <android/native_window_jni.h>
- #include <GLES2/gl2.h>
+ #if JUCE_ANDROID_GL_ES_VERSION_3_0
+  #define JUCE_OPENGL3 1
+  #include <GLES3/gl3.h>
+ #else
+  #include <GLES2/gl2.h>
+ #endif
  #include <EGL/egl.h>
 #endif
 
@@ -182,5 +186,3 @@ class OpenGLShaderProgram;
 #include "utils/juce_OpenGLAppComponent.h"
 
 }
-
-#endif   // JUCE_OPENGL_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MENUBARMODEL_H_INCLUDED
-#define JUCE_MENUBARMODEL_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -188,6 +187,3 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the MenuBarModel::Listener class directly. */
 typedef MenuBarModel::Listener MenuBarModelListener;
-
-
-#endif   // JUCE_MENUBARMODEL_H_INCLUDED

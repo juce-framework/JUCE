@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIDATACONCATENATOR_H_INCLUDED
-#define JUCE_MIDIDATACONCATENATOR_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -196,5 +195,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MidiDataConcatenator)
 };
-
-#endif   // JUCE_MIDIDATACONCATENATOR_H_INCLUDED

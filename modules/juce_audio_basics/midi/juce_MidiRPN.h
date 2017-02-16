@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIRPNDETECTOR_H_INCLUDED
-#define JUCE_MIDIRPNDETECTOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -153,6 +152,3 @@ public:
                                 bool isNRPN = false,
                                 bool use14BitValue = true);
 };
-
-
-#endif // JUCE_MIDIRPNDETECTOR_H_INCLUDED

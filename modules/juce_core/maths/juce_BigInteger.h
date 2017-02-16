@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BIGINTEGER_H_INCLUDED
-#define JUCE_BIGINTEGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -69,10 +68,11 @@ public:
     /** Creates a copy of another BigInteger. */
     BigInteger (const BigInteger&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     BigInteger (BigInteger&&) noexcept;
+
+    /** Move assignment operator */
     BigInteger& operator= (BigInteger&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~BigInteger();
@@ -350,6 +350,3 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
  // For backwards compatibility, BitArray is defined as an alias for BigInteger.
  typedef BigInteger BitArray;
 #endif
-
-
-#endif   // JUCE_BIGINTEGER_H_INCLUDED

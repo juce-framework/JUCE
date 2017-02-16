@@ -25,8 +25,7 @@
 // NB: this must come first, *before* the header-guard.
 #ifdef JUCE_VSTINTERFACE_H_INCLUDED
 
-#ifndef JUCE_VSTMIDIEVENTLIST_H_INCLUDED
-#define JUCE_VSTMIDIEVENTLIST_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /** Holds a set of VSTMidiEvent objects and makes it easy to add
@@ -184,5 +183,4 @@ private:
     }
 };
 
-#endif   // JUCE_VSTMIDIEVENTLIST_H_INCLUDED
-#endif   // JUCE_VSTMIDIEVENTLIST_H_INCLUDED
+#endif // JUCE_VSTINTERFACE_H_INCLUDED

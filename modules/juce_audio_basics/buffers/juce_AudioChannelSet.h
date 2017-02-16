@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOCHANNELSET_H_INCLUDED
-#define JUCE_AUDIOCHANNELSET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -369,7 +368,3 @@ private:
 
     explicit AudioChannelSet (uint32);
 };
-
-
-
-#endif   // JUCE_AUDIOCHANNELSET_H_INCLUDED

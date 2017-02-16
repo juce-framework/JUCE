@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VALUETREE_H_INCLUDED
-#define JUCE_VALUETREE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -92,9 +91,8 @@ public:
     /** Makes this object reference another node. */
     ValueTree& operator= (const ValueTree&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     ValueTree (ValueTree&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~ValueTree();
@@ -576,6 +574,3 @@ private:
 
     explicit ValueTree (SharedObject*) noexcept;
 };
-
-
-#endif   // JUCE_VALUETREE_H_INCLUDED

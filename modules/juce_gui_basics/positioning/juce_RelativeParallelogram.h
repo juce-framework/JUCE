@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RELATIVEPARALLELOGRAM_H_INCLUDED
-#define JUCE_RELATIVEPARALLELOGRAM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -60,6 +59,3 @@ public:
     //==============================================================================
     RelativePoint topLeft, topRight, bottomLeft;
 };
-
-
-#endif   // JUCE_RELATIVEPARALLELOGRAM_H_INCLUDED

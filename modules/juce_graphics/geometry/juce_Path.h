@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PATH_H_INCLUDED
-#define JUCE_PATH_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -75,10 +74,11 @@ public:
     /** Copies this path from another one. */
     Path& operator= (const Path&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     Path (Path&&) noexcept;
+
+    /** Move assignment operator */
     Path& operator= (Path&&) noexcept;
-   #endif
 
     bool operator== (const Path&) const noexcept;
     bool operator!= (const Path&) const noexcept;
@@ -827,5 +827,3 @@ private:
 
     JUCE_LEAK_DETECTOR (Path)
 };
-
-#endif   // JUCE_PATH_H_INCLUDED

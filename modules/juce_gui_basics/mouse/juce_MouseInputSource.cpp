@@ -345,6 +345,8 @@ public:
         // scrollable components.
         if (lastNonInertialWheelTarget == nullptr || ! wheel.isInertial)
             lastNonInertialWheelTarget = getTargetForGesture (peer, positionWithinPeer, time, screenPos);
+        else
+            screenPos = peer.localToGlobal (positionWithinPeer);
 
         if (Component* target = lastNonInertialWheelTarget)
             sendMouseWheel (*target, screenPos, time, wheel);

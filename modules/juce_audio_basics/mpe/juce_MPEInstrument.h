@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MPEINSTRUMENT_H_INCLUDED
-#define JUCE_MPEINSTRUMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -383,6 +382,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPEInstrument)
 };
-
-
-#endif // JUCE_MPE_H_INCLUDED

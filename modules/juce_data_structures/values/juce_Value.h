@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VALUE_H_INCLUDED
-#define JUCE_VALUE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -63,10 +62,8 @@ public:
     /** Creates a Value that is set to the specified value. */
     explicit Value (const var& initialValue);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     Value (Value&&) noexcept;
-    Value& operator= (Value&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~Value();
@@ -100,6 +97,9 @@ public:
         change asynchronously.
     */
     Value& operator= (const var& newValue);
+
+    /** Move assignment operator */
+    Value& operator= (Value&&) noexcept;
 
     /** Makes this object refer to the same underlying ValueSource as another one.
 
@@ -237,5 +237,3 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream&, const Value&);
 
 /** This typedef is just for compatibility with old code - newer code should use the Value::Listener class directly. */
 typedef Value::Listener ValueListener;
-
-#endif   // JUCE_VALUE_H_INCLUDED

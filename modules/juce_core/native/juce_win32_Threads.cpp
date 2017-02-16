@@ -41,7 +41,8 @@ void* getUser32Function (const char* functionName)
 CriticalSection::CriticalSection() noexcept
 {
     // (just to check the MS haven't changed this structure and broken things...)
-    static_jassert (sizeof (CRITICAL_SECTION) <= sizeof (lock));
+    static_assert (sizeof (CRITICAL_SECTION) <= sizeof (lock),
+                   "win32 lock array too small to hold CRITICAL_SECTION: please report this JUCE bug!");
 
     InitializeCriticalSection ((CRITICAL_SECTION*) lock);
 }

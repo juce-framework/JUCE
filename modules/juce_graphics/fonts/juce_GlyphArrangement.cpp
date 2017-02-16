@@ -40,7 +40,6 @@ PositionedGlyph::PositionedGlyph (const PositionedGlyph& other)
 {
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 PositionedGlyph::PositionedGlyph (PositionedGlyph&& other) noexcept
     : font (static_cast<Font&&> (other.font)),
       character (other.character), glyph (other.glyph),
@@ -59,7 +58,6 @@ PositionedGlyph& PositionedGlyph::operator= (PositionedGlyph&& other) noexcept
     whitespace = other.whitespace;
     return *this;
 }
-#endif
 
 PositionedGlyph::~PositionedGlyph() {}
 

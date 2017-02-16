@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RECTANGLELIST_H_INCLUDED
-#define JUCE_RECTANGLELIST_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -64,18 +63,18 @@ public:
         return *this;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     RectangleList (RectangleList&& other) noexcept
         : rects (static_cast<Array<RectangleType>&&> (other.rects))
     {
     }
 
+    /** Move assignment operator */
     RectangleList& operator= (RectangleList&& other) noexcept
     {
         rects = static_cast<Array<RectangleType>&&> (other.rects);
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns true if the region is empty. */
@@ -657,6 +656,3 @@ private:
     //==============================================================================
     Array<RectangleType> rects;
 };
-
-
-#endif   // JUCE_RECTANGLELIST_H_INCLUDED

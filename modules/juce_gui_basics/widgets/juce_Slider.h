@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SLIDER_H_INCLUDED
-#define JUCE_SLIDER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -930,5 +929,3 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
-
-#endif   // JUCE_SLIDER_H_INCLUDED

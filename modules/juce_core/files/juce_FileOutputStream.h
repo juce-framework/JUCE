@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILEOUTPUTSTREAM_H_INCLUDED
-#define JUCE_FILEOUTPUTSTREAM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -118,5 +117,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileOutputStream)
 };
-
-#endif   // JUCE_FILEOUTPUTSTREAM_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTINPUTTARGET_H_INCLUDED
-#define JUCE_TEXTINPUTTARGET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -90,6 +89,3 @@ public:
     */
     virtual VirtualKeyboardType getKeyboardType()       { return textKeyboard; }
 };
-
-
-#endif   // JUCE_TEXTINPUTTARGET_H_INCLUDED

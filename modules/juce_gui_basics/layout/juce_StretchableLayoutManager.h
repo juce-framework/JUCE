@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STRETCHABLELAYOUTMANAGER_H_INCLUDED
-#define JUCE_STRETCHABLELAYOUTMANAGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -255,6 +254,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutManager)
 };
-
-
-#endif   // JUCE_STRETCHABLELAYOUTMANAGER_H_INCLUDED

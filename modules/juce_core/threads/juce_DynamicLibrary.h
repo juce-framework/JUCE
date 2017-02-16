@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DYNAMICLIBRARY_H_INCLUDED
-#define JUCE_DYNAMICLIBRARY_H_INCLUDED
+#pragma once
 
 /**
     Handles the opening and closing of DLLs.
@@ -82,6 +81,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DynamicLibrary)
 };
-
-
-#endif   // JUCE_DYNAMICLIBRARY_H_INCLUDED

@@ -34,22 +34,21 @@
 
   ID:               juce_video
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE video playback and capture classes
   description:      Classes for playing video and capturing camera input.
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
   dependencies:     juce_data_structures juce_cryptography
-  OSXFrameworks:    QTKit QuickTime
+  OSXFrameworks:    AVFoundation CoreMedia
 
  END_JUCE_MODULE_DECLARATION
 
 *******************************************************************************/
 
 
-#ifndef JUCE_VIDEO_H_INCLUDED
-#define JUCE_VIDEO_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -99,10 +98,14 @@
 namespace juce
 {
 
-#include "playback/juce_DirectShowComponent.h"
-#include "playback/juce_QuickTimeMovieComponent.h"
+#if JUCE_DIRECTSHOW || DOXYGEN
+ #include "playback/juce_DirectShowComponent.h"
+#endif
+
+#if JUCE_MAC || DOXYGEN
+ #include "playback/juce_MovieComponent.h"
+#endif
+
 #include "capture/juce_CameraDevice.h"
 
 }
-
-#endif   // JUCE_VIDEO_H_INCLUDED

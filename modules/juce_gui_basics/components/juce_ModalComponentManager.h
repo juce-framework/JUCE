@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MODALCOMPONENTMANAGER_H_INCLUDED
-#define JUCE_MODALCOMPONENTMANAGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -371,6 +370,3 @@ private:
     ~ModalCallbackFunction();
     JUCE_DECLARE_NON_COPYABLE (ModalCallbackFunction)
 };
-
-
-#endif   // JUCE_MODALCOMPONENTMANAGER_H_INCLUDED

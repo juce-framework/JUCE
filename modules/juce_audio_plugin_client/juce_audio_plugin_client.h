@@ -33,7 +33,7 @@
 
   ID:               juce_audio_plugin_client
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE audio plugin wrapper classes
   description:      Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
   website:          http://www.juce.com/juce
@@ -46,8 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED
-#define JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED
+#pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_basics/juce_audio_basics.h>
@@ -80,6 +79,5 @@
 namespace juce
 {
  #include "utility/juce_PluginHostType.h"
+ #include "VST/juce_VSTCallbackHandler.h"
 }
-
-#endif   // JUCE_AUDIO_PLUGIN_CLIENT_H_INCLUDED

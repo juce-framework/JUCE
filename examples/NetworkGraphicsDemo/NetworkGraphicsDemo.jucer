@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="gWI5Ir" name="JUCE Network Graphics Demo" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              includeBinaryInAppConfig="1" jucerVersion="4.3.0">
+              includeBinaryInAppConfig="1" jucerVersion="4.3.1">
   <MAINGROUP id="OT9rJ2" name="JUCE Network Graphics Demo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>
@@ -114,14 +114,14 @@
     </LINUX_MAKE>
     <ANDROIDSTUDIO androidActivityClass="com.juce.networkgraphicsdemo.JUCENetworkGraphicsDemo"
                    androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
-                   targetFolder="Builds/AndroidStudio" androidSDKPath="" androidNDKPath=""
+                   targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
                    bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="clang"
                    gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
-        <CONFIGURATION name="Release" androidArchitectures="armeabi armeabi-v7a x86"
-                       isDebug="0" optimisation="3" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
+                       targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>

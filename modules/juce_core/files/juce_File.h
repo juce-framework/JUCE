@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILE_H_INCLUDED
-#define JUCE_FILE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -90,10 +89,11 @@ public:
     /** Copies from another file object. */
     File& operator= (const File& otherFile);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     File (File&&) noexcept;
+
+    /** Move assignment operator */
     File& operator= (File&&) noexcept;
-   #endif
 
     //==============================================================================
    #if JUCE_ALLOW_STATIC_NULL_VARIABLES
@@ -810,6 +810,7 @@ public:
             On Windows, this might be "\Documents and Settings\username\Application Data".
             On the Mac, it might be "~/Library". If you're going to store your settings in here,
             always create your own sub-folder to put them in, to avoid making a mess.
+            On GNU/Linux it is "~/.config".
         */
         userApplicationDataDirectory,
 
@@ -818,6 +819,8 @@ public:
 
             On the Mac it'll be "/Library", on Windows, it could be something like
             "\Documents and Settings\All Users\Application Data".
+
+            On GNU/Linux it is "/opt".
 
             Depending on the setup, this folder may be read-only.
         */
@@ -1029,5 +1032,3 @@ private:
     bool setFileReadOnlyInternal (bool) const;
     bool setFileExecutableInternal (bool) const;
 };
-
-#endif   // JUCE_FILE_H_INCLUDED

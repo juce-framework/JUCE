@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="4.3.0" version="4.3.0" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="4.3.1" version="4.3.1" bundleIdentifier="com.juce.theprojucer"
               defines="" includeBinaryInAppConfig="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
@@ -404,12 +404,8 @@
             file="Source/Project/jucer_TreeItemTypes.h"/>
     </GROUP>
     <GROUP id="{28174A5F-D7AD-7240-6104-135D5D2DDB3C}" name="Project Saving">
-      <FILE id="rJVyvQ" name="jucer_ProjectExport_AndroidAnt.h" compile="0"
-            resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidAnt.h"/>
-      <FILE id="nB4AaL" name="jucer_ProjectExport_AndroidBase.h" compile="0"
-            resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidBase.h"/>
-      <FILE id="eDGR9w" name="jucer_ProjectExport_AndroidStudio.h" compile="0"
-            resource="0" file="Source/Project Saving/jucer_ProjectExport_AndroidStudio.h"/>
+      <FILE id="eDGR9w" name="jucer_ProjectExport_Android.h" compile="0"
+            resource="0" file="Source/Project Saving/jucer_ProjectExport_Android.h"/>
       <FILE id="lYuOMq" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
             resource="0" file="Source/Project Saving/jucer_ProjectExport_CodeBlocks.h"/>
       <FILE id="lv4d6B" name="jucer_ProjectExport_Make.h" compile="0" resource="0"

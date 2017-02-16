@@ -32,7 +32,7 @@ void MessageManager::doPlatformSpecificInitialisation() {}
 void MessageManager::doPlatformSpecificShutdown() {}
 
 //==============================================================================
-bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
+bool MessageManager::dispatchNextMessageOnSystemQueue (const bool)
 {
     Logger::outputDebugString ("*** Modal loops are not possible in Android!! Exiting...");
     exit (1);
@@ -48,7 +48,7 @@ bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* cons
     return true;
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, deliverMessage, void, (JNIEnv* env, jobject activity, jlong value))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, deliverMessage, void, (JNIEnv* env, jobject, jlong value))
 {
     setEnv (env);
 

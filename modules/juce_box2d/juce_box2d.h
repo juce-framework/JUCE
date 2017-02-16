@@ -33,7 +33,7 @@
 
   ID:               juce_box2d
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE wrapper for the Box2D physics engine
   description:      The Box2D physics engine and some utility classes.
   website:          http://www.juce.com/juce
@@ -46,8 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_BOX2D_H_INCLUDED
-#define JUCE_BOX2D_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_graphics/juce_graphics.h>
@@ -60,5 +59,3 @@ namespace juce
   #include "utils/juce_Box2DRenderer.h"
 }
 #endif // DOXYGEN
-
-#endif   // JUCE_BOX2D_H_INCLUDED

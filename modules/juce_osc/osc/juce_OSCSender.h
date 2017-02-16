@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCSENDER_H_INCLUDED
-#define JUCE_OSCSENDER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -101,7 +100,7 @@ public:
     bool sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
                           const OSCBundle& bundle);
 
-   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
     /** Creates a new OSC message with the specified address pattern and list
         of arguments, and sends it to the target.
 
@@ -138,7 +137,7 @@ private:
 
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
  template <typename... Args>
  bool OSCSender::send (const OSCAddressPattern& address, Args&&... args)
  {
@@ -151,6 +150,4 @@ private:
  {
      return sendToIPAddress (targetIPAddress, targetPortNumber, OSCMessage (address, std::forward<Args> (args)...));
  }
-#endif // JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-
-#endif // JUCE_OSCSENDER_H_INCLUDED
+#endif // JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES

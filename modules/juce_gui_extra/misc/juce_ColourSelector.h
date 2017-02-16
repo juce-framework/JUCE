@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COLOURSELECTOR_H_INCLUDED
-#define JUCE_COLOURSELECTOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -166,6 +165,3 @@ private:
     ColourSelector (bool);
    #endif
 };
-
-
-#endif   // JUCE_COLOURSELECTOR_H_INCLUDED

@@ -32,15 +32,15 @@ String SystemStats::getJUCEVersion()
 {
     // Some basic tests, to keep an eye on things and make sure these types work ok
     // on all platforms. Let me know if any of these assertions fail on your system!
-    static_jassert (sizeof (pointer_sized_int) == sizeof (void*));
-    static_jassert (sizeof (int8) == 1);
-    static_jassert (sizeof (uint8) == 1);
-    static_jassert (sizeof (int16) == 2);
-    static_jassert (sizeof (uint16) == 2);
-    static_jassert (sizeof (int32) == 4);
-    static_jassert (sizeof (uint32) == 4);
-    static_jassert (sizeof (int64) == 8);
-    static_jassert (sizeof (uint64) == 8);
+    static_assert (sizeof (pointer_sized_int) == sizeof (void*), "Basic sanity test failed: please report!");
+    static_assert (sizeof (int8) == 1,                           "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint8) == 1,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (int16) == 2,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint16) == 2,                         "Basic sanity test failed: please report!");
+    static_assert (sizeof (int32) == 4,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint32) == 4,                         "Basic sanity test failed: please report!");
+    static_assert (sizeof (int64) == 8,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint64) == 8,                         "Basic sanity test failed: please report!");
 
     return "JUCE v" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
                 "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)

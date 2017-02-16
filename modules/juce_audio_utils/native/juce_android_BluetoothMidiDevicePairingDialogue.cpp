@@ -28,7 +28,8 @@
  METHOD (pairBluetoothMidiDevice, "pairBluetoothMidiDevice", "(Ljava/lang/String;)Z") \
  METHOD (unpairBluetoothMidiDevice, "unpairBluetoothMidiDevice", "(Ljava/lang/String;)V") \
  METHOD (getHumanReadableStringForBluetoothAddress, "getHumanReadableStringForBluetoothAddress", "(Ljava/lang/String;)Ljava/lang/String;") \
- METHOD (isBluetoothDevicePaired, "isBluetoothDevicePaired", "(Ljava/lang/String;)Z")
+ METHOD (isBluetoothDevicePaired, "isBluetoothDevicePaired", "(Ljava/lang/String;)Z") \
+ METHOD (startStopScan, "startStopScan", "(Z)V")
 
 DECLARE_JNI_CLASS (AndroidBluetoothManager, JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager");
 #undef JNI_CLASS_MEMBERS
@@ -36,6 +37,15 @@ DECLARE_JNI_CLASS (AndroidBluetoothManager, JUCE_ANDROID_ACTIVITY_CLASSPATH "$Bl
 //==============================================================================
 struct AndroidBluetoothMidiInterface
 {
+    static void startStopScan (bool startScanning)
+    {
+        JNIEnv* env = getEnv();
+        LocalRef<jobject> btManager (android.activity.callObjectMethod (JuceAppActivity.getAndroidBluetoothManager));
+
+        if (btManager.get() != nullptr)
+            env->CallVoidMethod (btManager.get(), AndroidBluetoothManager.startStopScan, (jboolean) (startScanning ? 1 : 0));
+    }
+
     static StringArray getBluetoothMidiDevicesNearby()
     {
         StringArray retval;
@@ -172,7 +182,6 @@ public:
         setRowHeight (40);
         setModel (this);
         setOutlineThickness (1);
-        updateDeviceList();
         startTimer (timerPeriodInMs);
     }
 
@@ -192,7 +201,7 @@ private:
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g,
-                           int width, int height, bool rowIsSelected) override
+                           int width, int height, bool) override
     {
         if (isPositiveAndBelow (rowNumber, devices.size()))
         {
@@ -210,14 +219,13 @@ private:
 
             g.setColour (getDeviceNameFontColour (device.connectionStatus));
             g.drawText (device.name,
-                        xmargin, ymargin,
-                        deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin),
+                        Rectangle<float> (xmargin, ymargin, deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topLeft, true);
 
             g.setColour (getDeviceStatusFontColour (device.connectionStatus));
             g.drawText (statusString,
-                        deviceNameWidth + xmargin, ymargin,
-                        width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin),
+                        Rectangle<float> (deviceNameWidth + xmargin, ymargin,
+                                          width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topRight, true);
 
             g.setColour (Colours::grey);
@@ -366,6 +374,8 @@ public:
     {
         ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
 
+        AndroidBluetoothMidiInterface::startStopScan (true);
+
         setAlwaysOnTop (true);
         setVisible (true);
         addToDesktop (ComponentPeer::windowHasDropShadow);
@@ -374,6 +384,11 @@ public:
 
         addAndMakeVisible (bluetoothDevicesList);
         enterModalState (true, exitCallback.release(), true);
+    }
+
+    ~BluetoothMidiSelectorOverlay()
+    {
+        AndroidBluetoothMidiInterface::startStopScan (false);
     }
 
     void paint (Graphics& g) override
@@ -439,7 +454,7 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
         return false;
     }
 
-    BluetoothMidiSelectorOverlay* overlay = new BluetoothMidiSelectorOverlay (exitCallback.release());
+    new BluetoothMidiSelectorOverlay (exitCallback.release());
     return true;
 }
 

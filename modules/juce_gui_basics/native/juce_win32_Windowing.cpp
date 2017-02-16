@@ -590,7 +590,8 @@ struct UUIDGetter<ITipInvocation>
 
 const CLSID ITipInvocation::clsid = {0x4CE576FA, 0x83DC, 0x4f88, {0x95, 0x1C, 0x9D, 0x07, 0x82, 0xB4, 0xE3, 0x76}};
 //==============================================================================
-class OnScreenKeyboard : private Timer
+class OnScreenKeyboard :   public DeletedAtShutdown,
+                           private Timer
 {
 public:
 
@@ -658,6 +659,157 @@ private:
 juce_ImplementSingleton_SingleThreaded (OnScreenKeyboard)
 
 //==============================================================================
+class UWPUIViewSettings
+{
+public:
+    UWPUIViewSettings()
+    {
+        ComBaseModule dll (L"api-ms-win-core-winrt-l1-1-0");
+
+        if (dll.h != nullptr)
+        {
+            roInitialize           = (RoInitializeFuncPtr)           ::GetProcAddress (dll.h, "RoInitialize");
+            roGetActivationFactory = (RoGetActivationFactoryFuncPtr) ::GetProcAddress (dll.h, "RoGetActivationFactory");
+            createHString          = (WindowsCreateStringFuncPtr)    ::GetProcAddress (dll.h, "WindowsCreateString");
+            deleteHString          = (WindowsDeleteStringFuncPtr)    ::GetProcAddress (dll.h, "WindowsDeleteString");
+
+            if (roInitialize == nullptr || roGetActivationFactory == nullptr
+            || createHString == nullptr || deleteHString == nullptr)
+                return;
+
+            ::HRESULT status = roInitialize (1);
+            if (status != S_OK && status != S_FALSE && status != 0x80010106L)
+                return;
+
+            LPCWSTR uwpClassName = L"Windows.UI.ViewManagement.UIViewSettings";
+            HSTRING uwpClassId;
+
+            if (createHString (uwpClassName, (::UINT32) wcslen (uwpClassName), &uwpClassId) != S_OK
+             || uwpClassId == nullptr)
+                return;
+
+            status = roGetActivationFactory (uwpClassId, __uuidof (IUIViewSettingsInterop), (void**) viewSettingsInterop.resetAndGetPointerAddress());
+            deleteHString (uwpClassId);
+
+            if (status != S_OK || viewSettingsInterop == nullptr)
+                return;
+
+            // move dll into member var
+            comBaseDLL = static_cast<ComBaseModule&&> (dll);
+        }
+    }
+
+    bool isTabletModeActivatedForWindow (::HWND hWnd) const
+    {
+        if (viewSettingsInterop == nullptr)
+            return false;
+
+        ComSmartPtr<IUIViewSettings> viewSettings;
+        if (viewSettingsInterop->GetForWindow(hWnd, __uuidof (IUIViewSettings), (void**) viewSettings.resetAndGetPointerAddress()) == S_OK
+            && viewSettings != nullptr)
+        {
+            IUIViewSettings::UserInteractionMode mode;
+
+            if (viewSettings->GetUserInteractionMode (&mode) == S_OK)
+                return (mode == IUIViewSettings::Touch);
+        }
+
+        return false;
+    }
+
+private:
+    struct HSTRING_PRIVATE;
+    typedef HSTRING_PRIVATE* HSTRING;
+
+    //==============================================================================
+    class IInspectable : public IUnknown
+    {
+    public:
+        virtual ::HRESULT STDMETHODCALLTYPE GetIids (ULONG* ,IID**) = 0;
+        virtual ::HRESULT STDMETHODCALLTYPE GetRuntimeClassName(HSTRING*) = 0;
+        virtual ::HRESULT STDMETHODCALLTYPE GetTrustLevel(void*) = 0;
+    };
+
+    //==============================================================================
+    class
+       #if (! JUCE_MINGW)
+        __declspec (uuid ("3694dbf9-8f68-44be-8ff5-195c98ede8a6"))
+       #endif
+    IUIViewSettingsInterop     : public IInspectable
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE GetForWindow(HWND hwnd, REFIID riid, void **ppv) = 0;
+    };
+
+   #if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
+    template <>
+    struct UUIDGetter<IUIViewSettingsInterop>
+    {
+        static CLSID get()
+        {
+            GUID g = {0x3694dbf9, 0x8f68, 0x44be, {0x8f, 0xf5, 0x19, 0x5c, 0x98, 0xed, 0xe8, 0xa6}};
+            return g;
+        }
+    };
+   #endif
+
+    //==============================================================================
+    class
+       #if (! JUCE_MINGW)
+        __declspec (uuid ("C63657F6-8850-470D-88F8-455E16EA2C26"))
+       #endif
+    IUIViewSettings     : public IInspectable
+    {
+    public:
+        enum UserInteractionMode
+        {
+          Mouse = 0,
+          Touch = 1
+        };
+
+        virtual HRESULT STDMETHODCALLTYPE GetUserInteractionMode (UserInteractionMode *value) = 0;
+    };
+
+   #if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
+    template <>
+    struct UUIDGetter<IUIViewSettings>
+    {
+        static CLSID get()
+        {
+            GUID g = {0xC63657F6, 0x8850, 0x470D, {0x88, 0xf8, 0x45, 0x5e, 0x16, 0xea, 0x2c, 0x26}};
+            return g;
+        }
+    };
+   #endif
+
+    //==============================================================================
+    struct ComBaseModule
+    {
+        ::HMODULE h;
+
+        ComBaseModule() : h (nullptr) {}
+        ComBaseModule(LPCWSTR libraryName) : h (::LoadLibrary (libraryName)) {}
+        ComBaseModule(ComBaseModule&& o) : h (o.h) { o.h = nullptr; }
+        ~ComBaseModule() { if (h != nullptr) ::FreeLibrary (h); h = nullptr; }
+
+        ComBaseModule& operator=(ComBaseModule&& o) { h = o.h; o.h = nullptr; return *this; }
+    };
+
+    typedef HRESULT (WINAPI* RoInitializeFuncPtr) (int);
+    typedef HRESULT (WINAPI* RoGetActivationFactoryFuncPtr) (HSTRING, REFIID, void**);
+    typedef HRESULT (WINAPI* WindowsCreateStringFuncPtr) (LPCWSTR,UINT32, HSTRING*);
+    typedef HRESULT (WINAPI* WindowsDeleteStringFuncPtr) (HSTRING);
+
+    ComBaseModule comBaseDLL;
+    ComSmartPtr<IUIViewSettingsInterop> viewSettingsInterop;
+
+    RoInitializeFuncPtr roInitialize;
+    RoGetActivationFactoryFuncPtr roGetActivationFactory;
+    WindowsCreateStringFuncPtr createHString;
+    WindowsDeleteStringFuncPtr deleteHString;
+};
+
+//==============================================================================
 class HWNDComponentPeer  : public ComponentPeer,
                            private Timer
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
@@ -704,6 +856,9 @@ public:
             if (shadower != nullptr)
                 shadower->setOwner (&component);
         }
+
+        // make sure that the on-screen keyboard code is loaded
+        OnScreenKeyboard::getInstance();
     }
 
     ~HWNDComponentPeer()
@@ -1019,13 +1174,16 @@ public:
         ShowCaret (hwnd);
         SetCaretPos (0, 0);
 
-        OnScreenKeyboard::getInstance()->activate();
+        if (uwpViewSettings.isTabletModeActivatedForWindow (hwnd))
+            OnScreenKeyboard::getInstance()->activate();
     }
 
     void dismissPendingTextInput() override
     {
         imeHandler.handleSetContext (hwnd, false);
-        OnScreenKeyboard::getInstance()->deactivate();
+
+        if (uwpViewSettings.isTabletModeActivatedForWindow (hwnd))
+            OnScreenKeyboard::getInstance()->deactivate();
     }
 
     void repaint (const Rectangle<int>& area) override
@@ -1283,6 +1441,7 @@ private:
     HICON currentWindowIcon;
     JuceDropTarget* dropTarget;
     uint8 updateLayeredWindowAlpha;
+    UWPUIViewSettings uwpViewSettings;
     MultiTouchMapper<DWORD> currentTouches;
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     ModifierKeyProvider* modProvider;

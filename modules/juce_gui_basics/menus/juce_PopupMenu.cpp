@@ -1251,7 +1251,6 @@ PopupMenu& PopupMenu::operator= (const PopupMenu& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 PopupMenu::PopupMenu (PopupMenu&& other) noexcept
     : lookAndFeel (other.lookAndFeel)
 {
@@ -1266,7 +1265,6 @@ PopupMenu& PopupMenu::operator= (PopupMenu&& other) noexcept
     lookAndFeel = other.lookAndFeel;
     return *this;
 }
-#endif
 
 PopupMenu::~PopupMenu()
 {

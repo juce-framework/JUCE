@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_HEAPBLOCK_H_INCLUDED
-#define JUCE_HEAPBLOCK_H_INCLUDED
+#pragma once
 
 #if ! (defined (DOXYGEN) || JUCE_EXCEPTIONS_DISABLED)
 namespace HeapBlockHelper
@@ -137,19 +136,19 @@ public:
         std::free (data);
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     HeapBlock (HeapBlock&& other) noexcept
         : data (other.data)
     {
         other.data = nullptr;
     }
 
+    /** Move assignment operator */
     HeapBlock& operator= (HeapBlock&& other) noexcept
     {
         std::swap (data, other.data);
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns a raw pointer to the allocated data.
@@ -309,6 +308,3 @@ private:
     JUCE_PREVENT_HEAP_ALLOCATION // Creating a 'new HeapBlock' would be missing the point!
    #endif
 };
-
-
-#endif   // JUCE_HEAPBLOCK_H_INCLUDED

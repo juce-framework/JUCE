@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILEBROWSERLISTENER_H_INCLUDED
-#define JUCE_FILEBROWSERLISTENER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -52,6 +51,3 @@ public:
     /** Callback when the browser's root folder changes. */
     virtual void browserRootChanged (const File& newRoot) = 0;
 };
-
-
-#endif   // JUCE_FILEBROWSERLISTENER_H_INCLUDED

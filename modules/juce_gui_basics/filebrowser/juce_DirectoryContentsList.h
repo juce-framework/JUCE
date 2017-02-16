@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED
-#define JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -218,6 +217,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsList)
 };
-
-
-#endif   // JUCE_DIRECTORYCONTENTSLIST_H_INCLUDED

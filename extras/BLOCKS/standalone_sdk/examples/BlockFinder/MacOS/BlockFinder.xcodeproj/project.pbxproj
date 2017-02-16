@@ -17,6 +17,23 @@
 		E2ECDFCF1DB6864E006D016F /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2ECDFC61DB6864E006D016F /* CoreMIDI.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E25109931E5376C000596664 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E251098F1E5376C000596664 /* BLOCKS-SDK.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E2BD1B8A1DB62B4000C4F301;
+			remoteInfo = "BLOCKS-SDK";
+		};
+		E25109961E53775E00596664 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E251098F1E5376C000596664 /* BLOCKS-SDK.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = E2BD1B891DB62B4000C4F301;
+			remoteInfo = "BLOCKS-SDK";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		E2ECDFB01DB684F9006D016F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -33,6 +50,7 @@
 		E232CCAF1DB8CCEA00276BB3 /* BlockFinder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BlockFinder.cpp; path = ../BlockFinder.cpp; sourceTree = "<group>"; };
 		E232CCB01DB8CCEA00276BB3 /* BlockFinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BlockFinder.h; path = ../BlockFinder.h; sourceTree = "<group>"; };
 		E242E7651DB77E9D0022D78D /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		E251098F1E5376C000596664 /* BLOCKS-SDK.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "BLOCKS-SDK.xcodeproj"; path = "../../../SDK/Build/MacOS/BLOCKS-SDK.xcodeproj"; sourceTree = "<group>"; };
 		E2ECDFB21DB684F9006D016F /* BlockFinder */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BlockFinder; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2ECDFBF1DB685D2006D016F /* libBLOCKS-SDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libBLOCKS-SDK.a"; path = "../../../../SDK/Build/MacOS/Debug/libBLOCKS-SDK.a"; sourceTree = "<group>"; };
 		E2ECDFC11DB6864E006D016F /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
@@ -63,9 +81,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E25109901E5376C000596664 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E25109941E5376C000596664 /* libBLOCKS-SDK.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		E2ECDFA91DB684F9006D016F = {
 			isa = PBXGroup;
 			children = (
+				E251098F1E5376C000596664 /* BLOCKS-SDK.xcodeproj */,
 				E232CCAF1DB8CCEA00276BB3 /* BlockFinder.cpp */,
 				E232CCB01DB8CCEA00276BB3 /* BlockFinder.h */,
 				E242E7651DB77E9D0022D78D /* main.mm */,
@@ -114,6 +141,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				E25109971E53775E00596664 /* PBXTargetDependency */,
 			);
 			name = BlockFinder;
 			productName = BlocksMonitor;
@@ -145,12 +173,28 @@
 			mainGroup = E2ECDFA91DB684F9006D016F;
 			productRefGroup = E2ECDFB31DB684F9006D016F /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E25109901E5376C000596664 /* Products */;
+					ProjectRef = E251098F1E5376C000596664 /* BLOCKS-SDK.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				E2ECDFB11DB684F9006D016F /* BlockFinder */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E25109941E5376C000596664 /* libBLOCKS-SDK.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libBLOCKS-SDK.a";
+			remoteRef = E25109931E5376C000596664 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		E2ECDFD31DB6872A006D016F /* ShellScript */ = {
@@ -179,6 +223,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E25109971E53775E00596664 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "BLOCKS-SDK";
+			targetProxy = E25109961E53775E00596664 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E2ECDFB71DB684F9006D016F /* Debug */ = {

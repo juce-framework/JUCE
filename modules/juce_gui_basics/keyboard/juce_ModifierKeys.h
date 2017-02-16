@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MODIFIERKEYS_H_INCLUDED
-#define JUCE_MODIFIERKEYS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -218,6 +217,3 @@ private:
     static ModifierKeys currentModifiers;
     static void updateCurrentModifiers() noexcept;
 };
-
-
-#endif   // JUCE_MODIFIERKEYS_H_INCLUDED

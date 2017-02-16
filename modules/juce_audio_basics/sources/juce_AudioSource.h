@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOSOURCE_H_INCLUDED
-#define JUCE_AUDIOSOURCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -182,6 +181,3 @@ public:
     */
     virtual void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) = 0;
 };
-
-
-#endif   // JUCE_AUDIOSOURCE_H_INCLUDED

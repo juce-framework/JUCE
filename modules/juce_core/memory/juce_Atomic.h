@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ATOMIC_H_INCLUDED
-#define JUCE_ATOMIC_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -64,8 +63,8 @@ public:
     /** Destructor. */
     inline ~Atomic() noexcept
     {
-        // This class can only be used for types which are 32 or 64 bits in size.
-        static_jassert (sizeof (Type) == 4 || sizeof (Type) == 8);
+        static_assert (sizeof (Type) == 4 || sizeof (Type) == 8,
+                       "Atomic can only be used for types which are 32 or 64 bits in size");
     }
 
     /** Atomically reads and returns the current value. */
@@ -436,5 +435,3 @@ inline void Atomic<Type>::memoryBarrier() noexcept
 #if JUCE_MSVC
   #pragma warning (pop)
 #endif
-
-#endif   // JUCE_ATOMIC_H_INCLUDED

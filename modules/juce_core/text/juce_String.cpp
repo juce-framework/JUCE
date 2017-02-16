@@ -226,16 +226,17 @@ private:
     {
         // Let me know if any of these assertions fail on your system!
        #if JUCE_NATIVE_WCHAR_IS_UTF8
-        static_jassert (sizeof (wchar_t) == 1);
+        static_assert (sizeof (wchar_t) == 1, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF16
-        static_jassert (sizeof (wchar_t) == 2);
+        static_assert (sizeof (wchar_t) == 2, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF32
-        static_jassert (sizeof (wchar_t) == 4);
+        static_assert (sizeof (wchar_t) == 4, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #else
         #error "native wchar_t size is unknown"
        #endif
 
-        static_jassert (sizeof (EmptyString) == sizeof (StringHolder));
+        static_assert (sizeof (EmptyString) == sizeof (StringHolder),
+                       "StringHolder is not large enough to hold an empty String");
     }
 };
 
@@ -276,7 +277,6 @@ String& String::operator= (const String& other) noexcept
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 String::String (String&& other) noexcept   : text (other.text)
 {
     other.text = &(emptyString.text);
@@ -287,7 +287,6 @@ String& String::operator= (String&& other) noexcept
     std::swap (text, other.text);
     return *this;
 }
-#endif
 
 inline String::PreallocationBytes::PreallocationBytes (const size_t num) noexcept : numBytes (num) {}
 
@@ -1326,6 +1325,18 @@ String String::replace (StringRef stringToReplace, StringRef stringToInsert, con
     return result;
 }
 
+String String::replaceFirstOccurrenceOf (StringRef stringToReplace, StringRef stringToInsert, const bool ignoreCase) const
+{
+    const int stringToReplaceLen = stringToReplace.length();
+    const int index = ignoreCase ? indexOfIgnoreCase (stringToReplace)
+                                 : indexOf (stringToReplace);
+
+    if (index >= 0)
+        return replaceSection (index, stringToReplaceLen, stringToInsert);
+
+    return *this;
+}
+
 class StringCreationHelper
 {
 public:
@@ -1872,7 +1883,7 @@ String String::formatted (const String pf, ... )
        #elif JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
         int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
-        if (num >= bufferSize)
+        if (num >= static_cast<int> (bufferSize))
             num = -1;
        #else
         HeapBlock<wchar_t> temp (bufferSize);
@@ -1915,7 +1926,7 @@ int String::getTrailingIntValue() const noexcept
             break;
         }
 
-        n += mult * (*t - '0');
+        n += static_cast<juce_wchar> (mult) * (*t - '0');
         mult *= 10;
     }
 

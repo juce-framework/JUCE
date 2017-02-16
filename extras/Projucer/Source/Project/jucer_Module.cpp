@@ -92,14 +92,17 @@ ModuleDescription::ModuleDescription (const File& folder)
 
 File ModuleDescription::getHeader() const
 {
-    const char* extensions[] = { ".h", ".hpp", ".hxx" };
-
-    for (int i = 0; i < numElementsInArray (extensions); ++i)
+    if (moduleFolder != File())
     {
-        File header (moduleFolder.getChildFile (moduleFolder.getFileName() + extensions[i]));
+        const char* extensions[] = { ".h", ".hpp", ".hxx" };
 
-        if (header.existsAsFile())
-            return header;
+        for (int i = 0; i < numElementsInArray (extensions); ++i)
+        {
+            File header (moduleFolder.getChildFile (moduleFolder.getFileName() + extensions[i]));
+
+            if (header.existsAsFile())
+                return header;
+        }
     }
 
     return File();
@@ -303,21 +306,34 @@ static void parseAndAddLibs (StringArray& libList, const String& libs)
 
 void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
 {
-    Project& project = exporter.getProject();
+    auto& project = exporter.getProject();
 
-    RelativePath modulePath = exporter.getModuleFolderRelativeToProject (getID());
+    const auto moduleRelativePath = exporter.getModuleFolderRelativeToProject (getID());
 
-    exporter.addToExtraSearchPaths (modulePath.getParentDirectory());
+    exporter.addToExtraSearchPaths (moduleRelativePath.getParentDirectory());
 
-    const String extraInternalSearchPaths (moduleInfo.getExtraSearchPaths().trim());
+    String libDirPlatform;
+    if (exporter.isLinux())
+        libDirPlatform = "Linux";
+    else if (exporter.isCodeBlocks() && exporter.isWindows())
+        libDirPlatform = "MinGW";
+    else
+        libDirPlatform = exporter.getTargetFolder().getFileName();
 
+    const auto libSubdirPath = String (moduleRelativePath.toUnixStyle() + "/libs/") + libDirPlatform;
+
+    const auto moduleLibDir = File (project.getProjectFolder().getFullPathName() + "/" + libSubdirPath);
+    if (moduleLibDir.exists())
+        exporter.addToModuleLibPaths (RelativePath (libSubdirPath, moduleRelativePath.getRoot()));
+
+    const auto extraInternalSearchPaths = moduleInfo.getExtraSearchPaths().trim();
     if (extraInternalSearchPaths.isNotEmpty())
     {
         StringArray paths;
         paths.addTokens (extraInternalSearchPaths, true);
 
         for (int i = 0; i < paths.size(); ++i)
-            exporter.addToExtraSearchPaths (modulePath.getChildFile (paths.getReference(i)));
+            exporter.addToExtraSearchPaths (moduleRelativePath.getChildFile (paths.getReference(i)));
     }
 
     {
@@ -357,9 +373,12 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         parseAndAddLibs (exporter.linuxLibs, moduleInfo.moduleInfo ["linuxLibs"].toString());
         parseAndAddLibs (exporter.linuxPackages, moduleInfo.moduleInfo ["linuxPackages"].toString());
     }
-    else if (exporter.isCodeBlocks() && exporter.isWindows())
+    else if (exporter.isWindows())
     {
-        parseAndAddLibs (exporter.mingwLibs, moduleInfo.moduleInfo ["mingwLibs"].toString());
+        if (exporter.isCodeBlocks())
+            parseAndAddLibs (exporter.mingwLibs, moduleInfo.moduleInfo ["mingwLibs"].toString());
+        else
+            parseAndAddLibs (exporter.windowsLibs, moduleInfo.moduleInfo ["windowsLibs"].toString());
     }
 }
 
@@ -424,20 +443,15 @@ void LibraryModule::CompileUnit::writeInclude (MemoryOutputStream&) const
 
 bool LibraryModule::CompileUnit::isNeededForExporter (ProjectExporter& exporter) const
 {
-    Project& project = exporter.getProject();
-
     if ((hasSuffix (file, "_OSX")        && ! exporter.isOSX())
      || (hasSuffix (file, "_iOS")        && ! exporter.isiOS())
      || (hasSuffix (file, "_Windows")    && ! exporter.isWindows())
      || (hasSuffix (file, "_Linux")      && ! exporter.isLinux())
-     || (hasSuffix (file, "_Android")    && ! exporter.isAndroid())
-     || (hasSuffix (file, "_AU")         && ! (project.shouldBuildAU()  .getValue()       && exporter.supportsAU()))
-     || (hasSuffix (file, "_AUv3")       && ! (project.shouldBuildAUv3().getValue()       && exporter.supportsAUv3()))
-     || (hasSuffix (file, "_AAX")        && ! (project.shouldBuildAAX() .getValue()       && exporter.supportsAAX()))
-     || (hasSuffix (file, "_RTAS")       && ! (project.shouldBuildRTAS().getValue()       && exporter.supportsRTAS()))
-     || (hasSuffix (file, "_VST2")       && ! (project.shouldBuildVST() .getValue()       && exporter.supportsVST()))
-     || (hasSuffix (file, "_VST3")       && ! (project.shouldBuildVST3().getValue()       && exporter.supportsVST3()))
-     || (hasSuffix (file, "_Standalone") && ! (project.shouldBuildStandalone().getValue() && exporter.supportsStandalone())))
+     || (hasSuffix (file, "_Android")    && ! exporter.isAndroid()))
+        return false;
+
+    const ProjectType::Target::Type targetType = Project::getTargetTypeFromFilePath (file, false);
+    if (targetType != ProjectType::Target::unspecified && ! exporter.shouldBuildTargetType (targetType))
         return false;
 
     return exporter.usesMMFiles() ? isCompiledForObjC

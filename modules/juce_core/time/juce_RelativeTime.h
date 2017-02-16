@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RELATIVETIME_H_INCLUDED
-#define JUCE_RELATIVETIME_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -180,7 +179,3 @@ bool operator<= (RelativeTime t1, RelativeTime t2) noexcept;
 RelativeTime  operator+  (RelativeTime t1, RelativeTime t2) noexcept;
 /** Subtracts two RelativeTimes. */
 RelativeTime  operator-  (RelativeTime t1, RelativeTime t2) noexcept;
-
-
-
-#endif   // JUCE_RELATIVETIME_H_INCLUDED

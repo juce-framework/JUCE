@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS)
+#if JUCE_PLUGINHOST_VST
 
 //==============================================================================
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
@@ -165,7 +165,7 @@ namespace
     {
        #if JUCE_WINDOWS
         return timeGetTime() * 1000000.0;
-       #elif JUCE_LINUX || JUCE_IOS
+       #elif JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
         timeval micro;
         gettimeofday (&micro, 0);
         return micro.tv_usec * 1000.0;
@@ -224,14 +224,11 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface* effec
 //==============================================================================
 #if JUCE_LINUX
 
-extern Display* display;
-extern XContext windowHandleXContext;
-
 namespace
 {
     static bool xErrorTriggered = false;
 
-    static int temporaryErrorHandler (Display*, XErrorEvent*)
+    static int temporaryErrorHandler (::Display*, XErrorEvent*)
     {
         xErrorTriggered = true;
         return 0;
@@ -249,8 +246,13 @@ namespace
         unsigned char* data;
         Atom userType;
 
-        XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
-                            &userType,  &userSize, &userCount, &bytes, &data);
+        {
+            ScopedXDisplay xDisplay;
+            ::Display* display = xDisplay.get();
+
+            XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+                                &userType,  &userSize, &userCount, &bytes, &data);
+        }
 
         XSetErrorHandler (oldErrorHandler);
 
@@ -263,7 +265,12 @@ namespace
         Window* childWindows;
         unsigned int numChildren = 0;
 
-        XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+        {
+            ScopedXDisplay xDisplay;
+            ::Display* display = xDisplay.get();
+
+            XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+        }
 
         if (numChildren > 0)
             return childWindows [0];
@@ -381,7 +388,7 @@ public:
     {
         getActiveModules().add (this);
 
-       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS
+       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
         fullParentDirectoryPathName = f.getParentDirectory().getFullPathName();
        #elif JUCE_MAC
         FSRef ref;
@@ -401,7 +408,7 @@ public:
     String fullParentDirectoryPathName;
    #endif
 
-  #if JUCE_WINDOWS || JUCE_LINUX
+  #if JUCE_WINDOWS || JUCE_LINUX || JUCE_ANDROID
     DynamicLibrary module;
 
     bool open()
@@ -956,7 +963,7 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_IOS
+   #if JUCE_IOS || JUCE_ANDROID
     bool hasEditor() const override                  { return false; }
    #else
     bool hasEditor() const override                  { return vstEffect != nullptr && (vstEffect->flags & vstEffectFlagHasEditor) != 0; }
@@ -1596,8 +1603,11 @@ private:
     {
         BusesProperties returnValue;
 
-        VstSpeakerConfiguration* inArr = nullptr, *outArr = nullptr;
-        if (effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)
+        HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
+
+       VstSpeakerConfiguration* inArr = inArrBlock.getData(), *outArr = outArrBlock.getData();
+        if (effect->numInputChannels == 0 ||
+            effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)
             inArr = outArr = nullptr;
 
         for (int dir = 0; dir < 2; ++dir)
@@ -1689,10 +1699,10 @@ private:
                     {
                         case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
                         case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps30:       setHostTimeFrameRate (3, 30.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 29.97, position.timeInSeconds); break;
-                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
                         default: break;
                     }
 
@@ -1991,7 +2001,7 @@ private:
 };
 
 //==============================================================================
-#if ! JUCE_IOS
+#if ! (JUCE_IOS || JUCE_ANDROID)
 class VSTPluginWindow;
 static Array<VSTPluginWindow*> activeVSTWindows;
 
@@ -2022,6 +2032,7 @@ public:
        #elif JUCE_LINUX
         pluginWindow = None;
         pluginProc = None;
+        display = XWindowSystem::getInstance()->displayRef();
 
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
@@ -2050,6 +2061,8 @@ public:
         carbonWrapper = nullptr;
         #endif
         cocoaWrapper = nullptr;
+       #elif JUCE_LINUX
+        display = XWindowSystem::getInstance()->displayUnref();
        #endif
 
         activeVSTWindows.removeFirstMatchingValue (this);
@@ -2250,6 +2263,7 @@ private:
     void* originalWndProc;
     int sizeCheckCount;
    #elif JUCE_LINUX
+    ::Display* display;
     Window pluginWindow;
     EventProcPtr pluginProc;
    #endif
@@ -2740,7 +2754,7 @@ private:
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
 {
-   #if JUCE_IOS
+   #if JUCE_IOS || JUCE_ANDROID
     return nullptr;
    #else
     return hasEditor() ? new VSTPluginWindow (*this)
@@ -2886,7 +2900,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
     return f.isDirectory() && f.hasFileExtension (".vst");
   #elif JUCE_WINDOWS
     return f.existsAsFile() && f.hasFileExtension (".dll");
-  #elif JUCE_LINUX
+  #elif JUCE_LINUX || JUCE_ANDROID
     return f.existsAsFile() && f.hasFileExtension (".so");
   #endif
 }
@@ -2942,7 +2956,7 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_ANDROID
     return FileSearchPath (SystemStats::getEnvironmentVariable ("VST_PATH",
                                                                 "/usr/lib/vst;/usr/local/lib/vst;~/.vst")
                              .replace (":", ";"));

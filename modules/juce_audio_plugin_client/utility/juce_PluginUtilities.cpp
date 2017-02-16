@@ -35,33 +35,6 @@ namespace juce
     AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Undefined;
 }
 
-#if _MSC_VER || JUCE_MINGW
-
-#if JucePlugin_Build_RTAS
- extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
-#endif
-
-extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
-{
-    if (reason == DLL_PROCESS_ATTACH)
-        Process::setCurrentModuleInstanceHandle (instance);
-
-   #if JucePlugin_Build_RTAS
-    if (GetModuleHandleA ("DAE.DLL") != 0)
-    {
-       #if JucePlugin_Build_AAX
-        if (! File::getSpecialLocation (File::currentExecutableFile).hasFileExtension ("aaxplugin"))
-       #endif
-            return DllMainRTAS (instance, reason, reserved);
-    }
-   #endif
-
-    ignoreUnused (reserved);
-    return TRUE;
-}
-
-#endif
-
 //==============================================================================
 namespace juce
 {
@@ -151,7 +124,7 @@ void JUCE_API getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
 #endif
 
 #if JucePlugin_Build_VST
-pointer_sized_int JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
+bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
 {
    #if VST3_REPLACEMENT_AVAILABLE
     if ((index == 'stCA' || index == 'stCa') && value == 'FUID' && ptr != nullptr)
@@ -159,12 +132,12 @@ pointer_sized_int JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, po
         uint8 fuid[16];
         getUUIDForVST2ID  (false, fuid);
         ::memcpy (ptr, fuid, 16);
-        return 1;
+        return true;
     }
    #else
     ignoreUnused (index, value, ptr);
    #endif
-    return 0;
+    return false;
 }
 #endif
 

@@ -219,6 +219,12 @@ bool File::setAsCurrentWorkingDirectory() const
     return chdir (getFullPathName().toUTF8()) == 0;
 }
 
+#if JUCE_ANDROID
+ typedef unsigned long juce_sigactionflags_type;
+#else
+ typedef int juce_sigactionflags_type;
+#endif
+
 //==============================================================================
 // The unix siginterrupt function is deprecated - this does the same job.
 int juce_siginterrupt (int sig, int flag)
@@ -227,9 +233,9 @@ int juce_siginterrupt (int sig, int flag)
     (void) ::sigaction (sig, nullptr, &act);
 
     if (flag != 0)
-        act.sa_flags &= ~SA_RESTART;
+        act.sa_flags &= static_cast<juce_sigactionflags_type> (~SA_RESTART);
     else
-        act.sa_flags |= SA_RESTART;
+        act.sa_flags |= static_cast<juce_sigactionflags_type> (SA_RESTART);
 
     return ::sigaction (sig, &act, nullptr);
 }
@@ -369,7 +375,7 @@ static bool setFileModeFlags (const String& fullPath, mode_t flags, bool shouldS
     else
         info.st_mode &= ~flags;
 
-    return chmod (fullPath.toUTF8(), info.st_mode) == 0;
+    return chmod (fullPath.toUTF8(), (mode_t) info.st_mode) == 0;
 }
 
 bool File::setFileReadOnlyInternal (bool shouldBeReadOnly) const
@@ -406,8 +412,8 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
     if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
     {
         struct utimbuf times;
-        times.actime  = accessTime != 0       ? (time_t) (accessTime / 1000)       : info.st_atime;
-        times.modtime = modificationTime != 0 ? (time_t) (modificationTime / 1000) : info.st_mtime;
+        times.actime  = (time_t) (accessTime != 0       ? (accessTime / 1000)       : info.st_atime);
+        times.modtime = (time_t) (modificationTime != 0 ? (modificationTime / 1000) : info.st_mtime);
 
         return utime (fullPath.toUTF8(), &times) == 0;
     }
@@ -455,7 +461,7 @@ Result File::createDirectoryInternal (const String& fileName) const
 //==============================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
-    if (handle != 0 && lseek (getFD (handle), pos, SEEK_SET) == pos)
+    if (handle != 0 && lseek (getFD (handle), (off_t) pos, SEEK_SET) == pos)
         return pos;
 
     return -1;

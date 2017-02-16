@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MESSAGE_H_INCLUDED
-#define JUCE_MESSAGE_H_INCLUDED
+#pragma once
 
 class MessageListener;
 
@@ -66,6 +65,3 @@ private:
     // messages still in the system event queue. These aren't harmful, but can cause annoying assertions.
     JUCE_DECLARE_NON_COPYABLE (Message)
 };
-
-
-#endif   // JUCE_MESSAGE_H_INCLUDED

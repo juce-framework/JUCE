@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_POPUPMENU_H_INCLUDED
-#define JUCE_POPUPMENU_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -96,10 +95,11 @@ public:
     /** Copies this menu from another one. */
     PopupMenu& operator= (const PopupMenu& other);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     PopupMenu (PopupMenu&& other) noexcept;
+
+    /** Move assignment operator */
     PopupMenu& operator= (PopupMenu&& other) noexcept;
-   #endif
 
     //==============================================================================
     /** Resets the menu, removing all its items. */
@@ -738,5 +738,3 @@ private:
 
     JUCE_LEAK_DETECTOR (PopupMenu)
 };
-
-#endif   // JUCE_POPUPMENU_H_INCLUDED

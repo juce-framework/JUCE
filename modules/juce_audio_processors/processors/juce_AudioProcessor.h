@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
-#define JUCE_AUDIOPROCESSOR_H_INCLUDED
+#pragma once
 
 struct PluginBusUtilities;
 
@@ -390,10 +389,16 @@ public:
         //==============================================================================
         /** Checks if a particular layout is supported.
 
-            @param set The AudioChannelSet which is to be probed.
+            @param set           The AudioChannelSet which is to be probed.
+            @param currentLayout If non-null, pretend that the current layout of the AudioProcessor is
+                                 currentLayout. On exit, currentLayout will be modified to
+                                 to represent the buses layouts of the AudioProcessor as if the layout
+                                 of the reciever had been succesfully changed. This is useful as changing
+                                 the layout of the reciever may change the bus layout of other buses.
+
             @see AudioChannelSet
         */
-        bool isLayoutSupported (const AudioChannelSet& set) const;
+        bool isLayoutSupported (const AudioChannelSet& set, BusesLayout* currentLayout = nullptr) const;
 
         /** Checks if this bus can support a given number of channels. */
         bool isNumberOfChannelsSupported (int channels) const;
@@ -554,8 +559,7 @@ public:
 
         If the layout is not supported by this audio processor then
         this method will return false. You can use the checkBusesLayoutSupported
-        and getNextBestLayout methods to probe which layouts this audio
-        processor supports.
+        methods to probe which layouts this audio processor supports.
     */
     bool setBusesLayoutWithoutEnabling (const BusesLayout&);
 
@@ -1260,6 +1264,20 @@ public:
     void setRateAndBufferSizeDetails (double sampleRate, int blockSize) noexcept;
 
     //==============================================================================
+    /** AAX plug-ins need to report a unique "plug-in id" for every audio layout
+        configuration that your AudioProcessor supports on the main bus. Override this
+        function if you want your AudioProcessor to use a custom "plug-in id" (for example
+        to stay backward compatible with older versions of JUCE).
+
+        The default implementation will compute a unique integer from the input and output
+        layout and add this value to the 4 character code 'jcaa' (for native AAX) or 'jyaa'
+        (for AudioSuite plug-ins).
+    */
+    virtual int32 getAAXPluginIDForMainBusConfig (const AudioChannelSet& mainInputLayout,
+                                                  const AudioChannelSet& mainOutputLayout,
+                                                  bool idForAudioSuite) const;
+
+    //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
     void editorBeingDeleted (AudioProcessorEditor*) noexcept;
 
@@ -1534,7 +1552,7 @@ private:
     void updateSpeakerFormatStrings();
     bool applyBusLayouts (const BusesLayout&);
     void audioIOChanged (bool busNumberChanged, bool channelNumChanged);
-    BusesLayout getNextBestLayout (const BusesLayout&) const;
+    void getNextBestLayout (const BusesLayout&, BusesLayout&) const;
 
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
@@ -1544,6 +1562,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
-
-
-#endif   // JUCE_AUDIOPROCESSOR_H_INCLUDED

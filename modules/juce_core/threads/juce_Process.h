@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PROCESS_H_INCLUDED
-#define JUCE_PROCESS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -159,6 +158,3 @@ private:
     Process();
     JUCE_DECLARE_NON_COPYABLE (Process)
 };
-
-
-#endif   // JUCE_PROCESS_H_INCLUDED

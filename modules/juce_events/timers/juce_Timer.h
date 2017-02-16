@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TIMER_H_INCLUDED
-#define JUCE_TIMER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -137,5 +136,3 @@ private:
 
     Timer& operator= (const Timer&) JUCE_DELETED_FUNCTION;
 };
-
-#endif   // JUCE_TIMER_H_INCLUDED

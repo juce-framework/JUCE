@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="rysVAr" name="OSCSender" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.OSCSender" includeBinaryInAppConfig="1"
-              jucerVersion="4.3.0">
+              jucerVersion="4.3.1">
   <MAINGROUP id="knnZZJ" name="OSCSender">
     <GROUP id="{F2A0007A-4D24-4DD6-DEC8-6428F36CE45D}" name="Source">
       <FILE id="ORaBHU" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
@@ -75,14 +75,14 @@
       </MODULEPATHS>
     </XCODE_IPHONE>
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.oscsender.OSCSender" androidInternetNeeded="1"
-                   androidBluetoothNeeded="1" androidCpp11="1" targetFolder="Builds/AndroidStudio"
+                   androidBluetoothNeeded="0" androidCpp11="1" targetFolder="Builds/Android"
                    androidSDKPath="" androidNDKPath="" androidScreenOrientation="unspecified"
                    gradleToolchain="clang" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="OSCSender"/>
-        <CONFIGURATION name="Release" androidArchitectures="armeabi armeabi-v7a x86"
-                       isDebug="0" optimisation="3" targetName="OSCSender"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
+                       targetName="OSCSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>

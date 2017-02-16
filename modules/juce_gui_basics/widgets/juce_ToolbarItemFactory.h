@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TOOLBARITEMFACTORY_H_INCLUDED
-#define JUCE_TOOLBARITEMFACTORY_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -103,6 +102,3 @@ public:
     */
     virtual ToolbarItemComponent* createItem (int itemId) = 0;
 };
-
-
-#endif   // JUCE_TOOLBARITEMFACTORY_H_INCLUDED

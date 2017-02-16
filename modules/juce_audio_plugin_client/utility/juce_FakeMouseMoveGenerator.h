@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED
-#define JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED
+#pragma once
 
 #if JUCE_MAC
 
@@ -63,5 +62,3 @@ private:
 #else
 struct FakeMouseMoveGenerator {};
 #endif
-
-#endif   // JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED

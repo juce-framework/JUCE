@@ -958,7 +958,6 @@ Expression& Expression::operator= (const Expression& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Expression::Expression (Expression&& other) noexcept
     : term (static_cast<ReferenceCountedObjectPtr<Term>&&> (other.term))
 {
@@ -969,7 +968,6 @@ Expression& Expression::operator= (Expression&& other) noexcept
     term = static_cast<ReferenceCountedObjectPtr<Term>&&> (other.term);
     return *this;
 }
-#endif
 
 Expression::Expression (const String& stringToParse, String& parseError)
 {

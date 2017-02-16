@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TOOLBAR_H_INCLUDED
-#define JUCE_TOOLBAR_H_INCLUDED
+#pragma once
 
 class ToolbarItemComponent;
 class ToolbarItemFactory;
@@ -325,6 +324,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Toolbar)
 };
-
-
-#endif   // JUCE_TOOLBAR_H_INCLUDED

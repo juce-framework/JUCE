@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAWABLEBUTTON_H_INCLUDED
-#define JUCE_DRAWABLEBUTTON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -183,6 +182,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton)
 };
-
-
-#endif   // JUCE_DRAWABLEBUTTON_H_INCLUDED

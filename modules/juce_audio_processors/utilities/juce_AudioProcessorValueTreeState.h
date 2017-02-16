@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
-#define JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED
+#pragma once
 
 #if JUCE_COMPILER_SUPPORTS_LAMBDAS
 
@@ -78,16 +77,16 @@ public:
         @param textToValueFunction  The inverse of valueToTextFunction
         @returns the parameter object that was created
     */
-    AudioProcessorParameter* createAndAddParameter (const String& parameterID,
-                                                    const String& parameterName,
-                                                    const String& labelText,
-                                                    NormalisableRange<float> valueRange,
-                                                    float defaultValue,
-                                                    std::function<String (float)> valueToTextFunction,
-                                                    std::function<float (const String&)> textToValueFunction);
+    AudioProcessorParameterWithID* createAndAddParameter (const String& parameterID,
+                                                          const String& parameterName,
+                                                          const String& labelText,
+                                                          NormalisableRange<float> valueRange,
+                                                          float defaultValue,
+                                                          std::function<String (float)> valueToTextFunction,
+                                                          std::function<float (const String&)> textToValueFunction);
 
     /** Returns a parameter by its ID string. */
-    AudioProcessorParameter* getParameter (StringRef parameterID) const noexcept;
+    AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;
 
     /** Returns a pointer to a floating point representation of a particular
         parameter which a realtime process can read to find out its current value.
@@ -228,5 +227,3 @@ private:
 };
 
 #endif
-
-#endif  // JUCE_AUDIOPROCESSORVALUETREESTATE_H_INCLUDED

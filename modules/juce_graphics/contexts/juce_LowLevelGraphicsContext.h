@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
-#define JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -96,6 +95,3 @@ public:
     virtual void drawGlyph (int glyphNumber, const AffineTransform&) = 0;
     virtual bool drawTextLayout (const AttributedString&, const Rectangle<float>&)  { return false; }
 };
-
-
-#endif   // JUCE_LOWLEVELGRAPHICSCONTEXT_H_INCLUDED

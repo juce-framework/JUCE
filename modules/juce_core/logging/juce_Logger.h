@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOGGER_H_INCLUDED
-#define JUCE_LOGGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -94,6 +93,3 @@ protected:
 private:
     static Logger* currentLogger;
 };
-
-
-#endif   // JUCE_LOGGER_H_INCLUDED

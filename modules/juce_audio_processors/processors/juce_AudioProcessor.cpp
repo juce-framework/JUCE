@@ -251,17 +251,21 @@ bool AudioProcessor::checkBusesLayoutSupported (const BusesLayout& layouts) cons
     return false;
 }
 
-AudioProcessor::BusesLayout AudioProcessor::getNextBestLayout (const BusesLayout& layouts) const
+void AudioProcessor::getNextBestLayout (const BusesLayout& desiredLayout, BusesLayout& actualLayouts) const
 {
     // if you are hitting this assertion then you are requesting a next
     // best layout which does not have the same number of buses as the
     // audio processor.
-    jassert (layouts.inputBuses. size() == getBusCount (true)
-          && layouts.outputBuses.size() == getBusCount (false));
+    jassert (desiredLayout.inputBuses. size() == getBusCount (true)
+          && desiredLayout.outputBuses.size() == getBusCount (false));
 
-    if (checkBusesLayoutSupported (layouts)) return layouts;
+    if (checkBusesLayoutSupported (desiredLayout))
+    {
+        actualLayouts = desiredLayout;
+        return;
+    }
 
-    BusesLayout originalState = getBusesLayout();
+    BusesLayout originalState = actualLayouts;
     BusesLayout currentState = originalState;
     BusesLayout bestSupported = currentState;
 
@@ -271,7 +275,7 @@ AudioProcessor::BusesLayout AudioProcessor::getNextBestLayout (const BusesLayout
 
         Array<AudioChannelSet>& currentLayouts         = (isInput ? currentState.inputBuses  : currentState.outputBuses);
         const Array<AudioChannelSet>& bestLayouts      = (isInput ? bestSupported.inputBuses : bestSupported.outputBuses);
-        const Array<AudioChannelSet>& requestedLayouts = (isInput ? layouts.inputBuses       : layouts.outputBuses);
+        const Array<AudioChannelSet>& requestedLayouts = (isInput ? desiredLayout.inputBuses : desiredLayout.outputBuses);
         const Array<AudioChannelSet>& originalLayouts  = (isInput ? originalState.inputBuses : originalState.outputBuses);
 
         for (int busIdx = 0; busIdx < requestedLayouts.size(); ++busIdx)
@@ -347,7 +351,7 @@ AudioProcessor::BusesLayout AudioProcessor::getNextBestLayout (const BusesLayout
         }
     }
 
-    return bestSupported;
+    actualLayouts = bestSupported;
 }
 
 //==============================================================================
@@ -763,7 +767,7 @@ AudioProcessor::BusesProperties AudioProcessor::busesPropertiesFromLayoutArray (
 }
 
 AudioProcessor::BusesLayout AudioProcessor::getNextBestLayoutInList (const BusesLayout& layouts,
-                                                                         const Array<InOutChannelPair>& legacyLayouts) const
+                                                                     const Array<InOutChannelPair>& legacyLayouts) const
 {
     const int numChannelConfigs = legacyLayouts.size();
     jassert (numChannelConfigs > 0);
@@ -1154,14 +1158,52 @@ int AudioProcessor::Bus::getMaxSupportedChannels (int limit) const
     return (isMain() && isLayoutSupported (AudioChannelSet::disabled())) ? 0 : -1;
 }
 
-bool AudioProcessor::Bus::isLayoutSupported (const AudioChannelSet& set) const
+bool AudioProcessor::Bus::isLayoutSupported (const AudioChannelSet& set, BusesLayout* ioLayout) const
 {
     bool isInputBus;
     int busIdx;
     busDirAndIndex (isInputBus, busIdx);
 
-    BusesLayout layouts = getBusesLayoutForLayoutChangeOfBus (set);
-    return (layouts.getChannelSet (isInputBus, busIdx) == set);
+    // check that supplied ioLayout is actually valid
+    if (ioLayout != nullptr)
+    {
+        bool suppliedCurrentSupported = owner.checkBusesLayoutSupported (*ioLayout);
+
+        if (! suppliedCurrentSupported)
+        {
+            *ioLayout = owner.getBusesLayout();
+
+            // the current layout you supplied is not a valid layout
+            jassertfalse;
+        }
+    }
+
+    BusesLayout currentLayout = (ioLayout != nullptr ? *ioLayout : owner.getBusesLayout());
+    const Array<AudioChannelSet>& actualBuses =
+        (isInputBus ? currentLayout.inputBuses : currentLayout.outputBuses);
+
+    if (actualBuses.getReference (busIdx) == set)
+        return true;
+
+    BusesLayout desiredLayout = currentLayout;
+    {
+        Array<AudioChannelSet>& desiredBuses =
+            (isInputBus ? desiredLayout.inputBuses : desiredLayout.outputBuses);
+
+        desiredBuses.getReference (busIdx) = set;
+    }
+
+    owner.getNextBestLayout (desiredLayout, currentLayout);
+
+    if (ioLayout != nullptr)
+        *ioLayout = currentLayout;
+
+    // Nearest layout has a different number of buses. JUCE plug-ins MUST
+    // have fixed number of buses.
+    jassert (currentLayout.inputBuses. size() == owner.getBusCount (true)
+          && currentLayout.outputBuses.size() == owner.getBusCount (false));
+
+    return (actualBuses.getReference (busIdx) == set);
 }
 
 bool AudioProcessor::Bus::isNumberOfChannelsSupported (int channels) const
@@ -1205,23 +1247,10 @@ AudioProcessor::BusesLayout AudioProcessor::Bus::getBusesLayoutForLayoutChangeOf
     int busIdx;
     busDirAndIndex (isInputBus, busIdx);
 
-    BusesLayout currentLayout = owner.getBusesLayout();
-    Array<AudioChannelSet>& potentialBusLayout =
-        (isInputBus ? currentLayout.inputBuses : currentLayout.outputBuses);
+    BusesLayout layouts = owner.getBusesLayout();
+    isLayoutSupported (set, &layouts);
 
-    if (potentialBusLayout.getReference (busIdx) == set)
-        return currentLayout;
-
-    potentialBusLayout.getReference (busIdx) = set;
-
-    BusesLayout nearest = owner.getNextBestLayout (currentLayout);
-
-    // Nearest layout has a different number of buses. JUCE plug-ins MUST
-    // have fixed number of buses.
-    jassert (currentLayout.inputBuses. size() == owner.getBusCount (true)
-          && currentLayout.outputBuses.size() == owner.getBusCount (false));
-
-    return nearest;
+    return layouts;
 }
 
 int AudioProcessor::Bus::getChannelIndexInProcessBlockBuffer (int channelIndex) const noexcept
@@ -1271,6 +1300,45 @@ AudioProcessor::BusesProperties AudioProcessor::BusesProperties::withOutput (con
     retval.addBus (false, name, dfltLayout, isActivatedByDefault);
 
     return retval;
+}
+
+//==============================================================================
+int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mainInputLayout,
+                                                      const AudioChannelSet& mainOutputLayout,
+                                                      const bool idForAudioSuite) const
+{
+    int uniqueFormatId = 0;
+    for (int dir = 0; dir < 2; ++dir)
+    {
+        const bool isInput = (dir == 0);
+        const AudioChannelSet& set = (isInput ? mainInputLayout : mainOutputLayout);
+        int aaxFormatIndex = 0;
+
+        if      (set == AudioChannelSet::disabled())           aaxFormatIndex = 0;
+        else if (set == AudioChannelSet::mono())               aaxFormatIndex = 1;
+        else if (set == AudioChannelSet::stereo())             aaxFormatIndex = 2;
+        else if (set == AudioChannelSet::createLCR())          aaxFormatIndex = 3;
+        else if (set == AudioChannelSet::createLCRS())         aaxFormatIndex = 4;
+        else if (set == AudioChannelSet::quadraphonic())       aaxFormatIndex = 5;
+        else if (set == AudioChannelSet::create5point0())      aaxFormatIndex = 6;
+        else if (set == AudioChannelSet::create5point1())      aaxFormatIndex = 7;
+        else if (set == AudioChannelSet::create6point0())      aaxFormatIndex = 8;
+        else if (set == AudioChannelSet::create6point1())      aaxFormatIndex = 9;
+        else if (set == AudioChannelSet::create7point0())      aaxFormatIndex = 10;
+        else if (set == AudioChannelSet::create7point1())      aaxFormatIndex = 11;
+        else if (set == AudioChannelSet::create7point0SDDS())  aaxFormatIndex = 12;
+        else if (set == AudioChannelSet::create7point1SDDS())  aaxFormatIndex = 13;
+        else
+        {
+            // AAX does not support this format and the wrapper should not have
+            // called this method with this layout
+            jassertfalse;
+        }
+
+        uniqueFormatId = (uniqueFormatId << 8) | aaxFormatIndex;
+    }
+
+    return (idForAudioSuite ? 0x6a796161 /* 'jyaa' */ : 0x6a636161 /* 'jcaa' */) + uniqueFormatId;
 }
 
 

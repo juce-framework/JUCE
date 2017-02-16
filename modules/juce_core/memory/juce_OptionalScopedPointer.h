@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED
-#define JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -189,6 +188,3 @@ private:
     //  myPointer.setOwned (myScopedPointer.release())
     void setOwned (const ScopedPointer<ObjectType>&) JUCE_DELETED_FUNCTION;
 };
-
-
-#endif   // JUCE_OPTIONALSCOPEDPOINTER_H_INCLUDED

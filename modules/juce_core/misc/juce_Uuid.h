@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_UUID_H_INCLUDED
-#define JUCE_UUID_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -118,6 +117,3 @@ private:
 
     JUCE_LEAK_DETECTOR (Uuid)
 };
-
-
-#endif   // JUCE_UUID_H_INCLUDED

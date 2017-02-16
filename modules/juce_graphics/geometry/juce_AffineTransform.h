@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AFFINETRANSFORM_H_INCLUDED
-#define JUCE_AFFINETRANSFORM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -274,5 +273,3 @@ public:
     float mat00, mat01, mat02;
     float mat10, mat11, mat12;
 };
-
-#endif   // JUCE_AFFINETRANSFORM_H_INCLUDED

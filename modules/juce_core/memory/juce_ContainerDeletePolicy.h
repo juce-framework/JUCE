@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CONTAINERDELETEPOLICY_H_INCLUDED
-#define JUCE_CONTAINERDELETEPOLICY_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -60,6 +59,3 @@ struct ContainerDeletePolicy
         delete object;
     }
 };
-
-
-#endif   // JUCE_CONTAINERDELETEPOLICY_H_INCLUDED

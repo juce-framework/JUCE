@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
-#define JUCE_TABLEHEADERCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -436,6 +435,3 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */
 typedef TableHeaderComponent::Listener TableHeaderListener;
-
-
-#endif   // JUCE_TABLEHEADERCOMPONENT_H_INCLUDED

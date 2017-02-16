@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="oNvA5C" name="ComponentTutorialExample" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.yourcompany.ComponentTutorialExample"
-              includeBinaryInAppConfig="1" jucerVersion="4.3.0">
+              includeBinaryInAppConfig="1" jucerVersion="4.3.1">
   <MAINGROUP id="WydTVz" name="ComponentTutorialExample">
     <GROUP id="{F2C8112A-EE4B-7AF1-A0A9-16152D1EF1A7}" name="Source">
       <FILE id="t4ngZQ" name="ToggleLightGridComponent.h" compile="0" resource="0"

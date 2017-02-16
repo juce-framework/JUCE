@@ -61,10 +61,10 @@ namespace BinaryData
     const int            jucer_MainTemplate_NoWindow_cppSize = 1992;
 
     extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 3848;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4001;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
-    const int            jucer_MainTemplate_Window_cppSize = 3760;
+    const int            jucer_MainTemplate_Window_cppSize = 3913;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
     const int            jucer_NewComponentTemplate_cppSize = 1389;

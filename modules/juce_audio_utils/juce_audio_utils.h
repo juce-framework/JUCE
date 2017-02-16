@@ -33,7 +33,7 @@
 
   ID:               juce_audio_utils
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE extra audio utility classes
   description:      Classes for audio-related GUI and miscellaneous tasks.
   website:          http://www.juce.com/juce
@@ -48,8 +48,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_UTILS_H_INCLUDED
-#define JUCE_AUDIO_UTILS_H_INCLUDED
+#pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_devices/juce_audio_devices.h>
@@ -89,5 +88,3 @@ namespace juce
 #include "audio_cd/juce_AudioCDReader.h"
 
 }
-
-#endif   // JUCE_AUDIO_UTILS_H_INCLUDED

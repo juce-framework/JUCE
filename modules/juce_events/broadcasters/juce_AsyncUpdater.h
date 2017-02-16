@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ASYNCUPDATER_H_INCLUDED
-#define JUCE_ASYNCUPDATER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -110,6 +109,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncUpdater)
 };
-
-
-#endif   // JUCE_ASYNCUPDATER_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CALLBACKMESSAGE_H_INCLUDED
-#define JUCE_CALLBACKMESSAGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -74,6 +73,3 @@ private:
     // messages still in the system event queue. These aren't harmful, but can cause annoying assertions.
     JUCE_DECLARE_NON_COPYABLE (CallbackMessage)
 };
-
-
-#endif   // JUCE_CALLBACKMESSAGE_H_INCLUDED

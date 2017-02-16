@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
-#define JUCE_KEYPRESSMAPPINGSET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -240,6 +239,3 @@ private:
     KeyPressMappingSet& operator= (const KeyPressMappingSet&);
     JUCE_LEAK_DETECTOR (KeyPressMappingSet)
 };
-
-
-#endif   // JUCE_KEYPRESSMAPPINGSET_H_INCLUDED

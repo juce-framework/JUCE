@@ -33,7 +33,7 @@
 
   ID:               juce_cryptography
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE cryptography classes
   description:      Classes for various basic cryptography functions, including RSA, Blowfish, MD5, SHA, etc.
   website:          http://www.juce.com/juce
@@ -46,8 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_CRYPTOGRAPHY_H_INCLUDED
-#define JUCE_CRYPTOGRAPHY_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_core/juce_core.h>
@@ -63,5 +62,3 @@ namespace juce
 #include "hashing/juce_Whirlpool.h"
 
 }
-
-#endif   // JUCE_CRYPTOGRAPHY_H_INCLUDED

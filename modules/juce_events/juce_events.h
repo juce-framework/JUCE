@@ -39,22 +39,20 @@
 
   ID:               juce_events
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE message and event handling classes
   description:      Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:          http://www.juce.com/juce
   license:          ISC
 
   dependencies:     juce_core
-  linuxPackages:    x11
 
  END_JUCE_MODULE_DECLARATION
 
 *******************************************************************************/
 
 
-#ifndef JUCE_EVENTS_H_INCLUDED
-#define JUCE_EVENTS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_core/juce_core.h>
@@ -81,12 +79,14 @@ namespace juce
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
-#include "native/juce_ScopedXLock.h"
+
+#if JUCE_LINUX
+ #include "native/juce_linux_EventLoop.h"
+#endif
+
 
 #if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW && JUCE_WINDOWS
  #include "native/juce_win32_HiddenMessageWindow.h"
 #endif
 
 }
-
-#endif   // JUCE_EVENTS_H_INCLUDED

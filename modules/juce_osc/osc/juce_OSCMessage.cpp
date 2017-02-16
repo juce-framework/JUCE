@@ -143,7 +143,7 @@ public:
         }
 
 
-       #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+       #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
         beginTest ("Initialisation with argument list (C++11 only)");
         {
             int testInt = 42;

@@ -702,12 +702,10 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 ValueTree::ValueTree (ValueTree&& other) noexcept
     : object (static_cast<SharedObject::Ptr&&> (other.object))
 {
 }
-#endif
 
 ValueTree::~ValueTree()
 {

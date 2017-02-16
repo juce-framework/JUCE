@@ -389,15 +389,26 @@ namespace CoreTextTypeLayout
     static void drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
                                  const CGContextRef& context, const float flipHeight)
     {
-        CTFrameRef frame = createCTFrame (text, CGRectMake ((CGFloat) area.getX(), flipHeight - (CGFloat) area.getBottom(),
-                                                            (CGFloat) area.getWidth(), (CGFloat) area.getHeight()));
+        Rectangle<float> ctFrameArea;
 
         const int verticalJustification = text.getJustification().getOnlyVerticalFlags();
+
+        // Ugly hack to fix a bug in OS X Sierra where the CTFrame needs to be slightly
+        // larger than the font height - otherwise the CTFrame will be invalid
+        if (verticalJustification == Justification::verticallyCentred)
+            ctFrameArea = area.withSizeKeepingCentre (area.getWidth(), area.getHeight() * 1.1f);
+        else if (verticalJustification == Justification::bottom)
+            ctFrameArea = area.withTop (area.getY() - (area.getHeight() * 0.1f));
+        else
+            ctFrameArea = area.withHeight (area.getHeight() * 1.1f);
+
+        CTFrameRef frame = createCTFrame (text, CGRectMake ((CGFloat) ctFrameArea.getX(), flipHeight - (CGFloat) ctFrameArea.getBottom(),
+                                                            (CGFloat) ctFrameArea.getWidth(), (CGFloat) ctFrameArea.getHeight()));
 
         if (verticalJustification == Justification::verticallyCentred
              || verticalJustification == Justification::bottom)
         {
-            float adjust = area.getHeight() - findCTFrameHeight (frame);
+            float adjust = ctFrameArea.getHeight() - findCTFrameHeight (frame);
 
             if (verticalJustification == Justification::verticallyCentred)
                 adjust *= 0.5f;
@@ -552,6 +563,13 @@ public:
                                                         (CFIndex) dataCopy.getSize(), kCFAllocatorNull);
         CGDataProviderRef provider = CGDataProviderCreateWithCFData (cfData);
         CFRelease (cfData);
+
+       #if JUCE_IOS
+        // Workaround for a an obscure iOS bug which can cause the app to dead-lock
+        // when loading custom type faces. See: http://www.openradar.me/18778790 and
+        // http://stackoverflow.com/questions/40242370/app-hangs-in-simulator
+        [UIFont systemFontOfSize: 12];
+       #endif
 
         fontRef = CGFontCreateWithDataProvider (provider);
         CGDataProviderRelease (provider);

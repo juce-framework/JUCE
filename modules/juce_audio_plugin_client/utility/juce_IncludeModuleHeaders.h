@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_INCLUDEMODULEHEADERS_H_INCLUDED
-#define JUCE_INCLUDEMODULEHEADERS_H_INCLUDED
+#pragma once
 
 #include "../juce_audio_plugin_client.h"
 
@@ -47,5 +46,3 @@ namespace juce
 }
 
 extern AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
-
-#endif   // JUCE_INCLUDEMODULEHEADERS_H_INCLUDED

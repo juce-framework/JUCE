@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SORTEDSET_H_INCLUDED
-#define JUCE_SORTEDSET_H_INCLUDED
+#pragma once
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -498,5 +497,3 @@ private:
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
-
-#endif   // JUCE_SORTEDSET_H_INCLUDED

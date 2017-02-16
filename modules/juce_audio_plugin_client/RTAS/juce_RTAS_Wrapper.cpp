@@ -31,6 +31,10 @@
  // (this is a workaround for a build problem in VC9)
  #define _DO_NOT_DECLARE_INTERLOCKED_INTRINSICS_IN_MEMORY
  #include <intrin.h>
+
+ #ifndef JucePlugin_WinBag_path
+  #error "You need to define the JucePlugin_WinBag_path value!"
+ #endif
 #endif
 
 #include "juce_RTAS_DigiCode_Header.h"
@@ -754,11 +758,11 @@ public:
         {
             case ficFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
             case ficFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
-            case ficFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 29.97002997; break;
-            case ficFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 29.97002997; break;
+            case ficFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 30.0 * 1000.0 / 1001.0; break;
+            case ficFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 30.0 * 1000.0 / 1001.0; break;
             case ficFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
             case ficFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
-            case ficFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.976; break;
+            case ficFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 24.0 * 1000.0 / 1001.0; break;
             default:                         info.frameRate = AudioPlayHead::fpsUnknown;  break;
         }
 

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_H_INCLUDED
-#define JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -115,7 +114,3 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsPostScriptRenderer)
 };
-
-
-
-#endif   // JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_H_INCLUDED

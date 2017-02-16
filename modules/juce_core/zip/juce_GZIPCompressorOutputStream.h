@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_GZIPCOMPRESSOROUTPUTSTREAM_H_INCLUDED
-#define JUCE_GZIPCOMPRESSOROUTPUTSTREAM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -99,5 +98,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream)
 };
-
-#endif   // JUCE_GZIPCOMPRESSOROUTPUTSTREAM_H_INCLUDED

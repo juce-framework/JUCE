@@ -29,7 +29,7 @@
 /*  The AppConfig.h file should be a file in your project, containing info to describe the
     plugin's name, type, etc. The introjucer will generate this file automatically for you.
 
-    You may need to adjust the include path of your project to make sure it can be 
+    You may need to adjust the include path of your project to make sure it can be
     found by this include statement. (Don't hack this file to change the include path)
 */
 #include "AppConfig.h"
@@ -59,7 +59,7 @@
  #define RES_ID         2000
  #define COMP_TYPE      kAudioUnitCarbonViewComponentType
  #define COMP_SUBTYPE   JucePlugin_AUSubType
- #define COMP_MANUF		JucePlugin_AUManufacturerCode
+ #define COMP_MANUF     JucePlugin_AUManufacturerCode
  #define VERSION        JucePlugin_VersionCode
  #define NAME           JucePlugin_Manufacturer ": " JucePlugin_Name " View"
  #define DESCRIPTION    NAME

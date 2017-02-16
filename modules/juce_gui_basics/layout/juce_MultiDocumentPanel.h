@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MULTIDOCUMENTPANEL_H_INCLUDED
-#define JUCE_MULTIDOCUMENTPANEL_H_INCLUDED
+#pragma once
 
 class MultiDocumentPanel;
 
@@ -299,6 +298,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanel)
 };
-
-
-#endif   // JUCE_MULTIDOCUMENTPANEL_H_INCLUDED

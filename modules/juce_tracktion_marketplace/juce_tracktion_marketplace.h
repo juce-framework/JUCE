@@ -33,7 +33,7 @@
 
   ID:               juce_tracktion_marketplace
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             JUCE Tracktion marketplace support
   description:      Classes for online product authentication via the Tracktion marketplace.
   website:          http://www.juce.com/juce
@@ -46,8 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
-#define JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
+#pragma once
 
 /**
     The Tracktion Marketplace module is a simple user-registration system for
@@ -83,6 +82,3 @@ namespace juce
     #include "marketplace/juce_OnlineUnlockForm.h"
    #endif
 }
-
-
-#endif   // JUCE_TRACKTION_MARKETPLACE_H_INCLUDED

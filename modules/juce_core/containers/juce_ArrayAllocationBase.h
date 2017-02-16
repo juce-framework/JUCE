@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ARRAYALLOCATIONBASE_H_INCLUDED
-#define JUCE_ARRAYALLOCATIONBASE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -60,7 +59,6 @@ public:
     {
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     ArrayAllocationBase (ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&& other) noexcept
         : elements (static_cast<HeapBlock<ElementType>&&> (other.elements)),
           numAllocated (other.numAllocated)
@@ -73,7 +71,6 @@ public:
         numAllocated = other.numAllocated;
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Changes the amount of storage allocated.
@@ -135,6 +132,3 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE (ArrayAllocationBase)
 };
-
-
-#endif   // JUCE_ARRAYALLOCATIONBASE_H_INCLUDED

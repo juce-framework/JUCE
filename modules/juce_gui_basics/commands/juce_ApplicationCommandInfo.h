@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED
-#define JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -184,6 +183,3 @@ struct JUCE_API  ApplicationCommandInfo
     */
     int flags;
 };
-
-
-#endif   // JUCE_APPLICATIONCOMMANDINFO_H_INCLUDED

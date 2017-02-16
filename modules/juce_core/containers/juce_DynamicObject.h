@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DYNAMICOBJECT_H_INCLUDED
-#define JUCE_DYNAMICOBJECT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -135,7 +134,3 @@ private:
 
     JUCE_LEAK_DETECTOR (DynamicObject)
 };
-
-
-
-#endif   // JUCE_DYNAMICOBJECT_H_INCLUDED

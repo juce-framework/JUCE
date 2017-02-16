@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STANDARDHEADER_H_INCLUDED
-#define JUCE_STANDARDHEADER_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /** Current JUCE version number.
@@ -38,7 +37,7 @@
 */
 #define JUCE_MAJOR_VERSION      4
 #define JUCE_MINOR_VERSION      3
-#define JUCE_BUILDNUMBER        0
+#define JUCE_BUILDNUMBER        1
 
 /** Current Juce version number.
 
@@ -157,5 +156,3 @@
 #ifndef DOXYGEN
  #define JUCE_NAMESPACE juce  // This old macro is deprecated: you should just use the juce namespace directly.
 #endif
-
-#endif   // JUCE_STANDARDHEADER_H_INCLUDED

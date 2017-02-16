@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPENGLEXTENSIONS_H_INCLUDED
-#define JUCE_OPENGLEXTENSIONS_H_INCLUDED
+#pragma once
 
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
@@ -153,5 +152,3 @@ struct OpenGLExtensionFunctions
 
     #undef JUCE_DECLARE_GL_FUNCTION
 };
-
-#endif   // JUCE_OPENGLEXTENSIONS_H_INCLUDED

@@ -197,9 +197,9 @@ namespace AiffFileHelpers
     {
         static bool isValidTag (const char* d) noexcept
         {
-            return CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (d[0])
-                && CharacterFunctions::isLetterOrDigit (d[1]) && CharacterFunctions::isLowerCase (d[1])
-                && CharacterFunctions::isLetterOrDigit (d[2]) && CharacterFunctions::isLowerCase (d[2]);
+            return CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (static_cast<juce_wchar> (d[0]))
+                && CharacterFunctions::isLetterOrDigit (d[1]) && CharacterFunctions::isLowerCase (static_cast<juce_wchar> (d[1]))
+                && CharacterFunctions::isLetterOrDigit (d[2]) && CharacterFunctions::isLowerCase (static_cast<juce_wchar> (d[2]));
         }
 
         static bool isAppleGenre (const String& tag) noexcept

@@ -84,7 +84,7 @@ public:
                             if (digitValue < 0)
                                 return createFail ("Syntax error in unicode escape sequence");
 
-                            c = (juce_wchar) ((c << 4) + digitValue);
+                            c = (juce_wchar) ((c << 4) + static_cast<juce_wchar> (digitValue));
                         }
 
                         break;

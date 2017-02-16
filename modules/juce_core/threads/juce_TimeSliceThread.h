@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TIMESLICETHREAD_H_INCLUDED
-#define JUCE_TIMESLICETHREAD_H_INCLUDED
+#pragma once
 
 class TimeSliceThread;
 
@@ -146,6 +145,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSliceThread)
 };
-
-
-#endif   // JUCE_TIMESLICETHREAD_H_INCLUDED

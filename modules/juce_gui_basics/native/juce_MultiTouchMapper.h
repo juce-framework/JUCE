@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MULTITOUCHMAPPER_H_INCLUDED
-#define JUCE_MULTITOUCHMAPPER_H_INCLUDED
+#pragma once
 
 template <typename IDType>
 class MultiTouchMapper
@@ -73,5 +72,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiTouchMapper)
 };
-
-#endif   // JUCE_MULTITOUCHMAPPER_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED
-#define JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -62,6 +61,3 @@ private:
     SystemAudioVolume(); // Don't instantiate this class, just call its static fns.
     JUCE_DECLARE_NON_COPYABLE (SystemAudioVolume)
 };
-
-
-#endif   // JUCE_SYSTEMAUDIOVOLUME_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RECTANGLE_H_INCLUDED
-#define JUCE_RECTANGLE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -974,6 +973,3 @@ private:
     static int ceilAsInt (float n) noexcept    { return (int) std::ceil (n); }
     static int ceilAsInt (double n) noexcept   { return (int) std::ceil (n); }
 };
-
-
-#endif   // JUCE_RECTANGLE_H_INCLUDED

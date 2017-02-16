@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTEDITOR_H_INCLUDED
-#define JUCE_TEXTEDITOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -748,6 +747,3 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */
 typedef TextEditor::Listener TextEditorListener;
-
-
-#endif   // JUCE_TEXTEDITOR_H_INCLUDED

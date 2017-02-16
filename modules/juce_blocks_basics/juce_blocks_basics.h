@@ -39,7 +39,7 @@
 
   ID:               juce_blocks_basics
   vendor:           juce
-  version:          4.3.0
+  version:          4.3.1
   name:             Provides low-level control over ROLI BLOCKS devices
   description:      JUCE wrapper for low-level control over ROLI BLOCKS devices.
   website:          http://developer.roli.com
@@ -52,8 +52,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_BLOCKS_BASICS_H_INCLUDED
-#define JUCE_BLOCKS_BASICS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_events/juce_events.h>
@@ -85,6 +84,3 @@ namespace juce
   #include "visualisers/juce_DrumPadLEDProgram.h"
   #include "visualisers/juce_BitmapLEDProgram.h"
 }
-
-
-#endif   // JUCE_BLOCKS_BASICS_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RELATIVEPOINT_H_INCLUDED
-#define JUCE_RELATIVEPOINT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -85,6 +84,3 @@ public:
     // The actual X and Y coords...
     RelativeCoordinate x, y;
 };
-
-
-#endif   // JUCE_RELATIVEPOINT_H_INCLUDED

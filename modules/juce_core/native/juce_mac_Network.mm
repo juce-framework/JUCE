@@ -1026,9 +1026,6 @@ public:
 
     void cancel()
     {
-        if (finished || isError())
-            return;
-
         if (connection != nullptr)
             connection->cancel();
     }

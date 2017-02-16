@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_INTERPROCESSCONNECTION_H_INCLUDED
-#define JUCE_INTERPROCESSCONNECTION_H_INCLUDED
+#pragma once
 
 class InterprocessConnectionServer;
 class MemoryBlock;
@@ -212,5 +211,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection)
 };
-
-#endif   // JUCE_INTERPROCESSCONNECTION_H_INCLUDED

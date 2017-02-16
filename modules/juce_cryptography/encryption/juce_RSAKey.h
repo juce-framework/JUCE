@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RSAKEY_H_INCLUDED
-#define JUCE_RSAKEY_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -169,6 +168,3 @@ private:
 
     JUCE_LEAK_DETECTOR (RSAKey)
 };
-
-
-#endif   // JUCE_RSAKEY_H_INCLUDED

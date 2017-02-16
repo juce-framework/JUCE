@@ -140,6 +140,8 @@ public:
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (Note* note = dynamic_cast<Note*> (component))
             return note->saveIfNeededAndUserAgrees() != FileBasedDocument::failedToWriteToFile;
+       #else
+        ignoreUnused (component);
        #endif
 
         return true;

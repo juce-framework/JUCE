@@ -101,11 +101,7 @@ namespace juce
  #endif
  #endif
 
- #if JUCE_LINUX
-  extern Display* display;
- #endif
-
-  extern JUCE_API pointer_sized_int handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
+  extern JUCE_API bool handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
 }
 
 
@@ -332,6 +328,10 @@ public:
 
         vstEffect.flags |= vstEffectFlagDataInChunks;
 
+       #if JUCE_LINUX
+        display = XWindowSystem::getInstance()->displayRef();
+       #endif
+
         activePlugins.add (this);
     }
 
@@ -370,6 +370,10 @@ public:
                 messageThreadIsDefinitelyCorrect = false;
                #endif
             }
+
+           #if JUCE_LINUX
+            display = XWindowSystem::getInstance()->displayUnref();
+           #endif
         }
 
     }
@@ -586,7 +590,9 @@ public:
                     hostCallback (&vstEffect, hostOpcodePlugInWantsMidi, 0, 1, 0, 0);
             }
 
-            if (getHostType().isAbletonLive() && filter->getTailLengthSeconds() == DBL_MAX && hostCallback != nullptr)
+            if (getHostType().isAbletonLive()
+                 && hostCallback != nullptr
+                 && filter->getTailLengthSeconds() == std::numeric_limits<double>::max())
             {
                 AbletonLiveHostSpecific hostCmd;
 
@@ -665,17 +671,17 @@ public:
             {
                 case vstSmpteRateFps24:        rate = AudioPlayHead::fps24;       fps = 24.0;  break;
                 case vstSmpteRateFps25:        rate = AudioPlayHead::fps25;       fps = 25.0;  break;
-                case vstSmpteRateFps2997:      rate = AudioPlayHead::fps2997;     fps = 29.97; break;
+                case vstSmpteRateFps2997:      rate = AudioPlayHead::fps2997;     fps = 30.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps30:        rate = AudioPlayHead::fps30;       fps = 30.0;  break;
-                case vstSmpteRateFps2997drop:  rate = AudioPlayHead::fps2997drop; fps = 29.97; break;
+                case vstSmpteRateFps2997drop:  rate = AudioPlayHead::fps2997drop; fps = 30.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps30drop:    rate = AudioPlayHead::fps30drop;   fps = 30.0;  break;
 
                 case vstSmpteRate16mmFilm:
                 case vstSmpteRate35mmFilm:     fps = 24.0; break;
 
-                case vstSmpteRateFps239:       fps = 23.976; break;
-                case vstSmpteRateFps249:       fps = 24.976; break;
-                case vstSmpteRateFps599:       fps = 59.94; break;
+                case vstSmpteRateFps239:       fps = 24.0 * 1000.0 / 1001.0; break;
+                case vstSmpteRateFps249:       fps = 25.0 * 1000.0 / 1001.0; break;
+                case vstSmpteRateFps599:       fps = 60.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps60:        fps = 60; break;
 
                 default:                       jassertfalse; // unknown frame-rate..
@@ -1153,7 +1159,7 @@ public:
             case plugInOpcodeGetManufacturerProductName:  return handleGetPlugInName (args);
             case plugInOpcodeGetManufacturerName:         return handleGetManufacturerName (args);
             case plugInOpcodeGetManufacturerVersion:      return handleGetManufacturerVersion (args);
-            case plugInOpcodeManufacturerSpecific:        return handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt);
+            case plugInOpcodeManufacturerSpecific:        return handleManufacturerSpecific (args);
             case plugInOpcodeCanPlugInDo:                 return handleCanPlugInDo (args);
             case plugInOpcodeGetTailSize:                 return handleGetTailSize (args);
             case plugInOpcodeKeyboardFocusRequired:       return handleKeyboardFocusRequired (args);
@@ -1341,7 +1347,11 @@ public:
                 Rectangle<int> childBounds (child->getWidth(), child->getHeight());
                 childBounds *= scale;
 
-                XResizeWindow (display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
+                {
+                    ScopedXDisplay xDisplay;
+                    ::Display* display = xDisplay.get();
+                    XResizeWindow (display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
+                }
                #endif
 
                #if JUCE_MAC
@@ -1402,6 +1412,7 @@ private:
    #if JUCE_MAC
     void* hostWindow;
    #elif JUCE_LINUX
+    ::Display* display;
     Window hostWindow;
    #else
     HWND hostWindow;
@@ -1797,7 +1808,7 @@ private:
         VstSpeakerConfiguration* pluginInput  = reinterpret_cast<VstSpeakerConfiguration*> (args.value);
         VstSpeakerConfiguration* pluginOutput = reinterpret_cast<VstSpeakerConfiguration*> (args.ptr);
 
-        if (pluginHasSidechainsOrAuxs() || filter->isMidiEffect())
+        if (filter->isMidiEffect())
             return 0;
 
         const int numIns  = filter->getBusCount (true);
@@ -1822,20 +1833,6 @@ private:
 
         if (pluginOutput != nullptr && pluginOutput->numberOfChannels > 0 && numOuts == 0)
             return 0;
-
-        if (pluginInput != nullptr && pluginInput->type >= 0)
-        {
-            // inconsistent request?
-            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginInput).size() != pluginInput->numberOfChannels)
-                return 0;
-        }
-
-        if (pluginOutput != nullptr && pluginOutput->type >= 0)
-        {
-            // inconsistent request?
-            if (SpeakerMappings::vstArrangementTypeToChannelSet (*pluginOutput).size() != pluginOutput->numberOfChannels)
-                return 0;
-        }
 
         AudioProcessor::BusesLayout layouts = filter->getBusesLayout();
 
@@ -1875,6 +1872,17 @@ private:
     pointer_sized_int handleGetManufacturerVersion (VstOpCodeArguments)
     {
         return convertHexVersionToDecimal (JucePlugin_VersionCode);
+    }
+
+    pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
+    {
+        if (handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
+            return 1;
+
+        if (auto vstFilter = dynamic_cast<VSTCallbackHandler*> (filter))
+            return vstFilter->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
+
+        return 0;
     }
 
     pointer_sized_int handleCanPlugInDo (VstOpCodeArguments args)
@@ -2104,6 +2112,14 @@ namespace
         return (int) pluginEntryPoint (audioMaster);
     }
    #endif
+
+    extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID)
+    {
+        if (reason == DLL_PROCESS_ATTACH)
+            Process::setCurrentModuleInstanceHandle (instance);
+
+        return true;
+    }
 #endif
 
 #endif

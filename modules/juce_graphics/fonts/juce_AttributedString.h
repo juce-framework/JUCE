@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ATTRIBUTEDSTRING_H_INCLUDED
-#define JUCE_ATTRIBUTEDSTRING_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -47,10 +46,8 @@ public:
 
     AttributedString (const AttributedString&);
     AttributedString& operator= (const AttributedString&);
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     AttributedString (AttributedString&&) noexcept;
     AttributedString& operator= (AttributedString&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~AttributedString() noexcept;
@@ -154,10 +151,8 @@ public:
         ~Attribute() noexcept;
         Attribute (const Attribute&) noexcept;
         Attribute& operator= (const Attribute&) noexcept;
-       #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
         Attribute (Attribute&&) noexcept;
         Attribute& operator= (Attribute&&) noexcept;
-       #endif
 
         /** Creates an attribute that specifies the font and colour for a range of characters. */
         Attribute (Range<int> range, const Font& font, Colour colour) noexcept;
@@ -206,5 +201,3 @@ private:
 
     JUCE_LEAK_DETECTOR (AttributedString)
 };
-
-#endif   // JUCE_ATTRIBUTEDSTRING_H_INCLUDED

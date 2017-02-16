@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED
-#define JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -117,6 +116,3 @@ struct TextEditorKeyMapper
         return false;
     }
 };
-
-
-#endif   // JUCE_TEXTEDITORKEYMAPPER_H_INCLUDED

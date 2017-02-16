@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ANIMATEDPOSITIONBEHAVIOURS_H_INCLUDED
-#define JUCE_ANIMATEDPOSITIONBEHAVIOURS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -146,6 +145,3 @@ namespace AnimatedPositionBehaviours
         double targetSnapPosition;
     };
 }
-
-
-#endif   // JUCE_ANIMATEDPOSITIONBEHAVIOURS_H_INCLUDED
