@@ -2178,7 +2178,8 @@ static const unsigned char temp_binary_data_17[] =
 "    {\r\n"
 "    public:\r\n"
 "        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Colours::lightgrey,\r\n"
+"                                                    Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
 "                                                    DocumentWindow::allButtons)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
@@ -2283,7 +2284,8 @@ static const unsigned char temp_binary_data_18[] =
 "    {\r\n"
 "    public:\r\n"
 "        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Colours::lightgrey,\r\n"
+"                                                    Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
 "                                                    DocumentWindow::allButtons)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
@@ -5294,8 +5296,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x28d496ad:  numBytes = 1161; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1992; return jucer_MainTemplate_NoWindow_cpp;
-        case 0xda2391f8:  numBytes = 3848; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x400bc026:  numBytes = 3760; return jucer_MainTemplate_Window_cpp;
+        case 0xda2391f8:  numBytes = 4001; return jucer_MainTemplate_SimpleWindow_cpp;
+        case 0x400bc026:  numBytes = 3913; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 666; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;

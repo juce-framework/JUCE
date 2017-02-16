@@ -405,10 +405,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_events\native\juce_android_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_android_Messaging.cpp
 		..\..\..\..\modules\juce_events\native\juce_ios_MessageManager.mm = ..\..\..\..\modules\juce_events\native\juce_ios_MessageManager.mm
+		..\..\..\..\modules\juce_events\native\juce_linux_EventLoop.h = ..\..\..\..\modules\juce_events\native\juce_linux_EventLoop.h
 		..\..\..\..\modules\juce_events\native\juce_linux_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_linux_Messaging.cpp
 		..\..\..\..\modules\juce_events\native\juce_mac_MessageManager.mm = ..\..\..\..\modules\juce_events\native\juce_mac_MessageManager.mm
 		..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
-		..\..\..\..\modules\juce_events\native\juce_ScopedXLock.h = ..\..\..\..\modules\juce_events\native\juce_ScopedXLock.h
 		..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
 	EndProjectSection
@@ -856,9 +856,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{50F1DC
 		..\..\..\..\modules\juce_gui_basics\native\juce_android_Windowing.cpp = ..\..\..\..\modules\juce_gui_basics\native\juce_android_Windowing.cpp
 		..\..\..\..\modules\juce_gui_basics\native\juce_ios_UIViewComponentPeer.mm = ..\..\..\..\modules\juce_gui_basics\native\juce_ios_UIViewComponentPeer.mm
 		..\..\..\..\modules\juce_gui_basics\native\juce_ios_Windowing.mm = ..\..\..\..\modules\juce_gui_basics\native\juce_ios_Windowing.mm
-		..\..\..\..\modules\juce_gui_basics\native\juce_linux_Clipboard.cpp = ..\..\..\..\modules\juce_gui_basics\native\juce_linux_Clipboard.cpp
 		..\..\..\..\modules\juce_gui_basics\native\juce_linux_FileChooser.cpp = ..\..\..\..\modules\juce_gui_basics\native\juce_linux_FileChooser.cpp
-		..\..\..\..\modules\juce_gui_basics\native\juce_linux_Windowing.cpp = ..\..\..\..\modules\juce_gui_basics\native\juce_linux_Windowing.cpp
+		..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11.cpp = ..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11.cpp
+		..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11.h = ..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11.h
+		..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11_Clipboard.cpp = ..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11_Clipboard.cpp
+		..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11_Windowing.cpp = ..\..\..\..\modules\juce_gui_basics\native\juce_linux_X11_Windowing.cpp
 		..\..\..\..\modules\juce_gui_basics\native\juce_mac_FileChooser.mm = ..\..\..\..\modules\juce_gui_basics\native\juce_mac_FileChooser.mm
 		..\..\..\..\modules\juce_gui_basics\native\juce_mac_MainMenu.mm = ..\..\..\..\modules\juce_gui_basics\native\juce_mac_MainMenu.mm
 		..\..\..\..\modules\juce_gui_basics\native\juce_mac_MouseCursor.mm = ..\..\..\..\modules\juce_gui_basics\native\juce_mac_MouseCursor.mm
@@ -1006,7 +1008,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5B0FE56E-266D-A62C-D8A9-D1F5E7905AF2}.Debug|Win32.Build.0 = Debug|Win32
+		{5B0FE56E-266D-A62C-D8A9-D1F5E7905AF2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5B0FE56E-266D-A62C-D8A9-D1F5E7905AF2}.Release|Win32.Build.0 = Release|Win32
+		{5B0FE56E-266D-A62C-D8A9-D1F5E7905AF2}.Release|Win32.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
