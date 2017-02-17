@@ -88,7 +88,7 @@ public:
     //==============================================================================
     CachedValue<String> androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
                         androidVersionCode, androidMinimumSDK, androidTheme,
-                        androidSharedLibraries, androidStaticLibraries;
+                        androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder;
 
     CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded;
     CachedValue<String> androidOtherPermissions;
@@ -108,6 +108,7 @@ public:
           androidTheme (settings, Ids::androidTheme, nullptr),
           androidSharedLibraries (settings, Ids::androidSharedLibraries, nullptr, ""),
           androidStaticLibraries (settings, Ids::androidStaticLibraries, nullptr, ""),
+          androidExtraAssetsFolder (settings, Ids::androidExtraAssetsFolder, nullptr, ""),
           androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
           androidMicNeeded (settings, Ids::microphonePermissionNeeded, nullptr, false),
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
@@ -216,6 +217,14 @@ public:
         }
 
         writeCmakeFile (appFolder.getChildFile ("CMakeLists.txt"));
+
+        File extraAssets (getProject().getFile().getParentDirectory().getChildFile(androidExtraAssetsFolder.get()));
+        if (extraAssets.exists() && extraAssets.isDirectory())
+        {
+            const File assetsFolder (appFolder.getChildFile ("src/main/assets"));
+            if (assetsFolder.deleteRecursively())
+                extraAssets.copyDirectoryTo (assetsFolder);
+        }
     }
 
     void removeOldFiles (const File& targetFolder) const
@@ -697,6 +706,9 @@ private:
 
         props.add (new TextWithDefaultPropertyComponent<String> (androidMinimumSDK, "Minimum SDK version", 32),
                    "The number of the minimum version of the Android SDK that the app requires");
+
+        props.add (new TextPropertyComponent (androidExtraAssetsFolder.getPropertyAsValue(), "Extra Android Assets", 256, false),
+                   "A path to a folder (relative to the project folder) which conatins extra android assets.");
     }
 
     //==============================================================================
