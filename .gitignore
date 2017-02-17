@@ -37,11 +37,9 @@ profile
 **/VisualStudio2010/Release
 **/VisualStudio2012/Debug
 **/VisualStudio2012/Release
-**/VisualStudio2013/Debug
-**/VisualStudio2013/Release
+**/VisualStudio2013/Win32
 **/VisualStudio2013/x64
-**/VisualStudio2015/Debug
-**/VisualStudio2015/Release
+**/VisualStudio2015/Win32
 **/VisualStudio2015/x64
 **/CodeBlocks/bin
 **/CodeBlocks/obj
