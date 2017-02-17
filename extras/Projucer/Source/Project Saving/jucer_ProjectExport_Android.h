@@ -218,12 +218,16 @@ public:
 
         writeCmakeFile (appFolder.getChildFile ("CMakeLists.txt"));
 
-        File extraAssets (getProject().getFile().getParentDirectory().getChildFile(androidExtraAssetsFolder.get()));
-        if (extraAssets.exists() && extraAssets.isDirectory())
+        const String androidExtraAssetsFolderValue = androidExtraAssetsFolder.get();
+        if (androidExtraAssetsFolderValue.isNotEmpty())
         {
-            const File assetsFolder (appFolder.getChildFile ("src/main/assets"));
-            if (assetsFolder.deleteRecursively())
-                extraAssets.copyDirectoryTo (assetsFolder);
+            File extraAssets (getProject().getFile().getParentDirectory().getChildFile(androidExtraAssetsFolderValue));
+            if (extraAssets.exists() && extraAssets.isDirectory())
+            {
+                const File assetsFolder (appFolder.getChildFile ("src/main/assets"));
+                if (assetsFolder.deleteRecursively())
+                    extraAssets.copyDirectoryTo (assetsFolder);
+            }
         }
     }
 
