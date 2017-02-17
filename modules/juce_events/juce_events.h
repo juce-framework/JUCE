@@ -53,6 +53,7 @@
 
 
 #pragma once
+#define JUCE_EVENTS_H_INCLUDED
 
 //==============================================================================
 #include <juce_core/juce_core.h>

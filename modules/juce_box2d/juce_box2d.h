@@ -47,6 +47,7 @@
 
 
 #pragma once
+#define JUCE_BOX2D_H_INCLUDED
 
 //==============================================================================
 #include <juce_graphics/juce_graphics.h>

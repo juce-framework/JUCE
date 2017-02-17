@@ -49,6 +49,7 @@
 
 
 #pragma once
+#define JUCE_AUDIO_UTILS_H_INCLUDED
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_devices/juce_audio_devices.h>

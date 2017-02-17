@@ -49,6 +49,7 @@
 
 
 #pragma once
+#define JUCE_AUDIO_FORMATS_H_INCLUDED
 
 #include <juce_audio_basics/juce_audio_basics.h>
 
