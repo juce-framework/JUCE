@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_OPENDOCUMENTMANAGER_H_INCLUDED
-#define JUCER_OPENDOCUMENTMANAGER_H_INCLUDED
+#pragma once
 
 #include "../Project/jucer_Project.h"
 
@@ -150,6 +149,3 @@ private:
 
     Array<OpenDocumentManager::Document*> previousDocs, nextDocs;
 };
-
-
-#endif   // JUCER_OPENDOCUMENTMANAGER_H_INCLUDED

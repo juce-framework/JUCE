@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_UTILITYFUNCTIONS_H_INCLUDED
-#define JUCER_UTILITYFUNCTIONS_H_INCLUDED
+#pragma once
 
 inline String quotedString (const String& s, bool wrapInTransMacro)
 {
@@ -112,5 +111,3 @@ inline void drawMouseOverCorners (Graphics& g, int w, int h)
     for (int i = r.getNumRectangles(); --i >= 0;)
         g.fillRect (r.getRectangle (i));
 }
-
-#endif   // JUCER_UTILITYFUNCTIONS_H_INCLUDED

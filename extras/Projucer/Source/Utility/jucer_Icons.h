@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_ICONS_H_INCLUDED
-#define JUCER_ICONS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -77,6 +76,3 @@ private:
 };
 
 const Icons& getIcons();
-
-
-#endif   // JUCER_ICONS_H_INCLUDED

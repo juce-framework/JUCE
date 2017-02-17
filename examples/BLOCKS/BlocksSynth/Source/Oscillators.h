@@ -1,6 +1,4 @@
-
-#ifndef OSCILLATORS_H_INCLUDED
-#define OSCILLATORS_H_INCLUDED
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -224,5 +222,3 @@ struct TriangleVoice : public Oscillator
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TriangleVoice)
 };
-
-#endif  // OSCILLATORS_H_INCLUDED

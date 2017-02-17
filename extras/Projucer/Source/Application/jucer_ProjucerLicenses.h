@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef PROJUCER_PROJUCERLICENSES_H_INCLUDED
-#define PROJUCER_PROJUCERLICENSES_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -137,7 +136,3 @@ private:
     static void crashCallback (const char*) {}
     static void quitCallback() {}
 };
-
-
-
-#endif  // PROJUCER_PROJUCERLICENSES_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FILEHELPERS_H_INCLUDED
-#define JUCER_FILEHELPERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -91,6 +90,3 @@ private:
     Time fileModificationTime;
     int64 fileHashCode, fileSize;
 };
-
-
-#endif   // JUCER_FILEHELPERS_H_INCLUDED

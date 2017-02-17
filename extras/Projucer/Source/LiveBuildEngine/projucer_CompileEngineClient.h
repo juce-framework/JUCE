@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __PROJUCER_CLANGCLIENT_H_5AE7396F__
-#define __PROJUCER_CLANGCLIENT_H_5AE7396F__
+#pragma once
 
 #include "projucer_ActivityList.h"
 #include "projucer_ErrorList.h"
@@ -166,6 +165,3 @@ struct LiveBuildProjectSettings
     static bool areWarningsDisabled (Project&);
     static void setWarningsDisabled (Project&, bool);
 };
-
-
-#endif  // __PROJUCER_CLANGCLIENT_H_5AE7396F__

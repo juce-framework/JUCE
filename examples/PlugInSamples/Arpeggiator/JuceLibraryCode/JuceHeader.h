@@ -10,8 +10,7 @@
 
 */
 
-#ifndef __APPHEADERFILE_NXASZK__
-#define __APPHEADERFILE_NXASZK__
+#pragma once
 
 #include "AppConfig.h"
 
@@ -45,5 +44,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x10000;
 }
 #endif
-
-#endif   // __APPHEADERFILE_NXASZK__

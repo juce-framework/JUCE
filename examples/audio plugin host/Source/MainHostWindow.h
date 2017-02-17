@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __MAINHOSTWINDOW_JUCEHEADER__
-#define __MAINHOSTWINDOW_JUCEHEADER__
+#pragma once
 
 #include "FilterGraph.h"
 #include "GraphEditorPanel.h"
@@ -108,6 +107,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainHostWindow)
 };
-
-
-#endif   // __MAINHOSTWINDOW_JUCEHEADER__

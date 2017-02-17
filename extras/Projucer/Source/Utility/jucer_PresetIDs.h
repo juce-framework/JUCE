@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PRESETIDS_H_INCLUDED
-#define JUCER_PRESETIDS_H_INCLUDED
+#pragma once
 
 
 // Handy list of static Identifiers..
@@ -236,5 +235,3 @@ namespace Ids
 
     #undef DECLARE_ID
 }
-
-#endif   // JUCER_PRESETIDS_H_INCLUDED

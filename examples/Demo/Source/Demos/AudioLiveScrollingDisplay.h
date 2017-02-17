@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __AUDIOLIVESCROLLINGDISPLAY_H_4C3BD3A7__
-#define __AUDIOLIVESCROLLINGDISPLAY_H_4C3BD3A7__
+#pragma once
 
 #include "../JuceDemoHeader.h"
 
@@ -78,6 +77,3 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveScrollingAudioDisplay)
 };
-
-
-#endif  // __AUDIOLIVESCROLLINGDISPLAY_H_4C3BD3A7__

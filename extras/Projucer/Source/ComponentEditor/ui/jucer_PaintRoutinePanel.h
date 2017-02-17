@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTROUTINEPANEL_H_INCLUDED
-#define JUCER_PAINTROUTINEPANEL_H_INCLUDED
+#pragma once
 
 #include "jucer_PaintRoutineEditor.h"
 #include "jucer_EditingPanelBase.h"
@@ -44,6 +43,3 @@ public:
 private:
     PaintRoutine& routine;
 };
-
-
-#endif   // JUCER_PAINTROUTINEPANEL_H_INCLUDED

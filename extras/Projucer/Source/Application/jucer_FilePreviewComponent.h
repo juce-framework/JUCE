@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FILEPREVIEWCOMPONENT_H_INCLUDED
-#define JUCER_FILEPREVIEWCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "../Utility/jucer_ProjucerLookAndFeel.h"
 
@@ -128,6 +127,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemPreviewComponent)
 };
-
-
-#endif   // JUCER_FILEPREVIEWCOMPONENT_H_INCLUDED

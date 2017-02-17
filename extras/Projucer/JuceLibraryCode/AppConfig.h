@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_M70QFTRRK__
-#define __JUCE_APPCONFIG_M70QFTRRK__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -116,6 +115,3 @@
 #ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
  //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR
 #endif
-
-
-#endif  // __JUCE_APPCONFIG_M70QFTRRK__

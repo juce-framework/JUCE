@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PROJECTTYPE_H_INCLUDED
-#define JUCER_PROJECTTYPE_H_INCLUDED
+#pragma once
 
 class Project;
 class ProjectExporter;
@@ -209,5 +208,3 @@ inline Array<ProjectType*> ProjectType::getAllTypes()
 
     return  Array<ProjectType*> (allTypes);
 }
-
-#endif   // JUCER_PROJECTTYPE_H_INCLUDED

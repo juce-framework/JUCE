@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FILEPATHPROPERTYCOMPONENT_H_INCLUDED
-#define JUCER_FILEPATHPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class FilePathPropertyComponent  : public PropertyComponent
@@ -140,6 +139,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilePathPropertyComponent)
 };
-
-
-#endif  // JUCER_FILEPATHPROPERTYCOMPONENT_H_INCLUDED

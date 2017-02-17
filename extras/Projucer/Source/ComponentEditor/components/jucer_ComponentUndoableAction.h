@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTUNDOABLEACTION_H_INCLUDED
-#define JUCER_COMPONENTUNDOABLEACTION_H_INCLUDED
+#pragma once
 
 #include "../ui/jucer_JucerDocumentEditor.h"
 
@@ -74,7 +73,3 @@ protected:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentUndoableAction)
 };
-
-
-
-#endif   // JUCER_COMPONENTUNDOABLEACTION_H_INCLUDED

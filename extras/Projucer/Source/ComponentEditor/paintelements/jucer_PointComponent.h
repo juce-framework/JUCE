@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_POINTCOMPONENT_H_INCLUDED
-#define JUCER_POINTCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "jucer_ElementSiblingComponent.h"
 #include "../ui/jucer_PaintRoutineEditor.h"
@@ -106,6 +105,3 @@ public:
 private:
     int dragX, dragY;
 };
-
-
-#endif   // JUCER_POINTCOMPONENT_H_INCLUDED

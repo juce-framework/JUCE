@@ -1,5 +1,4 @@
-#ifndef JUCE_LINUX_EVENTLOOP_H_INCLUDED
-#define JUCE_LINUX_EVENTLOOP_H_INCLUDED
+#pragma once
 
 namespace LinuxEventLoop
 {
@@ -29,5 +28,3 @@ namespace LinuxEventLoop
 
     void setWindowSystemFdInternal (int fd, CallbackFunctionBase* readCallback) noexcept;
 }
-
-#endif /* JUCE_LINUX_EVENTLOOP_H_INCLUDED */

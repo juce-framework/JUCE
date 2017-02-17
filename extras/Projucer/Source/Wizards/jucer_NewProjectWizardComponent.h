@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_NEWPROJECTWIZARDCOMPONENT_H_INCLUDED
-#define JUCER_NEWPROJECTWIZARDCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class ModulesFolderPathBox  : public Component,
@@ -447,6 +446,3 @@ private:
         createButton.setEnabled (projectName.getText().trim().isNotEmpty());
     }
 };
-
-
-#endif   // JUCER_NEWPROJECTWIZARDCOMPONENT_H_INCLUDED

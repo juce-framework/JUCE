@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_NTE0XB0IJ__
-#define __JUCE_APPCONFIG_NTE0XB0IJ__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -222,6 +221,3 @@
 #ifndef    JUCE_USE_CAMERA
  #define   JUCE_USE_CAMERA 0
 #endif
-
-
-#endif  // __JUCE_APPCONFIG_NTE0XB0IJ__

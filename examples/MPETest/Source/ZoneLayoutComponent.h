@@ -23,8 +23,7 @@
 */
 
 
-#ifndef ZONELAYOUTCOMPONENT_H_INCLUDED
-#define ZONELAYOUTCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class ZoneLayoutComponent : public Component,
@@ -149,6 +148,3 @@ private:
     Range<int> legacyModeChannelRange = { 1, 17 };
     const int numMidiChannels = 16;
 };
-
-
-#endif  // ZONELAYOUTCOMPONENT_H_INCLUDED

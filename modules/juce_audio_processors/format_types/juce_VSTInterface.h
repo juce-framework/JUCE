@@ -22,7 +22,7 @@
  ==============================================================================
 */
 
-#ifndef JUCE_VSTINTERFACE_H_INCLUDED
+#pragma once
 #define JUCE_VSTINTERFACE_H_INCLUDED
 
 #include "../../juce_core/juce_core.h"
@@ -454,5 +454,3 @@ enum VstSpeakerConfigurationType
 #else
  #pragma pack(pop)
 #endif
-
-#endif // JUCE_VSTINTERFACE_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED
-#define JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "../Project/jucer_Project.h"
 
@@ -164,6 +163,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GroupInformationComponent)
 };
-
-
-#endif   // JUCER_GROUPINFORMATIONCOMPONENT_H_INCLUDED

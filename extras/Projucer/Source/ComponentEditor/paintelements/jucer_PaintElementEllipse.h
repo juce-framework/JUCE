@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTELLIPSE_H_INCLUDED
-#define JUCER_PAINTELEMENTELLIPSE_H_INCLUDED
+#pragma once
 
 #include "jucer_ColouredElement.h"
 
@@ -154,6 +153,3 @@ private:
         PaintElementEllipse* const element;
     };
 };
-
-
-#endif   // JUCER_PAINTELEMENTELLIPSE_H_INCLUDED

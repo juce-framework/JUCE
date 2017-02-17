@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_NEWFILEWIZARD_H_INCLUDED
-#define JUCER_NEWFILEWIZARD_H_INCLUDED
+#pragma once
 
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
@@ -66,6 +65,3 @@ public:
 private:
     OwnedArray<Type> wizards;
 };
-
-
-#endif   // JUCER_NEWFILEWIZARD_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTPATH_H_INCLUDED
-#define JUCER_PAINTELEMENTPATH_H_INCLUDED
+#pragma once
 
 #include "jucer_ColouredElement.h"
 #include "jucer_ElementSiblingComponent.h"
@@ -171,6 +170,3 @@ private:
     int dragX, dragY;
     bool selected, dragging, mouseDownSelectStatus;
 };
-
-
-#endif   // JUCER_PAINTELEMENTPATH_H_INCLUDED

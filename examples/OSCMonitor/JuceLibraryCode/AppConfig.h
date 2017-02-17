@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_IHMIKJ__
-#define __JUCE_APPCONFIG_IHMIKJ__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -211,6 +210,3 @@
 #ifndef    JUCE_USE_CAMERA
  //#define JUCE_USE_CAMERA
 #endif
-
-
-#endif  // __JUCE_APPCONFIG_IHMIKJ__

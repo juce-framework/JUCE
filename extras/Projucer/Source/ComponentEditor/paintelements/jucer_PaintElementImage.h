@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTIMAGE_H_INCLUDED
-#define JUCER_PAINTELEMENTIMAGE_H_INCLUDED
+#pragma once
 
 #include "../jucer_PaintRoutine.h"
 #include "../properties/jucer_FilePropertyComponent.h"
@@ -481,6 +480,3 @@ private:
         PaintElementImage* const element;
     };
 };
-
-
-#endif   // JUCER_PAINTELEMENTIMAGE_H_INCLUDED

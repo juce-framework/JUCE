@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_OBJECTTYPES_H_INCLUDED
-#define JUCER_OBJECTTYPES_H_INCLUDED
+#pragma once
 
 #include "jucer_JucerDocument.h"
 #include "paintelements/jucer_PaintElement.h"
@@ -45,5 +44,3 @@ namespace ObjectTypes
     PaintElement* createNewImageElement (PaintRoutine* owner);
     PaintElement* createElementForXml (const XmlElement* const e, PaintRoutine* const owner);
 }
-
-#endif   // JUCER_OBJECTTYPES_H_INCLUDED

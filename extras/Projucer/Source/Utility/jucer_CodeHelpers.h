@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_CODEHELPERS_H_INCLUDED
-#define JUCER_CODEHELPERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -56,6 +55,3 @@ namespace CodeHelpers
     bool getIndentForCurrentBlock (CodeDocument::Position pos, const String& tab,
                                    String& blockIndent, String& lastLineIndent);
 }
-
-
-#endif   // JUCER_CODEHELPERS_H_INCLUDED

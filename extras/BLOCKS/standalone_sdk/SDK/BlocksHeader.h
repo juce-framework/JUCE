@@ -1,5 +1,4 @@
-#ifndef JUCEHEADER_INCLUDED
-#define JUCEHEADER_INCLUDED
+#pragma once
 
 #ifndef JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
 #define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
@@ -14,5 +13,3 @@
 #include <juce_blocks_basics/juce_blocks_basics.h>
 #include <juce_core/juce_core.h>
 #include <juce_events/juce_events.h>
-
-#endif   // JUCEHEADER_INCLUDED

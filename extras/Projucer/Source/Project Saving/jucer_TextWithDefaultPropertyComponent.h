@@ -23,8 +23,7 @@
 */
 
 
-#ifndef JUCER_TEXTWITHDEFAULTPROPERTYCOMPONENT_H_INCLUDED
-#define JUCER_TEXTWITHDEFAULTPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 template<typename Type>
 class TextWithDefaultPropertyComponent  : public PropertyComponent,
@@ -165,5 +164,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextWithDefaultPropertyComponent)
 };
-
-#endif  // JUCER_TEXTWITHDEFAULTPROPERTYCOMPONENT_H_INCLUDED

@@ -1,5 +1,4 @@
-#ifndef JUCE_XWINDOWSYSTEM_H_INCLUDED
-#define JUCE_XWINDOWSYSTEM_H_INCLUDED
+#pragma once
 
 // Hack to forward declare _XDisplay outside the
 // juce namespace
@@ -110,5 +109,3 @@ struct GetXProperty
 };
 
 #undef ATOM_TYPE
-
-#endif // JUCE_XWINDOWSYSTEM_H_INCLUDED

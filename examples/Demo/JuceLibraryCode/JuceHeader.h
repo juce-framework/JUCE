@@ -10,8 +10,7 @@
 
 */
 
-#ifndef __APPHEADERFILE_SBBIZR__
-#define __APPHEADERFILE_SBBIZR__
+#pragma once
 
 #include "AppConfig.h"
 
@@ -47,5 +46,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x30000;
 }
 #endif
-
-#endif   // __APPHEADERFILE_SBBIZR__

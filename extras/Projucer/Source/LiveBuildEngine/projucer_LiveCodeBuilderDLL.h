@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef PROJUCER_LIVECODEBUILDERDLL_H_INCLUDED
-#define PROJUCER_LIVECODEBUILDERDLL_H_INCLUDED
+#pragma once
 
 
 extern "C"
@@ -55,6 +54,3 @@ extern "C"
         X (projucer_hasLiveCodingLicence, bool, ())
 
 }
-
-
-#endif  // PROJUCER_LIVECODEBUILDERDLL_H_INCLUDED

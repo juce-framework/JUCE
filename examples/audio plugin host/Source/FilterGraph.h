@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __FILTERGRAPH_JUCEHEADER__
-#define __FILTERGRAPH_JUCEHEADER__
+#pragma once
 
 class FilterInGraph;
 class FilterGraph;
@@ -117,6 +116,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterGraph)
 };
-
-
-#endif   // __FILTERGRAPH_JUCEHEADER__

@@ -1,5 +1,4 @@
-#ifndef WAVESHAPEPROGRAM_H_INCLUDED
-#define WAVESHAPEPROGRAM_H_INCLUDED
+#pragma once
 
 /**
     A Program to draw moving waveshapes onto the LEDGrid
@@ -179,5 +178,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveshapeProgram)
 };
-
-#endif  // WAVESHAPEPROGRAM_H_INCLUDED

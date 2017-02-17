@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __INTERNALFILTERS_JUCEHEADER__
-#define __INTERNALFILTERS_JUCEHEADER__
+#pragma once
 
 #include "FilterGraph.h"
 
@@ -78,6 +77,3 @@ private:
     PluginDescription audioOutDesc;
     PluginDescription midiInDesc;
 };
-
-
-#endif   // __INTERNALFILTERS_JUCEHEADER__

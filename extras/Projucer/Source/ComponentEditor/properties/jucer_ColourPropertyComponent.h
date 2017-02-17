@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COLOURPROPERTYCOMPONENT_H_INCLUDED
-#define JUCER_COLOURPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class JucerColourPropertyComponent  : public PropertyComponent
@@ -207,6 +206,3 @@ public:
 
     ScopedPointer<ColourPropEditorComponent> colourPropEditor;
 };
-
-
-#endif   // JUCER_COLOURPROPERTYCOMPONENT_H_INCLUDED

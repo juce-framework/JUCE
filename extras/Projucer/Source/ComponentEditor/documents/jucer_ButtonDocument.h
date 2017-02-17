@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_BUTTONDOCUMENT_H_INCLUDED
-#define JUCER_BUTTONDOCUMENT_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 
@@ -70,6 +69,3 @@ public:
     ScopedPointer<PaintRoutine> paintRoutines[7];
     bool paintStatesEnabled [7];
 };
-
-
-#endif   // JUCER_BUTTONDOCUMENT_H_INCLUDED

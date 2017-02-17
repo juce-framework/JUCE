@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FLOATINGTOOLWINDOW_H_INCLUDED
-#define JUCER_FLOATINGTOOLWINDOW_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -78,6 +77,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatingToolWindow)
 };
-
-
-#endif  // JUCER_FLOATINGTOOLWINDOW_H_INCLUDED

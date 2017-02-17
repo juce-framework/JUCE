@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED
-#define JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -279,6 +278,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateTileBrowser)
 };
-
-
-#endif   // JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED

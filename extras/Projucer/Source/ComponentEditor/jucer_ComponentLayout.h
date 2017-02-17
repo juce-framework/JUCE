@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTLAYOUT_H_INCLUDED
-#define JUCER_COMPONENTLAYOUT_H_INCLUDED
+#pragma once
 
 
 #include "components/jucer_ComponentTypeHandler.h"
@@ -131,5 +130,3 @@ private:
 void positionToCode (const RelativePositionedRectangle& position,
                      const ComponentLayout* layout,
                      String& x, String& y, String& w, String& h);
-
-#endif   // JUCER_COMPONENTLAYOUT_H_INCLUDED

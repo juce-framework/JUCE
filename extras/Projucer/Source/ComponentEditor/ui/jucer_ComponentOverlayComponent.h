@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTOVERLAYCOMPONENT_H_INCLUDED
-#define JUCER_COMPONENTOVERLAYCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 
@@ -85,7 +84,3 @@ private:
     bool selected, dragging, mouseDownSelectStatus;
     double originalAspectRatio;
 };
-
-
-
-#endif   // JUCER_COMPONENTOVERLAYCOMPONENT_H_INCLUDED

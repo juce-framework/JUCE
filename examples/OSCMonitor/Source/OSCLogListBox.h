@@ -26,8 +26,7 @@
   ==============================================================================
 */
 
-#ifndef OSCLOGLISTBOX_H_INCLUDED
-#define OSCLOGLISTBOX_H_INCLUDED
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -178,6 +177,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCLogListBox)
 };
-
-
-#endif  // OSCLOGLISTBOX_H_INCLUDED
