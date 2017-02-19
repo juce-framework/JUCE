@@ -636,7 +636,8 @@ public:
         if (portNum == fNumInputs && ret == noErr)
         {
             // Side chain connected
-            juceFilter->getBus (true, 1)->setCurrentLayout (AudioChannelSet::mono());
+            if (AudioProcessor::Bus* bus = juceFilter->getBus (true, 1))
+                bus->setCurrentLayout (AudioChannelSet::mono());
         }
         return ret;
     }
@@ -648,7 +649,8 @@ public:
         if (portNum == fNumInputs && ret == noErr)
         {
             // Side chain disconnected
-            juceFilter->getBus (true, 1)->setCurrentLayout (AudioChannelSet::disabled());
+            if (AudioProcessor::Bus* bus = juceFilter->getBus (true, 1))
+                bus->setCurrentLayout (AudioChannelSet::disabled());
         }
         return ret;
     }
