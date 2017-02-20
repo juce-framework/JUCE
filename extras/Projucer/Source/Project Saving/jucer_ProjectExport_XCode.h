@@ -1303,14 +1303,14 @@ public:
 
         StringArray getTargetExtraHeaderSearchPaths() const
         {
-            StringArray extraSearchPaths;
+            StringArray targetExtraSearchPaths;
 
             if (type == RTASPlugIn)
             {
                 RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
 
-                extraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
-                extraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
+                targetExtraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
+                targetExtraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
 
                 static const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
                     "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
@@ -1343,10 +1343,10 @@ public:
                     "xplat/AVX/avx2/avx2sdk/utils" };
 
                 for (auto* path : p)
-                    owner.addProjectPathToBuildPathList (extraSearchPaths, rtasFolder.getChildFile (path));
+                    owner.addProjectPathToBuildPathList (targetExtraSearchPaths, rtasFolder.getChildFile (path));
             }
 
-            return extraSearchPaths;
+            return targetExtraSearchPaths;
         }
 
         void addExtraRTASTargetSettings()
