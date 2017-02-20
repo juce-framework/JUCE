@@ -157,6 +157,8 @@ public:
     void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index = -1);
     void addToModuleLibPaths   (const RelativePath& pathFromProjectFolder);
 
+    void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
+
     Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
     Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
     Drawable* getBigIcon() const;
@@ -416,7 +418,6 @@ private:
     void addCommonAudioPluginSettings();
     void addVST3FolderToPath();
     void addAAXFoldersToPath();
-    void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
 };

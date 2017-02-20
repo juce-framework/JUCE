@@ -396,7 +396,7 @@ Project::Item& ProjectExporter::getModulesGroup()
     return *modulesGroup;
 }
 
-void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList, const RelativePath& pathFromProjectFolder, int index)
+void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList, const RelativePath& pathFromProjectFolder, int index) const
 {
     const auto localPath = RelativePath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
 
