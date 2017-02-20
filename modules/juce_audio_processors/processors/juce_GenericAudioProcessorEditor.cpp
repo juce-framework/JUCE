@@ -123,6 +123,13 @@ private:
             return owner.getParameterText (index) + " " + owner.getParameterLabel (index).trimEnd();
         }
 
+        double getValueFromText (const String& text) override
+        {
+            if (AudioProcessorParameter* param = owner.getParameters()[index])
+                return (double) param->getValueForText (text);
+            return Slider::getValueFromText (text);
+        }
+
     private:
         //==============================================================================
         AudioProcessor& owner;
