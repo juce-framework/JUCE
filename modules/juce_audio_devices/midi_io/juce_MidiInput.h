@@ -172,7 +172,7 @@ public:
 private:
     //==============================================================================
     String name;
-    void* internal;
+    void* internal = nullptr;
 
     // The input objects are created with the openDevice() method.
     explicit MidiInput (const String&);
