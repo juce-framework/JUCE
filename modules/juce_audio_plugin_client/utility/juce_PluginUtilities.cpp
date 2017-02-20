@@ -39,6 +39,14 @@ namespace juce
 
 #if JucePlugin_Build_RTAS
  extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
+
+ extern "C" BOOL WINAPI DefaultDllMainRTAS (HINSTANCE, DWORD, LPVOID)
+ {
+    return 0;
+ }
+
+ // Use DefaultDllMainRTAS when DllMainRTAS isn't available.
+ #pragma comment(linker, "/alternatename:_DllMainRTAS@12=_DefaultDllMainRTAS@12")
 #endif
 
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
@@ -49,9 +57,7 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserve
    #if JucePlugin_Build_RTAS
     if (GetModuleHandleA ("DAE.DLL") != 0)
     {
-       #if JucePlugin_Build_AAX
-        if (! File::getSpecialLocation (File::currentExecutableFile).hasFileExtension ("aaxplugin"))
-       #endif
+        if (File::getSpecialLocation (File::currentExecutableFile).hasFileExtension ("dpm"))
             return DllMainRTAS (instance, reason, reserved);
     }
    #endif
