@@ -496,6 +496,10 @@ public:
 
         for (int i = 0; i < numParameters; ++i)
         {
+            // is this a meter? RTAS simply ignore such parameters...
+            if (((juceFilter->getParameterCategory(i) & 0xffff0000) >> 16) == 2)
+                continue;
+
             OSType rtasParamID = static_cast<OSType> (usingManagedParameters ? juceFilter->getParameterID (i).hashCode() : i);
             AddControl (new JucePluginControl (*juceFilter, i, rtasParamID));
         }
@@ -805,16 +809,28 @@ public:
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
     {
+        // ignoring level meter parameter(s)
+        if(((juceFilter->getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            return;
+
         SetControlValue (index + 2, floatToLong (newValue));
     }
 
     void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override
     {
+        // ignoring level meter parameter(s)
+        if(((juceFilter->getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            return;
+
         TouchControl (index + 2);
     }
 
     void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override
     {
+        // ignoring level meter parameter(s)
+        if(((juceFilter->getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            return;
+
         ReleaseControl (index + 2);
     }
 
