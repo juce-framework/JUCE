@@ -411,11 +411,9 @@ protected:
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
                        "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
 
-            const char* cppLanguageStandardNames[] = { "Use Default", "C++98", "GNU++98", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
+            const char* cppLanguageStandardNames[] = { "Use Default", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
             Array<var> cppLanguageStandardValues;
             cppLanguageStandardValues.add (var());
-            cppLanguageStandardValues.add ("c++98");
-            cppLanguageStandardValues.add ("gnu++98");
             cppLanguageStandardValues.add ("c++11");
             cppLanguageStandardValues.add ("gnu++11");
             cppLanguageStandardValues.add ("c++14");
