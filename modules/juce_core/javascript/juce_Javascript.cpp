@@ -67,7 +67,7 @@ namespace TokenTypes
 //==============================================================================
 struct JavascriptEngine::RootObject   : public DynamicObject
 {
-    RootObject()
+    RootObject() : quit(false)
     {
         setMethod ("exec",       exec);
         setMethod ("eval",       eval);
@@ -79,6 +79,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     }
 
     Time timeout;
+    bool quit;
 
     typedef const var::NativeFunctionArgs& Args;
     typedef const char* TokenType;
@@ -224,6 +225,12 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (Time::getCurrentTime() > root->timeout)
                 location.throwError ("Execution timed-out");
         }
+        
+        void checkQuit (const CodeLocation& location) const
+        {
+            if (root->quit)
+                location.throwError ("Execution interrupted");
+        }
     };
 
     //==============================================================================
@@ -305,6 +312,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             while (isDoLoop || condition->getResult (s))
             {
                 s.checkTimeOut (location);
+                s.checkQuit (location);
                 ResultCode r = body->perform (s, returnedValue);
 
                 if (r == returnWasHit)   return r;
@@ -720,7 +728,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var invokeFunction (const Scope& s, const var& function, const var& thisObject) const
         {
             s.checkTimeOut (location);
-
+            s.checkQuit (location);
+            
             Array<var> argVars;
             for (int i = 0; i < arguments.size(); ++i)
                 argVars.add (arguments.getUnchecked(i)->getResult (s));
@@ -1852,6 +1861,11 @@ var JavascriptEngine::callFunction (const Identifier& function, const var::Nativ
 const NamedValueSet& JavascriptEngine::getRootObjectProperties() const noexcept
 {
     return root->getProperties();
+}
+        
+void JavascriptEngine::stop()
+{
+    root->quit = true;
 }
 
 #if JUCE_MSVC

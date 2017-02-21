@@ -100,6 +100,9 @@ public:
 
     /** Provides access to the set of properties of the root namespace object. */
     const NamedValueSet& getRootObjectProperties() const noexcept;
+    
+    /** Stop the currently executing script as soon as possible. */
+    void stop();
 
 private:
     JUCE_PUBLIC_IN_DLL_BUILD (struct RootObject)
