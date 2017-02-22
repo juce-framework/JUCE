@@ -2209,6 +2209,9 @@ private:
 
     String addProjectItem (const Project::Item& projectItem) const
     {
+        if (projectItem.getParent() == *modulesGroup)
+            return addFileReference (rebaseFromProjectFolderToBuildTarget (getModuleFolderRelativeToProject (projectItem.getName())).toUnixStyle());
+
         if (projectItem.isGroup())
         {
             StringArray childIDs;
