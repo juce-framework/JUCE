@@ -977,6 +977,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"

@@ -75,6 +75,10 @@
  //#define JUCE_USE_ANDROID_OPENSLES
 #endif
 
+#ifndef    JUCE_USE_WINRT_MIDI
+ //#define JUCE_USE_WINRT_MIDI
+#endif
+
 //==============================================================================
 // juce_audio_formats flags:
 

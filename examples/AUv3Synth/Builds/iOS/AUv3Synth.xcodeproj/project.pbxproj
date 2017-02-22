@@ -501,6 +501,7 @@
 		5E6903988ADA7D101E926BCE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_KnownPluginList.h"; path = "../../../../modules/juce_audio_processors/scanning/juce_KnownPluginList.h"; sourceTree = "SOURCE_ROOT"; };
 		5E913F9E1E993CB16785B1A1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = crc.h; path = "../../../../modules/juce_audio_formats/codecs/flac/libFLAC/include/private/crc.h"; sourceTree = "SOURCE_ROOT"; };
 		5EDCECF062EB01976634221B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_DragAndDrop.cpp"; path = "../../../../modules/juce_gui_basics/native/juce_win32_DragAndDrop.cpp"; sourceTree = "SOURCE_ROOT"; };
+		5EDED508B3A6CC81AB53B0E2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_WinRTWrapper.cpp"; path = "../../../../modules/juce_events/native/juce_win32_WinRTWrapper.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5EF6762AB1C5CE4C2DCD59ED = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		5F2D06669F5AADE87DDC34B3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_KeyboardFocusTraverser.h"; path = "../../../../modules/juce_gui_basics/keyboard/juce_KeyboardFocusTraverser.h"; sourceTree = "SOURCE_ROOT"; };
 		5F6BB197FA13DEB1F2260CC0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_VST3Headers.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_VST3Headers.h"; sourceTree = "SOURCE_ROOT"; };
@@ -632,6 +633,7 @@
 		7A772485103B4848CD67493D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RelativePointPath.h"; path = "../../../../modules/juce_gui_basics/positioning/juce_RelativePointPath.h"; sourceTree = "SOURCE_ROOT"; };
 		7A7DC1C99D232DAD43C01146 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioDeviceSelectorComponent.h"; path = "../../../../modules/juce_audio_utils/gui/juce_AudioDeviceSelectorComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		7ABF11ED9BB6CD5850ABF47A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioIODeviceType.cpp"; path = "../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.cpp"; sourceTree = "SOURCE_ROOT"; };
+		7AFE986D9534BA57F7CC441A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_win32_WinRTWrapper.h"; path = "../../../../modules/juce_events/native/juce_win32_WinRTWrapper.h"; sourceTree = "SOURCE_ROOT"; };
 		7B215A260ADCE367FD8F3420 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_JSON.h"; path = "../../../../modules/juce_core/javascript/juce_JSON.h"; sourceTree = "SOURCE_ROOT"; };
 		7B351E0CEB9BE04BE1F04AF5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_NSViewComponent.h"; path = "../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		7B7A3CB2B7E41C7033768B9F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = uncompr.c; path = "../../../../modules/juce_core/zip/zlib/uncompr.c"; sourceTree = "SOURCE_ROOT"; };
@@ -2169,7 +2171,9 @@
 					B77C48286D446F5C7BD4B76F,
 					7CA84F62BB5AC492B1EB49A0,
 					64006FEB76C8189A341F77D6,
-					12F04ADB729E5DAB771C50C9, ); name = native; sourceTree = "<group>"; };
+					12F04ADB729E5DAB771C50C9,
+					5EDED508B3A6CC81AB53B0E2,
+					7AFE986D9534BA57F7CC441A, ); name = native; sourceTree = "<group>"; };
 		58E31A2D95C3B3D6DB0B207E = {isa = PBXGroup; children = (
 					B5C3356C447E60F512C5E8CD,
 					C9407CAAB91ABCB83CD3F80D,

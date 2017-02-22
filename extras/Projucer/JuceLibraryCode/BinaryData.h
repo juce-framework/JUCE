@@ -21,10 +21,10 @@ namespace BinaryData
     const int            LICENSESize = 11325;
 
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
-    const int            jucer_AnimatedComponentTemplate_cppSize = 1854;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1838;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
-    const int            jucer_AudioComponentTemplate_cppSize = 3108;
+    const int            jucer_AudioComponentTemplate_cppSize = 3092;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1162;
@@ -81,7 +81,7 @@ namespace BinaryData
     const int            jucer_NewInlineComponentTemplate_hSize = 1588;
 
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
-    const int            jucer_OpenGLComponentTemplate_cppSize = 1732;
+    const int            jucer_OpenGLComponentTemplate_cppSize = 1716;
 
     extern const char*   background_logo_svg;
     const int            background_logo_svgSize = 3117;
