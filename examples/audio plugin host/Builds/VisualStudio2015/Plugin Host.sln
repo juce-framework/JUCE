@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Plugin Host (App)", "Plugin Host (App).vcxproj", "{5666EAA2-C82B-D06A-5228-D0E810428536}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Plugin Host - App", "Plugin Host - App.vcxproj", "{5666EAA2-C82B-D06A-5228-D0E810428536}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin Host", "Plugin Host", "{4ECA3C56-A1DE-5728-6265-216D36610DCE}"
 	ProjectSection(SolutionItems) = preProject

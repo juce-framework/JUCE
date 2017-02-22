@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioAppExample (App)", "AudioAppExample (App).vcxproj", "{5EC68AA6-F066-CCC4-21D6-89C2125F627F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioAppExample - App", "AudioAppExample - App.vcxproj", "{5EC68AA6-F066-CCC4-21D6-89C2125F627F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AudioAppExample", "AudioAppExample", "{AC310617-230B-58E5-6205-F43F53BC9F14}"
 EndProject

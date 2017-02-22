@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "juce_dll (Static Library)", "juce_dll (Static Library).vcxproj", "{B636B53B-C44B-1E04-8668-D61B3900BAA4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "juce_dll - Static Library", "juce_dll - Static Library.vcxproj", "{B636B53B-C44B-1E04-8668-D61B3900BAA4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_dll", "juce_dll", "{7AAFE220-8379-311F-1BA8-B0A2EC5DC9B7}"
 EndProject

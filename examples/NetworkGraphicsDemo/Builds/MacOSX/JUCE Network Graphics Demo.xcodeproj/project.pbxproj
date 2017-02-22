@@ -2850,7 +2850,7 @@
 		4311FBCBD02948A0ED96C7DD = {isa = PBXNativeTarget; buildConfigurationList = B73863F5D180C23D3EC40C38; buildPhases = (
 					714944DB86A4D402E7FA269E,
 					C2977559BF9148DB70CA10AE,
-					865E89B94B41EB14C202CBB0, ); buildRules = ( ); dependencies = (  ); name = "JUCE Network Graphics Demo (App)"; productName = "JUCE Network Graphics Demo"; productReference = E4162459ED4C829EF7B19691; productType = "com.apple.product-type.application"; };
+					865E89B94B41EB14C202CBB0, ); buildRules = ( ); dependencies = (  ); name = "JUCE Network Graphics Demo - App"; productName = "JUCE Network Graphics Demo"; productReference = E4162459ED4C829EF7B19691; productType = "com.apple.product-type.application"; };
 		A5398ADB6F5B128C00EB935C = {isa = PBXProject; buildConfigurationList = 02715337C584F3C721251428; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D2EB65517396C974F0415A7F; projectDirPath = ""; projectRoot = ""; targets = (4311FBCBD02948A0ED96C7DD); };
 	};
 	rootObject = A5398ADB6F5B128C00EB935C;

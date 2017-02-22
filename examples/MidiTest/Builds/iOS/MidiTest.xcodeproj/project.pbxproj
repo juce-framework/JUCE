@@ -2675,7 +2675,7 @@
 		68C4BE0E455A27D9A0CEB672 = {isa = PBXNativeTarget; buildConfigurationList = 9EEC5DC9E6376BF734D6A626; buildPhases = (
 					A1114FDF6F871F83BAF3B6B8,
 					80C515E0387A6AF48C93D08C,
-					AADBC72B2C7030FAD1D8CAF8, ); buildRules = ( ); dependencies = (  ); name = "MidiTest (App)"; productName = MidiTest; productReference = AB7855931CA983F4EE039617; productType = "com.apple.product-type.application"; };
+					AADBC72B2C7030FAD1D8CAF8, ); buildRules = ( ); dependencies = (  ); name = "MidiTest - App"; productName = MidiTest; productReference = AB7855931CA983F4EE039617; productType = "com.apple.product-type.application"; };
 		08CC3758D6C29BD07C86A240 = {isa = PBXProject; buildConfigurationList = 33B4E927BEBC8696D1D2812E; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 68C4BE0E455A27D9A0CEB672 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 937739BC97C6E6294CDCF171; projectDirPath = ""; projectRoot = ""; targets = (68C4BE0E455A27D9A0CEB672); };
 	};
 	rootObject = 08CC3758D6C29BD07C86A240;

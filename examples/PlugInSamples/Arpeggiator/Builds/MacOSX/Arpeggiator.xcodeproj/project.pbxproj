@@ -3119,7 +3119,7 @@
 		08D74DB290FCD09A8D4810BB = {isa = PBXAggregateTarget; buildConfigurationList = 3C2FB38C546E3A4CBD11DD08; buildPhases = (  ); buildRules = ( ); dependencies = (
 					D65F24B83710D0DAEB515331,
 					78D7AF4AA023DEF36CFB4694,
-					E096AE1D1B8906A691BBBE6F, ); name = "Arpeggiator (All)"; productName = Arpeggiator; };
+					E096AE1D1B8906A691BBBE6F, ); name = "Arpeggiator - All"; productName = Arpeggiator; };
 		8743CAE2B16AA12050DFC703 = {isa = XCConfigurationList; buildConfigurations = (
 					D83A1735FBD5B491316453B8,
 					AC0ABA95F0350939E21390E1, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3144,7 +3144,7 @@
 					DD2730D2C73FAF12FC2A2FE1,
 					374615B793201971BEB6ACD7,
 					C536519964353A302E775B31, ); buildRules = ( ); dependencies = (
-					E096AE1D1B8906A691BBBE6F, ); name = "Arpeggiator (VST)"; productName = Arpeggiator; productReference = B7A2991D3F6CDC78EE921F1D; productType = "com.apple.product-type.bundle"; };
+					E096AE1D1B8906A691BBBE6F, ); name = "Arpeggiator - VST"; productName = Arpeggiator; productReference = B7A2991D3F6CDC78EE921F1D; productType = "com.apple.product-type.bundle"; };
 		6E29A49617F400783841C529 = {isa = XCConfigurationList; buildConfigurations = (
 					575D0AC8DD9926D1C8349BE2,
 					6B6E02F5844A057FE3738154, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3175,7 +3175,7 @@
 					2DBC42F261B32E5F29204E1A,
 					CE1F70D63BB05DCAD3BA3110,
 					040001CD4E8585137BF43942, ); buildRules = ( ); dependencies = (
-					E096AE1D1B8906A691BBBE6F, ); name = "Arpeggiator (AU)"; productName = Arpeggiator; productReference = 40D80A7071E7DF99EF20511D; productType = "com.apple.product-type.bundle"; };
+					E096AE1D1B8906A691BBBE6F, ); name = "Arpeggiator - AU"; productName = Arpeggiator; productReference = 40D80A7071E7DF99EF20511D; productType = "com.apple.product-type.bundle"; };
 		AFF7B7B2889999928579D32F = {isa = XCConfigurationList; buildConfigurations = (
 					47B6BE82623EE30A5AA944A2,
 					3C43BDBC68E42CE3DAB2F269, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3197,7 +3197,7 @@
 					2D9494700DCDA6E524726943,
 					9E93B5D7B33591139054C54E, ); runOnlyForDeploymentPostprocessing = 0; };
 		319717B733C323BE76160BD4 = {isa = PBXNativeTarget; buildConfigurationList = AFF7B7B2889999928579D32F; buildPhases = (
-					1CDAF3706AC2D6D164846859, ); buildRules = ( ); dependencies = (  ); name = "Arpeggiator (Shared Code)"; productName = Arpeggiator; productReference = 6C612817F52B969A5F16CE94; productType = "com.apple.product-type.library.static"; };
+					1CDAF3706AC2D6D164846859, ); buildRules = ( ); dependencies = (  ); name = "Arpeggiator - Shared Code"; productName = Arpeggiator; productReference = 6C612817F52B969A5F16CE94; productType = "com.apple.product-type.library.static"; };
 		4A5323BE8842B95E4FCCD6ED = {isa = PBXProject; buildConfigurationList = B601BADC34558F9AD61C80D7; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 08D74DB290FCD09A8D4810BB = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };892A28E616D56F05C8C11049 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };07D9D33E3466A8A497086BEE = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };319717B733C323BE76160BD4 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 7678EFC533FC99BEEF151913; projectDirPath = ""; projectRoot = ""; targets = (08D74DB290FCD09A8D4810BB, 892A28E616D56F05C8C11049, 07D9D33E3466A8A497086BEE, 319717B733C323BE76160BD4); };
 	};
 	rootObject = 4A5323BE8842B95E4FCCD6ED;

@@ -1,17 +1,17 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugIn (VST)", "GainPlugIn (VST).vcxproj", "{2A769212-432C-7313-391E-68B46A0888F2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugIn - VST", "GainPlugIn - VST.vcxproj", "{2A769212-432C-7313-391E-68B46A0888F2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E83746D9-1736-E433-6CEF-9C347DF444D1} = {E83746D9-1736-E433-6CEF-9C347DF444D1}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugIn (VST3)", "GainPlugIn (VST3).vcxproj", "{5810FF56-5ACC-8BFE-EFCE-D9655FEC8E5B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugIn - VST3", "GainPlugIn - VST3.vcxproj", "{5810FF56-5ACC-8BFE-EFCE-D9655FEC8E5B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E83746D9-1736-E433-6CEF-9C347DF444D1} = {E83746D9-1736-E433-6CEF-9C347DF444D1}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugIn (Shared Code)", "GainPlugIn (Shared Code).vcxproj", "{E83746D9-1736-E433-6CEF-9C347DF444D1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GainPlugIn - Shared Code", "GainPlugIn - Shared Code.vcxproj", "{E83746D9-1736-E433-6CEF-9C347DF444D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GainPlugIn", "GainPlugIn", "{8AACAA39-34B8-0B4A-DE7A-D67F333E01B2}"
 EndProject

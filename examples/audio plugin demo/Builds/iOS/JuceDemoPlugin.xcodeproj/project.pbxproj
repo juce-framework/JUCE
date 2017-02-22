@@ -3006,7 +3006,7 @@
 		D4A200CA175E6673EB359B63 = {isa = PBXAggregateTarget; buildConfigurationList = 66A99B0A3E2094889407A133; buildPhases = (  ); buildRules = ( ); dependencies = (
 					39BA6CC448686A3152C996CC,
 					5BABCAD79CD4FD3CBE9C6CFD,
-					603921D0E698F75EB96EAC53, ); name = "JuceDemoPlugin (All)"; productName = JuceDemoPlugin; };
+					603921D0E698F75EB96EAC53, ); name = "JuceDemoPlugin - All"; productName = JuceDemoPlugin; };
 		A3E7AD82A575444E87B942AA = {isa = XCConfigurationList; buildConfigurations = (
 					9847BE636E2825D8B76947EE,
 					5D13FAF3C958860246498452, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3030,7 +3030,7 @@
 					48EF3FC35F069A453302FDAE,
 					21D46B5E90C6126A53C1443D,
 					9FF557C26450DE83C5DDB798, ); buildRules = ( ); dependencies = (
-					603921D0E698F75EB96EAC53, ); name = "JuceDemoPlugin (AUv3 AppExtension)"; productName = JuceDemoPlugin; productReference = E4EE10B38F49E1F661E81D7F; productType = "com.apple.product-type.app-extension"; };
+					603921D0E698F75EB96EAC53, ); name = "JuceDemoPlugin - AUv3 AppExtension"; productName = JuceDemoPlugin; productReference = E4EE10B38F49E1F661E81D7F; productType = "com.apple.product-type.app-extension"; };
 		DEFAD4AD7072094C3629CFA7 = {isa = XCConfigurationList; buildConfigurations = (
 					36EE658E7C17E7D4290A5F03,
 					CDA9FA754F176B45AF024C64, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3058,7 +3058,7 @@
 					E5B5B52BE020C6A13F35FAE8,
 					E7272C419482BE1B4050E9C6, ); buildRules = ( ); dependencies = (
 					39BA6CC448686A3152C996CC,
-					603921D0E698F75EB96EAC53, ); name = "JuceDemoPlugin (Standalone Plugin)"; productName = JuceDemoPlugin; productReference = 193085CDCD099EC3E375DE7E; productType = "com.apple.product-type.application"; };
+					603921D0E698F75EB96EAC53, ); name = "JuceDemoPlugin - Standalone Plugin"; productName = JuceDemoPlugin; productReference = 193085CDCD099EC3E375DE7E; productType = "com.apple.product-type.application"; };
 		08D73ACBC0F6E2A4747629EE = {isa = XCConfigurationList; buildConfigurations = (
 					DE68D772AF78FA0D411FC4D4,
 					CD0D0EA3F45AD047F14FD2E8, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3079,7 +3079,7 @@
 					354E8A9B7FD3A7AA6598A990,
 					963703A2971006C8BB3D190E, ); runOnlyForDeploymentPostprocessing = 0; };
 		C3F206BB3277FBADE3BD615B = {isa = PBXNativeTarget; buildConfigurationList = 08D73ACBC0F6E2A4747629EE; buildPhases = (
-					4E087312D44130771EB1E9C2, ); buildRules = ( ); dependencies = (  ); name = "JuceDemoPlugin (Shared Code)"; productName = JuceDemoPlugin; productReference = 4D6248E85C22578615FA809C; productType = "com.apple.product-type.library.static"; };
+					4E087312D44130771EB1E9C2, ); buildRules = ( ); dependencies = (  ); name = "JuceDemoPlugin - Shared Code"; productName = JuceDemoPlugin; productReference = 4D6248E85C22578615FA809C; productType = "com.apple.product-type.library.static"; };
 		85250052F3E019894332668E = {isa = PBXProject; buildConfigurationList = 0720B453F376663EAB98BF9B; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { D4A200CA175E6673EB359B63 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };C6D88D358CA321193FD3CC4F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 1; }; }; };F2918F451F1385B37AF4A6ED = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };C3F206BB3277FBADE3BD615B = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4074359E1E7C4D54E87C3461; projectDirPath = ""; projectRoot = ""; targets = (D4A200CA175E6673EB359B63, C6D88D358CA321193FD3CC4F, F2918F451F1385B37AF4A6ED, C3F206BB3277FBADE3BD615B); };
 	};
 	rootObject = 85250052F3E019894332668E;

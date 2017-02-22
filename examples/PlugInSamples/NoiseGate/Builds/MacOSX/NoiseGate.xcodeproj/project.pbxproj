@@ -3287,7 +3287,7 @@
 					6FE20A9165A15D7BE98F2B99,
 					856D0693C32E5334DE591271,
 					0D517069DB7201D47B168BEE,
-					488C1DC0415EFF5825C77F33, ); name = "NoiseGate (All)"; productName = NoiseGate; };
+					488C1DC0415EFF5825C77F33, ); name = "NoiseGate - All"; productName = NoiseGate; };
 		F5CFD52892C9EFFE1B652ED9 = {isa = XCConfigurationList; buildConfigurations = (
 					BA984224A933EC837F514164,
 					AC5F1E6328DC16FF2891CB62, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3312,7 +3312,7 @@
 					216E0D6AC94324AA60E8341F,
 					EEE027F86C42C2897FFAFAB4,
 					88ED31A2FC837CDDC443C602, ); buildRules = ( ); dependencies = (
-					488C1DC0415EFF5825C77F33, ); name = "NoiseGate (VST)"; productName = NoiseGate; productReference = 29653597F013A08B9D0D9DAE; productType = "com.apple.product-type.bundle"; };
+					488C1DC0415EFF5825C77F33, ); name = "NoiseGate - VST"; productName = NoiseGate; productReference = 29653597F013A08B9D0D9DAE; productType = "com.apple.product-type.bundle"; };
 		5E6512855F529ACBE2F1CCE9 = {isa = XCConfigurationList; buildConfigurations = (
 					23F878D56387ED4B67B9E2DF,
 					32B1624E3B1B34C461D60562, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3337,7 +3337,7 @@
 					47F5AD1898E28C0A6D16C018,
 					FE7603D4FD2A5265B17C5CDB,
 					E3794423504E5A68368E60FB, ); buildRules = ( ); dependencies = (
-					488C1DC0415EFF5825C77F33, ); name = "NoiseGate (VST3)"; productName = NoiseGate; productReference = E39A67D3DE5B2F2092769CE7; productType = "com.apple.product-type.bundle"; };
+					488C1DC0415EFF5825C77F33, ); name = "NoiseGate - VST3"; productName = NoiseGate; productReference = E39A67D3DE5B2F2092769CE7; productType = "com.apple.product-type.bundle"; };
 		E5F26FFD4B7791E9CD1D994F = {isa = XCConfigurationList; buildConfigurations = (
 					6597D0E1B573ECB84853415C,
 					BCA3F1D08B6DEDD8120DDF25, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3362,7 +3362,7 @@
 					547175C3907E0E0E4318B03E,
 					60B6674FAE4C8F988F0F1086,
 					A47A37CF689DBA8E163F1A4D, ); buildRules = ( ); dependencies = (
-					488C1DC0415EFF5825C77F33, ); name = "NoiseGate (AAX)"; productName = NoiseGate; productReference = 9C62742BCA5D3C9524DE3029; productType = "com.apple.product-type.bundle"; };
+					488C1DC0415EFF5825C77F33, ); name = "NoiseGate - AAX"; productName = NoiseGate; productReference = 9C62742BCA5D3C9524DE3029; productType = "com.apple.product-type.bundle"; };
 		1A6AAD356017FB36162EB851 = {isa = XCConfigurationList; buildConfigurations = (
 					4130388B36B3B506391E717A,
 					B3B550855CF90C491B1B3921, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3393,7 +3393,7 @@
 					F38684DBAA310B29B5B2598B,
 					2B362E865E39D8FBBEF5836E,
 					0DF7A849451483A06FA065B3, ); buildRules = ( ); dependencies = (
-					488C1DC0415EFF5825C77F33, ); name = "NoiseGate (AU)"; productName = NoiseGate; productReference = 8D84B63F343660AEE31FD166; productType = "com.apple.product-type.bundle"; };
+					488C1DC0415EFF5825C77F33, ); name = "NoiseGate - AU"; productName = NoiseGate; productReference = 8D84B63F343660AEE31FD166; productType = "com.apple.product-type.bundle"; };
 		17413E5C8ECD089086907FAE = {isa = XCConfigurationList; buildConfigurations = (
 					1758235B660DAD052A883AC2,
 					27BE10A92BDA4ED51C4C6BF4, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3415,7 +3415,7 @@
 					540728F29B63369AACBD15B2,
 					0DA5D6F818C57F8FAE4C618E, ); runOnlyForDeploymentPostprocessing = 0; };
 		C6A39FF70BF77051D89E2CE4 = {isa = PBXNativeTarget; buildConfigurationList = 17413E5C8ECD089086907FAE; buildPhases = (
-					61132FB6D58EDB3690AECF80, ); buildRules = ( ); dependencies = (  ); name = "NoiseGate (Shared Code)"; productName = NoiseGate; productReference = B15F50973CE5D365D77D282B; productType = "com.apple.product-type.library.static"; };
+					61132FB6D58EDB3690AECF80, ); buildRules = ( ); dependencies = (  ); name = "NoiseGate - Shared Code"; productName = NoiseGate; productReference = B15F50973CE5D365D77D282B; productType = "com.apple.product-type.library.static"; };
 		BAD3113DEB12EFF472860A51 = {isa = PBXProject; buildConfigurationList = 1283F0CE36BC5AD8241EC08A; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { BE96E7C5FAB338297CC69BA9 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };89095DFC434F1A8EB6368E3A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };822408E00D8E4658EE40468E = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };C31F9AF2D73B265832C65F18 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };5B796CD6929336C2CDEDBCD1 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };C6A39FF70BF77051D89E2CE4 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 1E8CE067EFE6F03AB97CACC0; projectDirPath = ""; projectRoot = ""; targets = (BE96E7C5FAB338297CC69BA9, 89095DFC434F1A8EB6368E3A, 822408E00D8E4658EE40468E, C31F9AF2D73B265832C65F18, 5B796CD6929336C2CDEDBCD1, C6A39FF70BF77051D89E2CE4); };
 	};
 	rootObject = BAD3113DEB12EFF472860A51;

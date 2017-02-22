@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestRunner (ConsoleApp)", "UnitTestRunner (ConsoleApp).vcxproj", "{8059D6DB-7FA3-D129-4ADE-B3C1A560027C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestRunner - ConsoleApp", "UnitTestRunner - ConsoleApp.vcxproj", "{8059D6DB-7FA3-D129-4ADE-B3C1A560027C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTestRunner", "UnitTestRunner", "{00990D6E-9CF8-2040-6C36-725A4AF3CDC3}"
 EndProject

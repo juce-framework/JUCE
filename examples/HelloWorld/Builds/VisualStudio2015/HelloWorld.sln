@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWorld (App)", "HelloWorld (App).vcxproj", "{D0620B06-01BA-BA19-C625-CE28F4174EC7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWorld - App", "HelloWorld - App.vcxproj", "{D0620B06-01BA-BA19-C625-CE28F4174EC7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HelloWorld", "HelloWorld", "{6F71394B-2B3B-5C52-6829-36D38C31031E}"
 EndProject

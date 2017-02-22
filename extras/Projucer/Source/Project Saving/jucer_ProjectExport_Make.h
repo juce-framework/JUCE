@@ -231,7 +231,7 @@ public:
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)";
 
-            out << newLine << "\t@echo Linking \"" << owner.projectName << " (" << getName() << ")\"" << newLine
+            out << newLine << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_BINDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;

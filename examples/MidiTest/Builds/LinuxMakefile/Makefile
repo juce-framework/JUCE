@@ -83,7 +83,7 @@ OBJECTS_APP := \
 .PHONY: clean all
 
 $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : check-pkg-config $(OBJECTS_APP) $(RESOURCES)
-	@echo Linking "MidiTest (App)"
+	@echo Linking "MidiTest - App"
 	-$(V_AT)mkdir -p $(JUCE_BINDIR)
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)

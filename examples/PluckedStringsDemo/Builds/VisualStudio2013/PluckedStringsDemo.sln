@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2013
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluckedStringsDemo (App)", "PluckedStringsDemo (App).vcxproj", "{A05B4CDE-58D3-4400-5280-63574E9C8D46}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluckedStringsDemo - App", "PluckedStringsDemo - App.vcxproj", "{A05B4CDE-58D3-4400-5280-63574E9C8D46}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PluckedStringsDemo", "PluckedStringsDemo", "{6976908C-115C-0675-9A1C-C1FC567C924A}"
 EndProject

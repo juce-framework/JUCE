@@ -3202,7 +3202,7 @@
 					60FCED8B68702AB28A4297C4,
 					0F3A38F7A210718AC51B5B67,
 					6FBE3D1D1900F691ECD1E9CF,
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (All)"; productName = GainPlugIn; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn - All"; productName = GainPlugIn; };
 		BFCD4A7D0A1F6DB0A953047C = {isa = XCConfigurationList; buildConfigurations = (
 					2258034E5AABF301ACB109C1,
 					B5B4DDE9429C2F747AEAFEBC, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3227,7 +3227,7 @@
 					AAA7EBE70E20807CF2102118,
 					006D5D33A2A2D68C9354B32D,
 					911E05FA69C1B8015EA96560, ); buildRules = ( ); dependencies = (
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST)"; productName = GainPlugIn; productReference = 169146CE0C9730602B3D31BD; productType = "com.apple.product-type.bundle"; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn - VST"; productName = GainPlugIn; productReference = 169146CE0C9730602B3D31BD; productType = "com.apple.product-type.bundle"; };
 		391979B4660EDD6E009E0AD5 = {isa = XCConfigurationList; buildConfigurations = (
 					1F8B7104586EEA017DC9E66D,
 					8C4CBD97ADA22451A0CBDB2A, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3252,7 +3252,7 @@
 					F779790510354BCC375B6866,
 					961B720A39DE7A36993450FB,
 					B97CFDFCFBB3263FBE4CE9DA, ); buildRules = ( ); dependencies = (
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (VST3)"; productName = GainPlugIn; productReference = E5C2175FF96CED1519F2B7D6; productType = "com.apple.product-type.bundle"; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn - VST3"; productName = GainPlugIn; productReference = E5C2175FF96CED1519F2B7D6; productType = "com.apple.product-type.bundle"; };
 		BC01B854A2B1C169532B3C40 = {isa = XCConfigurationList; buildConfigurations = (
 					913C8DA77769EF7E429930F2,
 					93405247663082AE0B727930, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3283,7 +3283,7 @@
 					12E5B85CBAEF4ADCEF60C693,
 					7CD5DF20930E5FD4B8978F68,
 					0466EDF982628A74C5EF25A0, ); buildRules = ( ); dependencies = (
-					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn (AU)"; productName = GainPlugIn; productReference = F8D93BA03DB14514E2F9D007; productType = "com.apple.product-type.bundle"; };
+					88ABDE275ED6C6AF05876C8F, ); name = "GainPlugIn - AU"; productName = GainPlugIn; productReference = F8D93BA03DB14514E2F9D007; productType = "com.apple.product-type.bundle"; };
 		2D1D1BFA76D5FF752D06187F = {isa = XCConfigurationList; buildConfigurations = (
 					2CB812B0DEE790549B33EA23,
 					1A69EAB78F178B933E748B51, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
@@ -3305,7 +3305,7 @@
 					4BE2D2BC6F1DC08BB64BAC78,
 					DBB093FB9913BE37F564E2AE, ); runOnlyForDeploymentPostprocessing = 0; };
 		EF7E12AA943CABF4C9ACE9FC = {isa = PBXNativeTarget; buildConfigurationList = 2D1D1BFA76D5FF752D06187F; buildPhases = (
-					E57E58AA3A8632B697CF894F, ); buildRules = ( ); dependencies = (  ); name = "GainPlugIn (Shared Code)"; productName = GainPlugIn; productReference = 074F1E0FAFBD4B127B869BC2; productType = "com.apple.product-type.library.static"; };
+					E57E58AA3A8632B697CF894F, ); buildRules = ( ); dependencies = (  ); name = "GainPlugIn - Shared Code"; productName = GainPlugIn; productReference = 074F1E0FAFBD4B127B869BC2; productType = "com.apple.product-type.library.static"; };
 		14B1FDE882BA4A9678780A26 = {isa = PBXProject; buildConfigurationList = 738DD13F786359A977312E92; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 67946078D4B1207C2A6BDB4F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };BBE761975F619DAA1B4D0F57 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };8777AC1501FECCF360363C10 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };95B232D53C8384ECDA8C519B = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };EF7E12AA943CABF4C9ACE9FC = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 807311746F9F870D03BE88D9; projectDirPath = ""; projectRoot = ""; targets = (67946078D4B1207C2A6BDB4F, BBE761975F619DAA1B4D0F57, 8777AC1501FECCF360363C10, 95B232D53C8384ECDA8C519B, EF7E12AA943CABF4C9ACE9FC); };
 	};
 	rootObject = 14B1FDE882BA4A9678780A26;

@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlocksDrawing (App)", "BlocksDrawing (App).vcxproj", "{CFD78289-DF68-E998-FA52-BA8B893952D3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlocksDrawing - App", "BlocksDrawing - App.vcxproj", "{CFD78289-DF68-E998-FA52-BA8B893952D3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BlocksDrawing", "BlocksDrawing", "{43860E07-9CC4-474C-7DF8-B4B350DEAD19}"
 EndProject

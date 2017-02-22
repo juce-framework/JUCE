@@ -2837,7 +2837,7 @@
 		F0C1DAFB0E78213F565F044F = {isa = PBXNativeTarget; buildConfigurationList = A3CB76965E92DC1E80F3F9AF; buildPhases = (
 					B64F4B6419098A6C579D0EDB,
 					6F1EAB6EC19EDAB88EF14DE0,
-					704E8CB52C968D24DAE2ABD5, ); buildRules = ( ); dependencies = (  ); name = "BlocksDrawing (App)"; productName = BlocksDrawing; productReference = 7A425A86C84D843976582BAF; productType = "com.apple.product-type.application"; };
+					704E8CB52C968D24DAE2ABD5, ); buildRules = ( ); dependencies = (  ); name = "BlocksDrawing - App"; productName = BlocksDrawing; productReference = 7A425A86C84D843976582BAF; productType = "com.apple.product-type.application"; };
 		46C68557D30B3B44D3FE037B = {isa = PBXProject; buildConfigurationList = DD23365E44ACBF007DC85D46; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { F0C1DAFB0E78213F565F044F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0E79852FE469702C8F99D6F3; projectDirPath = ""; projectRoot = ""; targets = (F0C1DAFB0E78213F565F044F); };
 	};
 	rootObject = 46C68557D30B3B44D3FE037B;

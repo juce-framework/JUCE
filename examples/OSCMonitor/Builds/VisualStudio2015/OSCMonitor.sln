@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSCMonitor (App)", "OSCMonitor (App).vcxproj", "{E59DC404-E625-1E60-3811-4F0BFB026DF1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSCMonitor - App", "OSCMonitor - App.vcxproj", "{E59DC404-E625-1E60-3811-4F0BFB026DF1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OSCMonitor", "OSCMonitor", "{8FE0EDF3-C1F5-A4DD-9E6A-A37AF4783099}"
 EndProject

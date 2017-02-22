@@ -629,7 +629,7 @@ public:
 
         String getXCodeSchemeName() const
         {
-            return owner.projectName + " (" + getName() + ")";
+            return owner.projectName + " - " + getName();
         }
 
         String getID() const

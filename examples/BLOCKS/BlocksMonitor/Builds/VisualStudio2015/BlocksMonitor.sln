@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlocksMonitor (App)", "BlocksMonitor (App).vcxproj", "{03DA01BF-8B38-2BC2-67A7-AE95C2E39250}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlocksMonitor - App", "BlocksMonitor - App.vcxproj", "{03DA01BF-8B38-2BC2-67A7-AE95C2E39250}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BlocksMonitor", "BlocksMonitor", "{6AE39C98-F2ED-099B-F93C-DC358E327C74}"
 EndProject

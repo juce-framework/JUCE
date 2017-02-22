@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2013
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JUCE Network Graphics Demo (App)", "JUCE Network Graphics Demo (App).vcxproj", "{2F8ABED0-7428-13A5-07CD-EF1F3B43B926}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JUCE Network Graphics Demo - App", "JUCE Network Graphics Demo - App.vcxproj", "{2F8ABED0-7428-13A5-07CD-EF1F3B43B926}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JUCE Network Graphics Demo", "JUCE Network Graphics Demo", "{08CE5857-4D50-A042-5259-0B9391DF742B}"
 	ProjectSection(SolutionItems) = preProject

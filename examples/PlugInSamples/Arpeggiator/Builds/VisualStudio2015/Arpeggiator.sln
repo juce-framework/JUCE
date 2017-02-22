@@ -1,12 +1,12 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Arpeggiator (VST)", "Arpeggiator (VST).vcxproj", "{7B4A2CB7-0625-C36D-39FB-C651743A206F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Arpeggiator - VST", "Arpeggiator - VST.vcxproj", "{7B4A2CB7-0625-C36D-39FB-C651743A206F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB} = {7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Arpeggiator (Shared Code)", "Arpeggiator (Shared Code).vcxproj", "{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Arpeggiator - Shared Code", "Arpeggiator - Shared Code.vcxproj", "{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arpeggiator", "Arpeggiator", "{0EA7B801-AF4F-3BFC-6C54-2639431BB639}"
 EndProject

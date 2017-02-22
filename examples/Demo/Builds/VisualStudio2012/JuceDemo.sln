@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2012
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemo (App)", "JuceDemo (App).vcxproj", "{05F7128C-1654-E8D0-856F-98237CF1EBE4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemo - App", "JuceDemo - App.vcxproj", "{05F7128C-1654-E8D0-856F-98237CF1EBE4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JuceDemo", "JuceDemo", "{135D6DB4-A78F-94DD-BF95-700E37C8FEAE}"
 EndProject

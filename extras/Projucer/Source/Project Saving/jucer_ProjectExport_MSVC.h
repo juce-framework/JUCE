@@ -677,7 +677,7 @@ protected:
         String filename = project.getProjectFilenameRoot();
 
         if (target.isNotEmpty())
-            filename += String (" (") + target + String (")");
+            filename += String (" - ") + target;
 
         return getTargetFolder().getChildFile (filename).withFileExtension (extension);
     }
@@ -764,8 +764,8 @@ protected:
         {
             if (MSVCTargetBase* target = targets[i])
             {
-                out << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << " ("
-                    << target->getName() << ")\", \""
+                out << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << " - "
+                    << target->getName() << "\", \""
                     << target->getVCProjFile().getFileName() << "\", \"" << target->getProjectGuid() << '"' << newLine;
 
                 if (sharedCodeGuid.isNotEmpty() && target->type != ProjectType::Target::SharedCodeTarget)
