@@ -124,8 +124,10 @@ public:
 
             String targetName (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
-            if (owner.projectType.isStaticLibrary() || owner.projectType.isDynamicLibrary())
-                targetName = getLibbedFilename (targetName);
+            if (owner.projectType.isStaticLibrary())
+                targetName = getStaticLibbedFilename (targetName);
+            else if (owner.projectType.isDynamicLibrary())
+                targetName = getDynamicLibbedFilename (targetName);
             else
                 targetName = targetName.upToLastOccurrenceOf (".", false, false) + getTargetFileSuffix();
 
