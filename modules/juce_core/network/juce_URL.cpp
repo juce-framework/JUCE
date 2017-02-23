@@ -104,7 +104,7 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
     HeapBlock<char> buffer;
     URL::DownloadTask::Listener* const listener;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FallbackDownloadTask)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FallbackDownloadTask)
 };
 
 void URL::DownloadTask::Listener::progress (DownloadTask*, int64, int64) {}
