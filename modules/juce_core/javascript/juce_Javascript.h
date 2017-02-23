@@ -98,6 +98,9 @@ public:
     */
     RelativeTime maximumExecutionTime;
 
+    /** When called from another thread, causes the interpreter to time-out as soon as possible */
+    void stop() noexcept;
+
     /** Provides access to the set of properties of the root namespace object. */
     const NamedValueSet& getRootObjectProperties() const noexcept;
 
