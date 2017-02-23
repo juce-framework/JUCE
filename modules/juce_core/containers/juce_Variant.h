@@ -51,7 +51,7 @@ public:
     /** This structure is passed to a NativeFunction callback, and contains invocation
         details about the function's arguments and context.
     */
-    struct NativeFunctionArgs
+    struct JUCE_API  NativeFunctionArgs
     {
         NativeFunctionArgs (const var& thisObject, const var* args, int numArgs) noexcept;
 
