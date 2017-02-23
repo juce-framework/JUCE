@@ -44,6 +44,9 @@ namespace MidiHelpers
 //==============================================================================
 uint8 MidiMessage::floatValueToMidiByte (const float v) noexcept
 {
+    jassert (v >= 0 && v <= 1.0f);  // if your value is > 1, maybe you're passing an
+                                    // integer value to a float method by mistake?
+
     return MidiHelpers::validVelocity (roundToInt (v * 127.0f));
 }
 
