@@ -46,7 +46,10 @@ class NormalisableRange
 {
 public:
     /** Creates a continuous range that performs a dummy mapping. */
-    NormalisableRange() noexcept  : start(), end (1), interval(), skew (static_cast<ValueType> (1)), symmetricSkew (false) {}
+    NormalisableRange() noexcept
+        : start(), end (1), interval(),
+          skew (static_cast<ValueType> (1)), symmetricSkew (false)
+    {}
 
     /** Creates a copy of another range. */
     NormalisableRange (const NormalisableRange& other) noexcept
@@ -131,7 +134,7 @@ public:
             if (skew != static_cast<ValueType> (1) && proportion > ValueType())
                 proportion = std::exp (std::log (proportion) / skew);
 
-                return start + (end - start) * proportion;
+            return start + (end - start) * proportion;
         }
 
         ValueType distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
@@ -161,6 +164,21 @@ public:
     }
 
     Range<ValueType> getRange() const noexcept          { return Range<ValueType> (start, end); }
+
+    /** Given a value which is between the start and end points, this sets the skew
+        such that convertFrom0to1 (0.5) will return this value.
+        @param centrePointValue  this must be greater than the start of the range and less than the end.
+    */
+    void setSkewForCentre (ValueType centrePointValue) noexcept
+    {
+        jassert (centrePointValue > start);
+        jassert (centrePointValue < end);
+
+        symmetricSkew = false;
+        skew = std::log (static_cast<ValueType> (0.5))
+                / std::log ((centrePointValue - start) / (end - start));
+        checkInvariants();
+    }
 
     /** The start of the non-normalised range. */
     ValueType start;
