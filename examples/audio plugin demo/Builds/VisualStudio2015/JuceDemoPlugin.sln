@@ -1,7 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
-MinimumVisualStudioVersion = 10.0.40219.1
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2015
+
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemoPlugin - VST", "JuceDemoPlugin - VST.vcxproj", "{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372} = {1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}
@@ -30,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_basics", "juce_a
 		..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp = ..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp
 		..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h = ..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h
 		..\..\..\..\modules\juce_audio_basics\juce_audio_basics.mm = ..\..\..\..\modules\juce_audio_basics\juce_audio_basics.mm
+		..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h = ..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buffers", "buffers", "{7CD42E50-9A58-3EBA-EE01-8BB53EE23455}"
@@ -127,6 +127,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_devices", "juce_
 		..\..\..\..\modules\juce_audio_devices\juce_audio_devices.cpp = ..\..\..\..\modules\juce_audio_devices\juce_audio_devices.cpp
 		..\..\..\..\modules\juce_audio_devices\juce_audio_devices.h = ..\..\..\..\modules\juce_audio_devices\juce_audio_devices.h
 		..\..\..\..\modules\juce_audio_devices\juce_audio_devices.mm = ..\..\..\..\modules\juce_audio_devices\juce_audio_devices.mm
+		..\..\..\..\modules\juce_audio_devices\juce_audio_devices.h = ..\..\..\..\modules\juce_audio_devices\juce_audio_devices.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "audio_io", "audio_io", "{2FB2505D-2839-6A28-8B43-608B6961375F}"
@@ -180,6 +181,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_formats", "juce_
 		..\..\..\..\modules\juce_audio_formats\juce_audio_formats.cpp = ..\..\..\..\modules\juce_audio_formats\juce_audio_formats.cpp
 		..\..\..\..\modules\juce_audio_formats\juce_audio_formats.h = ..\..\..\..\modules\juce_audio_formats\juce_audio_formats.h
 		..\..\..\..\modules\juce_audio_formats\juce_audio_formats.mm = ..\..\..\..\modules\juce_audio_formats\juce_audio_formats.mm
+		..\..\..\..\modules\juce_audio_formats\juce_audio_formats.h = ..\..\..\..\modules\juce_audio_formats\juce_audio_formats.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "codecs", "codecs", "{39987945-FE5D-E386-3C47-064B2DF8EF23}"
@@ -351,15 +353,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modes", "modes", "{B1508D51-A050-EB5E-38AC-A3D9A2F5291D}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\floor_all.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\floor_all.h
+		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_8.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_8.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_11.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_11.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_16.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_16.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_44.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_44.h
-		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_8.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\psych_8.h
+		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_8.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_8.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_16.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_16.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44p51.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44p51.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44u.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_44u.h
-		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_8.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\residue_8.h
+		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_8.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_8.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_11.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_11.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_16.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_16.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_22.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_22.h
@@ -367,7 +370,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modes", "modes", "{B1508D51
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44p51.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44p51.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44u.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_44u.h
-		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_8.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_8.h
 		..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_X.h = ..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.2\lib\modes\setup_X.h
 	EndProjectSection
 EndProject
@@ -415,9 +417,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_plugin_client", 
 		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_utils.mm = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_utils.mm
 		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_Standalone.cpp = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_Standalone.cpp
 		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_utils.cpp = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_utils.cpp
+		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST_utils.mm = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST_utils.mm
 		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST2.cpp = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST2.cpp
 		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST3.cpp = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST3.cpp
-		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST_utils.mm = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_VST_utils.mm
+		..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h = ..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AAX", "AAX", "{C9FCC1E3-813E-81AC-9B21-A6935E784CD9}"
@@ -495,10 +498,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CoreAudioUtilityClasses", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTAS", "RTAS", "{50323C9F-3869-F520-9B08-4D2A01B0B606}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h
 		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode1.cpp = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode1.cpp
 		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode2.cpp = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode2.cpp
 		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode3.cpp = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode3.cpp
-		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h
 		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_MacUtilities.mm = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_MacUtilities.mm
 		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_WinUtilities.cpp = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_WinUtilities.cpp
 		..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_Wrapper.cpp = ..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_Wrapper.cpp
@@ -539,6 +542,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_processors", "ju
 		..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp = ..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp
 		..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h = ..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h
 		..\..\..\..\modules\juce_audio_processors\juce_audio_processors.mm = ..\..\..\..\modules\juce_audio_processors\juce_audio_processors.mm
+		..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h = ..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "format", "format", "{7A47E055-941C-ACBD-ABC9-681DE92A0D8D}"
@@ -612,6 +616,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_utils", "juce_au
 		..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp = ..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp
 		..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h = ..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h
 		..\..\..\..\modules\juce_audio_utils\juce_audio_utils.mm = ..\..\..\..\modules\juce_audio_utils\juce_audio_utils.mm
+		..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h = ..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "audio_cd", "audio_cd", "{2A0F5ACB-117B-DBDF-01A4-637E97E507E9}"
@@ -648,9 +653,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{F76E7B
 		..\..\..\..\modules\juce_audio_utils\native\juce_mac_AudioCDBurner.mm = ..\..\..\..\modules\juce_audio_utils\native\juce_mac_AudioCDBurner.mm
 		..\..\..\..\modules\juce_audio_utils\native\juce_mac_AudioCDReader.mm = ..\..\..\..\modules\juce_audio_utils\native\juce_mac_AudioCDReader.mm
 		..\..\..\..\modules\juce_audio_utils\native\juce_mac_BluetoothMidiDevicePairingDialogue.mm = ..\..\..\..\modules\juce_audio_utils\native\juce_mac_BluetoothMidiDevicePairingDialogue.mm
+		..\..\..\..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp = ..\..\..\..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp
 		..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDBurner.cpp = ..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDBurner.cpp
 		..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDReader.cpp = ..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDReader.cpp
-		..\..\..\..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp = ..\..\..\..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "players", "players", "{D975B1FC-4D8C-049F-316E-1267AFBDEFE7}"
@@ -666,6 +671,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_core", "juce_core", "{
 		..\..\..\..\modules\juce_core\juce_core.cpp = ..\..\..\..\modules\juce_core\juce_core.cpp
 		..\..\..\..\modules\juce_core\juce_core.h = ..\..\..\..\modules\juce_core\juce_core.h
 		..\..\..\..\modules\juce_core\juce_core.mm = ..\..\..\..\modules\juce_core\juce_core.mm
+		..\..\..\..\modules\juce_core\juce_core.h = ..\..\..\..\modules\juce_core\juce_core.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "containers", "containers", "{65518DFA-AA0E-33C8-3816-2792B73EE256}"
@@ -859,9 +865,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "text", "text", "{D3A3219A-8
 		..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp = ..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp
 		..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h = ..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h
 		..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h = ..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h
+		..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h = ..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h
 		..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h = ..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h
 		..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h = ..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32.h
-		..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h = ..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8.h
 		..\..\..\..\modules\juce_core\text\juce_Identifier.cpp = ..\..\..\..\modules\juce_core\text\juce_Identifier.cpp
 		..\..\..\..\modules\juce_core\text\juce_Identifier.h = ..\..\..\..\modules\juce_core\text\juce_Identifier.h
 		..\..\..\..\modules\juce_core\text\juce_LocalisedStrings.cpp = ..\..\..\..\modules\juce_core\text\juce_LocalisedStrings.cpp
@@ -971,6 +977,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_data_structures", "juc
 		..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp = ..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp
 		..\..\..\..\modules\juce_data_structures\juce_data_structures.h = ..\..\..\..\modules\juce_data_structures\juce_data_structures.h
 		..\..\..\..\modules\juce_data_structures\juce_data_structures.mm = ..\..\..\..\modules\juce_data_structures\juce_data_structures.mm
+		..\..\..\..\modules\juce_data_structures\juce_data_structures.h = ..\..\..\..\modules\juce_data_structures\juce_data_structures.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app_properties", "app_properties", "{4A705E23-0141-66F3-2594-CD9A0BF44C32}"
@@ -1005,6 +1012,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_events", "juce_events"
 		..\..\..\..\modules\juce_events\juce_events.cpp = ..\..\..\..\modules\juce_events\juce_events.cpp
 		..\..\..\..\modules\juce_events\juce_events.h = ..\..\..\..\modules\juce_events\juce_events.h
 		..\..\..\..\modules\juce_events\juce_events.mm = ..\..\..\..\modules\juce_events\juce_events.mm
+		..\..\..\..\modules\juce_events\juce_events.h = ..\..\..\..\modules\juce_events\juce_events.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "broadcasters", "broadcasters", "{9E47598B-2577-465A-C90A-32404F7850B2}"
@@ -1073,6 +1081,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_graphics", "juce_graph
 		..\..\..\..\modules\juce_graphics\juce_graphics.cpp = ..\..\..\..\modules\juce_graphics\juce_graphics.cpp
 		..\..\..\..\modules\juce_graphics\juce_graphics.h = ..\..\..\..\modules\juce_graphics\juce_graphics.h
 		..\..\..\..\modules\juce_graphics\juce_graphics.mm = ..\..\..\..\modules\juce_graphics\juce_graphics.mm
+		..\..\..\..\modules\juce_graphics\juce_graphics.h = ..\..\..\..\modules\juce_graphics\juce_graphics.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "colour", "colour", "{F3F11CDE-52EC-66F8-F2D7-53315CF3AAFF}"
@@ -1280,6 +1289,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_gui_basics", "juce_gui
 		..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp = ..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp
 		..\..\..\..\modules\juce_gui_basics\juce_gui_basics.h = ..\..\..\..\modules\juce_gui_basics\juce_gui_basics.h
 		..\..\..\..\modules\juce_gui_basics\juce_gui_basics.mm = ..\..\..\..\modules\juce_gui_basics\juce_gui_basics.mm
+		..\..\..\..\modules\juce_gui_basics\juce_gui_basics.h = ..\..\..\..\modules\juce_gui_basics\juce_gui_basics.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "application", "application", "{3EC53F5E-7B4C-388B-D81F-383A9790312D}"
@@ -1612,6 +1622,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_gui_extra", "juce_gui_
 		..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp = ..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp
 		..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h = ..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h
 		..\..\..\..\modules\juce_gui_extra\juce_gui_extra.mm = ..\..\..\..\modules\juce_gui_extra\juce_gui_extra.mm
+		..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h = ..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "code_editor", "code_editor", "{46D23535-DF3D-1036-B282-994A43B10DAE}"
@@ -1709,73 +1720,72 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}.Debug|Win32.Build.0 = Debug|Win32
-		{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}.Release|Win32.ActiveCfg = Release|Win32
+		{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}.Release|Win32.Build.0 = Release|Win32
-		{DF786751-7581-02E8-2BB4-E217CD55C907}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}.Release|Win32.ActiveCfg = Release|Win32
 		{DF786751-7581-02E8-2BB4-E217CD55C907}.Debug|Win32.Build.0 = Debug|Win32
-		{DF786751-7581-02E8-2BB4-E217CD55C907}.Release|Win32.ActiveCfg = Release|Win32
+		{DF786751-7581-02E8-2BB4-E217CD55C907}.Debug|Win32.ActiveCfg = Debug|Win32
 		{DF786751-7581-02E8-2BB4-E217CD55C907}.Release|Win32.Build.0 = Release|Win32
-		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DF786751-7581-02E8-2BB4-E217CD55C907}.Release|Win32.ActiveCfg = Release|Win32
 		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}.Debug|Win32.Build.0 = Debug|Win32
-		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}.Release|Win32.ActiveCfg = Release|Win32
+		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}.Release|Win32.Build.0 = Release|Win32
+		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}.Release|Win32.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{7D98269F-FE96-6BA2-6982-95A094257474} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{7CD42E50-9A58-3EBA-EE01-8BB53EE23455} = {7D98269F-FE96-6BA2-6982-95A094257474}
 		{66AF0C07-0405-CD6A-E150-7010B2E00ED8} = {7D98269F-FE96-6BA2-6982-95A094257474}
 		{DB02F856-3B14-F815-657A-998A3A86CFA6} = {7D98269F-FE96-6BA2-6982-95A094257474}
 		{86B37A69-3A9B-3421-F2F8-046E6EDB3930} = {7D98269F-FE96-6BA2-6982-95A094257474}
 		{5BDC5083-85A9-115E-C05A-1576B73A5841} = {7D98269F-FE96-6BA2-6982-95A094257474}
 		{0E9104F9-439D-05F1-914D-6702A13C9B7C} = {7D98269F-FE96-6BA2-6982-95A094257474}
-		{9B424FDD-E818-734F-9A73-089DB94DAD0F} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{7D98269F-FE96-6BA2-6982-95A094257474} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{2FB2505D-2839-6A28-8B43-608B6961375F} = {9B424FDD-E818-734F-9A73-089DB94DAD0F}
 		{3A38C056-9228-7750-758A-38C4DC501768} = {9B424FDD-E818-734F-9A73-089DB94DAD0F}
 		{F86FE87E-E9FA-0117-7B1D-9BD6F8AE7A2B} = {9B424FDD-E818-734F-9A73-089DB94DAD0F}
 		{AB4C4044-BD2A-AED7-B3B0-38C2624E2B03} = {9B424FDD-E818-734F-9A73-089DB94DAD0F}
-		{2C62B2A1-47C2-2C91-3E85-F988210D128A} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
-		{39987945-FE5D-E386-3C47-064B2DF8EF23} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
-		{2A093441-0818-FBB3-4018-AC42C7556BA1} = {39987945-FE5D-E386-3C47-064B2DF8EF23}
-		{EAE49DAE-C9DA-C22A-94BB-F594D24A8859} = {2A093441-0818-FBB3-4018-AC42C7556BA1}
-		{03DE31C9-4319-43F6-00CD-07D4076628AF} = {EAE49DAE-C9DA-C22A-94BB-F594D24A8859}
+		{9B424FDD-E818-734F-9A73-089DB94DAD0F} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{57D44D97-1CEA-8801-71F9-2FDC3B30C765} = {03DE31C9-4319-43F6-00CD-07D4076628AF}
 		{72BC0A0E-5EFA-E29B-BC3B-C7C1D82692DD} = {03DE31C9-4319-43F6-00CD-07D4076628AF}
-		{89150802-5D84-B6ED-6A2B-EF3360A15C5E} = {39987945-FE5D-E386-3C47-064B2DF8EF23}
-		{28514950-B775-46D9-9558-D6E19DBA7737} = {89150802-5D84-B6ED-6A2B-EF3360A15C5E}
-		{39BEDD74-6156-CE0A-3D68-92B6619C6F17} = {28514950-B775-46D9-9558-D6E19DBA7737}
-		{BB6B3427-6256-D4F0-0335-52F2EC20FCF9} = {39BEDD74-6156-CE0A-3D68-92B6619C6F17}
+		{03DE31C9-4319-43F6-00CD-07D4076628AF} = {EAE49DAE-C9DA-C22A-94BB-F594D24A8859}
+		{EAE49DAE-C9DA-C22A-94BB-F594D24A8859} = {2A093441-0818-FBB3-4018-AC42C7556BA1}
+		{2A093441-0818-FBB3-4018-AC42C7556BA1} = {39987945-FE5D-E386-3C47-064B2DF8EF23}
 		{C1E00123-06F7-8611-C34F-D28E65D1484B} = {BB6B3427-6256-D4F0-0335-52F2EC20FCF9}
 		{6206A11D-B7B7-C251-EDB5-3FED3EEA091C} = {BB6B3427-6256-D4F0-0335-52F2EC20FCF9}
 		{8417A906-7041-470C-88E5-BA45164FB3BB} = {BB6B3427-6256-D4F0-0335-52F2EC20FCF9}
+		{BB6B3427-6256-D4F0-0335-52F2EC20FCF9} = {39BEDD74-6156-CE0A-3D68-92B6619C6F17}
 		{B1508D51-A050-EB5E-38AC-A3D9A2F5291D} = {39BEDD74-6156-CE0A-3D68-92B6619C6F17}
+		{39BEDD74-6156-CE0A-3D68-92B6619C6F17} = {28514950-B775-46D9-9558-D6E19DBA7737}
+		{28514950-B775-46D9-9558-D6E19DBA7737} = {89150802-5D84-B6ED-6A2B-EF3360A15C5E}
+		{89150802-5D84-B6ED-6A2B-EF3360A15C5E} = {39987945-FE5D-E386-3C47-064B2DF8EF23}
+		{39987945-FE5D-E386-3C47-064B2DF8EF23} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
 		{DA257576-DA2A-550A-0603-007F49337197} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
 		{1F68DB2D-F9CD-F7E7-9821-B51A6CFDB6E7} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
-		{C429CDA0-0874-985D-BD51-47A6B1346857} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{2C62B2A1-47C2-2C91-3E85-F988210D128A} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{C9FCC1E3-813E-81AC-9B21-A6935E784CD9} = {C429CDA0-0874-985D-BD51-47A6B1346857}
-		{01F7858B-E414-71C0-D1D1-47AE748623E9} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{28C4B316-3A7D-C12A-B40A-9C5A915CF4D2} = {01F7858B-E414-71C0-D1D1-47AE748623E9}
+		{01F7858B-E414-71C0-D1D1-47AE748623E9} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{50323C9F-3869-F520-9B08-4D2A01B0B606} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{791F8646-523E-D82B-9BE6-161FF97A3500} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{AAFDD9E5-D8B4-FBBE-523A-DAB61777C71B} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{528CACAC-0F68-5903-57D8-F2871B50ED28} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{7F0D0651-DB0C-E069-9339-23C5867FAE33} = {C429CDA0-0874-985D-BD51-47A6B1346857}
-		{861DF610-5E57-5745-146B-95D712482F64} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{C429CDA0-0874-985D-BD51-47A6B1346857} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{7A47E055-941C-ACBD-ABC9-681DE92A0D8D} = {861DF610-5E57-5745-146B-95D712482F64}
 		{C4C2ECEF-256A-2D14-9D85-2E125EFC0C9B} = {861DF610-5E57-5745-146B-95D712482F64}
 		{AABFD766-1B4E-E263-08D3-C6E087C68950} = {861DF610-5E57-5745-146B-95D712482F64}
 		{DA5DE8C5-116D-D9AF-4FE3-7194EB099C35} = {861DF610-5E57-5745-146B-95D712482F64}
 		{86851094-F8E2-4D2E-50A4-D3D9032FC6F3} = {861DF610-5E57-5745-146B-95D712482F64}
-		{7EB91F56-DF03-C4D2-537F-FE2E438C9553} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{861DF610-5E57-5745-146B-95D712482F64} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{2A0F5ACB-117B-DBDF-01A4-637E97E507E9} = {7EB91F56-DF03-C4D2-537F-FE2E438C9553}
 		{AB54F86B-DB98-3AE3-F510-6232975EFB16} = {7EB91F56-DF03-C4D2-537F-FE2E438C9553}
 		{F76E7B5E-2093-0FFD-6770-333083258323} = {7EB91F56-DF03-C4D2-537F-FE2E438C9553}
 		{D975B1FC-4D8C-049F-316E-1267AFBDEFE7} = {7EB91F56-DF03-C4D2-537F-FE2E438C9553}
-		{5C1FF221-EF7F-CCBD-1CED-454508D18369} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{7EB91F56-DF03-C4D2-537F-FE2E438C9553} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{65518DFA-AA0E-33C8-3816-2792B73EE256} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
 		{A58B512B-E06C-F645-55DA-8C87A7FE568A} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
 		{F41628A6-1B4D-BAAE-BD31-8B298B25155E} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
@@ -1792,31 +1802,31 @@ Global
 		{B00B716D-4253-9A7E-3BD7-27AF9469D1E6} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
 		{E2A357EF-C157-ED08-1979-0CCF55091353} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
 		{E843862A-9401-9721-AA93-D8991E9A6E27} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
-		{F2168155-D168-B526-81BE-D83B4B91C24A} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
 		{5CEAE3EF-C9AF-D573-4DFD-C50764137E87} = {F2168155-D168-B526-81BE-D83B4B91C24A}
-		{F637247F-DED6-3C77-BFE6-443CE9E617D9} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{F2168155-D168-B526-81BE-D83B4B91C24A} = {5C1FF221-EF7F-CCBD-1CED-454508D18369}
+		{5C1FF221-EF7F-CCBD-1CED-454508D18369} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{4A705E23-0141-66F3-2594-CD9A0BF44C32} = {F637247F-DED6-3C77-BFE6-443CE9E617D9}
 		{A4B83D1B-4E23-17E7-3AEA-B45FBA1CC99C} = {F637247F-DED6-3C77-BFE6-443CE9E617D9}
 		{A85F4C49-821F-8970-673A-B944D49FB7E3} = {F637247F-DED6-3C77-BFE6-443CE9E617D9}
-		{FC794184-5E75-90FA-4D88-0E201BFED805} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{F637247F-DED6-3C77-BFE6-443CE9E617D9} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{9E47598B-2577-465A-C90A-32404F7850B2} = {FC794184-5E75-90FA-4D88-0E201BFED805}
 		{48F8370A-172B-3EA6-E5DF-EA1916F0153E} = {FC794184-5E75-90FA-4D88-0E201BFED805}
 		{3898C2CE-3B0F-2B59-A173-8F60EE808168} = {FC794184-5E75-90FA-4D88-0E201BFED805}
 		{01E01F63-A042-9A34-270C-B5D7C77D2D2E} = {FC794184-5E75-90FA-4D88-0E201BFED805}
 		{DB7B412F-7680-ACAF-3D61-D629541DA87B} = {FC794184-5E75-90FA-4D88-0E201BFED805}
-		{07F6A409-5964-FBB6-3EDE-5BC5039F20B5} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{FC794184-5E75-90FA-4D88-0E201BFED805} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{F3F11CDE-52EC-66F8-F2D7-53315CF3AAFF} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{790DC405-D2C8-91B2-0BBD-4B2905F779C8} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{FCF311FC-94D9-E1BB-08D5-60468FFF3651} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{C9065BC1-84B5-B81C-BD15-10A3DCD01605} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{CE0DC204-9779-CB1B-DB25-5589C1A4256E} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
-		{A2D0E9BB-628F-854A-2775-F44188825B03} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{5B1B94D6-AB1F-7F5C-DC1D-208A248E4CCE} = {A2D0E9BB-628F-854A-2775-F44188825B03}
 		{C0B9F4E9-281D-9A7F-82A1-B65533517FFD} = {A2D0E9BB-628F-854A-2775-F44188825B03}
+		{A2D0E9BB-628F-854A-2775-F44188825B03} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{B4E7DF71-9AE9-30A6-3D63-118486D76DFE} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{A3A05819-7E50-7977-B2C1-60EC721A88A5} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
 		{A3856E0A-3F84-E9FF-DC21-057DB1048DE1} = {07F6A409-5964-FBB6-3EDE-5BC5039F20B5}
-		{754F86DC-35C1-1F47-478B-BBD91384AD60} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{07F6A409-5964-FBB6-3EDE-5BC5039F20B5} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{3EC53F5E-7B4C-388B-D81F-383A9790312D} = {754F86DC-35C1-1F47-478B-BBD91384AD60}
 		{8DA7C9B9-999E-77C5-5260-92AF379693BB} = {754F86DC-35C1-1F47-478B-BBD91384AD60}
 		{C1B036D6-D597-5F37-AEE4-448BA7F06602} = {754F86DC-35C1-1F47-478B-BBD91384AD60}
@@ -1834,11 +1844,12 @@ Global
 		{40012E3B-5B7F-7EF6-B271-590D6A7965EC} = {754F86DC-35C1-1F47-478B-BBD91384AD60}
 		{29D48680-731C-919D-050C-60F3E03AC077} = {754F86DC-35C1-1F47-478B-BBD91384AD60}
 		{1E240A87-4855-E8B9-A1E3-9DAF37D75F46} = {754F86DC-35C1-1F47-478B-BBD91384AD60}
-		{3D224AD3-E8D5-0D00-29AA-840F07BD4E30} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
+		{754F86DC-35C1-1F47-478B-BBD91384AD60} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{46D23535-DF3D-1036-B282-994A43B10DAE} = {3D224AD3-E8D5-0D00-29AA-840F07BD4E30}
 		{ED6DB7D6-5216-3F9F-5428-E53D7CB223A9} = {3D224AD3-E8D5-0D00-29AA-840F07BD4E30}
 		{39245158-EAC7-DA09-7560-373129D7DC5D} = {3D224AD3-E8D5-0D00-29AA-840F07BD4E30}
 		{526A655D-3D6A-CABA-3206-9B8745975E38} = {3D224AD3-E8D5-0D00-29AA-840F07BD4E30}
 		{C0D38C33-F13D-0AE2-FB14-EA81FDBAE0A5} = {3D224AD3-E8D5-0D00-29AA-840F07BD4E30}
+		{3D224AD3-E8D5-0D00-29AA-840F07BD4E30} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 	EndGlobalSection
 EndGlobal
