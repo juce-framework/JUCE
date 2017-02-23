@@ -1872,7 +1872,7 @@ private:
     {
         StringArray s;
         s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
-        s.add ("GCC_C_LANGUAGE_STANDARD = c99");
+        s.add ("GCC_C_LANGUAGE_STANDARD = c11");
         s.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
         s.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
         s.add ("GCC_WARN_UNUSED_VARIABLE = YES");
