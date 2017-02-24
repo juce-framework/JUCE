@@ -177,6 +177,23 @@ namespace AndroidStatsHelpers
         return juceString (LocalRef<jstring> ((jstring) getEnv()->GetStaticObjectField (
                             BuildClass, getEnv()->GetStaticFieldID (BuildClass, fieldName, "Ljava/lang/String;"))));
     }
+
+    String getConfigFileValue (const char* file, const char* const key)
+    {
+        StringArray lines;
+        File (file).readLines (lines);
+
+        for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+            if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
+                return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+        return String();
+    }
+
+    String getCpuInfo (const char* key)
+    {
+        return getConfigFileValue ("/proc/cpuinfo", key);
+    }
 }
 
 //==============================================================================
@@ -210,9 +227,27 @@ String SystemStats::getCpuVendor()
     return AndroidStatsHelpers::getSystemProperty ("os.arch");
 }
 
+String SystemStats::getCpuModel()
+{
+    return AndroidStatsHelpers::getCpuInfo("Hardware");
+}
+
 int SystemStats::getCpuSpeedInMegaherz()
 {
-    return 0; // TODO
+    int maxFreq = 0;
+    for (int i = 0; i < getNumCpus(); ++i)
+    {
+        String coreStr = File("/sys/devices/system/cpu/cpu" + String(i) + "/cpufreq/cpuinfo_max_freq")
+                             .loadFileAsString();
+
+        // value is in KHz
+        const int coreFreq = coreStr.getIntValue() / 1000;
+
+        if (coreFreq > maxFreq)
+            maxFreq = coreFreq;
+    }
+
+    return maxFreq;
 }
 
 int SystemStats::getMemorySizeInMegabytes()

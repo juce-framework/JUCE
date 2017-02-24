@@ -90,6 +90,11 @@ String SystemStats::getCpuVendor()
     return v;
 }
 
+String SystemStats::getCpuModel()
+{
+    return LinuxStatsHelpers::getCpuInfo ("model name");
+}
+
 int SystemStats::getCpuSpeedInMegaherz()
 {
     return roundToInt (LinuxStatsHelpers::getCpuInfo ("cpu MHz").getFloatValue());
