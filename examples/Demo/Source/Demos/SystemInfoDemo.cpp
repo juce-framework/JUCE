@@ -125,6 +125,7 @@ static String getAllSystemInfo()
       << "Number of CPUs:  " << SystemStats::getNumCpus() << newLine
       << "Memory size:     " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
       << "CPU vendor:      " << SystemStats::getCpuVendor() << newLine
+      << "CPU model:       " << SystemStats::getCpuModel() << newLine
       << "CPU speed:       " << SystemStats::getCpuSpeedInMegaherz() << " MHz" << newLine
       << "CPU has MMX:     " << (SystemStats::hasMMX()    ? "yes" : "no") << newLine
       << "CPU has SSE:     " << (SystemStats::hasSSE()    ? "yes" : "no") << newLine

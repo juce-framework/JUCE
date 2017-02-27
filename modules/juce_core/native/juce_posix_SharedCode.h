@@ -1072,6 +1072,19 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 }
 
 
+//==============================================================================
+static inline String readPosixConfigFileValue (const char* file, const char* const key)
+{
+    StringArray lines;
+    File (file).readLines (lines);
+
+    for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+        if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
+            return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+    return {};
+}
+
 
 //==============================================================================
 class ChildProcess::ActiveProcess

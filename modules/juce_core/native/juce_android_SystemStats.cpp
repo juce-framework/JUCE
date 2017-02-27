@@ -154,14 +154,14 @@ namespace AndroidStatsHelpers
     DECLARE_JNI_CLASS (SystemClass, "java/lang/System");
     #undef JNI_CLASS_MEMBERS
 
-    String getSystemProperty (const String& name)
+    static inline String getSystemProperty (const String& name)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (SystemClass,
                                                                                           SystemClass.getProperty,
                                                                                           javaString (name).get())));
     }
 
-    String getLocaleValue (bool isRegion)
+    static inline String getLocaleValue (bool isRegion)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (JuceAppActivity,
                                                                                           JuceAppActivity.getLocaleValue,
@@ -172,7 +172,7 @@ namespace AndroidStatsHelpers
     DECLARE_JNI_CLASS (BuildClass, "android/os/Build");
     #undef JNI_CLASS_MEMBERS
 
-    String getAndroidOsBuildValue (const char* fieldName)
+    static inline String getAndroidOsBuildValue (const char* fieldName)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->GetStaticObjectField (
                             BuildClass, getEnv()->GetStaticFieldID (BuildClass, fieldName, "Ljava/lang/String;"))));
@@ -210,9 +210,25 @@ String SystemStats::getCpuVendor()
     return AndroidStatsHelpers::getSystemProperty ("os.arch");
 }
 
+String SystemStats::getCpuModel()
+{
+    return readPosixConfigFileValue ("/proc/cpuinfo", "Hardware");
+}
+
 int SystemStats::getCpuSpeedInMegaherz()
 {
-    return 0; // TODO
+    int maxFreqKHz = 0;
+
+    for (int i = 0; i < getNumCpus(); ++i)
+    {
+        int freqKHz = File ("/sys/devices/system/cpu/cpu" + String(i) + "/cpufreq/cpuinfo_max_freq")
+                        .loadFileAsString()
+                        .getIntValue();
+
+        maxFreqKHz = jmax (freqKHz, maxFreqKHz);
+    }
+
+    return maxFreqKHz / 1000;
 }
 
 int SystemStats::getMemorySizeInMegabytes()
