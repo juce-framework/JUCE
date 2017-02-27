@@ -112,12 +112,9 @@ static String getComment()
 
 Result ResourceFile::writeHeader (MemoryOutputStream& header)
 {
-    const String headerGuard ("BINARYDATA_H_" + String (project.getProjectUID().hashCode() & 0x7ffffff) + "_INCLUDED");
-
     header << "/* ========================================================================================="
            << getComment()
-           << "#ifndef " << headerGuard << newLine
-           << "#define " << headerGuard << newLine
+           << "#pragma once" << newLine
            << newLine
            << "namespace " << className << newLine
            << "{" << newLine;
@@ -156,9 +153,7 @@ Result ResourceFile::writeHeader (MemoryOutputStream& header)
            << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
            << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
            << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
-           << "}" << newLine
-           << newLine
-           << "#endif" << newLine;
+           << "}" << newLine;
 
     return Result::ok();
 }

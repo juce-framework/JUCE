@@ -49,7 +49,8 @@
 *******************************************************************************/
 
 
-#pragma once // %%
+#pragma once
+#define JUCE_GRAPHICS_H_INCLUDED
 
 #include <juce_core/juce_core.h>
 #include <juce_events/juce_events.h>

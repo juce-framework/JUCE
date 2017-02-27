@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PRESETIDS_H_INCLUDED
-#define JUCER_PRESETIDS_H_INCLUDED
+#pragma once
 
 
 // Handy list of static Identifiers..
@@ -167,6 +166,7 @@ namespace Ids
     DECLARE_ID (androidStaticLibraries);
     DECLARE_ID (androidSharedLibraries);
     DECLARE_ID (androidScreenOrientation);
+    DECLARE_ID (androidExtraAssetsFolder);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
@@ -235,5 +235,3 @@ namespace Ids
 
     #undef DECLARE_ID
 }
-
-#endif   // JUCER_PRESETIDS_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTLAYOUTPANEL_H_INCLUDED
-#define JUCER_COMPONENTLAYOUTPANEL_H_INCLUDED
+#pragma once
 
 #include "jucer_ComponentLayoutEditor.h"
 #include "jucer_EditingPanelBase.h"
@@ -115,6 +114,3 @@ private:
         PropertyPanel propsPanel;
     };
 };
-
-
-#endif   // JUCER_COMPONENTLAYOUTPANEL_H_INCLUDED

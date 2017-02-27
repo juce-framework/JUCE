@@ -8,11 +8,4 @@
   ==============================================================================
 */
 
-#ifndef HEADERGUARD
-#define HEADERGUARD
-
-
-
-
-
-#endif  // HEADERGUARD
+#pragma once

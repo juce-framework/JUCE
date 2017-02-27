@@ -49,6 +49,7 @@
 
 
 #pragma once
+#define JUCE_VIDEO_H_INCLUDED
 
 //==============================================================================
 #include <juce_gui_extra/juce_gui_extra.h>

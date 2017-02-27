@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED
-#define JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "jucer_Project.h"
 #include "../Application/jucer_OpenDocumentManager.h"
@@ -171,6 +170,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)
 };
-
-
-#endif   // JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED

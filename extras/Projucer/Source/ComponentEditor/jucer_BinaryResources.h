@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_BINARYRESOURCES_H_INCLUDED
-#define JUCER_BINARYRESOURCES_H_INCLUDED
+#pragma once
 
 class JucerDocument;
 
@@ -96,6 +95,3 @@ private:
     BinaryResource* findResource (const String& name) const noexcept;
     void changed();
 };
-
-
-#endif   // JUCER_BINARYRESOURCES_H_INCLUDED

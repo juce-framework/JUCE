@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTCOLOURPROPERTY_H_INCLUDED
-#define JUCER_COMPONENTCOLOURPROPERTY_H_INCLUDED
+#pragma once
 
 #include "jucer_ColourPropertyComponent.h"
 
@@ -168,6 +167,3 @@ private:
         bool isDefault, wasSpecified;
     };
 };
-
-
-#endif   // JUCER_COMPONENTCOLOURPROPERTY_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_TRANSLATIONTOOL_H_INCLUDED
-#define JUCER_TRANSLATIONTOOL_H_INCLUDED
+#pragma once
 
 
 struct TranslationHelpers
@@ -455,6 +454,3 @@ private:
         editorPre.selectAll();
     }
 };
-
-
-#endif   // JUCER_TRANSLATIONTOOL_H_INCLUDED

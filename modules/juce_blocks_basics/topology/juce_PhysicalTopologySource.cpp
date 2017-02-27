@@ -233,6 +233,23 @@ struct PhysicalTopologySource::Internal
             return name.indexOf (" BLOCK") > 0 || name.indexOf (" Block") > 0;
         }
 
+        static String cleanBlocksDeviceName (juce::String name)
+        {
+            name = name.trim();
+
+            if (name.endsWith (" IN)"))
+                return name.dropLastCharacters (4);
+
+            if (name.endsWith (" OUT)"))
+                return name.dropLastCharacters (5);
+
+            const int openBracketPosition = name.lastIndexOfChar ('[');
+            if (openBracketPosition != -1 && name.endsWith ("]"))
+                return name.dropLastCharacters (name.length() - openBracketPosition);
+
+            return name;
+        }
+
         struct MidiInputOutputPair
         {
             juce::String outputName, inputName;
@@ -254,9 +271,10 @@ struct PhysicalTopologySource::Internal
                     pair.inputName = midiInputs[j];
                     pair.inputIndex = j;
 
+                    String cleanedInputName = cleanBlocksDeviceName (pair.inputName);
                     for (int i = 0; i < midiOutputs.size(); ++i)
                     {
-                        if (midiOutputs[i].trim() == pair.inputName.trim())
+                        if (cleanBlocksDeviceName (midiOutputs[i]) == cleanedInputName)
                         {
                             pair.outputName = midiOutputs[i];
                             pair.outputIndex = i;

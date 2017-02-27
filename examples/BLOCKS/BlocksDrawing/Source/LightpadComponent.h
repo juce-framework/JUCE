@@ -1,5 +1,4 @@
-#ifndef LIGHTPADCOMPONENT_H_INCLUDED
-#define LIGHTPADCOMPONENT_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -133,6 +132,3 @@ private:
     Time lastMouseEventTime;
     Point<int> lastLED;
 };
-
-
-#endif  // LIGHTPADCOMPONENT_H_INCLUDED

@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_Z2XZCP__
-#define __JUCE_APPCONFIG_Z2XZCP__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -211,6 +210,3 @@
 #ifndef    JUCE_USE_CAMERA
  //#define JUCE_USE_CAMERA
 #endif
-
-
-#endif  // __JUCE_APPCONFIG_Z2XZCP__

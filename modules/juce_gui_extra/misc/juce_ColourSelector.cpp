@@ -207,7 +207,7 @@ public:
         ColourGradient cg;
         cg.isRadial = false;
         cg.point1.setXY (0.0f, (float) edge);
-        cg.point2.setXY (0.0f, (float) (getHeight() - edge));
+        cg.point2.setXY (0.0f, (float) getHeight());
 
         for (float i = 0.0f; i <= 1.0f; i += 0.02f)
             cg.addColour (i, Colour (i, 1.0f, 1.0f, 1.0f));

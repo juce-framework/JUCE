@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTNAMEPROPERTY_H_INCLUDED
-#define JUCER_COMPONENTNAMEPROPERTY_H_INCLUDED
+#pragma once
 
 #include "jucer_ComponentTypeHandler.h"
 #include "jucer_ComponentUndoableAction.h"
@@ -177,7 +176,3 @@ private:
         String newName, oldName;
     };
 };
-
-
-
-#endif   // JUCER_COMPONENTNAMEPROPERTY_H_INCLUDED

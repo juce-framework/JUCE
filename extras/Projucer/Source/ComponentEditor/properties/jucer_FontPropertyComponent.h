@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FONTPROPERTYCOMPONENT_H_INCLUDED
-#define JUCER_FONTPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class FontPropertyComponent    : public ChoicePropertyComponent
@@ -117,6 +116,3 @@ public:
             + ")";
     }
 };
-
-
-#endif   // JUCER_FONTPROPERTYCOMPONENT_H_INCLUDED

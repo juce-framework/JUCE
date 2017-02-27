@@ -322,11 +322,6 @@ void GeneratedCode::applyToCode (String& code,
                                  const String& oldFileWithUserData,
                                  Project* project) const
 {
-    // header guard..
-    String headerGuard ("__JUCE_HEADER_");
-    headerGuard << String::toHexString ((className + "xx" + targetFile.getFileNameWithoutExtension()).hashCode64()).toUpperCase() << "__";
-    replaceTemplate (code, "headerGuard", headerGuard);
-
     replaceTemplate (code, "version", JUCEApplicationBase::getInstance()->getApplicationVersion());
     replaceTemplate (code, "creationTime", Time::getCurrentTime().toString (true, true, true));
 

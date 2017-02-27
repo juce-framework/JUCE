@@ -4,8 +4,7 @@
 
 */
 
-#ifndef BINARYDATA_H_62491730_INCLUDED
-#define BINARYDATA_H_62491730_INCLUDED
+#pragma once
 
 namespace BinaryData
 {
@@ -22,34 +21,34 @@ namespace BinaryData
     const int            LICENSESize = 11325;
 
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
-    const int            jucer_AnimatedComponentTemplate_cppSize = 1949;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1854;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
-    const int            jucer_AudioComponentTemplate_cppSize = 3203;
+    const int            jucer_AudioComponentTemplate_cppSize = 3108;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1162;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
-    const int            jucer_AudioPluginEditorTemplate_hSize = 994;
+    const int            jucer_AudioPluginEditorTemplate_hSize = 938;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
     const int            jucer_AudioPluginFilterTemplate_cppSize = 5475;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2259;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2203;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2151;
 
     extern const char*   jucer_ComponentTemplate_h;
-    const int            jucer_ComponentTemplate_hSize = 2131;
+    const int            jucer_ComponentTemplate_hSize = 2064;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
     const int            jucer_ContentCompTemplate_cppSize = 886;
 
     extern const char*   jucer_ContentCompTemplate_h;
-    const int            jucer_ContentCompTemplate_hSize = 942;
+    const int            jucer_ContentCompTemplate_hSize = 886;
 
     extern const char*   jucer_InlineComponentTemplate_h;
     const int            jucer_InlineComponentTemplate_hSize = 1161;
@@ -61,28 +60,28 @@ namespace BinaryData
     const int            jucer_MainTemplate_NoWindow_cppSize = 1992;
 
     extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 3848;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4001;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
-    const int            jucer_MainTemplate_Window_cppSize = 3760;
+    const int            jucer_MainTemplate_Window_cppSize = 3913;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
     const int            jucer_NewComponentTemplate_cppSize = 1389;
 
     extern const char*   jucer_NewComponentTemplate_h;
-    const int            jucer_NewComponentTemplate_hSize = 666;
+    const int            jucer_NewComponentTemplate_hSize = 610;
 
     extern const char*   jucer_NewCppFileTemplate_cpp;
     const int            jucer_NewCppFileTemplate_cppSize = 262;
 
     extern const char*   jucer_NewCppFileTemplate_h;
-    const int            jucer_NewCppFileTemplate_hSize = 308;
+    const int            jucer_NewCppFileTemplate_hSize = 246;
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
-    const int            jucer_NewInlineComponentTemplate_hSize = 1644;
+    const int            jucer_NewInlineComponentTemplate_hSize = 1588;
 
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
-    const int            jucer_OpenGLComponentTemplate_cppSize = 1827;
+    const int            jucer_OpenGLComponentTemplate_cppSize = 1732;
 
     extern const char*   background_logo_svg;
     const int            background_logo_svgSize = 3117;
@@ -166,5 +165,3 @@ namespace BinaryData
     // return the corresponding data and its size (or a null pointer if the name isn't found).
     const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();
 }
-
-#endif

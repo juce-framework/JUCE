@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDITEST_MAINCOMPONENT_H
-#define JUCE_MIDITEST_MAINCOMPONENT_H
+#pragma once
 
 #include "JuceHeader.h"
 
@@ -95,5 +94,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
-
-#endif   // JUCE_MIDITEST_MAINCOMPONENT_H

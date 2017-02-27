@@ -148,7 +148,7 @@ namespace AAXClasses
         {AAX_eStemFormat_None,     {AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
     };
 
-    static AAX_EStemFormat aaxFormats[AAX_eStemFormatNum] =
+    static AAX_EStemFormat aaxFormats[] =
     {
         AAX_eStemFormat_Mono,
         AAX_eStemFormat_Stereo,
@@ -1895,8 +1895,8 @@ namespace AAXClasses
        #else
         Array<int32> pluginIds;
 
-        const int numIns  = numInputBuses  > 0 ? AAX_eStemFormatNum : 0;
-        const int numOuts = numOutputBuses > 0 ? AAX_eStemFormatNum : 0;
+        const int numIns  = numInputBuses  > 0 ? numElementsInArray (aaxFormats) : 0;
+        const int numOuts = numOutputBuses > 0 ? numElementsInArray (aaxFormats) : 0;
 
         for (int inIdx = 0; inIdx < jmax (numIns, 1); ++inIdx)
         {

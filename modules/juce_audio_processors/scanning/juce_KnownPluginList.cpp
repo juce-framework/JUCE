@@ -279,8 +279,8 @@ struct PluginSorter
 
         switch (method)
         {
-            case KnownPluginList::sortByCategory:           diff = first->category.compareNatural (second->category); break;
-            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName); break;
+            case KnownPluginList::sortByCategory:           diff = first->category.compareNatural (second->category, true); break;
+            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName, true); break;
             case KnownPluginList::sortByFormat:             diff = first->pluginFormatName.compare (second->pluginFormatName); break;
             case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first->fileOrIdentifier).compare (lastPathPart (second->fileOrIdentifier)); break;
             case KnownPluginList::sortByInfoUpdateTime:     diff = compare (first->lastInfoUpdateTime, second->lastInfoUpdateTime); break;
@@ -288,7 +288,7 @@ struct PluginSorter
         }
 
         if (diff == 0)
-            diff = first->name.compareNatural (second->name);
+            diff = first->name.compareNatural (second->name, true);
 
         return diff * direction;
     }
@@ -436,7 +436,7 @@ struct PluginTreeUtils
             if (! thisType.containsNonWhitespaceChars())
                 thisType = "Other";
 
-            if (thisType != lastType)
+            if (! thisType.equalsIgnoreCase (lastType))
             {
                 if (current->plugins.size() + current->subFolders.size() > 0)
                 {

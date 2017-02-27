@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COLOURPROPERTYCOMPONENT_H_INCLUDED
-#define JUCER_COLOURPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 struct ColourPropertyComponent  : public PropertyComponent
@@ -222,6 +221,3 @@ private:
 
     ColourEditorComponent colourEditor;
 };
-
-
-#endif  // JUCER_COLOURPROPERTYCOMPONENT_H_INCLUDED

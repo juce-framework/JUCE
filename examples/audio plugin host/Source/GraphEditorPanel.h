@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __GRAPHEDITORPANEL_JUCEHEADER__
-#define __GRAPHEDITORPANEL_JUCEHEADER__
+#pragma once
 
 #include "FilterGraph.h"
 
@@ -169,6 +168,3 @@ inline String toString (PluginWindow::WindowFormatType type)
 inline String getLastXProp (PluginWindow::WindowFormatType type)    { return "uiLastX_" + toString (type); }
 inline String getLastYProp (PluginWindow::WindowFormatType type)    { return "uiLastY_" + toString (type); }
 inline String getOpenProp  (PluginWindow::WindowFormatType type)    { return "uiopen_"  + toString (type); }
-
-
-#endif   // __GRAPHEDITORPANEL_JUCEHEADER__

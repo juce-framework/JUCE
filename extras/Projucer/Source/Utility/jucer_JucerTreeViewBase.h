@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_JUCERTREEVIEWBASE_H_INCLUDED
-#define JUCER_JUCERTREEVIEWBASE_H_INCLUDED
+#pragma once
 
 class ProjectContentComponent;
 class Project;
@@ -229,6 +228,3 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeItemComponent)
 };
-
-
-#endif   // JUCER_JUCERTREEVIEWBASE_H_INCLUDED

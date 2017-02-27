@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_RYSVAR__
-#define __JUCE_APPCONFIG_RYSVAR__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -104,6 +103,3 @@
 #ifndef    JUCE_USE_XCURSOR
  //#define JUCE_USE_XCURSOR
 #endif
-
-
-#endif  // __JUCE_APPCONFIG_RYSVAR__

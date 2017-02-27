@@ -204,7 +204,7 @@ public:
         {
             const String binaryPath (config.getTargetBinaryRelativePathString().trim());
             if (binaryPath.isEmpty())
-                return "$(SolutionDir)$(Configuration)";
+                return "$(SolutionDir)\\$(Platform)\\$(Configuration)";
 
             RelativePath binaryRelPath (binaryPath, RelativePath::projectFolder);
 
@@ -223,7 +223,7 @@ public:
 
         String getIntermediatesPath (const MSVCBuildConfiguration& config) const
         {
-            String intDir = (config.getIntermediatesPath().isNotEmpty() ? config.getIntermediatesPath() : "$(Configuration)");
+            String intDir = (config.getIntermediatesPath().isNotEmpty() ? config.getIntermediatesPath() : "$(Platform)\\$(Configuration)");
             if (! intDir.endsWithChar (L'\\'))
                 intDir += L'\\';
 
@@ -1192,10 +1192,10 @@ public:
 
                     {
                         XmlElement* intdir = props->createNewChildElement("IntDir");
-                        setConditionAttribute(*intdir, config);
+                        setConditionAttribute (*intdir, config);
 
                         String intermediatesPath = getIntermediatesPath (config);
-                        if (!intermediatesPath.endsWith("\\"))
+                        if (! intermediatesPath.endsWith ("\\"))
                             intermediatesPath << "\\";
 
                         intdir->addTextElement (FileHelpers::windowsStylePath (intermediatesPath));

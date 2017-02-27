@@ -23,8 +23,7 @@
 */
 
 
-#ifndef ZONECOLOURPICKER_H_INCLUDED
-#define ZONECOLOURPICKER_H_INCLUDED
+#pragma once
 
 
 class ZoneColourPicker
@@ -88,6 +87,3 @@ private:
     MPEZoneLayout zoneLayout;
     bool legacyModeEnabled;
 };
-
-
-#endif  // ZONECOLOURPICKER_H_INCLUDED

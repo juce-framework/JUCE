@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_APPLICATION_H_INCLUDED
-#define JUCER_APPLICATION_H_INCLUDED
+#pragma once
 
 #include "jucer_MainWindow.h"
 #include "../Project/jucer_Module.h"
@@ -140,6 +139,3 @@ private:
     void handleAsyncUpdate() override;
     void initCommandManager();
 };
-
-
-#endif   // JUCER_APPLICATION_H_INCLUDED

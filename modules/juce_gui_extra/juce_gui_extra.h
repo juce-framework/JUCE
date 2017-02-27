@@ -48,6 +48,7 @@
 
 
 #pragma once
+#define JUCE_GUI_EXTRA_H_INCLUDED
 
 #include <juce_gui_basics/juce_gui_basics.h>
 

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_SLIDINGPANELCOMPONENT_H_INCLUDED
-#define JUCER_SLIDINGPANELCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "../Application/jucer_Application.h"
 
@@ -79,6 +78,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SlidingPanelComponent)
 };
-
-
-#endif   // JUCER_SLIDINGPANELCOMPONENT_H_INCLUDED

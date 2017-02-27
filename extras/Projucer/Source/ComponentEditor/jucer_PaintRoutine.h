@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTROUTINE_H_INCLUDED
-#define JUCER_PAINTROUTINE_H_INCLUDED
+#pragma once
 
 #include "paintelements/jucer_PaintElement.h"
 class JucerDocument;
@@ -115,5 +114,3 @@ private:
     friend class FrontOrBackElementAction;
     void moveElementZOrder (int oldIndex, int newIndex);
 };
-
-#endif   // JUCER_PAINTROUTINE_H_INCLUDED

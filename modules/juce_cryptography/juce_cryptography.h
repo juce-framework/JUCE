@@ -47,6 +47,7 @@
 
 
 #pragma once
+#define JUCE_CRYPTOGRAPHY_H_INCLUDED
 
 //==============================================================================
 #include <juce_core/juce_core.h>

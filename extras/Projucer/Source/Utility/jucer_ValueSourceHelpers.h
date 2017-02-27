@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_VALUESOURCEHELPERS_H_INCLUDED
-#define JUCER_VALUESOURCEHELPERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -50,6 +49,3 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NumericValueSource)
 };
-
-
-#endif   // JUCER_VALUESOURCEHELPERS_H_INCLUDED

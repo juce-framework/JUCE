@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_GLOBALPREFERENCES_H_INCLUDED
-#define JUCER_GLOBALPREFERENCES_H_INCLUDED
+#pragma once
 
 //==============================================================================
 
@@ -108,6 +107,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlobalPreferencesComponent)
 };
-
-
-#endif  // JUCER_GLOBALPREFERENCES_H_INCLUDED

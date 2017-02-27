@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FILEPROPERTYCOMPONENT_H_INCLUDED
-#define JUCER_FILEPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class FilePropertyComponent  : public PropertyComponent,
@@ -60,6 +59,3 @@ public:
 private:
     FilenameComponent filenameComp;
 };
-
-
-#endif   // JUCER_FILEPROPERTYCOMPONENT_H_INCLUDED

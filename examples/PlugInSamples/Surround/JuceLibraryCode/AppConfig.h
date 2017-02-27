@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_S8Q71Q__
-#define __JUCE_APPCONFIG_S8Q71Q__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -223,7 +222,6 @@
  //#define JUCE_USE_CAMERA
 #endif
 
-
 //==============================================================================
 // Audio plugin settings..
 
@@ -350,5 +348,3 @@
 #ifndef  JucePlugin_AAXDisableMultiMono
  #define JucePlugin_AAXDisableMultiMono    0
 #endif
-
-#endif  // __JUCE_APPCONFIG_S8Q71Q__

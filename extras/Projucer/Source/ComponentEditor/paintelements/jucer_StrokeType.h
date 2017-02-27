@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_STROKETYPE_H_INCLUDED
-#define JUCER_STROKETYPE_H_INCLUDED
+#pragma once
 
 #include "jucer_FillType.h"
 
@@ -156,6 +155,3 @@ private:
         fill.colour = Colours::black;
     }
 };
-
-
-#endif   // JUCER_STROKETYPE_H_INCLUDED

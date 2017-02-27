@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_POSITIONPROPERTYBASE_H_INCLUDED
-#define JUCER_POSITIONPROPERTYBASE_H_INCLUDED
+#pragma once
 
 #include "../ui/jucer_PaintRoutineEditor.h"
 #include "../ui/jucer_ComponentLayoutEditor.h"
@@ -450,6 +449,3 @@ protected:
     ComponentPositionDimension dimension;
     const bool includeAnchorOptions, allowRelativeOptions;
 };
-
-
-#endif   // JUCER_POSITIONPROPERTYBASE_H_INCLUDED

@@ -23,8 +23,7 @@
 */
 
 
-#ifndef MPEDEMOSYNTHVOICE_H_INCLUDED
-#define MPEDEMOSYNTHVOICE_H_INCLUDED
+#pragma once
 
 
 class MPEDemoSynthVoice : public MPESynthesiserVoice
@@ -181,6 +180,3 @@ private:
     const double maxLevelDb = 31.0f;
     const double smoothingLengthInSeconds = 0.01;
 };
-
-
-#endif  // MPEDEMOSYNTHVOICE_H_INCLUDED

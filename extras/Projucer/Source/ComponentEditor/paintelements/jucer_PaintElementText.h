@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTTEXT_H_INCLUDED
-#define JUCER_PAINTELEMENTTEXT_H_INCLUDED
+#pragma once
 
 #include "jucer_ColouredElement.h"
 #include "../properties/jucer_FontPropertyComponent.h"
@@ -565,6 +564,3 @@ private:
         PaintElementText* const element;
     };
 };
-
-
-#endif   // JUCER_PAINTELEMENTTEXT_H_INCLUDED

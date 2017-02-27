@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_RESOURCEFILE_H_INCLUDED
-#define JUCER_RESOURCEFILE_H_INCLUDED
+#pragma once
 
 #include "../Project/jucer_Project.h"
 
@@ -64,6 +63,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)
 };
-
-
-#endif   // JUCER_RESOURCEFILE_H_INCLUDED

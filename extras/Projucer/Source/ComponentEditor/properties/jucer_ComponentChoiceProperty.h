@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTCHOICEPROPERTY_H_INCLUDED
-#define JUCER_COMPONENTCHOICEPROPERTY_H_INCLUDED
+#pragma once
 
 
 template <class ComponentType>
@@ -55,6 +54,3 @@ protected:
     ComponentType* component;
     JucerDocument& document;
 };
-
-
-#endif   // JUCER_COMPONENTCHOICEPROPERTY_H_INCLUDED

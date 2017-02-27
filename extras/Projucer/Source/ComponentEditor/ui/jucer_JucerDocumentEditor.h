@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_JUCERDOCUMENTEDITOR_H_INCLUDED
-#define JUCER_JUCERDOCUMENTEDITOR_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 #include "jucer_ComponentLayoutEditor.h"
@@ -91,6 +90,3 @@ private:
     void addElement (const int index);
     void addComponent (const int index);
 };
-
-
-#endif   // JUCER_JUCERDOCUMENTEDITOR_H_INCLUDED

@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_3T6YQETY1__
-#define __JUCE_APPCONFIG_3T6YQETY1__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -69,6 +68,3 @@
 #ifndef    JUCE_ALLOW_STATIC_NULL_VARIABLES
  //#define JUCE_ALLOW_STATIC_NULL_VARIABLES
 #endif
-
-
-#endif  // __JUCE_APPCONFIG_3T6YQETY1__

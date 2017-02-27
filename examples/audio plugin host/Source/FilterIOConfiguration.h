@@ -22,8 +22,7 @@
   ==============================================================================
  */
 
-#ifndef FILTERIOCONFIGURATION_H_INCLUDED
-#define FILTERIOCONFIGURATION_H_INCLUDED
+#pragma once
 
 #include "FilterGraph.h"
 
@@ -60,6 +59,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterIOConfigurationWindow)
 };
-
-
-#endif  // FILTERIOCONFIGURATION_H_INCLUDED

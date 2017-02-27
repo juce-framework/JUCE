@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_RESOURCEEDITORPANEL_H_INCLUDED
-#define JUCER_RESOURCEEDITORPANEL_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 
@@ -55,6 +54,3 @@ private:
     ScopedPointer<TableListBox> listBox;
     TextButton addButton, reloadAllButton, delButton;
 };
-
-
-#endif   // JUCER_RESOURCEEDITORPANEL_H_INCLUDED

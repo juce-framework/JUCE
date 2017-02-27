@@ -47,6 +47,7 @@
 
 
 #pragma once
+#define JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
 
 /**
     The Tracktion Marketplace module is a simple user-registration system for

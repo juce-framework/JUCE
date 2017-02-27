@@ -287,16 +287,24 @@ public:
 
 //==============================================================================
 MessageManagerLock::MessageManagerLock (Thread* const threadToCheck)
-    : blockingMessage(), locked (attemptLock (threadToCheck, nullptr))
+    : blockingMessage(), checker (threadToCheck, nullptr),
+      locked (attemptLock (threadToCheck != nullptr ? &checker : nullptr))
 {
 }
 
 MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal)
-    : blockingMessage(), locked (attemptLock (nullptr, jobToCheckForExitSignal))
+    : blockingMessage(), checker (nullptr, jobToCheckForExitSignal),
+      locked (attemptLock (jobToCheckForExitSignal != nullptr ? &checker : nullptr))
 {
 }
 
-bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob* const job)
+MessageManagerLock::MessageManagerLock (BailOutChecker& bailOutChecker)
+    : blockingMessage(), checker (nullptr, nullptr),
+      locked (attemptLock (&bailOutChecker))
+{
+}
+
+bool MessageManagerLock::attemptLock (BailOutChecker* bailOutChecker)
 {
     MessageManager* const mm = MessageManager::instance;
 
@@ -306,7 +314,7 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
     if (mm->currentThreadHasLockedMessageManager())
         return true;
 
-    if (threadToCheck == nullptr && job == nullptr)
+    if (bailOutChecker == nullptr)
     {
         mm->lockingLock.enter();
     }
@@ -314,8 +322,7 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
     {
         while (! mm->lockingLock.tryEnter())
         {
-            if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
-                  || (job != nullptr && job->shouldExit()))
+            if (bailOutChecker->shouldAbortAcquiringLock())
                 return false;
 
             Thread::yield();
@@ -332,8 +339,7 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
 
     while (! blockingMessage->lockedEvent.wait (20))
     {
-        if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
-              || (job != nullptr && job->shouldExit()))
+        if (bailOutChecker != nullptr && bailOutChecker->shouldAbortAcquiringLock())
         {
             blockingMessage->releaseEvent.signal();
             blockingMessage = nullptr;
@@ -365,6 +371,19 @@ MessageManagerLock::~MessageManagerLock() noexcept
             mm->lockingLock.exit();
         }
     }
+}
+
+//==============================================================================
+MessageManagerLock::ThreadChecker::ThreadChecker (Thread* const threadToUse,
+                                                  ThreadPoolJob* const threadJobToUse)
+    : threadToCheck (threadToUse), job (threadJobToUse)
+{
+}
+
+bool MessageManagerLock::ThreadChecker::shouldAbortAcquiringLock()
+{
+    return (threadToCheck != nullptr && threadToCheck->threadShouldExit())
+        || (job           != nullptr && job->shouldExit());
 }
 
 //==============================================================================

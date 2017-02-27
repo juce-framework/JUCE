@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTLAYOUTEDITOR_H_INCLUDED
-#define JUCER_COMPONENTLAYOUTEDITOR_H_INCLUDED
+#pragma once
 
 #include "jucer_ComponentOverlayComponent.h"
 #include "../jucer_JucerDocument.h"
@@ -86,6 +85,3 @@ private:
     SnapGridPainter grid;
     bool firstResize;
 };
-
-
-#endif   // JUCER_COMPONENTLAYOUTEDITOR_H_INCLUDED

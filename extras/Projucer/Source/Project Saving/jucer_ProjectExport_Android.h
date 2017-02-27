@@ -88,7 +88,7 @@ public:
     //==============================================================================
     CachedValue<String> androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
                         androidVersionCode, androidMinimumSDK, androidTheme,
-                        androidSharedLibraries, androidStaticLibraries;
+                        androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder;
 
     CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded;
     CachedValue<String> androidOtherPermissions;
@@ -108,6 +108,7 @@ public:
           androidTheme (settings, Ids::androidTheme, nullptr),
           androidSharedLibraries (settings, Ids::androidSharedLibraries, nullptr, ""),
           androidStaticLibraries (settings, Ids::androidStaticLibraries, nullptr, ""),
+          androidExtraAssetsFolder (settings, Ids::androidExtraAssetsFolder, nullptr, ""),
           androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
           androidMicNeeded (settings, Ids::microphonePermissionNeeded, nullptr, false),
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
@@ -216,6 +217,18 @@ public:
         }
 
         writeCmakeFile (appFolder.getChildFile ("CMakeLists.txt"));
+
+        const String androidExtraAssetsFolderValue = androidExtraAssetsFolder.get();
+        if (androidExtraAssetsFolderValue.isNotEmpty())
+        {
+            File extraAssets (getProject().getFile().getParentDirectory().getChildFile(androidExtraAssetsFolderValue));
+            if (extraAssets.exists() && extraAssets.isDirectory())
+            {
+                const File assetsFolder (appFolder.getChildFile ("src/main/assets"));
+                if (assetsFolder.deleteRecursively())
+                    extraAssets.copyDirectoryTo (assetsFolder);
+            }
+        }
     }
 
     void removeOldFiles (const File& targetFolder) const
@@ -346,9 +359,10 @@ private:
         if (cfgExtraLinkerFlags.isNotEmpty())
         {
             mo << "SET( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
-            mo << "SET( CMAKE_EXE_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
+            mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
         }
 
+        const StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
         if (getNumConfigurations() > 0)
         {
             bool first = true;
@@ -376,7 +390,20 @@ private:
                     mo << "    add_definitions(" << getEscapedPreprocessorDefs (cfgDefines).joinIntoString (" ") << ")" << newLine;
 
                 writeCmakePathLines (mo, "    ", "include_directories( AFTER", cfgHeaderPaths);
-                writeCmakePathLines (mo, "    ", "link_directories(", cfgLibraryPaths);
+
+                if (userLibraries.size() > 0)
+                {
+                    for (auto& lib : userLibraries)
+                    {
+                        String findLibraryCmd;
+                        findLibraryCmd << "find_library(" << lib.toLowerCase().replaceCharacter (L' ', L'_')
+                            << " \"" << lib << "\" PATHS";
+
+                        writeCmakePathLines (mo, "    ", findLibraryCmd, cfgLibraryPaths, "    NO_CMAKE_FIND_ROOT_PATH)");
+                    }
+
+                    mo << newLine;
+                }
 
                 first = false;
             }
@@ -414,8 +441,7 @@ private:
             mo << newLine;
         }
 
-        const StringArray& libraries = getProjectLibraries();
-
+        StringArray libraries (getAndroidLibraries());
         if (libraries.size() > 0)
         {
             for (auto& lib : libraries)
@@ -424,6 +450,7 @@ private:
             mo << newLine;
         }
 
+        libraries.addArray (userLibraries);
         mo << "target_link_libraries( ${BINARY_NAME}";
         if (libraries.size() > 0)
         {
@@ -683,6 +710,9 @@ private:
 
         props.add (new TextWithDefaultPropertyComponent<String> (androidMinimumSDK, "Minimum SDK version", 32),
                    "The number of the minimum version of the Android SDK that the app requires");
+
+        props.add (new TextPropertyComponent (androidExtraAssetsFolder.getPropertyAsValue(), "Extra Android Assets", 256, false),
+                   "A path to a folder (relative to the project folder) which conatins extra android assets.");
     }
 
     //==============================================================================
@@ -1038,6 +1068,9 @@ private:
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
 
+        if (supportsGLv3())
+            defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
+
         return defines;
     }
 
@@ -1072,16 +1105,8 @@ private:
 
         libraries.add ("log");
         libraries.add ("android");
-        libraries.add (androidMinimumSDK.get().getIntValue() >= 18 ? "GLESv3" : "GLESv2");
+        libraries.add (supportsGLv3() ? "GLESv3" : "GLESv2");
         libraries.add ("EGL");
-
-        return libraries;
-    }
-
-    StringArray getProjectLibraries() const
-    {
-        StringArray libraries (getAndroidLibraries());
-        libraries.addArray (StringArray::fromLines (getExternalLibrariesString()));
 
         return libraries;
     }
@@ -1105,7 +1130,8 @@ private:
         return relative.toUnixStyle();
     }
 
-    void writeCmakePathLines (MemoryOutputStream& mo, const String& prefix, const String& firstLine, const StringArray& paths) const
+    void writeCmakePathLines (MemoryOutputStream& mo, const String& prefix, const String& firstLine, const StringArray& paths,
+                              const String& suffix = ")") const
     {
         if (paths.size() > 0)
         {
@@ -1114,7 +1140,7 @@ private:
             for (auto& path : paths)
                 mo << prefix << "    \"" << escapeDirectoryForCmake (path) << "\"" << newLine;
 
-            mo << prefix << ")" << newLine << newLine;
+            mo << prefix << suffix << newLine << newLine;
         }
     }
 
@@ -1262,6 +1288,11 @@ private:
             escapedArray.add ("\"" + element.replace ("\\", "\\\\").replace ("\"", "\\\"") + "\"");
 
         return escapedArray.joinIntoString (", ");
+    }
+
+    bool supportsGLv3() const
+    {
+        return (androidMinimumSDK.get().getIntValue() >= 18);
     }
 
     //==============================================================================

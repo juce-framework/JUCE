@@ -22,13 +22,9 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMMANDLINE_H_INCLUDED
-#define JUCER_COMMANDLINE_H_INCLUDED
+#pragma once
 
 
 int performCommandLine (const String& commandLine);
 
 enum { commandLineNotPerformed = 0x72346231 };
-
-
-#endif   // JUCER_COMMANDLINE_H_INCLUDED
