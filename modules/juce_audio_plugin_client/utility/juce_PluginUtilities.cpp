@@ -35,33 +35,6 @@ namespace juce
     AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Undefined;
 }
 
-#if _MSC_VER || JUCE_MINGW
-
-#if JucePlugin_Build_RTAS
- extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
-#endif
-
-extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
-{
-    if (reason == DLL_PROCESS_ATTACH)
-        Process::setCurrentModuleInstanceHandle (instance);
-
-   #if JucePlugin_Build_RTAS
-    if (GetModuleHandleA ("DAE.DLL") != 0)
-    {
-       #if JucePlugin_Build_AAX
-        if (! File::getSpecialLocation (File::currentExecutableFile).hasFileExtension ("aaxplugin"))
-       #endif
-            return DllMainRTAS (instance, reason, reserved);
-    }
-   #endif
-
-    ignoreUnused (reserved);
-    return TRUE;
-}
-
-#endif
-
 //==============================================================================
 namespace juce
 {

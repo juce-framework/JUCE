@@ -73,6 +73,14 @@
  #if _MSC_VER
   short __stdcall NewPlugIn (void*)                          { return 0; }
   short __stdcall _PI_GetRoutineDescriptor (long, void*)     { return 0; }
+
+   extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
+   {
+       if (reason == DLL_PROCESS_ATTACH)
+           Process::setCurrentModuleInstanceHandle (instance);
+
+       return DllMainRTAS (instance, reason, reserved);
+   }
  #endif
 
 #endif

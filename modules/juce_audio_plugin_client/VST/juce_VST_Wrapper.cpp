@@ -2112,6 +2112,14 @@ namespace
         return (int) pluginEntryPoint (audioMaster);
     }
    #endif
+
+    extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID)
+    {
+        if (reason == DLL_PROCESS_ATTACH)
+            Process::setCurrentModuleInstanceHandle (instance);
+
+        return true;
+    }
 #endif
 
 #endif
