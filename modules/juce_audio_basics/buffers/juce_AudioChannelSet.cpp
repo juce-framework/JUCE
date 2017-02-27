@@ -194,16 +194,16 @@ String AudioChannelSet::getDescription() const
     if (*this == createLRS())          return "LRS";
     if (*this == createLCRS())         return "LCRS";
 
-    if (*this == create5point0())      return "5.1 Surround";
-    if (*this == create5point1())      return "5.1 Surround (+Lfe)";
-    if (*this == create6point0())      return "6.1 Surround";
-    if (*this == create6point1())      return "6.1 Surround (+Lfe)";
-    if (*this == create6point0Music()) return "6.1 (Music) Surround";
-    if (*this == create6point1Music()) return "6.1 (Music) Surround (+Lfe)";
-    if (*this == create7point0())      return "7.1 Surround";
-    if (*this == create7point1())      return "7.1 Surround (Lfe)";
-    if (*this == create7point0SDDS())  return "7.1 Surround SDDS";
-    if (*this == create7point1SDDS())  return "7.1 Surround SDDS (+Lfe)";
+    if (*this == create5point0())      return "5.0 Surround";
+    if (*this == create5point1())      return "5.1 Surround";
+    if (*this == create6point0())      return "6.0 Surround";
+    if (*this == create6point1())      return "6.1 Surround";
+    if (*this == create6point0Music()) return "6.0 (Music) Surround";
+    if (*this == create6point1Music()) return "6.1 (Music) Surround";
+    if (*this == create7point0())      return "7.0 Surround";
+    if (*this == create7point1())      return "7.1 Surround";
+    if (*this == create7point0SDDS())  return "7.0 Surround SDDS";
+    if (*this == create7point1SDDS())  return "7.1 Surround SDDS";
 
     if (*this == quadraphonic())       return "Quadraphonic";
     if (*this == pentagonal())         return "Pentagonal";
