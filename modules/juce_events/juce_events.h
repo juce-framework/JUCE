@@ -57,6 +57,15 @@
 
 #include <juce_core/juce_core.h>
 
+//==============================================================================
+/** Config: JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+    Will execute your application's suspend method on an iOS background task, giving
+    you extra time to save your applications state.
+*/
+#ifndef JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
+ #define JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK 0
+#endif
+
 #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER && JUCE_WINDOWS
  #include <hstring.h>
 #endif
