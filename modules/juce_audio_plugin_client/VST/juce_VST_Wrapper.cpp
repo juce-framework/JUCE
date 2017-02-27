@@ -101,10 +101,6 @@ namespace juce
  #endif
  #endif
 
- #if JUCE_LINUX
-  extern Display* display;
- #endif
-
   extern JUCE_API bool handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
 }
 
@@ -332,6 +328,10 @@ public:
 
         vstEffect.flags |= vstEffectFlagDataInChunks;
 
+       #if JUCE_LINUX
+        display = XWindowSystem::getInstance()->displayRef();
+       #endif
+
         activePlugins.add (this);
     }
 
@@ -370,6 +370,10 @@ public:
                 messageThreadIsDefinitelyCorrect = false;
                #endif
             }
+
+           #if JUCE_LINUX
+            display = XWindowSystem::getInstance()->displayUnref();
+           #endif
         }
 
     }
@@ -1343,7 +1347,11 @@ public:
                 Rectangle<int> childBounds (child->getWidth(), child->getHeight());
                 childBounds *= scale;
 
-                XResizeWindow (display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
+                {
+                    ScopedXDisplay xDisplay;
+                    ::Display* display = xDisplay.get();
+                    XResizeWindow (display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
+                }
                #endif
 
                #if JUCE_MAC
@@ -1404,6 +1412,7 @@ private:
    #if JUCE_MAC
     void* hostWindow;
    #elif JUCE_LINUX
+    ::Display* display;
     Window hostWindow;
    #else
     HWND hostWindow;

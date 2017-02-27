@@ -22,7 +22,6 @@
   ==============================================================================
 */
 
-extern ::Display* display;
 extern XContext windowHandleXContext;
 
 //==============================================================================
@@ -61,7 +60,9 @@ public:
         : component (comp), renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
           contextToShareWith (shareContext), context (nullptr), dummy (*this)
     {
-        ScopedXLock xlock;
+        display = XWindowSystem::getInstance()->displayRef();
+
+        ScopedXLock xlock (display);
         XSync (display, False);
 
         GLint attribs[] =
@@ -125,18 +126,20 @@ public:
 
         if (embeddedWindow != 0)
         {
-            ScopedXLock xlock;
+            ScopedXLock xlock (display);
             XUnmapWindow (display, embeddedWindow);
             XDestroyWindow (display, embeddedWindow);
         }
 
         if (bestVisual != nullptr)
             XFree (bestVisual);
+
+        XWindowSystem::getInstance()->displayUnref();
     }
 
     void initialiseOnRenderThread (OpenGLContext& c)
     {
-        ScopedXLock xlock;
+        ScopedXLock xlock (display);
         renderContext = glXCreateContext (display, bestVisual, (GLXContext) contextToShareWith, GL_TRUE);
         c.makeActive();
         context = &c;
@@ -163,6 +166,8 @@ public:
 
     static void deactivateCurrentContext()
     {
+        ScopedXDisplay xDisplay;
+        ::Display* display = xDisplay.get();
         glXMakeCurrent (display, None, 0);
     }
 
@@ -178,7 +183,7 @@ public:
         const Rectangle<int> physicalBounds =
             juce_LinuxScaledToPhysicalBounds (component.getPeer(), bounds);
 
-        ScopedXLock xlock;
+        ScopedXLock xlock (display);
         XMoveResizeWindow (display, embeddedWindow,
                            physicalBounds.getX(), physicalBounds.getY(),
                            (unsigned int) jmax (1, physicalBounds.getWidth()),
@@ -229,12 +234,17 @@ private:
     OpenGLContext* context;
     DummyComponent dummy;
 
+    ::Display* display;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };
 
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {
-    ScopedXLock xlock;
+    ScopedXDisplay xDisplay;
+    ::Display* display = xDisplay.get();
+
+    ScopedXLock xlock (display);
     return glXGetCurrentContext() != 0;
 }

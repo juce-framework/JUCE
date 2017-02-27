@@ -174,7 +174,7 @@ void MessageManager::broadcastMessage (const String& value)
         data.lpData = (void*) localCopy.toUTF32().getAddress();
 
         DWORD_PTR result;
-        SendMessageTimeout (windows.getUnchecked(i), WM_COPYDATA,
+        SendMessageTimeout (windows.getUnchecked (i), WM_COPYDATA,
                             (WPARAM) juce_messageWindowHandle,
                             (LPARAM) &data,
                             SMTO_BLOCK | SMTO_ABORTIFHUNG, 8000, &result);

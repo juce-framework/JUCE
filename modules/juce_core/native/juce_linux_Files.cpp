@@ -120,29 +120,22 @@ File File::getSpecialLocation (const SpecialLocationType type)
             return File();
         }
 
-        case userDocumentsDirectory:          return resolveXDGFolder ("XDG_DOCUMENTS_DIR", "~");
-        case userMusicDirectory:              return resolveXDGFolder ("XDG_MUSIC_DIR",     "~");
-        case userMoviesDirectory:             return resolveXDGFolder ("XDG_VIDEOS_DIR",    "~");
-        case userPicturesDirectory:           return resolveXDGFolder ("XDG_PICTURES_DIR",  "~");
+        case userDocumentsDirectory:          return resolveXDGFolder ("XDG_DOCUMENTS_DIR", "~/Documents");
+        case userMusicDirectory:              return resolveXDGFolder ("XDG_MUSIC_DIR",     "~/Music");
+        case userMoviesDirectory:             return resolveXDGFolder ("XDG_VIDEOS_DIR",    "~/Videos");
+        case userPicturesDirectory:           return resolveXDGFolder ("XDG_PICTURES_DIR",  "~/Pictures");
         case userDesktopDirectory:            return resolveXDGFolder ("XDG_DESKTOP_DIR",   "~/Desktop");
-        case userApplicationDataDirectory:    return resolveXDGFolder ("XDG_CONFIG_HOME",   "~");
+        case userApplicationDataDirectory:    return resolveXDGFolder ("XDG_CONFIG_HOME",   "~/.config");
         case commonDocumentsDirectory:
-        case commonApplicationDataDirectory:  return File ("/var");
+        case commonApplicationDataDirectory:  return File ("/opt");
         case globalApplicationsDirectory:     return File ("/usr");
 
         case tempDirectory:
         {
-            File tmp ("/var/tmp");
+            if (const char* tmpDir = getenv ("TMPDIR"))
+                return File (CharPointer_UTF8 (tmpDir));
 
-            if (! tmp.isDirectory())
-            {
-                tmp = "/tmp";
-
-                if (! tmp.isDirectory())
-                    tmp = File::getCurrentWorkingDirectory();
-            }
-
-            return tmp;
+            return File ("/tmp");
         }
 
         case invokedExecutableFile:

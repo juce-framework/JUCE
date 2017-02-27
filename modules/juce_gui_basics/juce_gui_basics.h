@@ -281,6 +281,10 @@ class FlexBox;
 #include "lookandfeel/juce_LookAndFeel_V1.h"
 #include "lookandfeel/juce_LookAndFeel_V3.h"
 
+#if JUCE_LINUX
+ #include "native/juce_linux_X11.h"
+#endif
+
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
 #include "layout/juce_FlexItem.h"
