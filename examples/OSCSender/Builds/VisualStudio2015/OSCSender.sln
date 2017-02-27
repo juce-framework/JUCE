@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSCSender (App)", "OSCSender (App).vcxproj", "{5B0FE56E-266D-A62C-D8A9-D1F5E7905AF2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSCSender - App", "OSCSender - App.vcxproj", "{5B0FE56E-266D-A62C-D8A9-D1F5E7905AF2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OSCSender", "OSCSender", "{D0B95125-8581-3E3A-A11B-7E86A9996948}"
 EndProject
@@ -411,6 +411,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"

@@ -222,12 +222,12 @@ public:
 
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
-        @see getSampleData
+        @see getNumSamples, getReadPointer, getWritePointer
     */
     int getNumChannels() const noexcept                             { return numChannels; }
 
     /** Returns the number of samples allocated in each of the buffer's channels.
-        @see getSampleData
+        @see getNumChannels, getReadPointer, getWritePointer
     */
     int getNumSamples() const noexcept                              { return size; }
 

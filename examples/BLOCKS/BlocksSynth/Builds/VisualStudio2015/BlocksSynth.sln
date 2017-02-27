@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlocksSynth (App)", "BlocksSynth (App).vcxproj", "{CB640A07-7531-1DE6-BD35-4AC4E7641B33}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlocksSynth - App", "BlocksSynth - App.vcxproj", "{CB640A07-7531-1DE6-BD35-4AC4E7641B33}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BlocksSynth", "BlocksSynth", "{3C0DE3DC-1D4B-7D69-1AFB-2146782C1E7E}"
 EndProject
@@ -977,6 +977,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"

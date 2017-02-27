@@ -28,7 +28,6 @@
   ==============================================================================
 */
 
-//==============================================================================
 struct FallbackDownloadTask  : public URL::DownloadTask,
                                public Thread
 {
@@ -38,15 +37,18 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
                           URL::DownloadTask::Listener* listenerToUse)
         : Thread ("DownloadTask thread"),
           fileStream (outputStreamToUse),
+          stream (streamToUse),
           bufferSize (bufferSizeToUse),
           buffer (bufferSize),
-          stream (streamToUse),
           listener (listenerToUse)
     {
+        jassert (fileStream != nullptr);
+        jassert (stream != nullptr);
+
         contentLength = stream->getTotalLength();
         httpCode      = stream->getStatusCode();
 
-        startThread ();
+        startThread();
     }
 
     ~FallbackDownloadTask()
@@ -59,7 +61,7 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
     //==============================================================================
     void run() override
     {
-        while (! stream->isExhausted() && ! stream->isError() && ! threadShouldExit())
+        while (! (stream->isExhausted() || stream->isError() || threadShouldExit()))
         {
             if (listener != nullptr)
                 listener->progress (this, downloaded, contentLength);
@@ -83,7 +85,7 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
 
         fileStream->flush();
 
-        if (threadShouldExit() || (stream != nullptr && stream->isError()))
+        if (threadShouldExit() || stream->isError())
             error = true;
 
         if (contentLength > 0 && downloaded < contentLength)
@@ -96,11 +98,13 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
     }
 
     //==============================================================================
-    ScopedPointer<FileOutputStream> fileStream;
-    size_t bufferSize;
+    const ScopedPointer<FileOutputStream> fileStream;
+    const ScopedPointer<WebInputStream> stream;
+    const size_t bufferSize;
     HeapBlock<char> buffer;
-    ScopedPointer<WebInputStream> stream;
-    URL::DownloadTask::Listener* listener;
+    URL::DownloadTask::Listener* const listener;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FallbackDownloadTask)
 };
 
 void URL::DownloadTask::Listener::progress (DownloadTask*, int64, int64) {}

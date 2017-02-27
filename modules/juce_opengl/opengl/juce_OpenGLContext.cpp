@@ -112,7 +112,14 @@ public:
         {
             // make sure everything has finished executing
             destroying.set (1);
-            execute (new DoNothingWorker(), true, true);
+
+            if (workQueue.size() > 0)
+            {
+                if (! renderThread->contains (this))
+                    resume();
+
+                execute (new DoNothingWorker(), true, true);
+            }
 
             pause();
             renderThread = nullptr;
@@ -430,8 +437,10 @@ public:
     JobStatus runJob() override
     {
         {
+            MessageLockWorker worker (*this);
+
             // Allow the message thread to finish setting-up the context before using it..
-            MessageManagerLock mml (this);
+            MessageManagerLock mml (worker);
             if (! mml.lockWasGained())
                 return ThreadPoolJob::jobHasFinished;
         }
@@ -606,6 +615,8 @@ public:
             BlockingWorker* blocker = (shouldBlock ? new BlockingWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse)) : nullptr);
             OpenGLContext::AsyncWorker::Ptr worker = (blocker != nullptr ? blocker : static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
             workQueue.add (worker);
+
+            context.triggerRepaint();
 
             if (blocker != nullptr)
                 blocker->block();

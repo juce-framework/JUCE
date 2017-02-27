@@ -299,6 +299,7 @@ extern AndroidSystem android;
  METHOD (requestRuntimePermission, "requestRuntimePermission", "(IJ)V" ) \
  METHOD (isPermissionGranted,     "isPermissionGranted", "(I)Z" ) \
  METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
+ METHOD (getSystemService,        "getSystemService",     "(Ljava/lang/String;)Ljava/lang/Object;") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS

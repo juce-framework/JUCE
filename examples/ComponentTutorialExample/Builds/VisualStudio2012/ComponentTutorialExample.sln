@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2012
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComponentTutorialExample (App)", "ComponentTutorialExample (App).vcxproj", "{2ACA5085-A5CC-255B-B79D-D8256B0C459C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComponentTutorialExample - App", "ComponentTutorialExample - App.vcxproj", "{2ACA5085-A5CC-255B-B79D-D8256B0C459C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ComponentTutorialExample", "ComponentTutorialExample", "{4CC25596-DA67-C019-1BB9-4E29AD97A9C1}"
 EndProject
@@ -414,6 +414,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"

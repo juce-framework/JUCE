@@ -1,22 +1,22 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate (VST)", "NoiseGate (VST).vcxproj", "{A536DDEE-63EA-6626-E173-346797F44F1C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate - VST", "NoiseGate - VST.vcxproj", "{A536DDEE-63EA-6626-E173-346797F44F1C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC} = {C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate (VST3)", "NoiseGate (VST3).vcxproj", "{79CECA03-F5D8-FAA6-DF41-B5C10F2E99DC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate - VST3", "NoiseGate - VST3.vcxproj", "{79CECA03-F5D8-FAA6-DF41-B5C10F2E99DC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC} = {C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate (AAX)", "NoiseGate (AAX).vcxproj", "{047A8F76-26B6-FCC1-DC5E-2B0920870033}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate - AAX", "NoiseGate - AAX.vcxproj", "{047A8F76-26B6-FCC1-DC5E-2B0920870033}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC} = {C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate (Shared Code)", "NoiseGate (Shared Code).vcxproj", "{C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseGate - Shared Code", "NoiseGate - Shared Code.vcxproj", "{C400EBA2-5D53-0AF7-AA8B-7F64FB12D8EC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NoiseGate", "NoiseGate", "{A6F84550-F0E5-4969-21D6-3C7864A60293}"
 EndProject
@@ -1040,6 +1040,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"

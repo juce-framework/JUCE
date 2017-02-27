@@ -411,11 +411,9 @@ protected:
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
                        "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
 
-            const char* cppLanguageStandardNames[] = { "Use Default", "C++98", "GNU++98", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
+            const char* cppLanguageStandardNames[] = { "Use Default", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
             Array<var> cppLanguageStandardValues;
             cppLanguageStandardValues.add (var());
-            cppLanguageStandardValues.add ("c++98");
-            cppLanguageStandardValues.add ("gnu++98");
             cppLanguageStandardValues.add ("c++11");
             cppLanguageStandardValues.add ("gnu++11");
             cppLanguageStandardValues.add ("c++14");
@@ -631,7 +629,7 @@ public:
 
         String getXCodeSchemeName() const
         {
-            return owner.projectName + " (" + getName() + ")";
+            return owner.projectName + " - " + getName();
         }
 
         String getID() const
@@ -667,7 +665,7 @@ public:
                 String productName (owner.replacePreprocessorTokens (*config, config->getTargetBinaryNameString()));
 
                 if (xcodeFileType == "archive.ar")
-                    productName = getLibbedFilename (productName);
+                    productName = getStaticLibbedFilename (productName);
                 else
                     productName += xcodeBundleExtension;
 
@@ -1027,7 +1025,7 @@ public:
             {
                 if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
                 {
-                    String productName (getLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString())));
+                    String productName (getStaticLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString())));
 
                     RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
                     flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
@@ -1326,14 +1324,14 @@ public:
 
         StringArray getTargetExtraHeaderSearchPaths() const
         {
-            StringArray extraSearchPaths;
+            StringArray targetExtraSearchPaths;
 
             if (type == RTASPlugIn)
             {
                 RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
 
-                extraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
-                extraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
+                targetExtraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
+                targetExtraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
 
                 static const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
                     "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
@@ -1366,10 +1364,10 @@ public:
                     "xplat/AVX/avx2/avx2sdk/utils" };
 
                 for (auto* path : p)
-                    owner.addProjectPathToBuildPathList (extraSearchPaths, rtasFolder.getChildFile (path));
+                    owner.addProjectPathToBuildPathList (targetExtraSearchPaths, rtasFolder.getChildFile (path));
             }
 
-            return extraSearchPaths;
+            return targetExtraSearchPaths;
         }
 
         void addExtraRTASTargetSettings()
@@ -1906,7 +1904,7 @@ private:
     {
         StringArray s;
         s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
-        s.add ("GCC_C_LANGUAGE_STANDARD = c99");
+        s.add ("GCC_C_LANGUAGE_STANDARD = c11");
         s.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
         s.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
         s.add ("GCC_WARN_UNUSED_VARIABLE = YES");
@@ -2243,6 +2241,9 @@ private:
 
     String addProjectItem (const Project::Item& projectItem) const
     {
+        if (projectItem.getParent() == *modulesGroup)
+            return addFileReference (rebaseFromProjectFolderToBuildTarget (getModuleFolderRelativeToProject (projectItem.getName())).toUnixStyle());
+
         if (projectItem.isGroup())
         {
             StringArray childIDs;

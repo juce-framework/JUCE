@@ -363,11 +363,14 @@ protected:
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
-    static String getLibbedFilename (String name)
+    static String getStaticLibbedFilename (String name)
     {
-        if (! name.startsWith ("lib"))         name = "lib" + name;
-        if (! name.endsWithIgnoreCase (".a"))  name += ".a";
-        return name;
+        return addSuffix (addLibPrefix (name), ".a");
+    }
+
+    static String getDynamicLibbedFilename (String name)
+    {
+        return addSuffix (addLibPrefix (name), ".so");
     }
 
     virtual void addPlatformSpecificSettingsForProjectType (const ProjectType&) = 0;
@@ -412,6 +415,18 @@ protected:
 
 private:
     //==============================================================================
+    static String addLibPrefix (const String name)
+    {
+        return name.startsWith ("lib") ? name
+                                       : "lib" + name;
+    }
+
+    static String addSuffix (const String name, const String suffix)
+    {
+        return name.endsWithIgnoreCase (suffix) ? name
+                                                : name + suffix;
+    }
+
     void createDependencyPathProperties (PropertyListBuilder&);
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();

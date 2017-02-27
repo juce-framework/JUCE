@@ -124,8 +124,10 @@ public:
 
             String targetName (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
-            if (owner.projectType.isStaticLibrary() || owner.projectType.isDynamicLibrary())
-                targetName = getLibbedFilename (targetName);
+            if (owner.projectType.isStaticLibrary())
+                targetName = getStaticLibbedFilename (targetName);
+            else if (owner.projectType.isDynamicLibrary())
+                targetName = getDynamicLibbedFilename (targetName);
             else
                 targetName = targetName.upToLastOccurrenceOf (".", false, false) + getTargetFileSuffix();
 
@@ -231,7 +233,7 @@ public:
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)";
 
-            out << newLine << "\t@echo Linking \"" << owner.projectName << " (" << getName() << ")\"" << newLine
+            out << newLine << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_BINDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;

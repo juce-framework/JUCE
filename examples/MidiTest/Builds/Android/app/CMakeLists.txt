@@ -660,6 +660,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_events/native/juce_osx_MessageQueue.h"
     "../../../../../modules/juce_events/native/juce_win32_HiddenMessageWindow.h"
     "../../../../../modules/juce_events/native/juce_win32_Messaging.cpp"
+    "../../../../../modules/juce_events/native/juce_win32_WinRTWrapper.cpp"
+    "../../../../../modules/juce_events/native/juce_win32_WinRTWrapper.h"
     "../../../../../modules/juce_events/timers/juce_MultiTimer.cpp"
     "../../../../../modules/juce_events/timers/juce_MultiTimer.h"
     "../../../../../modules/juce_events/timers/juce_Timer.cpp"
@@ -1791,6 +1793,8 @@ set_source_files_properties("../../../../../modules/juce_events/native/juce_mac_
 set_source_files_properties("../../../../../modules/juce_events/native/juce_osx_MessageQueue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/native/juce_win32_HiddenMessageWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/native/juce_win32_Messaging.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_events/native/juce_win32_WinRTWrapper.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_events/native/juce_win32_WinRTWrapper.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/timers/juce_MultiTimer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/timers/juce_MultiTimer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/timers/juce_Timer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

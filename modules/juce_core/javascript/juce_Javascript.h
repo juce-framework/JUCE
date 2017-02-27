@@ -46,7 +46,7 @@
     script creates complex connections between objects, you run the risk of creating cyclic
     dependencies and hence leaking.
 */
-class JavascriptEngine
+class JUCE_API  JavascriptEngine
 {
 public:
     /** Creates an instance of the engine.
@@ -97,6 +97,9 @@ public:
         suits your application.
     */
     RelativeTime maximumExecutionTime;
+
+    /** When called from another thread, causes the interpreter to time-out as soon as possible */
+    void stop() noexcept;
 
     /** Provides access to the set of properties of the root namespace object. */
     const NamedValueSet& getRootObjectProperties() const noexcept;

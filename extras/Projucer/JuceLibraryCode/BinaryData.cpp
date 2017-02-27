@@ -1239,8 +1239,6 @@ static const unsigned char temp_binary_data_4[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#pragma once\r\n"
-"\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -1310,8 +1308,6 @@ static const unsigned char temp_binary_data_5[] =
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
-"\r\n"
-"#pragma once\r\n"
 "\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
@@ -2498,8 +2494,6 @@ static const unsigned char temp_binary_data_24[] =
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
-"\r\n"
-"#pragma once\r\n"
 "\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
@@ -5241,8 +5235,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x10b04d10:  numBytes = 4971; return gradlew;
         case 0x76cff066:  numBytes = 2404; return gradlew_bat;
         case 0x34bc1021:  numBytes = 11325; return LICENSE;
-        case 0x6cf2645e:  numBytes = 1854; return jucer_AnimatedComponentTemplate_cpp;
-        case 0xafccbd3f:  numBytes = 3108; return jucer_AudioComponentTemplate_cpp;
+        case 0x6cf2645e:  numBytes = 1838; return jucer_AnimatedComponentTemplate_cpp;
+        case 0xafccbd3f:  numBytes = 3092; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1162; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5475; return jucer_AudioPluginFilterTemplate_cpp;
@@ -5261,7 +5255,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 246; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1588; return jucer_NewInlineComponentTemplate_h;
-        case 0x7fbac252:  numBytes = 1732; return jucer_OpenGLComponentTemplate_cpp;
+        case 0x7fbac252:  numBytes = 1716; return jucer_OpenGLComponentTemplate_cpp;
         case 0x406db5c1:  numBytes = 3117; return background_logo_svg;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;

@@ -222,7 +222,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         void checkTimeOut (const CodeLocation& location) const
         {
             if (Time::getCurrentTime() > root->timeout)
-                location.throwError ("Execution timed-out");
+                location.throwError (root->timeout == Time() ? "Interrupted" : "Execution timed-out");
         }
     };
 
@@ -1794,6 +1794,7 @@ JavascriptEngine::JavascriptEngine()  : maximumExecutionTime (15.0), root (new R
 JavascriptEngine::~JavascriptEngine() {}
 
 void JavascriptEngine::prepareTimeout() const noexcept   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
+void JavascriptEngine::stop() noexcept                   { root->timeout = {}; }
 
 void JavascriptEngine::registerNativeObject (const Identifier& name, DynamicObject* object)
 {

@@ -177,15 +177,13 @@ public:
     Node* addNode (AudioProcessor* newProcessor, uint32 nodeId = 0);
 
     /** Deletes a node within the graph which has the specified ID.
-
         This will also delete any connections that are attached to this node.
     */
     bool removeNode (uint32 nodeId);
 
-    /** Deletes a node within the graph which has the specified ID.
-
+    /** Deletes a node within the graph.
         This will also delete any connections that are attached to this node.
-     */
+    */
     bool removeNode (Node* node);
 
     //==============================================================================

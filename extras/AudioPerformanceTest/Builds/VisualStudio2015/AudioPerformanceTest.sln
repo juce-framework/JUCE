@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioPerformanceTest (App)", "AudioPerformanceTest (App).vcxproj", "{78607AE9-F43B-3DDB-0FE1-D745771AF527}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioPerformanceTest - App", "AudioPerformanceTest - App.vcxproj", "{78607AE9-F43B-3DDB-0FE1-D745771AF527}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AudioPerformanceTest", "AudioPerformanceTest", "{766FF2B3-94C6-07A1-DB7C-992BD758E759}"
 EndProject
@@ -914,6 +914,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"

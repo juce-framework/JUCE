@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLAppExample (App)", "OpenGLAppExample (App).vcxproj", "{182ACA5F-046A-783D-4973-5D5DE8D7D5A5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLAppExample - App", "OpenGLAppExample - App.vcxproj", "{182ACA5F-046A-783D-4973-5D5DE8D7D5A5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenGLAppExample", "OpenGLAppExample", "{76694535-81A6-A0CD-133B-E91F5160EF11}"
 EndProject
@@ -893,6 +893,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"

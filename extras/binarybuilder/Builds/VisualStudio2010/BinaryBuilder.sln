@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BinaryBuilder (ConsoleApp)", "BinaryBuilder (ConsoleApp).vcxproj", "{88983F7C-DB65-9E04-84E7-05F8979E0383}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BinaryBuilder - ConsoleApp", "BinaryBuilder - ConsoleApp.vcxproj", "{88983F7C-DB65-9E04-84E7-05F8979E0383}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BinaryBuilder", "BinaryBuilder", "{DD31A83B-04FF-61D7-2A48-7A33FF19204F}"
 EndProject

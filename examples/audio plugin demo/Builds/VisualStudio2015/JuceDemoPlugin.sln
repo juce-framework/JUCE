@@ -1,17 +1,17 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemoPlugin (VST)", "JuceDemoPlugin (VST).vcxproj", "{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemoPlugin - VST", "JuceDemoPlugin - VST.vcxproj", "{D82A1FD0-FB5C-8174-477C-8EF5CA51D2A8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372} = {1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemoPlugin (Standalone Plugin)", "JuceDemoPlugin (Standalone Plugin).vcxproj", "{DF786751-7581-02E8-2BB4-E217CD55C907}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemoPlugin - Standalone Plugin", "JuceDemoPlugin - Standalone Plugin.vcxproj", "{DF786751-7581-02E8-2BB4-E217CD55C907}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372} = {1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemoPlugin (Shared Code)", "JuceDemoPlugin (Shared Code).vcxproj", "{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JuceDemoPlugin - Shared Code", "JuceDemoPlugin - Shared Code.vcxproj", "{1AB90829-CCC5-D7C1-BC4A-70C8D3DAD372}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JuceDemoPlugin", "JuceDemoPlugin", "{9DCDAE5C-AF24-DA1D-55C8-7A351056BAE0}"
 	ProjectSection(SolutionItems) = preProject
@@ -1064,6 +1064,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{01E01F
 		..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h = ..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h
 		..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h = ..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h
 		..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.cpp
+		..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h = ..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "timers", "timers", "{DB7B412F-7680-ACAF-3D61-D629541DA87B}"
