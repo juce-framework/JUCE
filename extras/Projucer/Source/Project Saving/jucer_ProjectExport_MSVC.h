@@ -527,6 +527,29 @@ public:
             return delayLoadedDLLs;
         }
 
+        String getModuleDefinitions (const MSVCBuildConfiguration& config) const
+        {
+            const String& moduleDefinitions = config.config [Ids::msvcModuleDefinitionFile].toString();
+
+            if (moduleDefinitions.isNotEmpty())
+                return moduleDefinitions;
+
+            if (type == RTASPlugIn)
+            {
+                const ProjectExporter& exp = getOwner();
+
+                RelativePath moduleDefPath
+                    = RelativePath (exp.getPathForModuleString ("juce_audio_plugin_client"), RelativePath::projectFolder)
+                         .getChildFile ("juce_audio_plugin_client").getChildFile ("RTAS").getChildFile ("juce_RTAS_WinExports.def");
+
+                return prependDot (moduleDefPath.rebased (exp.getProject().getProjectFolder(),
+                                                            exp.getTargetFolder(),
+                                                            RelativePath::buildTargetFolder).toWindowsStyle());
+            }
+
+            return String();
+        }
+
         bool shouldUseRuntimeDLL (const MSVCBuildConfiguration& config) const
         {
             return (config.config [Ids::useRuntimeLibDLL].isVoid() ? (getOwner().hasTarget (AAXPlugIn) || getOwner().hasTarget (RTASPlugIn))
@@ -1338,10 +1361,10 @@ public:
                     if (delayLoadedDLLs.isNotEmpty())
                         link->createNewChildElement ("DelayLoadDLLs")->addTextElement (delayLoadedDLLs);
 
-                    const String moduleDefinitions (getModuleDefinitions());
-                    if (moduleDefinitions.isNotEmpty())
-                        link->createNewChildElement ("ModuleDefinitionFile")->addTextElement (moduleDefinitions);
-
+                    const String moduleDefinitionsFile (getModuleDefinitions (config));
+                    if (moduleDefinitionsFile.isNotEmpty())
+                        link->createNewChildElement ("ModuleDefinitionFile")
+                            ->addTextElement (moduleDefinitionsFile);
                 }
 
                 {

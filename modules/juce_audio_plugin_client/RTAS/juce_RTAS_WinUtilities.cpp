@@ -84,6 +84,20 @@ void JUCE_CALLTYPE resizeHostWindow (void* hostWindow,
                   SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 }
 
+extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
+
+extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
+{
+    if (reason == DLL_PROCESS_ATTACH)
+        Process::setCurrentModuleInstanceHandle (instance);
+
+    if (GetModuleHandleA ("DAE.DLL") != 0)
+        return DllMainRTAS (instance, reason, reserved);
+
+    ignoreUnused (reserved);
+    return TRUE;
+}
+
 #if ! JucePlugin_EditorRequiresKeyboardFocus
 
 namespace
