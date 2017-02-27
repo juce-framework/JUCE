@@ -423,7 +423,7 @@ public:
             return String();
         }
 
-        void addExtraSearchPaths (StringArray& searchPaths) const
+        void addExtraSearchPaths (Array<RelativePath>& searchPaths) const
         {
             if (type == RTASPlugIn)
             {
@@ -456,7 +456,7 @@ public:
                                            "xplat/AVX/avx2/avx2sdk/inc" };
 
                 for (int i = 0; i < numElementsInArray (p); ++i)
-                    searchPaths.add (getOwner().rebaseFromProjectFolderToBuildTarget (rtasFolder.getChildFile (p[i])).toWindowsStyle());
+                    searchPaths.add (getOwner().rebaseFromProjectFolderToBuildTarget (rtasFolder.getChildFile (p[i])));
             }
         }
 
@@ -1257,7 +1257,6 @@ public:
                     }
 
                     StringArray includePaths (getOwner().getHeaderSearchPaths (config));
-                    addExtraSearchPaths (includePaths);
                     includePaths.add ("%(AdditionalIncludeDirectories)");
                     cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                     cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
