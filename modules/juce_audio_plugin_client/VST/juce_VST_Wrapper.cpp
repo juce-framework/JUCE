@@ -667,17 +667,17 @@ public:
             {
                 case vstSmpteRateFps24:        rate = AudioPlayHead::fps24;       fps = 24.0;  break;
                 case vstSmpteRateFps25:        rate = AudioPlayHead::fps25;       fps = 25.0;  break;
-                case vstSmpteRateFps2997:      rate = AudioPlayHead::fps2997;     fps = 29.97; break;
+                case vstSmpteRateFps2997:      rate = AudioPlayHead::fps2997;     fps = 30.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps30:        rate = AudioPlayHead::fps30;       fps = 30.0;  break;
-                case vstSmpteRateFps2997drop:  rate = AudioPlayHead::fps2997drop; fps = 29.97; break;
+                case vstSmpteRateFps2997drop:  rate = AudioPlayHead::fps2997drop; fps = 30.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps30drop:    rate = AudioPlayHead::fps30drop;   fps = 30.0;  break;
 
                 case vstSmpteRate16mmFilm:
                 case vstSmpteRate35mmFilm:     fps = 24.0; break;
 
-                case vstSmpteRateFps239:       fps = 23.976; break;
-                case vstSmpteRateFps249:       fps = 24.976; break;
-                case vstSmpteRateFps599:       fps = 59.94; break;
+                case vstSmpteRateFps239:       fps = 24.0 * 1000.0 / 1001.0; break;
+                case vstSmpteRateFps249:       fps = 25.0 * 1000.0 / 1001.0; break;
+                case vstSmpteRateFps599:       fps = 60.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps60:        fps = 60; break;
 
                 default:                       jassertfalse; // unknown frame-rate..

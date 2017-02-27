@@ -888,11 +888,11 @@ namespace AAXClasses
                     case AAX_eFrameRate_Undeclared:    break;
                     case AAX_eFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
                     case AAX_eFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
-                    case AAX_eFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 29.97002997; break;
-                    case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 29.97002997; break;
+                    case AAX_eFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 30.0 * 1000.0 / 1001.0; break;
+                    case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 30.0 * 1000.0 / 1001.0; break;
                     case AAX_eFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
                     case AAX_eFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
-                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.976; break;
+                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 24.0 * 1000.0 / 1001.0; break;
                     default:                           break;
                 }
 
@@ -1734,8 +1734,10 @@ namespace AAXClasses
         return meterIdx;
     }
 
-    static void createDescriptor (AAX_IComponentDescriptor& desc, int configIndex,
-                                  const AudioProcessor::BusesLayout& fullLayout, AudioProcessor& processor,
+    static void createDescriptor (AAX_IComponentDescriptor& desc,
+                                  const AudioProcessor::BusesLayout& fullLayout,
+                                  AudioProcessor& processor,
+                                  Array<int32>& pluginIds,
                                   const int numMeters)
     {
         AAX_EStemFormat aaxInputFormat  = getFormatForAudioChannelSet (fullLayout.getMainInputChannelSet(),  false);
@@ -1797,10 +1799,22 @@ namespace AAXClasses
 
         // This value needs to match the RTAS wrapper's Type ID, so that
         // the host knows that the RTAS/AAX plugins are equivalent.
-        properties->AddProperty (AAX_eProperty_PlugInID_Native,     'jcaa' + configIndex);
+        const int32 pluginID = processor.getAAXPluginIDForMainBusConfig (fullLayout.getMainInputChannelSet(),
+                                                                         fullLayout.getMainOutputChannelSet(),
+                                                                         false);
+
+        // The plugin id generated from your AudioProcessor's getAAXPluginIDForMainBusConfig callback
+        // it not unique. Please fix your implementation!
+        jassert (! pluginIds.contains (pluginID));
+        pluginIds.add (pluginID);
+
+        properties->AddProperty (AAX_eProperty_PlugInID_Native, pluginID);
 
        #if ! JucePlugin_AAXDisableAudioSuite
-        properties->AddProperty (AAX_eProperty_PlugInID_AudioSuite, 'jyaa' + configIndex);
+        properties->AddProperty (AAX_eProperty_PlugInID_AudioSuite,
+                                 processor.getAAXPluginIDForMainBusConfig (fullLayout.getMainInputChannelSet(),
+                                                                           fullLayout.getMainOutputChannelSet(),
+                                                                           true));
        #endif
 
        #if JucePlugin_AAXDisableMultiMono
@@ -1879,7 +1893,7 @@ namespace AAXClasses
         }
 
        #else
-        int configIndex = 0;
+        Array<int32> pluginIds;
 
         const int numIns  = numInputBuses  > 0 ? AAX_eStemFormatNum : 0;
         const int numOuts = numOutputBuses > 0 ? AAX_eStemFormatNum : 0;
@@ -1900,14 +1914,14 @@ namespace AAXClasses
 
                 if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
                 {
-                    createDescriptor (*desc, configIndex++, fullLayout, *plugin, numMeters);
+                    createDescriptor (*desc, fullLayout, *plugin, pluginIds, numMeters);
                     check (descriptor.AddComponent (desc));
                 }
             }
         }
 
         // You don't have any supported layouts
-        jassert (configIndex > 0);
+        jassert (pluginIds.size() > 0);
        #endif
     }
 }
