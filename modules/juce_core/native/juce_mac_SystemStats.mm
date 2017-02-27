@@ -176,6 +176,17 @@ String SystemStats::getCpuVendor()
    #endif
 }
 
+String SystemStats::getCpuModel()
+{
+    char name[0x40];
+    size_t size = sizeof(name);
+
+    if (sysctlbyname("machdep.cpu.brand_string", &name, &size, nullptr, 0) < 0)
+        return String();
+
+    return String(name);
+}
+
 int SystemStats::getCpuSpeedInMegaherz()
 {
     uint64 speedHz = 0;

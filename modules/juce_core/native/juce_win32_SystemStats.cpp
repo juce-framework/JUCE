@@ -79,6 +79,30 @@ String SystemStats::getCpuVendor()
     return String (v, 12);
 }
 
+String SystemStats::getCpuModel()
+{
+    char name[0x40] = {0};
+
+    int info[4] = { 0 };
+    callCPUID (info, 0x80000000);
+
+    const int numExtIds = info[0];
+    // This indicates Brand String is unsupported
+    if (numExtIds < 0x80000004)
+        return String();
+
+    callCPUID (info, 0x80000002);
+    memcpy(name, info, sizeof(info));
+
+    callCPUID (info, 0x80000003);
+    memcpy(name + 16, info, sizeof(info));
+
+    callCPUID (info, 0x80000004);
+    memcpy(name + 32, info, sizeof(info));
+
+    return String(name).trim();
+}
+
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
