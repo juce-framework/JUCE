@@ -49,11 +49,14 @@ public:
     IPAddress (bool IPv6 = false) noexcept;
 
     /** Creates an IPv4 or IPv6 address by reading 4 or 16 bytes from an array.
+        @param bytes The array containing the bytes to read.
         @param IPv6 if true indicates that 16 bytes should be read instead of 4.
     */
     explicit IPAddress (const uint8 bytes[], bool IPv6 = false) noexcept;
 
-    /** Creates an IPv6 address from an array of 8 16-bit integers */
+    /** Creates an IPv6 address from an array of 8 16-bit integers
+        @param bytes The array containing the bytes to read.
+    */
     explicit IPAddress (const uint16 bytes[8]) noexcept;
 
     /** Creates an IPv4 address from 4 bytes. */
