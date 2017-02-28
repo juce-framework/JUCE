@@ -33,10 +33,10 @@ def add_doxygen_group(path, group_name):
     filename = os.path.basename(path)
     if filename.startswith("juce_") and filename.endswith(".h"):
 
-        group_definition_start = ("\n/** @weakgroup "
+        group_definition_start = ("\r\n/** @weakgroup "
                                   + group_name
-                                  + "\n *  @{\n */\n")
-        group_definition_end = "\n/** @}*/\n"
+                                  + "\r\n *  @{\r\n */\r\n")
+        group_definition_end = "\r\n/** @}*/\r\n"
 
         with open(path, "r") as f:
             content = f.read()
@@ -146,7 +146,7 @@ for module_name in juce_modules:
     module_definiton.append("")
     module_definiton.append("/** @} */")
 
-    module_definitions.append("\n".join(module_definiton))
+    module_definitions.append("\r\n".join(module_definiton))
 
     # Put the top level files into the main group.
     for filename in (set(dir_contents) - set(subdirs)):
@@ -160,4 +160,4 @@ for module_name in juce_modules:
 
 # Create an extra header file containing the module hierarchy.
 with open(os.path.join(build_directory, "juce_modules.dox"), "w") as f:
-    f.write("\n\n".join(module_definitions))
+    f.write("\r\n\r\n".join(module_definitions))
