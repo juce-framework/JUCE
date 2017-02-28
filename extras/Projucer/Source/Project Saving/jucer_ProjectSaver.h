@@ -394,7 +394,7 @@ private:
             // Fabian TODO
             out << "//==============================================================================" << newLine
                 << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
-                << " #ifdef JucePlugin_Build_Standalone" << newLine
+                << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
                 << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
                 << " #else" << newLine
                 << "  #define  JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine
