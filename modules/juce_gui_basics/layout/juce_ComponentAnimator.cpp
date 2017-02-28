@@ -131,11 +131,13 @@ public:
     {
         if (component != nullptr)
         {
+            const WeakReference<AnimationTask> weakRef (this);
             component->setAlpha ((float) destAlpha);
             component->setBounds (destination);
 
-            if (proxy != nullptr)
-                component->setVisible (destAlpha > 0);
+            if (! weakRef.wasObjectDeleted())
+                if (proxy != nullptr)
+                    component->setVisible (destAlpha > 0);
         }
     }
 
