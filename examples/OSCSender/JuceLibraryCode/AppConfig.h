@@ -30,7 +30,7 @@
 
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION
- #ifdef JucePlugin_Build_Standalone
+ #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)
   #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone
  #else
   #define  JUCE_STANDALONE_APPLICATION 1
@@ -72,6 +72,13 @@
 
 #ifndef    JUCE_ALLOW_STATIC_NULL_VARIABLES
  //#define JUCE_ALLOW_STATIC_NULL_VARIABLES
+#endif
+
+//==============================================================================
+// juce_events flags:
+
+#ifndef    JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+ //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
 #endif
 
 //==============================================================================
