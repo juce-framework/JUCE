@@ -179,7 +179,7 @@ public:
         AttributedString s;
         s.setWordWrap (AttributedString::none);
         s.setJustification (Justification::centredLeft);
-        s.append (font.getTypefaceName(), font.withPointHeight (height * 0.7f), Colours::black);
+        s.append (font.getTypefaceName(), font.withHeight (height * 0.7f), Colours::black);
         s.append ("   " + font.getTypefaceName(), Font (height * 0.5f, Font::italic), Colours::grey);
 
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
