@@ -869,16 +869,7 @@ public:
             else
             {
                 const String sdk (config.osxSDKVersion.get());
-
-                String sdkCompat (config.osxDeploymentTarget.get());
-                if (! owner.isiOS() && type == Target::AudioUnitv3PlugIn)
-                    for (int ver = oldestSDKVersion; ver < 11; ++ver)
-                        if (sdkCompat == getSDKName (ver))
-                        {
-                            // Set the AUv3 target's deployment target to 10.11.
-                            sdkCompat = getSDKName (11);
-                            break;
-                        }
+                const String sdkCompat (config.osxDeploymentTarget.get());
 
                 // The AUv3 target always needs to be at least 10.11
                 int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
