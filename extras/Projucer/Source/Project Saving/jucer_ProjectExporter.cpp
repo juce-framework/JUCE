@@ -342,26 +342,27 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs() const
 
 void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, const ProjectType::Target::Type targetType) const
 {
+    std::pair<String, ProjectType::Target::Type> targetFlags[] = {
+        {"JucePlugin_Build_VST",        ProjectType::Target::VSTPlugIn},
+        {"JucePlugin_Build_VST3",       ProjectType::Target::VST3PlugIn},
+        {"JucePlugin_Build_AU",         ProjectType::Target::AudioUnitPlugIn},
+        {"JucePlugin_Build_AUv3",       ProjectType::Target::AudioUnitv3PlugIn},
+        {"JucePlugin_Build_RTAS",       ProjectType::Target::RTASPlugIn},
+        {"JucePlugin_Build_AAX",        ProjectType::Target::AAXPlugIn},
+        {"JucePlugin_Build_Standalone", ProjectType::Target::StandalonePlugIn}
+    };
+
     if (targetType == ProjectType::Target::SharedCodeTarget)
     {
-        defs.set ("JucePlugin_Build_VST",        (shouldBuildTargetType (ProjectType::Target::VSTPlugIn)         ? "1" : "0"));
-        defs.set ("JucePlugin_Build_VST3",       (shouldBuildTargetType (ProjectType::Target::VST3PlugIn)        ? "1" : "0"));
-        defs.set ("JucePlugin_Build_AU",         (shouldBuildTargetType (ProjectType::Target::AudioUnitPlugIn)   ? "1" : "0"));
-        defs.set ("JucePlugin_Build_AUv3",       (shouldBuildTargetType (ProjectType::Target::AudioUnitv3PlugIn) ? "1" : "0"));
-        defs.set ("JucePlugin_Build_RTAS",       (shouldBuildTargetType (ProjectType::Target::RTASPlugIn)        ? "1" : "0"));
-        defs.set ("JucePlugin_Build_AAX",        (shouldBuildTargetType (ProjectType::Target::AAXPlugIn)         ? "1" : "0"));
-        defs.set ("JucePlugin_Build_Standalone", (shouldBuildTargetType (ProjectType::Target::StandalonePlugIn)  ? "1" : "0"));
+        for (auto& flag : targetFlags)
+            defs.set (flag.first, (shouldBuildTargetType (flag.second) ? "1" : "0"));
+
         defs.set ("JUCE_SHARED_CODE", "1");
     }
     else if (targetType != ProjectType::Target::unspecified)
     {
-        defs.set ("JucePlugin_Build_VST",        (targetType == ProjectType::Target::VSTPlugIn         ? "1" : "0"));
-        defs.set ("JucePlugin_Build_VST3",       (targetType == ProjectType::Target::VST3PlugIn        ? "1" : "0"));
-        defs.set ("JucePlugin_Build_AU",         (targetType == ProjectType::Target::AudioUnitPlugIn   ? "1" : "0"));
-        defs.set ("JucePlugin_Build_AUv3",       (targetType == ProjectType::Target::AudioUnitv3PlugIn ? "1" : "0"));
-        defs.set ("JucePlugin_Build_RTAS",       (targetType == ProjectType::Target::RTASPlugIn        ? "1" : "0"));
-        defs.set ("JucePlugin_Build_AAX",        (targetType == ProjectType::Target::AAXPlugIn         ? "1" : "0"));
-        defs.set ("JucePlugin_Build_Standalone", (targetType == ProjectType::Target::StandalonePlugIn  ? "1" : "0"));
+        for (auto& flag : targetFlags)
+            defs.set (flag.first, (targetType == flag.second ? "1" : "0"));
     }
 }
 

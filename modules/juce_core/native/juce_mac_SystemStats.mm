@@ -138,7 +138,7 @@ String SystemStats::getDeviceDescription()
    #if JUCE_IOS
     return nsStringToJuce ([[UIDevice currentDevice] model]);
    #else
-    return String();
+    return {};
    #endif
 }
 
@@ -172,8 +172,19 @@ String SystemStats::getCpuVendor()
 
     return String (reinterpret_cast<const char*> (vendor), 12);
    #else
-    return String();
+    return {};
    #endif
+}
+
+String SystemStats::getCpuModel()
+{
+    char name[65] = { 0 };
+    size_t size = sizeof (name) - 1;
+
+    if (sysctlbyname ("machdep.cpu.brand_string", &name, &size, nullptr, 0) >= 0)
+        return String (name);
+
+    return {};
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
@@ -204,11 +215,11 @@ String SystemStats::getFullUserName()
 
 String SystemStats::getComputerName()
 {
-    char name [256] = { 0 };
+    char name[256] = { 0 };
     if (gethostname (name, sizeof (name) - 1) == 0)
         return String (name).upToLastOccurrenceOf (".local", false, true);
 
-    return String();
+    return {};
 }
 
 static String getLocaleValue (CFStringRef key)

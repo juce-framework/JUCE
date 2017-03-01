@@ -412,8 +412,8 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
     if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
     {
         struct utimbuf times;
-        times.actime  = (time_t) (accessTime != 0       ? (accessTime / 1000)       : info.st_atime);
-        times.modtime = (time_t) (modificationTime != 0 ? (modificationTime / 1000) : info.st_mtime);
+        times.actime  = accessTime != 0       ? static_cast<time_t> (accessTime / 1000)       : static_cast<time_t> (info.st_atime);
+        times.modtime = modificationTime != 0 ? static_cast<time_t> (modificationTime / 1000) : static_cast<time_t> (info.st_mtime);
 
         return utime (fullPath.toUTF8(), &times) == 0;
     }
@@ -1071,6 +1071,19 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
     return handle != nullptr ? dlsym (handle, functionName.toUTF8()) : nullptr;
 }
 
+
+//==============================================================================
+static inline String readPosixConfigFileValue (const char* file, const char* const key)
+{
+    StringArray lines;
+    File (file).readLines (lines);
+
+    for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+        if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
+            return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+    return {};
+}
 
 
 //==============================================================================

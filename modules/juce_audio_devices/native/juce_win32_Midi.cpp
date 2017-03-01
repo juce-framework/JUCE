@@ -66,9 +66,11 @@ struct MidiServiceType
 class MidiService :   public DeletedAtShutdown
 {
 public:
+    ~MidiService();
+
     MidiServiceType* getService();
 
-    juce_DeclareSingleton (MidiService, true)
+    juce_DeclareSingleton (MidiService, false)
 
 private:
     MidiService();
@@ -1145,6 +1147,11 @@ MidiService::MidiService()
    #endif
 
     internal = new WindowsMidiService();
+}
+
+MidiService::~MidiService()
+{
+    clearSingletonInstance();
 }
 
 //==============================================================================

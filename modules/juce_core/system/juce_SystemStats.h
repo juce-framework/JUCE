@@ -154,6 +154,11 @@ public:
     */
     static String getCpuVendor();
 
+    /** Attempts to return a string describing the CPU model.
+        May not be available on some systems.
+    */
+    static String getCpuModel();
+
     static bool hasMMX() noexcept;    /**< Returns true if Intel MMX instructions are available. */
     static bool has3DNow() noexcept;  /**< Returns true if AMD 3DNOW instructions are available. */
     static bool hasSSE() noexcept;    /**< Returns true if Intel SSE instructions are available. */

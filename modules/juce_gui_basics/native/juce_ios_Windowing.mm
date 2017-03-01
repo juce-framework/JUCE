@@ -37,9 +37,11 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
 {
+    UIBackgroundTaskIdentifier appSuspendTask;
 }
 
 @property (strong, nonatomic) UIWindow *window;
+- (id)init;
 - (void) applicationDidFinishLaunching: (UIApplication*) application;
 - (void) applicationWillTerminate: (UIApplication*) application;
 - (void) applicationDidEnterBackground: (UIApplication*) application;
@@ -51,6 +53,14 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 @end
 
 @implementation JuceAppStartupDelegate
+
+- (id)init
+{
+    self = [super init];
+    appSuspendTask = UIBackgroundTaskInvalid;
+
+    return self;
+}
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
@@ -76,10 +86,31 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
-    ignoreUnused (application);
-
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    {
+       #if JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
+        appSuspendTask = [application beginBackgroundTaskWithName:@"JUCE Suspend Task" expirationHandler:^{
+            if (appSuspendTask != UIBackgroundTaskInvalid)
+            {
+                [application endBackgroundTask:appSuspendTask];
+                appSuspendTask = UIBackgroundTaskInvalid;
+            }
+        }];
+
+        MessageManager::callAsync ([self,application,app] ()
+                                   {
+                                       app->suspended();
+                                       if (appSuspendTask != UIBackgroundTaskInvalid)
+                                       {
+                                           [application endBackgroundTask:appSuspendTask];
+                                           appSuspendTask = UIBackgroundTaskInvalid;
+                                       }
+                                   });
+       #else
+        ignoreUnused (application);
         app->suspended();
+       #endif
+    }
 }
 
 - (void) applicationWillEnterForeground: (UIApplication*) application

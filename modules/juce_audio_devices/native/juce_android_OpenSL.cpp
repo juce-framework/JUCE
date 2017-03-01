@@ -317,7 +317,7 @@ public:
 
         void enqueueBuffer ()
         {
-            (*queue)->Enqueue (queue, getCurrentBuffer(), getBufferSizeInSamples() * sizeof (T));
+            (*queue)->Enqueue (queue, getCurrentBuffer(), static_cast<SLuint32> (getBufferSizeInSamples() * sizeof (T)));
             ++numBlocksOut;
         }
 

@@ -55,44 +55,34 @@ bool SystemStats::isOperatingSystem64Bit()
 }
 
 //==============================================================================
-namespace LinuxStatsHelpers
+static inline String getCpuInfo (const char* key)
 {
-    String getConfigFileValue (const char* file, const char* const key)
-    {
-        StringArray lines;
-        File (file).readLines (lines);
-
-        for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
-            if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
-                return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
-
-        return String();
-    }
-
-    String getCpuInfo (const char* key)
-    {
-        return getConfigFileValue ("/proc/cpuinfo", key);
-    }
+    return readPosixConfigFileValue ("/proc/cpuinfo", key);
 }
 
 String SystemStats::getDeviceDescription()
 {
-    return LinuxStatsHelpers::getCpuInfo ("Hardware");
+    return getCpuInfo ("Hardware");
 }
 
 String SystemStats::getCpuVendor()
 {
-    String v (LinuxStatsHelpers::getCpuInfo ("vendor_id"));
+    auto v = getCpuInfo ("vendor_id");
 
     if (v.isEmpty())
-        v = LinuxStatsHelpers::getCpuInfo ("model name");
+        v = getCpuInfo ("model name");
 
     return v;
 }
 
+String SystemStats::getCpuModel()
+{
+    return getCpuInfo ("model name");
+}
+
 int SystemStats::getCpuSpeedInMegaherz()
 {
-    return roundToInt (LinuxStatsHelpers::getCpuInfo ("cpu MHz").getFloatValue());
+    return roundToInt (getCpuInfo ("cpu MHz").getFloatValue());
 }
 
 int SystemStats::getMemorySizeInMegabytes()
@@ -151,7 +141,7 @@ String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getU
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
-    const String flags (LinuxStatsHelpers::getCpuInfo ("flags"));
+    auto flags = getCpuInfo ("flags");
     hasMMX   = flags.contains ("mmx");
     hasSSE   = flags.contains ("sse");
     hasSSE2  = flags.contains ("sse2");
@@ -163,7 +153,7 @@ void CPUInformation::initialise() noexcept
     hasAVX   = flags.contains ("avx");
     hasAVX2  = flags.contains ("avx2");
 
-    numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
+    numCpus = getCpuInfo ("processor").getIntValue() + 1;
 }
 
 //==============================================================================
@@ -207,7 +197,7 @@ JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
    #if JUCE_BSD
     return false;
    #else
-    return LinuxStatsHelpers::getConfigFileValue ("/proc/self/status", "TracerPid")
+    return readPosixConfigFileValue ("/proc/self/status", "TracerPid")
              .getIntValue() > 0;
    #endif
 }
