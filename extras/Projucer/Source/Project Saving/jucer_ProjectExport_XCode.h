@@ -595,8 +595,6 @@ public:
                     xcodeBundleExtension = ".aaxplugin";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
-
-                    addExtraAAXTargetSettings();
                     break;
 
                 case RTASPlugIn:
@@ -867,23 +865,11 @@ public:
             }
             else
             {
-                const String sdk (config.osxSDKVersion.get());
-                const String sdkCompat (config.osxDeploymentTarget.get());
+                String sdkRoot;
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget(config, &sdkRoot));
 
-                // The AUv3 target always needs to be at least 10.11
-                int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
-                                                                                       : oldestSDKVersion);
-
-                // if the user doesn't set it, then use the last known version that works well with JUCE
-                String deploymentTarget = "10.11";
-
-                for (int ver = oldestAllowedDeploymentTarget; ver <= currentSDKVersion; ++ver)
-                {
-                    if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
-                    if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
-                }
-
-                s.add ("MACOSX_DEPLOYMENT_TARGET = " + deploymentTarget);
+                if (sdkRoot.isNotEmpty())
+                    s.add ("SDKROOT = " + sdkRoot);
 
                 s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
                 s.add ("SDKROOT_ppc = macosx10.5");
@@ -1005,8 +991,10 @@ public:
             if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            const Array<RelativePath>& extraLibs = config.isDebug() ? xcodeExtraLibrariesDebug
-                                                                    : xcodeExtraLibrariesRelease;
+            Array<RelativePath> extraLibs (config.isDebug() ? xcodeExtraLibrariesDebug
+                                                            : xcodeExtraLibrariesRelease);
+
+            addExtraLibsForTargetType (config, extraLibs);
 
             for (auto& lib : extraLibs)
             {
@@ -1319,12 +1307,19 @@ public:
             xcodeExtraPListEntries.add (plistEntry);
         }
 
-        void addExtraAAXTargetSettings()
+        void addExtraLibsForTargetType  (const BuildConfiguration& config, Array<RelativePath>& extraLibs) const
         {
-            auto aaxLibsFolder = RelativePath (owner.getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
+            if (type == AAXPlugIn)
+            {
+                 auto aaxLibsFolder
+                    = RelativePath (owner.getAAXPathValue().toString(), RelativePath::projectFolder)
+                        .getChildFile ("Libs");
 
-            xcodeExtraLibrariesDebug.add   (aaxLibsFolder.getChildFile ("Debug/libAAXLibrary.a"));
-            xcodeExtraLibrariesRelease.add (aaxLibsFolder.getChildFile ("Release/libAAXLibrary.a"));
+                String libraryPath (config.isDebug() ? "Debug/libAAXLibrary" : "Release/libAAXLibrary");
+                libraryPath += (isUsingClangCppLibrary (config) ? "_libcpp.a" : ".a");
+
+                extraLibs.add   (aaxLibsFolder.getChildFile (libraryPath));
+            }
         }
 
         StringArray getTargetExtraHeaderSearchPaths() const
@@ -1381,6 +1376,45 @@ public:
 
             xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
             xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
+        }
+
+        bool isUsingClangCppLibrary (const BuildConfiguration& config) const
+        {
+            if (auto xcodeConfig = dynamic_cast<const XcodeBuildConfiguration*> (&config))
+            {
+                const String& configValue = xcodeConfig->cppStandardLibrary.get();
+
+                if (configValue.isNotEmpty())
+                    return (configValue == "libc++");
+
+                const int minorOSXDeploymentTarget
+                    = getOSXDeploymentTarget (*xcodeConfig).fromLastOccurrenceOf (".", false, false).getIntValue();
+
+                return (minorOSXDeploymentTarget > 8);
+            }
+
+            return false;
+        }
+
+        String getOSXDeploymentTarget (const XcodeBuildConfiguration& config, String* sdkRoot = nullptr) const
+        {
+            const String sdk (config.osxSDKVersion.get());
+            const String sdkCompat (config.osxDeploymentTarget.get());
+
+            // The AUv3 target always needs to be at least 10.11
+            int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
+                                                 : oldestSDKVersion);
+
+            // if the user doesn't set it, then use the last known version that works well with JUCE
+            String deploymentTarget = "10.11";
+
+            for (int ver = oldestAllowedDeploymentTarget; ver <= currentSDKVersion; ++ver)
+            {
+                if (sdk == getSDKName (ver) && sdkRoot != nullptr) *sdkRoot = String ("macosx10." + String (ver));
+                if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
+            }
+
+            return deploymentTarget;
         }
 
         //==============================================================================
