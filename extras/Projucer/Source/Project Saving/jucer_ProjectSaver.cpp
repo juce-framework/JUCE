@@ -80,6 +80,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_Build_RTAS",                  valueToBool (project.getShouldBuildRTASAsValue()));
     flags.set ("JucePlugin_Build_AAX",                   valueToBool (project.getShouldBuildAAXAsValue()));
     flags.set ("JucePlugin_Build_STANDALONE",            valueToBool (project.getShouldBuildStandalonePluginAsValue()));
+    flags.set ("JucePlugin_Enable_IAA",                  valueToBool (project.getShouldEnableIAAAsValue()));
     flags.set ("JucePlugin_Name",                        valueToStringLiteral (project.getPluginName()));
     flags.set ("JucePlugin_Desc",                        valueToStringLiteral (project.getPluginDesc()));
     flags.set ("JucePlugin_Manufacturer",                valueToStringLiteral (project.getPluginManufacturer()));
@@ -114,6 +115,9 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_AAXCategory",                 project.getPluginAAXCategory().toString());
     flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (project.getPluginAAXBypassDisabled()));
     flags.set ("JucePlugin_AAXDisableMultiMono",         valueToBool (project.getPluginAAXMultiMonoDisabled()));
+    flags.set ("JucePlugin_IAAType",                     valueToCharLiteral (project.getIAATypeCode()));
+    flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
+    flags.set ("JucePlugin_IAAName",                     project.getIAAPluginName().quoted());
 
     {
         String plugInChannelConfig = project.getPluginChannelConfigs().toString();

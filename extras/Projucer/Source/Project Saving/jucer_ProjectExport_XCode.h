@@ -732,10 +732,14 @@ public:
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
 
             const int inAppPurchasesEnabled = (owner.iOS && owner.isInAppPurchasesEnabled()) ? 1 : 0;
+            const int interAppAudioEnabled  = (owner.iOS
+                                               && type == Target::StandalonePlugIn
+                                               && owner.getProject().shouldEnableIAA()) ? 1 : 0;
             const int sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
 
             attributes << "SystemCapabilities = {";
             attributes << "com.apple.InAppPurchase = { enabled = " << inAppPurchasesEnabled << "; }; ";
+            attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
             attributes << "com.apple.Sandbox = { enabled = " << sandboxEnabled << "; }; ";
             attributes << "}; };";
 
@@ -953,8 +957,10 @@ public:
                 s.add ("SEPARATE_STRIP = YES");
             }
 
-            if (owner.project.getProjectType().isAudioPlugin() && type == Target::AudioUnitv3PlugIn &&  owner.isOSX())
-                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
+            if (owner.project.getProjectType().isAudioPlugin())
+                if ((owner.isOSX() && type == Target::AudioUnitv3PlugIn)
+                    || (owner.isiOS() && type == Target::StandalonePlugIn))
+                    s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
 
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
 
@@ -1112,14 +1118,36 @@ public:
             if (owner.settings ["UIStatusBarHidden"] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
-            if (owner.iOS && type != AudioUnitv3PlugIn)
+            if (owner.iOS)
             {
-                // Forcing full screen disables the split screen feature and prevents error ITMS-90475
-                addPlistDictionaryKeyBool (dict, "UIRequiresFullScreen", true);
-                addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
+                if (type != AudioUnitv3PlugIn)
+                {
+                    // Forcing full screen disables the split screen feature and prevents error ITMS-90475
+                    addPlistDictionaryKeyBool (dict, "UIRequiresFullScreen", true);
+                    addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
-                addIosScreenOrientations (dict);
-                addIosBackgroundModes (dict);
+                    addIosScreenOrientations (dict);
+                    addIosBackgroundModes (dict);
+                }
+
+                if (type == StandalonePlugIn && owner.getProject().shouldEnableIAA())
+                {
+                    XmlElement audioComponentsPlistKey ("key");
+                    audioComponentsPlistKey.addTextElement ("AudioComponents");
+
+                    dict->addChildElement (new XmlElement (audioComponentsPlistKey));
+
+                    XmlElement audioComponentsPlistEntry ("array");
+                    XmlElement* audioComponentsDict = audioComponentsPlistEntry.createNewChildElement ("dict");
+
+                    addPlistDictionaryKey    (audioComponentsDict, "name",         owner.project.getIAAPluginName());
+                    addPlistDictionaryKey    (audioComponentsDict, "manufacturer", owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4));
+                    addPlistDictionaryKey    (audioComponentsDict, "type",         owner.project.getIAATypeCode());
+                    addPlistDictionaryKey    (audioComponentsDict, "subtype",      owner.project.getPluginCode().toString().trim().substring (0, 4));
+                    addPlistDictionaryKeyInt (audioComponentsDict, "version",      owner.project.getVersionAsHexInteger());
+
+                    dict->addChildElement (new XmlElement (audioComponentsPlistEntry));
+                }
             }
 
             for (auto& e : xcodeExtraPListEntries)
@@ -1500,8 +1528,9 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        if (! isiOS() && project.getProjectType().isAudioPlugin())
-            topLevelGroupIDs.add (addEntitlementsFile());
+        StringArray entitlements = getEntitlements();
+        if (! entitlements.isEmpty())
+            topLevelGroupIDs.add (addEntitlementsFile (entitlements));
 
         for (auto& group : getAllGroups())
             if (group.getNumChildren() > 0)
@@ -2188,20 +2217,41 @@ private:
         return project.getProjectFilenameRoot() + String (".entitlements");
     }
 
-    String addEntitlementsFile() const
+    StringArray getEntitlements() const
     {
-        const char* sandboxEntitlement =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
-            "<plist version=\"1.0\">"
-            "<dict>"
-            " <key>com.apple.security.app-sandbox</key>"
-            "  <true/>"
-            "</dict>"
-            "</plist>";
+        StringArray keys;
+        if (project.getProjectType().isAudioPlugin())
+        {
+            if (isiOS())
+            {
+                if (project.shouldEnableIAA())
+                    keys.add ("inter-app-audio");
+            }
+            else
+            {
+                keys.add ("com.apple.security.app-sandbox");
+            }
+        }
+        return keys;
+    }
+
+    String addEntitlementsFile (StringArray keys) const
+    {
+        String content =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            "<plist version=\"1.0\">\n"
+            "<dict>\n";
+        for (auto& key : keys)
+        {
+            content += "\t<key>" + key + "</key>\n"
+                       "\t<true/>\n";
+        }
+        content += "</dict>\n"
+                   "</plist>\n";
 
         File entitlementsFile = getTargetFolder().getChildFile (getEntitlementsFileName());
-        overwriteFileIfDifferentOrThrow (entitlementsFile, sandboxEntitlement);
+        overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
         RelativePath plistPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
         return addFile (plistPath, false, false, false, false, nullptr);

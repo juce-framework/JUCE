@@ -153,6 +153,7 @@ void Project::setMissingAudioPluginDefaultValues()
     setValueIfVoid (getShouldBuildRTASAsValue(),                  false);
     setValueIfVoid (getShouldBuildAAXAsValue(),                   false);
     setValueIfVoid (getShouldBuildStandalonePluginAsValue(),      false);
+    setValueIfVoid (getShouldEnableIAAAsValue(),                  false);
 
     setValueIfVoid (getPluginName(),                    getTitle());
     setValueIfVoid (getPluginDesc(),                    getTitle());
@@ -629,6 +630,9 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "Whether the project should produce an AAX plugin.");
     props.add (new BooleanPropertyComponent (getShouldBuildStandalonePluginAsValue(), "Build Standalone Plug-In", "Enabled"),
                "Whether the project should produce a standalone version of your plugin.");
+    props.add (new BooleanPropertyComponent (getShouldEnableIAAAsValue(), "Enable Inter-App Audio", "Enabled"),
+               "Whether a standalone plug-in should be an Inter-App Audio app. You should also enable the audio "
+               "background capability in the iOS exporter.");
 
     props.add (new TextPropertyComponent (getPluginName(), "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
@@ -1255,6 +1259,34 @@ String Project::getAUMainTypeCode()
         else                                               s = "aufx";
     }
 
+    return s;
+}
+
+String Project::getIAATypeCode()
+{
+    String s;
+    if (getPluginWantsMidiInput().getValue())
+    {
+        if (getPluginIsSynth().getValue())
+            s = "auri";
+        else
+            s = "aurm";
+    }
+    else
+    {
+        if (getPluginIsSynth().getValue())
+            s = "aurg";
+        else
+            s = "aurx";
+    }
+    return s;
+}
+
+String Project::getIAAPluginName()
+{
+    String s = getPluginManufacturer().toString();
+    s << ": ";
+    s << getPluginName().toString();
     return s;
 }
 

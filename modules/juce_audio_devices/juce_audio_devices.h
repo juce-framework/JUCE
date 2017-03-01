@@ -62,6 +62,10 @@
 #include <juce_events/juce_events.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+#include <juce_gui_extra/juce_gui_extra.h>
+#endif
+
 //==============================================================================
 /** Config: JUCE_ASIO
     Enables ASIO audio devices (MS Windows only).
@@ -147,12 +151,12 @@
 namespace juce
 {
 
-#include "audio_io/juce_AudioIODevice.h"
-#include "audio_io/juce_AudioIODeviceType.h"
-#include "audio_io/juce_SystemAudioVolume.h"
 #include "midi_io/juce_MidiInput.h"
 #include "midi_io/juce_MidiMessageCollector.h"
 #include "midi_io/juce_MidiOutput.h"
+#include "audio_io/juce_AudioIODevice.h"
+#include "audio_io/juce_AudioIODeviceType.h"
+#include "audio_io/juce_SystemAudioVolume.h"
 #include "sources/juce_AudioSourcePlayer.h"
 #include "sources/juce_AudioTransportSource.h"
 #include "audio_io/juce_AudioDeviceManager.h"

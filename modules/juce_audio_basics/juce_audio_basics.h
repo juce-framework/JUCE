@@ -101,5 +101,6 @@ namespace juce
 #include "sources/juce_ReverbAudioSource.h"
 #include "sources/juce_ToneGeneratorAudioSource.h"
 #include "synthesisers/juce_Synthesiser.h"
+#include "audio_play_head/juce_AudioPlayHead.h"
 
 }
