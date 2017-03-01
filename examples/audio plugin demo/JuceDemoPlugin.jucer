@@ -13,7 +13,7 @@
               buildAAX="0" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
               includeBinaryInAppConfig="1" buildVST3="0" pluginManufacturerEmail="support@yourcompany.com"
               companyWebsite="www.juce.com" companyEmail="info@juce.com" pluginIsMidiEffectPlugin="0"
-              buildAUv3="1" buildStandalone="1">
+              buildAUv3="1" buildStandalone="1" enableIAA="0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="JuceDemo" aaxFolder="" postbuildCommand="" vst3Folder="">

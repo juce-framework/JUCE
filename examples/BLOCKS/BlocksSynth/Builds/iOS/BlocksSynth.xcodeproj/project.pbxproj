@@ -13,6 +13,7 @@
 		C04A639A8ABC44749B49ED36 = {isa = PBXBuildFile; fileRef = CBA6A8FCB0795C89183A8E71; };
 		459E5184BB7B47A2DCD0EE4E = {isa = PBXBuildFile; fileRef = 51425B8876D6230E6C6A2B20; };
 		0579DDF4B03255527CD92BF9 = {isa = PBXBuildFile; fileRef = CEC52ED2250DAF9085E67628; };
+		5B7EB925BF1E49DB880F3D8F = {isa = PBXBuildFile; fileRef = 9BC41ACE4F5BEBEC78DE8BCA; };
 		5CC0AE888A8B9CF85C8C1077 = {isa = PBXBuildFile; fileRef = 42747FC2DD3F362950112EFA; };
 		BDD9B6E13096A4F929CDF0C7 = {isa = PBXBuildFile; fileRef = 0A72A10DC2BCD29B4A801D40; };
 		03889D80A76102BB72F53888 = {isa = PBXBuildFile; fileRef = AB8E624C28BB20096959B5C9; };
@@ -59,6 +60,7 @@
 		831D05658D06983B575A395C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WaveshapeProgram.h; path = ../../Source/WaveshapeProgram.h; sourceTree = "SOURCE_ROOT"; };
 		87ECEEBFFBBFB5281E991537 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		8EF4F0D964C0ECA2E058F7DC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_events.mm"; path = "../../JuceLibraryCode/juce_events.mm"; sourceTree = "SOURCE_ROOT"; };
+		9BC41ACE4F5BEBEC78DE8BCA = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		A2B28708D5B3F688541B5AFE = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../../../../modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
 		A40D3E3FFBEC78F04EE0DE5A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_blocks_basics.cpp"; path = "../../JuceLibraryCode/juce_blocks_basics.cpp"; sourceTree = "SOURCE_ROOT"; };
 		AB8E624C28BB20096959B5C9 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -132,6 +134,7 @@
 					CBA6A8FCB0795C89183A8E71,
 					51425B8876D6230E6C6A2B20,
 					CEC52ED2250DAF9085E67628,
+					9BC41ACE4F5BEBEC78DE8BCA,
 					42747FC2DD3F362950112EFA,
 					0A72A10DC2BCD29B4A801D40,
 					AB8E624C28BB20096959B5C9,
@@ -275,6 +278,7 @@
 					C04A639A8ABC44749B49ED36,
 					459E5184BB7B47A2DCD0EE4E,
 					0579DDF4B03255527CD92BF9,
+					5B7EB925BF1E49DB880F3D8F,
 					5CC0AE888A8B9CF85C8C1077,
 					BDD9B6E13096A4F929CDF0C7,
 					03889D80A76102BB72F53888,
@@ -285,7 +289,7 @@
 					B62995CCD71EBA82C2BC1692,
 					C8A1585A07BDCD77C240ECAA,
 					1EFBDD8D783B94E754626B32, ); buildRules = ( ); dependencies = (  ); name = "BlocksSynth - App"; productName = BlocksSynth; productReference = D778C2ED7EA9D5EDCFBA1507; productType = "com.apple.product-type.application"; };
-		C28D173095C609C48901860E = {isa = PBXProject; buildConfigurationList = F2BDE5D743A9870C169E5CC8; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 0B9ADB15A71FB90DD6919895 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0F4E2B72B683E9B48DF13DDB; projectDirPath = ""; projectRoot = ""; targets = (0B9ADB15A71FB90DD6919895); };
+		C28D173095C609C48901860E = {isa = PBXProject; buildConfigurationList = F2BDE5D743A9870C169E5CC8; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 0B9ADB15A71FB90DD6919895 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0F4E2B72B683E9B48DF13DDB; projectDirPath = ""; projectRoot = ""; targets = (0B9ADB15A71FB90DD6919895); };
 	};
 	rootObject = C28D173095C609C48901860E;
 }

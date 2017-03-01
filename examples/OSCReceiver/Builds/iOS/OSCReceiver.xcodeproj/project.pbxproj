@@ -8,6 +8,7 @@
 
 		DEB467A3B42DB8A35DAFC3BF = {isa = PBXBuildFile; fileRef = 0AB2F0BDAF44CF1FE7BA007A; };
 		D8AD187002F25052453AAA7D = {isa = PBXBuildFile; fileRef = B4012AD4A80B8D23CDB2A7A2; };
+		9983B484984FC2A0DE716D91 = {isa = PBXBuildFile; fileRef = E020B248E1EF77EF4FCBDCE9; };
 		31096D23A1EA98E43FBA9D95 = {isa = PBXBuildFile; fileRef = 64D307BA4E7C75AB1648DEF6; };
 		B569A926F04E72DCCCADF553 = {isa = PBXBuildFile; fileRef = 1AD3B58EF82A3E2C666DBFE0; };
 		BEAC0D3BDB4671F8E47E441E = {isa = PBXBuildFile; fileRef = 1071DB173D561A5841FF0F30; };
@@ -47,6 +48,7 @@
 		DBB4370FE47F2C2AA8193558 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-App.plist"; path = "Info-App.plist"; sourceTree = "SOURCE_ROOT"; };
 		DD0518371AAA6FDE27C648C9 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_cryptography.mm"; path = "../../JuceLibraryCode/juce_cryptography.mm"; sourceTree = "SOURCE_ROOT"; };
 		DFD68BBF3B08639B6D1A15F7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_events.mm"; path = "../../JuceLibraryCode/juce_events.mm"; sourceTree = "SOURCE_ROOT"; };
+		E020B248E1EF77EF4FCBDCE9 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		F0F350DB73A4824A3A634B03 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../../../modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
 		F45092B8BF45760A7C6E162A = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = OSCReceiver/Images.xcassets; sourceTree = "SOURCE_ROOT"; };
 		FFBF4F820F32F94615A43588 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_data_structures.mm"; path = "../../JuceLibraryCode/juce_data_structures.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -80,6 +82,7 @@
 					F45092B8BF45760A7C6E162A, ); name = Resources; sourceTree = "<group>"; };
 		1CE4EC4CC850DCB4A4676A8A = {isa = PBXGroup; children = (
 					B4012AD4A80B8D23CDB2A7A2,
+					E020B248E1EF77EF4FCBDCE9,
 					64D307BA4E7C75AB1648DEF6,
 					1AD3B58EF82A3E2C666DBFE0,
 					1071DB173D561A5841FF0F30,
@@ -211,6 +214,7 @@
 					34B3E269DA7EB99036670552, ); runOnlyForDeploymentPostprocessing = 0; };
 		98DB1513FFCA4DC380991BE7 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
 					D8AD187002F25052453AAA7D,
+					9983B484984FC2A0DE716D91,
 					31096D23A1EA98E43FBA9D95,
 					B569A926F04E72DCCCADF553,
 					BEAC0D3BDB4671F8E47E441E,
@@ -219,7 +223,7 @@
 					2EA5C343F865CED412BD5E20,
 					E95E181406F96A95EF81C474,
 					98DB1513FFCA4DC380991BE7, ); buildRules = ( ); dependencies = (  ); name = "OSCReceiver - App"; productName = OSCReceiver; productReference = 0AB2F0BDAF44CF1FE7BA007A; productType = "com.apple.product-type.application"; };
-		9CDCD4F1CF6D5405D574A953 = {isa = PBXProject; buildConfigurationList = 26D2BBF40A8AF71F3DDC53E0; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 5E1B6101A5D94EDEE60C306A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 9C0E80FC020192937C98CFC2; projectDirPath = ""; projectRoot = ""; targets = (5E1B6101A5D94EDEE60C306A); };
+		9CDCD4F1CF6D5405D574A953 = {isa = PBXProject; buildConfigurationList = 26D2BBF40A8AF71F3DDC53E0; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 5E1B6101A5D94EDEE60C306A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 9C0E80FC020192937C98CFC2; projectDirPath = ""; projectRoot = ""; targets = (5E1B6101A5D94EDEE60C306A); };
 	};
 	rootObject = 9CDCD4F1CF6D5405D574A953;
 }

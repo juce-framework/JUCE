@@ -8,6 +8,7 @@
 
 		A6EB15B02B1D0A6FADABE7C2 = {isa = PBXBuildFile; fileRef = E6F7F38EEF1BA55231F5B1D4; };
 		1F529E86E1AC69ECADCF9EC1 = {isa = PBXBuildFile; fileRef = 69841546D58D64E5BCC0CD09; };
+		498BF0755DAAE523F866E815 = {isa = PBXBuildFile; fileRef = C57457CB1B57F45FE5EC6942; };
 		B1058124749A55CE21C5D191 = {isa = PBXBuildFile; fileRef = 4AA22AD4184103B8D35183D7; };
 		8ECB96C6693FC1C2E663B93C = {isa = PBXBuildFile; fileRef = 51FCB04D98B49DA7B24C3231; };
 		91BBD074F724A10436BEF6F2 = {isa = PBXBuildFile; fileRef = 42DBAA5FEB22C47EB3E9A465; };
@@ -38,6 +39,7 @@
 		B250E795EBF72C06F0B9B4C0 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = OSCSender/Images.xcassets; sourceTree = "SOURCE_ROOT"; };
 		B3E0874D711C4A66976E6C4C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainComponent.h; path = ../../Source/MainComponent.h; sourceTree = "SOURCE_ROOT"; };
 		BB5F825662E1D0FFF44D22DF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
+		C57457CB1B57F45FE5EC6942 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		E3586F7C2316AC6BD9CA1293 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-App.plist"; path = "Info-App.plist"; sourceTree = "SOURCE_ROOT"; };
 		E6F7F38EEF1BA55231F5B1D4 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OSCSender.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		ED4E215F7CA65E0BD389D502 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
@@ -70,6 +72,7 @@
 					B250E795EBF72C06F0B9B4C0, ); name = Resources; sourceTree = "<group>"; };
 		A68DF290C9C5236595AEAEB7 = {isa = PBXGroup; children = (
 					69841546D58D64E5BCC0CD09,
+					C57457CB1B57F45FE5EC6942,
 					4AA22AD4184103B8D35183D7,
 					51FCB04D98B49DA7B24C3231,
 					42DBAA5FEB22C47EB3E9A465,
@@ -199,6 +202,7 @@
 					345DA5934BAD8ACA0434B957, ); runOnlyForDeploymentPostprocessing = 0; };
 		53E02F5676BF451851C9C06E = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
 					1F529E86E1AC69ECADCF9EC1,
+					498BF0755DAAE523F866E815,
 					B1058124749A55CE21C5D191,
 					8ECB96C6693FC1C2E663B93C,
 					91BBD074F724A10436BEF6F2,
@@ -207,7 +211,7 @@
 					1E9F219D82037569524E98CF,
 					CDCF3ED48FB54EFBE0DD9046,
 					53E02F5676BF451851C9C06E, ); buildRules = ( ); dependencies = (  ); name = "OSCSender - App"; productName = OSCSender; productReference = E6F7F38EEF1BA55231F5B1D4; productType = "com.apple.product-type.application"; };
-		9CD8E1E30EDAF4E86990F260 = {isa = PBXProject; buildConfigurationList = ABFD3DA91CD9955D1FEC14F5; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 3D76C0E767055A9B4699DD95 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 168BF90B7EF8C12090B0A9B2; projectDirPath = ""; projectRoot = ""; targets = (3D76C0E767055A9B4699DD95); };
+		9CD8E1E30EDAF4E86990F260 = {isa = PBXProject; buildConfigurationList = ABFD3DA91CD9955D1FEC14F5; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 3D76C0E767055A9B4699DD95 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 168BF90B7EF8C12090B0A9B2; projectDirPath = ""; projectRoot = ""; targets = (3D76C0E767055A9B4699DD95); };
 	};
 	rootObject = 9CD8E1E30EDAF4E86990F260;
 }

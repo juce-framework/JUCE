@@ -13,6 +13,7 @@
 		924BC7B8C552402D22C30959 = {isa = PBXBuildFile; fileRef = D4DA6EE18C4F580FC8A220B8; };
 		B92223437105FB45C1973FF5 = {isa = PBXBuildFile; fileRef = 88A4EE2311F2D063677B1822; };
 		A458DA809D44DCCB921620D2 = {isa = PBXBuildFile; fileRef = 8F72A06310DEB2A6E6A0DA18; };
+		5C977F9FFDF98D3EF665291F = {isa = PBXBuildFile; fileRef = CA574CCDA7E28ACE73EA2784; };
 		1D0987A356ABA1C3B4A785BD = {isa = PBXBuildFile; fileRef = B5A57064DFB2BD47270A42E6; };
 		B4F2D8F80F24A3A8B90D2519 = {isa = PBXBuildFile; fileRef = C48524BD8330E2A4710D99FF; };
 		918E1AB94993954386975092 = {isa = PBXBuildFile; fileRef = 71386FCE19C79DC74F1623FF; };
@@ -71,6 +72,7 @@
 		C0CE2DBD3E07E03623F29618 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_basics.mm"; path = "../../JuceLibraryCode/juce_audio_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		C48524BD8330E2A4710D99FF = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		C8FBA54671860CB3636D7A76 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_processors.mm"; path = "../../JuceLibraryCode/juce_audio_processors.mm"; sourceTree = "SOURCE_ROOT"; };
+		CA574CCDA7E28ACE73EA2784 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		D4B872DDD2426FFED074A31B = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_opengl"; path = "../../../../../modules/juce_opengl"; sourceTree = "SOURCE_ROOT"; };
 		D4DA6EE18C4F580FC8A220B8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		D6785F19CD64D489BB604D80 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_utils"; path = "../../../../../modules/juce_audio_utils"; sourceTree = "SOURCE_ROOT"; };
@@ -126,6 +128,7 @@
 					D4DA6EE18C4F580FC8A220B8,
 					88A4EE2311F2D063677B1822,
 					8F72A06310DEB2A6E6A0DA18,
+					CA574CCDA7E28ACE73EA2784,
 					B5A57064DFB2BD47270A42E6,
 					C48524BD8330E2A4710D99FF,
 					71386FCE19C79DC74F1623FF,
@@ -269,6 +272,7 @@
 					924BC7B8C552402D22C30959,
 					B92223437105FB45C1973FF5,
 					A458DA809D44DCCB921620D2,
+					5C977F9FFDF98D3EF665291F,
 					1D0987A356ABA1C3B4A785BD,
 					B4F2D8F80F24A3A8B90D2519,
 					918E1AB94993954386975092,
@@ -279,7 +283,7 @@
 					D08BB290D5F778E1450AD3F3,
 					9C2AF708958E95C688544D95,
 					2410311707C8C7B9E6CFE23D, ); buildRules = ( ); dependencies = (  ); name = "BlocksMonitor - App"; productName = BlocksMonitor; productReference = 00558AF4AA37DD00B15B21A8; productType = "com.apple.product-type.application"; };
-		B42B7651E1352BD7921E5754 = {isa = PBXProject; buildConfigurationList = 61CDB68D74329CF066EA57D6; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 9C6BA11D1261B15A2F52EB60 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5D6DAC6A0A862ED325F1DB34; projectDirPath = ""; projectRoot = ""; targets = (9C6BA11D1261B15A2F52EB60); };
+		B42B7651E1352BD7921E5754 = {isa = PBXProject; buildConfigurationList = 61CDB68D74329CF066EA57D6; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 9C6BA11D1261B15A2F52EB60 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5D6DAC6A0A862ED325F1DB34; projectDirPath = ""; projectRoot = ""; targets = (9C6BA11D1261B15A2F52EB60); };
 	};
 	rootObject = B42B7651E1352BD7921E5754;
 }

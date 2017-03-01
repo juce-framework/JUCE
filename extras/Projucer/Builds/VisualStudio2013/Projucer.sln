@@ -951,17 +951,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{A3A058
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_graphics\native\juce_android_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_android_Fonts.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_android_GraphicsContext.cpp = ..\..\..\..\modules\juce_graphics\native\juce_android_GraphicsContext.cpp
+		..\..\..\..\modules\juce_graphics\native\juce_android_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_android_IconHelpers.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_freetype_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_freetype_Fonts.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_linux_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_linux_Fonts.cpp
+		..\..\..\..\modules\juce_graphics\native\juce_linux_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_linux_IconHelpers.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.h = ..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.h
 		..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.mm = ..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.mm
 		..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsHelpers.h = ..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsHelpers.h
 		..\..\..\..\modules\juce_graphics\native\juce_mac_Fonts.mm = ..\..\..\..\modules\juce_graphics\native\juce_mac_Fonts.mm
+		..\..\..\..\modules\juce_graphics\native\juce_mac_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_mac_IconHelpers.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h = ..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h
 		..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeface.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeface.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeLayout.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeLayout.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_win32_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_Fonts.cpp
+		..\..\..\..\modules\juce_graphics\native\juce_win32_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_IconHelpers.cpp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "placement", "placement", "{A3856E0A-3F84-E9FF-DC21-057DB1048DE1}"

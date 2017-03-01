@@ -12,6 +12,7 @@
 		F9B99B7794442B691803718A = {isa = PBXBuildFile; fileRef = CC144EDF680633EC54BB6C7C; };
 		2A954B85CEC7CB6CDDE645AF = {isa = PBXBuildFile; fileRef = 8E5DB762FF5447085518EB85; };
 		8F43218E0AFA8FBC12C39860 = {isa = PBXBuildFile; fileRef = C3C776709CFEB52B87A9E260; };
+		9B23B0143CF257E772E3EC46 = {isa = PBXBuildFile; fileRef = 5108DE103BDE300CC23F1F30; };
 		3BFCAE441B663BD739FBCCB4 = {isa = PBXBuildFile; fileRef = 6CDDF198D9632DA763449E05; };
 		5AE83D61A34B2B62A0610EBB = {isa = PBXBuildFile; fileRef = 9D95CB2E713755CD61842774; };
 		3FCDCEFCE3D77BE1FC8A1E17 = {isa = PBXBuildFile; fileRef = 740AFAC150EAC7E6A6D6E6FA; };
@@ -49,6 +50,7 @@
 		4C457BD97BB88F3D90FFF1C3 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_graphics"; path = "../../../../modules/juce_graphics"; sourceTree = "SOURCE_ROOT"; };
 		4F63D18FC561C73DB30F8DDF = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_devices.mm"; path = "../../JuceLibraryCode/juce_audio_devices.mm"; sourceTree = "SOURCE_ROOT"; };
 		50151F5E1EA38C0768AD9AC8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		5108DE103BDE300CC23F1F30 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		51626197E6CE921E472AFCA1 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		525E733E59BB89937210A34E = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		5A920C68F8B3292144B1BC95 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_video.mm"; path = "../../JuceLibraryCode/juce_video.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -133,6 +135,7 @@
 					CC144EDF680633EC54BB6C7C,
 					8E5DB762FF5447085518EB85,
 					C3C776709CFEB52B87A9E260,
+					5108DE103BDE300CC23F1F30,
 					6CDDF198D9632DA763449E05,
 					9D95CB2E713755CD61842774,
 					740AFAC150EAC7E6A6D6E6FA,
@@ -277,6 +280,7 @@
 					F9B99B7794442B691803718A,
 					2A954B85CEC7CB6CDDE645AF,
 					8F43218E0AFA8FBC12C39860,
+					9B23B0143CF257E772E3EC46,
 					3BFCAE441B663BD739FBCCB4,
 					5AE83D61A34B2B62A0610EBB,
 					3FCDCEFCE3D77BE1FC8A1E17,
@@ -287,7 +291,7 @@
 					56C1AB4D5E9F6E55C4A4D18C,
 					9C76B98AD0B6E256C4C90D77,
 					9CAA70AAF55A5D696C59AA51, ); buildRules = ( ); dependencies = (  ); name = "OpenGLAppExample - App"; productName = OpenGLAppExample; productReference = 7451C664E0B1FF42F028813E; productType = "com.apple.product-type.application"; };
-		92078120DD024E75D724B8AB = {isa = PBXProject; buildConfigurationList = 46FEBDB3E8E7421830E627F2; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 9F2051B91F59B036C151A2F9 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5EB8D0E327356FA2D5323013; projectDirPath = ""; projectRoot = ""; targets = (9F2051B91F59B036C151A2F9); };
+		92078120DD024E75D724B8AB = {isa = PBXProject; buildConfigurationList = 46FEBDB3E8E7421830E627F2; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 9F2051B91F59B036C151A2F9 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5EB8D0E327356FA2D5323013; projectDirPath = ""; projectRoot = ""; targets = (9F2051B91F59B036C151A2F9); };
 	};
 	rootObject = 92078120DD024E75D724B8AB;
 }

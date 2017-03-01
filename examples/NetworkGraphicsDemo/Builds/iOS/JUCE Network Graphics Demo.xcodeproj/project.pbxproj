@@ -13,6 +13,7 @@
 		67DF295E93E54432043126DF = {isa = PBXBuildFile; fileRef = 6799B056504F9F017998B9E2; };
 		770AB74B1D3A0108F764DD47 = {isa = PBXBuildFile; fileRef = 4D1DB6D77B6F3DE7A569780B; };
 		366A216FDEBD7BDDC1BA12D9 = {isa = PBXBuildFile; fileRef = DA40ED39AF4B56000E5A2743; };
+		1F7A8BD2B43B3D191132301D = {isa = PBXBuildFile; fileRef = E51ABCA80B75F33848F28184; };
 		CA694B2A73FCF12D7F9E7E49 = {isa = PBXBuildFile; fileRef = 448838BE6E937D450A3C84CE; };
 		5A64B64E5B45AEA1A0EECC4B = {isa = PBXBuildFile; fileRef = 9193D2A3C463BEAA07FD424D; };
 		F918FB5901F09EA77DB32022 = {isa = PBXBuildFile; fileRef = F7D557738137CA1A370BAA27; };
@@ -86,6 +87,7 @@
 		DA40ED39AF4B56000E5A2743 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		E4162459ED4C829EF7B19691 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "JUCE Network Graphics Demo.app"; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		E4EA870A22A0C6649E55DD30 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_utils"; path = "../../../../modules/juce_audio_utils"; sourceTree = "SOURCE_ROOT"; };
+		E51ABCA80B75F33848F28184 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		EF15E2FA8F8D4DB6479A48B6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_events.mm"; path = "../../JuceLibraryCode/juce_events.mm"; sourceTree = "SOURCE_ROOT"; };
 		F5D1149D91939A33DE653BAB = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_core.mm"; path = "../../JuceLibraryCode/juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
 		F7D557738137CA1A370BAA27 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -145,6 +147,7 @@
 					6799B056504F9F017998B9E2,
 					4D1DB6D77B6F3DE7A569780B,
 					DA40ED39AF4B56000E5A2743,
+					E51ABCA80B75F33848F28184,
 					448838BE6E937D450A3C84CE,
 					9193D2A3C463BEAA07FD424D,
 					F7D557738137CA1A370BAA27,
@@ -291,6 +294,7 @@
 					67DF295E93E54432043126DF,
 					770AB74B1D3A0108F764DD47,
 					366A216FDEBD7BDDC1BA12D9,
+					1F7A8BD2B43B3D191132301D,
 					CA694B2A73FCF12D7F9E7E49,
 					5A64B64E5B45AEA1A0EECC4B,
 					F918FB5901F09EA77DB32022,
@@ -301,7 +305,7 @@
 					714944DB86A4D402E7FA269E,
 					C2977559BF9148DB70CA10AE,
 					865E89B94B41EB14C202CBB0, ); buildRules = ( ); dependencies = (  ); name = "JUCE Network Graphics Demo - App"; productName = "JUCE Network Graphics Demo"; productReference = E4162459ED4C829EF7B19691; productType = "com.apple.product-type.application"; };
-		A5398ADB6F5B128C00EB935C = {isa = PBXProject; buildConfigurationList = 02715337C584F3C721251428; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D2EB65517396C974F0415A7F; projectDirPath = ""; projectRoot = ""; targets = (4311FBCBD02948A0ED96C7DD); };
+		A5398ADB6F5B128C00EB935C = {isa = PBXProject; buildConfigurationList = 02715337C584F3C721251428; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D2EB65517396C974F0415A7F; projectDirPath = ""; projectRoot = ""; targets = (4311FBCBD02948A0ED96C7DD); };
 	};
 	rootObject = A5398ADB6F5B128C00EB935C;
 }

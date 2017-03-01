@@ -13,6 +13,7 @@
 		020EF5B77BB12676D5084F84 = {isa = PBXBuildFile; fileRef = 289C8993673B68777CF3A968; };
 		99268544C0ECDC5566CB6B2D = {isa = PBXBuildFile; fileRef = 5DB9EA613B6C375A620567D4; };
 		4102C958B0DBAC6BE9614E71 = {isa = PBXBuildFile; fileRef = E9DA836CFC56933A44FCB8DE; };
+		3EBA7814DF0091D5E6F13E6A = {isa = PBXBuildFile; fileRef = C0B694FA24DC7DE0B44BC300; };
 		B5839C1ADE6343A97E377F9E = {isa = PBXBuildFile; fileRef = 61275921D3E9ECE1690FD578; };
 		820F8C7344562E54C962352F = {isa = PBXBuildFile; fileRef = B37B0559AA71B6CD7CEC8213; };
 		2276632F4A0CAA61F25AFCB2 = {isa = PBXBuildFile; fileRef = 342786564B1F67373B78584A; };
@@ -61,6 +62,7 @@
 		AB7855931CA983F4EE039617 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MidiTest.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		AFDE2BF9DBF2382C4106B4C7 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		B37B0559AA71B6CD7CEC8213 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		C0B694FA24DC7DE0B44BC300 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		C61C59FC15608FD1C65107F1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_basics.mm"; path = "../../JuceLibraryCode/juce_audio_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		C9B98C6FC4E44928170F7E81 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_core"; path = "../../../../modules/juce_core"; sourceTree = "SOURCE_ROOT"; };
 		CB919E222B28AB38228D080E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_gui_extra.mm"; path = "../../JuceLibraryCode/juce_gui_extra.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -115,6 +117,7 @@
 					289C8993673B68777CF3A968,
 					5DB9EA613B6C375A620567D4,
 					E9DA836CFC56933A44FCB8DE,
+					C0B694FA24DC7DE0B44BC300,
 					61275921D3E9ECE1690FD578,
 					B37B0559AA71B6CD7CEC8213,
 					342786564B1F67373B78584A,
@@ -256,6 +259,7 @@
 					020EF5B77BB12676D5084F84,
 					99268544C0ECDC5566CB6B2D,
 					4102C958B0DBAC6BE9614E71,
+					3EBA7814DF0091D5E6F13E6A,
 					B5839C1ADE6343A97E377F9E,
 					820F8C7344562E54C962352F,
 					2276632F4A0CAA61F25AFCB2,
@@ -265,7 +269,7 @@
 					A1114FDF6F871F83BAF3B6B8,
 					80C515E0387A6AF48C93D08C,
 					AADBC72B2C7030FAD1D8CAF8, ); buildRules = ( ); dependencies = (  ); name = "MidiTest - App"; productName = MidiTest; productReference = AB7855931CA983F4EE039617; productType = "com.apple.product-type.application"; };
-		08CC3758D6C29BD07C86A240 = {isa = PBXProject; buildConfigurationList = 33B4E927BEBC8696D1D2812E; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 68C4BE0E455A27D9A0CEB672 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 937739BC97C6E6294CDCF171; projectDirPath = ""; projectRoot = ""; targets = (68C4BE0E455A27D9A0CEB672); };
+		08CC3758D6C29BD07C86A240 = {isa = PBXProject; buildConfigurationList = 33B4E927BEBC8696D1D2812E; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 68C4BE0E455A27D9A0CEB672 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 937739BC97C6E6294CDCF171; projectDirPath = ""; projectRoot = ""; targets = (68C4BE0E455A27D9A0CEB672); };
 	};
 	rootObject = 08CC3758D6C29BD07C86A240;
 }

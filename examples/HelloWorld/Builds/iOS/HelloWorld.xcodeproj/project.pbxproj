@@ -8,6 +8,7 @@
 
 		9B5335D3CC41BA3A59D5E2E6 = {isa = PBXBuildFile; fileRef = 630E0739D24A3C9E99CD4592; };
 		F70117123739E2303A99AD70 = {isa = PBXBuildFile; fileRef = AF0CC5F28EB37B1FABBDD5DD; };
+		3755AEDF75D3AF5C7E02DF23 = {isa = PBXBuildFile; fileRef = 3847D554E299F92BBE0BD3D0; };
 		02F0D49EDD6A3E82D98302F3 = {isa = PBXBuildFile; fileRef = FE9531D38CA4C273B6FB87A7; };
 		9C737750FC4663FBFDF8C048 = {isa = PBXBuildFile; fileRef = FB6FA17C00AB569935B5CFF8; };
 		EAA5A5EECF04D2B7FCF768FC = {isa = PBXBuildFile; fileRef = EF932865774E86525CE7FC55; };
@@ -26,6 +27,7 @@
 		0EDDB91E8D84944C3EBACFFE = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainComponent.cpp; path = ../../Source/MainComponent.cpp; sourceTree = "SOURCE_ROOT"; };
 		20D5A8BFF03A85C71D10B72A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_gui_basics.mm"; path = "../../JuceLibraryCode/juce_gui_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		33F007A080A781EC0FEE6B98 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_graphics"; path = "../../../../modules/juce_graphics"; sourceTree = "SOURCE_ROOT"; };
+		3847D554E299F92BBE0BD3D0 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		6070F82641B68C6D023AD16D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_gui_extra.mm"; path = "../../JuceLibraryCode/juce_gui_extra.mm"; sourceTree = "SOURCE_ROOT"; };
 		630E0739D24A3C9E99CD4592 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloWorld.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		6C6ECDC15C8EC25DFD892B55 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_basics"; path = "../../../../modules/juce_gui_basics"; sourceTree = "SOURCE_ROOT"; };
@@ -73,6 +75,7 @@
 					B700739654886DC8E7C1293B, ); name = Resources; sourceTree = "<group>"; };
 		C581D34B32A781E9AED7F7B0 = {isa = PBXGroup; children = (
 					AF0CC5F28EB37B1FABBDD5DD,
+					3847D554E299F92BBE0BD3D0,
 					FE9531D38CA4C273B6FB87A7,
 					FB6FA17C00AB569935B5CFF8,
 					EF932865774E86525CE7FC55,
@@ -203,6 +206,7 @@
 					91B43FAA9FF01E555772E593, ); runOnlyForDeploymentPostprocessing = 0; };
 		CD0E71EFDCF3177FCE405E9D = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
 					F70117123739E2303A99AD70,
+					3755AEDF75D3AF5C7E02DF23,
 					02F0D49EDD6A3E82D98302F3,
 					9C737750FC4663FBFDF8C048,
 					EAA5A5EECF04D2B7FCF768FC,
@@ -211,7 +215,7 @@
 					026F69AE2DD97CA7C9006986,
 					C39352E04613E968B30D0584,
 					CD0E71EFDCF3177FCE405E9D, ); buildRules = ( ); dependencies = (  ); name = "HelloWorld - App"; productName = HelloWorld; productReference = 630E0739D24A3C9E99CD4592; productType = "com.apple.product-type.application"; };
-		E34D5B980741D93050D0BB6B = {isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 192D34128EA37F28BC1CBB22 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = (192D34128EA37F28BC1CBB22); };
+		E34D5B980741D93050D0BB6B = {isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 192D34128EA37F28BC1CBB22 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = (192D34128EA37F28BC1CBB22); };
 	};
 	rootObject = E34D5B980741D93050D0BB6B;
 }

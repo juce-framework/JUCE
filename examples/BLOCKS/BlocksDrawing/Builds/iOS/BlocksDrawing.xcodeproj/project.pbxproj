@@ -13,6 +13,7 @@
 		23D2896D495239FEA26A3255 = {isa = PBXBuildFile; fileRef = 11AEC78B996D849B2EA9C96F; };
 		EC92D4CA1DAD1B1AB983F355 = {isa = PBXBuildFile; fileRef = C34F16925E640C3542B78B92; };
 		EE68388C08422C998F9418CC = {isa = PBXBuildFile; fileRef = E427494183B988C7A7BD1017; };
+		E40E065B667FB47959EC8102 = {isa = PBXBuildFile; fileRef = 485A0E39984AC8CD2F98B50C; };
 		E759B32B9B193C5530B5728D = {isa = PBXBuildFile; fileRef = A2D1D8C580DFDB5C8E011C80; };
 		6CC5F22634ACED43D520FDF1 = {isa = PBXBuildFile; fileRef = 4D4A93B14DDB028B9592C841; };
 		BBFB0402058A2B62B9CAF548 = {isa = PBXBuildFile; fileRef = C759B8DF15E2D97796C44195; };
@@ -43,6 +44,7 @@
 		2C5EEC55C1DCC5A3372873C8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		34210DF6FF04098CE9FDF1D7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_graphics.mm"; path = "../../JuceLibraryCode/juce_graphics.mm"; sourceTree = "SOURCE_ROOT"; };
 		38BEC0B6AFAFA022B355CC1B = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainComponent.h; path = ../../Source/MainComponent.h; sourceTree = "SOURCE_ROOT"; };
+		485A0E39984AC8CD2F98B50C = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		49F51637C89080A76F65E9F7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
 		4ABD70F1E7F6F48AF857A965 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
 		4D4A93B14DDB028B9592C841 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -126,6 +128,7 @@
 					11AEC78B996D849B2EA9C96F,
 					C34F16925E640C3542B78B92,
 					E427494183B988C7A7BD1017,
+					485A0E39984AC8CD2F98B50C,
 					A2D1D8C580DFDB5C8E011C80,
 					4D4A93B14DDB028B9592C841,
 					C759B8DF15E2D97796C44195,
@@ -269,6 +272,7 @@
 					23D2896D495239FEA26A3255,
 					EC92D4CA1DAD1B1AB983F355,
 					EE68388C08422C998F9418CC,
+					E40E065B667FB47959EC8102,
 					E759B32B9B193C5530B5728D,
 					6CC5F22634ACED43D520FDF1,
 					BBFB0402058A2B62B9CAF548,
@@ -279,7 +283,7 @@
 					B64F4B6419098A6C579D0EDB,
 					6F1EAB6EC19EDAB88EF14DE0,
 					704E8CB52C968D24DAE2ABD5, ); buildRules = ( ); dependencies = (  ); name = "BlocksDrawing - App"; productName = BlocksDrawing; productReference = 7A425A86C84D843976582BAF; productType = "com.apple.product-type.application"; };
-		46C68557D30B3B44D3FE037B = {isa = PBXProject; buildConfigurationList = DD23365E44ACBF007DC85D46; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { F0C1DAFB0E78213F565F044F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0E79852FE469702C8F99D6F3; projectDirPath = ""; projectRoot = ""; targets = (F0C1DAFB0E78213F565F044F); };
+		46C68557D30B3B44D3FE037B = {isa = PBXProject; buildConfigurationList = DD23365E44ACBF007DC85D46; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { F0C1DAFB0E78213F565F044F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0E79852FE469702C8F99D6F3; projectDirPath = ""; projectRoot = ""; targets = (F0C1DAFB0E78213F565F044F); };
 	};
 	rootObject = 46C68557D30B3B44D3FE037B;
 }

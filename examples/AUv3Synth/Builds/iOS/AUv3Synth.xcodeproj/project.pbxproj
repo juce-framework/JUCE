@@ -15,6 +15,7 @@
 		669F51FA55E939D010EA279D = {isa = PBXBuildFile; fileRef = 5AD0B0347A511D96D2880A06; };
 		EDC8ABA2EC0A2D7A2147E896 = {isa = PBXBuildFile; fileRef = 296CD54575ED27C23A2F13F3; };
 		7DEC97493F97160DE6622DBC = {isa = PBXBuildFile; fileRef = 4B06F0FD512A72015EA72B0B; };
+		B6202FE6A6338C901BE699C8 = {isa = PBXBuildFile; fileRef = 145A2B3A8AC9557F57AFA206; };
 		1DF18B2507A574FBA9C49DE1 = {isa = PBXBuildFile; fileRef = 872D05BD56490FD7B375C11B; };
 		71F62F07CBC67FB4FB010583 = {isa = PBXBuildFile; fileRef = F563EF4F5BE16082D5E612C9; };
 		6B818B8342839FB008124DEA = {isa = PBXBuildFile; fileRef = DAF78E342ACF24B5A83E0605; };
@@ -44,6 +45,7 @@
 		0C04FB7E3B2CB5ED870A270D = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_core"; path = "../../../../modules/juce_core"; sourceTree = "SOURCE_ROOT"; };
 		0E0AA6CCA5E030195BC83D92 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_events"; path = "../../../../modules/juce_events"; sourceTree = "SOURCE_ROOT"; };
 		0FDE79162C42D29429F29BF2 = {isa = PBXFileReference; lastKnownFileType = file.ogg; name = singing.ogg; path = ../../Source/BinaryData/singing.ogg; sourceTree = "SOURCE_ROOT"; };
+		145A2B3A8AC9557F57AFA206 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		18ADDCF1C2123777FA507D82 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_basics.mm"; path = "../../JuceLibraryCode/juce_audio_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		2060810FA782E4FA6282BFFF = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MaterialLookAndFeel.h; path = ../../Source/MaterialLookAndFeel.h; sourceTree = "SOURCE_ROOT"; };
 		296CD54575ED27C23A2F13F3 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
@@ -149,6 +151,7 @@
 					5AD0B0347A511D96D2880A06,
 					296CD54575ED27C23A2F13F3,
 					4B06F0FD512A72015EA72B0B,
+					145A2B3A8AC9557F57AFA206,
 					872D05BD56490FD7B375C11B,
 					F563EF4F5BE16082D5E612C9,
 					DAF78E342ACF24B5A83E0605,
@@ -231,6 +234,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
+				CODE_SIGN_ENTITLEMENTS = "AUv3Synth.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -260,6 +264,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
+				CODE_SIGN_ENTITLEMENTS = "AUv3Synth.entitlements";
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -412,6 +417,7 @@
 					669F51FA55E939D010EA279D,
 					EDC8ABA2EC0A2D7A2147E896,
 					7DEC97493F97160DE6622DBC,
+					B6202FE6A6338C901BE699C8,
 					1DF18B2507A574FBA9C49DE1,
 					71F62F07CBC67FB4FB010583,
 					6B818B8342839FB008124DEA,
@@ -437,6 +443,7 @@
 					669F51FA55E939D010EA279D,
 					EDC8ABA2EC0A2D7A2147E896,
 					7DEC97493F97160DE6622DBC,
+					B6202FE6A6338C901BE699C8,
 					1DF18B2507A574FBA9C49DE1,
 					71F62F07CBC67FB4FB010583,
 					6B818B8342839FB008124DEA,
@@ -472,7 +479,7 @@
 					4D9D92DD454BB03746241196, ); runOnlyForDeploymentPostprocessing = 0; };
 		CD6892FED0DB19C0DDD9AD37 = {isa = PBXNativeTarget; buildConfigurationList = AF907C78A0D17B741F5F8944; buildPhases = (
 					1F4A8812AAE49E02F3215F48, ); buildRules = ( ); dependencies = (  ); name = "AUv3Synth - Shared Code"; productName = AUv3Synth; productReference = 9536B5A780A03F6BACB24144; productType = "com.apple.product-type.library.static"; };
-		D0E003364F0BE3205BD9243E = {isa = PBXProject; buildConfigurationList = 444EA74CE26BF416566E542C; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { EF49DCC88B5FC3C6E67ED2A4 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };7A046597FDDDB82B78C64AAC = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 1; }; }; };D493488C4B5B9D9B5990FEE2 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };CD6892FED0DB19C0DDD9AD37 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4BFA153CE4E8A774C67EC642; projectDirPath = ""; projectRoot = ""; targets = (EF49DCC88B5FC3C6E67ED2A4, 7A046597FDDDB82B78C64AAC, D493488C4B5B9D9B5990FEE2, CD6892FED0DB19C0DDD9AD37); };
+		D0E003364F0BE3205BD9243E = {isa = PBXProject; buildConfigurationList = 444EA74CE26BF416566E542C; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { EF49DCC88B5FC3C6E67ED2A4 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };7A046597FDDDB82B78C64AAC = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 1; }; }; };D493488C4B5B9D9B5990FEE2 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };CD6892FED0DB19C0DDD9AD37 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4BFA153CE4E8A774C67EC642; projectDirPath = ""; projectRoot = ""; targets = (EF49DCC88B5FC3C6E67ED2A4, 7A046597FDDDB82B78C64AAC, D493488C4B5B9D9B5990FEE2, CD6892FED0DB19C0DDD9AD37); };
 	};
 	rootObject = D0E003364F0BE3205BD9243E;
 }

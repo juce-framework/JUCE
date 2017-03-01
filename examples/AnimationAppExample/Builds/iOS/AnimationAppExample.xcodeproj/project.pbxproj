@@ -12,6 +12,7 @@
 		ACC6D859315761144D4178A0 = {isa = PBXBuildFile; fileRef = 717FA33AC0AA2629302F0314; };
 		3B937846DB65393DE597ABDE = {isa = PBXBuildFile; fileRef = C9F7ABDA09635BC3FAB0B008; };
 		96B761E33D6CA3700F0A9A51 = {isa = PBXBuildFile; fileRef = 287976618152E4BA76D627FA; };
+		3BDC668C74D7BE65921F24F3 = {isa = PBXBuildFile; fileRef = 894CC76489B4BE25D85811AB; };
 		139AEB224F22582CF606327F = {isa = PBXBuildFile; fileRef = 732EEC584A4CE3ED07C5BEFB; };
 		0DE5F0C9D8D826AF3EEBAC04 = {isa = PBXBuildFile; fileRef = 888284627B1FEA22193130AB; };
 		F3F1AF2E0D45882BFE3EDE07 = {isa = PBXBuildFile; fileRef = AF947B0E188B6EA57EB0109B; };
@@ -59,6 +60,7 @@
 		7E41C293EC2780CFA0A0183F = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_basics"; path = "../../../../modules/juce_audio_basics"; sourceTree = "SOURCE_ROOT"; };
 		859E13C66F2193112084D1B9 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		888284627B1FEA22193130AB = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		894CC76489B4BE25D85811AB = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		98474FB10BB003823EEC8759 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-App.plist"; path = "Info-App.plist"; sourceTree = "SOURCE_ROOT"; };
 		A67C5701B28E64F889A92422 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
 		AF947B0E188B6EA57EB0109B = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -122,6 +124,7 @@
 					717FA33AC0AA2629302F0314,
 					C9F7ABDA09635BC3FAB0B008,
 					287976618152E4BA76D627FA,
+					894CC76489B4BE25D85811AB,
 					732EEC584A4CE3ED07C5BEFB,
 					888284627B1FEA22193130AB,
 					AF947B0E188B6EA57EB0109B,
@@ -265,6 +268,7 @@
 					ACC6D859315761144D4178A0,
 					3B937846DB65393DE597ABDE,
 					96B761E33D6CA3700F0A9A51,
+					3BDC668C74D7BE65921F24F3,
 					139AEB224F22582CF606327F,
 					0DE5F0C9D8D826AF3EEBAC04,
 					F3F1AF2E0D45882BFE3EDE07,
@@ -275,7 +279,7 @@
 					6DD59723DA58F112C3C6F427,
 					2CCE82C7290D2D226DD34C0B,
 					4516F5A575174EF76FEAD8B3, ); buildRules = ( ); dependencies = (  ); name = "AnimationAppExample - App"; productName = AnimationAppExample; productReference = CBF69B3CBCD089CD7DC8343C; productType = "com.apple.product-type.application"; };
-		AEF97977FF56185DB5E0C493 = {isa = PBXProject; buildConfigurationList = 576D6DACFB71E339D0AD373A; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 80F5D4DB72CAE33FF7BE0E28 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = E2839CF91E2C633A933666F4; projectDirPath = ""; projectRoot = ""; targets = (80F5D4DB72CAE33FF7BE0E28); };
+		AEF97977FF56185DB5E0C493 = {isa = PBXProject; buildConfigurationList = 576D6DACFB71E339D0AD373A; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 80F5D4DB72CAE33FF7BE0E28 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = E2839CF91E2C633A933666F4; projectDirPath = ""; projectRoot = ""; targets = (80F5D4DB72CAE33FF7BE0E28); };
 	};
 	rootObject = AEF97977FF56185DB5E0C493;
 }
