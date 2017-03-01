@@ -43,6 +43,10 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 namespace juce
 {
+   #if JucePlugin_Enable_IAA && JUCE_IOS
+    #include "../../juce_audio_devices/native/juce_ios_Audio.h"
+   #endif
+
     #include "juce_StandaloneFilterWindow.h"
 }
 
@@ -106,5 +110,32 @@ protected:
     ApplicationProperties appProperties;
     ScopedPointer<StandaloneFilterWindow> mainWindow;
 };
+
+#if JucePlugin_Build_STANDALONE && JUCE_IOS
+
+bool JUCE_CALLTYPE juce_isInterAppAudioConnected()
+{
+    if (auto holder = StandalonePluginHolder::getInstance())
+        return holder->isInterAppAudioConnected();
+
+    return false;
+}
+
+void JUCE_CALLTYPE juce_switchToHostApplication()
+{
+    if (auto holder = StandalonePluginHolder::getInstance())
+        holder->switchToHostApplication();
+}
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
+{
+    if (auto holder = StandalonePluginHolder::getInstance())
+        return holder->getIAAHostIcon (size);
+
+    return Image();
+}
+#endif
+#endif
 
 #endif

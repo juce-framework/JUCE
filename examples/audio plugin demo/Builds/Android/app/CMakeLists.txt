@@ -29,6 +29,7 @@ add_library( ${BINARY_NAME}
     "../../../Source/PluginProcessor.cpp"
     "../../../Source/PluginProcessor.h"
     "../../../Source/SinewaveSynth.h"
+    "../../../../../modules/juce_audio_basics/audio_play_head/juce_AudioPlayHead.h"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.cpp"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.h"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioDataConverters.cpp"
@@ -115,6 +116,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_android_OpenSL.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_ios_Audio.cpp"
+    "../../../../../modules/juce_audio_devices/native/juce_ios_Audio.h"
     "../../../../../modules/juce_audio_devices/native/juce_linux_ALSA.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_linux_JackAudio.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_linux_Midi.cpp"
@@ -414,7 +416,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.h"
-    "../../../../../modules/juce_audio_processors/processors/juce_AudioPlayHead.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioPluginInstance.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h"
@@ -917,17 +918,21 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_graphics/images/juce_ImageFileFormat.h"
     "../../../../../modules/juce_graphics/native/juce_android_Fonts.cpp"
     "../../../../../modules/juce_graphics/native/juce_android_GraphicsContext.cpp"
+    "../../../../../modules/juce_graphics/native/juce_android_IconHelpers.cpp"
     "../../../../../modules/juce_graphics/native/juce_freetype_Fonts.cpp"
     "../../../../../modules/juce_graphics/native/juce_linux_Fonts.cpp"
+    "../../../../../modules/juce_graphics/native/juce_linux_IconHelpers.cpp"
     "../../../../../modules/juce_graphics/native/juce_mac_CoreGraphicsContext.h"
     "../../../../../modules/juce_graphics/native/juce_mac_CoreGraphicsContext.mm"
     "../../../../../modules/juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
     "../../../../../modules/juce_graphics/native/juce_mac_Fonts.mm"
+    "../../../../../modules/juce_graphics/native/juce_mac_IconHelpers.cpp"
     "../../../../../modules/juce_graphics/native/juce_RenderingHelpers.h"
     "../../../../../modules/juce_graphics/native/juce_win32_Direct2DGraphicsContext.cpp"
     "../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeface.cpp"
     "../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeLayout.cpp"
     "../../../../../modules/juce_graphics/native/juce_win32_Fonts.cpp"
+    "../../../../../modules/juce_graphics/native/juce_win32_IconHelpers.cpp"
     "../../../../../modules/juce_graphics/placement/juce_Justification.h"
     "../../../../../modules/juce_graphics/placement/juce_RectanglePlacement.cpp"
     "../../../../../modules/juce_graphics/placement/juce_RectanglePlacement.h"
@@ -1269,6 +1274,7 @@ add_library( ${BINARY_NAME}
 set_source_files_properties("../../../Source/PluginEditor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/PluginProcessor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/SinewaveSynth.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/audio_play_head/juce_AudioPlayHead.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioDataConverters.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1355,6 +1361,7 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/native/ju
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_OpenSL.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_ios_Audio.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_ios_Audio.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_linux_ALSA.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_linux_JackAudio.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_linux_Midi.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1654,7 +1661,6 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioPlayHead.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioPluginInstance.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2157,17 +2163,21 @@ set_source_files_properties("../../../../../modules/juce_graphics/images/juce_Im
 set_source_files_properties("../../../../../modules/juce_graphics/images/juce_ImageFileFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_android_Fonts.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_android_GraphicsContext.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/native/juce_android_IconHelpers.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_freetype_Fonts.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_linux_Fonts.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/native/juce_linux_IconHelpers.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_mac_CoreGraphicsContext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_mac_CoreGraphicsContext.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_mac_CoreGraphicsHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_mac_Fonts.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/native/juce_mac_IconHelpers.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_RenderingHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_Direct2DGraphicsContext.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeface.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeLayout.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_Fonts.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_IconHelpers.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/placement/juce_Justification.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/placement/juce_RectanglePlacement.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/placement/juce_RectanglePlacement.h" PROPERTIES HEADER_FILE_ONLY TRUE)

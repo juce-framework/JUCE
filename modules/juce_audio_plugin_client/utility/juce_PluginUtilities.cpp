@@ -149,6 +149,15 @@ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_i
 */
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
+#if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+extern bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
+extern void JUCE_CALLTYPE juce_switchToHostApplication();
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+extern Image JUCE_CALLTYPE juce_getIAAHostIcon (int);
+#endif
+#endif
+
 AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
 {
     AudioProcessor::setTypeOfNextNewPlugin (type);
@@ -160,3 +169,46 @@ AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor:
 
     return pluginInstance;
 }
+
+bool PluginHostType::isInterAppAudioConnected() const
+{
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+    if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
+        return juce_isInterAppAudioConnected();
+   #endif
+
+    return false;
+}
+
+void PluginHostType::switchToHostApplication() const
+{
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+    if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
+        juce_switchToHostApplication();
+   #endif
+}
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+namespace juce {
+
+extern Image JUCE_API getIconFromApplication (const String&, const int);
+
+Image PluginHostType::getHostIcon (int size) const
+{
+    ignoreUnused (size);
+
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+    if (isInterAppAudioConnected())
+        return juce_getIAAHostIcon (size);
+   #endif
+
+   #if JUCE_MAC
+    String bundlePath (getHostPath().upToLastOccurrenceOf (".app", true, true));
+    return getIconFromApplication (bundlePath, size);
+   #endif
+
+    return Image();
+}
+
+}
+#endif

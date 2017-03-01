@@ -945,10 +945,12 @@ public class JUCENetworkGraphicsDemo   extends Activity
     }
 
     //==============================================================================
-    public final int[] renderGlyph (char glyph, Paint paint, android.graphics.Matrix matrix, Rect bounds)
+    public final int[] renderGlyph (char glyph1, char glyph2, Paint paint, android.graphics.Matrix matrix, Rect bounds)
     {
         Path p = new Path();
-        paint.getTextPath (String.valueOf (glyph), 0, 1, 0.0f, 0.0f, p);
+
+        char[] str = { glyph1, glyph2 };
+        paint.getTextPath (str, 0, (glyph2 != 0 ? 2 : 1), 0.0f, 0.0f, p);
 
         RectF boundsF = new RectF();
         p.computeBounds (boundsF, true);

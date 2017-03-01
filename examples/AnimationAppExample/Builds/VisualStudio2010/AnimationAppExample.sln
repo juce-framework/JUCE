@@ -21,6 +21,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_basics", "juce_a
 		..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h = ..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "audio_play_head", "audio_play_head", "{EBF046F5-7CA3-37D3-9D14-C9A7C0217454}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h = ..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buffers", "buffers", "{7CD42E50-9A58-3EBA-EE01-8BB53EE23455}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp = ..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp
@@ -32,7 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buffers", "buffers", "{7CD4
 		..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.h = ..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "effects", "effects", "{66AF0C07-0405-CD6A-E150-7010B2E00ED8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "effects", "effects", "{F9D856A3-0393-6323-2067-7800D15AE886}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_basics\effects\juce_CatmullRomInterpolator.cpp = ..\..\..\..\modules\juce_audio_basics\effects\juce_CatmullRomInterpolator.cpp
 		..\..\..\..\modules\juce_audio_basics\effects\juce_CatmullRomInterpolator.h = ..\..\..\..\modules\juce_audio_basics\effects\juce_CatmullRomInterpolator.h
@@ -47,7 +52,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "effects", "effects", "{66AF
 		..\..\..\..\modules\juce_audio_basics\effects\juce_Reverb.h = ..\..\..\..\modules\juce_audio_basics\effects\juce_Reverb.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "midi", "midi", "{DB02F856-3B14-F815-657A-998A3A86CFA6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "midi", "midi", "{FBCC726E-3B5D-51C5-5448-EB34B8EF4D5A}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.cpp = ..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.cpp
 		..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.h = ..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.h
@@ -63,7 +68,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "midi", "midi", "{DB02F856-3
 		..\..\..\..\modules\juce_audio_basics\midi\juce_MidiRPN.h = ..\..\..\..\modules\juce_audio_basics\midi\juce_MidiRPN.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mpe", "mpe", "{86B37A69-3A9B-3421-F2F8-046E6EDB3930}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mpe", "mpe", "{42A6BDC7-7BE0-EBA7-7449-244611E7C050}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEInstrument.cpp = ..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEInstrument.cpp
 		..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEInstrument.h = ..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEInstrument.h
@@ -85,7 +90,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mpe", "mpe", "{86B37A69-3A9
 		..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.h = ..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sources", "sources", "{5BDC5083-85A9-115E-C05A-1576B73A5841}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sources", "sources", "{2C9328F7-BEDA-D0AD-8A77-25E2413F43B3}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_basics\sources\juce_AudioSource.h = ..\..\..\..\modules\juce_audio_basics\sources\juce_AudioSource.h
 		..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.cpp = ..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.cpp
@@ -105,7 +110,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sources", "sources", "{5BDC
 		..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.h = ..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "synthesisers", "synthesisers", "{0E9104F9-439D-05F1-914D-6702A13C9B7C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "synthesisers", "synthesisers", "{42788118-A55A-13F2-0D75-9336034CC898}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp = ..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp
 		..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.h = ..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.h
@@ -145,6 +150,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{F86FE8
 		..\..\..\..\modules\juce_audio_devices\native\juce_android_Midi.cpp = ..\..\..\..\modules\juce_audio_devices\native\juce_android_Midi.cpp
 		..\..\..\..\modules\juce_audio_devices\native\juce_android_OpenSL.cpp = ..\..\..\..\modules\juce_audio_devices\native\juce_android_OpenSL.cpp
 		..\..\..\..\modules\juce_audio_devices\native\juce_ios_Audio.cpp = ..\..\..\..\modules\juce_audio_devices\native\juce_ios_Audio.cpp
+		..\..\..\..\modules\juce_audio_devices\native\juce_ios_Audio.h = ..\..\..\..\modules\juce_audio_devices\native\juce_ios_Audio.h
 		..\..\..\..\modules\juce_audio_devices\native\juce_linux_ALSA.cpp = ..\..\..\..\modules\juce_audio_devices\native\juce_linux_ALSA.cpp
 		..\..\..\..\modules\juce_audio_devices\native\juce_linux_JackAudio.cpp = ..\..\..\..\modules\juce_audio_devices\native\juce_linux_JackAudio.cpp
 		..\..\..\..\modules\juce_audio_devices\native\juce_linux_Midi.cpp = ..\..\..\..\modules\juce_audio_devices\native\juce_linux_Midi.cpp
@@ -395,7 +401,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_processors", "ju
 		..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h = ..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "format", "format", "{7A47E055-941C-ACBD-ABC9-681DE92A0D8D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "format", "format", "{15387D64-C701-2C1A-5DEA-C056077E178A}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormat.cpp = ..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormat.cpp
 		..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormat.h = ..\..\..\..\modules\juce_audio_processors\format\juce_AudioPluginFormat.h
@@ -421,9 +427,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "format_types", "format_type
 		..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h = ..\..\..\..\modules\juce_audio_processors\format_types\juce_VSTPluginFormat.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "processors", "processors", "{AABFD766-1B4E-E263-08D3-C6E087C68950}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "processors", "processors", "{65AED23F-3946-CBF4-174B-30EC23840D6F}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPlayHead.h = ..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPlayHead.h
 		..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPluginInstance.h = ..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPluginInstance.h
 		..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.cpp = ..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.cpp
 		..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.h = ..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.h
@@ -1087,17 +1092,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{A3A058
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\modules\juce_graphics\native\juce_android_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_android_Fonts.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_android_GraphicsContext.cpp = ..\..\..\..\modules\juce_graphics\native\juce_android_GraphicsContext.cpp
+		..\..\..\..\modules\juce_graphics\native\juce_android_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_android_IconHelpers.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_freetype_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_freetype_Fonts.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_linux_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_linux_Fonts.cpp
+		..\..\..\..\modules\juce_graphics\native\juce_linux_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_linux_IconHelpers.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.h = ..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.h
 		..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.mm = ..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.mm
 		..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsHelpers.h = ..\..\..\..\modules\juce_graphics\native\juce_mac_CoreGraphicsHelpers.h
 		..\..\..\..\modules\juce_graphics\native\juce_mac_Fonts.mm = ..\..\..\..\modules\juce_graphics\native\juce_mac_Fonts.mm
+		..\..\..\..\modules\juce_graphics\native\juce_mac_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_mac_IconHelpers.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h = ..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h
 		..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeface.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeface.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeLayout.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeLayout.cpp
 		..\..\..\..\modules\juce_graphics\native\juce_win32_Fonts.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_Fonts.cpp
+		..\..\..\..\modules\juce_graphics\native\juce_win32_IconHelpers.cpp = ..\..\..\..\modules\juce_graphics\native\juce_win32_IconHelpers.cpp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "placement", "placement", "{A3856E0A-3F84-E9FF-DC21-057DB1048DE1}"
@@ -1635,12 +1644,13 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{57A7D67E-9F7D-B68C-3206-93FD091C77C3} = {9393A6E4-FC4C-6EB7-E23D-C95AFC6EA478}
+		{EBF046F5-7CA3-37D3-9D14-C9A7C0217454} = {7D98269F-FE96-6BA2-6982-95A094257474}
 		{7CD42E50-9A58-3EBA-EE01-8BB53EE23455} = {7D98269F-FE96-6BA2-6982-95A094257474}
-		{66AF0C07-0405-CD6A-E150-7010B2E00ED8} = {7D98269F-FE96-6BA2-6982-95A094257474}
-		{DB02F856-3B14-F815-657A-998A3A86CFA6} = {7D98269F-FE96-6BA2-6982-95A094257474}
-		{86B37A69-3A9B-3421-F2F8-046E6EDB3930} = {7D98269F-FE96-6BA2-6982-95A094257474}
-		{5BDC5083-85A9-115E-C05A-1576B73A5841} = {7D98269F-FE96-6BA2-6982-95A094257474}
-		{0E9104F9-439D-05F1-914D-6702A13C9B7C} = {7D98269F-FE96-6BA2-6982-95A094257474}
+		{F9D856A3-0393-6323-2067-7800D15AE886} = {7D98269F-FE96-6BA2-6982-95A094257474}
+		{FBCC726E-3B5D-51C5-5448-EB34B8EF4D5A} = {7D98269F-FE96-6BA2-6982-95A094257474}
+		{42A6BDC7-7BE0-EBA7-7449-244611E7C050} = {7D98269F-FE96-6BA2-6982-95A094257474}
+		{2C9328F7-BEDA-D0AD-8A77-25E2413F43B3} = {7D98269F-FE96-6BA2-6982-95A094257474}
+		{42788118-A55A-13F2-0D75-9336034CC898} = {7D98269F-FE96-6BA2-6982-95A094257474}
 		{7D98269F-FE96-6BA2-6982-95A094257474} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{2FB2505D-2839-6A28-8B43-608B6961375F} = {9B424FDD-E818-734F-9A73-089DB94DAD0F}
 		{3A38C056-9228-7750-758A-38C4DC501768} = {9B424FDD-E818-734F-9A73-089DB94DAD0F}
@@ -1664,9 +1674,9 @@ Global
 		{DA257576-DA2A-550A-0603-007F49337197} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
 		{1F68DB2D-F9CD-F7E7-9821-B51A6CFDB6E7} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
 		{2C62B2A1-47C2-2C91-3E85-F988210D128A} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
-		{7A47E055-941C-ACBD-ABC9-681DE92A0D8D} = {861DF610-5E57-5745-146B-95D712482F64}
+		{15387D64-C701-2C1A-5DEA-C056077E178A} = {861DF610-5E57-5745-146B-95D712482F64}
 		{C4C2ECEF-256A-2D14-9D85-2E125EFC0C9B} = {861DF610-5E57-5745-146B-95D712482F64}
-		{AABFD766-1B4E-E263-08D3-C6E087C68950} = {861DF610-5E57-5745-146B-95D712482F64}
+		{65AED23F-3946-CBF4-174B-30EC23840D6F} = {861DF610-5E57-5745-146B-95D712482F64}
 		{DA5DE8C5-116D-D9AF-4FE3-7194EB099C35} = {861DF610-5E57-5745-146B-95D712482F64}
 		{86851094-F8E2-4D2E-50A4-D3D9032FC6F3} = {861DF610-5E57-5745-146B-95D712482F64}
 		{861DF610-5E57-5745-146B-95D712482F64} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}

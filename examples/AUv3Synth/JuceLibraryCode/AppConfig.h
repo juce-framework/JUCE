@@ -247,6 +247,9 @@
 #ifndef  JucePlugin_Build_STANDALONE
  #define JucePlugin_Build_STANDALONE       1
 #endif
+#ifndef  JucePlugin_Enable_IAA
+ #define JucePlugin_Enable_IAA             0
+#endif
 #ifndef  JucePlugin_Name
  #define JucePlugin_Name                   "AUv3 Synth"
 #endif
@@ -348,4 +351,13 @@
 #endif
 #ifndef  JucePlugin_AAXDisableMultiMono
  #define JucePlugin_AAXDisableMultiMono    0
+#endif
+#ifndef  JucePlugin_IAAType
+ #define JucePlugin_IAAType                0x61757269 // 'auri'
+#endif
+#ifndef  JucePlugin_IAASubType
+ #define JucePlugin_IAASubType             JucePlugin_PluginCode
+#endif
+#ifndef  JucePlugin_IAAName
+ #define JucePlugin_IAAName                "ROLI Ltd.: AUv3 Synth"
 #endif

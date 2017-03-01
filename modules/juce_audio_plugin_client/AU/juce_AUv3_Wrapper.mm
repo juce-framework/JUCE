@@ -1430,5 +1430,14 @@ private:
 - (void)viewDidLayoutSubviews   { return cpp->viewDidLayoutSubviews(); }
 @end
 
+//==============================================================================
+#if JUCE_IOS
+bool JUCE_CALLTYPE juce_isInterAppAudioConnected() { return false; }
+void JUCE_CALLTYPE juce_switchToHostApplication()  {}
+#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return Image(); }
+#endif
+#endif
+
 #pragma clang diagnostic pop
 #endif

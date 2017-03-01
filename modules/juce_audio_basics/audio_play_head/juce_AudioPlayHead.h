@@ -137,4 +137,16 @@ public:
         multithreading issues if it's not called on the audio thread.
     */
     virtual bool getCurrentPosition (CurrentPositionInfo& result) = 0;
+
+    /** Returns true if this object can control the transport. */
+    virtual bool canControlTransport()                         { return false; };
+
+    /** Starts or stops the audio. */
+    virtual void transportPlay (bool shouldStartPlaying)       { ignoreUnused (shouldStartPlaying); };
+
+    /** Starts or stops recording the audio. */
+    virtual void transportRecord (bool shouldStartRecording)   { ignoreUnused (shouldStartRecording); };
+
+    /** Rewinds the audio. */
+    virtual void transportRewind()                             {};
 };

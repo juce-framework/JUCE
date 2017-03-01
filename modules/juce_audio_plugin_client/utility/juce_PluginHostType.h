@@ -170,6 +170,14 @@ public:
     }
 
     //==============================================================================
+    bool isInterAppAudioConnected() const;
+    void switchToHostApplication() const;
+
+   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
+    Image getHostIcon (int size) const;
+   #endif
+
+    //==============================================================================
     static String getHostPath()
     {
         return File::getSpecialLocation (File::hostApplicationPath).getFullPathName();

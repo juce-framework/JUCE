@@ -102,7 +102,6 @@ namespace juce
 {
 
 class AudioProcessor;
-#include "processors/juce_AudioPlayHead.h"
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
 #include "processors/juce_AudioProcessorParameter.h"

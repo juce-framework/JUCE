@@ -182,6 +182,14 @@ public:
     void startPlaying()
     {
         player.setProcessor (processor);
+
+       #if JucePlugin_Enable_IAA && JUCE_IOS
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+        {
+            processor->setPlayHead                (device->getAudioPlayHead());
+            device->setMidiMessageCollector (&player.getMidiMessageCollector());
+        }
+       #endif
     }
 
     void stopPlaying()
@@ -261,6 +269,41 @@ public:
     }
 
     //==============================================================================
+    void switchToHostApplication()
+    {
+       #if JUCE_IOS
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+            device->switchApplication();
+       #endif
+    }
+
+    bool isInterAppAudioConnected()
+    {
+       #if JUCE_IOS
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+            return device->isInterAppAudioConnected();
+       #endif
+
+        return false;
+    }
+
+   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
+    Image getIAAHostIcon (int size)
+    {
+       #if JUCE_IOS && JucePlugin_Enable_IAA
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+            return device->getIcon (size);
+       #else
+        ignoreUnused (size);
+       #endif
+
+        return Image();
+    }
+   #endif
+
+    static StandalonePluginHolder* getInstance();
+
+    //==============================================================================
     OptionalScopedPointer<PropertySet> settings;
     ScopedPointer<AudioProcessor> processor;
     AudioDeviceManager deviceManager;
@@ -327,7 +370,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandalonePluginHolder)
 };
-
 
 //==============================================================================
 /**
@@ -481,6 +523,8 @@ public:
         optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);
     }
 
+    virtual StandalonePluginHolder* getPluginHolder()    { return pluginHolder; }
+
     ScopedPointer<StandalonePluginHolder> pluginHolder;
 
 private:
@@ -489,3 +533,20 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
+
+StandalonePluginHolder* StandalonePluginHolder::getInstance()
+{
+   #if JucePlugin_Enable_IAA || JucePlugin_Build_STANDALONE
+    if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
+    {
+        Desktop& desktop (Desktop::getInstance());
+        const int numTopLevelWindows = desktop.getNumComponents();
+
+        for (int i = 0; i < numTopLevelWindows; ++i)
+            if (auto window = dynamic_cast<StandaloneFilterWindow*> (desktop.getComponent (i)))
+                return window->getPluginHolder();
+    }
+   #endif
+
+    return nullptr;
+}

@@ -55,3 +55,7 @@ namespace
 
 extern CGImageRef juce_createCoreGraphicsImage (const Image&, CGColorSpaceRef, bool mustOutliveSource);
 extern CGContextRef juce_getImageContext (const Image&);
+
+#if JUCE_IOS
+extern Image juce_createImageFromUIImage (UIImage*);
+#endif

@@ -315,7 +315,7 @@ namespace TextLayoutHelpers
             layout.ensureStorageAllocated (totalLines);
 
             addTextRuns (text);
-            layoutRuns (layout.getWidth(), text.getLineSpacing());
+            layoutRuns (layout.getWidth(), text.getLineSpacing(), text.getWordWrap());
 
             int charPosition = 0;
             int lineStartPosition = 0;
@@ -476,7 +476,7 @@ namespace TextLayoutHelpers
                 tokens.add (new Token (currentString, font, colour, lastCharType == 2));
         }
 
-        void layoutRuns (const float maxWidth, const float extraLineSpacing)
+        void layoutRuns (const float maxWidth, const float extraLineSpacing, const AttributedString::WordWrap wordWrap)
         {
             float x = 0, y = 0, h = 0;
             int i;
@@ -494,7 +494,9 @@ namespace TextLayoutHelpers
                 if (nextTok == nullptr)
                     break;
 
-                if (t.isNewLine || ((! nextTok->isWhitespace) && x + nextTok->area.getWidth() > maxWidth))
+                const bool tokenTooLarge = (x + nextTok->area.getWidth() > maxWidth);
+
+                if (t.isNewLine || ((! nextTok->isWhitespace) && (tokenTooLarge && wordWrap != AttributedString::none)))
                 {
                     setLastLineHeight (i + 1, h);
                     x = 0;
