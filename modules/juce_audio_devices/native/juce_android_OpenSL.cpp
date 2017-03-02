@@ -845,12 +845,26 @@ public:
         }
 
         session = OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
-                                               sampleRate, actualBufferSize, audioBuffersToEnqueue,
-                                               supportsFloatingPoint);
+                                         sampleRate, actualBufferSize, audioBuffersToEnqueue,
+                                         supportsFloatingPoint);
+        if (session != nullptr)
+            session->setAudioPreprocessingEnabled (audioProcessingEnabled);
+        else
+        {
+            if (numInputChannels > 0 && numOutputChannels > 0 && RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
+            {
+                // New versions of the Android emulator do not seem to support audio input anymore on OS X
+                activeInputChans = BigInteger(0);
+                numInputChannels = 0;
+
+                session = OpenSLSession::create(slLibrary, numInputChannels, numOutputChannels,
+                                                sampleRate, actualBufferSize, audioBuffersToEnqueue,
+                                                supportsFloatingPoint);
+            }
+        }
+
         if (session == nullptr)
             lastError = "Unknown error initializing opensl session";
-
-        session->setAudioPreprocessingEnabled (audioProcessingEnabled);
 
         deviceOpen = (session != nullptr);
         return lastError;
