@@ -49,7 +49,7 @@ void ProgressBar::setTextToDisplay (const String& text)
 
 void ProgressBar::lookAndFeelChanged()
 {
-    setOpaque (findColour (backgroundColourId).isOpaque());
+    setOpaque (getLookAndFeel().isProgressBarOpaque (*this));
 }
 
 void ProgressBar::colourChanged()
