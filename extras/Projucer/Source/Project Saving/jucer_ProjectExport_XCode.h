@@ -604,8 +604,6 @@ public:
                     xcodeBundleExtension = ".dpm";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
-
-                    addExtraRTASTargetSettings();
                     break;
 
                 case SharedCodeTarget:
@@ -1320,6 +1318,13 @@ public:
 
                 extraLibs.add   (aaxLibsFolder.getChildFile (libraryPath));
             }
+            else if (type == RTASPlugIn)
+            {
+                RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
+
+                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
+                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
+            }
         }
 
         StringArray getTargetExtraHeaderSearchPaths() const
@@ -1368,14 +1373,6 @@ public:
             }
 
             return targetExtraSearchPaths;
-        }
-
-        void addExtraRTASTargetSettings()
-        {
-            RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
-
-            xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
-            xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
         }
 
         bool isUsingClangCppLibrary (const BuildConfiguration& config) const
