@@ -607,6 +607,11 @@ void LookAndFeel_V2::drawSpinningWaitAnimation (Graphics& g, const Colour& colou
     }
 }
 
+bool LookAndFeel_V2::isProgressBarOpaque (ProgressBar& progressBar)
+{
+    return progressBar.findColour (ProgressBar::backgroundColourId).isOpaque();
+}
+
 bool LookAndFeel_V2::areScrollbarButtonsVisible()
 {
     return true;

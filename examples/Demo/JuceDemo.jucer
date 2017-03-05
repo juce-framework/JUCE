@@ -168,7 +168,8 @@
                    androidCpp11="1" targetFolder="Builds/Android" androidSDKPath=""
                    androidNDKPath="" androidBluetoothNeeded="0" bigIcon="BvyE0d"
                    androidScreenOrientation="unspecified" androidMicNeeded="1" gradleToolchain="clang"
-                   gradleToolchainVersion="3.6" androidTheme="@android:style/Theme.NoTitleBar">
+                   gradleToolchainVersion="3.6" androidTheme="@android:style/Theme.NoTitleBar"
+                   microphonePermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
                        targetName="JuceDemo"/>

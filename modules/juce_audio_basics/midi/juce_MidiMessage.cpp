@@ -225,7 +225,7 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
             *dest = (uint8) byte;
             memcpy (dest + 1, src, (size_t) (size - 1));
 
-            numBytesUsed += numVariableLengthSysexBytes;  // (these aren't counted in the size)
+            numBytesUsed += (numVariableLengthSysexBytes + size);  // (these aren't counted in the size)
         }
         else if (byte == 0xff)
         {
@@ -236,6 +236,8 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
             uint8* dest = allocateSpace (size);
             *dest = (uint8) byte;
             memcpy (dest + 1, src, (size_t) size - 1);
+
+            numBytesUsed += size;
         }
         else
         {
@@ -244,14 +246,14 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
 
             if (size > 1)
             {
-                packedData.asBytes[1] = src[0];
+                packedData.asBytes[1] = (sz > 0 ? src[0] : 0);
 
                 if (size > 2)
-                    packedData.asBytes[2] = src[1];
+                    packedData.asBytes[2] = (sz > 1 ? src[1] : 0);
             }
-        }
 
-        numBytesUsed += size;
+            numBytesUsed += jmin (size, sz + 1);
+        }
     }
     else
     {

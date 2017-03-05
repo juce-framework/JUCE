@@ -105,6 +105,8 @@ public:
         */
         virtual void drawProgressBar (Graphics&, ProgressBar&, int width, int height,
                                       double progress, const String& textToShow) = 0;
+
+        virtual bool isProgressBarOpaque (ProgressBar&) = 0;
     };
 
 protected:
