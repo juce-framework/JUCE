@@ -138,6 +138,7 @@ public:
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
+            frontWindow = nullptr;
             android.activity.callVoidMethod (JuceAppActivity.deleteView, view.get());
         }
         else
@@ -365,7 +366,13 @@ public:
 
     void toFront (bool makeActive) override
     {
-        view.callVoidMethod (ComponentPeerView.bringToFront);
+        // Avoid calling bringToFront excessively: it's very slow
+        if (frontWindow != this)
+        {
+            view.callVoidMethod (ComponentPeerView.bringToFront);
+
+            frontWindow = this;
+        }
 
         if (makeActive)
             grabFocus();
@@ -571,6 +578,7 @@ private:
     bool usingAndroidGraphics, fullScreen;
     int sizeAllocated;
     float scale;
+    static AndroidComponentPeer* frontWindow;
 
     struct PreallocatedImage  : public ImagePixelData
     {
@@ -629,6 +637,7 @@ private:
 ModifierKeys AndroidComponentPeer::currentModifiers = 0;
 Point<float> AndroidComponentPeer::lastMousePos;
 int64 AndroidComponentPeer::touchesDown = 0;
+AndroidComponentPeer* AndroidComponentPeer::frontWindow = nullptr;
 
 //==============================================================================
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
