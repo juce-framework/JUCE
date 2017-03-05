@@ -1190,8 +1190,6 @@ public:
         const int numIns  = numInputBuses  > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
         const int numOuts = numOutputBuses > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
 
-        int configIndex = 0;
-
         for (int inIdx = 0; inIdx < jmax (numIns, 1); ++inIdx)
         {
             EPlugIn_StemFormat rtasInFormat = numIns > 0 ? (EPlugIn_StemFormat) inIdx : ePlugIn_StemFormat_Error;
@@ -1206,8 +1204,14 @@ public:
                 if (! CopyPasteFromAAX::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
                     continue;
 
+                const int32 pluginID =
+                    processor.getAAXPluginIDForMainBusConfig (
+                        fullLayout.getMainInputChannelSet(),
+                        fullLayout.getMainOutputChannelSet(),
+                        false);
+
                 CEffectType* const type
-                    = new CEffectTypeRTAS ('jcaa' + (configIndex++),
+                    = new CEffectTypeRTAS (pluginId,
                                            JucePlugin_RTASProductId,
                                            JucePlugin_RTASCategory);
 
