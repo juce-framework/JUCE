@@ -907,9 +907,34 @@ public:
         shutdownJuce_GUI();
     }
 
+    static AudioChannelSet rtasChannelSet (int numChannels)
+    {
+        if (numChannels == 0) return AudioChannelSet::disabled();
+        if (numChannels == 1) return AudioChannelSet::mono();
+        if (numChannels == 2) return AudioChannelSet::stereo();
+        if (numChannels == 3) return AudioChannelSet::createLCR();
+        if (numChannels == 4) return AudioChannelSet::quadraphonic();
+        if (numChannels == 5) return AudioChannelSet::create5point0();
+        if (numChannels == 6) return AudioChannelSet::create5point1();
+
+        #if PT_VERS_MAJOR >= 9
+        if (numChannels == 7) return AudioChannelSet::create7point0();
+        if (numChannels == 8) return AudioChannelSet::create7point1();
+        #else
+        if (numChannels == 7) return AudioChannelSet::create7point0SDDS();
+        if (numChannels == 8) return AudioChannelSet::create7point1SDDS();
+        #endif
+
+        jassertfalse;
+
+        return AudioChannelSet::discreteChannels (numChannels);
+    }
+
     //==============================================================================
     void CreateEffectTypes()
     {
+        ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
+
         const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
         const int numConfigs = numElementsInArray (channelConfigs);
 
@@ -921,8 +946,13 @@ public:
         {
             if (channelConfigs[i][0] <= 8 && channelConfigs[i][1] <= 8)
             {
+                const AudioChannelSet inputLayout  (rtasChannelSet (channelConfigs[i][0]));
+                const AudioChannelSet outputLayout (rtasChannelSet (channelConfigs[i][1]));
+
+                const int32 pluginId = plugin->getAAXPluginIDForMainBusConfig (inputLayout, outputLayout, false);
+
                 CEffectType* const type
-                    = new CEffectTypeRTAS ('jcaa' + i,
+                    = new CEffectTypeRTAS (pluginId,
                                            JucePlugin_RTASProductId,
                                            JucePlugin_RTASCategory);
 
