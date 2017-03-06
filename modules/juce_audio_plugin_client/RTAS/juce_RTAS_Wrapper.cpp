@@ -1155,28 +1155,27 @@ public:
         shutdownJuce_GUI();
     }
 
-    static AudioChannelSet channelSetFromStemFormat (EPlugIn_StemFormat format) noexcept
+    static AudioChannelSet rtasChannelSet (int numChannels)
     {
-        switch (format)
-        {
-            case ePlugIn_StemFormat_Mono:      return AudioChannelSet::mono();
-            case ePlugIn_StemFormat_Stereo:    return AudioChannelSet::stereo();
-            case ePlugIn_StemFormat_LCR:       return AudioChannelSet::createLCR();
-            case ePlugIn_StemFormat_LCRS:      return AudioChannelSet::createLCRS();
-            case ePlugIn_StemFormat_Quad:      return AudioChannelSet::quadraphonic();
-            case ePlugIn_StemFormat_5dot0:     return AudioChannelSet::create5point0();
-            case ePlugIn_StemFormat_5dot1:     return AudioChannelSet::create5point1();
-            case ePlugIn_StemFormat_6dot0:     return AudioChannelSet::create6point0();
-            case ePlugIn_StemFormat_6dot1:     return AudioChannelSet::create6point1();
-            case ePlugIn_StemFormat_7dot0SDDS: return AudioChannelSet::create7point0SDDS();
-            case ePlugIn_StemFormat_7dot0DTS:  return AudioChannelSet::create7point0();
-            case ePlugIn_StemFormat_7dot1SDDS: return AudioChannelSet::create7point1SDDS();
-            case ePlugIn_StemFormat_7dot1DTS:  return AudioChannelSet::create7point1();
-            default:
-                break;
-        }
+        if (numChannels == 0) return AudioChannelSet::disabled();
+        if (numChannels == 1) return AudioChannelSet::mono();
+        if (numChannels == 2) return AudioChannelSet::stereo();
+        if (numChannels == 3) return AudioChannelSet::createLCR();
+        if (numChannels == 4) return AudioChannelSet::quadraphonic();
+        if (numChannels == 5) return AudioChannelSet::create5point0();
+        if (numChannels == 6) return AudioChannelSet::create5point1();
 
-        return AudioChannelSet::disabled();
+        #if PT_VERS_MAJOR >= 9
+        if (numChannels == 7) return AudioChannelSet::create7point0();
+        if (numChannels == 8) return AudioChannelSet::create7point1();
+        #else
+        if (numChannels == 7) return AudioChannelSet::create7point0SDDS();
+        if (numChannels == 8) return AudioChannelSet::create7point1SDDS();
+        #endif
+
+        jassertfalse;
+
+        return AudioChannelSet::discreteChannels (numChannels);
     }
 
     //==============================================================================
@@ -1187,28 +1186,22 @@ public:
         const int numInputBuses = plugin->getBusCount (true);
         const int numOutputBuses = plugin->getBusCount (false);
 
-        const int numIns  = numInputBuses  > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
-        const int numOuts = numOutputBuses > 0 ? ePlugIn_StemFormat_NumberExplicitChoices : 0;
+        const int numIns  = numInputBuses  > 0 ? 9 : 0;
+        const int numOuts = numOutputBuses > 0 ? 9 : 0;
 
         for (int inIdx = 0; inIdx < jmax (numIns, 1); ++inIdx)
         {
-            EPlugIn_StemFormat rtasInFormat = numIns > 0 ? (EPlugIn_StemFormat) inIdx : ePlugIn_StemFormat_Error;
-            const AudioChannelSet inLayout = channelSetFromStemFormat (rtasInFormat);
+            const AudioChannelSet inputLayout (rtasChannelSet (inIdx));
 
             for (int outIdx = 0; outIdx < jmax (numOuts, 1); ++outIdx)
             {
-                EPlugIn_StemFormat rtasOutFormat = numOuts > 0 ? (EPlugIn_StemFormat) outIdx : ePlugIn_StemFormat_Error;
-                const AudioChannelSet outLayout = channelSetFromStemFormat (rtasOutFormat);
+                const AudioChannelSet outputLayout (rtasChannelSet (outIdx));
 
                 AudioProcessor::BusesLayout fullLayout;
-                if (! CopyPasteFromAAX::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
+                if (! CopyPasteFromAAX::fullBusesLayoutFromMainLayout (*plugin, inputLayout, outputLayout, fullLayout))
                     continue;
 
-                const int32 pluginId =
-                    plugin->getAAXPluginIDForMainBusConfig (
-                        fullLayout.getMainInputChannelSet(),
-                        fullLayout.getMainOutputChannelSet(),
-                        false);
+                const int32 pluginId = plugin->getAAXPluginIDForMainBusConfig (inputLayout, outputLayout, false);
 
                 CEffectType* const type
                     = new CEffectTypeRTAS (pluginId,
@@ -1218,8 +1211,8 @@ public:
                 type->DefineTypeNames (createRTASName().toRawUTF8());
                 type->DefineSampleRateSupport (eSupports48kAnd96kAnd192k);
 
-                type->DefineStemFormats (getFormatForChans (inLayout.size() > 0 ? inLayout.size() : outLayout.size()),
-                                         getFormatForChans (outLayout.size() > 0 ? outLayout.size() : inLayout.size()));
+                type->DefineStemFormats (getFormatForChans (inputLayout.size() > 0 ? inputLayout.size() : outputLayout.size()),
+                                         getFormatForChans (outputLayout.size() > 0 ? outputLayout.size() : inputLayout.size()));
 
                #if ! JucePlugin_RTASDisableBypass
                 type->AddGestalt (pluginGestalt_CanBypass);
