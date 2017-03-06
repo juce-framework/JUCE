@@ -276,7 +276,7 @@ extern AndroidSystem android;
  STATICMETHOD (createHTTPStream, "createHTTPStream",     "(Ljava/lang/String;Z[BLjava/lang/String;I[ILjava/lang/StringBuffer;ILjava/lang/String;)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream;") \
  METHOD (launchURL,              "launchURL",            "(Ljava/lang/String;)V") \
  METHOD (showMessageBox,         "showMessageBox",       "(Ljava/lang/String;Ljava/lang/String;J)V") \
- METHOD (showOkCancelBox,        "showOkCancelBox",      "(Ljava/lang/String;Ljava/lang/String;J)V") \
+ METHOD (showOkCancelBox,        "showOkCancelBox",      "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V") \
  METHOD (showYesNoCancelBox,     "showYesNoCancelBox",   "(Ljava/lang/String;Ljava/lang/String;J)V") \
  STATICMETHOD (getLocaleValue,   "getLocaleValue",       "(Z)Ljava/lang/String;") \
  STATICMETHOD (getDocumentsFolder, "getDocumentsFolder", "()Ljava/lang/String;") \

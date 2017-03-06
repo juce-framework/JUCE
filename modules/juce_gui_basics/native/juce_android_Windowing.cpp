@@ -737,7 +737,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
     android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(),
-                                     javaString (message).get(), (jlong) (pointer_sized_int) callback);
+                                     javaString (message).get(), (jlong) (pointer_sized_int) callback,
+                                     javaString (TRANS ("OK")).get(), javaString (TRANS ("Cancel")).get());
     return false;
 }
 
@@ -750,6 +751,19 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 
     android.activity.callVoidMethod (JuceAppActivity.showYesNoCancelBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
+    return 0;
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*iconType*/,
+                                                   const String& title, const String& message,
+                                                   Component* /*associatedComponent*/,
+                                                   ModalComponentManager::Callback* callback)
+{
+    jassert (callback != nullptr); // on android, all alerts must be non-modal!!
+
+    android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(),
+                                     javaString (message).get(), (jlong) (pointer_sized_int) callback,
+                                     javaString (TRANS ("Yes")).get(), javaString (TRANS ("No")).get());
     return 0;
 }
 

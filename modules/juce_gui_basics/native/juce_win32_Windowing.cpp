@@ -3464,7 +3464,7 @@ public:
     int getResult() const
     {
         const int r = MessageBox (owner, message.toWideCharPointer(), title.toWideCharPointer(), flags);
-        return (r == IDYES || r == IDOK) ? 1 : (r == IDNO ? 2 : 0);
+        return (r == IDYES || r == IDOK) ? 1 : (r == IDNO && (flags & 1) != 0 ? 2 : 0);
     }
 
     void handleAsyncUpdate() override
@@ -3543,6 +3543,20 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 {
     ScopedPointer<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
                                                                 MB_YESNOCANCEL, callback, callback != nullptr));
+    if (callback == nullptr)
+        return mb->getResult();
+
+    mb.release();
+    return 0;
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType iconType,
+                                                  const String& title, const String& message,
+                                                  Component* associatedComponent,
+                                                  ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
+                                                                MB_YESNO, callback, callback != nullptr));
     if (callback == nullptr)
         return mb->getResult();
 

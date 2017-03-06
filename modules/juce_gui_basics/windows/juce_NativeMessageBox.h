@@ -155,6 +155,48 @@ public:
                                                  ModalComponentManager::Callback* callback);
                                                #endif
 
+    /** Shows a dialog box with three buttons.
+
+        Ideal for yes/no boxes.
+
+        The escape key can be used to trigger the no button.
+
+        If the callback parameter is null, the box is shown modally, and the method will
+        block until the user has clicked the button (or pressed the escape or return keys).
+        If the callback parameter is non-null, the box will be displayed and placed into a
+        modal state, but this method will return immediately, and the callback will be invoked
+        later when the user dismisses the box.
+
+        @param iconType     the type of icon to show
+        @param title        the headline to show at the top of the box
+        @param message      a longer, more descriptive message to show underneath the title
+        @param associatedComponent   if this is non-null, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
+        @param callback     if this is non-null, the box will be launched asynchronously,
+                            returning immediately, and the callback will receive a call to its
+                            modalStateFinished() when the box is dismissed, with its parameter
+                            being 1 if the "yes" button was pressed or 0 for the "no" button was
+                            pressed. The callback object will be owned and deleted by the
+                            system, so make sure that it works safely and doesn't keep any references
+                            to objects that might be deleted before it gets called.
+
+        @returns If the callback parameter has been set, this returns 0. Otherwise, it returns one
+                 of the following values:
+                 - 0 if 'no' was pressed
+                 - 1 if 'yes' was pressed
+    */
+    static int JUCE_CALLTYPE showYesNoBox (AlertWindow::AlertIconType iconType,
+                                           const String& title,
+                                           const String& message,
+                                          #if JUCE_MODAL_LOOPS_PERMITTED
+                                           Component* associatedComponent = nullptr,
+                                           ModalComponentManager::Callback* callback = nullptr);
+                                          #else
+                                           Component* associatedComponent,
+                                           ModalComponentManager::Callback* callback);
+                                          #endif
+
 private:
     NativeMessageBox() JUCE_DELETED_FUNCTION;
     JUCE_DECLARE_NON_COPYABLE (NativeMessageBox)

@@ -360,6 +360,20 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
     return 0;
 }
 
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*iconType*/,
+                                                  const String& title, const String& message,
+                                                  Component* /*associatedComponent*/,
+                                                  ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"No", @"Yes", nil, callback, callback != nullptr));
+
+    if (callback == nullptr)
+        return mb->getResult();
+
+    mb.release();
+    return 0;
+}
+
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool)
 {

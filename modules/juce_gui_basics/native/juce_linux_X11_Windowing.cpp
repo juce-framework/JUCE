@@ -3958,6 +3958,15 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                             associatedComponent, callback);
 }
 
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType iconType,
+                                                  const String& title, const String& message,
+                                                  Component* associatedComponent,
+                                                  ModalComponentManager::Callback* callback)
+{
+    return AlertWindow::showOkCancelBox (iconType, title, message, TRANS ("Yes"), TRANS ("No"),
+                                         associatedComponent, callback);
+}
+
 //============================== X11 - MouseCursor =============================
 
 void* CustomMouseCursorInfo::create() const
