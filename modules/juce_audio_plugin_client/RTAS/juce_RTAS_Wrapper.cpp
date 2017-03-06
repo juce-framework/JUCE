@@ -1204,8 +1204,8 @@ public:
                 if (! CopyPasteFromAAX::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
                     continue;
 
-                const int32 pluginID =
-                    processor.getAAXPluginIDForMainBusConfig (
+                const int32 pluginId =
+                    plugin->getAAXPluginIDForMainBusConfig (
                         fullLayout.getMainInputChannelSet(),
                         fullLayout.getMainOutputChannelSet(),
                         false);
