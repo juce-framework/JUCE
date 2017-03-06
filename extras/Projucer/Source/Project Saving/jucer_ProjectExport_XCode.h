@@ -604,8 +604,6 @@ public:
                     xcodeBundleExtension = ".dpm";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
-
-                    addExtraRTASTargetSettings();
                     break;
 
                 case SharedCodeTarget:
@@ -1325,6 +1323,17 @@ public:
 
                 extraLibs.add   (aaxLibsFolder.getChildFile (libraryPath));
             }
+            else if (type == RTASPlugIn)
+            {
+                auto rtasFolder
+                    = RelativePath (owner.getRTASPathValue().toString(), RelativePath::projectFolder)
+                        .getChildFile ("MacBag").getChildFile ("Libs");
+
+                String libraryPath (config.isDebug() ? "Debug/libPluginLibrary" : "Release/libPluginLibrary");
+                libraryPath += (isUsingClangCppLibrary (config) ? "_libcpp.a" : ".a");
+
+                extraLibs.add (rtasFolder.getChildFile (libraryPath));
+            }
         }
 
         StringArray getTargetExtraHeaderSearchPaths() const
@@ -1373,23 +1382,6 @@ public:
             }
 
             return targetExtraSearchPaths;
-        }
-
-        void addExtraRTASTargetSettings()
-        {
-            RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
-
-            for (ProjectExporter::ConstConfigIterator confIter (owner); confIter.next();)
-            {
-                const String libName (
-                    confIter->config[Ids::cppLibType] == "libc++"
-                    ? "libPluginLibrary_libcpp.a"
-                    : "libPluginLibrary.a");
-                if (confIter->isDebug())
-                    xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/" + libName));
-                else
-                    xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/" + libName));
-            }
         }
 
         bool isUsingClangCppLibrary (const BuildConfiguration& config) const
