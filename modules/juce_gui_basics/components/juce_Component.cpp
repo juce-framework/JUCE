@@ -434,9 +434,9 @@ struct Component::ComponentHelpers
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
     {
         if (Component* p = comp.getParentComponent())
-            return comp.getLocalArea (p, p->getLocalBounds());
+            return p->getLocalBounds();
 
-        return convertFromParentSpace (comp, Desktop::getInstance().getDisplays().getMainDisplay().userArea);
+        return Desktop::getInstance().getDisplays().getMainDisplay().userArea;
     }
 
     static void releaseAllCachedImageResources (Component& c)
@@ -1250,10 +1250,8 @@ void Component::setBounds (const String& newBoundsExpression)
 void Component::setBoundsRelative (const float x, const float y,
                                    const float w, const float h)
 {
-    const Rectangle<int> parentArea (ComponentHelpers::getParentOrMainMonitorBounds (*this));
-
-    const int pw = parentArea.getWidth();
-    const int ph = parentArea.getHeight();
+    const int pw = getParentWidth();
+    const int ph = getParentHeight();
 
     setBounds (roundToInt (x * pw),
                roundToInt (y * ph),
@@ -1263,8 +1261,8 @@ void Component::setBoundsRelative (const float x, const float y,
 
 void Component::setCentrePosition (const int x, const int y)
 {
-    setTopLeftPosition (ComponentHelpers::convertFromParentSpace (*this, Point<int> (x, y))
-                        .translated (getWidth() / -2, getHeight() / -2));
+    setTopLeftPosition (x - getWidth() / 2,
+                        y - getHeight() / 2);
 }
 
 void Component::setCentreRelative (const float x, const float y)
