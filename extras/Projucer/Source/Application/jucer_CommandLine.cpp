@@ -359,7 +359,7 @@ namespace
     {
         const String content (file.loadFileAsString());
 
-        if (content.contains ("%%") && content.contains ("//["))
+        if (content.contains ("%""%") && content.contains ("//["))
             return; // ignore projucer GUI template files
 
         StringArray lines;
