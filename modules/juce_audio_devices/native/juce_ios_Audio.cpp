@@ -536,7 +536,7 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
+   #if JUCE_MODULE_AVAILABLE_juce_graphics
     Image getIcon (int size)
     {
         if (owner.interAppAudioConnected)
@@ -1047,7 +1047,7 @@ void iOSAudioIODevice::switchApplication()                          { return pim
 void iOSAudioIODevice::handleStatusChange (bool enabled, const char* reason)   { pimpl->handleStatusChange (enabled, reason); }
 void iOSAudioIODevice::handleRouteChange (const char* reason)                  { pimpl->handleRouteChange (reason); }
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+#if JUCE_MODULE_AVAILABLE_juce_graphics
 Image iOSAudioIODevice::getIcon (int size)                                     { return pimpl->getIcon (size); }
 #endif
 

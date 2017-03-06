@@ -73,7 +73,7 @@ public:
 
     //==============================================================================
     virtual bool isInterAppAudioConnected() const                              { return interAppAudioConnected; }
-   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
+   #if JUCE_MODULE_AVAILABLE_juce_graphics
     virtual Image getIcon (int size);
    #endif
     virtual void switchApplication();
