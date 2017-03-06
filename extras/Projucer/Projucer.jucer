@@ -473,8 +473,10 @@
             file="Source/Utility/jucer_StoredSettings.h"/>
       <FILE id="L2TiJS" name="jucer_SVGPathDataComponent.h" compile="0" resource="0"
             file="Source/Utility/jucer_SVGPathDataComponent.h"/>
-      <FILE id="UTS8o0" name="jucer_TranslationTool.h" compile="0" resource="0"
-            file="Source/Utility/jucer_TranslationTool.h"/>
+      <FILE id="UTS8o0" name="jucer_TranslationHelpers.h" compile="0" resource="0"
+            file="Source/Utility/jucer_TranslationHelpers.h"/>
+      <FILE id="TkZPlN" name="jucer_TranslationToolComponent.h" compile="0"
+            resource="0" file="Source/Utility/jucer_TranslationToolComponent.h"/>
       <FILE id="AwKJZp" name="jucer_UTF8Component.h" compile="0" resource="0"
             file="Source/Utility/jucer_UTF8Component.h"/>
       <FILE id="OWw7bL" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"

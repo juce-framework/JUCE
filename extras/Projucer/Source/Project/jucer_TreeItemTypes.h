@@ -25,7 +25,7 @@
 #pragma once
 
 #include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Utility/jucer_TranslationTool.h"
+#include "../Utility/jucer_TranslationToolComponent.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 #include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"

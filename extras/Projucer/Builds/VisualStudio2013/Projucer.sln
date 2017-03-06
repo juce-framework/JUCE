@@ -236,7 +236,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{5B44
 		..\..\Source\Utility\jucer_StoredSettings.cpp = ..\..\Source\Utility\jucer_StoredSettings.cpp
 		..\..\Source\Utility\jucer_StoredSettings.h = ..\..\Source\Utility\jucer_StoredSettings.h
 		..\..\Source\Utility\jucer_SVGPathDataComponent.h = ..\..\Source\Utility\jucer_SVGPathDataComponent.h
-		..\..\Source\Utility\jucer_TranslationTool.h = ..\..\Source\Utility\jucer_TranslationTool.h
+		..\..\Source\Utility\jucer_TranslationHelpers.h = ..\..\Source\Utility\jucer_TranslationHelpers.h
+		..\..\Source\Utility\jucer_TranslationToolComponent.h = ..\..\Source\Utility\jucer_TranslationToolComponent.h
 		..\..\Source\Utility\jucer_UTF8Component.h = ..\..\Source\Utility\jucer_UTF8Component.h
 		..\..\Source\Utility\jucer_ValueSourceHelpers.h = ..\..\Source\Utility\jucer_ValueSourceHelpers.h
 	EndProjectSection

@@ -117,8 +117,8 @@ public:
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
           androidKeyAliasPass (settings, Ids::androidKeyAliasPass, nullptr, "android"),
-          gradleVersion (settings, Ids::gradleVersion, nullptr, "2.14.1"),
-          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "2.2.3"),
+          gradleVersion (settings, Ids::gradleVersion, nullptr, "3.3"),
+          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "2.3.0"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "25.0.2"),
           AndroidExecutable (findAndroidExecutable())
@@ -134,7 +134,7 @@ public:
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
         props.add (new TextWithDefaultPropertyComponent<String> (gradleVersion, "gradle version", 32),
-                   "The version of gradle that is used to build this app (2.14.1 is fine for JUCE)");
+                   "The version of gradle that is used to build this app (3.3 is fine for JUCE)");
 
         props.add (new TextWithDefaultPropertyComponent<String> (androidPluginVersion, "android plug-in version", 32),
                    "The version of the android build plugin for gradle that is used to build this app");
