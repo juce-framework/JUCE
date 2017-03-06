@@ -257,7 +257,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE namedChannelSet (int numChannels);
 
     /** Return an array of channel sets which have a given number of channels */
-    static Array<AudioChannelSet> channelSetsWithNumberOfChannels (int numChannels);
+    static Array<AudioChannelSet> JUCE_CALLTYPE channelSetsWithNumberOfChannels (int numChannels);
 
     //==============================================================================
     /** Represents different audio channel types. */
@@ -308,7 +308,7 @@ public:
     static String JUCE_CALLTYPE getAbbreviatedChannelTypeName (ChannelType);
 
     /** Returns the channel type from an abbreviated name. */
-    static ChannelType getChannelTypeFromAbbreviation (const String& abbreviation);
+    static ChannelType JUCE_CALLTYPE getChannelTypeFromAbbreviation (const String& abbreviation);
 
     //==============================================================================
     enum
