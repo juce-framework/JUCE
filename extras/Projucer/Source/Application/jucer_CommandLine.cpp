@@ -25,6 +25,8 @@
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_Module.h"
+#include "../Utility/jucer_TranslationHelpers.h"
+
 #include "jucer_CommandLine.h"
 
 
@@ -600,6 +602,21 @@ namespace
         std::cout << out.toString() << std::endl;
     }
 
+    static void scanFoldersForTranslationFiles (const StringArray& args)
+    {
+        checkArgumentCount (args, 2);
+
+        StringArray translations;
+
+        for (auto it = args.begin() + 1; it != args.end(); ++it)
+        {
+            const File directoryToSearch (getDirectoryCheckingForExistence (*it));
+            TranslationHelpers::scanFolderForTranslations (translations, directoryToSearch);
+        }
+
+        std::cout << TranslationHelpers::mungeStrings (translations) << std::endl;
+    }
+
     //==============================================================================
     static void encodeBinary (const StringArray& args)
     {
@@ -713,6 +730,9 @@ namespace
                   << std::endl
                   << " " << appName << " --encode-binary source_binary_file target_cpp_file" << std::endl
                   << "    Converts a binary file to a C++ file containing its contents as a block of data. Provide a .h file as the target if you want a single output file, or a .cpp file if you want a pair of .h/.cpp files." << std::endl
+                  << std::endl
+                  << " " << appName << " --trans target_folders..." << std::endl
+                  << "    Scans each of the given folders (recursively) for any NEEDS_TRANS macros, and generates a translation file that can be used with Projucer's translation file builder" << std::endl
                   << std::endl;
     }
 }
@@ -745,6 +765,7 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args); return 0; }
         if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args); return 0; }
         if (matchArgument (command, "encode-binary"))            { encodeBinary (args); return 0; }
+        if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
     }
     catch (const CommandLineError& error)
     {
