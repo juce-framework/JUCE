@@ -155,7 +155,7 @@ public:
                                                  ModalComponentManager::Callback* callback);
                                                #endif
 
-    /** Shows a dialog box with three buttons.
+    /** Shows a dialog box with two buttons.
 
         Ideal for yes/no boxes.
 
