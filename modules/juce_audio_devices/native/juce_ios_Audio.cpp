@@ -647,8 +647,8 @@ public:
                                              kAudioUnitScope_Global, 0, &connected, &dataSize);
         jassert (err == noErr);
 
-        JUCE_IOS_AUDIO_LOG ("handleInterAppAudioConnectionChange: " << connected ? "connected"
-                                                                                 : "disconnected");
+        JUCE_IOS_AUDIO_LOG ("handleInterAppAudioConnectionChange: " << (connected ? "connected"
+                                                                                  : "disconnected"));
 
         if (connected != owner.interAppAudioConnected)
         {
@@ -967,13 +967,21 @@ private:
                              &dataSize);
         if (desc.mSampleRate != owner.getCurrentSampleRate())
         {
-            owner.updateSampleRateAndAudioInput();
-            const ScopedLock sl (callbackLock);
-            if (owner.callback != nullptr)
+            struct RouteChangeMessage : public CallbackMessage
             {
-                owner.callback->audioDeviceStopped();
-                owner.callback->audioDeviceAboutToStart (&owner);
-            }
+                RouteChangeMessage (iOSAudioIODevice& dev)
+                    : device (dev)
+                {}
+
+                void messageCallback() override
+                {
+                    device.handleRouteChange ("Stream format change");
+                }
+
+                iOSAudioIODevice& device;
+            };
+
+            (new RouteChangeMessage (owner))->post();
         }
     }
 
