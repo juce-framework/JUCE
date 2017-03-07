@@ -144,15 +144,15 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         var findFunctionCall (const CodeLocation& location, const var& targetObject, const Identifier& functionName) const
         {
-            if (DynamicObject* o = targetObject.getDynamicObject())
+            if (auto* o = targetObject.getDynamicObject())
             {
-                if (const var* prop = getPropertyPointer (o, functionName))
+                if (auto* prop = getPropertyPointer (o, functionName))
                     return *prop;
 
-                for (DynamicObject* p = o->getProperty (getPrototypeIdentifier()).getDynamicObject(); p != nullptr;
+                for (auto* p = o->getProperty (getPrototypeIdentifier()).getDynamicObject(); p != nullptr;
                      p = p->getProperty (getPrototypeIdentifier()).getDynamicObject())
                 {
-                    if (const var* prop = getPropertyPointer (p, functionName))
+                    if (auto* prop = getPropertyPointer (p, functionName))
                         return *prop;
                 }
 
@@ -162,23 +162,23 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             }
 
             if (targetObject.isString())
-                if (var* m = findRootClassProperty (StringClass::getClassName(), functionName))
+                if (auto* m = findRootClassProperty (StringClass::getClassName(), functionName))
                     return *m;
 
             if (targetObject.isArray())
-                if (var* m = findRootClassProperty (ArrayClass::getClassName(), functionName))
+                if (auto* m = findRootClassProperty (ArrayClass::getClassName(), functionName))
                     return *m;
 
-            if (var* m = findRootClassProperty (ObjectClass::getClassName(), functionName))
+            if (auto* m = findRootClassProperty (ObjectClass::getClassName(), functionName))
                 return *m;
 
             location.throwError ("Unknown function '" + functionName.toString() + "'");
-            return var();
+            return {};
         }
 
         var* findRootClassProperty (const Identifier& className, const Identifier& propName) const
         {
-            if (DynamicObject* cls = root->getProperty (className).getDynamicObject())
+            if (auto* cls = root->getProperty (className).getDynamicObject())
                 return getPropertyPointer (cls, propName);
 
             return nullptr;
@@ -186,7 +186,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         var findSymbolInParentScopes (const Identifier& name) const
         {
-            if (const var* v = getPropertyPointer (scope, name))
+            if (auto* v = getPropertyPointer (scope, name))
                 return *v;
 
             return parent != nullptr ? parent->findSymbolInParentScopes (name)
@@ -195,13 +195,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         bool findAndInvokeMethod (const Identifier& function, const var::NativeFunctionArgs& args, var& result) const
         {
-            DynamicObject* target = args.thisObject.getDynamicObject();
+            auto* target = args.thisObject.getDynamicObject();
 
             if (target == nullptr || target == scope)
             {
-                if (const var* m = getPropertyPointer (scope, function))
+                if (auto* m = getPropertyPointer (scope, function))
                 {
-                    if (FunctionObject* fo = dynamic_cast<FunctionObject*> (m->getObject()))
+                    if (auto fo = dynamic_cast<FunctionObject*> (m->getObject()))
                     {
                         result = fo->invoke (*this, args);
                         return true;
@@ -209,12 +209,31 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 }
             }
 
-            const NamedValueSet& props = scope->getProperties();
+            const auto& props = scope->getProperties();
 
             for (int i = 0; i < props.size(); ++i)
-                if (DynamicObject* o = props.getValueAt (i).getDynamicObject())
+                if (auto* o = props.getValueAt (i).getDynamicObject())
                     if (Scope (this, root, o).findAndInvokeMethod (function, args, result))
                         return true;
+
+            return false;
+        }
+
+        bool invokeMethod (const var& m, const var::NativeFunctionArgs& args, var& result) const
+        {
+            if (isFunction (m))
+            {
+                auto* target = args.thisObject.getDynamicObject();
+
+                if (target == nullptr || target == scope)
+                {
+                    if (auto fo = dynamic_cast<FunctionObject*> (m.getObject()))
+                    {
+                        result = fo->invoke (*this, args);
+                        return true;
+                    }
+                }
+            }
 
             return false;
         }
@@ -1372,7 +1391,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         template <typename OpType>
         Expression* parsePreIncDec()
         {
-            Expression* e = parseFactor(); // careful - bare pointer is deliberately alised
+            Expression* e = parseFactor(); // careful - bare pointer is deliberately aliased
             ExpPtr lhs (e), one (new LiteralValue (location, (int) 1));
             return new SelfAssignment (location, e, new OpType (location, lhs, one));
         }
@@ -1380,7 +1399,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         template <typename OpType>
         Expression* parsePostIncDec (ExpPtr& lhs)
         {
-            Expression* e = lhs.release(); // careful - bare pointer is deliberately alised
+            Expression* e = lhs.release(); // careful - bare pointer is deliberately aliased
             ExpPtr lhs2 (e), one (new LiteralValue (location, (int) 1));
             return new PostAssignment (location, e, new OpType (location, lhs2, one));
         }
@@ -1841,6 +1860,26 @@ var JavascriptEngine::callFunction (const Identifier& function, const var::Nativ
         prepareTimeout();
         if (result != nullptr) *result = Result::ok();
         RootObject::Scope (nullptr, root, root).findAndInvokeMethod (function, args, returnVal);
+    }
+    catch (String& error)
+    {
+        if (result != nullptr) *result = Result::fail (error);
+    }
+
+    return returnVal;
+}
+
+var JavascriptEngine::callFunctionObject (DynamicObject* objectScope, const var& functionObject,
+                                          const var::NativeFunctionArgs& args, Result* result)
+{
+    var returnVal (var::undefined());
+
+    try
+    {
+        prepareTimeout();
+        if (result != nullptr) *result = Result::ok();
+        RootObject::Scope rootScope (nullptr, root, root);
+        RootObject::Scope (&rootScope, root, objectScope).invokeMethod (functionObject, args, returnVal);
     }
     catch (String& error)
     {
