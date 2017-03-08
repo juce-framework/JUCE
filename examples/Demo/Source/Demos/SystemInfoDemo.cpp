@@ -123,6 +123,7 @@ static String getAllSystemInfo()
 
     systemInfo
       << "Number of CPUs:  " << SystemStats::getNumCpus() << newLine
+      << "Physical CPUs:   " << SystemStats::getNumPhysicalCpus() << newLine
       << "Memory size:     " << SystemStats::getMemorySizeInMegabytes() << " MB" << newLine
       << "CPU vendor:      " << SystemStats::getCpuVendor() << newLine
       << "CPU model:       " << SystemStats::getCpuModel() << newLine

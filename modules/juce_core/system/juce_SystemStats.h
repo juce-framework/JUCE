@@ -143,6 +143,13 @@ public:
     /** Returns the number of CPU cores. */
     static int getNumCpus() noexcept;
 
+    /** Returns the number of physical CPU cores. This ignores hyperthreading.
+        If it cannot find the correct number it is assumed to be equal to 
+        getNumCpus().
+        @see getNumCpus()
+     */
+    static int getNumPhysicalCpus() noexcept;
+
     /** Returns the approximate CPU speed.
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
                     what year you're reading this...)

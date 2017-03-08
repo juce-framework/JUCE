@@ -92,6 +92,13 @@ void CPUInformation::initialise() noexcept
    #endif
 
     numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
+
+    unsigned int numPhys;
+    size_t len = sizeof(numPhys);
+    if (sysctlbyname ("hw.physicalcpu", &numPhys, &len, nullptr, 0) >= 0)
+        numPhysicalCpus = numPhys;
+    else
+        numPhysicalCpus = numCpus;
 }
 
 //==============================================================================
