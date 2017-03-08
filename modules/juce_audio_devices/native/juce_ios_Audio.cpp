@@ -424,12 +424,14 @@ public:
         Boolean hostIsPlaying = NO;
         OSStatus err = callbackInfo.transportStateProc2 (callbackInfo.hostUserData,
                                                          &hostIsPlaying,
-                                                         NULL,
-                                                         NULL,
-                                                         NULL,
-                                                         NULL,
-                                                         NULL,
-                                                         NULL);
+                                                         nullptr,
+                                                         nullptr,
+                                                         nullptr,
+                                                         nullptr,
+                                                         nullptr,
+                                                         nullptr);
+
+        ignoreUnused (err);
         jassert (err == noErr);
 
         if (hostIsPlaying != shouldSartPlaying)
@@ -446,13 +448,14 @@ public:
 
         Boolean hostIsRecording = NO;
         OSStatus err = callbackInfo.transportStateProc2 (callbackInfo.hostUserData,
-                                                         NULL,
+                                                         nullptr,
                                                          &hostIsRecording,
-                                                         NULL,
-                                                         NULL,
-                                                         NULL,
-                                                         NULL,
-                                                         NULL);
+                                                         nullptr,
+                                                         nullptr,
+                                                         nullptr,
+                                                         nullptr,
+                                                         nullptr);
+        ignoreUnused (err);
         jassert (err == noErr);
 
         if (hostIsRecording != shouldStartRecording)
@@ -487,7 +490,7 @@ public:
         OSStatus err = callbackInfo.transportStateProc2 (callbackInfo.hostUserData,
                                                          &hostIsPlaying,
                                                          &hostIsRecording,
-                                                         NULL,
+                                                         nullptr,
                                                          &hostCurrentSampleInTimeLine,
                                                          &hostIsCycling,
                                                          &hostCycleStartBeat,
@@ -520,7 +523,7 @@ public:
         UInt32 hostTimeSigDenominator = 0;
         Float64 hostCurrentMeasureDownBeat = 0;
         err = callbackInfo.musicalTimeLocationProc (callbackInfo.hostUserData,
-                                                    NULL,
+                                                    nullptr,
                                                     &hostTimeSigNumerator,
                                                     &hostTimeSigDenominator,
                                                     &hostCurrentMeasureDownBeat);
@@ -925,6 +928,7 @@ private:
     {
         OSStatus err = AudioUnitSetProperty (audioUnit, kAudioOutputUnitProperty_RemoteControlToHost,
                                              kAudioUnitScope_Global, 0, &event, sizeof (event));
+        ignoreUnused (err);
         jassert (err == noErr);
     }
 
@@ -965,12 +969,12 @@ private:
                              0,
                              &desc,
                              &dataSize);
+
         if (desc.mSampleRate != owner.getCurrentSampleRate())
         {
             struct RouteChangeMessage : public CallbackMessage
             {
-                RouteChangeMessage (iOSAudioIODevice& dev)
-                    : device (dev)
+                RouteChangeMessage (iOSAudioIODevice& dev) : device (dev)
                 {}
 
                 void messageCallback() override
