@@ -648,6 +648,7 @@ public:
         UInt32 dataSize = sizeof (connected);
         OSStatus err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_IsInterAppConnected,
                                              kAudioUnitScope_Global, 0, &connected, &dataSize);
+        ignoreUnused (err);
         jassert (err == noErr);
 
         JUCE_IOS_AUDIO_LOG ("handleInterAppAudioConnectionChange: " << (connected ? "connected"
@@ -921,6 +922,7 @@ private:
                                              0,
                                              &callbackInfo,
                                              &dataSize);
+        ignoreUnused (err);
         jassert (err == noErr);
     }
 
