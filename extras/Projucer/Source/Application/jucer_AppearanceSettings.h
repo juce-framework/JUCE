@@ -44,6 +44,9 @@ public:
     Font getCodeFont() const;
     Value getCodeFontValue();
 
+    float getLineSpacing() const;
+    Value getLineSpacingValue();
+
     ValueTree settings;
 
     static File getSchemesFolder();
@@ -52,6 +55,7 @@ public:
     void selectPresetScheme (int index);
 
     static Font getDefaultCodeFont();
+    static float getDefaultLineSpacing();
 
     static void showGlobalPreferences (ScopedPointer<Component>& ownerPointer);
 
