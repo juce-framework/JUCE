@@ -268,7 +268,7 @@ Value AppearanceSettings::getCodeFontValue()
 
 float AppearanceSettings::getLineSpacing() const
 {
-    const String lineSpacingString(settings[Ids::lineSpacing].toString());
+    const String lineSpacingString (settings[Ids::lineSpacing].toString());
 
     if (lineSpacingString.isEmpty())
         return getDefaultLineSpacing();

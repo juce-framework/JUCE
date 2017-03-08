@@ -196,7 +196,7 @@ struct AppearanceEditor
             props.add (FontSizeValueSource::createProperty ("Font Size", fontValue));
             
             Value lineSpacingValue (scheme.getLineSpacingValue());
-            props.add (LineSpacingValueSource::createProperty("Line Spacing", lineSpacingValue));
+            props.add (LineSpacingValueSource::createProperty ("Line Spacing", lineSpacingValue));
 
             const StringArray colourNames (scheme.getColourNames());
 
