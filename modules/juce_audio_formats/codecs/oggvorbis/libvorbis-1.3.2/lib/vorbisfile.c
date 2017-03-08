@@ -1926,7 +1926,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
            #ifdef ANDROID
             float f = pcm[i][j];
             f = (f <= 1.0f ? (f >= -1.0f ? f : -1.0f) : 1.0f);
-            val = vorbis_ftoi(f * 128.f);
+            val = vorbis_ftoi(f * 127.f);
            #else
             val=vorbis_ftoi(pcm[i][j]*128.f);
             if(val>127)val=127;
