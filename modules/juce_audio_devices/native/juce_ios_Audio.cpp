@@ -33,14 +33,18 @@ class iOSAudioIODevice;
 static const char* const iOSAudioDeviceName = "iOS Audio";
 
 //==============================================================================
-struct AudioSessionHolder
+struct AudioSessionHolder      : public AsyncUpdater
 {
     AudioSessionHolder();
     ~AudioSessionHolder();
 
-    void handleStatusChange (bool enabled, const char* reason) const;
-    void handleRouteChange (const char* reason) const;
+    void handleAsyncUpdate() override;
 
+    void handleStatusChange (bool enabled, const char* reason) const;
+    void handleRouteChange (const char* reason);
+
+    CriticalSection routeChangeLock;
+    String lastRouteChangeReason;
     Array<iOSAudioIODevice*> activeDevices;
 
     id nativeSession;
@@ -215,7 +219,8 @@ static void logNSError (NSError* e)
 #endif
 
 //==============================================================================
-class iOSAudioIODevice::Pimpl      : public AudioPlayHead
+class iOSAudioIODevice::Pimpl      : public AudioPlayHead,
+                                     private AsyncUpdater
 {
 public:
     Pimpl (iOSAudioIODevice& ioDevice)
@@ -960,6 +965,11 @@ private:
         }
     }
 
+    void handleAsyncUpdate() override
+    {
+        owner.handleRouteChange ("Stream format change");
+    }
+
     void handleStreamFormatChange()
     {
         AudioStreamBasicDescription desc;
@@ -973,22 +983,7 @@ private:
                              &dataSize);
 
         if (desc.mSampleRate != owner.getCurrentSampleRate())
-        {
-            struct RouteChangeMessage : public CallbackMessage
-            {
-                RouteChangeMessage (iOSAudioIODevice& dev) : device (dev)
-                {}
-
-                void messageCallback() override
-                {
-                    device.handleRouteChange ("Stream format change");
-                }
-
-                iOSAudioIODevice& device;
-            };
-
-            (new RouteChangeMessage (owner))->post();
-        }
+            triggerAsyncUpdate();
     }
 
     static void handleStreamFormatChangeCallback (void* device,
@@ -1117,32 +1112,24 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_iOSAudio()
 AudioSessionHolder::AudioSessionHolder()    { nativeSession = [[iOSAudioSessionNative alloc] init: this]; }
 AudioSessionHolder::~AudioSessionHolder()   { [nativeSession release]; }
 
+void AudioSessionHolder::handleAsyncUpdate()
+{
+    const ScopedLock sl (routeChangeLock);
+    for (auto device: activeDevices)
+        device->handleRouteChange (lastRouteChangeReason.toRawUTF8());
+}
+
 void AudioSessionHolder::handleStatusChange (bool enabled, const char* reason) const
 {
     for (auto device: activeDevices)
         device->handleStatusChange (enabled, reason);
 }
 
-void AudioSessionHolder::handleRouteChange (const char* reason) const
+void AudioSessionHolder::handleRouteChange (const char* reason)
 {
-    struct RouteChangeMessage : public CallbackMessage
-    {
-        RouteChangeMessage (Array<iOSAudioIODevice*> devs, const char* r)
-          : devices (devs), changeReason (r)
-        {
-        }
-
-        void messageCallback() override
-        {
-            for (auto device: devices)
-                device->handleRouteChange (changeReason);
-        }
-
-        Array<iOSAudioIODevice*> devices;
-        const char* changeReason;
-    };
-
-    (new RouteChangeMessage (activeDevices, reason))->post();
+    const ScopedLock sl (routeChangeLock);
+    lastRouteChangeReason = reason;
+    triggerAsyncUpdate();
 }
 
 #undef JUCE_NSERROR_CHECK
