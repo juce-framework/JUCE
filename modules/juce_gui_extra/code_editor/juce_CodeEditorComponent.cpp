@@ -415,7 +415,7 @@ void CodeEditorComponent::setLineSpacing(float factor)
     else
         lineSpacing = 1.0f;
 
-    lineHeight = roundToInt(font.getHeight() * lineSpacing);
+    lineHeight = roundToInt (font.getHeight() * lineSpacing);
 }
 
 bool CodeEditorComponent::isTextInputActive() const

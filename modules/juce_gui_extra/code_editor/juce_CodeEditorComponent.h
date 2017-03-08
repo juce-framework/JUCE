@@ -72,10 +72,10 @@ public:
     int getLineHeight() const noexcept                          { return lineHeight; }
 
     /** Returns the line spacing factor */
-    float getLineSpacing() const noexcept                          { return lineSpacing; }
+    float getLineSpacing() const noexcept                       { return lineSpacing; }
 
     /** Set the line spacing factor. Valid values between 0.2f and 3.0f */
-    void setLineSpacing(float factor);
+    void setLineSpacing (float factor);
 
     /** Returns the number of whole lines visible on the screen,
         This doesn't include a cut-off line that might be visible at the bottom if the

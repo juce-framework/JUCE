@@ -234,7 +234,7 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 
     editor.setColourScheme (cs);
     editor.setFont (getCodeFont());
-    editor.setLineSpacing(getLineSpacing());
+    editor.setLineSpacing (getLineSpacing());
 
     for (int i = 0; i < AppearanceColours::numColours; ++i)
     {
@@ -278,7 +278,7 @@ float AppearanceSettings::getLineSpacing() const
 
 Value AppearanceSettings::getLineSpacingValue()
 {
-    return settings.getPropertyAsValue(Ids::lineSpacing, nullptr);
+    return settings.getPropertyAsValue (Ids::lineSpacing, nullptr);
 }
 
 Value AppearanceSettings::getColourValue (const String& colourName)
