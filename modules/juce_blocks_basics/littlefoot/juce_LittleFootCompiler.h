@@ -39,9 +39,10 @@ using namespace juce;
 */
 struct Compiler
 {
-    Compiler() {}
+    Compiler() = default;
 
-    /**
+    /** Gives the compiler a zero-terminated list of native function prototypes to
+        use when parsing function calls.
     */
     void addNativeFunctions (const char* const* functionPrototypes)
     {
@@ -49,7 +50,8 @@ struct Compiler
             nativeFunctions.add (NativeFunction (*functionPrototypes, nullptr));
     }
 
-    /**
+    /** Tells the compiler to use the list of native function prototypes from
+        this littlefoot::Runner object.
     */
     template <typename RunnerType>
     void addNativeFunctions (const RunnerType& runner)
@@ -58,20 +60,22 @@ struct Compiler
             nativeFunctions.add (runner.getNativeFunction (i));
     }
 
-    /**
+    /** Compiles a littlefoot program.
+        If there's an error, this returns it, otherwise the compiled bytecode is
+        placed in the compiledObjectCode member.
     */
-    Result compile (const String& sourceCode, uint32 heapSizeBytesRequired)
+    Result compile (const String& sourceCode, uint32 defaultHeapSize)
     {
         try
         {
-            SyntaxTreeBuilder stb (sourceCode);
+            SyntaxTreeBuilder stb (sourceCode, nativeFunctions, defaultHeapSize);
             stb.compile();
             stb.simplify();
 
             compiledObjectCode.clear();
 
-            CodeGenerator codeGen (compiledObjectCode, nativeFunctions, stb.functions);
-            codeGen.generateCode (stb.blockBeingParsed, (heapSizeBytesRequired + 3) & ~3u);
+            CodeGenerator codeGen (compiledObjectCode, stb);
+            codeGen.generateCode (stb.blockBeingParsed, stb.heapSizeRequired);
             return Result::ok();
         }
         catch (String error)
@@ -80,7 +84,14 @@ struct Compiler
         }
     }
 
-    /**
+    /** After a successful compilation, this returns the finished Program. */
+    Program getCompiledProgram() const noexcept
+    {
+        return Program (compiledObjectCode.begin(), (uint32) compiledObjectCode.size());
+    }
+
+    /** After a successful call to compile(), this contains the bytecode generated.
+        A littlefoot::Program object can be created directly from this array.
     */
     Array<uint8> compiledObjectCode;
 
@@ -102,7 +113,7 @@ private:
         X(return_,  "return")   X(true_,   "true")    X(false_,  "false")
 
     #define LITTLEFOOT_OPERATORS(X) \
-        X(semicolon,     ";")        X(dot,          ".")       X(comma,        ",") \
+        X(semicolon,     ";")        X(dot,          ".")       X(comma,        ",")    X(hash,       "#") \
         X(openParen,     "(")        X(closeParen,   ")")       X(openBrace,    "{")    X(closeBrace, "}") \
         X(openBracket,   "[")        X(closeBracket, "]")       X(colon,        ":")    X(question,   "?") \
         X(equals,        "==")       X(assign,       "=")       X(notEquals,    "!=")   X(logicalNot, "!") \
@@ -354,7 +365,8 @@ private:
     //==============================================================================
     struct SyntaxTreeBuilder  : private TokenIterator
     {
-        SyntaxTreeBuilder (const String& code)  : TokenIterator (code) {}
+        SyntaxTreeBuilder (const String& code, const Array<NativeFunction>& nativeFns, uint32 defaultHeapSize)
+            : TokenIterator (code), nativeFunctions (nativeFns), heapSizeRequired (defaultHeapSize) {}
 
         void compile()
         {
@@ -362,6 +374,12 @@ private:
 
             while (currentType != Token::eof)
             {
+                if (matchIf (Token::hash))
+                {
+                    parseCompilerDirective();
+                    continue;
+                }
+
                 if (! matchesAnyTypeOrVoid())
                     throwErrorExpecting ("a global variable or function");
 
@@ -377,7 +395,7 @@ private:
                 if (type == Type::void_)
                     location.throwError ("A variable type cannot be 'void'");
 
-                int arraySize = matchIf (Token::openBracket) ? parseArraySize() : 0;
+                int arraySize = matchIf (Token::openBracket) ? parseIntegerLiteral() : 0;
 
                 if (arraySize > 0)
                     location.throwError ("Arrays not yet implemented!");
@@ -399,9 +417,29 @@ private:
                 f->block->simplify (*this);
         }
 
+        Function* findFunction (FunctionID functionID) const noexcept
+        {
+            for (auto f : functions)
+                if (f->functionID == functionID)
+                    return f;
+
+            return nullptr;
+        }
+
+        NativeFunction* findNativeFunction (FunctionID functionID) const noexcept
+        {
+            for (auto& f : nativeFunctions)
+                if (f.functionID == functionID)
+                    return &f;
+
+            return nullptr;
+        }
+
         //==============================================================================
         BlockPtr blockBeingParsed = nullptr;
         Array<Function*> functions;
+        const Array<NativeFunction>& nativeFunctions;
+        uint32 heapSizeRequired;
 
         template <typename Type, typename... Args>
         Type* allocate (Args... args)   { auto o = new Type (args...); allAllocatedObjects.add (o); return o; }
@@ -410,10 +448,23 @@ private:
         OwnedArray<AllocatedObject> allAllocatedObjects;
 
         //==============================================================================
+        void parseCompilerDirective()
+        {
+            auto name = parseIdentifier();
+
+            if (name == "heapsize")
+            {
+                match (Token::colon);
+                heapSizeRequired = (((uint32) parseIntegerLiteral()) + 3) & ~3u;
+                return;
+            }
+
+            location.throwError ("Unknown compiler directive");
+        }
+
         void parseFunctionDeclaration (Type returnType, const String& name)
         {
             auto f = allocate<Function>();
-            functions.add (f);
 
             while (matchesAnyType())
             {
@@ -431,6 +482,12 @@ private:
 
             match (Token::closeParen);
             f->functionID = createFunctionID (name, returnType, f->getArgumentTypes());
+
+            if (findFunction (f->functionID) != nullptr || findNativeFunction (f->functionID) != nullptr)
+                location.throwError ("Duplicate function declaration");
+
+            functions.add (f);
+
             f->block = parseBlock (true);
             f->returnType = returnType;
 
@@ -443,12 +500,11 @@ private:
             }
         }
 
-        int parseArraySize()
+        int parseIntegerLiteral()
         {
             auto e = parseExpression();
-            e->simplify (*this);
 
-            if (auto literal = dynamic_cast<LiteralValue*> (e))
+            if (auto literal = dynamic_cast<LiteralValue*> (e->simplify (*this)))
             {
                 if (literal->value.isInt() || literal->value.isInt64())
                 {
@@ -459,7 +515,7 @@ private:
                 }
             }
 
-            location.throwError ("An array size must be a constant integer");
+            location.throwError ("Expected an integer constant");
             return 0;
         }
 
@@ -618,8 +674,8 @@ private:
         {
             if (currentType == Token::identifier)  return parseSuffixes (allocate<Identifier> (location, blockBeingParsed, parseIdentifier()));
             if (matchIf (Token::openParen))        return parseSuffixes (matchCloseParen (parseExpression()));
-            if (matchIf (Token::true_))            return parseSuffixes (allocate<LiteralValue> (location, blockBeingParsed, (int) 1));
-            if (matchIf (Token::false_))           return parseSuffixes (allocate<LiteralValue> (location, blockBeingParsed, (int) 0));
+            if (matchIf (Token::true_))            return parseSuffixes (allocate<LiteralValue> (location, blockBeingParsed, true));
+            if (matchIf (Token::false_))           return parseSuffixes (allocate<LiteralValue> (location, blockBeingParsed, false));
 
             if (currentType == Token::literal)
             {
@@ -835,12 +891,12 @@ private:
     //==============================================================================
     struct CodeGenerator
     {
-        CodeGenerator (Array<uint8>& output, const Array<NativeFunction>& nativeFns, const Array<Function*>& fns)
-            : outputCode (output), nativeFunctions (nativeFns), functions (fns) {}
+        CodeGenerator (Array<uint8>& output, const SyntaxTreeBuilder& stb)
+            : outputCode (output), syntaxTree (stb) {}
 
         void generateCode (BlockPtr outerBlock, uint32 heapSizeBytesRequired)
         {
-            for (auto f : functions)
+            for (auto f : syntaxTree.functions)
             {
                 f->address = createMarker();
                 f->unwindAddress = createMarker();
@@ -848,16 +904,19 @@ private:
 
             emit ((int16) 0); // checksum
             emit ((int16) 0); // size
-            emit ((int16) functions.size());
+            emit ((int16) syntaxTree.functions.size());
             emit ((int16) outerBlock->variables.size());
             emit ((int16) heapSizeBytesRequired);
 
-            for (auto f : functions)
+            for (auto f : syntaxTree.functions)
                 emit (f->functionID, f->address);
 
-            for (auto f : functions)
+            auto codeStart = outputCode.size();
+
+            for (auto f : syntaxTree.functions)
                 f->emit (*this);
 
+            removeJumpsToNextInstruction (codeStart);
             resolveMarkers();
 
             Program::writeInt16 (outputCode.begin() + 2, (int16) outputCode.size());
@@ -868,39 +927,92 @@ private:
 
         //==============================================================================
         Array<uint8>& outputCode;
-        const Array<NativeFunction>& nativeFunctions;
-        const Array<Function*>& functions;
+        const SyntaxTreeBuilder& syntaxTree;
 
         struct Marker  { int index = 0; };
-        struct MarkerAndAddress  { int markerIndex, address; };
+        struct MarkerAndAddress  { Marker marker; int address; };
 
         int nextMarker = 0;
         Array<MarkerAndAddress> markersToResolve, resolvedMarkers;
 
         Marker createMarker() noexcept  { Marker m; m.index = ++nextMarker; return m; }
-        void attachMarker (Marker m)    { resolvedMarkers.add ({ m.index, outputCode.size() }); }
+        void attachMarker (Marker m)    { resolvedMarkers.add ({ m, outputCode.size() }); }
 
-        int getResolvedMarkerAddress (int markerIndex) const
+        int getResolvedMarkerAddress (Marker marker) const
         {
             for (auto m : resolvedMarkers)
-                if (m.markerIndex == markerIndex)
+                if (m.marker.index == marker.index)
                     return m.address;
 
             jassertfalse;
             return 0;
         }
 
+        Marker getMarkerAtAddress (int address) const noexcept
+        {
+            for (auto m : markersToResolve)
+                if (m.address == address)
+                    return m.marker;
+
+            jassertfalse;
+            return {};
+        }
+
         void resolveMarkers()
         {
             for (auto m : markersToResolve)
-                Program::writeInt16 (outputCode.begin() + m.address, (int16) getResolvedMarkerAddress (m.markerIndex));
+                Program::writeInt16 (outputCode.begin() + m.address, (int16) getResolvedMarkerAddress (m.marker));
+        }
+
+        void removeCode (int address, int size)
+        {
+            outputCode.removeRange (address, size);
+
+            for (int i = markersToResolve.size(); --i >= 0;)
+            {
+                auto& m = markersToResolve.getReference (i);
+
+                if (m.address >= address + size)
+                    m.address -= size;
+                else if (m.address >= address)
+                    markersToResolve.remove (i);
+            }
+
+            for (auto& m : resolvedMarkers)
+                if (m.address >= address + size)
+                    m.address -= size;
+        }
+
+        void removeJumpsToNextInstruction (int address)
+        {
+            while (address < outputCode.size())
+            {
+                auto op = (OpCode) outputCode.getUnchecked (address);
+                auto opSize = 1 + Program::getNumExtraBytesForOpcode (op);
+
+                if (op == OpCode::jump)
+                {
+                    auto marker = getMarkerAtAddress (address + 1);
+
+                    if (marker.index != 0)
+                    {
+                        if (getResolvedMarkerAddress (marker) == address + opSize)
+                        {
+                            removeCode (address, opSize);
+                            continue;
+                        }
+                    }
+                }
+
+                address += opSize;
+            }
         }
 
         Marker breakTarget, continueTarget;
 
         //==============================================================================
         void emit (OpCode op)           { emit ((int8) op); }
-        void emit (Marker m)            { markersToResolve.add ({ m.index, outputCode.size() }); emit ((int16) 0); }
+        void emit (Marker m)            { markersToResolve.add ({ m, outputCode.size() }); emit ((int16) 0); }
         void emit (int8 value)          { outputCode.add ((uint8) value); }
         void emit (int16 value)         { uint8 d[2]; Program::writeInt16 (d, value); outputCode.insertArray (-1, d, (int) sizeof (d)); }
         void emit (int32 value)         { uint8 d[4]; Program::writeInt32 (d, value); outputCode.insertArray (-1, d, (int) sizeof (d)); }
@@ -955,7 +1067,7 @@ private:
                 index += stackDepth;
 
                 if (index == 0)
-                    emit ((OpCode) ((int) OpCode::dup));
+                    emit (OpCode::dup);
                 else if (index < 8)
                     emit ((OpCode) ((int) OpCode::dupOffset_01 + index - 1));
                 else if (index >= 128)
@@ -965,25 +1077,6 @@ private:
             }
 
             emitCast (sourceType, requiredType, location);
-        }
-
-        //==============================================================================
-        Function* findFunction (FunctionID functionID) const noexcept
-        {
-            for (auto f : functions)
-                if (f->functionID == functionID)
-                    return f;
-
-            return nullptr;
-        }
-
-        NativeFunction* findNativeFunction (FunctionID functionID) const noexcept
-        {
-            for (auto& f : nativeFunctions)
-                if (f.functionID == functionID)
-                    return &f;
-
-            return nullptr;
         }
     };
 
@@ -1385,9 +1478,7 @@ private:
                 else if (fn->returnType != Type::void_)
                     location.throwError ("Cannot return a value from a void function");
 
-                if (parentBlock->statements.getLast() != this)
-                    cg.emit (OpCode::jump, fn->unwindAddress);
-
+                cg.emit (OpCode::jump, fn->unwindAddress);
                 return;
             }
 
@@ -1798,7 +1889,7 @@ private:
 
             auto functionID = getFunctionID (cg);
 
-            if (auto fn = cg.findFunction (functionID))
+            if (auto fn = cg.syntaxTree.findFunction (functionID))
             {
                 emitArgs (cg, fn->getArgumentTypes(), stackDepth);
                 cg.emit (OpCode::call, fn->address);
@@ -1806,7 +1897,7 @@ private:
                 return;
             }
 
-            if (auto nativeFn = cg.findNativeFunction (functionID))
+            if (auto nativeFn = cg.syntaxTree.findNativeFunction (functionID))
             {
                 emitArgs (cg, getArgTypesFromFunctionName (nativeFn->nameAndArguments), stackDepth);
                 cg.emit (OpCode::callNative, nativeFn->functionID);
@@ -1836,10 +1927,10 @@ private:
 
             auto functionID = getFunctionID (cg);
 
-            if (auto fn = cg.findFunction (functionID))
+            if (auto fn = cg.syntaxTree.findFunction (functionID))
                 return fn->returnType;
 
-            if (auto nativeFn = cg.findNativeFunction (functionID))
+            if (auto nativeFn = cg.syntaxTree.findNativeFunction (functionID))
                 return nativeFn->returnType;
 
             if (auto b = findBuiltInFunction (functionID))

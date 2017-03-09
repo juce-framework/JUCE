@@ -3,15 +3,15 @@
 /**
     A Program to draw moving waveshapes onto the LEDGrid
 */
-class WaveshapeProgram : public LEDGrid::Program
+class WaveshapeProgram : public Block::Program
 {
 public:
-    WaveshapeProgram (LEDGrid& lg) : Program (lg) {}
+    WaveshapeProgram (Block& b) : Program (b) {}
 
     /** Sets the waveshape type to display on the grid */
     void setWaveshapeType (uint8 type)
     {
-        ledGrid.setDataByte (0, type);
+        block.setDataByte (0, type);
     }
 
     /** Generates the Y coordinates for 1.5 cycles of each of the four waveshapes and stores them
@@ -74,21 +74,18 @@ public:
         // Store the values for each of the waveshapes at the correct offsets in the shared data heap
         for (uint8 i = 0; i < 45; ++i)
         {
-            ledGrid.setDataByte (sineWaveOffset     + i, sineWaveY[i]);
-            ledGrid.setDataByte (squareWaveOffset   + i, squareWaveY[i]);
-            ledGrid.setDataByte (sawWaveOffset      + i, sawWaveY[i]);
-            ledGrid.setDataByte (triangleWaveOffset + i, triangleWaveY[i]);
+            block.setDataByte (sineWaveOffset     + i, sineWaveY[i]);
+            block.setDataByte (squareWaveOffset   + i, squareWaveY[i]);
+            block.setDataByte (sawWaveOffset      + i, sawWaveY[i]);
+            block.setDataByte (triangleWaveOffset + i, triangleWaveY[i]);
         }
-    }
-
-    uint32 getHeapSize() override
-    {
-        return totalDataSize;
     }
 
     String getLittleFootProgram() override
     {
         return R"littlefoot(
+
+        #heapsize: 256
 
         int yOffset;
 
@@ -172,8 +169,6 @@ private:
     static constexpr uint32 squareWaveOffset   = 46;  // 1 byte * 45
     static constexpr uint32 sawWaveOffset      = 91;  // 1 byte * 45
     static constexpr uint32 triangleWaveOffset = 136; // 1 byte * 45
-
-    static constexpr uint32 totalDataSize = triangleWaveOffset + 45;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveshapeProgram)

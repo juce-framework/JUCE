@@ -134,6 +134,21 @@ struct PhysicalTopologySource::Internal
 
             if (midiInput != nullptr)
                 midiInput->stop();
+
+            if (interprocessLock != nullptr)
+                interprocessLock->exit();
+        }
+
+        bool lockAgainstOtherProcesses (const String& midiInName, const String& midiOutName)
+        {
+            interprocessLock.reset (new juce::InterProcessLock ("blocks_sdk_"
+                                                                  + File::createLegalFileName (midiInName)
+                                                                  + "_" + File::createLegalFileName (midiOutName)));
+            if (interprocessLock->enter (500))
+                return true;
+
+            interprocessLock = nullptr;
+            return false;
         }
 
         struct Listener
@@ -189,6 +204,7 @@ struct PhysicalTopologySource::Internal
 
     private:
         juce::ListenerList<Listener> listeners;
+        std::unique_ptr<juce::InterProcessLock> interprocessLock;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MIDIDeviceConnection)
     };
@@ -215,13 +231,16 @@ struct PhysicalTopologySource::Internal
             {
                 std::unique_ptr<MIDIDeviceConnection> dev (new MIDIDeviceConnection());
 
-                dev->midiInput.reset (juce::MidiInput::openDevice (pair.inputIndex, dev.get()));
-                dev->midiOutput.reset (juce::MidiOutput::openDevice (pair.outputIndex));
-
-                if (dev->midiInput != nullptr)
+                if (dev->lockAgainstOtherProcesses (pair.inputName, pair.outputName))
                 {
-                    dev->midiInput->start();
-                    return dev.release();
+                    dev->midiInput.reset (juce::MidiInput::openDevice (pair.inputIndex, dev.get()));
+                    dev->midiOutput.reset (juce::MidiOutput::openDevice (pair.outputIndex));
+
+                    if (dev->midiInput != nullptr)
+                    {
+                        dev->midiInput->start();
+                        return dev.release();
+                    }
                 }
             }
 
@@ -486,6 +505,12 @@ struct PhysicalTopologySource::Internal
                 detector.handleButtonChange (deviceID, deviceTimestampToHost (timestamp), buttonID.get(), isDown);
         }
 
+        void handleCustomMessage (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp, const int32* data)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleCustomMessage (deviceID, deviceTimestampToHost (timestamp), data);
+        }
+
         void handleTouchChange (BlocksProtocol::TopologyIndex deviceIndex,
                                 uint32 timestamp,
                                 BlocksProtocol::TouchIndex touchIndex,
@@ -530,6 +555,18 @@ struct PhysicalTopologySource::Internal
         {
             if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
                 detector.handleSharedDataACK (deviceID, counter);
+        }
+
+        void handleFirmwareUpdateACK (BlocksProtocol::TopologyIndex deviceIndex, BlocksProtocol::FirmwareUpdateACKCode resultCode)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleFirmwareUpdateACK (deviceID, (uint8) resultCode.get());
+        }
+
+        void handleLogMessage (BlocksProtocol::TopologyIndex deviceIndex, const String& message)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleLogMessage (deviceID, message);
         }
 
         //==============================================================================
@@ -827,6 +864,24 @@ struct PhysicalTopologySource::Internal
                         bi->handleSharedDataACK (packetCounter);
         }
 
+        void handleFirmwareUpdateACK (Block::UID deviceID, uint8 resultCode)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleFirmwareUpdateACK (resultCode);
+        }
+
+        void handleLogMessage (Block::UID deviceID, const String& message) const
+        {
+            JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleLogMessage (message);
+        }
+
         void handleButtonChange (Block::UID deviceID, Block::Timestamp timestamp, uint32 buttonIndex, bool isDown) const
         {
             JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
@@ -870,6 +925,14 @@ struct PhysicalTopologySource::Internal
         {
             for (auto surface : activeTouchSurfaces)
                 surface->cancelAllActiveTouches();
+        }
+
+        void handleCustomMessage (Block::UID deviceID, Block::Timestamp timestamp, const int32* data)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleCustomMessage (timestamp, data);
         }
 
         //==============================================================================
@@ -992,7 +1055,8 @@ struct PhysicalTopologySource::Internal
 
     //==============================================================================
     struct BlockImplementation  : public Block,
-                                  private MIDIDeviceConnection::Listener
+                                  private MIDIDeviceConnection::Listener,
+                                  private Timer
     {
         BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, bool master)
             : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial))), modelData (serial),
@@ -1108,6 +1172,16 @@ struct PhysicalTopologySource::Internal
             return sendMessageToDevice (p);
         }
 
+        void handleCustomMessage (Block::Timestamp, const int32* data)
+        {
+            ProgramEventMessage m;
+
+            for (uint32 i = 0; i < BlocksProtocol::numProgramMessageInts; ++i)
+                m.values[i] = data[i];
+
+            programEventListeners.call (&Block::ProgramEventListener::handleProgramEvent, *this, m);
+        }
+
         static BlockImplementation* getFrom (Block& b) noexcept
         {
             if (auto bi = dynamic_cast<BlockImplementation*> (&b))
@@ -1127,42 +1201,84 @@ struct PhysicalTopologySource::Internal
         }
 
         //==============================================================================
-        void clearProgramAndData()
+        std::function<void(const String&)> logger;
+
+        void setLogger (std::function<void(const String&)> newLogger) override
         {
-            programSize = 0;
-            remoteHeap.clear();
+            logger = newLogger;
         }
 
-        void setProgram (const void* compiledCode, size_t codeSize)
+        void handleLogMessage (const String& message) const
         {
-            clearProgramAndData();
-            setDataBytes (0, compiledCode, codeSize);
-            programSize = (uint32) codeSize;
+            if (logger != nullptr)
+                logger (message);
         }
 
-        void setDataByte (size_t offset, uint8 value)
+        //==============================================================================
+        juce::Result setProgram (Program* newProgram) override
         {
-            remoteHeap.setByte (programSize + offset, value);
+            if (newProgram == nullptr || program.get() != newProgram)
+            {
+                {
+                    std::unique_ptr<Program> p (newProgram);
+
+                    if (program != nullptr
+                         && newProgram != nullptr
+                         && program->getLittleFootProgram() == newProgram->getLittleFootProgram())
+                        return juce::Result::ok();
+
+                    stopTimer();
+                    std::swap (program, p);
+                }
+
+                stopTimer();
+                programSize = 0;
+
+                if (program != nullptr)
+                {
+                    littlefoot::Compiler compiler;
+                    compiler.addNativeFunctions (PhysicalTopologySource::getStandardLittleFootFunctions());
+
+                    auto err = compiler.compile (program->getLittleFootProgram(), 512);
+
+                    if (err.failed())
+                        return err;
+
+                    DBG ("Compiled littlefoot program, space needed: "
+                            << (int) compiler.getCompiledProgram().getTotalSpaceNeeded() << " bytes");
+
+                    if (compiler.getCompiledProgram().getTotalSpaceNeeded() > getMemorySize())
+                        return Result::fail ("Program too large!");
+
+                    size_t size = (size_t) compiler.compiledObjectCode.size();
+                    programSize = (uint32) size;
+
+                    remoteHeap.resetDataRangeToUnknown (0, remoteHeap.blockSize);
+                    remoteHeap.clear();
+                    remoteHeap.sendChanges (*this, true);
+
+                    remoteHeap.resetDataRangeToUnknown (0, (uint32) size);
+                    remoteHeap.setBytes (0, compiler.compiledObjectCode.begin(), size);
+                    remoteHeap.sendChanges (*this, true);
+                }
+                else
+                {
+                    remoteHeap.clear();
+                }
+            }
+            else
+            {
+                jassertfalse;
+            }
+
+            return juce::Result::ok();
         }
 
-        void setDataBytes (size_t offset, const void* newData, size_t num)
-        {
-            remoteHeap.setBytes (programSize + offset, static_cast<const uint8*> (newData), num);
-        }
+        Program* getProgram() const override                                        { return program.get(); }
 
-        void setDataBits (uint32 startBit, uint32 numBits, uint32 value)
+        void sendProgramEvent (const ProgramEventMessage& message) override
         {
-            remoteHeap.setBits (programSize * 8 + startBit, numBits, value);
-        }
-
-        uint8 getDataByte (size_t offset)
-        {
-            return remoteHeap.getByte (programSize + offset);
-        }
-
-        void sendProgramEvent (const LEDGrid::ProgramEventMessage& message)
-        {
-            static_assert (sizeof (LEDGrid::ProgramEventMessage::values) == 4 * BlocksProtocol::numProgramMessageInts,
+            static_assert (sizeof (ProgramEventMessage::values) == 4 * BlocksProtocol::numProgramMessageInts,
                            "Need to keep the internal and external messages structures the same");
 
             if (remoteHeap.isProgramLoaded())
@@ -1187,15 +1303,92 @@ struct PhysicalTopologySource::Internal
             }
         }
 
-        void saveProgramAsDefault()
+        void timerCallback() override
         {
-            sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
+            if (remoteHeap.isFullySynced() && remoteHeap.isProgramLoaded())
+            {
+                stopTimer();
+                sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
+            }
+            else
+            {
+                startTimer (100);
+            }
+        }
+
+        void saveProgramAsDefault() override
+        {
+            startTimer (10);
+        }
+
+        uint32 getMemorySize() override
+        {
+            return modelData.programAndHeapSize;
+        }
+
+        void setDataByte (size_t offset, uint8 value) override
+        {
+            remoteHeap.setByte (programSize + offset, value);
+        }
+
+        void setDataBytes (size_t offset, const void* newData, size_t num) override
+        {
+            remoteHeap.setBytes (programSize + offset, static_cast<const uint8*> (newData), num);
+        }
+
+        void setDataBits (uint32 startBit, uint32 numBits, uint32 value) override
+        {
+            remoteHeap.setBits (programSize * 8 + startBit, numBits, value);
+        }
+
+        uint8 getDataByte (size_t offset) override
+        {
+            return remoteHeap.getByte (programSize + offset);
         }
 
         void handleSharedDataACK (uint32 packetCounter) noexcept
         {
             pingFromDevice();
             remoteHeap.handleACKFromDevice (*this, packetCounter);
+        }
+
+        bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void (uint8)> callback) override
+        {
+            firmwarePacketAckCallback = {};
+
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<256> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+
+                if (p.addFirmwareUpdatePacket (data, size))
+                {
+                    p.writePacketSysexFooter();
+
+                    if (sendMessageToDevice (p))
+                    {
+                        firmwarePacketAckCallback = callback;
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                jassertfalse;
+            }
+
+            return false;
+        }
+
+        void handleFirmwareUpdateACK (uint8 resultCode)
+        {
+            if (firmwarePacketAckCallback != nullptr)
+            {
+                firmwarePacketAckCallback (resultCode);
+                firmwarePacketAckCallback = {};
+            }
         }
 
         void pingFromDevice()
@@ -1232,7 +1425,7 @@ struct PhysicalTopologySource::Internal
                 if (auto renderer = ledGrid->getRenderer())
                     renderer->renderLEDGrid (*ledGrid);
 
-            remoteHeap.sendChanges (*this);
+            remoteHeap.sendChanges (*this, false);
 
             if (lastMessageSendTime < juce::Time::getCurrentTime() - juce::RelativeTime::milliseconds (pingIntervalMs))
                 sendCommandMessage (BlocksProtocol::ping);
@@ -1260,12 +1453,15 @@ struct PhysicalTopologySource::Internal
         using RemoteHeapType = littlefoot::LittleFootRemoteHeap<BlockImplementation>;
         RemoteHeapType remoteHeap;
 
-        uint32 programSize = 0;
-
         Detector& detector;
         juce::Time lastMessageSendTime, lastMessageReceiveTime;
 
     private:
+        std::unique_ptr<Program> program;
+        uint32 programSize = 0;
+
+        std::function<void (uint8)> firmwarePacketAckCallback;
+
         uint32 resetMessagesSent = 0;
         bool isStillConnected = true;
         bool isMaster = false;
@@ -1316,114 +1512,137 @@ struct PhysicalTopologySource::Internal
     };
 
     //==============================================================================
-    struct LEDRowImplementation  : public LEDRow
+    struct LEDRowImplementation  : public LEDRow,
+                                   private Timer
     {
-        LEDRowImplementation (BlockImplementation& b) : LEDRow (b), blockImpl (b)
+        LEDRowImplementation (BlockImplementation& b) : LEDRow (b)
         {
-            loadProgramOntoBlock();
+            startTimer (300);
         }
 
-        /*  Data format:
-
-            0:  10 x 5-6-5 bits for button LED RGBs
-            20: 15 x 5-6-5 bits for LED row colours
-            50:  1 x 5-6-5 bits for LED row overlay colour
-        */
-        static constexpr uint32 totalDataSize = 256;
-
-        //==============================================================================
         void setButtonColour (uint32 index, LEDColour colour)
         {
             if (index < 10)
-                write565Colour (16 * index, colour);
+            {
+                colours[index] = colour;
+                flush();
+            }
         }
 
         int getNumLEDs() const override
         {
-            return blockImpl.modelData.numLEDRowLEDs;
+            return static_cast<const BlockImplementation&> (block).modelData.numLEDRowLEDs;
         }
 
         void setLEDColour (int index, LEDColour colour) override
         {
             if ((uint32) index < 15u)
-                write565Colour (20 * 8 + 16 * (uint32) index, colour);
+            {
+                colours[10 + index] = colour;
+                flush();
+            }
         }
 
         void setOverlayColour (LEDColour colour) override
         {
-            write565Colour (50 * 8, colour);
+            colours[25] = colour;
+            flush();
         }
 
         void resetOverlayColour() override
         {
-            write565Colour (50 * 8, {});
+            setOverlayColour ({});
         }
 
     private:
+        LEDColour colours[26];
+
+        void timerCallback() override
+        {
+            stopTimer();
+            loadProgramOntoBlock();
+            flush();
+        }
+
         void loadProgramOntoBlock()
         {
-            littlefoot::Compiler compiler;
-            compiler.addNativeFunctions (PhysicalTopologySource::getStandardLittleFootFunctions());
-
-            auto err = compiler.compile (getLittleFootProgram(), totalDataSize);
-
-            if (err.failed())
+            if (block.getProgram() == nullptr)
             {
-                DBG (err.getErrorMessage());
-                jassertfalse;
-                return;
-            }
+                auto err = block.setProgram (new DefaultLEDGridProgram (block));
 
-            blockImpl.setProgram (compiler.compiledObjectCode.begin(), (size_t) compiler.compiledObjectCode.size());
+                if (err.failed())
+                {
+                    DBG (err.getErrorMessage());
+                    jassertfalse;
+                }
+            }
+        }
+
+        void flush()
+        {
+            if (block.getProgram() != nullptr)
+                for (uint32 i = 0; i < (uint32) numElementsInArray (colours); ++i)
+                    write565Colour (16 * i, colours[i]);
         }
 
         void write565Colour (uint32 bitIndex, LEDColour colour)
         {
-            blockImpl.setDataBits (bitIndex,      5, colour.getRed()   >> 3);
-            blockImpl.setDataBits (bitIndex + 5,  6, colour.getGreen() >> 2);
-            blockImpl.setDataBits (bitIndex + 11, 5, colour.getBlue()  >> 3);
+            block.setDataBits (bitIndex,      5, colour.getRed()   >> 3);
+            block.setDataBits (bitIndex + 5,  6, colour.getGreen() >> 2);
+            block.setDataBits (bitIndex + 11, 5, colour.getBlue()  >> 3);
         }
 
-        static const char* getLittleFootProgram() noexcept
+        struct DefaultLEDGridProgram  : public Block::Program
         {
-            return R"littlefoot(
+            DefaultLEDGridProgram (Block& b) : Block::Program (b) {}
 
-            int getColour (int bitIndex)
+            juce::String getLittleFootProgram() override
             {
-                return makeARGB (255,
-                                 getHeapBits (bitIndex,      5) << 3,
-                                 getHeapBits (bitIndex + 5,  6) << 2,
-                                 getHeapBits (bitIndex + 11, 5) << 3);
+                /*  Data format:
+
+                    0:  10 x 5-6-5 bits for button LED RGBs
+                    20: 15 x 5-6-5 bits for LED row colours
+                    50:  1 x 5-6-5 bits for LED row overlay colour
+                */
+                return R"littlefoot(
+
+                #heapsize: 128
+
+                int getColour (int bitIndex)
+                {
+                    return makeARGB (255,
+                                     getHeapBits (bitIndex,      5) << 3,
+                                     getHeapBits (bitIndex + 5,  6) << 2,
+                                     getHeapBits (bitIndex + 11, 5) << 3);
+                }
+
+                int getButtonColour (int index)
+                {
+                    return getColour (16 * index);
+                }
+
+                int getLEDColour (int index)
+                {
+                    if (getHeapInt (50))
+                        return getColour (50 * 8);
+
+                    return getColour (20 * 8 + 16 * index);
+                }
+
+                void repaint()
+                {
+                    for (int x = 0; x < 15; ++x)
+                        fillPixel (getLEDColour (x), x, 0);
+
+                    for (int i = 0; i < 10; ++i)
+                        fillPixel (getButtonColour (i), i, 1);
+                }
+
+                void handleMessage (int p1, int p2) {}
+
+                )littlefoot";
             }
-
-            int getButtonColour (int index)
-            {
-                return getColour (16 * index);
-            }
-
-            int getLEDColour (int index)
-            {
-                if (getHeapInt (50))
-                    return getColour (50 * 8);
-
-                return getColour (20 * 8 + 16 * index);
-            }
-
-            void repaint()
-            {
-                for (int x = 0; x < 15; ++x)
-                    setLED (x, 0, getLEDColour (x));
-
-                for (int i = 0; i < 10; ++i)
-                    setLED (i, 1, getButtonColour (i));
-            }
-
-            void handleMessage (int p1, int p2) {}
-
-            )littlefoot";
-        }
-
-        BlockImplementation& blockImpl;
+        };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LEDRowImplementation)
     };
@@ -1638,50 +1857,7 @@ struct PhysicalTopologySource::Internal
         int getNumColumns() const override      { return blockImpl.modelData.lightGridWidth; }
         int getNumRows() const override         { return blockImpl.modelData.lightGridHeight; }
 
-        juce::Result setProgram (Program* newProgram) override
-        {
-            if (program.get() != newProgram)
-            {
-                program.reset (newProgram);
-
-                if (program != nullptr)
-                {
-                    littlefoot::Compiler compiler;
-                    compiler.addNativeFunctions (PhysicalTopologySource::getStandardLittleFootFunctions());
-
-                    auto err = compiler.compile (newProgram->getLittleFootProgram(), newProgram->getHeapSize());
-
-                    if (err.failed())
-                        return err;
-
-                    DBG ("Compiled littlefoot program, size = " << (int) compiler.compiledObjectCode.size() << " bytes");
-
-                    blockImpl.setProgram (compiler.compiledObjectCode.begin(), (size_t) compiler.compiledObjectCode.size());
-                }
-                else
-                {
-                    blockImpl.clearProgramAndData();
-                }
-            }
-            else
-            {
-                jassertfalse;
-            }
-
-            return juce::Result::ok();
-        }
-
-        Program* getProgram() const override                                        { return program.get(); }
-
-        void sendProgramEvent (const ProgramEventMessage& m) override               { blockImpl.sendProgramEvent (m); }
-        void saveProgramAsDefault() override                                        { blockImpl.saveProgramAsDefault(); }
-        void setDataByte (size_t offset, uint8 value) override                      { blockImpl.setDataByte (offset, value); }
-        void setDataBytes (size_t offset, const void* data, size_t num) override    { blockImpl.setDataBytes (offset, data, num); }
-        void setDataBits (uint32 startBit, uint32 numBits, uint32 value) override   { blockImpl.setDataBits (startBit, numBits, value); }
-        uint8 getDataByte (size_t offset) override                                  { return blockImpl.getDataByte (offset); }
-
         BlockImplementation& blockImpl;
-        std::unique_ptr<Program> program;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LEDGridImplementation)
     };

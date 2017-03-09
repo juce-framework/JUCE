@@ -78,7 +78,10 @@ struct HostPacketDecoder
             case MessageFromDevice::touchEndWithVelocity:     return handleTouchWithVelocity (handler, reader, deviceIndex, packetTimestamp, false, true);
             case MessageFromDevice::controlButtonDown:        return handleButtonDownOrUp (handler, reader, deviceIndex, packetTimestamp, true);
             case MessageFromDevice::controlButtonUp:          return handleButtonDownOrUp (handler, reader, deviceIndex, packetTimestamp, false);
+            case MessageFromDevice::programEventMessage:      return handleCustomMessage (handler, reader, deviceIndex, packetTimestamp);
             case MessageFromDevice::packetACK:                return handlePacketACK (handler, reader, deviceIndex);
+            case MessageFromDevice::firmwareUpdateACK:        return handleFirmwareUpdateACK (handler, reader, deviceIndex);
+            case MessageFromDevice::logMessage:               return handleLogMessage (handler, reader, deviceIndex);
 
             default:
                 jassertfalse; // got an invalid message type, could be a corrupt packet, or a
@@ -217,6 +220,24 @@ struct HostPacketDecoder
         return true;
     }
 
+    static bool handleCustomMessage (Handler& handler, Packed7BitArrayReader& reader,
+                                     TopologyIndex deviceIndex, PacketTimestamp packetTimestamp)
+    {
+        if (reader.getRemainingBits() < BitSizes::programEventMessage - MessageType::bits)
+        {
+            jassertfalse; // not enough data available for this message type!
+            return false;
+        }
+
+        int32 data[numProgramMessageInts] = {};
+
+        for (uint32 i = 0; i < numProgramMessageInts; ++i)
+            data[i] = (int32) reader.read<IntegerWithBitSize<32>>().get();
+
+        handler.handleCustomMessage (deviceIndex, packetTimestamp.get(), data);
+        return true;
+    }
+
     static bool handlePacketACK (Handler& handler, Packed7BitArrayReader& reader, TopologyIndex deviceIndex)
     {
         if (reader.getRemainingBits() < BitSizes::packetACK - MessageType::bits)
@@ -226,6 +247,32 @@ struct HostPacketDecoder
         }
 
         handler.handlePacketACK (deviceIndex, reader.read<PacketCounter>());
+        return true;
+    }
+
+    static bool handleFirmwareUpdateACK (Handler& handler, Packed7BitArrayReader& reader, TopologyIndex deviceIndex)
+    {
+        if (reader.getRemainingBits() < FirmwareUpdateACKCode::bits)
+        {
+            jassertfalse; // not enough data available for this message type!
+            return false;
+        }
+
+        handler.handleFirmwareUpdateACK (deviceIndex, reader.read<FirmwareUpdateACKCode>());
+        return true;
+    }
+
+    static bool handleLogMessage (Handler& handler, Packed7BitArrayReader& reader, TopologyIndex deviceIndex)
+    {
+        String message;
+
+        while (reader.getRemainingBits() >= 7)
+        {
+            uint32 c = reader.read<IntegerWithBitSize<7>>();
+            message << (char) c;
+        }
+
+        handler.handleLogMessage (deviceIndex, message);
         return true;
     }
 };

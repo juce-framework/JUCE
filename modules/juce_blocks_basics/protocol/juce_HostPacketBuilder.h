@@ -218,6 +218,20 @@ struct HostPacketBuilder
         return true;
     }
 
+    bool addFirmwareUpdatePacket (const uint8* packetData, uint8 size)
+    {
+        if (! data.hasCapacity (MessageType::bits + FirmwareUpdatePacketSize::bits + 7 * size))
+            return false;
+
+        writeMessageType (MessageFromHost::firmwareUpdatePacket);
+        data << FirmwareUpdatePacketSize (size);
+
+        for (uint8 i = 0; i < size; ++i)
+            data << IntegerWithBitSize<7> ((uint32) packetData[i]);
+
+        return true;
+    }
+
     //==============================================================================
 private:
     Packed7BitArrayBuilder<maxPacketBytes> data;
