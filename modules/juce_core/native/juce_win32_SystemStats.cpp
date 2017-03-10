@@ -104,6 +104,37 @@ String SystemStats::getCpuModel()
 }
 
 //==============================================================================
+namespace SystemStatsHelpers
+{
+    static int getNumberOfPhysicalCores()
+    {
+        int numPhysicalCpus = 0;
+        DWORD buffer_size = 0;
+        GetLogicalProcessorInformation(0, &buffer_size);
+        const int nb_buffers = buffer_size / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
+
+        SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = new SYSTEM_LOGICAL_PROCESSOR_INFORMATION[nb_buffers];
+        BOOL rc = GetLogicalProcessorInformation(buffer, &buffer_size);
+
+        if (rc != FALSE)
+        {
+            for (int i = 0; i < nb_buffers; i++)
+            {
+                if (buffer[i].Relationship == RelationProcessorCore)
+                    numPhysicalCpus++;
+            }
+        }
+        else
+        {
+            numPhysicalCpus = SystemStats::getNumCpus();
+        }
+
+        delete[] buffer;
+        return numPhysicalCpus;
+    }
+}
+
+//==============================================================================
 void CPUInformation::initialise() noexcept
 {
     int info[4] = { 0 };
@@ -127,6 +158,8 @@ void CPUInformation::initialise() noexcept
     SYSTEM_INFO systemInfo;
     GetNativeSystemInfo (&systemInfo);
     numCpus = (int) systemInfo.dwNumberOfProcessors;
+
+    numPhysicalCpus = SystemStatsHelpers::getNumberOfPhysicalCores();
 }
 
 #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
