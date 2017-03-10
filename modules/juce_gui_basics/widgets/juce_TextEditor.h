@@ -462,6 +462,16 @@ public:
     */
     void setScrollToShowCursor (bool shouldScrollToShowCaret);
 
+    /** Sets the line spacing of the TextEditor.
+
+        The default (and minimum) value is 1.0 and values > 1.0 will increase the line spacing as a
+        multiple of the line height e.g. for double-spacing call this method with an argument of 2.0.
+    */
+    void setLineSpacing (float newLineSpacing) noexcept             { lineSpacing = jmax (1.0f, newLineSpacing); }
+
+    /** Returns the current line spacing of the TextEditor. */
+    float getLineSpacing() const noexcept                           { return lineSpacing; }
+
     //==============================================================================
     void moveCaretToEnd();
     bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
@@ -669,32 +679,32 @@ private:
 
     ScopedPointer<Viewport> viewport;
     TextHolderComponent* textHolder;
-    BorderSize<int> borderSize;
+    BorderSize<int> borderSize { 1, 1, 1, 3 };
 
-    bool readOnly;
-    bool caretVisible;
-    bool multiline;
-    bool wordWrap;
-    bool returnKeyStartsNewLine;
-    bool popupMenuEnabled;
-    bool selectAllTextWhenFocused;
-    bool scrollbarVisible;
-    bool wasFocused;
-    bool keepCaretOnScreen;
-    bool tabKeyUsed;
-    bool menuActive;
-    bool valueTextNeedsUpdating;
-    bool consumeEscAndReturnKeys;
-    bool styleChanged;
+    bool readOnly = false;
+    bool caretVisible = true;
+    bool multiline = false;
+    bool wordWrap = false;
+    bool returnKeyStartsNewLine = false;
+    bool popupMenuEnabled = true;
+    bool selectAllTextWhenFocused = false;
+    bool scrollbarVisible = true;
+    bool wasFocused = false;
+    bool keepCaretOnScreen = true;
+    bool tabKeyUsed = false;
+    bool menuActive = false;
+    bool valueTextNeedsUpdating = false;
+    bool consumeEscAndReturnKeys = true;
+    bool styleChanged = false;
 
     UndoManager undoManager;
     ScopedPointer<CaretComponent> caret;
     Range<int> selection;
-    int leftIndent, topIndent;
-    unsigned int lastTransactionTime;
-    Font currentFont;
-    mutable int totalNumChars;
-    int caretPosition;
+    int leftIndent = 4, topIndent = 4;
+    unsigned int lastTransactionTime = 0;
+    Font currentFont { 14.0f };
+    mutable int totalNumChars = 0;
+    int caretPosition = 0;
     OwnedArray<UniformTextSection> sections;
     String textToShowWhenEmpty;
     Colour colourForTextWhenEmpty;
@@ -702,6 +712,7 @@ private:
     OptionalScopedPointer<InputFilter> inputFilter;
     Value textValue;
     VirtualKeyboardType keyboardType;
+    float lineSpacing = 1.0f;
 
     enum
     {

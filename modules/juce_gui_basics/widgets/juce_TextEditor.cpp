@@ -278,21 +278,11 @@ class TextEditor::Iterator
 {
 public:
     Iterator (const OwnedArray<UniformTextSection>& sectionList,
-              const float wrapWidth,
-              const juce_wchar passwordChar)
-      : indexInText (0),
-        lineY (0),
-        lineHeight (0),
-        maxDescent (0),
-        atomX (0),
-        atomRight (0),
-        atom (0),
-        currentSection (nullptr),
-        sections (sectionList),
-        sectionIndex (0),
-        atomIndex (0),
+              float wrapWidth, juce_wchar passwordChar, float spacing)
+      : sections (sectionList),
         wordWrapWidth (wrapWidth),
-        passwordCharacter (passwordChar)
+        passwordCharacter (passwordChar),
+        lineSpacing (spacing)
     {
         jassert (wordWrapWidth > 0);
 
@@ -319,6 +309,7 @@ public:
         atomIndex (other.atomIndex),
         wordWrapWidth (other.wordWrapWidth),
         passwordCharacter (other.passwordCharacter),
+        lineSpacing (other.lineSpacing),
         tempAtom (other.tempAtom)
     {
     }
@@ -337,7 +328,7 @@ public:
                 atomX = 0;
 
                 if (tempAtom.numChars > 0)
-                    lineY += lineHeight;
+                    lineY += lineHeight * lineSpacing;
 
                 indexInText += tempAtom.numChars;
 
@@ -472,7 +463,7 @@ public:
     void beginNewLine()
     {
         atomX = 0;
-        lineY += lineHeight;
+        lineY += lineHeight * lineSpacing;
 
         int tempSectionIndex = sectionIndex;
         int tempAtomIndex = atomIndex;
@@ -547,7 +538,7 @@ public:
         const float startX = indexToX (selected.getStart());
         const float endX   = indexToX (selected.getEnd());
 
-        area.add (startX, lineY, endX - startX, lineHeight);
+        area.add (startX, lineY, endX - startX, lineHeight * lineSpacing);
     }
 
     void drawUnderline (Graphics& g, const Range<int> underline, const Colour colour) const
@@ -664,20 +655,21 @@ public:
     }
 
     //==============================================================================
-    int indexInText;
-    float lineY, lineHeight, maxDescent;
-    float atomX, atomRight;
-    const TextAtom* atom;
-    const UniformTextSection* currentSection;
+    int indexInText = 0;
+    float lineY = 0, lineHeight = 0, maxDescent = 0;
+    float atomX = 0, atomRight = 0;
+    const TextAtom* atom = nullptr;
+    const UniformTextSection* currentSection = nullptr;
 
 private:
     const OwnedArray<UniformTextSection>& sections;
-    int sectionIndex, atomIndex;
+    int sectionIndex = 0, atomIndex = 0;
     const float wordWrapWidth;
     const juce_wchar passwordCharacter;
+    const float lineSpacing;
     TextAtom tempAtom;
 
-    Iterator& operator= (const Iterator&);
+    Iterator& operator= (const Iterator&) = delete;
 
     void moveToEndOfLastAtom()
     {
@@ -688,7 +680,7 @@ private:
             if (atom->isNewLine())
             {
                 atomX = 0.0f;
-                lineY += lineHeight;
+                lineY += lineHeight * lineSpacing;
             }
         }
     }
@@ -900,28 +892,6 @@ namespace TextEditorDefs
 TextEditor::TextEditor (const String& name,
                         const juce_wchar passwordChar)
     : Component (name),
-      borderSize (1, 1, 1, 3),
-      readOnly (false),
-      caretVisible (true),
-      multiline (false),
-      wordWrap (false),
-      returnKeyStartsNewLine (false),
-      popupMenuEnabled (true),
-      selectAllTextWhenFocused (false),
-      scrollbarVisible (true),
-      wasFocused (false),
-      keepCaretOnScreen (true),
-      tabKeyUsed (false),
-      menuActive (false),
-      valueTextNeedsUpdating (false),
-      consumeEscAndReturnKeys (true),
-      styleChanged (false),
-      leftIndent (4),
-      topIndent (4),
-      lastTransactionTime (0),
-      currentFont (14.0f),
-      totalNumChars (0),
-      caretPosition (0),
       passwordCharacter (passwordChar),
       keyboardType (TextInputTarget::textKeyboard),
       dragType (notDragging)
@@ -1292,7 +1262,7 @@ void TextEditor::repaintText (const Range<int> range)
 
         if (wordWrapWidth > 0)
         {
-            Iterator i (sections, wordWrapWidth, passwordCharacter);
+            Iterator i (sections, wordWrapWidth, passwordCharacter, lineSpacing);
 
             i.getCharPosition (range.getStart(), x, y, lh);
 
@@ -1407,7 +1377,7 @@ void TextEditor::updateTextHolderSize()
     {
         float maxWidth = 0.0f;
 
-        Iterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter, lineSpacing);
 
         while (i.next())
             maxWidth = jmax (maxWidth, i.atomRight);
@@ -1604,7 +1574,7 @@ void TextEditor::drawContent (Graphics& g)
         const Rectangle<int> clip (g.getClipBounds());
         Colour selectedTextColour;
 
-        Iterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter, lineSpacing);
 
         if (! selection.isEmpty())
         {
@@ -1648,7 +1618,7 @@ void TextEditor::drawContent (Graphics& g)
         {
             const Range<int> underlinedSection = underlinedSections.getReference (j);
 
-            Iterator i2 (sections, wordWrapWidth, passwordCharacter);
+            Iterator i2 (sections, wordWrapWidth, passwordCharacter, lineSpacing);
 
             while (i2.next() && i2.lineY < clip.getBottom())
             {
@@ -2429,7 +2399,7 @@ void TextEditor::getCharPosition (const int index, float& cx, float& cy, float& 
 
     if (wordWrapWidth > 0 && sections.size() > 0)
     {
-        Iterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter, lineSpacing);
 
         i.getCharPosition (index, cx, cy, lineHeight);
     }
@@ -2446,7 +2416,7 @@ int TextEditor::indexAtPosition (const float x, const float y)
 
     if (wordWrapWidth > 0)
     {
-        Iterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter, lineSpacing);
 
         while (i.next())
         {
