@@ -972,8 +972,8 @@ private:
     {
         // The number of buffers to enqueue needs to be at least two for the audio to use the low-latency
         // audio path (see "Performance" section in ndk/docs/Additional_library_docs/opensles/index.html)
-        buffersToEnqueueForLowLatency = 2,
-        buffersToEnqueueSlowAudio = 4,
+        buffersToEnqueueForLowLatency = 4,
+        buffersToEnqueueSlowAudio = 8,
         defaultBufferSizeIsMultipleOfNative = 1
     };
 
