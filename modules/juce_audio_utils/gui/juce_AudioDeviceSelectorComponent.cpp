@@ -569,7 +569,7 @@ private:
 
         if (currentDevice != nullptr && currentDevice->hasControlPanel())
         {
-            addAndMakeVisible (showUIButton = new TextButton (TRANS ("Control panel"),
+            addAndMakeVisible (showUIButton = new TextButton (TRANS ("Control Panel"),
                                                               TRANS ("Opens the device's own control panel")));
             showUIButton->addListener (this);
         }
@@ -585,7 +585,7 @@ private:
             {
                 if (resetDeviceButton == nullptr)
                 {
-                    addAndMakeVisible (resetDeviceButton = new TextButton (TRANS ("Reset device"),
+                    addAndMakeVisible (resetDeviceButton = new TextButton (TRANS ("Reset Device"),
                         TRANS ("Resets the audio interface - sometimes needed after changing a device's properties in its custom control panel")));
 
                     resetDeviceButton->addListener (this);
