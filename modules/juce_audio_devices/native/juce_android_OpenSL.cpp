@@ -724,6 +724,7 @@ public:
     //==============================================================================
     OpenSLAudioIODevice (const String& deviceName)
         : AudioIODevice (deviceName, openSLTypeName),
+          actualBufferSize (0), sampleRate (0),
           audioProcessingEnabled (true),
           callback (nullptr)
     {
