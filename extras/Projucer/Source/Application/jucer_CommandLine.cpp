@@ -617,6 +617,23 @@ namespace
         std::cout << TranslationHelpers::mungeStrings (translations) << std::endl;
     }
 
+    static void createFinishedTranslationFile (const StringArray& args)
+    {
+        checkArgumentCount (args, 3);
+
+        const String preTranslated  = getFileCheckingForExistence (args[1]).loadFileAsString();
+        const String postTranslated = getFileCheckingForExistence (args[2]).loadFileAsString();
+
+        const String           localisedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
+        const LocalisedStrings localised        = LocalisedStrings (localisedContent, false);
+
+
+        const auto out = TranslationHelpers::createFinishedTranslationFile (TranslationHelpers::breakApart (preTranslated),
+                                                                            TranslationHelpers::breakApart (postTranslated),
+                                                                            localised);
+        std::cout << out << std::endl;
+    }
+
     //==============================================================================
     static void encodeBinary (const StringArray& args)
     {
@@ -733,6 +750,9 @@ namespace
                   << std::endl
                   << " " << appName << " --trans target_folders..." << std::endl
                   << "    Scans each of the given folders (recursively) for any NEEDS_TRANS macros, and generates a translation file that can be used with Projucer's translation file builder" << std::endl
+                  << std::endl
+                  << " " << appName << " --trans-finish pre_translated_file post_translated_file optional_existing_translation_file" << std::endl
+                  << "    Creates a completed translations mapping file, that can be used to initialise a LocalisedStrings object. This allows you to localise the strings in your project" << std::endl
                   << std::endl;
     }
 }
@@ -766,6 +786,7 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args); return 0; }
         if (matchArgument (command, "encode-binary"))            { encodeBinary (args); return 0; }
         if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
+        if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args); return 0; }
     }
     catch (const CommandLineError& error)
     {
