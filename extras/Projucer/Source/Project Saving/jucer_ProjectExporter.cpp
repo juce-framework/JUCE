@@ -329,7 +329,10 @@ void ProjectExporter::addVST3FolderToPath()
     const String vst3Folder (getVST3PathValue().toString());
 
     if (vst3Folder.isNotEmpty())
-        addToExtraSearchPaths (RelativePath (vst3Folder, RelativePath::projectFolder), 0);
+    {
+        addToExtraSearchPaths (RelativePath (vst3Folder, RelativePath::projectFolder).getChildFile ("VST2_SDK"), 0);
+        addToExtraSearchPaths (RelativePath (vst3Folder, RelativePath::projectFolder).getChildFile ("VST3_SDK"), 0);
+    }
 }
 
 void ProjectExporter::addAAXFoldersToPath()

@@ -277,7 +277,7 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
 
     if (key == Ids::vst3Path)
     {
-        fileToCheckFor = "base/source/baseiids.cpp";
+        fileToCheckFor = "VST3_SDK/base/source/baseiids.cpp";
     }
     else if (key == Ids::rtasPath)
     {
