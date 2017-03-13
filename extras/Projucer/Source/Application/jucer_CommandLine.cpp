@@ -627,10 +627,11 @@ namespace
         const String           localisedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
         const LocalisedStrings localised        = LocalisedStrings (localisedContent, false);
 
+        using TH = TranslationHelpers;
+        const String out = TH::createFinishedTranslationFile (TH::trimEnd (TH::breakApart (preTranslated)),
+                                                              TH::trimEnd (TH::breakApart (postTranslated)),
+                                                              localised);
 
-        const auto out = TranslationHelpers::createFinishedTranslationFile (TranslationHelpers::breakApart (preTranslated),
-                                                                            TranslationHelpers::breakApart (postTranslated),
-                                                                            localised);
         std::cout << out << std::endl;
     }
 

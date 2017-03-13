@@ -227,6 +227,20 @@ struct TranslationHelpers
         return result;
     }
 
+    static StringArray trimEnd (const StringArray& array)
+    {
+        StringArray result;
+        result.ensureStorageAllocated (array.size());
+
+        for (int i = 0; i < array.size(); ++i)
+        {
+            result.add (array[i].trimEnd()
+                                .replace ("\n", String())
+                                .replace ("\r", String()));
+        }
+        return result;
+    }
+
     static String escapeString (const String& s)
     {
         return s.replace ("\"", "\\\"")
