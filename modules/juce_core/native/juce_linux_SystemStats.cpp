@@ -153,7 +153,13 @@ void CPUInformation::initialise() noexcept
     hasAVX   = flags.contains ("avx");
     hasAVX2  = flags.contains ("avx2");
 
-    numCpus = getCpuInfo ("processor").getIntValue() + 1;
+    numLogicalCPUs  = getCpuInfo ("processor").getIntValue() + 1;
+
+    // Assume CPUs in all sockets have the same number of cores
+    numPhysicalCPUs = getCpuInfo ("cpu cores").getIntValue() * (getCpuInfo ("physical id").getIntValue() + 1);
+
+    if (numPhysicalCpus <= 0)
+        numPhysicalCpus = numLogicalCPUs;
 }
 
 //==============================================================================

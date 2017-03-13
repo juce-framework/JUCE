@@ -140,8 +140,11 @@ public:
     //==============================================================================
     // CPU and memory information..
 
-    /** Returns the number of CPU cores. */
+    /** Returns the number of logical CPU cores. */
     static int getNumCpus() noexcept;
+
+    /** Returns the number of physical CPU cores. */
+    static int getNumPhysicalCpus() noexcept;
 
     /** Returns the approximate CPU speed.
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on

@@ -91,7 +91,16 @@ void CPUInformation::initialise() noexcept
     hasAVX2  = (b & (1u <<  5)) != 0;
    #endif
 
-    numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
+    numLogicalCPUs = (int) [[NSProcessInfo processInfo] activeProcessorCount];
+
+    unsigned int physicalcpu = 0;
+    size_t len = sizeof (physicalcpu);
+
+    if (sysctlbyname ("hw.physicalcpu", &physicalcpu, &len, nullptr, 0) >= 0)
+        numPhysicalCPUs = (int) physicalcpu;
+
+    if (numPhysicalCPUs <= 0)
+        numPhysicalCPUs = numLogicalCPUs;
 }
 
 //==============================================================================
