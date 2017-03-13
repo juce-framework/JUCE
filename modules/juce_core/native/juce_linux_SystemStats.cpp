@@ -158,8 +158,8 @@ void CPUInformation::initialise() noexcept
     // Assume CPUs in all sockets have the same number of cores
     numPhysicalCPUs = getCpuInfo ("cpu cores").getIntValue() * (getCpuInfo ("physical id").getIntValue() + 1);
 
-    if (numPhysicalCpus <= 0)
-        numPhysicalCpus = numLogicalCPUs;
+    if (numPhysicalCPUs <= 0)
+        numPhysicalCPUs = numLogicalCPUs;
 }
 
 //==============================================================================
