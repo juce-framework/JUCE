@@ -227,18 +227,12 @@ struct TranslationHelpers
         return result;
     }
 
-    static StringArray trimEnd (const StringArray& array)
+    static StringArray withTrimmedEnds (StringArray array)
     {
-        StringArray result;
-        result.ensureStorageAllocated (array.size());
+        for (auto& s : array)
+            s = s.trimEnd().removeCharacters ("\r\n");
 
-        for (int i = 0; i < array.size(); ++i)
-        {
-            result.add (array[i].trimEnd()
-                                .replace ("\n", String())
-                                .replace ("\r", String()));
-        }
-        return result;
+        return array;
     }
 
     static String escapeString (const String& s)

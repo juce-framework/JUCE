@@ -621,18 +621,16 @@ namespace
     {
         checkArgumentCount (args, 3);
 
-        const String preTranslated  = getFileCheckingForExistence (args[1]).loadFileAsString();
-        const String postTranslated = getFileCheckingForExistence (args[2]).loadFileAsString();
+        auto preTranslated  = getFileCheckingForExistence (args[1]).loadFileAsString();
+        auto postTranslated = getFileCheckingForExistence (args[2]).loadFileAsString();
 
-        const String           localisedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
-        const LocalisedStrings localised        = LocalisedStrings (localisedContent, false);
+        auto localisedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
+        auto localised        = LocalisedStrings (localisedContent, false);
 
         using TH = TranslationHelpers;
-        const String out = TH::createFinishedTranslationFile (TH::trimEnd (TH::breakApart (preTranslated)),
-                                                              TH::trimEnd (TH::breakApart (postTranslated)),
-                                                              localised);
-
-        std::cout << out << std::endl;
+        std::cout << TH::createFinishedTranslationFile (TH::withTrimmedEnds (TH::breakApart (preTranslated)),
+                                                        TH::withTrimmedEnds (TH::breakApart (postTranslated)),
+                                                        localised) << std::endl;
     }
 
     //==============================================================================
