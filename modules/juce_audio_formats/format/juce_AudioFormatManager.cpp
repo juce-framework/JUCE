@@ -73,6 +73,10 @@ void AudioFormatManager::registerBasicFormats()
    #if JUCE_USE_WINDOWS_MEDIA_FORMAT
     registerFormat (new WindowsMediaAudioFormat(), false);
    #endif
+
+   #if JUCE_USE_WAVPACK
+    registerFormat (new WavPackAudioFormat(), false);
+   #endif
 }
 
 void AudioFormatManager::clearFormats()
