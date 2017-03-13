@@ -39,7 +39,7 @@
     GUI controls like sliders.
 
     To use:
-    1) Create an AudioProcessorValueTreeState, and give it some parameters using createParameter().
+    1) Create an AudioProcessorValueTreeState, and give it some parameters using createAndAddParameter().
     2) Initialise the state member variable with a type name.
 */
 class JUCE_API  AudioProcessorValueTreeState  : private Timer,
@@ -125,7 +125,7 @@ public:
         This must be initialised after all calls to createAndAddParameter().
         You can replace this with your own ValueTree object, and can add properties and
         children to the tree. This class will automatically add children for each of the
-        parameter objects that are created by createParameter().
+        parameter objects that are created by createAndAddParameter().
     */
     ValueTree state;
 
