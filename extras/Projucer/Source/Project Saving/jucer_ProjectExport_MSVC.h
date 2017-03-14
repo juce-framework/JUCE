@@ -1814,3 +1814,42 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2015)
 };
+
+//==============================================================================
+class MSVCProjectExporterVC2017  : public MSVCProjectExporterVC2012
+{
+public:
+    MSVCProjectExporterVC2017 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterVC2012 (p, t, "VisualStudio2017")
+    {
+        name = getName();
+    }
+
+    static const char* getName()                { return "Visual Studio 2017"; }
+    static const char* getValueTreeTypeName()   { return "VS2017"; }
+    int getVisualStudioVersion() const override { return 15; }
+    String getSolutionComment() const override  { return "# Visual Studio 2017"; }
+    String getToolsVersion() const override     { return "15.0"; }
+    String getDefaultToolset() const override   { return "v141"; }
+
+    static MSVCProjectExporterVC2017* createForSettings (Project& project, const ValueTree& settings)
+    {
+        if (settings.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2017 (project, settings);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        MSVCProjectExporterBase::createExporterProperties (props);
+
+        static const char* toolsetNames[] = { "(default)", "v140", "v140_xp", "v141", "v141_xp" };
+        const var toolsets[]              = { var(),       "v140", "v140_xp", "v141", "v141_xp" };
+
+        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
+        addIPPLibraryProperty (props);
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
+};
