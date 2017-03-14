@@ -447,6 +447,22 @@ enum VstSpeakerConfigurationType
     vstSpeakerConfigTypeLRCLfeLsRsTflTfcTfrTrlTrrLfe2
 };
 
+//==============================================================================
+struct vst2FxBank
+{
+    int32 magic1;
+    int32 size;
+    int32 magic2;
+    int32 version1;
+    int32 fxID;
+    int32 version2;
+    int32 elements;
+    int32 current;
+    char shouldBeZero[124];
+    int32 chunkSize;
+    char chunk[1];
+};
+
 #if JUCE_MSVC
  #pragma pack(pop)
 #elif JUCE_MAC || JUCE_IOS

@@ -55,6 +55,10 @@
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
 
+#if JUCE_VST3_CAN_REPLACE_VST2
+#include "../../juce_audio_processors/format_types/juce_VSTInterface.h"
+#endif
+
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
  #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
 #endif
@@ -64,8 +68,6 @@
   #pragma warning (push)
   #pragma warning (disable: 4514 4996)
  #endif
-
- #include <pluginterfaces/vst2.x/vstfxstore.h>
 
  #if JUCE_MSVC
   #pragma warning (pop)
@@ -1265,19 +1267,19 @@ public:
     void loadVST2VstWBlock (const char* data, int size)
     {
         const int headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
-        const struct fxBank* bank = (const struct fxBank*) (data + (8 + headerLen));
-        const int version = static_cast<int> (htonl (bank->version)); ignoreUnused (version);
+        const vst2FxBank* bank = (const vst2FxBank*) (data + (8 + headerLen));
+        const int version = static_cast<int> (htonl (bank->version1)); ignoreUnused (version);
 
         jassert ('VstW' == htonl (*(juce::int32*) data));
         jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
-        jassert (cMagic == htonl (bank->chunkMagic));
-        jassert (chunkBankMagic == htonl (bank->fxMagic));
+        jassert ('CcnK' == htonl (bank->magic1));
+        jassert ('FBCh' == htonl (bank->magic2));
         jassert (version == 1 || version == 2);
         jassert (JucePlugin_VSTUniqueID == htonl (bank->fxID));
 
-        setStateInformation (bank->content.data.chunk,
-                             jmin ((int) (size - (bank->content.data.chunk - data)),
-                                   (int) htonl (bank->content.data.size)));
+        setStateInformation (bank->chunk,
+                             jmin ((int) (size - (bank->chunk - data)),
+                                   (int) htonl (bank->chunkSize)));
     }
 
     bool loadVST3PresetFile (const char* data, int size)
@@ -1450,16 +1452,16 @@ public:
             return status;
 
         const int bankBlockSize = 160;
-        struct fxBank bank;
+        vst2FxBank bank;
 
         zerostruct (bank);
-        bank.chunkMagic         = (VstInt32) htonl (cMagic);
-        bank.byteSize           = (VstInt32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
-        bank.fxMagic            = (VstInt32) htonl (chunkBankMagic);
-        bank.version            = (VstInt32) htonl (2);
-        bank.fxID               = (VstInt32) htonl (JucePlugin_VSTUniqueID);
-        bank.fxVersion          = (VstInt32) htonl (JucePlugin_VersionCode);
-        bank.content.data.size  = (VstInt32) htonl ((unsigned int) mem.getSize());
+        bank.magic1         = (int32) htonl ('CcnK');
+        bank.size           = (int32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
+        bank.magic1         = (int32) htonl ('FBCh');
+        bank.version1       = (int32) htonl (2);
+        bank.fxID           = (int32) htonl (JucePlugin_VSTUniqueID);
+        bank.version2       = (int32) htonl (JucePlugin_VersionCode);
+        bank.chunkSize      = (int32) htonl ((unsigned int) mem.getSize());
 
         status = state->write (&bank, bankBlockSize);
 
