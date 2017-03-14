@@ -33,7 +33,7 @@
 class WinRTWrapper :   public DeletedAtShutdown
 {
 public:
-    juce_DeclareSingleton (WinRTWrapper, true)
+    juce_DeclareSingleton_SingleThreaded (WinRTWrapper, true)
 
     class ScopedHString
     {

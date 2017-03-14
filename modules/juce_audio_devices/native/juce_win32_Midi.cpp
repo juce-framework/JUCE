@@ -63,23 +63,6 @@ struct MidiServiceType
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiServiceType)
 };
 
-class MidiService :   public DeletedAtShutdown
-{
-public:
-    ~MidiService();
-
-    MidiServiceType* getService();
-
-    juce_DeclareSingleton (MidiService, false)
-
-private:
-    MidiService();
-
-    ScopedPointer<MidiServiceType> internal;
-};
-
-juce_ImplementSingleton (MidiService)
-
 //==============================================================================
 class WindowsMidiService :   public MidiServiceType
 {
@@ -92,7 +75,7 @@ private:
             MidiInCollector (WindowsMidiService& s,
                              MidiInput* const inputDevice,
                              MidiInputCallback& cb)
-                : midiService (s),
+                : service (s),
                   input (inputDevice),
                   callback (cb)
             {
@@ -141,7 +124,7 @@ private:
             {
                 if (deviceHandle != 0 && ! isStarted)
                 {
-                    midiService.activeMidiCollectors.addIfNotAlreadyThere (this);
+                    service.activeMidiCollectors.addIfNotAlreadyThere (this);
 
                     for (int i = 0; i < (int) numHeaders; ++i)
                     {
@@ -171,7 +154,7 @@ private:
                     isStarted = false;
                     midiInReset (deviceHandle);
                     midiInStop (deviceHandle);
-                    midiService.activeMidiCollectors.removeFirstMatchingValue (this);
+                    service.activeMidiCollectors.removeFirstMatchingValue (this);
                     unprepareAllHeaders();
                     concatenator.reset();
                 }
@@ -182,7 +165,7 @@ private:
             {
                 MidiInCollector* const collector = reinterpret_cast<MidiInCollector*> (dwInstance);
 
-                if (collector->midiService.activeMidiCollectors.contains (collector))
+                if (collector->service.activeMidiCollectors.contains (collector))
                 {
                     if (uMsg == MIM_DATA)
                         collector->handleMessage ((const uint8*) &midiMessage, (uint32) timeStamp);
@@ -194,7 +177,7 @@ private:
             HMIDIIN deviceHandle = 0;
 
         private:
-            WindowsMidiService& midiService;
+            WindowsMidiService& service;
             MidiInput* input;
             MidiInputCallback& callback;
             MidiDataConcatenator concatenator { 4096 };
@@ -1128,41 +1111,46 @@ public:
 #endif   // JUCE_USE_WINRT_MIDI
 
 //==============================================================================
-MidiServiceType* MidiService::getService()
-{
-    return internal.get();
-}
 
-MidiService::MidiService()
+class MidiService
 {
-   #if JUCE_USE_WINRT_MIDI
-    try
+public:
+    MidiService()
     {
-        internal = new WinRTMidiService();
-        return;
+       #if JUCE_USE_WINRT_MIDI
+        try
+        {
+            internal = new WinRTMidiService();
+            return;
+        }
+        catch (std::runtime_error&)
+        {
+        }
+       #endif
+
+        internal = new WindowsMidiService();
     }
-    catch (std::runtime_error&)
+
+    MidiServiceType* get()
     {
+        return internal.get();
     }
-   #endif
 
-    internal = new WindowsMidiService();
-}
+private:
+    ScopedPointer<MidiServiceType> internal;
+};
 
-MidiService::~MidiService()
-{
-    clearSingletonInstance();
-}
+static MidiService midiService;
 
 //==============================================================================
 StringArray MidiInput::getDevices()
 {
-    return MidiService::getInstance()->getService()->getDevices (true);
+    return midiService.get()->getDevices (true);
 }
 
 int MidiInput::getDefaultDeviceIndex()
 {
-    return MidiService::getInstance()->getService()->getDefaultDeviceIndex (true);
+    return midiService.get()->getDefaultDeviceIndex (true);
 }
 
 MidiInput::MidiInput (const String& deviceName)
@@ -1179,7 +1167,7 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
     ScopedPointer<MidiServiceType::InputWrapper> wrapper;
     try
     {
-        wrapper = MidiService::getInstance()->getService()->createInputWrapper (in, index, callback);
+        wrapper = midiService.get()->createInputWrapper (in, index, callback);
     }
     catch (std::runtime_error&)
     {
@@ -1202,12 +1190,12 @@ void MidiInput::stop()    { static_cast<MidiServiceType::InputWrapper*> (interna
 //==============================================================================
 StringArray MidiOutput::getDevices()
 {
-    return MidiService::getInstance()->getService()->getDevices (false);
+    return midiService.get()->getDevices (false);
 }
 
 int MidiOutput::getDefaultDeviceIndex()
 {
-    return MidiService::getInstance()->getService()->getDefaultDeviceIndex (false);
+    return midiService.get()->getDefaultDeviceIndex (false);
 }
 
 MidiOutput* MidiOutput::openDevice (const int index)
@@ -1215,7 +1203,7 @@ MidiOutput* MidiOutput::openDevice (const int index)
     ScopedPointer<MidiServiceType::OutputWrapper> wrapper;
     try
     {
-        wrapper = MidiService::getInstance()->getService()->createOutputWrapper (index);
+        wrapper = midiService.get()->createOutputWrapper (index);
     }
     catch (std::runtime_error&)
     {
