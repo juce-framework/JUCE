@@ -1867,8 +1867,7 @@ bool String::containsNonWhitespaceChars() const noexcept
     return false;
 }
 
-// Note! The format parameter here MUST NOT be a reference, otherwise MS's va_start macro fails to work (but still compiles).
-String String::formatted (const String pf, ... )
+String String::formattedRaw (const char* pf, ...)
 {
     size_t bufferSize = 256;
 
@@ -1877,19 +1876,22 @@ String String::formatted (const String pf, ... )
         va_list args;
         va_start (args, pf);
 
-       #if JUCE_WINDOWS
-        HeapBlock<wchar_t> temp (bufferSize);
-        const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
-       #elif JUCE_ANDROID
+      #if JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
-        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
+        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf, args);
         if (num >= static_cast<int> (bufferSize))
             num = -1;
-       #else
+      #else
+        String wideCharVersion (pf);
         HeapBlock<wchar_t> temp (bufferSize);
-        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
+        const int num = (int)
+       #if JUCE_WINDOWS
+            _vsnwprintf
+       #else
+            vswprintf
        #endif
-
+                (temp.getData(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
+      #endif
         va_end (args);
 
         if (num > 0)

@@ -919,7 +919,8 @@ public:
         on the platform, it may be using wchar_t or char character types, so that even string
         literals can't be safely used as parameters if you're writing portable code.
     */
-    static String formatted (const String formatString, ... );
+    template <typename... Args>
+    static String formatted (const String& formatStr, Args... args)      { return formattedRaw (formatStr.toRawUTF8(), args...); }
 
     //==============================================================================
     // Numeric conversions..
@@ -1274,6 +1275,9 @@ private:
     // to bools (this is possible because the compiler can add an implicit cast
     // via a const char*)
     operator bool() const noexcept  { return false; }
+
+    //==============================================================================
+    static String formattedRaw (const char*, ...);
 };
 
 //==============================================================================
