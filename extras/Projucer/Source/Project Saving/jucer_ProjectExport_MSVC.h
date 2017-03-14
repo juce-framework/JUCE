@@ -677,7 +677,7 @@ protected:
         String filename = project.getProjectFilenameRoot();
 
         if (target.isNotEmpty())
-            filename += String (" - ") + target;
+            filename += String ("_") + target.removeCharacters (" ");
 
         return getTargetFolder().getChildFile (filename).withFileExtension (extension);
     }
