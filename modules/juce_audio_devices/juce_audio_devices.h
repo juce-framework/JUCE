@@ -62,7 +62,7 @@
 #include <juce_events/juce_events.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+#if JUCE_MODULE_AVAILABLE_juce_graphics
 #include <juce_gui_extra/juce_gui_extra.h>
 #endif
 
