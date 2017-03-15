@@ -81,8 +81,33 @@ String OpenGLHelpers::translateVertexShaderToV3 (const String& code)
 {
    #if JUCE_OPENGL3
     if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
-        return JUCE_GLSL_VERSION "\n" + code.replace ("attribute", "in")
-                                            .replace ("varying", "out");
+    {
+        String output;
+
+       #if JUCE_ANDROID
+        {
+            int numAttributes = 0;
+
+            for (int p = code.indexOf (0, "attribute "); p >= 0; p = code.indexOf (p + 1, "attribute "))
+                numAttributes++;
+
+            int last = 0;
+
+            for (int p = code.indexOf (0, "attribute "); p >= 0; p = code.indexOf (p + 1, "attribute "))
+            {
+                output += code.substring (last, p) + String ("layout(location=") + String (--numAttributes) + ") in ";
+
+                last = p + 10;
+            }
+
+            output += code.substring (last);
+        }
+       #else
+        output = code.replace ("attribute", "in");
+       #endif
+
+        return JUCE_GLSL_VERSION "\n" + output.replace ("varying", "out");
+    }
    #endif
 
     return code;
