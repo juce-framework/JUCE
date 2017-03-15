@@ -28,4 +28,4 @@
   ==============================================================================
 */
 
-juce_ImplementSingleton_SingleThreaded (WinRTWrapper)
+juce_ImplementSingleton (WinRTWrapper)

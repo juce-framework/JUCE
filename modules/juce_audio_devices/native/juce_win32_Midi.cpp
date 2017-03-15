@@ -64,10 +64,10 @@ struct MidiServiceType
 };
 
 //==============================================================================
-class WindowsMidiService :   public MidiServiceType
+class WindowsMidiService     : public MidiServiceType
 {
 private:
-    struct WindowsInputWrapper :   public InputWrapper
+    struct WindowsInputWrapper     : public InputWrapper
     {
         class MidiInCollector
         {
@@ -75,7 +75,7 @@ private:
             MidiInCollector (WindowsMidiService& s,
                              MidiInput* const inputDevice,
                              MidiInputCallback& cb)
-                : service (s),
+                : midiService (s),
                   input (inputDevice),
                   callback (cb)
             {
@@ -124,7 +124,7 @@ private:
             {
                 if (deviceHandle != 0 && ! isStarted)
                 {
-                    service.activeMidiCollectors.addIfNotAlreadyThere (this);
+                    midiService.activeMidiCollectors.addIfNotAlreadyThere (this);
 
                     for (int i = 0; i < (int) numHeaders; ++i)
                     {
@@ -154,7 +154,7 @@ private:
                     isStarted = false;
                     midiInReset (deviceHandle);
                     midiInStop (deviceHandle);
-                    service.activeMidiCollectors.removeFirstMatchingValue (this);
+                    midiService.activeMidiCollectors.removeFirstMatchingValue (this);
                     unprepareAllHeaders();
                     concatenator.reset();
                 }
@@ -165,7 +165,7 @@ private:
             {
                 MidiInCollector* const collector = reinterpret_cast<MidiInCollector*> (dwInstance);
 
-                if (collector->service.activeMidiCollectors.contains (collector))
+                if (collector->midiService.activeMidiCollectors.contains (collector))
                 {
                     if (uMsg == MIM_DATA)
                         collector->handleMessage ((const uint8*) &midiMessage, (uint32) timeStamp);
@@ -177,7 +177,7 @@ private:
             HMIDIIN deviceHandle = 0;
 
         private:
-            WindowsMidiService& service;
+            WindowsMidiService& midiService;
             MidiInput* input;
             MidiInputCallback& callback;
             MidiDataConcatenator concatenator { 4096 };
@@ -341,7 +341,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsInputWrapper)
     };
 
-    struct WindowsOutputWrapper :   public OutputWrapper
+    struct WindowsOutputWrapper     : public OutputWrapper
     {
         struct MidiOutHandle
         {
@@ -571,7 +571,7 @@ using namespace ABI::Windows::Devices::Midi;
 using namespace ABI::Windows::Devices::Enumeration;
 using namespace ABI::Windows::Storage::Streams;
 
-class WinRTMidiService :   public MidiServiceType
+class WinRTMidiService     : public MidiServiceType
 {
 private:
     template <typename COMFactoryType>
@@ -609,25 +609,49 @@ private:
             if (FAILED (hr))
                 return false;
 
-            hr = watcher->add_Added (
-                Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformation*>>(
-                    [this] (IDeviceWatcher*, IDeviceInformation* info) { return addDevice (info); }
-                ).Get(),
-                &deviceAddedToken);
-            if (FAILED (hr))
-                return false;
+            class DeviceEnumerationThread     : public Thread
+            {
+            public:
+                DeviceEnumerationThread (String threadName, MidiIODeviceWatcher<COMFactoryType>& p)
+                    : Thread (threadName), parent (p)
+                {}
 
-            hr = watcher->add_Removed (
-                Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>>(
-                    [this] (IDeviceWatcher*, IDeviceInformationUpdate* info) { return removeDevice (info); }
-                ).Get(),
-                &deviceRemovedToken);
-            if (FAILED (hr))
-                return false;
+                void run() override
+                {
+                    parent.watcher->add_Added (
+                        Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformation*>> (
+                            [this](IDeviceWatcher*, IDeviceInformation* info) { return parent.addDevice (info); }
+                        ).Get(),
+                        &parent.deviceAddedToken);
 
-            hr = watcher->Start();
-            if (FAILED (hr))
-                return false;
+                    parent.watcher->add_Removed (
+                        Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>> (
+                            [this](IDeviceWatcher*, IDeviceInformationUpdate* info) { return parent.removeDevice (info); }
+                        ).Get(),
+                        &parent.deviceRemovedToken);
+
+                    EventRegistrationToken deviceEnumerationCompletedToken { 0 };
+                    parent.watcher->add_EnumerationCompleted (
+                        Callback<ITypedEventHandler<DeviceWatcher*, IInspectable*>> (
+                            [this](IDeviceWatcher*, IInspectable*) { enumerationCompleted.signal(); return S_OK; }
+                        ).Get(),
+                        &deviceEnumerationCompletedToken);
+
+                    parent.watcher->Start();
+                    enumerationCompleted.wait();
+
+                    if (deviceEnumerationCompletedToken.value != 0)
+                        parent.watcher->remove_EnumerationCompleted (deviceEnumerationCompletedToken);
+                }
+
+            private:
+                MidiIODeviceWatcher<COMFactoryType>& parent;
+                WaitableEvent enumerationCompleted;
+            };
+
+            DeviceEnumerationThread enumerationThread ("WinRT Device Enumeration Thread", *this);
+            enumerationThread.startThread();
+            enumerationThread.waitForThreadToExit (4000);
 
             return true;
         }
@@ -741,10 +765,8 @@ private:
         {
             auto& lastDevices = lastQueriedConnectedDevices.get();
             for (int i = 0; i < lastDevices.size(); ++i)
-            {
                 if (lastDevices[i].isDefault)
                     return i;
-            }
 
             return 0;
         }
@@ -770,9 +792,11 @@ private:
 
         ComSmartPtr<COMFactoryType>& factory;
 
-        EventRegistrationToken deviceAddedToken { 0 }, deviceRemovedToken { 0 };
+        EventRegistrationToken deviceAddedToken   { 0 },
+                               deviceRemovedToken { 0 };
 
         ComSmartPtr<IDeviceWatcher> watcher;
+
         Array<DeviceInfo> connectedDevices;
         CriticalSection deviceChanges;
         ThreadLocalValue<Array<DeviceInfo>> lastQueriedConnectedDevices;
@@ -781,7 +805,7 @@ private:
     };
 
     template <typename COMFactoryType, typename COMInterfaceType, typename COMType>
-    class OpenMidiPortThread :   public Thread
+    class OpenMidiPortThread     : public Thread
     {
     public:
         OpenMidiPortThread (String threadName,
@@ -835,7 +859,7 @@ private:
         WaitableEvent portOpened { true };
     };
 
-    struct WinRTInputWrapper : public InputWrapper
+    struct WinRTInputWrapper     : public InputWrapper
     {
         WinRTInputWrapper (WinRTMidiService& service,
                            MidiInput* const input,
@@ -980,7 +1004,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WinRTInputWrapper);
     };
 
-    struct WinRTOutputWrapper : public OutputWrapper
+    struct WinRTOutputWrapper     : public OutputWrapper
     {
         WinRTOutputWrapper (WinRTMidiService& service, const int index)
         {
@@ -1111,46 +1135,58 @@ public:
 #endif   // JUCE_USE_WINRT_MIDI
 
 //==============================================================================
-
-class MidiService
+class MidiService :   public DeletedAtShutdown
 {
 public:
-    MidiService()
-    {
-       #if JUCE_USE_WINRT_MIDI
-        try
-        {
-            internal = new WinRTMidiService();
-            return;
-        }
-        catch (std::runtime_error&)
-        {
-        }
-       #endif
+    ~MidiService();
 
-        internal = new WindowsMidiService();
-    }
+    MidiServiceType* getService();
 
-    MidiServiceType* get()
-    {
-        return internal.get();
-    }
+    juce_DeclareSingleton (MidiService, false)
 
 private:
+    MidiService();
+
     ScopedPointer<MidiServiceType> internal;
 };
 
-static MidiService midiService;
+juce_ImplementSingleton (MidiService)
+
+MidiService::~MidiService()
+{
+    clearSingletonInstance();
+}
+
+MidiServiceType* MidiService::getService()
+{
+    return internal.get();
+}
+
+MidiService::MidiService()
+{
+   #if JUCE_USE_WINRT_MIDI
+    try
+    {
+        internal = new WinRTMidiService();
+        return;
+    }
+    catch (std::runtime_error&)
+    {
+    }
+   #endif
+
+    internal = new WindowsMidiService();
+}
 
 //==============================================================================
 StringArray MidiInput::getDevices()
 {
-    return midiService.get()->getDevices (true);
+    return MidiService::getInstance()->getService()->getDevices (true);
 }
 
 int MidiInput::getDefaultDeviceIndex()
 {
-    return midiService.get()->getDefaultDeviceIndex (true);
+    return MidiService::getInstance()->getService()->getDefaultDeviceIndex (true);
 }
 
 MidiInput::MidiInput (const String& deviceName)
@@ -1167,7 +1203,7 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
     ScopedPointer<MidiServiceType::InputWrapper> wrapper;
     try
     {
-        wrapper = midiService.get()->createInputWrapper (in, index, callback);
+        wrapper = MidiService::getInstance()->getService()->createInputWrapper (in, index, callback);
     }
     catch (std::runtime_error&)
     {
@@ -1190,12 +1226,12 @@ void MidiInput::stop()    { static_cast<MidiServiceType::InputWrapper*> (interna
 //==============================================================================
 StringArray MidiOutput::getDevices()
 {
-    return midiService.get()->getDevices (false);
+    return MidiService::getInstance()->getService()->getDevices (false);
 }
 
 int MidiOutput::getDefaultDeviceIndex()
 {
-    return midiService.get()->getDefaultDeviceIndex (false);
+    return MidiService::getInstance()->getService()->getDefaultDeviceIndex (false);
 }
 
 MidiOutput* MidiOutput::openDevice (const int index)
@@ -1203,7 +1239,7 @@ MidiOutput* MidiOutput::openDevice (const int index)
     ScopedPointer<MidiServiceType::OutputWrapper> wrapper;
     try
     {
-        wrapper = midiService.get()->createOutputWrapper (index);
+        wrapper = MidiService::getInstance()->getService()->createOutputWrapper (index);
     }
     catch (std::runtime_error&)
     {
