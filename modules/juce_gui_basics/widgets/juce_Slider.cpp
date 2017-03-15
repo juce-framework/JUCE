@@ -1044,13 +1044,11 @@ public:
 
     void restoreMouseIfHidden()
     {
-        const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
-
-        for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
+        for (auto& ms : Desktop::getInstance().getMouseSources())
         {
-            if (mi->isUnboundedMouseMovementEnabled())
+            if (ms.isUnboundedMouseMovementEnabled())
             {
-                mi->enableUnboundedMouseMovement (false);
+                ms.enableUnboundedMouseMovement (false);
 
                 const double pos = sliderBeingDragged == 2 ? getMaxValue()
                                                            : (sliderBeingDragged == 1 ? getMinValue()
@@ -1059,7 +1057,7 @@ public:
 
                 if (isRotary())
                 {
-                    mousePos = mi->getLastMouseDownPosition();
+                    mousePos = ms.getLastMouseDownPosition();
 
                     const float delta = (float) (pixelsForFullDragExtent * (owner.valueToProportionOfLength (valueOnMouseDown)
                                                                                 - owner.valueToProportionOfLength (pos)));
@@ -1080,7 +1078,7 @@ public:
                                                                        isVertical()   ? pixelPos : (owner.getHeight() / 2.0f)));
                 }
 
-                mi->setScreenPosition (mousePos);
+                ms.setScreenPosition (mousePos);
             }
         }
     }

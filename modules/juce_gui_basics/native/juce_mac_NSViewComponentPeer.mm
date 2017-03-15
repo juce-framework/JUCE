@@ -585,8 +585,8 @@ public:
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit
-            handleMouseEvent (0, Point<float> (-1.0f, -1.0f), currentModifiers,
-                              getMousePressure (ev), getMouseTime (ev));
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, currentModifiers,
+                              getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
 
         showArrowCursorIfNeeded();
     }
@@ -658,7 +658,7 @@ public:
             wheel.deltaY = scale * (float) [ev deltaY];
         }
 
-        handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev), wheel);
+        handleMouseWheel (MouseInputSource::InputSourceType::mouse, getMousePos (ev, view), getMouseTime (ev), wheel);
     }
 
     void redirectMagnify (NSEvent* ev)
@@ -667,7 +667,7 @@ public:
         const float invScale = 1.0f - (float) [ev magnification];
 
         if (invScale > 0.0f)
-            handleMagnifyGesture (0, getMousePos (ev, view), getMouseTime (ev), 1.0f / invScale);
+            handleMagnifyGesture (MouseInputSource::InputSourceType::mouse, getMousePos (ev, view), getMouseTime (ev), 1.0f / invScale);
        #endif
         ignoreUnused (ev);
     }
@@ -689,8 +689,8 @@ public:
     void sendMouseEvent (NSEvent* ev)
     {
         updateModifiers (ev);
-        handleMouseEvent (0, getMousePos (ev, view), currentModifiers,
-                          getMousePressure (ev), getMouseTime (ev));
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (ev, view), currentModifiers,
+                          getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
     }
 
     bool handleKeyEvent (NSEvent* ev, bool isKeyDown)
@@ -2046,10 +2046,15 @@ bool MouseInputSource::SourceList::addSource()
 {
     if (sources.size() == 0)
     {
-        addSource (0, true);
+        addSource (0, MouseInputSource::InputSourceType::mouse);
         return true;
     }
 
+    return false;
+}
+
+bool MouseInputSource::SourceList::canUseTouch()
+{
     return false;
 }
 

@@ -2157,15 +2157,16 @@ public:
         wheel.isSmooth = false;
         wheel.isInertial = false;
 
-        handleMouseWheel (0, getMousePos (buttonPressEvent), getEventTime (buttonPressEvent), wheel);
+        handleMouseWheel (MouseInputSource::InputSourceType::mouse, getMousePos (buttonPressEvent),
+                          getEventTime (buttonPressEvent), wheel);
     }
 
     void handleButtonPressEvent (const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag)
     {
         currentModifiers = currentModifiers.withFlags (buttonModifierFlag);
         toFront (true);
-        handleMouseEvent (0, getMousePos (buttonPressEvent), currentModifiers,
-                          MouseInputSource::invalidPressure, getEventTime (buttonPressEvent));
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (buttonPressEvent), currentModifiers,
+                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (buttonPressEvent), {});
     }
 
     void handleButtonPressEvent (const XButtonPressedEvent& buttonPressEvent)
@@ -2203,8 +2204,8 @@ public:
         if (dragState->dragging)
             handleExternalDragButtonReleaseEvent();
 
-        handleMouseEvent (0, getMousePos (buttonRelEvent), currentModifiers,
-                          MouseInputSource::invalidPressure, getEventTime (buttonRelEvent));
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (buttonRelEvent), currentModifiers,
+                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (buttonRelEvent));
 
         clearLastMousePos();
     }
@@ -2218,8 +2219,8 @@ public:
         if (dragState->dragging)
             handleExternalDragMotionNotify();
 
-        handleMouseEvent (0, getMousePos (movedEvent), currentModifiers,
-                          MouseInputSource::invalidPressure, getEventTime (movedEvent));
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (movedEvent), currentModifiers,
+                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (movedEvent));
     }
 
     void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
@@ -2232,8 +2233,8 @@ public:
         if (! currentModifiers.isAnyMouseButtonDown())
         {
             updateKeyModifiers ((int) enterEvent.state);
-            handleMouseEvent (0, getMousePos (enterEvent), currentModifiers,
-                              MouseInputSource::invalidPressure, getEventTime (enterEvent));
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (enterEvent), currentModifiers,
+                              MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (enterEvent));
         }
     }
 
@@ -2246,8 +2247,8 @@ public:
              || leaveEvent.mode == NotifyUngrab)
         {
             updateKeyModifiers ((int) leaveEvent.state);
-            handleMouseEvent (0, getMousePos (leaveEvent), currentModifiers,
-                              MouseInputSource::invalidPressure, getEventTime (leaveEvent));
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (leaveEvent), currentModifiers,
+                              MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (leaveEvent));
         }
     }
 
@@ -3782,10 +3783,15 @@ bool MouseInputSource::SourceList::addSource()
 {
     if (sources.size() == 0)
     {
-        addSource (0, true);
+        addSource (0, MouseInputSource::InputSourceType::mouse);
         return true;
     }
 
+    return false;
+}
+
+bool MouseInputSource::SourceList::canUseTouch()
+{
     return false;
 }
 

@@ -120,6 +120,7 @@ class MarkerList;
 class RelativeRectangle;
 class MouseEvent;
 struct MouseWheelDetails;
+struct PenDetails;
 class ToggleButton;
 class TextButton;
 class AlertWindow;

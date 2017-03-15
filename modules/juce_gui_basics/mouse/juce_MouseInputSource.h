@@ -48,6 +48,14 @@
 class JUCE_API  MouseInputSource
 {
 public:
+    /** Possible mouse input sources */
+    enum InputSourceType
+    {
+        mouse,
+        touch,
+        pen
+    };
+
     //==============================================================================
     MouseInputSource (const MouseInputSource&) noexcept;
     MouseInputSource& operator= (const MouseInputSource&) noexcept;
@@ -58,10 +66,9 @@ public:
     bool operator!= (const MouseInputSource& other) const noexcept     { return pimpl != other.pimpl; }
 
     //==============================================================================
-    /** Returns true if this object represents a normal desk-based mouse device. */
-    bool isMouse() const noexcept;
+    /** Returns the type of input source that this object represents */
+    MouseInputSource::InputSourceType getType() const noexcept;
 
-    /** Returns true if this object represents a source of touch events - i.e. a finger or stylus. */
     bool isTouch() const noexcept;
 
     /** Returns true if this source has an on-screen pointer that can hover over
@@ -101,8 +108,34 @@ public:
     */
     float getCurrentPressure() const noexcept;
 
+    /** Returns the device's current orientation in radians. 0 indicates a touch pointer
+        aligned with the x-axis and pointing from left to right; increasing values indicate
+        rotation in the clockwise direction. Only reported by a touch pointer.
+    */
+    float getCurrentOrientation() const noexcept;
+
+    /** Returns the device's current rotation. Indicates the clockwise rotation, or twist, of the pointer
+        in radians. The default is 0. Only reported by a pen pointer.
+    */
+    float getCurrentRotation() const noexcept;
+
+    /** Returns the angle of tilt of the pointer in a range of -1.0 to 1.0 either in the x- or y-axis. The default is 0.
+        If x-axis, a positive value indicates a tilt to the right and if y-axis, a positive value indicates a tilt toward the user.
+        Only reported by a pen pointer.
+    */
+    float getCurrentTilt (bool tiltX) const noexcept;
+
     /** Returns true if the current pressure value is meaningful. */
     bool isPressureValid() const noexcept;
+
+    /** Returns true if the current orientation value is meaningful. */
+    bool isOrientationValid() const noexcept;
+
+    /** Returns true if the current rotation value is meaningful. */
+    bool isRotationValid() const noexcept;
+
+    /** Returns true if the current tilt value (either x- or y-axis) is meaningful. */
+    bool isTiltValid (bool tiltX) const noexcept;
 
     /** Returns the component that was last known to be under this pointer. */
     Component* getComponentUnderMouse() const;
@@ -178,6 +211,16 @@ public:
     */
     static const float invalidPressure;
 
+    /** A default value for orientation, which is used when a device doesn't support it */
+    static const float invalidOrientation;
+
+    /** A default value for rotation, which is used when a device doesn't support it */
+    static const float invalidRotation;
+
+    /** Default values for tilt, which are used when a device doesn't support it */
+    static const float invalidTiltX;
+    static const float invalidTiltY;
+
 private:
     //==============================================================================
     friend class ComponentPeer;
@@ -188,7 +231,7 @@ private:
     struct SourceList;
 
     explicit MouseInputSource (MouseInputSourceInternal*) noexcept;
-    void handleEvent (ComponentPeer&, Point<float>, int64 time, ModifierKeys, float);
+    void handleEvent (ComponentPeer&, Point<float>, int64 time, ModifierKeys, float, float, const PenDetails&);
     void handleWheel (ComponentPeer&, Point<float>, int64 time, const MouseWheelDetails&);
     void handleMagnifyGesture (ComponentPeer&, Point<float>, int64 time, float scaleFactor);
 

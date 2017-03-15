@@ -85,21 +85,22 @@ bool ComponentPeer::isKioskMode() const
 }
 
 //==============================================================================
-void ComponentPeer::handleMouseEvent (int touchIndex, Point<float> pos, ModifierKeys newMods, float newPressure, int64 time)
+void ComponentPeer::handleMouseEvent (MouseInputSource::InputSourceType type, Point<float> pos, ModifierKeys newMods,
+                                      float newPressure, float newOrientation, int64 time, PenDetails pen, int touchIndex)
 {
-    if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
-        MouseInputSource (*mouse).handleEvent (*this, pos, time, newMods, newPressure);
+    if (auto* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (type, touchIndex))
+        MouseInputSource (*mouse).handleEvent (*this, pos, time, newMods, newPressure, newOrientation, pen);
 }
 
-void ComponentPeer::handleMouseWheel (int touchIndex, Point<float> pos, int64 time, const MouseWheelDetails& wheel)
+void ComponentPeer::handleMouseWheel (MouseInputSource::InputSourceType type, Point<float> pos, int64 time, const MouseWheelDetails& wheel, int touchIndex)
 {
-    if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
+    if (auto* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (type, touchIndex))
         MouseInputSource (*mouse).handleWheel (*this, pos, time, wheel);
 }
 
-void ComponentPeer::handleMagnifyGesture (int touchIndex, Point<float> pos, int64 time, float scaleFactor)
+void ComponentPeer::handleMagnifyGesture (MouseInputSource::InputSourceType type, Point<float> pos, int64 time, float scaleFactor, int touchIndex)
 {
-    if (MouseInputSource* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (touchIndex))
+    if (auto* mouse = Desktop::getInstance().mouseSources->getOrCreateMouseInputSource (type, touchIndex))
         MouseInputSource (*mouse).handleMagnifyGesture (*this, pos, time, scaleFactor);
 }
 
@@ -113,7 +114,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     if (component.isTransformed())
         g.addTransform (component.getTransform());
 
-    const Rectangle<int> peerBounds (getBounds());
+    auto peerBounds = getBounds();
 
     if (peerBounds.getWidth() != component.getWidth() || peerBounds.getHeight() != component.getHeight())
         // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size

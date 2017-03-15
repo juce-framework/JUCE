@@ -105,6 +105,26 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 #endif
 
+#ifndef WM_NCPOINTERUPDATE
+enum
+{
+    WM_NCPOINTERUPDATE             = 0x241,
+    WM_NCPOINTERDOWN               = 0x242,
+    WM_NCPOINTERUP                 = 0x243,
+    WM_POINTERUPDATE               = 0x245,
+    WM_POINTERDOWN                 = 0x246,
+    WM_POINTERUP                   = 0x247,
+    WM_POINTERENTER                = 0x249,
+    WM_POINTERLEAVE                = 0x24A,
+    WM_POINTERACTIVATE             = 0x24B,
+    WM_POINTERCAPTURECHANGED       = 0x24C,
+    WM_TOUCHHITTESTING             = 0x24D,
+    WM_POINTERWHEEL                = 0x24E,
+    WM_POINTERHWHEEL               = 0x24F,
+    WM_POINTERHITTEST              = 0x250
+};
+#endif
+
 #ifndef MONITOR_DPI_TYPE
   enum Monitor_DPI_Type
   {
@@ -1530,7 +1550,7 @@ private:
         static bool isHWNDBlockedByModalComponents (HWND h)
         {
             for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
-                if (Component* const c = Desktop::getInstance().getComponent (i))
+                if (auto* c = Desktop::getInstance().getComponent (i))
                     if ((! c->isCurrentlyBlockedByAnotherModalComponent())
                           && IsChild ((HWND) c->getWindowHandle(), h))
                         return false;
@@ -1560,12 +1580,13 @@ private:
                 case WM_NCMOUSEHOVER:
                 case WM_MOUSEHOVER:
                 case WM_TOUCH:
-               #ifdef WM_POINTERUPDATE
                 case WM_POINTERUPDATE:
-                case WM_POINTERDOWN:
+                case WM_NCPOINTERUPDATE:
+                case WM_POINTERWHEEL:
+                case WM_POINTERHWHEEL:
                 case WM_POINTERUP:
-               #endif
-                    return isHWNDBlockedByModalComponents (m.hwnd);
+                case WM_POINTERACTIVATE:
+                    return isHWNDBlockedByModalComponents(m.hwnd);
                 case WM_NCLBUTTONDOWN:
                 case WM_NCLBUTTONDBLCLK:
                 case WM_NCRBUTTONDOWN:
@@ -1580,9 +1601,11 @@ private:
                 case WM_RBUTTONDBLCLK:
                 case WM_KEYDOWN:
                 case WM_SYSKEYDOWN:
+                case WM_NCPOINTERDOWN:
+                case WM_POINTERDOWN:
                     if (isHWNDBlockedByModalComponents (m.hwnd))
                     {
-                        if (Component* const modal = Component::getCurrentlyModalComponent (0))
+                        if (auto* modal = Component::getCurrentlyModalComponent (0))
                             modal->inputAttemptWhenModal();
 
                         return true;
@@ -1955,9 +1978,9 @@ private:
     }
 
     //==============================================================================
-    void doMouseEvent (Point<float> position, float pressure)
+    void doMouseEvent (Point<float> position, float pressure, float orientation = 0.0f, ModifierKeys mods = currentModifiers)
     {
-        handleMouseEvent (0, position, currentModifiers, pressure, getMouseEventTime());
+        handleMouseEvent (MouseInputSource::InputSourceType::mouse, position, mods, pressure, orientation, getMouseEventTime());
     }
 
     StringArray getAvailableRenderingEngines() override
@@ -2018,10 +2041,22 @@ private:
         return (GetMessageExtraInfo() & 0xFFFFFF80 /*SIGNATURE_MASK*/) == 0xFF515780 /*MI_WP_SIGNATURE*/;
     }
 
+    static bool areOtherTouchSourcesActive()
+    {
+        for (auto& ms : Desktop::getInstance().getMouseSources())
+            if (ms.isDragging() && (ms.getType() == MouseInputSource::InputSourceType::touch
+                                     || ms.getType() == MouseInputSource::InputSourceType::pen))
+                return true;
+
+        return false;
+    }
+
     void doMouseMove (Point<float> position, bool isMouseDownEvent)
     {
+        ModifierKeys modsToSend (currentModifiers);
+
         // this will be handled by WM_TOUCH
-        if (isTouchEvent())
+        if (isTouchEvent() || areOtherTouchSourcesActive())
             return;
 
         if (! isMouseOver)
@@ -2062,17 +2097,21 @@ private:
         static int minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
         const uint32 now = Time::getMillisecondCounter();
 
+        if (! Desktop::getInstance().getMainMouseSource().isDragging())
+            modsToSend = modsToSend.withoutMouseButtons();
+
         if (now >= lastMouseTime + minTimeBetweenMouses)
         {
             lastMouseTime = now;
-            doMouseEvent (position, MouseInputSource::invalidPressure);
+            doMouseEvent (position, MouseInputSource::invalidPressure,
+                          MouseInputSource::invalidOrientation, modsToSend);
         }
     }
 
     void doMouseDown (Point<float> position, const WPARAM wParam)
     {
         // this will be handled by WM_TOUCH
-        if (isTouchEvent())
+        if (isTouchEvent() || areOtherTouchSourcesActive())
             return;
 
         if (GetCapture() != hwnd)
@@ -2098,7 +2137,7 @@ private:
     void doMouseUp (Point<float> position, const WPARAM wParam)
     {
         // this will be handled by WM_TOUCH
-        if (isTouchEvent())
+        if (isTouchEvent() || areOtherTouchSourcesActive())
             return;
 
         updateModifiersFromWParam (wParam);
@@ -2138,7 +2177,9 @@ private:
     void doMouseExit()
     {
         isMouseOver = false;
-        doMouseEvent (getCurrentMousePos(), MouseInputSource::invalidPressure);
+
+        if (! areOtherTouchSourcesActive())
+            doMouseEvent (getCurrentMousePos(), MouseInputSource::invalidPressure);
     }
 
     ComponentPeer* findPeerUnderMouse (Point<float>& localPos)
@@ -2157,6 +2198,19 @@ private:
         return peer;
     }
 
+    static MouseInputSource::InputSourceType getPointerType (WPARAM wParam)
+    {
+       #ifdef WM_POINTERWHEEL
+        POINTER_INPUT_TYPE pointerType;
+
+        if (GetPointerType (GET_POINTERID_WPARAM (wParam), &pointerType))
+            if (pointerType == 3)
+                return MouseInputSource::InputSourceType::pen;
+       #endif
+
+        return MouseInputSource::InputSourceType::mouse;
+    }
+
     void doMouseWheel (const WPARAM wParam, const bool isVertical)
     {
         updateKeyModifiers();
@@ -2170,8 +2224,8 @@ private:
         wheel.isInertial = false;
 
         Point<float> localPos;
-        if (ComponentPeer* const peer = findPeerUnderMouse (localPos))
-            peer->handleMouseWheel (0, localPos, getMouseEventTime(), wheel);
+        if (auto* peer = findPeerUnderMouse (localPos))
+            peer->handleMouseWheel (getPointerType (wParam), localPos, getMouseEventTime(), wheel);
     }
 
     bool doGestureEvent (LPARAM lParam)
@@ -2191,7 +2245,7 @@ private:
                 {
                     case 3: /*GID_ZOOM*/
                         if (gi.dwFlags != 1 /*GF_BEGIN*/ && lastMagnifySize > 0)
-                            peer->handleMagnifyGesture (0, localPos, getMouseEventTime(),
+                            peer->handleMagnifyGesture (MouseInputSource::InputSourceType::touch, localPos, getMouseEventTime(),
                                                         (float) (gi.ullArguments / (double) lastMagnifySize));
 
                         lastMagnifySize = gi.ullArguments;
@@ -2213,7 +2267,7 @@ private:
     LRESULT doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)
     {
         if ((styleFlags & windowIgnoresMouseClicks) != 0)
-            if (HWNDComponentPeer* const parent = getOwnerOfWindow (GetParent (hwnd)))
+            if (auto* parent = getOwnerOfWindow (GetParent (hwnd)))
                 if (parent != this)
                     return parent->doTouchEvent (numInputs, eventHandle);
 
@@ -2235,7 +2289,9 @@ private:
         return 0;
     }
 
-    bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp)
+    bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp,
+                           const float touchPressure = MouseInputSource::invalidPressure,
+                           const float orientation = 0.0f)
     {
         bool isCancel = false;
 
@@ -2243,7 +2299,7 @@ private:
         const int64 time = getMouseEventTime();
         const Point<float> pos (globalToLocal (Point<float> (touch.x / 100.0f,
                                                              touch.y / 100.0f)));
-        const float pressure = MouseInputSource::invalidPressure;
+        const float pressure = touchPressure;
         ModifierKeys modsToSend (currentModifiers);
 
         if (isDown)
@@ -2252,7 +2308,7 @@ private:
             modsToSend = currentModifiers;
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-            handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(), pressure, time);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(), pressure, orientation, time, PenDetails(), touchIndex);
 
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return false;
@@ -2276,14 +2332,14 @@ private:
             currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
-        handleMouseEvent (touchIndex, pos, modsToSend, pressure, time);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend, pressure, orientation, time, PenDetails(), touchIndex);
 
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return false;
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex, Point<float> (-10.0f, -10.0f), currentModifiers, pressure, time);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, Point<float> (-10.0f, -10.0f), currentModifiers, pressure, orientation, time, PenDetails(), touchIndex);
 
             if (! isValidPeer (this))
                 return false;
@@ -2293,6 +2349,47 @@ private:
     }
 
    #ifdef WM_POINTERUPDATE
+    bool handlePointerInput (WPARAM wParam, LPARAM lParam, const bool isDown, const bool isUp)
+    {
+        POINTER_INPUT_TYPE pointerType;
+        if (! GetPointerType (GET_POINTERID_WPARAM (wParam), &pointerType))
+            return false;
+
+        if (pointerType == 0x00000002) // PT_TOUCH
+        {
+            POINTER_TOUCH_INFO touchInfo;
+            if (! GetPointerTouchInfo (GET_POINTERID_WPARAM (wParam), &touchInfo))
+                return false;
+
+            const float pressure = touchInfo.touchMask & TOUCH_MASK_PRESSURE ? touchInfo.pressure : MouseInputSource::invalidPressure;
+            const float orientation = touchInfo.touchMask & TOUCH_MASK_ORIENTATION ? degreesToRadians (static_cast<float> (touchInfo.orientation))
+                                                                                   : MouseInputSource::invalidOrientation;
+
+            if (! handleTouchInput (emulateTouchEventFromPointer (lParam, wParam),
+                                    isDown, isUp, pressure, orientation))
+                return false;
+        }
+        else if (pointerType == 0x00000003) // PT_PEN
+        {
+            POINTER_PEN_INFO penInfo;
+            if (! GetPointerPenInfo (GET_POINTERID_WPARAM (wParam), &penInfo))
+                return false;
+
+            const float pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? penInfo.pressure / 1024.0f : MouseInputSource::invalidPressure;
+
+            if (! handlePenInput (penInfo, globalToLocal (Point<float> (static_cast<float> (GET_X_LPARAM(lParam)),
+                                                                        static_cast<float> (GET_Y_LPARAM(lParam)))),
+                                  pressure, isDown, isUp))
+                return false;
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     TOUCHINPUT emulateTouchEventFromPointer (LPARAM lParam, WPARAM wParam)
     {
         TOUCHINPUT touchInput;
@@ -2303,6 +2400,58 @@ private:
 
         return touchInput;
     }
+
+    bool handlePenInput (POINTER_PEN_INFO penInfo, Point<float> pos, const float pressure, bool isDown, bool isUp)
+    {
+        const int64 time = getMouseEventTime();
+        ModifierKeys modsToSend (currentModifiers);
+        PenDetails penDetails;
+
+        penDetails.rotation = (penInfo.penMask & PEN_MASK_ROTATION) ? degreesToRadians (static_cast<float> (penInfo.rotation)) : MouseInputSource::invalidRotation;
+        penDetails.tiltX = (penInfo.penMask & PEN_MASK_TILT_X) ? penInfo.tiltX / 90.0f : MouseInputSource::invalidTiltX;
+        penDetails.tiltY = (penInfo.penMask & PEN_MASK_TILT_Y) ? penInfo.tiltY / 90.0f : MouseInputSource::invalidTiltY;
+
+        auto pInfoFlags = penInfo.pointerInfo.pointerFlags;
+
+        if ((pInfoFlags & POINTER_FLAG_FIRSTBUTTON) != 0)
+            currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+        else if ((pInfoFlags & POINTER_FLAG_SECONDBUTTON) != 0)
+            currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::rightButtonModifier);
+
+        if (isDown)
+        {
+            modsToSend = currentModifiers;
+
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend.withoutMouseButtons(),
+                              pressure, MouseInputSource::invalidOrientation, time, penDetails);
+
+            if (! isValidPeer (this)) // (in case this component was deleted by the event)
+                return false;
+        }
+        else if (isUp || ! (pInfoFlags & POINTER_FLAG_INCONTACT))
+        {
+            modsToSend = modsToSend.withoutMouseButtons();
+        }
+
+        handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend, pressure,
+                          MouseInputSource::invalidOrientation, time, penDetails);
+
+        if (! isValidPeer (this)) // (in case this component was deleted by the event)
+            return false;
+
+        if (isUp)
+        {
+            handleMouseEvent (MouseInputSource::InputSourceType::pen, { -10.0f, -10.0f }, currentModifiers,
+                              pressure, MouseInputSource::invalidOrientation, time, penDetails);
+
+            if (! isValidPeer (this))
+                return false;
+        }
+
+        return true;
+    }
+
    #endif
 
     //==============================================================================
@@ -2583,7 +2732,8 @@ private:
 
         if (contains (pos.roundToInt(), false))
         {
-            doMouseEvent (pos, MouseInputSource::invalidPressure);
+            if (! areOtherTouchSourcesActive())
+                doMouseEvent (pos, MouseInputSource::invalidPressure);
 
             if (! isValidPeer (this))
                 return true;
@@ -2724,7 +2874,7 @@ private:
 public:
     static LRESULT CALLBACK windowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        if (HWNDComponentPeer* const peer = getOwnerOfWindow (h))
+        if (auto* peer = getOwnerOfWindow (h))
         {
             jassert (isValidPeer (peer));
             return peer->peerWindowProc (h, message, wParam, lParam);
@@ -2794,13 +2944,25 @@ private:
                 return 1;
 
             //==============================================================================
-           #ifdef WM_POINTERUPDATE
-            case WM_POINTERUPDATE:      handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, false); return 0;
-            case WM_POINTERDOWN:        handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), true, false);  return 0;
-            case WM_POINTERUP:          handleTouchInput (emulateTouchEventFromPointer (lParam, wParam), false, true);  return 0;
-           #endif
+            case WM_POINTERUPDATE:
+                if (handlePointerInput (wParam, lParam, false, false))
+                    return 0;
+                break;
 
+            case WM_POINTERDOWN:
+                if (handlePointerInput (wParam, lParam, true, false))
+                    return 0;
+                break;
+
+            case WM_POINTERUP:
+                if (handlePointerInput (wParam, lParam, false, true))
+                    return 0;
+                break;
+
+            //==============================================================================
             case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;
+
+            case WM_POINTERLEAVE:
             case WM_MOUSELEAVE:         doMouseExit(); return 0;
 
             case WM_LBUTTONDOWN:
@@ -2811,11 +2973,15 @@ private:
             case WM_MBUTTONUP:
             case WM_RBUTTONUP:          doMouseUp (getPointFromLParam (lParam), wParam); return 0;
 
+            case WM_POINTERWHEEL:
             case 0x020A: /* WM_MOUSEWHEEL */   doMouseWheel (wParam, true);  return 0;
+
+            case WM_POINTERHWHEEL:
             case 0x020E: /* WM_MOUSEHWHEEL */  doMouseWheel (wParam, false); return 0;
 
             case WM_CAPTURECHANGED:     doCaptureChanged(); return 0;
 
+            case WM_NCPOINTERUPDATE:
             case WM_NCMOUSEMOVE:
                 if (hasTitleBar())
                     break;
@@ -2928,6 +3094,7 @@ private:
 
                 break;
 
+            case WM_POINTERACTIVATE:
             case WM_MOUSEACTIVATE:
                 if (! component.getMouseClickGrabsKeyboardFocus())
                     return MA_NOACTIVATE;
@@ -3054,6 +3221,7 @@ private:
 
                 break;
 
+            case WM_NCPOINTERDOWN:
             case WM_NCLBUTTONDOWN:
                 handleLeftClickInNCArea (wParam);
                 break;
@@ -3571,11 +3739,17 @@ bool MouseInputSource::SourceList::addSource()
 
     if (numSources == 0 || canUseMultiTouch())
     {
-        addSource (numSources, numSources == 0);
+        addSource (numSources, numSources == 0 ? MouseInputSource::InputSourceType::mouse
+                                               : MouseInputSource::InputSourceType::touch);
         return true;
     }
 
     return false;
+}
+
+bool MouseInputSource::SourceList::canUseTouch()
+{
+    return canUseMultiTouch();
 }
 
 Point<float> MouseInputSource::getCurrentRawMousePosition()

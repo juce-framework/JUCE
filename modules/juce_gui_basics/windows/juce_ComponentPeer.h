@@ -310,9 +310,14 @@ public:
     virtual void setAlpha (float newAlpha) = 0;
 
     //==============================================================================
-    void handleMouseEvent (int touchIndex, Point<float> positionWithinPeer, ModifierKeys newMods, float pressure, int64 time);
-    void handleMouseWheel (int touchIndex, Point<float> positionWithinPeer, int64 time, const MouseWheelDetails&);
-    void handleMagnifyGesture (int touchIndex, Point<float> positionWithinPeer, int64 time, float scaleFactor);
+    void handleMouseEvent (MouseInputSource::InputSourceType type, Point<float> positionWithinPeer, ModifierKeys newMods, float pressure,
+                           float orientation, int64 time, PenDetails pen = {}, int touchIndex = 0);
+
+    void handleMouseWheel (MouseInputSource::InputSourceType type, Point<float> positionWithinPeer,
+                           int64 time, const MouseWheelDetails&, int touchIndex = 0);
+
+    void handleMagnifyGesture (MouseInputSource::InputSourceType type, Point<float> positionWithinPeer,
+                               int64 time, float scaleFactor, int touchIndex = 0);
 
     void handleUserClosingWindow();
 

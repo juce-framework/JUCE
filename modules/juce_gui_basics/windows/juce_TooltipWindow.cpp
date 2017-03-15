@@ -130,7 +130,7 @@ void TooltipWindow::timerCallback()
     const MouseInputSource mouseSource (desktop.getMainMouseSource());
     const unsigned int now = Time::getApproximateMillisecondCounter();
 
-    Component* const newComp = mouseSource.isMouse() ? mouseSource.getComponentUnderMouse() : nullptr;
+    Component* const newComp = ! mouseSource.isTouch() ? mouseSource.getComponentUnderMouse() : nullptr;
     const String newTip (getTipFor (newComp));
     const bool tipChanged = (newTip != lastTipUnderMouse || newComp != lastComponentUnderMouse);
     lastComponentUnderMouse = newComp;

@@ -240,14 +240,16 @@ void Desktop::sendMouseMove()
 
         lastFakeMouseMove = getMousePositionFloat();
 
-        if (Component* const target = findComponentAt (lastFakeMouseMove.roundToInt()))
+        if (auto* target = findComponentAt (lastFakeMouseMove.roundToInt()))
         {
             Component::BailOutChecker checker (target);
             const Point<float> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
             const Time now (Time::getCurrentTime());
 
-            const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(),
-                                 MouseInputSource::invalidPressure, target, target, now, pos, now, 0, false);
+            const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(), MouseInputSource::invalidPressure,
+                                 MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
+                                 MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                 target, target, now, pos, now, 0, false);
 
             if (me.mods.isAnyMouseButtonDown())
                 mouseListeners.callChecked (checker, &MouseListener::mouseDrag, me);
