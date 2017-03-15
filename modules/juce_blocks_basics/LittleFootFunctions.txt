@@ -66,6 +66,18 @@ float map (float value, float sourceMin, float sourceMax);
 */
 int mod (int dividend, int divisor);
 
+/** Returns a random floating-point number.
+
+    @returns a random value in the range 0 (inclusive) to 1.0 (exclusive)
+*/
+float getRandomFloat();
+
+/** Returns a random integer, limited to a given range.
+
+    @returns a random integer between 0 (inclusive) and maxValue (exclusive).
+*/
+int getRandomInt (int maxValue)
+
 /** Returns the number of milliseconds since a fixed event (usually system startup).
  
     This returns a monotonically increasing value which it unaffected by changes to the
@@ -117,14 +129,24 @@ int getPortToMaster();
 /** Returns the block type of the block with this ID. */
 int getBlockTypeForID (int blockID);
 
-/** Sends a message to the block with the specified ID. This will be processed in the handleMessage() callback.
+/** Sends a message to the block with the specified ID. 
+    This will be processed in the handleMessage() callback.
     
-    @param blockID    the ID of the block to send this message to
-    @param data0      the first chunk of data to send
-    @param data1      the second chunk of data to send
-    @param data2      the third chunk of data to send
+    @param blockID     the ID of the block to send this message to
+    @param param1      the first chunk of data to send
+    @param param2      the second chunk of data to send
+    @param param3      the third chunk of data to send
 */
-void sendMessageToBlock (int blockID, int data0, int data1, int data2);
+void sendMessageToBlock (int blockID, int param1, int param2, int param3);
+
+/** Sends a message to the host. 
+    To receive this the host will need to implement the Block::ProgramEventListener::handleProgramEvent() method.
+    
+    @param param1      the first chunk of data to send
+    @param param2      the second chunk of data to send
+    @param param3      the third chunk of data to send
+*/
+void sendMessageToHost (int param1, int param2, int param3);
 
 /** Combines a set of 8-bit ARGB values into a 32-bit colour and returns the result. */
 int makeARGB (int alpha, int red, int green, int blue);
@@ -320,4 +342,4 @@ void handleMIDI (int byte0, int byte1, int byte2);
 
     @see sendMessageToBlock
 */
-void handleMessage (int data0, int data1, int data2);
+void handleMessage (int param1, int param2, int param3);

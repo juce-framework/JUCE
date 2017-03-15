@@ -222,7 +222,7 @@ public:
         To receive the message the program must provide a littlefoot function called
         handleMessage with the following form:
         @code
-        void handleMessage (int param1, int param2)
+        void handleMessage (int param1, int param2, int param3)
         {
             // Do something with the two integer parameters that the app has sent...
         }
