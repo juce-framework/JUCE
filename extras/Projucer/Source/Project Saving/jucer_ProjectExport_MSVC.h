@@ -1204,8 +1204,8 @@ public:
                         setConditionAttribute (*intdir, config);
 
                         String intermediatesPath = getIntermediatesPath (config);
-                        if (! intermediatesPath.endsWith ("\\"))
-                            intermediatesPath << "\\";
+                        if (! intermediatesPath.endsWithChar (L'\\'))
+                            intermediatesPath += L'\\';
 
                         intdir->addTextElement (FileHelpers::windowsStylePath (intermediatesPath));
                     }
@@ -1301,7 +1301,7 @@ public:
                 {
                     XmlElement* res = group->createNewChildElement ("ResourceCompile");
                     res->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
-                                                                                            : "NDEBUG;%(PreprocessorDefinitions)");
+                                                                                                    : "NDEBUG;%(PreprocessorDefinitions)");
                 }
 
                 {
@@ -1309,7 +1309,7 @@ public:
                     link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config));
                     link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
-                                                                                                    : "%(IgnoreSpecificDefaultLibraries)");
+                                                                                                            : "%(IgnoreSpecificDefaultLibraries)");
                     link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
                     link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true)));
                     link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp ? "Console" : "Windows");
