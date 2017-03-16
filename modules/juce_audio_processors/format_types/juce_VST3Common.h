@@ -494,7 +494,7 @@ struct VST3BufferExchange
         for (int i = channelStartOffset; i < channelEnd; ++i)
             bus.add (buffer.getWritePointer (i, sampleOffset));
 
-        assignRawPointer (vstBuffers, bus.getRawDataPointer());
+        assignRawPointer (vstBuffers, (numChannels > 0 ? bus.getRawDataPointer() : nullptr));
         vstBuffers.numChannels      = numChannels;
         vstBuffers.silenceFlags     = 0;
     }
@@ -512,10 +512,9 @@ struct VST3BufferExchange
         if (index >= busMapToUse.size())
             busMapToUse.add (Bus());
 
-        if (numChansForBus > 0)
-            associateBufferTo (result.getReference (index),
-                               busMapToUse.getReference (index),
-                               source, numChansForBus, channelIndexOffset);
+        associateBufferTo (result.getReference (index),
+                           busMapToUse.getReference (index),
+                           source, numChansForBus, channelIndexOffset);
 
         channelIndexOffset += numChansForBus;
     }
