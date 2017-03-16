@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2013
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Projucer - App", "Projucer - App.vcxproj", "{E4CFCE31-1AF5-C360-751D-9682E333BE4D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Projucer - App", "Projucer_App.vcxproj", "{E4CFCE31-1AF5-C360-751D-9682E333BE4D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projucer", "Projucer", "{A5163566-3141-5B06-2ADC-EA7195B43BF8}"
 EndProject

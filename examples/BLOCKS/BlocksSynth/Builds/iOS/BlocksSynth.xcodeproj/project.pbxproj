@@ -871,6 +871,7 @@
 		B2945D912BAAD64AB84975AA = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_BubbleComponent.h"; path = "../../../../../modules/juce_gui_basics/misc/juce_BubbleComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		B29B68EFD93C936B6004A003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RelativeRectangle.h"; path = "../../../../../modules/juce_gui_basics/positioning/juce_RelativeRectangle.h"; sourceTree = "SOURCE_ROOT"; };
 		B2A083D68101A749DA6CEC50 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_GZIPCompressorOutputStream.h"; path = "../../../../../modules/juce_core/zip/juce_GZIPCompressorOutputStream.h"; sourceTree = "SOURCE_ROOT"; };
+		B2DD4D2A1B5AFFE598D8A449 = {isa = PBXFileReference; lastKnownFileType = text.txt; name = LittleFootFunctions.txt; path = "../../../../../modules/juce_blocks_basics/LittleFootFunctions.txt"; sourceTree = "SOURCE_ROOT"; };
 		B2F323A2CF9DBDE87094A12C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_SystemStats.cpp"; path = "../../../../../modules/juce_core/native/juce_android_SystemStats.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B31CB3E3F4BD0212647C599D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ResizableEdgeComponent.cpp"; path = "../../../../../modules/juce_gui_basics/layout/juce_ResizableEdgeComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B34A138110D01A3CA9CB727D = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = os.h; path = "../../../../../modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/os.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1724,6 +1725,7 @@
 					4A4AFBC9552F022B065AF812,
 					211D0DA102619F3D2048A741,
 					CD2D5E669A846D3497CADFF5,
+					B2DD4D2A1B5AFFE598D8A449,
 					014DEEB53672D7474B219518,
 					CD2D5E669A846D3497CADFF5, ); name = "juce_blocks_basics"; sourceTree = "<group>"; };
 		989C3BDC492942642C24282E = {isa = PBXGroup; children = (

@@ -14,19 +14,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E83746D9-1736-E433-6CEF-9C347DF444D1}</ProjectGuid>
+    <ProjectGuid>{6682B889-29F8-82A9-59E4-6F23A6DEF43F}</ProjectGuid>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"
                  Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"
                  Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v140</PlatformToolset>
@@ -43,15 +43,17 @@
   </PropertyGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <TargetExt>.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\Shared Code\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\Shared Code\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">GainPlugIn</TargetName>
+    <TargetExt>.aaxdll</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\AAX\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\AAX\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MultiOutSynth</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\Shared Code\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\Shared Code\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">GainPlugIn</TargetName>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LibraryPath);$(SolutionDir)\$(Platform)\$(Configuration)\Shared Code</LibraryPath>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\AAX\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\AAX\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MultiOutSynth</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(LibraryPath);$(SolutionDir)\$(Platform)\$(Configuration)\Shared Code</LibraryPath>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -65,9 +67,9 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>c:\SDKs\VST3 SDK;..\..\JuceLibraryCode;..\..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=1;JucePlugin_Build_VST3=1;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JUCE_SHARED_CODE=1;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>c:\SDKs\VST_SDK\VST3_SDK;..\..\JuceLibraryCode;c:\SDKs\AAX;c:\SDKs\AAX\Interfaces;c:\SDKs\AAX\Interfaces\ACF;..\..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=1;JucePlugin_Build_Standalone=0;JucePlugin_AAXLibs_path=&quot;c:\\SDKs\\AAX\\Libs&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
@@ -81,23 +83,31 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\GainPlugIn.lib</OutputFile>
+      <OutputFile>$(OutDir)\MultiOutSynth.aaxdll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\GainPlugIn.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\MultiOutSynth.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalDependencies>MultiOutSynth.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\GainPlugIn.bsc</OutputFile>
+      <OutputFile>$(IntDir)\MultiOutSynth.bsc</OutputFile>
     </Bscmake>
-    <Lib>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Lib>
+    <PreBuildEvent>
+      <Command>if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot;
+if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot;
+if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot;
+</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy /Y &quot;$(OutDir)\MultiOutSynth.aaxdll&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32\MultiOutSynth.aaxplugin&quot;
+&quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; &quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -109,9 +119,9 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>c:\SDKs\VST3 SDK;..\..\JuceLibraryCode;..\..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=1;JucePlugin_Build_VST3=1;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JUCE_SHARED_CODE=1;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>c:\SDKs\VST_SDK\VST3_SDK;..\..\JuceLibraryCode;c:\SDKs\AAX;c:\SDKs\AAX\Interfaces;c:\SDKs\AAX\Interfaces\ACF;..\..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=1;JucePlugin_Build_Standalone=0;JucePlugin_AAXLibs_path=&quot;c:\\SDKs\\AAX\\Libs&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
@@ -125,41 +135,35 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\GainPlugIn.lib</OutputFile>
+      <OutputFile>$(OutDir)\MultiOutSynth.aaxdll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\GainPlugIn.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\MultiOutSynth.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalDependencies>MultiOutSynth.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\GainPlugIn.bsc</OutputFile>
+      <OutputFile>$(IntDir)\MultiOutSynth.bsc</OutputFile>
     </Bscmake>
-    <Lib>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Lib>
+    <PreBuildEvent>
+      <Command>if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot;
+if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot;
+if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot;
+</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy /Y &quot;$(OutDir)\MultiOutSynth.aaxdll&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32\MultiOutSynth.aaxplugin&quot;
+&quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; &quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\GainProcessor.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_basics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_devices.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_formats.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_plugin_client_utils.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_processors.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_core.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_cryptography.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_data_structures.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_events.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_graphics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_gui_basics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_gui_extra.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_opengl.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_video.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_plugin_client_AAX.cpp"/>
   </ItemGroup>
   <ItemGroup/>
   <ItemGroup>

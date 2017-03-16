@@ -682,6 +682,7 @@
 		86A4BD370ED34FF4CC252A18 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TableHeaderComponent.cpp"; path = "../../../../../modules/juce_gui_basics/widgets/juce_TableHeaderComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		86C050562945072E55B2304F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MidiOutput.cpp"; path = "../../../../../modules/juce_audio_devices/midi_io/juce_MidiOutput.cpp"; sourceTree = "SOURCE_ROOT"; };
 		86C53DA3976331FD98DF115F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Messaging.cpp"; path = "../../../../../modules/juce_events/native/juce_win32_Messaging.cpp"; sourceTree = "SOURCE_ROOT"; };
+		87A0F829F783B63B1E0B6537 = {isa = PBXFileReference; lastKnownFileType = text.txt; name = LittleFootFunctions.txt; path = "../../../../../modules/juce_blocks_basics/LittleFootFunctions.txt"; sourceTree = "SOURCE_ROOT"; };
 		87BC371E6F85D8C525AD8514 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_IconHelpers.cpp"; path = "../../../../../modules/juce_graphics/native/juce_android_IconHelpers.cpp"; sourceTree = "SOURCE_ROOT"; };
 		8818BE9F1A26A6F0393DF753 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "psych_8.h"; path = "../../../../../modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/psych_8.h"; sourceTree = "SOURCE_ROOT"; };
 		8853EE56290506D1C5B1A324 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jutils.c; path = "../../../../../modules/juce_graphics/image_formats/jpglib/jutils.c"; sourceTree = "SOURCE_ROOT"; };
@@ -1714,6 +1715,7 @@
 					84EC8ECF8486B94F4750630F,
 					CC7A625D7B7F517BC85C5578,
 					193EE3A9C056FB7BFD83667C,
+					87A0F829F783B63B1E0B6537,
 					243F5C11D97748ED03B760C6,
 					193EE3A9C056FB7BFD83667C, ); name = "juce_blocks_basics"; sourceTree = "<group>"; };
 		AAD6D4686EC957A745989577 = {isa = PBXGroup; children = (

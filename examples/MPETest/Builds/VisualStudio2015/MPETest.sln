@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MPETest - App", "MPETest - App.vcxproj", "{D4B09FE5-F7C6-3530-7AA4-725B57317169}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MPETest - App", "MPETest_App.vcxproj", "{D4B09FE5-F7C6-3530-7AA4-725B57317169}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MPETest", "MPETest", "{2104D3B3-D213-B9E2-8704-B617D039D2E2}"
 EndProject

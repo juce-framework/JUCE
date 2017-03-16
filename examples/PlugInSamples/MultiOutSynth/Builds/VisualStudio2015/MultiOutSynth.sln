@@ -1,22 +1,22 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - VST", "MultiOutSynth - VST.vcxproj", "{7790E2A1-4049-EC16-F460-753EE395D0C9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - VST", "MultiOutSynth_VST.vcxproj", "{7790E2A1-4049-EC16-F460-753EE395D0C9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{33FE4627-BBEA-82E1-5512-8C1F218CF560} = {33FE4627-BBEA-82E1-5512-8C1F218CF560}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - VST3", "MultiOutSynth - VST3.vcxproj", "{44876436-075F-C9F0-C107-5BB5C5DE6638}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - VST3", "MultiOutSynth_VST3.vcxproj", "{44876436-075F-C9F0-C107-5BB5C5DE6638}"
 	ProjectSection(ProjectDependencies) = postProject
 		{33FE4627-BBEA-82E1-5512-8C1F218CF560} = {33FE4627-BBEA-82E1-5512-8C1F218CF560}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - AAX", "MultiOutSynth - AAX.vcxproj", "{6682B889-29F8-82A9-59E4-6F23A6DEF43F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - AAX", "MultiOutSynth_AAX.vcxproj", "{6682B889-29F8-82A9-59E4-6F23A6DEF43F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{33FE4627-BBEA-82E1-5512-8C1F218CF560} = {33FE4627-BBEA-82E1-5512-8C1F218CF560}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - Shared Code", "MultiOutSynth - Shared Code.vcxproj", "{33FE4627-BBEA-82E1-5512-8C1F218CF560}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiOutSynth - Shared Code", "MultiOutSynth_SharedCode.vcxproj", "{33FE4627-BBEA-82E1-5512-8C1F218CF560}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MultiOutSynth", "MultiOutSynth", "{007626F4-2388-91C7-11B0-1939EBE0BFFF}"
 EndProject

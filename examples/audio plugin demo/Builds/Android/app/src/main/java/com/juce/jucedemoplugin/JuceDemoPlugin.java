@@ -1374,13 +1374,14 @@ public class JuceDemoPlugin   extends Activity
         builder.create().show();
     }
 
-    public final void showOkCancelBox (String title, String message, final long callback)
+    public final void showOkCancelBox (String title, String message, final long callback,
+                                       String okButtonText, String cancelButtonText)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder (this);
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
-               .setPositiveButton ("OK", new DialogInterface.OnClickListener()
+               .setPositiveButton (okButtonText.isEmpty() ? "OK" : okButtonText, new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
@@ -1388,7 +1389,7 @@ public class JuceDemoPlugin   extends Activity
                             JuceDemoPlugin.this.alertDismissed (callback, 1);
                         }
                     })
-               .setNegativeButton ("Cancel", new DialogInterface.OnClickListener()
+               .setNegativeButton (cancelButtonText.isEmpty() ? "Cancel" : cancelButtonText, new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {

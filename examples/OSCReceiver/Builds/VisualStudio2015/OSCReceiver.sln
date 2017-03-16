@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2015
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSCReceiver - App", "OSCReceiver - App.vcxproj", "{A40EAB9E-5492-90CF-0F05-8362CD22E2D2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSCReceiver - App", "OSCReceiver_App.vcxproj", "{A40EAB9E-5492-90CF-0F05-8362CD22E2D2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OSCReceiver", "OSCReceiver", "{9A574EBE-2E34-2FC0-4D7B-63541DEE3E30}"
 EndProject

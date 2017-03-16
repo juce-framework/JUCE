@@ -1,7 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2013
 
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BouncingBallWavetableDemo - App", "BouncingBallWavetableDemo - App.vcxproj", "{92F70965-E03C-282C-1EE5-5DD138408925}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BouncingBallWavetableDemo - App", "BouncingBallWavetableDemo_App.vcxproj", "{92F70965-E03C-282C-1EE5-5DD138408925}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BouncingBallWavetableDemo", "BouncingBallWavetableDemo", "{B5ABA88E-F55C-D7D6-D01C-C4ABC8C607D8}"
 EndProject

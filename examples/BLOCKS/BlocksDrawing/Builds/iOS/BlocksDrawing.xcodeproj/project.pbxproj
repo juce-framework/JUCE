@@ -86,6 +86,7 @@
 		0A98DFE44610565EF648D538 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MPESynthesiserVoice.cpp"; path = "../../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserVoice.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0B0185EBD24E4B48AD01D22B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_WebInputStream.cpp"; path = "../../../../../modules/juce_core/network/juce_WebInputStream.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0B0E6BBD74D806034228CD61 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioFormatReaderSource.cpp"; path = "../../../../../modules/juce_audio_formats/format/juce_AudioFormatReaderSource.cpp"; sourceTree = "SOURCE_ROOT"; };
+		0B6F2EC110F1FDCC29644209 = {isa = PBXFileReference; lastKnownFileType = text.txt; name = LittleFootFunctions.txt; path = "../../../../../modules/juce_blocks_basics/LittleFootFunctions.txt"; sourceTree = "SOURCE_ROOT"; };
 		0BA1A36CC006BB5B35A09E06 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_WebBrowserComponent.cpp"; path = "../../../../../modules/juce_gui_extra/native/juce_win32_WebBrowserComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0BB27BEFDC069EDBC8A863CD = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Array.h"; path = "../../../../../modules/juce_core/containers/juce_Array.h"; sourceTree = "SOURCE_ROOT"; };
 		0BE109C233090B72CC415748 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_events.h"; path = "../../../../../modules/juce_events/juce_events.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1718,6 +1719,7 @@
 					E548F4B94A1174FA31E734D8,
 					88F5C798F640B57B88D360C8,
 					111367FFC293098B75C802F1,
+					0B6F2EC110F1FDCC29644209,
 					E3C076697100860027D438CA,
 					111367FFC293098B75C802F1, ); name = "juce_blocks_basics"; sourceTree = "<group>"; };
 		20CDBE2700DDEC3C372E90FA = {isa = PBXGroup; children = (
