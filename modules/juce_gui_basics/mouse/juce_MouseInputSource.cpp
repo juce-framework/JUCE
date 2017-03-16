@@ -574,7 +574,9 @@ MouseInputSource& MouseInputSource::operator= (const MouseInputSource& other) no
 }
 
 MouseInputSource::InputSourceType MouseInputSource::getType() const noexcept    { return pimpl->inputType; }
+bool MouseInputSource::isMouse() const noexcept                                 { return (getType() == MouseInputSource::InputSourceType::mouse); }
 bool MouseInputSource::isTouch() const noexcept                                 { return (getType() == MouseInputSource::InputSourceType::touch); }
+bool MouseInputSource::isPen() const noexcept                                   { return (getType() == MouseInputSource::InputSourceType::pen); }
 bool MouseInputSource::canHover() const noexcept                                { return ! isTouch(); }
 bool MouseInputSource::hasMouseWheel() const noexcept                           { return ! isTouch(); }
 int MouseInputSource::getIndex() const noexcept                                 { return pimpl->index; }

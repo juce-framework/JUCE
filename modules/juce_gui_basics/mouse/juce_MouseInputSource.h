@@ -48,7 +48,7 @@
 class JUCE_API  MouseInputSource
 {
 public:
-    /** Possible mouse input sources */
+    /** Possible mouse input sources. */
     enum InputSourceType
     {
         mouse,
@@ -66,10 +66,17 @@ public:
     bool operator!= (const MouseInputSource& other) const noexcept     { return pimpl != other.pimpl; }
 
     //==============================================================================
-    /** Returns the type of input source that this object represents */
+    /** Returns the type of input source that this object represents. */
     MouseInputSource::InputSourceType getType() const noexcept;
 
+    /** Returns true if this object represents a normal desk-based mouse device. */
+    bool isMouse() const noexcept;
+
+    /** Returns true if this object represents a source of touch events. */
     bool isTouch() const noexcept;
+
+    /** Returns true if this object represents a pen device. */
+    bool isPen() const noexcept;
 
     /** Returns true if this source has an on-screen pointer that can hover over
         items without clicking them.
