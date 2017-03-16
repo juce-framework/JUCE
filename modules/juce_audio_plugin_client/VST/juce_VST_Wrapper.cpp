@@ -446,7 +446,7 @@ public:
                         {
                             if (outputs[j] == chan)
                             {
-                                chan = new FloatType [blockSize * 2];
+                                chan = new FloatType [(size_t) blockSize * 2];
                                 tmpBuffers.tempChannels.set (i, chan);
                                 break;
                             }
