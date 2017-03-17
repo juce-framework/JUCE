@@ -2200,12 +2200,14 @@ private:
 
     static MouseInputSource::InputSourceType getPointerType (WPARAM wParam)
     {
-       #ifdef WM_POINTERWHEEL
+       #if JUCE_USE_WINDOWS_POINTER_API
         POINTER_INPUT_TYPE pointerType;
 
         if (GetPointerType (GET_POINTERID_WPARAM (wParam), &pointerType))
             if (pointerType == 3)
                 return MouseInputSource::InputSourceType::pen;
+       #else
+        ignoreUnused (wParam);
        #endif
 
         return MouseInputSource::InputSourceType::mouse;
@@ -2348,7 +2350,7 @@ private:
         return true;
     }
 
-   #ifdef WM_POINTERUPDATE
+   #if JUCE_USE_WINDOWS_POINTER_API
     bool handlePointerInput (WPARAM wParam, LPARAM lParam, const bool isDown, const bool isUp)
     {
         POINTER_INPUT_TYPE pointerType;
@@ -2944,6 +2946,7 @@ private:
                 return 1;
 
             //==============================================================================
+           #if JUCE_USE_WINDOWS_POINTER_API
             case WM_POINTERUPDATE:
                 if (handlePointerInput (wParam, lParam, false, false))
                     return 0;
@@ -2958,6 +2961,7 @@ private:
                 if (handlePointerInput (wParam, lParam, false, true))
                     return 0;
                 break;
+           #endif
 
             //==============================================================================
             case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;

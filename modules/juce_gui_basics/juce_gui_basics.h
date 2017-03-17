@@ -107,6 +107,14 @@
  #define JUCE_USE_XCURSOR 1
 #endif
 
+/** Config: JUCE_USE_WINDOWS_POINTER_API
+    Enables the Windows pointer input API for advanced touch and pen input. This is only available on Windows 8
+    and above so disable this if you are using earlier versions of Windows.
+*/
+#ifndef JUCE_USE_WINDOWS_POINTER_API
+ #define JUCE_USE_WINDOWS_POINTER_API 0
+#endif
+
 //==============================================================================
 namespace juce
 {
