@@ -2017,12 +2017,14 @@ private:
         // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
         int vstInputs;
         for (vstInputs = 0; vstInputs < data.numInputs; ++vstInputs)
-            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr)
+            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr
+                  && data.inputs[vstInputs].numChannels > 0)
                 break;
 
         int vstOutputs;
         for (vstOutputs = 0; vstOutputs < data.numOutputs; ++vstOutputs)
-            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr)
+            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr
+                  && data.outputs[vstOutputs].numChannels > 0)
                 break;
 
         {
