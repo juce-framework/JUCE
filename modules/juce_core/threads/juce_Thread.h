@@ -125,7 +125,7 @@ public:
                     if it had to be killed by force.
         @see signalThreadShouldExit, threadShouldExit, waitForThreadToExit, isThreadRunning
     */
-    bool stopThread (int timeOutMilliseconds);
+    bool stopThread (int timeOutMilliseconds, bool throwAssert = true);
 
     //==============================================================================
     /** Returns true if the thread is currently active */

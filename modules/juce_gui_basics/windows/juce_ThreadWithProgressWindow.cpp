@@ -27,13 +27,16 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasCancelButton,
                                                     const int cancellingTimeOutMs,
                                                     const String& cancelButtonText,
-                                                    Component* componentToCentreAround)
+                                                    Component* componentToCentreAround,
+                                                    bool withAlert)
    : Thread ("ThreadWithProgressWindow"),
      progress (0.0),
      timeOutMsWhenCancelling (cancellingTimeOutMs),
      wasCancelledByUser (false)
 {
-    alertWindow = LookAndFeel::getDefaultLookAndFeel()
+  
+   if (!withAlert) return;
+   alertWindow = LookAndFeel::getDefaultLookAndFeel()
                     .createAlertWindow (title, String(),
                                         cancelButtonText.isEmpty() ? TRANS("Cancel")
                                                                    : cancelButtonText,
@@ -94,7 +97,7 @@ void ThreadWithProgressWindow::timerCallback()
         threadComplete (threadStillRunning);
         return; // (this may be deleted now)
     }
-
+  
     const ScopedLock sl (messageLock);
     alertWindow->setMessage (message);
 }

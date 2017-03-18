@@ -47,6 +47,9 @@ public:
         or it will fail.
     */
     bool initialise (OpenGLContext& context, int width, int height);
+    
+    bool initialise (OpenGLContext& context, int width, int height,bool wantsDepth,bool wantsStencil);
+
 
     /** Tries to allocates a buffer containing a copy of a given image.
         Note that a valid openGL context must be selected when you call this method,
@@ -105,6 +108,9 @@ public:
 
     /** Selects the framebuffer as the current target, and clears it to transparent. */
     void makeCurrentAndClear();
+
+    /** Selects the framebuffer as the current target, and clears it to colour. */
+    void makeCurrentAndClear(Colour colour);
 
     /** Reads an area of pixels from the framebuffer into a 32-bit ARGB pixel array.
         The lineStride is measured as a number of pixels, not bytes - pass a stride
