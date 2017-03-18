@@ -105,10 +105,11 @@ public:
                               bool hasCancelButton,
                               int timeOutMsWhenCancelling = 10000,
                               const String& cancelButtonText = String(),
-                              Component* componentToCentreAround = nullptr);
+                              Component* componentToCentreAround = nullptr ,bool withAlertView = true);
+  
 
     /** Destructor. */
-    ~ThreadWithProgressWindow();
+    virtual ~ThreadWithProgressWindow();
 
     //==============================================================================
    #if JUCE_MODAL_LOOPS_PERMITTED
@@ -156,7 +157,7 @@ public:
     */
     virtual void threadComplete (bool userPressedCancel);
 
-private:
+protected:
     //==============================================================================
     void timerCallback() override;
 
@@ -168,6 +169,7 @@ private:
     bool wasCancelledByUser;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow)
+  
 };
 
 #endif   // JUCE_THREADWITHPROGRESSWINDOW_H_INCLUDED

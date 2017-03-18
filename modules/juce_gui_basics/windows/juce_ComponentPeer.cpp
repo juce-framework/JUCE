@@ -157,7 +157,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
         been set to low.. This setting is sometimes changed by things like Direct3D, and can
         mess up a lot of the calculations that the library needs to do.
     */
-    jassert (roundToInt (10.1f) == 10);
+    //jassert (roundToInt (10.1f) == 10);
 }
 
 Component* ComponentPeer::getTargetForKeyPress()

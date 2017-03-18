@@ -260,7 +260,7 @@ private:
 
 
 //==============================================================================
-bool OpenGLHelpers::isContextActive()
+inline bool OpenGLHelpers::isContextActive()
 {
     return wglGetCurrentContext() != 0;
 }

@@ -74,6 +74,10 @@ public:
     CallOutBox (Component& contentComponent,
                 const Rectangle<int>& areaToPointTo,
                 Component* parentComponent);
+    
+    CallOutBox (Component& contentComponent,
+                const Rectangle<int>& areaToPointTo,
+                Component* parentComponent,float gap,float cornerSize,LookAndFeel* laf);
 
     /** Destructor. */
     ~CallOutBox();
@@ -118,6 +122,10 @@ public:
     static CallOutBox& launchAsynchronously (Component* contentComponent,
                                              const Rectangle<int>& areaToPointTo,
                                              Component* parentComponent);
+    
+    static CallOutBox& launchAsynchronously (Component* contentComponent,
+                                             const Rectangle<int>& areaToPointTo,
+                                             Component* parentComponent,float gap,float cornerSize,LookAndFeel* laf);
 
     /** Posts a message which will dismiss the callout box asynchronously.
         NB: it's safe to call this method from any thread.
@@ -180,6 +188,9 @@ private:
     void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox)
+public:
+    float mGap;
+    float mCornerSize;
 };
 
 
