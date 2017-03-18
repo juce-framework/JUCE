@@ -28,7 +28,7 @@
    /* We must ensure that zlib uses 'const' in declarations. */
 #  define ZLIB_CONST
 #endif
-#include "../../../juce_core/zip/zlib/zlib.h"
+#include JUCE_ZLIB_INCLUDE_PATH
 #ifdef const
    /* zlib.h sometimes #defines const to nothing, undo this. */
 #  undef const

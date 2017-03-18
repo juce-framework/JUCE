@@ -92,8 +92,6 @@ namespace juce
 
 }
 
-using namespace juce;
-
 namespace juce
 {
 

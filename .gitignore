@@ -16,8 +16,16 @@
 *.d
 *.sdf
 *.opensdf
+*.obj
+*.tlog
+*.exe
+*.log
+*.ipdb
+*.iobj
+
 *.VC.db
 *.VC.opendb
+
 xcuserdata
 *.xccheckout
 *.xcscmblueprint
@@ -51,6 +59,10 @@ profile
 **/CodeBlocks/obj
 **/CodeBlocks/*.depend
 **/CodeBlocks/*.layout
+
+extras/Introjucer/Builds/VisualStudio2015/The Introjucer.VC.db
+examples/Demo/Builds/VisualStudio2015/JuceDemo.VC.db
+
 **/Builds/AndroidStudio
 **/doxygen/doc
 **/doxygen/build

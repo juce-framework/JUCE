@@ -381,7 +381,7 @@ void ComboBox::paint (Graphics& g)
          && label->getText().isEmpty()
          && ! label->isBeingEdited())
     {
-        g.setColour (findColour (textColourId).withMultipliedAlpha (0.5f));
+        g.setColour (label->findColour(Label::textColourId));
         g.setFont (label->getFont());
         g.drawFittedText (textWhenNothingSelected, label->getBounds().reduced (2, 1),
                           label->getJustificationType(),
@@ -556,7 +556,7 @@ void ComboBox::mouseDown (const MouseEvent& e)
     beginDragAutoRepeat (300);
 
     isButtonDown = isEnabled() && ! e.mods.isPopupMenu();
-
+    repaint();
     if (isButtonDown && (e.eventComponent == this || ! label->isEditable()))
         showPopupIfNotActive();
 }
