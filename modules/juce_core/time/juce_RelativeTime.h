@@ -162,20 +162,20 @@ private:
 
 //==============================================================================
 /** Compares two RelativeTimes. */
-bool operator== (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator!= (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator>  (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator>  (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator<  (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator<  (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator>= (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator>= (RelativeTime t1, RelativeTime t2) noexcept;
 /** Compares two RelativeTimes. */
-bool operator<= (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator<= (RelativeTime t1, RelativeTime t2) noexcept;
 
 //==============================================================================
 /** Adds two RelativeTimes together. */
-RelativeTime  operator+  (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API RelativeTime  JUCE_CALLTYPE operator+  (RelativeTime t1, RelativeTime t2) noexcept;
 /** Subtracts two RelativeTimes. */
-RelativeTime  operator-  (RelativeTime t1, RelativeTime t2) noexcept;
+JUCE_API RelativeTime  JUCE_CALLTYPE operator-  (RelativeTime t1, RelativeTime t2) noexcept;
