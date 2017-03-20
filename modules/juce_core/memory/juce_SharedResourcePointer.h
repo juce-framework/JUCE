@@ -109,7 +109,7 @@ public:
     */
     ~SharedResourcePointer()
     {
-        SharedObjectHolder& holder = getSharedObjectHolder();
+        auto& holder = getSharedObjectHolder();
         const SpinLock::ScopedLockType sl (holder.lock);
 
         if (--(holder.refCount) == 0)
@@ -127,7 +127,11 @@ public:
     */
     SharedObjectType& getObject() const noexcept        { return *sharedObject; }
 
+    /** Returns the shared object. */
     SharedObjectType* operator->() const noexcept       { return sharedObject; }
+
+    /** Returns the number of SharedResourcePointers that are currently holding the shared object. */
+    int getReferenceCount() const noexcept              { return getSharedObjectHolder().refCount; }
 
 private:
     struct SharedObjectHolder  : public ReferenceCountedObject
@@ -147,7 +151,7 @@ private:
 
     void initialise()
     {
-        SharedObjectHolder& holder = getSharedObjectHolder();
+        auto& holder = getSharedObjectHolder();
         const SpinLock::ScopedLockType sl (holder.lock);
 
         if (++(holder.refCount) == 1)
