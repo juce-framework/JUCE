@@ -1296,6 +1296,10 @@ public:
 
                     if (config.areWarningsTreatedAsErrors())
                         cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
+
+                    String cppLanguageStandard = getOwner().getCppLanguageStandard();
+                    if (cppLanguageStandard.isNotEmpty())
+                        cl->createNewChildElement ("LanguageStandard")->addTextElement (cppLanguageStandard);
                 }
 
                 {
@@ -1474,15 +1478,16 @@ public:
 
     };
 
-    static const char* getName()                { return "Visual Studio 2010"; }
-    static const char* getValueTreeTypeName()   { return "VS2010"; }
-    int getVisualStudioVersion() const override { return 10; }
-    virtual String getSolutionComment() const   { return "# Visual Studio 2010"; }
-    virtual String getToolsVersion() const      { return "4.0"; }
-    virtual String getDefaultToolset() const    { return "Windows7.1SDK"; }
-    Value getPlatformToolsetValue()             { return getSetting (Ids::toolset); }
-    Value getIPPLibraryValue()                  { return getSetting (Ids::IPPLibrary); }
-    String getIPPLibrary() const                { return settings [Ids::IPPLibrary]; }
+    static const char* getName()                  { return "Visual Studio 2010"; }
+    static const char* getValueTreeTypeName()     { return "VS2010"; }
+    int getVisualStudioVersion() const override   { return 10; }
+    virtual String getSolutionComment() const     { return "# Visual Studio 2010"; }
+    virtual String getToolsVersion() const        { return "4.0"; }
+    virtual String getDefaultToolset() const      { return "Windows7.1SDK"; }
+    Value getPlatformToolsetValue()               { return getSetting (Ids::toolset); }
+    Value getIPPLibraryValue()                    { return getSetting (Ids::IPPLibrary); }
+    String getIPPLibrary() const                  { return settings [Ids::IPPLibrary]; }
+    virtual String getCppLanguageStandard() const { return String(); }
 
     String getPlatformToolset() const
     {
@@ -1840,6 +1845,9 @@ public:
         return nullptr;
     }
 
+    Value getCppStandardValue()                         { return getSetting (Ids::cppLanguageStandard); }
+    String getCppLanguageStandard() const override      { return settings [Ids::cppLanguageStandard];  }
+
     void createExporterProperties (PropertyListBuilder& props) override
     {
         MSVCProjectExporterBase::createExporterProperties (props);
@@ -1849,6 +1857,18 @@ public:
 
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
         addIPPLibraryProperty (props);
+
+        static const char* cppStandardNames[]  = { "(default)", "C++14",    "Latest C++ Standard" };
+
+        Array<var> cppStandardValues;
+        cppStandardValues.add (var());
+        cppStandardValues.add ("stdcpp14");
+        cppStandardValues.add ("stdcpplatest");
+
+        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ standard to use",
+                                                StringArray (cppStandardNames), cppStandardValues),
+                                                "The C++ language standard to use");
+
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
