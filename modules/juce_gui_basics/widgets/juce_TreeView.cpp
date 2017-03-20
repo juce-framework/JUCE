@@ -1599,9 +1599,13 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         }
 
         if (mightContainSubItems())
+        {
+            auto backgroundColour = ownerView->findColour (TreeView::backgroundColourId);
+
             paintOpenCloseButton (g, Rectangle<float> ((float) (depth * indentWidth), 0, (float) indentWidth, (float) itemHeight),
-                                  Colours::white,
+                                  backgroundColour.isTransparent() ? Colours::white : backgroundColour,
                                   ownerView->viewport->getContentComp()->isMouseOverButton (this));
+        }
     }
 
     if (isOpen())
