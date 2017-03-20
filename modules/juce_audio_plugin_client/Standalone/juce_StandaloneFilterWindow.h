@@ -211,7 +211,7 @@ public:
                                                               true, false));
         o.content->setSize (500, 450);
 
-        o.dialogTitle                   = TRANS("Audio Settings");
+        o.dialogTitle                   = TRANS("Audio/MIDI Settings");
         o.dialogBackgroundColour        = Colour (0xfff0f0f0);
         o.escapeKeyTriggersCloseButton  = true;
         o.useNativeTitleBar             = true;
@@ -488,7 +488,7 @@ public:
     void buttonClicked (Button*) override
     {
         PopupMenu m;
-        m.addItem (1, TRANS("Audio Settings..."));
+        m.addItem (1, TRANS("Audio/MIDI Settings..."));
         m.addSeparator();
         m.addItem (2, TRANS("Save current state..."));
         m.addItem (3, TRANS("Load a saved state..."));
