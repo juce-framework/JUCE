@@ -287,7 +287,7 @@ public:
     //==============================================================================
     struct BypassParam  : public Vst::Parameter
     {
-        BypassParam (AudioProcessor& p, Vst::ParamID vstParamID)  : owner (p)
+        BypassParam (Vst::ParamID vstParamID)
         {
             info.id = vstParamID;
             toString128 (info.title, "Bypass");
@@ -362,9 +362,6 @@ public:
 
         Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v; }
         Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v; }
-
-    private:
-        AudioProcessor& owner;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BypassParam)
     };
@@ -638,7 +635,7 @@ private:
                 }
 
                 bypassParamID = static_cast<Vst::ParamID> (usingManagedParameter ? paramBypass : numParameters);
-                parameters.addParameter (new BypassParam (*pluginInstance, bypassParamID));
+                parameters.addParameter (new BypassParam (bypassParamID));
 
                 if (pluginInstance->getNumPrograms() > 1)
                     parameters.addParameter (new ProgramChangeParameter (*pluginInstance));
