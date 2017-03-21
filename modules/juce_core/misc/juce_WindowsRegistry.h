@@ -98,10 +98,10 @@ public:
     static bool JUCE_CALLTYPE keyExists (const String& regValuePath, WoW64Mode mode = WoW64_Default);
 
     /** Deletes a registry value. */
-    static void JUCE_CALLTYPE deleteValue (const String& regValuePath, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE deleteValue (const String& regValuePath, WoW64Mode mode = WoW64_Default);
 
     /** Deletes a registry key (which is registry-talk for 'folder'). */
-    static void JUCE_CALLTYPE deleteKey (const String& regKeyPath, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE deleteKey (const String& regKeyPath, WoW64Mode mode = WoW64_Default);
 
     /** Creates a file association in the registry.
 
