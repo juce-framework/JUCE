@@ -147,6 +147,13 @@ String SystemStats::getDeviceDescription()
    #if JUCE_IOS
     return nsStringToJuce ([[UIDevice currentDevice] model]);
    #else
+    size_t size;
+    if (sysctlbyname ("hw.model", nullptr, &size, nullptr, 0) >= 0)
+    {
+        HeapBlock<char> model (size);
+        if (sysctlbyname ("hw.model", model,   &size, nullptr, 0) >= 0)
+            return model.getData();
+    }
     return {};
    #endif
 }
