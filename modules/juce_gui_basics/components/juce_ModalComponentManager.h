@@ -49,7 +49,7 @@ public:
         For some quick ways of creating callback objects, see the ModalCallbackFunction class.
         @see ModalCallbackFunction
     */
-    class Callback
+    class JUCE_API  Callback
     {
     public:
         /** */

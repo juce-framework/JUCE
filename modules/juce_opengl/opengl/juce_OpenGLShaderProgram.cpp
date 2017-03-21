@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept
-    : context (c), programID (0)
+OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept  : context (c)
 {
 }
 

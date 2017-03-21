@@ -31,7 +31,10 @@
 class JUCE_API  OpenGLShaderProgram
 {
 public:
+    /** Creates a shader for use in a particular GL context. */
     OpenGLShaderProgram (const OpenGLContext&) noexcept;
+
+    /** Destructor. */
     ~OpenGLShaderProgram() noexcept;
 
     /** Returns the version of GLSL that the current context supports.
@@ -124,7 +127,7 @@ public:
         Be careful not to call the set() functions unless the appropriate program
         is loaded into the current context.
     */
-    struct Uniform
+    struct JUCE_API  Uniform
     {
         /** Initialises a uniform.
             The program must have been successfully linked when this
@@ -169,13 +172,13 @@ public:
         After a program has been linked, you can create Attribute objects to let you
         set the attributes that your vertex shaders use.
     */
-    struct Attribute
+    struct JUCE_API  Attribute
     {
         /** Initialises an attribute.
             The program must have been successfully linked when this
             constructor is called.
         */
-        Attribute (const OpenGLShaderProgram& program, const char* attributeName);
+        Attribute (const OpenGLShaderProgram&, const char* attributeName);
 
         /** The attribute's ID number.
             If the uniform couldn't be found, this value will be < 0.
@@ -188,7 +191,7 @@ public:
 
 private:
     const OpenGLContext& context;
-    mutable GLuint programID;
+    mutable GLuint programID = 0;
     String errorLog;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLShaderProgram)
