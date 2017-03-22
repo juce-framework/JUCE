@@ -229,7 +229,11 @@ Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
     Value v (projectDefaults.getPropertyAsValue (key, nullptr));
 
     if (v.toString().isEmpty())
-        v = getFallbackPath (key, os);
+    {
+        auto defaultPath = getFallbackPath (key, os);
+        if (os == TargetOS::getThisOS())
+            v = defaultPath;
+    }
 
     return v;
 }
