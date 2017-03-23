@@ -155,15 +155,15 @@ String SystemStats::getStackBacktrace()
 static SystemStats::CrashHandlerFunction globalCrashHandler = nullptr;
 
 #if JUCE_WINDOWS
-static LONG WINAPI handleCrash (LPEXCEPTION_POINTERS)
+static LONG WINAPI handleCrash (LPEXCEPTION_POINTERS ep)
 {
-    globalCrashHandler();
+    globalCrashHandler (ep);
     return EXCEPTION_EXECUTE_HANDLER;
 }
 #else
-static void handleCrash (int)
+static void handleCrash (int signum)
 {
-    globalCrashHandler();
+    globalCrashHandler ((void*) (pointer_sized_int) signum);
     kill (getpid(), SIGKILL);
 }
 
