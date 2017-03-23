@@ -192,7 +192,7 @@ public:
     */
     static String getStackBacktrace();
 
-    /** A function type for use in setApplicationCrashHandler(). The parameter will contain 
+    /** A function type for use in setApplicationCrashHandler(). The parameter will contain
         platform-specific data about the crash.
     */
     typedef void (*CrashHandlerFunction) (void*);
