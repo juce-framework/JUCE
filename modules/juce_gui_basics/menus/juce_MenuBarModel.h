@@ -129,7 +129,7 @@ public:
     virtual void menuItemSelected (int menuItemID,
                                    int topLevelMenuIndex) = 0;
 
-    /** This is called when the user starts/stops navigating the maenu bar.
+    /** This is called when the user starts/stops navigating the menu bar.
 
         @param isActive              true when the user starts navigating the menu bar
     */
