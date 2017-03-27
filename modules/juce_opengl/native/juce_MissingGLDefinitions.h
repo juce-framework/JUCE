@@ -149,6 +149,10 @@ enum MissingOpenGLDefinitions
     GL_READ_FRAMEBUFFER             = 0x8CA8,
     GL_DRAW_FRAMEBUFFER             = 0x8CA9,
     GL_GEOMETRY_SHADER              = 0x8DD9,
+    GL_UNSIGNED_INT_24_8            =  0x84FA,
+    GL_DEPTH_STENCIL                = 0x84F9,
+    GL_DEPTH_STENCIL_ATTACHMENT     =  0x821A,
+
 	GL_PROGRAM_POINT_SIZE			= 0x8642,
 	GL_DEPTH32F_STENCIL8            = 0x8CAD,
    #endif
