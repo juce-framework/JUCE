@@ -257,7 +257,7 @@ String SystemStats::getLogonName()
     if (struct passwd* const pw = getpwuid (getuid()))
         return CharPointer_UTF8 (pw->pw_name);
 
-    return String();
+    return {};
 }
 
 String SystemStats::getFullUserName()
@@ -271,7 +271,7 @@ String SystemStats::getComputerName()
     if (gethostname (name, sizeof (name) - 1) == 0)
         return name;
 
-    return String();
+    return {};
 }
 
 

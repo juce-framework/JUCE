@@ -42,7 +42,7 @@ struct MidiServiceType
 
     struct OutputWrapper
     {
-        virtual ~OutputWrapper () {}
+        virtual ~OutputWrapper() {}
 
         virtual String getDeviceName() = 0;
 

@@ -56,7 +56,7 @@ struct AndroidBluetoothMidiInterface
 
         // if this is null then bluetooth is not enabled
         if (btManager.get() == nullptr)
-            return StringArray();
+            return {};
 
         jobjectArray jDevices = (jobjectArray) env->CallObjectMethod (btManager.get(),
                                                                       AndroidBluetoothManager.getMidiBluetoothAddresses);

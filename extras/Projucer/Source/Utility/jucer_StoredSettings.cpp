@@ -251,7 +251,7 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
 
         // no RTAS on this OS!
         jassertfalse;
-        return String();
+        return {};
     }
 
     if (key == Ids::aaxPath)
@@ -261,7 +261,7 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
 
         // no AAX on this OS!
         jassertfalse;
-        return String();
+        return {};
     }
 
     if (key == Ids::androidSDKPath)
@@ -272,7 +272,7 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
 
     // didn't recognise the key provided!
     jassertfalse;
-    return String();
+    return {};
 }
 
 bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path)

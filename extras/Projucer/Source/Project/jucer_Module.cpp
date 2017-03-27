@@ -81,7 +81,7 @@ static var parseModuleDesc (const File& header)
         }
     }
 
-    return var();
+    return {};
 }
 
 ModuleDescription::ModuleDescription (const File& folder)
@@ -135,13 +135,9 @@ ModuleList& ModuleList::operator= (const ModuleList& other)
 
 const ModuleDescription* ModuleList::getModuleWithID (const String& moduleID) const
 {
-    for (int i = 0; i < modules.size(); ++i)
-    {
-        ModuleDescription* m = modules.getUnchecked(i);
-
+    for (auto* m : modules)
         if (m->getID() == moduleID)
             return m;
-    }
 
     return nullptr;
 }
@@ -164,8 +160,8 @@ StringArray ModuleList::getIDs() const
 {
     StringArray results;
 
-    for (int i = 0; i < modules.size(); ++i)
-        results.add (modules.getUnchecked(i)->getID());
+    for (auto* m : modules)
+        results.add (m->getID());
 
     results.sort (true);
     return results;
@@ -174,6 +170,7 @@ StringArray ModuleList::getIDs() const
 Result ModuleList::tryToAddModuleFromFolder (const File& path)
 {
     ModuleDescription m (path);
+
     if (m.isValid())
     {
         modules.add (new ModuleDescription (m));

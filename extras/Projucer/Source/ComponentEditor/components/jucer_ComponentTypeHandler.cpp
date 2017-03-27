@@ -523,7 +523,7 @@ void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* com
 
 String ComponentTypeHandler::getCreationParameters (GeneratedCode&, Component*)
 {
-    return String();
+    return {};
 }
 
 void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)

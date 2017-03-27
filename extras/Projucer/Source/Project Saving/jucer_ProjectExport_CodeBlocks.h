@@ -214,7 +214,7 @@ private:
                                                     Array<var> (archFlags, numElementsInArray (archFlags))));
         }
 
-        String getLibrarySubdirPath () const override
+        String getLibrarySubdirPath() const override
         {
             const String archFlag = getArchitectureTypeVar();
 
@@ -227,7 +227,7 @@ private:
                 return "/i386";
 
             jassertfalse;
-            return String();
+            return {};
         }
     };
 
@@ -254,38 +254,35 @@ private:
 
         String getTargetSuffix() const
         {
-            const ProjectType::Target::TargetFileType fileType = getTargetFileType();
+            auto fileType = getTargetFileType();
 
             switch (fileType)
             {
-                case executable:
-                    return "";
-                case staticLibrary:
-                    return ".a";
-                case sharedLibraryOrDLL:
-                    return ".so";
+                case executable:            return {};
+                case staticLibrary:         return ".a";
+                case sharedLibraryOrDLL:    return ".so";
+
                 case pluginBundle:
                     switch (type)
-                {
-                    case VST3PlugIn:
-                        return ".vst3";
-                    case VSTPlugIn:
-                        return ".so";
-                    default:
-                        break;
-                }
+                    {
+                        case VST3PlugIn:    return ".vst3";
+                        case VSTPlugIn:     return ".so";
+                        default:            break;
+                    }
 
                     return ".so";
+
                 default:
                     break;
             }
 
-            return String();
+            return {};
         }
 
         bool isDynamicLibrary() const
         {
-            return (type == DynamicLibrary || type == VST3PlugIn || type == VSTPlugIn || type == AAXPlugIn);
+            return (type == DynamicLibrary || type == VST3PlugIn
+                     || type == VSTPlugIn || type == AAXPlugIn);
         }
     };
 

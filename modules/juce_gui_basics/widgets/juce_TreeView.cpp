@@ -1156,7 +1156,7 @@ TreeViewItem::~TreeViewItem()
 
 String TreeViewItem::getUniqueName() const
 {
-    return String();
+    return {};
 }
 
 void TreeViewItem::itemOpennessChanged (bool)
@@ -1378,7 +1378,7 @@ void TreeViewItem::itemSelectionChanged (bool)
 
 String TreeViewItem::getTooltip()
 {
-    return String();
+    return {};
 }
 
 void TreeViewItem::ownerViewChanged (TreeView*)
@@ -1387,7 +1387,7 @@ void TreeViewItem::ownerViewChanged (TreeView*)
 
 var TreeViewItem::getDragSourceDescription()
 {
-    return var();
+    return {};
 }
 
 bool TreeViewItem::isInterestedInFileDrag (const StringArray&)

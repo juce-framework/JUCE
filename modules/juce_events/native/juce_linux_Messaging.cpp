@@ -107,7 +107,7 @@ public:
         readCallback[WINDOW_SYSTEM_FD]->active = true;
     }
 
-    void removeWindowSystemFd ()
+    void removeWindowSystemFd()
     {
         jassert (fdCount == FD_COUNT);
 

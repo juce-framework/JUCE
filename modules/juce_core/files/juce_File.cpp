@@ -114,7 +114,7 @@ static String removeEllipsis (const String& path)
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
-        return String();
+        return {};
 
 #if JUCE_WINDOWS
     // Windows..
@@ -548,7 +548,7 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const
 String File::loadFileAsString() const
 {
     if (! existsAsFile())
-        return String();
+        return {};
 
     FileInputStream in (*this);
     return in.openedOk() ? in.readEntireStreamAsString()
@@ -667,7 +667,7 @@ String File::getFileExtension() const
     if (indexOfDot > fullPath.lastIndexOfChar (separator))
         return fullPath.substring (indexOfDot);
 
-    return String();
+    return {};
 }
 
 bool File::hasFileExtension (StringRef possibleSuffix) const

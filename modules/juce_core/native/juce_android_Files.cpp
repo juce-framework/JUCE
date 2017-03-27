@@ -45,7 +45,7 @@ bool File::isOnRemovableDrive() const
 
 String File::getVersion() const
 {
-    return String();
+    return {};
 }
 
 static File getSpecialFile (jmethodID type)

@@ -1527,7 +1527,7 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getName() const
         default:                break;
     }
 
-    return String();
+    return {};
 }
 
 void AudioProcessorGraph::AudioGraphIOProcessor::fillInPluginDescription (PluginDescription& d) const
@@ -1649,7 +1649,7 @@ int AudioProcessorGraph::AudioGraphIOProcessor::getNumPrograms()                
 int AudioProcessorGraph::AudioGraphIOProcessor::getCurrentProgram()                 { return 0; }
 void AudioProcessorGraph::AudioGraphIOProcessor::setCurrentProgram (int)            { }
 
-const String AudioProcessorGraph::AudioGraphIOProcessor::getProgramName (int)       { return String(); }
+const String AudioProcessorGraph::AudioGraphIOProcessor::getProgramName (int)       { return {}; }
 void AudioProcessorGraph::AudioGraphIOProcessor::changeProgramName (int, const String&) {}
 
 void AudioProcessorGraph::AudioGraphIOProcessor::getStateInformation (juce::MemoryBlock&) {}

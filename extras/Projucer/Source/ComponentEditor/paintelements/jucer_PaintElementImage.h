@@ -404,7 +404,7 @@ private:
             if (element != nullptr)
                 return element->getResource();
 
-            return String();
+            return {};
         }
     };
 

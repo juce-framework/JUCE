@@ -48,7 +48,7 @@ bool AudioFormat::canHandleFile (const File& f)
 const String& AudioFormat::getFormatName() const                { return formatName; }
 const StringArray& AudioFormat::getFileExtensions() const       { return fileExtensions; }
 bool AudioFormat::isCompressed()                                { return false; }
-StringArray AudioFormat::getQualityOptions()                    { return StringArray(); }
+StringArray AudioFormat::getQualityOptions()                    { return {}; }
 
 MemoryMappedAudioFormatReader* AudioFormat::createMemoryMappedReader (const File&)
 {

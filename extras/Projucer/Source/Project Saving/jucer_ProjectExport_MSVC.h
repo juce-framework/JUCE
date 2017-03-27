@@ -163,10 +163,11 @@ public:
             }
         }
 
-        String getLibrarySubdirPath () const override
+        String getLibrarySubdirPath() const override
         {
-            auto result = String ("$(Platform)\\");
+            String result ("$(Platform)\\");
             result += isUsingRuntimeLibDLL() ? "MD" : "MT";
+
             if (isDebug())
                 result += "d";
 
@@ -246,31 +247,26 @@ public:
 
             switch (fileType)
             {
-            case executable:
-                return ".exe";
-            case staticLibrary:
-                return ".lib";
-            case sharedLibraryOrDLL:
-                return ".dll";
-            case pluginBundle:
-                switch (type)
-                {
-                case VST3PlugIn:
-                    return ".vst3";
-                case AAXPlugIn:
-                    return ".aaxdll";
-                case RTASPlugIn:
-                    return ".dpm";
+                case executable:            return ".exe";
+                case staticLibrary:         return ".lib";
+                case sharedLibraryOrDLL:    return ".dll";
+
+                case pluginBundle:
+                    switch (type)
+                    {
+                        case VST3PlugIn:    return ".vst3";
+                        case AAXPlugIn:     return ".aaxdll";
+                        case RTASPlugIn:    return ".dpm";
+                        default:            break;
+                    }
+
+                    return ".dll";
+
                 default:
                     break;
-                }
-
-                return ".dll";
-            default:
-                break;
             }
 
-            return String();
+            return {};
         }
 
         XmlElement* createToolElement (XmlElement& parent, const String& toolName) const
@@ -350,7 +346,7 @@ public:
                     createRebasedPath (bundleScript) + String (" \"") + macOSDir + String ("\" ") + createRebasedPath (iconFilePath);
             }
 
-            return String();
+            return {};
         }
 
         String getExtraPreBuildSteps (const MSVCBuildConfiguration& config) const
@@ -372,7 +368,7 @@ public:
                 return script;
             }
 
-            return String();
+            return {};
         }
 
         String getPostBuildSteps (const MSVCBuildConfiguration& config) const
@@ -418,9 +414,10 @@ public:
 
         String getExtraLinkerFlags() const
         {
-            if (type == RTASPlugIn) return "/FORCE:multiple";
+            if (type == RTASPlugIn)
+                return "/FORCE:multiple";
 
-            return String();
+            return {};
         }
 
         StringArray getExtraSearchPaths() const
@@ -533,7 +530,7 @@ public:
                                                             RelativePath::buildTargetFolder).toWindowsStyle());
             }
 
-            return String();
+            return {};
         }
 
         bool shouldUseRuntimeDLL (const MSVCBuildConfiguration& config) const
@@ -748,7 +745,7 @@ protected:
                 if (target->type == ProjectType::Target::SharedCodeTarget)
                     return target->getProjectGuid();
 
-        return String();
+        return {};
     }
 
     //==============================================================================
@@ -1067,9 +1064,10 @@ protected:
         return path.getFileNameWithoutExtension().startsWithIgnoreCase ("juce_audio_plugin_client_RTAS_");
     }
 
-    StringArray getModuleLibs () const
+    StringArray getModuleLibs() const
     {
         StringArray result;
+
         for (auto& lib : windowsLibs)
             result.add (lib + ".lib");
 
@@ -1487,7 +1485,7 @@ public:
     Value getPlatformToolsetValue()               { return getSetting (Ids::toolset); }
     Value getIPPLibraryValue()                    { return getSetting (Ids::IPPLibrary); }
     String getIPPLibrary() const                  { return settings [Ids::IPPLibrary]; }
-    virtual String getCppLanguageStandard() const { return String(); }
+    virtual String getCppLanguageStandard() const { return {}; }
 
     String getPlatformToolset() const
     {

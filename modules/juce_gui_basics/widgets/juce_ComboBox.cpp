@@ -200,15 +200,15 @@ int ComboBox::getNumItems() const noexcept
 
 String ComboBox::getItemText (const int index) const
 {
-    if (const PopupMenu::Item* const item = getItemForIndex (index))
+    if (auto* item = getItemForIndex (index))
         return item->text;
 
-    return String();
+    return {};
 }
 
 int ComboBox::getItemId (const int index) const noexcept
 {
-    if (const PopupMenu::Item* const item = getItemForIndex (index))
+    if (auto* item = getItemForIndex (index))
         return item->itemID;
 
     return 0;
@@ -223,7 +223,7 @@ int ComboBox::indexOfItemId (const int itemId) const noexcept
 
         while (iterator.next())
         {
-            PopupMenu::Item &item = iterator.getItem();
+            auto& item = iterator.getItem();
 
             if (item.itemID == itemId)
                 return n;

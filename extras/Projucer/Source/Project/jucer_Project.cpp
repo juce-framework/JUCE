@@ -855,7 +855,7 @@ String Project::Item::getFilePath() const
     if (isFile())
         return state [Ids::file].toString();
 
-    return String();
+    return {};
 }
 
 File Project::Item::getFile() const
@@ -1363,7 +1363,7 @@ String Project::getFileTemplate (const String& templateName)
         return String::fromUTF8 (data, dataSize);
 
     jassertfalse;
-    return String();
+    return {};
 
 }
 

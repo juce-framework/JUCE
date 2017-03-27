@@ -445,7 +445,7 @@ protected:
                        "Enable this to strip any locally defined symbols resulting in a smaller binary size. Enabling this will also remove any function names from crash logs. Must be disabled for static library projects.");
         }
 
-        String getLibrarySubdirPath () const override
+        String getLibrarySubdirPath() const override
         {
             return "${CURRENT_ARCH}";
         }
@@ -779,7 +779,7 @@ public:
             if (type == AggregateTarget)
                 // the aggregate target should not specify any settings at all!
                 // it just defines dependencies on the other targets.
-                return StringArray();
+                return {};
 
             StringArray s;
 
@@ -979,7 +979,7 @@ public:
                 case RTASPlugIn:        return config.rtasBinaryLocation.get();
                 case AAXPlugIn:         return config.aaxBinaryLocation.get();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
-                default:                return String();
+                default:                return {};
             }
         }
 
@@ -2240,7 +2240,7 @@ private:
             }
         }
 
-        return String();
+        return {};
     }
 
     String getEntitlementsFileName() const
@@ -2328,7 +2328,7 @@ private:
                             xcodeTarget);
         }
 
-        return String();
+        return {};
     }
 
     String addFramework (const String& frameworkName) const
@@ -2475,7 +2475,7 @@ private:
             }
         }
 
-        return StringArray();
+        return {};
     }
 
     StringArray getNamesOfTargets() const

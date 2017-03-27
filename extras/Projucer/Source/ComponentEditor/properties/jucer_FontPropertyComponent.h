@@ -94,7 +94,7 @@ public:
 
     static String getTypefaceNameCode (const String& typefaceName)
     {
-        if (typefaceName == getDefaultFont())   return String();
+        if (typefaceName == getDefaultFont())   return {};
         if (typefaceName == getDefaultSans())   return "Font::getDefaultSansSerifFontName(), ";
         if (typefaceName == getDefaultSerif())  return "Font::getDefaultSerifFontName(), ";
         if (typefaceName == getDefaultMono())   return "Font::getDefaultMonospacedFontName(), ";

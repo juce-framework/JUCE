@@ -110,7 +110,7 @@ namespace TTFNameExtractor
             }
         }
 
-        return String();
+        return {};
     }
 
     static String getTypefaceNameFromFile (MemoryInputStream& input)
@@ -128,7 +128,7 @@ namespace TTFNameExtractor
                 return parseNameTable (input, ByteOrder::swapIfLittleEndian (tableDirectory.offset));
         }
 
-        return String();
+        return {};
     }
 }
 

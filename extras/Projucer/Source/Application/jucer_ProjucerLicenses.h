@@ -87,7 +87,7 @@ struct ProjucerLicenses  : private DeletedAtShutdown
             return String::fromUTF8 (name);
         }
 
-        return String();
+        return {};
     }
 
     bool isDLLPresent() const

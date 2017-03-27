@@ -488,7 +488,7 @@ private:
     }
 
     //==============================================================================
-    String getAppBuildGradleFileContent () const
+    String getAppBuildGradleFileContent() const
     {
         MemoryOutputStream mo;
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;

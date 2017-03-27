@@ -1284,7 +1284,7 @@ public:
         fifos.clear();
         startThread (9);
 
-        return String();
+        return {};
     }
 
     void close() override

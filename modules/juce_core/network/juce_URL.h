@@ -240,10 +240,10 @@ public:
     URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
-    String getPostData() const noexcept                  { return postData.toString(); }
+    String getPostData() const noexcept                             { return postData.toString(); }
 
     /** Returns the data that was set using withPOSTData() as MemoryBlock. */
-    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept { return postData; }
+    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept    { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
@@ -375,7 +375,7 @@ public:
         bool finished, error;
         int httpCode;
 
-        DownloadTask ();
+        DownloadTask();
 
     private:
         friend class URL;
@@ -441,7 +441,7 @@ public:
     /** Tries to download the entire contents of this URL and parse it as XML.
 
         If it fails, or if the text that it reads can't be parsed as XML, this will
-        return 0.
+        return nullptr.
 
         When it returns a valid XmlElement object, the caller is responsibile for deleting
         this object when no longer needed.

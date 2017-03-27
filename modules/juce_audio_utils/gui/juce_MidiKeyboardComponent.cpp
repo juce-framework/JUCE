@@ -558,7 +558,7 @@ String MidiKeyboardComponent::getWhiteNoteText (const int midiNoteNumber)
     if (midiNoteNumber % 12 == 0)
         return MidiMessage::getMidiNoteName (midiNoteNumber, true, true, octaveNumForMiddleC);
 
-    return String();
+    return {};
 }
 
 void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,

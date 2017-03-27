@@ -78,7 +78,7 @@ class SlObjectRef
 {
 public:
     //==============================================================================
-    SlObjectRef () noexcept {}
+    SlObjectRef() noexcept {}
     SlObjectRef (const SlObjectRef&  obj) noexcept : cb (obj.cb) {}
     SlObjectRef (SlObjectRef&& obj) noexcept : cb (static_cast<ReferenceCountedObjectPtr<ControlBlock>&&> (obj.cb)) { obj.cb = nullptr; }
     explicit SlObjectRef (SLObjectItf o) : cb (new ControlBlock (o)) {}
@@ -108,7 +108,7 @@ class SlRef : public SlObjectRef
 {
 public:
     //==============================================================================
-    SlRef () noexcept : type (nullptr) {}
+    SlRef() noexcept : type (nullptr) {}
     SlRef (SlRef& r)  noexcept : SlObjectRef (r), type (r.type) {}
     SlRef (SlRef&& r) noexcept : SlObjectRef (static_cast<SlRef&&> (r)), type (r.type) { r.type = nullptr; }
 
@@ -315,7 +315,7 @@ public:
             (*queue)->Clear (queue);
         }
 
-        void enqueueBuffer ()
+        void enqueueBuffer()
         {
             (*queue)->Enqueue (queue, getCurrentBuffer(), static_cast<SLuint32> (getBufferSizeInSamples() * sizeof (T)));
             ++numBlocksOut;
@@ -986,7 +986,7 @@ private:
         if (text.get() != 0)
             return juceString (text);
 
-        return String();
+        return {};
     }
 
     static bool androidHasSystemFeature (const String& property)

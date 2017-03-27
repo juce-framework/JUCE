@@ -471,7 +471,7 @@ void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex
     if (isPositiveAndBelow (parameterIndex, getNumParameters()))
     {
         for (int i = listeners.size(); --i >= 0;)
-            if (AudioProcessorListener* l = getListenerLocked (i))
+            if (auto* l = getListenerLocked (i))
                 l->audioProcessorParameterChanged (this, parameterIndex, newValue);
     }
     else
@@ -492,7 +492,7 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
        #endif
 
         for (int i = listeners.size(); --i >= 0;)
-            if (AudioProcessorListener* l = getListenerLocked (i))
+            if (auto* l = getListenerLocked (i))
                 l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
     }
     else
@@ -542,7 +542,7 @@ int AudioProcessor::getNumParameters()
 
 float AudioProcessor::getParameter (int index)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
+    if (auto* p = getParamChecked (index))
         return p->getValue();
 
     return 0;
@@ -550,13 +550,13 @@ float AudioProcessor::getParameter (int index)
 
 void AudioProcessor::setParameter (int index, float newValue)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
+    if (auto* p = getParamChecked (index))
         p->setValue (newValue);
 }
 
 float AudioProcessor::getParameterDefaultValue (int index)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getDefaultValue();
 
     return 0;
@@ -564,16 +564,16 @@ float AudioProcessor::getParameterDefaultValue (int index)
 
 const String AudioProcessor::getParameterName (int index)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
+    if (auto* p = getParamChecked (index))
         return p->getName (512);
 
-    return String();
+    return {};
 }
 
 String AudioProcessor::getParameterID (int index)
 {
     // Don't use getParamChecked here, as this must also work for legacy plug-ins
-    if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (managedParameters[index]))
+    if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (managedParameters[index]))
         return p->paramID;
 
     return String (index);
@@ -581,7 +581,7 @@ String AudioProcessor::getParameterID (int index)
 
 String AudioProcessor::getParameterName (int index, int maximumStringLength)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getName (maximumStringLength);
 
     return getParameterName (index).substring (0, maximumStringLength);
@@ -601,7 +601,7 @@ const String AudioProcessor::getParameterText (int index)
 
 String AudioProcessor::getParameterText (int index, int maximumStringLength)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getText (p->getValue(), maximumStringLength);
 
     return getParameterText (index).substring (0, maximumStringLength);
@@ -609,7 +609,7 @@ String AudioProcessor::getParameterText (int index, int maximumStringLength)
 
 int AudioProcessor::getParameterNumSteps (int index)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getNumSteps();
 
     return AudioProcessor::getDefaultNumParameterSteps();
@@ -622,15 +622,15 @@ int AudioProcessor::getDefaultNumParameterSteps() noexcept
 
 String AudioProcessor::getParameterLabel (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getLabel();
 
-    return String();
+    return {};
 }
 
 bool AudioProcessor::isParameterAutomatable (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->isAutomatable();
 
     return true;
@@ -638,7 +638,7 @@ bool AudioProcessor::isParameterAutomatable (int index) const
 
 bool AudioProcessor::isParameterOrientationInverted (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->isOrientationInverted();
 
     return false;
@@ -646,7 +646,7 @@ bool AudioProcessor::isParameterOrientationInverted (int index) const
 
 bool AudioProcessor::isMetaParameter (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->isMetaParameter();
 
     return false;
@@ -654,7 +654,7 @@ bool AudioProcessor::isMetaParameter (int index) const
 
 AudioProcessorParameter::Category AudioProcessor::getParameterCategory (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getCategory();
 
     return AudioProcessorParameter::genericParameter;

@@ -1179,7 +1179,7 @@ bool String::matchesWildcard (StringRef wildcard, const bool ignoreCase) const n
 String String::repeatedString (StringRef stringToRepeat, int numberOfTimesToRepeat)
 {
     if (numberOfTimesToRepeat <= 0)
-        return String();
+        return {};
 
     String result (PreallocationBytes (findByteOffsetOfEnd (stringToRepeat) * (size_t) numberOfTimesToRepeat));
     CharPointerType n (result.text);
@@ -1291,7 +1291,7 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
 
     const size_t newTotalBytes = initialBytes + newStringBytes + remainderBytes;
     if (newTotalBytes <= 0)
-        return String();
+        return {};
 
     String result (PreallocationBytes ((size_t) newTotalBytes));
 
@@ -1537,7 +1537,7 @@ String String::substring (int start, const int end) const
         start = 0;
 
     if (end <= start)
-        return String();
+        return {};
 
     int i = 0;
     CharPointerType t1 (text);
@@ -1545,7 +1545,7 @@ String String::substring (int start, const int end) const
     while (i < start)
     {
         if (t1.isEmpty())
-            return String();
+            return {};
 
         ++i;
         ++t1;
@@ -1579,7 +1579,7 @@ String String::substring (int start) const
     while (--start >= 0)
     {
         if (t.isEmpty())
-            return String();
+            return {};
 
         ++t;
     }
@@ -1604,7 +1604,7 @@ String String::fromFirstOccurrenceOf (StringRef sub,
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
     if (i < 0)
-        return String();
+        return {};
 
     return substring (includeSubString ? i : i + sub.length());
 }
@@ -1658,7 +1658,7 @@ String String::unquoted() const
     const int len = length();
 
     if (len == 0)
-        return String();
+        return {};
 
     const juce_wchar lastChar = text [len - 1];
     const int dropAtStart = (*text == '"' || *text == '\'') ? 1 : 0;
@@ -1709,7 +1709,7 @@ String String::trim() const
         CharPointerType trimmedEnd (findTrimmedEnd (start, end));
 
         if (trimmedEnd <= start)
-            return String();
+            return {};
 
         if (text < start || trimmedEnd < end)
             return String (start, trimmedEnd);
@@ -1782,7 +1782,7 @@ String String::trimCharactersAtEnd (StringRef charactersToTrim) const
 String String::retainCharacters (StringRef charactersToRetain) const
 {
     if (isEmpty())
-        return String();
+        return {};
 
     StringCreationHelper builder (text);
 
@@ -1804,7 +1804,7 @@ String String::retainCharacters (StringRef charactersToRetain) const
 String String::removeCharacters (StringRef charactersToRemove) const
 {
     if (isEmpty())
-        return String();
+        return {};
 
     StringCreationHelper builder (text);
 
@@ -1903,7 +1903,7 @@ String String::formattedRaw (const char* pf, ...)
             break;                          // returns -1 because of an error rather than because it needs more space.
     }
 
-    return String();
+    return {};
 }
 
 //==============================================================================
@@ -1963,7 +1963,7 @@ String String::toHexString (short number)     { return toHexString ((int) (unsig
 String String::toHexString (const void* const d, const int size, const int groupSize)
 {
     if (size <= 0)
-        return String();
+        return {};
 
     int numChars = (size * 2) + 2;
     if (groupSize > 0)
@@ -2008,7 +2008,7 @@ String String::createStringFromData (const void* const unknownData, int size)
     const uint8* const data = static_cast<const uint8*> (unknownData);
 
     if (size <= 0 || data == nullptr)
-        return String();
+        return {};
 
     if (size == 1)
         return charToString ((juce_wchar) data[0]);
@@ -2174,7 +2174,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
         }
     }
 
-    return String();
+    return {};
 }
 
 #if JUCE_MSVC

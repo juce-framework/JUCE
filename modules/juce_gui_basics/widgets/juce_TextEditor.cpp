@@ -49,7 +49,7 @@ struct TextAtom
             return atomText.substring (0, numChars);
 
         if (isNewLine())
-            return String();
+            return {};
 
         return String::repeatedString (String::charToString (passwordCharacter), numChars);
     }
@@ -2344,7 +2344,7 @@ String TextEditor::getText() const
 String TextEditor::getTextInRange (const Range<int>& range) const
 {
     if (range.isEmpty())
-        return String();
+        return {};
 
     MemoryOutputStream mo;
     mo.preallocate ((size_t) jmin (getTotalNumChars(), range.getLength()));
@@ -2353,7 +2353,7 @@ String TextEditor::getTextInRange (const Range<int>& range) const
 
     for (int i = 0; i < sections.size(); ++i)
     {
-        const UniformTextSection* const s = sections.getUnchecked (i);
+        auto* s = sections.getUnchecked (i);
         const int nextIndex = index + s->getTotalLength();
 
         if (range.getStart() < nextIndex)

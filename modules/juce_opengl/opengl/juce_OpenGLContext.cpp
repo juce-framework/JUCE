@@ -547,7 +547,7 @@ public:
             finishedSignal.signal();
         }
 
-        void block() { finishedSignal.wait (); }
+        void block() { finishedSignal.wait(); }
 
         OpenGLContext::AsyncWorker::Ptr originalWorker;
         WaitableEvent finishedSignal;

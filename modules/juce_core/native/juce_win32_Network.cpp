@@ -501,7 +501,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 
 void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 {
-    result.addIfNotAlreadyThere (IPAddress::local ());
+    result.addIfNotAlreadyThere (IPAddress::local());
 
     if (includeIPv6)
         result.addIfNotAlreadyThere (IPAddress::local (true));

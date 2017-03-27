@@ -172,7 +172,7 @@ public:
             return juceString (string);
         }
 
-        return String();
+        return {};
     }
 
     String getOutputPortNameForJuceIndex (int idx)
@@ -183,7 +183,7 @@ public:
             return juceString (string);
         }
 
-        return String();
+        return {};
     }
 
     StringArray getDevices (bool input)
@@ -200,7 +200,7 @@ public:
             return javaStringArrayToJuce (devices);
         }
 
-        return StringArray();
+        return {};
     }
 
     AndroidMidiInput* openMidiInputPortWithIndex (int idx, MidiInput* juceMidiInput, juce::MidiInputCallback* callback)

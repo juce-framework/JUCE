@@ -470,7 +470,7 @@ public:
             }
         }
 
-        return String();
+        return {};
     }
    #endif
   #else
@@ -981,7 +981,7 @@ public:
                 return String (pinProps.text, sizeof (pinProps.text));
         }
 
-        return String();
+        return {};
     }
 
     bool isInputChannelStereoPair (int index) const override
@@ -1005,7 +1005,7 @@ public:
                 return String (pinProps.text, sizeof (pinProps.text));
         }
 
-        return String();
+        return {};
     }
 
     bool isOutputChannelStereoPair (int index) const override
@@ -1810,7 +1810,7 @@ private:
     String getTextForOpcode (const int index, const VstHostToPlugInOpcodes opcode) const
     {
         if (vstEffect == nullptr)
-            return String();
+            return {};
 
         jassert (index >= 0 && index < vstEffect->numParameters);
         char nm[256] = { 0 };

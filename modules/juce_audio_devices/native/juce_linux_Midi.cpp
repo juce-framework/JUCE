@@ -212,7 +212,7 @@ public:
         return instance;
     }
 
-    void registerCallback ()
+    void registerCallback()
     {
         if (inputThread == nullptr)
             inputThread = new MidiInputThread (*this);
@@ -221,7 +221,7 @@ public:
             inputThread->startThread();
     }
 
-    void unregisterCallback ()
+    void unregisterCallback()
     {
         jassert (activeCallbacks.get() > 0);
         if (--activeCallbacks == 0 && inputThread->isThreadRunning())
@@ -273,7 +273,7 @@ private:
     friend class ReferenceCountedObjectPtr<AlsaClient>;
     friend struct ContainerDeletePolicy<AlsaClient>;
 
-    AlsaClient ()
+    AlsaClient()
         : handle (nullptr),
           inputThread (nullptr)
     {
@@ -601,7 +601,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
 // (These are just stub functions if ALSA is unavailable...)
 
-StringArray MidiOutput::getDevices()                                { return StringArray(); }
+StringArray MidiOutput::getDevices()                                { return {}; }
 int MidiOutput::getDefaultDeviceIndex()                             { return 0; }
 MidiOutput* MidiOutput::openDevice (int)                            { return nullptr; }
 MidiOutput* MidiOutput::createNewDevice (const String&)             { return nullptr; }
@@ -613,7 +613,7 @@ MidiInput::~MidiInput() {}
 void MidiInput::start() {}
 void MidiInput::stop()  {}
 int MidiInput::getDefaultDeviceIndex()      { return 0; }
-StringArray MidiInput::getDevices()         { return StringArray(); }
+StringArray MidiInput::getDevices()         { return {}; }
 MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { return nullptr; }
 MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return nullptr; }
 

@@ -35,7 +35,7 @@ class JUCE_API  SoundPlayer             : public AudioIODeviceCallback
 {
 public:
     //==============================================================================
-    SoundPlayer ();
+    SoundPlayer();
 
     /** Destructor. */
     virtual ~SoundPlayer();

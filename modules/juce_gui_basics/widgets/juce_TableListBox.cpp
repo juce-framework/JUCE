@@ -206,10 +206,10 @@ public:
         const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
         if (columnId != 0)
-            if (TableListBoxModel* m = owner.getModel())
+            if (auto* m = owner.getModel())
                 return m->getCellTooltip (row, columnId);
 
-        return String();
+        return {};
     }
 
     Component* findChildComponentForColumn (const int columnId) const
@@ -477,8 +477,8 @@ void TableListBoxModel::deleteKeyPressed (int)                          {}
 void TableListBoxModel::returnKeyPressed (int)                          {}
 void TableListBoxModel::listWasScrolled()                               {}
 
-String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String(); }
-var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var(); }
+String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return {}; }
+var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return {}; }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {

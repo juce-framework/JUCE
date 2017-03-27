@@ -106,7 +106,7 @@ static String addPooledString (Array<String>& strings, const NewStringType& newS
 String StringPool::getPooledString (const char* const newString)
 {
     if (newString == nullptr || *newString == 0)
-        return String();
+        return {};
 
     const ScopedLock sl (lock);
     garbageCollectIfNeeded();
@@ -116,7 +116,7 @@ String StringPool::getPooledString (const char* const newString)
 String StringPool::getPooledString (String::CharPointerType start, String::CharPointerType end)
 {
     if (start.isEmpty() || start == end)
-        return String();
+        return {};
 
     const ScopedLock sl (lock);
     garbageCollectIfNeeded();
@@ -126,7 +126,7 @@ String StringPool::getPooledString (String::CharPointerType start, String::CharP
 String StringPool::getPooledString (StringRef newString)
 {
     if (newString.isEmpty())
-        return String();
+        return {};
 
     const ScopedLock sl (lock);
     garbageCollectIfNeeded();
@@ -136,7 +136,7 @@ String StringPool::getPooledString (StringRef newString)
 String StringPool::getPooledString (const String& newString)
 {
     if (newString.isEmpty())
-        return String();
+        return {};
 
     const ScopedLock sl (lock);
     garbageCollectIfNeeded();

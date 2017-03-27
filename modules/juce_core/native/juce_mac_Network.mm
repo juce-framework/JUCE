@@ -613,7 +613,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
         static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSURLSessionTask*, NSError*)
         {
-            if (auto state = getState (self)) state->didBecomeInvalidWithError ();
+            if (auto state = getState (self)) state->didBecomeInvalidWithError();
         }
     };
 };

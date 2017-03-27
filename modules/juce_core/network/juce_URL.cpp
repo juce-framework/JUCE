@@ -526,7 +526,7 @@ String URL::readEntireTextStream (const bool usePostCommand) const
     if (in != nullptr)
         return in->readEntireStreamAsString();
 
-    return String();
+    return {};
 }
 
 XmlElement* URL::readEntireXmlStream (const bool usePostCommand) const

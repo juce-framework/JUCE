@@ -49,7 +49,7 @@ String OSCArgument::getString() const noexcept
         return stringValue;
 
     jassertfalse; // you must check the type of an argument before attempting to get its value!
-    return String();
+    return {};
 }
 
 int32 OSCArgument::getInt32() const noexcept

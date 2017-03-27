@@ -3376,7 +3376,7 @@ private:
                 return String (buffer);
             }
 
-            return String();
+            return {};
         }
 
         int getCompositionCaretPos (HIMC hImc, LPARAM lParam, const String& currentIMEString) const

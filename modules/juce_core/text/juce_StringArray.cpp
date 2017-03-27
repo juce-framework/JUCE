@@ -320,7 +320,7 @@ String StringArray::joinIntoString (StringRef separator, int start, int numberTo
         start = 0;
 
     if (start >= last)
-        return String();
+        return {};
 
     if (start == last - 1)
         return strings.getReference (start);
@@ -334,7 +334,7 @@ String StringArray::joinIntoString (StringRef separator, int start, int numberTo
     String result;
     result.preallocateBytes (bytesNeeded);
 
-    String::CharPointerType dest (result.getCharPointer());
+    auto dest = result.getCharPointer();
 
     while (start < last)
     {

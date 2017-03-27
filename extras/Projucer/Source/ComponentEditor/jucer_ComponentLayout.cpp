@@ -715,7 +715,7 @@ void ComponentLayout::fillInGeneratedCode (GeneratedCode& code) const
 String ComponentLayout::getComponentMemberVariableName (Component* comp) const
 {
     if (comp == nullptr)
-        return String();
+        return {};
 
     String name (comp->getProperties() ["memberName"].toString());
 
@@ -775,7 +775,7 @@ String ComponentLayout::getUnusedMemberName (String nameRoot, Component* comp) c
 String ComponentLayout::getComponentVirtualClassName (Component* comp) const
 {
     if (comp == nullptr)
-        return String();
+        return {};
 
     return comp->getProperties() ["virtualName"];
 }

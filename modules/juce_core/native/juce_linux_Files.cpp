@@ -74,7 +74,7 @@ bool File::isOnRemovableDrive() const
 
 String File::getVersion() const
 {
-    return String(); // xxx not yet implemented
+    return {}; // xxx not yet implemented
 }
 
 //==============================================================================

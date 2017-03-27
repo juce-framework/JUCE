@@ -606,7 +606,7 @@ private:
             return str.fromFirstOccurrenceOf ("#", false, false)
                       .upToLastOccurrenceOf (")", false, false).trim();
 
-        return String();
+        return {};
     }
 
     //==============================================================================
@@ -1160,7 +1160,7 @@ private:
         if (xml.parent != nullptr)
             return getInheritedAttribute (*xml.parent, attributeName);
 
-        return String();
+        return {};
     }
 
     static int parsePlacementFlags (const String& align) noexcept

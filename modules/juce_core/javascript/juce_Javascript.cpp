@@ -158,7 +158,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
                 // if there's a class with an overridden DynamicObject::hasMethod, this avoids an error
                 if (o->hasMethod (functionName))
-                    return var();
+                    return {};
             }
 
             if (targetObject.isString())
@@ -517,7 +517,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         }
 
         var throwError (const char* typeName) const
-            { location.throwError (getTokenName (operation) + " is not allowed on the " + typeName + " type"); return var(); }
+            { location.throwError (getTokenName (operation) + " is not allowed on the " + typeName + " type"); return {}; }
     };
 
     struct EqualsOp  : public BinaryOperator
@@ -757,7 +757,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                     if (o->hasMethod (dot->child)) // allow an overridden DynamicObject::invokeMethod to accept a method call.
                         return o->invokeMethod (dot->child, args);
 
-            location.throwError ("This expression is not a function!"); return var();
+            location.throwError ("This expression is not a function!"); return {};
         }
 
         ExpPtr object;

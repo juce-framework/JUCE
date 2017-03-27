@@ -201,7 +201,7 @@ public:
             break;
         }
 
-        return String();
+        return {};
     }
 
     void restoreFromString (const String& s)

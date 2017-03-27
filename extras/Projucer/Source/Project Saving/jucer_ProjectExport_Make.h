@@ -51,19 +51,21 @@ protected:
                                                     Array<var> (archFlags, numElementsInArray (archFlags))));
         }
 
-        String getLibrarySubdirPath () const override
+        String getLibrarySubdirPath() const override
         {
-            const String archFlag = getArchitectureTypeVar();
+            String archFlag = getArchitectureTypeVar();
+            String prefix ("-march=");
 
-            const auto prefix = String ("-march=");
             if (archFlag.startsWith (prefix))
                 return archFlag.substring (prefix.length());
-            else if (archFlag == "-m64")
+
+            if (archFlag == "-m64")
                 return "x86_64";
-            else if (archFlag == "-m32")
+
+            if (archFlag == "-m32")
                 return "i386";
-            else
-                return "$(shell uname -m)";
+
+            return "$(shell uname -m)";
         }
     };
 
@@ -86,7 +88,7 @@ public:
             if (type == AggregateTarget)
                 // the aggregate target should not specify any settings at all!
                 // it just defines dependencies on the other targets.
-                return StringArray();
+                return {};
 
             StringPairArray commonOptions  = owner.getAllPreprocessorDefs (config, ProjectType::Target::unspecified);
             StringPairArray targetSpecific = owner.getAllPreprocessorDefs (config, type);
@@ -140,17 +142,13 @@ public:
         {
             switch (type)
             {
-                case VSTPlugIn:
-                    return ".so";
-                case VST3PlugIn:
-                    return ".vst3";
-                case SharedCodeTarget:
-                    return ".a";
-                default:
-                    break;
+                case VSTPlugIn:             return ".so";
+                case VST3PlugIn:            return ".vst3";
+                case SharedCodeTarget:      return ".a";
+                default:                    break;
             }
 
-            return String();
+            return {};
         }
 
         String getTargetVarName() const

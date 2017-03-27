@@ -873,5 +873,5 @@ String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& confi
     if (libraries.size() != 0)
         return replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim();
 
-    return String();
+    return {};
 }

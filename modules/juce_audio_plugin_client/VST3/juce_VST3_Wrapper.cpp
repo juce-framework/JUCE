@@ -862,7 +862,7 @@ private:
     private:
         void timerCallback() override
         {
-            stopTimer ();
+            stopTimer();
 
             ViewRect viewRect;
             getSize (&viewRect);

@@ -242,7 +242,7 @@ String SystemStats::getOperatingSystemName()
 
 String SystemStats::getDeviceDescription()
 {
-    return String();
+    return {};
 }
 
 bool SystemStats::isOperatingSystem64Bit()

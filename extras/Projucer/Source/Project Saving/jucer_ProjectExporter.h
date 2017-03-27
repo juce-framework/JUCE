@@ -218,7 +218,7 @@ public:
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
         virtual var getDefaultOptimisationLevel() const = 0;
-        virtual String getLibrarySubdirPath() const         { return String(); }
+        virtual String getLibrarySubdirPath() const         { return {}; }
 
 
         //==============================================================================

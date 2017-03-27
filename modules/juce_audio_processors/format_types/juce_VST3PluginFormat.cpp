@@ -2131,7 +2131,7 @@ public:
                 return toString (busInfo.name);
         }
 
-        return String();
+        return {};
     }
 
     const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, true, true); }
@@ -2223,7 +2223,7 @@ public:
             return toString (result);
         }
 
-        return String();
+        return {};
     }
 
     void setParameter (int parameterIndex, float newValue) override

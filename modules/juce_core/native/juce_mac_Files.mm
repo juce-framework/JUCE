@@ -273,7 +273,7 @@ String File::getVersion() const
                     return nsStringToJuce (name);
     }
 
-    return String();
+    return {};
 }
 
 //==============================================================================
