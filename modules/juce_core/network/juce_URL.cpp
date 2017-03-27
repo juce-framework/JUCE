@@ -484,6 +484,8 @@ WebInputStream* URL::createInputStream (const bool usePostCommand,
 
     if (timeOutMs != 0)
         wi->withConnectionTimeout (timeOutMs);
+    else if (connectionTimeOutMs != 0)
+        wi->withConnectionTimeout (connectionTimeOutMs);
 
     if (httpRequestCmd.isNotEmpty())
         wi->withCustomRequestCommand (httpRequestCmd);
