@@ -679,6 +679,65 @@ private:
 juce_ImplementSingleton_SingleThreaded (OnScreenKeyboard)
 
 //==============================================================================
+struct HSTRING_PRIVATE;
+typedef HSTRING_PRIVATE* HSTRING;
+
+class IInspectable : public IUnknown
+{
+public:
+    virtual ::HRESULT STDMETHODCALLTYPE GetIids (ULONG* ,IID**) = 0;
+    virtual ::HRESULT STDMETHODCALLTYPE GetRuntimeClassName(HSTRING*) = 0;
+    virtual ::HRESULT STDMETHODCALLTYPE GetTrustLevel(void*) = 0;
+};
+
+class
+   #if (! JUCE_MINGW)
+    __declspec (uuid ("3694dbf9-8f68-44be-8ff5-195c98ede8a6"))
+   #endif
+    IUIViewSettingsInterop     : public IInspectable
+{
+public:
+    virtual HRESULT STDMETHODCALLTYPE GetForWindow(HWND hwnd, REFIID riid, void **ppv) = 0;
+};
+
+class
+   #if (! JUCE_MINGW)
+    __declspec (uuid ("C63657F6-8850-470D-88F8-455E16EA2C26"))
+   #endif
+    IUIViewSettings     : public IInspectable
+{
+public:
+    enum UserInteractionMode
+    {
+        Mouse = 0,
+        Touch = 1
+    };
+
+    virtual HRESULT STDMETHODCALLTYPE GetUserInteractionMode (UserInteractionMode *value) = 0;
+};
+
+#if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
+template <>
+struct UUIDGetter<IUIViewSettingsInterop>
+{
+    static CLSID get()
+    {
+        GUID g = {0x3694dbf9, 0x8f68, 0x44be, {0x8f, 0xf5, 0x19, 0x5c, 0x98, 0xed, 0xe8, 0xa6}};
+        return g;
+    }
+};
+
+template <>
+struct UUIDGetter<IUIViewSettings>
+{
+    static CLSID get()
+    {
+        GUID g = {0xC63657F6, 0x8850, 0x470D, {0x88, 0xf8, 0x45, 0x5e, 0x16, 0xea, 0x2c, 0x26}};
+        return g;
+    }
+};
+#endif
+
 class UWPUIViewSettings
 {
 public:
@@ -738,70 +797,6 @@ public:
     }
 
 private:
-    struct HSTRING_PRIVATE;
-    typedef HSTRING_PRIVATE* HSTRING;
-
-    //==============================================================================
-    class IInspectable : public IUnknown
-    {
-    public:
-        virtual ::HRESULT STDMETHODCALLTYPE GetIids (ULONG* ,IID**) = 0;
-        virtual ::HRESULT STDMETHODCALLTYPE GetRuntimeClassName(HSTRING*) = 0;
-        virtual ::HRESULT STDMETHODCALLTYPE GetTrustLevel(void*) = 0;
-    };
-
-    //==============================================================================
-    class
-       #if (! JUCE_MINGW)
-        __declspec (uuid ("3694dbf9-8f68-44be-8ff5-195c98ede8a6"))
-       #endif
-    IUIViewSettingsInterop     : public IInspectable
-    {
-    public:
-        virtual HRESULT STDMETHODCALLTYPE GetForWindow(HWND hwnd, REFIID riid, void **ppv) = 0;
-    };
-
-   #if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
-    template <>
-    struct UUIDGetter<IUIViewSettingsInterop>
-    {
-        static CLSID get()
-        {
-            GUID g = {0x3694dbf9, 0x8f68, 0x44be, {0x8f, 0xf5, 0x19, 0x5c, 0x98, 0xed, 0xe8, 0xa6}};
-            return g;
-        }
-    };
-   #endif
-
-    //==============================================================================
-    class
-       #if (! JUCE_MINGW)
-        __declspec (uuid ("C63657F6-8850-470D-88F8-455E16EA2C26"))
-       #endif
-    IUIViewSettings     : public IInspectable
-    {
-    public:
-        enum UserInteractionMode
-        {
-          Mouse = 0,
-          Touch = 1
-        };
-
-        virtual HRESULT STDMETHODCALLTYPE GetUserInteractionMode (UserInteractionMode *value) = 0;
-    };
-
-   #if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
-    template <>
-    struct UUIDGetter<IUIViewSettings>
-    {
-        static CLSID get()
-        {
-            GUID g = {0xC63657F6, 0x8850, 0x470D, {0x88, 0xf8, 0x45, 0x5e, 0x16, 0xea, 0x2c, 0x26}};
-            return g;
-        }
-    };
-   #endif
-
     //==============================================================================
     struct ComBaseModule
     {
