@@ -424,7 +424,7 @@ int AudioProcessor::getChannelIndexInProcessBlockBuffer (bool isInput, int busIn
     for (int i = 0; i < ioBus.size() && i < busIndex; ++i)
         channelIndex += getChannelCountOfBus (isInput, i);
 
-        return channelIndex;
+    return channelIndex;
 }
 
 int AudioProcessor::getOffsetInBusBufferForAbsoluteChannelIndex (bool isInput, int absoluteChannelIndex, /*out*/ int& busIdx) const noexcept

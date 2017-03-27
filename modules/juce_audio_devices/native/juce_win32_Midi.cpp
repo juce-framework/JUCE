@@ -451,7 +451,7 @@ private:
                         while ((h.dwFlags & MHDR_DONE) == 0)
                             Sleep (1);
 
-                            int count = 500; // 1 sec timeout
+                        int count = 500; // 1 sec timeout
 
                         while (--count >= 0)
                         {
