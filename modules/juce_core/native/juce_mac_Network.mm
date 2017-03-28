@@ -526,7 +526,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     {
         if (calledComplete.exchange (1) == 0)
         {
-            httpCode = nsError != nil ? getHTTPErrorCode (nsError) ? -1;
+            httpCode = nsError != nil ? getHTTPErrorCode (nsError) : -1;
             error = true;
             finished = true;
 
