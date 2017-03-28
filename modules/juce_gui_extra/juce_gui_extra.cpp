@@ -68,6 +68,16 @@
  #include <X11/Xutil.h>
  #undef SIZEOF
  #undef KeyPress
+
+ #if JUCE_WEB_BROWSER
+  #include <unistd.h>
+  #include <fcntl.h>
+  #include <sys/wait.h>
+  #include <gtk/gtk.h>
+  #include <gtk/gtkx.h>
+  #include <glib-unix.h>
+  #include <webkit/webkit.h>
+ #endif
 #endif
 
 //==============================================================================
