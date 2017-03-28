@@ -279,6 +279,9 @@ Atoms::Atoms(::Display* display)
     XdndActionPrivate            = getCreating (display, "XdndActionPrivate");
     XdndActionDescription        = getCreating (display, "XdndActionDescription");
 
+    XembedMsgType                = getCreating (display, "_XEMBED");
+    XembedInfo                   = getCreating (display, "_XEMBED_INFO");
+
     allowedMimeTypes[0]          = getCreating (display, "UTF8_STRING");
     allowedMimeTypes[1]          = getCreating (display, "text/plain;charset=utf-8");
     allowedMimeTypes[2]          = getCreating (display, "text/plain");

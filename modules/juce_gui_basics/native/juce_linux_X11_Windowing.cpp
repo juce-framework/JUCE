@@ -26,6 +26,17 @@
  #define JUCE_DEBUG_XERRORS 1
 #endif
 
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+ #define JUCE_X11_SUPPORTS_XEMBED 1
+#else
+ #define JUCE_X11_SUPPORTS_XEMBED 0
+#endif
+
+#if JUCE_X11_SUPPORTS_XEMBED
+bool juce_handleXEmbedEvent (ComponentPeer*, void*);
+unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
+#endif
+
 extern WindowMessageReceiveCallback dispatchWindowMessage;
 
 extern XContext windowHandleXContext;
@@ -1456,8 +1467,8 @@ class LinuxComponentPeer  : public ComponentPeer
 public:
     LinuxComponentPeer (Component& comp, const int windowStyleFlags, Window parentToAddTo)
         : ComponentPeer (comp, windowStyleFlags),
-          windowH (0), parentWindow (0),
-          fullScreen (false), mapped (false),
+          windowH (0), parentWindow (0), keyProxy (0),
+          fullScreen (false), mapped (false), focused (false),
           visual (nullptr), depth (0),
           isAlwaysOnTop (comp.isAlwaysOnTop()),
           currentScaleFactor (1.0)
@@ -1483,6 +1494,10 @@ public:
     {
         // it's dangerous to delete a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+       #if JUCE_X11_SUPPORTS_XEMBED
+        juce_handleXEmbedEvent (this, nullptr);
+       #endif
 
         deleteIconPixmaps();
         destroyWindow();
@@ -1718,6 +1733,33 @@ public:
         return false;
     }
 
+    bool isParentWindowOf (Window possibleChild) const
+    {
+        if (windowH != 0 && possibleChild != 0)
+        {
+            if (possibleChild == windowH)
+                return true;
+
+            Window* windowList = nullptr;
+            uint32 windowListSize = 0;
+            Window parent, root;
+
+            ScopedXLock xlock (display);
+            if (XQueryTree (display, possibleChild, &root, &parent, &windowList, &windowListSize) != 0)
+            {
+                if (windowList != nullptr)
+                    XFree (windowList);
+
+                if (parent == root)
+                    return false;
+
+                return isParentWindowOf (parent);
+            }
+        }
+
+        return false;
+    }
+
     bool isFrontWindow() const
     {
         Window* windowList = nullptr;
@@ -1845,7 +1887,19 @@ public:
         ScopedXLock xlock (display);
         XGetInputFocus (display, &focusedWindow, &revert);
 
-        return focusedWindow == windowH;
+        return isParentWindowOf (focusedWindow);
+    }
+
+    Window getFocusWindow()
+    {
+       #if JUCE_X11_SUPPORTS_XEMBED
+        Window w = (Window) juce_getCurrentFocusWindow (this);
+
+        if (w != 0)
+            return w;
+       #endif
+
+        return windowH;
     }
 
     void grabFocus() override
@@ -1858,7 +1912,7 @@ public:
             && atts.map_state == IsViewable
             && ! isFocused())
         {
-            XSetInputFocus (display, windowH, RevertToParent, (::Time) getUserTime());
+            XSetInputFocus (display, getFocusWindow(), RevertToParent, (::Time) getUserTime());
             isActiveApplication = true;
         }
     }
@@ -2255,15 +2309,23 @@ public:
     void handleFocusInEvent()
     {
         isActiveApplication = true;
-        if (isFocused())
+
+        if (isFocused() && ! focused)
+        {
+            focused = true;
             handleFocusGain();
+        }
     }
 
     void handleFocusOutEvent()
     {
-        isActiveApplication = false;
-        if (! isFocused())
+        if (! isFocused() && focused)
+        {
+            focused = false;
+            isActiveApplication = false;
+
             handleFocusLoss();
+        }
     }
 
     void handleExposeEvent (XExposeEvent& exposeEvent)
@@ -2310,15 +2372,15 @@ public:
 
         // if the native title bar is dragged, need to tell any active menus, etc.
         if ((styleFlags & windowHasTitleBar) != 0
-              && component.isCurrentlyBlockedByAnotherModalComponent())
+            && component.isCurrentlyBlockedByAnotherModalComponent())
         {
-            if (Component* const currentModalComp = Component::getCurrentlyModalComponent())
-                currentModalComp->inputAttemptWhenModal();
+                if (Component* const currentModalComp = Component::getCurrentlyModalComponent())
+                    currentModalComp->inputAttemptWhenModal();
         }
 
         if (confEvent.window == windowH
-             && confEvent.above != 0
-             && isFrontWindow())
+            && confEvent.above != 0
+                && isFrontWindow())
         {
             handleBroughtToFront();
         }
@@ -2386,7 +2448,11 @@ public:
                          && XGetWindowAttributes (display, clientMsg.window, &atts))
                     {
                         if (atts.map_state == IsViewable)
-                            XSetInputFocus (display, clientMsg.window, RevertToParent, (::Time) clientMsg.data.l[1]);
+                            XSetInputFocus (display,
+                                            (clientMsg.window == windowH ? getFocusWindow ()
+                                                                         : clientMsg.window),
+                                            RevertToParent,
+                                            (::Time) clientMsg.data.l[1]);
                     }
                 }
             }
@@ -2482,6 +2548,51 @@ public:
         {
             if (Component* c = glRepaintListeners [i])
                 c->handleCommandMessage (0);
+        }
+    }
+
+    //==============================================================================
+    unsigned long createKeyProxy()
+    {
+        jassert (keyProxy == 0 && windowH != 0);
+
+        if (keyProxy == 0 && windowH != 0)
+        {
+            XSetWindowAttributes swa;
+            swa.event_mask = KeyPressMask | KeyReleaseMask | FocusChangeMask;
+
+            keyProxy = XCreateWindow (display, windowH,
+                                      -1, -1, 1, 1, 0, 0,
+                                      InputOnly, CopyFromParent,
+                                      CWEventMask,
+                                      &swa);
+
+            XMapWindow (display, keyProxy);
+            XSaveContext (display, (XID) keyProxy, windowHandleXContext, (XPointer) this);
+        }
+
+        return keyProxy;
+    }
+
+    void deleteKeyProxy()
+    {
+        jassert (keyProxy != 0);
+
+        if (keyProxy != 0)
+        {
+            XPointer handlePointer;
+
+            if (! XFindContext (display, (XID) keyProxy, windowHandleXContext, &handlePointer))
+                XDeleteContext (display, (XID) keyProxy, windowHandleXContext);
+
+            XDestroyWindow (display, keyProxy);
+            XSync (display, false);
+
+            XEvent event;
+            while (XCheckWindowEvent (display, keyProxy, getAllEventsMask(), &event) == True)
+            {}
+
+            keyProxy = 0;
         }
     }
 
@@ -2638,10 +2749,10 @@ private:
     ScopedPointer<LinuxRepaintManager> repainter;
 
     friend class LinuxRepaintManager;
-    Window windowH, parentWindow;
+    Window windowH, parentWindow, keyProxy;
     Rectangle<int> bounds;
     Image taskbarImage;
-    bool fullScreen, mapped;
+    bool fullScreen, mapped, focused;
     Visual* visual;
     int depth;
     BorderSize<int> windowBorder;
@@ -2927,11 +3038,6 @@ private:
                                  CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
                                  &swa);
 
-        unsigned int buttonMask = EnterWindowMask | LeaveWindowMask | PointerMotionMask;
-
-        if ((styleFlags & windowIgnoresMouseClicks) == 0)
-            buttonMask |= ButtonPressMask | ButtonReleaseMask;
-
         // Set the window context to identify the window handle object
         if (XSaveContext (display, (XID) windowH, windowHandleXContext, (XPointer) this))
         {
@@ -2984,6 +3090,10 @@ private:
         ScopedXLock xlock (display);
 
         XPointer handlePointer;
+
+        if (keyProxy != 0)
+            deleteKeyProxy();
+
         if (! XFindContext (display, (XID) windowH, windowHandleXContext, &handlePointer))
             XDeleteContext (display, (XID) windowH, windowHandleXContext);
 
@@ -3640,8 +3750,13 @@ namespace WindowingHelpers {
     {
         if (event.xany.window != None)
         {
-            if (LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (event.xany.window))
-                peer->handleWindowMessage (event);
+           #if JUCE_X11_SUPPORTS_XEMBED
+            if (! juce_handleXEmbedEvent (nullptr, &event))
+           #endif
+            {
+                if (LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (event.xany.window))
+                    peer->handleWindowMessage (event);
+            }
         }
         else if (event.xany.type == KeymapNotify)
         {
@@ -3927,6 +4042,19 @@ void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy)
         linuxPeer->removeOpenGLRepaintListener (dummy);
 }
 
+unsigned long juce_createKeyProxyWindow (ComponentPeer* peer)
+{
+    if (LinuxComponentPeer* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
+        return linuxPeer->createKeyProxy();
+
+    return 0;
+}
+
+void juce_deleteKeyProxyWindow (ComponentPeer* peer)
+{
+    if (LinuxComponentPeer* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
+        linuxPeer->deleteKeyProxy();
+}
 //==============================================================================
 #if JUCE_MODAL_LOOPS_PERMITTED
 void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,

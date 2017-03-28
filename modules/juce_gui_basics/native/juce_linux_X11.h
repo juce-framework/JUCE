@@ -103,6 +103,7 @@ struct Atoms
          XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
          XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
          XdndActionDescription, XdndActionCopy, XdndActionPrivate,
+         XembedMsgType, XembedInfo,
          allowedActions[5],
          allowedMimeTypes[4];
 
