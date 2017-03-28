@@ -282,10 +282,10 @@ void FileTreeComponent::refresh()
 //==============================================================================
 File FileTreeComponent::getSelectedFile (const int index) const
 {
-    if (const FileListTreeItem* const item = dynamic_cast<const FileListTreeItem*> (getSelectedItem (index)))
+    if (auto* item = dynamic_cast<const FileListTreeItem*> (getSelectedItem (index)))
         return item->file;
 
-    return File();
+    return {};
 }
 
 void FileTreeComponent::deselectAllFiles()

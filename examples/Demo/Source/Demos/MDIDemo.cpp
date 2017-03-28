@@ -86,7 +86,7 @@ public:
     File getLastDocumentOpened() override
     {
         // not interested in this for now
-        return File();
+        return {};
     }
 
     void setLastDocumentOpened (const File& /*file*/) override

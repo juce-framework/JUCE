@@ -43,7 +43,7 @@ public:
         if (f.hasFileExtension (sourceFileExtensions))  return f.withFileExtension (".h");
         if (f.hasFileExtension (headerFileExtensions))  return f.withFileExtension (".cpp");
 
-        return File();
+        return {};
     }
 
     void setName (const String& newName) override

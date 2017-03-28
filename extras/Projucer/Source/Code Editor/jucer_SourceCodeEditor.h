@@ -64,7 +64,7 @@ public:
             return findCounterpart (file, extensions);
         }
 
-        return File();
+        return {};
     }
 
     static File findCounterpart (const File& file, const char** extensions)
@@ -77,7 +77,7 @@ public:
                 return f;
         }
 
-        return File();
+        return {};
     }
 
     void reloadFromFile() override;

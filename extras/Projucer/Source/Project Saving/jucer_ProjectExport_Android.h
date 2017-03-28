@@ -284,7 +284,7 @@ public:
            return defaultInstallation;
       #endif
 
-        return File();
+        return {};
     }
 
 protected:

@@ -114,10 +114,10 @@ File File::getSpecialLocation (const SpecialLocationType type)
             if (const char* homeDir = getenv ("HOME"))
                 return File (CharPointer_UTF8 (homeDir));
 
-            if (struct passwd* const pw = getpwuid (getuid()))
+            if (auto* pw = getpwuid (getuid()))
                 return File (CharPointer_UTF8 (pw->pw_dir));
 
-            return File();
+            return {};
         }
 
         case userDocumentsDirectory:          return resolveXDGFolder ("XDG_DOCUMENTS_DIR", "~/Documents");
@@ -161,7 +161,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             break;
     }
 
-    return File();
+    return {};
 }
 
 //==============================================================================

@@ -456,14 +456,12 @@ namespace
     {
         File result;
 
-        for (int i = 0; i < allFiles.size(); ++i)
+        for (auto& f : allFiles)
         {
-            const File& f = allFiles.getReference(i);
-
             if (f.getFileName().equalsIgnoreCase (name) && f != sourceFile)
             {
                 if (result.exists())
-                    return File(); // multiple possible results, so don't change it!
+                    return {}; // multiple possible results, so don't change it!
 
                 result = f;
             }

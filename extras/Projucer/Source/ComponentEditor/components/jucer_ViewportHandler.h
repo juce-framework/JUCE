@@ -502,10 +502,10 @@ private:
 
         File getFile() const
         {
-            const String filename (getViewportJucerComponentFile (component));
+            auto filename = getViewportJucerComponentFile (component);
 
             if (filename.isEmpty())
-                return File();
+                return {};
 
             return document.getCppFile().getSiblingFile (filename);
         }

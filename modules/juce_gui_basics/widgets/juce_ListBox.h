@@ -59,7 +59,7 @@ public:
         and handle mouse clicks with listBoxItemClicked().
 
         This method will be called whenever a custom component might need to be updated - e.g.
-        when the table is changed, or TableListBox::updateContent() is called.
+        when the list is changed, or ListBox::updateContent() is called.
 
         If you don't need a custom component for the specified row, then return nullptr.
         (Bear in mind that even if you're not creating a new component, you may still need to

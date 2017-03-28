@@ -96,21 +96,21 @@ File ModuleDescription::getHeader() const
     {
         const char* extensions[] = { ".h", ".hpp", ".hxx" };
 
-        for (int i = 0; i < numElementsInArray (extensions); ++i)
+        for (auto e : extensions)
         {
-            File header (moduleFolder.getChildFile (moduleFolder.getFileName() + extensions[i]));
+            File header (moduleFolder.getChildFile (moduleFolder.getFileName() + e));
 
             if (header.existsAsFile())
                 return header;
         }
     }
 
-    return File();
+    return {};
 }
 
 StringArray ModuleDescription::getDependencies() const
 {
-    StringArray deps = StringArray::fromTokens (moduleInfo ["dependencies"].toString(), " \t;,", "\"'");
+    auto deps = StringArray::fromTokens (moduleInfo ["dependencies"].toString(), " \t;,", "\"'");
     deps.trim();
     deps.removeEmptyStrings();
     return deps;
@@ -635,7 +635,7 @@ File EnabledModuleList::findLocalModuleFolder (const String& moduleID, bool useE
         }
     }
 
-    return File();
+    return {};
 }
 
 File EnabledModuleList::getModuleFolder (const String& moduleID)

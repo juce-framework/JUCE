@@ -400,7 +400,7 @@ bool Project::hasProjectBeenModified()
 File Project::resolveFilename (String filename) const
 {
     if (filename.isEmpty())
-        return File();
+        return {};
 
     filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
 
@@ -863,7 +863,7 @@ File Project::Item::getFile() const
     if (isFile())
         return project.resolveFilename (state [Ids::file].toString());
 
-    return File();
+    return {};
 }
 
 void Project::Item::setFile (const File& file)

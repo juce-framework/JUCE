@@ -253,7 +253,7 @@ public:
             appFolder = appFolder.getParentDirectory();
         }
 
-        return File();
+        return {};
     }
 
 private:

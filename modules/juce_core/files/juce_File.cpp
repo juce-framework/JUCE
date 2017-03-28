@@ -698,7 +698,7 @@ bool File::hasFileExtension (StringRef possibleSuffix) const
 File File::withFileExtension (StringRef newExtension) const
 {
     if (fullPath.isEmpty())
-        return File();
+        return {};
 
     String filePart (getFileName());
 

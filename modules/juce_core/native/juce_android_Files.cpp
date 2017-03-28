@@ -86,7 +86,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             break;
     }
 
-    return File();
+    return {};
 }
 
 bool File::moveToTrash() const

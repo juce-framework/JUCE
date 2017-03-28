@@ -127,7 +127,7 @@ private:
         if (tryFindDLLFileInAppConfigFolder(dllFile))
             return dllFile;
 
-        return File();
+        return {};
     }
 
    #if JUCE_MAC
