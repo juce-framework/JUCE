@@ -211,8 +211,12 @@ struct Viewport::DragToScrollListener   : private MouseListener,
                                                                 (int) offsetY.getPosition()));
     }
 
-    void mouseDown (const MouseEvent&) override
+    void mouseDown (const MouseEvent& e) override
     {
+        for (auto c = e.eventComponent; c != nullptr && c != &viewport; c = c->getParentComponent())
+            if (c->getViewportIgnoreDragFlag())
+                return;
+
         ++numTouches;
     }
 
