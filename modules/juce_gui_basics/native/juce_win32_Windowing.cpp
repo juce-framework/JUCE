@@ -67,64 +67,6 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 }
 
 //==============================================================================
-#ifndef WM_TOUCH
- #define WM_TOUCH 0x0240
- #define TOUCHEVENTF_MOVE    0x0001
- #define TOUCHEVENTF_DOWN    0x0002
- #define TOUCHEVENTF_UP      0x0004
- #define TOUCHEVENTF_PRIMARY 0x0010
- DECLARE_HANDLE (HTOUCHINPUT);
- DECLARE_HANDLE (HGESTUREINFO);
-
- struct TOUCHINPUT
- {
-    LONG x;
-    LONG y;
-    HANDLE hSource;
-    DWORD dwID;
-    DWORD dwFlags;
-    DWORD dwMask;
-    DWORD dwTime;
-    ULONG_PTR dwExtraInfo;
-    DWORD cxContact;
-    DWORD cyContact;
- };
-
- struct GESTUREINFO
- {
-    UINT cbSize;
-    DWORD dwFlags;
-    DWORD dwID;
-    HWND hwndTarget;
-    POINTS ptsLocation;
-    DWORD dwInstanceID;
-    DWORD dwSequenceID;
-    ULONGLONG ullArguments;
-    UINT cbExtraArgs;
- };
-
-#endif
-
-#ifndef WM_NCPOINTERUPDATE
-enum
-{
-    WM_NCPOINTERUPDATE             = 0x241,
-    WM_NCPOINTERDOWN               = 0x242,
-    WM_NCPOINTERUP                 = 0x243,
-    WM_POINTERUPDATE               = 0x245,
-    WM_POINTERDOWN                 = 0x246,
-    WM_POINTERUP                   = 0x247,
-    WM_POINTERENTER                = 0x249,
-    WM_POINTERLEAVE                = 0x24A,
-    WM_POINTERACTIVATE             = 0x24B,
-    WM_POINTERCAPTURECHANGED       = 0x24C,
-    WM_TOUCHHITTESTING             = 0x24D,
-    WM_POINTERWHEEL                = 0x24E,
-    WM_POINTERHWHEEL               = 0x24F,
-    WM_POINTERHITTEST              = 0x250
-};
-#endif
-
 #ifndef MONITOR_DPI_TYPE
   enum Monitor_DPI_Type
   {
@@ -173,6 +115,27 @@ static bool canUseMultiTouch()
     }
 
     return registerTouchWindow != nullptr;
+}
+
+typedef BOOL (WINAPI* GetPointerTypeFunc) (UINT32, POINTER_INPUT_TYPE*);
+typedef BOOL (WINAPI* GetPointerTouchInfoFunc) (UINT32, POINTER_TOUCH_INFO*);
+typedef BOOL (WINAPI* GetPointerPenInfoFunc) (UINT32, POINTER_PEN_INFO*);
+
+static GetPointerTypeFunc      getPointerTypeFunction = nullptr;
+static GetPointerTouchInfoFunc getPointerTouchInfo = nullptr;
+static GetPointerPenInfoFunc   getPointerPenInfo = nullptr;
+
+static bool canUsePointerAPI = false;
+
+static void checkForPointerAPI()
+{
+    getPointerTypeFunction = (GetPointerTypeFunc) getUser32Function ("GetPointerType");
+    getPointerTouchInfo    = (GetPointerTouchInfoFunc) getUser32Function ("GetPointerTouchInfo");
+    getPointerPenInfo      = (GetPointerPenInfoFunc) getUser32Function ("GetPointerPenInfo");
+
+    canUsePointerAPI = (getPointerTypeFunction != nullptr
+                     && getPointerTouchInfo    != nullptr
+                     && getPointerPenInfo      != nullptr);
 }
 
 static Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
@@ -1698,6 +1661,7 @@ private:
             setDPIAwareness();
             setMessageFilter();
             updateBorderSize();
+            checkForPointerAPI();
 
             // Calling this function here is (for some reason) necessary to make Windows
             // correctly enable the menu items that we specify in the wm_initmenu message.
@@ -2195,15 +2159,19 @@ private:
 
     static MouseInputSource::InputSourceType getPointerType (WPARAM wParam)
     {
-       #if JUCE_USE_WINDOWS_POINTER_API
-        POINTER_INPUT_TYPE pointerType;
+        if (getPointerTypeFunction != nullptr)
+        {
+            POINTER_INPUT_TYPE pointerType;
 
-        if (GetPointerType (GET_POINTERID_WPARAM (wParam), &pointerType))
-            if (pointerType == 3)
-                return MouseInputSource::InputSourceType::pen;
-       #else
-        ignoreUnused (wParam);
-       #endif
+            if (getPointerTypeFunction (GET_POINTERID_WPARAM (wParam), &pointerType))
+            {
+                if (pointerType == 2)
+                    return MouseInputSource::InputSourceType::touch;
+
+                if (pointerType == 3)
+                    return MouseInputSource::InputSourceType::pen;
+            }
+        }
 
         return MouseInputSource::InputSourceType::mouse;
     }
@@ -2345,34 +2313,35 @@ private:
         return true;
     }
 
-   #if JUCE_USE_WINDOWS_POINTER_API
     bool handlePointerInput (WPARAM wParam, LPARAM lParam, const bool isDown, const bool isUp)
     {
-        POINTER_INPUT_TYPE pointerType;
-        if (! GetPointerType (GET_POINTERID_WPARAM (wParam), &pointerType))
+        if (! canUsePointerAPI)
             return false;
 
-        if (pointerType == 0x00000002) // PT_TOUCH
+        auto pointerType = getPointerType (wParam);
+
+        if (pointerType == MouseInputSource::InputSourceType::touch)
         {
             POINTER_TOUCH_INFO touchInfo;
-            if (! GetPointerTouchInfo (GET_POINTERID_WPARAM (wParam), &touchInfo))
+            if (! getPointerTouchInfo (GET_POINTERID_WPARAM (wParam), &touchInfo))
                 return false;
 
-            const float pressure = touchInfo.touchMask & TOUCH_MASK_PRESSURE ? touchInfo.pressure : MouseInputSource::invalidPressure;
-            const float orientation = touchInfo.touchMask & TOUCH_MASK_ORIENTATION ? degreesToRadians (static_cast<float> (touchInfo.orientation))
-                                                                                   : MouseInputSource::invalidOrientation;
+            const auto pressure = touchInfo.touchMask & TOUCH_MASK_PRESSURE ? touchInfo.pressure
+                                                                            : MouseInputSource::invalidPressure;
+            const auto orientation = touchInfo.touchMask & TOUCH_MASK_ORIENTATION ? degreesToRadians (static_cast<float> (touchInfo.orientation))
+                                                                                  : MouseInputSource::invalidOrientation;
 
             if (! handleTouchInput (emulateTouchEventFromPointer (lParam, wParam),
                                     isDown, isUp, pressure, orientation))
                 return false;
         }
-        else if (pointerType == 0x00000003) // PT_PEN
+        else if (pointerType == MouseInputSource::InputSourceType::pen)
         {
             POINTER_PEN_INFO penInfo;
-            if (! GetPointerPenInfo (GET_POINTERID_WPARAM (wParam), &penInfo))
+            if (! getPointerPenInfo (GET_POINTERID_WPARAM (wParam), &penInfo))
                 return false;
 
-            const float pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? penInfo.pressure / 1024.0f : MouseInputSource::invalidPressure;
+            const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? penInfo.pressure / 1024.0f : MouseInputSource::invalidPressure;
 
             if (! handlePenInput (penInfo, globalToLocal (Point<float> (static_cast<float> (GET_X_LPARAM(lParam)),
                                                                         static_cast<float> (GET_Y_LPARAM(lParam)))),
@@ -2400,7 +2369,7 @@ private:
 
     bool handlePenInput (POINTER_PEN_INFO penInfo, Point<float> pos, const float pressure, bool isDown, bool isUp)
     {
-        const int64 time = getMouseEventTime();
+        const auto time = getMouseEventTime();
         ModifierKeys modsToSend (currentModifiers);
         PenDetails penDetails;
 
@@ -2448,8 +2417,6 @@ private:
 
         return true;
     }
-
-   #endif
 
     //==============================================================================
     void sendModifierKeyChangeIfNeeded()
@@ -2941,7 +2908,6 @@ private:
                 return 1;
 
             //==============================================================================
-           #if JUCE_USE_WINDOWS_POINTER_API
             case WM_POINTERUPDATE:
                 if (handlePointerInput (wParam, lParam, false, false))
                     return 0;
@@ -2956,7 +2922,6 @@ private:
                 if (handlePointerInput (wParam, lParam, false, true))
                     return 0;
                 break;
-           #endif
 
             //==============================================================================
             case WM_MOUSEMOVE:          doMouseMove (getPointFromLParam (lParam), false); return 0;
