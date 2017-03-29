@@ -364,14 +364,14 @@ protected:
     Component& component;
     const int styleFlags;
     Rectangle<int> lastNonFullscreenBounds;
-    ComponentBoundsConstrainer* constrainer;
+    ComponentBoundsConstrainer* constrainer = nullptr;
 
 private:
     //==============================================================================
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
-    Component* lastDragAndDropCompUnderMouse;
+    Component* lastDragAndDropCompUnderMouse = nullptr;
     const uint32 uniqueID;
-    bool isWindowMinimised;
+    bool isWindowMinimised = false;
     Component* getTargetForKeyPress();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer)

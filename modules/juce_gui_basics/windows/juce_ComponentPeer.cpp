@@ -28,17 +28,14 @@ static uint32 lastUniquePeerID = 1;
 ComponentPeer::ComponentPeer (Component& comp, const int flags)
     : component (comp),
       styleFlags (flags),
-      constrainer (nullptr),
-      lastDragAndDropCompUnderMouse (nullptr),
-      uniqueID (lastUniquePeerID += 2), // increment by 2 so that this can never hit 0
-      isWindowMinimised (false)
+      uniqueID (lastUniquePeerID += 2) // increment by 2 so that this can never hit 0
 {
     Desktop::getInstance().peers.add (this);
 }
 
 ComponentPeer::~ComponentPeer()
 {
-    Desktop& desktop = Desktop::getInstance();
+    auto& desktop = Desktop::getInstance();
     desktop.peers.removeFirstMatchingValue (this);
     desktop.triggerFocusCallback();
 }
@@ -56,15 +53,9 @@ ComponentPeer* ComponentPeer::getPeer (const int index) noexcept
 
 ComponentPeer* ComponentPeer::getPeerFor (const Component* const component) noexcept
 {
-    const Array<ComponentPeer*>& peers = Desktop::getInstance().peers;
-
-    for (int i = peers.size(); --i >= 0;)
-    {
-        ComponentPeer* const peer = peers.getUnchecked(i);
-
+    for (auto* peer : Desktop::getInstance().peers)
         if (&(peer->getComponent()) == component)
             return peer;
-    }
 
     return nullptr;
 }
@@ -169,7 +160,7 @@ Component* ComponentPeer::getTargetForKeyPress()
         c = &component;
 
     if (c->isCurrentlyBlockedByAnotherModalComponent())
-        if (Component* const currentModalComp = Component::getCurrentlyModalComponent())
+        if (auto* currentModalComp = Component::getCurrentlyModalComponent())
             c = currentModalComp;
 
     return c;
@@ -193,7 +184,7 @@ bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
     {
         const WeakReference<Component> deletionChecker (target);
 
-        if (const Array<KeyListener*>* const keyListeners = target->keyListeners)
+        if (auto* keyListeners = target->keyListeners.get())
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
@@ -211,7 +202,7 @@ bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
         if (keyWasUsed || deletionChecker == nullptr)
             break;
 
-        if (Component* const currentlyFocused = Component::getCurrentlyFocusedComponent())
+        if (auto* currentlyFocused = Component::getCurrentlyFocusedComponent())
         {
             const bool isTab      = (keyInfo == KeyPress::tabKey);
             const bool isShiftTab = (keyInfo == KeyPress (KeyPress::tabKey, ModifierKeys::shiftModifier, 0));
@@ -265,7 +256,7 @@ void ComponentPeer::handleModifierKeysChange()
 {
     ModifierKeys::updateCurrentModifiers();
 
-    Component* target = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
+    auto* target = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
 
     if (target == nullptr)
         target = Component::getCurrentlyFocusedComponent();
@@ -279,7 +270,7 @@ void ComponentPeer::handleModifierKeysChange()
 
 TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
 {
-    Component* const c = Component::getCurrentlyFocusedComponent();
+    auto* c = Component::getCurrentlyFocusedComponent();
 
     if (c == &component || component.isParentOf (c))
         if (TextInputTarget* const ti = dynamic_cast<TextInputTarget*> (c))
@@ -313,8 +304,8 @@ void ComponentPeer::handleMovedOrResized()
     {
         const WeakReference<Component> deletionChecker (&component);
 
-        Rectangle<int> newBounds (Component::ComponentHelpers::rawPeerPositionToLocal (component, getBounds()));
-        Rectangle<int> oldBounds (component.getBounds());
+        auto newBounds = Component::ComponentHelpers::rawPeerPositionToLocal (component, getBounds());
+        auto oldBounds = component.getBounds();
 
         const bool wasMoved   = (oldBounds.getPosition() != newBounds.getPosition());
         const bool wasResized = (oldBounds.getWidth() != newBounds.getWidth() || oldBounds.getHeight() != newBounds.getHeight());
@@ -452,31 +443,6 @@ namespace DragHelpers
 
         return nullptr;
     }
-
-    // We'll use an async message to deliver the drop, because if the target decides
-    // to run a modal loop, it can gum-up the operating system..
-    class AsyncDropMessage  : public CallbackMessage
-    {
-    public:
-        AsyncDropMessage (Component* c, const ComponentPeer::DragInfo& d)  : target (c), info (d) {}
-
-        void messageCallback() override
-        {
-            if (Component* const c = target.get())
-            {
-                if (isFileDrag (info))
-                    dynamic_cast<FileDragAndDropTarget*> (c)->filesDropped (info.files, info.position.x, info.position.y);
-                else
-                    dynamic_cast<TextDragAndDropTarget*> (c)->textDropped (info.text, info.position.x, info.position.y);
-            }
-        }
-
-    private:
-        WeakReference<Component> target;
-        const ComponentPeer::DragInfo info;
-
-        JUCE_DECLARE_NON_COPYABLE (AsyncDropMessage)
-    };
 }
 
 bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
@@ -508,7 +474,7 @@ bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
             if (DragHelpers::isSuitableTarget (info, newTarget))
             {
                 dragAndDropTargetComponent = newTarget;
-                const Point<int> pos (newTarget->getLocalPoint (&component, info.position));
+                auto pos = newTarget->getLocalPoint (&component, info.position);
 
                 if (DragHelpers::isFileDrag (info))
                     dynamic_cast<FileDragAndDropTarget*> (newTarget)->fileDragEnter (info.files, pos.x, pos.y);
@@ -525,7 +491,7 @@ bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
     if (! DragHelpers::isSuitableTarget (info, newTarget))
         return false;
 
-    const Point<int> pos (newTarget->getLocalPoint (&component, info.position));
+    auto pos = newTarget->getLocalPoint (&component, info.position);
 
     if (DragHelpers::isFileDrag (info))
         dynamic_cast<FileDragAndDropTarget*> (newTarget)->fileDragMove (info.files, pos.x, pos.y);
@@ -550,7 +516,7 @@ bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
 {
     handleDragMove (info);
 
-    if (Component* const targetComp = dragAndDropTargetComponent)
+    if (WeakReference<Component> targetComp = dragAndDropTargetComponent)
     {
         dragAndDropTargetComponent = nullptr;
         lastDragAndDropCompUnderMouse = nullptr;
@@ -565,10 +531,22 @@ bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
                     return true;
             }
 
-            ComponentPeer::DragInfo info2 (info);
-            info2.position = targetComp->getLocalPoint (&component, info.position);
+            ComponentPeer::DragInfo infoCopy (info);
+            infoCopy.position = targetComp->getLocalPoint (&component, info.position);
 
-            (new DragHelpers::AsyncDropMessage (targetComp, info2))->post();
+            // We'll use an async message to deliver the drop, because if the target decides
+            // to run a modal loop, it can gum-up the operating system..
+            MessageManager::callAsync ([=]()
+            {
+                if (auto* c = targetComp.get())
+                {
+                    if (DragHelpers::isFileDrag (info))
+                        dynamic_cast<FileDragAndDropTarget*> (c)->filesDropped (infoCopy.files, infoCopy.position.x, infoCopy.position.y);
+                    else
+                        dynamic_cast<TextDragAndDropTarget*> (c)->textDropped (infoCopy.text, infoCopy.position.x, infoCopy.position.y);
+                }
+            });
+
             return true;
         }
     }

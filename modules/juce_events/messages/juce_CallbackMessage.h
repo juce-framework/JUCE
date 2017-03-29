@@ -46,7 +46,10 @@
     Always create a new instance of a CallbackMessage on the heap, as it will be
     deleted automatically after the message has been delivered.
 
-    @see MessageManager, MessageListener, ActionListener, ChangeListener
+    Note that this class was essential back in the days before C++11, but in modern
+    times you may prefer to use MessageManager::callAsync() with a lambda.
+
+    @see MessageManager::callAsync, MessageListener, ActionListener, ChangeListener
 */
 class JUCE_API  CallbackMessage   : public MessageManager::MessageBase
 {

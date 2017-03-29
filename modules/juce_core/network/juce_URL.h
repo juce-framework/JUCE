@@ -393,14 +393,14 @@ public:
 
     /** Download the URL to a file.
 
-     This method attempts to download the URL to a given file location.
+        This method attempts to download the URL to a given file location.
 
-     Using this method to download files on mobile is less flexible but more reliable
-     than using createInputStream or WebInputStreams as it will attempt to download the file
-     using a native OS background network task. Such tasks automatically deal with
-     network re-connections and continuing your download while your app is suspended but are
-     limited to simple GET requests.
-     */
+        Using this method to download files on mobile is less flexible but more reliable
+        than using createInputStream or WebInputStreams as it will attempt to download the file
+        using a native OS background network task. Such tasks automatically deal with
+        network re-connections and continuing your download while your app is suspended but are
+        limited to simple GET requests.
+    */
     DownloadTask* downloadToFile (const File& targetLocation,
                                   String extraHeaders = String(),
                                   DownloadTask::Listener* listener = nullptr);

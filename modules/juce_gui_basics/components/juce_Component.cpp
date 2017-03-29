@@ -1731,7 +1731,7 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus,
 
     if (! isCurrentlyModal (false))
     {
-        ModalComponentManager& mcm = *ModalComponentManager::getInstance();
+        auto& mcm = *ModalComponentManager::getInstance();
         mcm.startModal (this, deleteWhenDismissed);
         mcm.attachCallback (this, callback);
 
@@ -1753,36 +1753,24 @@ void Component::exitModalState (const int returnValue)
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            ModalComponentManager& mcm = *ModalComponentManager::getInstance();
+            auto& mcm = *ModalComponentManager::getInstance();
             mcm.endModal (this, returnValue);
             mcm.bringModalComponentsToFront();
 
             // If any of the mouse sources are over another Component when we exit the modal state then send a mouse enter event
-            const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
-
-            for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-            {
-                if (Component* c = mi->getComponentUnderMouse())
-                    c->internalMouseEnter (*mi, mi->getScreenPosition(), Time::getCurrentTime());
-            }
+            for (auto& ms : Desktop::getInstance().getMouseSources())
+                if (auto* c = ms.getComponentUnderMouse())
+                    c->internalMouseEnter (ms, ms.getScreenPosition(), Time::getCurrentTime());
         }
         else
         {
-            struct ExitModalStateMessage   : public CallbackMessage
+            WeakReference<Component> target (this);
+
+            MessageManager::callAsync ([=]()
             {
-                ExitModalStateMessage (Component* c, int res)  : target (c), result (res)  {}
-
-                void messageCallback() override
-                {
-                    if (Component* c = target)
-                        c->exitModalState (result);
-                }
-
-                WeakReference<Component> target;
-                int result;
-            };
-
-            (new ExitModalStateMessage (this, returnValue))->post();
+                if (auto* c = target.get())
+                    c->exitModalState (returnValue);
+            });
         }
     }
 }
@@ -1792,7 +1780,7 @@ bool Component::isCurrentlyModal (bool onlyConsiderForemostModalComponent) const
     const int n = onlyConsiderForemostModalComponent ? 1 : getNumCurrentlyModalComponents();
 
     for (int i = 0; i < n; ++i)
-        if (getCurrentlyModalComponent (i) == this)
+        if (getCurrentlyModalComponent(i) == this)
             return true;
 
     return false;
@@ -2333,25 +2321,15 @@ void Component::internalModalInputAttempt()
 }
 
 //==============================================================================
-void Component::postCommandMessage (const int commandId)
+void Component::postCommandMessage (const int commandID)
 {
-    struct CustomCommandMessage   : public CallbackMessage
+    WeakReference<Component> target (this);
+
+    MessageManager::callAsync ([=]()
     {
-        CustomCommandMessage (Component* const c, const int command)
-            : target (c), commandId (command) {}
-
-        void messageCallback() override
-        {
-            if (auto* c = target.get())
-                c->handleCommandMessage (commandId);
-        }
-
-    private:
-        WeakReference<Component> target;
-        int commandId;
-    };
-
-    (new CustomCommandMessage (this, commandId))->post();
+        if (auto* c = target.get())
+            c->handleCommandMessage (commandID);
+    });
 }
 
 void Component::handleCommandMessage (int)

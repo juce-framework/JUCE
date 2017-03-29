@@ -99,12 +99,12 @@ public:
    #endif
 
     //==============================================================================
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
-    /** Asynchronously invokes a function or C++11 lambda on the message thread.
-        Internally this uses the CallbackMessage class to invoke the callback.
-    */
-    static void callAsync (std::function<void(void)>);
-   #endif
+    /** Asynchronously invokes a function or C++11 lambda on the message thread. */
+    template <typename FunctionType>
+    static void callAsync (FunctionType functionToCall)
+    {
+        new AsyncCallInvoker<FunctionType> (functionToCall);
+    }
 
     /** Calls a function using the message-thread.
 
@@ -211,9 +211,9 @@ private:
     friend class MessageManagerLock;
 
     ScopedPointer<ActionBroadcaster> broadcaster;
-    bool quitMessagePosted, quitMessageReceived;
+    bool quitMessagePosted = false, quitMessageReceived = false;
     Thread::ThreadID messageThreadId;
-    Thread::ThreadID volatile threadWithLock;
+    Thread::ThreadID volatile threadWithLock = {};
     CriticalSection lockingLock;
 
     static bool postMessageToSystemQueue (MessageBase*);
@@ -221,6 +221,16 @@ private:
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
     static bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
+
+    template <typename FunctionType>
+    struct AsyncCallInvoker  : public MessageBase
+    {
+        AsyncCallInvoker (FunctionType f) : callback (f)  { post(); }
+        void messageCallback() override                   { callback(); }
+        FunctionType callback;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncCallInvoker)
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageManager)
 };

@@ -29,10 +29,7 @@
 */
 
 MessageManager::MessageManager() noexcept
-  : quitMessagePosted (false),
-    quitMessageReceived (false),
-    messageThreadId (Thread::getCurrentThreadId()),
-    threadWithLock (0)
+  : messageThreadId (Thread::getCurrentThreadId())
 {
     if (JUCEApplicationBase::isStandaloneApp())
         Thread::setCurrentThreadName ("Juce Message Thread");
@@ -74,7 +71,7 @@ void MessageManager::deleteInstance()
 //==============================================================================
 bool MessageManager::MessageBase::post()
 {
-    MessageManager* const mm = MessageManager::instance;
+    auto* mm = MessageManager::instance;
 
     if (mm == nullptr || mm->quitMessagePosted || ! postMessageToSystemQueue (this))
     {
@@ -118,7 +115,7 @@ public:
 
     void messageCallback() override
     {
-        if (MessageManager* const mm = MessageManager::instance)
+        if (auto* mm = MessageManager::instance)
             mm->quitMessageReceived = true;
     }
 
@@ -149,30 +146,11 @@ void MessageManager::stopDispatchLoop()
 #endif
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
-struct AsyncFunction  : private MessageManager::MessageBase
-{
-    AsyncFunction (std::function<void(void)> f)  : fn (f)  { post(); }
-
-private:
-    std::function<void(void)> fn;
-    void messageCallback() override    { fn(); }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncFunction)
-};
-
-void MessageManager::callAsync (std::function<void(void)> f)
-{
-    new AsyncFunction (f);
-}
-#endif
-
-//==============================================================================
 class AsyncFunctionCallback   : public MessageManager::MessageBase
 {
 public:
     AsyncFunctionCallback (MessageCallbackFunction* const f, void* const param)
-        : result (nullptr), func (f), parameter (param)
+        : func (f), parameter (param)
     {}
 
     void messageCallback() override
@@ -182,7 +160,7 @@ public:
     }
 
     WaitableEvent finished;
-    void* volatile result;
+    void* volatile result = nullptr;
 
 private:
     MessageCallbackFunction* const func;
@@ -306,7 +284,7 @@ MessageManagerLock::MessageManagerLock (BailOutChecker& bailOutChecker)
 
 bool MessageManagerLock::attemptLock (BailOutChecker* bailOutChecker)
 {
-    MessageManager* const mm = MessageManager::instance;
+    auto* mm = MessageManager::instance;
 
     if (mm == nullptr)
         return false;
@@ -358,7 +336,7 @@ MessageManagerLock::~MessageManagerLock() noexcept
 {
     if (blockingMessage != nullptr)
     {
-        MessageManager* const mm = MessageManager::instance;
+        auto* mm = MessageManager::instance;
 
         jassert (mm == nullptr || mm->currentThreadHasLockedMessageManager());
 
