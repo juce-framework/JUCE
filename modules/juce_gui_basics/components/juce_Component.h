@@ -2234,12 +2234,12 @@ public:
         Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
         should not move their parent Viewport when dragged.
     */
-    void setViewportIgnoreDragFlag (bool ignoreDrag) { flags.viewportIgnoreDragFlag = ignoreDrag; };
+    void setViewportIgnoreDragFlag (bool ignoreDrag) noexcept { flags.viewportIgnoreDragFlag = ignoreDrag; };
 
     /** Retrieves the current state of the Viewport drag-to-scroll functionality flag.
         @see setViewportIgnoreDragFlag
     */
-    bool getViewportIgnoreDragFlag() { return flags.viewportIgnoreDragFlag; }
+    bool getViewportIgnoreDragFlag() const noexcept { return flags.viewportIgnoreDragFlag; }
 
     //==============================================================================
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
