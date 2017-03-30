@@ -685,7 +685,7 @@ public:
 
         if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iid, Vst::IMessage::iid))
         {
-            ComSmartPtr<Message> m (new Message (*this, attributeList));
+            ComSmartPtr<Message> m (new Message (attributeList));
             messageQueue.add (m);
             m->addRef();
             *obj = m;
@@ -782,18 +782,18 @@ private:
     class Message  : public Vst::IMessage
     {
     public:
-        Message (VST3HostContext& o, Vst::IAttributeList* list)
-           : owner (o), attributeList (list)
+        Message (Vst::IAttributeList* list)
+           : attributeList (list)
         {
         }
 
-        Message (VST3HostContext& o, Vst::IAttributeList* list, FIDString id)
-           : owner (o), attributeList (list), messageId (toString (id))
+        Message (Vst::IAttributeList* list, FIDString id)
+           : attributeList (list), messageId (toString (id))
         {
         }
 
-        Message (VST3HostContext& o, Vst::IAttributeList* list, FIDString id, const var& v)
-           : value (v), owner (o), attributeList (list), messageId (toString (id))
+        Message (Vst::IAttributeList* list, FIDString id, const var& v)
+           : value (v), attributeList (list), messageId (toString (id))
         {
         }
 
@@ -809,7 +809,6 @@ private:
         var value;
 
     private:
-        VST3HostContext& owner;
         ComSmartPtr<Vst::IAttributeList> attributeList;
         String messageId;
         Atomic<int> refCount;
@@ -938,7 +937,7 @@ private:
                 }
             }
 
-            owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, value)));
+            owner->messageQueue.add (ComSmartPtr<Message> (new Message (this, id, value)));
         }
 
         template <typename Type>

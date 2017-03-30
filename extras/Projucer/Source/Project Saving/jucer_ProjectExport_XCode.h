@@ -28,7 +28,7 @@
 namespace
 {
     const char* const osxVersionDefault         = "default";
-    const int oldestSDKVersion  = 6;
+    const int oldestSDKVersion  = 5;
     const int currentSDKVersion = 12;
     const int minimumAUv3SDKVersion = 11;
 
