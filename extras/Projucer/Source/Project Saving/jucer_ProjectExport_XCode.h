@@ -28,7 +28,7 @@
 namespace
 {
     const char* const osxVersionDefault         = "default";
-    const int oldestSDKVersion  = 5;
+    const int oldestSDKVersion  = 6;
     const int currentSDKVersion = 12;
     const int minimumAUv3SDKVersion = 11;
 
@@ -2560,7 +2560,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 0820; ";
+        attributes << "{ LastUpgradeCheck = 0830; ";
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())
         {
