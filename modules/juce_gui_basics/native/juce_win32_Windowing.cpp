@@ -67,6 +67,131 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 }
 
 //==============================================================================
+#ifndef WM_NCPOINTERUPDATE
+enum
+{
+    WM_NCPOINTERUPDATE = 0x241,
+    WM_NCPOINTERDOWN = 0x242,
+    WM_NCPOINTERUP = 0x243,
+    WM_POINTERUPDATE = 0x245,
+    WM_POINTERDOWN = 0x246,
+    WM_POINTERUP = 0x247,
+    WM_POINTERENTER = 0x249,
+    WM_POINTERLEAVE = 0x24A,
+    WM_POINTERACTIVATE = 0x24B,
+    WM_POINTERCAPTURECHANGED = 0x24C,
+    WM_TOUCHHITTESTING = 0x24D,
+    WM_POINTERWHEEL = 0x24E,
+    WM_POINTERHWHEEL = 0x24F,
+    WM_POINTERHITTEST = 0x250
+};
+
+enum
+{
+    PT_TOUCH = 0x00000002,
+    PT_PEN = 0x00000003
+};
+
+enum POINTER_BUTTON_CHANGE_TYPE
+{
+    POINTER_CHANGE_NONE,
+    POINTER_CHANGE_FIRSTBUTTON_DOWN,
+    POINTER_CHANGE_FIRSTBUTTON_UP,
+    POINTER_CHANGE_SECONDBUTTON_DOWN,
+    POINTER_CHANGE_SECONDBUTTON_UP,
+    POINTER_CHANGE_THIRDBUTTON_DOWN,
+    POINTER_CHANGE_THIRDBUTTON_UP,
+    POINTER_CHANGE_FOURTHBUTTON_DOWN,
+    POINTER_CHANGE_FOURTHBUTTON_UP,
+    POINTER_CHANGE_FIFTHBUTTON_DOWN,
+    POINTER_CHANGE_FIFTHBUTTON_UP,
+};
+
+typedef DWORD POINTER_INPUT_TYPE;
+typedef UINT32 POINTER_FLAGS;
+
+typedef UINT32 PEN_FLAGS;
+
+typedef UINT32 PEN_MASK;
+#define PEN_MASK_NONE                   0x00000000
+#define PEN_MASK_PRESSURE               0x00000001
+#define PEN_MASK_ROTATION               0x00000002
+#define PEN_MASK_TILT_X                 0x00000004
+#define PEN_MASK_TILT_Y                 0x00000008
+
+typedef UINT32 TOUCH_FLAGS;
+
+typedef UINT32 TOUCH_MASK;
+#define TOUCH_MASK_NONE                 0x00000000
+#define TOUCH_MASK_CONTACTAREA          0x00000001
+#define TOUCH_MASK_ORIENTATION          0x00000002
+#define TOUCH_MASK_PRESSURE             0x00000004
+
+struct POINTER_INFO
+{
+    POINTER_INPUT_TYPE    pointerType;
+    UINT32          pointerId;
+    UINT32          frameId;
+    POINTER_FLAGS   pointerFlags;
+    HANDLE          sourceDevice;
+    HWND            hwndTarget;
+    POINT           ptPixelLocation;
+    POINT           ptHimetricLocation;
+    POINT           ptPixelLocationRaw;
+    POINT           ptHimetricLocationRaw;
+    DWORD           dwTime;
+    UINT32          historyCount;
+    INT32           InputData;
+    DWORD           dwKeyStates;
+    UINT64          PerformanceCount;
+    POINTER_BUTTON_CHANGE_TYPE ButtonChangeType;
+};
+
+struct POINTER_TOUCH_INFO
+{
+    POINTER_INFO    pointerInfo;
+    TOUCH_FLAGS     touchFlags;
+    TOUCH_MASK      touchMask;
+    RECT            rcContact;
+    RECT            rcContactRaw;
+    UINT32          orientation;
+    UINT32          pressure;
+};
+
+struct POINTER_PEN_INFO
+{
+    POINTER_INFO    pointerInfo;
+    PEN_FLAGS       penFlags;
+    PEN_MASK        penMask;
+    UINT32          pressure;
+    UINT32          rotation;
+    INT32           tiltX;
+    INT32           tiltY;
+};
+
+#define GET_POINTERID_WPARAM(wParam)    (LOWORD(wParam))
+
+#define POINTER_FLAG_NONE               0x00000000
+#define POINTER_FLAG_NEW                0x00000001
+#define POINTER_FLAG_INRANGE            0x00000002
+#define POINTER_FLAG_INCONTACT          0x00000004
+#define POINTER_FLAG_FIRSTBUTTON        0x00000010
+#define POINTER_FLAG_SECONDBUTTON       0x00000020
+#define POINTER_FLAG_THIRDBUTTON        0x00000040
+#define POINTER_FLAG_FOURTHBUTTON       0x00000080
+#define POINTER_FLAG_FIFTHBUTTON        0x00000100
+#define POINTER_FLAG_PRIMARY            0x00002000
+#define POINTER_FLAG_CONFIDENCE         0x00004000
+#define POINTER_FLAG_CANCELED           0x00008000
+#define POINTER_FLAG_DOWN               0x00010000
+#define POINTER_FLAG_UPDATE             0x00020000
+#define POINTER_FLAG_UP                 0x00040000
+#define POINTER_FLAG_WHEEL              0x00080000
+#define POINTER_FLAG_HWHEEL             0x00100000
+#define POINTER_FLAG_CAPTURECHANGED     0x00200000
+#define POINTER_FLAG_HASTRANSFORM       0x00400000
+#endif
+
 #ifndef MONITOR_DPI_TYPE
   enum Monitor_DPI_Type
   {
