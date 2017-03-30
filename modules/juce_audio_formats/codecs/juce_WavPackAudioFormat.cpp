@@ -26,7 +26,28 @@
 
 namespace WavPackNamespace
 {
+#if JUCE_INCLUDE_WAVPACK_CODE || ! defined (JUCE_INCLUDE_WAVPACK_CODE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+#include "wavpack/common_utils.c"
+#include "wavpack/entropy_utils.c"
+#include "wavpack/decorr_utils.c"
+#include "wavpack/tags.c"
+#include "wavpack/open_legacy.c"
+#include "wavpack/open_utils.c"
+#include "wavpack/read_words.c"
+#include "wavpack/unpack_floats.c"
+#include "wavpack/unpack.c"
+#include "wavpack/unpack_seek.c"
+#include "wavpack/unpack_utils.c"
+
+#pragma GCC diagnostic pop
+#else
 #include <wavpack/wavpack.h>
+#endif
 }
 
 //==============================================================================
