@@ -132,10 +132,10 @@ public:
         NumTypes
     };
 
-    PluginWindow (Component* pluginEditor, AudioProcessorGraph::Node*, WindowFormatType, AudioProcessorGraph&);
+    PluginWindow (Component* pluginEditor, AudioProcessorGraph::Node*, WindowFormatType);
     ~PluginWindow();
 
-    static PluginWindow* getWindowFor (AudioProcessorGraph::Node*, WindowFormatType, AudioProcessorGraph&);
+    static PluginWindow* getWindowFor (AudioProcessorGraph::Node*, WindowFormatType);
 
     static void closeCurrentlyOpenWindowsFor (const uint32 nodeId);
     static void closeAllCurrentlyOpenWindows();
@@ -144,7 +144,6 @@ public:
     void closeButtonPressed() override;
 
 private:
-    AudioProcessorGraph& graph;
     AudioProcessorGraph::Node* owner;
     WindowFormatType type;
 
