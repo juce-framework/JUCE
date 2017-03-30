@@ -61,7 +61,7 @@ public:
         throw a std::bad_alloc exception.
     */
     AudioBuffer (int numChannelsToAllocate,
-                 int numSamplesToAllocate) noexcept
+                 int numSamplesToAllocate)
        : numChannels (numChannelsToAllocate),
          size (numSamplesToAllocate)
     {
@@ -88,7 +88,7 @@ public:
     */
     AudioBuffer (Type* const* dataToReferTo,
                  int numChannelsToUse,
-                 int numSamples) noexcept
+                 int numSamples)
         : numChannels (numChannelsToUse),
           size (numSamples),
           allocatedBytes (0)
@@ -117,7 +117,7 @@ public:
     AudioBuffer (Type* const* dataToReferTo,
                  int numChannelsToUse,
                  int startSample,
-                 int numSamples) noexcept
+                 int numSamples)
         : numChannels (numChannelsToUse),
           size (numSamples),
           allocatedBytes (0),
@@ -134,7 +134,7 @@ public:
         using an external data buffer, in which case boths buffers will just point to the same
         shared block of data.
     */
-    AudioBuffer (const AudioBuffer& other) noexcept
+    AudioBuffer (const AudioBuffer& other)
        : numChannels (other.numChannels),
          size (other.size),
          allocatedBytes (other.allocatedBytes)
@@ -162,7 +162,7 @@ public:
     /** Copies another buffer onto this one.
         This buffer's size will be changed to that of the other buffer.
     */
-    AudioBuffer& operator= (const AudioBuffer& other) noexcept
+    AudioBuffer& operator= (const AudioBuffer& other)
     {
         if (this != &other)
         {
@@ -323,7 +323,7 @@ public:
                   int newNumSamples,
                   bool keepExistingContent = false,
                   bool clearExtraSpace = false,
-                  bool avoidReallocating = false) noexcept
+                  bool avoidReallocating = false)
     {
         jassert (newNumChannels >= 0);
         jassert (newNumSamples >= 0);
@@ -410,9 +410,9 @@ public:
                                 size of the arrays passed in
     */
     void setDataToReferTo (Type** dataToReferTo,
-                           const int newNumChannels,
-                           const int newStartSample,
-                           const int newNumSamples) noexcept
+                           int newNumChannels,
+                           int newStartSample,
+                           int newNumSamples)
     {
         jassert (dataToReferTo != nullptr);
         jassert (newNumChannels >= 0 && newNumSamples >= 0);
@@ -449,8 +449,8 @@ public:
                                 size of the arrays passed in
     */
     void setDataToReferTo (Type** dataToReferTo,
-                           const int newNumChannels,
-                           const int newNumSamples) noexcept
+                           int newNumChannels,
+                           int newNumSamples)
     {
         setDataToReferTo (dataToReferTo, newNumChannels, 0, newNumSamples);
     }
@@ -499,8 +499,7 @@ public:
         For speed, this doesn't check whether the channel and sample number
         are in-range, so be careful!
     */
-    void clear (int startSample,
-                int numSamples) noexcept
+    void clear (int startSample, int numSamples) noexcept
     {
         jassert (startSample >= 0 && startSample + numSamples <= size);
 
@@ -519,9 +518,7 @@ public:
         For speed, this doesn't check whether the channel and sample number
         are in-range, so be careful!
     */
-    void clear (int channel,
-                int startSample,
-                int numSamples) noexcept
+    void clear (int channel, int startSample, int numSamples) noexcept
     {
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && startSample + numSamples <= size);
@@ -582,19 +579,16 @@ public:
         For speed, this doesn't check whether the channel and sample number
         are in-range, so be careful!
     */
-    void applyGain (int channel,
-                    int startSample,
-                    int numSamples,
-                    Type gain) noexcept
+    void applyGain (int channel, int startSample, int numSamples, Type gain) noexcept
     {
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && startSample + numSamples <= size);
 
-        if (gain != 1.0f && ! isClear)
+        if (gain != (Type) 1 && ! isClear)
         {
             Type* const d = channels [channel] + startSample;
 
-            if (gain == 0.0f)
+            if (gain == 0)
                 FloatVectorOperations::clear (d, numSamples);
             else
                 FloatVectorOperations::multiply (d, gain, numSamples);
@@ -606,9 +600,7 @@ public:
         For speed, this doesn't check whether the sample numbers
         are in-range, so be careful!
     */
-    void applyGain (int startSample,
-                    int numSamples,
-                    Type gain) noexcept
+    void applyGain (int startSample, int numSamples, Type gain) noexcept
     {
         for (int i = 0; i < numChannels; ++i)
             applyGain (i, startSample, numSamples, gain);
@@ -629,11 +621,8 @@ public:
         For speed, this doesn't check whether the sample numbers
         are in-range, so be careful!
     */
-    void applyGainRamp (int channel,
-                        int startSample,
-                        int numSamples,
-                        Type startGain,
-                        Type endGain) noexcept
+    void applyGainRamp (int channel, int startSample, int numSamples,
+                        Type startGain, Type endGain) noexcept
     {
         if (! isClear)
         {
@@ -647,7 +636,7 @@ public:
                 jassert (startSample >= 0 && startSample + numSamples <= size);
 
                 const Type increment = (endGain - startGain) / numSamples;
-                Type* d = channels [channel] + startSample;
+                auto* d = channels [channel] + startSample;
 
                 while (--numSamples >= 0)
                 {
@@ -667,10 +656,8 @@ public:
         For speed, this doesn't check whether the sample numbers
         are in-range, so be careful!
     */
-    void applyGainRamp (int startSample,
-                        int numSamples,
-                        Type startGain,
-                        Type endGain) noexcept
+    void applyGainRamp (int startSample, int numSamples,
+                        Type startGain, Type endGain) noexcept
     {
         for (int i = 0; i < numChannels; ++i)
             applyGainRamp (i, startSample, numSamples, startGain, endGain);
@@ -703,23 +690,23 @@ public:
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
         jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
-        if (gainToApplyToSource != 0.0f && numSamples > 0 && ! source.isClear)
+        if (gainToApplyToSource != 0 && numSamples > 0 && ! source.isClear)
         {
-            Type* const d = channels [destChannel] + destStartSample;
+            auto* d = channels [destChannel] + destStartSample;
             const Type* const s  = source.channels [sourceChannel] + sourceStartSample;
 
             if (isClear)
             {
                 isClear = false;
 
-                if (gainToApplyToSource != 1.0f)
+                if (gainToApplyToSource != (Type) 1)
                     FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, s, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != 1.0f)
+                if (gainToApplyToSource != (Type) 1)
                     FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, s, numSamples);
@@ -749,22 +736,22 @@ public:
         jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (gainToApplyToSource != 0.0f && numSamples > 0)
+        if (gainToApplyToSource != 0 && numSamples > 0)
         {
-            Type* const d = channels [destChannel] + destStartSample;
+            auto* d = channels [destChannel] + destStartSample;
 
             if (isClear)
             {
                 isClear = false;
 
-                if (gainToApplyToSource != 1.0f)
+                if (gainToApplyToSource != (Type) 1)
                     FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, source, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != 1.0f)
+                if (gainToApplyToSource != (Type) 1)
                     FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, source, numSamples);
@@ -801,11 +788,11 @@ public:
         }
         else
         {
-            if (numSamples > 0 && (startGain != 0.0f || endGain != 0.0f))
+            if (numSamples > 0 && (startGain != 0 || endGain != 0))
             {
                 isClear = false;
                 const Type increment = (endGain - startGain) / numSamples;
-                Type* d = channels [destChannel] + destStartSample;
+                auto* d = channels [destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
                 {
@@ -904,9 +891,9 @@ public:
 
         if (numSamples > 0)
         {
-            Type* const d = channels [destChannel] + destStartSample;
+            auto* d = channels [destChannel] + destStartSample;
 
-            if (gain != 1.0f)
+            if (gain != (Type) 1)
             {
                 if (gain == 0)
                 {
@@ -957,11 +944,11 @@ public:
         }
         else
         {
-            if (numSamples > 0 && (startGain != 0.0f || endGain != 0.0f))
+            if (numSamples > 0 && (startGain != 0 || endGain != 0))
             {
                 isClear = false;
                 const Type increment = (endGain - startGain) / numSamples;
-                Type* d = channels [destChannel] + destStartSample;
+                auto* d = channels [destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
                 {
@@ -978,41 +965,35 @@ public:
         @param startSample  the start sample within the channel
         @param numSamples   the number of samples to check
     */
-    Range<Type> findMinMax (int channel,
-                            int startSample,
-                            int numSamples) const noexcept
+    Range<Type> findMinMax (int channel, int startSample, int numSamples) const noexcept
     {
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && startSample + numSamples <= size);
 
         if (isClear)
-            return Range<Type>();
+            return {};
 
         return FloatVectorOperations::findMinAndMax (channels [channel] + startSample, numSamples);
     }
 
-
     /** Finds the highest absolute sample value within a region of a channel. */
-    Type getMagnitude (int channel,
-                       int startSample,
-                       int numSamples) const noexcept
+    Type getMagnitude (int channel, int startSample, int numSamples) const noexcept
     {
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && startSample + numSamples <= size);
 
         if (isClear)
-            return 0.0f;
+            return {};
 
-        const Range<Type> r (findMinMax (channel, startSample, numSamples));
+        auto r = findMinMax (channel, startSample, numSamples);
 
         return jmax (r.getStart(), -r.getStart(), r.getEnd(), -r.getEnd());
     }
 
     /** Finds the highest absolute sample value within a region on all channels. */
-    Type getMagnitude (int startSample,
-                       int numSamples) const noexcept
+    Type getMagnitude (int startSample, int numSamples) const noexcept
     {
-        Type mag = 0.0f;
+        Type mag = 0;
 
         if (! isClear)
             for (int i = 0; i < numChannels; ++i)
@@ -1022,15 +1003,13 @@ public:
     }
 
     /** Returns the root mean squared level for a region of a channel. */
-    Type getRMSLevel (int channel,
-                      int startSample,
-                      int numSamples) const noexcept
+    Type getRMSLevel (int channel, int startSample, int numSamples) const noexcept
     {
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && startSample + numSamples <= size);
 
         if (numSamples <= 0 || channel < 0 || channel >= numChannels || isClear)
-            return 0.0f;
+            return {};
 
         const Type* const data = channels [channel] + startSample;
         double sum = 0.0;
@@ -1069,7 +1048,7 @@ private:
     size_t allocatedBytes;
     Type** channels;
     HeapBlock<char, true> allocatedData;
-    Type* preallocatedChannelSpace [32];
+    Type* preallocatedChannelSpace[32];
     bool isClear;
 
     void allocateData()
@@ -1078,8 +1057,8 @@ private:
         allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (Type) + channelListSize + 32;
         allocatedData.malloc (allocatedBytes);
         channels = reinterpret_cast<Type**> (allocatedData.getData());
+        auto* chan = (Type*) (allocatedData + channelListSize);
 
-        Type* chan = (Type*) (allocatedData + channelListSize);
         for (int i = 0; i < numChannels; ++i)
         {
             channels[i] = chan;
