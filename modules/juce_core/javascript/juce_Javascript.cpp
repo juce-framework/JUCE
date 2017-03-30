@@ -1333,10 +1333,12 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
                 while (currentType != TokenTypes::closeBrace)
                 {
-                    e->names.add (currentValue.toString());
+                    auto memberName = currentValue.toString();
                     match ((currentType == TokenTypes::literal && currentValue.isString())
                              ? TokenTypes::literal : TokenTypes::identifier);
                     match (TokenTypes::colon);
+
+                    e->names.add (memberName);
                     e->initialisers.add (parseExpression());
 
                     if (currentType != TokenTypes::closeBrace)
