@@ -1604,7 +1604,7 @@ private:
         {
             jassert (isPositiveAndBelow (args.index, filter->getNumParameters()));
             // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
-            filter->getParameterName (args.index, 16).copyToUTF8 ((char*) args.ptr, 16 + 1);
+            filter->getParameterName (args.index, 32).copyToUTF8 ((char*) args.ptr, 32 + 1);
         }
 
         return 0;
