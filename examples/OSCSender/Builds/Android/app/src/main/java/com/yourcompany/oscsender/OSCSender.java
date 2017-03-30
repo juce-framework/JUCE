@@ -55,6 +55,7 @@ import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import java.lang.Runnable;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
 import java.util.*;
 import java.io.*;
@@ -145,38 +146,6 @@ public class OSCSender   extends Activity
 
 
     //==============================================================================
-    public static class MidiPortID extends Object
-    {
-        public MidiPortID (int index, boolean direction)
-        {
-            androidIndex = index;
-            isInput = direction;
-        }
-
-        public int androidIndex;
-        public boolean isInput;
-
-        @Override
-        public int hashCode()
-        {
-            Integer i = new Integer (androidIndex);
-            return i.hashCode() * (isInput ? -1 : 1);
-        }
-
-        @Override
-        public boolean equals (Object obj)
-        {
-            if (obj == null)
-                return false;
-
-            if (getClass() != obj.getClass())
-                return false;
-
-            MidiPortID other = (MidiPortID) obj;
-            return (androidIndex == other.androidIndex && isInput == other.isInput);
-        }
-    }
-
     public interface JuceMidiPort
     {
         boolean isInputPort();
@@ -186,7 +155,6 @@ public class OSCSender   extends Activity
         void stop();
 
         void close();
-        MidiPortID getPortId();
 
         // send will do nothing on an input port
         void sendMidi (byte[] msg, int offset, int count);
