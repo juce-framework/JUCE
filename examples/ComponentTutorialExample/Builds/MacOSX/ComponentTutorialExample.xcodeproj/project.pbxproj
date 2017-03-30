@@ -398,6 +398,7 @@
 		7649D4157DCCF92903C883EC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_String.cpp"; path = "../../../../modules/juce_core/text/juce_String.cpp"; sourceTree = "SOURCE_ROOT"; };
 		767CBBD58A107FCA005D38E8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Value.h"; path = "../../../../modules/juce_data_structures/values/juce_Value.h"; sourceTree = "SOURCE_ROOT"; };
 		77003D29EC7BA8C0194A6CC2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DragAndDropTarget.h"; path = "../../../../modules/juce_gui_basics/mouse/juce_DragAndDropTarget.h"; sourceTree = "SOURCE_ROOT"; };
+		774AEE793F3CB08E13F14B20 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_linux_XEmbedComponent.cpp"; path = "../../../../modules/juce_gui_extra/native/juce_linux_XEmbedComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		77F780A1027086DABE090075 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Expression.h"; path = "../../../../modules/juce_core/maths/juce_Expression.h"; sourceTree = "SOURCE_ROOT"; };
 		7805AB0B72F8F0E01363D2D5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CallOutBox.h"; path = "../../../../modules/juce_gui_basics/windows/juce_CallOutBox.h"; sourceTree = "SOURCE_ROOT"; };
 		78F08B1A3E20C34EE41E3CBB = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jmemnobs.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jmemnobs.c"; sourceTree = "SOURCE_ROOT"; };
@@ -573,6 +574,7 @@
 		A7220770FDA088EC533BDE74 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_gui_extra.h"; path = "../../../../modules/juce_gui_extra/juce_gui_extra.h"; sourceTree = "SOURCE_ROOT"; };
 		A7E128D5BC1767916C80652C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_events.cpp"; path = "../../../../modules/juce_events/juce_events.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A7E1DDDC3B554B92985D87C5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DrawableComposite.cpp"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawableComposite.cpp"; sourceTree = "SOURCE_ROOT"; };
+		A865F40D468E3256830F5838 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_XEmbedComponent.h"; path = "../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		A8C6E57CF011EB43FDBF3386 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MultiTimer.h"; path = "../../../../modules/juce_events/timers/juce_MultiTimer.h"; sourceTree = "SOURCE_ROOT"; };
 		A8EBB243F37A295D5F0533E8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TabbedButtonBar.h"; path = "../../../../modules/juce_gui_basics/layout/juce_TabbedButtonBar.h"; sourceTree = "SOURCE_ROOT"; };
 		A8FB3AE1936AE125BCD697E6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Colours.h"; path = "../../../../modules/juce_graphics/colour/juce_Colours.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1667,7 +1669,8 @@
 		7EFB988D9B0136F977E60F45 = {isa = PBXGroup; children = (
 					55DFA734C7AEB7AD1FA75ACB,
 					F6FB8FC72C99063A9189CDF1,
-					06D9A86CD966602EE667D435, ); name = embedding; sourceTree = "<group>"; };
+					06D9A86CD966602EE667D435,
+					A865F40D468E3256830F5838, ); name = embedding; sourceTree = "<group>"; };
 		4137F663128F4E123AE245AC = {isa = PBXGroup; children = (
 					696B53B2113C83A6EF2ED417,
 					8B11018691CF485F1067F278,
@@ -1694,6 +1697,7 @@
 					181B35AA4E9C24FC3F8802FE,
 					B8D769997D853AAE6FF3E0B5,
 					E7B0F634D832385B0E24349E,
+					774AEE793F3CB08E13F14B20,
 					85FAA35DD263DD133CC67497,
 					70E4B7F2E6C60D45E3BEBD67,
 					B15BCED79FD05CCDB7C2DE05,
@@ -1865,7 +1869,7 @@
 					7065518BA4A719BD600955DB,
 					A0BD0396A9AB3F7FCF37AD62,
 					8F57F6817BE0F4126A95541F, ); buildRules = ( ); dependencies = (  ); name = "ComponentTutorialExample - App"; productName = ComponentTutorialExample; productReference = 48DBB774ADD58780B75FD130; productType = "com.apple.product-type.application"; };
-		3B89677F666BF40854CDE8D3 = {isa = PBXProject; buildConfigurationList = D2C0D08571281A97A8437C77; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { FDDAB81F5F4DA48E7807E65A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D0953BB62CDDA1D6C60E6893; projectDirPath = ""; projectRoot = ""; targets = (FDDAB81F5F4DA48E7807E65A); };
+		3B89677F666BF40854CDE8D3 = {isa = PBXProject; buildConfigurationList = D2C0D08571281A97A8437C77; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { FDDAB81F5F4DA48E7807E65A = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = D0953BB62CDDA1D6C60E6893; projectDirPath = ""; projectRoot = ""; targets = (FDDAB81F5F4DA48E7807E65A); };
 	};
 	rootObject = 3B89677F666BF40854CDE8D3;
 }

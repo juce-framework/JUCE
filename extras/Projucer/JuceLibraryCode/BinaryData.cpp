@@ -1563,7 +1563,7 @@ static const unsigned char temp_binary_data_8[] =
 "\r\n"
 "const String FILTERCLASSNAME::getProgramName (int index)\r\n"
 "{\r\n"
-"    return String();\r\n"
+"    return {};\r\n"
 "}\r\n"
 "\r\n"
 "void FILTERCLASSNAME::changeProgramName (int index, const String& newName)\r\n"
@@ -5239,7 +5239,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3092; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1162; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5475; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 5469; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2203; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2064; return jucer_ComponentTemplate_h;

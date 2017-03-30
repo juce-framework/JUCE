@@ -588,6 +588,7 @@
 		B6C28B2DAE4802FA291E3487 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DrawablePath.h"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawablePath.h"; sourceTree = "SOURCE_ROOT"; };
 		B6C345F16BFAD37B64A5605A = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ReferenceCountedArray.h"; path = "../../../../modules/juce_core/containers/juce_ReferenceCountedArray.h"; sourceTree = "SOURCE_ROOT"; };
 		B700739654886DC8E7C1293B = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = HelloWorld/Images.xcassets; sourceTree = "SOURCE_ROOT"; };
+		B73D30DDD2A8CABBE1EBA6B0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_linux_XEmbedComponent.cpp"; path = "../../../../modules/juce_gui_extra/native/juce_linux_XEmbedComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B78154B28539A2E8152D2B9C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AsyncUpdater.h"; path = "../../../../modules/juce_events/broadcasters/juce_AsyncUpdater.h"; sourceTree = "SOURCE_ROOT"; };
 		B7F363708A0CDC05D9C04876 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Typeface.cpp"; path = "../../../../modules/juce_graphics/fonts/juce_Typeface.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B86F88CBFF4E577BCCF8D620 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TextEditor.cpp"; path = "../../../../modules/juce_gui_basics/widgets/juce_TextEditor.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -734,6 +735,7 @@
 		E80A7D62B2B3F4BD2CD3F170 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DrawableButton.cpp"; path = "../../../../modules/juce_gui_basics/buttons/juce_DrawableButton.cpp"; sourceTree = "SOURCE_ROOT"; };
 		E830FDCCA2799244C53AEB8F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ScopedLock.h"; path = "../../../../modules/juce_core/threads/juce_ScopedLock.h"; sourceTree = "SOURCE_ROOT"; };
 		E833133B78833DA0D34F48A4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Drawable.h"; path = "../../../../modules/juce_gui_basics/drawables/juce_Drawable.h"; sourceTree = "SOURCE_ROOT"; };
+		E83530BF56FBD5548A48B56F = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_XEmbedComponent.h"; path = "../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		E8606788391C1A26DBA73D23 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = adler32.c; path = "../../../../modules/juce_core/zip/zlib/adler32.c"; sourceTree = "SOURCE_ROOT"; };
 		E862612C6909A6188FBEB8C8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DeletedAtShutdown.cpp"; path = "../../../../modules/juce_events/messages/juce_DeletedAtShutdown.cpp"; sourceTree = "SOURCE_ROOT"; };
 		E8C858BC5875BA7F76E62B28 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_MouseCursor.mm"; path = "../../../../modules/juce_gui_basics/native/juce_mac_MouseCursor.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -1665,7 +1667,8 @@
 		A2648DB3D9CC727490A690CE = {isa = PBXGroup; children = (
 					6C632E34FD1B617525987657,
 					02C0DD7DC29B27B39D5FF154,
-					DD10783090721EFE21E4FAA5, ); name = embedding; sourceTree = "<group>"; };
+					DD10783090721EFE21E4FAA5,
+					E83530BF56FBD5548A48B56F, ); name = embedding; sourceTree = "<group>"; };
 		518915E1B6795C40C04DF4C6 = {isa = PBXGroup; children = (
 					DCCDA2F20A439FE5044946DE,
 					5E4F70838E79D6A25B8A80B0,
@@ -1692,6 +1695,7 @@
 					939EC86DADE3927918AA327C,
 					3D65648962104F4C641FF3D0,
 					57F380E4FB341A37BEE30E8B,
+					B73D30DDD2A8CABBE1EBA6B0,
 					FB845B6C46248D66EB02A862,
 					140B14E0142DF835F1C6D951,
 					5136E02D20343ED8DCD90A20,
@@ -1871,7 +1875,7 @@
 					026F69AE2DD97CA7C9006986,
 					C39352E04613E968B30D0584,
 					CD0E71EFDCF3177FCE405E9D, ); buildRules = ( ); dependencies = (  ); name = "HelloWorld - App"; productName = HelloWorld; productReference = 630E0739D24A3C9E99CD4592; productType = "com.apple.product-type.application"; };
-		E34D5B980741D93050D0BB6B = {isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; attributes = { LastUpgradeCheck = 0820; TargetAttributes = { 192D34128EA37F28BC1CBB22 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = (192D34128EA37F28BC1CBB22); };
+		E34D5B980741D93050D0BB6B = {isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 192D34128EA37F28BC1CBB22 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = (192D34128EA37F28BC1CBB22); };
 	};
 	rootObject = E34D5B980741D93050D0BB6B;
 }

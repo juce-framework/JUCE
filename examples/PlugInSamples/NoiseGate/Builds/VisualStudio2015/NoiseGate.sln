@@ -1637,6 +1637,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "embedding", "embedding", "{
 		..\..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h = ..\..\..\..\..\modules\juce_gui_extra\embedding\juce_ActiveXControlComponent.h
 		..\..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h = ..\..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h
 		..\..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h = ..\..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h
+		..\..\..\..\..\modules\juce_gui_extra\embedding\juce_XEmbedComponent.h = ..\..\..\..\..\modules\juce_gui_extra\embedding\juce_XEmbedComponent.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{526A655D-3D6A-CABA-3206-9B8745975E38}"
@@ -1669,6 +1670,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{C0D38C
 		..\..\..\..\..\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm = ..\..\..\..\..\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm
 		..\..\..\..\..\modules\juce_gui_extra\native\juce_linux_X11_SystemTrayIcon.cpp = ..\..\..\..\..\modules\juce_gui_extra\native\juce_linux_X11_SystemTrayIcon.cpp
 		..\..\..\..\..\modules\juce_gui_extra\native\juce_linux_X11_WebBrowserComponent.cpp = ..\..\..\..\..\modules\juce_gui_extra\native\juce_linux_X11_WebBrowserComponent.cpp
+		..\..\..\..\..\modules\juce_gui_extra\native\juce_linux_XEmbedComponent.cpp = ..\..\..\..\..\modules\juce_gui_extra\native\juce_linux_XEmbedComponent.cpp
 		..\..\..\..\..\modules\juce_gui_extra\native\juce_mac_AppleRemote.mm = ..\..\..\..\..\modules\juce_gui_extra\native\juce_mac_AppleRemote.mm
 		..\..\..\..\..\modules\juce_gui_extra\native\juce_mac_CarbonViewWrapperComponent.h = ..\..\..\..\..\modules\juce_gui_extra\native\juce_mac_CarbonViewWrapperComponent.h
 		..\..\..\..\..\modules\juce_gui_extra\native\juce_mac_NSViewComponent.mm = ..\..\..\..\..\modules\juce_gui_extra\native\juce_mac_NSViewComponent.mm

@@ -898,6 +898,7 @@
 		BB1202BFAC430CB62A78E63E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SubregionStream.h"; path = "../../../../modules/juce_core/streams/juce_SubregionStream.h"; sourceTree = "SOURCE_ROOT"; };
 		BB2CC079724044CBEC68D1B2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MidiKeyboardState.cpp"; path = "../../../../modules/juce_audio_basics/midi/juce_MidiKeyboardState.cpp"; sourceTree = "SOURCE_ROOT"; };
 		BB3A9DD17C4B752BC5C3AE02 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "stream_decoder.h"; path = "../../../../modules/juce_audio_formats/codecs/flac/libFLAC/include/protected/stream_decoder.h"; sourceTree = "SOURCE_ROOT"; };
+		BC182013A3A195C4C14F3E2C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_XEmbedComponent.h"; path = "../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		BC40851115EBBE44982702B0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = endswap.h; path = "../../../../modules/juce_audio_formats/codecs/flac/endswap.h"; sourceTree = "SOURCE_ROOT"; };
 		BC658689F10CCF8E1847ABA3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DrawableButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_DrawableButton.h"; sourceTree = "SOURCE_ROOT"; };
 		BC91AC2F5F929948EA4DED1C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ThreadWithProgressWindow.h"; path = "../../../../modules/juce_gui_basics/windows/juce_ThreadWithProgressWindow.h"; sourceTree = "SOURCE_ROOT"; };
@@ -989,6 +990,7 @@
 		D0063CF6E767B55FE5078D63 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = memory.h; path = "../../../../modules/juce_audio_formats/codecs/flac/libFLAC/include/private/memory.h"; sourceTree = "SOURCE_ROOT"; };
 		D0368021E3ADE399F6B18F62 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jdphuff.c; path = "../../../../modules/juce_graphics/image_formats/jpglib/jdphuff.c"; sourceTree = "SOURCE_ROOT"; };
 		D09628A1CC2F5D43B17CA473 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CachedComponentImage.h"; path = "../../../../modules/juce_gui_basics/components/juce_CachedComponentImage.h"; sourceTree = "SOURCE_ROOT"; };
+		D0C5F893D627CF675AE4C3CE = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_linux_XEmbedComponent.cpp"; path = "../../../../modules/juce_gui_extra/native/juce_linux_XEmbedComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		D0D459BC748C9E077474CE99 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ResizableCornerComponent.h"; path = "../../../../modules/juce_gui_basics/layout/juce_ResizableCornerComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		D0D7C01D95C4259DAE32E722 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RSAKey.h"; path = "../../../../modules/juce_cryptography/encryption/juce_RSAKey.h"; sourceTree = "SOURCE_ROOT"; };
 		D0D94FCDE9A461A44F81D72A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_gui_basics.mm"; path = "../../../../modules/juce_gui_basics/juce_gui_basics.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -2480,7 +2482,8 @@
 		F7A472C3DA3CFF81EEA2BCB9 = {isa = PBXGroup; children = (
 					200238375D55147DC98E25F0,
 					8A3CDD43812C610DA9BBACB0,
-					00C5D011D05E276D93CAC42A, ); name = embedding; sourceTree = "<group>"; };
+					00C5D011D05E276D93CAC42A,
+					BC182013A3A195C4C14F3E2C, ); name = embedding; sourceTree = "<group>"; };
 		63FD16A1B4C5CAE35F72E89C = {isa = PBXGroup; children = (
 					AAED8A25776EB53213A2AC8E,
 					81596391E40F15FCDEDAF320,
@@ -2507,6 +2510,7 @@
 					DB9C5ADE1BB668E63563C264,
 					9A0A08A15D47D2F8556CA449,
 					9A0DC1C0EB29EB9097632781,
+					D0C5F893D627CF675AE4C3CE,
 					E7B0A37EAEFF238743AABE4E,
 					6562FCA20B6E1D38DAAF88ED,
 					E9A21F496D5DDC6CB7933A35,
@@ -2801,7 +2805,7 @@
 					DD4C62A6EA1FD3497B42CDB0,
 					E8585DDC9F9A0EE2FB82FA52,
 					136E27FD16209F9868093A6C, ); buildRules = ( ); dependencies = (  ); name = "UnitTestRunner - ConsoleApp"; productName = UnitTestRunner; productReference = 080EAB9CF5AB2BD6B2BBB173; productType = "com.apple.product-type.tool"; };
-		E1E93F2B4B2D17E011395520 = {isa = PBXProject; buildConfigurationList = 18FC121B1014F7999CD135D3; attributes = { LastUpgradeCheck = 0820; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 99F3717D3FEAFDCA3C22E868; projectDirPath = ""; projectRoot = ""; targets = (B0D62ED1051EE9DFD49F6321); };
+		E1E93F2B4B2D17E011395520 = {isa = PBXProject; buildConfigurationList = 18FC121B1014F7999CD135D3; attributes = { LastUpgradeCheck = 0830; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 99F3717D3FEAFDCA3C22E868; projectDirPath = ""; projectRoot = ""; targets = (B0D62ED1051EE9DFD49F6321); };
 	};
 	rootObject = E1E93F2B4B2D17E011395520;
 }

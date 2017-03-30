@@ -110,7 +110,3 @@
 #ifndef    JUCE_USE_XCURSOR
  //#define JUCE_USE_XCURSOR
 #endif
-
-#ifndef    JUCE_USE_WINDOWS_POINTER_API
- //#define JUCE_USE_WINDOWS_POINTER_API
-#endif

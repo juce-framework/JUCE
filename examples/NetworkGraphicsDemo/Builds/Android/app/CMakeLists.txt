@@ -1132,6 +1132,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h"
+    "../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h"
     "../../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.cpp"
     "../../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.h"
     "../../../../../modules/juce_gui_extra/misc/juce_AppleRemote.h"
@@ -1156,6 +1157,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm"
     "../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_linux_X11_WebBrowserComponent.cpp"
+    "../../../../../modules/juce_gui_extra/native/juce_linux_XEmbedComponent.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_mac_AppleRemote.mm"
     "../../../../../modules/juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
     "../../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm"
@@ -2348,6 +2350,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/documents/juc
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_AnimatedAppComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_AppleRemote.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2372,6 +2375,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_a
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_linux_X11_WebBrowserComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_linux_XEmbedComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_AppleRemote.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
