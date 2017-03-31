@@ -349,12 +349,15 @@ void ConcertinaPanel::setMaximumPanelSize (Component* component, int maximumSize
 
 void ConcertinaPanel::setPanelHeaderSize (Component* component, int headerSize)
 {
-    const int index = indexOfComp (component);
+    const auto index = indexOfComp (component);
     jassert (index >= 0); // The specified component doesn't seem to have been added!
 
     if (index >= 0)
     {
-        currentSizes->get(index).minSize = headerSize;
+        auto oldMin = currentSizes->get (index).minSize;
+
+        currentSizes->get (index).minSize = headerSize;
+        currentSizes->get (index).size += headerSize - oldMin;
         resized();
     }
 }
