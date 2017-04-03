@@ -251,6 +251,8 @@ public:
 
     Array<double> getAvailableSampleRates()
     {
+        const ScopedLock sl (callbackLock);
+
         Array<double> rates;
 
         // Important: the supported audio sample rates change on the iPhone 6S
@@ -269,22 +271,19 @@ public:
         {
             const double supportedRate = trySampleRate (rate);
 
-            rates.addIfNotAlreadyThere (supportedRate);
+            if (rates.addIfNotAlreadyThere (supportedRate))
+                JUCE_IOS_AUDIO_LOG ("available rate = " + String (supportedRate, 0) + "Hz");
+
             rate = jmax (rate, supportedRate);
         }
 
         trySampleRate (owner.getCurrentSampleRate());
+        updateCurrentBufferSize();
 
         AudioUnitAddPropertyListener (audioUnit,
                                       kAudioUnitProperty_StreamFormat,
                                       handleStreamFormatChangeCallback,
                                       this);
-
-        for (auto r : rates)
-        {
-            ignoreUnused (r);
-            JUCE_IOS_AUDIO_LOG ("available rate = " + String (r, 0) + "Hz");
-        }
 
         return rates;
     }
@@ -866,10 +865,10 @@ private:
         // array in this application's .plist file.
         jassert (err == noErr);
 
-        err = AudioUnitAddPropertyListener(audioUnit,
-                                           kAudioUnitProperty_IsInterAppConnected,
-                                           audioUnitPropertyChangeDispatcher,
-                                           this);
+        err = AudioUnitAddPropertyListener (audioUnit,
+                                            kAudioUnitProperty_IsInterAppConnected,
+                                            audioUnitPropertyChangeDispatcher,
+                                            this);
         jassert (err == noErr);
        #endif
 
