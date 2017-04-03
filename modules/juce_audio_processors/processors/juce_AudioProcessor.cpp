@@ -905,6 +905,8 @@ bool AudioProcessor::applyBusLayouts (const BusesLayout& layouts)
      || layouts.outputBuses.size() != numOutputBuses)
         return false;
 
+    int newNumberOfIns = 0, newNumberOfOuts = 0;
+
     for (int busIdx = 0; busIdx < numInputBuses;  ++busIdx)
     {
         Bus& bus = *getBus (true, busIdx);
@@ -913,6 +915,8 @@ bool AudioProcessor::applyBusLayouts (const BusesLayout& layouts)
         bus.layout = set;
         if (! set.isDisabled())
             bus.lastLayout = set;
+
+        newNumberOfIns += set.size();
     }
 
     for (int busIdx = 0; busIdx < numOutputBuses;  ++busIdx)
@@ -923,9 +927,11 @@ bool AudioProcessor::applyBusLayouts (const BusesLayout& layouts)
         bus.layout = set;
         if (! set.isDisabled())
             bus.lastLayout = set;
+
+        newNumberOfOuts += set.size();
     }
 
-    const bool channelNumChanged = (oldNumberOfIns != getTotalNumInputChannels() || oldNumberOfOuts != getTotalNumOutputChannels());
+    const bool channelNumChanged = (oldNumberOfIns != newNumberOfIns || oldNumberOfOuts != newNumberOfOuts);
     audioIOChanged (false, channelNumChanged);
 
     return true;
