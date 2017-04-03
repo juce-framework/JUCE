@@ -54,6 +54,8 @@ public:
         fps30           = 3,
         fps2997drop     = 4,
         fps30drop       = 5,
+        fps60           = 6,
+        fps60drop       = 7,
         fpsUnknown      = 99
     };
 

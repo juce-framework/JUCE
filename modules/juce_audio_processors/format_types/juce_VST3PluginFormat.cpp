@@ -208,6 +208,16 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
             case AudioPlayHead::fps25: context.frameRate.framesPerSecond = 25; break;
             case AudioPlayHead::fps30: context.frameRate.framesPerSecond = 30; break;
 
+            case AudioPlayHead::fps60:
+            case AudioPlayHead::fps60drop:
+            {
+                context.frameRate.framesPerSecond = 60;
+
+                if (position.frameRate == AudioPlayHead::fps60drop)
+                    context.frameRate.flags = FrameRate::kDropRate;
+            }
+            break;
+
             case AudioPlayHead::fps2997:
             case AudioPlayHead::fps2997drop:
             case AudioPlayHead::fps30drop:
