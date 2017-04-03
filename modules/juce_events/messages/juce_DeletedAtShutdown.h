@@ -65,7 +65,5 @@ public:
     static void deleteAll();
 
 private:
-    static Array <DeletedAtShutdown*>& getObjects();
-
     JUCE_DECLARE_NON_COPYABLE (DeletedAtShutdown)
 };
