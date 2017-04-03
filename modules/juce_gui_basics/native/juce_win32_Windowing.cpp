@@ -518,7 +518,7 @@ public:
 
         if (transparent)
         {
-            RECT windowBounds = getWindowRect (hwnd);
+            auto windowBounds = getWindowRect (hwnd);
 
             POINT p = { -x, -y };
             POINT pos = { windowBounds.left, windowBounds.top };
@@ -568,7 +568,7 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 {
     HWND hwnd = (HWND) nativeWindowHandle;
 
-    RECT r = getWindowRect (hwnd);
+    auto r = getWindowRect (hwnd);
     const int w = r.right - r.left;
     const int h = r.bottom - r.top;
 
@@ -922,9 +922,9 @@ private:
 //==============================================================================
 class HWNDComponentPeer  : public ComponentPeer,
                            private Timer
-   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-    , public ModifierKeyReceiver
-   #endif
+                          #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+                           , public ModifierKeyReceiver
+                          #endif
 {
 public:
     enum RenderingEngineType
@@ -938,20 +938,7 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           dontRepaint (nonRepainting),
           parentToAddTo (parent),
-          currentRenderingEngine (softwareRenderingEngine),
-          lastPaintTime (0),
-          lastMagnifySize (0),
-          fullScreen (false),
-          isDragging (false),
-          isMouseOver (false),
-          hasCreatedCaret (false),
-          constrainerIsResizing (false),
-          currentWindowIcon (0),
-          dropTarget (nullptr),
-          updateLayeredWindowAlpha (255)
-         #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-        , modProvider (nullptr)
-         #endif
+          currentRenderingEngine (softwareRenderingEngine)
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
 
@@ -1050,7 +1037,7 @@ public:
         {
             if (HWND parentHwnd = GetParent (hwnd))
             {
-                RECT parentRect = getWindowRect (parentHwnd);
+                auto parentRect = getWindowRect (parentHwnd);
                 newBounds.translate (parentRect.left, parentRect.top);
             }
         }
@@ -1075,11 +1062,11 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        Rectangle<int> bounds (rectangleFromRECT (getWindowRect (hwnd)));
+        auto bounds = rectangleFromRECT (getWindowRect (hwnd));
 
-        if (HWND parentH = GetParent (hwnd))
+        if (auto parentH = GetParent (hwnd))
         {
-            RECT r = getWindowRect (parentH);
+            auto r = getWindowRect (parentH);
             bounds.translate (-r.left, -r.top);
         }
 
@@ -1088,7 +1075,7 @@ public:
 
     Point<int> getScreenPosition() const
     {
-        RECT r = getWindowRect (hwnd);
+        auto r = getWindowRect (hwnd);
 
         return Point<int> (r.left + windowBorder.getLeft(),
                            r.top  + windowBorder.getTop());
@@ -1188,7 +1175,7 @@ public:
 
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        RECT r = getWindowRect (hwnd);
+        auto r = getWindowRect (hwnd);
 
         if (! (isPositiveAndBelow (localPos.x, (int) (r.right - r.left))
                 && isPositiveAndBelow (localPos.y, (int) (r.bottom - r.top))))
@@ -1530,7 +1517,7 @@ public:
     {
         if (m.message == WM_KEYDOWN || m.message == WM_KEYUP)
             if (Component::getCurrentlyFocusedComponent() != nullptr)
-                if (HWNDComponentPeer* h = getOwnerOfWindow (m.hwnd))
+                if (auto* h = getOwnerOfWindow (m.hwnd))
                     return m.message == WM_KEYDOWN ? h->doKeyDown (m.wParam)
                                                    : h->doKeyUp (m.wParam);
 
@@ -1544,28 +1531,28 @@ private:
    #if JUCE_DIRECT2D
     ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
    #endif
-    uint32 lastPaintTime;
-    ULONGLONG lastMagnifySize;
-    bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
+    uint32 lastPaintTime = 0;
+    ULONGLONG lastMagnifySize = 0;
+    bool fullScreen = false, isDragging = false, isMouseOver = false,
+         hasCreatedCaret = false, constrainerIsResizing = false;
     BorderSize<int> windowBorder;
-    HICON currentWindowIcon;
-    JuceDropTarget* dropTarget;
-    uint8 updateLayeredWindowAlpha;
+    HICON currentWindowIcon = 0;
+    JuceDropTarget* dropTarget = nullptr;
+    uint8 updateLayeredWindowAlpha = 255;
     UWPUIViewSettings uwpViewSettings;
     MultiTouchMapper<DWORD> currentTouches;
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-    ModifierKeyProvider* modProvider;
+    ModifierKeyProvider* modProvider = nullptr;
    #endif
 
     //==============================================================================
-    class TemporaryImage    : public Timer
+    struct TemporaryImage    : private Timer
     {
-    public:
         TemporaryImage() {}
 
         Image& getImage (const bool transparent, const int w, const int h)
         {
-            const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
+            auto format = transparent ? Image::ARGB : Image::RGB;
 
             if ((! image.isValid()) || image.getWidth() < w || image.getHeight() < h || image.getFormat() != format)
                 image = Image (new WindowsBitmapImage (format, (w + 31) & ~31, (h + 31) & ~31, false));
@@ -1577,7 +1564,7 @@ private:
         void timerCallback() override
         {
             stopTimer();
-            image = Image();
+            image = {};
         }
 
     private:
@@ -1599,9 +1586,9 @@ private:
             String windowClassName ("JUCE_");
             windowClassName << String::toHexString (Time::currentTimeMillis());
 
-            HINSTANCE moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
+            auto moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
 
-            TCHAR moduleFile [1024] = { 0 };
+            TCHAR moduleFile[1024] = { 0 };
             GetModuleFileName (moduleHandle, moduleFile, 1024);
             WORD iconNum = 0;
 
@@ -1799,7 +1786,7 @@ private:
             // correctly enable the menu items that we specify in the wm_initmenu message.
             GetSystemMenu (hwnd, false);
 
-            const float alpha = component.getAlpha();
+            auto alpha = component.getAlpha();
             if (alpha < 1.0f)
                 setAlpha (alpha);
         }
@@ -1849,9 +1836,7 @@ private:
 
     void setIcon (const Image& newIcon)
     {
-        HICON hicon = IconConverters::createHICONFromImage (newIcon, TRUE, 0, 0);
-
-        if (hicon != 0)
+        if (auto hicon = IconConverters::createHICONFromImage (newIcon, TRUE, 0, 0))
         {
             SendMessage (hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
             SendMessage (hwnd, WM_SETICON, ICON_SMALL, (LPARAM) hicon);
@@ -1867,8 +1852,7 @@ private:
     {
         typedef BOOL (WINAPI* ChangeWindowMessageFilterExFunc) (HWND, UINT, DWORD, PVOID);
 
-        if (ChangeWindowMessageFilterExFunc changeMessageFilter
-                = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx"))
+        if (auto changeMessageFilter = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx"))
         {
             changeMessageFilter (hwnd, WM_DROPFILES, 1 /*MSGFLT_ALLOW*/, nullptr);
             changeMessageFilter (hwnd, WM_COPYDATA, 1 /*MSGFLT_ALLOW*/, nullptr);
@@ -1889,19 +1873,19 @@ private:
     {
         if (IsWindowVisible (hwnd))
         {
-            ChildWindowClippingInfo& info = *(ChildWindowClippingInfo*) context;
+            auto& info = *(ChildWindowClippingInfo*) context;
 
             HWND parent = GetParent (hwnd);
 
             if (parent == info.peer->hwnd)
             {
-                RECT r = getWindowRect (hwnd);
+                auto r = getWindowRect (hwnd);
                 POINT pos = { r.left, r.top };
                 ScreenToClient (GetParent (hwnd), &pos);
 
-                Rectangle<int> clip (Rectangle<int> (pos.x, pos.y,
-                                                     r.right  - r.left,
-                                                     r.bottom - r.top));
+                Rectangle<int> clip (pos.x, pos.y,
+                                     r.right  - r.left,
+                                     r.bottom - r.top);
 
                 info.clip->subtract (clip - info.origin);
 
@@ -1978,7 +1962,7 @@ private:
             // it's not possible to have a transparent window with a title bar at the moment!
             jassert (! hasTitleBar());
 
-            RECT r = getWindowRect (hwnd);
+            auto r = getWindowRect (hwnd);
             x = y = 0;
             w = r.right - r.left;
             h = r.bottom - r.top;
@@ -1999,7 +1983,7 @@ private:
                 CombineRgn (rgn, rgn, clipRgn, RGN_AND);
                 DeleteObject (clipRgn);
 
-                char rgnData [8192];
+                char rgnData[8192];
                 const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) rgnData);
 
                 if (res > 0 && res <= sizeof (rgnData))
@@ -2012,7 +1996,7 @@ private:
                     {
                         needToPaintAll = false;
 
-                        const RECT* rects = (const RECT*) (rgnData + sizeof (RGNDATAHEADER));
+                        auto rects = (const RECT*) (rgnData + sizeof (RGNDATAHEADER));
 
                         for (int i = (int) ((RGNDATA*) rgnData)->rdh.nCount; --i >= 0;)
                         {
@@ -2047,8 +2031,8 @@ private:
             if (! contextClip.isEmpty())
             {
                 if (transparent)
-                    for (const Rectangle<int>* i = contextClip.begin(), * const e = contextClip.end(); i != e; ++i)
-                        offscreenImage.clear (*i);
+                    for (auto& i : contextClip)
+                        offscreenImage.clear (i);
 
                 // if the component's not opaque, this won't draw properly unless the platform can support this
                 jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
@@ -2275,12 +2259,12 @@ private:
 
     ComponentPeer* findPeerUnderMouse (Point<float>& localPos)
     {
-        const Point<int> globalPos (getCurrentMousePosGlobal().roundToInt());
+        auto globalPos = getCurrentMousePosGlobal().roundToInt();
 
         // Because Windows stupidly sends all wheel events to the window with the keyboard
         // focus, we have to redirect them here according to the mouse pos..
         POINT p = { globalPos.x, globalPos.y };
-        HWNDComponentPeer* peer = getOwnerOfWindow (WindowFromPoint (p));
+        auto* peer = getOwnerOfWindow (WindowFromPoint (p));
 
         if (peer == nullptr)
             peer = this;
@@ -2374,7 +2358,7 @@ private:
         {
             for (int i = 0; i < numInputs; ++i)
             {
-                const DWORD flags = inputInfo[i].dwFlags;
+                auto flags = inputInfo[i].dwFlags;
 
                 if ((flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
                     if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0, (flags & TOUCHEVENTF_UP) != 0))
@@ -2393,9 +2377,9 @@ private:
         bool isCancel = false;
 
         const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
-        const int64 time = getMouseEventTime();
-        const Point<float> pos (globalToLocal (Point<float> (touch.x / 100.0f,
-                                                             touch.y / 100.0f)));
+        auto time = getMouseEventTime();
+        auto pos = globalToLocal (Point<float> (touch.x / 100.0f,
+                                                touch.y / 100.0f));
         const float pressure = touchPressure;
         ModifierKeys modsToSend (currentModifiers);
 
@@ -2767,9 +2751,9 @@ private:
     {
         if (isConstrainedNativeWindow())
         {
-            const float scale = getComponent().getDesktopScaleFactor();
-            Rectangle<int> pos (ScalingHelpers::unscaledScreenPosToScaled (scale, rectangleFromRECT (r)));
-            const Rectangle<int> current (getCurrentScaledBounds (scale));
+            auto scale = getComponent().getDesktopScaleFactor();
+            auto pos = ScalingHelpers::unscaledScreenPosToScaled (scale, rectangleFromRECT (r));
+            auto current = getCurrentScaledBounds (scale);
 
             constrainer->checkBounds (pos, current,
                                       Desktop::getInstance().getDisplays().getTotalBounds (true),
@@ -2795,9 +2779,9 @@ private:
             if ((wp.flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
                  && ! Component::isMouseButtonDownAnywhere())
             {
-                const float scale = getComponent().getDesktopScaleFactor();
-                Rectangle<int> pos (ScalingHelpers::unscaledScreenPosToScaled (scale, Rectangle<int> (wp.x, wp.y, wp.cx, wp.cy)));
-                const Rectangle<int> current (getCurrentScaledBounds (scale));
+                auto scale = getComponent().getDesktopScaleFactor();
+                auto pos = ScalingHelpers::unscaledScreenPosToScaled (scale, Rectangle<int> (wp.x, wp.y, wp.cx, wp.cy));
+                auto current = getCurrentScaledBounds (scale);
 
                 constrainer->checkBounds (pos, current,
                                           Desktop::getInstance().getDisplays().getTotalBounds (true),
@@ -2824,7 +2808,7 @@ private:
 
     bool handlePositionChanged()
     {
-        const Point<float> pos (getCurrentMousePos());
+        auto pos = getCurrentMousePos();
 
         if (contains (pos.roundToInt(), false))
         {
@@ -2853,7 +2837,7 @@ private:
                 return;
         }
 
-        Component* underMouse = component.getComponentAt (component.getMouseXYRelative());
+        auto* underMouse = component.getComponentAt (component.getMouseXYRelative());
 
         if (underMouse == nullptr)
             underMouse = &component;
@@ -2873,7 +2857,7 @@ private:
 
     void handlePowerBroadcast (WPARAM wParam)
     {
-        if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
         {
             switch (wParam)
             {
@@ -3212,8 +3196,14 @@ private:
 
                 return 0;
 
+           #if JUCE_REMOVE_COMPONENT_FROM_DESKTOP_ON_WM_DESTROY
+            case WM_DESTROY:
+                getComponent().removeFromDesktop();
+                return 0;
+           #endif
+
             case WM_QUERYENDSESSION:
-                if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+                if (auto* app = JUCEApplicationBase::getInstance())
                 {
                     app->systemRequestedQuit();
                     return MessageManager::getInstance()->hasStopMessageBeenSent();
