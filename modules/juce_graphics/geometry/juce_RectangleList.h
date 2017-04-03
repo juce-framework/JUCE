@@ -352,11 +352,11 @@ public:
 
         for (int j = 0; j < rects.size(); ++j)
         {
-            const RectangleType& rect = rects.getReference (j);
+            auto& rect = rects.getReference (j);
 
-            for (const Rectangle<OtherValueType>* r = other.begin(), * const e = other.end(); r != e; ++r)
+            for (auto& r : other)
             {
-                RectangleType clipped (r->template toType<ValueType>());
+                auto clipped = r.template toType<ValueType>();
 
                 if (rect.intersectRectangle (clipped))
                     result.rects.add (clipped);
@@ -386,7 +386,7 @@ public:
         {
             for (int i = rects.size(); --i >= 0;)
             {
-                RectangleType r (rects.getReference (i));
+                auto r = rects.getReference (i);
 
                 if (rect.intersectRectangle (r))
                     destRegion.rects.add (r);

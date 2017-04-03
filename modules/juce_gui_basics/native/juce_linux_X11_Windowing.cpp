@@ -2699,8 +2699,8 @@ private:
                 adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
 
                 if (peer.depth == 32)
-                    for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
-                        image.clear (*i - totalArea.getPosition());
+                    for (auto& i : originalRepaintRegion)
+                        image.clear (i - totalArea.getPosition());
 
                 {
                     ScopedPointer<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
@@ -2709,9 +2709,10 @@ private:
                     peer.handlePaint (*context);
                 }
 
-                for (const Rectangle<int>* i = originalRepaintRegion.begin(), * const e = originalRepaintRegion.end(); i != e; ++i)
+                for (auto& i : originalRepaintRegion)
                 {
-                    XBitmapImage* xbitmap = static_cast<XBitmapImage*> (image.getPixelData());
+                    auto* xbitmap = static_cast<XBitmapImage*> (image.getPixelData());
+
                    #if JUCE_USE_XSHM
                     if (xbitmap->isUsingXShm())
                         ++shmPaintsPending;
@@ -2719,10 +2720,10 @@ private:
 
 
                    xbitmap->blitToWindow (peer.windowH,
-                                          i->getX(), i->getY(),
-                                          (unsigned int) i->getWidth(),
-                                          (unsigned int) i->getHeight(),
-                                          i->getX() - totalArea.getX(), i->getY() - totalArea.getY());
+                                          i.getX(), i.getY(),
+                                          (unsigned int) i.getWidth(),
+                                          (unsigned int) i.getHeight(),
+                                          i.getX() - totalArea.getX(), i.getY() - totalArea.getY());
                 }
             }
 

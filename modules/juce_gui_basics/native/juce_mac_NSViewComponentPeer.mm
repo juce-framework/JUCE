@@ -933,8 +933,8 @@ public:
 
     void setNeedsDisplayRectangles()
     {
-        for (const Rectangle<float>* i = deferredRepaints.begin(), *e = deferredRepaints.end(); i != e; ++i)
-            [view setNeedsDisplayInRect: makeNSRect (*i)];
+        for (auto& i : deferredRepaints)
+            [view setNeedsDisplayInRect: makeNSRect (i)];
 
         lastRepaintTime = Time::getMillisecondCounter();
         deferredRepaints.clear();

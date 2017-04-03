@@ -249,8 +249,8 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
     HeapBlock<CGRect> rects (numRects);
 
     int i = 0;
-    for (const Rectangle<int>* r = clipRegion.begin(), * const e = clipRegion.end(); r != e; ++r)
-        rects[i++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
+    for (auto& r : clipRegion)
+        rects[i++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
 
     CGContextClipToRects (context, rects, numRects);
     lastClipRectIsValid = false;
@@ -559,8 +559,9 @@ void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
     HeapBlock<CGRect> rects ((size_t) list.getNumRectangles());
 
     size_t num = 0;
-    for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
-        rects[num++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
+
+    for (auto& r : list)
+        rects[num++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
 
     if (state->fillType.isColour())
     {

@@ -777,8 +777,8 @@ public:
     void paint (Graphics& g) override
     {
         scale = g.getInternalContext().getPhysicalPixelScaleFactor();
-        const Rectangle<int> compBounds (owner.getLocalBounds());
-        const Rectangle<int> imageBounds (compBounds * scale);
+        auto compBounds = owner.getLocalBounds();
+        auto imageBounds = compBounds * scale;
 
         if (image.isNull() || image.getBounds() != imageBounds)
         {
@@ -794,12 +794,12 @@ public:
         if (! validArea.containsRectangle (compBounds))
         {
             Graphics imG (image);
-            LowLevelGraphicsContext& lg = imG.getInternalContext();
+            auto& lg = imG.getInternalContext();
 
             lg.addTransform (AffineTransform::scale (scale));
 
-            for (const Rectangle<int>* i = validArea.begin(), * const e = validArea.end(); i != e; ++i)
-                lg.excludeClipRectangle (*i);
+            for (auto& i : validArea)
+                lg.excludeClipRectangle (i);
 
             if (! owner.isOpaque())
             {

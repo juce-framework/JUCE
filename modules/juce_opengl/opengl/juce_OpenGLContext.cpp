@@ -199,9 +199,9 @@ public:
         cachedImageFrameBuffer.makeCurrentRenderingTarget();
         const int imageH = cachedImageFrameBuffer.getHeight();
 
-        for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
+        for (auto& r : list)
         {
-            glScissor (i->getX(), imageH - i->getBottom(), i->getWidth(), i->getHeight());
+            glScissor (r.getX(), imageH - r.getBottom(), r.getWidth(), r.getHeight());
             glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
 
