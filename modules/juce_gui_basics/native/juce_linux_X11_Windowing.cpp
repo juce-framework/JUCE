@@ -2268,13 +2268,18 @@ public:
     {
         updateKeyModifiers ((int) movedEvent.state);
 
-        lastMousePos = Point<int> (movedEvent.x_root, movedEvent.y_root);
+        if ((movedEvent.state & (Button1MotionMask | Button2MotionMask
+                               | Button3MotionMask | Button4MotionMask
+                               | Button5MotionMask)) != 0)
+        {
+            lastMousePos = Point<int> (movedEvent.x_root, movedEvent.y_root);
 
-        if (dragState->dragging)
-            handleExternalDragMotionNotify();
+            if (dragState->dragging)
+                handleExternalDragMotionNotify();
 
-        handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (movedEvent), currentModifiers,
-                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (movedEvent));
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (movedEvent), currentModifiers,
+                              MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (movedEvent));
+        }
     }
 
     void handleEnterNotifyEvent (const XEnterWindowEvent& enterEvent)
