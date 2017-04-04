@@ -203,8 +203,9 @@ public:
 
 public:
     //==============================================================================
-    Pimpl (XEmbedComponent& parent, Window x11Window, bool wantsKeyboardFocus)
-        : owner (parent), atoms (x11display.get()), wantsFocus (wantsKeyboardFocus)
+    Pimpl (XEmbedComponent& parent, Window x11Window, bool wantsKeyboardFocus, bool isClientInitiated)
+        : owner (parent), atoms (x11display.get()), clientInitiated (isClientInitiated),
+          wantsFocus (wantsKeyboardFocus)
     {
         if (widgets == nullptr)
             widgets = new Array<Pimpl*>;
@@ -212,7 +213,9 @@ public:
         widgets->add (this);
 
         createHostWindow();
-        setClient (x11Window);
+
+        if (clientInitiated)
+            setClient (x11Window, true);
 
         owner.setWantsKeyboardFocus (wantsFocus);
         owner.addComponentListener (this);
@@ -221,7 +224,7 @@ public:
     ~Pimpl()
     {
         owner.removeComponentListener (this);
-        setClient (0);
+        setClient (0, true);
 
         if (host != 0)
         {
@@ -253,21 +256,34 @@ public:
         }
     }
     //==============================================================================
-    void setClient (Window xembedClient)
+    void setClient (Window xembedClient, bool shouldReparent)
     {
         removeClient();
 
         if (xembedClient != 0)
         {
+            Display* dpy = getDisplay();
+
             client = xembedClient;
 
-            configureNotify();
+            // if the client has initiated the component then keep the clients size
+            // otherwise the client should use the host's window' size
+            if (clientInitiated)
+            {
+                configureNotify();
+            }
+            else
+            {
+                Rectangle<int> newBounds = getX11BoundsFromJuce();
+                XResizeWindow (dpy, client, static_cast<unsigned int> (newBounds.getWidth()),
+                                            static_cast<unsigned int> (newBounds.getHeight()));
+            }
 
-            Display* dpy = getDisplay();
             XSelectInput (dpy, client, StructureNotifyMask | PropertyChangeMask | FocusChangeMask);
             getXEmbedMappedFlag();
 
-            XReparentWindow (dpy, client, host, 0, 0);
+            if (shouldReparent)
+                XReparentWindow (dpy, client, host, 0, 0);
 
             if (supportsXembed)
                 sendXEmbedEvent (CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, (long) host, xembedVersion);
@@ -301,6 +317,16 @@ public:
             sendXEmbedEvent (CurrentTime, XEMBED_WINDOW_ACTIVATE);
     }
 
+    unsigned long getHostWindowID()
+    {
+        // You are using the client initiated version of the protocol. You cannot
+        // retrieve the window id of the host. Please read the documentation for
+        // the XEmebedComponent class.
+        jassert (! clientInitiated);
+
+        return host;
+    }
+
 private:
     //==============================================================================
     XEmbedComponent& owner;
@@ -309,6 +335,7 @@ private:
     ScopedXDisplay x11display;
     Atoms atoms;
 
+    bool clientInitiated;
     bool wantsFocus        = false;
     bool supportsXembed    = false;
     bool hasBeenMapped     = false;
@@ -321,7 +348,7 @@ private:
     void componentParentHierarchyChanged (Component&) override   { peerChanged (owner.getPeer()); }
     void componentMovedOrResized (Component&, bool, bool) override
     {
-        if (client != 0 && lastPeer != nullptr)
+        if (host != 0 && lastPeer != nullptr)
         {
             Display* dpy = getDisplay();
             Rectangle<int> newBounds = getX11BoundsFromJuce();
@@ -336,8 +363,8 @@ private:
                                        static_cast<unsigned int> (newBounds.getWidth()),
                                        static_cast<unsigned int> (newBounds.getHeight()));
 
-                    if (currentBounds.getWidth() != newBounds.getWidth()
-                        || currentBounds.getHeight() != newBounds.getHeight())
+                    if (client != 0 && (currentBounds.getWidth() != newBounds.getWidth()
+                                        || currentBounds.getHeight() != newBounds.getHeight()))
                         XResizeWindow (dpy, client,
                                        static_cast<unsigned int> (newBounds.getWidth()),
                                        static_cast<unsigned int> (newBounds.getHeight()));
@@ -357,7 +384,7 @@ private:
         swa.border_pixel = 0;
         swa.background_pixmap = None;
         swa.override_redirect = True;
-        swa.event_mask = StructureNotifyMask | FocusChangeMask;
+        swa.event_mask = SubstructureNotifyMask | StructureNotifyMask | FocusChangeMask;
 
         host = XCreateWindow (dpy, root, 0, 0, 1, 1, 0, CopyFromParent,
                               InputOutput, CopyFromParent,
@@ -547,7 +574,7 @@ private:
 
     bool handleX11Event (const XEvent& e)
     {
-        if (e.xany.window == client)
+        if (e.xany.window == client && client != 0)
         {
             switch (e.type)
             {
@@ -559,10 +586,24 @@ private:
                 return true;
             }
         }
-        else if (e.xany.window == host)
+        else if (e.xany.window == host && host != 0)
         {
             switch (e.type)
             {
+            case ReparentNotify:
+                if (e.xreparent.parent == host && e.xreparent.window != client)
+                {
+                    setClient (e.xreparent.window, false);
+                    return true;
+                }
+                break;
+            case CreateNotify:
+                if (e.xcreatewindow.parent != e.xcreatewindow.window && e.xcreatewindow.parent == host && e.xcreatewindow.window != client)
+                {
+                    setClient (e.xcreatewindow.window, false);
+                    return true;
+                }
+                break;
             case GravityNotify:
                 componentMovedOrResized (owner, true, true);
                 return true;
@@ -576,6 +617,7 @@ private:
                     return true;
                 }
                 break;
+
             }
         }
 
@@ -671,8 +713,14 @@ Array<XEmbedComponent::Pimpl*>* XEmbedComponent::Pimpl::widgets = nullptr;
 HashMap<ComponentPeer*,XEmbedComponent::Pimpl::SharedKeyWindow*>* XEmbedComponent::Pimpl::SharedKeyWindow::keyWindows = nullptr;
 
 //==============================================================================
+XEmbedComponent::XEmbedComponent (bool wantsKeyboardFocus)
+    : pimpl (new Pimpl (*this, 0, wantsKeyboardFocus, false))
+{
+    setOpaque (true);
+}
+
 XEmbedComponent::XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus)
-    : pimpl (new Pimpl (*this, wID, wantsKeyboardFocus))
+    : pimpl (new Pimpl (*this, wID, wantsKeyboardFocus, true))
 {
     setOpaque (true);
 }
@@ -687,6 +735,7 @@ void XEmbedComponent::paint (Graphics& g)
 void XEmbedComponent::focusGained (FocusChangeType changeType)     { pimpl->focusGained (changeType); }
 void XEmbedComponent::focusLost   (FocusChangeType changeType)     { pimpl->focusLost   (changeType); }
 void XEmbedComponent::broughtToFront()                             { pimpl->broughtToFront(); }
+unsigned long XEmbedComponent::getHostWindowID()                   { return pimpl->getHostWindowID(); }
 
 //==============================================================================
 bool juce_handleXEmbedEvent (ComponentPeer* p, void* e)
