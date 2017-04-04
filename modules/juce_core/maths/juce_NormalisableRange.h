@@ -103,11 +103,46 @@ public:
         checkInvariants();
     }
 
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    /** Creates a NormalisableRange with a given range and an injective mapping function.
+
+        @param rangeStart           The minimum value in the range.
+        @param rangeEnd             The maximum value in the range.
+        @param convertFrom0To1Func  A function which uses the current start and end of this NormalisableRange
+                                    and produces a mapped value from a normalised value.
+        @param convertTo0To1Func    A function which uses the current start and end of this NormalisableRange
+                                    and produces a normalised value from a mapped value.
+        @param snapToLegalValueFunc A function which uses the current start and end of this NormalisableRange
+                                    to take a mapped value and snap it to the nearest legal value.
+    */
+    NormalisableRange (ValueType rangeStart,
+                       ValueType rangeEnd,
+                       std::function<ValueType (ValueType currentRangeStart, ValueType currentRangeEnd, ValueType normalisedValue)> convertFrom0To1Func,
+                       std::function<ValueType (ValueType currentRangeStart, ValueType currentRangeEnd, ValueType mappedValue)> convertTo0To1Func,
+                       std::function<ValueType (ValueType currentRangeStart, ValueType currentRangeEnd, ValueType valueToSnap)> snapToLegalValueFunc = nullptr) noexcept
+        : start (rangeStart),
+          end   (rangeEnd),
+          interval(),
+          skew (static_cast<ValueType> (1)),
+          symmetricSkew (false),
+          convertFrom0To1Function  (convertFrom0To1Func),
+          convertTo0To1Function    (convertTo0To1Func),
+          snapToLegalValueFunction (snapToLegalValueFunc)
+    {
+        checkInvariants();
+    }
+   #endif
+
     /** Uses the properties of this mapping to convert a non-normalised value to
         its 0->1 representation.
     */
     ValueType convertTo0to1 (ValueType v) const noexcept
     {
+       #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+        if (convertTo0To1Function != nullptr)
+            return convertTo0To1Function (start, end, v);
+       #endif
+
         ValueType proportion = (v - start) / (end - start);
 
         if (skew == static_cast<ValueType> (1))
@@ -129,6 +164,11 @@ public:
     */
     ValueType convertFrom0to1 (ValueType proportion) const noexcept
     {
+       #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+        if (convertFrom0To1Function != nullptr)
+            return convertFrom0To1Function (start, end, proportion);
+       #endif
+
         if (! symmetricSkew)
         {
             if (skew != static_cast<ValueType> (1) && proportion > ValueType())
@@ -147,10 +187,16 @@ public:
         return start + (end - start) / static_cast<ValueType> (2) * (static_cast<ValueType> (1) + distanceFromMiddle);
     }
 
-    /** Takes a non-normalised value and snaps it based on the interval property of
-        this NormalisedRange. */
+    /** Takes a non-normalised value and snaps it based on either the interval property of
+        this NormalisedRange or the lambda function supplied to the constructor.
+    */
     ValueType snapToLegalValue (ValueType v) const noexcept
     {
+       #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+        if (snapToLegalValueFunction != nullptr)
+            return snapToLegalValueFunction (start, end, v);
+       #endif
+
         if (interval > ValueType())
             v = start + interval * std::floor ((v - start) / interval + static_cast<ValueType> (0.5));
 
@@ -163,10 +209,15 @@ public:
         return v;
     }
 
+    /** Returns the extent of the normalisable range. */
     Range<ValueType> getRange() const noexcept          { return Range<ValueType> (start, end); }
 
     /** Given a value which is between the start and end points, this sets the skew
         such that convertFrom0to1 (0.5) will return this value.
+
+        If you have used lambda functions for convertFrom0to1Func and convertFrom0to1Func in the
+        constructor of this class then the skew value is ignored.
+
         @param centrePointValue  this must be greater than the start of the range and less than the end.
     */
     void setSkewForCentre (ValueType centrePointValue) noexcept
@@ -180,13 +231,18 @@ public:
         checkInvariants();
     }
 
-    /** The start of the non-normalised range. */
+    /** The minimum value of the non-normalised range. */
     ValueType start;
 
-    /** The end of the non-normalised range. */
+    /** The maximum value of the non-normalised range. */
     ValueType end;
 
-    /** The snapping interval that should be used (in non-normalised value). Use 0 for a continuous range. */
+    /** The snapping interval that should be used (for a non-normalised value). Use 0 for a
+        continuous range.
+
+        If you have used a lambda function for snapToLegalValueFunction in the constructor of
+        this class then the interval is ignored.
+    */
     ValueType interval;
 
     /** An optional skew factor that alters the way values are distribute across the range.
@@ -197,6 +253,9 @@ public:
         A factor of 1.0 has no skewing effect at all. If the factor is < 1.0, the lower end
         of the range will fill more of the slider's length; if the factor is > 1.0, the upper
         end of the range will be expanded.
+
+        If you have used lambda functions for convertFrom0to1Func and convertFrom0to1Func in the
+        constructor of this class then the skew value is ignored.
     */
     ValueType skew;
 
@@ -210,4 +269,10 @@ private:
         jassert (interval >= ValueType());
         jassert (skew > ValueType());
     }
+
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    std::function<ValueType (ValueType, ValueType, ValueType)> convertFrom0To1Function  = nullptr,
+                                                               convertTo0To1Function    = nullptr,
+                                                               snapToLegalValueFunction = nullptr;
+   #endif
 };
