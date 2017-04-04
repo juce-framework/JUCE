@@ -490,7 +490,7 @@ class TemporaryMainMenuWithStandardCommands
 {
 public:
     TemporaryMainMenuWithStandardCommands()
-        : oldMenu (MenuBarModel::getMacMainMenu()), oldAppleMenu (nullptr)
+        : oldMenu (MenuBarModel::getMacMainMenu())
     {
         if (auto* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
             oldAppleMenu = new PopupMenu (*appleMenu);
@@ -524,7 +524,7 @@ public:
         [menu release];
 
         // use a dummy modal component so that apps can tell that something is currently modal.
-        dummyModalComponent.enterModalState();
+        dummyModalComponent.enterModalState (false);
     }
 
     ~TemporaryMainMenuWithStandardCommands()
@@ -533,7 +533,7 @@ public:
     }
 
 private:
-    MenuBarModel* oldMenu;
+    MenuBarModel* const oldMenu;
     ScopedPointer<PopupMenu> oldAppleMenu;
     String oldRecentItems;
 
