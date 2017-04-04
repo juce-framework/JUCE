@@ -53,6 +53,8 @@ enum class MessageFromDevice
     deviceTopology          = 0x01,
     packetACK               = 0x02,
     firmwareUpdateACK       = 0x03,
+    deviceTopologyExtend    = 0x04,
+    deviceTopologyEnd       = 0x05,
 
     touchStart              = 0x10,
     touchMove               = 0x11,
@@ -153,6 +155,8 @@ struct DeviceConnection
     ConnectorPort port1, port2;
 };
 
+static constexpr uint8 maxBlocksInTopologyPacket = 6;
+static constexpr uint8 maxConnectionsInTopologyPacket = 24;
 
 //==============================================================================
 /** The coordinates of a touch. */
@@ -299,6 +303,14 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "getBlockTypeForID/ii",
     "sendMessageToBlock/viiii",
     "sendMessageToHost/viii",
+    "getHorizontalDistFromMaster/i",
+    "getVerticalDistFromMaster/i",
+    "getAngleFromMaster/i",
+    "setAutoRotate/vb",
+    "getClusterWidth/i",
+    "getClusterHeight/i",
+    "getClusterXpos/i",
+    "getClusterYpos/i",
     "makeARGB/iiiii",
     "blendARGB/iii",
     "fillPixel/viii",
@@ -306,6 +318,7 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "fillRect/viiiii",
     "blendRect/viiiii",
     "blendGradientRect/viiiiiiii",
+    "blendCircle/vifffb",
     "addPressurePoint/vifff",
     "drawPressureMap/v",
     "fadePressureMap/v",

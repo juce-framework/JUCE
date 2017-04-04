@@ -69,7 +69,9 @@ struct HostPacketDecoder
 
         switch ((MessageFromDevice) messageType)
         {
-            case MessageFromDevice::deviceTopology:           return handleTopology (handler, reader);
+            case MessageFromDevice::deviceTopology:           return handleTopology (handler, reader, true);
+            case MessageFromDevice::deviceTopologyExtend:     return handleTopology (handler, reader, false);
+            case MessageFromDevice::deviceTopologyEnd:        return handleTopologyEnd (handler, reader);
             case MessageFromDevice::touchStart:               return handleTouch (handler, reader, deviceIndex, packetTimestamp, true, false);
             case MessageFromDevice::touchMove:                return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, false);
             case MessageFromDevice::touchEnd:                 return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, true);
@@ -90,7 +92,7 @@ struct HostPacketDecoder
         }
     }
 
-    static bool handleTopology (Handler& handler, Packed7BitArrayReader& reader)
+    static bool handleTopology (Handler& handler, Packed7BitArrayReader& reader, bool newTopology)
     {
         if (reader.getRemainingBits() < DeviceCount::bits + ConnectionCount::bits)
         {
@@ -116,7 +118,8 @@ struct HostPacketDecoder
             return false;
         }
 
-        handler.beginTopology ((int) numDevices, (int) numConnections);
+        if (newTopology)
+            handler.beginTopology ((int) numDevices, (int) numConnections);
 
         for (uint32 i = 0; i < numDevices; ++i)
             handleTopologyDevice (handler, reader);
@@ -124,8 +127,24 @@ struct HostPacketDecoder
         for (uint32 i = 0; i < numConnections; ++i)
             handleTopologyConnection (handler, reader);
 
-        handler.endTopology();
+        // Packet must be last in topology, otherwise wait for topology end message
+        if (numDevices < maxBlocksInTopologyPacket && numConnections < maxConnectionsInTopologyPacket)
+            handler.endTopology();
 
+        return true;
+    }
+
+    static bool handleTopologyEnd (Handler& handler, Packed7BitArrayReader& reader)
+    {
+        auto deviceProtocolVersion = reader.read<ProtocolVersion>();
+
+        if (deviceProtocolVersion > currentProtocolVersion)
+        {
+            jassertfalse;
+            return false;
+        }
+
+        handler.endTopology();
         return true;
     }
 
