@@ -438,12 +438,16 @@ public:
     //==============================================================================
     bool isFocused() const override
     {
-        return view.callBooleanMethod (ComponentPeerView.hasFocus);
+        if (view != nullptr)
+            return view.callBooleanMethod (ComponentPeerView.hasFocus);
+
+        return false;
     }
 
     void grabFocus() override
     {
-        view.callBooleanMethod (ComponentPeerView.requestFocus);
+        if (view != nullptr)
+            view.callBooleanMethod (ComponentPeerView.requestFocus);
     }
 
     void handleFocusChangeCallback (bool hasFocus)
