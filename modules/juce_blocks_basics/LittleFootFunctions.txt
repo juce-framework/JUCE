@@ -289,6 +289,11 @@ void sendPitchBend (int channel, int position);
 void sendChannelPressure (int channel, int pressure);
 
 //==============================================================================
+/**  
+    Use this method to draw the display. 
+    The Block will call this approximately 25 times per second.
+*/
+void repaint()
 
 /** Called when a button is pushed.
  
