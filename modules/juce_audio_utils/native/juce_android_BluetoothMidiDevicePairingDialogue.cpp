@@ -28,7 +28,7 @@
  METHOD (pairBluetoothMidiDevice, "pairBluetoothMidiDevice", "(Ljava/lang/String;)Z") \
  METHOD (unpairBluetoothMidiDevice, "unpairBluetoothMidiDevice", "(Ljava/lang/String;)V") \
  METHOD (getHumanReadableStringForBluetoothAddress, "getHumanReadableStringForBluetoothAddress", "(Ljava/lang/String;)Ljava/lang/String;") \
- METHOD (isBluetoothDevicePaired, "isBluetoothDevicePaired", "(Ljava/lang/String;)Z") \
+ METHOD (getBluetoothDeviceStatus, "getBluetoothDeviceStatus", "(Ljava/lang/String;)I") \
  METHOD (startStopScan, "startStopScan", "(Z)V")
 
 DECLARE_JNI_CLASS (AndroidBluetoothManager, JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager");
@@ -121,17 +121,24 @@ struct AndroidBluetoothMidiInterface
     }
 
     //==============================================================================
-    static bool isBluetoothDevicePaired (const String& address)
+    enum PairStatus
+    {
+        unpaired = 0,
+        paired = 1,
+        pairing = 2
+    };
+
+    static PairStatus isBluetoothDevicePaired (const String& address)
     {
         JNIEnv* env = getEnv();
 
         LocalRef<jobject> btManager (android.activity.callObjectMethod (JuceAppActivity.getAndroidBluetoothManager));
 
         if (btManager.get() == nullptr)
-            return false;
+            return unpaired;
 
-        return env->CallBooleanMethod (btManager.get(), AndroidBluetoothManager.isBluetoothDevicePaired,
-                                       javaString (address).get());
+        return static_cast<PairStatus> (env->CallIntMethod (btManager.get(), AndroidBluetoothManager.getBluetoothDeviceStatus,
+                                                            javaString (address).get()));
     }
 };
 
@@ -350,9 +357,19 @@ private:
              address != bluetoothAddresses.end(); ++address)
         {
             String name = AndroidBluetoothMidiInterface::getHumanReadableStringForBluetoothAddress (*address);
-            DeviceStatus status =  AndroidBluetoothMidiInterface::isBluetoothDevicePaired (*address)
-                                      ? AndroidBluetoothMidiDevice::connected
-                                      : AndroidBluetoothMidiDevice::disconnected;
+
+            DeviceStatus status;
+            switch (AndroidBluetoothMidiInterface::isBluetoothDevicePaired (*address))
+            {
+                case AndroidBluetoothMidiInterface::pairing:
+                    status = AndroidBluetoothMidiDevice::connecting;
+                    break;
+                case AndroidBluetoothMidiInterface::paired:
+                    status = AndroidBluetoothMidiDevice::connected;
+                    break;
+                default:
+                    status = AndroidBluetoothMidiDevice::disconnected;
+            }
 
             newDevices.add (AndroidBluetoothMidiDevice (name, *address, status));
         }
