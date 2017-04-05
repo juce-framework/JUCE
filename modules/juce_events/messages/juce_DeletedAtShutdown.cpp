@@ -48,6 +48,13 @@ DeletedAtShutdown::~DeletedAtShutdown()
     getDeletedAtShutdownObjects().removeFirstMatchingValue (this);
 }
 
+#if JUCE_MSVC
+ // Disable unreachable code warning, in case the compiler manages to figure out that
+ // you have no classes of DeletedAtShutdown that could throw an exception in their destructor.
+ #pragma warning (push)
+ #pragma warning (disable: 4702)
+#endif
+
 void DeletedAtShutdown::deleteAll()
 {
     // make a local copy of the array, so it can't get into a loop if something
@@ -61,13 +68,6 @@ void DeletedAtShutdown::deleteAll()
 
     for (int i = localCopy.size(); --i >= 0;)
     {
-       #if JUCE_MSVC
-        // Disable unreachable code warning, in case the compiler manages to figure out
-        // that you have no classes of DeletedAtShutdown that could throw an exception here.
-        #pragma warning (push)
-        #pragma warning (disable: 4702)
-       #endif
-
         JUCE_TRY
         {
             auto* deletee = localCopy.getUnchecked(i);
@@ -83,15 +83,15 @@ void DeletedAtShutdown::deleteAll()
             delete deletee;
         }
         JUCE_CATCH_EXCEPTION
-
-       #if JUCE_MSVC
-        #pragma warning (pop)
-       #endif
     }
 
-    // if no objects got re-created during shutdown, this should have been emptied by their
-    // destructors
+    // if this fails, then it's likely that some new DeletedAtShutdown objects were
+    // created while executing the destructors of the other ones.
     jassert (getDeletedAtShutdownObjects().isEmpty());
 
     getDeletedAtShutdownObjects().clear(); // just to make sure the array doesn't have any memory still allocated
 }
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
