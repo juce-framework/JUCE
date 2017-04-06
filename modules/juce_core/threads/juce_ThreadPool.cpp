@@ -90,13 +90,17 @@ ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 ThreadPool::ThreadPool (const int numThreads, size_t threadStackSize)
 {
     jassert (numThreads > 0); // not much point having a pool without any threads!
+    mThrowAssert = true;
+    mTimeOut = 500;   
 
     createThreads (numThreads, threadStackSize);
 }
 
 ThreadPool::ThreadPool()
 {
-    createThreads (SystemStats::getNumCpus());
+  mThrowAssert = true;
+  mTimeOut = 500;
+  createThreads (SystemStats::getNumCpus());
 }
 
 ThreadPool::~ThreadPool()
@@ -120,7 +124,7 @@ void ThreadPool::stopThreads()
         threads.getUnchecked(i)->signalThreadShouldExit();
 
     for (int i = threads.size(); --i >= 0;)
-        threads.getUnchecked(i)->stopThread (500);
+        threads.getUnchecked(i)->stopThread (mTimeOut,mThrowAssert);
 }
 
 void ThreadPool::addJob (ThreadPoolJob* const job, const bool deleteJobWhenFinished)

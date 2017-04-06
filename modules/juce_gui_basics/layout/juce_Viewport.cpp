@@ -365,7 +365,13 @@ void Viewport::updateVisibleArea()
     if (canShowHBar && ! hBarVisible)
         visibleOrigin.setX (0);
 
-    verticalScrollBar.setBounds (contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
+    if (mScrollbarOnRight) {
+      verticalScrollBar.setBounds(contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
+    }
+    else {
+      verticalScrollBar.setBounds(0, 15, scrollbarWidth, contentArea.getHeight()-15);
+    }
+
     verticalScrollBar.setRangeLimits (0.0, contentBounds.getHeight());
     verticalScrollBar.setCurrentRange (visibleOrigin.y, contentArea.getHeight());
     verticalScrollBar.setSingleStepSize (singleStepY);

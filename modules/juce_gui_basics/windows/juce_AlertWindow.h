@@ -74,7 +74,7 @@ public:
                  Component* associatedComponent = nullptr);
 
     /** Destroys the AlertWindow */
-    ~AlertWindow();
+    virtual ~AlertWindow();
 
     //==============================================================================
     /** Returns the type of alert icon that was specified when the window
@@ -454,7 +454,7 @@ protected:
     /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */
-    void buttonClicked (Button*) override;
+    virtual void buttonClicked (Button*) override;
     /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
@@ -462,7 +462,7 @@ protected:
     /** @internal */
     int getDesktopWindowStyleFlags() const override;
 
-private:
+protected:
     //==============================================================================
     String text;
     TextLayout textLayout;

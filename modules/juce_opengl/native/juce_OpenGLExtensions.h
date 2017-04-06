@@ -63,7 +63,20 @@
     USE_FUNCTION (glUniform1fv,             void, (GLint p1, GLsizei p2, const GLfloat* p3), (p1, p2, p3))\
     USE_FUNCTION (glUniformMatrix2fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glUniformMatrix3fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
-    USE_FUNCTION (glUniformMatrix4fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))
+    USE_FUNCTION (glUniformMatrix4fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
+    USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2),(p1,p2))\
+    USE_FUNCTION (glBindVertexArray,        void, (GLuint p1),(p1)) \
+    USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2),(p1,p2))\
+    USE_FUNCTION (glMapBuffer,              void*, (GLenum p1, GLenum p2),(p1,p2))\
+    USE_FUNCTION (glUnmapBuffer,            GLboolean,(GLenum p1),(p1))\
+    USE_FUNCTION (glCopyBufferSubData,       void,(GLenum p1, GLenum p2, GLintptr p3,GLintptr p4, GLsizeiptr p5),(p1,p2,p3,p4,p5))\
+    USE_FUNCTION (glMapBufferRange,          void*,(GLenum p1,GLintptr p2,GLsizeiptr p3,GLbitfield p4),(p1,p2,p3,p4))\
+    USE_FUNCTION (glVertexAttribDivisor,     void, (GLuint p1,GLuint p2),(p1,p2))\
+    USE_FUNCTION (glRenderbufferStorageMultisample,  void, (GLenum p1,GLsizei p2,GLenum p3,GLsizei p4,GLsizei p5),(p1,p2,p3,p4,p5))\
+    USE_FUNCTION (glBlitFramebuffer, void, (GLint p1,GLint p2,GLint p3,GLint p4,GLint p5,GLint p6,GLint p7,GLint p8, GLbitfield p9, GLenum p10),(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10))\
+	  USE_FUNCTION (glDisablei, void, (GLenum p1, GLuint p2),(p1,p2)) \
+    USE_FUNCTION (glDrawBuffers,void, (GLsizei p1, const GLenum* p2), (p1,p2)) \
+    USE_FUNCTION (glStencilOpSeparate, void, (GLenum p1,GLenum p2,GLenum p3,GLenum p4),(p1,p2,p3,p4))
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
     @see OpenGLExtensionFunctions
@@ -82,15 +95,16 @@
     USE_FUNCTION (glCheckFramebufferStatus, GLenum, (GLenum p1), (p1))\
     USE_FUNCTION (glFramebufferTexture2D,   void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4, GLint p5), (p1, p2, p3, p4, p5))\
     USE_FUNCTION (glFramebufferRenderbuffer,  void, (GLenum p1, GLenum p2, GLenum p3, GLuint p4), (p1, p2, p3, p4))\
-    USE_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))
+    USE_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))\
+    USE_FUNCTION (glDrawArraysInstanced, void, (GLenum p1, GLint p2, GLsizei p3, GLsizei p4), (p1, p2, p3, p4))
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
     @see OpenGLExtensionFunctions
 */
 #define JUCE_GL_VERTEXBUFFER_FUNCTIONS(USE_FUNCTION) \
-    USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
-    USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
-    USE_FUNCTION (glBindVertexArray,        void, (GLuint p1), (p1))
+    //USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
+    //USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
+    //USE_FUNCTION (glBindVertexArray,        void, (GLuint p1), (p1))
 
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded

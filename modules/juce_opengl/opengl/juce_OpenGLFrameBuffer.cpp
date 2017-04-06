@@ -184,6 +184,18 @@ bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int heigh
     return pimpl != nullptr;
 }
 
+bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int height,bool wantsDepth,bool wantsStencil){
+    jassert (context.isActive()); // The context must be active when creating a framebuffer!
+    
+    pimpl = nullptr;
+    pimpl = new Pimpl (context, width, height, wantsDepth, wantsStencil);
+    
+    if (! pimpl->createdOk())
+        pimpl = nullptr;
+    
+    return pimpl != nullptr;
+}
+
 bool OpenGLFrameBuffer::initialise (OpenGLContext& context, const Image& image)
 {
     if (! image.isARGB())
@@ -309,6 +321,15 @@ void OpenGLFrameBuffer::makeCurrentAndClear()
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 }
+
+void OpenGLFrameBuffer::makeCurrentAndClear(Colour colour) {
+  if (makeCurrentRenderingTarget())
+  {
+    glClearColor(colour.getFloatRed(), colour.getFloatGreen(), colour.getFloatBlue(),colour.getAlpha() );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  }
+}
+
 
 bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& area)
 {
