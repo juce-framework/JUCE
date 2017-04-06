@@ -1722,6 +1722,8 @@ public:
         if (metadataValues.size() > 0)
             metadataValues.set ("MetaDataSource", "WAV");
 
+        metadataValues.addArray (createDefaultSMPLMetadata());
+
         WavAudioFormat format;
         MemoryBlock memoryBlock;
 
@@ -1755,6 +1757,23 @@ private:
         numTestAudioBufferChannels = 2,
         numTestAudioBufferSamples = 256
     };
+
+    StringPairArray createDefaultSMPLMetadata() const
+    {
+        StringPairArray m;
+
+        m.set ("Manufacturer", "0");
+        m.set ("Product", "0");
+        m.set ("SamplePeriod", "0");
+        m.set ("MidiUnityNote", "60");
+        m.set ("MidiPitchFraction", "0");
+        m.set ("SmpteFormat", "0");
+        m.set ("SmpteOffset", "0");
+        m.set ("NumSampleLoops", "0");
+        m.set ("SamplerData", "0");
+
+        return m;
+    }
 
     JUCE_DECLARE_NON_COPYABLE (WaveAudioFormatTests)
 };
