@@ -270,6 +270,9 @@ public:
     /** @internal */
     static bool respondsToKey (const KeyPress&);
 
+//#NT_HACK
+    bool mScrollbarOnRight = true;
+
 private:
     //==============================================================================
     WeakReference<Component> contentComp;
