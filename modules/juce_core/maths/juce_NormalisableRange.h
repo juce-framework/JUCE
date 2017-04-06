@@ -55,7 +55,10 @@ public:
     NormalisableRange (const NormalisableRange& other) noexcept
         : start (other.start), end (other.end),
           interval (other.interval), skew (other.skew),
-          symmetricSkew (other.symmetricSkew)
+          symmetricSkew (other.symmetricSkew),
+          convertFrom0To1Function (other.convertFrom0To1Function),
+          convertTo0To1Function (other.convertTo0To1Function),
+          snapToLegalValueFunction (other.snapToLegalValueFunction)
     {
         checkInvariants();
     }
@@ -68,7 +71,12 @@ public:
         interval = other.interval;
         skew = other.skew;
         symmetricSkew = other.symmetricSkew;
+        convertFrom0To1Function = other.convertFrom0To1Function;
+        convertTo0To1Function = other.convertTo0To1Function;
+        snapToLegalValueFunction = other.snapToLegalValueFunction;
+
         checkInvariants();
+
         return *this;
     }
 
