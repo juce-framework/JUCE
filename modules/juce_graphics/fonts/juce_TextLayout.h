@@ -81,7 +81,7 @@ public:
         The position of the text within the rectangle is controlled by the justification
         flags set in the original AttributedString that was used to create this layout.
     */
-    void draw (Graphics&, const Rectangle<float>& area) const;
+    void draw (Graphics&, Rectangle<float> area) const;
 
     //==============================================================================
     /** A positioned glyph. */
