@@ -89,14 +89,14 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)
 }
 
 MemoryBlock::MemoryBlock (MemoryBlock&& other) noexcept
-    : data (static_cast<HeapBlock<char>&&> (other.data)),
+    : data (static_cast<HeapBlockType&&> (other.data)),
       size (other.size)
 {
 }
 
 MemoryBlock& MemoryBlock::operator= (MemoryBlock&& other) noexcept
 {
-    data = static_cast<HeapBlock<char>&&> (other.data);
+    data = static_cast<HeapBlockType&&> (other.data);
     size = other.size;
     return *this;
 }

@@ -258,7 +258,8 @@ public:
 
 private:
     //==============================================================================
-    HeapBlock<char> data;
+    typedef HeapBlock<char, true> HeapBlockType;
+    HeapBlockType data;
     size_t size;
 
     JUCE_LEAK_DETECTOR (MemoryBlock)
