@@ -201,6 +201,12 @@ public:
                              bool allowVerticalScrollingWithoutScrollbar = false,
                              bool allowHorizontalScrollingWithoutScrollbar = false);
 
+    /** Sets vertical scrollbar position to right or left of the contents.
+
+        Default is true, to the right.
+    */
+    void setVerticalScrollbarOnRight(bool verticalScrollbarOnRight);
+
     /** True if the vertical scrollbar is enabled.
         @see setScrollBarsShown
     */
@@ -279,8 +285,10 @@ private:
     bool showHScrollbar, showVScrollbar, deleteContent;
     bool customScrollBarThickness;
     bool allowScrollingWithoutScrollbarV, allowScrollingWithoutScrollbarH;
+    bool vScrollbarOnRight;
     Component contentHolder;
     ScrollBar verticalScrollBar, horizontalScrollBar;
+
 
     struct DragToScrollListener;
     friend struct DragToScrollListener;

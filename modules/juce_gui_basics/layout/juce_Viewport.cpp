@@ -33,6 +33,7 @@ Viewport::Viewport (const String& name)
     customScrollBarThickness (false),
     allowScrollingWithoutScrollbarV (false),
     allowScrollingWithoutScrollbarH (false),
+    vScrollbarOnRight (true),
     verticalScrollBar (true),
     horizontalScrollBar (false)
 {
@@ -333,7 +334,15 @@ void Viewport::updateVisibleArea()
             }
         }
 
-        if (vBarVisible)  contentArea.setWidth  (getWidth()  - scrollbarWidth);
+        if (vBarVisible)  {
+          if(vScrollbarOnRight) {
+            contentArea.setWidth  (getWidth()  - scrollbarWidth);
+          }
+          else {
+            contentArea.setWidth  (getWidth());
+            contentArea.removeFromLeft(scrollbarWidth);
+          }
+        }
         if (hBarVisible)  contentArea.setHeight (getHeight() - scrollbarWidth);
 
         if (contentComp == nullptr)
@@ -365,7 +374,13 @@ void Viewport::updateVisibleArea()
     if (canShowHBar && ! hBarVisible)
         visibleOrigin.setX (0);
 
-    verticalScrollBar.setBounds (contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
+    if (vScrollbarOnRight) {
+      verticalScrollBar.setBounds(contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
+    }
+    else {
+      verticalScrollBar.setBounds(0, 0, scrollbarWidth, contentArea.getHeight());
+    }
+
     verticalScrollBar.setRangeLimits (0.0, contentBounds.getHeight());
     verticalScrollBar.setCurrentRange (visibleOrigin.y, contentArea.getHeight());
     verticalScrollBar.setSingleStepSize (singleStepY);
@@ -429,6 +444,14 @@ void Viewport::setScrollBarsShown (const bool showVerticalScrollbarIfNeeded,
         showHScrollbar = showHorizontalScrollbarIfNeeded;
         updateVisibleArea();
     }
+}
+
+void Viewport::setVerticalScrollbarOnRight(bool verticalScrollbarOnRight)
+{
+  if(vScrollbarOnRight != verticalScrollbarOnRight){
+    vScrollbarOnRight = verticalScrollbarOnRight;
+    updateVisibleArea();
+  }
 }
 
 void Viewport::setScrollBarThickness (const int thickness)
