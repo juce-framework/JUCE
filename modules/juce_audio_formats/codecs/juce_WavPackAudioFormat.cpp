@@ -27,10 +27,21 @@
 namespace WavPackNamespace
 {
 #if JUCE_INCLUDE_WAVPACK_CODE || ! defined (JUCE_INCLUDE_WAVPACK_CODE)
+
+#if ! JUCE_MSVC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
+#if JUCE_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4838)
+#pragma warning(disable : 4389)
+#pragma warning(disable : 4245)
+#pragma warning(disable : 4189)
+#endif
 
 #include "wavpack/common_utils.c"
 #include "wavpack/entropy_utils.c"
@@ -44,7 +55,14 @@ namespace WavPackNamespace
 #include "wavpack/unpack_seek.c"
 #include "wavpack/unpack_utils.c"
 
+#if ! JUCE_MSVC
 #pragma GCC diagnostic pop
+#endif
+
+#if JUCE_MSVC
+#pragma warning(pop)
+#endif
+
 #else
 #include <wavpack/wavpack.h>
 #endif
