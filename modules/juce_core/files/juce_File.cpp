@@ -770,8 +770,7 @@ bool File::appendText (const String& text,
     if (out.failedToOpen())
         return false;
 
-    out.writeText (text, asUnicode, writeUnicodeHeaderBytes);
-    return true;
+    return out.writeText (text, asUnicode, writeUnicodeHeaderBytes);
 }
 
 bool File::replaceWithText (const String& textToWrite,
