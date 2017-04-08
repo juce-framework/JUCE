@@ -73,6 +73,21 @@ public:
         }
     }
 
+    bool hitTest(int x, int y) override {
+
+      Rectangle<int> pos;
+
+      if (TreeViewItem* const item = findItemAt(y, pos)) {
+        if (x < pos.getX() && owner.openCloseButtonsVisible){
+          return true;
+        }
+        else if (x < pos.getX() + pos.getWidth()) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     void mouseUp (const MouseEvent& e) override
     {
         updateButtonUnderMouse (e);
