@@ -450,6 +450,9 @@ private:
         if (tag == "switch")    return parseSwitch (xml);
         if (tag == "a")         return parseLinkElement (xml);
         if (tag == "style")     parseCSSStyle (xml);
+        if (tag == "defs")
+            if (const XmlElement* const style = xml->getChildByName ("style"))
+                parseCSSStyle (xml.getChild (style));
 
         return nullptr;
     }
@@ -1127,6 +1130,9 @@ private:
 
                 if (*endOfName == '{')
                     return endOfName;
+
+                if (*endOfName == ',')
+                    return CharacterFunctions::find (endOfName, (juce_wchar) '{');
             }
         }
 
@@ -1150,20 +1156,29 @@ private:
         }
         else if (xml->hasAttribute ("class"))
         {
-            String::CharPointerType openBrace = findStyleItem (cssStyleText.getCharPointer(),
-                                                               xml->getStringAttribute ("class").getCharPointer());
-
-            if (! openBrace.isEmpty())
+            String::CharPointerType styleIter = cssStyleText.getCharPointer();
+            while (true)
             {
+                String::CharPointerType openBrace = findStyleItem (styleIter,
+                                                                   xml->getStringAttribute ("class").getCharPointer());
+                if (openBrace.isEmpty())
+                    break;
+
                 String::CharPointerType closeBrace = CharacterFunctions::find (openBrace, (juce_wchar) '}');
 
-                if (closeBrace != openBrace)
+                if (closeBrace.isEmpty())
                 {
-                    const String value (getAttributeFromStyleList (String (openBrace + 1, closeBrace),
-                                                                   attributeName, defaultValue));
-                    if (value.isNotEmpty())
-                        return value;
+                    // No close brace found??
+                    // Should add assert for this or is there some parse error reporting mechanism?
+                    break;
                 }
+
+                const String value (getAttributeFromStyleList (String (openBrace + 1, closeBrace),
+                                                               attributeName, defaultValue));
+                if (value.isNotEmpty())
+                    return value;
+
+                styleIter = closeBrace + 1;
             }
         }
 
