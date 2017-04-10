@@ -54,6 +54,7 @@ import android.text.ClipboardManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
@@ -488,12 +489,33 @@ public class AudioPerformanceTest   extends Activity
     public class MidiDeviceManager extends MidiManager.DeviceCallback implements MidiManager.OnDeviceOpenedListener
     {
         //==============================================================================
+        private class DummyBluetoothGattCallback extends BluetoothGattCallback
+        {
+            public DummyBluetoothGattCallback()
+            {
+                super();
+            }
+
+            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {}
+            public void onServicesDiscovered(BluetoothGatt gatt, int status) {}
+            public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {}
+            public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {}
+            public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {}
+            public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {}
+            public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {}
+            public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {}
+            public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {}
+            public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {}
+        }
+
+        //==============================================================================
         private class MidiDeviceOpenTask extends java.util.TimerTask
         {
-            public MidiDeviceOpenTask (MidiDeviceManager deviceManager, MidiDevice device)
+            public MidiDeviceOpenTask (MidiDeviceManager deviceManager, MidiDevice device, BluetoothGatt gattToUse)
             {
                 owner = deviceManager;
                 midiDevice = device;
+                btGatt = gattToUse;
             }
 
             @Override
@@ -503,6 +525,14 @@ public class AudioPerformanceTest   extends Activity
                 {
                     owner = null;
                     boolean retval = super.cancel();
+
+                    if (btGatt != null)
+                    {
+                        btGatt.disconnect();
+                        btGatt.close();
+
+                        btGatt = null;
+                    }
 
                     if (midiDevice != null)
                     {
@@ -539,6 +569,8 @@ public class AudioPerformanceTest   extends Activity
                 return "";
             }
 
+            public BluetoothGatt getGatt() { return btGatt; }
+
             public int getID()
             {
                 return midiDevice.getInfo().getId();
@@ -556,6 +588,7 @@ public class AudioPerformanceTest   extends Activity
 
             private MidiDeviceManager owner;
             private MidiDevice midiDevice;
+            private BluetoothGatt btGatt;
         }
 
         //==============================================================================
@@ -570,9 +603,9 @@ public class AudioPerformanceTest   extends Activity
             }
 
             openPorts = new HashMap<MidiPortPath, WeakReference<JuceMidiPort>> ();
-            midiDevices = new ArrayList<MidiDevice>();
+            midiDevices = new ArrayList<Pair<MidiDevice,BluetoothGatt>>();
             openTasks = new HashMap<Integer, MidiDeviceOpenTask>();
-            btDevicesPairing = new HashSet<String>();
+            btDevicesPairing = new HashMap<String, BluetoothGatt>();
 
             MidiDeviceInfo[] foundDevices = manager.getDevices();
             for (MidiDeviceInfo info : foundDevices)
@@ -600,8 +633,18 @@ public class AudioPerformanceTest   extends Activity
 
             openPorts = null;
 
-            for (MidiDevice device : midiDevices)
-                device.close();
+            for (Pair<MidiDevice, BluetoothGatt> device : midiDevices)
+            {
+                if (device.second != null)
+                {
+                    device.second.disconnect();
+                    device.second.close();
+                }
+
+                device.first.close();
+            }
+
+            midiDevices.clear();
 
             super.finalize();
         }
@@ -647,30 +690,36 @@ public class AudioPerformanceTest   extends Activity
                     if (openPorts.containsKey (portInfo))
                         return null;
 
-                    MidiDevice device = getMidiDeviceForId (portInfo.deviceId);
-                    if (device != null)
+                    Pair<MidiDevice,BluetoothGatt> devicePair = getMidiDevicePairForId (portInfo.deviceId);
+
+                    if (devicePair != null)
                     {
-                        JuceMidiPort juceMidiPort = null;
-
-                        if (isInput)
+                        MidiDevice device = devicePair.first;
+                        if (device != null)
                         {
-                            MidiOutputPort outputPort = device.openOutputPort (portInfo.portIndex);
+                            JuceMidiPort juceMidiPort = null;
 
-                            if (outputPort != null)
-                                juceMidiPort = new JuceMidiInputPort(this, outputPort, portInfo, host);
-                        }
-                        else
-                        {
-                            MidiInputPort inputPort = device.openInputPort (portInfo.portIndex);
+                            if (isInput)
+                            {
+                                MidiOutputPort outputPort = device.openOutputPort(portInfo.portIndex);
 
-                            if (inputPort != null)
-                                juceMidiPort = new JuceMidiOutputPort(this, inputPort, portInfo);
-                        }
+                                if (outputPort != null)
+                                    juceMidiPort = new JuceMidiInputPort(this, outputPort, portInfo, host);
+                            }
+                            else
+                            {
+                                MidiInputPort inputPort = device.openInputPort(portInfo.portIndex);
 
-                        if (juceMidiPort != null) {
-                            openPorts.put(portInfo, new WeakReference<JuceMidiPort>(juceMidiPort));
+                                if (inputPort != null)
+                                    juceMidiPort = new JuceMidiOutputPort(this, inputPort, portInfo);
+                            }
 
-                            return juceMidiPort;
+                            if (juceMidiPort != null)
+                            {
+                                openPorts.put(portInfo, new WeakReference<JuceMidiPort>(juceMidiPort));
+
+                                return juceMidiPort;
+                            }
                         }
                     }
                 }
@@ -699,7 +748,7 @@ public class AudioPerformanceTest   extends Activity
                     if (findMidiDeviceForBluetoothAddress (address) != null)
                         return 1;
 
-                    if (btDevicesPairing.contains (address))
+                    if (btDevicesPairing.containsKey (address))
                         return 2;
 
                     if (findOpenTaskForBluetoothAddress (address) != null)
@@ -721,7 +770,11 @@ public class AudioPerformanceTest   extends Activity
                 if (getBluetoothDeviceStatus (btAddress) != 0)
                     return false;
 
-                btDevicesPairing.add (btDevice.getAddress());
+                BluetoothGatt gatt = btDevice.connectGatt (getApplicationContext(), true, new DummyBluetoothGattCallback());
+                if (gatt != null)
+                    gatt.requestConnectionPriority (BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+
+                btDevicesPairing.put (btDevice.getAddress(), gatt);
                 manager.openBluetoothDevice(btDevice, this, null);
             }
 
@@ -735,7 +788,17 @@ public class AudioPerformanceTest   extends Activity
 
             synchronized (MidiDeviceManager.class)
             {
-                btDevicesPairing.remove (address);
+                if (btDevicesPairing.containsKey (address))
+                {
+                    BluetoothGatt gatt = btDevicesPairing.get (address);
+                    if (gatt != null)
+                    {
+                        gatt.disconnect();
+                        gatt.close();
+                    }
+
+                    btDevicesPairing.remove (address);
+                }
 
                 MidiDeviceOpenTask openTask = findOpenTaskForBluetoothAddress (address);
                 if (openTask != null)
@@ -745,9 +808,10 @@ public class AudioPerformanceTest   extends Activity
                     openTasks.remove (deviceID);
                 }
 
-                MidiDevice midiDevice = findMidiDeviceForBluetoothAddress (address);
-                if (midiDevice != null)
+                Pair<MidiDevice, BluetoothGatt> midiDevicePair = findMidiDeviceForBluetoothAddress (address);
+                if (midiDevicePair != null)
                 {
+                    MidiDevice midiDevice = midiDevicePair.first;
                     onDeviceRemoved (midiDevice.getInfo());
 
                     try {
@@ -761,11 +825,11 @@ public class AudioPerformanceTest   extends Activity
             }
         }
 
-        private MidiDevice findMidiDeviceForBluetoothAddress (String address)
+        private Pair<MidiDevice, BluetoothGatt> findMidiDeviceForBluetoothAddress (String address)
         {
-            for (MidiDevice midiDevice : midiDevices)
+            for (Pair<MidiDevice,BluetoothGatt> midiDevice : midiDevices)
             {
-                MidiDeviceInfo info = midiDevice.getInfo();
+                MidiDeviceInfo info = midiDevice.first.getInfo();
                 if (info.getType() == MidiDeviceInfo.TYPE_BLUETOOTH)
                 {
                     BluetoothDevice btDevice = (BluetoothDevice) info.getProperties().get (info.PROPERTY_BLUETOOTH_DEVICE);
@@ -825,24 +889,38 @@ public class AudioPerformanceTest   extends Activity
         {
             synchronized (MidiDeviceManager.class)
             {
-                MidiDevice device = getMidiDeviceForId (info.getId());
+                Pair<MidiDevice, BluetoothGatt> devicePair = getMidiDevicePairForId (info.getId());
 
-                // close all ports that use this device
-                boolean removedPort = true;
+                if (devicePair != null)
+                {
+                    MidiDevice midiDevice = devicePair.first;
+                    BluetoothGatt gatt = devicePair.second;
 
-                while (removedPort == true) {
-                    removedPort = false;
-                    for (MidiPortPath key : openPorts.keySet()) {
-                        if (key.deviceId == info.getId()) {
-                            openPorts.get(key).get().close();
-                            removedPort = true;
-                            break;
+                    // close all ports that use this device
+                    boolean removedPort = true;
+
+                    while (removedPort == true)
+                    {
+                        removedPort = false;
+                        for (MidiPortPath key : openPorts.keySet())
+                        {
+                            if (key.deviceId == info.getId())
+                            {
+                                openPorts.get(key).get().close();
+                                removedPort = true;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (device != null)
-                    midiDevices.remove (device);
+                    if (gatt != null)
+                    {
+                        gatt.disconnect();
+                        gatt.close();
+                    }
+
+                    midiDevices.remove (devicePair);
+                }
             }
         }
 
@@ -857,6 +935,7 @@ public class AudioPerformanceTest   extends Activity
             {
                 MidiDeviceInfo info = theDevice.getInfo();
                 int deviceID = info.getId();
+                BluetoothGatt gatt = null;
 
                 if (! openTasks.containsKey (deviceID))
                 {
@@ -866,8 +945,9 @@ public class AudioPerformanceTest   extends Activity
                         if (btDevice != null)
                         {
                             String btAddress = btDevice.getAddress();
-                            if (btDevicesPairing.contains (btAddress))
+                            if (btDevicesPairing.containsKey (btAddress))
                             {
+                                gatt = btDevicesPairing.get (btAddress);
                                 btDevicesPairing.remove (btAddress);
                             }
                             else
@@ -875,6 +955,18 @@ public class AudioPerformanceTest   extends Activity
                                 // unpair was called in the mean time
                                 try
                                 {
+                                    Pair<MidiDevice, BluetoothGatt> midiDevicePair = findMidiDeviceForBluetoothAddress (btDevice.getAddress());
+                                    if (midiDevicePair != null)
+                                    {
+                                        gatt = midiDevicePair.second;
+
+                                        if (gatt != null)
+                                        {
+                                            gatt.disconnect();
+                                            gatt.close();
+                                        }
+                                    }
+
                                     theDevice.close();
                                 }
                                 catch (IOException e)
@@ -885,7 +977,7 @@ public class AudioPerformanceTest   extends Activity
                         }
                     }
 
-                    MidiDeviceOpenTask openTask = new MidiDeviceOpenTask (this, theDevice);
+                    MidiDeviceOpenTask openTask = new MidiDeviceOpenTask (this, theDevice, gatt);
                     openTasks.put (deviceID, openTask);
 
                     new java.util.Timer().schedule (openTask, 3000);
@@ -903,13 +995,32 @@ public class AudioPerformanceTest   extends Activity
                 {
                     if (! midiDevices.contains(theDevice))
                     {
+                        BluetoothGatt gatt = openTasks.get (deviceID).getGatt();
                         openTasks.remove (deviceID);
-                        midiDevices.add (theDevice);
+                        midiDevices.add (new Pair<MidiDevice,BluetoothGatt> (theDevice, gatt));
                     }
                 }
                 else
                 {
                     // unpair was called in the mean time
+                    MidiDeviceInfo info = theDevice.getInfo();
+                    BluetoothDevice btDevice = (BluetoothDevice) info.getProperties().get (info.PROPERTY_BLUETOOTH_DEVICE);
+                    if (btDevice != null)
+                    {
+                        String btAddress = btDevice.getAddress();
+                        Pair<MidiDevice, BluetoothGatt> midiDevicePair = findMidiDeviceForBluetoothAddress (btDevice.getAddress());
+                        if (midiDevicePair != null)
+                        {
+                            BluetoothGatt gatt = midiDevicePair.second;
+
+                            if (gatt != null)
+                            {
+                                gatt.disconnect();
+                                gatt.close();
+                            }
+                        }
+                    }
+
                     try
                     {
                         theDevice.close();
@@ -983,19 +1094,19 @@ public class AudioPerformanceTest   extends Activity
                 MidiDeviceInfo[] infos = new MidiDeviceInfo[midiDevices.size()];
 
                 int idx = 0;
-                for (MidiDevice midiDevice : midiDevices)
-                    infos[idx++] = midiDevice.getInfo();
+                for (Pair<MidiDevice,BluetoothGatt> midiDevice : midiDevices)
+                    infos[idx++] = midiDevice.first.getInfo();
 
                 return infos;
             }
         }
 
-        private MidiDevice getMidiDeviceForId (int deviceId)
+        private Pair<MidiDevice, BluetoothGatt> getMidiDevicePairForId (int deviceId)
         {
             synchronized (MidiDeviceManager.class)
             {
-                for (MidiDevice midiDevice : midiDevices)
-                    if (midiDevice.getInfo().getId() == deviceId)
+                for (Pair<MidiDevice,BluetoothGatt> midiDevice : midiDevices)
+                    if (midiDevice.first.getInfo().getId() == deviceId)
                         return midiDevice;
             }
 
@@ -1003,9 +1114,9 @@ public class AudioPerformanceTest   extends Activity
         }
 
         private MidiManager manager;
-        private HashSet<String> btDevicesPairing;
+        private HashMap<String, BluetoothGatt> btDevicesPairing;
         private HashMap<Integer, MidiDeviceOpenTask> openTasks;
-        private ArrayList<MidiDevice> midiDevices;
+        private ArrayList<Pair<MidiDevice, BluetoothGatt>> midiDevices;
         private MidiDeviceInfo[] deviceInfos;
         private HashMap<MidiPortPath, WeakReference<JuceMidiPort>> openPorts;
     }

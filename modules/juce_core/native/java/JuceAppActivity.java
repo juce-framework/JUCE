@@ -54,6 +54,7 @@ import android.text.ClipboardManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
