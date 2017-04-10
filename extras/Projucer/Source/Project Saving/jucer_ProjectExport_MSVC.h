@@ -593,6 +593,14 @@ public:
     }
 
     //==============================================================================
+    Value getManifestFile() { return getSetting (Ids::msvcManifestFile); }
+    RelativePath getManifestPath() const
+    {
+        const String& path = settings [Ids::msvcManifestFile].toString();
+        return path.isEmpty() ? RelativePath() : RelativePath (settings [Ids::msvcManifestFile], RelativePath::projectFolder);
+    }
+
+    //==============================================================================
     const String& getProjectName() const         { return projectName; }
 
     virtual int getVisualStudioVersion() const = 0;
@@ -615,8 +623,10 @@ public:
        #endif
     }
 
-    void createExporterProperties (PropertyListBuilder&) override
+    void createExporterProperties (PropertyListBuilder& props) override
     {
+        props.add(new TextPropertyComponent(getManifestFile(), "Manifest file", 8192, false),
+            "Path to a manifest input file which should be linked into your binary (path is relative to jucer file).");
     }
 
     enum OptimisationLevel
@@ -1359,6 +1369,16 @@ public:
                     XmlElement* bsc = group->createNewChildElement ("Bscmake");
                     bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true)));
+                }
+
+                const RelativePath& manifestFile = getOwner().getManifestPath();
+                if (manifestFile.getRoot() != RelativePath::unknown)
+                {
+                    XmlElement* bsc = group->createNewChildElement ("Manifest");
+                    bsc->createNewChildElement ("AdditionalManifestFiles")
+                        ->addTextElement (manifestFile.rebased (getOwner().getProject().getFile().getParentDirectory(),
+                                          getOwner().getTargetFolder(),
+                                          RelativePath::buildTargetFolder).toWindowsStyle());
                 }
 
                 if (getTargetFileType() == staticLibrary && ! config.is64Bit())

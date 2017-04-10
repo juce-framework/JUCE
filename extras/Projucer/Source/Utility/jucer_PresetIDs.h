@@ -101,6 +101,7 @@ namespace Ids
     DECLARE_ID (extraDLLs);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
+    DECLARE_ID (msvcManifestFile);
     DECLARE_ID (warningsAreErrors);
     DECLARE_ID (linuxArchitecture);
     DECLARE_ID (linuxCodeBlocksArchitecture);
