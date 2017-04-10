@@ -74,8 +74,6 @@ public:
         A ValueTree that is created with this constructor can't actually be used for anything,
         it's just a default 'null' ValueTree that can be returned to indicate some sort of failure.
         To create a real one, use the constructor that takes a string.
-
-        @see ValueTree::invalid
     */
     ValueTree() noexcept;
 
@@ -327,7 +325,7 @@ public:
 
         The delta specifies how far to move through the list, so a value of 1 would return the node
         that follows this one, -1 would return the node before it, 0 will return this node itself, etc.
-        If the requested position is beyond the range of available nodes, this will return ValueTree::invalid.
+        If the requested position is beyond the range of available nodes, this will return an empty ValueTree().
     */
     ValueTree getSibling (int delta) const noexcept;
 
