@@ -110,7 +110,7 @@ private:
         X(if_,      "if")       X(else_,   "else")    X(do_,     "do") \
         X(while_,   "while")    X(for_,    "for")     X(break_,  "break")   X(continue_, "continue") \
         X(void_,    "void")     X(int_,    "int")     X(float_,  "float")   X(bool_,     "bool") \
-        X(return_,  "return")   X(true_,   "true")    X(false_,  "false")
+        X(return_,  "return")   X(true_,   "true")    X(false_,  "false")   X(const_,    "const")
 
     #define LITTLEFOOT_OPERATORS(X) \
         X(semicolon,     ";")        X(dot,          ".")       X(comma,        ",")    X(hash,       "#") \
@@ -144,7 +144,7 @@ private:
         CodeLocation (const String& code) noexcept        : program (code), location (program.getCharPointer()) {}
         CodeLocation (const CodeLocation& other) noexcept : program (other.program), location (other.location) {}
 
-        void throwError (const String& message) const
+        [[noreturn]] void throwError (const String& message) const
         {
             int col = 1, line = 1;
 
@@ -205,7 +205,7 @@ private:
         {
             if (isIdentifierStart (*p))
             {
-                String::CharPointerType end (p);
+                auto end = p;
                 while (isIdentifierBody (*++end)) {}
 
                 const size_t len = (size_t) (end - p);
@@ -329,7 +329,7 @@ private:
 
         bool parseOctalLiteral()
         {
-            String::CharPointerType t (p);
+            auto t = p;
             int64 v = *t - '0';
             if (v != 0) return false;  // first digit of octal must be 0
 
@@ -380,6 +380,8 @@ private:
                     continue;
                 }
 
+                const bool isConstVariable = matchIf (Token::const_);
+
                 if (! matchesAnyTypeOrVoid())
                     throwErrorExpecting ("a global variable or function");
 
@@ -388,6 +390,9 @@ private:
 
                 if (matchIf (Token::openParen))
                 {
+                    if (isConstVariable)
+                        location.throwError ("Return type of a function cannot be const");
+
                     parseFunctionDeclaration (type, name);
                     continue;
                 }
@@ -395,19 +400,7 @@ private:
                 if (type == Type::void_)
                     location.throwError ("A variable type cannot be 'void'");
 
-                int arraySize = matchIf (Token::openBracket) ? parseIntegerLiteral() : 0;
-
-                if (arraySize > 0)
-                    location.throwError ("Arrays not yet implemented!");
-
-                while (matchIf (Token::comma))
-                {
-                    blockBeingParsed->addVariable (name, type, location);
-                    name = parseIdentifier();
-                }
-
-                blockBeingParsed->addVariable (name, type, location);
-                match (Token::semicolon);
+                parseGlobalVariableDeclaraion (isConstVariable, type, name);
             }
         }
 
@@ -462,6 +455,54 @@ private:
             location.throwError ("Unknown compiler directive");
         }
 
+        void parseGlobalVariableDeclaraion (bool isConst, Type type, String name)
+        {
+            for (;;)
+            {
+                int arraySize = matchIf (Token::openBracket) ? parseIntegerLiteral() : 0;
+
+                if (arraySize > 0)
+                    location.throwError ("Arrays not yet implemented!");
+
+                var constantInitialiser;
+
+                if (isConst)
+                    constantInitialiser = parseConstantExpressionInitialiser (type);
+
+                blockBeingParsed->addVariable ({ name, type, true, isConst, constantInitialiser }, location);
+
+                if (matchIf (Token::comma))
+                {
+                    name = parseIdentifier();
+                    continue;
+                }
+
+                match (Token::semicolon);
+                break;
+            }
+        }
+
+        var parseConstantExpressionInitialiser (Type expectedType)
+        {
+            var result;
+            match (Token::assign);
+            auto e = parseExpression();
+
+            if (auto literal = dynamic_cast<LiteralValue*> (e->simplify (*this)))
+            {
+                result = literal->value;
+
+                if (getTypeOfVar (result) != expectedType)
+                    location.throwError ("Expected a constant expression of type " + getTypeName (expectedType));
+            }
+            else
+            {
+                location.throwError ("Expected a constant expression");
+            }
+
+            return result;
+        }
+
         void parseFunctionDeclaration (Type returnType, const String& name)
         {
             auto f = allocate<Function>();
@@ -469,7 +510,7 @@ private:
             while (matchesAnyType())
             {
                 auto type = tokenToType (skip());
-                f->arguments.add ({ parseIdentifier(), type });
+                f->arguments.add ({ parseIdentifier(), type, false, false, 0 });
 
                 if (f->arguments.size() > 127)
                     location.throwError ("Too many function arguments");
@@ -547,7 +588,8 @@ private:
             if (matchIf (Token::plusplus))         return matchEndOfStatement (parsePreIncDec (Token::plus));
             if (matchIf (Token::minusminus))       return matchEndOfStatement (parsePreIncDec (Token::minus));
             if (matchesAny (Token::openParen))     return matchEndOfStatement (parseFactor());
-            if (matchesAnyType())                  return parseVariableDeclaration (tokenToType (skip()));
+            if (matchIf (Token::const_))           return parseVariableDeclaration (true);
+            if (matchesAnyType())                  return parseVariableDeclaration (false);
 
             if (matchesAny (Token::identifier, Token::literal, Token::minus))
                 return matchEndOfStatement (parseExpression());
@@ -758,43 +800,57 @@ private:
             return returnStatement;
         }
 
-        StatementPtr parseVariableDeclaration (Type type)
+        StatementPtr parseVariableDeclaration (bool isConst)
         {
+            if (isConst && ! matchesAnyType())
+                throwErrorExpecting ("a type");
+
+            auto type = tokenToType (skip());
+
             for (StatementPtr result = nullptr;;)
             {
                 auto name = parseIdentifier();
                 auto loc = location;
-                blockBeingParsed->addVariable (name, type, loc);
 
-                auto assignedValue = matchIf (Token::assign) ? parseExpression() : nullptr;
-
-                if (auto literal = dynamic_cast<LiteralValue*> (assignedValue))
-                    if (static_cast<double> (literal->value) == 0)
-                        assignedValue = nullptr;
-
-                if (assignedValue != nullptr || ! blockBeingParsed->isMainBlockOfFunction) // no need to assign 0 for variables in the outer scope
+                if (isConst)
                 {
-                    if (assignedValue == nullptr)
-                        assignedValue = allocate<LiteralValue> (loc, blockBeingParsed, (int) 0);
+                    auto constantValue = parseConstantExpressionInitialiser (type);
+                    blockBeingParsed->addVariable ({ name, type, false, true, constantValue }, loc);
+                }
+                else
+                {
+                    blockBeingParsed->addVariable ({ name, type, false, false, {} }, loc);
 
-                    auto assignment = allocate<Assignment> (loc, blockBeingParsed, name, assignedValue, false);
+                    auto assignedValue = matchIf (Token::assign) ? parseExpression() : nullptr;
 
-                    if (result == nullptr)
+                    if (auto literal = dynamic_cast<LiteralValue*> (assignedValue))
+                        if (static_cast<double> (literal->value) == 0)
+                            assignedValue = nullptr;
+
+                    if (assignedValue != nullptr || ! blockBeingParsed->isMainBlockOfFunction) // no need to assign 0 for variables in the outer scope
                     {
-                        result = assignment;
-                    }
-                    else
-                    {
-                        auto block = dynamic_cast<BlockPtr> (result);
+                        if (assignedValue == nullptr)
+                            assignedValue = allocate<LiteralValue> (loc, blockBeingParsed, (int) 0);
 
-                        if (block == nullptr)
+                        auto assignment = allocate<Assignment> (loc, blockBeingParsed, name, assignedValue, false);
+
+                        if (result == nullptr)
                         {
-                            block = allocate<BlockStatement> (loc, blockBeingParsed, functions.getLast(), false);
-                            block->statements.add (result);
-                            result = block;
+                            result = assignment;
                         }
+                        else
+                        {
+                            auto block = dynamic_cast<BlockPtr> (result);
 
-                        block->statements.add (assignment);
+                            if (block == nullptr)
+                            {
+                                block = allocate<BlockStatement> (loc, blockBeingParsed, functions.getLast(), false);
+                                block->statements.add (result);
+                                result = block;
+                            }
+
+                            block->statements.add (assignment);
+                        }
                     }
                 }
 
@@ -848,7 +904,7 @@ private:
 
         String parseIdentifier()
         {
-            String name = currentValue.toString();
+            auto name = currentValue.toString();
             match (Token::identifier);
             return name;
         }
@@ -1104,12 +1160,15 @@ private:
     {
         Expression (const CodeLocation& l, BlockPtr parent) noexcept : Statement (l, parent) {}
         virtual Type getType (CodeGenerator&) const = 0;
+        virtual ExpPtr simplify (SyntaxTreeBuilder&) override    { return this; }
     };
 
     struct Variable
     {
         String name;
         Type type;
+        bool isGlobal, isConst;
+        var constantValue;
     };
 
     //==============================================================================
@@ -1266,38 +1325,43 @@ private:
                                                  + parentBlock->variables.size());
         }
 
-        const Array<Variable>& getGlobalVariables() const noexcept
-        {
-            return parentBlock != nullptr ? parentBlock->getGlobalVariables() : variables;
-        }
+        const Array<Variable>& getGlobalVariables() const noexcept  { return parentBlock != nullptr ? parentBlock->getGlobalVariables() : variables; }
+        const Array<Variable>& getGlobalConstants() const noexcept  { return parentBlock != nullptr ? parentBlock->getGlobalConstants() : constants; }
 
-        Type getVariableType (const String& name, const CodeLocation& locationForError) const
+        const Variable& getVariable (const String& name, const CodeLocation& locationForError) const
         {
+            for (auto& v : constants)
+                if (v.name == name)
+                    return v;
+
             for (auto& v : variables)
                 if (v.name == name)
-                    return v.type;
+                    return v;
 
             if (! isMainBlockOfFunction)
-                return parentBlock->getVariableType (name, locationForError);
+                return parentBlock->getVariable (name, locationForError);
 
             for (auto& v : function->arguments)
                 if (v.name == name)
-                    return v.type;
+                    return v;
+
+            for (auto& v : getGlobalConstants())
+                if (v.name == name)
+                    return v;
 
             for (auto& v : getGlobalVariables())
                 if (v.name == name)
-                    return v.type;
+                    return v;
 
             locationForError.throwError ("Unknown variable '" + name + "'");
-            return {};
         }
 
-        void addVariable (const String& name, Type type, const CodeLocation& locationForError)
+        void addVariable (Variable v, const CodeLocation& locationForError)
         {
-            if (indexOf (variables, name) >= 0)
-                locationForError.throwError ("Variable '" + name + "' already exists");
+            if (indexOf (variables, v.name) >= 0 || indexOf (constants, v.name) >= 0)
+                locationForError.throwError ("Variable '" + v.name + "' already exists");
 
-            variables.add ({ name, type });
+            (v.isConst ? constants : variables).add (v);
         }
 
         static int indexOf (const Array<Variable>& vars, const String& name) noexcept
@@ -1311,7 +1375,7 @@ private:
 
         Function* function;
         Array<StatementPtr> statements;
-        Array<Variable> variables;
+        Array<Variable> variables, constants;
         bool isMainBlockOfFunction;
     };
 
@@ -1356,7 +1420,7 @@ private:
 
         Statement* simplify (SyntaxTreeBuilder& stb) override
         {
-            condition   = dynamic_cast<ExpPtr> (condition->simplify (stb));
+            condition   = condition->simplify (stb);
             trueBranch  = trueBranch->simplify (stb);
             falseBranch = falseBranch != nullptr ? falseBranch->simplify (stb) : nullptr;
 
@@ -1402,11 +1466,11 @@ private:
             visit (condition); visit (trueBranch); visit (falseBranch);
         }
 
-        Statement* simplify (SyntaxTreeBuilder& stb) override
+        ExpPtr simplify (SyntaxTreeBuilder& stb) override
         {
-            condition   = dynamic_cast<ExpPtr> (condition->simplify (stb));
-            trueBranch  = dynamic_cast<ExpPtr> (trueBranch->simplify (stb));
-            falseBranch = dynamic_cast<ExpPtr> (falseBranch->simplify (stb));
+            condition   = condition->simplify (stb);
+            trueBranch  = trueBranch->simplify (stb);
+            falseBranch = falseBranch->simplify (stb);
 
             if (auto literal = dynamic_cast<LiteralValue*> (condition))
                 return literal->value ? trueBranch : falseBranch;
@@ -1569,7 +1633,17 @@ private:
 
         Type getType (CodeGenerator&) const override
         {
-            return parentBlock->getVariableType (name, location);
+            return parentBlock->getVariable (name, location).type;
+        }
+
+        ExpPtr simplify (SyntaxTreeBuilder& stb) override
+        {
+            auto& v = parentBlock->getVariable (name, location);
+
+            if (v.isConst)
+                return stb.allocate<LiteralValue> (location, parentBlock, v.constantValue);
+
+            return this;
         }
 
         String name;
@@ -1626,9 +1700,9 @@ private:
             visit (source);
         }
 
-        Statement* simplify (SyntaxTreeBuilder& stb) override
+        ExpPtr simplify (SyntaxTreeBuilder& stb) override
         {
-            source = dynamic_cast<ExpPtr> (source->simplify (stb));
+            source = source->simplify (stb);
 
             if (auto literal = dynamic_cast<LiteralValue*> (source))
             {
@@ -1745,7 +1819,7 @@ private:
             visit (lhs); visit (rhs);
         }
 
-        Statement* simplifyFloat (double a, double b, LiteralValue* literal)
+        ExpPtr simplifyFloat (double a, double b, LiteralValue* literal)
         {
             if (operation == Token::plus)                 { literal->value = a + b;  return literal; }
             if (operation == Token::minus)                { literal->value = a - b;  return literal; }
@@ -1760,14 +1834,14 @@ private:
             return this;
         }
 
-        Statement* simplifyBool (bool a, bool b, LiteralValue* literal)
+        ExpPtr simplifyBool (bool a, bool b, LiteralValue* literal)
         {
             if (operation == Token::logicalOr)            { literal->value = a || b; return literal; }
             if (operation == Token::logicalAnd)           { literal->value = a && b; return literal; }
             return this;
         }
 
-        Statement* simplifyInt (int a, int b, LiteralValue* literal)
+        ExpPtr simplifyInt (int a, int b, LiteralValue* literal)
         {
             if (operation == Token::plus)                 { literal->value = a +  b; return literal; }
             if (operation == Token::minus)                { literal->value = a -  b; return literal; }
@@ -1790,10 +1864,10 @@ private:
             return this;
         }
 
-        Statement* simplify (SyntaxTreeBuilder& stb) override
+        ExpPtr simplify (SyntaxTreeBuilder& stb) override
         {
-            lhs = dynamic_cast<ExpPtr> (lhs->simplify (stb));
-            rhs = dynamic_cast<ExpPtr> (rhs->simplify (stb));
+            lhs = lhs->simplify (stb);
+            rhs = rhs->simplify (stb);
 
             if (auto literal1 = dynamic_cast<LiteralValue*> (lhs))
             {
@@ -1858,7 +1932,7 @@ private:
 
         Type getType (CodeGenerator&) const override
         {
-            return parentBlock->getVariableType (target, location);
+            return parentBlock->getVariable (target, location).type;
         }
 
         void visitSubStatements (Statement::Visitor& visit) const override
@@ -1866,9 +1940,9 @@ private:
             visit (newValue);
         }
 
-        Statement* simplify (SyntaxTreeBuilder& stb) override
+        ExpPtr simplify (SyntaxTreeBuilder& stb) override
         {
-            newValue = dynamic_cast<ExpPtr> (newValue->simplify (stb));
+            newValue = newValue->simplify (stb);
             return this;
         }
 
@@ -2015,6 +2089,14 @@ private:
                 visit (arg);
         }
 
+        ExpPtr simplify (SyntaxTreeBuilder& stb) override
+        {
+            for (auto& arg : arguments)
+                arg = arg->simplify (stb);
+
+            return this;
+        }
+
         String functionName;
         Array<ExpPtr> arguments;
     };
@@ -2033,10 +2115,10 @@ private:
             visit (object); visit (index);
         }
 
-        Statement* simplify (SyntaxTreeBuilder& stb) override
+        ExpPtr simplify (SyntaxTreeBuilder& stb) override
         {
-            object = dynamic_cast<ExpPtr> (object->simplify (stb));
-            index = dynamic_cast<ExpPtr> (index->simplify (stb));
+            object = object->simplify (stb);
+            index = index->simplify (stb);
             return this;
         }
 
