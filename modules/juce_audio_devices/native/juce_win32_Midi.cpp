@@ -64,10 +64,10 @@ struct MidiServiceType
 };
 
 //==============================================================================
-class WindowsMidiService     : public MidiServiceType
+class WindowsMidiService  : public MidiServiceType
 {
 private:
-    struct WindowsInputWrapper     : public InputWrapper
+    struct WindowsInputWrapper  : public InputWrapper
     {
         class MidiInCollector
         {
@@ -341,7 +341,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsInputWrapper)
     };
 
-    struct WindowsOutputWrapper     : public OutputWrapper
+    struct WindowsOutputWrapper  : public OutputWrapper
     {
         struct MidiOutHandle
         {
@@ -386,11 +386,12 @@ private:
 
             for (int i = parent.activeOutputHandles.size(); --i >= 0;)
             {
-                han = parent.activeOutputHandles.getUnchecked (i);
+                auto* activeHandle = parent.activeOutputHandles.getUnchecked (i);
 
                 if (han->deviceId == deviceId)
                 {
-                    han->refCount++;
+                    activeHandle->refCount++;
+                    han = activeHandle;
 
                     return;
                 }
@@ -571,7 +572,7 @@ using namespace ABI::Windows::Devices::Midi;
 using namespace ABI::Windows::Devices::Enumeration;
 using namespace ABI::Windows::Storage::Streams;
 
-class WinRTMidiService     : public MidiServiceType
+class WinRTMidiService  : public MidiServiceType
 {
 private:
     template <typename COMFactoryType>
@@ -609,7 +610,7 @@ private:
             if (FAILED (hr))
                 return false;
 
-            class DeviceEnumerationThread     : public Thread
+            class DeviceEnumerationThread  : public Thread
             {
             public:
                 DeviceEnumerationThread (String threadName, MidiIODeviceWatcher<COMFactoryType>& p)
@@ -805,7 +806,7 @@ private:
     };
 
     template <typename COMFactoryType, typename COMInterfaceType, typename COMType>
-    class OpenMidiPortThread     : public Thread
+    class OpenMidiPortThread  : public Thread
     {
     public:
         OpenMidiPortThread (String threadName,
@@ -859,7 +860,7 @@ private:
         WaitableEvent portOpened { true };
     };
 
-    struct WinRTInputWrapper     : public InputWrapper
+    struct WinRTInputWrapper  : public InputWrapper
     {
         WinRTInputWrapper (WinRTMidiService& service,
                            MidiInput* const input,
@@ -1004,7 +1005,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WinRTInputWrapper);
     };
 
-    struct WinRTOutputWrapper     : public OutputWrapper
+    struct WinRTOutputWrapper  : public OutputWrapper
     {
         WinRTOutputWrapper (WinRTMidiService& service, const int index)
         {
@@ -1135,7 +1136,7 @@ public:
 #endif   // JUCE_USE_WINRT_MIDI
 
 //==============================================================================
-class MidiService :   public DeletedAtShutdown
+class MidiService :  public DeletedAtShutdown
 {
 public:
     ~MidiService();
