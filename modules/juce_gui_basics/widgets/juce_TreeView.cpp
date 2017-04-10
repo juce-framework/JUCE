@@ -876,7 +876,7 @@ void TreeView::recalculateIfNeeded()
         if (rootItem != nullptr)
         {
             viewport->getViewedComponent()
-                ->setSize (jmax (viewport->getMaximumVisibleWidth(), rootItem->totalWidth + 50),
+                ->setSize (jmax (viewport->getMaximumVisibleWidth(), rootItem->totalWidth),
                            rootItem->totalHeight - (rootItemVisible ? 0 : rootItem->itemHeight));
         }
         else
