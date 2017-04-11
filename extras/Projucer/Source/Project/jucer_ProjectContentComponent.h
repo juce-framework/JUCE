@@ -156,8 +156,8 @@ private:
     Component* createDisabledBuildTabSubscribe (String textPrefix, bool loggedIn, bool dllPresent);
     Component* createDisabledBuildTabInfoOnly (const char* messsage);
 
-    bool isContinuousRebuildEnabled()           { return getAppSettings().getGlobalProperties().getBoolValue ("continuousRebuild", true);  }
-    void setContinuousRebuildEnabled (bool b)   { getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b); }
+    bool isContinuousRebuildEnabled();
+    void setContinuousRebuildEnabled (bool b);
     void rebuildNow();
     void handleCrash (const String& message);
     void updateWarningState();

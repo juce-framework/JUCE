@@ -1563,6 +1563,19 @@ void ProjectContentComponent::timerCallback()
     refreshTabsIfBuildStatusChanged();
 }
 
+bool ProjectContentComponent::isContinuousRebuildEnabled()
+{
+    return getAppSettings().getGlobalProperties().getBoolValue ("continuousRebuild", true);
+}
+
+void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
+{
+    getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
+
+    if (childProcess != nullptr)
+        childProcess->setContinuousRebuild (b);
+}
+
 ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::getChildProcess()
 {
     if (childProcess == nullptr && isBuildEnabled())
