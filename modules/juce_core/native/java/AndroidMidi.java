@@ -312,12 +312,20 @@
         //==============================================================================
         private class DummyBluetoothGattCallback extends BluetoothGattCallback
         {
-            public DummyBluetoothGattCallback()
+            public DummyBluetoothGattCallback (MidiDeviceManager mm)
             {
                 super();
+                owner = mm;
             }
 
-            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {}
+            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
+            {
+                if (newState == BluetoothProfile.STATE_CONNECTED)
+                {
+                    gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+                    owner.pairBluetoothDeviceStepTwo (gatt.getDevice());
+                }
+            }
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {}
             public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {}
             public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {}
@@ -327,6 +335,8 @@
             public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {}
             public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {}
             public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {}
+
+            private MidiDeviceManager owner;
         }
 
         //==============================================================================
@@ -591,15 +601,26 @@
                 if (getBluetoothDeviceStatus (btAddress) != 0)
                     return false;
 
-                BluetoothGatt gatt = btDevice.connectGatt (getApplicationContext(), true, new DummyBluetoothGattCallback());
-                if (gatt != null)
-                    gatt.requestConnectionPriority (BluetoothGatt.CONNECTION_PRIORITY_HIGH);
 
-                btDevicesPairing.put (btDevice.getAddress(), gatt);
-                manager.openBluetoothDevice(btDevice, this, null);
+                btDevicesPairing.put (btDevice.getAddress(), null);
+                BluetoothGatt gatt = btDevice.connectGatt (getApplicationContext(), true, new DummyBluetoothGattCallback (this));
+
+                if (gatt != null)
+                {
+                    btDevicesPairing.put (btDevice.getAddress(), gatt);
+                }
+                else
+                {
+                    pairBluetoothDeviceStepTwo (btDevice);
+                }
             }
 
             return true;
+        }
+
+        public void pairBluetoothDeviceStepTwo (BluetoothDevice btDevice)
+        {
+            manager.openBluetoothDevice(btDevice, this, null);
         }
 
         public void unpairBluetoothDevice (String address)
@@ -757,11 +778,13 @@
                 MidiDeviceInfo info = theDevice.getInfo();
                 int deviceID = info.getId();
                 BluetoothGatt gatt = null;
+                boolean isBluetooth = false;
 
                 if (! openTasks.containsKey (deviceID))
                 {
                     if (info.getType() == MidiDeviceInfo.TYPE_BLUETOOTH)
                     {
+                        isBluetooth = true;
                         BluetoothDevice btDevice = (BluetoothDevice) info.getProperties().get (info.PROPERTY_BLUETOOTH_DEVICE);
                         if (btDevice != null)
                         {
@@ -801,7 +824,7 @@
                     MidiDeviceOpenTask openTask = new MidiDeviceOpenTask (this, theDevice, gatt);
                     openTasks.put (deviceID, openTask);
 
-                    new java.util.Timer().schedule (openTask, 3000);
+                    new java.util.Timer().schedule (openTask, (isBluetooth ? 2000 : 100));
                 }
             }
         }
