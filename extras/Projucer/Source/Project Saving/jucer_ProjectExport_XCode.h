@@ -1206,6 +1206,12 @@ public:
             StringArray paths (owner.extraSearchPaths);
             paths.addArray (config.getHeaderSearchPaths());
             paths.addArray (getTargetExtraHeaderSearchPaths());
+
+            // Always needed to compile .r files
+            paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
+                            .rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
+                            .toUnixStyle());
+
             paths.add ("$(inherited)");
 
             paths = getCleanedStringArray (paths);

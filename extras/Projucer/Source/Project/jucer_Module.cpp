@@ -506,7 +506,12 @@ void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
 
         if (cu.isNeededForExporter (exporter))
         {
-            File localFile = exporter.getProject().getGeneratedCodeFolder().getChildFile (cu.file.getFileName());
+            // .r files require a different include scheme, with a different file name
+            auto filename = cu.file.getFileName();
+            if (cu.file.getFileExtension() == ".r")
+                filename = cu.file.getFileNameWithoutExtension() + "_r.r";
+
+            File localFile = exporter.getProject().getGeneratedCodeFolder().getChildFile (filename);
             result.add (localFile);
 
             if (projectSaver != nullptr)

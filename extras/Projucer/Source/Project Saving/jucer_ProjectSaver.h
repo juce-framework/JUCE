@@ -527,9 +527,19 @@ private:
                 mem << "*/" << newLine
                     << newLine
                     << "#include " << project.getAppConfigFilename().quoted() << newLine
-                    << "#include <" << module.getID() << "/" << cu.file.getFileName() << ">" << newLine;
+                    << "#include <";
 
-                replaceFileIfDifferent (generatedCodeFolder.getChildFile (cu.file.getFileName()), mem);
+                auto moduleWrapperFilename = cu.file.getFileName();
+
+                // .r files require a different include scheme, with a different file name
+                if (cu.file.getFileExtension() == ".r")
+                    moduleWrapperFilename = cu.file.getFileNameWithoutExtension() + "_r.r";
+                else
+                     mem << module.getID() << "/";
+
+                mem << cu.file.getFileName() << ">" << newLine;
+
+                replaceFileIfDifferent (generatedCodeFolder.getChildFile (moduleWrapperFilename), mem);
             }
         }
     }
