@@ -117,8 +117,8 @@ private:
     File deadMansPedalFile;
     StringArray failedFiles;
     Atomic<int> nextIndex;
-    float progress;
-    bool allowAsync;
+    float progress = 0;
+    const bool allowAsync;
 
     void updateProgress();
     void setDeadMansPedalFile (const StringArray& newContents);
