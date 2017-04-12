@@ -100,23 +100,90 @@ jfieldID JNIClassBase::resolveStaticField (JNIEnv* env, const char* fieldName, c
 }
 
 //==============================================================================
-ThreadLocalValue<JNIEnv*> androidJNIEnv;
+JavaVM* androidJNIJavaVM = nullptr;
 
-JNIEnv* getEnv() noexcept
+class JniEnvThreadHolder
 {
-    JNIEnv* env = androidJNIEnv.get();
-    jassert (env != nullptr);
+public:
+    static JniEnvThreadHolder& getInstance() noexcept
+    {
+        // You cann only use JNI functions AFTER JNI_OnLoad was called
+        jassert (androidJNIJavaVM != nullptr);
 
-    return env;
-}
+        try
+        {
+            if (instance == nullptr)
+                instance = new JniEnvThreadHolder;
+        }
+        catch (...)
+        {
+            jassertfalse;
+            std::terminate();
+        }
 
-void setEnv (JNIEnv* env) noexcept
+        return *instance;
+    }
+
+    static JNIEnv* getEnv()
+    {
+        JNIEnv* env = reinterpret_cast<JNIEnv*> (pthread_getspecific (getInstance().threadKey));
+
+        // You are trying to use a JUCE function on a thread that was not created by JUCE.
+        // You need to first call setEnv on this thread before using JUCE
+        jassert (env != nullptr);
+
+        return env;
+    }
+
+    static void setEnv (JNIEnv* env)
+    {
+        // env must not be a nullptr
+        jassert (env != nullptr);
+
+       #if JUCE_DEBUG
+        JNIEnv* oldenv = reinterpret_cast<JNIEnv*> (pthread_getspecific (getInstance().threadKey));
+
+        // This thread is already attached to the JavaVM and you trying to attach
+        // it to a different instance of the VM.
+        jassert (oldenv == nullptr || oldenv == env);
+       #endif
+
+        pthread_setspecific (getInstance().threadKey, env);
+    }
+
+private:
+    pthread_key_t threadKey;
+
+    static void threadDetach (void* p)
+    {
+        if (JNIEnv* env = reinterpret_cast<JNIEnv*> (p))
+        {
+            ignoreUnused (env);
+
+            androidJNIJavaVM->DetachCurrentThread();
+        }
+    }
+
+    JniEnvThreadHolder()
+    {
+        pthread_key_create (&threadKey, threadDetach);
+    }
+
+    static JniEnvThreadHolder* instance;
+};
+
+JniEnvThreadHolder* JniEnvThreadHolder::instance = nullptr;
+
+//==============================================================================
+JNIEnv* getEnv() noexcept            { return JniEnvThreadHolder::getEnv(); }
+void setEnv (JNIEnv* env) noexcept   { JniEnvThreadHolder::setEnv (env); }
+
+extern "C" jint JNI_OnLoad (JavaVM* vm, void*)
 {
-    androidJNIEnv.get() = env;
-}
+    // Huh? JNI_OnLoad was called two times!
+    jassert (androidJNIJavaVM == nullptr);
 
-extern "C" jint JNI_OnLoad (JavaVM*, void*)
-{
+    androidJNIJavaVM = vm;
     return JNI_VERSION_1_2;
 }
 
@@ -127,6 +194,8 @@ AndroidSystem::AndroidSystem() : screenWidth (0), screenHeight (0), dpi (160)
 
 void AndroidSystem::initialise (JNIEnv* env, jobject act, jstring file, jstring dataDir)
 {
+    setEnv (env);
+
     screenWidth = screenHeight = 0;
     dpi = 160;
     JNIClassBase::initialiseAllClasses (env);

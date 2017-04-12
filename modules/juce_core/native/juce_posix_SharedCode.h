@@ -906,12 +906,25 @@ void InterProcessLock::exit()
 }
 
 //==============================================================================
-#if ! JUCE_ANDROID
 void JUCE_API juce_threadEntryPoint (void*);
+
+#if JUCE_ANDROID
+extern JavaVM* androidJNIJavaVM;
+#endif
 
 extern "C" void* threadEntryProc (void*);
 extern "C" void* threadEntryProc (void* userData)
 {
+   #if JUCE_ANDROID
+    // JNI_OnLoad was not called - make sure you load the JUCE shared library
+    // using System.load inside of Java
+    jassert (androidJNIJavaVM != nullptr);
+
+    JNIEnv* env;
+    androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+    setEnv (env);
+   #endif
+
     JUCE_AUTORELEASEPOOL
     {
         juce_threadEntryPoint (userData);
@@ -999,7 +1012,6 @@ bool Thread::setThreadPriority (void* handle, int priority)
     param.sched_priority = ((maxPriority - minPriority) * priority) / 10 + minPriority;
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
-#endif
 
 Thread::ThreadID JUCE_CALLTYPE Thread::getCurrentThreadId()
 {
@@ -1233,7 +1245,6 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 }
 
 //==============================================================================
-#if ! JUCE_ANDROID
 struct HighResolutionTimer::Pimpl
 {
     Pimpl (HighResolutionTimer& t)  : owner (t), thread (0), destroyThread (false), isRunning (false)
@@ -1241,7 +1252,7 @@ struct HighResolutionTimer::Pimpl
         pthread_condattr_t attr;
         pthread_condattr_init (&attr);
 
-       #if ! (JUCE_MAC || JUCE_IOS)
+       #if JUCE_LINUX || (JUCE_ANDROID && defined(__ANDROID_API__) && __ANDROID_API__ >= 21)
         pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
        #endif
 
@@ -1320,7 +1331,13 @@ private:
     static void* timerThread (void* param)
     {
        #if JUCE_ANDROID
-        const AndroidThreadScope androidEnv;
+        // JNI_OnLoad was not called - make sure you load the JUCE shared library
+        // using System.load inside of Java
+        jassert (androidJNIJavaVM != nullptr);
+
+        JNIEnv* env;
+        androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+        setEnv (env);
        #else
         int dummy;
         pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, &dummy);
@@ -1469,5 +1486,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
-
-#endif

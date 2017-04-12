@@ -293,9 +293,7 @@ extern AndroidSystem android;
  METHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager;") \
  METHOD (getAndroidSDKVersion,    "getAndroidSDKVersion", "()I") \
  METHOD (audioManagerGetProperty, "audioManagerGetProperty", "(Ljava/lang/String;)Ljava/lang/String;") \
- METHOD (setCurrentThreadPriority, "setCurrentThreadPriority", "(I)I") \
  METHOD (hasSystemFeature,         "hasSystemFeature", "(Ljava/lang/String;)Z" ) \
- METHOD (createNewThread,          "createNewThread", "(JLjava/lang/String;J)Ljava/lang/Thread;") \
  METHOD (requestRuntimePermission, "requestRuntimePermission", "(IJ)V" ) \
  METHOD (isPermissionGranted,     "isPermissionGranted", "(I)Z" ) \
  METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
@@ -327,19 +325,6 @@ DECLARE_JNI_CLASS (Paint, "android/graphics/Paint");
  METHOD (setValues,     "setValues", "([F)V") \
 
 DECLARE_JNI_CLASS (Matrix, "android/graphics/Matrix");
-#undef JNI_CLASS_MEMBERS
-
-//==============================================================================
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (start, "start", "()V") \
- METHOD (stop, "stop", "()V") \
- METHOD (setName, "setName", "(Ljava/lang/String;)V") \
- METHOD (getName, "getName", "()Ljava/lang/String;") \
- METHOD (getId, "getId", "()J") \
- STATICMETHOD (currentThread, "currentThread", "()Ljava/lang/Thread;") \
- METHOD (setPriority, "setPriority", "(I)V") \
-
-DECLARE_JNI_CLASS (JuceThread, "java/lang/Thread");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
