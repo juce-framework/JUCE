@@ -152,32 +152,37 @@ public:
 
     void entry()
     {
+        CommandReceiver::setBlocking (outChannel,      true);
+
         gtk_init (nullptr, nullptr);
+
+        WebKitSettings* settings = webkit_settings_new();
+        webkit_settings_set_hardware_acceleration_policy (settings, WEBKIT_HARDWARE_ACCELERATION_POLICY_NEVER);
+
         GtkWidget *plug;
 
         plug = gtk_plug_new(0);
         GtkWidget* container;
         container = gtk_scrolled_window_new (nullptr, nullptr);
 
-        webview = webkit_web_view_new();
-        gtk_container_add (GTK_CONTAINER (container), webview);
+        GtkWidget* webviewWidget = webkit_web_view_new_with_settings (settings);
+        webview = WEBKIT_WEB_VIEW (webviewWidget);
+
+
+        gtk_container_add (GTK_CONTAINER (container), webviewWidget);
         gtk_container_add (GTK_CONTAINER (plug),      container);
 
-        webkit_web_view_load_uri (WEBKIT_WEB_VIEW (webview), "about:blank");
+        webkit_web_view_load_uri (webview, "about:blank");
 
-        g_signal_connect (WEBKIT_WEB_VIEW (webview), "navigation-policy-decision-requested",
-                          G_CALLBACK (navigationPolicyDecisionCallback), this);
+        g_signal_connect (webview, "decide-policy",
+                          G_CALLBACK (decidePolicyCallback), this);
 
-        g_signal_connect (WEBKIT_WEB_VIEW (webview), "new-window-policy-decision-requested",
-                          G_CALLBACK (newWindowPolicyDecisionCallback), this);
-
-        g_signal_connect (WEBKIT_WEB_VIEW (webview), "document-load-finished",
-                          G_CALLBACK (documentLoadFinishedCallback), this);
+        g_signal_connect (webview, "load-changed",
+                          G_CALLBACK (loadChangedCallback), this);
 
         gtk_widget_show_all (plug);
         unsigned long wID = (unsigned long) gtk_plug_get_id (GTK_PLUG (plug));
 
-        CommandReceiver::setBlocking (outChannel,      true);
 
         ssize_t ret;
 
@@ -196,21 +201,21 @@ public:
         static Identifier urlIdentifier ("url");
         String url (params.getProperty (urlIdentifier, var()).toString());
 
-        webkit_web_view_load_uri (WEBKIT_WEB_VIEW (webview), url.toRawUTF8());
+        webkit_web_view_load_uri (webview, url.toRawUTF8());
     }
 
     void handleDecisionResponse (const var& params)
     {
-        WebKitWebPolicyDecision* decision
-            = (WebKitWebPolicyDecision*) ((int64) params.getProperty ("decision_id", var (0)));
+        WebKitPolicyDecision* decision
+            = (WebKitPolicyDecision*) ((int64) params.getProperty ("decision_id", var (0)));
         bool allow = params.getProperty ("allow", var (false));
 
         if (decision != nullptr && decisions.contains (decision))
         {
             if (allow)
-                webkit_web_policy_decision_use (decision);
+                webkit_policy_decision_use (decision);
             else
-                webkit_web_policy_decision_ignore (decision);
+                webkit_policy_decision_ignore (decision);
 
             decisions.removeAllInstancesOf (decision);
             g_object_unref (decision);
@@ -222,10 +227,10 @@ public:
     {
         if      (cmd == "quit")      quit();
         else if (cmd == "goToURL")   goToURL (params);
-        else if (cmd == "goBack")    webkit_web_view_go_back      (WEBKIT_WEB_VIEW (webview));
-        else if (cmd == "goForward") webkit_web_view_go_forward   (WEBKIT_WEB_VIEW (webview));
-        else if (cmd == "refresh")   webkit_web_view_reload       (WEBKIT_WEB_VIEW (webview));
-        else if (cmd == "stop")      webkit_web_view_stop_loading (WEBKIT_WEB_VIEW (webview));
+        else if (cmd == "goBack")    webkit_web_view_go_back      (webview);
+        else if (cmd == "goForward") webkit_web_view_go_forward   (webview);
+        else if (cmd == "refresh")   webkit_web_view_reload       (webview);
+        else if (cmd == "stop")      webkit_web_view_stop_loading (webview);
         else if (cmd == "decision")  handleDecisionResponse (params);
     }
 
@@ -251,19 +256,18 @@ public:
         exit (-1);
     }
 
-    bool onNavigation (WebKitWebFrame* webFrame,
-                       WebKitNetworkRequest* /*request*/,
-                       WebKitWebNavigationAction* action,
-                       WebKitWebPolicyDecision* decision)
+    bool onNavigation (String frameName,
+                       WebKitNavigationAction* action,
+                       WebKitPolicyDecision* decision)
     {
-        if (decision != nullptr && webkit_web_frame_find_frame (webFrame, "_top") == webFrame)
+        if (decision != nullptr && frameName.isEmpty())
         {
             g_object_ref (decision);
             decisions.add (decision);
 
             DynamicObject::Ptr params = new DynamicObject;
 
-            params->setProperty ("url", String (webkit_web_navigation_action_get_original_uri (action)));
+            params->setProperty ("url", String (webkit_uri_request_get_uri (webkit_navigation_action_get_request (action))));
             params->setProperty ("decision_id", (int64) decision);
             CommandReceiver::sendCommand (outChannel, "pageAboutToLoad", var (params));
 
@@ -273,20 +277,19 @@ public:
         return false;
     }
 
-    bool onNewWindow (WebKitWebFrame* /*webFrame*/,
-                      WebKitNetworkRequest* /*request*/,
-                      WebKitWebNavigationAction* action,
-                      WebKitWebPolicyDecision* decision)
+    bool onNewWindow (String /*frameName*/,
+                      WebKitNavigationAction* action,
+                      WebKitPolicyDecision* decision)
     {
         if (decision != nullptr)
         {
             DynamicObject::Ptr params = new DynamicObject;
 
-            params->setProperty ("url", String (webkit_web_navigation_action_get_original_uri (action)));
+            params->setProperty ("url", String (webkit_uri_request_get_uri (webkit_navigation_action_get_request (action))));
             CommandReceiver::sendCommand (outChannel, "newWindowAttemptingToLoad", var (params));
 
             // never allow new windows
-            webkit_web_policy_decision_ignore (decision);
+            webkit_policy_decision_ignore (decision);
 
             return true;
         }
@@ -294,15 +297,57 @@ public:
         return false;
     }
 
-    void onLoadFinished (WebKitWebFrame* webFrame)
+    void onLoadChanged (WebKitLoadEvent loadEvent)
     {
-        if (webkit_web_frame_find_frame (webFrame, "_top") == webFrame)
+        if (loadEvent == WEBKIT_LOAD_FINISHED)
         {
             DynamicObject::Ptr params = new DynamicObject;
 
-            params->setProperty ("url", String (webkit_web_frame_get_uri (webFrame)));
+            params->setProperty ("url", String (webkit_web_view_get_uri (webview)));
             CommandReceiver::sendCommand (outChannel, "pageFinishedLoading", var (params));
         }
+    }
+
+    bool onDecidePolicy (WebKitPolicyDecision*    decision,
+                         WebKitPolicyDecisionType decisionType)
+    {
+        switch (decisionType)
+        {
+        case WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION:
+            {
+                WebKitNavigationPolicyDecision* navigationDecision = WEBKIT_NAVIGATION_POLICY_DECISION (decision);
+                const char* frameName = webkit_navigation_policy_decision_get_frame_name (navigationDecision);
+
+                return onNavigation (String (frameName != nullptr ? frameName : ""),
+                                     webkit_navigation_policy_decision_get_navigation_action (navigationDecision),
+                                     decision);
+            }
+            break;
+        case WEBKIT_POLICY_DECISION_TYPE_NEW_WINDOW_ACTION:
+            {
+                WebKitNavigationPolicyDecision* navigationDecision = WEBKIT_NAVIGATION_POLICY_DECISION (decision);
+                const char* frameName = webkit_navigation_policy_decision_get_frame_name (navigationDecision);
+
+                return onNewWindow  (String (frameName != nullptr ? frameName : ""),
+                                     webkit_navigation_policy_decision_get_navigation_action (navigationDecision),
+                                     decision);
+            }
+            break;
+        case WEBKIT_POLICY_DECISION_TYPE_RESPONSE:
+            {
+                WebKitResponsePolicyDecision *response = WEBKIT_RESPONSE_POLICY_DECISION (decision);
+
+                // for now just always allow response requests
+                ignoreUnused (response);
+                webkit_policy_decision_use (decision);
+                return true;
+            }
+            break;
+        default:
+            break;
+        }
+
+        return false;
     }
 
 private:
@@ -311,40 +356,27 @@ private:
         return (reinterpret_cast<GtkChildProcess*> (user)->pipeReady (fd, condition) ? TRUE : FALSE);
     }
 
-    static gboolean navigationPolicyDecisionCallback (WebKitWebView*,
-                                                      WebKitWebFrame* webFrame,
-                                                      WebKitNetworkRequest* request,
-                                                      WebKitWebNavigationAction* action,
-                                                      WebKitWebPolicyDecision* decision,
-                                                      gpointer user)
+    static gboolean decidePolicyCallback (WebKitWebView*,
+                                          WebKitPolicyDecision*    decision,
+                                          WebKitPolicyDecisionType decisionType,
+                                          gpointer user)
     {
         GtkChildProcess& owner = *reinterpret_cast<GtkChildProcess*> (user);
-        return (owner.onNavigation (webFrame, request, action, decision) ? TRUE : FALSE);
+        return (owner.onDecidePolicy (decision, decisionType) ? TRUE : FALSE);
     }
 
-    static gboolean newWindowPolicyDecisionCallback (WebKitWebView*,
-                                                     WebKitWebFrame* webFrame,
-                                                     WebKitNetworkRequest* request,
-                                                     WebKitWebNavigationAction* action,
-                                                     WebKitWebPolicyDecision* decision,
-                                                     gpointer user)
+    static void loadChangedCallback (WebKitWebView*,
+                                     WebKitLoadEvent loadEvent,
+                                     gpointer        user)
     {
         GtkChildProcess& owner = *reinterpret_cast<GtkChildProcess*> (user);
-        return (owner.onNewWindow (webFrame, request, action, decision) ? TRUE : FALSE);
-    }
-
-    static void documentLoadFinishedCallback (WebKitWebView*,
-                                              WebKitWebFrame* webFrame,
-                                              gpointer        user)
-    {
-        GtkChildProcess& owner = *reinterpret_cast<GtkChildProcess*> (user);
-        owner.onLoadFinished (webFrame);
+        owner.onLoadChanged (loadEvent);
     }
 
     int outChannel;
     CommandReceiver receiver;
-    GtkWidget* webview = nullptr;
-    Array<WebKitWebPolicyDecision*> decisions;
+    WebKitWebView* webview = nullptr;
+    Array<WebKitPolicyDecision*> decisions;
 };
 
 //==============================================================================

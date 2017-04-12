@@ -76,7 +76,7 @@
   #include <gtk/gtk.h>
   #include <gtk/gtkx.h>
   #include <glib-unix.h>
-  #include <webkit/webkit.h>
+  #include <webkit2/webkit2.h>
  #endif
 #endif
 
