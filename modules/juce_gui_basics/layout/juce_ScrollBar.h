@@ -284,6 +284,13 @@ public:
         */
         virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
                                      double newRangeStart) = 0;
+
+        /** Called when a ScrollBar hidden.*/
+        virtual void scrollBarHidden(ScrollBar* scrollBarThatIsHidden) {};
+
+        /** Called when a ScrollBar Shown.*/
+        virtual void scrollBarShown(ScrollBar* scrollBarThatIsShown) {};
+
     };
 
     /** Registers a listener that will be called when the scrollbar is moved. */
@@ -378,6 +385,8 @@ public:
     void resized() override;
     /** @internal */
     void parentHierarchyChanged() override;
+    /** @internal */
+    void visibilityChanged() override;
 
 private:
     //==============================================================================
@@ -386,7 +395,7 @@ private:
     int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
     int dragStartMousePos, lastMousePos;
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
-    bool vertical, isDraggingThumb, autohides;
+    bool vertical, isDraggingThumb, autohides, cachedVisState;
     class ScrollbarButton;
     friend struct ContainerDeletePolicy<ScrollbarButton>;
     ScopedPointer<ScrollbarButton> upButton, downButton;

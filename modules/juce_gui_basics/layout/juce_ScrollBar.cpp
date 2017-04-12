@@ -52,20 +52,21 @@ private:
 
 
 //==============================================================================
-ScrollBar::ScrollBar (const bool shouldBeVertical)
-    : totalRange (0.0, 1.0),
-      visibleRange (0.0, 0.1),
-      singleStepSize (0.1),
-      thumbAreaStart (0),
-      thumbAreaSize (0),
-      thumbStart (0),
-      thumbSize (0),
-      initialDelayInMillisecs (100),
-      repeatDelayInMillisecs (50),
-      minimumDelayInMillisecs (10),
-      vertical (shouldBeVertical),
-      isDraggingThumb (false),
-      autohides (true)
+ScrollBar::ScrollBar(const bool shouldBeVertical)
+  : totalRange(0.0, 1.0),
+  visibleRange(0.0, 0.1),
+  singleStepSize(0.1),
+  thumbAreaStart(0),
+  thumbAreaSize(0),
+  thumbStart(0),
+  thumbSize(0),
+  initialDelayInMillisecs(100),
+  repeatDelayInMillisecs(50),
+  minimumDelayInMillisecs(10),
+  vertical(shouldBeVertical),
+  isDraggingThumb(false),
+  autohides(true),
+  cachedVisState(isVisible())
 {
     setRepaintsOnMouseActivity (true);
     setFocusContainer (true);
@@ -334,6 +335,16 @@ void ScrollBar::resized()
 void ScrollBar::parentHierarchyChanged()
 {
     lookAndFeelChanged();
+}
+
+void ScrollBar::visibilityChanged()
+{
+  if (isVisible()) {
+    listeners.call(&ScrollBar::Listener::scrollBarShown, this);
+  }
+  else {
+    listeners.call(&ScrollBar::Listener::scrollBarHidden, this);
+  }
 }
 
 void ScrollBar::mouseDown (const MouseEvent& e)

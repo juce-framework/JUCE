@@ -333,7 +333,6 @@ void Viewport::updateVisibleArea()
                 vBarVisible = canShowVBar && (vBarVisible || contentComp->getBottom() > contentArea.getHeight());
             }
         }
-
         if (vBarVisible)  {
           if(vScrollbarOnRight) {
             contentArea.setWidth  (getWidth()  - scrollbarWidth);
@@ -343,7 +342,8 @@ void Viewport::updateVisibleArea()
             contentArea.removeFromLeft(scrollbarWidth);
           }
         }
-        if (hBarVisible)  contentArea.setHeight (getHeight() - scrollbarWidth);
+        if (hBarVisible)  
+          contentArea.setHeight (getHeight() - scrollbarWidth);
 
         if (contentComp == nullptr)
         {
@@ -389,9 +389,20 @@ void Viewport::updateVisibleArea()
     if (canShowVBar && ! vBarVisible)
         visibleOrigin.setY (0);
 
+    bool hWasVisible = horizontalScrollBar.isVisible();
+    bool vWasVisible = verticalScrollBar.isVisible();
+
     // Force the visibility *after* setting the ranges to avoid flicker caused by edge conditions in the numbers.
     horizontalScrollBar.setVisible (hBarVisible);
     verticalScrollBar.setVisible (vBarVisible);
+
+//     if ((hWasVisible && !hBarVisible) || (vWasVisible && !vBarVisible)) {
+//       auto test = 1;
+//     }
+// 
+//     if ((!hWasVisible && hBarVisible) || (!vWasVisible && vBarVisible)) {
+//       auto test = 1;
+//     }
 
     if (contentComp != nullptr)
     {
