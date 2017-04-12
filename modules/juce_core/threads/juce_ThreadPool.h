@@ -123,8 +123,8 @@ private:
     friend class ThreadPool;
     friend class ThreadPoolThread;
     String jobName;
-    ThreadPool* pool;
-    bool shouldStop, isActive, shouldBeDeleted;
+    ThreadPool* pool = nullptr;
+    bool shouldStop = false, isActive = false, shouldBeDeleted = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob)
 };
@@ -262,8 +262,7 @@ public:
     */
     bool contains (const ThreadPoolJob* job) const;
 
-    /** Returns true if the given job is currently being run by a thread.
-    */
+    /** Returns true if the given job is currently being run by a thread. */
     bool isJobRunning (const ThreadPoolJob* job) const;
 
     /** Waits until a job has finished running and has been removed from the pool.
@@ -283,7 +282,6 @@ public:
     StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
     /** Changes the priority of all the threads.
-
         This will call Thread::setPriority() for each thread in the pool.
         May return false if for some reason the priority can't be changed.
     */
@@ -292,7 +290,7 @@ public:
 
 private:
     //==============================================================================
-    Array <ThreadPoolJob*> jobs;
+    Array<ThreadPoolJob*> jobs;
 
     class ThreadPoolThread;
     friend class ThreadPoolJob;
