@@ -353,7 +353,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/ComponentBase.h"
     "../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/MusicDeviceBase.cpp"
     "../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/MusicDeviceBase.h"
-    "../../../../../modules/juce_audio_plugin_client/AU/AUResources.r"
     "../../../../../modules/juce_audio_plugin_client/AU/juce_AU_Wrapper.mm"
     "../../../../../modules/juce_audio_plugin_client/AU/juce_AUv3_Wrapper.mm"
     "../../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode_Header.h"
@@ -377,15 +376,12 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_plugin_client/VST/juce_VST_Wrapper.mm"
     "../../../../../modules/juce_audio_plugin_client/VST/juce_VSTCallbackHandler.h"
     "../../../../../modules/juce_audio_plugin_client/VST3/juce_VST3_Wrapper.cpp"
-    "../../../../../modules/juce_audio_plugin_client/AUResources.r"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client.h"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.cpp"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.mm"
-    "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AU.r"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AU_1.mm"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AU_2.mm"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AUv3.mm"
-    "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS.r"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_1.cpp"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_2.cpp"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_3.cpp"
@@ -1600,7 +1596,6 @@ set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AU/
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/ComponentBase.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/MusicDeviceBase.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/MusicDeviceBase.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AU/AUResources.r" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AU/juce_AU_Wrapper.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AU/juce_AUv3_Wrapper.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode_Header.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1624,15 +1619,12 @@ set_source_files_properties("../../../../../modules/juce_audio_plugin_client/VST
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/VST/juce_VST_Wrapper.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/VST/juce_VSTCallbackHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/VST3/juce_VST3_Wrapper.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_plugin_client/AUResources.r" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AAX.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AU.r" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AU_1.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AU_2.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_AUv3.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS.r" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_1.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_2.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_3.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

@@ -409,15 +409,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sampler", "sampler", "{1F68
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_plugin_client", "juce_audio_plugin_client", "{C429CDA0-0874-985D-BD51-47A6B1346857}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\..\..\modules\juce_audio_plugin_client\AUResources.r = ..\..\..\..\..\modules\juce_audio_plugin_client\AUResources.r
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AAX.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AAX.cpp
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AAX.mm = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AAX.mm
-		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU.r = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU.r
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU_1.mm = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU_1.mm
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU_2.mm = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AU_2.mm
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AUv3.mm = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_AUv3.mm
-		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS.r = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS.r
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_1.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_1.cpp
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_2.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_2.cpp
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_3.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client_RTAS_3.cpp
@@ -432,7 +429,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "juce_audio_plugin_client", 
 		..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h = ..\..\..\..\..\modules\juce_audio_plugin_client\juce_audio_plugin_client.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AAX", "AAX", "{C9FCC1E3-813E-81AC-9B21-A6935E784CD9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AAX", "AAX", "{30B1D075-AFF1-0954-01F7-00354E8D1843}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Modifier_Injector.h = ..\..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Modifier_Injector.h
 		..\..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.cpp
@@ -440,7 +437,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AAX", "AAX", "{C9FCC1E3-813
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AU", "AU", "{01F7858B-E414-71C0-D1D1-47AE748623E9}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\..\..\modules\juce_audio_plugin_client\AU\AUResources.r = ..\..\..\..\..\modules\juce_audio_plugin_client\AU\AUResources.r
 		..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AU_Wrapper.mm = ..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AU_Wrapper.mm
 		..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AUv3_Wrapper.mm = ..\..\..\..\..\modules\juce_audio_plugin_client\AU\juce_AUv3_Wrapper.mm
 	EndProjectSection
@@ -505,7 +501,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CoreAudioUtilityClasses", "
 		..\..\..\..\..\modules\juce_audio_plugin_client\AU\CoreAudioUtilityClasses\MusicDeviceBase.h = ..\..\..\..\..\modules\juce_audio_plugin_client\AU\CoreAudioUtilityClasses\MusicDeviceBase.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTAS", "RTAS", "{50323C9F-3869-F520-9B08-4D2A01B0B606}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTAS", "RTAS", "{5B3AD6D0-EF6C-CA0E-28E5-72AB5524AE6D}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h = ..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h
 		..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode1.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode1.cpp
@@ -516,13 +512,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RTAS", "RTAS", "{50323C9F-3
 		..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_Wrapper.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_Wrapper.cpp
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Standalone", "Standalone", "{791F8646-523E-D82B-9BE6-161FF97A3500}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Standalone", "Standalone", "{6A99FC18-66A6-A656-B0E5-B2D7AE5E9341}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\..\modules\juce_audio_plugin_client\Standalone\juce_StandaloneFilterApp.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\Standalone\juce_StandaloneFilterApp.cpp
 		..\..\..\..\..\modules\juce_audio_plugin_client\Standalone\juce_StandaloneFilterWindow.h = ..\..\..\..\..\modules\juce_audio_plugin_client\Standalone\juce_StandaloneFilterWindow.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utility", "utility", "{AAFDD9E5-D8B4-FBBE-523A-DAB61777C71B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utility", "utility", "{4F6B5B42-9697-B616-8280-333D8A4DF8C4}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_CarbonVisibility.h = ..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_CarbonVisibility.h
 		..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_CheckSettingMacros.h = ..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_CheckSettingMacros.h
@@ -534,14 +530,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utility", "utility", "{AAFD
 		..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_WindowsHooks.h = ..\..\..\..\..\modules\juce_audio_plugin_client\utility\juce_WindowsHooks.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VST", "VST", "{528CACAC-0F68-5903-57D8-F2871B50ED28}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VST", "VST", "{FA15E65D-1F37-0B45-3321-31A026AE3E21}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp
 		..\..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm = ..\..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm
 		..\..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VSTCallbackHandler.h = ..\..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VSTCallbackHandler.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VST3", "VST3", "{7F0D0651-DB0C-E069-9339-23C5867FAE33}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VST3", "VST3", "{59838CF6-B424-44DA-0DED-96EAA721DBE2}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.cpp = ..\..\..\..\..\modules\juce_audio_plugin_client\VST3\juce_VST3_Wrapper.cpp
 	EndProjectSection
@@ -1845,14 +1841,14 @@ Global
 		{DA257576-DA2A-550A-0603-007F49337197} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
 		{1F68DB2D-F9CD-F7E7-9821-B51A6CFDB6E7} = {2C62B2A1-47C2-2C91-3E85-F988210D128A}
 		{2C62B2A1-47C2-2C91-3E85-F988210D128A} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
-		{C9FCC1E3-813E-81AC-9B21-A6935E784CD9} = {C429CDA0-0874-985D-BD51-47A6B1346857}
+		{30B1D075-AFF1-0954-01F7-00354E8D1843} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{28C4B316-3A7D-C12A-B40A-9C5A915CF4D2} = {01F7858B-E414-71C0-D1D1-47AE748623E9}
 		{01F7858B-E414-71C0-D1D1-47AE748623E9} = {C429CDA0-0874-985D-BD51-47A6B1346857}
-		{50323C9F-3869-F520-9B08-4D2A01B0B606} = {C429CDA0-0874-985D-BD51-47A6B1346857}
-		{791F8646-523E-D82B-9BE6-161FF97A3500} = {C429CDA0-0874-985D-BD51-47A6B1346857}
-		{AAFDD9E5-D8B4-FBBE-523A-DAB61777C71B} = {C429CDA0-0874-985D-BD51-47A6B1346857}
-		{528CACAC-0F68-5903-57D8-F2871B50ED28} = {C429CDA0-0874-985D-BD51-47A6B1346857}
-		{7F0D0651-DB0C-E069-9339-23C5867FAE33} = {C429CDA0-0874-985D-BD51-47A6B1346857}
+		{5B3AD6D0-EF6C-CA0E-28E5-72AB5524AE6D} = {C429CDA0-0874-985D-BD51-47A6B1346857}
+		{6A99FC18-66A6-A656-B0E5-B2D7AE5E9341} = {C429CDA0-0874-985D-BD51-47A6B1346857}
+		{4F6B5B42-9697-B616-8280-333D8A4DF8C4} = {C429CDA0-0874-985D-BD51-47A6B1346857}
+		{FA15E65D-1F37-0B45-3321-31A026AE3E21} = {C429CDA0-0874-985D-BD51-47A6B1346857}
+		{59838CF6-B424-44DA-0DED-96EAA721DBE2} = {C429CDA0-0874-985D-BD51-47A6B1346857}
 		{C429CDA0-0874-985D-BD51-47A6B1346857} = {AD2C04D4-7DBA-314E-4D66-F2B021015F59}
 		{15387D64-C701-2C1A-5DEA-C056077E178A} = {861DF610-5E57-5745-146B-95D712482F64}
 		{C4C2ECEF-256A-2D14-9D85-2E125EFC0C9B} = {861DF610-5E57-5745-146B-95D712482F64}

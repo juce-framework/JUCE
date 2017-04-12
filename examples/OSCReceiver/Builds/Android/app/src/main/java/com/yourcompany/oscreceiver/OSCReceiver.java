@@ -54,6 +54,7 @@ import android.text.ClipboardManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
@@ -1293,36 +1294,8 @@ public class OSCReceiver   extends Activity
         return null;
     }
 
-    public final int setCurrentThreadPriority (int priority)
-    {
-        android.os.Process.setThreadPriority (android.os.Process.myTid(), priority);
-        return android.os.Process.getThreadPriority (android.os.Process.myTid());
-    }
-
     public final boolean hasSystemFeature (String property)
     {
         return getPackageManager().hasSystemFeature (property);
-    }
-
-    private static class JuceThread extends Thread
-    {
-        public JuceThread (long host, String threadName, long threadStackSize)
-        {
-            super (null, null, threadName, threadStackSize);
-            _this = host;
-        }
-
-        public void run()
-        {
-            runThread(_this);
-        }
-
-        private native void runThread (long host);
-        private long _this;
-    }
-
-    public final Thread createNewThread(long host, String threadName, long threadStackSize)
-    {
-        return new JuceThread(host, threadName, threadStackSize);
     }
 }
