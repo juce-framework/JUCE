@@ -22,33 +22,29 @@
   ==============================================================================
 */
 
-class ImageCache::Pimpl     : private Timer,
-                              private DeletedAtShutdown
+struct ImageCache::Pimpl     : private Timer,
+                               private DeletedAtShutdown
 {
-public:
-    Pimpl()  : cacheTimeout (5000)
-    {
-    }
+    Pimpl() {}
+    ~Pimpl() { clearSingletonInstance(); }
 
-    ~Pimpl()
-    {
-        clearSingletonInstance();
-    }
+    juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl)
 
-    Image getFromHashCode (const int64 hashCode)
+    Image getFromHashCode (const int64 hashCode) noexcept
     {
         const ScopedLock sl (lock);
 
-        for (int i = images.size(); --i >= 0;)
+        for (auto& item : images)
         {
-            const Item* const item = images.getUnchecked(i);
-
-            if (item->hashCode == hashCode)
-                return item->image;
+            if (item.hashCode == hashCode)
+            {
+                item.lastUseTime = Time::getApproximateMillisecondCounter();
+                return item.image;
+            }
         }
 
-        return Image();
-    }
+        return {};
+     }
 
     void addImageToCache (const Image& image, const int64 hashCode)
     {
@@ -57,38 +53,33 @@ public:
             if (! isTimerRunning())
                 startTimer (2000);
 
-            Item* const item = new Item();
-            item->hashCode = hashCode;
-            item->image = image;
-            item->lastUseTime = Time::getApproximateMillisecondCounter();
-
             const ScopedLock sl (lock);
-            images.add (item);
+            images.add ({ image, hashCode, Time::getApproximateMillisecondCounter() });
         }
     }
 
     void timerCallback() override
     {
-        const uint32 now = Time::getApproximateMillisecondCounter();
+        auto now = Time::getApproximateMillisecondCounter();
 
         const ScopedLock sl (lock);
 
         for (int i = images.size(); --i >= 0;)
         {
-            Item* const item = images.getUnchecked(i);
+            auto& item = images.getReference(i);
 
-            if (item->image.getReferenceCount() <= 1)
+            if (item.image.getReferenceCount() <= 1)
             {
-                if (now > item->lastUseTime + cacheTimeout || now < item->lastUseTime - 1000)
+                if (now > item.lastUseTime + cacheTimeout || now < item.lastUseTime - 1000)
                     images.remove (i);
             }
             else
             {
-                item->lastUseTime = now; // multiply-referenced, so this image is still in use.
+                item.lastUseTime = now; // multiply-referenced, so this image is still in use.
             }
         }
 
-        if (images.size() == 0)
+        if (images.isEmpty())
             stopTimer();
     }
 
@@ -97,7 +88,7 @@ public:
         const ScopedLock sl (lock);
 
         for (int i = images.size(); --i >= 0;)
-            if (images.getUnchecked(i)->image.getReferenceCount() <= 1)
+            if (images.getReference(i).image.getReferenceCount() <= 1)
                 images.remove (i);
     }
 
@@ -108,13 +99,9 @@ public:
         uint32 lastUseTime;
     };
 
-    unsigned int cacheTimeout;
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl)
-
-private:
-    OwnedArray<Item> images;
+    Array<Item> images;
     CriticalSection lock;
+    unsigned int cacheTimeout = 5000;
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
@@ -128,7 +115,7 @@ Image ImageCache::getFromHashCode (const int64 hashCode)
     if (Pimpl::getInstanceWithoutCreating() != nullptr)
         return Pimpl::getInstanceWithoutCreating()->getFromHashCode (hashCode);
 
-    return Image();
+    return {};
 }
 
 void ImageCache::addImageToCache (const Image& image, const int64 hashCode)
@@ -138,8 +125,8 @@ void ImageCache::addImageToCache (const Image& image, const int64 hashCode)
 
 Image ImageCache::getFromFile (const File& file)
 {
-    const int64 hashCode = file.hashCode64();
-    Image image (getFromHashCode (hashCode));
+    auto hashCode = file.hashCode64();
+    auto image = getFromHashCode (hashCode);
 
     if (image.isNull())
     {
@@ -152,8 +139,8 @@ Image ImageCache::getFromFile (const File& file)
 
 Image ImageCache::getFromMemory (const void* imageData, const int dataSize)
 {
-    const int64 hashCode = (int64) (pointer_sized_int) imageData;
-    Image image (getFromHashCode (hashCode));
+    auto hashCode = (int64) (pointer_sized_int) imageData;
+    auto image = getFromHashCode (hashCode);
 
     if (image.isNull())
     {

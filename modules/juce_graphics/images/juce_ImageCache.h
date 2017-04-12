@@ -112,8 +112,8 @@ public:
 
 private:
     //==============================================================================
-    class Pimpl;
-    friend class Pimpl;
+    struct Pimpl;
+    friend struct Pimpl;
 
     ImageCache();
     ~ImageCache();
