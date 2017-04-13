@@ -2039,7 +2039,6 @@ public:
 
        #elif JUCE_LINUX
         pluginWindow = None;
-        pluginProc = None;
         display = XWindowSystem::getInstance()->displayRef();
 
        #elif JUCE_MAC
@@ -2174,16 +2173,10 @@ public:
             {
                 const Rectangle<int> clip (g.getClipBounds());
 
-                XEvent ev = { 0 };
-                ev.xexpose.type = Expose;
-                ev.xexpose.display = display;
-                ev.xexpose.window = pluginWindow;
-                ev.xexpose.x = clip.getX();
-                ev.xexpose.y = clip.getY();
-                ev.xexpose.width = clip.getWidth();
-                ev.xexpose.height = clip.getHeight();
-
-                sendEventToChild (ev);
+                XClearArea (display, pluginWindow,
+                            clip.getX(), clip.getY(),
+                            static_cast<unsigned int> (clip.getWidth()), static_cast<unsigned int> (clip.getHeight()),
+                            True);
             }
            #endif
         }
@@ -2233,19 +2226,7 @@ public:
     {
         ignoreUnused (e);
 
-       #if JUCE_LINUX
-        if (pluginWindow == 0)
-            return;
-
-        toFront (true);
-
-        XEvent ev;
-        prepareXEvent (ev, e);
-        ev.xbutton.type = ButtonPress;
-        translateJuceToXButtonModifiers (e, ev);
-        sendEventToChild (ev);
-
-       #elif JUCE_WINDOWS
+       #if JUCE_WINDOWS || JUCE_LINUX
         toFront (true);
        #endif
     }
@@ -2273,7 +2254,6 @@ private:
    #elif JUCE_LINUX
     ::Display* display;
     Window pluginWindow;
-    EventProcPtr pluginProc;
    #endif
 
     // This is a workaround for old Mackie plugins that crash if their
@@ -2471,7 +2451,6 @@ private:
             pluginHWND = 0;
            #elif JUCE_LINUX
             pluginWindow = 0;
-            pluginProc = 0;
            #endif
         }
     }
@@ -2531,128 +2510,12 @@ private:
     }
 #endif
 
-#if JUCE_LINUX
-    //==============================================================================
-    // overload mouse/keyboard events to forward them to the plugin's inner window..
-    void sendEventToChild (XEvent& event)
-    {
-        if (pluginProc != 0)
-        {
-            // if the plugin publishes an event procedure, pass the event directly..
-            pluginProc (&event);
-        }
-        else if (pluginWindow != 0)
-        {
-            // if the plugin has a window, then send the event to the window so that
-            // its message thread will pick it up..
-            XSendEvent (display, pluginWindow, False, NoEventMask, &event);
-            XFlush (display);
-        }
-    }
-
-    void prepareXEvent (XEvent& ev, const MouseEvent& e) const noexcept
-    {
-        zerostruct (ev);
-        ev.xcrossing.display = display;
-        ev.xcrossing.window = pluginWindow;
-        ev.xcrossing.root = RootWindow (display, DefaultScreen (display));
-        ev.xcrossing.time = CurrentTime;
-        ev.xcrossing.x = e.x;
-        ev.xcrossing.y = e.y;
-        ev.xcrossing.x_root = e.getScreenX();
-        ev.xcrossing.y_root = e.getScreenY();
-    }
-
-    void mouseEnter (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xcrossing.type = EnterNotify;
-            ev.xcrossing.mode = NotifyNormal;
-            ev.xcrossing.detail = NotifyAncestor;
-            translateJuceToXCrossingModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseExit (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xcrossing.type = LeaveNotify;
-            ev.xcrossing.mode = NotifyNormal;
-            ev.xcrossing.detail = NotifyAncestor;
-            ev.xcrossing.focus = hasKeyboardFocus (true);
-            translateJuceToXCrossingModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseMove (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xmotion.type = MotionNotify;
-            ev.xmotion.is_hint = NotifyNormal;
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseDrag (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xmotion.type = MotionNotify;
-            ev.xmotion.is_hint = NotifyNormal;
-            translateJuceToXMotionModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseUp (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xbutton.type = ButtonRelease;
-            translateJuceToXButtonModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xbutton.type = ButtonPress;
-            translateJuceToXMouseWheelModifiers (e, wheel.deltaY, ev);
-            sendEventToChild (ev);
-
-            ev.xbutton.type = ButtonRelease;
-            sendEventToChild (ev);
-        }
-    }
-
+   #if JUCE_LINUX
     void updatePluginWindowHandle()
     {
         pluginWindow = getChildWindow ((Window) getWindowHandle());
-
-        if (pluginWindow != 0)
-            pluginProc = (EventProcPtr) getPropertyFromXWindow (pluginWindow,
-                                                                XInternAtom (display, "_XEventProc", False));
     }
-#endif
+   #endif
 
     //==============================================================================
 #if JUCE_MAC
