@@ -92,6 +92,14 @@ public:
                                   the input or output name to refer to a pair of devices.
     */
     virtual StringArray getDeviceNames (bool wantInputNames = false) const = 0;
+    
+    /** Returns an identifier for the device, which is unique for this device type.
+        May return -1 if not supported by the device type.
+     
+        @param deviceName   the name of the device, as returned by getDeviceNames()
+        @param forInput     whether or not this is an input device
+     */
+    virtual int64 getDeviceId (String deviceName, bool forInput) const;
 
     /** Returns the name of the default device.
 

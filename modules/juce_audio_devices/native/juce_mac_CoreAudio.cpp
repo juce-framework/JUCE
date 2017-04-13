@@ -1850,6 +1850,13 @@ public:
         return wantInputNames ? inputDeviceNames
                               : outputDeviceNames;
     }
+    
+    int64 getDeviceId (String deviceName, bool forInput) const
+    {
+        const int index  = (forInput ? inputDeviceNames : outputDeviceNames).indexOf (deviceName);
+        return static_cast<int64>((forInput ? inputIds : outputIds)[index]);
+    }
+
 
     int getDefaultDeviceIndex (bool forInput) const override
     {

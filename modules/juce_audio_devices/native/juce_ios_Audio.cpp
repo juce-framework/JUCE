@@ -318,6 +318,8 @@ public:
                  const BigInteger& outputChannelsWanted,
                  double targetSampleRate, int bufferSize) override
     {
+        const ScopedLock sl (statusLock);
+        
         close();
 
         lastError.clear();
@@ -374,6 +376,8 @@ public:
 
     void close() override
     {
+        const ScopedLock sl (statusLock);
+        
         if (isRunning)
         {
             isRunning = false;
@@ -415,6 +419,8 @@ public:
 
     void stop() override
     {
+        const ScopedLock sl (statusLock);
+        
         if (isRunning)
         {
             AudioIODeviceCallback* lastCallback;
@@ -460,6 +466,8 @@ public:
 
         JUCE_IOS_AUDIO_LOG ("handleStatusChange: enabled: " << (int) enabled << ", reason: " << reason);
 
+        const ScopedLock sl (statusLock);
+        
         isRunning = enabled;
         setAudioSessionActive (enabled);
 
@@ -478,6 +486,8 @@ public:
 
         JUCE_IOS_AUDIO_LOG ("handleRouteChange: reason: " << reason);
 
+        const ScopedLock sl (statusLock);
+        
         fixAudioRouteIfSetToReceiver();
 
         if (isRunning)
@@ -508,6 +518,7 @@ private:
     //==============================================================================
     SharedResourcePointer<AudioSessionHolder> sessionHolder;
     CriticalSection callbackLock;
+    CriticalSection statusLock;
     NSTimeInterval sampleRate = 0;
     int numInputChannels = 2, numOutputChannels = 2;
     int preferredBufferSize = 0, actualBufferSize = 0;

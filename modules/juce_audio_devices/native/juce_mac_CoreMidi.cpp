@@ -34,6 +34,27 @@
 
 namespace CoreMidiHelpers
 {
+    // fwd decl
+    static MIDIClientRef getGlobalMidiClient();
+    
+    struct MidiSetupState
+    {
+        MidiSetupState()
+        {
+            // Make sure we are listening to changes
+            getGlobalMidiClient();
+        }
+        
+        CriticalSection lock;
+        Array <MidiSetupListener*> listeners;
+    };
+    
+    static MidiSetupState & getGlobalMidiSetupState()
+    {
+        static MidiSetupState state;
+        return state;
+    }
+    
     static bool checkError (const OSStatus err, const int lineNum)
     {
         if (err == noErr)
@@ -203,9 +224,19 @@ namespace CoreMidiHelpers
         return s;
     }
 
-    static void globalSystemChangeCallback (const MIDINotification*, void*)
+    static void globalSystemChangeCallback (const MIDINotification* notification, void*)
     {
-        // TODO.. Should pass-on this notification..
+        if (!notification) { return; }
+        
+        if (notification->messageID == kMIDIMsgObjectAdded || notification->messageID == kMIDIMsgObjectRemoved)
+        {
+            auto & state = getGlobalMidiSetupState();
+            const ScopedLock sl (state.lock);
+            for (auto & listener : state.listeners)
+            {
+                listener->midiDevicesChanged();
+            }
+        }
     }
 
     static String getGlobalMidiClientName()
@@ -548,6 +579,22 @@ void MidiInput::stop()
 {
     const ScopedLock sl (CoreMidiHelpers::callbackLock);
     static_cast<CoreMidiHelpers::MidiPortAndCallback*> (internal)->active = false;
+}
+
+//==============================================================================
+
+void MidiSetup::addListener (MidiSetupListener * const listener)
+{
+    auto & state = CoreMidiHelpers::getGlobalMidiSetupState();
+    const ScopedLock sl (state.lock);
+    state.listeners.addIfNotAlreadyThere (listener);
+}
+
+void MidiSetup::removeListener (MidiSetupListener * const listener)
+{
+    auto & state = CoreMidiHelpers::getGlobalMidiSetupState();
+    const ScopedLock sl (state.lock);
+    state.listeners.removeFirstMatchingValue (listener);
 }
 
 #undef CHECK_ERROR
