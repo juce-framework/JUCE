@@ -99,10 +99,6 @@ public:
 
     //==============================================================================
     /** Changes the font to use for subsequent text-drawing functions.
-
-        Note there's also a setFont (float, int) method to quickly change the size and
-        style of the current font.
-
         @see drawSingleLineText, drawMultiLineText, drawText, drawFittedText
     */
     void setFont (const Font& newFont);

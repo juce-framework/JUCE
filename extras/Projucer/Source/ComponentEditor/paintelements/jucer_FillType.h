@@ -256,7 +256,7 @@ public:
 
         case linearGradient:
         case radialGradient:
-            return gradCol1.isOpaque() && gradCol1.isOpaque();
+            return gradCol1.isOpaque() && gradCol2.isOpaque();
 
         case imageBrush:
             return image.isValid()

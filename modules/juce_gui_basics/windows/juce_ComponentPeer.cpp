@@ -25,7 +25,7 @@
 static uint32 lastUniquePeerID = 1;
 
 //==============================================================================
-ComponentPeer::ComponentPeer (Component& comp, const int flags)
+ComponentPeer::ComponentPeer (Component& comp, int flags)
     : component (comp),
       styleFlags (flags),
       uniqueID (lastUniquePeerID += 2) // increment by 2 so that this can never hit 0
@@ -154,7 +154,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 
 Component* ComponentPeer::getTargetForKeyPress()
 {
-    Component* c = Component::getCurrentlyFocusedComponent();
+    auto* c = Component::getCurrentlyFocusedComponent();
 
     if (c == nullptr)
         c = &component;
@@ -180,7 +180,7 @@ bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
 {
     bool keyWasUsed = false;
 
-    for (Component* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
+    for (auto* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
     {
         const WeakReference<Component> deletionChecker (target);
 
@@ -226,7 +226,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
     ModifierKeys::updateCurrentModifiers();
     bool keyWasUsed = false;
 
-    for (Component* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
+    for (auto* target = getTargetForKeyPress(); target != nullptr; target = target->getParentComponent())
     {
         const WeakReference<Component> deletionChecker (target);
 
@@ -235,7 +235,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
         if (keyWasUsed || deletionChecker == nullptr)
             break;
 
-        if (const Array<KeyListener*>* const keyListeners = target->keyListeners)
+        if (auto* keyListeners = target->keyListeners.get())
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
@@ -264,8 +264,7 @@ void ComponentPeer::handleModifierKeysChange()
     if (target == nullptr)
         target = &component;
 
-    if (target != nullptr)
-        target->internalModifierKeysChanged();
+    target->internalModifierKeysChanged();
 }
 
 TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
@@ -273,7 +272,7 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
     auto* c = Component::getCurrentlyFocusedComponent();
 
     if (c == &component || component.isParentOf (c))
-        if (TextInputTarget* const ti = dynamic_cast<TextInputTarget*> (c))
+        if (auto* ti = dynamic_cast<TextInputTarget*> (c))
             if (ti->isTextInputActive())
                 return ti;
 
