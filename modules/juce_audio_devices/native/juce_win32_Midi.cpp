@@ -619,15 +619,17 @@ private:
 
                 void run() override
                 {
+                    auto parentPtr = &parent;
+
                     parent.watcher->add_Added (
                         Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformation*>> (
-                            [this](IDeviceWatcher*, IDeviceInformation* info) { return parent.addDevice (info); }
+                            [parentPtr](IDeviceWatcher*, IDeviceInformation* info) { return parentPtr->addDevice (info); }
                         ).Get(),
                         &parent.deviceAddedToken);
 
                     parent.watcher->add_Removed (
                         Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>> (
-                            [this](IDeviceWatcher*, IDeviceInformationUpdate* info) { return parent.removeDevice (info); }
+                            [parentPtr](IDeviceWatcher*, IDeviceInformationUpdate* info) { return parentPtr->removeDevice (info); }
                         ).Get(),
                         &parent.deviceRemovedToken);
 
