@@ -470,6 +470,8 @@ public:
         }
         else
         {
+            isClear = false;
+
             for (int chan = 0; chan < numChannels; ++chan)
             {
                 Type* const dest = channels[chan];
