@@ -388,7 +388,7 @@ private:
             {
                 auto* activeHandle = parent.activeOutputHandles.getUnchecked (i);
 
-                if (han->deviceId == deviceId)
+                if (activeHandle->deviceId == deviceId)
                 {
                     activeHandle->refCount++;
                     han = activeHandle;
