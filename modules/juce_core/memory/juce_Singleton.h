@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SINGLETON_H_INCLUDED
-#define JUCE_SINGLETON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -288,7 +287,3 @@
 #define juce_ImplementSingleton_SingleThreaded(classname) \
 \
     classname* classname::_singletonInstance = nullptr;
-
-
-
-#endif   // JUCE_SINGLETON_H_INCLUDED

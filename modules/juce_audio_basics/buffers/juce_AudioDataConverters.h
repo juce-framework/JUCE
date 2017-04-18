@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIODATACONVERTERS_H_INCLUDED
-#define JUCE_AUDIODATACONVERTERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -371,7 +370,7 @@ public:
         {
             // If you're using interleaved data, call the other constructor! If you're using non-interleaved data,
             // you should pass NonInterleaved as the template parameter for the interleaving type!
-            static_jassert (InterleavingType::isInterleavedType == 0);
+            static_assert (InterleavingType::isInterleavedType == 0, "Incorrect constructor for interleaved data");
         }
 
         /** Creates a pointer from some raw data in the appropriate format with the specified number of interleaved channels.
@@ -411,7 +410,8 @@ public:
         */
         inline void setAsFloat (float newValue) noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
             Endianness::setAsFloat (data, newValue);
         }
 
@@ -428,7 +428,8 @@ public:
         */
         inline void setAsInt32 (int32 newValue) noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+             // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
             Endianness::setAsInt32 (data, newValue);
         }
 
@@ -446,7 +447,8 @@ public:
         */
         void convertSamples (Pointer source, int numSamples) const noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
 
             for (Pointer dest (*this); --numSamples >= 0;)
             {
@@ -462,7 +464,8 @@ public:
         template <class OtherPointerType>
         void convertSamples (OtherPointerType source, int numSamples) const noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
 
             Pointer dest (*this);
 
@@ -713,6 +716,3 @@ private:
     AudioDataConverters();
     JUCE_DECLARE_NON_COPYABLE (AudioDataConverters)
 };
-
-
-#endif   // JUCE_AUDIODATACONVERTERS_H_INCLUDED

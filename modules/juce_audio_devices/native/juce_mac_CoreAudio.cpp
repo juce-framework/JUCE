@@ -921,7 +921,6 @@ public:
           isStarted (false)
     {
         CoreAudioInternal* device = nullptr;
-
         if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
         {
             jassert (inputDeviceId != 0);
@@ -931,9 +930,9 @@ public:
         {
             device = new CoreAudioInternal (*this, outputDeviceId, false, true);
         }
+        jassert (device != nullptr);
 
         internal = device;
-        jassert (device != nullptr);
 
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioObjectPropertySelectorWildcard;
@@ -1004,14 +1003,6 @@ public:
         internal->stop (false);
     }
 
-    void restart()
-    {
-        JUCE_COREAUDIOLOG ("Restarting");
-        AudioIODeviceCallback* oldCallback = internal->callback;
-        stop();
-        start (oldCallback);
-    }
-
     BigInteger getActiveOutputChannels() const override     { return internal->activeOutputChans; }
     BigInteger getActiveInputChannels() const override      { return internal->activeInputChans; }
 
@@ -1074,6 +1065,19 @@ public:
         deviceType.audioDeviceListChanged();
     }
 
+    void restart()
+    {
+        JUCE_COREAUDIOLOG ("Restarting");
+        AudioIODeviceCallback* oldCallback = internal->callback;
+        stop();
+        start (oldCallback);
+    }
+
+    bool setCurrentSampleRate (double newSampleRate)
+    {
+        return internal->setNominalSampleRate (newSampleRate);
+    }
+
     CoreAudioIODeviceType& deviceType;
     int inputIndex, outputIndex;
 
@@ -1107,10 +1111,10 @@ class AudioIODeviceCombiner    : public AudioIODevice,
                                  private Thread
 {
 public:
-    AudioIODeviceCombiner (const String& deviceName)
+    AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType& deviceType)
         : AudioIODevice (deviceName, "CoreAudio"),
-          Thread (deviceName), callback (nullptr),
-          currentSampleRate (0), currentBufferSize (0), active (false)
+          Thread (deviceName),
+          owner (deviceType)
     {
     }
 
@@ -1120,7 +1124,7 @@ public:
         devices.clear();
     }
 
-    void addDevice (AudioIODevice* device, bool useInputs, bool useOutputs)
+    void addDevice (CoreAudioIODevice* device, bool useInputs, bool useOutputs)
     {
         jassert (device != nullptr);
         jassert (! isOpen());
@@ -1280,7 +1284,7 @@ public:
         fifos.clear();
         startThread (9);
 
-        return String();
+        return {};
     }
 
     void close() override
@@ -1392,11 +1396,12 @@ public:
     }
 
 private:
+    CoreAudioIODeviceType& owner;
     CriticalSection callbackLock;
-    AudioIODeviceCallback* callback;
-    double currentSampleRate;
-    int currentBufferSize;
-    bool active;
+    AudioIODeviceCallback* callback = nullptr;
+    double currentSampleRate = 0;
+    int currentBufferSize = 0;
+    bool active = false;
     String lastError;
 
     AudioSampleBuffer fifos;
@@ -1551,10 +1556,62 @@ private:
         }
     }
 
+    void handleAudioDeviceAboutToStart (AudioIODevice* device)
+    {
+        const ScopedLock sl (callbackLock);
+
+        auto newSampleRate = device->getCurrentSampleRate();
+        auto commonRates = getAvailableSampleRates();
+        if (! commonRates.contains (newSampleRate))
+        {
+            commonRates.sort();
+            if (newSampleRate < commonRates.getFirst() || newSampleRate > commonRates.getLast())
+                newSampleRate = jlimit (commonRates.getFirst(), commonRates.getLast(), newSampleRate);
+            else
+                for (auto it = commonRates.begin(); it < commonRates.end() - 1; ++it)
+                    if (it[0] < newSampleRate && it[1] > newSampleRate)
+                    {
+                        newSampleRate = newSampleRate - it[0] < it[1] - newSampleRate ? it[0] : it[1];
+                        break;
+                    }
+        }
+        currentSampleRate = newSampleRate;
+
+        bool anySampleRateChanges = false;
+        for (int i = 0; i < devices.size(); ++i)
+            if (devices.getUnchecked(i)->getCurrentSampleRate() != currentSampleRate)
+            {
+                devices.getUnchecked(i)->setCurrentSampleRate (currentSampleRate);
+                anySampleRateChanges = true;
+            }
+
+        if (anySampleRateChanges)
+            owner.audioDeviceListChanged();
+
+        if (callback != nullptr)
+            callback->audioDeviceAboutToStart (device);
+    }
+
+    void handleAudioDeviceStopped()
+    {
+        const ScopedLock sl (callbackLock);
+
+        if (callback != nullptr)
+            callback->audioDeviceStopped();
+    }
+
+    void handleAudioDeviceError (const String& errorMessage)
+    {
+        const ScopedLock sl (callbackLock);
+
+        if (callback != nullptr)
+            callback->audioDeviceError (errorMessage);
+    }
+
     //==============================================================================
     struct DeviceWrapper  : private AudioIODeviceCallback
     {
-        DeviceWrapper (AudioIODeviceCombiner& cd, AudioIODevice* d, bool useIns, bool useOuts)
+        DeviceWrapper (AudioIODeviceCombiner& cd, CoreAudioIODevice* d, bool useIns, bool useOuts)
             : owner (cd), device (d), inputIndex (0), outputIndex (0),
               useInputs (useIns), useOutputs (useOuts),
               inputFifo (32), outputFifo (32), done (false)
@@ -1732,19 +1789,15 @@ private:
             owner.notify();
         }
 
-        void audioDeviceAboutToStart (AudioIODevice*) override {}
-        void audioDeviceStopped() override {}
+        double getCurrentSampleRate()                        { return device->getCurrentSampleRate(); }
+        bool   setCurrentSampleRate (double newSampleRate)   { return device->setCurrentSampleRate (newSampleRate); }
 
-        void audioDeviceError (const String& errorMessage) override
-        {
-            const ScopedLock sl (owner.callbackLock);
-
-            if (owner.callback != nullptr)
-                owner.callback->audioDeviceError (errorMessage);
-        }
+        void audioDeviceAboutToStart (AudioIODevice* d) override      { owner.handleAudioDeviceAboutToStart (d); }
+        void audioDeviceStopped() override                            { owner.handleAudioDeviceStopped(); }
+        void audioDeviceError (const String& errorMessage) override   { owner.handleAudioDeviceError (errorMessage); }
 
         AudioIODeviceCombiner& owner;
-        ScopedPointer<AudioIODevice> device;
+        ScopedPointer<CoreAudioIODevice> device;
         int inputIndex, numInputChans, outputIndex, numOutputChans;
         bool useInputs, useOutputs;
         AbstractFifo inputFifo, outputFifo;
@@ -1942,7 +1995,7 @@ public:
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();
 
-        ScopedPointer<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (combinedName));
+        ScopedPointer<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (combinedName, *this));
         combo->addDevice (in.release(),  true, false);
         combo->addDevice (out.release(), false, true);
         return combo.release();

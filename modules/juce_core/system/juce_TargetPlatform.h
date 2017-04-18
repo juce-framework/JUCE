@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TARGETPLATFORM_H_INCLUDED
-#define JUCE_TARGETPLATFORM_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /*  This file figures out which platform is being built, and defines some macros
@@ -193,20 +192,22 @@
 
 #ifdef __clang__
   #define JUCE_CLANG 1
+
+  #if ((! __has_feature (cxx_nullptr)) || (! __has_feature (cxx_rvalue_references)) || (! __has_feature (cxx_static_assert)))
+   #error "Clang 3.2 and earlier are no longer supported!"
+  #endif
 #elif defined (__GNUC__)
   #define JUCE_GCC 1
+
+  #if (__cplusplus < 201103L && (! defined (__GXX_EXPERIMENTAL_CXX0X__))) || ((__GNUC__ * 100 + __GNUC_MINOR__) < 406)
+   #error "GCC 4.5 and earlier are no longer supported!"
+  #endif
 #elif defined (_MSC_VER)
   #define JUCE_MSVC 1
 
-  #if _MSC_VER < 1500
-    #define JUCE_VC8_OR_EARLIER 1
-
-    #if _MSC_VER < 1400
-      #error "Visual Studio 2003 and earlier are no longer supported!"
-    #endif
+  #if _MSC_VER < 1600
+    #error "Visual Studio 2008 and earlier are no longer supported!"
   #endif
 #else
   #error unknown compiler
 #endif
-
-#endif   // JUCE_TARGETPLATFORM_H_INCLUDED

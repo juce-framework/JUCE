@@ -23,8 +23,7 @@
 */
 
 
-#ifndef VISUALISER_H_INCLUDED
-#define VISUALISER_H_INCLUDED
+#pragma once
 
 
 class NoteComponent : public Component
@@ -248,6 +247,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Visualiser)
 };
-
-
-#endif  // VISUALISER_H_INCLUDED

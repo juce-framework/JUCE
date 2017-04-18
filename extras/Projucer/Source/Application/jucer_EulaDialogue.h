@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef PROJUCER_EULADIALOGUE_H_INCLUDED
-#define PROJUCER_EULADIALOGUE_H_INCLUDED
+#pragma once
 
 
 class EULADialogue : public AlertWindow
@@ -75,6 +74,3 @@ private:
     EULADialogueComponent component;
     ProjucerDialogLookAndFeel lookAndFeel;
 };
-
-
-#endif  // PROJUCER_EULADIALOGUE_H_INCLUDED

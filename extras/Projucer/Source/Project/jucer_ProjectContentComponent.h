@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED
-#define JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "jucer_Project.h"
 #include "../Application/jucer_OpenDocumentManager.h"
@@ -157,8 +156,8 @@ private:
     Component* createDisabledBuildTabSubscribe (String textPrefix, bool loggedIn, bool dllPresent);
     Component* createDisabledBuildTabInfoOnly (const char* messsage);
 
-    bool isContinuousRebuildEnabled()           { return getAppSettings().getGlobalProperties().getBoolValue ("continuousRebuild", true);  }
-    void setContinuousRebuildEnabled (bool b)   { getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b); }
+    bool isContinuousRebuildEnabled();
+    void setContinuousRebuildEnabled (bool b);
     void rebuildNow();
     void handleCrash (const String& message);
     void updateWarningState();
@@ -171,6 +170,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)
 };
-
-
-#endif   // JUCER_PROJECTCONTENTCOMPONENT_H_INCLUDED

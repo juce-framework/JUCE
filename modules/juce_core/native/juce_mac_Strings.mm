@@ -31,7 +31,7 @@
 String String::fromCFString (CFStringRef cfString)
 {
     if (cfString == 0)
-        return String();
+        return {};
 
     CFRange range = { 0, CFStringGetLength (cfString) };
     CFIndex bytesNeeded = 0;

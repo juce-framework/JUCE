@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PRESETIDS_H_INCLUDED
-#define JUCER_PRESETIDS_H_INCLUDED
+#pragma once
 
 
 // Handy list of static Identifiers..
@@ -102,8 +101,11 @@ namespace Ids
     DECLARE_ID (extraDLLs);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
+    DECLARE_ID (msvcManifestFile);
     DECLARE_ID (warningsAreErrors);
     DECLARE_ID (linuxArchitecture);
+    DECLARE_ID (linuxCodeBlocksArchitecture);
+    DECLARE_ID (windowsCodeBlocksArchitecture);
     DECLARE_ID (toolset);
     DECLARE_ID (IPPLibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
@@ -112,7 +114,6 @@ namespace Ids
     DECLARE_ID (jucerVersion);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
-    DECLARE_ID (internalPostBuildComamnd);
     DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (wholeProgramOptimisation);
@@ -166,6 +167,7 @@ namespace Ids
     DECLARE_ID (androidStaticLibraries);
     DECLARE_ID (androidSharedLibraries);
     DECLARE_ID (androidScreenOrientation);
+    DECLARE_ID (androidExtraAssetsFolder);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
@@ -173,7 +175,7 @@ namespace Ids
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);
-    DECLARE_ID (gradleWrapperVersion);
+    const Identifier androidPluginVersion ("gradleWrapperVersion"); // old name is very confusing, but we need to remain backward compatible
     DECLARE_ID (gradleToolchain);
     DECLARE_ID (gradleToolchainVersion);
     DECLARE_ID (linuxExtraPkgConfig);
@@ -234,5 +236,3 @@ namespace Ids
 
     #undef DECLARE_ID
 }
-
-#endif   // JUCER_PRESETIDS_H_INCLUDED

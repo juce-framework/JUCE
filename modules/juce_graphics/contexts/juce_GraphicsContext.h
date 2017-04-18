@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_GRAPHICSCONTEXT_H_INCLUDED
-#define JUCE_GRAPHICSCONTEXT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -100,10 +99,6 @@ public:
 
     //==============================================================================
     /** Changes the font to use for subsequent text-drawing functions.
-
-        Note there's also a setFont (float, int) method to quickly change the size and
-        style of the current font.
-
         @see drawSingleLineText, drawMultiLineText, drawText, drawFittedText
     */
     void setFont (const Font& newFont);
@@ -751,6 +746,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics)
 };
-
-
-#endif   // JUCE_GRAPHICSCONTEXT_H_INCLUDED

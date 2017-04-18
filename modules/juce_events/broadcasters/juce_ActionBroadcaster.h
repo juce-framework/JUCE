@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ACTIONBROADCASTER_H_INCLUDED
-#define JUCE_ACTIONBROADCASTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -84,6 +83,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster)
 };
-
-
-#endif   // JUCE_ACTIONBROADCASTER_H_INCLUDED

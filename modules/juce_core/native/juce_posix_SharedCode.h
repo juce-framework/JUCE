@@ -219,6 +219,12 @@ bool File::setAsCurrentWorkingDirectory() const
     return chdir (getFullPathName().toUTF8()) == 0;
 }
 
+#if JUCE_ANDROID
+ typedef unsigned long juce_sigactionflags_type;
+#else
+ typedef int juce_sigactionflags_type;
+#endif
+
 //==============================================================================
 // The unix siginterrupt function is deprecated - this does the same job.
 int juce_siginterrupt (int sig, int flag)
@@ -227,9 +233,9 @@ int juce_siginterrupt (int sig, int flag)
     (void) ::sigaction (sig, nullptr, &act);
 
     if (flag != 0)
-        act.sa_flags &= ~SA_RESTART;
+        act.sa_flags &= static_cast<juce_sigactionflags_type> (~SA_RESTART);
     else
-        act.sa_flags |= SA_RESTART;
+        act.sa_flags |= static_cast<juce_sigactionflags_type> (SA_RESTART);
 
     return ::sigaction (sig, &act, nullptr);
 }
@@ -369,7 +375,7 @@ static bool setFileModeFlags (const String& fullPath, mode_t flags, bool shouldS
     else
         info.st_mode &= ~flags;
 
-    return chmod (fullPath.toUTF8(), info.st_mode) == 0;
+    return chmod (fullPath.toUTF8(), (mode_t) info.st_mode) == 0;
 }
 
 bool File::setFileReadOnlyInternal (bool shouldBeReadOnly) const
@@ -406,8 +412,8 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
     if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
     {
         struct utimbuf times;
-        times.actime  = accessTime != 0       ? (time_t) (accessTime / 1000)       : info.st_atime;
-        times.modtime = modificationTime != 0 ? (time_t) (modificationTime / 1000) : info.st_mtime;
+        times.actime  = accessTime != 0       ? static_cast<time_t> (accessTime / 1000)       : static_cast<time_t> (info.st_atime);
+        times.modtime = modificationTime != 0 ? static_cast<time_t> (modificationTime / 1000) : static_cast<time_t> (info.st_mtime);
 
         return utime (fullPath.toUTF8(), &times) == 0;
     }
@@ -455,7 +461,7 @@ Result File::createDirectoryInternal (const String& fileName) const
 //==============================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
-    if (handle != 0 && lseek (getFD (handle), pos, SEEK_SET) == pos)
+    if (handle != 0 && lseek (getFD (handle), (off_t) pos, SEEK_SET) == pos)
         return pos;
 
     return -1;
@@ -709,7 +715,7 @@ String File::getVolumeLabel() const
     }
    #endif
 
-    return String();
+    return {};
 }
 
 int File::getVolumeSerialNumber() const
@@ -900,12 +906,25 @@ void InterProcessLock::exit()
 }
 
 //==============================================================================
-#if ! JUCE_ANDROID
 void JUCE_API juce_threadEntryPoint (void*);
+
+#if JUCE_ANDROID
+extern JavaVM* androidJNIJavaVM;
+#endif
 
 extern "C" void* threadEntryProc (void*);
 extern "C" void* threadEntryProc (void* userData)
 {
+   #if JUCE_ANDROID
+    // JNI_OnLoad was not called - make sure you load the JUCE shared library
+    // using System.load inside of Java
+    jassert (androidJNIJavaVM != nullptr);
+
+    JNIEnv* env;
+    androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+    setEnv (env);
+   #endif
+
     JUCE_AUTORELEASEPOOL
     {
         juce_threadEntryPoint (userData);
@@ -993,7 +1012,6 @@ bool Thread::setThreadPriority (void* handle, int priority)
     param.sched_priority = ((maxPriority - minPriority) * priority) / 10 + minPriority;
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
-#endif
 
 Thread::ThreadID JUCE_CALLTYPE Thread::getCurrentThreadId()
 {
@@ -1065,6 +1083,19 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
     return handle != nullptr ? dlsym (handle, functionName.toUTF8()) : nullptr;
 }
 
+
+//==============================================================================
+static inline String readPosixConfigFileValue (const char* file, const char* const key)
+{
+    StringArray lines;
+    File (file).readLines (lines);
+
+    for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+        if (lines[i].upToFirstOccurrenceOf (":", false, false).trim().equalsIgnoreCase (key))
+            return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+    return {};
+}
 
 
 //==============================================================================
@@ -1214,7 +1245,6 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 }
 
 //==============================================================================
-#if ! JUCE_ANDROID
 struct HighResolutionTimer::Pimpl
 {
     Pimpl (HighResolutionTimer& t)  : owner (t), thread (0), destroyThread (false), isRunning (false)
@@ -1222,7 +1252,7 @@ struct HighResolutionTimer::Pimpl
         pthread_condattr_t attr;
         pthread_condattr_init (&attr);
 
-       #if ! (JUCE_MAC || JUCE_IOS)
+       #if JUCE_LINUX || (JUCE_ANDROID && defined(__ANDROID_API__) && __ANDROID_API__ >= 21)
         pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
        #endif
 
@@ -1301,7 +1331,13 @@ private:
     static void* timerThread (void* param)
     {
        #if JUCE_ANDROID
-        const AndroidThreadScope androidEnv;
+        // JNI_OnLoad was not called - make sure you load the JUCE shared library
+        // using System.load inside of Java
+        jassert (androidJNIJavaVM != nullptr);
+
+        JNIEnv* env;
+        androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+        setEnv (env);
        #else
         int dummy;
         pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, &dummy);
@@ -1450,5 +1486,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
-
-#endif

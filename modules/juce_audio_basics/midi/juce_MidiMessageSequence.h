@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIMESSAGESEQUENCE_H_INCLUDED
-#define JUCE_MIDIMESSAGESEQUENCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -54,17 +53,17 @@ public:
     /** Replaces this sequence with another one. */
     MidiMessageSequence& operator= (const MidiMessageSequence&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     MidiMessageSequence (MidiMessageSequence&& other) noexcept
         : list (static_cast<OwnedArray<MidiEventHolder>&&> (other.list))
     {}
 
+    /** Move assignment operator */
     MidiMessageSequence& operator= (MidiMessageSequence&& other) noexcept
     {
         list = static_cast<OwnedArray<MidiEventHolder>&&> (other.list);
         return *this;
     }
-   #endif
 
     /** Destructor. */
     ~MidiMessageSequence();
@@ -287,6 +286,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MidiMessageSequence)
 };
-
-
-#endif   // JUCE_MIDIMESSAGESEQUENCE_H_INCLUDED

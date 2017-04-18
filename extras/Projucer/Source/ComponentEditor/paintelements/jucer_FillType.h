@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FILLTYPE_H_INCLUDED
-#define JUCER_FILLTYPE_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 #include "../jucer_UtilityFunctions.h"
@@ -236,7 +235,7 @@ public:
             break;
         }
 
-        return String();
+        return {};
     }
 
     void restoreFromString (const String& s)
@@ -291,7 +290,7 @@ public:
 
         case linearGradient:
         case radialGradient:
-            return gradCol1.isOpaque() && gradCol1.isOpaque();
+            return gradCol1.isOpaque() && gradCol2.isOpaque();
 
         case imageBrush:
             return image.isValid()
@@ -423,6 +422,3 @@ private:
         }
     }
 };
-
-
-#endif   // JUCER_FILLTYPE_H_INCLUDED

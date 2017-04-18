@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CHARACTERFUNCTIONS_H_INCLUDED
-#define JUCE_CHARACTERFUNCTIONS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -647,6 +646,3 @@ public:
 private:
     static double mulexp10 (const double value, int exponent) noexcept;
 };
-
-
-#endif   // JUCE_CHARACTERFUNCTIONS_H_INCLUDED

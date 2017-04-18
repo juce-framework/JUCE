@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUNTEDVOLUMELISTCHANGEDETECTOR_H_INCLUDED
-#define JUCE_MOUNTEDVOLUMELISTCHANGEDETECTOR_H_INCLUDED
+#pragma once
 
 #if JUCE_MAC || JUCE_WINDOWS || defined (DOXYGEN)
 
@@ -61,5 +60,3 @@ private:
 };
 
 #endif
-
-#endif   // JUCE_MOUNTEDVOLUMELISTCHANGEDETECTOR_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VSTCOMMON_H_INCLUDED
-#define JUCE_VSTCOMMON_H_INCLUDED
+#pragma once
 
 //==============================================================================
 struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give easier access to items in the namespace)
@@ -234,5 +233,3 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return AudioChannelSet::unknown;
     }
 };
-
-#endif   // JUCE_VSTCOMMON_H_INCLUDED

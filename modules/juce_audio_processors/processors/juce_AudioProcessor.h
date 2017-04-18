@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPROCESSOR_H_INCLUDED
-#define JUCE_AUDIOPROCESSOR_H_INCLUDED
+#pragma once
 
 struct PluginBusUtilities;
 
@@ -1265,6 +1264,20 @@ public:
     void setRateAndBufferSizeDetails (double sampleRate, int blockSize) noexcept;
 
     //==============================================================================
+    /** AAX plug-ins need to report a unique "plug-in id" for every audio layout
+        configuration that your AudioProcessor supports on the main bus. Override this
+        function if you want your AudioProcessor to use a custom "plug-in id" (for example
+        to stay backward compatible with older versions of JUCE).
+
+        The default implementation will compute a unique integer from the input and output
+        layout and add this value to the 4 character code 'jcaa' (for native AAX) or 'jyaa'
+        (for AudioSuite plug-ins).
+    */
+    virtual int32 getAAXPluginIDForMainBusConfig (const AudioChannelSet& mainInputLayout,
+                                                  const AudioChannelSet& mainOutputLayout,
+                                                  bool idForAudioSuite) const;
+
+    //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
     void editorBeingDeleted (AudioProcessorEditor*) noexcept;
 
@@ -1549,6 +1562,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
-
-
-#endif   // JUCE_AUDIOPROCESSOR_H_INCLUDED

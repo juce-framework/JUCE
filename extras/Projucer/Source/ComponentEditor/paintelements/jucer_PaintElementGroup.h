@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTGROUP_H_INCLUDED
-#define JUCER_PAINTELEMENTGROUP_H_INCLUDED
+#pragma once
 
 #include "jucer_PaintElement.h"
 #include "../jucer_ObjectTypes.h"
@@ -242,6 +241,3 @@ private:
         PaintElementGroup* const element;
     };
 };
-
-
-#endif   // JUCER_PAINTELEMENTGROUP_H_INCLUDED

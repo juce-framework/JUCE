@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_JUCERDOCUMENT_H_INCLUDED
-#define JUCER_JUCERDOCUMENT_H_INCLUDED
+#pragma once
 
 #include "../Application/jucer_OpenDocumentManager.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
@@ -180,6 +179,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerDocument)
 };
-
-
-#endif   // JUCER_JUCERDOCUMENT_H_INCLUDED

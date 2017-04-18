@@ -108,7 +108,7 @@ namespace TimeHelpers
 
        #ifdef JUCE_MSVC
         if (tm->tm_year < -1900 || tm->tm_year > 8099)
-            return String();   // Visual Studio's library can only handle 0 -> 9999 AD
+            return {};   // Visual Studio's library can only handle 0 -> 9999 AD
         #endif
 
         for (size_t bufferSize = 256; ; bufferSize += 256)
@@ -491,15 +491,15 @@ Time Time::fromISO8601 (StringRef iso) noexcept
 
     const int year = parseFixedSizeIntAndSkip (t, 4, '-');
     if (year < 0)
-        return Time();
+        return {};
 
     const int month = parseFixedSizeIntAndSkip (t, 2, '-');
     if (month < 0)
-        return Time();
+        return {};
 
     const int day = parseFixedSizeIntAndSkip (t, 2, 0);
     if (day < 0)
-        return Time();
+        return {};
 
     int hours = 0, minutes = 0, milliseconds = 0;
 
@@ -508,11 +508,11 @@ Time Time::fromISO8601 (StringRef iso) noexcept
         ++t;
         hours = parseFixedSizeIntAndSkip (t, 2, ':');
         if (hours < 0)
-            return Time();
+            return {};
 
         minutes = parseFixedSizeIntAndSkip (t, 2, ':');
         if (minutes < 0)
-            return Time();
+            return {};
 
         milliseconds = (int) (1000.0 * CharacterFunctions::readDoubleValue (t));
     }
@@ -523,18 +523,18 @@ Time Time::fromISO8601 (StringRef iso) noexcept
     {
         const int offsetHours = parseFixedSizeIntAndSkip (t, 2, ':');
         if (offsetHours < 0)
-            return Time();
+            return {};
 
         const int offsetMinutes = parseFixedSizeIntAndSkip (t, 2, 0);
         if (offsetMinutes < 0)
-            return Time();
+            return {};
 
         const int offsetMs = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
         milliseconds += nextChar == '-' ? offsetMs : -offsetMs; // NB: this seems backwards but is correct!
     }
     else if (nextChar != 0 && nextChar != 'Z')
     {
-        return Time();
+        return {};
     }
 
     return Time (year, month - 1, day, hours, minutes, 0, milliseconds, false);

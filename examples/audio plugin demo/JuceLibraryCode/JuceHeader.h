@@ -10,8 +10,7 @@
 
 */
 
-#ifndef __APPHEADERFILE_0NRD9LLGO__
-#define __APPHEADERFILE_0NRD9LLGO__
+#pragma once
 
 #include "AppConfig.h"
 
@@ -43,5 +42,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x10000;
 }
 #endif
-
-#endif   // __APPHEADERFILE_0NRD9LLGO__

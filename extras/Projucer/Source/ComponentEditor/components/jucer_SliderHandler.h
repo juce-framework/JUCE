@@ -546,7 +546,7 @@ private:
                 default:    jassertfalse; break;
             }
 
-            return String();
+            return {};
         }
 
     private:
@@ -660,7 +660,7 @@ private:
             default:                                    jassertfalse; break;
         }
 
-        return String();
+        return {};
     }
 
     static Slider::SliderStyle sliderStringToStyle (const String& s)
@@ -685,7 +685,7 @@ private:
             default:                    jassertfalse; break;
         }
 
-        return String();
+        return {};
     }
 
     static Slider::TextEntryBoxPosition stringToTextBoxPos (const String& s)

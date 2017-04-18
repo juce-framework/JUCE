@@ -564,6 +564,13 @@ public:
         CGDataProviderRef provider = CGDataProviderCreateWithCFData (cfData);
         CFRelease (cfData);
 
+       #if JUCE_IOS
+        // Workaround for a an obscure iOS bug which can cause the app to dead-lock
+        // when loading custom type faces. See: http://www.openradar.me/18778790 and
+        // http://stackoverflow.com/questions/40242370/app-hangs-in-simulator
+        [UIFont systemFontOfSize: 12];
+       #endif
+
         fontRef = CGFontCreateWithDataProvider (provider);
         CGDataProviderRelease (provider);
 

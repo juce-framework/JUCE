@@ -728,7 +728,7 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, 
 
     bool opened = setEditorComponent (doc->createEditor(), doc);
 
-    if (opened && grabFocus)
+    if (opened && grabFocus && isShowing())
         contentView->grabKeyboardFocus();
 
     return opened;
@@ -1561,6 +1561,19 @@ void ProjectContentComponent::timerCallback()
         killChildProcess();
 
     refreshTabsIfBuildStatusChanged();
+}
+
+bool ProjectContentComponent::isContinuousRebuildEnabled()
+{
+    return getAppSettings().getGlobalProperties().getBoolValue ("continuousRebuild", true);
+}
+
+void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
+{
+    getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
+
+    if (childProcess != nullptr)
+        childProcess->setContinuousRebuild (b);
 }
 
 ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::getChildProcess()

@@ -22,17 +22,17 @@
   ==============================================================================
 */
 
-void FileChooser::showPlatformDialog (Array<File>& results,
-                                      const String& title,
-                                      const File& currentFileOrDirectory,
-                                      const String& filter,
-                                      bool selectsDirectory,
-                                      bool selectsFiles,
-                                      bool isSaveDialogue,
-                                      bool warnAboutOverwritingExistingFiles,
-                                      bool selectMultipleFiles,
+void FileChooser::showPlatformDialog (Array<File>& /*results*/,
+                                      const String& /*title*/,
+                                      const File& /*currentFileOrDirectory*/,
+                                      const String& /*filter*/,
+                                      bool /*selectsDirectory*/,
+                                      bool /*selectsFiles*/,
+                                      bool /*isSaveDialogue*/,
+                                      bool /*warnAboutOverwritingExistingFiles*/,
+                                      bool /*selectMultipleFiles*/,
                                       bool /*treatFilePackagesAsDirs*/,
-                                      FilePreviewComponent* extraInfoComponent)
+                                      FilePreviewComponent* /*extraInfoComponent*/)
 {
     // TODO
 

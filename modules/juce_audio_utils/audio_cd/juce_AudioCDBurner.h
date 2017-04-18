@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOCDBURNER_H_INCLUDED
-#define JUCE_AUDIOCDBURNER_H_INCLUDED
+#pragma once
 
 #if JUCE_USE_CDBURNER || DOXYGEN
 
@@ -166,4 +165,3 @@ private:
 
 
 #endif
-#endif   // JUCE_AUDIOCDBURNER_H_INCLUDED

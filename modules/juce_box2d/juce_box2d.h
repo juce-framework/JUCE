@@ -46,7 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_BOX2D_H_INCLUDED
+#pragma once
 #define JUCE_BOX2D_H_INCLUDED
 
 //==============================================================================
@@ -60,5 +60,3 @@ namespace juce
   #include "utils/juce_Box2DRenderer.h"
 }
 #endif // DOXYGEN
-
-#endif   // JUCE_BOX2D_H_INCLUDED

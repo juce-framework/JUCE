@@ -22,11 +22,10 @@
   ==============================================================================
 */
 
-#ifndef JUCER_TREEITEMTYPES_H_INCLUDED
-#define JUCER_TREEITEMTYPES_H_INCLUDED
+#pragma once
 
 #include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Utility/jucer_TranslationTool.h"
+#include "../Utility/jucer_TranslationToolComponent.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 #include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"
@@ -46,6 +45,3 @@ struct ConfigTreeItemTypes
     #include "jucer_ConfigTree_Modules.h"
     #include "jucer_ConfigTree_Exporter.h"
 };
-
-
-#endif   // JUCER_TREEITEMTYPES_H_INCLUDED

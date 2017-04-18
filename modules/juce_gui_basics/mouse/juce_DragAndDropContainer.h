@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
-#define JUCE_DRAGANDDROPCONTAINER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -130,8 +129,8 @@ public:
         @param files            a list of filenames to drag
         @param canMoveFiles     if true, the app that receives the files is allowed to move the files to a new location
                                 (if this is appropriate). If false, the receiver is expected to make a copy of them.
-        @returns        true if the files were successfully dropped somewhere, or false if it
-                        was interrupted
+        @returns                true if the files were successfully dropped somewhere, or false if it
+                                was interrupted
         @see performExternalDragDropOfText
     */
     static bool performExternalDragDropOfFiles (const StringArray& files, bool canMoveFiles);
@@ -206,6 +205,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer)
 };
-
-
-#endif   // JUCE_DRAGANDDROPCONTAINER_H_INCLUDED

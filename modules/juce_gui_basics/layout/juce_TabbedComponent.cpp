@@ -297,6 +297,7 @@ void TabbedComponent::changeCallback (const int newCurrentTabIndex, const String
             // do these ops as two stages instead of addAndMakeVisible() so that the
             // component has always got a parent when it gets the visibilityChanged() callback
             addChildComponent (panelComponent);
+            panelComponent->sendLookAndFeelChange();
             panelComponent->setVisible (true);
             panelComponent->toFront (true);
         }

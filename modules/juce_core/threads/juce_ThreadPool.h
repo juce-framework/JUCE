@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_THREADPOOL_H_INCLUDED
-#define JUCE_THREADPOOL_H_INCLUDED
+#pragma once
 
 class ThreadPool;
 class ThreadPoolThread;
@@ -324,6 +323,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool)
 };
-
-
-#endif   // JUCE_THREADPOOL_H_INCLUDED

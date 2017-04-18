@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CARETCOMPONENT_H_INCLUDED
-#define JUCE_CARETCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -75,6 +74,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (CaretComponent)
 };
-
-
-#endif   // JUCE_CARETCOMPONENT_H_INCLUDED

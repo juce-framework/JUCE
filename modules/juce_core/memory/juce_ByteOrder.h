@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BYTEORDER_H_INCLUDED
-#define JUCE_BYTEORDER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -236,6 +235,3 @@ inline int  ByteOrder::littleEndian24Bit (const void* const bytes) noexcept     
 inline int  ByteOrder::bigEndian24Bit (const void* const bytes) noexcept                             { return (((int) static_cast<const int8*> (bytes)[0]) << 16) | (((int) static_cast<const uint8*> (bytes)[1]) << 8) | ((int) static_cast<const uint8*> (bytes)[2]); }
 inline void ByteOrder::littleEndian24BitToChars (const int value, void* const destBytes) noexcept    { static_cast<uint8*> (destBytes)[0] = (uint8) value;         static_cast<uint8*> (destBytes)[1] = (uint8) (value >> 8); static_cast<uint8*> (destBytes)[2] = (uint8) (value >> 16); }
 inline void ByteOrder::bigEndian24BitToChars (const int value, void* const destBytes) noexcept       { static_cast<uint8*> (destBytes)[0] = (uint8) (value >> 16); static_cast<uint8*> (destBytes)[1] = (uint8) (value >> 8); static_cast<uint8*> (destBytes)[2] = (uint8) value; }
-
-
-#endif   // JUCE_BYTEORDER_H_INCLUDED

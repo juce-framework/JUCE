@@ -1,5 +1,4 @@
-#ifndef BLOCKCOMPONENTS_H_INCLUDED
-#define BLOCKCOMPONENTS_H_INCLUDED
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -29,7 +28,7 @@ public:
 
         // If this is a Lightpad then set the grid program to be blank
         if (auto grid = block->getLEDGrid())
-            grid->setProgram (new BitmapLEDProgram(*grid));
+            block->setProgram (new BitmapLEDProgram (*block));
 
         // If this is a Lightpad then redraw it at 25Hz
         if (block->getType() == Block::lightPadBlock)
@@ -520,5 +519,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlBlockComponent)
 };
-
-#endif  // BLOCKCOMPONENTS_H_INCLUDED

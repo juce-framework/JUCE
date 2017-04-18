@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUSEINACTIVITYDETECTOR_H_INCLUDED
-#define JUCE_MOUSEINACTIVITYDETECTOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -106,6 +105,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInactivityDetector)
 };
-
-
-#endif   // JUCE_MOUSEINACTIVITYDETECTOR_H_INCLUDED

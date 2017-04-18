@@ -23,8 +23,7 @@
 */
 
 
-#ifndef MPESETUPCOMPONENT_H_INCLUDED
-#define MPESETUPCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class MPESetupComponent : public Component,
@@ -330,6 +329,3 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESetupComponent)
 
 };
-
-
-#endif  // MPESETUPCOMPONENT_H_INCLUDED

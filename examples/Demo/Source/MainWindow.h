@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __MAINWINDOW_H_7DB41986__
-#define __MAINWINDOW_H_7DB41986__
+#pragma once
 
 class ContentComponent;
 
@@ -112,6 +111,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainAppWindow)
 };
-
-
-#endif  // __MAINWINDOW_H_7DB41986__

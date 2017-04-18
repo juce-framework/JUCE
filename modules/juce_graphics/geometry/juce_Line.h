@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LINE_H_INCLUDED
-#define JUCE_LINE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -425,6 +424,3 @@ private:
         return along2 >= 0 && along2 <= static_cast<ValueType> (1);
     }
 };
-
-
-#endif   // JUCE_LINE_H_INCLUDED

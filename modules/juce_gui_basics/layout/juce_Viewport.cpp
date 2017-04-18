@@ -193,7 +193,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
                                           private ViewportDragPosition::Listener
 {
     DragToScrollListener (Viewport& v)
-        : viewport (v), numTouches (0), isDragging (false)
+        : viewport (v), numTouches (0), isDragging (false), isViewportDragBlocked (false)
     {
         viewport.contentHolder.addMouseListener (this, true);
         offsetX.addListener (this);
@@ -211,14 +211,17 @@ struct Viewport::DragToScrollListener   : private MouseListener,
                                                                 (int) offsetY.getPosition()));
     }
 
-    void mouseDown (const MouseEvent&) override
+    void mouseDown (const MouseEvent& e) override
     {
+        if (doesMouseEventComponentBlockViewportDrag (e.eventComponent))
+            isViewportDragBlocked = true;
+
         ++numTouches;
     }
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (numTouches == 1)
+        if (numTouches == 1 && ! isViewportDragBlocked)
         {
             Point<float> totalOffset = e.getOffsetFromDragStart().toFloat();
 
@@ -241,16 +244,27 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         }
     }
 
-    void mouseUp (const MouseEvent&) override
+    void mouseUp (const MouseEvent& e) override
     {
-        if (--numTouches == 0)
+        if (doesMouseEventComponentBlockViewportDrag (e.eventComponent))
+            isViewportDragBlocked = false;
+
+        if (--numTouches <= 0)
         {
             offsetX.endDrag();
             offsetY.endDrag();
             isDragging = false;
+            numTouches = 0;
         }
+    }
 
-        jassert (numTouches >= 0);
+    bool doesMouseEventComponentBlockViewportDrag (const Component* eventComp)
+    {
+        for (auto c = eventComp; c != nullptr && c != &viewport; c = c->getParentComponent())
+            if (c->getViewportIgnoreDragFlag())
+                return true;
+
+        return false;
     }
 
     Viewport& viewport;
@@ -258,6 +272,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
     Point<int> originalViewPos;
     int numTouches;
     bool isDragging;
+
+    bool isViewportDragBlocked;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragToScrollListener)
 };

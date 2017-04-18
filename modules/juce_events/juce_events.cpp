@@ -40,7 +40,12 @@
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 #define JUCE_CORE_INCLUDE_JNI_HELPERS 1
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
+
+#if JUCE_USE_WINRT_MIDI
+ #define JUCE_EVENTS_INCLUDE_WINRT_WRAPPER 1
+#endif
 
 #include "juce_events.h"
 
@@ -53,10 +58,6 @@
  #import <IOKit/pwr_mgt/IOPMLib.h>
 
 #elif JUCE_LINUX
- #include <X11/Xlib.h>
- #include <X11/Xresource.h>
- #include <X11/Xutil.h>
- #undef KeyPress
  #include <unistd.h>
 #endif
 
@@ -88,9 +89,11 @@ namespace juce
 
 #elif JUCE_WINDOWS
  #include "native/juce_win32_Messaging.cpp"
+ #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
+  #include "native/juce_win32_WinRTWrapper.cpp"
+ #endif
 
 #elif JUCE_LINUX
- #include "native/juce_ScopedXLock.h"
  #include "native/juce_linux_Messaging.cpp"
 
 #elif JUCE_ANDROID

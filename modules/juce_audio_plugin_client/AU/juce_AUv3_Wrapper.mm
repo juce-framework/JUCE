@@ -721,10 +721,12 @@ public:
         {
             case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24; break;
             case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25; break;
-            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop; break;
-            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30; break;
             case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997; break;
             case kSMPTETimeType2997Drop:    info.frameRate = AudioPlayHead::fps2997drop; break;
+            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop; break;
+            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30; break;
+            case kSMPTETimeType60Drop:      info.frameRate = AudioPlayHead::fps60drop; break;
+            case kSMPTETimeType60:          info.frameRate = AudioPlayHead::fps60; break;
             default:                        info.frameRate = AudioPlayHead::fpsUnknown; break;
         }
 
@@ -1430,6 +1432,15 @@ private:
 - (CGSize) preferredContentSize { return cpp->getPreferredContentSize(); }
 - (void)viewDidLayoutSubviews   { return cpp->viewDidLayoutSubviews(); }
 @end
+
+//==============================================================================
+#if JUCE_IOS
+bool JUCE_CALLTYPE juce_isInterAppAudioConnected() { return false; }
+void JUCE_CALLTYPE juce_switchToHostApplication()  {}
+#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return Image(); }
+#endif
+#endif
 
 #pragma clang diagnostic pop
 #endif

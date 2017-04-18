@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_THREADLOCALVALUE_H_INCLUDED
-#define JUCE_THREADLOCALVALUE_H_INCLUDED
+#pragma once
 
 // (NB: on win32, native thread-locals aren't possible in a dynamically loaded DLL in XP).
 #if ! ((JUCE_MSVC && (JUCE_64BIT || ! defined (JucePlugin_PluginCode))) \
@@ -195,6 +194,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ThreadLocalValue)
 };
-
-
-#endif   // JUCE_THREADLOCALVALUE_H_INCLUDED

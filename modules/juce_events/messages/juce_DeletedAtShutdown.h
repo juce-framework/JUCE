@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DELETEDATSHUTDOWN_H_INCLUDED
-#define JUCE_DELETEDATSHUTDOWN_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -66,9 +65,5 @@ public:
     static void deleteAll();
 
 private:
-    static Array <DeletedAtShutdown*>& getObjects();
-
     JUCE_DECLARE_NON_COPYABLE (DeletedAtShutdown)
 };
-
-#endif   // JUCE_DELETEDATSHUTDOWN_H_INCLUDED

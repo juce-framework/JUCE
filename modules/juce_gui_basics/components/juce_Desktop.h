@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DESKTOP_H_INCLUDED
-#define JUCE_DESKTOP_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -71,6 +70,8 @@ public:
 
     /** Makes the mouse pointer jump to a given location.
         The coordinates are relative to the top-left of the main monitor.
+        Note that this is a pretty old method, kept around mainly for backwards-compatibility,
+        and you should use the MouseInputSource class directly in new code.
     */
     static void setMousePosition (Point<int> newPosition);
 
@@ -462,6 +463,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop)
 };
-
-
-#endif   // JUCE_DESKTOP_H_INCLUDED

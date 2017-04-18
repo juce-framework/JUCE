@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIINPUT_H_INCLUDED
-#define JUCE_MIDIINPUT_H_INCLUDED
+#pragma once
 
 class MidiInput;
 
@@ -173,13 +172,10 @@ public:
 private:
     //==============================================================================
     String name;
-    void* internal;
+    void* internal = nullptr;
 
     // The input objects are created with the openDevice() method.
     explicit MidiInput (const String&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInput)
 };
-
-
-#endif   // JUCE_MIDIINPUT_H_INCLUDED

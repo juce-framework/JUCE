@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IMAGECACHE_H_INCLUDED
-#define JUCE_IMAGECACHE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -113,13 +112,11 @@ public:
 
 private:
     //==============================================================================
-    class Pimpl;
-    friend class Pimpl;
+    struct Pimpl;
+    friend struct Pimpl;
 
     ImageCache();
     ~ImageCache();
 
     JUCE_DECLARE_NON_COPYABLE (ImageCache)
 };
-
-#endif   // JUCE_IMAGECACHE_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUSECURSOR_H_INCLUDED
-#define JUCE_MOUSECURSOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -111,10 +110,11 @@ public:
     /** Destructor. */
     ~MouseCursor();
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     MouseCursor (MouseCursor&&) noexcept;
+
+    /** Move assignment operator */
     MouseCursor& operator= (MouseCursor&&) noexcept;
-   #endif
 
     /** Checks whether two mouse cursors are the same.
 
@@ -176,5 +176,3 @@ private:
 
     JUCE_LEAK_DETECTOR (MouseCursor)
 };
-
-#endif   // JUCE_MOUSECURSOR_H_INCLUDED

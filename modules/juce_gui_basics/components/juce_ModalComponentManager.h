@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MODALCOMPONENTMANAGER_H_INCLUDED
-#define JUCE_MODALCOMPONENTMANAGER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -50,7 +49,7 @@ public:
         For some quick ways of creating callback objects, see the ModalCallbackFunction class.
         @see ModalCallbackFunction
     */
-    class Callback
+    class JUCE_API  Callback
     {
     public:
         /** */
@@ -371,6 +370,3 @@ private:
     ~ModalCallbackFunction();
     JUCE_DECLARE_NON_COPYABLE (ModalCallbackFunction)
 };
-
-
-#endif   // JUCE_MODALCOMPONENTMANAGER_H_INCLUDED

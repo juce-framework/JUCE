@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED
-#define JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -66,5 +65,3 @@ public:
     */
     virtual void releaseResources() = 0;
 };
-
-#endif   // JUCE_CACHEDCOMPONENTIMAGE_H_INCLUDED

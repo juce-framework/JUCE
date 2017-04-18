@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOIODEVICE_H_INCLUDED
-#define JUCE_AUDIOIODEVICE_H_INCLUDED
+#pragma once
 
 class AudioIODevice;
 
@@ -310,6 +309,3 @@ protected:
     /** @internal */
     String name, typeName;
 };
-
-
-#endif   // JUCE_AUDIOIODEVICE_H_INCLUDED

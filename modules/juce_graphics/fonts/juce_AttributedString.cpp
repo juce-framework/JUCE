@@ -136,7 +136,6 @@ namespace
 AttributedString::Attribute::Attribute() noexcept : colour (0xff000000) {}
 AttributedString::Attribute::~Attribute() noexcept {}
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 AttributedString::Attribute::Attribute (Attribute&& other) noexcept
     : range (other.range),
       font (static_cast<Font&&> (other.font)),
@@ -151,7 +150,6 @@ AttributedString::Attribute& AttributedString::Attribute::operator= (Attribute&&
     colour = other.colour;
     return *this;
 }
-#endif
 
 AttributedString::Attribute::Attribute (const Attribute& other) noexcept
     : range (other.range),
@@ -216,7 +214,6 @@ AttributedString& AttributedString::operator= (const AttributedString& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 AttributedString::AttributedString (AttributedString&& other) noexcept
     : text (static_cast<String&&> (other.text)),
       lineSpacing (other.lineSpacing),
@@ -237,7 +234,6 @@ AttributedString& AttributedString::operator= (AttributedString&& other) noexcep
     attributes = static_cast<Array<Attribute>&&> (other.attributes);
     return *this;
 }
-#endif
 
 AttributedString::~AttributedString() noexcept {}
 

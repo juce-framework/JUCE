@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_WILDCARDFILEFILTER_H_INCLUDED
-#define JUCE_WILDCARDFILEFILTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -79,6 +78,3 @@ private:
 
     JUCE_LEAK_DETECTOR (WildcardFileFilter)
 };
-
-
-#endif   // JUCE_WILDCARDFILEFILTER_H_INCLUDED

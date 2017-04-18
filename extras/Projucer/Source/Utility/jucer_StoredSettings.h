@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_STOREDSETTINGS_H_INCLUDED
-#define JUCER_STOREDSETTINGS_H_INCLUDED
+#pragma once
 
 #include <map>
 #include "../Application/jucer_AppearanceSettings.h"
@@ -100,6 +99,3 @@ private:
 
 StoredSettings& getAppSettings();
 PropertiesFile& getGlobalProperties();
-
-
-#endif   // JUCER_STOREDSETTINGS_H_INCLUDED

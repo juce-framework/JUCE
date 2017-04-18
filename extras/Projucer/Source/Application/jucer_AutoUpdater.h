@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_AUTOUPDATER_H_INCLUDED
-#define JUCER_AUTOUPDATER_H_INCLUDED
+#pragma once
 
 class UpdaterDialogModalCallback;
 
@@ -103,6 +102,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatestVersionChecker)
 };
-
-
-#endif   // JUCER_AUTOUPDATER_H_INCLUDED

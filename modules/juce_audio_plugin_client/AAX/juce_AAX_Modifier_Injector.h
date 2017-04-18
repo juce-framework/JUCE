@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AAX_MODIFIER_INJECTOR_H_INCLUDED
-#define JUCE_AAX_MODIFIER_INJECTOR_H_INCLUDED
+#pragma once
 
 struct ModifierKeyProvider
 {
@@ -37,5 +36,3 @@ struct ModifierKeyReceiver
     virtual void setModifierKeyProvider (ModifierKeyProvider*) = 0;
     virtual void removeModifierKeyProvider() = 0;
 };
-
-#endif

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTTYPEHANDLER_H_INCLUDED
-#define JUCER_COMPONENTTYPEHANDLER_H_INCLUDED
+#pragma once
 
 class ComponentOverlayComponent;
 class ComponentLayout;
@@ -138,6 +137,3 @@ protected:
 private:
     JUCE_DECLARE_NON_COPYABLE (ComponentTypeHandler)
 };
-
-
-#endif   // JUCER_COMPONENTTYPEHANDLER_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SELECTEDITEMSET_H_INCLUDED
-#define JUCE_SELECTEDITEMSET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -318,6 +317,3 @@ private:
 
     JUCE_LEAK_DETECTOR (SelectedItemSet<SelectableItemType>)
 };
-
-
-#endif   // JUCE_SELECTEDITEMSET_H_INCLUDED

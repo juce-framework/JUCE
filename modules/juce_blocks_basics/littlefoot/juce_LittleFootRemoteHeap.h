@@ -52,16 +52,35 @@ struct LittleFootRemoteHeap
     void clear() noexcept
     {
         zeromem (targetData, sizeof (targetData));
+        invalidateData();
+    }
+
+    void resetDeviceStateToUnknown()
+    {
+        invalidateData();
+        messagesSent.clear();
+        resetDataRangeToUnknown (0, ImplementationClass::maxBlockSize);
+    }
+
+    void resetDataRangeToUnknown (size_t offset, size_t size) noexcept
+    {
+        auto* latestState = getLatestExpectedDataState();
+
+        for (size_t i = 0; i < size; ++i)
+            latestState[offset + i] = unknownByte;
     }
 
     void setByte (size_t offset, uint8 value) noexcept
     {
         if (offset < blockSize)
         {
-            if (targetData [offset] != value)
+            if (targetData[offset] != value)
             {
-                targetData [offset] = value;
-                invalidateData();
+                targetData[offset] = value;
+                needsSyncing = true;
+
+                if (programStateKnown && offset < programSize)
+                    programStateKnown = false;
             }
         }
         else
@@ -100,37 +119,31 @@ struct LittleFootRemoteHeap
         return 0;
     }
 
-    void invalidateData()
+    void invalidateData() noexcept
     {
-        dataHasChanged = true;
+        needsSyncing = true;
         programStateKnown = false;
     }
 
-    void sendChanges (ImplementationClass& bi)
+    bool isFullySynced() const noexcept
     {
-        if (dataHasChanged && messagesSent.isEmpty())
+        return ! needsSyncing;
+    }
+
+    void sendChanges (ImplementationClass& bi, bool forceSend)
+    {
+        if ((needsSyncing && messagesSent.isEmpty()) || forceSend)
         {
-            for (;;)
+            for (int maxChanges = 30; --maxChanges >= 0;)
             {
                 uint16 data[ImplementationClass::maxBlockSize];
-                uint32 packetIndex;
+                auto* latestState = getLatestExpectedDataState();
 
-                if (messagesSent.isEmpty())
-                {
-                    for (uint32 i = 0; i < blockSize; ++i)
-                        data[i] = deviceState[i];
+                for (uint32 i = 0; i < blockSize; ++i)
+                    data[i] = latestState[i];
 
-                    packetIndex = lastPacketIndexReceived;
-                }
-                else
-                {
-                    auto& lastPacket = messagesSent.getReference (messagesSent.size() - 1);
-
-                    for (uint32 i = 0; i < blockSize; ++i)
-                        data[i] = lastPacket.resultDataState[i];
-
-                    packetIndex = lastPacket.packetIndex;
-                }
+                uint32 packetIndex = messagesSent.isEmpty() ? lastPacketIndexReceived
+                                                            : messagesSent.getLast()->packetIndex;
 
                 packetIndex = (packetIndex + 1) & ImplementationClass::maxPacketCounter;
 
@@ -141,14 +154,14 @@ struct LittleFootRemoteHeap
             }
         }
 
-        for (auto& m : messagesSent)
+        for (auto* m : messagesSent)
         {
-            if (m.dispatchTime >= Time::getCurrentTime() - RelativeTime::milliseconds (250))
+            if (m->dispatchTime >= Time::getCurrentTime() - RelativeTime::milliseconds (250))
                 break;
 
-            m.dispatchTime = Time::getCurrentTime();
-            bi.sendMessageToDevice (m.packet);
-            //DBG ("Sending packet " << (int) m.packetIndex << " - " << m.packet.size() << " bytes, device " << bi.getDeviceIndex());
+            m->dispatchTime = Time::getCurrentTime();
+            bi.sendMessageToDevice (m->packet);
+            //DBG ("Sending packet " << (int) m->packetIndex << " - " << m->packet.size() << " bytes, device " << bi.getDeviceIndex());
 
             if (getTotalSizeOfMessagesSent() > 200)
                 break;
@@ -157,7 +170,7 @@ struct LittleFootRemoteHeap
 
     void handleACKFromDevice (ImplementationClass& bi, uint32 packetIndex) noexcept
     {
-        //DBG ("ACK " << (int) packetIndex);
+        //DBG ("ACK " << (int) packetIndex << "   device " << (int) bi.getDeviceIndex());
 
         if (lastPacketIndexReceived != packetIndex)
         {
@@ -165,7 +178,7 @@ struct LittleFootRemoteHeap
 
             for (int i = messagesSent.size(); --i >= 0;)
             {
-                auto& m = messagesSent.getReference(i);
+                auto& m = *messagesSent.getUnchecked(i);
 
                 if (m.packetIndex == packetIndex)
                 {
@@ -174,10 +187,10 @@ struct LittleFootRemoteHeap
 
                     messagesSent.removeRange (0, i + 1);
                     dumpStatus();
-                    sendChanges (bi);
+                    sendChanges (bi, false);
 
                     if (messagesSent.isEmpty())
-                        dataHasChanged = false;
+                        needsSyncing = false;
 
                     return;
                 }
@@ -191,17 +204,16 @@ struct LittleFootRemoteHeap
     {
         if (! programStateKnown)
         {
+            programStateKnown = true;
+
             uint8 deviceMemory[ImplementationClass::maxBlockSize];
-            bool anyUnknowns = false;
 
             for (size_t i = 0; i < blockSize; ++i)
-            {
-                anyUnknowns = (deviceState[i] > 255);
                 deviceMemory[i] = (uint8) deviceState[i];
-            }
 
-            programLoaded = ! anyUnknowns && littlefoot::Program (deviceMemory, (uint32) blockSize).checksumMatches();
-            programStateKnown = true;
+            littlefoot::Program prog (deviceMemory, (uint32) blockSize);
+            programLoaded = prog.checksumMatches();
+            programSize = prog.getProgramSize();
         }
 
         return programLoaded;
@@ -214,15 +226,13 @@ struct LittleFootRemoteHeap
 private:
     uint16 deviceState[ImplementationClass::maxBlockSize];
     uint8 targetData[ImplementationClass::maxBlockSize] = { 0 };
-    bool dataHasChanged = true, programStateKnown = true, programLoaded = false;
+    uint32 programSize = 0;
+    bool needsSyncing = true, programStateKnown = true, programLoaded = false;
 
-    void resetDeviceStateToUnknown()
+    uint16* getLatestExpectedDataState() noexcept
     {
-        invalidateData();
-        messagesSent.clear();
-
-        for (uint32 i = 0; i < ImplementationClass::maxBlockSize; ++i)
-            deviceState[i] = unknownByte;
+        return messagesSent.isEmpty() ? deviceState
+                                      : messagesSent.getLast()->resultDataState;
     }
 
     struct ChangeMessage
@@ -233,16 +243,16 @@ private:
         uint16 resultDataState[ImplementationClass::maxBlockSize];
     };
 
-    Array<ChangeMessage> messagesSent;
+    OwnedArray<ChangeMessage> messagesSent;
     uint32 lastPacketIndexReceived = 0;
 
     int getTotalSizeOfMessagesSent() const noexcept
     {
         int total = 0;
 
-        for (auto& m : messagesSent)
-            if (m.dispatchTime != Time())
-                total += m.packet.size();
+        for (auto* m : messagesSent)
+            if (m->dispatchTime != Time())
+                total += m->packet.size();
 
         return total;
     }
@@ -280,6 +290,8 @@ private:
         Diff (uint16* current, const uint8* target, size_t blockSizeToUse)
             : newData (target), blockSize (blockSizeToUse)
         {
+            ranges.ensureStorageAllocated ((int) blockSize);
+
             for (int i = 0; i < (int) blockSize; ++i)
                 ranges.add ({ i, 1, newData[i] == current[i], false });
 
@@ -290,7 +302,7 @@ private:
 
         bool createChangeMessage (const ImplementationClass& bi,
                                   const uint16* currentState,
-                                  Array<ChangeMessage>& messagesCreated,
+                                  OwnedArray<ChangeMessage>& messagesCreated,
                                   uint32 nextPacketIndex)
         {
             if (ranges.isEmpty())
@@ -301,8 +313,7 @@ private:
             if (deviceIndex < 0)
                 return false;
 
-            messagesCreated.add ({});
-            auto& message = messagesCreated.getReference (messagesCreated.size() - 1);
+            auto& message = *messagesCreated.add (new ChangeMessage());
 
             message.packetIndex = nextPacketIndex;
 
@@ -366,27 +377,27 @@ private:
 
         void coalesceUniformRegions()
         {
-            for (int i = 0; i < ranges.size() - 1; ++i)
+            for (int i = ranges.size(); --i > 0;)
             {
-                auto& r1 = ranges.getReference (i);
-                auto r2 = ranges.getReference (i + 1);
+                auto& r1 = ranges.getReference (i - 1);
+                auto r2 = ranges.getReference (i);
 
                 if (r1.isSkipped == r2.isSkipped
                      && (r1.isSkipped || newData[r1.index] == newData[r2.index]))
                 {
                     r1.length += r2.length;
-                    ranges.remove (i + 1);
-                    i = jmax (0, i - 2);
+                    ranges.remove (i);
+                    i = jmin (ranges.size() - 1, i + 1);
                 }
             }
         }
 
         void coalesceSequences()
         {
-            for (int i = 0; i < ranges.size() - 1; ++i)
+            for (int i = ranges.size(); --i > 0;)
             {
-                auto& r1 = ranges.getReference (i);
-                auto r2 = ranges.getReference (i + 1);
+                auto& r1 = ranges.getReference (i - 1);
+                auto r2 = ranges.getReference (i);
 
                 if (! (r1.isSkipped || r2.isSkipped)
                      && (r1.isMixed || r1.length == 1)
@@ -396,8 +407,8 @@ private:
                     {
                         r1.length += r2.length;
                         r1.isMixed = true;
-                        ranges.remove (i + 1);
-                        i = jmax (0, i - 2);
+                        ranges.remove (i);
+                        i = jmin (ranges.size() - 1, i + 1);
                     }
                 }
             }

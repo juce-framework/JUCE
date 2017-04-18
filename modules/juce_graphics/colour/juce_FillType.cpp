@@ -63,7 +63,6 @@ FillType& FillType::operator= (const FillType& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 FillType::FillType (FillType&& other) noexcept
     : colour (other.colour),
       gradient (other.gradient.release()),
@@ -82,7 +81,6 @@ FillType& FillType::operator= (FillType&& other) noexcept
     transform = other.transform;
     return *this;
 }
-#endif
 
 FillType::~FillType() noexcept
 {

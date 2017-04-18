@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RESIZABLEWINDOW_H_INCLUDED
-#define JUCE_RESIZABLEWINDOW_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -405,6 +404,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableWindow)
 };
-
-
-#endif   // JUCE_RESIZABLEWINDOW_H_INCLUDED

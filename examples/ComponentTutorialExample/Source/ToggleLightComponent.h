@@ -8,8 +8,7 @@
   ==============================================================================
 */
 
-#ifndef TOGGLELIGHTCOMPONENT_H_INCLUDED
-#define TOGGLELIGHTCOMPONENT_H_INCLUDED
+#pragma once
 
 /**
     This class represents one of the individual lights in our grid.
@@ -48,6 +47,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleLightComponent)
 };
-
-
-#endif  // TOGGLELIGHTCOMPONENT_H_INCLUDED

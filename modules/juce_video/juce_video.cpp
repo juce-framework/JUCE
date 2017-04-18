@@ -38,9 +38,7 @@
 #include "juce_video.h"
 
 #if JUCE_MAC
- #if JUCE_QUICKTIME
-  #import <QTKit/QTKit.h>
- #endif
+  #import <AVFoundation/AVFoundation.h>
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -104,8 +102,8 @@ namespace juce
   #include "native/juce_mac_CameraDevice.mm"
  #endif
 
- #if JUCE_QUICKTIME
-  #include "native/juce_mac_QuickTimeMovieComponent.mm"
+ #if JUCE_MAC
+  #include "native/juce_mac_MovieComponent.mm"
  #endif
 
 #elif JUCE_WINDOWS
@@ -116,10 +114,6 @@ namespace juce
 
  #if JUCE_DIRECTSHOW
   #include "native/juce_win32_DirectShowComponent.cpp"
- #endif
-
- #if JUCE_QUICKTIME
-  #include "native/juce_win32_QuickTimeMovieComponent.cpp"
  #endif
 
 #elif JUCE_LINUX

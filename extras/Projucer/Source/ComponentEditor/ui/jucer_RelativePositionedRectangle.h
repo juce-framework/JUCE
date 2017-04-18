@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_RELATIVEPOSITIONEDRECTANGLE_H_INCLUDED
-#define JUCER_RELATIVEPOSITIONEDRECTANGLE_H_INCLUDED
+#pragma once
 
 class ComponentLayout;
 
@@ -757,6 +756,3 @@ struct RelativePositionedRectangle
     int64 relativeToW;
     int64 relativeToH;
 };
-
-
-#endif   // JUCER_RELATIVEPOSITIONEDRECTANGLE_H_INCLUDED

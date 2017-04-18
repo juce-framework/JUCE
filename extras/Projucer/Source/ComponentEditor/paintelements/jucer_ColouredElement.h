@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COLOUREDELEMENT_H_INCLUDED
-#define JUCER_COLOUREDELEMENT_H_INCLUDED
+#pragma once
 
 #include "../jucer_PaintRoutine.h"
 #include "../jucer_JucerDocument.h"
@@ -79,6 +78,3 @@ protected:
 
     void convertToNewPathElement (const Path& path);
 };
-
-
-#endif   // JUCER_COLOUREDELEMENT_H_INCLUDED

@@ -41,8 +41,16 @@ struct AudioThumbnail::MinMaxValue
 
     inline void setFloat (Range<float> newRange) noexcept
     {
+        // Workaround for an ndk armeabi compiler bug which crashes on signed saturation
+       #if JUCE_ANDROID
+        Range<float> limitedRange (jlimit (-1.0f, 1.0f, newRange.getStart()),
+                                   jlimit (-1.0f, 1.0f, newRange.getEnd()));
+        values[0] = (int8) (limitedRange.getStart() * 127.0f);
+        values[1] = (int8) (limitedRange.getEnd()   * 127.0f);
+       #else
         values[0] = (int8) jlimit (-128, 127, roundFloatToInt (newRange.getStart() * 127.0f));
         values[1] = (int8) jlimit (-128, 127, roundFloatToInt (newRange.getEnd()   * 127.0f));
+       #endif
 
         if (values[0] == values[1])
         {

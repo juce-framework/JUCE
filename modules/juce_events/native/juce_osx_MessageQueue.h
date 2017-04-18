@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSX_MESSAGEQUEUE_H_INCLUDED
-#define JUCE_OSX_MESSAGEQUEUE_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /* An internal message pump class used in OSX and iOS. */
@@ -109,5 +108,3 @@ private:
         static_cast<MessageQueue*> (info)->runLoopCallback();
     }
 };
-
-#endif   // JUCE_OSX_MESSAGEQUEUE_H_INCLUDED

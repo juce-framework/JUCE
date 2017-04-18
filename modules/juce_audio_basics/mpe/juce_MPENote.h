@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MPENOTE_H_INCLUDED
-#define JUCE_MPENOTE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -181,6 +180,3 @@ struct JUCE_API  MPENote
     /** Returns true if two notes are different notes, determined by their unique ID. */
     bool operator!= (const MPENote& other) const noexcept;
 };
-
-
-#endif // JUCE_MPENOTE_H_INCLUDED

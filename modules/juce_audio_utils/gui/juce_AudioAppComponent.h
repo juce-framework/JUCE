@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOAPPCOMPONENT_H_INCLUDED
-#define JUCE_AUDIOAPPCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -112,6 +111,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioAppComponent)
 };
-
-
-#endif   // JUCE_AUDIOAPPCOMPONENT_H_INCLUDED

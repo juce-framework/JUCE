@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SAMPLER_H_INCLUDED
-#define JUCE_SAMPLER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -141,6 +140,3 @@ private:
 
     JUCE_LEAK_DETECTOR (SamplerVoice)
 };
-
-
-#endif   // JUCE_SAMPLER_H_INCLUDED

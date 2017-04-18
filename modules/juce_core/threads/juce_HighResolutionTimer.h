@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_HIGHRESOLUTIONTIMER_H_INCLUDED
-#define JUCE_HIGHRESOLUTIONTIMER_H_INCLUDED
+#pragma once
 
 /**
     A high-resolution periodic timer.
@@ -106,6 +105,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HighResolutionTimer)
 };
-
-
-#endif   // JUCE_HIGHRESOLUTIONTIMER_H_INCLUDED

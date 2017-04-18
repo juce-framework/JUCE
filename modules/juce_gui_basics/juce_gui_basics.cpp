@@ -254,7 +254,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "misc/juce_DropShadower.cpp"
 
 // these classes are C++11-only
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS && JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
  #include "layout/juce_FlexBox.cpp"
 #endif
 
@@ -282,8 +282,9 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #include "native/juce_win32_FileChooser.cpp"
 
 #elif JUCE_LINUX
- #include "native/juce_linux_Clipboard.cpp"
- #include "native/juce_linux_Windowing.cpp"
+ #include "native/juce_linux_X11.cpp"
+ #include "native/juce_linux_X11_Clipboard.cpp"
+ #include "native/juce_linux_X11_Windowing.cpp"
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_RELATIVEPATH_H_INCLUDED
-#define JUCER_RELATIVEPATH_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -114,6 +113,3 @@ private:
         return currentWorkingDirectory.getChildFile (path);
     }
 };
-
-
-#endif   // JUCER_RELATIVEPATH_H_INCLUDED

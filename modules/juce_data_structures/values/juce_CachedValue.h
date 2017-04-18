@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CACHEDVALUE_H_INCLUDED
-#define JUCE_CACHEDVALUE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -307,5 +306,3 @@ inline void CachedValue<Type>::valueTreePropertyChanged (ValueTree& changedTree,
     if (changedProperty == targetProperty && targetTree == changedTree)
         forceUpdateOfCachedValue();
 }
-
-#endif   // JUCE_CACHEDVALUE_H_INCLUDED

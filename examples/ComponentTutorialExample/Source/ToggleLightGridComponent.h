@@ -8,8 +8,7 @@
   ==============================================================================
 */
 
-#ifndef TOGGLELIGHTGRIDCOMPONENT_H_INCLUDED
-#define TOGGLELIGHTGRIDCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "ToggleLightComponent.h"
 
@@ -61,7 +60,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleLightGridComponent)
 };
-
-
-
-#endif  // TOGGLELIGHTGRIDCOMPONENT_H_INCLUDED

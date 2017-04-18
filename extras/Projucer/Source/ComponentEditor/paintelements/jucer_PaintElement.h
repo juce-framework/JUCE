@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENT_H_INCLUDED
-#define JUCER_PAINTELEMENT_H_INCLUDED
+#pragma once
 
 #include "../jucer_GeneratedCode.h"
 #include "../ui/jucer_RelativePositionedRectangle.h"
@@ -170,6 +169,3 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE (ElementListener)
 };
-
-
-#endif   // JUCER_PAINTELEMENT_H_INCLUDED

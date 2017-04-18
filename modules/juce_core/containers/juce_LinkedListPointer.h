@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LINKEDLISTPOINTER_H_INCLUDED
-#define JUCE_LINKEDLISTPOINTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -83,7 +82,6 @@ public:
         return *this;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     LinkedListPointer (LinkedListPointer&& other) noexcept
         : item (other.item)
     {
@@ -98,7 +96,6 @@ public:
         other.item = nullptr;
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns the item which this pointer points to. */
@@ -368,6 +365,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (LinkedListPointer)
 };
-
-
-#endif   // JUCE_LINKEDLISTPOINTER_H_INCLUDED

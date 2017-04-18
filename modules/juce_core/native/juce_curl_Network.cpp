@@ -143,7 +143,7 @@ public:
     }
 
     //==============================================================================
-    bool setOptions ()
+    bool setOptions()
     {
         const String address = url.toString (! isPost);
 
@@ -209,7 +209,7 @@ public:
 
     bool connect (WebInputStream::Listener* webInputListener)
     {
-        if (! setOptions ())
+        if (! setOptions())
         {
             cleanup();
             return false;

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILESEARCHPATH_H_INCLUDED
-#define JUCE_FILESEARCHPATH_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -166,5 +165,3 @@ private:
 
     JUCE_LEAK_DETECTOR (FileSearchPath)
 };
-
-#endif   // JUCE_FILESEARCHPATH_H_INCLUDED

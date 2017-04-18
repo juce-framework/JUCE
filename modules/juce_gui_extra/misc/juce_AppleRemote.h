@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_APPLEREMOTE_H_INCLUDED
-#define JUCE_APPLEREMOTE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -111,4 +110,3 @@ private:
 };
 
 #endif
-#endif   // JUCE_APPLEREMOTE_H_INCLUDED

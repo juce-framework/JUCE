@@ -28,7 +28,8 @@
  METHOD (pairBluetoothMidiDevice, "pairBluetoothMidiDevice", "(Ljava/lang/String;)Z") \
  METHOD (unpairBluetoothMidiDevice, "unpairBluetoothMidiDevice", "(Ljava/lang/String;)V") \
  METHOD (getHumanReadableStringForBluetoothAddress, "getHumanReadableStringForBluetoothAddress", "(Ljava/lang/String;)Ljava/lang/String;") \
- METHOD (isBluetoothDevicePaired, "isBluetoothDevicePaired", "(Ljava/lang/String;)Z")
+ METHOD (getBluetoothDeviceStatus, "getBluetoothDeviceStatus", "(Ljava/lang/String;)I") \
+ METHOD (startStopScan, "startStopScan", "(Z)V")
 
 DECLARE_JNI_CLASS (AndroidBluetoothManager, JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager");
 #undef JNI_CLASS_MEMBERS
@@ -36,6 +37,15 @@ DECLARE_JNI_CLASS (AndroidBluetoothManager, JUCE_ANDROID_ACTIVITY_CLASSPATH "$Bl
 //==============================================================================
 struct AndroidBluetoothMidiInterface
 {
+    static void startStopScan (bool startScanning)
+    {
+        JNIEnv* env = getEnv();
+        LocalRef<jobject> btManager (android.activity.callObjectMethod (JuceAppActivity.getAndroidBluetoothManager));
+
+        if (btManager.get() != nullptr)
+            env->CallVoidMethod (btManager.get(), AndroidBluetoothManager.startStopScan, (jboolean) (startScanning ? 1 : 0));
+    }
+
     static StringArray getBluetoothMidiDevicesNearby()
     {
         StringArray retval;
@@ -46,7 +56,7 @@ struct AndroidBluetoothMidiInterface
 
         // if this is null then bluetooth is not enabled
         if (btManager.get() == nullptr)
-            return StringArray();
+            return {};
 
         jobjectArray jDevices = (jobjectArray) env->CallObjectMethod (btManager.get(),
                                                                       AndroidBluetoothManager.getMidiBluetoothAddresses);
@@ -111,17 +121,24 @@ struct AndroidBluetoothMidiInterface
     }
 
     //==============================================================================
-    static bool isBluetoothDevicePaired (const String& address)
+    enum PairStatus
+    {
+        unpaired = 0,
+        paired = 1,
+        pairing = 2
+    };
+
+    static PairStatus isBluetoothDevicePaired (const String& address)
     {
         JNIEnv* env = getEnv();
 
         LocalRef<jobject> btManager (android.activity.callObjectMethod (JuceAppActivity.getAndroidBluetoothManager));
 
         if (btManager.get() == nullptr)
-            return false;
+            return unpaired;
 
-        return env->CallBooleanMethod (btManager.get(), AndroidBluetoothManager.isBluetoothDevicePaired,
-                                       javaString (address).get());
+        return static_cast<PairStatus> (env->CallIntMethod (btManager.get(), AndroidBluetoothManager.getBluetoothDeviceStatus,
+                                                            javaString (address).get()));
     }
 };
 
@@ -172,7 +189,6 @@ public:
         setRowHeight (40);
         setModel (this);
         setOutlineThickness (1);
-        updateDeviceList();
         startTimer (timerPeriodInMs);
     }
 
@@ -192,7 +208,7 @@ private:
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g,
-                           int width, int height, bool rowIsSelected) override
+                           int width, int height, bool) override
     {
         if (isPositiveAndBelow (rowNumber, devices.size()))
         {
@@ -210,14 +226,13 @@ private:
 
             g.setColour (getDeviceNameFontColour (device.connectionStatus));
             g.drawText (device.name,
-                        xmargin, ymargin,
-                        deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin),
+                        Rectangle<float> (xmargin, ymargin, deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topLeft, true);
 
             g.setColour (getDeviceStatusFontColour (device.connectionStatus));
             g.drawText (statusString,
-                        deviceNameWidth + xmargin, ymargin,
-                        width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin),
+                        Rectangle<float> (deviceNameWidth + xmargin, ymargin,
+                                          width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
                         Justification::topRight, true);
 
             g.setColour (Colours::grey);
@@ -342,9 +357,19 @@ private:
              address != bluetoothAddresses.end(); ++address)
         {
             String name = AndroidBluetoothMidiInterface::getHumanReadableStringForBluetoothAddress (*address);
-            DeviceStatus status =  AndroidBluetoothMidiInterface::isBluetoothDevicePaired (*address)
-                                      ? AndroidBluetoothMidiDevice::connected
-                                      : AndroidBluetoothMidiDevice::disconnected;
+
+            DeviceStatus status;
+            switch (AndroidBluetoothMidiInterface::isBluetoothDevicePaired (*address))
+            {
+                case AndroidBluetoothMidiInterface::pairing:
+                    status = AndroidBluetoothMidiDevice::connecting;
+                    break;
+                case AndroidBluetoothMidiInterface::paired:
+                    status = AndroidBluetoothMidiDevice::connected;
+                    break;
+                default:
+                    status = AndroidBluetoothMidiDevice::disconnected;
+            }
 
             newDevices.add (AndroidBluetoothMidiDevice (name, *address, status));
         }
@@ -366,6 +391,8 @@ public:
     {
         ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
 
+        AndroidBluetoothMidiInterface::startStopScan (true);
+
         setAlwaysOnTop (true);
         setVisible (true);
         addToDesktop (ComponentPeer::windowHasDropShadow);
@@ -374,6 +401,11 @@ public:
 
         addAndMakeVisible (bluetoothDevicesList);
         enterModalState (true, exitCallback.release(), true);
+    }
+
+    ~BluetoothMidiSelectorOverlay()
+    {
+        AndroidBluetoothMidiInterface::startStopScan (false);
     }
 
     void paint (Graphics& g) override
@@ -439,7 +471,7 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
         return false;
     }
 
-    BluetoothMidiSelectorOverlay* overlay = new BluetoothMidiSelectorOverlay (exitCallback.release());
+    new BluetoothMidiSelectorOverlay (exitCallback.release());
     return true;
 }
 

@@ -8,8 +8,7 @@
   ==============================================================================
 */
 
-#ifndef __PLUGINEDITOR_H_4ACCBAA__
-#define __PLUGINEDITOR_H_4ACCBAA__
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
@@ -45,6 +44,3 @@ private:
 
     void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo);
 };
-
-
-#endif  // __PLUGINEDITOR_H_4ACCBAA__

@@ -50,7 +50,7 @@ private:
         if (NSURL* url = [actionInformation valueForKey: nsStringLiteral ("WebActionOriginalURLKey")])
             return nsStringToJuce ([url absoluteString]);
 
-        return String();
+        return {};
     }
 
     static void decidePolicyForNavigationAction (id self, SEL, WebView*, NSDictionary* actionInformation,

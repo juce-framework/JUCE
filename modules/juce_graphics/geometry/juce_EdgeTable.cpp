@@ -133,13 +133,13 @@ EdgeTable::EdgeTable (const RectangleList<int>& rectanglesToAdd)
     allocate();
     clearLineSizes();
 
-    for (const Rectangle<int>* r = rectanglesToAdd.begin(), * const e = rectanglesToAdd.end(); r != e; ++r)
+    for (auto& r : rectanglesToAdd)
     {
-        const int x1 = r->getX() << 8;
-        const int x2 = r->getRight() << 8;
-        int y = r->getY() - bounds.getY();
+        const int x1 = r.getX() << 8;
+        const int x2 = r.getRight() << 8;
+        int y = r.getY() - bounds.getY();
 
-        for (int j = r->getHeight(); --j >= 0;)
+        for (int j = r.getHeight(); --j >= 0;)
             addEdgePointPair (x1, x2, y++, 255);
     }
 
@@ -156,13 +156,13 @@ EdgeTable::EdgeTable (const RectangleList<float>& rectanglesToAdd)
     allocate();
     clearLineSizes();
 
-    for (const Rectangle<float>* r = rectanglesToAdd.begin(), * const e = rectanglesToAdd.end(); r != e; ++r)
+    for (auto& r : rectanglesToAdd)
     {
-        const int x1 = roundToInt (r->getX() * 256.0f);
-        const int x2 = roundToInt (r->getRight() * 256.0f);
+        const int x1 = roundToInt (r.getX() * 256.0f);
+        const int x2 = roundToInt (r.getRight() * 256.0f);
 
-        const int y1 = roundToInt (r->getY() * 256.0f) - (bounds.getY() << 8);
-        const int y2 = roundToInt (r->getBottom() * 256.0f) - (bounds.getY() << 8);
+        const int y1 = roundToInt (r.getY() * 256.0f) - (bounds.getY() << 8);
+        const int y2 = roundToInt (r.getBottom() * 256.0f) - (bounds.getY() << 8);
 
         if (x2 <= x1 || y2 <= y1)
             continue;

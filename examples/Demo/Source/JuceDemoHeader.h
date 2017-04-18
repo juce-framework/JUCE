@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCEDEMOHEADER_H_EE664D1A__
-#define __JUCEDEMOHEADER_H_EE664D1A__
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainWindow.h"
@@ -66,6 +65,3 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE (JuceDemoType)
 };
-
-
-#endif  // __JUCEDEMOHEADER_H_EE664D1A__

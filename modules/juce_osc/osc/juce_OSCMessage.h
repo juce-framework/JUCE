@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCMESSAGE_H_INCLUDED
-#define JUCE_OSCMESSAGE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -52,7 +51,7 @@ public:
     OSCMessage (const OSCAddressPattern& ap) noexcept;
 
 
-   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
     /** Constructs an OSCMessage object with the given address pattern and list
         of arguments.
 
@@ -142,7 +141,7 @@ public:
 private:
 
     //==============================================================================
-   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
     template <typename Arg1, typename... Args>
     void addArguments (Arg1&& arg1, Args&&... args)
     {
@@ -160,7 +159,7 @@ private:
 
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES && JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
  template <typename Arg1, typename... Args>
  OSCMessage::OSCMessage (const OSCAddressPattern& ap, Arg1&& arg1, Args&&... args)
      : addressPattern (ap)
@@ -168,5 +167,3 @@ private:
      addArguments (std::forward<Arg1> (arg1), std::forward<Args> (args)...);
  }
 #endif
-
-#endif // JUCE_OSCMESSAGE_H_INCLUDED

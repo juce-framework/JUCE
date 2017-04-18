@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ZIPFILE_H_INCLUDED
-#define JUCE_ZIPFILE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -263,5 +262,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile)
 };
-
-#endif   // JUCE_ZIPFILE_H_INCLUDED

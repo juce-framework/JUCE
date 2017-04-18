@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VARIANT_H_INCLUDED
-#define JUCE_VARIANT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -52,7 +51,7 @@ public:
     /** This structure is passed to a NativeFunction callback, and contains invocation
         details about the function's arguments and context.
     */
-    struct NativeFunctionArgs
+    struct JUCE_API  NativeFunctionArgs
     {
         NativeFunctionArgs (const var& thisObject, const var* args, int numArgs) noexcept;
 
@@ -109,14 +108,12 @@ public:
     var& operator= (ReferenceCountedObject* object);
     var& operator= (NativeFunction method);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     var (var&&) noexcept;
     var (String&&);
     var (MemoryBlock&&);
     var (Array<var>&&);
     var& operator= (var&&) noexcept;
     var& operator= (String&&);
-   #endif
 
     void swapWith (var& other) noexcept;
 
@@ -348,6 +345,3 @@ struct VariantConverter<String>
     static String fromVar (const var& v)           { return v.toString(); }
     static var toVar (const String& s)             { return s; }
 };
-
-
-#endif   // JUCE_VARIANT_H_INCLUDED

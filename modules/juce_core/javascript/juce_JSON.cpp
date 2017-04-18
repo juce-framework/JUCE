@@ -84,7 +84,7 @@ public:
                             if (digitValue < 0)
                                 return createFail ("Syntax error in unicode escape sequence");
 
-                            c = (juce_wchar) ((c << 4) + digitValue);
+                            c = (juce_wchar) ((c << 4) + static_cast<juce_wchar> (digitValue));
                         }
 
                         break;
@@ -590,7 +590,7 @@ public:
     {
         switch (r.nextInt (depth > 3 ? 6 : 8))
         {
-            case 0:     return var();
+            case 0:     return {};
             case 1:     return r.nextInt();
             case 2:     return r.nextInt64();
             case 3:     return r.nextBool();
@@ -618,7 +618,7 @@ public:
             }
 
             default:
-                return var();
+                return {};
         }
     }
 

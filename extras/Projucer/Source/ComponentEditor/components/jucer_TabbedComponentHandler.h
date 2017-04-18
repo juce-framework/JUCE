@@ -147,7 +147,7 @@ public:
             default:                                jassertfalse; break;
         }
 
-        return String();
+        return {};
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)

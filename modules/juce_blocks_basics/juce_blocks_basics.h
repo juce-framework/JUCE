@@ -52,8 +52,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_BLOCKS_BASICS_H_INCLUDED
-#define JUCE_BLOCKS_BASICS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #include <juce_events/juce_events.h>
@@ -85,6 +84,3 @@ namespace juce
   #include "visualisers/juce_DrumPadLEDProgram.h"
   #include "visualisers/juce_BitmapLEDProgram.h"
 }
-
-
-#endif   // JUCE_BLOCKS_BASICS_H_INCLUDED

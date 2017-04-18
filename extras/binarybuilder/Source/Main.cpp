@@ -153,8 +153,7 @@ int main (int argc, char* argv[])
     }
 
     *header << "/* (Auto-generated binary data file). */\r\n\r\n"
-               "#ifndef BINARY_" << className.toUpperCase() << "_H\r\n"
-               "#define BINARY_" << className.toUpperCase() << "_H\r\n\r\n"
+               "#pragma once\r\n\r\n"
                "namespace " << className << "\r\n"
                "{\r\n";
 
@@ -187,8 +186,7 @@ int main (int argc, char* argv[])
         }
     }
 
-    *header << "}\r\n\r\n"
-               "#endif\r\n";
+    *header << "}\r\n";
 
     header = nullptr;
     cpp = nullptr;

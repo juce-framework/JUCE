@@ -137,7 +137,7 @@ private:
             c = c->getParentComponent();
         }
 
-        return String();
+        return {};
     }
 };
 

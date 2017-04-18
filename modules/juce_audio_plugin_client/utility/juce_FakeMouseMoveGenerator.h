@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED
-#define JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED
+#pragma once
 
 #if JUCE_MAC
 
@@ -51,8 +50,8 @@ public:
                 if (Component* const comp = Desktop::getInstance().findComponentAt (screenPos.roundToInt()))
                     if (ComponentPeer* const peer = comp->getPeer())
                         if (! peer->isFocused())
-                            peer->handleMouseEvent (0, peer->globalToLocal (screenPos), mods,
-                                                    MouseInputSource::invalidPressure, Time::currentTimeMillis());
+                            peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, peer->globalToLocal (screenPos), mods,
+                                                    MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
         }
     }
 
@@ -63,5 +62,3 @@ private:
 #else
 struct FakeMouseMoveGenerator {};
 #endif
-
-#endif   // JUCE_FAKEMOUSEMOVEGENERATOR_H_INCLUDED

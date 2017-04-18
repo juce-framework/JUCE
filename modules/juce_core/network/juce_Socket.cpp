@@ -39,10 +39,17 @@
 
 #if JUCE_WINDOWS
  typedef int       juce_socklen_t;
+ typedef int       juce_recvsend_size_t;
  typedef SOCKET    SocketHandle;
  static const SocketHandle invalidSocket = INVALID_SOCKET;
+#elif JUCE_ANDROID
+ typedef socklen_t juce_socklen_t;
+ typedef size_t    juce_recvsend_size_t;
+ typedef int       SocketHandle;
+ static const SocketHandle invalidSocket = -1;
 #else
  typedef socklen_t juce_socklen_t;
+ typedef socklen_t juce_recvsend_size_t;
  typedef int       SocketHandle;
  static const SocketHandle invalidSocket = -1;
 #endif
@@ -198,7 +205,7 @@ namespace SocketHelpers
         {
             long bytesThisTime = -1;
             char* const buffer = static_cast<char*> (destBuffer) + bytesRead;
-            const juce_socklen_t numToRead = (juce_socklen_t) (maxBytesToRead - bytesRead);
+            const juce_recvsend_size_t numToRead = (juce_recvsend_size_t) (maxBytesToRead - bytesRead);
 
             {
                 // avoid race-condition
@@ -467,7 +474,7 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     if (isListener || ! connected)
         return -1;
 
-    return (int) ::send (handle, (const char*) sourceBuffer, (juce_socklen_t) numBytesToWrite, 0);
+    return (int) ::send (handle, (const char*) sourceBuffer, (juce_recvsend_size_t) numBytesToWrite, 0);
 }
 
 //==============================================================================
@@ -730,7 +737,7 @@ int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,
     }
 
     return (int) ::sendto (handle, (const char*) sourceBuffer,
-                           (juce_socklen_t) numBytesToWrite, 0,
+                           (juce_recvsend_size_t) numBytesToWrite, 0,
                            info->ai_addr, (socklen_t) info->ai_addrlen);
 }
 
@@ -752,7 +759,9 @@ bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
 
 bool DatagramSocket::setEnablePortReuse (bool enabled)
 {
-   #if ! JUCE_ANDROID
+   #if JUCE_ANDROID
+    ignoreUnused (enabled);
+   #else
     if (handle >= 0)
         return SocketHelpers::setOption (handle,
                                         #if JUCE_WINDOWS || JUCE_LINUX

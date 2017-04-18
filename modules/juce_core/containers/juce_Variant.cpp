@@ -51,7 +51,7 @@ public:
     virtual int toInt (const ValueUnion&) const noexcept                        { return 0; }
     virtual int64 toInt64 (const ValueUnion&) const noexcept                    { return 0; }
     virtual double toDouble (const ValueUnion&) const noexcept                  { return 0; }
-    virtual String toString (const ValueUnion&) const                           { return String(); }
+    virtual String toString (const ValueUnion&) const                           { return {}; }
     virtual bool toBool (const ValueUnion&) const noexcept                      { return false; }
     virtual ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
     virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return nullptr; }
@@ -291,7 +291,7 @@ public:
             return d->clone().get();
 
         jassertfalse; // can only clone DynamicObjects!
-        return var();
+        return {};
     }
 
     void writeToStream (const ValueUnion&, OutputStream& output) const override
@@ -314,7 +314,7 @@ public:
 
     Array<var>* toArray (const ValueUnion& data) const noexcept override
     {
-        if (RefCountedArray* a = dynamic_cast<RefCountedArray*> (data.objectValue))
+        if (auto* a = dynamic_cast<RefCountedArray*> (data.objectValue))
             return &(a->array);
 
         return nullptr;
@@ -331,7 +331,7 @@ public:
     {
         Array<var> arrayCopy;
 
-        if (const Array<var>* array = toArray (original.value))
+        if (auto* array = toArray (original.value))
             for (int i = 0; i < array->size(); ++i)
                 arrayCopy.add (array->getReference(i).clone());
 
@@ -340,7 +340,7 @@ public:
 
     void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
-        if (const Array<var>* array = toArray (data))
+        if (auto* array = toArray (data))
         {
             MemoryOutputStream buffer (512);
             const int numItems = array->size();
@@ -358,9 +358,7 @@ public:
     struct RefCountedArray  : public ReferenceCountedObject
     {
         RefCountedArray (const Array<var>& a)  : array (a)  { incReferenceCount(); }
-       #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
         RefCountedArray (Array<var>&& a)  : array (static_cast<Array<var>&&> (a)) { incReferenceCount(); }
-       #endif
         Array<var> array;
     };
 };
@@ -527,7 +525,6 @@ var& var::operator= (const Array<var>& v)        { var v2 (v); swapWith (v2); re
 var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); return *this; }
 var& var::operator= (NativeFunction v)           { var v2 (v); swapWith (v2); return *this; }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 var::var (var&& other) noexcept
     : type (other.type),
       value (other.value)
@@ -563,7 +560,6 @@ var& var::operator= (String&& v)
     new (value.stringValue) String (static_cast<String&&> (v));
     return *this;
 }
-#endif
 
 //==============================================================================
 bool var::equals (const var& other) const noexcept
@@ -597,7 +593,7 @@ var var::clone() const noexcept
 //==============================================================================
 const var& var::operator[] (const Identifier& propertyName) const
 {
-    if (DynamicObject* const o = getDynamicObject())
+    if (auto* o = getDynamicObject())
         return o->getProperty (propertyName);
 
     return getNullVarRef();
@@ -610,7 +606,7 @@ const var& var::operator[] (const char* const propertyName) const
 
 var var::getProperty (const Identifier& propertyName, const var& defaultReturnValue) const
 {
-    if (DynamicObject* const o = getDynamicObject())
+    if (auto* o = getDynamicObject())
         return o->getProperties().getWithDefault (propertyName, defaultReturnValue);
 
     return defaultReturnValue;
@@ -623,10 +619,10 @@ var::NativeFunction var::getNativeFunction() const
 
 var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
 {
-    if (DynamicObject* const o = getDynamicObject())
+    if (auto* o = getDynamicObject())
         return o->invokeMethod (method, var::NativeFunctionArgs (*this, arguments, numArguments));
 
-    return var();
+    return {};
 }
 
 var var::call (const Identifier& method) const
@@ -666,7 +662,7 @@ var var::call (const Identifier& method, const var& arg1, const var& arg2, const
 //==============================================================================
 int var::size() const
 {
-    if (const Array<var>* const array = getArray())
+    if (auto* array = getArray())
         return array->size();
 
     return 0;
@@ -674,7 +670,7 @@ int var::size() const
 
 const var& var::operator[] (int arrayIndex) const
 {
-    const Array<var>* const array = getArray();
+    auto* array = getArray();
 
     // When using this method, the var must actually be an array, and the index
     // must be in-range!
@@ -685,7 +681,7 @@ const var& var::operator[] (int arrayIndex) const
 
 var& var::operator[] (int arrayIndex)
 {
-    const Array<var>* const array = getArray();
+    auto* array = getArray();
 
     // When using this method, the var must actually be an array, and the index
     // must be in-range!
@@ -696,7 +692,7 @@ var& var::operator[] (int arrayIndex)
 
 Array<var>* var::convertToArray()
 {
-    if (Array<var>* array = getArray())
+    if (auto* array = getArray())
         return array;
 
     Array<var> tempVar;
@@ -714,7 +710,7 @@ void var::append (const var& n)
 
 void var::remove (const int index)
 {
-    if (Array<var>* const array = getArray())
+    if (auto* const array = getArray())
         array->remove (index);
 }
 
@@ -730,7 +726,7 @@ void var::resize (const int numArrayElementsWanted)
 
 int var::indexOf (const var& n) const
 {
-    if (const Array<var>* const array = getArray())
+    if (auto* const array = getArray())
         return array->indexOf (n);
 
     return -1;
@@ -778,7 +774,7 @@ var var::readFromStream (InputStream& input)
             case varMarker_Array:
             {
                 var v;
-                Array<var>* const destArray = v.convertToArray();
+                auto* destArray = v.convertToArray();
 
                 for (int i = input.readCompressedInt(); --i >= 0;)
                     destArray->add (readFromStream (input));
@@ -791,7 +787,7 @@ var var::readFromStream (InputStream& input)
         }
     }
 
-    return var();
+    return {};
 }
 
 var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int numArgs) noexcept

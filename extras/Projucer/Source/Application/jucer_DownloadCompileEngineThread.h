@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_DOWNLOADCOMPILEENGINETHREAD_H_INCLUDED
-#define JUCER_DOWNLOADCOMPILEENGINETHREAD_H_INCLUDED
+#pragma once
 
 #include "jucer_Application.h"
 
@@ -53,5 +52,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadCompileEngineThread)
 };
-
-#endif   // JUCER_DOWNLOADCOMPILEENGINETHREAD_H_INCLUDED

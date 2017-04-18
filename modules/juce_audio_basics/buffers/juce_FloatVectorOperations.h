@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FLOATVECTOROPERATIONS_H_INCLUDED
-#define JUCE_FLOATVECTOROPERATIONS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -211,6 +210,3 @@ public:
     */
     static void JUCE_CALLTYPE disableDenormalisedNumberSupport() noexcept;
 };
-
-
-#endif   // JUCE_FLOATVECTOROPERATIONS_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COLOURGRADIENT_H_INCLUDED
-#define JUCE_COLOURGRADIENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -176,6 +175,3 @@ private:
 
     JUCE_LEAK_DETECTOR (ColourGradient)
 };
-
-
-#endif   // JUCE_COLOURGRADIENT_H_INCLUDED

@@ -30,9 +30,9 @@
 
 /**
 */
-struct DrumPadGridProgram  : public LEDGrid::Program
+struct DrumPadGridProgram  : public Block::Program
 {
-    DrumPadGridProgram (LEDGrid&);
+    DrumPadGridProgram (Block&);
 
     //==============================================================================
     /** These let the program dim pads which aren't having gestures performed on them. */
@@ -114,18 +114,13 @@ private:
     static constexpr uint32 slideDirection_byte   = 156;  // 1 byte
     static constexpr uint32 touchedPads_byte      = 158;  // 1 byte x 4   (Zero means empty slot, so stores padIdx + 1)
     static constexpr uint32 animationTimers_byte  = 162;  // 4 byte x 16  (16:16 bits counter:increment)
-    static constexpr uint32 heatMap_byte          = 226;  // 4 byte x 225
-    static constexpr uint32 heatDecayMap_byte     = 1126; // 1 byte x 225
+    static constexpr uint32 totalHeapSize         = 226;
 
     static constexpr uint32 maxNumPads        = 25;
     static constexpr uint32 colourSizeBytes   = 2;
-    static constexpr uint32 heatMapSize       = 15 * 15 * 4;
-    static constexpr uint32 heatMapDecaySize  = 15 * 15;
-    static constexpr uint32 totalDataSize     = heatDecayMap_byte + heatMapDecaySize;
 
     int getPadIndex (float posX, float posY) const;
     void setGridFills (int numColumns, int numRows, const juce::Array<GridFill>& fills, uint32 byteOffset);
 
     juce::String getLittleFootProgram() override;
-    uint32 getHeapSize() override;
 };

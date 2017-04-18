@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
-#define JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -79,5 +78,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSubsectionReader)
 };
-
-#endif   // JUCE_AUDIOSUBSECTIONREADER_H_INCLUDED

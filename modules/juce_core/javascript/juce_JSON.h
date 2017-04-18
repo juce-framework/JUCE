@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_JSON_H_INCLUDED
-#define JUCE_JSON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -133,6 +132,3 @@ private:
     //==============================================================================
     JSON() JUCE_DELETED_FUNCTION; // This class can't be instantiated - just use its static methods.
 };
-
-
-#endif   // JUCE_JSON_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CHANGELISTENER_H_INCLUDED
-#define JUCE_CHANGELISTENER_H_INCLUDED
+#pragma once
 
 class ChangeBroadcaster;
 
@@ -65,6 +64,3 @@ public:
     private: virtual int changeListenerCallback (void*) { return 0; }
    #endif
 };
-
-
-#endif   // JUCE_CHANGELISTENER_H_INCLUDED

@@ -249,8 +249,8 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
     HeapBlock<CGRect> rects (numRects);
 
     int i = 0;
-    for (const Rectangle<int>* r = clipRegion.begin(), * const e = clipRegion.end(); r != e; ++r)
-        rects[i++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
+    for (auto& r : clipRegion)
+        rects[i++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
 
     CGContextClipToRects (context, rects, numRects);
     lastClipRectIsValid = false;
@@ -559,8 +559,9 @@ void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
     HeapBlock<CGRect> rects ((size_t) list.getNumRectangles());
 
     size_t num = 0;
-    for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
-        rects[num++] = CGRectMake (r->getX(), flipHeight - r->getBottom(), r->getWidth(), r->getHeight());
+
+    for (auto& r : list)
+        rects[num++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
 
     if (state->fillType.isColour())
     {
@@ -876,7 +877,6 @@ Image juce_loadWithCoreImage (InputStream& input)
 }
 #endif
 
-#if JUCE_MAC
 Image juce_createImageFromCIImage (CIImage*, int, int);
 Image juce_createImageFromCIImage (CIImage* im, int w, int h)
 {
@@ -904,4 +904,16 @@ CGContextRef juce_getImageContext (const Image& image)
     return 0;
 }
 
+#if JUCE_IOS
+Image juce_createImageFromUIImage (UIImage* img)
+{
+    CGImageRef image = [img CGImage];
+
+    Image retval (Image::ARGB, (int) CGImageGetWidth (image), (int) CGImageGetHeight (image), true);
+    CGContextRef ctx = juce_getImageContext (retval);
+
+    CGContextDrawImage (ctx, CGRectMake (0.0f, 0.0f, CGImageGetWidth (image), CGImageGetHeight (image)), image);
+
+    return retval;
+}
 #endif

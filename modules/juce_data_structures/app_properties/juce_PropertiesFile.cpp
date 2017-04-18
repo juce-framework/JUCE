@@ -92,7 +92,7 @@ File PropertiesFile::Options::getDefaultFile() const
                                                          : File::userApplicationDataDirectory));
 
     if (dir == File())
-        return File();
+        return {};
 
     dir = dir.getChildFile (folderName.isNotEmpty() ? folderName
                                                     : applicationName);

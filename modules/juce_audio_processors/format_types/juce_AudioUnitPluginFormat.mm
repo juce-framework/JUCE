@@ -882,7 +882,7 @@ public:
         if (isPositiveAndBelow (index, getTotalNumInputChannels()))
             return "Input " + String (index + 1);
 
-        return String();
+        return {};
     }
 
     const String getOutputChannelName (int index) const override
@@ -890,7 +890,7 @@ public:
         if (isPositiveAndBelow (index, getTotalNumOutputChannels()))
             return "Output " + String (index + 1);
 
-        return String();
+        return {};
     }
 
     bool isInputChannelStereoPair (int index) const override    { return isPositiveAndBelow (index, getTotalNumInputChannels()); }
@@ -972,17 +972,17 @@ public:
 
     const String getParameterName (int index) override
     {
-        if (const ParamInfo* p = parameters[index])
+        if (auto* p = parameters[index])
             return p->name;
 
-        return String();
+        return {};
     }
 
     const String getParameterText (int index) override   { return String (getParameter (index)); }
 
     bool isParameterAutomatable (int index) const override
     {
-        if (const ParamInfo* p = parameters[index])
+        if (auto* p = parameters[index])
             return p->automatable;
 
         return false;

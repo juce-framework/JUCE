@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_URL_H_INCLUDED
-#define JUCE_URL_H_INCLUDED
+#pragma once
 
 class WebInputStream;
 //==============================================================================
@@ -241,10 +240,10 @@ public:
     URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
-    String getPostData() const noexcept                  { return postData.toString(); }
+    String getPostData() const noexcept                             { return postData.toString(); }
 
     /** Returns the data that was set using withPOSTData() as MemoryBlock. */
-    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept { return postData; }
+    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept    { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
@@ -376,7 +375,7 @@ public:
         bool finished, error;
         int httpCode;
 
-        DownloadTask ();
+        DownloadTask();
 
     private:
         friend class URL;
@@ -394,14 +393,14 @@ public:
 
     /** Download the URL to a file.
 
-     This method attempts to download the URL to a given file location.
+        This method attempts to download the URL to a given file location.
 
-     Using this method to download files on mobile is less flexible but more reliable
-     than using createInputStream or WebInputStreams as it will attempt to download the file
-     using a native OS background network task. Such tasks automatically deal with
-     network re-connections and continuing your download while your app is suspended but are
-     limited to simple GET requests.
-     */
+        Using this method to download files on mobile is less flexible but more reliable
+        than using createInputStream or WebInputStreams as it will attempt to download the file
+        using a native OS background network task. Such tasks automatically deal with
+        network re-connections and continuing your download while your app is suspended but are
+        limited to simple GET requests.
+    */
     DownloadTask* downloadToFile (const File& targetLocation,
                                   String extraHeaders = String(),
                                   DownloadTask::Listener* listener = nullptr);
@@ -442,7 +441,7 @@ public:
     /** Tries to download the entire contents of this URL and parse it as XML.
 
         If it fails, or if the text that it reads can't be parsed as XML, this will
-        return 0.
+        return nullptr.
 
         When it returns a valid XmlElement object, the caller is responsibile for deleting
         this object when no longer needed.
@@ -525,5 +524,3 @@ private:
 
     JUCE_LEAK_DETECTOR (URL)
 };
-
-#endif   // JUCE_URL_H_INCLUDED

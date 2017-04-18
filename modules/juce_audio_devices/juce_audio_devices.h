@@ -56,11 +56,15 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_DEVICES_H_INCLUDED
+#pragma once
 #define JUCE_AUDIO_DEVICES_H_INCLUDED
 
 #include <juce_events/juce_events.h>
 #include <juce_audio_basics/juce_audio_basics.h>
+
+#if JUCE_MODULE_AVAILABLE_juce_graphics
+#include <juce_gui_extra/juce_gui_extra.h>
+#endif
 
 //==============================================================================
 /** Config: JUCE_ASIO
@@ -123,20 +127,38 @@
  #endif
 #endif
 
+/** Config: JUCE_USE_WINRT_MIDI
+    ***
+    EXPERIMENTAL - Microsoft's Bluetooth MIDI stack has multiple issues,
+    use at your own risk!
+    ***
+
+    Enables the use of the Windows Runtime API for MIDI, which supports
+    Bluetooth Low Energy connections on computers with the Anniversary Update
+    of Windows 10.
+
+    To compile with this flag requires version 10.0.14393.0 of the Windows
+    Standalone SDK and you must add the path to the WinRT headers. This path
+    should be something similar to
+    "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
+*/
+#ifndef JUCE_USE_WINRT_MIDI
+ #define JUCE_USE_WINRT_MIDI 0
+#endif
+
+
 //==============================================================================
 namespace juce
 {
 
-#include "audio_io/juce_AudioIODevice.h"
-#include "audio_io/juce_AudioIODeviceType.h"
-#include "audio_io/juce_SystemAudioVolume.h"
 #include "midi_io/juce_MidiInput.h"
 #include "midi_io/juce_MidiMessageCollector.h"
 #include "midi_io/juce_MidiOutput.h"
+#include "audio_io/juce_AudioIODevice.h"
+#include "audio_io/juce_AudioIODeviceType.h"
+#include "audio_io/juce_SystemAudioVolume.h"
 #include "sources/juce_AudioSourcePlayer.h"
 #include "sources/juce_AudioTransportSource.h"
 #include "audio_io/juce_AudioDeviceManager.h"
 
 }
-
-#endif   // JUCE_AUDIO_DEVICES_H_INCLUDED

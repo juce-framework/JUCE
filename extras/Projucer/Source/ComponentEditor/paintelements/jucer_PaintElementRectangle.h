@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTRECTANGLE_H_INCLUDED
-#define JUCER_PAINTELEMENTRECTANGLE_H_INCLUDED
+#pragma once
 
 #include "jucer_ColouredElement.h"
 
@@ -183,6 +182,3 @@ private:
         PaintElementRectangle* const element;
     };
 };
-
-
-#endif   // JUCER_PAINTELEMENTRECTANGLE_H_INCLUDED

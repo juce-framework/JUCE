@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CODETOKENISER_H_INCLUDED
-#define JUCE_CODETOKENISER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -53,6 +52,3 @@ public:
 private:
     JUCE_LEAK_DETECTOR (CodeTokeniser)
 };
-
-
-#endif   // JUCE_CODETOKENISER_H_INCLUDED

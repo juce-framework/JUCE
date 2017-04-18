@@ -42,7 +42,7 @@ struct CameraDevice::Pimpl
 
     Time getTimeOfFirstRecordedFrame() const
     {
-        return Time();
+        return {};
     }
 
     void addListener (CameraDevice::Listener* listenerToAdd)

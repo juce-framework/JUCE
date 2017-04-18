@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_NEWPROJECTWIZARD_H_INCLUDED
-#define JUCER_NEWPROJECTWIZARD_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -224,6 +223,3 @@ struct NewProjectWizard
             project.createExporterForCurrentPlatform();
     }
 };
-
-
-#endif   // JUCER_NEWPROJECTWIZARD_H_INCLUDED

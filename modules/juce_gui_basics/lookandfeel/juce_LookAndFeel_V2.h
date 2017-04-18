@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOOKANDFEEL_V2_H_INCLUDED
-#define JUCE_LOOKANDFEEL_V2_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -90,6 +89,7 @@ public:
     //==============================================================================
     void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
     void drawSpinningWaitAnimation (Graphics&, const Colour& colour, int x, int y, int w, int h) override;
+    bool isProgressBarOpaque (ProgressBar&) override;
 
     //==============================================================================
     bool areScrollbarButtonsVisible() override;
@@ -366,6 +366,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel_V2)
 };
-
-
-#endif   // JUCE_LOOKANDFEEL_V2_H_INCLUDED

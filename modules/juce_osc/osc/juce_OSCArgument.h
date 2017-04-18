@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCARGUMENT_H_INCLUDED
-#define JUCE_OSCARGUMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -108,6 +107,3 @@ private:
     String stringValue;
     MemoryBlock blob;
 };
-
-
-#endif // JUCE_OSCARGUMENT_H_INCLUDED

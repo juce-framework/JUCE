@@ -1239,9 +1239,6 @@ static const unsigned char temp_binary_data_4[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef MAINCOMPONENT_H_INCLUDED\r\n"
-"#define MAINCOMPONENT_H_INCLUDED\r\n"
-"\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -1298,10 +1295,7 @@ static const unsigned char temp_binary_data_4[] =
 "\r\n"
 "\r\n"
 "// (This function is called by the app startup code to create our main component)\r\n"
-"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n"
-"\r\n"
-"\r\n"
-"#endif  // MAINCOMPONENT_H_INCLUDED\r\n";
+"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n";
 
 const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_4;
 
@@ -1314,9 +1308,6 @@ static const unsigned char temp_binary_data_5[] =
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
-"\r\n"
-"#ifndef MAINCOMPONENT_H_INCLUDED\r\n"
-"#define MAINCOMPONENT_H_INCLUDED\r\n"
 "\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
@@ -1402,10 +1393,7 @@ static const unsigned char temp_binary_data_5[] =
 "\r\n"
 "\r\n"
 "// (This function is called by the app startup code to create our main component)\r\n"
-"Component* createMainContentComponent()     { return new MainContentComponent(); }\r\n"
-"\r\n"
-"\r\n"
-"#endif  // MAINCOMPONENT_H_INCLUDED\r\n";
+"Component* createMainContentComponent()     { return new MainContentComponent(); }\r\n";
 
 const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_5;
 
@@ -1467,8 +1455,7 @@ static const unsigned char temp_binary_data_7[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
+"#pragma once\r\n"
 "\r\n"
 "EDITORHEADERS\r\n"
 "\r\n"
@@ -1492,10 +1479,7 @@ static const unsigned char temp_binary_data_7[] =
 "    FILTERCLASSNAME& processor;\r\n"
 "\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EDITORCLASSNAME)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
+"};\r\n";
 
 const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_7;
 
@@ -1579,7 +1563,7 @@ static const unsigned char temp_binary_data_8[] =
 "\r\n"
 "const String FILTERCLASSNAME::getProgramName (int index)\r\n"
 "{\r\n"
-"    return String();\r\n"
+"    return {};\r\n"
 "}\r\n"
 "\r\n"
 "void FILTERCLASSNAME::changeProgramName (int index, const String& newName)\r\n"
@@ -1693,8 +1677,7 @@ static const unsigned char temp_binary_data_9[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
+"#pragma once\r\n"
 "\r\n"
 "APPHEADERS\r\n"
 "\r\n"
@@ -1744,10 +1727,7 @@ static const unsigned char temp_binary_data_9[] =
 "private:\r\n"
 "    //==============================================================================\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
+"};\r\n";
 
 const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_9;
 
@@ -1851,8 +1831,7 @@ static const unsigned char temp_binary_data_11[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef %%headerGuard%%\r\n"
-"#define %%headerGuard%%\r\n"
+"#pragma once\r\n"
 "\r\n"
 "//[Headers]     -- You can add your own extra header files here --\r\n"
 "%%includeJUCEHeader%%\r\n"
@@ -1893,9 +1872,7 @@ static const unsigned char temp_binary_data_11[] =
 "};\r\n"
 "\r\n"
 "//[EndFile] You can add extra defines here...\r\n"
-"//[/EndFile]\r\n"
-"\r\n"
-"#endif   // %%headerGuard%%\r\n";
+"//[/EndFile]\r\n";
 
 const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_11;
 
@@ -1950,8 +1927,7 @@ static const unsigned char temp_binary_data_13[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
+"#pragma once\r\n"
 "\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
@@ -1974,10 +1950,7 @@ static const unsigned char temp_binary_data_13[] =
 "private:\r\n"
 "    //==============================================================================\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
+"};\r\n";
 
 const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_13;
 
@@ -2178,7 +2151,8 @@ static const unsigned char temp_binary_data_17[] =
 "    {\r\n"
 "    public:\r\n"
 "        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Colours::lightgrey,\r\n"
+"                                                    Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
 "                                                    DocumentWindow::allButtons)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
@@ -2283,7 +2257,8 @@ static const unsigned char temp_binary_data_18[] =
 "    {\r\n"
 "    public:\r\n"
 "        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Colours::lightgrey,\r\n"
+"                                                    Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
 "                                                    DocumentWindow::allButtons)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
@@ -2390,8 +2365,7 @@ static const unsigned char temp_binary_data_20[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
+"#pragma once\r\n"
 "\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
@@ -2409,10 +2383,7 @@ static const unsigned char temp_binary_data_20[] =
 "\r\n"
 "private:\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
+"};\r\n";
 
 const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_20;
 
@@ -2444,14 +2415,7 @@ static const unsigned char temp_binary_data_22[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"\r\n"
-"\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
+"#pragma once\r\n";
 
 const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_22;
 
@@ -2467,8 +2431,7 @@ static const unsigned char temp_binary_data_23[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
+"#pragma once\r\n"
 "\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
@@ -2518,10 +2481,7 @@ static const unsigned char temp_binary_data_23[] =
 "\r\n"
 "private:\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
+"};\r\n";
 
 const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_23;
 
@@ -2534,9 +2494,6 @@ static const unsigned char temp_binary_data_24[] =
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
-"\r\n"
-"#ifndef MAINCOMPONENT_H_INCLUDED\r\n"
-"#define MAINCOMPONENT_H_INCLUDED\r\n"
 "\r\n"
 "INCLUDE_JUCE\r\n"
 "\r\n"
@@ -2599,10 +2556,7 @@ static const unsigned char temp_binary_data_24[] =
 "\r\n"
 "\r\n"
 "// (This function is called by the app startup code to create our main component)\r\n"
-"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n"
-"\r\n"
-"\r\n"
-"#endif  // MAINCOMPONENT_H_INCLUDED\r\n";
+"Component* createMainContentComponent()    { return new MainContentComponent(); }\r\n";
 
 const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_24;
 
@@ -5281,27 +5235,27 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x10b04d10:  numBytes = 4971; return gradlew;
         case 0x76cff066:  numBytes = 2404; return gradlew_bat;
         case 0x34bc1021:  numBytes = 11325; return LICENSE;
-        case 0x6cf2645e:  numBytes = 1949; return jucer_AnimatedComponentTemplate_cpp;
-        case 0xafccbd3f:  numBytes = 3203; return jucer_AudioComponentTemplate_cpp;
+        case 0x6cf2645e:  numBytes = 1838; return jucer_AnimatedComponentTemplate_cpp;
+        case 0xafccbd3f:  numBytes = 3092; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1162; return jucer_AudioPluginEditorTemplate_cpp;
-        case 0x4d0721bf:  numBytes = 994; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5475; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2259; return jucer_AudioPluginFilterTemplate_h;
+        case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
+        case 0x51b49ac5:  numBytes = 5469; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2203; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2131; return jucer_ComponentTemplate_h;
+        case 0xfc72fe86:  numBytes = 2064; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
-        case 0x6fa10171:  numBytes = 942; return jucer_ContentCompTemplate_h;
+        case 0x6fa10171:  numBytes = 886; return jucer_ContentCompTemplate_h;
         case 0x28d496ad:  numBytes = 1161; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1992; return jucer_MainTemplate_NoWindow_cpp;
-        case 0xda2391f8:  numBytes = 3848; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x400bc026:  numBytes = 3760; return jucer_MainTemplate_Window_cpp;
+        case 0xda2391f8:  numBytes = 4001; return jucer_MainTemplate_SimpleWindow_cpp;
+        case 0x400bc026:  numBytes = 3913; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
-        case 0xe7bf237a:  numBytes = 666; return jucer_NewComponentTemplate_h;
+        case 0xe7bf237a:  numBytes = 610; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
-        case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:  numBytes = 1644; return jucer_NewInlineComponentTemplate_h;
-        case 0x7fbac252:  numBytes = 1827; return jucer_OpenGLComponentTemplate_cpp;
+        case 0x0842c43c:  numBytes = 246; return jucer_NewCppFileTemplate_h;
+        case 0x36e634a1:  numBytes = 1588; return jucer_NewInlineComponentTemplate_h;
+        case 0x7fbac252:  numBytes = 1716; return jucer_OpenGLComponentTemplate_cpp;
         case 0x406db5c1:  numBytes = 3117; return background_logo_svg;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;

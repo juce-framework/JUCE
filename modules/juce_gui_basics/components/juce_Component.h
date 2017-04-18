@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COMPONENT_H_INCLUDED
-#define JUCE_COMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -1209,6 +1208,11 @@ public:
           parent instead, unless it's a top-level component without a parent,
           in which case it just takes the focus itself.
 
+        Important note! It's obviously not possible for a component to be focused
+        unless it's actually visible, on-screen, and inside a window that is also
+        visible. So there's no point trying to call this in the component's own
+        constructor or before all of its parent hierarchy has been fully instantiated.
+
         @see setWantsKeyboardFocus, getWantsKeyboardFocus, hasKeyboardFocus,
              getCurrentlyFocusedComponent, focusGained, focusLost,
              keyPressed, keyStateChanged
@@ -2226,6 +2230,17 @@ public:
     */
     CachedComponentImage* getCachedComponentImage() const noexcept  { return cachedImage; }
 
+    /** Sets a flag to indicate whether mouse drag events on this Component should be ignored when it is inside a
+        Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
+        should not move their parent Viewport when dragged.
+    */
+    void setViewportIgnoreDragFlag (bool ignoreDrag) noexcept { flags.viewportIgnoreDragFlag = ignoreDrag; };
+
+    /** Retrieves the current state of the Viewport drag-to-scroll functionality flag.
+        @see setViewportIgnoreDragFlag
+    */
+    bool getViewportIgnoreDragFlag() const noexcept { return flags.viewportIgnoreDragFlag; }
+
     //==============================================================================
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
     JUCE_DEPRECATED (Point<int> relativePositionToGlobal (Point<int>) const);
@@ -2284,6 +2299,7 @@ private:
         bool mouseDownWasBlocked        : 1;
         bool isMoveCallbackPending      : 1;
         bool isResizeCallbackPending    : 1;
+        bool viewportIgnoreDragFlag     : 1;
        #if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
        #endif
@@ -2300,9 +2316,9 @@ private:
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, Point<float>, Time, float);
-    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers, float);
-    void internalMouseDrag  (MouseInputSource, Point<float>, Time, float);
+    void internalMouseDown  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
+    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers, float, float, float, float, float);
+    void internalMouseDrag  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
@@ -2358,6 +2374,3 @@ protected:
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
    #endif
 };
-
-
-#endif   // JUCE_COMPONENT_H_INCLUDED

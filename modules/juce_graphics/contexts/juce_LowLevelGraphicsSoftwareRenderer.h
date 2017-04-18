@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
-#define JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -51,6 +50,3 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer)
 };
-
-
-#endif   // JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_H_INCLUDED

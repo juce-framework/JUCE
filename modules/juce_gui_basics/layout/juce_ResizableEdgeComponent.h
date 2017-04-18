@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RESIZABLEEDGECOMPONENT_H_INCLUDED
-#define JUCE_RESIZABLEEDGECOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -94,6 +93,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableEdgeComponent)
 };
-
-
-#endif   // JUCE_RESIZABLEEDGECOMPONENT_H_INCLUDED

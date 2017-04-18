@@ -58,7 +58,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_CORE_H_INCLUDED
+#pragma once
 #define JUCE_CORE_H_INCLUDED
 
 //==============================================================================
@@ -361,5 +361,3 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
   #pragma warning (disable: 4251)
  #endif
 #endif
-
-#endif   // JUCE_CORE_H_INCLUDED

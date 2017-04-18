@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_MAINWINDOW_H_INCLUDED
-#define JUCER_MAINWINDOW_H_INCLUDED
+#pragma once
 
 #include "../Project/jucer_ProjectContentComponent.h"
 
@@ -118,6 +117,3 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindowList)
 };
-
-
-#endif   // JUCER_MAINWINDOW_H_INCLUDED

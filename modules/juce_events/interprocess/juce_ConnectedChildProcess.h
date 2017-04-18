@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CONNECTEDCHILDPROCESS_H_INCLUDED
-#define JUCE_CONNECTEDCHILDPROCESS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -193,6 +192,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildProcessMaster)
 };
-
-
-#endif   // JUCE_CONNECTEDCHILDPROCESS_H_INCLUDED

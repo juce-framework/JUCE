@@ -229,7 +229,11 @@ Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
     Value v (projectDefaults.getPropertyAsValue (key, nullptr));
 
     if (v.toString().isEmpty())
-        v = getFallbackPath (key, os);
+    {
+        auto defaultPath = getFallbackPath (key, os);
+        if (os == TargetOS::getThisOS())
+            v = defaultPath;
+    }
 
     return v;
 }
@@ -237,8 +241,8 @@ Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
 String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS os)
 {
     if (key == Ids::vst3Path)
-        return os == TargetOS::windows ? "c:\\SDKs\\VST3 SDK"
-                                       : "~/SDKs/VST3 SDK";
+        return os == TargetOS::windows ? "c:\\SDKs\\VST_SDK\\VST3_SDK"
+                                       : "~/SDKs/VST_SDK/VST3_SDK";
 
     if (key == Ids::rtasPath)
     {
@@ -247,7 +251,7 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
 
         // no RTAS on this OS!
         jassertfalse;
-        return String();
+        return {};
     }
 
     if (key == Ids::aaxPath)
@@ -257,7 +261,7 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
 
         // no AAX on this OS!
         jassertfalse;
-        return String();
+        return {};
     }
 
     if (key == Ids::androidSDKPath)
@@ -268,7 +272,7 @@ String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS 
 
     // didn't recognise the key provided!
     jassertfalse;
-    return String();
+    return {};
 }
 
 bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path)

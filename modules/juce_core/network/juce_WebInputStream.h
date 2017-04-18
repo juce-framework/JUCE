@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_WEBINPUTSTREAM_H_INCLUDED
-#define JUCE_WEBINPUTSTREAM_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -217,5 +216,3 @@ class JUCE_API WebInputStream : public InputStream
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
-
-#endif // JUCE_WEBINPUTSTREAM_H_INCLUDED

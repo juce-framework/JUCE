@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTROUTINEEDITOR_H_INCLUDED
-#define JUCER_PAINTROUTINEEDITOR_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 #include "../jucer_PaintRoutine.h"
@@ -84,6 +83,3 @@ private:
     void updateComponentOverlay();
     void updateChildBounds();
 };
-
-
-#endif   // JUCER_PAINTROUTINEEDITOR_H_INCLUDED

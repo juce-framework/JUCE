@@ -67,7 +67,6 @@ RelativeCoordinate& RelativeCoordinate::operator= (const RelativeCoordinate& oth
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 RelativeCoordinate::RelativeCoordinate (RelativeCoordinate&& other) noexcept
     : term (static_cast<Expression&&> (other.term))
 {
@@ -78,7 +77,6 @@ RelativeCoordinate& RelativeCoordinate::operator= (RelativeCoordinate&& other) n
     term = static_cast<Expression&&> (other.term);
     return *this;
 }
-#endif
 
 RelativeCoordinate::RelativeCoordinate (const double absoluteDistanceFromOrigin)
     : term (absoluteDistanceFromOrigin)

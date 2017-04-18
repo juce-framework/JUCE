@@ -63,7 +63,7 @@ void ImagePreviewComponent::timerCallback()
 
     ScopedPointer<FileInputStream> in (fileToLoad.createInputStream());
 
-    if (in != nullptr)
+    if (in != nullptr && in->getFile().existsAsFile())
     {
         if (ImageFileFormat* const format = ImageFileFormat::findImageFormatForStream (*in))
         {

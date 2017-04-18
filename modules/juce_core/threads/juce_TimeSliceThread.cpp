@@ -72,6 +72,17 @@ void TimeSliceThread::removeTimeSliceClient (TimeSliceClient* const client)
     }
 }
 
+void TimeSliceThread::removeAllClients()
+{
+    for (;;)
+    {
+        if (auto* c = getClient (0))
+            removeTimeSliceClient (c);
+        else
+            break;
+    }
+}
+
 void TimeSliceThread::moveToFrontOfQueue (TimeSliceClient* client)
 {
     const ScopedLock sl (listLock);
@@ -91,7 +102,7 @@ int TimeSliceThread::getNumClients() const
 TimeSliceClient* TimeSliceThread::getClient (const int i) const
 {
     const ScopedLock sl (listLock);
-    return clients [i];
+    return clients[i];
 }
 
 //==============================================================================
@@ -102,7 +113,7 @@ TimeSliceClient* TimeSliceThread::getNextClient (int index) const
 
     for (int i = clients.size(); --i >= 0;)
     {
-        TimeSliceClient* const c = clients.getUnchecked ((i + index) % clients.size());
+        auto* c = clients.getUnchecked ((i + index) % clients.size());
 
         if (client == nullptr || c->nextCallTime < soonest)
         {
@@ -132,13 +143,13 @@ void TimeSliceThread::run()
                 numClients = clients.size();
                 index = numClients > 0 ? ((index + 1) % numClients) : 0;
 
-                if (TimeSliceClient* const firstClient = getNextClient (index))
+                if (auto* firstClient = getNextClient (index))
                     nextClientTime = firstClient->nextCallTime;
             }
 
             if (numClients > 0)
             {
-                const Time now (Time::getCurrentTime());
+                auto now = Time::getCurrentTime();
 
                 if (nextClientTime > now)
                 {

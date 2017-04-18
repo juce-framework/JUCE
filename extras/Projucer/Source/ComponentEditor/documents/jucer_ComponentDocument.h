@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTDOCUMENT_H_INCLUDED
-#define JUCER_COMPONENTDOCUMENT_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 
@@ -58,6 +57,3 @@ private:
     ScopedPointer<ComponentLayout> components;
     ScopedPointer<PaintRoutine> backgroundGraphics;
 };
-
-
-#endif   // JUCER_COMPONENTDOCUMENT_H_INCLUDED

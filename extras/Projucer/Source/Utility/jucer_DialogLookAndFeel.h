@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef PROJUCER_LOOKANDFEEL_H_INCLUDED
-#define PROJUCER_LOOKANDFEEL_H_INCLUDED
+#pragma once
 
 
 class ProjucerDialogLookAndFeel  : public LookAndFeel_V3
@@ -141,7 +140,3 @@ private:
         g.drawRoundedRectangle (buttonRect.reduced (1.0f), 5.0f, 2.0f);
     }
 };
-
-
-
-#endif  // PROJUCER_LOOKANDFEEL_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BORDERSIZE_H_INCLUDED
-#define JUCE_BORDERSIZE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -148,6 +147,3 @@ private:
     //==============================================================================
     ValueType top, left, bottom, right;
 };
-
-
-#endif   // JUCE_BORDERSIZE_H_INCLUDED

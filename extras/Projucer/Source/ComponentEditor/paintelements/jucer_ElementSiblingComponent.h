@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_ELEMENTSIBLINGCOMPONENT_H_INCLUDED
-#define JUCER_ELEMENTSIBLINGCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -55,5 +54,3 @@ protected:
 
     PaintElement* const owner;
 };
-
-#endif   // JUCER_ELEMENTSIBLINGCOMPONENT_H_INCLUDED

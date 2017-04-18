@@ -69,10 +69,10 @@ bool DynamicObject::hasMethod (const Identifier& methodName) const
 
 var DynamicObject::invokeMethod (Identifier method, const var::NativeFunctionArgs& args)
 {
-    if (var::NativeFunction function = properties [method].getNativeFunction())
+    if (auto function = properties [method].getNativeFunction())
         return function (args);
 
-    return var();
+    return {};
 }
 
 void DynamicObject::setMethod (Identifier name, var::NativeFunction function)
@@ -88,7 +88,7 @@ void DynamicObject::clear()
 void DynamicObject::cloneAllProperties()
 {
     for (int i = properties.size(); --i >= 0;)
-        if (var* v = properties.getVarPointerAt (i))
+        if (auto* v = properties.getVarPointerAt (i))
             *v = v->clone();
 }
 

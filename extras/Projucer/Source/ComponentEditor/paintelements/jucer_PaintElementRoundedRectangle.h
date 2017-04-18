@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTROUNDEDRECTANGLE_H_INCLUDED
-#define JUCER_PAINTELEMENTROUNDEDRECTANGLE_H_INCLUDED
+#pragma once
 
 #include "jucer_ColouredElement.h"
 #include "../jucer_UtilityFunctions.h"
@@ -264,6 +263,3 @@ private:
         PaintElementRoundedRectangle* const element;
     };
 };
-
-
-#endif   // JUCER_PAINTELEMENTROUNDEDRECTANGLE_H_INCLUDED

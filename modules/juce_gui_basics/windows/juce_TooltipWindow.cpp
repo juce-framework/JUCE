@@ -80,7 +80,7 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
             repaint();
         }
 
-        if (Component* const parent = getParentComponent())
+        if (auto* parent = getParentComponent())
         {
             updatePosition (tip, parent->getLocalPoint (nullptr, screenPos),
                             parent->getLocalBounds());
@@ -111,7 +111,7 @@ String TooltipWindow::getTipFor (Component* const c)
                 return ttc->getTooltip();
     }
 
-    return String();
+    return {};
 }
 
 void TooltipWindow::hideTip()
@@ -130,7 +130,7 @@ void TooltipWindow::timerCallback()
     const MouseInputSource mouseSource (desktop.getMainMouseSource());
     const unsigned int now = Time::getApproximateMillisecondCounter();
 
-    Component* const newComp = mouseSource.isMouse() ? mouseSource.getComponentUnderMouse() : nullptr;
+    Component* const newComp = ! mouseSource.isTouch() ? mouseSource.getComponentUnderMouse() : nullptr;
     const String newTip (getTipFor (newComp));
     const bool tipChanged = (newTip != lastTipUnderMouse || newComp != lastComponentUnderMouse);
     lastComponentUnderMouse = newComp;

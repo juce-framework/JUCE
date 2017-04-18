@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MEMORYBLOCK_H_INCLUDED
-#define JUCE_MEMORYBLOCK_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -70,10 +69,11 @@ public:
     */
     MemoryBlock& operator= (const MemoryBlock&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     MemoryBlock (MemoryBlock&&) noexcept;
+
+    /** Move assignment operator */
     MemoryBlock& operator= (MemoryBlock&&) noexcept;
-   #endif
 
     //==============================================================================
     /** Compares two memory blocks.
@@ -103,6 +103,11 @@ public:
     template <typename Type>
     char& operator[] (const Type offset) const noexcept             { return data [offset]; }
 
+    /** Returns an iterator for the data. */
+    char* begin() const noexcept                                    { return data; }
+
+    /** Returns an end-iterator for the data. */
+    char* end() const noexcept                                      { return begin() + getSize(); }
 
     //==============================================================================
     /** Returns the block's current allocated size, in bytes. */
@@ -253,11 +258,9 @@ public:
 
 private:
     //==============================================================================
-    HeapBlock<char> data;
+    typedef HeapBlock<char, true> HeapBlockType;
+    HeapBlockType data;
     size_t size;
 
     JUCE_LEAK_DETECTOR (MemoryBlock)
 };
-
-
-#endif   // JUCE_MEMORYBLOCK_H_INCLUDED

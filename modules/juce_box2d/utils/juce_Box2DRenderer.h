@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BOX2DRENDERER_H_INCLUDED
-#define JUCE_BOX2DRENDERER_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /** A simple implementation of the b2Draw class, used to draw a Box2D world.
@@ -72,6 +71,3 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Box2DRenderer)
 };
-
-
-#endif   // JUCE_BOX2DRENDERER_H_INCLUDED

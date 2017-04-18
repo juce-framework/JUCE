@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PROJECTEXPORTER_H_INCLUDED
-#define JUCER_PROJECTEXPORTER_H_INCLUDED
+#pragma once
 
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
@@ -75,7 +74,6 @@ public:
     virtual bool isCodeBlocks() const    = 0;
     virtual bool isMakefile() const      = 0;
     virtual bool isAndroidStudio() const = 0;
-    virtual bool isAndroidAnt() const    = 0;
 
     // operating system targeted by exporter
     virtual bool isAndroid() const = 0;
@@ -84,14 +82,21 @@ public:
     virtual bool isOSX() const     = 0;
     virtual bool isiOS() const     = 0;
 
+    //==============================================================================
     // cross-platform audio plug-ins supported by exporter
-    virtual bool supportsVST()  const  = 0;
-    virtual bool supportsVST3() const  = 0;
-    virtual bool supportsAAX()  const  = 0;
-    virtual bool supportsRTAS() const  = 0;
-    virtual bool supportsAU()   const  = 0;
-    virtual bool supportsAUv3() const  = 0;
-    virtual bool supportsStandalone() const  = 0; // as in Standalong plug-in type, not GUIApp or ConsoleApp
+    virtual bool supportsTargetType (ProjectType::Target::Type type) const = 0;
+
+    inline bool shouldBuildTargetType (ProjectType::Target::Type type) const
+    {
+        return project.shouldBuildTargetType (type) && supportsTargetType (type);
+    }
+
+    inline void callForAllSupportedTargets (std::function<void (ProjectType::Target::Type)> callback)
+    {
+        for (int i = 0; i < ProjectType::Target::unspecified; ++i)
+            if (shouldBuildTargetType (static_cast<ProjectType::Target::Type> (i)))
+                callback (static_cast<ProjectType::Target::Type> (i));
+    }
 
     //==============================================================================
     bool mayCompileOnCurrentOS() const
@@ -150,6 +155,9 @@ public:
 
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
     void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index = -1);
+    void addToModuleLibPaths   (const RelativePath& pathFromProjectFolder);
+
+    void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
 
     Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
     Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
@@ -187,19 +195,16 @@ public:
     Project::Item& getModulesGroup();
 
     //==============================================================================
-    String makefileTargetSuffix;
-    bool makefileIsDLL;
     StringArray linuxLibs, linuxPackages, makefileExtraLinkerFlags;
 
     //==============================================================================
-    String msvcTargetSuffix;
     StringPairArray msvcExtraPreprocessorDefs;
-    bool msvcIsDLL, msvcIsWindowsSubsystem;
     String msvcDelayLoadedDLLs;
-    StringArray mingwLibs;
+    StringArray mingwLibs, windowsLibs;
 
     //==============================================================================
     StringArray extraSearchPaths;
+    StringArray moduleLibSearchPaths;
 
     //==============================================================================
     class BuildConfiguration  : public ReferenceCountedObject
@@ -213,6 +218,8 @@ public:
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
         virtual var getDefaultOptimisationLevel() const = 0;
+        virtual String getLibrarySubdirPath() const         { return {}; }
+
 
         //==============================================================================
         Value getNameValue()                                { return getValue (Ids::name); }
@@ -234,7 +241,8 @@ public:
 
         Value getBuildConfigPreprocessorDefs()              { return getValue (Ids::defines); }
         String getBuildConfigPreprocessorDefsString() const { return config [Ids::defines]; }
-        StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
+        StringPairArray getAllPreprocessorDefs() const;    // includes inherited definitions
+        StringPairArray getUniquePreprocessorDefs() const; // returns pre-processor definitions that are not already in the project pre-processor defs
 
         Value getHeaderSearchPathValue()                    { return getValue (Ids::headerPath); }
         String getHeaderSearchPathString() const            { return config [Ids::headerPath]; }
@@ -316,9 +324,11 @@ public:
     String getExporterPreprocessorDefsString() const    { return getSettingString (Ids::extraDefs); }
 
     // includes exporter, project + config defs
-    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config) const;
+    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const;
     // includes exporter + project defs..
     StringPairArray getAllPreprocessorDefs() const;
+
+    void addTargetSpecificPreprocessorDefs (StringPairArray& defs, const ProjectType::Target::Type targetType) const;
 
     String replacePreprocessorTokens (const BuildConfiguration&, const String& sourceString) const;
 
@@ -345,7 +355,7 @@ protected:
 
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;
-    Project::Item* modulesGroup;
+    Project::Item* modulesGroup = nullptr;
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
 
@@ -353,11 +363,14 @@ protected:
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
-    static String getLibbedFilename (String name)
+    static String getStaticLibbedFilename (String name)
     {
-        if (! name.startsWith ("lib"))         name = "lib" + name;
-        if (! name.endsWithIgnoreCase (".a"))  name += ".a";
-        return name;
+        return addSuffix (addLibPrefix (name), ".a");
+    }
+
+    static String getDynamicLibbedFilename (String name)
+    {
+        return addSuffix (addLibPrefix (name), ".so");
     }
 
     virtual void addPlatformSpecificSettingsForProjectType (const ProjectType&) = 0;
@@ -402,6 +415,18 @@ protected:
 
 private:
     //==============================================================================
+    static String addLibPrefix (const String name)
+    {
+        return name.startsWith ("lib") ? name
+                                       : "lib" + name;
+    }
+
+    static String addSuffix (const String name, const String suffix)
+    {
+        return name.endsWithIgnoreCase (suffix) ? name
+                                                : name + suffix;
+    }
+
     void createDependencyPathProperties (PropertyListBuilder&);
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();
@@ -411,6 +436,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
 };
-
-
-#endif   // JUCER_PROJECTEXPORTER_H_INCLUDED

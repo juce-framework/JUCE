@@ -111,7 +111,6 @@ Value::Value (const Value& other)  : value (other.value)
 {
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Value::Value (Value&& other) noexcept
 {
     // moving a Value with listeners will lose those listeners, which
@@ -132,7 +131,6 @@ Value& Value::operator= (Value&& other) noexcept
     value = static_cast<ReferenceCountedObjectPtr<ValueSource>&&> (other.value);
     return *this;
 }
-#endif
 
 Value::~Value()
 {

@@ -144,21 +144,25 @@ namespace juce
 #if JUCE_MAC || JUCE_IOS
  #include "native/juce_mac_Fonts.mm"
  #include "native/juce_mac_CoreGraphicsContext.mm"
+ #include "native/juce_mac_IconHelpers.cpp"
 
 #elif JUCE_WINDOWS
  #include "native/juce_win32_DirectWriteTypeface.cpp"
  #include "native/juce_win32_DirectWriteTypeLayout.cpp"
  #include "native/juce_win32_Fonts.cpp"
+ #include "native/juce_win32_IconHelpers.cpp"
  #if JUCE_DIRECT2D
   #include "native/juce_win32_Direct2DGraphicsContext.cpp"
  #endif
 
 #elif JUCE_LINUX
  #include "native/juce_linux_Fonts.cpp"
+ #include "native/juce_linux_IconHelpers.cpp"
 
 #elif JUCE_ANDROID
  #include "native/juce_android_GraphicsContext.cpp"
  #include "native/juce_android_Fonts.cpp"
+ #include "native/juce_android_IconHelpers.cpp"
 
 #endif
 }

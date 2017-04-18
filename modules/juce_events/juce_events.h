@@ -46,18 +46,29 @@
   license:          ISC
 
   dependencies:     juce_core
-  linuxPackages:    x11
 
  END_JUCE_MODULE_DECLARATION
 
 *******************************************************************************/
 
 
-#ifndef JUCE_EVENTS_H_INCLUDED
+#pragma once
 #define JUCE_EVENTS_H_INCLUDED
 
-//==============================================================================
 #include <juce_core/juce_core.h>
+
+//==============================================================================
+/** Config: JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+    Will execute your application's suspend method on an iOS background task, giving
+    you extra time to save your applications state.
+*/
+#ifndef JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
+ #define JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK 0
+#endif
+
+#if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER && JUCE_WINDOWS
+ #include <hstring.h>
+#endif
 
 namespace juce
 {
@@ -81,12 +92,19 @@ namespace juce
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
-#include "native/juce_ScopedXLock.h"
 
-#if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW && JUCE_WINDOWS
- #include "native/juce_win32_HiddenMessageWindow.h"
+#if JUCE_LINUX
+ #include "native/juce_linux_EventLoop.h"
+#endif
+
+
+#if JUCE_WINDOWS
+ #if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW
+  #include "native/juce_win32_HiddenMessageWindow.h"
+ #endif
+ #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
+  #include "native/juce_win32_WinRTWrapper.h"
+ #endif
 #endif
 
 }
-
-#endif   // JUCE_EVENTS_H_INCLUDED

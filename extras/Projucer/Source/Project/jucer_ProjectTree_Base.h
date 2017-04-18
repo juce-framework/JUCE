@@ -235,7 +235,7 @@ public:
     bool mightContainSubItems() override                { return item.getNumChildren() > 0; }
     String getUniqueName() const override               { jassert (item.getID().isNotEmpty()); return item.getID(); }
     bool canBeSelected() const override                 { return true; }
-    String getTooltip() override                        { return String(); }
+    String getTooltip() override                        { return {}; }
     File getDraggableFile() const override              { return getFile(); }
 
     var getDragSourceDescription() override

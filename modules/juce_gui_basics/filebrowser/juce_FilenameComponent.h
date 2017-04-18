@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILENAMECOMPONENT_H_INCLUDED
-#define JUCE_FILENAMECOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -228,7 +227,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilenameComponent)
 };
-
-
-
-#endif   // JUCE_FILENAMECOMPONENT_H_INCLUDED

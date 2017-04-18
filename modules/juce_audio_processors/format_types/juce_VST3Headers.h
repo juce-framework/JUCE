@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VST3HEADERS_H_INCLUDED
-#define JUCE_VST3HEADERS_H_INCLUDED
+#pragma once
 
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 #if _MSC_VER
@@ -85,14 +84,12 @@
  #include <public.sdk/source/vst/vsteditcontroller.h>
 #else
  #include <base/source/baseiids.cpp>
- #include <base/source/fatomic.cpp>
  #include <base/source/fbuffer.cpp>
  #include <base/source/fdebug.cpp>
  #include <base/source/fobject.cpp>
- #include <base/source/frect.cpp>
  #include <base/source/fstreamer.cpp>
  #include <base/source/fstring.cpp>
- #include <base/source/fthread.cpp>
+ #include <base/source/flock.cpp>
  #include <base/source/updatehandler.cpp>
  #include <pluginterfaces/base/conststringtable.cpp>
  #include <pluginterfaces/base/funknown.cpp>
@@ -177,5 +174,3 @@ namespace Steinberg
 #undef DEF_CLASS2
 #undef DEF_CLASS_W
 #undef END_FACTORY
-
-#endif   // JUCE_VST3HEADERS_H_INCLUDED

@@ -164,5 +164,5 @@ float DirectoryIterator::getEstimatedProgress() const
     const float detailedIndex = (subIterator != nullptr) ? index + subIterator->getEstimatedProgress()
                                                          : (float) index;
 
-    return detailedIndex / totalNumFiles;
+    return jlimit (0.0f, 1.0f, detailedIndex / totalNumFiles);
 }

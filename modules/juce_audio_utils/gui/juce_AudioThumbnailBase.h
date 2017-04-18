@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOTHUMBNAILBASE_H_INCLUDED
-#define JUCE_AUDIOTHUMBNAILBASE_H_INCLUDED
+#pragma once
 
 class AudioThumbnailCache;
 
@@ -151,5 +150,3 @@ public:
     /** Returns the hash code that was set by setSource() or setReader(). */
     virtual int64 getHashCode() const = 0;
 };
-
-#endif   // JUCE_AUDIOTHUMBNAILBASE_H_INCLUDED

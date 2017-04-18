@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_XMLCODETOKENISER_H_INCLUDED
-#define JUCE_XMLCODETOKENISER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -57,6 +56,3 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlTokeniser)
 };
-
-
-#endif   // JUCE_XMLCODETOKENISER_H_INCLUDED

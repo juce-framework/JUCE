@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_APPEARANCESETTINGS_H_INCLUDED
-#define JUCER_APPEARANCESETTINGS_H_INCLUDED
+#pragma once
 
 
 class AppearanceSettings    : private ValueTree::Listener
@@ -76,7 +75,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings)
 };
-
-
-
-#endif   // JUCER_APPEARANCESETTINGS_H_INCLUDED

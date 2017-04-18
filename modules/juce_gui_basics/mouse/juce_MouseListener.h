@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUSELISTENER_H_INCLUDED
-#define JUCE_MOUSELISTENER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -160,6 +159,3 @@ private:
     virtual int mouseWheelMove (const MouseEvent&, float, float) { return 0; }
    #endif
 };
-
-
-#endif   // JUCE_MOUSELISTENER_H_INCLUDED

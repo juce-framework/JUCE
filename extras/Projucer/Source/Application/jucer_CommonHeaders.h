@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMMONHEADERS_H_INCLUDED
-#define JUCER_COMMONHEADERS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 struct TargetOS
@@ -72,5 +71,3 @@ enum ColourIds
 {
     mainBackgroundColourId          = 0x2340000,
 };
-
-#endif   // JUCER_COMMONHEADERS_H_INCLUDED

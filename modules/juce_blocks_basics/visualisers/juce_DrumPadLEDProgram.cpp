@@ -29,16 +29,16 @@
 */
 
 
-DrumPadGridProgram::DrumPadGridProgram (LEDGrid& lg)  : Program (lg) {}
+DrumPadGridProgram::DrumPadGridProgram (Block& b)  : Program (b) {}
 
 int DrumPadGridProgram::getPadIndex (float posX, float posY) const
 {
-    posX = juce::jmin (0.99f, posX / ledGrid.block.getWidth());
-    posY = juce::jmin (0.99f, posY / ledGrid.block.getHeight());
+    posX = juce::jmin (0.99f, posX / block.getWidth());
+    posY = juce::jmin (0.99f, posY / block.getHeight());
 
-    const uint32 offset  = ledGrid.getDataByte (visiblePads_byte) ? numColumns1_byte : numColumns0_byte;
-    const int numColumns = ledGrid.getDataByte (offset + numColumns0_byte);
-    const int numRows    = ledGrid.getDataByte (offset + numRows0_byte);
+    const uint32 offset  = block.getDataByte (visiblePads_byte) ? numColumns1_byte : numColumns0_byte;
+    const int numColumns = block.getDataByte (offset + numColumns0_byte);
+    const int numRows    = block.getDataByte (offset + numRows0_byte);
 
     return int (posX * numColumns) + int (posY * numRows) * numColumns;
 }
@@ -49,9 +49,9 @@ void DrumPadGridProgram::startTouch (float startX, float startY)
 
     for (size_t i = 0; i < 4; ++i)
     {
-        if (ledGrid.getDataByte (touchedPads_byte + i) == 0)
+        if (block.getDataByte (touchedPads_byte + i) == 0)
         {
-            ledGrid.setDataByte (touchedPads_byte + i, static_cast<uint8> (padIdx + 1));
+            block.setDataByte (touchedPads_byte + i, static_cast<uint8> (padIdx + 1));
             break;
         }
     }
@@ -62,28 +62,28 @@ void DrumPadGridProgram::endTouch (float startX, float startY)
     const auto padIdx = getPadIndex (startX, startY);
 
     for (size_t i = 0; i < 4; ++i)
-        if (ledGrid.getDataByte (touchedPads_byte + i) == (padIdx + 1))
-            ledGrid.setDataByte (touchedPads_byte + i, 0);
+        if (block.getDataByte (touchedPads_byte + i) == (padIdx + 1))
+            block.setDataByte (touchedPads_byte + i, 0);
 }
 
 void DrumPadGridProgram::sendTouch (float x, float y, float z, LEDColour colour)
 {
-    LEDGrid::ProgramEventMessage e;
+    Block::ProgramEventMessage e;
 
     e.values[0] = 0x20000000
-                    + (juce::jlimit (0, 255, juce::roundToInt (x * (255.0f / ledGrid.block.getWidth())))  << 16)
-                    + (juce::jlimit (0, 255, juce::roundToInt (y * (255.0f / ledGrid.block.getHeight()))) << 8)
+                    + (juce::jlimit (0, 255, juce::roundToInt (x * (255.0f / block.getWidth())))  << 16)
+                    + (juce::jlimit (0, 255, juce::roundToInt (y * (255.0f / block.getHeight()))) << 8)
                     +  juce::jlimit (0, 255, juce::roundToInt (z * 255.0f));
 
     e.values[1] = (int32) colour.getARGB();
 
-    ledGrid.sendProgramEvent (e);
+    block.sendProgramEvent (e);
 }
 
 //==============================================================================
 void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const juce::Array<GridFill>& fills)
 {
-    uint8 visiblePads = ledGrid.getDataByte (visiblePads_byte);
+    uint8 visiblePads = block.getDataByte (visiblePads_byte);
 
     setGridFills (numColumns, numRows, fills, visiblePads * numColumns1_byte);
 }
@@ -92,8 +92,8 @@ void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const juce::
 {
     jassert (numColumns * numRows == fills.size());
 
-    ledGrid.setDataByte (byteOffset + numColumns0_byte, (uint8) numColumns);
-    ledGrid.setDataByte (byteOffset + numRows0_byte,    (uint8) numRows);
+    block.setDataByte (byteOffset + numColumns0_byte, (uint8) numColumns);
+    block.setDataByte (byteOffset + numRows0_byte,    (uint8) numRows);
 
     uint32 i = 0;
 
@@ -108,11 +108,11 @@ void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const juce::
         const uint32 colourOffsetBytes = byteOffset + colours0_byte + i * colourSizeBytes;
         const uint32 colourOffsetBits  = colourOffsetBytes * 8;
 
-        ledGrid.setDataBits (colourOffsetBits,      5, fill.colour.getRed()   >> 3);
-        ledGrid.setDataBits (colourOffsetBits + 5,  6, fill.colour.getGreen() >> 2);
-        ledGrid.setDataBits (colourOffsetBits + 11, 5, fill.colour.getBlue()  >> 3);
+        block.setDataBits (colourOffsetBits,      5, fill.colour.getRed()   >> 3);
+        block.setDataBits (colourOffsetBits + 5,  6, fill.colour.getGreen() >> 2);
+        block.setDataBits (colourOffsetBits + 11, 5, fill.colour.getBlue()  >> 3);
 
-        ledGrid.setDataByte (byteOffset + fillTypes0_byte + i, static_cast<uint8> (fill.fillType));
+        block.setDataByte (byteOffset + fillTypes0_byte + i, static_cast<uint8> (fill.fillType));
 
         ++i;
     }
@@ -121,12 +121,12 @@ void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const juce::
 void DrumPadGridProgram::triggerSlideTransition (int newNumColumns, int newNumRows,
                                                  const juce::Array<GridFill>& newFills, SlideDirection direction)
 {
-    uint8 newVisible = ledGrid.getDataByte (visiblePads_byte) ? 0 : 1;
+    uint8 newVisible = block.getDataByte (visiblePads_byte) ? 0 : 1;
 
     setGridFills (newNumColumns, newNumRows, newFills, newVisible * numColumns1_byte);
 
-    ledGrid.setDataByte (visiblePads_byte, newVisible);
-    ledGrid.setDataByte (slideDirection_byte, (uint8) direction);
+    block.setDataByte (visiblePads_byte, newVisible);
+    block.setDataByte (slideDirection_byte, (uint8) direction);
 }
 
 //==============================================================================
@@ -143,8 +143,8 @@ void DrumPadGridProgram::setPadAnimationState (uint32 padIdx, double loopTimeSec
 
     uint32 offset = 8 * animationTimers_byte + 32 * padIdx;
 
-    ledGrid.setDataBits (offset,      16, aniValue);
-    ledGrid.setDataBits (offset + 16, 16, aniIncrement);
+    block.setDataBits (offset,      16, aniValue);
+    block.setDataBits (offset + 16, 16, aniIncrement);
 }
 
 void DrumPadGridProgram::suspendAnimations()
@@ -152,28 +152,25 @@ void DrumPadGridProgram::suspendAnimations()
     for (uint32 i = 0; i < 16; ++i)
     {
         uint32 offset = 8 * animationTimers_byte + 32 * i;
-        ledGrid.setDataBits (offset + 16, 16, 0);
+        block.setDataBits (offset + 16, 16, 0);
     }
 
     // Hijack touch dimming
-    ledGrid.setDataByte (touchedPads_byte, 255);
+    block.setDataByte (touchedPads_byte, 255);
 }
 
 void DrumPadGridProgram::resumeAnimations()
 {
     // Unhijack touch dimming
-    ledGrid.setDataByte (touchedPads_byte, 0);
+    block.setDataByte (touchedPads_byte, 0);
 }
 
 //==============================================================================
-uint32 DrumPadGridProgram::getHeapSize()
-{
-    return totalDataSize;
-}
-
 juce::String DrumPadGridProgram::getLittleFootProgram()
 {
     return R"littlefoot(
+
+    #heapsize: 256
 
     int dimFactor;
     int dimDelay;
@@ -236,8 +233,8 @@ juce::String DrumPadGridProgram::getLittleFootProgram()
                 {
                     int gradColour = blendARGB (colour, makeARGB (((xx + yy) * 250) / divisor, 0, 0, 0));
 
-                    setLED (x + xx, y + yy, gradColour);
-                    setLED (x + yy, y + xx, gradColour);
+                    fillPixel (gradColour, x + xx, y + yy);
+                    fillPixel (gradColour, x + yy, y + xx);
                 }
             }
         }
@@ -255,7 +252,7 @@ juce::String DrumPadGridProgram::getLittleFootProgram()
 
         for (int i = 1; i <= numToDo; ++i)
         {
-            setLED (x, y, colour);
+            fillPixel (colour, x, y);
 
             if (i < w)
                 ++x;
@@ -278,87 +275,44 @@ juce::String DrumPadGridProgram::getLittleFootProgram()
         {
             fillGradientRect (colour, padX, padY, padW);
         }
-
         else if (fill == 1) // Filled
         {
             fillRect (colour, padX, padY, padW, padW);
         }
-
         else if (fill == 2) // Hollow
         {
             outlineRect (colour, padX, padY, padW);
         }
-
         else if (fill == 3) // Hollow with plus
         {
             outlineRect (colour, padX, padY, padW);
             drawPlus (0xffffffff, padX, padY, padW);
         }
-
         else if (fill == 4) // Pulsing dot
         {
             int pulseCol = blendARGB (colour, makeARGB (animateProgress, 0, 0, 0));
 
-            setLED (padX + halfW, padY + halfW, pulseCol);
+            fillPixel (pulseCol, padX + halfW, padY + halfW);
         }
-
         else if (fill == 5) // Blinking dot
         {
-            int blinkCol = animateProgress > 64 ? makeARGB (255, 0, 0, 0) : colour;
+            int blinkCol = animateProgress > 64 ? 0xff000000 : colour;
 
-            setLED (padX + halfW, padY + halfW, blinkCol);
+            fillPixel (blinkCol, padX + halfW, padY + halfW);
         }
-
         else if (fill == 6) // Pizza filled
         {
-            outlineRect (blendARGB (colour, makeARGB (220, 0, 0, 0)), padX, padY, padW); // Dim outline
-            setLED (padX + halfW, padY + halfW, colour); // Bright centre
+            outlineRect (blendARGB (colour, 0xdc000000), padX, padY, padW); // Dim outline
+            fillPixel (colour, padX + halfW, padY + halfW); // Bright centre
 
             drawPizzaLED (colour, padX, padY, padW, animateProgress);
         }
-
-        else if (fill == 7) // Pizza hollow
+        else  // Pizza hollow
         {
-            outlineRect (blendARGB (colour, makeARGB (220, 0, 0, 0)), padX, padY, padW); // Dim outline
+            outlineRect (blendARGB (colour, 0xdc000000), padX, padY, padW); // Dim outline
 
             drawPizzaLED (colour, padX, padY, padW, animateProgress);
-            return;
         }
-    }
-
-    void fadeHeatMap()
-    {
-        for (int i = 0; i < 225; ++i)
-        {
-            int colourOffset = 226 + i * 4;
-            int colour = getHeapInt (colourOffset);
-            int alpha = (colour >> 24) & 0xff;
-
-            if (alpha > 0)
-            {
-                alpha -= getHeapByte (1126 + i);
-                setHeapInt (colourOffset, alpha < 0 ? 0 : ((alpha << 24) | (colour & 0xffffff)));
-            }
-        }
-    }
-
-    void addToHeatMap (int x, int y, int colour)
-    {
-        if (x >= 0 && y >= 0 && x < 15 && y < 15)
-        {
-            int offset = 226 + 4 * (x + y * 15);
-            colour = blendARGB (getHeapInt (offset), colour);
-            setHeapInt (offset, colour);
-
-            int decay = ((colour >> 24) & 0xff) / 14; // change divisor to change trail times
-            offset = 1126 + (x + y * 15);
-            setHeapByte (offset, decay > 0 ? decay : 1);
-        }
-    }
-
-    int getHeatmapColour (int x, int y)
-    {
-        return getHeapInt (226 + 4 * (x + y * 15));
     }
 
     int isPadActive (int index)
@@ -499,48 +453,25 @@ juce::String DrumPadGridProgram::getLittleFootProgram()
         slideAnimatePads();
 
         // Overlay heatmap
-        for (int y = 0; y < 15; ++y)
-            for (int x = 0; x < 15; ++x)
-                blendLED (x, y, getHeatmapColour (x, y));
-
-        fadeHeatMap();
+        drawPressureMap();
+        fadePressureMap();
     }
 
     // DrumPadGridProgram::sendTouch results in this callback, giving
     // us more touch updates per frame and therefore smoother trails.
-    void handleMessage (int pos, int colour)
+    void handleMessage (int pos, int colour, int dummy)
     {
         if ((pos >> 24) != 0x20)
             return;
 
-        int tx = ((pos >> 16) & 0xff) - 13;
-        int ty = ((pos >> 8) & 0xff) - 13;
-
+        int tx = (pos >> 16) & 0xff;
+        int ty = (pos >> 8) & 0xff;
         int tz = pos & 0xff;
-        tz = tz > 30 ? tz : 30;
 
-        int ledCentreX = tx >> 4;
-        int ledCentreY = ty >> 4;
-        int adjustX = (tx - (ledCentreX << 4)) >> 2;
-        int adjustY = (ty - (ledCentreY << 4)) >> 2;
-
-        for (int dy = -2; dy <= 2; ++dy)
-        {
-            for (int dx = -2; dx <= 2; ++dx)
-            {
-                int distance = dx * dx + dy * dy;
-                int level = distance == 0 ? 255 : (distance == 1 ? 132 : (distance < 5 ? 9 : (distance == 5 ? 2 : 0)));
-
-                level += (dx * adjustX);
-                level += (dy * adjustY);
-
-                level = (tz * level) >> 8;
-
-                if (level > 0)
-                    addToHeatMap (ledCentreX + dx, ledCentreY + dy,
-                                  makeARGB (level, colour >> 16, colour >> 8, colour));
-            }
-        }
+        addPressurePoint (colour,
+                          tx * (2.0 / (256 + 20)),
+                          ty * (2.0 / (256 + 20)),
+                          tz * (1.0 / 3.0));
     }
 
     )littlefoot";

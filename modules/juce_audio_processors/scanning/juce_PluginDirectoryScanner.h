@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED
-#define JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -118,14 +117,11 @@ private:
     File deadMansPedalFile;
     StringArray failedFiles;
     Atomic<int> nextIndex;
-    float progress;
-    bool allowAsync;
+    float progress = 0;
+    const bool allowAsync;
 
     void updateProgress();
     void setDeadMansPedalFile (const StringArray& newContents);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginDirectoryScanner)
 };
-
-
-#endif   // JUCE_PLUGINDIRECTORYSCANNER_H_INCLUDED

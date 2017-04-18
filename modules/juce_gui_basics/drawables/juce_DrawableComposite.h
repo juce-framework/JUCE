@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAWABLECOMPOSITE_H_INCLUDED
-#define JUCE_DRAWABLECOMPOSITE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -156,6 +155,3 @@ private:
     DrawableComposite& operator= (const DrawableComposite&);
     JUCE_LEAK_DETECTOR (DrawableComposite)
 };
-
-
-#endif   // JUCE_DRAWABLECOMPOSITE_H_INCLUDED

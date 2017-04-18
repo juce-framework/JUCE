@@ -338,7 +338,7 @@ public:
         if (isPositiveAndBelow (index, getTotalNumInputChannels()))
             return String (plugin->PortNames [inputs [index]]).trim();
 
-        return String();
+        return {};
     }
 
     const String getOutputChannelName (const int index) const
@@ -346,7 +346,7 @@ public:
         if (isPositiveAndBelow (index, getTotalNumInputChannels()))
             return String (plugin->PortNames [outputs [index]]).trim();
 
-        return String();
+        return {};
     }
 
     //==============================================================================
@@ -390,7 +390,7 @@ public:
             return String (plugin->PortNames [parameters [index]]).trim();
         }
 
-        return String();
+        return {};
     }
 
     const String getParameterText (int index)
@@ -407,7 +407,7 @@ public:
             return String (parameterValues[index].scaled, 4);
         }
 
-        return String();
+        return {};
     }
 
     //==============================================================================
@@ -424,7 +424,7 @@ public:
     const String getProgramName (int index)
     {
         // XXX
-        return String();
+        return {};
     }
 
     void changeProgramName (int index, const String& newName)

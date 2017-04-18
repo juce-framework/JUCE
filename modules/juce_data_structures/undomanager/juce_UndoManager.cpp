@@ -286,31 +286,31 @@ bool UndoManager::redo()
 
 String UndoManager::getUndoDescription() const
 {
-    if (const ActionSet* const s = getCurrentSet())
+    if (auto* s = getCurrentSet())
         return s->name;
 
-    return String();
+    return {};
 }
 
 String UndoManager::getRedoDescription() const
 {
-    if (const ActionSet* const s = getNextSet())
+    if (auto* s = getNextSet())
         return s->name;
 
-    return String();
+    return {};
 }
 
 Time UndoManager::getTimeOfUndoTransaction() const
 {
-    if (const ActionSet* const s = getCurrentSet())
+    if (auto* s = getCurrentSet())
         return s->time;
 
-    return Time();
+    return {};
 }
 
 Time UndoManager::getTimeOfRedoTransaction() const
 {
-    if (const ActionSet* const s = getNextSet())
+    if (auto* s = getNextSet())
         return s->time;
 
     return Time::getCurrentTime();

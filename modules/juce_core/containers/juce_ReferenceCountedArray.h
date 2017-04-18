@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED
-#define JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -918,6 +917,3 @@ private:
             ContainerDeletePolicy<ObjectClass>::destroy (o);
     }
 };
-
-
-#endif   // JUCE_REFERENCECOUNTEDARRAY_H_INCLUDED

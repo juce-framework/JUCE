@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOOKANDFEEL_H_INCLUDED
-#define JUCE_LOOKANDFEEL_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /** This class is used to hold a few look and feel base classes which are associated
@@ -228,6 +227,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel)
 };
-
-
-#endif   // JUCE_LOOKANDFEEL_H_INCLUDED

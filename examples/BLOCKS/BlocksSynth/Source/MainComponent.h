@@ -1,5 +1,4 @@
-#ifndef MAINCOMPONENT_H_INCLUDED
-#define MAINCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Audio.h"
@@ -146,7 +145,7 @@ public:
                     scaleX = static_cast<float> (grid->getNumColumns() - 1) / activeBlock->getWidth();
                     scaleY = static_cast<float> (grid->getNumRows() - 1)    / activeBlock->getHeight();
 
-                    setLEDProgram (grid);
+                    setLEDProgram (*activeBlock);
                 }
 
                 break;
@@ -228,7 +227,7 @@ private:
             currentMode = waveformSelectionMode;
 
         // Set the LEDGrid program to the new mode
-        setLEDProgram (activeBlock->getLEDGrid());
+        setLEDProgram (*activeBlock);
     }
 
    #if JUCE_IOS
@@ -260,15 +259,15 @@ private:
     }
 
     /** Sets the LEDGrid Program for the selected mode */
-    void setLEDProgram (LEDGrid* grid)
+    void setLEDProgram (Block& block)
     {
         if (currentMode == waveformSelectionMode)
         {
             // Create a new WaveshapeProgram for the LEDGrid
-            waveshapeProgram = new WaveshapeProgram (*grid);
+            waveshapeProgram = new WaveshapeProgram (block);
 
             // Set the LEDGrid program
-            grid->setProgram (waveshapeProgram);
+            block.setProgram (waveshapeProgram);
 
             // Initialise the program
             waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
@@ -277,10 +276,16 @@ private:
         else if (currentMode == playMode)
         {
             // Create a new DrumPadGridProgram for the LEDGrid
-            gridProgram = new DrumPadGridProgram (*grid);
+            gridProgram = new DrumPadGridProgram (block);
 
             // Set the LEDGrid program
-            grid->setProgram (gridProgram);
+            auto error = block.setProgram (gridProgram);
+
+            if (error.failed())
+            {
+                DBG (error.getErrorMessage());
+                jassertfalse;
+            }
 
             // Setup the grid layout
             gridProgram->setGridFills (layout.numColumns,
@@ -327,6 +332,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
-
-
-#endif  // MAINCOMPONENT_H_INCLUDED

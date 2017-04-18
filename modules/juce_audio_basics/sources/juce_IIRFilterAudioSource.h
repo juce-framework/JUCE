@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED
-#define JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -71,6 +70,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IIRFilterAudioSource)
 };
-
-
-#endif   // JUCE_IIRFILTERAUDIOSOURCE_H_INCLUDED

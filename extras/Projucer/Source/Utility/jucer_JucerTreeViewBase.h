@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_JUCERTREEVIEWBASE_H_INCLUDED
-#define JUCER_JUCERTREEVIEWBASE_H_INCLUDED
+#pragma once
 
 class ProjectContentComponent;
 class Project;
@@ -58,7 +57,7 @@ public:
     virtual void paintIcon (Graphics& g, Rectangle<int> area)   { getIcon().draw (g, area.reduced (2).toFloat(), isIconCrossedOut()); }
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
     virtual int getMillisecsAllowedForDragGesture()             { return 120; };
-    virtual File getDraggableFile() const                       { return File(); }
+    virtual File getDraggableFile() const                       { return {}; }
 
     void refreshSubItems();
     virtual void deleteItem();
@@ -229,6 +228,3 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeItemComponent)
 };
-
-
-#endif   // JUCER_JUCERTREEVIEWBASE_H_INCLUDED
