@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SCOPEDVALUESETTER_H_INCLUDED
-#define JUCE_SCOPEDVALUESETTER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -97,6 +96,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ScopedValueSetter)
 };
-
-
-#endif   // JUCE_SCOPEDVALUESETTER_H_INCLUDED

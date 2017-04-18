@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VST3PLUGINFORMAT_H_INCLUDED
-#define JUCE_VST3PLUGINFORMAT_H_INCLUDED
+#pragma once
 
 #if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)) || DOXYGEN
 
@@ -65,4 +64,3 @@ private:
 };
 
 #endif   // JUCE_PLUGINHOST_VST3
-#endif   // JUCE_VST3PLUGINFORMAT_H_INCLUDED

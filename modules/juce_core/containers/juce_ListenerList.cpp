@@ -33,7 +33,7 @@
 struct ListenerBase
 {
     ListenerBase (int& counter) : c (counter) {}
-    virtual ~ListenerBase () {}
+    virtual ~ListenerBase() {}
 
     virtual void f () = 0;
     virtual void f (void*) = 0;

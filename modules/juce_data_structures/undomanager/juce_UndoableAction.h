@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_UNDOABLEACTION_H_INCLUDED
-#define JUCE_UNDOABLEACTION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -94,6 +93,3 @@ public:
     */
     virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { ignoreUnused (nextAction); return nullptr; }
 };
-
-
-#endif   // JUCE_UNDOABLEACTION_H_INCLUDED

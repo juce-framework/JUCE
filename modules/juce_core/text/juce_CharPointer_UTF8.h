@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CHARPOINTER_UTF8_H_INCLUDED
-#define JUCE_CHARPOINTER_UTF8_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -127,7 +126,7 @@ public:
         {
             juce_wchar bit = 0x40;
 
-            while ((n & bit) != 0 && bit > 0x8)
+            while ((static_cast<juce_wchar> (n) & bit) != 0 && bit > 0x8)
             {
                 ++data;
                 bit >>= 1;
@@ -568,5 +567,3 @@ public:
 private:
     CharType* data;
 };
-
-#endif   // JUCE_CHARPOINTER_UTF8_H_INCLUDED

@@ -6,9 +6,6 @@
   ==============================================================================
 */
 
-#ifndef MAINCOMPONENT_H_INCLUDED
-#define MAINCOMPONENT_H_INCLUDED
-
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
@@ -82,6 +79,3 @@ private:
 
 // (This function is called by the app startup code to create our main component)
 Component* createMainContentComponent()    { return new MainContentComponent(); }
-
-
-#endif  // MAINCOMPONENT_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_JUSTIFICATIONPROPERTY_H_INCLUDED
-#define JUCER_JUSTIFICATIONPROPERTY_H_INCLUDED
+#pragma once
 
 
 class JustificationProperty  : public ChoicePropertyComponent
@@ -97,6 +96,3 @@ public:
         return -1;
     }
 };
-
-
-#endif   // JUCER_JUSTIFICATIONPROPERTY_H_INCLUDED

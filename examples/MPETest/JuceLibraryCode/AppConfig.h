@@ -11,8 +11,7 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_IILE7R__
-#define __JUCE_APPCONFIG_IILE7R__
+#pragma once
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -39,7 +38,7 @@
 
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION
- #ifdef JucePlugin_Build_Standalone
+ #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)
   #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone
  #else
   #define  JUCE_STANDALONE_APPLICATION 1
@@ -77,6 +76,10 @@
 
 #ifndef    JUCE_USE_ANDROID_OPENSLES
  //#define JUCE_USE_ANDROID_OPENSLES
+#endif
+
+#ifndef    JUCE_USE_WINRT_MIDI
+ //#define JUCE_USE_WINRT_MIDI
 #endif
 
 //==============================================================================
@@ -164,6 +167,13 @@
 #endif
 
 //==============================================================================
+// juce_events flags:
+
+#ifndef    JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+ //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+#endif
+
+//==============================================================================
 // juce_graphics flags:
 
 #ifndef    JUCE_USE_COREIMAGE_LOADER
@@ -222,6 +232,3 @@
 #ifndef    JUCE_USE_CAMERA
  //#define JUCE_USE_CAMERA
 #endif
-
-
-#endif  // __JUCE_APPCONFIG_IILE7R__

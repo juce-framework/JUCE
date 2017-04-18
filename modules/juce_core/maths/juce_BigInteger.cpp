@@ -119,7 +119,6 @@ BigInteger::BigInteger (const BigInteger& other)
     memcpy (getValues(), other.getValues(), sizeof (uint32) * allocatedSize);
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 BigInteger::BigInteger (BigInteger&& other) noexcept
     : heapAllocation (static_cast<HeapBlock<uint32>&&> (other.heapAllocation)),
       allocatedSize (other.allocatedSize),
@@ -138,7 +137,6 @@ BigInteger& BigInteger::operator= (BigInteger&& other) noexcept
     negative = other.negative;
     return *this;
 }
-#endif
 
 BigInteger::~BigInteger()
 {
@@ -1137,7 +1135,7 @@ String BigInteger::toString (const int base, const int minimumNumCharacters) con
     else
     {
         jassertfalse; // can't do the specified base!
-        return String();
+        return {};
     }
 
     s = s.paddedLeft ('0', minimumNumCharacters);

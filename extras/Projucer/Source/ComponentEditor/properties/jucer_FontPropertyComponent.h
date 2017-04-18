@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FONTPROPERTYCOMPONENT_H_INCLUDED
-#define JUCER_FONTPROPERTYCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class FontPropertyComponent    : public ChoicePropertyComponent
@@ -85,7 +84,7 @@ public:
         if (typefaceName == getDefaultSerif()) return Font (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags());
         if (typefaceName == getDefaultMono())  return Font (Font::getDefaultMonospacedFontName(), font.getHeight(), font.getStyleFlags());
 
-        Font f = Font (typefaceName, font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (font.getExtraKerningFactor());
+        auto f = Font (typefaceName, font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (font.getExtraKerningFactor());
         if (f.getAvailableStyles().contains (font.getTypefaceStyle()))
         {
             f.setTypefaceStyle (font.getTypefaceStyle());
@@ -95,7 +94,7 @@ public:
 
     static String getTypefaceNameCode (const String& typefaceName)
     {
-        if (typefaceName == getDefaultFont())   return String();
+        if (typefaceName == getDefaultFont())   return {};
         if (typefaceName == getDefaultSans())   return "Font::getDefaultSansSerifFontName(), ";
         if (typefaceName == getDefaultSerif())  return "Font::getDefaultSerifFontName(), ";
         if (typefaceName == getDefaultMono())   return "Font::getDefaultMonospacedFontName(), ";
@@ -115,23 +114,25 @@ public:
     static String getCompleteFontCode (const Font& font, const String& typefaceName)
     {
         String s;
+
         s << "Font ("
           << getTypefaceNameCode (typefaceName)
           << CodeHelpers::floatLiteral (font.getHeight(), 2)
-          << ", "
-          << getFontStyleCode (font)
-          << ")";
-        if (font.getTypefaceStyle() != "Regular")
-        {
-            s << ".withTypefaceStyle (" << CodeHelpers::stringLiteral (font.getTypefaceStyle()) << ")";
-        }
+          << ", ";
+
+        if (font.getAvailableStyles().contains(font.getTypefaceStyle()))
+            s << "Font::plain).withTypefaceStyle ("
+              << CodeHelpers::stringLiteral (font.getTypefaceStyle())
+              << ")";
+        else
+            s << getFontStyleCode (font)
+              << ")";
+
         if (font.getExtraKerningFactor() != 0)
-        {
-            s << ".withExtraKerningFactor (" << CodeHelpers::floatLiteral (font.getExtraKerningFactor(), 3) << ")";
-        }
+            s << ".withExtraKerningFactor ("
+              << CodeHelpers::floatLiteral (font.getExtraKerningFactor(), 3)
+              << ")";
+
         return s;
     }
 };
-
-
-#endif   // JUCER_FONTPROPERTYCOMPONENT_H_INCLUDED

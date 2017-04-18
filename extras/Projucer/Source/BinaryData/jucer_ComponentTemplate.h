@@ -17,8 +17,7 @@
   ==============================================================================
 */
 
-#ifndef %%headerGuard%%
-#define %%headerGuard%%
+#pragma once
 
 //[Headers]     -- You can add your own extra header files here --
 %%includeJUCEHeader%%
@@ -60,5 +59,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-
-#endif   // %%headerGuard%%

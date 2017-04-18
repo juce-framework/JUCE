@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOFORMATREADERSOURCE_H_INCLUDED
-#define JUCE_AUDIOFORMATREADERSOURCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -95,6 +94,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatReaderSource)
 };
-
-
-#endif   // JUCE_AUDIOFORMATREADERSOURCE_H_INCLUDED

@@ -1,6 +1,4 @@
-
-#ifndef AUDIO_H_INCLUDED
-#define AUDIO_H_INCLUDED
+#pragma once
 
 #include "Oscillators.h"
 
@@ -91,5 +89,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Audio)
 };
-
-#endif  // AUDIO_H_INCLUDED

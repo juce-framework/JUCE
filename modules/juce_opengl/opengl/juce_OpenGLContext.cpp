@@ -110,6 +110,17 @@ public:
     {
         if (renderThread != nullptr)
         {
+            // make sure everything has finished executing
+            destroying.set (1);
+
+            if (workQueue.size() > 0)
+            {
+                if (! renderThread->contains (this))
+                    resume();
+
+                execute (new DoNothingWorker(), true, true);
+            }
+
             pause();
             renderThread = nullptr;
         }
@@ -188,9 +199,9 @@ public:
         cachedImageFrameBuffer.makeCurrentRenderingTarget();
         const int imageH = cachedImageFrameBuffer.getHeight();
 
-        for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
+        for (auto& r : list)
         {
-            glScissor (i->getX(), imageH - i->getBottom(), i->getWidth(), i->getHeight());
+            glScissor (r.getX(), imageH - r.getBottom(), r.getWidth(), r.getHeight());
             glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
 
@@ -207,11 +218,13 @@ public:
 
         if (context.renderComponents && isUpdating)
         {
+            MessageLockWorker worker (*this);
+
             // This avoids hogging the message thread when doing intensive rendering.
             if (lastMMLockReleaseTime + 1 >= Time::getMillisecondCounter())
                 Thread::sleep (2);
 
-            mmLock = new MessageManagerLock (this);  // need to acquire this before locking the context.
+            mmLock = new MessageManagerLock (worker);  // need to acquire this before locking the context.
             if (! mmLock->lockWasGained())
                 return false;
 
@@ -224,6 +237,8 @@ public:
         NativeContext::Locker locker (*nativeContext);
 
         JUCE_CHECK_OPENGL_ERROR
+
+        doWorkWhileWaitingForLock (true);
 
         if (context.renderer != nullptr)
         {
@@ -409,8 +424,10 @@ public:
     JobStatus runJob() override
     {
         {
+            MessageLockWorker worker (*this);
+
             // Allow the message thread to finish setting-up the context before using it..
-            MessageManagerLock mml (this);
+            MessageManagerLock mml (worker);
             if (! mml.lockWasGained())
                 return ThreadPoolJob::jobHasFinished;
         }
@@ -502,10 +519,97 @@ public:
     }
 
     //==============================================================================
+    struct MessageLockWorker : MessageManagerLock::BailOutChecker
+    {
+        MessageLockWorker (CachedImage& cachedImageRequestingLock)
+            : owner (cachedImageRequestingLock)
+        {
+        }
+
+        bool shouldAbortAcquiringLock() override   { return owner.doWorkWhileWaitingForLock (false); }
+
+        CachedImage& owner;
+        JUCE_DECLARE_NON_COPYABLE(MessageLockWorker)
+    };
+
+    //==============================================================================
+    struct BlockingWorker : OpenGLContext::AsyncWorker
+    {
+        BlockingWorker (OpenGLContext::AsyncWorker::Ptr && workerToUse)
+            : originalWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse))
+        {}
+
+        void operator() (OpenGLContext& calleeContext)
+        {
+            if (originalWorker != nullptr)
+                (*originalWorker) (calleeContext);
+
+            finishedSignal.signal();
+        }
+
+        void block() { finishedSignal.wait(); }
+
+        OpenGLContext::AsyncWorker::Ptr originalWorker;
+        WaitableEvent finishedSignal;
+    };
+
+    bool doWorkWhileWaitingForLock (bool contextIsAlreadyActive)
+    {
+        bool contextActivated = false;
+
+        for (OpenGLContext::AsyncWorker::Ptr work = workQueue.removeAndReturn (0);
+             work != nullptr && (! shouldExit()); work = workQueue.removeAndReturn (0))
+        {
+            if ((! contextActivated) && (! contextIsAlreadyActive))
+            {
+                if (! context.makeActive())
+                    break;
+
+                contextActivated = true;
+            }
+
+            NativeContext::Locker locker (*nativeContext);
+
+            (*work) (context);
+            clearGLError();
+        }
+
+        if (contextActivated)
+            OpenGLContext::deactivateCurrentContext();
+
+        return shouldExit();
+    }
+
+    void execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool shouldBlock, bool calledFromDestructor = false)
+    {
+        if (calledFromDestructor || destroying.get() == 0)
+        {
+            BlockingWorker* blocker = (shouldBlock ? new BlockingWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse)) : nullptr);
+            OpenGLContext::AsyncWorker::Ptr worker = (blocker != nullptr ? blocker : static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
+            workQueue.add (worker);
+
+            context.triggerRepaint();
+
+            if (blocker != nullptr)
+                blocker->block();
+        }
+        else
+            jassertfalse; // you called execute AFTER you detached your openglcontext
+    }
+
+    //==============================================================================
     static CachedImage* get (Component& c) noexcept
     {
         return dynamic_cast<CachedImage*> (c.getCachedComponentImage());
     }
+
+    //==============================================================================
+    // used to push no work on to the gl thread to easily block
+    struct DoNothingWorker : OpenGLContext::AsyncWorker
+    {
+        DoNothingWorker() {}
+        void operator() (OpenGLContext&) override {}
+    };
 
     //==============================================================================
     ScopedPointer<NativeContext> nativeContext;
@@ -526,10 +630,11 @@ public:
 
     WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent;
     bool shadersAvailable, hasInitialised;
-    Atomic<int> needsUpdate;
+    Atomic<int> needsUpdate, destroying;
     uint32 lastMMLockReleaseTime;
 
     ScopedPointer<ThreadPool> renderThread;
+    ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
 
    #if JUCE_IOS
     iOSBackgroundProcessCheck backgroundProcessCheck;
@@ -908,6 +1013,14 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
 
 void OpenGLContext::setImageCacheSize (size_t newSize) noexcept     { imageCacheMaxSize = newSize; }
 size_t OpenGLContext::getImageCacheSize() const noexcept            { return imageCacheMaxSize; }
+
+void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool shouldBlock)
+{
+    if (CachedImage* const c = getCachedImage())
+        c->execute (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse), shouldBlock);
+    else
+        jassertfalse; // You must have attached the context to a component
+}
 
 //==============================================================================
 struct DepthTestDisabler

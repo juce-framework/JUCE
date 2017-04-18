@@ -225,7 +225,7 @@ File NewFileWizard::Type::askUserToChooseNewFile (const String& suggestedFilenam
     if (fc.browseForFileToSave (true))
         return fc.getResult();
 
-    return File();
+    return {};
 }
 
 //==============================================================================

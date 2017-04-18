@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_COMPONENTLISTENER_H_INCLUDED
-#define JUCE_COMPONENTLISTENER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -106,6 +105,3 @@ public:
     */
     virtual void componentBeingDeleted (Component& component);
 };
-
-
-#endif   // JUCE_COMPONENTLISTENER_H_INCLUDED

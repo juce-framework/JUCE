@@ -52,6 +52,9 @@ enum class MessageFromDevice
 {
     deviceTopology          = 0x01,
     packetACK               = 0x02,
+    firmwareUpdateACK       = 0x03,
+    deviceTopologyExtend    = 0x04,
+    deviceTopologyEnd       = 0x05,
 
     touchStart              = 0x10,
     touchMove               = 0x11,
@@ -62,7 +65,11 @@ enum class MessageFromDevice
     touchEndWithVelocity    = 0x15,
 
     controlButtonDown       = 0x20,
-    controlButtonUp         = 0x21
+    controlButtonUp         = 0x21,
+
+    programEventMessage     = 0x28,
+
+    logMessage              = 0x30
 };
 
 /** Messages that the host may send to a device. */
@@ -70,7 +77,8 @@ enum class MessageFromHost
 {
     deviceCommandMessage    = 0x01,
     sharedDataChange        = 0x02,
-    programEventMessage     = 0x03
+    programEventMessage     = 0x03,
+    firmwareUpdatePacket    = 0x04
 };
 
 
@@ -147,6 +155,8 @@ struct DeviceConnection
     ConnectorPort port1, port2;
 };
 
+static constexpr uint8 maxBlocksInTopologyPacket = 6;
+static constexpr uint8 maxConnectionsInTopologyPacket = 24;
 
 //==============================================================================
 /** The coordinates of a touch. */
@@ -224,15 +234,18 @@ using ByteCountMany          = IntegerWithBitSize<8>;
 using ByteValue              = IntegerWithBitSize<8>;
 using ByteSequenceContinues  = IntegerWithBitSize<1>;
 
-static constexpr uint32 numProgramMessageInts = 2;
+using FirmwareUpdateACKCode    = IntegerWithBitSize<7>;
+using FirmwareUpdatePacketSize = IntegerWithBitSize<7>;
+
+static constexpr uint32 numProgramMessageInts = 3;
 
 static constexpr uint32 apiModeHostPingTimeoutMs = 5000;
 
-static constexpr uint32 padBlockProgramAndHeapSize = 3200;
+static constexpr uint32 padBlockProgramAndHeapSize = 7200;
 static constexpr uint32 padBlockStackSize = 800;
 
-static constexpr uint32 controlBlockProgramAndHeapSize = 1500;
-static constexpr uint32 controlBlockStackSize = 500;
+static constexpr uint32 controlBlockProgramAndHeapSize = 3000;
+static constexpr uint32 controlBlockStackSize = 800;
 
 
 //==============================================================================
@@ -251,6 +264,8 @@ enum BitSizes
     programEventMessage      = MessageType::bits + 32 * numProgramMessageInts,
     packetACK                = MessageType::bits + PacketCounter::bits,
 
+    firmwareUpdateACK        = MessageType::bits + FirmwareUpdateACKCode::bits,
+
     controlButtonMessage     = typeDeviceAndTime + ControlButtonID::bits,
 };
 
@@ -258,18 +273,71 @@ enum BitSizes
 // These are the littlefoot functions provided for use in BLOCKS programs
 static constexpr const char* ledProgramLittleFootFunctions[] =
 {
+    "min/iii",
+    "min/fff",
+    "max/iii",
+    "max/fff",
+    "clamp/iiii",
+    "clamp/ffff",
+    "abs/ii",
+    "abs/ff",
+    "map/ffffff",
+    "map/ffff",
+    "mod/iii",
+    "getRandomFloat/f",
+    "getRandomInt/ii",
+    "getMillisecondCounter/i",
+    "getFirmwareVersion/i",
+    "log/vi",
+    "logHex/vi",
+    "getTimeInCurrentFunctionCall/i",
+    "getBatteryLevel/f",
+    "isBatteryCharging/b",
+    "isMasterBlock/b",
+    "isConnectedToHost/b",
+    "setStatusOverlayActive/vb",
+    "getNumBlocksInTopology/i",
+    "getBlockIDForIndex/ii",
+    "getBlockIDOnPort/ii",
+    "getPortToMaster/i",
+    "getBlockTypeForID/ii",
+    "sendMessageToBlock/viiii",
+    "sendMessageToHost/viii",
+    "getHorizontalDistFromMaster/i",
+    "getVerticalDistFromMaster/i",
+    "getAngleFromMaster/i",
+    "setAutoRotate/vb",
+    "getClusterWidth/i",
+    "getClusterHeight/i",
+    "getClusterXpos/i",
+    "getClusterYpos/i",
     "makeARGB/iiiii",
     "blendARGB/iii",
-    "setLED/viii",
-    "blendLED/viii",
+    "fillPixel/viii",
+    "blendPixel/viii",
     "fillRect/viiiii",
     "blendRect/viiiii",
-    "sendMIDI/vi",
-    "sendMIDI/vii",
-    "sendMIDI/viii",
+    "blendGradientRect/viiiiiiii",
+    "blendCircle/vifffb",
     "addPressurePoint/vifff",
     "drawPressureMap/v",
     "fadePressureMap/v",
-    "enableDebug/viii",
+    "drawNumber/viiii",
+    "clearDisplay/v",
+    "clearDisplay/vi",
+    "sendMIDI/vi",
+    "sendMIDI/vii",
+    "sendMIDI/viii",
+    "sendNoteOn/viii",
+    "sendNoteOff/viii",
+    "sendAftertouch/viii",
+    "sendCC/viii",
+    "sendPitchBend/vii",
+    "sendChannelPressure/vii",
+    "setChannelRange/vbii",
+    "assignChannel/ii",
+    "deassignChannel/vii",
+    "getControlChannel/i",
+    "useMPEDuplicateFilter/vb",
     nullptr
 };

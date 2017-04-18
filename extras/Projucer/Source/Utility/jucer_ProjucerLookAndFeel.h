@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PROJUCERLOOKANDFEEL_H_INCLUDED
-#define JUCER_PROJUCERLOOKANDFEEL_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -45,7 +44,3 @@ private:
     Image backgroundTexture;
     Colour backgroundTextureBaseColour;
 };
-
-
-
-#endif

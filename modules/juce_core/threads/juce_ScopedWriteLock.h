@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SCOPEDWRITELOCK_H_INCLUDED
-#define JUCE_SCOPEDWRITELOCK_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -87,6 +86,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ScopedWriteLock)
 };
-
-
-#endif   // JUCE_SCOPEDWRITELOCK_H_INCLUDED

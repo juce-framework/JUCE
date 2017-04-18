@@ -54,7 +54,10 @@ import android.text.ClipboardManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import java.lang.Runnable;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.*;
 import java.util.*;
 import java.io.*;
 import java.net.URL;
@@ -62,8 +65,6 @@ import java.net.HttpURLConnection;
 import android.media.AudioManager;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.app.ActivityCompat;
 import android.Manifest;
 $$JuceAndroidMidiImports$$ // If you get an error here, you need to re-save your project with the Projucer!
 
@@ -120,7 +121,7 @@ public class JuceAppActivity   extends Activity
 
     public boolean isPermissionGranted (int permissionID)
     {
-        return ContextCompat.checkSelfPermission (this, getAndroidPermissionName (permissionID)) == PackageManager.PERMISSION_GRANTED;
+        return getApplicationContext().checkCallingOrSelfPermission (getAndroidPermissionName (permissionID)) == PackageManager.PERMISSION_GRANTED;
     }
 
     private Map<Integer, Long> permissionCallbackPtrMap;
@@ -129,11 +130,11 @@ public class JuceAppActivity   extends Activity
     {
         String permissionName = getAndroidPermissionName (permissionID);
 
-        if (ContextCompat.checkSelfPermission (this, permissionName) != PackageManager.PERMISSION_GRANTED)
+        if (getApplicationContext().checkCallingOrSelfPermission (permissionName) != PackageManager.PERMISSION_GRANTED)
         {
             // remember callbackPtr, request permissions, and let onRequestPermissionResult call callback asynchronously
             permissionCallbackPtrMap.put (permissionID, ptrToCallback);
-            ActivityCompat.requestPermissions (this, new String[]{permissionName}, permissionID);
+            requestPermissionsCompat (new String[]{permissionName}, permissionID);
         }
         else
         {
@@ -147,38 +148,6 @@ public class JuceAppActivity   extends Activity
     $$JuceAndroidRuntimePermissionsCode$$ // If you get an error here, you need to re-save your project with the Projucer!
 
     //==============================================================================
-    public static class MidiPortID extends Object
-    {
-        public MidiPortID (int index, boolean direction)
-        {
-            androidIndex = index;
-            isInput = direction;
-        }
-
-        public int androidIndex;
-        public boolean isInput;
-
-        @Override
-        public int hashCode()
-        {
-            Integer i = new Integer (androidIndex);
-            return i.hashCode() * (isInput ? -1 : 1);
-        }
-
-        @Override
-        public boolean equals (Object obj)
-        {
-            if (obj == null)
-                return false;
-
-            if (getClass() != obj.getClass())
-                return false;
-
-            MidiPortID other = (MidiPortID) obj;
-            return (androidIndex == other.androidIndex && isInput == other.isInput);
-        }
-    }
-
     public interface JuceMidiPort
     {
         boolean isInputPort();
@@ -188,7 +157,6 @@ public class JuceAppActivity   extends Activity
         void stop();
 
         void close();
-        MidiPortID getPortId();
 
         // send will do nothing on an input port
         void sendMidi (byte[] msg, int offset, int count);
@@ -293,6 +261,27 @@ public class JuceAppActivity   extends Activity
         try
         {
             actionBarHideMethod.invoke (actionBar);
+        }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
+    }
+
+    void requestPermissionsCompat (String[] permissions, int requestCode)
+    {
+        Method requestPermissionsMethod = null;
+        try
+        {
+            requestPermissionsMethod = this.getClass().getMethod ("requestPermissions",
+                                                                  String[].class, int.class);
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (requestPermissionsMethod == null) return;
+
+        try
+        {
+            requestPermissionsMethod.invoke (this, permissions, requestCode);
         }
         catch (java.lang.IllegalArgumentException e) {}
         catch (java.lang.IllegalAccessException e) {}
@@ -470,13 +459,14 @@ public class JuceAppActivity   extends Activity
         builder.create().show();
     }
 
-    public final void showOkCancelBox (String title, String message, final long callback)
+    public final void showOkCancelBox (String title, String message, final long callback,
+                                       String okButtonText, String cancelButtonText)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder (this);
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
-               .setPositiveButton ("OK", new DialogInterface.OnClickListener()
+               .setPositiveButton (okButtonText.isEmpty() ? "OK" : okButtonText, new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
@@ -484,7 +474,7 @@ public class JuceAppActivity   extends Activity
                             JuceAppActivity.this.alertDismissed (callback, 1);
                         }
                     })
-               .setNegativeButton ("Cancel", new DialogInterface.OnClickListener()
+               .setNegativeButton (cancelButtonText.isEmpty() ? "Cancel" : cancelButtonText, new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
@@ -735,6 +725,26 @@ public class JuceAppActivity   extends Activity
 
         public void setViewName (String newName)    {}
 
+        public void setSystemUiVisibilityCompat (int visibility)
+        {
+            Method systemUIVisibilityMethod = null;
+            try
+            {
+                systemUIVisibilityMethod = this.getClass().getMethod ("setSystemUiVisibility", int.class);
+            }
+            catch (SecurityException e)     { return; }
+            catch (NoSuchMethodException e) { return; }
+            if (systemUIVisibilityMethod == null) return;
+
+            try
+            {
+                systemUIVisibilityMethod.invoke (this, visibility);
+            }
+            catch (java.lang.IllegalArgumentException e) {}
+            catch (java.lang.IllegalAccessException e) {}
+            catch (java.lang.reflect.InvocationTargetException e) {}
+        }
+
         public boolean isVisible()                  { return getVisibility() == VISIBLE; }
         public void setVisible (boolean b)          { setVisibility (b ? VISIBLE : INVISIBLE); }
 
@@ -822,10 +832,12 @@ public class JuceAppActivity   extends Activity
     }
 
     //==============================================================================
-    public final int[] renderGlyph (char glyph, Paint paint, android.graphics.Matrix matrix, Rect bounds)
+    public final int[] renderGlyph (char glyph1, char glyph2, Paint paint, android.graphics.Matrix matrix, Rect bounds)
     {
         Path p = new Path();
-        paint.getTextPath (String.valueOf (glyph), 0, 1, 0.0f, 0.0f, p);
+
+        char[] str = { glyph1, glyph2 };
+        paint.getTextPath (str, 0, (glyph2 != 0 ? 2 : 1), 0.0f, 0.0f, p);
 
         RectF boundsF = new RectF();
         p.computeBounds (boundsF, true);
@@ -1038,8 +1050,8 @@ public class JuceAppActivity   extends Activity
     {
         java.util.Locale locale = java.util.Locale.getDefault();
 
-        return isRegion ? locale.getDisplayCountry  (java.util.Locale.US)
-                        : locale.getDisplayLanguage (java.util.Locale.US);
+        return isRegion ? locale.getCountry()
+                        : locale.getLanguage();
     }
 
     private static final String getFileLocation (String type)
@@ -1199,36 +1211,8 @@ public class JuceAppActivity   extends Activity
         return null;
     }
 
-    public final int setCurrentThreadPriority (int priority)
-    {
-        android.os.Process.setThreadPriority (android.os.Process.myTid(), priority);
-        return android.os.Process.getThreadPriority (android.os.Process.myTid());
-    }
-
     public final boolean hasSystemFeature (String property)
     {
         return getPackageManager().hasSystemFeature (property);
-    }
-
-    private static class JuceThread extends Thread
-    {
-        public JuceThread (long host, String threadName, long threadStackSize)
-        {
-            super (null, null, threadName, threadStackSize);
-            _this = host;
-        }
-
-        public void run()
-        {
-            runThread(_this);
-        }
-
-        private native void runThread (long host);
-        private long _this;
-    }
-
-    public final Thread createNewThread(long host, String threadName, long threadStackSize)
-    {
-        return new JuceThread(host, threadName, threadStackSize);
     }
 }

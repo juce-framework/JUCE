@@ -35,11 +35,9 @@ static Array <PluginWindow*> activePluginWindows;
 
 PluginWindow::PluginWindow (Component* const pluginEditor,
                             AudioProcessorGraph::Node* const o,
-                            WindowFormatType t,
-                            AudioProcessorGraph& audioGraph)
+                            WindowFormatType t)
     : DocumentWindow (pluginEditor->getName(), Colours::lightblue,
                       DocumentWindow::minimiseButton | DocumentWindow::closeButton),
-      graph (audioGraph),
       owner (o),
       type (t)
 {
@@ -82,10 +80,9 @@ class ProcessorProgramPropertyComp : public PropertyComponent,
                                      private AudioProcessorListener
 {
 public:
-    ProcessorProgramPropertyComp (const String& name, AudioProcessor& p, int index_)
+    ProcessorProgramPropertyComp (const String& name, AudioProcessor& p)
         : PropertyComponent (name),
-          owner (p),
-          index (index_)
+          owner (p)
     {
         owner.addListener (this);
     }
@@ -101,7 +98,6 @@ public:
 
 private:
     AudioProcessor& owner;
-    const int index;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProcessorProgramPropertyComp)
 };
@@ -129,7 +125,7 @@ public:
             if (name.isEmpty())
                 name = "Unnamed";
 
-            ProcessorProgramPropertyComp* const pc = new ProcessorProgramPropertyComp (name, *p, i);
+            ProcessorProgramPropertyComp* const pc = new ProcessorProgramPropertyComp (name, *p);
             programs.add (pc);
             totalHeight += pc->getPreferredHeight();
         }
@@ -157,8 +153,7 @@ private:
 
 //==============================================================================
 PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* const node,
-                                          WindowFormatType type,
-                                          AudioProcessorGraph& audioGraph)
+                                          WindowFormatType type)
 {
     jassert (node != nullptr);
 
@@ -193,7 +188,7 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* const node,
         if (AudioPluginInstance* const plugin = dynamic_cast<AudioPluginInstance*> (processor))
             ui->setName (plugin->getName());
 
-        return new PluginWindow (ui, node, type, audioGraph);
+        return new PluginWindow (ui, node, type);
     }
 
     return nullptr;
@@ -395,7 +390,7 @@ public:
                             default: break;
                         };
 
-                        if (PluginWindow* const w = PluginWindow::getWindowFor (f, type, graph.getGraph()))
+                        if (PluginWindow* const w = PluginWindow::getWindowFor (f, type))
                             w->toFront (true);
                     }
                 }
@@ -429,7 +424,7 @@ public:
         else if (e.getNumberOfClicks() == 2)
         {
             if (const AudioProcessorGraph::Node::Ptr f = graph.getNodeForId (filterID))
-                if (PluginWindow* const w = PluginWindow::getWindowFor (f, PluginWindow::Normal, graph.getGraph()))
+                if (PluginWindow* const w = PluginWindow::getWindowFor (f, PluginWindow::Normal))
                     w->toFront (true);
         }
     }

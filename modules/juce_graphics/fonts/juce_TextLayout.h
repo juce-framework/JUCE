@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TEXTLAYOUT_H_INCLUDED
-#define JUCE_TEXTLAYOUT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -45,10 +44,8 @@ public:
     TextLayout();
     TextLayout (const TextLayout&);
     TextLayout& operator= (const TextLayout&);
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     TextLayout (TextLayout&&) noexcept;
     TextLayout& operator= (TextLayout&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~TextLayout();
@@ -84,7 +81,7 @@ public:
         The position of the text within the rectangle is controlled by the justification
         flags set in the original AttributedString that was used to create this layout.
     */
-    void draw (Graphics&, const Rectangle<float>& area) const;
+    void draw (Graphics&, Rectangle<float> area) const;
 
     //==============================================================================
     /** A positioned glyph. */
@@ -192,5 +189,3 @@ private:
 
     JUCE_LEAK_DETECTOR (TextLayout)
 };
-
-#endif   // JUCE_TEXTLAYOUT_H_INCLUDED

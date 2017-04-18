@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSCRECEIVER_H_INCLUDED
-#define JUCE_OSCRECEIVER_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -212,6 +211,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCReceiver)
 };
-
-
-#endif // JUCE_OSCRECEIVER_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MIDIBUFFER_H_INCLUDED
-#define JUCE_MIDIBUFFER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -236,6 +235,3 @@ public:
 private:
     JUCE_LEAK_DETECTOR (MidiBuffer)
 };
-
-
-#endif   // JUCE_MIDIBUFFER_H_INCLUDED

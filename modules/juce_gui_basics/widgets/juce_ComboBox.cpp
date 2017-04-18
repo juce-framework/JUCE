@@ -200,15 +200,15 @@ int ComboBox::getNumItems() const noexcept
 
 String ComboBox::getItemText (const int index) const
 {
-    if (const PopupMenu::Item* const item = getItemForIndex (index))
+    if (auto* item = getItemForIndex (index))
         return item->text;
 
-    return String();
+    return {};
 }
 
 int ComboBox::getItemId (const int index) const noexcept
 {
-    if (const PopupMenu::Item* const item = getItemForIndex (index))
+    if (auto* item = getItemForIndex (index))
         return item->itemID;
 
     return 0;
@@ -223,7 +223,7 @@ int ComboBox::indexOfItemId (const int itemId) const noexcept
 
         while (iterator.next())
         {
-            PopupMenu::Item &item = iterator.getItem();
+            auto& item = iterator.getItem();
 
             if (item.itemID == itemId)
                 return n;
@@ -530,24 +530,35 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
 void ComboBox::showPopup()
 {
-    PopupMenu::MenuItemIterator iterator (currentMenu, true);
-    const int selectedId = getSelectedId();
+    PopupMenu noChoicesMenu;
+    const bool hasItems = (currentMenu.getNumItems() > 0);
 
-    while (iterator.next())
+    if (hasItems)
     {
-        PopupMenu::Item &item = iterator.getItem();
+        PopupMenu::MenuItemIterator iterator (currentMenu, true);
+        const int selectedId = getSelectedId();
 
-        if (item.itemID != 0)
-            item.isTicked = (item.itemID == selectedId);
+        while (iterator.next())
+        {
+            PopupMenu::Item &item = iterator.getItem();
+
+            if (item.itemID != 0)
+                item.isTicked = (item.itemID == selectedId);
+        }
+    }
+    else
+    {
+        noChoicesMenu.addItem (1, noChoicesMessage, false, false);
     }
 
-    currentMenu.setLookAndFeel(&getLookAndFeel());
-    currentMenu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                            .withItemThatMustBeVisible (getSelectedId())
-                                            .withMinimumWidth (getWidth())
-                                            .withMaximumNumColumns (1)
-                                            .withStandardItemHeight (label->getHeight()),
-                        ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
+    PopupMenu& menuToShow = (hasItems ? currentMenu : noChoicesMenu);
+    menuToShow.setLookAndFeel (&getLookAndFeel());
+    menuToShow.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                                  .withItemThatMustBeVisible (getSelectedId())
+                                                  .withMinimumWidth (getWidth())
+                                                  .withMaximumNumColumns (1)
+                                                  .withStandardItemHeight (label->getHeight()),
+                              ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
 }
 
 //==============================================================================

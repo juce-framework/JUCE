@@ -26,6 +26,8 @@ MouseEvent::MouseEvent (MouseInputSource inputSource,
                         Point<float> pos,
                         ModifierKeys modKeys,
                         float force,
+                        float o, float r,
+                        float tX, float tY,
                         Component* const eventComp,
                         Component* const originator,
                         Time time,
@@ -38,6 +40,8 @@ MouseEvent::MouseEvent (MouseInputSource inputSource,
       y (roundToInt (pos.y)),
       mods (modKeys),
       pressure (force),
+      orientation (o), rotation (r),
+      tiltX (tX), tiltY (tY),
       eventComponent (eventComp),
       originalComponent (originator),
       eventTime (time),
@@ -59,23 +63,24 @@ MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) cons
     jassert (otherComponent != nullptr);
 
     return MouseEvent (source, otherComponent->getLocalPoint (eventComponent, position),
-                       mods, pressure, otherComponent, originalComponent, eventTime,
+                       mods, pressure, orientation, rotation, tiltX, tiltY,
+                       otherComponent, originalComponent, eventTime,
                        otherComponent->getLocalPoint (eventComponent, mouseDownPos),
                        mouseDownTime, numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 MouseEvent MouseEvent::withNewPosition (Point<float> newPosition) const noexcept
 {
-    return MouseEvent (source, newPosition, mods, pressure, eventComponent,
-                       originalComponent, eventTime, mouseDownPos, mouseDownTime,
+    return MouseEvent (source, newPosition, mods, pressure, orientation, rotation, tiltX, tiltY,
+                       eventComponent, originalComponent, eventTime, mouseDownPos, mouseDownTime,
                        numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 MouseEvent MouseEvent::withNewPosition (Point<int> newPosition) const noexcept
 {
-    return MouseEvent (source, newPosition.toFloat(), mods, pressure, eventComponent,
-                       originalComponent, eventTime, mouseDownPos, mouseDownTime,
-                       numberOfClicks, wasMovedSinceMouseDown != 0);
+    return MouseEvent (source, newPosition.toFloat(), mods, pressure, orientation, rotation,
+                       tiltX, tiltY, eventComponent,  originalComponent, eventTime, mouseDownPos,
+                       mouseDownTime, numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 //==============================================================================
@@ -120,6 +125,9 @@ int MouseEvent::getMouseDownScreenX() const                     { return getMous
 int MouseEvent::getMouseDownScreenY() const                     { return getMouseDownScreenPosition().y; }
 
 bool MouseEvent::isPressureValid() const noexcept               { return pressure > 0.0f && pressure < 1.0f; }
+bool MouseEvent::isOrientationValid() const noexcept            { return orientation >= 0.0f && orientation <= 2.0f * float_Pi; }
+bool MouseEvent::isRotationValid() const noexcept               { return rotation >= 0 && rotation <= 2.0f * float_Pi; }
+bool MouseEvent::isTiltValid (bool isX) const noexcept          { return isX ? (tiltX >= -1.0f && tiltX <= 1.0f) : (tiltY >= -1.0f && tiltY <= 1.0f); }
 
 //==============================================================================
 static int doubleClickTimeOutMs = 400;

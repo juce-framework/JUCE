@@ -51,7 +51,7 @@ void ApplicationCommandManager::registerCommand (const ApplicationCommandInfo& n
     // the name isn't optional!
     jassert (newCommand.shortName.isNotEmpty());
 
-    if (ApplicationCommandInfo* command = getMutableCommandForID (newCommand.commandID))
+    if (auto* command = getMutableCommandForID (newCommand.commandID))
     {
         // Trying to re-register the same command ID with different parameters can often indicate a typo.
         // This assertion is here because I've found it useful catching some mistakes, but it may also cause
@@ -132,19 +132,19 @@ const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const 
 
 String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const noexcept
 {
-    if (const ApplicationCommandInfo* const ci = getCommandForID (commandID))
+    if (auto* ci = getCommandForID (commandID))
         return ci->shortName;
 
-    return String();
+    return {};
 }
 
 String ApplicationCommandManager::getDescriptionOfCommand (const CommandID commandID) const noexcept
 {
-    if (const ApplicationCommandInfo* const ci = getCommandForID (commandID))
+    if (auto* ci = getCommandForID (commandID))
         return ci->description.isNotEmpty() ? ci->description
                                             : ci->shortName;
 
-    return String();
+    return {};
 }
 
 StringArray ApplicationCommandManager::getCommandCategories() const
@@ -186,7 +186,7 @@ bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::Invocati
     bool ok = false;
     ApplicationCommandInfo commandInfo (0);
 
-    if (ApplicationCommandTarget* const target = getTargetForCommand (inf.commandID, commandInfo))
+    if (auto* target = getTargetForCommand (inf.commandID, commandInfo))
     {
         ApplicationCommandTarget::InvocationInfo info (inf);
         info.commandFlags = commandInfo.flags;
@@ -248,7 +248,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 
     if (c == nullptr)
     {
-        if (TopLevelWindow* const activeWindow = TopLevelWindow::getActiveTopLevelWindow())
+        if (auto* activeWindow = TopLevelWindow::getActiveTopLevelWindow())
         {
             c = activeWindow->getPeer()->getLastFocusedSubcomponent();
 
@@ -259,12 +259,12 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 
     if (c == nullptr && Process::isForegroundProcess())
     {
-        Desktop& desktop = Desktop::getInstance();
+        auto& desktop = Desktop::getInstance();
 
         // getting a bit desperate now: try all desktop comps..
         for (int i = desktop.getNumComponents(); --i >= 0;)
-            if (ComponentPeer* const peer = desktop.getComponent(i)->getPeer())
-                if (ApplicationCommandTarget* const target = findTargetForComponent (peer->getLastFocusedSubcomponent()))
+            if (auto* peer = desktop.getComponent(i)->getPeer())
+                if (auto* target = findTargetForComponent (peer->getLastFocusedSubcomponent()))
                     return target;
     }
 
@@ -274,11 +274,11 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         // component that really should get the event. And if not, the event will
         // still be passed up to the top level window anyway, so let's send it to the
         // content comp.
-        if (ResizableWindow* const resizableWindow = dynamic_cast<ResizableWindow*> (c))
-            if (Component* const content = resizableWindow->getContentComponent())
+        if (auto* resizableWindow = dynamic_cast<ResizableWindow*> (c))
+            if (auto* content = resizableWindow->getContentComponent())
                 c = content;
 
-        if (ApplicationCommandTarget* const target = findTargetForComponent (c))
+        if (auto* target = findTargetForComponent (c))
             return target;
     }
 

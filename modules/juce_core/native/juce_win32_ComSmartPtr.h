@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_WIN32_COMSMARTPTR_H_INCLUDED
-#define JUCE_WIN32_COMSMARTPTR_H_INCLUDED
+#pragma once
 
 #if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
 #ifdef __uuidof
@@ -182,5 +181,3 @@ public:
         return ComBaseClassHelperBase <ComClass>::QueryInterface (refId, result);
     }
 };
-
-#endif   // JUCE_WIN32_COMSMARTPTR_H_INCLUDED

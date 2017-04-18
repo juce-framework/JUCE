@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_FILEHELPERS_H_INCLUDED
-#define JUCER_FILEHELPERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -54,14 +53,14 @@ namespace FileHelpers
 }
 
 //==============================================================================
-const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx;swift;s;asm";
+const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx;swift;s;asm;r";
 const char* const headerFileExtensions          = "h;hpp;hxx;hh;inl";
 const char* const cOrCppFileExtensions          = "cpp;cc;cxx;c";
 const char* const cppFileExtensions             = "cpp;cc;cxx";
 const char* const objCFileExtensions            = "mm;m";
 const char* const asmFileExtensions             = "s;S;asm";
 const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;swift;s;S;asm;h;hpp;hxx;hh;inl";
-const char* const browseableFileExtensions      = "cpp;mm;m;c;cc;cxx;swift;s;S;asm;r;h;hpp;hxx;hh;inl;txt;md;rtf";
+const char* const browseableFileExtensions      = "cpp;mm;m;c;cc;cxx;swift;s;S;asm;h;hpp;hxx;hh;inl;txt;md;rtf";
 const char* const fileTypesToCompileByDefault   = "cpp;mm;c;m;cc;cxx;swift;s;S;asm;r";
 
 //==============================================================================
@@ -91,6 +90,3 @@ private:
     Time fileModificationTime;
     int64 fileHashCode, fileSize;
 };
-
-
-#endif   // JUCER_FILEHELPERS_H_INCLUDED

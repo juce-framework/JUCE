@@ -1133,7 +1133,7 @@ struct StateHelpers
 
         ~ShaderQuadQueue() noexcept
         {
-            static_jassert (sizeof (VertexInfo) == 8);
+            static_assert (sizeof (VertexInfo) == 8, "Sanity check VertexInfo size");
             context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
             context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
             context.extensions.glDeleteBuffers (2, buffers);
@@ -1200,15 +1200,15 @@ struct StateHelpers
 
         void add (const RectangleList<int>& list, const PixelARGB colour) noexcept
         {
-            for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
-                add (*i, colour);
+            for (auto& i : list)
+                add (i, colour);
         }
 
         void add (const RectangleList<int>& list, const Rectangle<int>& clip, const PixelARGB colour) noexcept
         {
-            for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
+            for (auto& i : list)
             {
-                const Rectangle<int> r (i->getIntersection (clip));
+                auto r = i.getIntersection (clip);
 
                 if (! r.isEmpty())
                     add (r, colour);

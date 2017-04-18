@@ -27,6 +27,11 @@ class ComponentAnimator::AnimationTask
 public:
     AnimationTask (Component* c) noexcept  : component (c) {}
 
+    ~AnimationTask()
+    {
+        masterReference.clear();
+    }
+
     void reset (const Rectangle<int>& finalBounds,
                 float finalAlpha,
                 int millisecondsToSpendMoving,
@@ -63,14 +68,15 @@ public:
 
     bool useTimeslice (const int elapsed)
     {
-        if (Component* const c = proxy != nullptr ? static_cast<Component*> (proxy)
-                                                  : static_cast<Component*> (component))
+        if (auto* c = proxy != nullptr ? static_cast<Component*> (proxy)
+                                       : static_cast<Component*> (component))
         {
             msElapsed += elapsed;
             double newProgress = msElapsed / (double) msTotal;
 
             if (newProgress >= 0 && newProgress < 1.0)
             {
+                const WeakReference<AnimationTask> weakRef (this);
                 newProgress = timeToDistance (newProgress);
                 const double delta = (newProgress - lastProgress) / (1.0 - lastProgress);
                 jassert (newProgress >= lastProgress);
@@ -99,6 +105,11 @@ public:
                         }
                     }
 
+                    // Check whether the animation was cancelled/deleted during
+                    // a callback during the setBounds method
+                    if (weakRef.wasObjectDeleted())
+                        return false;
+
                     if (isChangingAlpha)
                     {
                         alpha += (destAlpha - alpha) * delta;
@@ -120,18 +131,19 @@ public:
     {
         if (component != nullptr)
         {
+            const WeakReference<AnimationTask> weakRef (this);
             component->setAlpha ((float) destAlpha);
             component->setBounds (destination);
 
-            if (proxy != nullptr)
-                component->setVisible (destAlpha > 0);
+            if (! weakRef.wasObjectDeleted())
+                if (proxy != nullptr)
+                    component->setVisible (destAlpha > 0);
         }
     }
 
     //==============================================================================
-    class ProxyComponent  : public Component
+    struct ProxyComponent  : public Component
     {
-    public:
         ProxyComponent (Component& c)
         {
             setWantsKeyboardFocus (false);
@@ -140,15 +152,15 @@ public:
             setAlpha (c.getAlpha());
             setInterceptsMouseClicks (false, false);
 
-            if (Component* const parent = c.getParentComponent())
+            if (auto* parent = c.getParentComponent())
                 parent->addAndMakeVisible (this);
             else if (c.isOnDesktop() && c.getPeer() != nullptr)
                 addToDesktop (c.getPeer()->getStyleFlags() | ComponentPeer::windowIgnoresKeyPresses);
             else
                 jassertfalse; // seem to be trying to animate a component that's not visible..
 
-            const float scale = (float) Desktop::getInstance().getDisplays()
-                                            .getDisplayContaining (getScreenBounds().getCentre()).scale;
+            auto scale = (float) Desktop::getInstance().getDisplays()
+                                  .getDisplayContaining (getScreenBounds().getCentre()).scale;
 
             image = c.createComponentSnapshot (c.getLocalBounds(), false, scale);
 
@@ -169,6 +181,9 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyComponent)
     };
 
+    WeakReference<AnimationTask>::Master masterReference;
+    friend class WeakReference<AnimationTask>;
+
     WeakReference<Component> component;
     ScopedPointer<Component> proxy;
 
@@ -187,6 +202,8 @@ private:
                             : 0.5 * (startSpeed + 0.5 * (midSpeed - startSpeed))
                                 + (time - 0.5) * (midSpeed + (time - 0.5) * (endSpeed - midSpeed));
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnimationTask)
 };
 
 //==============================================================================
@@ -216,7 +233,7 @@ void ComponentAnimator::animateComponent (Component* const component,
 
     if (component != nullptr)
     {
-        AnimationTask* at = findTaskFor (component);
+        auto* at = findTaskFor (component);
 
         if (at == nullptr)
         {
@@ -273,7 +290,7 @@ void ComponentAnimator::cancelAllAnimations (const bool moveComponentsToTheirFin
 void ComponentAnimator::cancelAnimation (Component* const component,
                                          const bool moveComponentToItsFinalPosition)
 {
-    if (AnimationTask* const at = findTaskFor (component))
+    if (auto* at = findTaskFor (component))
     {
         if (moveComponentToItsFinalPosition)
             at->moveToFinalDestination();
@@ -287,7 +304,7 @@ Rectangle<int> ComponentAnimator::getComponentDestination (Component* const comp
 {
     jassert (component != nullptr);
 
-    if (AnimationTask* const at = findTaskFor (component))
+    if (auto* at = findTaskFor (component))
         return at->destination;
 
     return component->getBounds();
@@ -305,18 +322,18 @@ bool ComponentAnimator::isAnimating() const noexcept
 
 void ComponentAnimator::timerCallback()
 {
-    const uint32 timeNow = Time::getMillisecondCounter();
+    auto timeNow = Time::getMillisecondCounter();
 
-    if (lastTime == 0 || lastTime == timeNow)
+    if (lastTime == 0)
         lastTime = timeNow;
 
-    const int elapsed = (int) (timeNow - lastTime);
+    auto elapsed = (int) (timeNow - lastTime);
 
-    for (int i = tasks.size(); --i >= 0;)
+    for (auto* task : Array<AnimationTask*> (tasks.begin(), tasks.size()))
     {
-        if (! tasks.getUnchecked(i)->useTimeslice (elapsed))
+        if (tasks.contains (task) && ! task->useTimeslice (elapsed))
         {
-            tasks.remove (i);
+            tasks.removeObject (task);
             sendChangeMessage();
         }
     }

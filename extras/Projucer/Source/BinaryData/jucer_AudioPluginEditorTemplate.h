@@ -8,8 +8,7 @@
   ==============================================================================
 */
 
-#ifndef HEADERGUARD
-#define HEADERGUARD
+#pragma once
 
 EDITORHEADERS
 
@@ -34,6 +33,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EDITORCLASSNAME)
 };
-
-
-#endif  // HEADERGUARD

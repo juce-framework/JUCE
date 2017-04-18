@@ -223,13 +223,23 @@ bool JPEGImageFormat::usesFileExtension (const File& f)   { return f.hasFileExte
 
 bool JPEGImageFormat::canUnderstand (InputStream& in)
 {
-    const int bytesNeeded = 10;
+    const int bytesNeeded = 24;
     uint8 header [bytesNeeded];
 
-    return in.read (header, bytesNeeded) == bytesNeeded
+    if (in.read (header, bytesNeeded) == bytesNeeded
             && header[0] == 0xff
             && header[1] == 0xd8
-            && header[2] == 0xff;
+            && header[2] == 0xff)
+        return true;
+
+   #if JUCE_USING_COREIMAGE_LOADER
+    return header[20] == 'j'
+        && header[21] == 'p'
+        && header[22] == '2'
+        && header[23] == ' ';
+   #endif
+
+    return false;
 }
 
 #if JUCE_USING_COREIMAGE_LOADER

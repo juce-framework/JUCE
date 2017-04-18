@@ -56,6 +56,7 @@ public:
         MuseReceptorGeneric,
         Reaper,
         Renoise,
+        SADiE,
         SteinbergCubase4,
         SteinbergCubase5,
         SteinbergCubase5Bridged,
@@ -102,6 +103,7 @@ public:
     bool isReceptor() const noexcept          { return type == MuseReceptorGeneric; }
     bool isReaper() const noexcept            { return type == Reaper; }
     bool isRenoise() const noexcept           { return type == Renoise; }
+    bool isSADiE() const noexcept             { return type == SADiE; }
     bool isSamplitude() const noexcept        { return type == MagixSamplitude; }
     bool isSonar() const noexcept             { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
     bool isSteinbergTestHost() const noexcept { return type == SteinbergTestHost; }
@@ -138,6 +140,7 @@ public:
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
             case Renoise:                  return "Renoise";
+            case SADiE:                    return "SADiE";
             case SteinbergCubase4:         return "Steinberg Cubase 4";
             case SteinbergCubase5:         return "Steinberg Cubase 5";
             case SteinbergCubase5Bridged:  return "Steinberg Cubase 5 Bridged";
@@ -165,6 +168,14 @@ public:
 
         return "Unknown";
     }
+
+    //==============================================================================
+    bool isInterAppAudioConnected() const;
+    void switchToHostApplication() const;
+
+   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
+    Image getHostIcon (int size) const;
+   #endif
 
     //==============================================================================
     static String getHostPath()
@@ -268,12 +279,14 @@ private:
         if (hostFilename.containsIgnoreCase ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase     ("Bitwig Studio"))     return BitwigStudio;
+        if (hostFilename.containsIgnoreCase ("Sadie"))             return SADiE;
 
        #elif JUCE_LINUX
         if (hostFilename.containsIgnoreCase ("Ardour"))            return Ardour;
         if (hostFilename.startsWith         ("Bitwig"))            return BitwigStudio;
 
        #elif JUCE_IOS
+       #elif JUCE_ANDROID
        #else
         #error
        #endif

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAWABLEBUTTON_H_INCLUDED
-#define JUCE_DRAWABLEBUTTON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -149,7 +148,7 @@ public:
     enum ColourIds
     {
         textColourId             = 0x1004010,  /**< The colour to use for the button's text label. */
-        textColourOnId           = 0x1004013,  /**< The colour to use for the button's text.when the button's toggle state is "on". */
+        textColourOnId           = 0x1004013,  /**< The colour to use for the button's text when the button's toggle state is "on". */
 
         backgroundColourId       = 0x1004011,  /**< The colour used to fill the button's background (when
                                                     the button is toggled 'off'). Note that if you use the
@@ -183,6 +182,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton)
 };
-
-
-#endif   // JUCE_DRAWABLEBUTTON_H_INCLUDED

@@ -29,10 +29,7 @@
 */
 
 MessageManager::MessageManager() noexcept
-  : quitMessagePosted (false),
-    quitMessageReceived (false),
-    messageThreadId (Thread::getCurrentThreadId()),
-    threadWithLock (0)
+  : messageThreadId (Thread::getCurrentThreadId())
 {
     if (JUCEApplicationBase::isStandaloneApp())
         Thread::setCurrentThreadName ("Juce Message Thread");
@@ -74,7 +71,7 @@ void MessageManager::deleteInstance()
 //==============================================================================
 bool MessageManager::MessageBase::post()
 {
-    MessageManager* const mm = MessageManager::instance;
+    auto* mm = MessageManager::instance;
 
     if (mm == nullptr || mm->quitMessagePosted || ! postMessageToSystemQueue (this))
     {
@@ -118,7 +115,7 @@ public:
 
     void messageCallback() override
     {
-        if (MessageManager* const mm = MessageManager::instance)
+        if (auto* mm = MessageManager::instance)
             mm->quitMessageReceived = true;
     }
 
@@ -149,30 +146,11 @@ void MessageManager::stopDispatchLoop()
 #endif
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
-struct AsyncFunction  : private MessageManager::MessageBase
-{
-    AsyncFunction (std::function<void(void)> f)  : fn (f)  { post(); }
-
-private:
-    std::function<void(void)> fn;
-    void messageCallback() override    { fn(); }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncFunction)
-};
-
-void MessageManager::callAsync (std::function<void(void)> f)
-{
-    new AsyncFunction (f);
-}
-#endif
-
-//==============================================================================
 class AsyncFunctionCallback   : public MessageManager::MessageBase
 {
 public:
     AsyncFunctionCallback (MessageCallbackFunction* const f, void* const param)
-        : result (nullptr), func (f), parameter (param)
+        : func (f), parameter (param)
     {}
 
     void messageCallback() override
@@ -182,7 +160,7 @@ public:
     }
 
     WaitableEvent finished;
-    void* volatile result;
+    void* volatile result = nullptr;
 
 private:
     MessageCallbackFunction* const func;
@@ -287,18 +265,26 @@ public:
 
 //==============================================================================
 MessageManagerLock::MessageManagerLock (Thread* const threadToCheck)
-    : blockingMessage(), locked (attemptLock (threadToCheck, nullptr))
+    : blockingMessage(), checker (threadToCheck, nullptr),
+      locked (attemptLock (threadToCheck != nullptr ? &checker : nullptr))
 {
 }
 
 MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal)
-    : blockingMessage(), locked (attemptLock (nullptr, jobToCheckForExitSignal))
+    : blockingMessage(), checker (nullptr, jobToCheckForExitSignal),
+      locked (attemptLock (jobToCheckForExitSignal != nullptr ? &checker : nullptr))
 {
 }
 
-bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob* const job)
+MessageManagerLock::MessageManagerLock (BailOutChecker& bailOutChecker)
+    : blockingMessage(), checker (nullptr, nullptr),
+      locked (attemptLock (&bailOutChecker))
 {
-    MessageManager* const mm = MessageManager::instance;
+}
+
+bool MessageManagerLock::attemptLock (BailOutChecker* bailOutChecker)
+{
+    auto* mm = MessageManager::instance;
 
     if (mm == nullptr)
         return false;
@@ -306,7 +292,7 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
     if (mm->currentThreadHasLockedMessageManager())
         return true;
 
-    if (threadToCheck == nullptr && job == nullptr)
+    if (bailOutChecker == nullptr)
     {
         mm->lockingLock.enter();
     }
@@ -314,8 +300,7 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
     {
         while (! mm->lockingLock.tryEnter())
         {
-            if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
-                  || (job != nullptr && job->shouldExit()))
+            if (bailOutChecker->shouldAbortAcquiringLock())
                 return false;
 
             Thread::yield();
@@ -332,8 +317,7 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
 
     while (! blockingMessage->lockedEvent.wait (20))
     {
-        if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
-              || (job != nullptr && job->shouldExit()))
+        if (bailOutChecker != nullptr && bailOutChecker->shouldAbortAcquiringLock())
         {
             blockingMessage->releaseEvent.signal();
             blockingMessage = nullptr;
@@ -352,7 +336,7 @@ MessageManagerLock::~MessageManagerLock() noexcept
 {
     if (blockingMessage != nullptr)
     {
-        MessageManager* const mm = MessageManager::instance;
+        auto* mm = MessageManager::instance;
 
         jassert (mm == nullptr || mm->currentThreadHasLockedMessageManager());
 
@@ -365,6 +349,19 @@ MessageManagerLock::~MessageManagerLock() noexcept
             mm->lockingLock.exit();
         }
     }
+}
+
+//==============================================================================
+MessageManagerLock::ThreadChecker::ThreadChecker (Thread* const threadToUse,
+                                                  ThreadPoolJob* const threadJobToUse)
+    : threadToCheck (threadToUse), job (threadJobToUse)
+{
+}
+
+bool MessageManagerLock::ThreadChecker::shouldAbortAcquiringLock()
+{
+    return (threadToCheck != nullptr && threadToCheck->threadShouldExit())
+        || (job           != nullptr && job->shouldExit());
 }
 
 //==============================================================================

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef PROJUCER_LOGINFORM_H_INCLUDED
-#define PROJUCER_LOGINFORM_H_INCLUDED
+#pragma once
 
 
 class LoginForm  : public Component,
@@ -312,6 +311,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoginForm)
 };
-
-
-#endif  // PROJUCER_LOGINFORM_H_INCLUDED

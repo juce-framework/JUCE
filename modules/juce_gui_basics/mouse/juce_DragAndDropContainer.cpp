@@ -40,8 +40,7 @@ public:
         : sourceDetails (desc, sourceComponent, Point<int>()),
           image (im), owner (ddc),
           mouseDragSource (mouseSource),
-          imageOffset (offset),
-          hasCheckedForExternalDrag (false)
+          imageOffset (offset)
     {
         updateSize();
 
@@ -211,7 +210,7 @@ private:
     DragAndDropContainer& owner;
     WeakReference<Component> mouseDragSource, currentlyOverComp;
     const Point<int> imageOffset;
-    bool hasCheckedForExternalDrag;
+    bool hasCheckedForExternalDrag = false;
     Time lastTimeOverTarget;
 
     void updateSize()
@@ -294,27 +293,6 @@ private:
                 target->itemDragMove (details);
     }
 
-    struct ExternalDragAndDropMessage  : public CallbackMessage
-    {
-        ExternalDragAndDropMessage (const StringArray& f, bool canMove)
-            : files (f), canMoveFiles (canMove)
-        {}
-
-        ExternalDragAndDropMessage (const String& t) : text (t), canMoveFiles() {}
-
-        void messageCallback() override
-        {
-            if (text.isEmpty())
-                DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles);
-            else
-                DragAndDropContainer::performExternalDragDropOfText (text);
-        }
-
-        String text;
-        StringArray files;
-        bool canMoveFiles;
-    };
-
     void checkForExternalDrag (DragAndDropTarget::SourceDetails& details, Point<int> screenPos)
     {
         if (! hasCheckedForExternalDrag)
@@ -322,21 +300,26 @@ private:
             if (Desktop::getInstance().findComponentAt (screenPos) == nullptr)
             {
                 hasCheckedForExternalDrag = true;
-                StringArray files;
-                String text;
-                bool canMoveFiles = false;
 
                 if (ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
                 {
+                    StringArray files;
+                    bool canMoveFiles = false;
+
                     if (owner.shouldDropFilesWhenDraggedExternally (details, files, canMoveFiles) && ! files.isEmpty())
                     {
-                        (new ExternalDragAndDropMessage (files, canMoveFiles))->post();
+                        MessageManager::callAsync ([=]()  { DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles); });
                         deleteSelf();
+                        return;
                     }
-                    else if (owner.shouldDropTextWhenDraggedExternally (details, text) && text.isNotEmpty())
+
+                    String text;
+
+                    if (owner.shouldDropTextWhenDraggedExternally (details, text) && text.isNotEmpty())
                     {
-                        (new ExternalDragAndDropMessage (text))->post();
+                        MessageManager::callAsync ([=]()  { DragAndDropContainer::performExternalDragDropOfText (text); });
                         deleteSelf();
+                        return;
                     }
                 }
             }

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MENUBARMODEL_H_INCLUDED
-#define JUCE_MENUBARMODEL_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -130,7 +129,7 @@ public:
     virtual void menuItemSelected (int menuItemID,
                                    int topLevelMenuIndex) = 0;
 
-    /** This is called when the user starts/stops navigating the maenu bar.
+    /** This is called when the user starts/stops navigating the menu bar.
 
         @param isActive              true when the user starts navigating the menu bar
     */
@@ -188,6 +187,3 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the MenuBarModel::Listener class directly. */
 typedef MenuBarModel::Listener MenuBarModelListener;
-
-
-#endif   // JUCE_MENUBARMODEL_H_INCLUDED

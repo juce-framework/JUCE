@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RENDERINGHELPERS_H_INCLUDED
-#define JUCE_RENDERINGHELPERS_H_INCLUDED
+#pragma once
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -1606,8 +1605,8 @@ struct ClipRegions
             RectangleList<int> inverse (edgeTable.getMaximumBounds());
 
             if (inverse.subtract (r))
-                for (const Rectangle<int>* i = inverse.begin(), * const e = inverse.end(); i != e; ++i)
-                    edgeTable.excludeRectangle (*i);
+                for (auto& i : inverse)
+                    edgeTable.excludeRectangle (i);
 
             return edgeTable.isEmpty() ? nullptr : this;
         }
@@ -1846,14 +1845,14 @@ struct ClipRegions
         template <class Renderer>
         void iterate (Renderer& r) const noexcept
         {
-            for (const Rectangle<int>* i = clip.begin(), * const e = clip.end(); i != e; ++i)
+            for (auto& i : clip)
             {
-                const int x = i->getX();
-                const int w = i->getWidth();
+                const int x = i.getX();
+                const int w = i.getWidth();
                 jassert (w > 0);
-                const int bottom = i->getBottom();
+                const int bottom = i.getBottom();
 
-                for (int y = i->getY(); y < bottom; ++y)
+                for (int y = i.getY(); y < bottom; ++y)
                 {
                     r.setEdgeTableYPos (y);
                     r.handleEdgeTableLineFull (x, w);
@@ -1873,9 +1872,9 @@ struct ClipRegions
             template <class Renderer>
             void iterate (Renderer& r) const noexcept
             {
-                for (const Rectangle<int>* i = clip.begin(), * const e = clip.end(); i != e; ++i)
+                for (auto& i : clip)
                 {
-                    const Rectangle<int> rect (i->getIntersection (area));
+                    auto rect = i.getIntersection (area);
 
                     if (! rect.isEmpty())
                     {
@@ -1913,12 +1912,12 @@ struct ClipRegions
             {
                 const RenderingHelpers::FloatRectangleRasterisingInfo f (area);
 
-                for (const Rectangle<int>* i = clip.begin(), * const e = clip.end(); i != e; ++i)
+                for (auto& i : clip)
                 {
-                    const int clipLeft   = i->getX();
-                    const int clipRight  = i->getRight();
-                    const int clipTop    = i->getY();
-                    const int clipBottom = i->getBottom();
+                    const int clipLeft   = i.getX();
+                    const int clipRight  = i.getRight();
+                    const int clipTop    = i.getY();
+                    const int clipBottom = i.getBottom();
 
                     if (f.totalBottom > clipTop && f.totalTop < clipBottom
                          && f.totalRight > clipLeft && f.totalLeft < clipRight)
@@ -2067,8 +2066,8 @@ public:
                 cloneClipIfMultiplyReferenced();
                 RectangleList<int> scaledList;
 
-                for (const Rectangle<int>* i = r.begin(), * const e = r.end(); i != e; ++i)
-                    scaledList.add (transform.transformed (*i));
+                for (auto& i : r)
+                    scaledList.add (transform.transformed (i));
 
                 clip = clip->clipToRectangleList (scaledList);
             }
@@ -2685,5 +2684,3 @@ protected:
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
-
-#endif   // JUCE_RENDERINGHELPERS_H_INCLUDED

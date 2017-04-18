@@ -65,8 +65,15 @@ Block::~Block() {}
 void Block::addDataInputPortListener (DataInputPortListener* listener)      { dataInputPortListeners.add (listener); }
 void Block::removeDataInputPortListener (DataInputPortListener* listener)   { dataInputPortListeners.remove (listener); }
 
+void Block::addProgramEventListener (ProgramEventListener* listener)        { programEventListeners.add (listener); }
+void Block::removeProgramEventListener (ProgramEventListener* listener)     { programEventListeners.remove (listener); }
+
+
 bool Block::ConnectionPort::operator== (const ConnectionPort& other) const noexcept { return edge == other.edge && index == other.index; }
 bool Block::ConnectionPort::operator!= (const ConnectionPort& other) const noexcept { return ! operator== (other); }
+
+Block::Program::Program (Block& b) : block (b) {}
+Block::Program::~Program() {}
 
 //==============================================================================
 TouchSurface::TouchSurface (Block& b) : block (b) {}
@@ -90,9 +97,6 @@ void ControlButton::removeListener (Listener* l)        { listeners.remove (l); 
 //==============================================================================
 LEDGrid::LEDGrid (Block& b) : block (b) {}
 LEDGrid::~LEDGrid() {}
-
-LEDGrid::Program::Program (LEDGrid& l) : ledGrid (l) {}
-LEDGrid::Program::~Program() {}
 
 LEDGrid::Renderer::~Renderer() {}
 

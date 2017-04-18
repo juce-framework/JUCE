@@ -134,7 +134,6 @@ XmlElement& XmlElement::operator= (const XmlElement& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 XmlElement::XmlElement (XmlElement&& other) noexcept
     : nextListItem      (static_cast<LinkedListPointer<XmlElement>&&> (other.nextListItem)),
       firstChildElement (static_cast<LinkedListPointer<XmlElement>&&> (other.firstChildElement)),
@@ -157,7 +156,6 @@ XmlElement& XmlElement::operator= (XmlElement&& other) noexcept
 
     return *this;
 }
-#endif
 
 void XmlElement::copyChildrenAndAttributesFrom (const XmlElement& other)
 {

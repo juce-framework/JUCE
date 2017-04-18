@@ -23,8 +23,7 @@
 */
 
 
-#ifndef MAINCOMPONENT_H_INCLUDED
-#define MAINCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class MainComponent : public Component,
@@ -195,6 +194,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
-
-
-#endif  // MAINCOMPONENT_H_INCLUDED

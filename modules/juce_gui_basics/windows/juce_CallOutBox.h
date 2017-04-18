@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CALLOUTBOX_H_INCLUDED
-#define JUCE_CALLOUTBOX_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -181,6 +180,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox)
 };
-
-
-#endif   // JUCE_CALLOUTBOX_H_INCLUDED

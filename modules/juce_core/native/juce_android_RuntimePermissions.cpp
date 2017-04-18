@@ -40,7 +40,9 @@ namespace
         }
 
         std::unique_ptr<RuntimePermissions::Callback> uptr (callbackPtr);
-        (*uptr) (permissionWasGranted);
+
+        if (RuntimePermissions::Callback callbackObj = *uptr)
+            callbackObj (permissionWasGranted);
     }
 }
 

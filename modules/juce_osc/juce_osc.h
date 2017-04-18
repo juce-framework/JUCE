@@ -46,7 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_OSC_H_INCLUDED
+#pragma once
 #define JUCE_OSC_H_INCLUDED
 
 #include <juce_core/juce_core.h>
@@ -67,5 +67,3 @@ namespace juce
 #include "osc/juce_OSCSender.h"
 
 }
-
-#endif   // JUCE_OSC_H_INCLUDED

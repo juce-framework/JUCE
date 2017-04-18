@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_IMAGERESOURCEPROPERTY_H_INCLUDED
-#define JUCER_IMAGERESOURCEPROPERTY_H_INCLUDED
+#pragma once
 
 #include "../../Project Saving/jucer_ResourceFile.h"
 
@@ -140,6 +139,3 @@ protected:
     JucerDocument& document;
     const bool allowChoiceOfNoResource;
 };
-
-
-#endif   // JUCER_IMAGERESOURCEPROPERTY_H_INCLUDED

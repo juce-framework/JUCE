@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_APPLICATIONCOMMANDID_H_INCLUDED
-#define JUCE_APPLICATIONCOMMANDID_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -86,6 +85,3 @@ namespace StandardApplicationCommandIDs
         redo           = 0x1009
     };
 }
-
-
-#endif   // JUCE_APPLICATIONCOMMANDID_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SCOPEDPOINTER_H_INCLUDED
-#define JUCE_SCOPEDPOINTER_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -78,12 +77,10 @@ public:
     {
     }
 
-   #if JUCE_COMPILER_SUPPORTS_NULLPTR
     /** Creates a ScopedPointer containing a null pointer. */
     inline ScopedPointer (decltype (nullptr)) noexcept   : object (nullptr)
     {
     }
-   #endif
 
     /** Creates a ScopedPointer that owns the specified object. */
     inline ScopedPointer (ObjectType* const objectToTakePossessionOf) noexcept
@@ -153,13 +150,14 @@ public:
         return *this;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Take ownership of another ScopedPointer */
     ScopedPointer (ScopedPointer&& other) noexcept
         : object (other.object)
     {
         other.object = nullptr;
     }
 
+    /** Take ownership of another ScopedPointer */
     ScopedPointer& operator= (ScopedPointer&& other) noexcept
     {
         ContainerDeletePolicy<ObjectType>::destroy (object);
@@ -167,7 +165,6 @@ public:
         other.object = nullptr;
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns the object that this ScopedPointer refers to. */
@@ -257,7 +254,6 @@ bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* const po
 #ifndef DOXYGEN
 // NB: This is just here to prevent any silly attempts to call deleteAndZero() on a ScopedPointer.
 template <typename Type>
-void deleteAndZero (ScopedPointer<Type>&)  { static_jassert (sizeof (Type) == 12345); }
+void deleteAndZero (ScopedPointer<Type>&)  { static_assert (sizeof (Type) == 12345,
+                                                            "Attempt to call deleteAndZero() on a ScopedPointer"); }
 #endif
-
-#endif   // JUCE_SCOPEDPOINTER_H_INCLUDED

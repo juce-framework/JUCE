@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MESSAGELISTENER_H_INCLUDED
-#define JUCE_MESSAGELISTENER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -73,6 +72,3 @@ private:
     WeakReference<MessageListener>::Master masterReference;
     friend class WeakReference<MessageListener>;
 };
-
-
-#endif   // JUCE_MESSAGELISTENER_H_INCLUDED

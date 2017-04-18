@@ -86,7 +86,7 @@ public:
     File getLastDocumentOpened() override
     {
         // not interested in this for now
-        return File();
+        return {};
     }
 
     void setLastDocumentOpened (const File& /*file*/) override
@@ -140,6 +140,8 @@ public:
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (Note* note = dynamic_cast<Note*> (component))
             return note->saveIfNeededAndUserAgrees() != FileBasedDocument::failedToWriteToFile;
+       #else
+        ignoreUnused (component);
        #endif
 
         return true;

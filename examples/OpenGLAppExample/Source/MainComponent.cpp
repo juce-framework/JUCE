@@ -6,12 +6,8 @@
   ==============================================================================
 */
 
-#ifndef MAINCOMPONENT_H_INCLUDED
-#define MAINCOMPONENT_H_INCLUDED
-
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Resources/WavefrontObjParser.h"
-
 
 
 //==============================================================================
@@ -142,7 +138,11 @@ public:
             "\n"
             "void main()\n"
             "{\n"
+          #if JUCE_OPENGL_ES
+            "    lowp vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+          #else
             "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+          #endif
             "    gl_FragColor = colour;\n"
             "}\n";
 
@@ -386,6 +386,3 @@ private:
 
 // (This function is called by the app startup code to create our main component)
 Component* createMainContentComponent()    { return new MainContentComponent(); }
-
-
-#endif  // MAINCOMPONENT_H_INCLUDED

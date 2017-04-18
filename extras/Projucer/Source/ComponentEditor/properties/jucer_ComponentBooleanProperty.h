@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_COMPONENTBOOLEANPROPERTY_H_INCLUDED
-#define JUCER_COMPONENTBOOLEANPROPERTY_H_INCLUDED
+#pragma once
 
 
 template <class ComponentType>
@@ -57,6 +56,3 @@ protected:
     ComponentType* component;
     JucerDocument& document;
 };
-
-
-#endif   // JUCER_COMPONENTBOOLEANPROPERTY_H_INCLUDED

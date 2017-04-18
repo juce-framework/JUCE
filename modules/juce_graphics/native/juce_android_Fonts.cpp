@@ -169,8 +169,8 @@ public:
     {
         JNIEnv* const env = getEnv();
 
-        LocalRef<jbyteArray> bytes (env->NewByteArray (size));
-        env->SetByteArrayRegion (bytes, 0, size, (const jbyte*) data);
+        LocalRef<jbyteArray> bytes (env->NewByteArray ((jsize) size));
+        env->SetByteArrayRegion (bytes, 0, (jsize) size, (const jbyte*) data);
 
         typeface = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.getTypeFaceFromByteArray, bytes.get()));
 
@@ -207,7 +207,7 @@ public:
 
         const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
 
-        HeapBlock<jfloat> localWidths (numDone);
+        HeapBlock<jfloat> localWidths (static_cast<size_t> (numDone));
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
         env->DeleteLocalRef (widths);
 
@@ -226,7 +226,7 @@ public:
 
         const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
 
-        HeapBlock<jfloat> localWidths (numDone);
+        HeapBlock<jfloat> localWidths (static_cast<size_t> (numDone));
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
         env->DeleteLocalRef (widths);
 
@@ -237,8 +237,40 @@ public:
         float x = 0;
         for (int i = 0; i < numDone; ++i)
         {
-            glyphs.add ((int) s.getAndAdvance());
-            x += localWidths[i];
+            const float local = localWidths[i];
+
+            // Android uses jchar (UTF-16) characters
+            jchar ch = (jchar) s.getAndAdvance();
+
+            // Android has no proper glyph support, so we have to do
+            // a hacky workaround for ligature detection
+
+           #if JUCE_STRING_UTF_TYPE <= 16
+            static_assert (sizeof (int) >= (sizeof (jchar) * 2), "Unable store two java chars in one glyph");
+
+            // if the width of this glyph is zero inside the string but has
+            // a width on it's own, then it's probably due to ligature
+            if (local == 0.0f && glyphs.size() > 0 && getStringWidth (String (ch)) > 0.0f)
+            {
+                // modify the previous glyph
+                int& glyphNumber = glyphs.getReference (glyphs.size() - 1);
+
+                // make sure this is not a three character ligature
+                if (glyphNumber < std::numeric_limits<jchar>::max())
+                {
+                    const unsigned int previousGlyph
+                        = static_cast<unsigned int> (glyphNumber) & ((1U << (sizeof (jchar) * 8U)) - 1U);
+                    const unsigned int thisGlyph
+                        = static_cast<unsigned int> (ch)          & ((1U << (sizeof (jchar) * 8U)) - 1U);
+
+                    glyphNumber = static_cast<int> ((thisGlyph << (sizeof (jchar) * 8U)) | previousGlyph);
+                    ch = 0;
+                }
+            }
+           #endif
+
+            glyphs.add ((int) ch);
+            x += local;
             xOffsets.add (x * referenceFontToUnits);
         }
     }
@@ -250,10 +282,22 @@ public:
 
     EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& t, float /*fontHeight*/) override
     {
+       #if JUCE_STRING_UTF_TYPE <= 16
+        static_assert (sizeof (int) >= (sizeof (jchar) * 2), "Unable store two jni chars in one int");
+
+        // glyphNumber of zero is used to indicate that the last character was a ligature
+        if (glyphNumber == 0) return nullptr;
+
+        jchar ch1 = (static_cast<unsigned int> (glyphNumber) >> 0)                     & ((1U << (sizeof (jchar) * 8U)) - 1U);
+        jchar ch2 = (static_cast<unsigned int> (glyphNumber) >> (sizeof (jchar) * 8U)) & ((1U << (sizeof (jchar) * 8U)) - 1U);
+       #else
+        jchar ch1 = glyphNumber, ch2 = 0;
+       #endif
+
         JNIEnv* env = getEnv();
 
         jobject matrix = GraphicsHelpers::createMatrix (env, AffineTransform::scale (referenceFontToUnits).followedBy (t));
-        jintArray maskData = (jintArray) android.activity.callObjectMethod (JuceAppActivity.renderGlyph, (jchar) glyphNumber, paint.get(), matrix, rect.get());
+        jintArray maskData = (jintArray) android.activity.callObjectMethod (JuceAppActivity.renderGlyph, ch1, ch2, paint.get(), matrix, rect.get());
 
         env->DeleteLocalRef (matrix);
 

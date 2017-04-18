@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_HASHMAP_H_INCLUDED
-#define JUCE_HASHMAP_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -446,6 +445,9 @@ public:
         HashEntry* entry;
         int index;
 
+        // using the copy constructor is ok, but you cannot assign iterators
+        Iterator& operator= (const Iterator&) JUCE_DELETED_FUNCTION;
+
         JUCE_LEAK_DETECTOR (Iterator)
     };
 
@@ -474,6 +476,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashMap)
 };
-
-
-#endif   // JUCE_HASHMAP_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TIME_H_INCLUDED
-#define JUCE_TIME_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -412,6 +411,3 @@ JUCE_API bool operator<= (Time time1, Time time2) noexcept;
 JUCE_API bool operator>  (Time time1, Time time2) noexcept;
 /** Compares two Time objects. */
 JUCE_API bool operator>= (Time time1, Time time2) noexcept;
-
-
-#endif   // JUCE_TIME_H_INCLUDED

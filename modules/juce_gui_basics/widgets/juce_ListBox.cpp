@@ -138,7 +138,7 @@ public:
         if (ListBoxModel* m = owner.getModel())
             return m->getTooltipForRow (row);
 
-        return String();
+        return {};
     }
 
     ScopedPointer<Component> customComponent;
@@ -344,6 +344,11 @@ public:
     ListBoxMouseMoveSelector (ListBox& lb) : owner (lb)
     {
         owner.addMouseListener (this, true);
+    }
+
+    ~ListBoxMouseMoveSelector()
+    {
+        owner.removeMouseListener (this);
     }
 
     void mouseMove (const MouseEvent& e) override
@@ -963,6 +968,6 @@ void ListBoxModel::selectedRowsChanged (int) {}
 void ListBoxModel::deleteKeyPressed (int) {}
 void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
-var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var(); }
-String ListBoxModel::getTooltipForRow (int)                             { return String(); }
+var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return {}; }
+String ListBoxModel::getTooltipForRow (int)                             { return {}; }
 MouseCursor ListBoxModel::getMouseCursorForRow (int)                    { return MouseCursor::NormalCursor; }

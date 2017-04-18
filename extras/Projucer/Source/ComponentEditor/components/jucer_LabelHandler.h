@@ -80,7 +80,10 @@ public:
         font.setBold (xml.getBoolAttribute ("bold", false));
         font.setItalic (xml.getBoolAttribute ("italic", false));
         font.setExtraKerningFactor ((float) xml.getDoubleAttribute ("kerning", 0.0));
-        font.setTypefaceStyle (xml.getStringAttribute ("typefaceStyle", "Regular"));
+        auto fontStyle = xml.getStringAttribute ("typefaceStyle");
+        if (! fontStyle.isEmpty())
+            font.setTypefaceStyle (fontStyle);
+
         l->setFont (font);
 
         l->getProperties().set ("typefaceName", xml.getStringAttribute ("fontname", FontPropertyComponent::getDefaultFont()));
@@ -169,15 +172,13 @@ public:
         ComponentTypeHandler::getEditableProperties (component, document, props);
 
         Label* const l = dynamic_cast<Label*> (component);
-        props.add (new LabelTextProperty (l, document));
-
+        props.add (new LabelTextProperty          (l, document));
         props.add (new LabelJustificationProperty (l, document));
-        props.add (new FontNameProperty (l, document));
-        props.add (new FontTypefaceStyleProperty (l, document));
-        props.add (new FontSizeProperty (l, document));
-        props.add (new FontStyleFlagsProperty (l, document));
-        props.add (new FontKerningProperty (l, document));
-        
+        props.add (new FontNameProperty           (l, document));
+        props.add (new FontStyleProperty          (l, document));
+        props.add (new FontSizeProperty           (l, document));
+        props.add (new FontKerningProperty        (l, document));
+
         addColourProperties (component, document, props);
 
         props.add (new LabelEditableProperty (l, document));
@@ -492,91 +493,6 @@ private:
             String newState, oldState;
         };
     };
-    
-    //==============================================================================
-    class FontTypefaceStyleProperty  : public ChoicePropertyComponent,
-                                       public ChangeListener
-    {
-    public:
-        FontTypefaceStyleProperty (Label* const label_, JucerDocument& doc)
-            : ChoicePropertyComponent ("font style"),
-              label (label_),
-              document (doc)
-        {
-            document.addChangeListener (this);
-            updateStylesList (label_->getFont());
-        }
-        
-        ~FontTypefaceStyleProperty()
-        {
-            document.removeChangeListener (this);
-        }
-        
-        void updateStylesList (const Font& newFont)
-        {
-            if (getNumChildComponents())
-            {
-                ((ComboBox*)getChildComponent(0))->clear();
-                getChildComponent(0)->setVisible(false);
-                removeAllChildren();
-            }
-            
-            choices.clear();
-            choices.addArray (newFont.getAvailableStyles());
-            refresh();
-        }
-        
-        void setIndex (int newIndex)
-        {
-            Font f (label->getFont());
-            f.setTypefaceStyle (choices[newIndex]);
-            document.perform (new FontTypefaceStyleChangeAction (label, *document.getComponentLayout(), f),
-                              "Change Label font typeface style");
-        }
-        
-        int getIndex() const
-        {
-            return choices.indexOf(label->getFont().getTypefaceStyle());
-        }
-        
-        void changeListenerCallback (ChangeBroadcaster*)
-        {
-            updateStylesList (label->getFont());
-        }
-        
-    private:
-        Label* const label;
-        JucerDocument& document;
-        
-        class FontTypefaceStyleChangeAction  : public ComponentUndoableAction <Label>
-        {
-        public:
-            FontTypefaceStyleChangeAction (Label* const comp, ComponentLayout& l, const Font& newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
-            {
-                oldState = comp->getFont();
-            }
-            
-            bool perform()
-            {
-                showCorrectTab();
-                getComponent()->setFont (newState);
-                changed();
-                return true;
-            }
-            
-            bool undo()
-            {
-                showCorrectTab();
-                getComponent()->setFont (oldState);
-                changed();
-                return true;
-            }
-            
-            Font newState, oldState;
-        };
-    };
 
     //==============================================================================
     class FontSizeProperty  : public SliderPropertyComponent,
@@ -650,61 +566,101 @@ private:
     };
 
     //==============================================================================
-    class FontStyleFlagsProperty  : public ChoicePropertyComponent,
-                                    public ChangeListener
+    class FontStyleProperty  : public ChoicePropertyComponent,
+                               public ChangeListener
     {
     public:
-        FontStyleFlagsProperty (Label* const label_, JucerDocument& doc)
-            : ChoicePropertyComponent ("style flags"),
+        FontStyleProperty (Label* const label_, JucerDocument& doc)
+            : ChoicePropertyComponent ("style"),
               label (label_),
               document (doc)
         {
             document.addChangeListener (this);
 
-            choices.add ("normal");
-            choices.add ("bold");
-            choices.add ("italic");
-            choices.add ("bold + italic");
+            updateStylesList (label->getFont());
         }
 
-        ~FontStyleFlagsProperty()
+        ~FontStyleProperty()
         {
             document.removeChangeListener (this);
+        }
+
+        void updateStylesList (const Font& newFont)
+        {
+            if (getNumChildComponents() > 0)
+            {
+                if (auto cb = dynamic_cast<ComboBox*> (getChildComponent (0)))
+                    cb->clear();
+
+                getChildComponent (0)->setVisible (false);
+                removeAllChildren();
+            }
+
+            choices.clear();
+
+            choices.add ("Regular");
+            choices.add ("Bold");
+            choices.add ("Italic");
+            choices.add ("Bold Italic");
+
+            choices.mergeArray (newFont.getAvailableStyles());
+            refresh();
         }
 
         void setIndex (int newIndex)
         {
             Font f (label->getFont());
 
-            f.setBold (newIndex == 1 || newIndex == 3);
-            f.setItalic (newIndex == 2 || newIndex == 3);
+            if (f.getAvailableStyles().contains (choices[newIndex]))
+            {
+                f.setBold   (false);
+                f.setItalic (false);
+                f.setTypefaceStyle (choices[newIndex]);
+            }
+            else
+            {
+                f.setTypefaceStyle ("Regular");
+                f.setBold   (newIndex == 1 || newIndex == 3);
+                f.setItalic (newIndex == 2 || newIndex == 3);
+            }
 
-            document.perform (new FontStyleFlagsChangeAction (label, *document.getComponentLayout(), f),
-                              "Change Label font style flags");
+            document.perform (new FontStyleChangeAction (label, *document.getComponentLayout(), f),
+                              "Change Label font style");
         }
 
         int getIndex() const
         {
-            if (label->getFont().isBold() && label->getFont().isItalic())
-                return 3;
-            else if (label->getFont().isBold())
-                return 1;
-            else if (label->getFont().isItalic())
-                return 2;
+            auto f = label->getFont();
 
-            return 0;
+            const auto typefaceIndex = choices.indexOf (f.getTypefaceStyle());
+            if (typefaceIndex == -1)
+            {
+                if (f.isBold() && f.isItalic())
+                    return 3;
+                else if (f.isBold())
+                    return 1;
+                else if (f.isItalic())
+                    return 2;
+
+                return 0;
+            }
+
+            return typefaceIndex;
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)
+        {
+            updateStylesList (label->getFont());
+        }
 
     private:
         Label* const label;
         JucerDocument& document;
 
-        class FontStyleFlagsChangeAction  : public ComponentUndoableAction <Label>
+        class FontStyleChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
-            FontStyleFlagsChangeAction (Label* const comp, ComponentLayout& l, const Font& newState_)
+            FontStyleChangeAction (Label* const comp, ComponentLayout& l, const Font& newState_)
                 : ComponentUndoableAction <Label> (comp, l),
                   newState (newState_)
             {
@@ -730,10 +686,10 @@ private:
             Font newState, oldState;
         };
     };
-    
+
     //==============================================================================
     class FontKerningProperty  : public SliderPropertyComponent,
-    public ChangeListener
+                                 public ChangeListener
     {
     public:
         FontKerningProperty (Label* const label_, JucerDocument& doc)
@@ -743,31 +699,34 @@ private:
         {
             document.addChangeListener (this);
         }
-        
+
         ~FontKerningProperty()
         {
             document.removeChangeListener (this);
         }
-        
+
         void setValue (double newValue)
         {
             document.getUndoManager().undoCurrentTransactionOnly();
-            
+
             document.perform (new FontKerningChangeAction (label, *document.getComponentLayout(), (float) newValue),
                               "Change Label font kerning");
         }
-        
+
         double getValue() const
         {
             return label->getFont().getExtraKerningFactor();
         }
-        
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-        
+
+        void changeListenerCallback (ChangeBroadcaster*)
+        {
+            refresh();
+        }
+
     private:
         Label* const label;
         JucerDocument& document;
-        
+
         class FontKerningChangeAction  : public ComponentUndoableAction <Label>
         {
         public:
@@ -777,7 +736,7 @@ private:
             {
                 oldState = comp->getFont().getExtraKerningFactor();
             }
-            
+
             bool perform()
             {
                 showCorrectTab();
@@ -787,7 +746,7 @@ private:
                 changed();
                 return true;
             }
-            
+
             bool undo()
             {
                 showCorrectTab();
@@ -797,9 +756,8 @@ private:
                 changed();
                 return true;
             }
-            
+
             float newState, oldState;
         };
     };
-    
 };

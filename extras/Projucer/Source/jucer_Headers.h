@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADERS_JUCEHEADER__
-#define __JUCER_HEADERS_JUCEHEADER__
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Application/jucer_CommonHeaders.h"
@@ -32,7 +31,4 @@
  #define RUN_CLANG_IN_CHILD_PROCESS 1
 #else
  #define RUN_CLANG_IN_CHILD_PROCESS 1
-#endif
-
-
 #endif

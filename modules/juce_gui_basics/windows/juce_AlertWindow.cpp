@@ -173,10 +173,10 @@ TextEditor* AlertWindow::getTextEditor (const String& nameOfTextEditor) const
 
 String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
 {
-    if (TextEditor* const t = getTextEditor (nameOfTextEditor))
+    if (auto* t = getTextEditor (nameOfTextEditor))
         return t->getText();
 
-    return String();
+    return {};
 }
 
 

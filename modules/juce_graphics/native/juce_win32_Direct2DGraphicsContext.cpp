@@ -191,8 +191,8 @@ public:
 
     void fillRectList (const RectangleList<float>& list)
     {
-        for (const Rectangle<float>* r = list.begin(), * const e = list.end(); r != e; ++r)
-            fillRect (*r);
+        for (auto& r : list)
+            fillRect (r);
     }
 
     void fillPath (const Path& p, const AffineTransform& transform)

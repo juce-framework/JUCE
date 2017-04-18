@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TIMESLICETHREAD_H_INCLUDED
-#define JUCE_TIMESLICETHREAD_H_INCLUDED
+#pragma once
 
 class TimeSliceThread;
 
@@ -106,24 +105,28 @@ public:
 
     //==============================================================================
     /** Adds a client to the list.
-
         The client's callbacks will start after the number of milliseconds specified
         by millisecondsBeforeStarting (and this may happen before this method has returned).
     */
-    void addTimeSliceClient (TimeSliceClient* client, int millisecondsBeforeStarting = 0);
-
-    /** Removes a client from the list.
-
-        This method will make sure that all callbacks to the client have completely
-        finished before the method returns.
-    */
-    void removeTimeSliceClient (TimeSliceClient* client);
+    void addTimeSliceClient (TimeSliceClient* clientToAdd, int millisecondsBeforeStarting = 0);
 
     /** If the given client is waiting in the queue, it will be moved to the front
         and given a time-slice as soon as possible.
         If the specified client has not been added, nothing will happen.
     */
-    void moveToFrontOfQueue (TimeSliceClient* client);
+    void moveToFrontOfQueue (TimeSliceClient* clientToMove);
+
+    /** Removes a client from the list.
+        This method will make sure that all callbacks to the client have completely
+        finished before the method returns.
+    */
+    void removeTimeSliceClient (TimeSliceClient* clientToRemove);
+
+    /** Removes all the active and pending clients from the list.
+        This method will make sure that all callbacks to clients have finished before the
+        method returns.
+    */
+    void removeAllClients();
 
     /** Returns the number of registered clients. */
     int getNumClients() const;
@@ -146,6 +149,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSliceThread)
 };
-
-
-#endif   // JUCE_TIMESLICETHREAD_H_INCLUDED

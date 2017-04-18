@@ -44,6 +44,9 @@ namespace MidiHelpers
 //==============================================================================
 uint8 MidiMessage::floatValueToMidiByte (const float v) noexcept
 {
+    jassert (v >= 0 && v <= 1.0f);  // if your value is > 1, maybe you're passing an
+                                    // integer value to a float method by mistake?
+
     return MidiHelpers::validVelocity (roundToInt (v * 127.0f));
 }
 
@@ -222,7 +225,7 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
             *dest = (uint8) byte;
             memcpy (dest + 1, src, (size_t) (size - 1));
 
-            numBytesUsed += numVariableLengthSysexBytes;  // (these aren't counted in the size)
+            numBytesUsed += (numVariableLengthSysexBytes + size);  // (these aren't counted in the size)
         }
         else if (byte == 0xff)
         {
@@ -233,6 +236,8 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
             uint8* dest = allocateSpace (size);
             *dest = (uint8) byte;
             memcpy (dest + 1, src, (size_t) size - 1);
+
+            numBytesUsed += size;
         }
         else
         {
@@ -241,14 +246,14 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
 
             if (size > 1)
             {
-                packedData.asBytes[1] = src[0];
+                packedData.asBytes[1] = (sz > 0 ? src[0] : 0);
 
                 if (size > 2)
-                    packedData.asBytes[2] = src[1];
+                    packedData.asBytes[2] = (sz > 1 ? src[1] : 0);
             }
-        }
 
-        numBytesUsed += size;
+            numBytesUsed += jmin (size, sz + 1);
+        }
     }
     else
     {
@@ -285,7 +290,6 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 MidiMessage::MidiMessage (MidiMessage&& other) noexcept
    : timeStamp (other.timeStamp), size (other.size)
 {
@@ -301,7 +305,6 @@ MidiMessage& MidiMessage::operator= (MidiMessage&& other) noexcept
     other.size = 0;
     return *this;
 }
-#endif
 
 MidiMessage::~MidiMessage() noexcept
 {
@@ -786,7 +789,7 @@ double MidiMessage::getTempoMetaEventTickLength (const short timeFormat) const n
         {
             case 24: framesPerSecond = 24.0;   break;
             case 25: framesPerSecond = 25.0;   break;
-            case 29: framesPerSecond = 29.97;  break;
+            case 29: framesPerSecond = 30.0 * 1000.0 / 1001.0;  break;
             case 30: framesPerSecond = 30.0;   break;
             default: framesPerSecond = 30.0;   break;
         }
@@ -1020,7 +1023,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
         return s;
     }
 
-    return String();
+    return {};
 }
 
 double MidiMessage::getMidiNoteInHertz (const int noteNumber, const double frequencyOfA) noexcept

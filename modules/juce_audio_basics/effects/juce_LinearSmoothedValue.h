@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LINEARSMOOTHEDVALUE_H_INCLUDED
-#define JUCE_LINEARSMOOTHEDVALUE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -108,6 +107,3 @@ private:
     FloatType currentValue, target, step;
     int countdown, stepsToTarget;
 };
-
-
-#endif   // JUCE_LINEARSMOOTHEDVALUE_H_INCLUDED

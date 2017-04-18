@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SHAPEBUTTON_H_INCLUDED
-#define JUCE_SHAPEBUTTON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -75,6 +74,23 @@ public:
                      Colour overColour,
                      Colour downColour);
 
+    /** Sets the colours to use for drawing the shape when the button's toggle state is 'on'. To enable this behaviour, use the
+        shouldUseOnColours() method.
+
+        @param normalColour     the colour to fill the shape with when the mouse isn't over and the button's toggle state is 'on'
+        @param overColour       the colour to use when the mouse is over the shape and the button's toggle state is 'on'
+        @param downColour       the colour to use when the button is in the pressed-down state and the button's toggle state is 'on'
+     */
+    void setOnColours (Colour normalColourOn,
+                       Colour overColourOn,
+                       Colour downColourOn);
+
+    /** Set whether the button should use the 'on' set of colours when its toggle state is 'on'.
+        By default these will be the same as the normal colours but the setOnColours method can be
+        used to provide a different set of colours.
+    */
+    void shouldUseOnColours (bool shouldUse);
+
     /** Sets up an outline to draw around the shape.
 
         @param outlineColour        the colour to use
@@ -92,7 +108,9 @@ public:
 
 private:
     //==============================================================================
-    Colour normalColour, overColour, downColour, outlineColour;
+    Colour normalColour,   overColour,   downColour,
+           normalColourOn, overColourOn, downColourOn, outlineColour;
+    bool useOnColours;
     DropShadowEffect shadow;
     Path shape;
     BorderSize<int> border;
@@ -101,6 +119,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShapeButton)
 };
-
-
-#endif   // JUCE_SHAPEBUTTON_H_INCLUDED

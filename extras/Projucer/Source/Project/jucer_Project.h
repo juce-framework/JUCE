@@ -22,11 +22,11 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PROJECT_H_INCLUDED
-#define JUCER_PROJECT_H_INCLUDED
+#pragma once
+
+#include "jucer_ProjectType.h"
 
 class ProjectExporter;
-class ProjectType;
 class LibraryModule;
 class EnabledModuleList;
 
@@ -95,7 +95,8 @@ public:
     Value getCompanyEmail()                             { return getProjectValue (Ids::companyEmail); }
 
     //==============================================================================
-    Value getProjectValue (const Identifier& name)      { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
+    Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
+    var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }
 
     Value getProjectPreprocessorDefs()                  { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
@@ -122,13 +123,25 @@ public:
 
     //==============================================================================
     // Some helper methods for audio plugin/host projects.
-    Value shouldBuildVST()                      { return getProjectValue ("buildVST"); }
-    Value shouldBuildVST3()                     { return getProjectValue ("buildVST3"); }
-    Value shouldBuildAU()                       { return getProjectValue ("buildAU"); }
-    Value shouldBuildAUv3()                     { return getProjectValue ("buildAUv3"); }
-    Value shouldBuildRTAS()                     { return getProjectValue ("buildRTAS"); }
-    Value shouldBuildAAX()                      { return getProjectValue ("buildAAX"); }
-    Value shouldBuildStandalone()               { return shouldBuildAUv3(); /* TODO: enable this when standalone becomes independent from AUv3: getProjectValue ("buildStandalone"); */}
+    Value getShouldBuildVSTAsValue()                      { return getProjectValue ("buildVST"); }
+    Value getShouldBuildVST3AsValue()                     { return getProjectValue ("buildVST3"); }
+    Value getShouldBuildAUAsValue()                       { return getProjectValue ("buildAU"); }
+    Value getShouldBuildAUv3AsValue()                     { return getProjectValue ("buildAUv3"); }
+    Value getShouldBuildRTASAsValue()                     { return getProjectValue ("buildRTAS"); }
+    Value getShouldBuildAAXAsValue()                      { return getProjectValue ("buildAAX"); }
+    Value getShouldBuildStandalonePluginAsValue()         { return getProjectValue ("buildStandalone");}
+    Value getShouldEnableIAAAsValue()                     { return getProjectValue ("enableIAA"); }
+
+    bool shouldBuildVST()         const                   { return getProjectVar ("buildVST"); }
+    bool shouldBuildVST3()        const                   { return getProjectVar ("buildVST3"); }
+    bool shouldBuildAU()          const                   { return getProjectVar ("buildAU"); }
+    bool shouldBuildAUv3()        const                   { return getProjectVar ("buildAUv3"); }
+    bool shouldBuildRTAS()        const                   { return getProjectVar ("buildRTAS"); }
+    bool shouldBuildAAX()         const                   { return getProjectVar ("buildAAX"); }
+    bool shouldBuildStandalonePlugin()  const             { return getProjectVar ("buildStandalone"); }
+    bool shouldEnableIAA()        const                   { return getProjectVar ("enableIAA"); }
+
+    //==============================================================================
     Value getPluginName()                       { return getProjectValue ("pluginName"); }
     Value getPluginDesc()                       { return getProjectValue ("pluginDesc"); }
     Value getPluginManufacturer()               { return getProjectValue ("pluginManufacturer"); }
@@ -152,12 +165,18 @@ public:
     String getPluginRTASCategoryCode();
     String getAUMainTypeString();
     String getAUMainTypeCode();
+    String getIAATypeCode();
+    String getIAAPluginName();
     String getPluginVSTCategoryString();
 
     bool isAUPluginHost();
     bool isVSTPluginHost();
     bool isVST3PluginHost();
 
+    bool shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept;
+    static ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
+
+    //==============================================================================
     void updateDeprecatedProjectSettingsInteractively();
 
     //==============================================================================
@@ -343,6 +362,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
 };
-
-
-#endif   // JUCER_PROJECT_H_INCLUDED

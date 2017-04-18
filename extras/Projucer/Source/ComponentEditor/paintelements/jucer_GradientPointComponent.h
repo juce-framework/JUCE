@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_GRADIENTPOINTCOMPONENT_H_INCLUDED
-#define JUCER_GRADIENTPOINTCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "jucer_PointComponent.h"
 #include "jucer_ColouredElement.h"
@@ -98,6 +97,3 @@ public:
 private:
     bool isStroke, isStart;
 };
-
-
-#endif   // JUCER_GRADIENTPOINTCOMPONENT_H_INCLUDED

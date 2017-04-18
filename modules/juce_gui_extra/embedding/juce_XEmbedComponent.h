@@ -1,0 +1,107 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   Permission is granted to use this software under the terms of either:
+   a) the GPL v2 (or any later version)
+   b) the Affero GPL v3
+
+   Details of these licenses can be found at: www.gnu.org/licenses
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+   ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.juce.com for more information.
+
+  ==============================================================================
+*/
+
+#pragma once
+
+/** @internal */
+bool juce_handleXEmbedEvent (ComponentPeer*, void*);
+/** @internal */
+unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
+
+#if JUCE_LINUX || DOXYGEN
+
+//==============================================================================
+/**
+    A Linux-specific class that can embed a foreign X11 widget.
+
+    Use this class to embed a foreign X11 widget from other toolkits such as
+    GTK+ or QT.
+
+    There are two ways to initiate the Xembed protocol. Either the client creates
+    a window and passes this to the host (client initiated) or the host
+    creates a window in which the client can reparent it's client widget
+    (host initiated). XEmbedComponent supports both protocol types.
+
+    This is how you embed a GTK+ widget: if you are using the client
+    initiated version of the protocol, then create a new gtk widget with
+    gtk_plug_new (0). Then query the window id of the plug via gtk_plug_get_id().
+    Pass this id to the constructor of this class.
+
+    If you are using the host initiated version of the protocol, then first create
+    the XEmbedComponent using the default constructor. Use getHostWindowID to get
+    the window id of the host, use this to construct your gtk plug via gtk_plug_new.
+
+    A similar approach can be used to embed QT widgets via QT's QX11EmbedWidget
+    class.
+
+    Other toolkits or raw X11 widgets should follow the X11 embed protocol:
+    https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
+*/
+class XEmbedComponent : public Component
+{
+public:
+    //==============================================================================
+
+    /** Creates a JUCE component wrapping a foreign widget
+
+        Use this constructor if you are using the host initiated version
+        of the XEmbedProtocol. When using this version of the protocol
+        you must call getHostWindowID() and pass this id to the foreign toolkit.
+    */
+    XEmbedComponent (bool wantsKeyboardFocus = true);
+
+    /** Create a JUCE component wrapping the foreign widget with id wID
+
+        Use this constructor if you are using the client initiated version
+        of the XEmbedProtocol.
+    */
+    XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus = true);
+
+
+    /** Destructor. */
+    ~XEmbedComponent();
+
+    /** Use this method to retrieve the host's window id when using the
+        host initiated version of the XEmbedProtocol
+    */
+    unsigned long getHostWindowID();
+
+protected:
+    //==============================================================================
+    /** @internal */
+    void paint (Graphics&) override;
+    void focusGained (FocusChangeType) override;
+    void focusLost (FocusChangeType) override;
+    void broughtToFront() override;
+
+private:
+    friend bool juce::juce_handleXEmbedEvent (ComponentPeer*, void*);
+    friend unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
+
+    class Pimpl;
+    friend struct ContainerDeletePolicy<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
+};
+
+#endif

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_MISCUTILITIES_H_INCLUDED
-#define JUCER_MISCUTILITIES_H_INCLUDED
+#pragma once
 
 
 String hexString8Digits (int value);
@@ -104,6 +103,3 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter)
 };
-
-
-#endif // JUCER_MISCUTILITIES_H_INCLUDED

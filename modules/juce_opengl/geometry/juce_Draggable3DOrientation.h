@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
-#define JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -153,5 +152,3 @@ private:
         return QuaternionType::fromAngle (2.0f * std::asin (d), rotationAxis);
     }
 };
-
-#endif   // JUCE_DRAGGABLE3DORIENTATION_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BLUETOOTHMIDIDEVICPAIRINGCOMPONENT_H_INCLUDED
-#define JUCE_BLUETOOTHMIDIDEVICPAIRINGCOMPONENT_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -73,6 +72,3 @@ public:
     */
     static bool isAvailable();
 };
-
-
-#endif   // JUCE_BLUETOOTHMIDIDEVICPAIRINGCOMPONENT_H_INCLUDED

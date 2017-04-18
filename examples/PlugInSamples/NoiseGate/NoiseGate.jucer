@@ -9,7 +9,8 @@
               pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="NoiseGateAU" pluginRTASCategory="" aaxIdentifier="com.roli.NoiseGate"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.3.1"
-              pluginIsMidiEffectPlugin="0" buildAUv3="0">
+              pluginIsMidiEffectPlugin="0" buildAUv3="0" buildStandalone="0"
+              enableIAA="0">
   <MAINGROUP id="FVYuyg" name="NoiseGate">
     <GROUP id="{6EB662B0-ED81-2504-8B90-DCBFA5675DFC}" name="Source">
       <FILE id="iyPpdA" name="NoiseGate.cpp" compile="1" resource="0" file="Source/NoiseGate.cpp"/>
@@ -65,6 +66,30 @@
         <MODULEPATH id="juce_audio_basics" path="../../../modules"/>
       </MODULEPATHS>
     </VS2015>
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="NoiseGate"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="NoiseGate"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../modules"/>
+        <MODULEPATH id="juce_events" path="../../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../modules"/>
+        <MODULEPATH id="juce_core" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../../modules"/>
+      </MODULEPATHS>
+    </VS2017>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>

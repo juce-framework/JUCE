@@ -424,7 +424,7 @@ int AudioProcessor::getChannelIndexInProcessBlockBuffer (bool isInput, int busIn
     for (int i = 0; i < ioBus.size() && i < busIndex; ++i)
         channelIndex += getChannelCountOfBus (isInput, i);
 
-        return channelIndex;
+    return channelIndex;
 }
 
 int AudioProcessor::getOffsetInBusBufferForAbsoluteChannelIndex (bool isInput, int absoluteChannelIndex, /*out*/ int& busIdx) const noexcept
@@ -471,7 +471,7 @@ void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex
     if (isPositiveAndBelow (parameterIndex, getNumParameters()))
     {
         for (int i = listeners.size(); --i >= 0;)
-            if (AudioProcessorListener* l = getListenerLocked (i))
+            if (auto* l = getListenerLocked (i))
                 l->audioProcessorParameterChanged (this, parameterIndex, newValue);
     }
     else
@@ -492,7 +492,7 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
        #endif
 
         for (int i = listeners.size(); --i >= 0;)
-            if (AudioProcessorListener* l = getListenerLocked (i))
+            if (auto* l = getListenerLocked (i))
                 l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
     }
     else
@@ -542,7 +542,7 @@ int AudioProcessor::getNumParameters()
 
 float AudioProcessor::getParameter (int index)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
+    if (auto* p = getParamChecked (index))
         return p->getValue();
 
     return 0;
@@ -550,13 +550,13 @@ float AudioProcessor::getParameter (int index)
 
 void AudioProcessor::setParameter (int index, float newValue)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
+    if (auto* p = getParamChecked (index))
         p->setValue (newValue);
 }
 
 float AudioProcessor::getParameterDefaultValue (int index)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getDefaultValue();
 
     return 0;
@@ -564,16 +564,16 @@ float AudioProcessor::getParameterDefaultValue (int index)
 
 const String AudioProcessor::getParameterName (int index)
 {
-    if (AudioProcessorParameter* p = getParamChecked (index))
+    if (auto* p = getParamChecked (index))
         return p->getName (512);
 
-    return String();
+    return {};
 }
 
 String AudioProcessor::getParameterID (int index)
 {
     // Don't use getParamChecked here, as this must also work for legacy plug-ins
-    if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (managedParameters[index]))
+    if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (managedParameters[index]))
         return p->paramID;
 
     return String (index);
@@ -581,7 +581,7 @@ String AudioProcessor::getParameterID (int index)
 
 String AudioProcessor::getParameterName (int index, int maximumStringLength)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getName (maximumStringLength);
 
     return getParameterName (index).substring (0, maximumStringLength);
@@ -601,7 +601,7 @@ const String AudioProcessor::getParameterText (int index)
 
 String AudioProcessor::getParameterText (int index, int maximumStringLength)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getText (p->getValue(), maximumStringLength);
 
     return getParameterText (index).substring (0, maximumStringLength);
@@ -609,7 +609,7 @@ String AudioProcessor::getParameterText (int index, int maximumStringLength)
 
 int AudioProcessor::getParameterNumSteps (int index)
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getNumSteps();
 
     return AudioProcessor::getDefaultNumParameterSteps();
@@ -622,15 +622,15 @@ int AudioProcessor::getDefaultNumParameterSteps() noexcept
 
 String AudioProcessor::getParameterLabel (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getLabel();
 
-    return String();
+    return {};
 }
 
 bool AudioProcessor::isParameterAutomatable (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->isAutomatable();
 
     return true;
@@ -638,7 +638,7 @@ bool AudioProcessor::isParameterAutomatable (int index) const
 
 bool AudioProcessor::isParameterOrientationInverted (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->isOrientationInverted();
 
     return false;
@@ -646,7 +646,7 @@ bool AudioProcessor::isParameterOrientationInverted (int index) const
 
 bool AudioProcessor::isMetaParameter (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->isMetaParameter();
 
     return false;
@@ -654,7 +654,7 @@ bool AudioProcessor::isMetaParameter (int index) const
 
 AudioProcessorParameter::Category AudioProcessor::getParameterCategory (int index) const
 {
-    if (AudioProcessorParameter* p = managedParameters[index])
+    if (auto* p = managedParameters[index])
         return p->getCategory();
 
     return AudioProcessorParameter::genericParameter;
@@ -905,6 +905,8 @@ bool AudioProcessor::applyBusLayouts (const BusesLayout& layouts)
      || layouts.outputBuses.size() != numOutputBuses)
         return false;
 
+    int newNumberOfIns = 0, newNumberOfOuts = 0;
+
     for (int busIdx = 0; busIdx < numInputBuses;  ++busIdx)
     {
         Bus& bus = *getBus (true, busIdx);
@@ -913,6 +915,8 @@ bool AudioProcessor::applyBusLayouts (const BusesLayout& layouts)
         bus.layout = set;
         if (! set.isDisabled())
             bus.lastLayout = set;
+
+        newNumberOfIns += set.size();
     }
 
     for (int busIdx = 0; busIdx < numOutputBuses;  ++busIdx)
@@ -923,9 +927,11 @@ bool AudioProcessor::applyBusLayouts (const BusesLayout& layouts)
         bus.layout = set;
         if (! set.isDisabled())
             bus.lastLayout = set;
+
+        newNumberOfOuts += set.size();
     }
 
-    const bool channelNumChanged = (oldNumberOfIns != getTotalNumInputChannels() || oldNumberOfOuts != getTotalNumOutputChannels());
+    const bool channelNumChanged = (oldNumberOfIns != newNumberOfIns || oldNumberOfOuts != newNumberOfOuts);
     audioIOChanged (false, channelNumChanged);
 
     return true;
@@ -1300,6 +1306,45 @@ AudioProcessor::BusesProperties AudioProcessor::BusesProperties::withOutput (con
     retval.addBus (false, name, dfltLayout, isActivatedByDefault);
 
     return retval;
+}
+
+//==============================================================================
+int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mainInputLayout,
+                                                      const AudioChannelSet& mainOutputLayout,
+                                                      const bool idForAudioSuite) const
+{
+    int uniqueFormatId = 0;
+    for (int dir = 0; dir < 2; ++dir)
+    {
+        const bool isInput = (dir == 0);
+        const AudioChannelSet& set = (isInput ? mainInputLayout : mainOutputLayout);
+        int aaxFormatIndex = 0;
+
+        if      (set == AudioChannelSet::disabled())           aaxFormatIndex = 0;
+        else if (set == AudioChannelSet::mono())               aaxFormatIndex = 1;
+        else if (set == AudioChannelSet::stereo())             aaxFormatIndex = 2;
+        else if (set == AudioChannelSet::createLCR())          aaxFormatIndex = 3;
+        else if (set == AudioChannelSet::createLCRS())         aaxFormatIndex = 4;
+        else if (set == AudioChannelSet::quadraphonic())       aaxFormatIndex = 5;
+        else if (set == AudioChannelSet::create5point0())      aaxFormatIndex = 6;
+        else if (set == AudioChannelSet::create5point1())      aaxFormatIndex = 7;
+        else if (set == AudioChannelSet::create6point0())      aaxFormatIndex = 8;
+        else if (set == AudioChannelSet::create6point1())      aaxFormatIndex = 9;
+        else if (set == AudioChannelSet::create7point0())      aaxFormatIndex = 10;
+        else if (set == AudioChannelSet::create7point1())      aaxFormatIndex = 11;
+        else if (set == AudioChannelSet::create7point0SDDS())  aaxFormatIndex = 12;
+        else if (set == AudioChannelSet::create7point1SDDS())  aaxFormatIndex = 13;
+        else
+        {
+            // AAX does not support this format and the wrapper should not have
+            // called this method with this layout
+            jassertfalse;
+        }
+
+        uniqueFormatId = (uniqueFormatId << 8) | aaxFormatIndex;
+    }
+
+    return (idForAudioSuite ? 0x6a796161 /* 'jyaa' */ : 0x6a636161 /* 'jcaa' */) + uniqueFormatId;
 }
 
 

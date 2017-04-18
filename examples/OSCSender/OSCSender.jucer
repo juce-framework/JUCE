@@ -58,6 +58,22 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="OSCSender"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="OSCSender"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2017>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
@@ -75,14 +91,14 @@
       </MODULEPATHS>
     </XCODE_IPHONE>
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.oscsender.OSCSender" androidInternetNeeded="1"
-                   androidBluetoothNeeded="1" androidCpp11="1" targetFolder="Builds/AndroidStudio"
+                   androidBluetoothNeeded="0" androidCpp11="1" targetFolder="Builds/Android"
                    androidSDKPath="" androidNDKPath="" androidScreenOrientation="unspecified"
                    gradleToolchain="clang" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="1" targetName="OSCSender"/>
-        <CONFIGURATION name="Release" androidArchitectures="armeabi armeabi-v7a x86"
-                       isDebug="0" optimisation="3" targetName="OSCSender"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
+                       targetName="OSCSender"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>

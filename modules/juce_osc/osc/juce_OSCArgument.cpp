@@ -49,7 +49,7 @@ String OSCArgument::getString() const noexcept
         return stringValue;
 
     jassertfalse; // you must check the type of an argument before attempting to get its value!
-    return String();
+    return {};
 }
 
 int32 OSCArgument::getInt32() const noexcept
@@ -216,17 +216,6 @@ public:
                 assignment = copy;
                 expect (assignment.getType() == OSCTypes::blob);
                 expect (assignment.getBlob() == blob);
-
-               #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-                OSCArgument move = std::move (arg);
-                expect (move.getType() == OSCTypes::blob);
-                expect (move.getBlob() == blob);
-
-                OSCArgument moveAssignment ("this will be overwritten!");
-                moveAssignment = std::move (copy);
-                expect (moveAssignment.getType() == OSCTypes::blob);
-                expect (moveAssignment.getBlob() == blob);
-               #endif
            }
         }
     }

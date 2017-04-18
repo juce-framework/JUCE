@@ -348,3 +348,29 @@ void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
     if (TimerThread::instance != nullptr)
         TimerThread::instance->callTimersSynchronously();
 }
+
+#if JUCE_COMPILER_SUPPORTS_LAMBDAS
+struct LambdaInvoker  : private Timer
+{
+    LambdaInvoker (int milliseconds, std::function<void()> f)  : function (f)
+    {
+        startTimer (milliseconds);
+    }
+
+    void timerCallback() override
+    {
+        auto f = function;
+        delete this;
+        f();
+    }
+
+    std::function<void()> function;
+
+    JUCE_DECLARE_NON_COPYABLE (LambdaInvoker)
+};
+
+void JUCE_CALLTYPE Timer::callAfterDelay (int milliseconds, std::function<void()> f)
+{
+    new LambdaInvoker (milliseconds, f);
+}
+#endif

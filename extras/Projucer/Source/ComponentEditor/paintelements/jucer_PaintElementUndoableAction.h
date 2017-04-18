@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTUNDOABLEACTION_H_INCLUDED
-#define JUCER_PAINTELEMENTUNDOABLEACTION_H_INCLUDED
+#pragma once
 
 #include "../ui/jucer_JucerDocumentEditor.h"
 #include "jucer_PaintElementGroup.h"
@@ -136,7 +135,3 @@ private:
     PaintElementUndoableAction (const PaintElementUndoableAction&);
     PaintElementUndoableAction& operator= (const PaintElementUndoableAction&);
 };
-
-
-
-#endif   // JUCER_PAINTELEMENTUNDOABLEACTION_H_INCLUDED

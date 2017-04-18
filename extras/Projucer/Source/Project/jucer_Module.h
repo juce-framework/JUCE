@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_MODULE_H_INCLUDED
-#define JUCER_MODULE_H_INCLUDED
+#pragma once
 
 #include "jucer_Project.h"
 class ProjectExporter;
@@ -170,6 +169,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };
-
-
-#endif   // JUCER_MODULE_H_INCLUDED

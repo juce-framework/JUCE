@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SUBREGIONSTREAM_H_INCLUDED
-#define JUCE_SUBREGIONSTREAM_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -86,5 +85,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubregionStream)
 };
-
-#endif   // JUCE_SUBREGIONSTREAM_H_INCLUDED

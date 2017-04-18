@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_DOCUMENTEDITORCOMPONENT_H_INCLUDED
-#define JUCER_DOCUMENTEDITORCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "jucer_OpenDocumentManager.h"
 
@@ -51,6 +50,3 @@ protected:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentEditorComponent)
 };
-
-
-#endif   // JUCER_DOCUMENTEDITORCOMPONENT_H_INCLUDED

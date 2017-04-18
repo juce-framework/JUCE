@@ -558,7 +558,7 @@ String MidiKeyboardComponent::getWhiteNoteText (const int midiNoteNumber)
     if (midiNoteNumber % 12 == 0)
         return MidiMessage::getMidiNoteName (midiNoteNumber, true, true, octaveNumForMiddleC);
 
-    return String();
+    return {};
 }
 
 void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
@@ -853,11 +853,9 @@ void MidiKeyboardComponent::timerCallback()
 
     if (shouldCheckMousePos)
     {
-        const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
-
-        for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-            if (mi->getComponentUnderMouse() == this || isParentOf (mi->getComponentUnderMouse()))
-                updateNoteUnderMouse (getLocalPoint (nullptr, mi->getScreenPosition()).roundToInt(), mi->isDragging(), mi->getIndex());
+        for (auto& ms : Desktop::getInstance().getMouseSources())
+            if (ms.getComponentUnderMouse() == this || isParentOf (ms.getComponentUnderMouse()))
+                updateNoteUnderMouse (getLocalPoint (nullptr, ms.getScreenPosition()).roundToInt(), ms.isDragging(), ms.getIndex());
     }
 }
 

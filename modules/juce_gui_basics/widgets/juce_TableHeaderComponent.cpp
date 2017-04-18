@@ -92,15 +92,15 @@ int TableHeaderComponent::getNumColumns (const bool onlyCountVisibleColumns) con
 
 String TableHeaderComponent::getColumnName (const int columnId) const
 {
-    if (const ColumnInfo* const ci = getInfoForId (columnId))
+    if (auto* ci = getInfoForId (columnId))
         return ci->name;
 
-    return String();
+    return {};
 }
 
 void TableHeaderComponent::setColumnName (const int columnId, const String& newName)
 {
-    if (ColumnInfo* const ci = getInfoForId (columnId))
+    if (auto* ci = getInfoForId (columnId))
     {
         if (ci->name != newName)
         {

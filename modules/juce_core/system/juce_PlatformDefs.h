@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PLATFORMDEFS_H_INCLUDED
-#define JUCE_PLATFORMDEFS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /*  This file defines miscellaneous macros for debugging, assertions, etc.
@@ -63,7 +62,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
+#if JUCE_IOS || JUCE_LINUX
   /** This will try to break into the debugger if the app is currently being debugged.
       If called by an app that's not being debugged, the behaviour isn't defined - it may
       crash or not, depending on the platform.
@@ -81,6 +80,8 @@
   #else
    #define JUCE_BREAK_IN_DEBUGGER       { asm ("int $3"); }
   #endif
+#elif JUCE_ANDROID
+  #define JUCE_BREAK_IN_DEBUGGER        { __builtin_trap(); }
 #else
   #define JUCE_BREAK_IN_DEBUGGER        { __asm int 3 }
 #endif
@@ -172,30 +173,6 @@
 #define JUCE_STRINGIFY(item)  JUCE_STRINGIFY_MACRO_HELPER (item)
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_STATIC_ASSERT
-  /** A compile-time assertion macro.
-     If the expression parameter is false, the macro will cause a compile error. (The actual error
-     message that the compiler generates may be completely bizarre and seem to have no relation to
-     the place where you put the static_assert though!)
-  */
-  #define static_jassert(expression) static_assert(expression, #expression);
-#else
- #ifndef DOXYGEN
-  namespace juce
-  {
-     template <bool b> struct JuceStaticAssert;
-     template <>       struct JuceStaticAssert<true> { static void dummy() {} };
-  }
- #endif
-
-  /** A compile-time assertion macro.
-      If the expression parameter is false, the macro will cause a compile error. (The actual error
-      message that the compiler generates may be completely bizarre and seem to have no relation to
-      the place where you put the static_assert though!)
-  */
-  #define static_jassert(expression)      juce::JuceStaticAssert<expression>::dummy();
-#endif
-
 /** This is a shorthand macro for declaring stubs for a class's copy constructor and operator=.
 
     For example, instead of
@@ -324,5 +301,3 @@
 #else
  #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS
 #endif
-
-#endif   // JUCE_PLATFORMDEFS_H_INCLUDED

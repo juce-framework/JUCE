@@ -46,7 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_DATA_STRUCTURES_H_INCLUDED
+#pragma once
 #define JUCE_DATA_STRUCTURES_H_INCLUDED
 
 //==============================================================================
@@ -65,5 +65,3 @@ namespace juce
 #include "app_properties/juce_ApplicationProperties.h"
 
 }
-
-#endif   // JUCE_DATA_STRUCTURES_H_INCLUDED

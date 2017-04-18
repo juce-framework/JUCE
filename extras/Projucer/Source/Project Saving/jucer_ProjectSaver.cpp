@@ -73,13 +73,14 @@ namespace
 void ProjectSaver::writePluginCharacteristicsFile()
 {
     StringPairArray flags;
-    flags.set ("JucePlugin_Build_VST",                   valueToBool (project.shouldBuildVST()));
-    flags.set ("JucePlugin_Build_VST3",                  valueToBool (project.shouldBuildVST3()));
-    flags.set ("JucePlugin_Build_AU",                    valueToBool (project.shouldBuildAU()));
-    flags.set ("JucePlugin_Build_AUv3",                  valueToBool (project.shouldBuildAUv3()));
-    flags.set ("JucePlugin_Build_RTAS",                  valueToBool (project.shouldBuildRTAS()));
-    flags.set ("JucePlugin_Build_AAX",                   valueToBool (project.shouldBuildAAX()));
-    flags.set ("JucePlugin_Build_STANDALONE",            valueToBool (project.shouldBuildStandalone()));
+    flags.set ("JucePlugin_Build_VST",                   valueToBool (project.getShouldBuildVSTAsValue()));
+    flags.set ("JucePlugin_Build_VST3",                  valueToBool (project.getShouldBuildVST3AsValue()));
+    flags.set ("JucePlugin_Build_AU",                    valueToBool (project.getShouldBuildAUAsValue()));
+    flags.set ("JucePlugin_Build_AUv3",                  valueToBool (project.getShouldBuildAUv3AsValue()));
+    flags.set ("JucePlugin_Build_RTAS",                  valueToBool (project.getShouldBuildRTASAsValue()));
+    flags.set ("JucePlugin_Build_AAX",                   valueToBool (project.getShouldBuildAAXAsValue()));
+    flags.set ("JucePlugin_Build_STANDALONE",            valueToBool (project.getShouldBuildStandalonePluginAsValue()));
+    flags.set ("JucePlugin_Enable_IAA",                  valueToBool (project.getShouldEnableIAAAsValue()));
     flags.set ("JucePlugin_Name",                        valueToStringLiteral (project.getPluginName()));
     flags.set ("JucePlugin_Desc",                        valueToStringLiteral (project.getPluginDesc()));
     flags.set ("JucePlugin_Manufacturer",                valueToStringLiteral (project.getPluginManufacturer()));
@@ -114,6 +115,9 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_AAXCategory",                 project.getPluginAAXCategory().toString());
     flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (project.getPluginAAXBypassDisabled()));
     flags.set ("JucePlugin_AAXDisableMultiMono",         valueToBool (project.getPluginAAXMultiMonoDisabled()));
+    flags.set ("JucePlugin_IAAType",                     valueToCharLiteral (project.getIAATypeCode()));
+    flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
+    flags.set ("JucePlugin_IAAName",                     project.getIAAPluginName().quoted());
 
     {
         String plugInChannelConfig = project.getPluginChannelConfigs().toString();

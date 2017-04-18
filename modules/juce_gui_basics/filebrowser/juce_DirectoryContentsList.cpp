@@ -119,7 +119,7 @@ bool DirectoryContentsList::getFileInfo (const int index, FileInfo& result) cons
 {
     const ScopedLock sl (fileListLock);
 
-    if (const FileInfo* const info = files [index])
+    if (auto* info = files [index])
     {
         result = *info;
         return true;
@@ -132,10 +132,10 @@ File DirectoryContentsList::getFile (const int index) const
 {
     const ScopedLock sl (fileListLock);
 
-    if (const FileInfo* const info = files [index])
+    if (auto* info = files [index])
         return root.getChildFile (info->filename);
 
-    return File();
+    return {};
 }
 
 bool DirectoryContentsList::contains (const File& targetFile) const

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RUNTIMEPERMISSIONS_H_INCLUDED
-#define JUCE_RUNTIMEPERMISSIONS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -128,6 +127,3 @@ public:
     */
     static bool isGranted (PermissionID permission);
 };
-
-
-#endif   // JUCE_RUNTIMEPERMISSIONS_H_INCLUDED

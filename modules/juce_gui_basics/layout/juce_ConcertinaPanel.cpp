@@ -219,16 +219,25 @@ public:
 
     void paint (Graphics& g) override
     {
-        const Rectangle<int> area (getWidth(), getHeaderSize());
-        g.reduceClipRegion (area);
+        if (customHeaderComponent == nullptr)
+        {
+            const Rectangle<int> area (getWidth(), getHeaderSize());
+            g.reduceClipRegion (area);
 
-        getLookAndFeel().drawConcertinaPanelHeader (g, area, isMouseOver(), isMouseButtonDown(),
-                                                    getPanel(), *component);
+            getLookAndFeel().drawConcertinaPanelHeader (g, area, isMouseOver(), isMouseButtonDown(),
+                                                        getPanel(), *component);
+        }
     }
 
     void resized() override
     {
-        component->setBounds (getLocalBounds().withTop (getHeaderSize()));
+        auto bounds = getLocalBounds();
+        auto headerBounds = bounds.removeFromTop (getHeaderSize());
+
+        if (customHeaderComponent != nullptr)
+            customHeaderComponent->setBounds (headerBounds);
+
+        component->setBounds (bounds);
     }
 
     void mouseDown (const MouseEvent&) override
@@ -250,11 +259,23 @@ public:
         getPanel().panelHeaderDoubleClicked (component);
     }
 
+    void setCustomHeaderComponent (Component* headerComponent, bool shouldTakeOwnership)
+    {
+        customHeaderComponent.set (headerComponent, shouldTakeOwnership);
+
+        if (headerComponent != nullptr)
+        {
+            addAndMakeVisible (customHeaderComponent);
+            customHeaderComponent->addMouseListener (this, false);
+        }
+    }
+
     OptionalScopedPointer<Component> component;
 
 private:
     PanelSizes dragStartSizes;
     int mouseDownY;
+    OptionalScopedPointer<Component> customHeaderComponent;
 
     int getHeaderSize() const noexcept
     {
@@ -349,14 +370,28 @@ void ConcertinaPanel::setMaximumPanelSize (Component* component, int maximumSize
 
 void ConcertinaPanel::setPanelHeaderSize (Component* component, int headerSize)
 {
-    const int index = indexOfComp (component);
+    const auto index = indexOfComp (component);
     jassert (index >= 0); // The specified component doesn't seem to have been added!
 
     if (index >= 0)
     {
-        currentSizes->get(index).minSize = headerSize;
+        auto oldMin = currentSizes->get (index).minSize;
+
+        currentSizes->get (index).minSize = headerSize;
+        currentSizes->get (index).size += headerSize - oldMin;
         resized();
     }
+}
+
+void ConcertinaPanel::setCustomPanelHeader (Component* component, Component* customComponent, bool takeOwnership)
+{
+    OptionalScopedPointer<Component> optional (customComponent, takeOwnership);
+
+    const auto index = indexOfComp (component);
+    jassert (index >= 0); // The specified component doesn't seem to have been added!
+
+    if (index >= 0)
+        holders.getUnchecked (index)->setCustomHeaderComponent (optional.release(), takeOwnership);
 }
 
 void ConcertinaPanel::resized()

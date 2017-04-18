@@ -54,7 +54,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_BASICS_H_INCLUDED
+#pragma once
 #define JUCE_AUDIO_BASICS_H_INCLUDED
 
 #include <juce_core/juce_core.h>
@@ -101,7 +101,6 @@ namespace juce
 #include "sources/juce_ReverbAudioSource.h"
 #include "sources/juce_ToneGeneratorAudioSource.h"
 #include "synthesisers/juce_Synthesiser.h"
+#include "audio_play_head/juce_AudioPlayHead.h"
 
 }
-
-#endif   // JUCE_AUDIO_BASICS_H_INCLUDED

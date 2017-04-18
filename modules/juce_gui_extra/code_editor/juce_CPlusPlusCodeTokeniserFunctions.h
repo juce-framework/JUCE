@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED
-#define JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -660,6 +659,3 @@ struct CppTokeniserFunctions
         return mo.toString();
     }
 };
-
-
-#endif   // JUCE_CPLUSPLUSCODETOKENISERFUNCTIONS_H_INCLUDED

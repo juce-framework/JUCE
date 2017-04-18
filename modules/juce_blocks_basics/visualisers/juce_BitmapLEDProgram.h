@@ -32,14 +32,13 @@
 /**
     A simple Program to set the colours of individual LEDs.
 */
-struct BitmapLEDProgram   : public LEDGrid::Program
+struct BitmapLEDProgram   : public Block::Program
 {
-    BitmapLEDProgram (LEDGrid&);
+    BitmapLEDProgram (Block&);
 
     /** Set the colour of the LED at coordinates {x, y}. */
     void setLED (uint32 x, uint32 y, LEDColour);
 
 private:
     juce::String getLittleFootProgram() override;
-    uint32 getHeapSize() override;
 };

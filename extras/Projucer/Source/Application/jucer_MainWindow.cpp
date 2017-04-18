@@ -597,11 +597,11 @@ Project* MainWindowList::getFrontmostProject()
 
 File findDefaultModulesFolder (bool mustContainJuceCoreModule)
 {
-    const MainWindowList& windows = ProjucerApplication::getApp().mainWindowList;
+    auto& windows = ProjucerApplication::getApp().mainWindowList;
 
     for (int i = windows.windows.size(); --i >= 0;)
     {
-        if (Project* p = windows.windows.getUnchecked (i)->getProject())
+        if (auto* p = windows.windows.getUnchecked (i)->getProject())
         {
             const File f (EnabledModuleList::findDefaultModulesFolder (*p));
 
@@ -613,11 +613,11 @@ File findDefaultModulesFolder (bool mustContainJuceCoreModule)
     if (mustContainJuceCoreModule)
         return findDefaultModulesFolder (false);
 
-    File f (File::getSpecialLocation (File::currentApplicationFile));
+    auto f = File::getSpecialLocation (File::currentApplicationFile);
 
     for (;;)
     {
-        File parent (f.getParentDirectory());
+        auto parent = f.getParentDirectory();
 
         if (parent == f || ! parent.isDirectory())
             break;
@@ -628,5 +628,5 @@ File findDefaultModulesFolder (bool mustContainJuceCoreModule)
         f = parent;
     }
 
-    return File();
+    return {};
 }

@@ -3131,12 +3131,12 @@ private:
 MP3AudioFormat::MP3AudioFormat()  : AudioFormat (MP3Decoder::mp3FormatName, ".mp3") {}
 MP3AudioFormat::~MP3AudioFormat() {}
 
-Array<int> MP3AudioFormat::getPossibleSampleRates() { return Array<int>(); }
-Array<int> MP3AudioFormat::getPossibleBitDepths()   { return Array<int>(); }
+Array<int> MP3AudioFormat::getPossibleSampleRates() { return {}; }
+Array<int> MP3AudioFormat::getPossibleBitDepths()   { return {}; }
 bool MP3AudioFormat::canDoStereo()                  { return true; }
 bool MP3AudioFormat::canDoMono()                    { return true; }
 bool MP3AudioFormat::isCompressed()                 { return true; }
-StringArray MP3AudioFormat::getQualityOptions()     { return StringArray(); }
+StringArray MP3AudioFormat::getQualityOptions()     { return {}; }
 
 AudioFormatReader* MP3AudioFormat::createReaderFor (InputStream* sourceStream, const bool deleteStreamIfOpeningFails)
 {

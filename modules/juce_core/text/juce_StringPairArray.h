@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STRINGPAIRARRAY_H_INCLUDED
-#define JUCE_STRINGPAIRARRAY_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -154,6 +153,3 @@ private:
 
     JUCE_LEAK_DETECTOR (StringPairArray)
 };
-
-
-#endif   // JUCE_STRINGPAIRARRAY_H_INCLUDED

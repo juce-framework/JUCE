@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_STATISTICSACCUMULATOR_H_INCLUDED
-#define JUCE_STATISTICSACCUMULATOR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -142,6 +141,3 @@ private:
     KahanSum sum, sumSquares;
     FloatType minimum, maximum;
 };
-
-
-#endif   // JUCE_STATISTICSACCUMULATOR_H_INCLUDED

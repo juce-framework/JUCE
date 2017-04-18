@@ -55,6 +55,10 @@
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
 
+#if JUCE_VST3_CAN_REPLACE_VST2
+#include "../../juce_audio_processors/format_types/juce_VSTInterface.h"
+#endif
+
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
  #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
 #endif
@@ -64,8 +68,6 @@
   #pragma warning (push)
   #pragma warning (disable: 4514 4996)
  #endif
-
- #include <pluginterfaces/vst2.x/vstfxstore.h>
 
  #if JUCE_MSVC
   #pragma warning (pop)
@@ -285,7 +287,7 @@ public:
     //==============================================================================
     struct BypassParam  : public Vst::Parameter
     {
-        BypassParam (AudioProcessor& p, Vst::ParamID vstParamID)  : owner (p)
+        BypassParam (Vst::ParamID vstParamID)
         {
             info.id = vstParamID;
             toString128 (info.title, "Bypass");
@@ -360,9 +362,6 @@ public:
 
         Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v; }
         Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v; }
-
-    private:
-        AudioProcessor& owner;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BypassParam)
     };
@@ -636,7 +635,7 @@ private:
                 }
 
                 bypassParamID = static_cast<Vst::ParamID> (usingManagedParameter ? paramBypass : numParameters);
-                parameters.addParameter (new BypassParam (*pluginInstance, bypassParamID));
+                parameters.addParameter (new BypassParam (bypassParamID));
 
                 if (pluginInstance->getNumPrograms() > 1)
                     parameters.addParameter (new ProgramChangeParameter (*pluginInstance));
@@ -863,7 +862,7 @@ private:
     private:
         void timerCallback() override
         {
-            stopTimer ();
+            stopTimer();
 
             ViewRect viewRect;
             getSize (&viewRect);
@@ -887,7 +886,10 @@ private:
                 if (pluginEditor != nullptr)
                 {
                     addAndMakeVisible (pluginEditor);
-                    setBounds (pluginEditor->getLocalBounds());
+
+                    lastBounds = pluginEditor->getLocalBounds();
+                    setBounds (lastBounds);
+
                     resizeHostWindow();
                 }
 
@@ -908,15 +910,22 @@ private:
                 g.fillAll (Colours::black);
             }
 
-            void childBoundsChanged (Component*) override
+            void childBoundsChanged (Component* childComponent) override
             {
-                resizeHostWindow();
+                if (lastBounds != childComponent->getLocalBounds())
+                {
+                    lastBounds = childComponent->getLocalBounds();
+                    resizeHostWindow();
+                }
             }
 
             void resized() override
             {
                 if (pluginEditor != nullptr)
-                    pluginEditor->setBounds (getLocalBounds());
+                {
+                    lastBounds = getLocalBounds();
+                    pluginEditor->setBounds (lastBounds);
+                }
             }
 
             void resizeHostWindow()
@@ -954,6 +963,7 @@ private:
         private:
             JuceVST3Editor& owner;
             FakeMouseMoveGenerator fakeMouseGenerator;
+            Rectangle<int> lastBounds;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
@@ -1265,19 +1275,19 @@ public:
     void loadVST2VstWBlock (const char* data, int size)
     {
         const int headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
-        const struct fxBank* bank = (const struct fxBank*) (data + (8 + headerLen));
-        const int version = static_cast<int> (htonl (bank->version)); ignoreUnused (version);
+        const vst2FxBank* bank = (const vst2FxBank*) (data + (8 + headerLen));
+        const int version = static_cast<int> (htonl (bank->version1)); ignoreUnused (version);
 
         jassert ('VstW' == htonl (*(juce::int32*) data));
         jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
-        jassert (cMagic == htonl (bank->chunkMagic));
-        jassert (chunkBankMagic == htonl (bank->fxMagic));
+        jassert ('CcnK' == htonl (bank->magic1));
+        jassert ('FBCh' == htonl (bank->magic2));
         jassert (version == 1 || version == 2);
         jassert (JucePlugin_VSTUniqueID == htonl (bank->fxID));
 
-        setStateInformation (bank->content.data.chunk,
-                             jmin ((int) (size - (bank->content.data.chunk - data)),
-                                   (int) htonl (bank->content.data.size)));
+        setStateInformation (bank->chunk,
+                             jmin ((int) (size - (bank->chunk - data)),
+                                   (int) htonl (bank->chunkSize)));
     }
 
     bool loadVST3PresetFile (const char* data, int size)
@@ -1354,19 +1364,35 @@ public:
 
     bool readFromMemoryStream (IBStream* state)
     {
-        FUnknownPtr<MemoryStream> s (state);
+        FUnknownPtr<ISizeableStream> s (state);
+        Steinberg::int64 size = 0;
 
         if (s != nullptr
-             && s->getData() != nullptr
-             && s->getSize() > 0
-             && s->getSize() < 1024 * 1024 * 100) // (some hosts seem to return junk for the size)
+             && s->getStreamSize (size) == kResultOk
+             && size > 0
+             && size < 1024 * 1024 * 100) // (some hosts seem to return junk for the size)
         {
+            MemoryBlock block (static_cast<size_t> (size));
+
+            // turns out that Cubase 9 might give you the incorrect stream size :-(
+            Steinberg::int32 bytesRead = 1;
+            int len;
+
+            for (len = 0; bytesRead > 0 && len < static_cast<int> (block.getSize()); len += bytesRead)
+                if (state->read (block.getData(), static_cast<int32> (block.getSize()), &bytesRead) != kResultOk)
+                    break;
+
+            if (len == 0)
+                return false;
+
+            block.setSize (static_cast<size_t> (len));
+
             // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
             if (getHostType().isAdobeAudition())
-                if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
+                if (block.getSize() >= 5 && memcmp (block.getData(), "VC2!E", 5) == 0)
                     return false;
 
-            return loadStateData (s->getData(), (int) s->getSize());
+            return loadStateData (block.getData(), (int) block.getSize());
         }
 
         return false;
@@ -1450,16 +1476,16 @@ public:
             return status;
 
         const int bankBlockSize = 160;
-        struct fxBank bank;
+        vst2FxBank bank;
 
         zerostruct (bank);
-        bank.chunkMagic         = (VstInt32) htonl (cMagic);
-        bank.byteSize           = (VstInt32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
-        bank.fxMagic            = (VstInt32) htonl (chunkBankMagic);
-        bank.version            = (VstInt32) htonl (2);
-        bank.fxID               = (VstInt32) htonl (JucePlugin_VSTUniqueID);
-        bank.fxVersion          = (VstInt32) htonl (JucePlugin_VersionCode);
-        bank.content.data.size  = (VstInt32) htonl ((unsigned int) mem.getSize());
+        bank.magic1         = (int32) htonl ('CcnK');
+        bank.size           = (int32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
+        bank.magic1         = (int32) htonl ('FBCh');
+        bank.version1       = (int32) htonl (2);
+        bank.fxID           = (int32) htonl (JucePlugin_VSTUniqueID);
+        bank.version2       = (int32) htonl (JucePlugin_VersionCode);
+        bank.chunkSize      = (int32) htonl ((unsigned int) mem.getSize());
 
         status = state->write (&bank, bankBlockSize);
 
@@ -1988,12 +2014,14 @@ private:
         // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
         int vstInputs;
         for (vstInputs = 0; vstInputs < data.numInputs; ++vstInputs)
-            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr)
+            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr
+                  && data.inputs[vstInputs].numChannels > 0)
                 break;
 
         int vstOutputs;
         for (vstOutputs = 0; vstOutputs < data.numOutputs; ++vstOutputs)
-            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr)
+            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr
+                  && data.outputs[vstOutputs].numChannels > 0)
                 break;
 
         {
@@ -2645,5 +2673,10 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 
     return dynamic_cast<IPluginFactory*> (globalFactory);
 }
+
+//==============================================================================
+#if _MSC_VER || JUCE_MINGW
+extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
+#endif
 
 #endif //JucePlugin_Build_VST3

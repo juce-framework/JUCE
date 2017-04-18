@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-OpenGLAppComponent::OpenGLAppComponent()   : frameCounter (0)
+OpenGLAppComponent::OpenGLAppComponent()
 {
     setOpaque (true);
     openGLContext.setRenderer (this);

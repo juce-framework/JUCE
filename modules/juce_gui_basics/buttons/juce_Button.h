@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BUTTON_H_INCLUDED
-#define JUCE_BUTTON_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -512,5 +511,3 @@ private:
  /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
  typedef Button::Listener ButtonListener;
 #endif
-
-#endif   // JUCE_BUTTON_H_INCLUDED

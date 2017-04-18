@@ -96,8 +96,8 @@ public:
         jassert (byteArray != nullptr);
         jbyte* data = getEnv()->GetByteArrayElements (byteArray, nullptr);
 
-        HeapBlock<uint8> buffer (len);
-        std::memcpy (buffer.getData(), data + offset, len);
+        HeapBlock<uint8> buffer (static_cast<size_t> (len));
+        std::memcpy (buffer.getData(), data + offset, static_cast<size_t> (len));
 
         midiConcatenator.pushMidiData (buffer.getData(),
                                        len, static_cast<double> (timestamp) * 1.0e-9,
@@ -109,8 +109,8 @@ public:
 private:
     MidiInput* juceMidiInput;
     MidiInputCallback* callback;
-    GlobalRef javaMidiDevice;
     MidiDataConcatenator midiConcatenator;
+    GlobalRef javaMidiDevice;
 };
 
 //==============================================================================
@@ -144,7 +144,7 @@ private:
 };
 
 JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024JuceMidiInputPort), handleReceive,
-                   void, (JNIEnv* env, jobject device, jlong host, jbyteArray byteArray,
+                   void, (JNIEnv* env, jobject, jlong host, jbyteArray byteArray,
                           jint offset, jint count, jlong timestamp))
 {
     // Java may create a Midi thread which JUCE doesn't know about and this callback may be
@@ -172,7 +172,7 @@ public:
             return juceString (string);
         }
 
-        return String();
+        return {};
     }
 
     String getOutputPortNameForJuceIndex (int idx)
@@ -183,7 +183,7 @@ public:
             return juceString (string);
         }
 
-        return String();
+        return {};
     }
 
     StringArray getDevices (bool input)
@@ -200,7 +200,7 @@ public:
             return javaStringArrayToJuce (devices);
         }
 
-        return StringArray();
+        return {};
     }
 
     AndroidMidiInput* openMidiInputPortWithIndex (int idx, MidiInput* juceMidiInput, juce::MidiInputCallback* callback)
@@ -302,7 +302,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         jbyteArray content = messageContent.get();
 
         jbyte* rawBytes = env->GetByteArrayElements (content, nullptr);
-        std::memcpy (rawBytes, message.getRawData(), messageSize);
+        std::memcpy (rawBytes, message.getRawData(), static_cast<size_t> (messageSize));
         env->ReleaseByteArrayElements (content, rawBytes, 0);
 
         androidMidi->send (content, (jint) 0, (jint) messageSize);

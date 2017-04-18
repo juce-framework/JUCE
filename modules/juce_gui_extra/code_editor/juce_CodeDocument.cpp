@@ -422,7 +422,7 @@ CodeDocument::Position CodeDocument::Position::movedByLines (const int deltaLine
 
 juce_wchar CodeDocument::Position::getCharacter() const
 {
-    if (const CodeDocumentLine* const l = owner->lines [line])
+    if (auto* l = owner->lines [line])
         return l->line [getIndexInLine()];
 
     return 0;
@@ -430,10 +430,10 @@ juce_wchar CodeDocument::Position::getCharacter() const
 
 String CodeDocument::Position::getLineText() const
 {
-    if (const CodeDocumentLine* const l = owner->lines [line])
+    if (auto* l = owner->lines [line])
         return l->line;
 
-    return String();
+    return {};
 }
 
 void CodeDocument::Position::setPositionMaintained (const bool isMaintained)
@@ -482,7 +482,7 @@ String CodeDocument::getAllContent() const
 String CodeDocument::getTextBetween (const Position& start, const Position& end) const
 {
     if (end.getPosition() <= start.getPosition())
-        return String();
+        return {};
 
     const int startLine = start.getLineNumber();
     const int endLine = end.getLineNumber();
@@ -492,7 +492,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
         if (CodeDocumentLine* const line = lines [startLine])
             return line->line.substring (start.getIndexInLine(), end.getIndexInLine());
 
-        return String();
+        return {};
     }
 
     MemoryOutputStream mo;
@@ -526,7 +526,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
 
 int CodeDocument::getNumCharacters() const noexcept
 {
-    if (const CodeDocumentLine* const lastLine = lines.getLast())
+    if (auto* lastLine = lines.getLast())
         return lastLine->lineStartInFile + lastLine->lineLength;
 
     return 0;
@@ -534,10 +534,10 @@ int CodeDocument::getNumCharacters() const noexcept
 
 String CodeDocument::getLine (const int lineIndex) const noexcept
 {
-    if (const CodeDocumentLine* const line = lines [lineIndex])
+    if (auto* line = lines [lineIndex])
         return line->line;
 
-    return String();
+    return {};
 }
 
 int CodeDocument::getMaximumLineLength() noexcept

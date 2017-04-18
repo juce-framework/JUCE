@@ -846,8 +846,8 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             modsToSend = currentModifiers;
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-            handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(),
-                              MouseInputSource::invalidPressure, time);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
+                              MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, touchIndex);
 
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return;
@@ -874,15 +874,16 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         float pressure = maximumForce > 0 ? jlimit (0.0001f, 0.9999f, getTouchForce (touch) / maximumForce)
                                           : MouseInputSource::invalidPressure;
 
-        handleMouseEvent (touchIndex, pos, modsToSend, pressure, time);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend, pressure,
+                          MouseInputSource::invalidOrientation, time, { }, touchIndex);
 
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return;
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex, Point<float> (-1.0f, -1.0f),
-                              modsToSend, MouseInputSource::invalidPressure, time);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, Point<float> (-1.0f, -1.0f), modsToSend,
+                              MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))
                 return;

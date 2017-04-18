@@ -377,7 +377,7 @@ public:
     String getResource() const
     {
         if (element == nullptr)
-            return String();
+            return {};
 
         if (isForStroke)
             return element->getStrokeType().fill.imageResourceName;

@@ -24,7 +24,9 @@
 
 ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
   : Button (t),
-    normalColour (n), overColour (o), downColour (d),
+    normalColour   (n), overColour   (o), downColour   (d),
+    normalColourOn (n), overColourOn (o), downColourOn (d),
+    useOnColours(false),
     maintainShapeProportions (false),
     outlineWidth (0.0f)
 {
@@ -35,8 +37,20 @@ ShapeButton::~ShapeButton() {}
 void ShapeButton::setColours (Colour newNormalColour, Colour newOverColour, Colour newDownColour)
 {
     normalColour = newNormalColour;
-    overColour = newOverColour;
-    downColour = newDownColour;
+    overColour   = newOverColour;
+    downColour   = newDownColour;
+}
+
+void ShapeButton::setOnColours (Colour newNormalColourOn, Colour newOverColourOn, Colour newDownColourOn)
+{
+    normalColourOn = newNormalColourOn;
+    overColourOn   = newOverColourOn;
+    downColourOn   = newDownColourOn;
+}
+
+void ShapeButton::shouldUseOnColours (bool shouldUse)
+{
+    useOnColours = shouldUse;
 }
 
 void ShapeButton::setOutline (Colour newOutlineColour, const float newOutlineWidth)
@@ -101,9 +115,10 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
 
     const AffineTransform trans (shape.getTransformToScaleToFit (r, maintainShapeProportions));
 
-    g.setColour (isButtonDown || getToggleState() ? downColour
-                                                  : isMouseOverButton ? overColour
-                                                                      : normalColour);
+    if      (isButtonDown)      g.setColour (getToggleState() && useOnColours ? downColourOn   : downColour);
+    else if (isMouseOverButton) g.setColour (getToggleState() && useOnColours ? overColourOn   : overColour);
+    else                        g.setColour (getToggleState() && useOnColours ? normalColourOn : normalColour);
+
     g.fillPath (shape, trans);
 
     if (outlineWidth > 0.0f)

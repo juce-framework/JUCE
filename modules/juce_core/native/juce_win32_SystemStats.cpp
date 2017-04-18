@@ -79,6 +79,49 @@ String SystemStats::getCpuVendor()
     return String (v, 12);
 }
 
+String SystemStats::getCpuModel()
+{
+    char name[65] = { 0 };
+    int info[4] = { 0 };
+
+    callCPUID (info, 0x80000000);
+
+    const int numExtIDs = info[0];
+
+    if (numExtIDs < 0x80000004)  // if brand string is unsupported
+        return {};
+
+    callCPUID (info, 0x80000002);
+    memcpy (name, info, sizeof (info));
+
+    callCPUID (info, 0x80000003);
+    memcpy (name + 16, info, sizeof (info));
+
+    callCPUID (info, 0x80000004);
+    memcpy (name + 32, info, sizeof (info));
+
+    return String (name).trim();
+}
+
+static int findNumberOfPhysicalCores() noexcept
+{
+    int numPhysicalCores = 0;
+    DWORD bufferSize = 0;
+
+    if (GetLogicalProcessorInformation (nullptr, &bufferSize))
+    {
+        const size_t numBuffers = (size_t) (bufferSize / sizeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
+        HeapBlock<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer (numBuffers);
+
+        if (GetLogicalProcessorInformation (buffer, &bufferSize))
+            for (size_t i = 0; i < numBuffers; ++i)
+                if (buffer[i].Relationship == RelationProcessorCore)
+                    ++numPhysicalCores;
+    }
+
+    return numPhysicalCores;
+}
+
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
@@ -102,7 +145,11 @@ void CPUInformation::initialise() noexcept
 
     SYSTEM_INFO systemInfo;
     GetNativeSystemInfo (&systemInfo);
-    numCpus = (int) systemInfo.dwNumberOfProcessors;
+    numLogicalCPUs  = (int) systemInfo.dwNumberOfProcessors;
+    numPhysicalCPUs = findNumberOfPhysicalCores();
+
+    if (numPhysicalCPUs <= 0)
+        numPhysicalCPUs = numLogicalCPUs;
 }
 
 #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
@@ -195,7 +242,7 @@ String SystemStats::getOperatingSystemName()
 
 String SystemStats::getDeviceDescription()
 {
-    return String();
+    return {};
 }
 
 bool SystemStats::isOperatingSystem64Bit()

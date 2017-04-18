@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CONCERTINAPANEL_H_INCLUDED
-#define JUCE_CONCERTINAPANEL_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -93,6 +92,19 @@ public:
     /** Sets the height of the header section for one of the panels. */
     void setPanelHeaderSize (Component* panelComponent, int headerSize);
 
+    /** Sets a custom header Component for one of the panels.
+
+        @param panelComponent           the panel component to add the custom header to.
+        @param customHeaderComponent    the custom component to use for the panel header.
+                                        This can be nullptr to clear the custom header component
+                                        and just use the standard LookAndFeel panel.
+        @param takeOwnership            if true, then the PanelHolder will take ownership
+                                        of the custom header component, and will delete it later when
+                                        it's no longer needed. If false, it won't delete it, and
+                                        you must make sure it doesn't get deleted while in use.
+     */
+    void setCustomPanelHeader (Component* panelComponent, Component* customHeaderComponent, bool takeOwnership);
+
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
@@ -127,6 +139,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConcertinaPanel)
 };
-
-
-#endif   // JUCE_CONCERTINAPANEL_H_INCLUDED

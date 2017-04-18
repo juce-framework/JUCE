@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef DEMOUTILITIES_H_INCLUDED
-#define DEMOUTILITIES_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /*
@@ -74,6 +73,3 @@ struct SlowerBouncingNumber  : public BouncingNumber
         speed *= 0.3;
     }
 };
-
-
-#endif  // DEMOUTILITIES_H_INCLUDED

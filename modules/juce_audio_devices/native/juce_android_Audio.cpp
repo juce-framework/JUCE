@@ -199,7 +199,7 @@ public:
             numDeviceOutputChannels = 2;
             outputDevice = GlobalRef (env->NewObject (AudioTrack, AudioTrack.constructor,
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
-                                                      (jint) (minBufferSizeOut * numDeviceOutputChannels * sizeof (int16)), MODE_STREAM));
+                                                      (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM));
 
             int outputDeviceState = env->CallIntMethod (outputDevice, AudioTrack.getState);
             if (outputDeviceState > 0)
@@ -232,7 +232,7 @@ public:
                                                          0 /* (default audio source) */, sampleRate,
                                                          numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
                                                          ENCODING_PCM_16BIT,
-                                                         (jint) (minBufferSizeIn * numDeviceInputChannels * sizeof (int16))));
+                                                         (jint) (minBufferSizeIn * numDeviceInputChannels * static_cast<int> (sizeof (int16)))));
 
                 int inputDeviceState = env->CallIntMethod (inputDevice, AudioRecord.getState);
                 if (inputDeviceState > 0)
@@ -441,9 +441,9 @@ public:
 
     //==============================================================================
     void scanForDevices() {}
-    StringArray getDeviceNames (bool wantInputNames) const              { return StringArray (javaAudioTypeName); }
-    int getDefaultDeviceIndex (bool forInput) const                     { return 0; }
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const    { return device != nullptr ? 0 : -1; }
+    StringArray getDeviceNames (bool) const                             { return StringArray (javaAudioTypeName); }
+    int getDefaultDeviceIndex (bool) const                              { return 0; }
+    int getIndexOfDevice (AudioIODevice* device, bool) const            { return device != nullptr ? 0 : -1; }
     bool hasSeparateInputsAndOutputs() const                            { return false; }
 
     AudioIODevice* createDevice (const String& outputDeviceName,

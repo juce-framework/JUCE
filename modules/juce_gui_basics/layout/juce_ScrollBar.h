@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SCROLLBAR_H_INCLUDED
-#define JUCE_SCROLLBAR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -401,6 +400,3 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
 typedef ScrollBar::Listener ScrollBarListener;
-
-
-#endif   // JUCE_SCROLLBAR_H_INCLUDED

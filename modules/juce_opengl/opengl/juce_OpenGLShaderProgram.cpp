@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept
-    : context (c), programID (0)
+OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept  : context (c)
 {
 }
 
@@ -34,11 +33,13 @@ OpenGLShaderProgram::~OpenGLShaderProgram() noexcept
 
 GLuint OpenGLShaderProgram::getProgramID() const noexcept
 {
-    // This method can only be used when the current thread has an active OpenGL context.
-    jassert (OpenGLHelpers::isContextActive());
-
     if (programID == 0)
+    {
+        // This method should only be called when the current thread has an active OpenGL context.
+        jassert (OpenGLHelpers::isContextActive());
+
         programID = context.extensions.glCreateProgram();
+    }
 
     return programID;
 }

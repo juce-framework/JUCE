@@ -93,7 +93,7 @@ public:
             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN
                  || lParam == WM_LBUTTONDBLCLK || lParam == WM_RBUTTONDBLCLK)
             {
-                if (Component* const current = Component::getCurrentlyModalComponent())
+                if (auto* current = Component::getCurrentlyModalComponent())
                     current->inputAttemptWhenModal();
             }
         }
@@ -110,9 +110,10 @@ public:
 
             const Time eventTime (getMouseEventTime());
 
-            const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
-                                Point<float>(), eventMods, MouseInputSource::invalidPressure,
-                                &owner, &owner, eventTime, Point<float>(), eventTime, 1, false);
+            const MouseEvent e (Desktop::getInstance().getMainMouseSource(), {}, eventMods,
+                                MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation,
+                                MouseInputSource::invalidRotation, MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                &owner, &owner, eventTime, {}, eventTime, 1, false);
 
             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
             {

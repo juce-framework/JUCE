@@ -48,7 +48,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_PROCESSORS_H_INCLUDED
+#pragma once
 #define JUCE_AUDIO_PROCESSORS_H_INCLUDED
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -102,7 +102,6 @@ namespace juce
 {
 
 class AudioProcessor;
-#include "processors/juce_AudioPlayHead.h"
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
 #include "processors/juce_AudioProcessorParameter.h"
@@ -121,13 +120,11 @@ class AudioProcessor;
 #include "format_types/juce_VST3PluginFormat.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
-#include "utilities/juce_AudioProcessorValueTreeState.h"
 #include "utilities/juce_AudioProcessorParameterWithID.h"
 #include "utilities/juce_AudioParameterFloat.h"
 #include "utilities/juce_AudioParameterInt.h"
 #include "utilities/juce_AudioParameterBool.h"
 #include "utilities/juce_AudioParameterChoice.h"
+#include "utilities/juce_AudioProcessorValueTreeState.h"
 
 }
-
-#endif   // JUCE_AUDIO_PROCESSORS_H_INCLUDED

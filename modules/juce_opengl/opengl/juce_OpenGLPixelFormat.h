@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPENGLPIXELFORMAT_H_INCLUDED
-#define JUCE_OPENGLPIXELFORMAT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -65,6 +64,3 @@ public:
 
     uint8 multisamplingLevel;         /**< The number of samples to use for full-scene multisampled anti-aliasing (if available). */
 };
-
-
-#endif   // JUCE_OPENGLPIXELFORMAT_H_INCLUDED

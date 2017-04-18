@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CODEEDITORCOMPONENT_H_INCLUDED
-#define JUCE_CODEEDITORCOMPONENT_H_INCLUDED
+#pragma once
 
 class CodeTokeniser;
 
@@ -430,6 +429,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorComponent)
 };
-
-
-#endif   // JUCE_CODEEDITORCOMPONENT_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_QUATERNION_H_INCLUDED
-#define JUCE_QUATERNION_H_INCLUDED
+#pragma once
 
 #include "juce_Vector3D.h"
 #include "juce_Matrix3D.h"
@@ -94,6 +93,3 @@ public:
     /** The scalar part of the quaternion. */
     Type scalar;
 };
-
-
-#endif   // JUCE_QUATERNION_H_INCLUDED

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OPENGLAPPCOMPONENT_H_INCLUDED
-#define JUCE_OPENGLAPPCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -34,11 +33,13 @@
     paint() and mouse-handling. The base class provides some simple abstractions
     to take care of continuously repainting itself.
 */
-class OpenGLAppComponent   : public Component,
-                             private OpenGLRenderer
+class JUCE_API  OpenGLAppComponent   : public Component,
+                                       private OpenGLRenderer
 {
 public:
     OpenGLAppComponent();
+
+    /** Destructor. */
     ~OpenGLAppComponent();
 
     /** Returns the number of times that the render method has been called since
@@ -46,6 +47,9 @@ public:
     */
     int getFrameCounter() const noexcept        { return frameCounter; }
 
+    /** This must be called from your subclass's destructor, to shut down
+        the GL system and stop it calling render() before your class is destroyed.
+    */
     void shutdownOpenGL();
 
     /** Implement this method to set up any GL objects that you need for rendering.
@@ -58,16 +62,17 @@ public:
     */
     virtual void shutdown() = 0;
 
-    /**
+    /** Called to render your openGL.
+        @see OpenGLRenderer::render()
     */
     virtual void render() = 0;
 
+    /** The GL context */
     OpenGLContext openGLContext;
 
 private:
     //==============================================================================
-
-    int frameCounter;
+    int frameCounter = 0;
 
     void newOpenGLContextCreated() override;
     void renderOpenGL() override;
@@ -75,6 +80,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLAppComponent)
 };
-
-
-#endif   // JUCE_OPENGLAPPCOMPONENT_H_INCLUDED

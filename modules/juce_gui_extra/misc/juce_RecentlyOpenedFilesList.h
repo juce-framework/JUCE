@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RECENTLYOPENEDFILESLIST_H_INCLUDED
-#define JUCE_RECENTLYOPENEDFILESLIST_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -159,6 +158,3 @@ private:
 
     JUCE_LEAK_DETECTOR (RecentlyOpenedFilesList)
 };
-
-
-#endif   // JUCE_RECENTLYOPENEDFILESLIST_H_INCLUDED

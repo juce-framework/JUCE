@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_GENERATEDCODE_H_INCLUDED
-#define JUCER_GENERATEDCODE_H_INCLUDED
+#pragma once
 
 #include "../Project/jucer_Project.h"
 class JucerDocument;
@@ -98,6 +97,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GeneratedCode)
 };
-
-
-#endif   // JUCER_GENERATEDCODE_H_INCLUDED

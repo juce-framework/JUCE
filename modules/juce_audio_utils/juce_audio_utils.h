@@ -48,7 +48,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_UTILS_H_INCLUDED
+#pragma once
 #define JUCE_AUDIO_UTILS_H_INCLUDED
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -89,5 +89,3 @@ namespace juce
 #include "audio_cd/juce_AudioCDReader.h"
 
 }
-
-#endif   // JUCE_AUDIO_UTILS_H_INCLUDED

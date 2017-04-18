@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_DROPSHADOWEFFECT_H_INCLUDED
-#define JUCE_DROPSHADOWEFFECT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -105,6 +104,3 @@ private:
 
     JUCE_LEAK_DETECTOR (DropShadowEffect)
 };
-
-
-#endif   // JUCE_DROPSHADOWEFFECT_H_INCLUDED

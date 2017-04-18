@@ -134,8 +134,7 @@ int64 InputStream::readInt64BigEndian()
 
 float InputStream::readFloat()
 {
-    // the union below relies on these types being the same size...
-    static_jassert (sizeof (int32) == sizeof (float));
+    static_assert (sizeof (int32) == sizeof (float), "Union assumes float has the same size as an int32");
     union { int32 asInt; float asFloat; } n;
     n.asInt = (int32) readInt();
     return n.asFloat;

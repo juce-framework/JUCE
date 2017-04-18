@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VST3COMMON_H_INCLUDED
-#define JUCE_VST3COMMON_H_INCLUDED
+#pragma once
 
 //==============================================================================
 #define JUCE_DECLARE_VST3_COM_REF_METHODS \
@@ -495,7 +494,7 @@ struct VST3BufferExchange
         for (int i = channelStartOffset; i < channelEnd; ++i)
             bus.add (buffer.getWritePointer (i, sampleOffset));
 
-        assignRawPointer (vstBuffers, bus.getRawDataPointer());
+        assignRawPointer (vstBuffers, (numChannels > 0 ? bus.getRawDataPointer() : nullptr));
         vstBuffers.numChannels      = numChannels;
         vstBuffers.silenceFlags     = 0;
     }
@@ -513,10 +512,9 @@ struct VST3BufferExchange
         if (index >= busMapToUse.size())
             busMapToUse.add (Bus());
 
-        if (numChansForBus > 0)
-            associateBufferTo (result.getReference (index),
-                               busMapToUse.getReference (index),
-                               source, numChansForBus, channelIndexOffset);
+        associateBufferTo (result.getReference (index),
+                           busMapToUse.getReference (index),
+                           source, numChansForBus, channelIndexOffset);
 
         channelIndexOffset += numChansForBus;
     }
@@ -569,4 +567,3 @@ template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
 {
     static inline VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
 };
-#endif   // JUCE_VST3COMMON_H_INCLUDED

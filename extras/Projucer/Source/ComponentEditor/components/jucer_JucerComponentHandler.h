@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_JUCERCOMPONENTHANDLER_H_INCLUDED
-#define JUCER_JUCERCOMPONENTHANDLER_H_INCLUDED
+#pragma once
 
 #include "../ui/jucer_TestComponent.h"
 #include "../properties/jucer_FilePropertyComponent.h"
@@ -267,6 +266,3 @@ private:
         };
     };
 };
-
-
-#endif   // JUCER_JUCERCOMPONENTHANDLER_H_INCLUDED

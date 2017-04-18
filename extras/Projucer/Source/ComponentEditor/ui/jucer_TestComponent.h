@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_TESTCOMPONENT_H_INCLUDED
-#define JUCER_TESTCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 
@@ -75,6 +74,3 @@ private:
     void updateContents();
     void reload();
 };
-
-
-#endif   // JUCER_TESTCOMPONENT_H_INCLUDED

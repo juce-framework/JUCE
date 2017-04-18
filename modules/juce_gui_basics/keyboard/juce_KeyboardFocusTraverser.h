@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_KEYBOARDFOCUSTRAVERSER_H_INCLUDED
-#define JUCE_KEYBOARDFOCUSTRAVERSER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -84,6 +83,3 @@ public:
     */
     virtual Component* getDefaultComponent (Component* parentComponent);
 };
-
-
-#endif   // JUCE_KEYBOARDFOCUSTRAVERSER_H_INCLUDED

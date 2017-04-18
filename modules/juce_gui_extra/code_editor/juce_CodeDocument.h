@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CODEDOCUMENT_H_INCLUDED
-#define JUCE_CODEDOCUMENT_H_INCLUDED
+#pragma once
 
 class CodeDocumentLine;
 
@@ -412,6 +411,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeDocument)
 };
-
-
-#endif   // JUCE_CODEDOCUMENT_H_INCLUDED

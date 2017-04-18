@@ -346,7 +346,7 @@ struct ClassDatabase
                 if (m.definition.isValid() && File (m.definition.file).exists())
                     return m.definition.file;
 
-            return File();
+            return {};
         }
 
         Array<File> getAllSourceFiles() const

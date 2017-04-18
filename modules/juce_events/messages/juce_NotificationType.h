@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_NOTIFICATIONTYPE_H_INCLUDED
-#define JUCE_NOTIFICATIONTYPE_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -43,6 +42,3 @@ enum NotificationType
     sendNotificationSync,       /**< Requests a synchronous notification. */
     sendNotificationAsync,      /**< Requests an asynchronous notification. */
 };
-
-
-#endif   // JUCE_NOTIFICATIONTYPE_H_INCLUDED

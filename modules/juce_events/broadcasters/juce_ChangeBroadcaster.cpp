@@ -48,7 +48,7 @@ void ChangeBroadcaster::addChangeListener (ChangeListener* const listener)
 
 void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener)
 {
-    // Listeners can only be safely added when the event thread is locked
+    // Listeners can only be safely removed when the event thread is locked
     // You can  use a MessageManagerLock if you need to call this from another thread.
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
@@ -57,7 +57,7 @@ void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener)
 
 void ChangeBroadcaster::removeAllChangeListeners()
 {
-    // Listeners can only be safely added when the event thread is locked
+    // Listeners can only be safely removed when the event thread is locked
     // You can  use a MessageManagerLock if you need to call this from another thread.
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 

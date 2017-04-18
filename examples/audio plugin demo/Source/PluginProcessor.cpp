@@ -147,8 +147,7 @@ private:
 
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
-    : AudioProcessor (BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
-                                       .withOutput ("Output", AudioChannelSet::stereo(), true)),
+    : AudioProcessor (getBusesProperties()),
       lastUIWidth (400),
       lastUIHeight (200),
       gainParam (nullptr),
@@ -186,21 +185,33 @@ void JuceDemoPluginAudioProcessor::initialiseSynth()
 bool JuceDemoPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     // Only mono/stereo and input/output must have same layout
-    const AudioChannelSet& mainInput  = layouts.getMainInputChannelSet();
     const AudioChannelSet& mainOutput = layouts.getMainOutputChannelSet();
 
     // input and output layout must be the same
-    if (mainInput != mainOutput) return false;
+    if (wrapperType != wrapperType_Standalone && layouts.getMainInputChannelSet() != mainOutput)
+        return false;
 
     // do not allow disabling the main buses
-    if (mainInput.isDisabled()) return false;
+    if (mainOutput.isDisabled()) return false;
 
     // only allow stereo and mono
-    if (mainInput.size() > 2) return false;
+    if (mainOutput.size() > 2) return false;
 
     return true;
 }
 
+AudioProcessor::BusesProperties JuceDemoPluginAudioProcessor::getBusesProperties()
+{
+    // This plug-in should not have any inputs when run as a standalone plug-in
+
+    if (PluginHostType::getPluginLoadedAs() == wrapperType_Standalone)
+        return BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true);
+    else
+        return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
+                                .withOutput ("Output", AudioChannelSet::stereo(), true);
+}
+
+//==============================================================================
 void JuceDemoPluginAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
 {
     // Use this method as the place to do any pre-playback
@@ -244,8 +255,8 @@ void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
 {
     const int numSamples = buffer.getNumSamples();
 
-    // apply our gain-change to the incoming data..
-    applyGain (buffer, delayBuffer);
+    if (wrapperType == wrapperType_Standalone)
+        buffer.clear();
 
     // Now pass any incoming midi messages to our keyboard state object, and let it
     // add messages to the buffer if the user is clicking on the on-screen keys
@@ -257,11 +268,16 @@ void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
     // Apply our delay effect to the new output..
     applyDelay (buffer, delayBuffer);
 
-    // In case we have more outputs than inputs, we'll clear any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
-        buffer.clear (i, 0, numSamples);
+    if (wrapperType != wrapperType_Standalone)
+    {
+        // In case we have more outputs than inputs, we'll clear any output
+        // channels that didn't contain input data, (because these aren't
+        // guaranteed to be empty - they may contain garbage).
+        for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+            buffer.clear (i, 0, numSamples);
+    }
+
+    applyGain (buffer, delayBuffer); // apply our gain-change to the outgoing data..
 
     // Now ask the host for the current time so we can store it to be displayed later...
     updateCurrentTimeInfoFromHost();
@@ -273,7 +289,7 @@ void JuceDemoPluginAudioProcessor::applyGain (AudioBuffer<FloatType>& buffer, Au
     ignoreUnused (delayBuffer);
     const float gainLevel = *gainParam;
 
-    for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
+    for (int channel = 0; channel < getTotalNumOutputChannels(); ++channel)
         buffer.applyGain (channel, 0, buffer.getNumSamples(), gainLevel);
 }
 
@@ -285,7 +301,7 @@ void JuceDemoPluginAudioProcessor::applyDelay (AudioBuffer<FloatType>& buffer, A
 
     int delayPos = 0;
 
-    for (int channel = 0; channel < getTotalNumInputChannels(); ++channel)
+    for (int channel = 0; channel < getTotalNumOutputChannels(); ++channel)
     {
         FloatType* const channelData = buffer.getWritePointer (channel);
         FloatType* const delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));

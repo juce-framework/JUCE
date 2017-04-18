@@ -48,7 +48,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_AUDIO_FORMATS_H_INCLUDED
+#pragma once
 #define JUCE_AUDIO_FORMATS_H_INCLUDED
 
 #include <juce_audio_basics/juce_audio_basics.h>
@@ -132,5 +132,3 @@ class AudioFormat;
 #include "sampler/juce_Sampler.h"
 
 }
-
-#endif   // JUCE_AUDIO_FORMATS_H_INCLUDED

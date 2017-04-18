@@ -151,7 +151,7 @@ String InterprocessConnection::getConnectedHostName() const
         const ScopedLock sl (pipeAndSocketLock);
 
         if (pipe == nullptr && socket == nullptr)
-            return String();
+            return {};
 
         if (socket != nullptr && ! socket->isLocal())
             return socket->getHostName();

@@ -258,6 +258,8 @@ private:
         {
             if (AudioProcessor::Bus* bus = filter->getBus (isInput, currentBus))
             {
+                name.setText (bus->getName(), NotificationType::dontSendNotification);
+
                 int i;
 
                 for (i = 1; i < AudioChannelSet::maxChannelsOfNamedLayout; ++i)
@@ -282,10 +284,9 @@ private:
                 const bool canBeDisabled = bus->isNumberOfChannelsSupported (0);
 
                 if (canBeDisabled != enabledToggle.isEnabled())
-                {
                     enabledToggle.setEnabled (canBeDisabled);
-                    enabledToggle.setToggleState (bus->isEnabled(), NotificationType::dontSendNotification);
-                }
+
+                enabledToggle.setToggleState (bus->isEnabled(), NotificationType::dontSendNotification);
             }
         }
     }

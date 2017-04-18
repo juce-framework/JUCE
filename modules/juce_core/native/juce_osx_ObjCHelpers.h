@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_OSX_OBJCHELPERS_H_INCLUDED
-#define JUCE_OSX_OBJCHELPERS_H_INCLUDED
+#pragma once
 
 
 /* This file contains a few helper functions that are used internally but which
@@ -225,6 +224,3 @@ private:
 };
 
 #endif
-
-
-#endif   // JUCE_OSX_OBJCHELPERS_H_INCLUDED

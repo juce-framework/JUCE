@@ -42,7 +42,8 @@ namespace WindowsFileHelpers
 
     int64 fileTimeToTime (const FILETIME* const ft)
     {
-        static_jassert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME)); // tell me if this fails!
+        static_assert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME),
+                       "ULARGE_INTEGER is too small to hold FILETIME: please report!");
 
         return (int64) ((reinterpret_cast<const ULARGE_INTEGER*> (ft)->QuadPart - 116444736000000000LL) / 10000);
     }
@@ -95,7 +96,7 @@ namespace WindowsFileHelpers
         if (SHGetSpecialFolderPath (0, path, type, FALSE))
             return File (String (path));
 
-        return File();
+        return {};
     }
 
     File getModuleFileName (HINSTANCE moduleHandle)
@@ -598,7 +599,7 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
 
         default:
             jassertfalse; // unknown type?
-            return File();
+            return {};
     }
 
     return WindowsFileHelpers::getSpecialFolderPath (csidlType);

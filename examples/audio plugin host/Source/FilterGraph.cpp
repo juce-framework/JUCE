@@ -391,7 +391,8 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
     XmlElement* layouts = new XmlElement ("LAYOUT");
     const AudioProcessor::BusesLayout layout = plugin->getBusesLayout();
 
-    for (bool isInput : { true, false })
+    const bool isInputChoices[] = { true, false };
+    for (bool isInput : isInputChoices)
         layouts->addChildElement (createBusLayoutXml (layout, isInput));
 
     e->addChildElement (layouts);
@@ -420,7 +421,8 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     {
         AudioProcessor::BusesLayout layout = instance->getBusesLayout();
 
-        for (bool isInput : { true, false })
+        const bool isInputChoices[] = { true, false };
+        for (bool isInput : isInputChoices)
             readBusLayoutFromXml (layout, instance, *layoutEntity, isInput);
 
         instance->setBusesLayout (layout);
@@ -453,7 +455,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
             {
                 jassert (node->getProcessor() != nullptr);
 
-                if (PluginWindow* const w = PluginWindow::getWindowFor (node, type, graph))
+                if (PluginWindow* const w = PluginWindow::getWindowFor (node, type))
                     w->toFront (true);
             }
         }

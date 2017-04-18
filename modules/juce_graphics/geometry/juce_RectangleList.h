@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RECTANGLELIST_H_INCLUDED
-#define JUCE_RECTANGLELIST_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -64,18 +63,18 @@ public:
         return *this;
     }
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     RectangleList (RectangleList&& other) noexcept
         : rects (static_cast<Array<RectangleType>&&> (other.rects))
     {
     }
 
+    /** Move assignment operator */
     RectangleList& operator= (RectangleList&& other) noexcept
     {
         rects = static_cast<Array<RectangleType>&&> (other.rects);
         return *this;
     }
-   #endif
 
     //==============================================================================
     /** Returns true if the region is empty. */
@@ -353,11 +352,11 @@ public:
 
         for (int j = 0; j < rects.size(); ++j)
         {
-            const RectangleType& rect = rects.getReference (j);
+            auto& rect = rects.getReference (j);
 
-            for (const Rectangle<OtherValueType>* r = other.begin(), * const e = other.end(); r != e; ++r)
+            for (auto& r : other)
             {
-                RectangleType clipped (r->template toType<ValueType>());
+                auto clipped = r.template toType<ValueType>();
 
                 if (rect.intersectRectangle (clipped))
                     result.rects.add (clipped);
@@ -387,7 +386,7 @@ public:
         {
             for (int i = rects.size(); --i >= 0;)
             {
-                RectangleType r (rects.getReference (i));
+                auto r = rects.getReference (i);
 
                 if (rect.intersectRectangle (r))
                     destRegion.rects.add (r);
@@ -657,6 +656,3 @@ private:
     //==============================================================================
     Array<RectangleType> rects;
 };
-
-
-#endif   // JUCE_RECTANGLELIST_H_INCLUDED

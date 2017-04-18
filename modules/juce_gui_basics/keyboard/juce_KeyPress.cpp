@@ -150,7 +150,7 @@ namespace KeyPressHelpers
             {
                 case '0': case '1': case '2': case '3': case '4':
                 case '5': case '6': case '7': case '8': case '9':
-                    return (int) (KeyPress::numberPad0 + lastChar - '0');
+                    return (int) (KeyPress::numberPad0 + (int) lastChar - '0');
 
                 case '+':   return KeyPress::numberPadAdd;
                 case '-':   return KeyPress::numberPadSubtract;

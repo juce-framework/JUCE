@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PROGRESSBAR_H_INCLUDED
-#define JUCE_PROGRESSBAR_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -106,6 +105,8 @@ public:
         */
         virtual void drawProgressBar (Graphics&, ProgressBar&, int width, int height,
                                       double progress, const String& textToShow) = 0;
+
+        virtual bool isProgressBarOpaque (ProgressBar&) = 0;
     };
 
 protected:
@@ -130,6 +131,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar)
 };
-
-
-#endif   // JUCE_PROGRESSBAR_H_INCLUDED

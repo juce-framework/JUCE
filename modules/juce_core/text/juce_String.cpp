@@ -226,16 +226,17 @@ private:
     {
         // Let me know if any of these assertions fail on your system!
        #if JUCE_NATIVE_WCHAR_IS_UTF8
-        static_jassert (sizeof (wchar_t) == 1);
+        static_assert (sizeof (wchar_t) == 1, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF16
-        static_jassert (sizeof (wchar_t) == 2);
+        static_assert (sizeof (wchar_t) == 2, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF32
-        static_jassert (sizeof (wchar_t) == 4);
+        static_assert (sizeof (wchar_t) == 4, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #else
         #error "native wchar_t size is unknown"
        #endif
 
-        static_jassert (sizeof (EmptyString) == sizeof (StringHolder));
+        static_assert (sizeof (EmptyString) == sizeof (StringHolder),
+                       "StringHolder is not large enough to hold an empty String");
     }
 };
 
@@ -276,7 +277,6 @@ String& String::operator= (const String& other) noexcept
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 String::String (String&& other) noexcept   : text (other.text)
 {
     other.text = &(emptyString.text);
@@ -287,7 +287,6 @@ String& String::operator= (String&& other) noexcept
     std::swap (text, other.text);
     return *this;
 }
-#endif
 
 inline String::PreallocationBytes::PreallocationBytes (const size_t num) noexcept : numBytes (num) {}
 
@@ -1180,7 +1179,7 @@ bool String::matchesWildcard (StringRef wildcard, const bool ignoreCase) const n
 String String::repeatedString (StringRef stringToRepeat, int numberOfTimesToRepeat)
 {
     if (numberOfTimesToRepeat <= 0)
-        return String();
+        return {};
 
     String result (PreallocationBytes (findByteOffsetOfEnd (stringToRepeat) * (size_t) numberOfTimesToRepeat));
     CharPointerType n (result.text);
@@ -1292,7 +1291,7 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
 
     const size_t newTotalBytes = initialBytes + newStringBytes + remainderBytes;
     if (newTotalBytes <= 0)
-        return String();
+        return {};
 
     String result (PreallocationBytes ((size_t) newTotalBytes));
 
@@ -1324,6 +1323,18 @@ String String::replace (StringRef stringToReplace, StringRef stringToInsert, con
     }
 
     return result;
+}
+
+String String::replaceFirstOccurrenceOf (StringRef stringToReplace, StringRef stringToInsert, const bool ignoreCase) const
+{
+    const int stringToReplaceLen = stringToReplace.length();
+    const int index = ignoreCase ? indexOfIgnoreCase (stringToReplace)
+                                 : indexOf (stringToReplace);
+
+    if (index >= 0)
+        return replaceSection (index, stringToReplaceLen, stringToInsert);
+
+    return *this;
 }
 
 class StringCreationHelper
@@ -1526,7 +1537,7 @@ String String::substring (int start, const int end) const
         start = 0;
 
     if (end <= start)
-        return String();
+        return {};
 
     int i = 0;
     CharPointerType t1 (text);
@@ -1534,7 +1545,7 @@ String String::substring (int start, const int end) const
     while (i < start)
     {
         if (t1.isEmpty())
-            return String();
+            return {};
 
         ++i;
         ++t1;
@@ -1568,7 +1579,7 @@ String String::substring (int start) const
     while (--start >= 0)
     {
         if (t.isEmpty())
-            return String();
+            return {};
 
         ++t;
     }
@@ -1593,7 +1604,7 @@ String String::fromFirstOccurrenceOf (StringRef sub,
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
     if (i < 0)
-        return String();
+        return {};
 
     return substring (includeSubString ? i : i + sub.length());
 }
@@ -1647,7 +1658,7 @@ String String::unquoted() const
     const int len = length();
 
     if (len == 0)
-        return String();
+        return {};
 
     const juce_wchar lastChar = text [len - 1];
     const int dropAtStart = (*text == '"' || *text == '\'') ? 1 : 0;
@@ -1698,7 +1709,7 @@ String String::trim() const
         CharPointerType trimmedEnd (findTrimmedEnd (start, end));
 
         if (trimmedEnd <= start)
-            return String();
+            return {};
 
         if (text < start || trimmedEnd < end)
             return String (start, trimmedEnd);
@@ -1771,7 +1782,7 @@ String String::trimCharactersAtEnd (StringRef charactersToTrim) const
 String String::retainCharacters (StringRef charactersToRetain) const
 {
     if (isEmpty())
-        return String();
+        return {};
 
     StringCreationHelper builder (text);
 
@@ -1793,7 +1804,7 @@ String String::retainCharacters (StringRef charactersToRetain) const
 String String::removeCharacters (StringRef charactersToRemove) const
 {
     if (isEmpty())
-        return String();
+        return {};
 
     StringCreationHelper builder (text);
 
@@ -1856,8 +1867,7 @@ bool String::containsNonWhitespaceChars() const noexcept
     return false;
 }
 
-// Note! The format parameter here MUST NOT be a reference, otherwise MS's va_start macro fails to work (but still compiles).
-String String::formatted (const String pf, ... )
+String String::formattedRaw (const char* pf, ...)
 {
     size_t bufferSize = 256;
 
@@ -1866,19 +1876,22 @@ String String::formatted (const String pf, ... )
         va_list args;
         va_start (args, pf);
 
-       #if JUCE_WINDOWS
-        HeapBlock<wchar_t> temp (bufferSize);
-        const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
-       #elif JUCE_ANDROID
+      #if JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
-        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
-        if (num >= bufferSize)
+        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf, args);
+        if (num >= static_cast<int> (bufferSize))
             num = -1;
-       #else
+      #else
+        String wideCharVersion (pf);
         HeapBlock<wchar_t> temp (bufferSize);
-        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
+        const int num = (int)
+       #if JUCE_WINDOWS
+            _vsnwprintf
+       #else
+            vswprintf
        #endif
-
+                (temp.getData(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
+      #endif
         va_end (args);
 
         if (num > 0)
@@ -1890,7 +1903,7 @@ String String::formatted (const String pf, ... )
             break;                          // returns -1 because of an error rather than because it needs more space.
     }
 
-    return String();
+    return {};
 }
 
 //==============================================================================
@@ -1915,7 +1928,7 @@ int String::getTrailingIntValue() const noexcept
             break;
         }
 
-        n += mult * (*t - '0');
+        n += static_cast<juce_wchar> (mult) * (*t - '0');
         mult *= 10;
     }
 
@@ -1950,7 +1963,7 @@ String String::toHexString (short number)     { return toHexString ((int) (unsig
 String String::toHexString (const void* const d, const int size, const int groupSize)
 {
     if (size <= 0)
-        return String();
+        return {};
 
     int numChars = (size * 2) + 2;
     if (groupSize > 0)
@@ -1995,7 +2008,7 @@ String String::createStringFromData (const void* const unknownData, int size)
     const uint8* const data = static_cast<const uint8*> (unknownData);
 
     if (size <= 0 || data == nullptr)
-        return String();
+        return {};
 
     if (size == 1)
         return charToString ((juce_wchar) data[0]);
@@ -2161,7 +2174,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
         }
     }
 
-    return String();
+    return {};
 }
 
 #if JUCE_MSVC

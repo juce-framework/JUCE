@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCER_SNAPGRIDPAINTER_H_INCLUDED
-#define JUCER_SNAPGRIDPAINTER_H_INCLUDED
+#pragma once
 
 #include "../jucer_JucerDocument.h"
 #include "../jucer_PaintRoutine.h"
@@ -79,6 +78,3 @@ private:
     int snapGridSize;
     bool snapShown;
 };
-
-
-#endif   // JUCER_SNAPGRIDPAINTER_H_INCLUDED

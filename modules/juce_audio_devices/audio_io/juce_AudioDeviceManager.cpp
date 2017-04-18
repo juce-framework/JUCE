@@ -442,7 +442,7 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     jassert (&newSetup != &currentSetup);    // this will have no effect
 
     if (newSetup == currentSetup && currentAudioDevice != nullptr)
-        return String();
+        return {};
 
     if (! (newSetup == currentSetup))
         sendChangeMessage();
@@ -462,7 +462,7 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         if (treatAsChosenDevice)
             updateXml();
 
-        return String();
+        return {};
     }
 
     if (currentSetup.inputDeviceName != newInputDeviceName

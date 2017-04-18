@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPROCESSOREDITOR_H_INCLUDED
-#define JUCE_AUDIOPROCESSOREDITOR_H_INCLUDED
+#pragma once
 
 class AudioProcessorEditorListener;
 //==============================================================================
@@ -171,6 +170,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)
 };
-
-
-#endif   // JUCE_AUDIOPROCESSOREDITOR_H_INCLUDED

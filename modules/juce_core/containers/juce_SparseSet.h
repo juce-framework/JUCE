@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SPARSESET_H_INCLUDED
-#define JUCE_SPARSESET_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -294,7 +293,3 @@ private:
                 values.removeRange (--i, 2);
     }
 };
-
-
-
-#endif   // JUCE_SPARSESET_H_INCLUDED

@@ -46,7 +46,7 @@
 *******************************************************************************/
 
 
-#ifndef JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
+#pragma once
 #define JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
 
 /**
@@ -83,6 +83,3 @@ namespace juce
     #include "marketplace/juce_OnlineUnlockForm.h"
    #endif
 }
-
-
-#endif   // JUCE_TRACKTION_MARKETPLACE_H_INCLUDED

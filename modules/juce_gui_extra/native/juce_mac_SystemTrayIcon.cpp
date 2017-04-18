@@ -92,41 +92,44 @@ public:
         if (owner.isCurrentlyBlockedByAnotherModalComponent())
         {
             if (isLeft || isRight)
-                if (Component* const current = Component::getCurrentlyModalComponent())
+                if (auto* current = Component::getCurrentlyModalComponent())
                     current->inputAttemptWhenModal();
         }
         else
         {
-            ModifierKeys eventMods (ModifierKeys::getCurrentModifiersRealtime());
+            auto eventMods = ModifierKeys::getCurrentModifiersRealtime();
 
             if (([e modifierFlags] & NSEventModifierFlagCommand) != 0)
                 eventMods = eventMods.withFlags (ModifierKeys::commandModifier);
 
-            const Time now (Time::getCurrentTime());
+            auto now = Time::getCurrentTime();
 
             MouseInputSource mouseSource = Desktop::getInstance().getMainMouseSource();
-            const float pressure = (float) e.pressure;
+            auto pressure = (float) e.pressure;
 
             if (isLeft || isRight)  // Only mouse up is sent by the OS, so simulate a down/up
             {
                 setHighlighted (true);
                 startTimer (150);
 
-                owner.mouseDown (MouseEvent (mouseSource, Point<float>(),
+                owner.mouseDown (MouseEvent (mouseSource, {},
                                              eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                          : ModifierKeys::rightButtonModifier),
-                                             pressure, &owner, &owner, now,
-                                             Point<float>(), now, 1, false));
+                                             pressure, MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
+                                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                             &owner, &owner, now, {}, now, 1, false));
 
-                owner.mouseUp (MouseEvent (mouseSource, Point<float>(), eventMods.withoutMouseButtons(),
-                                           pressure, &owner, &owner, now,
-                                           Point<float>(), now, 1, false));
+                owner.mouseUp (MouseEvent (mouseSource, {}, eventMods.withoutMouseButtons(), pressure,
+                                           MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
+                                           MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                           &owner, &owner, now, {}, now, 1, false));
             }
             else if (type == NSEventTypeMouseMoved)
             {
-                owner.mouseMove (MouseEvent (mouseSource, Point<float>(), eventMods,
-                                             pressure, &owner, &owner, now,
-                                             Point<float>(), now, 1, false));
+                owner.mouseMove (MouseEvent (mouseSource, {}, eventMods, pressure,
+                                             MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
+                                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                             &owner, &owner, now, {}, now, 1, false));
             }
         }
     }
@@ -195,7 +198,7 @@ private:
     private:
         static void handleEventDown (id self, SEL, NSEvent* e)
         {
-            if (Pimpl* const owner = getOwner (self))
+            if (auto* owner = getOwner (self))
                 owner->handleStatusItemAction (e);
         }
 
@@ -203,7 +206,7 @@ private:
         {
             NSRect bounds = [self bounds];
 
-            if (Pimpl* const owner = getOwner (self))
+            if (auto* owner = getOwner (self))
                 [owner->statusItem drawStatusBarBackgroundInRect: bounds
                                                    withHighlight: owner->isHighlighted];
 

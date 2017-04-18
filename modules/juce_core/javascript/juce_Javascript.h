@@ -46,7 +46,7 @@
     script creates complex connections between objects, you run the risk of creating cyclic
     dependencies and hence leaking.
 */
-class JavascriptEngine
+class JUCE_API  JavascriptEngine
 {
 public:
     /** Creates an instance of the engine.
@@ -84,6 +84,15 @@ public:
                       const var::NativeFunctionArgs& args,
                       Result* errorMessage = nullptr);
 
+    /** Calls a function object in the namespace of a dynamic object, and returns the result.
+        The function arguments are passed in the same format as used by native
+        methods in the var class.
+    */
+    var callFunctionObject (DynamicObject* objectScope,
+                            const var& functionObject,
+                            const var::NativeFunctionArgs& args,
+                            Result* errorMessage = nullptr);
+
     /** Adds a native object to the root namespace.
         The object passed-in is reference-counted, and will be retained by the
         engine until the engine is deleted. The name must be a simple JS identifier,
@@ -97,6 +106,9 @@ public:
         suits your application.
     */
     RelativeTime maximumExecutionTime;
+
+    /** When called from another thread, causes the interpreter to time-out as soon as possible */
+    void stop() noexcept;
 
     /** Provides access to the set of properties of the root namespace object. */
     const NamedValueSet& getRootObjectProperties() const noexcept;

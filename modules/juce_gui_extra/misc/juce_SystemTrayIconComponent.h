@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_SYSTEMTRAYICONCOMPONENT_H_INCLUDED
-#define JUCE_SYSTEMTRAYICONCOMPONENT_H_INCLUDED
+#pragma once
 
 #if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC || DOXYGEN
 
@@ -99,4 +98,3 @@ private:
 
 
 #endif
-#endif   // JUCE_SYSTEMTRAYICONCOMPONENT_H_INCLUDED

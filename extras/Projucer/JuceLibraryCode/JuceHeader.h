@@ -10,8 +10,7 @@
 
 */
 
-#ifndef __APPHEADERFILE_M70QFTRRK__
-#define __APPHEADERFILE_M70QFTRRK__
+#pragma once
 
 #include "AppConfig.h"
 
@@ -39,5 +38,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x40301;
 }
 #endif
-
-#endif   // __APPHEADERFILE_M70QFTRRK__

@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_FILLTYPE_H_INCLUDED
-#define JUCE_FILLTYPE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -64,10 +63,11 @@ public:
     /** Makes a copy of another FillType. */
     FillType& operator= (const FillType&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     FillType (FillType&&) noexcept;
+
+    /** Move assignment operator */
     FillType& operator= (FillType&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~FillType() noexcept;
@@ -144,6 +144,3 @@ public:
 private:
     JUCE_LEAK_DETECTOR (FillType)
 };
-
-
-#endif   // JUCE_FILLTYPE_H_INCLUDED

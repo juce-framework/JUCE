@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TIMER_H_INCLUDED
-#define JUCE_TIMER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -122,6 +121,11 @@ public:
     */
     int getTimerInterval() const noexcept                   { return timerPeriodMs; }
 
+    //==============================================================================
+   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
+    /** Invokes a lambda after a given number of milliseconds. */
+    static void JUCE_CALLTYPE callAfterDelay (int milliseconds, std::function<void()> functionToCall);
+   #endif
 
     //==============================================================================
     /** For internal use only: invokes any timers that need callbacks.
@@ -137,5 +141,3 @@ private:
 
     Timer& operator= (const Timer&) JUCE_DELETED_FUNCTION;
 };
-
-#endif   // JUCE_TIMER_H_INCLUDED

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_UNITTEST_H_INCLUDED
-#define JUCE_UNITTEST_H_INCLUDED
+#pragma once
 
 class UnitTestRunner;
 
@@ -422,6 +421,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (UnitTestRunner)
 };
-
-
-#endif   // JUCE_UNITTEST_H_INCLUDED

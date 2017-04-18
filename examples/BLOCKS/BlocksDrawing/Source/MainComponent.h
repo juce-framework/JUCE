@@ -1,5 +1,4 @@
-#ifndef MAINCOMPONENT_H_INCLUDED
-#define MAINCOMPONENT_H_INCLUDED
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "LightpadComponent.h"
@@ -136,7 +135,7 @@ public:
         addAndMakeVisible (connectButton);
        #endif
 
-		setSize (600, 600);
+        setSize (600, 600);
     }
 
     ~MainComponent()
@@ -234,7 +233,7 @@ public:
                     scaleX = (float) (grid->getNumColumns()) / activeBlock->getWidth();
                     scaleY = (float) (grid->getNumRows())    / activeBlock->getHeight();
 
-                    setLEDProgram (grid);
+                    setLEDProgram (*activeBlock);
                 }
 
                 // Make the on screen Lighpad component visible
@@ -287,7 +286,7 @@ private:
         {
             // Switch to canvas mode and set the LEDGrid program
             currentMode = canvas;
-            setLEDProgram (activeBlock->getLEDGrid());
+            setLEDProgram (*activeBlock);
         }
     }
 
@@ -299,8 +298,8 @@ private:
             BluetoothMidiDevicePairingDialogue::open();
             return;
         }
-	   #else
-		ignoreUnused (b);
+       #else
+        ignoreUnused (b);
        #endif
 
         clearLEDs();
@@ -326,7 +325,7 @@ private:
         {
             // Switch to colour palette mode and set the LEDGrid program
             currentMode = colourPalette;
-            setLEDProgram (activeBlock->getLEDGrid());
+            setLEDProgram (*activeBlock);
         }
 
         stopTimer();
@@ -351,7 +350,7 @@ private:
     }
 
     /** Sets the LEDGrid Program for the selected mode */
-    void setLEDProgram (LEDGrid* grid)
+    void setLEDProgram (Block& block)
     {
         canvasProgram = nullptr;
         colourPaletteProgram = nullptr;
@@ -359,10 +358,10 @@ private:
         if (currentMode == canvas)
         {
             // Create a new BitmapLEDProgram for the LEDGrid
-            canvasProgram = new BitmapLEDProgram (*grid);
+            canvasProgram = new BitmapLEDProgram (block);
 
             // Set the LEDGrid program
-            grid->setProgram (canvasProgram);
+            block.setProgram (canvasProgram);
 
             // Redraw any previously drawn LEDs
             redrawLEDs();
@@ -370,10 +369,10 @@ private:
         else if (currentMode == colourPalette)
         {
             // Create a new DrumPadGridProgram for the LEDGrid
-            colourPaletteProgram = new DrumPadGridProgram (*grid);
+            colourPaletteProgram = new DrumPadGridProgram (block);
 
             // Set the LEDGrid program
-            grid->setProgram (colourPaletteProgram);
+            block.setProgram (colourPaletteProgram);
 
             // Setup the grid layout
             colourPaletteProgram->setGridFills (layout.numColumns,
@@ -535,6 +534,3 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
-
-
-#endif  // MAINCOMPONENT_H_INCLUDED

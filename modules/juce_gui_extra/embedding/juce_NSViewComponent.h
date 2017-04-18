@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_NSVIEWCOMPONENT_H_INCLUDED
-#define JUCE_NSVIEWCOMPONENT_H_INCLUDED
+#pragma once
 
 #if JUCE_MAC || DOXYGEN
 
@@ -84,4 +83,3 @@ private:
 };
 
 #endif
-#endif   // JUCE_NSVIEWCOMPONENT_H_INCLUDED

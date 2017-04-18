@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPLUGININSTANCE_H_INCLUDED
-#define JUCE_AUDIOPLUGININSTANCE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -84,6 +83,3 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance)
 };
-
-
-#endif   // JUCE_AUDIOPLUGININSTANCE_H_INCLUDED

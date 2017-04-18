@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_BLOWFISH_H_INCLUDED
-#define JUCE_BLOWFISH_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -106,6 +105,3 @@ private:
 
     JUCE_LEAK_DETECTOR (BlowFish)
 };
-
-
-#endif   // JUCE_BLOWFISH_H_INCLUDED

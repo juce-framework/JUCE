@@ -1,5 +1,4 @@
-#ifndef BLOCKFINDER_INCLUDED
-#define BLOCKFINDER_INCLUDED
+#pragma once
 
 #include <BlocksHeader.h>
 
@@ -19,5 +18,3 @@ private:
     // The PhysicalTopologySource member variable which reports BLOCKS changes.
     juce::PhysicalTopologySource pts;
 };
-
-#endif // BLOCKFINDER_INCLUDED

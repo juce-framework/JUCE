@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_GROUPCOMPONENT_H_INCLUDED
-#define JUCE_GROUPCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -106,6 +105,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (GroupComponent)
 };
-
-
-#endif   // JUCE_GROUPCOMPONENT_H_INCLUDED

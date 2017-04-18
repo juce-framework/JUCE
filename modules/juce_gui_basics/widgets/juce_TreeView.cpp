@@ -367,15 +367,11 @@ private:
 
     static bool isMouseDraggingInChildCompOf (Component* const comp)
     {
-        const Array<MouseInputSource>& mouseSources = Desktop::getInstance().getMouseSources();
-
-        for (MouseInputSource* mi = mouseSources.begin(), * const e = mouseSources.end(); mi != e; ++mi)
-        {
-            if (mi->isDragging())
-                if (Component* const underMouse = mi->getComponentUnderMouse())
+        for (auto& ms : Desktop::getInstance().getMouseSources())
+            if (ms.isDragging())
+                if (auto* underMouse = ms.getComponentUnderMouse())
                     if (comp == underMouse || comp->isParentOf (underMouse))
                         return true;
-        }
 
         return false;
     }
@@ -1156,7 +1152,7 @@ TreeViewItem::~TreeViewItem()
 
 String TreeViewItem::getUniqueName() const
 {
-    return String();
+    return {};
 }
 
 void TreeViewItem::itemOpennessChanged (bool)
@@ -1378,7 +1374,7 @@ void TreeViewItem::itemSelectionChanged (bool)
 
 String TreeViewItem::getTooltip()
 {
-    return String();
+    return {};
 }
 
 void TreeViewItem::ownerViewChanged (TreeView*)
@@ -1387,7 +1383,7 @@ void TreeViewItem::ownerViewChanged (TreeView*)
 
 var TreeViewItem::getDragSourceDescription()
 {
-    return var();
+    return {};
 }
 
 bool TreeViewItem::isInterestedInFileDrag (const StringArray&)
@@ -1599,9 +1595,13 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         }
 
         if (mightContainSubItems())
+        {
+            auto backgroundColour = ownerView->findColour (TreeView::backgroundColourId);
+
             paintOpenCloseButton (g, Rectangle<float> ((float) (depth * indentWidth), 0, (float) indentWidth, (float) itemHeight),
-                                  Colours::white,
+                                  backgroundColour.isTransparent() ? Colours::white : backgroundColour,
                                   ownerView->viewport->getContentComp()->isMouseOverButton (this));
+        }
     }
 
     if (isOpen())

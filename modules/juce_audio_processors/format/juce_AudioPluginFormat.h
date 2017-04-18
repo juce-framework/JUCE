@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOPLUGINFORMAT_H_INCLUDED
-#define JUCE_AUDIOPLUGINFORMAT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -165,6 +164,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormat)
 };
-
-
-#endif   // JUCE_AUDIOPLUGINFORMAT_H_INCLUDED

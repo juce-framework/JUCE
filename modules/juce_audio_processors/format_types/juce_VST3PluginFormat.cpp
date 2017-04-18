@@ -187,6 +187,7 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
 
     zerostruct (context);
     context.sampleRate = sampleRate;
+    auto& fr = context.frameRate;
 
     if (playHead != nullptr)
     {
@@ -204,25 +205,16 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
 
         switch (position.frameRate)
         {
-            case AudioPlayHead::fps24: context.frameRate.framesPerSecond = 24; break;
-            case AudioPlayHead::fps25: context.frameRate.framesPerSecond = 25; break;
-            case AudioPlayHead::fps30: context.frameRate.framesPerSecond = 30; break;
-
-            case AudioPlayHead::fps2997:
-            case AudioPlayHead::fps2997drop:
-            case AudioPlayHead::fps30drop:
-            {
-                context.frameRate.framesPerSecond = 30;
-                context.frameRate.flags = FrameRate::kDropRate;
-
-                if (position.frameRate == AudioPlayHead::fps2997drop)
-                    context.frameRate.flags |= FrameRate::kPullDownRate;
-            }
-            break;
-
-            case AudioPlayHead::fpsUnknown: break;
-
-            default:    jassertfalse; break; // New frame rate?
+            case AudioPlayHead::fps24:       fr.framesPerSecond = 24; fr.flags = 0; break;
+            case AudioPlayHead::fps25:       fr.framesPerSecond = 25; fr.flags = 0; break;
+            case AudioPlayHead::fps2997:     fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate; break;
+            case AudioPlayHead::fps2997drop: fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate | FrameRate::kDropRate; break;
+            case AudioPlayHead::fps30:       fr.framesPerSecond = 30; fr.flags = 0; break;
+            case AudioPlayHead::fps30drop:   fr.framesPerSecond = 30; fr.flags = FrameRate::kDropRate; break;
+            case AudioPlayHead::fps60:       fr.framesPerSecond = 60; fr.flags = 0; break;
+            case AudioPlayHead::fps60drop:   fr.framesPerSecond = 60; fr.flags = FrameRate::kDropRate; break;
+            case AudioPlayHead::fpsUnknown:  break;
+            default:                         jassertfalse; break; // New frame rate?
         }
 
         if (position.isPlaying)     context.state |= ProcessContext::kPlaying;
@@ -231,10 +223,11 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
     }
     else
     {
-        context.tempo                       = 120.0;
-        context.frameRate.framesPerSecond   = 30;
-        context.timeSigNumerator            = 4;
-        context.timeSigDenominator          = 4;
+        context.tempo               = 120.0;
+        context.timeSigNumerator    = 4;
+        context.timeSigDenominator  = 4;
+        fr.framesPerSecond          = 30;
+        fr.flags                    = 0;
     }
 
     if (context.projectTimeMusic >= 0.0)        context.state |= ProcessContext::kProjectTimeMusicValid;
@@ -685,7 +678,7 @@ public:
 
         if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iid, Vst::IMessage::iid))
         {
-            ComSmartPtr<Message> m (new Message (*this, attributeList));
+            ComSmartPtr<Message> m (new Message (attributeList));
             messageQueue.add (m);
             m->addRef();
             *obj = m;
@@ -782,18 +775,18 @@ private:
     class Message  : public Vst::IMessage
     {
     public:
-        Message (VST3HostContext& o, Vst::IAttributeList* list)
-           : owner (o), attributeList (list)
+        Message (Vst::IAttributeList* list)
+           : attributeList (list)
         {
         }
 
-        Message (VST3HostContext& o, Vst::IAttributeList* list, FIDString id)
-           : owner (o), attributeList (list), messageId (toString (id))
+        Message (Vst::IAttributeList* list, FIDString id)
+           : attributeList (list), messageId (toString (id))
         {
         }
 
-        Message (VST3HostContext& o, Vst::IAttributeList* list, FIDString id, const var& v)
-           : value (v), owner (o), attributeList (list), messageId (toString (id))
+        Message (Vst::IAttributeList* list, FIDString id, const var& v)
+           : value (v), attributeList (list), messageId (toString (id))
         {
         }
 
@@ -809,7 +802,6 @@ private:
         var value;
 
     private:
-        VST3HostContext& owner;
         ComSmartPtr<Vst::IAttributeList> attributeList;
         String messageId;
         Atomic<int> refCount;
@@ -938,7 +930,7 @@ private:
                 }
             }
 
-            owner->messageQueue.add (ComSmartPtr<Message> (new Message (*owner, this, id, value)));
+            owner->messageQueue.add (ComSmartPtr<Message> (new Message (this, id, value)));
         }
 
         template <typename Type>
@@ -2131,7 +2123,7 @@ public:
                 return toString (busInfo.name);
         }
 
-        return String();
+        return {};
     }
 
     const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, true, true); }
@@ -2223,7 +2215,7 @@ public:
             return toString (result);
         }
 
-        return String();
+        return {};
     }
 
     void setParameter (int parameterIndex, float newValue) override

@@ -28,8 +28,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RESULT_H_INCLUDED
-#define JUCE_RESULT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -101,11 +100,8 @@ public:
     //==============================================================================
     Result (const Result&);
     Result& operator= (const Result&);
-
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     Result (Result&&) noexcept;
     Result& operator= (Result&&) noexcept;
-   #endif
 
     bool operator== (const Result& other) const noexcept;
     bool operator!= (const Result& other) const noexcept;
@@ -122,6 +118,3 @@ private:
     operator int() const;
     operator void*() const;
 };
-
-
-#endif   // JUCE_RESULT_H_INCLUDED

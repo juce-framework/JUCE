@@ -22,12 +22,8 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RTAS_DIGICODE_HEADER_H_INCLUDED
-#define JUCE_RTAS_DIGICODE_HEADER_H_INCLUDED
+#pragma once
 
-#if JucePlugin_Build_RTAS
-
-//==============================================================================
 #if JucePlugin_Build_RTAS
 #ifdef _MSC_VER
 
@@ -69,6 +65,3 @@
 
 #endif
 #endif
-#endif
-
-#endif   // JUCE_RTAS_DIGICODE_HEADER_H_INCLUDED

@@ -77,7 +77,7 @@ Identifier PathSettingsTab::getKeyForPropertyComponent (TextPropertyComponent* c
 
     // this property component does not have a key associated to it!
     jassertfalse;
-    return String();
+    return {};
 }
 
 Component* PathSettingsTab::getContent()
