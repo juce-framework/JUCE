@@ -941,10 +941,10 @@ public:
                 s.add ("SEPARATE_STRIP = YES");
             }
 
-            if (owner.project.getProjectType().isAudioPlugin())
-                if ((owner.isOSX() && type == Target::AudioUnitv3PlugIn)
-                    || (owner.isiOS() && type == Target::StandalonePlugIn))
-                    s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
+            if (owner.project.getProjectType().isAudioPlugin()
+                && (   (owner.isOSX() && type == Target::AudioUnitv3PlugIn)
+                    || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
+                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
 
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
 

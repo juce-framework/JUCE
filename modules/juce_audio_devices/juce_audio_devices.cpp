@@ -182,7 +182,6 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_IOS
- #include "native/juce_ios_Audio.h"
  #include "native/juce_ios_Audio.cpp"
  #include "native/juce_mac_CoreMidi.cpp"
 

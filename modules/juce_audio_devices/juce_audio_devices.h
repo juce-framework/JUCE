@@ -161,4 +161,8 @@ namespace juce
 #include "sources/juce_AudioTransportSource.h"
 #include "audio_io/juce_AudioDeviceManager.h"
 
+#if JUCE_IOS
+ #include "native/juce_ios_Audio.h"
+#endif
+
 }
