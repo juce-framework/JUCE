@@ -115,3 +115,7 @@ void WebBrowserComponent::visibilityChanged()
 void WebBrowserComponent::focusGained (FocusChangeType)
 {
 }
+
+void WebBrowserComponent::clearCookies()
+{
+}

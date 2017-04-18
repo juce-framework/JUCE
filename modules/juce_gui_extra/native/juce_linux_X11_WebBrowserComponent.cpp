@@ -729,3 +729,10 @@ void WebBrowserComponent::visibilityChanged()
 void WebBrowserComponent::focusGained (FocusChangeType)
 {
 }
+
+void WebBrowserComponent::clearCookies()
+{
+    // Currently not implemented on linux as WebBrowserComponent currently does not
+    // store cookies on linux
+    jassertfalse;
+}

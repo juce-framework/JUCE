@@ -421,3 +421,18 @@ void WebBrowserComponent::visibilityChanged()
 void WebBrowserComponent::focusGained (FocusChangeType)
 {
 }
+
+void WebBrowserComponent::clearCookies()
+{
+    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+
+    if (NSArray<NSHTTPCookie *>* cookies = [storage cookies])
+    {
+        const NSUInteger n = [cookies count];
+
+        for (NSUInteger i = 0; i < n; ++i)
+            [storage deleteCookie:[cookies objectAtIndex:i]];
+    }
+
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}

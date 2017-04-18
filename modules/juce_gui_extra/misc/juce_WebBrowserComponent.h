@@ -79,6 +79,9 @@ public:
     /** Refreshes the browser. */
     void refresh();
 
+    /** Clear cookies that the OS has stored for the WebComponents of this application */
+    static void clearCookies();
+
     //==============================================================================
     /** This callback is called when the browser is about to navigate
         to a new location.

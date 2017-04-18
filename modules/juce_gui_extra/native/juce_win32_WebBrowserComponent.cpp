@@ -364,3 +364,35 @@ void WebBrowserComponent::focusGained (FocusChangeType)
         oleObject->Release();
     }
 }
+
+void WebBrowserComponent::clearCookies()
+{
+    HeapBlock<::INTERNET_CACHE_ENTRY_INFO> entry;
+    ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFO);
+    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+
+    if (urlCacheHandle == nullptr && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+    {
+        entry.realloc (1, entrySize);
+        urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+    }
+
+    if (urlCacheHandle != nullptr)
+    {
+        while (true)
+        {
+            ::DeleteUrlCacheEntry (entry.getData()->lpszSourceUrlName);
+
+            if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0
+                  && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+            {
+                entry.realloc (1, entrySize);
+
+                if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0)
+                    break;
+            }
+        }
+
+        FindCloseUrlCache (urlCacheHandle);
+    }
+}
