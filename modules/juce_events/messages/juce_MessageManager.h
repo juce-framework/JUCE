@@ -365,6 +365,10 @@ private:
     struct ThreadChecker : BailOutChecker
     {
         ThreadChecker (Thread* const, ThreadPoolJob* const);
+
+        // Required to supress VS2013 compiler warnings
+        ThreadChecker& operator= (const ThreadChecker&) = delete;
+
         bool shouldAbortAcquiringLock() override;
 
         Thread* const threadToCheck;

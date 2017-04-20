@@ -35,6 +35,9 @@ struct ListenerBase
     ListenerBase (int& counter) : c (counter) {}
     virtual ~ListenerBase() {}
 
+    // Required to supress VS2013 compiler warnings
+    ListenerBase& operator= (const ListenerBase&) = delete;
+
     virtual void f () = 0;
     virtual void f (void*) = 0;
     virtual void f (void*, void*) = 0;
@@ -50,6 +53,9 @@ struct Listener1 : public ListenerBase
 {
     Listener1 (int& counter) : ListenerBase (counter) {}
 
+    // Required to supress VS2013 compiler warnings
+    Listener1& operator= (const Listener1&) = delete;
+
     void f () override                                         { c += 1; }
     void f (void*) override                                    { c += 2; }
     void f (void*, void*) override                             { c += 3; }
@@ -62,6 +68,9 @@ struct Listener1 : public ListenerBase
 struct Listener2 : public ListenerBase
 {
     Listener2 (int& counter) : ListenerBase (counter) {}
+
+    // Required to supress VS2013 compiler warnings
+    Listener1& operator= (const Listener1&) = delete;
 
     void f () override                                         { c -= 2; }
     void f (void*) override                                    { c -= 4; }
