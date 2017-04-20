@@ -216,7 +216,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
             flags |= OFN_ENABLEHOOK;
 
             info.customComponent = new CustomComponentHolder (extraInfoComponent);
-            info.customComponent->enterModalState();
+            info.customComponent->enterModalState (false);
         }
 
         const size_t filterSpaceNumChars = 2048;
