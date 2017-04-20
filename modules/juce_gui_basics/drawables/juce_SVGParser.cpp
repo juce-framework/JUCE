@@ -1118,7 +1118,7 @@ private:
         return source;
     }
 
-    String getStyleAttribute (const XmlPath& xml, StringRef attributeName, const String& defaultValue = {}) const
+    String getStyleAttribute (const XmlPath& xml, StringRef attributeName, const String& defaultValue = String()) const
     {
         if (xml->hasAttribute (attributeName))
             return xml->getStringAttribute (attributeName, defaultValue);
