@@ -220,23 +220,23 @@ void Project::removeDefunctExporters()
 {
     ValueTree exporters (projectRoot.getChildWithName (Ids::EXPORTFORMATS));
 
-    for (;;)
-    {
-        ValueTree oldVC6Exporter        (exporters.getChildWithName ("MSVC6"));
-        ValueTree oldAndroidAntExporter (exporters.getChildWithName ("ANDROID"));
+    StringPairArray oldExporters;
+    oldExporters.set ("ANDROID", "Android Ant Exporter");
+    oldExporters.set ("MSVC6", "MSVC6");
+    oldExporters.set ("VS2010", "Visual Studio 2010");
+    oldExporters.set ("VS2012", "Visual Studio 2012");
 
-        if      (oldVC6Exporter.isValid())
-            exporters.removeChild (oldVC6Exporter, nullptr);
-        else if (oldAndroidAntExporter.isValid())
+    for (auto& key : oldExporters.getAllKeys())
+    {
+        ValueTree oldExporter (exporters.getChildWithName (key));
+
+        if (oldExporter.isValid())
         {
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Android Ant Exporter"),
-                                         TRANS("The Android Ant Exporter is deprecated. The exporter will be removed from this project."));
-
-            exporters.removeChild (oldAndroidAntExporter, nullptr);
+                                         TRANS (oldExporters[key]),
+                                         TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+            exporters.removeChild (oldExporter, nullptr);
         }
-        else
-            break;
     }
 }
 
