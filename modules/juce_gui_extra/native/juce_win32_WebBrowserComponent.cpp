@@ -379,7 +379,7 @@ void WebBrowserComponent::clearCookies()
 
     if (urlCacheHandle != nullptr)
     {
-        while (true)
+        for (;;)
         {
             ::DeleteUrlCacheEntry (entry.getData()->lpszSourceUrlName);
 
