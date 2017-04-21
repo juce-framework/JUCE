@@ -211,15 +211,12 @@ public:
     bool isHorizontalScrollBarShown() const noexcept            { return showHScrollbar; }
 
     /** Changes the width of the scrollbars.
-
         If this isn't specified, the default width from the LookAndFeel class will be used.
-
         @see LookAndFeel::getDefaultScrollbarWidth
     */
     void setScrollBarThickness (int thickness);
 
     /** Returns the thickness of the scrollbars.
-
         @see setScrollBarThickness
     */
     int getScrollBarThickness() const;
@@ -239,6 +236,15 @@ public:
     */
     ScrollBar* getHorizontalScrollBar() noexcept                { return &horizontalScrollBar; }
 
+    /** True if there's any off-screen content that could be scrolled vertically,
+        or false if everything is currently visible.
+    */
+    bool canScrollVertically() const noexcept;
+
+    /** True if there's any off-screen content that could be scrolled horizontally,
+        or false if everything is currently visible.
+    */
+    bool canScrollHorizontally() const noexcept;
 
     /** Enables or disables drag-to-scroll functionality in the viewport. */
     void setScrollOnDragEnabled (bool shouldScrollOnDrag);
@@ -271,15 +277,15 @@ public:
 
 private:
     //==============================================================================
+    ScrollBar verticalScrollBar { true }, horizontalScrollBar { false };
+    Component contentHolder;
     WeakReference<Component> contentComp;
     Rectangle<int> lastVisibleArea;
-    int scrollBarThickness;
-    int singleStepX, singleStepY;
-    bool showHScrollbar, showVScrollbar, deleteContent;
-    bool customScrollBarThickness;
-    bool allowScrollingWithoutScrollbarV, allowScrollingWithoutScrollbarH;
-    Component contentHolder;
-    ScrollBar verticalScrollBar, horizontalScrollBar;
+    int scrollBarThickness = 0;
+    int singleStepX = 16, singleStepY = 16;
+    bool showHScrollbar = true, showVScrollbar = true, deleteContent = true;
+    bool customScrollBarThickness = false;
+    bool allowScrollingWithoutScrollbarV = false, allowScrollingWithoutScrollbarH = false;
 
     struct DragToScrollListener;
     friend struct DragToScrollListener;
