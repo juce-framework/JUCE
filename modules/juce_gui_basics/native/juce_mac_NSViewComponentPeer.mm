@@ -651,7 +651,7 @@ public:
         @catch (...)
         {}
 
-        if (wheel.deltaX == 0 && wheel.deltaY == 0)
+        if (wheel.deltaX == 0.0f && wheel.deltaY == 0.0f)
         {
             const float scale = 10.0f / 256.0f;
             wheel.deltaX = scale * (float) [ev deltaX];

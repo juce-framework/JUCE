@@ -746,12 +746,12 @@ public:
 
         PathElementType elementType;
 
-        float x1, y1, x2, y2, x3, y3;
+        float x1 = 0, y1 = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
 
         //==============================================================================
     private:
         const Path& path;
-        size_t index;
+        size_t index = 0;
 
         JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
@@ -802,7 +802,7 @@ private:
     friend class PathFlatteningIterator;
     friend class Path::Iterator;
     ArrayAllocationBase<float, DummyCriticalSection> data;
-    size_t numElements;
+    size_t numElements = 0;
 
     struct PathBounds
     {
@@ -813,11 +813,11 @@ private:
         void extend (float, float) noexcept;
         void extend (float, float, float, float) noexcept;
 
-        float pathXMin, pathXMax, pathYMin, pathYMax;
+        float pathXMin = 0, pathXMax = 0, pathYMin = 0, pathYMax = 0;
     };
 
     PathBounds bounds;
-    bool useNonZeroWinding;
+    bool useNonZeroWinding = true;
 
     static const float lineMarker;
     static const float moveMarker;

@@ -588,12 +588,12 @@ private:
 
         if (positiveFlexibility)
         {
-            if (totalFlexGrow != 0)
+            if (totalFlexGrow != 0.0)
                 changeUnit = difference / totalFlexGrow;
         }
         else
         {
-            if (totalFlexShrink != 0)
+            if (totalFlexShrink != 0.0)
                 changeUnit = difference / totalFlexShrink;
         }
 

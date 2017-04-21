@@ -283,7 +283,7 @@ public:
             return gradCol1.isTransparent() && gradCol2.isTransparent();
 
         case imageBrush:
-            return imageOpacity == 0;
+            return imageOpacity == 0.0;
 
         default:
             jassertfalse;

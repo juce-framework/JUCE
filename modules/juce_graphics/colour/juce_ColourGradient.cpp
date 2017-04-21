@@ -132,7 +132,7 @@ void ColourGradient::setColour (int index, Colour newColour) noexcept
 
 Colour ColourGradient::getColourAtPosition (const double position) const noexcept
 {
-    jassert (colours.getReference(0).position == 0); // the first colour specified has to go at position 0
+    jassert (colours.getReference(0).position == 0.0); // the first colour specified has to go at position 0
 
     if (position <= 0 || colours.size() <= 1)
         return colours.getReference(0).colour;
@@ -157,7 +157,7 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
     JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED // Trying to use this object without setting its coordinates?
     jassert (colours.size() >= 2);
     jassert (numEntries > 0);
-    jassert (colours.getReference(0).position == 0); // The first colour specified has to go at position 0
+    jassert (colours.getReference(0).position == 0.0); // The first colour specified has to go at position 0
 
     PixelARGB pix1 (colours.getReference (0).colour.getPixelARGB());
     int index = 0;

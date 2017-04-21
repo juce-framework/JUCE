@@ -142,7 +142,7 @@ double CharacterFunctions::mulexp10 (const double value, int exponent) noexcept
     if (exponent == 0)
         return value;
 
-    if (value == 0)
+    if (value == 0.0)
         return 0;
 
     const bool negative = (exponent < 0);

@@ -1415,8 +1415,8 @@ void CodeEditorComponent::mouseDoubleClick (const MouseEvent& e)
 
 void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if ((verticalScrollBar.isVisible() && wheel.deltaY != 0)
-         || (horizontalScrollBar.isVisible() && wheel.deltaX != 0))
+    if ((verticalScrollBar.isVisible() && wheel.deltaY != 0.0f)
+         || (horizontalScrollBar.isVisible() && wheel.deltaX != 0.0f))
     {
         {
             MouseWheelDetails w (wheel);

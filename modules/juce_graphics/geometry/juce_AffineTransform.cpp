@@ -71,10 +71,10 @@ bool AffineTransform::operator!= (const AffineTransform& other) const noexcept
 //==============================================================================
 bool AffineTransform::isIdentity() const noexcept
 {
-    return (mat01 == 0)
-        && (mat02 == 0)
-        && (mat10 == 0)
-        && (mat12 == 0)
+    return (mat01 == 0.0f)
+        && (mat02 == 0.0f)
+        && (mat10 == 0.0f)
+        && (mat12 == 0.0f)
         && (mat00 == 1.0f)
         && (mat11 == 1.0f);
 }
@@ -228,7 +228,7 @@ AffineTransform AffineTransform::inverted() const noexcept
 
 bool AffineTransform::isSingularity() const noexcept
 {
-    return (mat00 * mat11 - mat10 * mat01) == 0;
+    return (mat00 * mat11 - mat10 * mat01) == 0.0f;
 }
 
 AffineTransform AffineTransform::fromTargetPoints (const float x00, const float y00,
@@ -250,8 +250,8 @@ AffineTransform AffineTransform::fromTargetPoints (const float sx1, const float 
 
 bool AffineTransform::isOnlyTranslation() const noexcept
 {
-    return (mat01 == 0)
-        && (mat10 == 0)
+    return (mat01 == 0.0f)
+        && (mat10 == 0.0f)
         && (mat00 == 1.0f)
         && (mat11 == 1.0f);
 }

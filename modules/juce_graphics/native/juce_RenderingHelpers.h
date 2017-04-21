@@ -86,7 +86,7 @@ public:
 
         complexTransform = getTransformWith (t);
         isOnlyTranslated = false;
-        isRotated = (complexTransform.mat01 != 0 || complexTransform.mat10 != 0
+        isRotated = (complexTransform.mat01 != 0.0f || complexTransform.mat10 != 0.0f
                       || complexTransform.mat00 < 0 || complexTransform.mat11 < 0);
     }
 

@@ -95,12 +95,12 @@ private:
     const AffineTransform transform;
     float* points;
     const float toleranceSquared;
-    float subPathCloseX, subPathCloseY;
+    float subPathCloseX = 0, subPathCloseY = 0;
     const bool isIdentityTransform;
 
-    HeapBlock<float> stackBase;
+    HeapBlock<float> stackBase { 32 };
     float* stackPos;
-    size_t index, stackSize;
+    size_t index = 0, stackSize = 32;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PathFlatteningIterator)
 };

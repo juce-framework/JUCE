@@ -489,7 +489,7 @@ void Viewport::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
 
 static int rescaleMouseWheelDistance (float distance, int singleStepSize) noexcept
 {
-    if (distance == 0)
+    if (distance == 0.0f)
         return 0;
 
     distance *= 14.0f * singleStepSize;

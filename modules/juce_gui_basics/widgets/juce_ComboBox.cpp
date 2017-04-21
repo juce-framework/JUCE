@@ -599,13 +599,12 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 
 void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0)
+    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0.0f)
     {
-        const int oldPos = (int) mouseWheelAccumulator;
+        auto oldPos = (int) mouseWheelAccumulator;
         mouseWheelAccumulator += wheel.deltaY * 5.0f;
-        const int delta = oldPos - (int) mouseWheelAccumulator;
 
-        if (delta != 0)
+        if (auto delta = oldPos - (int) mouseWheelAccumulator)
             nudgeSelectedItem (delta);
     }
     else

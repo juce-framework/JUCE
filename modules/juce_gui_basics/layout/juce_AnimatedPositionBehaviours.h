@@ -43,7 +43,6 @@ namespace AnimatedPositionBehaviours
     struct ContinuousWithMomentum
     {
         ContinuousWithMomentum() noexcept
-            : velocity (0), damping (0.92)
         {
         }
 
@@ -82,11 +81,11 @@ namespace AnimatedPositionBehaviours
         */
         bool isStopped (double /*position*/) const noexcept
         {
-            return velocity == 0;
+            return velocity == 0.0;
         }
 
     private:
-        double velocity, damping;
+        double velocity = 0, damping = 0.92;
     };
 
     //==============================================================================

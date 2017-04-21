@@ -128,7 +128,7 @@ public:
             s << getFontStyleCode (font)
               << ")";
 
-        if (font.getExtraKerningFactor() != 0)
+        if (font.getExtraKerningFactor() != 0.0f)
             s << ".withExtraKerningFactor ("
               << CodeHelpers::floatLiteral (font.getExtraKerningFactor(), 3)
               << ")";

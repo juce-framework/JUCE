@@ -38,12 +38,7 @@ PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
       transform (transform_),
       points (path_.data.elements),
       toleranceSquared (tolerance * tolerance),
-      subPathCloseX (0),
-      subPathCloseY (0),
-      isIdentityTransform (transform_.isIdentity()),
-      stackBase (32),
-      index (0),
-      stackSize (32)
+      isIdentityTransform (transform_.isIdentity())
 {
     stackPos = stackBase;
 }
@@ -55,7 +50,7 @@ PathFlatteningIterator::~PathFlatteningIterator()
 bool PathFlatteningIterator::isLastInSubpath() const noexcept
 {
     return stackPos == stackBase.getData()
-             && (index >= path.numElements || points [index] == Path::moveMarker);
+             && (index >= path.numElements || isMarker (points[index], Path::moveMarker));
 }
 
 bool PathFlatteningIterator::next()
@@ -79,12 +74,12 @@ bool PathFlatteningIterator::next()
 
             type = points [index++];
 
-            if (type != Path::closeSubPathMarker)
+            if (! isMarker (type, Path::closeSubPathMarker))
             {
                 x2 = points [index++];
                 y2 = points [index++];
 
-                if (type == Path::quadMarker)
+                if (isMarker (type, Path::quadMarker))
                 {
                     x3 = points [index++];
                     y3 = points [index++];
@@ -92,7 +87,7 @@ bool PathFlatteningIterator::next()
                     if (! isIdentityTransform)
                         transform.transformPoints (x2, y2, x3, y3);
                 }
-                else if (type == Path::cubicMarker)
+                else if (isMarker (type, Path::cubicMarker))
                 {
                     x3 = points [index++];
                     y3 = points [index++];
@@ -113,17 +108,17 @@ bool PathFlatteningIterator::next()
         {
             type = *--stackPos;
 
-            if (type != Path::closeSubPathMarker)
+            if (! isMarker (type, Path::closeSubPathMarker))
             {
                 x2 = *--stackPos;
                 y2 = *--stackPos;
 
-                if (type == Path::quadMarker)
+                if (isMarker (type, Path::quadMarker))
                 {
                     x3 = *--stackPos;
                     y3 = *--stackPos;
                 }
-                else if (type == Path::cubicMarker)
+                else if (isMarker (type, Path::cubicMarker))
                 {
                     x3 = *--stackPos;
                     y3 = *--stackPos;
@@ -133,7 +128,7 @@ bool PathFlatteningIterator::next()
             }
         }
 
-        if (type == Path::lineMarker)
+        if (isMarker (type, Path::lineMarker))
         {
             ++subPathIndex;
 
@@ -146,7 +141,7 @@ bool PathFlatteningIterator::next()
             return true;
         }
 
-        if (type == Path::quadMarker)
+        if (isMarker (type, Path::quadMarker))
         {
             const size_t offset = (size_t) (stackPos - stackBase);
 
@@ -157,15 +152,15 @@ bool PathFlatteningIterator::next()
                 stackPos = stackBase + offset;
             }
 
-            const float m1x = (x1 + x2) * 0.5f;
-            const float m1y = (y1 + y2) * 0.5f;
-            const float m2x = (x2 + x3) * 0.5f;
-            const float m2y = (y2 + y3) * 0.5f;
-            const float m3x = (m1x + m2x) * 0.5f;
-            const float m3y = (m1y + m2y) * 0.5f;
+            auto m1x = (x1 + x2) * 0.5f;
+            auto m1y = (y1 + y2) * 0.5f;
+            auto m2x = (x2 + x3) * 0.5f;
+            auto m2y = (y2 + y3) * 0.5f;
+            auto m3x = (m1x + m2x) * 0.5f;
+            auto m3y = (m1y + m2y) * 0.5f;
 
-            const float errorX = m3x - x2;
-            const float errorY = m3y - y2;
+            auto errorX = m3x - x2;
+            auto errorY = m3y - y2;
 
             if (errorX * errorX + errorY * errorY > toleranceSquared)
             {
@@ -194,7 +189,7 @@ bool PathFlatteningIterator::next()
 
             jassert (stackPos < stackBase + stackSize);
         }
-        else if (type == Path::cubicMarker)
+        else if (isMarker (type, Path::cubicMarker))
         {
             const size_t offset = (size_t) (stackPos - stackBase);
 
@@ -205,21 +200,21 @@ bool PathFlatteningIterator::next()
                 stackPos = stackBase + offset;
             }
 
-            const float m1x = (x1 + x2) * 0.5f;
-            const float m1y = (y1 + y2) * 0.5f;
-            const float m2x = (x3 + x2) * 0.5f;
-            const float m2y = (y3 + y2) * 0.5f;
-            const float m3x = (x3 + x4) * 0.5f;
-            const float m3y = (y3 + y4) * 0.5f;
-            const float m4x = (m1x + m2x) * 0.5f;
-            const float m4y = (m1y + m2y) * 0.5f;
-            const float m5x = (m3x + m2x) * 0.5f;
-            const float m5y = (m3y + m2y) * 0.5f;
+            auto m1x = (x1 + x2) * 0.5f;
+            auto m1y = (y1 + y2) * 0.5f;
+            auto m2x = (x3 + x2) * 0.5f;
+            auto m2y = (y3 + y2) * 0.5f;
+            auto m3x = (x3 + x4) * 0.5f;
+            auto m3y = (y3 + y4) * 0.5f;
+            auto m4x = (m1x + m2x) * 0.5f;
+            auto m4y = (m1y + m2y) * 0.5f;
+            auto m5x = (m3x + m2x) * 0.5f;
+            auto m5y = (m3y + m2y) * 0.5f;
 
-            const float error1X = m4x - x2;
-            const float error1Y = m4y - y2;
-            const float error2X = m5x - x3;
-            const float error2Y = m5y - y3;
+            auto error1X = m4x - x2;
+            auto error1Y = m4y - y2;
+            auto error2X = m5x - x3;
+            auto error2Y = m5y - y3;
 
             if (error1X * error1X + error1Y * error1Y > toleranceSquared
                  || error2X * error2X + error2Y * error2Y > toleranceSquared)
@@ -255,7 +250,7 @@ bool PathFlatteningIterator::next()
                 *stackPos++ = Path::lineMarker;
             }
         }
-        else if (type == Path::closeSubPathMarker)
+        else if (isMarker (type, Path::closeSubPathMarker))
         {
             if (x2 != subPathCloseX || y2 != subPathCloseY)
             {
@@ -270,7 +265,7 @@ bool PathFlatteningIterator::next()
         }
         else
         {
-            jassert (type == Path::moveMarker);
+            jassert (isMarker (type, Path::moveMarker));
 
             subPathIndex = -1;
             subPathCloseX = x1 = x2;
