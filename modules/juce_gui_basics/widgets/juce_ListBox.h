@@ -577,11 +577,11 @@ private:
     ScopedPointer<ListViewport> viewport;
     ScopedPointer<Component> headerComponent;
     ScopedPointer<MouseListener> mouseMoveSelector;
-    int totalItems, rowHeight, minimumRowWidth;
-    int outlineThickness;
-    int lastRowSelected;
-    bool multipleSelection, alwaysFlipSelection, hasDoneInitialUpdate, selectOnMouseDown;
     SparseSet<int> selected;
+    int totalItems = 0, rowHeight = 22, minimumRowWidth = 0;
+    int outlineThickness = 0;
+    int lastRowSelected = -1;
+    bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true;
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
