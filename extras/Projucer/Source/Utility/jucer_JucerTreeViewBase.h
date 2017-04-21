@@ -56,7 +56,7 @@ public:
     virtual bool isIconCrossedOut() const                       { return false; }
     virtual void paintIcon (Graphics& g, Rectangle<int> area)   { getIcon().draw (g, area.reduced (2).toFloat(), isIconCrossedOut()); }
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
-    virtual int getMillisecsAllowedForDragGesture()             { return 120; };
+    virtual int getMillisecsAllowedForDragGesture()             { return 120; }
     virtual File getDraggableFile() const                       { return {}; }
 
     void refreshSubItems();

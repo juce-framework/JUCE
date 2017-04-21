@@ -938,7 +938,7 @@ public:
 
         lastRepaintTime = Time::getMillisecondCounter();
         deferredRepaints.clear();
-    };
+    }
 
     void invokePaint (LowLevelGraphicsContext& context)
     {
@@ -1622,7 +1622,7 @@ private:
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)        { return YES; }
     static BOOL wantsDefaultClipping (id, SEL)               { return YES; } // (this is the default, but may want to customise it in future)
-    static BOOL worksWhenModal (id self, SEL)                { if (NSViewComponentPeer* p = getOwner (self)) return p->worksWhenModal(); return NO; };
+    static BOOL worksWhenModal (id self, SEL)                { if (NSViewComponentPeer* p = getOwner (self)) return p->worksWhenModal(); return NO; }
 
     static void drawRect (id self, SEL, NSRect r)            { if (NSViewComponentPeer* p = getOwner (self)) p->drawRect (r); }
     static void frameChanged (id self, SEL, NSNotification*) { if (NSViewComponentPeer* p = getOwner (self)) p->redirectMovedOrResized(); }

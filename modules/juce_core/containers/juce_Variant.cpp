@@ -230,8 +230,8 @@ public:
     void createCopy (ValueUnion& dest, const ValueUnion& source) const override   { new (dest.stringValue) String (*getString (source)); }
 
     bool isString() const noexcept override                          { return true; }
-    int toInt (const ValueUnion& data) const noexcept override       { return getString (data)->getIntValue(); };
-    int64 toInt64 (const ValueUnion& data) const noexcept override   { return getString (data)->getLargeIntValue(); };
+    int toInt (const ValueUnion& data) const noexcept override       { return getString (data)->getIntValue(); }
+    int64 toInt64 (const ValueUnion& data) const noexcept override   { return getString (data)->getLargeIntValue(); }
     double toDouble (const ValueUnion& data) const noexcept override { return getString (data)->getDoubleValue(); }
     String toString (const ValueUnion& data) const override          { return *getString (data); }
     bool toBool (const ValueUnion& data) const noexcept override     { return getString (data)->getIntValue() != 0

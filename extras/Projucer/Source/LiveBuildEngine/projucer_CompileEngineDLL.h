@@ -78,7 +78,7 @@ struct CompileEngineDLL
         typedef returnType (*name##_type) params; \
         name##_type name = nullptr;
 
-    LIVE_DLL_FUNCTIONS (DECLARE_LIVE_DLL_FN);
+    LIVE_DLL_FUNCTIONS (DECLARE_LIVE_DLL_FN)
 
     #undef DECLARE_LIVE_DLL_FN
 

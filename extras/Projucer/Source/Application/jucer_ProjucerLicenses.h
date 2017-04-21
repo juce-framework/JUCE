@@ -33,7 +33,7 @@ struct ProjucerLicenses  : private DeletedAtShutdown
         dll.initialise (crashCallback, quitCallback, false);
     }
 
-    juce_DeclareSingleton (ProjucerLicenses, false);
+    juce_DeclareSingleton (ProjucerLicenses, false)
 
     //==============================================================================
     struct LoginCallback
