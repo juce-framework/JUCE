@@ -2228,18 +2228,18 @@ public:
     /** Returns the object that was set by setCachedComponentImage().
         @see setCachedComponentImage
     */
-    CachedComponentImage* getCachedComponentImage() const noexcept  { return cachedImage; }
+    CachedComponentImage* getCachedComponentImage() const noexcept      { return cachedImage; }
 
     /** Sets a flag to indicate whether mouse drag events on this Component should be ignored when it is inside a
         Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
         should not move their parent Viewport when dragged.
     */
-    void setViewportIgnoreDragFlag (bool ignoreDrag) noexcept { flags.viewportIgnoreDragFlag = ignoreDrag; };
+    void setViewportIgnoreDragFlag (bool ignoreDrag) noexcept           { flags.viewportIgnoreDragFlag = ignoreDrag; }
 
     /** Retrieves the current state of the Viewport drag-to-scroll functionality flag.
         @see setViewportIgnoreDragFlag
     */
-    bool getViewportIgnoreDragFlag() const noexcept { return flags.viewportIgnoreDragFlag; }
+    bool getViewportIgnoreDragFlag() const noexcept                     { return flags.viewportIgnoreDragFlag; }
 
     //==============================================================================
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.

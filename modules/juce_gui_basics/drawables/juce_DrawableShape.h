@@ -125,7 +125,7 @@ public:
     void setDashLengths (const Array<float>& newDashLengths);
 
     /** Returns the set of dash lengths that the path is using. */
-    const Array<float>& getDashLengths() const noexcept             { return dashLengths; };
+    const Array<float>& getDashLengths() const noexcept             { return dashLengths; }
 
     //==============================================================================
     /** @internal */

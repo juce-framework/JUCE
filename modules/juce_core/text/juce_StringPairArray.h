@@ -96,7 +96,7 @@ public:
     const StringArray& getAllValues() const noexcept        { return values; }
 
     /** Returns the number of strings in the array */
-    inline int size() const noexcept                        { return keys.size(); };
+    inline int size() const noexcept                        { return keys.size(); }
 
 
     //==============================================================================

@@ -1309,8 +1309,8 @@ public:
         These functions are deprecated: use the methods provided in the AudioChannelSet
         class.
      */
-    JUCE_DEPRECATED_WITH_BODY (const String getInputSpeakerArrangement()  const noexcept, { return cachedInputSpeakerArrString; });
-    JUCE_DEPRECATED_WITH_BODY (const String getOutputSpeakerArrangement() const noexcept, { return cachedOutputSpeakerArrString; });
+    JUCE_DEPRECATED_WITH_BODY (const String getInputSpeakerArrangement()  const noexcept, { return cachedInputSpeakerArrString; })
+    JUCE_DEPRECATED_WITH_BODY (const String getOutputSpeakerArrangement() const noexcept, { return cachedOutputSpeakerArrString; })
 
     /** Returns the name of one of the processor's input channels.
 
@@ -1558,7 +1558,7 @@ private:
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
 
     // This method is no longer used - you can delete it from your AudioProcessor classes.
-    JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; });
+    JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; })
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
