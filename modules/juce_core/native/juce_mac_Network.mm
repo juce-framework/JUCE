@@ -1022,7 +1022,7 @@ public:
 
 private:
     WebInputStream& owner;
-    const URL& url;
+    URL url;
     ScopedPointer<URLConnectionState> connection;
     String headers;
     MemoryBlock postData;
