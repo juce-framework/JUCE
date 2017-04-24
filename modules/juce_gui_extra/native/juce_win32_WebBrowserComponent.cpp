@@ -383,13 +383,17 @@ void WebBrowserComponent::clearCookies()
         {
             ::DeleteUrlCacheEntry (entry.getData()->lpszSourceUrlName);
 
-            if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0
-                  && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+            if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0)
             {
-                entry.realloc (1, entrySize);
+                if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+                {
+                    entry.realloc (1, entrySize);
 
-                if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0)
-                    break;
+                    if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) != 0)
+                        continue;
+                }
+
+                break;
             }
         }
 
