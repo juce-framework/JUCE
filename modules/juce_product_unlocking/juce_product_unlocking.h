@@ -31,11 +31,11 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_tracktion_marketplace
+  ID:               juce_product_unlocking
   vendor:           juce
   version:          4.3.1
-  name:             JUCE Tracktion marketplace support
-  description:      Classes for online product authentication via the Tracktion marketplace.
+  name:             JUCE Online marketplace support
+  description:      Classes for online product authentication
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
@@ -47,11 +47,11 @@
 
 
 #pragma once
-#define JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
+#define JUCE_PRODUCT_UNLOCKING_H_INCLUDED
 
 /**
-    The Tracktion Marketplace module is a simple user-registration system for
-    allowing you to build apps/plugins with features that are unlocked by a
+    The juce_product_unlocking module provides simple user-registration classes
+    for allowing you to build apps/plugins with features that are unlocked by a
     user having a suitable account on a webserver.
 
     Although originally designed for use with products that are sold on the

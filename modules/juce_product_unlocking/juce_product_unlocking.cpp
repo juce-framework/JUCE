@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#ifdef JUCE_TRACKTION_MARKETPLACE_H_INCLUDED
+#ifdef JUCE_PRODUCT_UNLOCKING_H_INCLUDED
  /* When you add this cpp file to your project, you mustn't include it in a file where you've
     already included any other headers - just put it inside a file on its own, possibly with your config
     flags preceding it, but don't include anything else. That also includes avoiding any automatic prefix
@@ -31,7 +31,7 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "juce_tracktion_marketplace.h"
+#include "juce_product_unlocking.h"
 
 namespace juce
 {
