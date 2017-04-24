@@ -111,8 +111,8 @@ public:
     /** Searches through the known formats to try to create a suitable reader for
         this file.
 
-        If none of the registered formats can open the file, it'll return 0. If it
-        returns a reader, it's the caller's responsibility to delete the reader.
+        If none of the registered formats can open the file, it'll return nullptr.
+        It's the caller's responsibility to delete the reader that is returned.
     */
     AudioFormatReader* createReaderFor (const File& audioFile);
 
