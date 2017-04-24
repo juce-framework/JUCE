@@ -1,4 +1,4 @@
-/*
+D/*
   ==============================================================================
 
    This file is part of the JUCE library.
@@ -29,8 +29,9 @@ Drawable::Drawable()
 }
 
 Drawable::Drawable (const Drawable& other)
-    : Component (other.getName())
+    : Drawable()
 {
+    setName(other.getName());
     setComponentID (other.getComponentID());
     setTransform (other.getTransform());
 }
