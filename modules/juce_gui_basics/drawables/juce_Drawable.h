@@ -61,8 +61,7 @@ public:
 
         @see drawWithin
     */
-    void draw (Graphics& g, float opacity,
-               const AffineTransform& transform = AffineTransform()) const;
+    void draw (Graphics& g, float opacity, const AffineTransform& transform = {}) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
 
@@ -96,7 +95,7 @@ public:
         @param opacity                  the opacity to use, in the range 0 to 1.0
     */
     void drawWithin (Graphics& g,
-                     const Rectangle<float>& destArea,
+                     Rectangle<float> destArea,
                      RectanglePlacement placement,
                      float opacity) const;
 
@@ -211,7 +210,7 @@ protected:
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
-    void setBoundsToEnclose (const Rectangle<float>&);
+    void setBoundsToEnclose (Rectangle<float>);
 
     Point<int> originRelativeToComponent;
 
