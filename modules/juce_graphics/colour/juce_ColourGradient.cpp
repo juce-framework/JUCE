@@ -43,6 +43,17 @@ ColourGradient::ColourGradient (Colour colour1, const float x1, const float y1,
     colours.add (ColourPoint (1.0, colour2));
 }
 
+ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
+                                Colour colour2, Point<float> p2,
+                                const bool radial)
+    : point1 (p1),
+      point2 (p2),
+      isRadial (radial)
+{
+    colours.add (ColourPoint (0.0, colour1));
+    colours.add (ColourPoint (1.0, colour2));
+}
+
 ColourGradient::~ColourGradient()
 {
 }
@@ -141,12 +152,12 @@ Colour ColourGradient::getColourAtPosition (const double position) const noexcep
     while (position < colours.getReference(i).position)
         --i;
 
-    const ColourPoint& p1 = colours.getReference (i);
+    auto& p1 = colours.getReference (i);
 
     if (i >= colours.size() - 1)
         return p1.colour;
 
-    const ColourPoint& p2 = colours.getReference (i + 1);
+    auto& p2 = colours.getReference (i + 1);
 
     return p1.colour.interpolatedWith (p2.colour, (float) ((position - p1.position) / (p2.position - p1.position)));
 }

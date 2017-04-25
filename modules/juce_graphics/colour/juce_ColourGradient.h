@@ -56,6 +56,27 @@ public:
                     Colour colour2, float x2, float y2,
                     bool isRadial);
 
+    /** Creates a gradient object.
+
+        point1 is the location to draw with colour1. Likewise point2 is where
+        colour2 should be. In between them there's a gradient.
+
+        If isRadial is true, the colours form a circular gradient with point1 at
+        its centre.
+
+        The alpha transparencies of the colours are used, so note that
+        if you blend from transparent to a solid colour, the RGB of the transparent
+        colour will become visible in parts of the gradient. e.g. blending
+        from Colour::transparentBlack to Colours::white will produce a
+        muddy grey colour midway, but Colour::transparentWhite to Colours::white
+        will be white all the way across.
+
+        @see ColourGradient
+    */
+    ColourGradient (Colour colour1, Point<float> point1,
+                    Colour colour2, Point<float> point2,
+                    bool isRadial);
+
     /** Creates an uninitialised gradient.
 
         If you use this constructor instead of the other one, be sure to set all the
