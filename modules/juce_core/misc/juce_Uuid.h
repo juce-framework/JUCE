@@ -66,6 +66,10 @@ public:
 
     bool operator== (const Uuid&) const noexcept;
     bool operator!= (const Uuid&) const noexcept;
+    bool operator< (const Uuid&) const noexcept;
+    bool operator<= (const Uuid&) const noexcept;
+    bool operator> (const Uuid&) const noexcept;
+    bool operator>= (const Uuid&) const noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this UUID.
@@ -114,6 +118,28 @@ private:
     //==============================================================================
     uint8 uuid[16];
     String getHexRegion (int, int) const;
+
+    /** Compare using the standard IETF and ITU conventions.
+        @returns -1 if a is less-than b, 0 if they're equal, and 1 if b is greater-than a.
+    */
+    static int compare (const Uuid& a, const Uuid& b) noexcept;
+    static int getTimeLow (const Uuid&) noexcept;
+    static int16 getTimeMid (const Uuid&) noexcept;
+    static int16 getTimeHiAndVersion (const Uuid&) noexcept;
+    static uint8 getClockSeqHiAndReserved (const Uuid&) noexcept;
+    static uint8 getClockLow (const Uuid&) noexcept;
+
+    template<typename ReturnType, ReturnType (*ComponentGetter) (const Uuid&) noexcept>
+    static uint8 check (const Uuid& a, const Uuid& b) noexcept
+    {
+        const ReturnType x = ComponentGetter (a);
+        const ReturnType y = ComponentGetter (b);
+
+        if (x != y)
+            return x < y ? -1 : 1;
+
+        return 0;
+    }
 
     JUCE_LEAK_DETECTOR (Uuid)
 };

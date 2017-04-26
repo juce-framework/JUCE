@@ -53,8 +53,38 @@ Uuid& Uuid::operator= (const Uuid& other) noexcept
     return *this;
 }
 
+int Uuid::getTimeLow (const Uuid& uuid) noexcept                    { return ((int) uuid.uuid[15] << 24) + ((int) uuid.uuid[14] << 16) + ((int) uuid.uuid[13] << 8) + (int) uuid.uuid[12]; }
+int16 Uuid::getTimeMid (const Uuid& uuid) noexcept                  { return ((int16) uuid.uuid[11] << 8) + (int16) uuid.uuid[10]; }
+int16 Uuid::getTimeHiAndVersion (const Uuid& uuid) noexcept         { return ((int16) uuid.uuid[9] << 8) + (int16) uuid.uuid[8]; }
+uint8 Uuid::getClockSeqHiAndReserved (const Uuid& uuid) noexcept    { return uuid.uuid[9]; }
+uint8 Uuid::getClockLow (const Uuid& uuid) noexcept                 { return uuid.uuid[8]; }
+
+int Uuid::compare (const Uuid& a, const Uuid& b) noexcept
+{
+    if (int r = check<int, getTimeLow> (a, b))                      return r;
+    if (int16 r = check<int16, getTimeMid> (a, b))                  return r;
+    if (int16 r = check<int16, getTimeHiAndVersion> (a, b))         return r;
+    if (uint8 r = check<uint8, getClockSeqHiAndReserved> (a, b))    return r;
+    if (uint8 r = check<uint8, getClockLow> (a, b))                 return r;
+
+    for (size_t i = 0; i <= 6; ++i)
+    {
+        if (a.uuid[i] < b.uuid[i])
+            return -1;
+
+        if (a.uuid[i] > b.uuid[i])
+            return 1;
+    }
+
+    return 0;
+}
+
 bool Uuid::operator== (const Uuid& other) const noexcept    { return memcmp (uuid, other.uuid, sizeof (uuid)) == 0; }
 bool Uuid::operator!= (const Uuid& other) const noexcept    { return ! operator== (other); }
+bool Uuid::operator< (const Uuid& other) const noexcept     { return compare (*this, other) < 0; }
+bool Uuid::operator<= (const Uuid& other) const noexcept    { return compare (*this, other) <= 0; }
+bool Uuid::operator> (const Uuid& other) const noexcept     { return compare (*this, other) > 0; }
+bool Uuid::operator>= (const Uuid& other) const noexcept    { return compare (*this, other) >= 0; }
 
 Uuid Uuid::null() noexcept
 {
