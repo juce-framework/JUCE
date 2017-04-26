@@ -108,10 +108,8 @@ private:
         if (allowMultipleFiles ? chooser.browseForMultipleFilesToOpen()
                                : chooser.browseForFileToOpen())
         {
-            const Array<File>& files = chooser.getResults();
-
-            for (int i = 0; i < files.size(); ++i)
-                [resultListener chooseFilename: juceStringToNS (files.getReference(i).getFullPathName())];
+            for (auto& f : chooser.getResults())
+                [resultListener chooseFilename: juceStringToNS (f.getFullPathName())];
         }
        #else
         ignoreUnused (resultListener, allowMultipleFiles);
@@ -440,14 +438,14 @@ void WebBrowserComponent::focusGained (FocusChangeType)
 
 void WebBrowserComponent::clearCookies()
 {
-    NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    NSHTTPCookieStorage* storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
 
-    if (NSArray<NSHTTPCookie *>* cookies = [storage cookies])
+    if (NSArray<NSHTTPCookie*>* cookies = [storage cookies])
     {
         const NSUInteger n = [cookies count];
 
         for (NSUInteger i = 0; i < n; ++i)
-            [storage deleteCookie:[cookies objectAtIndex:i]];
+            [storage deleteCookie: [cookies objectAtIndex: i]];
     }
 
     [[NSUserDefaults standardUserDefaults] synchronize];
