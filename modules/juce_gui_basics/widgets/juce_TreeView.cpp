@@ -638,6 +638,9 @@ void TreeView::restoreOpennessState (const XmlElement& newState, const bool rest
     {
         rootItem->restoreOpennessState (newState);
 
+        needsRecalculating = true;
+        recalculateIfNeeded();
+
         if (newState.hasAttribute ("scrollPos"))
             viewport->setViewPosition (viewport->getViewPositionX(),
                                        newState.getIntAttribute ("scrollPos"));
