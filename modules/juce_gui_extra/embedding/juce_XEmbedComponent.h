@@ -69,14 +69,16 @@ public:
         of the XEmbedProtocol. When using this version of the protocol
         you must call getHostWindowID() and pass this id to the foreign toolkit.
     */
-    XEmbedComponent (bool wantsKeyboardFocus = true);
+    XEmbedComponent (bool wantsKeyboardFocus = true,
+                     bool allowForeignWidgetToResizeComponent = false);
 
     /** Create a JUCE component wrapping the foreign widget with id wID
 
         Use this constructor if you are using the client initiated version
         of the XEmbedProtocol.
     */
-    XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus = true);
+    XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus = true,
+                     bool allowForeignWidgetToResizeComponent = false);
 
 
     /** Destructor. */

@@ -21,6 +21,10 @@
 
   ==============================================================================
 */
+
+//==============================================================================
+extern int juce_gtkWebkitMain (int argc, const char* argv[]);
+
 class CommandReceiver
 {
 public:
@@ -150,7 +154,7 @@ public:
         : outChannel (outChannelToUse), receiver (this, inChannel)
     {}
 
-    void entry()
+    int entry()
     {
         CommandReceiver::setBlocking (outChannel,      true);
 
@@ -197,6 +201,7 @@ public:
         receiver.tryNextRead();
 
         gtk_main();
+        return 0;
     }
 
     void goToURL (const var& params)
@@ -256,7 +261,7 @@ public:
 
     void quit()
     {
-        exit (-1);
+        gtk_main_quit();
     }
 
     bool onNavigation (String frameName,
@@ -502,12 +507,25 @@ private:
         {
             xembed = nullptr;
 
-            kill (childProcess, SIGTERM);
+            int status = 0, result;
 
-            int status = 0;
+            result = waitpid (childProcess, &status, WNOHANG);
+            for (int i = 0; i < 15 && (! WIFEXITED(status) || result != childProcess); ++i)
+            {
+                Thread::sleep (100);
+                result = waitpid (childProcess, &status, WNOHANG);
+            }
 
-            while (! WIFEXITED(status))
-                waitpid (childProcess, &status, 0);
+            // clean-up any zombies
+            status = 0;
+            if (! WIFEXITED(status) || result != childProcess)
+            {
+                do
+                {
+                    kill (childProcess, SIGTERM);
+                    waitpid (childProcess, &status, 0);
+                } while (! WIFEXITED(status));
+            }
 
             childProcess = 0;
         }
@@ -530,8 +548,24 @@ private:
             close (inPipe[0]);
             close (outPipe[1]);
 
-            GtkChildProcess child (outPipe[0], inPipe[1]);
-            child.entry();
+            HeapBlock<const char*> argv (5);
+            StringArray arguments;
+
+            arguments.add (File::getSpecialLocation (File::currentExecutableFile).getFullPathName());
+            arguments.add ("--juce-gtkwebkitfork-child");
+            arguments.add (String (outPipe[0]));
+            arguments.add (String (inPipe [1]));
+
+            for (int i = 0; i < arguments.size(); ++i)
+                argv[i] = arguments[i].toRawUTF8();
+
+            argv[4] = nullptr;
+
+           #if JUCE_STANDALONE_APPLICATION
+            execv (arguments[0].toRawUTF8(), (char**) argv.getData());
+           #else
+            juce_gtkWebkitMain (4, (const char**) argv.getData());
+           #endif
             exit (0);
         }
 
@@ -765,4 +799,14 @@ void WebBrowserComponent::clearCookies()
     // Currently not implemented on linux as WebBrowserComponent currently does not
     // store cookies on linux
     jassertfalse;
+}
+
+int juce_gtkWebkitMain (int argc, const char* argv[])
+{
+    if (argc != 4) return -1;
+
+
+    GtkChildProcess child (String (argv[2]).getIntValue(),
+                           String (argv[3]).getIntValue());
+    return child.entry();
 }

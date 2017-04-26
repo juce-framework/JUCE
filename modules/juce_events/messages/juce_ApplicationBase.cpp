@@ -177,6 +177,10 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
+#if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra
+ extern int juce_gtkWebkitMain (int argc, const char* argv[]);
+#endif
+
 #if JUCE_WINDOWS
  const char* const* juce_argv = nullptr;
  int juce_argc = 0;
@@ -216,6 +220,11 @@ int JUCEApplicationBase::main (int argc, const char* argv[], void* customDelegat
 
        #if JUCE_MAC
         initialiseNSApplication();
+       #endif
+
+       #if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra
+        if (argc >= 2 && String (argv[1]) == "--juce-gtkwebkitfork-child")
+            return juce_gtkWebkitMain (argc, argv);
        #endif
 
        #if JUCE_IOS

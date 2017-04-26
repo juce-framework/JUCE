@@ -203,9 +203,10 @@ public:
 
 public:
     //==============================================================================
-    Pimpl (XEmbedComponent& parent, Window x11Window, bool wantsKeyboardFocus, bool isClientInitiated)
+    Pimpl (XEmbedComponent& parent, Window x11Window,
+           bool wantsKeyboardFocus, bool isClientInitiated, bool shouldAllowResize)
         : owner (parent), atoms (x11display.get()), clientInitiated (isClientInitiated),
-          wantsFocus (wantsKeyboardFocus)
+          wantsFocus (wantsKeyboardFocus), allowResize (shouldAllowResize)
     {
         if (widgets == nullptr)
             widgets = new Array<Pimpl*>;
@@ -337,6 +338,7 @@ private:
 
     bool clientInitiated;
     bool wantsFocus        = false;
+    bool allowResize       = false;
     bool supportsXembed    = false;
     bool hasBeenMapped     = false;
     int xembedVersion      = maxXEmbedVersionToSupport;
@@ -582,7 +584,11 @@ private:
                 propertyChanged (e.xproperty.atom);
                 return true;
             case ConfigureNotify:
-                configureNotify();
+                if (allowResize)
+                    configureNotify();
+                else
+                    MessageManager::callAsync([this] () {componentMovedOrResized (owner, true, true);});
+
                 return true;
             }
         }
@@ -713,14 +719,14 @@ Array<XEmbedComponent::Pimpl*>* XEmbedComponent::Pimpl::widgets = nullptr;
 HashMap<ComponentPeer*,XEmbedComponent::Pimpl::SharedKeyWindow*>* XEmbedComponent::Pimpl::SharedKeyWindow::keyWindows = nullptr;
 
 //==============================================================================
-XEmbedComponent::XEmbedComponent (bool wantsKeyboardFocus)
-    : pimpl (new Pimpl (*this, 0, wantsKeyboardFocus, false))
+XEmbedComponent::XEmbedComponent (bool wantsKeyboardFocus, bool allowForeignWidgetToResizeComponent)
+    : pimpl (new Pimpl (*this, 0, wantsKeyboardFocus, false, allowForeignWidgetToResizeComponent))
 {
     setOpaque (true);
 }
 
-XEmbedComponent::XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus)
-    : pimpl (new Pimpl (*this, wID, wantsKeyboardFocus, true))
+XEmbedComponent::XEmbedComponent (unsigned long wID, bool wantsKeyboardFocus, bool allowForeignWidgetToResizeComponent)
+    : pimpl (new Pimpl (*this, wID, wantsKeyboardFocus, true, allowForeignWidgetToResizeComponent))
 {
     setOpaque (true);
 }
