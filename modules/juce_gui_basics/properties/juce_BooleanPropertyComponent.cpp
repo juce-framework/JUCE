@@ -69,7 +69,7 @@ void BooleanPropertyComponent::paint (Graphics& g)
     g.setColour (findColour (backgroundColourId));
     g.fillRect (button.getBounds());
 
-    g.setColour (findColour (ComboBox::outlineColourId));
+    g.setColour (findColour (outlineColourId));
     g.drawRect (button.getBounds());
 }
 
