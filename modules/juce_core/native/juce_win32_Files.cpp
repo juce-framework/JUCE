@@ -35,12 +35,25 @@
 //==============================================================================
 namespace WindowsFileHelpers
 {
-    DWORD getAtts (const String& path)
+    DWORD getAtts (const String& path) noexcept
     {
         return GetFileAttributes (path.toWideCharPointer());
     }
 
-    int64 fileTimeToTime (const FILETIME* const ft)
+    bool changeAtts (const String& path, DWORD bitsToSet, DWORD bitsToClear) noexcept
+    {
+        auto oldAtts = getAtts (path);
+
+        if (oldAtts == INVALID_FILE_ATTRIBUTES)
+            return false;
+
+        auto newAtts = ((oldAtts | bitsToSet) & ~bitsToClear);
+
+        return newAtts == oldAtts
+                || SetFileAttributes (path.toWideCharPointer(), newAtts) != FALSE;
+    }
+
+    int64 fileTimeToTime (const FILETIME* const ft) noexcept
     {
         static_assert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME),
                        "ULARGE_INTEGER is too small to hold FILETIME: please report!");
@@ -149,7 +162,7 @@ bool File::hasWriteAccess() const
     if (fullPath.isEmpty())
         return true;
 
-    const DWORD attr = WindowsFileHelpers::getAtts (fullPath);
+    auto attr = WindowsFileHelpers::getAtts (fullPath);
 
     // NB: According to MS, the FILE_ATTRIBUTE_READONLY attribute doesn't work for
     // folders, and can be incorrectly set for some special folders, so we'll just say
@@ -159,17 +172,11 @@ bool File::hasWriteAccess() const
             || (attr & FILE_ATTRIBUTE_READONLY) == 0;
 }
 
-bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
+bool File::setFileReadOnlyInternal (bool shouldBeReadOnly) const
 {
-    const DWORD oldAtts = WindowsFileHelpers::getAtts (fullPath);
-
-    if (oldAtts == INVALID_FILE_ATTRIBUTES)
-        return false;
-
-    const DWORD newAtts = shouldBeReadOnly ? (oldAtts |  FILE_ATTRIBUTE_READONLY)
-                                           : (oldAtts & ~FILE_ATTRIBUTE_READONLY);
-    return newAtts == oldAtts
-            || SetFileAttributes (fullPath.toWideCharPointer(), newAtts) != FALSE;
+    return WindowsFileHelpers::changeAtts (fullPath,
+                                           shouldBeReadOnly ? FILE_ATTRIBUTE_READONLY : 0,
+                                           shouldBeReadOnly ? 0 : FILE_ATTRIBUTE_READONLY);
 }
 
 bool File::setFileExecutableInternal (bool /*shouldBeExecutable*/) const
