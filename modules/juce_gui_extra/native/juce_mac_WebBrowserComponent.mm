@@ -35,6 +35,8 @@ struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:),
                    decidePolicyForNewWindowAction, "v@:@@@@@");
         addMethod (@selector (webView:didFinishLoadForFrame:), didFinishLoadForFrame, "v@:@@");
+        addMethod (@selector (webView:didFailLoadWithError:forFrame:),  didFailLoadWithError,  "v@:@@@");
+        addMethod (@selector (webView:didFailProvisionalLoadWithError:forFrame:),  didFailLoadWithError,  "v@:@@@");
         addMethod (@selector (webView:willCloseFrame:), willCloseFrame, "v@:@@");
         addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:), runOpenPanel, "v@:@@", @encode (BOOL));
 
@@ -75,6 +77,20 @@ private:
         {
             NSURL* url = [[[frame dataSource] request] URL];
             getOwner (self)->pageFinishedLoading (nsStringToJuce ([url absoluteString]));
+        }
+    }
+
+    static void didFailLoadWithError (id self, SEL, WebView* sender, NSError* error, WebFrame* frame)
+    {
+        if ([frame isEqual: [sender mainFrame]])
+        {
+            const char* errorString = [[error localizedDescription] UTF8String];
+
+            bool proceedToErrorPage = getOwner (self)->pageLoadHadNetworkError (errorString);
+
+            // WebKit doesn't have an internal error page, so make a really simple one ourselves
+            if (proceedToErrorPage)
+                getOwner(self)->goToURL (String ("data:text/plain,") + errorString);
         }
     }
 

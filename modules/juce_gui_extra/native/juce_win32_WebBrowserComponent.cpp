@@ -173,6 +173,29 @@ private:
                 return S_OK;
             }
 
+            if (dispIdMember == DISPID_NAVIGATEERROR)
+            {
+                int statusCode = pDispParams->rgvarg[1].pvarVal->intVal;
+                *pDispParams->rgvarg[0].pboolVal = VARIANT_FALSE;
+
+                // IWebBrowser2 also reports http status codes here, we need
+                // report only network erros
+                if (statusCode < 0)
+                {
+                    LPTSTR messageBuffer = nullptr;
+                    size_t size = FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                                 NULL, statusCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &messageBuffer, 0, NULL);
+
+                    String message(messageBuffer, size);
+                    LocalFree(messageBuffer);
+
+                    if (!owner.pageLoadHadNetworkError(message))
+                        *pDispParams->rgvarg[0].pboolVal = VARIANT_TRUE;
+                }
+
+                return S_OK;
+            }
+
             if (dispIdMember == 263 /*DISPID_WINDOWCLOSING*/)
             {
                 owner.windowCloseRequest();

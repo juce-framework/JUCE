@@ -149,6 +149,7 @@ namespace juce
 #if JUCE_WEB_BROWSER
  bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
  void WebBrowserComponent::pageFinishedLoading (const String&) {}
+ bool WebBrowserComponent::pageLoadHadNetworkError (const String&) { return true; }
  void WebBrowserComponent::windowCloseRequest() {}
  void WebBrowserComponent::newWindowAttemptingToLoad (const String&) {}
 #endif

@@ -95,6 +95,18 @@ public:
     /** This callback happens when the browser has finished loading a page. */
     virtual void pageFinishedLoading (const String& url);
 
+    /** This callback happens when a network error was encountered while
+        trying to load a page.
+
+        You can override this method to show some other error page by calling
+        goToURL. Return true to allow the browser to carry on to the internal
+        browser error page.
+
+        The errorInfo contains some platform dependent string describing the
+        error.
+    */
+    virtual bool pageLoadHadNetworkError (const String& errorInfo);
+
     /** This callback occurs when a script or other activity in the browser asks for
         the window to be closed.
     */

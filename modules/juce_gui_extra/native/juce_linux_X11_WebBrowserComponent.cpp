@@ -180,6 +180,9 @@ public:
         g_signal_connect (webview, "load-changed",
                           G_CALLBACK (loadChangedCallback), this);
 
+        g_signal_connect (webview, "load-failed",
+                          G_CALLBACK (loadFailedCallback), this);
+
         gtk_widget_show_all (plug);
         unsigned long wID = (unsigned long) gtk_plug_get_id (GTK_PLUG (plug));
 
@@ -350,6 +353,14 @@ public:
         return false;
     }
 
+    void onLoadFailed (GError* error)
+    {
+        DynamicObject::Ptr params = new DynamicObject;
+
+        params->setProperty ("error", String (error != nullptr ? error->message : "unknown error"));
+        CommandReceiver::sendCommand (outChannel, "pageLoadHadNetworkError", var (params));
+    }
+
 private:
     static gboolean pipeReadyStatic (gint fd, GIOCondition condition, gpointer user)
     {
@@ -371,6 +382,16 @@ private:
     {
         GtkChildProcess& owner = *reinterpret_cast<GtkChildProcess*> (user);
         owner.onLoadChanged (loadEvent);
+    }
+
+    static void loadFailedCallback (WebKitWebView*,
+                                    WebKitLoadEvent /*loadEvent*/,
+                                    gchar*          /*failing_uri*/,
+                                    GError*         error,
+                                    gpointer        user)
+    {
+        GtkChildProcess& owner = *reinterpret_cast<GtkChildProcess*> (user);
+        owner.onLoadFailed (error);
     }
 
     int outChannel;
@@ -566,6 +587,7 @@ private:
         else if (cmd == "pageFinishedLoading")       owner.pageFinishedLoading (url);
         else if (cmd == "windowCloseRequest")        owner.windowCloseRequest();
         else if (cmd == "newWindowAttemptingToLoad") owner.newWindowAttemptingToLoad (url);
+        else if (cmd == "pageLoadHadNetworkError")   handlePageLoadHadNetworkError (params);
 
         threadBlocker.signal();
     }
@@ -583,6 +605,14 @@ private:
 
             CommandReceiver::sendCommand (outChannel, "decision", var (params));
         }
+    }
+
+    void handlePageLoadHadNetworkError (const var& params)
+    {
+        String error = params.getProperty ("error", "Unknown error");
+
+        if (owner.pageLoadHadNetworkError (error))
+            goToURL (String ("data:text/plain,") + error, nullptr, nullptr);
     }
 
     void handleCommand (const String& cmd, const var& params) override
