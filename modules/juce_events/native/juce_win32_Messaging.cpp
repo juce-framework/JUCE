@@ -112,6 +112,10 @@ namespace WindowsMessageHelpers
     }
 }
 
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+LRESULT juce_offerEventToActiveXControl (::MSG&);
+#endif
+
 //==============================================================================
 bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
 {
@@ -123,6 +127,11 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
 
     if (GetMessage (&m, (HWND) 0, 0, 0) >= 0)
     {
+      #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+        if (juce_offerEventToActiveXControl (m) != S_FALSE)
+            return true;
+      #endif
+
         if (m.message == customMessageID && m.hwnd == juce_messageWindowHandle)
         {
             dispatchMessageFromLParam (m.lParam);

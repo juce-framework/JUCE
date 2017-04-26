@@ -107,11 +107,15 @@ public:
     /** @internal */
     void paint (Graphics&) override;
 
+    /** @internal */
+    intptr_t offerEventToActiveXControl (void*);
+    static intptr_t offerEventToActiveXControlStatic (void*);
+
 private:
     class Pimpl;
     friend struct ContainerDeletePolicy<Pimpl>;
     ScopedPointer<Pimpl> control;
-    bool mouseEventsAllowed;
+    bool mouseEventsAllowed = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveXControlComponent)
 };
