@@ -22,6 +22,18 @@
   ==============================================================================
 */
 
+static XmlElement* findFontsConfFile()
+{
+    static const char* pathsToSearch[] = { "/etc/fonts/fonts.conf",
+                                           "/usr/share/fonts/fonts.conf" };
+
+    for (auto* path : pathsToSearch)
+        if (auto* xml = XmlDocument::parse (File (path)))
+            return xml;
+
+    return nullptr;
+}
+
 StringArray FTTypefaceList::getDefaultFontDirectories()
 {
     StringArray fontDirs;
@@ -29,21 +41,19 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
     fontDirs.addTokens (String (CharPointer_UTF8 (getenv ("JUCE_FONT_PATH"))), ";,", "");
     fontDirs.removeEmptyStrings (true);
 
-    if (fontDirs.size() == 0)
+    if (fontDirs.isEmpty())
     {
-        const ScopedPointer<XmlElement> fontsInfo (XmlDocument::parse (File ("/etc/fonts/fonts.conf")));
-
-        if (fontsInfo != nullptr)
+        if (ScopedPointer<XmlElement> fontsInfo = findFontsConfFile())
         {
             forEachXmlChildElementWithTagName (*fontsInfo, e, "dir")
             {
-                String fontPath (e->getAllSubText().trim());
+                auto fontPath = e->getAllSubText().trim();
 
                 if (fontPath.isNotEmpty())
                 {
                     if (e->getStringAttribute ("prefix") == "xdg")
                     {
-                        String xdgDataHome (SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", String()));
+                        auto xdgDataHome = SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", {});
 
                         if (xdgDataHome.trimStart().isEmpty())
                             xdgDataHome = "~/.local/share";
@@ -57,7 +67,7 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
         }
     }
 
-    if (fontDirs.size() == 0)
+    if (fontDirs.isEmpty())
         fontDirs.add ("/usr/X11R6/lib/X11/fonts");
 
     fontDirs.removeDuplicates (false);
@@ -120,19 +130,19 @@ private:
     {
         const StringArray choices (choicesArray);
 
-        for (int j = 0; j < choices.size(); ++j)
-            if (names.contains (choices[j], true))
-                return choices[j];
+        for (auto& choice : choices)
+            if (names.contains (choice, true))
+                return choice;
 
-        for (int j = 0; j < choices.size(); ++j)
-            for (int i = 0; i < names.size(); ++i)
-                if (names[i].startsWithIgnoreCase (choices[j]))
-                    return names[i];
+        for (auto& choice : choices)
+            for (auto& name : names)
+                if (name.startsWithIgnoreCase (choice))
+                    return name;
 
-        for (int j = 0; j < choices.size(); ++j)
-            for (int i = 0; i < names.size(); ++i)
-                if (names[i].containsIgnoreCase (choices[j]))
-                    return names[i];
+        for (auto& choice : choices)
+            for (auto& name : names)
+                if (name.containsIgnoreCase (choice))
+                    return name;
 
         return names[0];
     }
